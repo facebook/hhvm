@@ -64,6 +64,7 @@ public:
                           bool checkExist = false);
   virtual ArrayData *lval(CStrRef k, Variant *&ret, bool copy,
                           bool checkExist = false);
+  virtual ArrayData *lvalNew(Variant *&ret, bool copy);
 
   virtual ArrayData *set(int64   k, CVarRef v, bool copy);
   virtual ArrayData *set(litstr  k, CVarRef v, bool copy);

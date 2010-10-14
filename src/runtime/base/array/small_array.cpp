@@ -34,7 +34,7 @@ SmallArray::SmallArray() : m_nNumOfElements(0),
   m_pos = ArrayData::invalid_index;
 }
 
-SmallArray::SmallArray(unsigned int nSize, unsigned long n,
+SmallArray::SmallArray(unsigned int nSize, int64 n,
                        StringData *keys[],
                        const Variant *values[]) :
   m_nNumOfElements(nSize),
@@ -54,7 +54,7 @@ SmallArray::SmallArray(unsigned int nSize, unsigned long n,
   }
 }
 
-SmallArray::SmallArray(unsigned int nSize, unsigned long n,
+SmallArray::SmallArray(unsigned int nSize, int64 n,
                        int64 keys[], const Variant *values[]) :
   m_nNumOfElements(nSize),
   m_nListHead(ArrayData::invalid_index),
@@ -513,7 +513,7 @@ SmallArray::Bucket *SmallArray::addKey(int p, int64 h) {
   connect_to_global_dllist(p, b);
   m_nNumOfElements++;
 
-  if ((long)h >= (long)m_nNextFreeElement) {
+  if (h >= m_nNextFreeElement && m_nNextFreeElement >= 0) {
     m_nNextFreeElement = h + 1;
   }
   return &b;
@@ -534,7 +534,7 @@ SmallArray::Bucket *SmallArray::addKey(int p, StringData *key) {
 }
 
 void SmallArray::renumber() {
-  unsigned long i = 0;
+  int64 i = 0;
   for (int p = m_nListHead; p >= 0; ) {
     Bucket &b = m_arBuckets[p];
     p = b.next;
@@ -543,6 +543,33 @@ void SmallArray::renumber() {
     }
   }
   m_nNextFreeElement = i;
+}
+
+ArrayData *SmallArray::lvalNew(Variant *&ret, bool copy) {
+  if (m_nNumOfElements >= SARR_SIZE) {
+    ArrayData* a = escalateToZendArray();
+    a->lvalNew(ret, false);
+    return a;
+  }
+  if (copy) {
+    SmallArray *a = copyImpl();
+    if (!a->nextInsert(null)) {
+      ret = &(Variant::lvalBlackHole());
+      return a;
+    }
+    int p = a->m_nListTail;
+    ASSERT(p >= 0 && p < SARR_TABLE_SIZE && m_arBuckets[p].kind != Empty);
+    ret = &a->m_arBuckets[p].data;
+    return a;
+  }
+  if (!nextInsert(null)) {
+    ret = &(Variant::lvalBlackHole());
+    return NULL;
+  }
+  int p = m_nListTail;
+  ASSERT(p >= 0 && p < SARR_TABLE_SIZE && m_arBuckets[p].kind != Empty);
+  ret = &m_arBuckets[p].data;
+  return NULL;
 }
 
 ArrayData *SmallArray::lval(Variant *&ret, bool copy) {
@@ -892,12 +919,18 @@ ArrayData *SmallArray::copy() const {
   return copyImpl();
 }
 
-void SmallArray::nextInsert(CVarRef v) {
+bool SmallArray::nextInsert(CVarRef v) {
+  if (m_nNextFreeElement < 0) {
+    raise_warning("Cannot add element to the array as the next element is "
+                  "already occupied");
+    return false;
+  }
   int64 h = m_nNextFreeElement;
   int p = find(h);
   Bucket *pb = addKey(p, h);
   pb->data = v;
   m_nNextFreeElement = h + 1;
+  return true;
 }
 
 ArrayData *SmallArray::append(CVarRef v, bool copy) {
@@ -1047,10 +1080,16 @@ ArrayData *SmallArray::prepend(CVarRef v, bool copy) {
 ///////////////////////////////////////////////////////////////////////////////
 // delete
 
-void SmallArray::erase(Bucket *pb) {
+void SmallArray::erase(Bucket *pb, bool updateNext /* = false */) {
   if (pb->key) {
     if (pb->key->decRefCount() == 0) DELETE(StringData)(pb->key);
     pb->key = NULL;
+  } else {
+    // Match PHP 5.3.1 semantics
+    if (pb->h == m_nNextFreeElement-1 &&
+        (pb->h == 0x7fffffffffffffffLL || updateNext)) {
+      --m_nNextFreeElement;
+    }
   }
   pb->kind = Empty;
   pb->data.unset();
@@ -1161,10 +1200,7 @@ ArrayData *SmallArray::pop(Variant &value) {
          m_arBuckets[(int)m_nListTail].kind != Empty);
   Bucket &b = m_arBuckets[(int)m_nListTail];
   value = b.data;
-  if (b.kind == IntKey && (uint)b.h == m_nNextFreeElement - 1) {
-    m_nNextFreeElement--;
-  }
-  erase(&b);
+  erase(&b, true);
   // To match PHP-like semantics, the pop operation resets the array's
   // internal iterator
   m_pos = (ssize_t)m_nListHead;

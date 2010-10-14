@@ -1947,6 +1947,38 @@ bool TestCodeRun::TestArrayOffset() {
        "$attr[b::$s]='mno';"
        "var_dump($attr);");
 
+ MVCRO("<?php\n"
+       "function f(&$elem) {\n"
+       "$elem = 44;\n"
+       "}\n"
+       "$arr = array();\n"
+       "$arr[PHP_INT_MAX-1] = 1;\n"
+       "$arr[PHP_INT_MAX] = 2;\n"
+       "var_dump($arr);\n"
+       "f($arr[]);\n"
+       "var_dump($arr);\n"
+       "unset($arr[PHP_INT_MAX]);\n"
+       "unset($arr[PHP_INT_MAX-1]);\n"
+       "f($arr[]);\n"
+       "var_dump($arr);\n"
+       ,
+       "array(2) {\n"
+       "  [9223372036854775806]=>\n"
+       "  int(1)\n"
+       "  [9223372036854775807]=>\n"
+       "  int(2)\n"
+       "}\n"
+       "array(2) {\n"
+       "  [9223372036854775806]=>\n"
+       "  int(1)\n"
+       "  [9223372036854775807]=>\n"
+       "  int(2)\n"
+       "}\n"
+       "array(1) {\n"
+       "  [9223372036854775807]=>\n"
+       "  int(44)\n"
+       "}\n");
+
   return true;
 }
 

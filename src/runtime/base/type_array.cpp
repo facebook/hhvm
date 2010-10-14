@@ -451,7 +451,7 @@ Variant Array::rvalAt(CVarRef key, bool error /* = false*/) const {
     if (key.m_data.pstr->isStrictlyInteger(n)) {
       return m_px->get(n, error);
     } else {
-      return m_px->get(String(key.m_data.pstr), error);
+      return m_px->get(key.asCStrRef(), error);
     }
   }
   case KindOfArray:
@@ -489,6 +489,20 @@ Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
     }
   }
   return ret;
+}
+
+Variant &Array::lvalAt() {
+  if (!m_px) {
+    SmartPtr<ArrayData>::operator=(ArrayData::Create());
+  }
+  Variant *ret = NULL;
+  ArrayData *arr = m_px;
+  ArrayData *escalated = arr->lvalNew(ret, arr->getCount() > 1);
+  if (escalated) {
+    SmartPtr<ArrayData>::operator=(escalated);
+  }
+  ASSERT(ret);
+  return *ret;
 }
 
 Variant &Array::lvalAt(litstr  key, bool checkExist /* = false */,

@@ -86,6 +86,8 @@ public:
   virtual ArrayData *lvalPtr(CStrRef k, Variant *&ret, bool copy,
                              bool create);
 
+  virtual ArrayData *lvalNew(Variant *&ret, bool copy);
+
   virtual ArrayData *set(int64   k, CVarRef v, bool copy);
   virtual ArrayData *set(litstr  k, CVarRef v, bool copy);
   virtual ArrayData *set(CStrRef k, CVarRef v, bool copy);
@@ -153,9 +155,9 @@ public:
 
   // these two constructors should never be called directly, they are
   // only called from generated code.
-  SmallArray(unsigned int nSize, unsigned long n,
+  SmallArray(unsigned int nSize, int64 n,
              StringData *keys[], const Variant *values[]);
-  SmallArray(unsigned int nSize, unsigned long n,
+  SmallArray(unsigned int nSize, int64 n,
              int64 keys[], const Variant *values[]);
 
 private:
@@ -163,7 +165,7 @@ private:
   int8            m_nListHead;
   int8            m_nListTail;
   int8            m_siPastEnd;
-  unsigned long   m_nNextFreeElement;
+  int64           m_nNextFreeElement;
 
   Bucket  m_arBuckets[SARR_TABLE_SIZE];
 
@@ -201,8 +203,8 @@ private:
   inline bool addVal(int64 h, CVarRef data);
   inline bool addVal(StringData *key, CVarRef data);
 
-  inline void erase(Bucket *pb);
-  inline void nextInsert(CVarRef v);
+  inline void erase(Bucket *pb, bool updateNext = false);
+  inline bool nextInsert(CVarRef v);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

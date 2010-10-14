@@ -672,12 +672,9 @@ class Variant {
     return *ret;
   }
 
-  Variant &lvalAt() {
-    append(null);
-    return lval();
-  }
-
   Variant *lvalPtr(CStrRef key, bool forWrite, bool create);
+
+  Variant &lvalAt();
 
   static Variant &lvalInvalid();
   static Variant &lvalBlackHole();
@@ -1327,11 +1324,6 @@ inline const Variant Array::operator[](CStrRef key) const {
 
 inline const Variant Array::operator[](CVarRef key) const {
   return rvalAt(key);
-}
-
-inline Variant &Array::lvalAt() {
-  append(null);
-  return lval();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -165,6 +165,15 @@ class ArrayData : public Countable {
                           bool checkExist = false) = 0;
 
   /**
+   * Getting l-value (that Variant pointer) of a new element with the next
+   * available integer key. Return NULL if escalation is not needed, or an
+   * escalated array data. Note that adding a new element with the next
+   * available integer key may fail, in which case ret is set to point to
+   * the lval blackhole (see Variant::lvalBlackHole() for details).
+   */
+  virtual ArrayData *lvalNew(Variant *&ret, bool copy) = 0;
+
+  /**
    * Helper function used for getting a reference to elements of
    * the o_properties array
    */

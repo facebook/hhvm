@@ -29,6 +29,10 @@
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 
+#define ALWAYS_INLINE  __attribute__((always_inline))
+#define LIKELY(pred)   __builtin_expect((pred), true)
+#define UNLIKELY(pred) __builtin_expect((pred), false)
+
 /**
  * Split a string into a list of tokens by character delimiter.
  */

@@ -2103,7 +2103,7 @@ Variant Variant::rvalAt(CVarRef offset, bool error /* = false */) const {
       if (offset.m_data.pstr->isStrictlyInteger(n)) {
         return m_data.parr->get(n, error);
       } else {
-        return m_data.parr->get(String(offset.m_data.pstr), error);
+        return m_data.parr->get(offset.asCStrRef(), error);
       }
     }
     case KindOfArray:
@@ -2231,6 +2231,55 @@ Variant *Variant::lvalPtr(CStrRef key, bool forWrite, bool create) {
     return t->asArrRef().lvalPtr(key, forWrite, create);
   }
   return NULL;
+}
+
+Variant &Variant::lvalAt() {
+  switch (m_type) {
+  case KindOfNull:
+    set(ArrayData::Create());
+    break;
+  case KindOfBoolean:
+    if (!toBoolean()) {
+      set(ArrayData::Create());
+    } else {
+      throw_bad_type_exception("[] operator not supported for this type");
+      return lvalBlackHole();
+    }
+    break;
+  case KindOfArray:
+    break;
+  case KindOfVariant:
+    return m_data.pvar->lvalAt();
+  case KindOfObject:
+    {
+      Array params = CREATE_VECTOR1(null);
+      Variant& ret = lvalBlackHole();
+      ret = m_data.pobj->o_invoke(s_offsetGet, params);
+      raise_warning("Indirect modification of overloaded element of %s has "
+                    "no effect", m_data.pobj->o_getClassName().data());
+      return ret;
+    }
+  case KindOfStaticString:
+  case KindOfString:
+    if (getStringData()->empty()) {
+      set(ArrayData::Create());
+      break;
+    }
+    // fall through to throw
+  default:
+    throw_bad_type_exception("[] operator not supported for this type");
+    return lvalBlackHole();
+  }
+
+  ASSERT(m_type == KindOfArray);
+  Variant *ret = NULL;
+  ArrayData *arr = m_data.parr;
+  ArrayData *escalated = arr->lvalNew(ret, arr->getCount() > 1);
+  if (escalated) {
+    set(escalated);
+  }
+  ASSERT(ret);
+  return *ret;
 }
 
 Variant &Variant::lvalInvalid() {

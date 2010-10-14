@@ -132,6 +132,10 @@ ArrayData *GlobalArrayWrapper::lval(CStrRef k, Variant *&ret, bool copy,
   ret = &m_globals->get(k);
   return NULL;
 }
+ArrayData* GlobalArrayWrapper::lvalNew(Variant *&ret, bool copy) {
+  ret = &m_globals->lvalAt();
+  return NULL;
+}
 
 ArrayData *GlobalArrayWrapper::set(int64   k, CVarRef v, bool copy) {
   set(Variant(k), v, copy);

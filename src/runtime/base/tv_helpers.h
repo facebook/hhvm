@@ -41,45 +41,66 @@ namespace HPHP {
 // Assumes 'IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_type != KindOfVariant'
 #ifdef FAST_REFCOUNT_FOR_VARIANT
 inline void tvDecRefCell(TypedValue* tv) {
+  ASSERT(IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_type != KindOfVariant);
   if (tv->m_data.pvar->decRefCount() == 0) {
     if (tv->m_type < KindOfArray) {
       ASSERT(tv->m_type == KindOfString);
       tv->m_data.pstr->release();
     } else {
-      if (tv->m_type != KindOfArray) {
+      if (tv->m_type == KindOfArray) {
+        tv->m_data.parr->release();
+      } else {
         ASSERT(tv->m_type == KindOfObject);
         tv->m_data.pobj->release();
-      } else {
-        tv->m_data.parr->release();
       }
     }
   }
 }
 #else
 inline void tvDecRefCell(TypedValue* tv) {
+  ASSERT(IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_type != KindOfVariant);
   if (tv->m_type < KindOfArray) {
     ASSERT(tv->m_type == KindOfString);
     if (tv->m_data.pstr->decRefCount() == 0) {
       tv->m_data.pstr->release();
     }
   } else {
-    if (tv->m_type != KindOfArray) {
+    if (tv->m_type == KindOfArray) {
+      if (tv->m_data.parr->decRefCount() == 0) {
+        tv->m_data.parr->release();
+      }
+    } else {
       ASSERT(tv->m_type == KindOfObject);
       if (tv->m_data.pobj->decRefCount() == 0) {
         tv->m_data.pobj->release();
-      }
-    } else {
-      if (tv->m_data.parr->decRefCount() == 0) {
-        tv->m_data.parr->release();
       }
     }
   }
 }
 #endif
 
+inline void tvDecRefStr(TypedValue* tv) {
+  ASSERT(tv->m_type == KindOfString);
+  if (tv->m_data.pstr->decRefCount() == 0) {
+    tv->m_data.pstr->release();
+  }
+}
+
+inline void tvDecRefArr(TypedValue* tv) {
+  ASSERT(tv->m_type == KindOfArray);
+  if (tv->m_data.parr->decRefCount() == 0) {
+    tv->m_data.parr->release();
+  }
+}
+
+inline void tvDecRefObj(TypedValue* tv) {
+  ASSERT(tv->m_type == KindOfObject);
+  if (tv->m_data.pobj->decRefCount() == 0) {
+    tv->m_data.pobj->release();
+  }
+}
+
 // Assumes 'tv' is live
-//
-// Assumes 'tv->m_type != KindOfVariant && tv->_count > 0'
 inline void tvDecRefVarInternal(TypedValue* tv) {
   ASSERT(tv->m_type != KindOfVariant);
   ASSERT(tv->_count > 0);
@@ -89,57 +110,56 @@ inline void tvDecRefVarInternal(TypedValue* tv) {
 }
 
 // Assumes 'tv' is live
-//
-// Assumes 'tv->m_type == KindOfVariant'
 inline void tvDecRefVar(TypedValue* tv) {
   ASSERT(tv->m_type == KindOfVariant);
   tvDecRefVarInternal(tv->m_data.ptv);
 }
 
-// Assumes 'tv' is live
-//
-// Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
+// Assumes 'data' is live
+// Assumes 'IS_REFCOUNTED_TYPE(type)'
 #ifdef FAST_REFCOUNT_FOR_VARIANT
-inline void tvDecRef(TypedValue* tv) {
-  if (tv->m_data.pvar->decRefCount() == 0) {
-    if (tv->m_type == KindOfString) {
-      tv->m_data.pstr->release();
+inline void tvDecRefHelper(DataType type, uint64_t datum) {
+  ASSERT(IS_REFCOUNTED_TYPE(type));
+  if (((Variant*)datum)->decRefCount() == 0) {
+    if (type == KindOfString) {
+      ((StringData*)datum)->release();
     } else {
-      if (tv->m_type < KindOfObject) {
-        ASSERT(tv->m_type == KindOfArray);
-        tv->m_data.parr->release();
+      if (type < KindOfObject) {
+        ASSERT(type == KindOfArray);
+        ((ArrayData*)datum)->release();
       } else {
-        if (tv->m_type != KindOfObject) {
-          ASSERT(tv->m_type == KindOfVariant);
-          tv->m_data.pvar->release();
+        if (type == KindOfObject) {
+          ((ObjectData*)datum)->release();
         } else {
-          tv->m_data.pobj->release();
+          ASSERT(type == KindOfVariant);
+          ((Variant*)datum)->release();
         }
       }
     }
   }
 }
 #else
-inline void tvDecRef(TypedValue* tv) {
-  if (tv->m_type == KindOfString) {
-    if (tv->m_data.pstr->decRefCount() == 0) {
-      tv->m_data.pstr->release();
+inline void tvDecRefHelper(DataType type, uint64_t datum) {
+  ASSERT(IS_REFCOUNTED_TYPE(type));
+  if (type == KindOfString) {
+    if (((StringData*)datum)->decRefCount() == 0) {
+      ((StringData*)datum)->release();
     }
   } else {
-    if (tv->m_type < KindOfObject) {
-      ASSERT(tv->m_type == KindOfArray);
-      if (tv->m_data.parr->decRefCount() == 0) {
-        tv->m_data.parr->release();
+    if (type < KindOfObject) {
+      ASSERT(type == KindOfArray);
+      if (((ArrayData*)datum)->decRefCount() == 0) {
+        ((ArrayData*)datum)->release();
       }
     } else {
-      if (tv->m_type != KindOfObject) {
-        ASSERT(tv->m_type == KindOfVariant);
-        if (tv->m_data.pvar->decRefCount() == 0) {
-          tv->m_data.pvar->release();
+      if (type == KindOfObject) {
+        if (((ObjectData*)datum)->decRefCount() == 0) {
+          ((ObjectData*)datum)->release();
         }
       } else {
-        if (tv->m_data.pobj->decRefCount() == 0) {
-          tv->m_data.pobj->release();
+        ASSERT(type == KindOfVariant);
+        if (((Variant*)datum)->decRefCount() == 0) {
+          ((Variant*)datum)->release();
         }
       }
     }
@@ -148,16 +168,24 @@ inline void tvDecRef(TypedValue* tv) {
 #endif
 
 // Assumes 'tv' is live
-//
-// Assumes 'tv.m_type != KindOfVariant'
+// Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
+inline void tvDecRef(TypedValue* tv) {
+  tvDecRefHelper(tv->m_type, tv->m_data.num);
+}
+
+inline TypedValue* tvBoxHelper(DataType type, uint64_t datum) {
+  TypedValue* innerCell = (TypedValue*)(NEW(Variant)());
+  innerCell->m_data.num = datum;
+  innerCell->_count = 1;
+  innerCell->m_type = type;
+  return innerCell;
+}
+
+// Assumes 'tv' is live
 inline void tvBox(TypedValue* tv) {
   ASSERT(tv->m_type != KindOfVariant);
   ASSERT(tv->_count == 0);
-  TypedValue* innerCell = (TypedValue*)(NEW(Variant)());
-  innerCell->m_data.num = (tv)->m_data.num;
-  innerCell->_count = 1;
-  innerCell->m_type = (tv)->m_type;
-  tv->m_data.ptv = innerCell;
+  tv->m_data.ptv = tvBoxHelper(tv->m_type, tv->m_data.num);
   tv->m_type = KindOfVariant;
 }
 
@@ -169,7 +197,6 @@ inline void tvIncRef(TypedValue* tv) {
 }
 
 // Assumes 'tv' is live
-//
 // Assumes 'tv.m_type == KindOfVariant'
 inline void tvUnbox(TypedValue* tv) {
   TV_UNBOX(tv);
@@ -181,39 +208,41 @@ inline void tvReadCell(const TypedValue* fr, TypedValue* to) {
 }
 
 // Assumes 'fr' is live and 'to' is dead
+// Assumes 'fr->m_type != KindOfVariant'
+// NOTE: this helper will initialize to->_count to 0
 inline void tvDupCell(const TypedValue* fr, TypedValue* to) {
   TV_DUP_CELL(fr, to);
 }
 
-// Assumes 'to' is dead and 'fr' is live
-//
+// Assumes 'fr' is live and 'to' is dead
 // Assumes 'fr->m_type == KindOfVariant'
+// NOTE: this helper will initialize to->_count to 0
 inline void tvDupVar(const TypedValue* fr, TypedValue* to) {
   TV_DUP_VAR(fr,to);
 }
 
-// Assumes 'to' is dead and 'fr' is live
+// Assumes 'fr' is live and 'to' is dead
+// NOTE: this helper will initialize to->_count to 0
 inline void tvDup(const TypedValue* fr, TypedValue* to) {
   TV_DUP(fr,to);
 }
 
 // Assumes 'tv' is dead
+// NOTE: this helper will initialize tv->_count to 0
 inline void tvWriteNull(TypedValue* tv) {
   TV_WRITE_NULL(tv);
 }
 
 // Assumes 'tv' is dead
+// NOTE: this helper will initialize tv->_count to 0
 inline void tvWriteUninit(TypedValue* tv) {
   TV_WRITE_UNINIT(tv);
 }
 
 // Assumes 'to' and 'fr' are live
-//
 // Assumes that 'fr->m_type != KindOfVariant'
-//
-// If 'to->m_type == KindOfVariant', this will
-// perform the set operation on the inner cell
-// (to->m_data.ptv)
+// If 'to->m_type == KindOfVariant', this will perform the set
+// operation on the inner cell (to->m_data.ptv)
 inline void tvSet(TypedValue * fr, TypedValue * to) {
   ASSERT(fr->m_type != KindOfVariant);
   if (to->m_type == KindOfVariant) {
@@ -232,7 +261,7 @@ inline void tvSet(TypedValue * fr, TypedValue * to) {
 }
 
 /**
- * tvAsVariant and tvAsCVarRef serve as escape hatches that allows us to call
+ * tvAsVariant and tvAsCVarRef serve as escape hatches that allow us to call
  * into the Variant machinery. Ideally we will use these as little as possible
  * in the long term.
  */
@@ -271,6 +300,17 @@ inline const Variant& tvVarAsCVarRef(const TypedValue* tv) {
   return *(const Variant*)(tv);
 }
 
+inline bool tvIsStronglyBound(const TypedValue* tv) {
+  return (tv->m_type == KindOfVariant && tv->m_data.ptv->_count > 1);
+}
+
+void tvCastToBooleanInPlace(TypedValue* tv);
+void tvCastToInt64InPlace(TypedValue* tv, int base = 10);
+void tvCastToDoubleInPlace(TypedValue* tv);
+void tvCastToStringInPlace(TypedValue* tv);
+void tvCastToArrayInPlace(TypedValue* tv);
+void tvCastToObjectInPlace(TypedValue* tv);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 
@@ -280,4 +320,4 @@ inline const Variant& tvVarAsCVarRef(const TypedValue* tv) {
 #include <runtime/base/undef_tv_macros.h>
 #endif
 
-#endif // __HPHP_HPHPVALUE_H__
+#endif // __HPHP_TV_HELPERS_H__

@@ -94,6 +94,8 @@ public:
   virtual ArrayData *lvalPtr(CStrRef k, Variant *&ret, bool copy,
                              bool create);
 
+  virtual ArrayData *lvalNew(Variant *&ret, bool copy);
+
   virtual ArrayData *set(int64   k, CVarRef v, bool copy);
   virtual ArrayData *set(litstr  k, CVarRef v, bool copy);
   virtual ArrayData *set(CStrRef k, CVarRef v, bool copy);
@@ -158,7 +160,7 @@ public:
 
   // This constructor should never be called directly, it is only called
   // from generated code.
-  ZendArray(uint nSize, unsigned long n, Bucket *bkts[]);
+  ZendArray(uint nSize, int64 n, Bucket *bkts[]);
 
 private:
   enum Flag {
@@ -170,7 +172,7 @@ private:
   uint             m_nTableSize;
   uint             m_nTableMask;
   uint             m_nNumOfElements;
-  unsigned long    m_nNextFreeElement;
+  int64            m_nNextFreeElement;
   Bucket         * m_pListHead;
   Bucket         * m_pListTail;
   Bucket         **m_arBuckets;
@@ -194,7 +196,7 @@ private:
   bool update(litstr key, CVarRef data);
   bool update(StringData *key, CVarRef data);
 
-  void erase(Bucket ** prev);
+  void erase(Bucket ** prev, bool updateNext = false);
   ZendArray *copyImpl() const;
 
   void resize();

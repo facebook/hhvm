@@ -52,6 +52,8 @@ public:
   virtual ssize_t iter_advance(ssize_t prev) const;
   virtual ssize_t iter_rewind(ssize_t prev) const;
 
+  ssize_t iter_advance_helper(ssize_t prev) const __attribute__((cold));
+
   virtual Variant reset();
   virtual Variant prev();
   virtual Variant current() const;
@@ -68,10 +70,10 @@ public:
 
   virtual bool idxExists(ssize_t idx) const;
 
-  virtual Variant get(int64   k, bool error=false) const;
-  virtual Variant get(litstr  k, bool error=false) const;
-  virtual Variant get(CStrRef k, bool error=false) const;
-  virtual Variant get(CVarRef k, bool error=false) const;
+  virtual Variant get(int64   k, bool error=false) const __attribute__((flatten));
+  virtual Variant get(litstr  k, bool error=false) const __attribute__((flatten));
+  virtual Variant get(CStrRef k, bool error=false) const __attribute__((flatten));
+  virtual Variant get(CVarRef k, bool error=false) const __attribute__((flatten));
 
   virtual void load(CVarRef k, Variant& v) const;
 
@@ -93,6 +95,8 @@ public:
                           bool checkExist=false);
   virtual ArrayData* lvalPtr(CStrRef k, Variant*& ret, bool copy,
                              bool create);
+
+  virtual ArrayData* lvalNew(Variant*& ret, bool copy);
 
   virtual ArrayData* set(int64   k, CVarRef v, bool copy);
   virtual ArrayData* set(litstr  k, CVarRef v, bool copy);
@@ -136,6 +140,10 @@ public:
   };
 
   // Element index, with special values < 0 used for hash tables.
+  // NOTE: Unfortunately, g++ on x64 tends to generate worse machine code for
+  // 32-bit ints than it does for 64-bit ints. As such, we have deliberately
+  // chosen to use ssize_t in some places where ideally we *should* have used
+  // ElmInd.
   typedef int32 ElmInd;
   static const ElmInd ElmIndEmpty      = -1; // == ArrayData::invalid_index
   static const ElmInd ElmIndTombstone  = -2;
@@ -153,37 +161,51 @@ private:
   // elements are naturally aligned.  If necessary, m_data starts and ends with
   // padding in order to meet the element alignment requirements.
   //
-  // Element addresses are computed relative to m_hash.
+  // Given 2^K == m_tableMask+1 && K >= 2 && K <= 32 &&
+  //       block == (void*)(uintptr_t(m_data) - uintptr_t(m_dataPad)):
   //
   //            +--------------------+
-  // m_data --> | alignment padding? |
+  // block -->  | alignment padding? |
   //            +--------------------+
-  // element 0  |                    | 2^m_lgTableSize - 2^(m_lgTableSize-2)
-  // element 1  |                    | elements.
-  // ...        |                    |
+  // m_data --> | slot 0             | 0.75 * 2^K slots for elements.
+  //            | slot 1             |
+  //            | ...                |
   //            +--------------------+
-  // m_hash --> |                    | 2^m_lgTableSize hash table entries.
+  // m_hash --> |                    | 2^K hash table entries.
   //            +--------------------+
   //            | alignment padding? |
   //            +--------------------+
   void*   m_data;        // Contains elements and hash table.
   ElmInd* m_hash;        // Hash table.
   int64   m_nextKI;      // Next integer key to use for append.
-  uint32  m_lgTableSize; // Hash table has 2^m_lgTableSize slots.
+  uint32  m_tableMask;   // Bitmask used when indexing into the Hash table.
   ElmInd  m_nElms;       // Total number of elements in array.
   uint32  m_hLoad;       // Hash table load (# of non-empty slots).
   ElmInd  m_lastE;       // Index of last used element.
-  bool    m_linear;      // (true) ? m_data came from linear allocator.
-  bool    m_siPastEnd;   // (true) ? strong iterators possibly past end.
+  char    m_linear;      // (true) ? m_data came from linear allocator.
+  char    m_siPastEnd;   // (true) ? strong iterators possibly past end.
+  uchar   m_dataPad;     // Number of bytes that m_data was advanced to
+                         //   achieve the required alignment
+
+  inline void* getBlock() {
+    return ((void*)(uintptr_t(m_data) - uintptr_t(m_dataPad)));
+  }
 
   void dumpDebugInfo() const;
 
-  ElmInd nextElm(Elm* elms, ElmInd ei) const;
+  ssize_t /*ElmInd*/ nextElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
 
-  ElmInd find(int64 ki) const;
-  ElmInd find(const char* k, int len, int64 prehash) const;
-  ElmInd* findForInsert(int64 ki) const;
-  ElmInd* findForInsert(const char* k, int len, int64 prehash) const;
+  inline ssize_t /*ElmInd*/ find(int64 ki) const;
+  inline ssize_t /*ElmInd*/ find(const char* k, int len, int64 prehash) const;
+  inline ElmInd* findForInsert(int64 ki) const;
+  inline ElmInd* findForInsert(const char* k, int len, int64 prehash) const;
+
+  /**
+   * findForNewInsert() CANNOT be used unless the caller can guarantee that
+   * the relevant key is not already present in the array. Otherwise this can
+   * put the array into a bad state; use with caution.
+   */
+  inline ElmInd* ALWAYS_INLINE findForNewInsert(size_t h0) const;
 
   bool nextInsert(CVarRef data);
   bool addLvalImpl(int64 ki, Variant** pDest, bool doFind=true);
@@ -195,15 +217,38 @@ private:
   bool update(litstr key, CVarRef data);
   bool update(StringData* key, CVarRef data);
 
-  void erase(ElmInd* ei);
+  void erase(ElmInd* ei, bool updateNext = false);
   HphpArray* copyImpl() const;
 
-  Elm* allocElm(ElmInd* ei);
+  inline Elm* ALWAYS_INLINE allocElm(ElmInd* ei);
   void reallocData(size_t maxElms, size_t tableSize);
-  void delinearize();
-  inline void resize();
-  void grow();
-  void compact(bool renumber=false);
+  void delinearize() __attribute__((cold));
+
+  /**
+   * grow() increases the hash table size and the number of slots for
+   * elements by a factor of 2. grow() rebuilds the hash table, but it
+   * does not compact the elements.
+   */
+  void grow() __attribute__((cold));
+
+  /**
+   * compact() does not change the hash table size or the number of slots
+   * for elements. compact() rebuilds the hash table and compacts the
+   * elements into the slots with lower addresses.
+   */
+  void compact(bool renumber=false) __attribute__((cold));
+
+  /**
+   * resize() and resizeIfNeeded() will grow or compact the array as
+   * necessary to ensure that there is room for a new element and a
+   * new hash entry.
+   *
+   * resize() assumes that the array does not have room for a new element
+   * or a new hash entry. resizeIfNeeded() will first check if there is room
+   * for a new element and hash entry before growing or compacting the array.
+   */
+  void resize();
+  inline void ALWAYS_INLINE resizeIfNeeded();
 
   // Memory allocator methods.
   DECLARE_SMART_ALLOCATION(HphpArray, SmartAllocatorImpl::NeedRestoreOnce);

@@ -21,7 +21,6 @@
 #define __HPHP_TV_MACROS__
 
 // Assumes 'tv' is live
-//
 // Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
 #ifdef FAST_REFCOUNT_FOR_VARIANT
 #define TV_INCREF(tv) { \
@@ -50,11 +49,8 @@
 #endif
 
 // Assumes 'tv' is live
-//
-// Assumes 'tv->m_type == KindOfVariant'
 #define TV_UNBOX(tv) { \
   ASSERT((tv)->m_type == KindOfVariant); \
-  ASSERT((tv)->_count == 0); \
   TypedValue* innerCell = (tv)->m_data.ptv; \
   (tv)->m_data.num = innerCell->m_data.num; \
   (tv)->m_type = innerCell->m_type; \
@@ -83,44 +79,67 @@
 }
 
 // Assumes 'fr' is live and 'to' is dead
-#define TV_DUP_CELL(fr, to) { \
+// NOTE: this helper will not change the value of to->_count
+#define TV_DUP_CELL_NC(fr, to) { \
   ASSERT((fr)->m_type != KindOfVariant); \
   (to)->m_data.num = (fr)->m_data.num; \
-  (to)->_count = 0; \
   (to)->m_type = (fr)->m_type; \
   if (IS_REFCOUNTED_TYPE((to)->m_type)) { \
     TV_INCREF(to); \
   } \
 }
 
-// Assumes 'to' is dead and 'fr' is live
-//
-// Assumes 'fr->m_type == KindOfVariant'
-#define TV_DUP_VAR(fr,to) { \
+// Assumes 'fr' is live and 'to' is dead
+// NOTE: this helper will not change the value of to->_count
+#define TV_DUP_VAR_NC(fr,to) { \
   ASSERT((fr)->m_type == KindOfVariant); \
   (to)->m_data.num = (fr)->m_data.num; \
-  (to)->_count = 0; \
   (to)->m_type = KindOfVariant; \
   TV_INCREF(to); \
 }
 
-// Assumes 'to' is dead and 'fr' is live
-#define TV_DUP(fr,to) { \
+// Assumes 'fr' is live and 'to' is dead
+// NOTE: this helper will not change the value of to->_count
+#define TV_DUP_NC(fr,to) { \
   (to)->m_data.num = (fr)->m_data.num; \
-  (to)->_count = 0; \
   (to)->m_type = (fr)->m_type; \
   if (IS_REFCOUNTED_TYPE((to)->m_type)) { \
     TV_INCREF(to); \
   } \
 }
 
+// Assumes 'fr' is live and 'to' is dead
+// Assumes 'fr->m_type != KindOfVariant'
+// NOTE: this helper will initialize to->_count to 0
+#define TV_DUP_CELL(fr, to) { \
+  TV_DUP_CELL_NC((fr), (to)) \
+  (to)->_count = 0; \
+}
+
+// Assumes 'fr' is live and 'to' is dead
+// Assumes 'fr->m_type == KindOfVariant'
+// NOTE: this helper will initialize to->_count to 0
+#define TV_DUP_VAR(fr, to) { \
+  TV_DUP_VAR_NC((fr), (to)) \
+  (to)->_count = 0; \
+}
+
+// Assumes 'fr' is live and 'to' is dead
+// NOTE: this helper will initialize to->_count to 0
+#define TV_DUP(fr,to) { \
+  TV_DUP_NC((fr), (to)) \
+  (to)->_count = 0; \
+}
+
 // Assumes 'tv' is dead
+// NOTE: this helper will initialize tv->_count to 0
 #define TV_WRITE_NULL(tv) \
   (tv)->m_data.num = 0; \
   (tv)->_count = 0; \
   (tv)->m_type = KindOfNull
 
 // Assumes 'tv' is dead
+// NOTE: this helper will initialize tv->_count to 0
 #define TV_WRITE_UNINIT(tv) \
   (tv)->m_data.num = 1; \
   (tv)->_count = 0; \

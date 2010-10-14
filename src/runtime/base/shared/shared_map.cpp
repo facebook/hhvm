@@ -157,6 +157,15 @@ ArrayData *SharedMap::lval(CVarRef k, Variant *&ret, bool copy,
   }
   return escalated;
 }
+ArrayData *SharedMap::lvalNew(Variant *&ret, bool copy) {
+  ArrayData *escalated = escalate();
+  ArrayData *ee = escalated->lvalNew(ret, false);
+  if (ee) {
+    escalated->release();
+    return ee;
+  }
+  return escalated;
+}
 
 ArrayData *SharedMap::set(int64 k, CVarRef v, bool copy) {
   ArrayData *escalated = escalate();

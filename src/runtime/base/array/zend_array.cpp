@@ -112,7 +112,7 @@ ZendArray::ZendArray(uint nSize /* = 0 */) :
   m_arBuckets = (Bucket **)calloc(m_nTableSize, sizeof(Bucket *));
 }
 
-ZendArray::ZendArray(uint nSize, unsigned long n, Bucket *bkts[]) :
+ZendArray::ZendArray(uint nSize, int64 n, Bucket *bkts[]) :
   m_nNumOfElements(nSize), m_nNextFreeElement(n),
   m_pListHead(NULL), m_pListTail(NULL), m_flag(0) {
 
@@ -555,6 +555,11 @@ void ZendArray::rehash() {
 }
 
 bool ZendArray::nextInsert(CVarRef data) {
+  if (m_nNextFreeElement < 0) {
+    raise_warning("Cannot add element to the array as the next element is "
+                  "already occupied");
+    return false;
+  }
   int64 h = m_nNextFreeElement;
   Bucket * p = NEW(Bucket)(data);
   p->h = h;
@@ -589,7 +594,7 @@ bool ZendArray::addLvalImpl(int64 h, Variant **pDest,
   CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
-  if ((long)h >= (long)m_nNextFreeElement) {
+  if (h >= m_nNextFreeElement && m_nNextFreeElement >= 0) {
     m_nNextFreeElement = h + 1;
   }
   if (++m_nNumOfElements > m_nTableSize) {
@@ -635,7 +640,7 @@ bool ZendArray::addVal(int64 h, CVarRef data) {
   CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
-  if ((long)h >= (long)m_nNextFreeElement) {
+  if (h >= m_nNextFreeElement && m_nNextFreeElement >= 0) {
     m_nNextFreeElement = h + 1;
   }
   if (++m_nNumOfElements > m_nTableSize) {
@@ -679,7 +684,7 @@ bool ZendArray::update(int64 h, CVarRef data) {
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
 
-  if ((long)h >= (long)m_nNextFreeElement) {
+  if (h >= m_nNextFreeElement && m_nNextFreeElement >= 0) {
     m_nNextFreeElement = h + 1;
   }
   if (++m_nNumOfElements > m_nTableSize) {
@@ -830,6 +835,26 @@ ArrayData *ZendArray::lval(CVarRef k, Variant *&ret, bool copy,
   }
 }
 
+ArrayData *ZendArray::lvalNew(Variant *&ret, bool copy) {
+  if (copy) {
+    ZendArray *a = copyImpl();
+    if (!a->nextInsert(null)) {
+      ret = &(Variant::lvalBlackHole());
+      return a;
+    }
+    ASSERT(a->m_pListTail);
+    ret = &a->m_pListTail->data;
+    return a;
+  }
+  if (!nextInsert(null)) {
+    ret = &(Variant::lvalBlackHole());
+    return NULL;
+  }
+  ASSERT(m_pListTail);
+  ret = &m_pListTail->data;
+  return NULL;
+}
+
 ArrayData *ZendArray::set(int64 k, CVarRef v, bool copy) {
   if (copy) {
     ZendArray *a = copyImpl();
@@ -895,7 +920,7 @@ ArrayData *ZendArray::add(int64 k, CVarRef v, bool copy) {
   CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
-  if ((long)k >= (long)m_nNextFreeElement) {
+  if (k >= m_nNextFreeElement && m_nNextFreeElement >= 0) {
     m_nNextFreeElement = k + 1;
   }
   if (++m_nNumOfElements > m_nTableSize) {
@@ -963,7 +988,7 @@ ArrayData *ZendArray::addLval(CVarRef k, Variant *&ret, bool copy) {
 ///////////////////////////////////////////////////////////////////////////////
 // delete
 
-void ZendArray::erase(Bucket ** prev) {
+void ZendArray::erase(Bucket ** prev, bool updateNext /* = false */) {
   if (prev == NULL)
     return;
   Bucket * p = *prev;
@@ -999,7 +1024,11 @@ void ZendArray::erase(Bucket ** prev) {
       }
     }
     m_nNumOfElements--;
-
+    // Match PHP 5.3.1 semantics
+    if (p->h == m_nNextFreeElement-1 &&
+        (p->h == 0x7fffffffffffffffLL || updateNext)) {
+      --m_nNextFreeElement;
+    }
     DELETE(Bucket)(p);
   }
   if (nextElementUnsetInsideForeachByReference) {
@@ -1218,15 +1247,12 @@ ArrayData *ZendArray::pop(Variant &value) {
   }
   if (m_pListTail) {
     value = m_pListTail->data;
-    if (!m_pListTail->key && (uint)m_pListTail->h == m_nNextFreeElement - 1) {
-      m_nNextFreeElement--;
-    }
     prepareBucketHeadsForWrite();
-    erase(findForErase(m_pListTail));
+    erase(findForErase(m_pListTail), true);
   } else {
     value = null;
   }
-  // To match PHP-like semantics, the prepend operation resets the array's
+  // To match PHP-like semantics, the pop operation resets the array's
   // internal iterator
   m_pos = (ssize_t)m_pListHead;
   return NULL;
@@ -1251,7 +1277,7 @@ ArrayData *ZendArray::dequeue(Variant &value) {
   } else {
     value = null;
   }
-  // To match PHP-like semantics, the pop operation resets the array's
+  // To match PHP-like semantics, the dequeue operation resets the array's
   // internal iterator
   m_pos = (ssize_t)m_pListHead;
   return NULL;
@@ -1306,7 +1332,7 @@ ArrayData *ZendArray::prepend(CVarRef v, bool copy) {
 }
 
 void ZendArray::renumber() {
-  unsigned long i = 0;
+  int64 i = 0;
   Bucket* p = m_pListHead;
   for (; p; p = p->pListNext) {
     if (p->key == NULL) {

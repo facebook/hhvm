@@ -57,7 +57,7 @@ const char *CodeGenerator::SPLITTER_MARKER =
 
 CodeGenerator::CodeGenerator(std::ostream *primary,
                              Output output /* = PickledPHP */,
-                             std::string *filename /* = NULL */)
+                             const std::string *filename /* = NULL */)
     : m_out(NULL), m_output(output), m_context(NoContext),
       m_insideScalarArray(false), m_itemIndex(-1) {
   for (int i = 0; i < StreamCount; i++) {
@@ -346,9 +346,9 @@ void CodeGenerator::print(const std::string &msg, bool indent /* = true */) {
   for (unsigned int i = 0; i < msg.length(); i++) {
     unsigned char ch = msg[i];
     *m_out << ch;
-    if (ch == '\n' && indent) {
+    if (ch == '\n') {
       m_lineNo[m_curStream]++;
-      if (m_indentPending[m_curStream]) {
+      if (indent && m_indentPending[m_curStream]) {
         for (int i = 0; i < m_indentation[m_curStream]; i++) {
           *m_out << Option::Tab;
         }

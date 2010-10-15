@@ -65,6 +65,11 @@ endif
 # For hotprofiler instrumentation
 HOTPROFILER = 1
 
+# Use jemalloc by default.
+ifndef NO_JEMALLOC
+USE_JEMALLOC = 1
+endif
+
 # Only use jemalloc *or* tcmalloc.
 ifdef USE_JEMALLOC
 NO_TCMALLOC = 1

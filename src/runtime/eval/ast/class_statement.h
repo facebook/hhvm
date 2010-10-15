@@ -127,7 +127,6 @@ public:
   void semanticCheck(const ClassStatement *cls) const;
   ClassStatementMarkerPtr getMarker() const;
   void delayDeclaration() { m_delayDeclaration = true; }
-  bool isDelayedDeclaration() const { return m_delayDeclaration;}
 protected:
   std::string m_name;
   std::string m_lname;

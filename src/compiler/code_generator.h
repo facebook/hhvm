@@ -105,7 +105,7 @@ public:
 public:
   CodeGenerator() {} // only for creating a dummy code generator
   CodeGenerator(std::ostream *primary, Output output = PickledPHP,
-                std::string *filename = NULL);
+                const std::string *filename = NULL);
 
   /**
    * ...if it was passed in from constructor.

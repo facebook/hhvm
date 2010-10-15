@@ -16,6 +16,7 @@
 
 #include <iomanip>
 #include <algorithm>
+#include <sstream>
 #include <boost/format.hpp>
 #include <boost/bind.hpp>
 #include <compiler/analysis/analysis_result.h>
@@ -64,7 +65,7 @@ AnalysisResult::AnalysisResult()
     m_scalarArraysCounter(0), m_paramRTTICounter(0),
     m_scalarArraySortedAvgLen(0), m_scalarArraySortedIndex(0),
     m_scalarArraySortedSumLen(0), m_scalarArrayCompressedTextSize(0),
-    m_system(false) {
+    m_pregenerating(false), m_pregenerated(false), m_system(false) {
   m_classForcedVariants[0] = m_classForcedVariants[1] = false;
 }
 
@@ -1306,7 +1307,7 @@ void AnalysisResult::clusterByFileSizes(StringToFileScopePtrVecMap &clusters,
   std::map<std::string, FileScopePtr> sortedFiles;
   long totalSize = 0;
   BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
-    totalSize += f->getSize();
+    totalSize += getFileSize(f);
     sortedFiles[f->getName()] = f;
   }
 
@@ -1320,13 +1321,14 @@ void AnalysisResult::clusterByFileSizes(StringToFileScopePtrVecMap &clusters,
   for (std::map<std::string, FileScopePtr>::const_iterator iter =
          sortedFiles.begin(); iter != sortedFiles.end(); ++iter) {
     FileScopePtr f = iter->second;
-    if (f->getSize() > clusterSize) {
+    int fileSize = getFileSize(f);
+    if (fileSize > clusterSize) {
       largeFiles.push_back(f);
     } else {
-      size += f->getSize();
+      size += fileSize;
       if ((size / FUZZYNESS) > (clusterSize / FUZZYNESS)) {
         clusterName = Option::FormatClusterFile(++count);
-        size = f->getSize();
+        size = fileSize;
       }
       clusters[clusterName].push_back(f);
     }
@@ -1602,6 +1604,25 @@ protected:
   const FileScopePtrVec &m_files;
 };
 
+class PreGenerateCPPJob : public OutputJob {
+public:
+  PreGenerateCPPJob(AnalysisResultPtr ar, CodeGenerator::Output output,
+                    FileScopePtr file)
+      : OutputJob(ar, output), m_file(file) {
+  }
+
+  virtual void outputImpl() {
+    ostringstream out;
+    CodeGenerator cg(&out, m_output, &m_file->getName());
+    m_ar->outputCPPFileImpl(cg, m_file);
+    string code = out.str();
+    m_ar->addPregeneratedCPP(m_file->getName(), code);
+  }
+
+private:
+  FileScopePtr m_file;
+};
+
 #define DECLARE_JOB(name, body)                                     \
 class name ## Job : public OutputJob {                              \
 public:                                                             \
@@ -1676,23 +1697,31 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     createGlobalFuncTable();
   }
 
-  FileScopePtrVec trueDeps;
+  unsigned int threadCount = Option::ParserThreadCount * 2;
+  if (threadCount > m_fileScopes.size()) {
+    threadCount = m_fileScopes.size();
+  }
+  if (threadCount <= 0) threadCount = 1;
+
+  if (Option::SystemGen) {
+    threadCount = 1;
+  }
+
   StringToFileScopePtrVecMap clusters;
   if (clusterCount > 0) {
+    if (Option::PregenerateCPP) {
+      preGenerateCPP(output, m_fileScopes, threadCount);
+      m_pregenerated = true;
+    }
     clusterByFileSizes(clusters, clusterCount);
   } else {
     BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
       clusters[f->outputFilebase()].push_back(f);
     }
   }
-  unsigned int threadCount = Option::ParserThreadCount * 2;
+
   if (threadCount > clusters.size()) {
     threadCount = clusters.size();
-  }
-  if (threadCount <= 0) threadCount = 1;
-
-  if (Option::SystemGen) {
-    threadCount = 1;
   }
 
   // 1st round doing cpp/*.cpp
@@ -1870,9 +1899,11 @@ void AnalysisResult::recordSourceInfo(const std::string &file, int line,
   // With FrameInjection, there is normally no need to generate the source info
   // map, so to save memory.
   if (Option::GenerateSourceInfo) {
+    Lock lock(m_sourceInfoMutex);
+    SourceInfo &target = m_pregenerating ? m_sourceInfoPregen : m_sourceInfos;
     // we only need one to one mapping, and there doesn't seem to be a need
     // to display multiple PHP file locations for one C++ frame
-    m_sourceInfos[file][line] = loc;
+    target[file][line] = loc;
   }
 }
 
@@ -3720,7 +3751,6 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
 
 void AnalysisResult::outputCPPClusterImpl(CodeGenerator &cg,
                                           const FileScopePtrVec &files) {
-  AnalysisResultPtr ar = shared_from_this();
   cg_printf("\n");
 
   // includes
@@ -3750,12 +3780,86 @@ void AnalysisResult::outputCPPClusterImpl(CodeGenerator &cg,
   cg.printImplStarter();
   cg.namespaceBegin();
   BOOST_FOREACH(FileScopePtr fs, files) {
-    cg.setContext(CodeGenerator::CppImplementation);
-    fs->outputCPPImpl(cg, ar);
-    cg.setContext(CodeGenerator::CppPseudoMain);
-    fs->outputCPPPseudoMain(cg, ar);
+    if (m_pregenerated) {
+      const string &code = getPregeneratedCPP(fs->getName());
+      if (Option::GenerateSourceInfo) {
+        int offset = cg.getLineNo(CodeGenerator::PrimaryStream) - 1;
+        movePregeneratedSourceInfo(fs->getName(), cg.getFileName(), offset);
+      }
+      cg.printRaw(code);
+    } else {
+      outputCPPFileImpl(cg, fs);
+    }
   }
   cg.namespaceEnd();
+}
+
+void AnalysisResult::outputCPPFileImpl(CodeGenerator &cg, FileScopePtr fs) {
+  AnalysisResultPtr ar = shared_from_this();
+  cg.setContext(CodeGenerator::CppImplementation);
+  fs->outputCPPImpl(cg, ar);
+  cg.setContext(CodeGenerator::CppPseudoMain);
+  fs->outputCPPPseudoMain(cg, ar);
+}
+
+void AnalysisResult::preGenerateCPP(CodeGenerator::Output output,
+                                    const FileScopePtrVec &files,
+                                    int threadCount) {
+  AnalysisResultPtr ar = shared_from_this();
+  vector<PreGenerateCPPJob*> jobs;
+  JobQueueDispatcher<OutputJob*, OutputWorker>
+    dispatcher(threadCount, true, 0, NULL);
+
+  m_pregenerating = true;
+  BOOST_FOREACH(FileScopePtr fs, files) {
+    PreGenerateCPPJob *job = new PreGenerateCPPJob(ar, output, fs);
+    jobs.push_back(job);
+    dispatcher.enqueue(job);
+  }
+
+  dispatcher.run();
+  m_pregenerating = false;
+  for (unsigned int i = 0; i < jobs.size(); ++i) {
+    delete jobs[i];
+  }
+}
+
+void AnalysisResult::addPregeneratedCPP(const std::string &name,
+                                        std::string &code) {
+  Lock lock(m_pregenMapMutex);
+  code.swap(m_pregenMap[name]);
+}
+
+const string &AnalysisResult::getPregeneratedCPP(const string &name) {
+  Lock lock(m_pregenMapMutex);
+  StringMap::const_iterator iter = m_pregenMap.find(name);
+  ASSERT(iter != m_pregenMap.end());
+  return iter->second;
+}
+
+void AnalysisResult::movePregeneratedSourceInfo(const std::string &source,
+                                                const std::string &target,
+                                                int offset) {
+  Lock lock(m_sourceInfoMutex);
+  SourceInfo::const_iterator iterPregen = m_sourceInfoPregen.find(source);
+  ASSERT(iterPregen != m_sourceInfoPregen.end());
+
+  const SourceLocationMap &sourceLoc = iterPregen->second;
+  SourceLocationMap &targetLoc = m_sourceInfos[target];
+  for (SourceLocationMap::const_iterator iterLoc = sourceLoc.begin();
+       iterLoc != sourceLoc.end(); ++iterLoc) {
+    targetLoc[iterLoc->first + offset] = iterLoc->second;
+  }
+}
+
+int AnalysisResult::getFileSize(FileScopePtr fs) {
+  if (m_pregenerated) {
+    StringMap::const_iterator iterPregen = m_pregenMap.find(fs->getName());
+    ASSERT(iterPregen != m_pregenMap.end());
+    return iterPregen->second.size();
+  } else {
+    return fs->getSize();
+  }
 }
 
 void AnalysisResult::outputFFI(vector<string> &additionalCPPs) {

@@ -345,6 +345,10 @@ public:
   void outputCPPSepExtensionImpl(const std::string &filename);
 
   void outputCPPClusterImpl(CodeGenerator &cg, const FileScopePtrVec &files);
+  void outputCPPFileImpl(CodeGenerator &cg, FileScopePtr fs);
+
+  void addPregeneratedCPP(const std::string &name, std::string &code);
+  const std::string &getPregeneratedCPP(const std::string &name);
 
   std::set<std::string> m_variableTableFunctions;
   std::set<int> m_concatLengths;
@@ -440,6 +444,7 @@ private:
   int m_scalarArraySortedSumLen;
   std::vector<ScalarArrayExp> m_scalarArraySorted;
   int m_scalarArrayCompressedTextSize;
+  bool m_pregenerating, m_pregenerated;
 
   typedef boost::adjacency_list<boost::setS, boost::vecS> Graph;
   typedef boost::graph_traits<Graph>::vertex_descriptor vertex_descriptor;
@@ -457,7 +462,15 @@ private:
   void renameStaticNames(std::map<int, std::vector<std::string> > &names,
                          const char *file, const char *prefix);
 
-  std::map<std::string, std::map<int, LocationPtr> > m_sourceInfos;
+  typedef std::map<std::string, std::string> StringMap;
+  Mutex m_pregenMapMutex;
+  StringMap m_pregenMap;
+
+  typedef std::map<int, LocationPtr> SourceLocationMap;
+  typedef std::map<std::string, SourceLocationMap> SourceInfo;
+  Mutex m_sourceInfoMutex;
+  SourceInfo m_sourceInfos;
+  SourceInfo m_sourceInfoPregen;
   std::map<std::string, std::set<std::pair<std::string, int> > > m_clsNameMap;
   std::map<std::string, std::set<std::pair<std::string, int> > > m_funcNameMap;
 
@@ -513,6 +526,12 @@ private:
                                     bool includes = true,
                                     bool noNamespace = false);
   void outputCPPGlobalImplementations(CodeGenerator &cg);
+
+  void preGenerateCPP(CodeGenerator::Output output,
+                      const FileScopePtrVec &files, int threadCount);
+  void movePregeneratedSourceInfo(const std::string &source,
+                                  const std::string &target, int offset);
+  int getFileSize(FileScopePtr fs);
 
   void outputCPPClassDeclaredFlagsLookup(CodeGenerator &cg);
 

@@ -29,7 +29,25 @@ istream *preprocessXHP(istream &input, iostream &output,
   istream *is = &input;
   string code, error;
   uint32_t errline;
-  XHPResult res = xhp_preprocess(input, code, false, error, errline);
+
+  // Under HPHP, the 'include_debug' flag hurts performance and does not
+  // provide any additional benefit, so it should always be set to false.
+  xhp_flags_t flags;
+  memset(&flags, 0, sizeof(xhp_flags_t));
+  flags.eval = false;
+  flags.short_tags = true;
+  flags.idx_expr = true;
+  flags.include_debug = false;
+  flags.emit_namespaces = false;
+
+  XHPResult res;
+  {
+    stringbuf sb;
+    input >> noskipws >> &sb;
+    string buffer = sb.str();
+    res = xhp_preprocess(buffer, code, error, errline, flags);
+  }
+
   if (res == XHPRewrote) {
     output << code;
     is = &output;

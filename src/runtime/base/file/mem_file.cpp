@@ -20,6 +20,8 @@
 #include <runtime/base/server/static_content_cache.h>
 #include <runtime/base/runtime_option.h>
 #include <util/compression.h>
+#include <util/logger.h>
+
 using namespace std;
 
 namespace HPHP {
@@ -54,11 +56,13 @@ bool MemFile::open(CStrRef filename, CStrRef mode) {
   if (strchr(mode, '+') || strchr(mode, 'a') || strchr(mode, 'w')) {
     return false;
   }
-  int len = -1;
+  int len = INT_MIN;
   bool compressed = false;
   char *data =
     StaticContentCache::TheFileCache->read(filename.c_str(), len, compressed);
-  if (len != -1) {
+  // -1: PHP file; -2: directory
+  if (len != INT_MIN && len != -1 && len != -2) {
+    ASSERT(len >= 0);
     if (compressed) {
       ASSERT(RuntimeOption::EnableOnDemandUncompress);
       data = gzdecode(data, len);
@@ -74,6 +78,10 @@ bool MemFile::open(CStrRef filename, CStrRef mode) {
     m_data = data;
     m_len = len;
     return true;
+  }
+  if (len != INT_MIN) {
+    Logger::Error("Cannot open a PHP file or a directory as MemFile: %s",
+                  filename.c_str());
   }
   return false;
 }

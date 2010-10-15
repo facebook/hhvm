@@ -31,17 +31,22 @@ ForEachStatement::ForEachStatement(STATEMENT_ARGS, ExpressionPtr source,
 void ForEachStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
   Variant map(m_source->eval(env));
-  for (ArrayIterPtr iter = map.begin(env.currentContext()); !iter->end();
-       iter->next()) {
-    Variant &v = m_value->lval(env);
-    v = iter->second();
-    Variant *k = NULL;
-    if (m_key) {
-      k = &m_key->lval(env);
-      *k = iter->first();
+  if (m_key) {
+    for (ArrayIterPtr iter = map.begin(env.currentContext()); !iter->end();
+         iter->next()) {
+      const Variant &value = iter->second();
+      m_key->set(env, iter->first());
+      m_value->set(env, value);
+      if (!m_body) continue;
+      EVAL_STMT_HANDLE_BREAK(m_body, env);
     }
-    if (!m_body) continue;
-    EVAL_STMT_HANDLE_BREAK(m_body, env);
+  } else {
+    for (ArrayIterPtr iter = map.begin(env.currentContext()); !iter->end();
+         iter->next()) {
+      m_value->set(env, iter->second());
+      if (!m_body) continue;
+      EVAL_STMT_HANDLE_BREAK(m_body, env);
+    }
   }
 }
 

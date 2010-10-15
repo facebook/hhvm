@@ -15,12 +15,14 @@
 */
 
 #include <compiler/statement/foreach_statement.h>
+#include <compiler/expression/assignment_expression.h>
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/block_scope.h>
 #include <compiler/expression/simple_variable.h>
 #include <compiler/option.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/class_scope.h>
+#include <util/util.h>
 
 using namespace HPHP;
 using namespace std;
@@ -191,10 +193,21 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   int mapId = cg.createNewLocalId(ar);
   bool passTemp = true;
   bool isArray = false;
+  bool nameSimple = !m_name || m_name->is(Expression::KindOfSimpleVariable);
+  bool valueSimple = m_value->is(Expression::KindOfSimpleVariable);
 
   if (m_ref ||
       !m_array->is(Expression::KindOfSimpleVariable) ||
       m_array->isThis()) {
+
+    if (m_ref) {
+      if (!nameSimple) {
+        cg_printf("Variant %s%d_n;\n", Option::MapPrefix, mapId);
+      }
+      if (!valueSimple) {
+        cg_printf("Variant %s%d_v;\n", Option::MapPrefix, mapId);
+      }
+    }
     cg_printf("Variant %s%d", Option::MapPrefix, mapId);
     TypePtr expectedType = m_array->getExpectedType();
     // Clear m_expectedType to avoid type cast (toArray).
@@ -219,20 +232,37 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     passTemp = false;
   }
 
+  /* We need to generate sets for $a[x] etc
+     Without AssignmentLHS context, we get lvalAt(...) = instead.
+     But if we set AssignmentLHS earlier, a simple variable can end up
+     being marked "unused"
+  */
+  if (m_name) m_name->setContext(Expression::AssignmentLHS);
+  m_value->setContext(Expression::AssignmentLHS);
+
+  bool orderName = m_name && m_name->preOutputCPP(cg, ar, 0);
+  bool orderValue = m_value->preOutputCPP(cg, ar, 0);
+
   cppDeclareBufs(cg, ar);
   int iterId = cg.createNewLocalId(ar);
   cg_printf("for (");
   if (m_ref) {
     cg_printf("MutableArrayIterPtr %s%d = %s%d.begin(",
               Option::IterPrefix, iterId, Option::MapPrefix, mapId);
-    if (m_name) {
+    if (!nameSimple) {
+      cg_printf("&%s%d_n", Option::MapPrefix, mapId);
+    } else if (m_name) {
       cg_printf("&");
       m_name->outputCPP(cg, ar);
     } else {
       cg_printf("NULL");
     }
     cg_printf(", ");
-    m_value->outputCPP(cg, ar);
+    if (!valueSimple) {
+      cg_printf("%s%d_v", Option::MapPrefix, mapId);
+    } else {
+      m_value->outputCPP(cg, ar);
+    }
     cg_printf("); %s%d->advance();", Option::IterPrefix, iterId);
   } else {
     if (passTemp) {
@@ -278,17 +308,90 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_indentBegin(") {\n");
   cg_printf("LOOP_COUNTER_CHECK(%d);\n", labelId);
 
+  /*
+    The order of evaluation here is.
+    - second() (if !m_ref)
+    - first() (if !m_ref && m_name is set)
+    - side effects of m_name (if set)
+    - side effects of m_value
+    - assignment to m_value
+    - assignment to m_name
+    This order is observable, and we have tests to prove it.
+
+    Optimize for the usual case, where m_name and m_value are
+    simple variables.
+  */
+
+  const char *op = isArray ? "." : "->";
+  string valueStr, nameStr;
+
   if (!m_ref) {
-    cg_printf(isArray ? "%s%d.second(" : "%s%d->second(",
-              Option::IterPrefix, iterId);
-    m_value->outputCPP(cg, ar);
-    cg_printf(");\n");
-    if (m_name) {
-      m_name->outputCPP(cg, ar);
-      cg_printf(isArray ? " = %s%d.first();\n" : " = %s%d->first();\n",
-                Option::IterPrefix, iterId);
+    Util::string_printf(valueStr, "%s%d%ssecond()",
+                        Option::IterPrefix, iterId, op);
+    Util::string_printf(nameStr, "%s%d%sfirst()",
+                        Option::IterPrefix, iterId, op);
+    if (valueSimple) {
+      cg_printf("%s%d%ssecond(", Option::IterPrefix, iterId, op);
+      m_value->outputCPP(cg, ar);
+      cg_printf(");\n");
+    } else if (m_name || m_value->hasEffect()) {
+      string tmp;
+      Util::string_printf(tmp, "%s%d_v", Option::MapPrefix, mapId);
+      cg_printf("CVarRef %s = %s;\n",
+                tmp.c_str(), valueStr.c_str());
+      valueStr = tmp;
+    }
+    if (m_name && m_name->hasEffect()) {
+      string tmp;
+      Util::string_printf(tmp, "%s%d_n", Option::MapPrefix, mapId);
+      cg_printf("CVarRef %s = %s;\n",
+                tmp.c_str(), nameStr.c_str());
+      nameStr = tmp;
+    }
+  } else {
+    Util::string_printf(valueStr, "%s%d_v", Option::MapPrefix, mapId);
+    Util::string_printf(nameStr, "%s%d_n", Option::MapPrefix, mapId);
+  }
+
+  bool wrap = false;
+  if (m_name) {
+    if (orderName || m_value->hasEffect()) {
+      ar->setInExpression(true);
+      m_name->preOutputCPP(cg, ar,
+                           m_value->hasEffect() ? Expression::FixOrder: 0);
+      wrap = true;
     }
   }
+
+  if (!valueSimple) {
+    if (orderValue) {
+      m_value->outputCPPBegin(cg, ar);
+      wrap = true;
+    }
+    if (!AssignmentExpression::SpecialAssignment(
+          cg, ar, m_value, ExpressionPtr(), valueStr.c_str(), m_ref)) {
+      m_value->outputCPP(cg, ar);
+      cg_printf(m_ref ? " = ref(%s)" : " = %s", valueStr.c_str());
+    }
+    cg_printf(";\n");
+  }
+
+  if (m_name && (!nameSimple || !m_ref)) {
+    if (orderName) {
+      m_name->outputCPPBegin(cg, ar);
+    }
+    if (!AssignmentExpression::SpecialAssignment(
+          cg, ar, m_name, ExpressionPtr(), nameStr.c_str(), m_ref)) {
+      m_name->outputCPP(cg, ar);
+      cg_printf(m_ref ? " = ref(%s)" : " = %s", nameStr.c_str());
+    }
+    cg_printf(";\n");
+  }
+  if (wrap) {
+    ar->wrapExpressionEnd(cg);
+    ar->setInExpression(false);
+  }
+
   if (m_stmt) {
     m_stmt->outputCPP(cg, ar);
   }

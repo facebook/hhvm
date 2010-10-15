@@ -40,18 +40,15 @@ void StrongForEachStatement::eval(VariableEnvironment &env) const {
     Variant kTemp;
     for (MutableArrayIterPtr iter = source.begin(&kTemp, vTemp);
          iter->advance();) {
-      Variant &v = m_value->lval(env);
-      v = ref(vTemp);
-      Variant &k = m_key->lval(env);
-      k = ref(kTemp);
+      m_key->set(env, kTemp);
+      m_value->set(env, ref(vTemp));
       if (!m_body) continue;
       EVAL_STMT_HANDLE_BREAK(m_body, env);
     }
   } else {
     for (MutableArrayIterPtr iter = source.begin(NULL, vTemp);
          iter->advance();) {
-      Variant &v = m_value->lval(env);
-      v = ref(vTemp);
+      m_value->set(env, ref(vTemp));
       if (!m_body) continue;
       EVAL_STMT_HANDLE_BREAK(m_body, env);
     }

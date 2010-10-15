@@ -260,17 +260,14 @@ bool AssignmentExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   return Expression::preOutputCPP(cg, ar, state);
 }
 
-void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
-                                         AnalysisResultPtr ar) {
-  BlockScopePtr scope = ar->getScope();
-  bool ref = (m_ref && m_value->isRefable());
-
-  bool setNull = false;
-  bool arrayLike = false;
-
-  if (m_variable->is(Expression::KindOfArrayElementExpression)) {
+bool AssignmentExpression::SpecialAssignment(CodeGenerator &cg,
+                                             AnalysisResultPtr ar,
+                                             ExpressionPtr lval,
+                                             ExpressionPtr rval,
+                                             const char *rvalStr, bool ref) {
+  if (lval->is(Expression::KindOfArrayElementExpression)) {
     ArrayElementExpressionPtr exp =
-      dynamic_pointer_cast<ArrayElementExpression>(m_variable);
+      dynamic_pointer_cast<ArrayElementExpression>(lval);
     if (!exp->isSuperGlobal() && !exp->isDynamicGlobal()) {
       exp->getVariable()->outputCPP(cg, ar);
       if (exp->getOffset()) {
@@ -280,7 +277,11 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
       } else {
         cg_printf(".append((");
       }
-      wrapValue(cg, ar, m_value, ref, true);
+      if (rval) {
+        wrapValue(cg, ar, rval, ref, true);
+      } else {
+        cg_printf(ref ? "ref(%s)" : "%s", rvalStr);
+      }
       cg_printf(")");
       ExpressionPtr off = exp->getOffset();
       if (off) {
@@ -297,23 +298,42 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
         }
       }
       cg_printf(")");
-      return;
+      return true;
     }
-  } else if (m_variable->is(Expression::KindOfObjectPropertyExpression)) {
+  } else if (lval->is(Expression::KindOfObjectPropertyExpression)) {
     ObjectPropertyExpressionPtr var(
-      dynamic_pointer_cast<ObjectPropertyExpression>(m_variable));
+      dynamic_pointer_cast<ObjectPropertyExpression>(lval));
     if (!var->isValid()) {
       var->outputCPPObject(cg, ar);
       cg_printf("o_set(");
       var->outputCPPProperty(cg, ar);
       cg_printf(", %s", ref ? "ref(" : "");
-      m_value->outputCPP(cg, ar);
+      if (rval) {
+        rval->outputCPP(cg, ar);
+      } else {
+        cg_printf(ref ? "ref(%s)" : "%s", rvalStr);
+      }
       cg_printf("%s, %s)",
                 ref ? ")" : "",
                 ar->getClassScope() ? "s_class_name" : "empty_string");
-      return;
+      return true;
     }
-  } else if (m_variable->is(Expression::KindOfSimpleVariable) &&
+  }
+  return false;
+}
+
+void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
+                                         AnalysisResultPtr ar) {
+  bool ref = (m_ref && m_value->isRefable());
+
+  bool setNull = false;
+  bool arrayLike = false;
+
+  if (SpecialAssignment(cg, ar, m_variable, m_value, NULL, ref)) {
+    return;
+  }
+
+  if (m_variable->is(Expression::KindOfSimpleVariable) &&
       m_value->is(Expression::KindOfConstantExpression)) {
     ConstantExpressionPtr exp =
       dynamic_pointer_cast<ConstantExpression>(m_value);

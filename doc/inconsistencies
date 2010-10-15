@@ -56,13 +56,24 @@ while logging an error. Effectively, there is a try/catch enclosing the body
 of the __destruct method. These exceptions are catchable in PHP outside of the
 __destruct method.
 
-(2) Exceptions thrown from __toString()
+(2) Global variable's destructor
+
+In HipHop, global variables are not destructed at end of web requests or
+program execution if memory manager is enabled (default). They are garbage
+collected by memory sweeping as a whole for performance reason and for
+preventing memory leaks if circular reference exists between two or more
+global variables. So destructors of global objects are not called.
+
+In PHP, global variables are destructed before a web page responds. Therefore,
+output from their destrcutors will be part of the HTTP response.
+
+(3) Exceptions thrown from __toString()
 
 PHP doesn't allow them. HipHop does. Also, PHP doesn't allow __toString() to
 return anything other than a string. HipHop will just convert return value to
 string.
 
-(3) unset
+(4) unset
 
 In PHP, a data member that is unset will not appear at all in vardump or
 serialize. Also, unsetting a data member and then resetting it will alter its
@@ -74,7 +85,7 @@ a data member and then resetting it, it's order is not altered in foreach
 iteration. When unsetting then resetting to NULL, HipHop will be confused to
 think the property is still not present (bug).
 
-(3) $this handling of static method
+(5) $this handling of static method
 
 In PHP, $this may be passed into an unrelated class's static method. Here's an
 example,

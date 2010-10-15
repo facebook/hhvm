@@ -381,18 +381,25 @@ void CodeGenerator::print(const std::string &msg, bool indent /* = true */) {
       *m_out << Option::Tab;
     }
   }
-  for (unsigned int i = 0; i < msg.length(); i++) {
-    unsigned char ch = msg[i];
-    *m_out << ch;
-    if (ch == '\n') {
-      m_lineNo[m_curStream]++;
-      if (indent && m_indentPending[m_curStream]) {
-        for (int i = 0; i < m_indentation[m_curStream]; i++) {
-          *m_out << Option::Tab;
+  if (indent) {
+    for (unsigned int i = 0; i < msg.length(); i++) {
+      unsigned char ch = msg[i];
+      *m_out << ch;
+      if (ch == '\n') {
+        m_lineNo[m_curStream]++;
+        if (indent && m_indentPending[m_curStream]) {
+          for (int i = 0; i < m_indentation[m_curStream]; i++) {
+            *m_out << Option::Tab;
+          }
         }
+        m_indentPending[m_curStream] = true;
       }
-      m_indentPending[m_curStream] = true;
     }
+  } else { // optimized version for not indent
+    for (unsigned int i = 0; i < msg.length(); i++) {
+      if (msg[i] == '\n') m_lineNo[m_curStream]++;
+    }
+    *m_out << msg;
   }
 }
 

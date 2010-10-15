@@ -608,7 +608,10 @@ quiet:
 	@true
 
 # Suppressing no rule errors
-%.d %.h %.hpp %.hh:
+%.d:
+	@
+
+%.h %.hpp %.hh:
 	@
 
 DEPEND_FILES := $(OBJECTS:.o=.d)

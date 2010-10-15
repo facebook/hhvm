@@ -214,6 +214,7 @@ bool Option::GenerateSourceInfo = false;
 bool Option::GenerateDocComments = true;
 bool Option::FlAnnotate = false;
 bool Option::SystemGen = false;
+bool Option::PregenerateCPP = false;
 bool Option::UseMethodIndex = false;
 
 void (*Option::m_hookHandler)(Hdf &config);
@@ -404,6 +405,7 @@ void Option::Load(Hdf &config) {
   AutoInline         = config["AutoInline"].getBool(false);
   ControlFlow        = config["ControlFlow"].getBool(false);
   DumpAst            = config["DumpAst"].getBool(false);
+  PregenerateCPP     = config["PregenerateCPP"].getBool(false);
 
   if (m_hookHandler) m_hookHandler(config);
 

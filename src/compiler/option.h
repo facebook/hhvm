@@ -356,6 +356,7 @@ public:
   static bool SystemGen; // -t cpp -f sys
   static bool ControlFlow;
   static bool DumpAst;
+  static bool PregenerateCPP;
 
   static void setHookHandler(void (*hookHandler)(Hdf &config)) {
     m_hookHandler = hookHandler;

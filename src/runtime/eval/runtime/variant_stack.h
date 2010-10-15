@@ -35,6 +35,12 @@ public:
     }
     m_stack[m_ptr++] = v;
   }
+  void pushRef(Variant &v) {
+    if (m_ptr == m_cap) {
+      grow();
+    }
+    m_stack[m_ptr++] = ref(v);
+  }
   void pushSwap(Variant &v) {
     if (m_ptr == m_cap) {
       grow();

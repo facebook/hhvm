@@ -236,11 +236,12 @@ void FunctionStatement::directBind(VariableEnvironment &env,
       // should throw if it's ref and not lval
       v = ref((*it)->refval(env));
       (*piter)->bind(fenv, v, true);
+      as.pushRef(v);
     } else {
       v = (*it)->eval(env);
       (*piter)->bind(fenv, v);
+      as.push(v);
     }
-    as.push(v);
     fenv.incArgc();
   }
   // more parameters than actual arguments

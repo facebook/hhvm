@@ -86,7 +86,11 @@ HPHP::Variant *hphpBuildVariant(int kind, void *v) {
 // initialization and session management
 
 void hphpStart() {
-  hphp_ffi_init();
+  static bool initialized = false;
+  if (!initialized) {
+    initialized = true;
+    hphp_ffi_init();
+  }
 }
 
 HPHP::HphpSession *hphpStartSession() {

@@ -217,13 +217,17 @@ Variant f_fgets(CObjRef handle, int64 length /* = 1024 */) {
     return false;
   }
   CHECK_HANDLE(handle, f);
-  return f->readLine(length);
+  String line = f->readLine(length);
+  if (!line.isNull()) {
+    return line;
+  }
+  return false;
 }
 
 Variant f_fgetss(CObjRef handle, int64 length /* = 0 */,
-                CStrRef allowable_tags /* = null_string */) {
-  String ret = f_fgets(handle, length);
-  if (!ret.empty()) {
+                 CStrRef allowable_tags /* = null_string */) {
+  Variant ret = f_fgets(handle, length);
+  if (!same(ret, false)) {
     return StringUtil::StripHTMLTags(ret, allowable_tags);
   }
   return ret;

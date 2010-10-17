@@ -137,7 +137,6 @@ void StackTraceBase::InstallReportOnErrors() {
 
   // Turn on bt-on-sig for a good default set of error signals
   signal(SIGQUIT, bt_handler);
-  signal(SIGTERM, bt_handler);
   signal(SIGILL,  bt_handler);
   signal(SIGFPE,  bt_handler);
   signal(SIGSEGV, bt_handler);

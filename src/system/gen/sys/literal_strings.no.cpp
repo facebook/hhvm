@@ -554,7 +554,6 @@ StaticString s_sys_ss76b5e27b("getSubPath");
 StaticString s_sys_ss76d82ece("Method ");
 StaticString s_sys_ss76fcd666("rowcount");
 StaticString s_sys_ss77054c67("seek");
-StaticString s_sys_ss772c1715("define");
 StaticString s_sys_ss7730b079("\000ReflectionExtension\000name", 25);
 StaticString s_sys_ss7787fc15("sortwithsortkeys");
 StaticString s_sys_ss77c51ddf("\000ReflectionClass\000info", 21);

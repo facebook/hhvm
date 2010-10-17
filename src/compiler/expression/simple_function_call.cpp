@@ -635,7 +635,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
         case DefinedFunction: {
           ConstantTablePtr constants = ar->getConstants();
           // system constant
-          if (constants->isPresent(symbol)) {
+          if (constants->isPresent(symbol) && !constants->isDynamic(symbol)) {
             return CONSTANT("true");
           }
           // user constant

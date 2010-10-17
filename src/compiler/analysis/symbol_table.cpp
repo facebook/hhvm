@@ -97,6 +97,9 @@ void SymbolTable::import(SymbolTablePtr src) {
     if (src_sym.valueSet()) {
       dst_sym.setValue(src_sym.getValue());
     }
+    if (src_sym.isDynamic()) {
+      dst_sym.setDynamic();
+    }
     dst_sym.setCoerced(src_sym.getCoerced());
     dst_sym.setRType(src_sym.getRType());
   }

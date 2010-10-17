@@ -2225,6 +2225,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
     BOOST_FOREACH(string sym, syms) {
       if (system || ct->isSepExtension(sym)) {
         strings.push_back(sym.c_str());
+        dyns[sym.c_str()] = ct->isDynamic(sym);
       }
     }
     BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
@@ -2263,13 +2264,15 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
         hphp_const_char_map<bool>::const_iterator it = dyns.find(name);
         bool dyn = it != dyns.end() && it->second;
         if (dyn) {
-          cg_printf("HASH_RETURN(0x%016llXLL, g->%s, \"%s\");\n",
-              hash_string(name), varName.c_str(),
-              cg.escapeLabel(name).c_str());
+          string escaped = cg.escapeLabel(name);
+          cg_printf("HASH_RETURN(0x%016llXLL, "
+                    "getDynamicConstant(g->%s, \"%s\"), \"%s\");\n",
+                    hash_string(name), varName.c_str(),
+                    escaped.c_str(), escaped.c_str());
         } else {
           cg_printf("HASH_RETURN(0x%016llXLL, %s, \"%s\");\n",
-              hash_string(name), varName.c_str(),
-              cg.escapeLabel(name).c_str());
+                    hash_string(name), varName.c_str(),
+                    cg.escapeLabel(name).c_str());
         }
       }
     }

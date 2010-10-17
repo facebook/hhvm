@@ -46,7 +46,3 @@ print "define('GLOBAL_STATE_SKIP', 2);\n";
 print "define('GLOBAL_SYMBOL_GLOBAL_VARIABLE',     0);\n";
 print "define('GLOBAL_SYMBOL_STATIC_VARIABLE',     1);\n";
 print "define('GLOBAL_SYMBOL_CLASS_STATIC',        2);\n";
-
-// defining it twice, as session extension uses for dynamic value
-print "define('SID', '');\n";
-print "define('SID', '');\n";

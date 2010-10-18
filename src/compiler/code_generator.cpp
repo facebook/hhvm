@@ -26,6 +26,7 @@
 #include <util/util.h>
 #include <util/hash.h>
 #include <boost/format.hpp>
+#include <boost/scoped_array.hpp>
 
 using namespace HPHP;
 using namespace std;
@@ -63,7 +64,7 @@ CodeGenerator::CodeGenerator(std::ostream *primary,
   for (int i = 0; i < StreamCount; i++) {
     m_streams[i] = NULL;
     m_indentation[i] = 0;
-    m_indentPending[i] = false;
+    m_indentPending[i] = true;
     m_lineNo[i] = 1;
     m_inComments[i] = 0;
     m_wrappedExpression[i] = false;
@@ -258,7 +259,7 @@ void CodeGenerator::printDocComment(const std::string comment) {
       escaped += '\\'; // splitting illegal /* into /\*
     }
   }
-  print(escaped, false);
+  print(escaped.c_str(), false);
   printf("\n");
 }
 
@@ -308,60 +309,72 @@ std::string CodeGenerator::escapeLabel(const std::string &name,
 // helpers
 
 void CodeGenerator::print(const char *fmt, va_list ap) {
-  string msg;
+  if (!m_out) return;
+  boost::scoped_array<char> buf;
   bool done = false;
   for (int len = 1024; !done; len <<= 1) {
     va_list v;
     va_copy(v, ap);
 
-    char *buf = (char*)malloc(len);
-    if (vsnprintf(buf, len, fmt, v) < len) {
-      msg = buf;
-      done = true;
-    }
-    free(buf);
+    buf.reset(new char[len]);
+    if (vsnprintf(buf.get(), len, fmt, v) < len) done = true;
 
     va_end(v);
   }
-  if (m_out) {
-    print(msg);
+  print(buf.get());
+}
+
+void CodeGenerator::print(const char *msg, bool indent /* = true */) {
+  const char *start = msg;
+  int length = 1;
+  for (const char *iter = msg; ; ++iter, ++length) {
+    if (*iter == '\n') {
+      if (indent) {
+        // Only indent if it is pending and if it is not an empty line
+        if (m_indentPending[m_curStream] && length > 1) printIndent();
+
+        // Printing substrings requires an additional copy operation,
+        // so do it only if necessary
+        if (iter[1] != '\0') {
+          printSubstring(start, length);
+        } else {
+          *m_out << start;
+        }
+        start = iter + 1;
+        length = 0;
+      }
+      m_lineNo[m_curStream]++;
+      m_indentPending[m_curStream] = true;
+    } else if (*iter == '\0') {
+      // Perform print only in case what's left is not an empty string
+      if (length > 1) {
+        if (indent && m_indentPending[m_curStream]) {
+          printIndent();
+          m_indentPending[m_curStream] = false;
+        }
+        *m_out << start;
+      }
+      break;
+    }
   }
 }
 
-void CodeGenerator::print(const std::string &msg, bool indent /* = true */) {
-  // empty line doesn't need indentation
-  if (msg.size() == 1 && msg[0] == '\n') {
-    *m_out << '\n';
-    m_lineNo[m_curStream]++;
-    m_indentPending[m_curStream] = true;
-    return;
+void CodeGenerator::printSubstring(const char *start, int length) {
+  const int BUF_LEN = 0x100;
+  char buf[BUF_LEN];
+  while (length > 0) {
+    int curLength = min(length, BUF_LEN - 1);
+    memcpy(buf, start, curLength);
+    buf[curLength] = '\0';
+    *m_out << buf;
+    length -= curLength;
+    start += curLength;
   }
+}
 
-  if (m_indentPending[m_curStream]) {
-    m_indentPending[m_curStream] = false;
-    for (int i = 0; i < m_indentation[m_curStream]; i++) {
-      *m_out << Option::Tab;
-    }
-  }
-  if (indent) {
-    for (unsigned int i = 0; i < msg.length(); i++) {
-      unsigned char ch = msg[i];
-      *m_out << ch;
-      if (ch == '\n') {
-        m_lineNo[m_curStream]++;
-        if (indent && m_indentPending[m_curStream]) {
-          for (int i = 0; i < m_indentation[m_curStream]; i++) {
-            *m_out << Option::Tab;
-          }
-        }
-        m_indentPending[m_curStream] = true;
-      }
-    }
-  } else { // optimized version for not indent
-    for (unsigned int i = 0; i < msg.length(); i++) {
-      if (msg[i] == '\n') m_lineNo[m_curStream]++;
-    }
-    *m_out << msg;
+void CodeGenerator::printIndent() {
+  for (int i = 0; i < m_indentation[m_curStream]; i++) {
+    *m_out << Option::Tab;
   }
 }
 

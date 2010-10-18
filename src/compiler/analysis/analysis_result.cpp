@@ -3660,7 +3660,7 @@ void AnalysisResult::outputCPPClusterImpl(CodeGenerator &cg,
         int offset = cg.getLineNo(CodeGenerator::PrimaryStream) - 1;
         movePregeneratedSourceInfo(fs->getName(), cg.getFileName(), offset);
       }
-      cg.printRaw(code);
+      cg.printRaw(code.c_str());
     } else {
       outputCPPFileImpl(cg, fs);
     }

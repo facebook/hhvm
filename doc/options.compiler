@@ -201,6 +201,24 @@ Default is false. In case clustering of output files has been requested and this
 option is set to true, the files are pre-generated in memory in order to perform
 a more precise partitioning.
 
+= GCCOptimization
+
+Default is disabled. This option allows to selectively decrease the compiler
+optimization level for long functions. It is specified as:
+
+  GCCOptimization {
+    O2 = X
+    O1 = Y
+    O0 = Z
+  }
+
+where X, Y, Z are the minimum length functions must have (measured as line
+count) for their optimization level to be decreased respectively to O2, O1,
+O0. Note that all these parameters are optional, so it is possible for example
+to only specify O1 and O0 but not O2, meaning that O2 will never be used as an
+optimization level. In general it is expected that if specified, the minimum
+line counts will be increasing for a decreasing optimization level.
+
 = DynamicFunctionPrefix
 
 Deprecating. These are options for specifying which functions may be called

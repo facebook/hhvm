@@ -217,6 +217,8 @@ bool Option::SystemGen = false;
 bool Option::PregenerateCPP = false;
 bool Option::UseMethodIndex = false;
 
+int Option::GCCOptimization[] = {0, 0, 0};
+
 void (*Option::m_hookHandler)(Hdf &config);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -407,9 +409,25 @@ void Option::Load(Hdf &config) {
   DumpAst            = config["DumpAst"].getBool(false);
   PregenerateCPP     = config["PregenerateCPP"].getBool(false);
 
+  {
+    Hdf gccOptimization = config["GCCOptimization"];
+    GCCOptimization[0] = gccOptimization["O0"].getInt32(0);
+    GCCOptimization[1] = gccOptimization["O1"].getInt32(GCCOptimization[0]);
+    GCCOptimization[2] = gccOptimization["O2"].getInt32(GCCOptimization[1]);
+  }
+
   if (m_hookHandler) m_hookHandler(config);
 
   OnLoad();
+}
+
+int Option::GetOptimizationLevel(int length) {
+  if (length <= 0) return 3;
+  for (int i = 2; i >= 0; --i) {
+    int min = GCCOptimization[i];
+    if (length < min || min == 0) return i + 1;
+  }
+  return 0;
 }
 
 void Option::Load() {

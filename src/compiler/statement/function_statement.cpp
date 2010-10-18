@@ -178,6 +178,13 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
   bool needsWrapper = isWrapper ||
     (Option::HardTypeHints && funcScope->needsTypeCheckWrapper());
 
+  int startLineImplementation = -1;
+  if (context == CodeGenerator::CppDeclaration ||
+      context == CodeGenerator::CppImplementation ||
+      context == CodeGenerator::CppPseudoMain) {
+    startLineImplementation = cg.getLineNo(CodeGenerator::PrimaryStream);
+  }
+
   if (funcScope->isInlined()) cg_printf("inline ");
 
   TypePtr type = funcScope->getReturnType();
@@ -207,6 +214,10 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
     case CodeGenerator::CppForwardDeclaration:
     case CodeGenerator::CppTypedParamsWrapperDecl:
       funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
+      if (!isWrapper) {
+        int opt = Option::GetOptimizationLevel(m_cppLength);
+        if (opt < 3) cg_printf(") __attribute__((optimize(%d))", opt);
+      }
       cg_printf(");\n");
       if (!isWrapper) {
         if (funcScope->hasDirectInvoke()) {
@@ -246,6 +257,9 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
         cg.setContext(CodeGenerator::NoContext); // no inner functions/classes
         outputCPPStmt(cg, ar);
         cg_indentEnd("}\n");
+        ASSERT(startLineImplementation >= 0);
+        m_cppLength = cg.getLineNo(CodeGenerator::PrimaryStream)
+                      - startLineImplementation;
         if (needsWrapper) {
           cg.setContext(CodeGenerator::CppTypedParamsWrapperImpl);
           outputCPPImpl(cg, ar);

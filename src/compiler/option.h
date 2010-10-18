@@ -358,6 +358,9 @@ public:
   static bool DumpAst;
   static bool PregenerateCPP;
 
+  static int GCCOptimization[3];
+  static int GetOptimizationLevel(int length);
+
   static void setHookHandler(void (*hookHandler)(Hdf &config)) {
     m_hookHandler = hookHandler;
   }

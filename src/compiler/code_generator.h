@@ -133,7 +133,7 @@ public:
   void printf(const char *fmt, ...);
   void indentBegin(const char *fmt, ...);
   void indentEnd(const char *fmt, ...);
-  void printRaw(const std::string &msg) { print(msg, false);}
+  void printRaw(const char *msg) { print(msg, false);}
   bool wrapExpressionBegin();
   bool wrapExpressionEnd();
 
@@ -266,7 +266,9 @@ private:
   bool m_translatePredefined; // translate predefined constants in PHP output
 
   void print(const char *fmt, va_list ap);
-  void print(const std::string &msg, bool indent = true);
+  void print(const char *msg, bool indent = true);
+  void printSubstring(const char *start, int length);
+  void printIndent();
   std::string getFormattedName(const std::string &file);
 };
 

@@ -48,7 +48,7 @@ MethodStatement::MethodStatement
     m_method(method), m_modifiers(modifiers),
     m_ref(ref), m_originalName(name),
     m_params(params), m_stmt(stmt), m_attribute(attr),
-    m_docComment(docComment) {
+    m_docComment(docComment), m_cppLength(-1) {
   m_name = Util::toLower(name);
 }
 
@@ -449,7 +449,9 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
       funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
       if (m_stmt) {
-        cg_printf(");\n");
+        int opt = Option::GetOptimizationLevel(m_cppLength);
+        if (opt < 3) cg_printf(") __attribute__((optimize(%d)));\n", opt);
+        else cg_printf(");\n");
       } else if (funcScope->isPerfectVirtual()) {
         cg_printf(") { return throw_fatal(\"pure virtual\");}\n");
       } else {
@@ -472,6 +474,10 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     case CodeGenerator::CppImplementation:
     case CodeGenerator::CppTypedParamsWrapperImpl:
       if (m_stmt) {
+        int startLineImplementation = -1;
+        if (context == CodeGenerator::CppImplementation) {
+          startLineImplementation = cg.getLineNo(CodeGenerator::PrimaryStream);
+        }
         TypePtr type = funcScope->getReturnType();
         if (type) {
           type->outputCPPDecl(cg, ar, getScope());
@@ -555,6 +561,9 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             outputCPPStmt(cg, ar);
           }
           cg_indentEnd("}\n");
+          ASSERT(startLineImplementation >= 0);
+          m_cppLength = cg.getLineNo(CodeGenerator::PrimaryStream)
+                        - startLineImplementation;
           if (Option::HardTypeHints && funcScope->needsTypeCheckWrapper()) {
             cg.setContext(CodeGenerator::CppTypedParamsWrapperImpl);
             outputCPPImpl(cg, ar);

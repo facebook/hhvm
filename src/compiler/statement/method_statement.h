@@ -85,6 +85,7 @@ protected:
   StatementListPtr m_stmt;
   int m_attribute;
   std::string m_docComment;
+  int m_cppLength;
 
   void outputCPPArgInjections(CodeGenerator &cg, AnalysisResultPtr ar,
                               const char *name, ClassScopePtr cls,

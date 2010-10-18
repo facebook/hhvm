@@ -17,7 +17,7 @@ ENDIF()
 
 add_custom_command(TARGET hphp
         POST_BUILD
-        COMMAND hphp ARGS -t cpp -f exe --input-dir . -i hphpi.php -o gen -c hphpi_build.hdf --log=1
+        COMMAND hphp ARGS -t cpp -f exe --input-dir . -i hphpi.php -o gen -vEnableEval=2 --log=1
         COMMAND mv ARGS gen/program hphpi
         WORKING_DIRECTORY ${HPHP_HOME}/src/hphpi
         COMMENT "Building hphpi"

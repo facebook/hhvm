@@ -32,12 +32,25 @@ RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
   :  m_rewritten(false), m_defaultDoc(false), m_done(false) {
   if (!process(vhost, transport, sourceRoot, pathTranslation,
                transport->getUrl())) {
-    if (RuntimeOption::ErrorDocument404.empty() ||
-        !process(vhost, transport, sourceRoot, pathTranslation,
-                 RuntimeOption::ErrorDocument404.c_str())) {
-      transport->sendString("Not Found", 404);
-      m_done = true;
+    if (!RuntimeOption::ErrorDocument404.empty()) {
+      String redirectURL(RuntimeOption::ErrorDocument404);
+      if (m_queryString != "") {
+        if (redirectURL.find('?') == -1) {
+          redirectURL += "?";
+        } else {
+          // has query in 404 string
+          redirectURL += "&";
+        }
+        redirectURL += m_queryString;
+      }
+      if (process(vhost, transport, sourceRoot, pathTranslation,
+                  redirectURL.data())) {
+        // 404 redirection succeed
+        return;
+      }
     }
+    transport->sendString("Not Found", 404);
+    m_done = true;
   }
 }
 

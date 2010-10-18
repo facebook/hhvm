@@ -596,6 +596,12 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
   int maxlen = 0;
   int minlen = -1;
   Array arr = from.toArray();
+
+  if (arr.empty()) {
+    // Nothing to translate
+    return str;
+  }
+
   for (ArrayIter iter(arr); iter; ++iter) {
     String search = iter.first();
     int len = search.size();

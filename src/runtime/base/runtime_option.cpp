@@ -311,6 +311,8 @@ std::string RuntimeOption::MailForceExtraParameters;
 int RuntimeOption::PregBacktraceLimit = 100000;
 int RuntimeOption::PregRecursionLimit = 100000;
 
+int RuntimeOption::ProfilerTraceBuffer;
+
 ///////////////////////////////////////////////////////////////////////////////
 // keep this block after all the above static variables, or we will have
 // static variable dependency problems on initialization
@@ -895,6 +897,7 @@ void RuntimeOption::Load(Hdf &config) {
     // when new config format is pushed.
     EnableAPCSizeStats = stats["EnableAPCSizeStats"].getBool();
     APCSizeCountPrime = stats["APCSizeCountPrime"].getBool();
+    ProfilerTraceBuffer = stats["ProfilerTraceBuffer"].getInt32(2000000);
   }
   {
     config["ServerVariables"].get(ServerVariables);

@@ -233,6 +233,7 @@ public:
   static bool EnableAPCSizeDetail;
   static bool EnableAPCFetchStats;
   static bool APCSizeCountPrime;
+  static int32 ProfilerTraceBuffer;
 
   static int64 MaxRSS;
   static int64 MaxRSSPollingCycle;

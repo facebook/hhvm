@@ -906,11 +906,10 @@ public:
     return nWanted < s_n_backing - 2;
   }
 
-#define HOME_PHP_TRACE_LENGTH 2000000   /* ~2M procedure calls in home.php */
   void trace_get_space() {
     bool track_realloc = FALSE;
     if (s_n_backing == 0) {
-      s_n_backing = HOME_PHP_TRACE_LENGTH * 2;  // 2 frames/call
+      s_n_backing = RuntimeOption::ProfilerTraceBuffer;
     } else {
       // we always have at least one free slot
       collectStats("(trace buffer realloc)", s_trace[nTrace++]);

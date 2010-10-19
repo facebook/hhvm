@@ -18,11 +18,23 @@
 
 #include <runtime/base/base_includes.h>
 #include <util/thread_local.h>
+#include <util/logger.h>
 #include <util/lock.h>
+#include <util/cronolog.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+  class AccessLogFileData {
+  public:
+    AccessLogFileData(const std::string &fil,
+                      const std::string &lnk,
+                      const std::string &fmt) :
+      file(fil), symLink(lnk), format(fmt) {}
+    std::string file;
+    std::string symLink;
+    std::string format;
+  };
 class AccessLog {
 public:
   class ThreadData {
@@ -35,17 +47,16 @@ public:
   AccessLog(GetThreadDataFunc f) :
       m_initialized(false), m_fGetThreadData(f) {}
   ~AccessLog();
-  bool init(const std::string &defaultFormat,
-            std::vector<std::pair<std::string, std::string> > &files);
-  bool init(const std::string &format, const std::string &file);
+  void init(const std::string &defaultFormat,
+            std::vector<AccessLogFileData> &files);
+  void init(const std::string &format, const std::string &symLink,
+            const std::string &file);
   void log(Transport *transport, const VirtualHost *vhost);
   bool setThreadLog(const char *file);
   void clearThreadLog();
   void onNewRequest();
   std::string &defaultFormat() { return m_defaultFormat; }
-  std::vector<std::pair<std::string, std::string> > &files() {
-    return m_files;
-  }
+  std::vector<AccessLogFileData> &files() { return m_files; }
 private:
   bool parseConditions(const char* &format, int code);
   std::string parseArgument(const char* &format);
@@ -57,12 +68,13 @@ private:
                 FILE *outFile, const char *format);
 
   std::vector<FILE*> m_output;
+  std::vector<Cronolog> m_cronOutput;
   bool m_initialized;
   GetThreadDataFunc m_fGetThreadData;
   std::string m_defaultFormat;
-  std::vector<std::pair<std::string, std::string> > m_files;
+  std::vector<AccessLogFileData> m_files;
 
-  bool openFiles();
+  void openFiles();
   Mutex m_initLock;
 };
 

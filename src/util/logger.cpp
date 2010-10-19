@@ -52,7 +52,9 @@ IMPLEMENT_LOGLEVEL(Verbose);
 
 bool Logger::UseLogAggregator = false;
 bool Logger::UseLogFile = true;
+bool Logger::UseCronolog = true;
 FILE *Logger::Output = NULL;
+Cronolog Logger::cronOutput;
 Logger::LogLevelType Logger::LogLevel = LogInfo;
 bool Logger::LogHeader = false;
 bool Logger::LogNativeStackTrace = true;
@@ -133,8 +135,13 @@ void Logger::log(const std::string &msg, const StackTrace *stackTrace,
     LogAggregator::TheLogAggregator.log(*stackTrace, msg);
   }
   if (UseLogFile) {
-    FILE *f = Output ? Output : stdout;
-
+    FILE *f;
+    if (UseCronolog) {
+      f = cronOutput.getOutputFile();
+      if (!f) f = stdout;
+    } else {
+      f = Output ? Output : stdout;
+    }
     string header, sheader;
     if (LogHeader) {
       header = GetHeader();
@@ -236,6 +243,7 @@ void Logger::SetThreadHook(PFUNC_LOG func, void *data) {
 }
 
 void Logger::SetNewOutput(FILE *output) {
+  Logger::UseCronolog = false;
   ThreadData *threadData = s_threadData.get();
   if (threadData->log) {
     fclose(threadData->log);

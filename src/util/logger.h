@@ -19,7 +19,8 @@
 
 #include <string>
 #include <stdarg.h>
-#include "thread_local.h"
+#include <util/thread_local.h>
+#include <util/cronolog.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,8 +39,9 @@ public:
 
   static bool UseLogAggregator;
   static bool UseLogFile;
+  static bool UseCronolog;
   static FILE *Output;
-
+  static Cronolog cronOutput;
   static LogLevelType LogLevel;
 
   static bool LogHeader;

@@ -30,6 +30,7 @@
 #include <util/file_cache.h>
 #include <runtime/base/preg.h>
 #include <util/parser/scanner.h>
+#include <runtime/base/server/access_log.h>
 
 using namespace std;
 
@@ -41,6 +42,7 @@ std::string RuntimeOption::BuildId;
 std::string RuntimeOption::PidFile = "www.pid";
 
 std::string RuntimeOption::LogFile;
+std::string RuntimeOption::LogFileSymLink;
 std::string RuntimeOption::LogAggregatorFile;
 std::string RuntimeOption::LogAggregatorDatabase;
 int RuntimeOption::LogAggregatorSleepSeconds = 10;
@@ -67,10 +69,11 @@ int64 RuntimeOption::SerializationSizeLimit = 0;
 int64 RuntimeOption::StringOffsetLimit = 10 * 1024 * 1024; // 10MB
 
 std::string RuntimeOption::AccessLogDefaultFormat;
-std::vector<std::pair<std::string, std::string> >  RuntimeOption::AccessLogs;
+std::vector<AccessLogFileData> RuntimeOption::AccessLogs;
 
 std::string RuntimeOption::AdminLogFormat;
 std::string RuntimeOption::AdminLogFile;
+std::string RuntimeOption::AdminLogSymLink;
 
 
 std::string RuntimeOption::Tier;
@@ -443,8 +446,10 @@ void RuntimeOption::Load(Hdf &config) {
       logger["MaxMessagesPerRequest"].getInt32(-1);
 
     Logger::UseLogFile = logger["UseLogFile"].getBool(true);
+    Logger::UseCronolog = logger["UseCronolog"].getBool(false);
     if (Logger::UseLogFile) {
       LogFile = logger["File"].getString();
+      LogFileSymLink = logger["SymLink"].getString();
     }
 
     Hdf aggregator = logger["Aggregator"];
@@ -470,14 +475,16 @@ void RuntimeOption::Load(Hdf &config) {
         if (fname.empty()) {
           continue;
         }
+        string symLink = hdf["SymLink"].getString();
         AccessLogs.
-          push_back(pair<string, string>(fname, hdf["Format"].
-                                         getString(AccessLogDefaultFormat)));
+          push_back(AccessLogFileData(fname, symLink, hdf["Format"].
+                                      getString(AccessLogDefaultFormat)));
       }
     }
 
     AdminLogFormat = logger["AdminLog.Format"].getString("%h %t %s %U");
     AdminLogFile = logger["AdminLog.File"].getString();
+    AdminLogSymLink = logger["AdminLog.SymLink"].getString();
   }
   {
     Hdf error = config["ErrorHandling"];

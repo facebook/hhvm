@@ -24,6 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class AccessLogFileData;
 /**
  * Configurable options set from command line or configurable file at startup
  * time.
@@ -37,6 +38,7 @@ public:
   static std::string PidFile;
 
   static std::string LogFile;
+  static std::string LogFileSymLink;
   static std::string LogAggregatorFile;
   static std::string LogAggregatorDatabase;
   static int LogAggregatorSleepSeconds;
@@ -63,10 +65,11 @@ public:
   static int64 StringOffsetLimit;
 
   static std::string AccessLogDefaultFormat;
-  static std::vector<std::pair<std::string, std::string> > AccessLogs;
+  static std::vector<AccessLogFileData> AccessLogs;
 
   static std::string AdminLogFormat;
   static std::string AdminLogFile;
+  static std::string AdminLogSymLink;
 
   static std::string Tier;
   static std::string Host;

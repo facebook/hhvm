@@ -29,7 +29,7 @@ using namespace std;
 AccessLog::~AccessLog() {
   for (uint i = 0; i < m_output.size(); ++i) {
     if (m_output[i]) {
-      if (m_files[i].first[0] == '|') {
+      if (m_files[i].file[0] == '|') {
         pclose(m_output[i]);
       } else {
         fclose(m_output[i]);
@@ -38,48 +38,60 @@ AccessLog::~AccessLog() {
   }
 }
 
-bool AccessLog::init(const string &defaultFormat,
-                     vector<pair<string, string> > &files) {
+void AccessLog::init(const string &defaultFormat,
+                     vector<AccessLogFileData> &files) {
   Lock l(m_initLock);
-  if (m_initialized) return false;
+  if (m_initialized) return;
   m_initialized = true;
   m_defaultFormat = defaultFormat;
   m_files = files;
-  return openFiles();
+  openFiles();
 }
 
-bool AccessLog::init(const string &format,
+void AccessLog::init(const string &format,
+                     const string &symLink,
                      const string &file) {
   Lock l(m_initLock);
-  if (m_initialized) return false;
+  if (m_initialized) return;
   m_initialized = true;
   m_defaultFormat = format;
   if (!file.empty() && !format.empty()) {
-    m_files.push_back(pair<string, string>(file, format));
+    m_files.push_back(AccessLogFileData(file, symLink, format));
   }
-  return openFiles();
+  openFiles();
 }
 
-bool AccessLog::openFiles() {
-  ASSERT(m_output.empty());
-  if (m_files.empty()) return false;
-  for (vector<pair<string, string> >::const_iterator it = m_files.begin();
+void AccessLog::openFiles() {
+  ASSERT(m_output.empty() && m_cronOutput.empty());
+  if (m_files.empty()) return;
+  for (vector<AccessLogFileData>::const_iterator it = m_files.begin();
        it != m_files.end(); ++it) {
-    const string &file = it->first;
+    const string &file = it->file;
+    const string &symLink = it->symLink;
     ASSERT(!file.empty());
     FILE *fp = NULL;
-    if (file[0] == '|') {
-      string plog = file.substr(1);
-      fp = popen(plog.c_str(), "w");
+    if (Logger::UseCronolog) {
+      Cronolog cl;
+      if (strchr(file.c_str(), '%')) {
+        cl.m_template = file;
+        cl.m_linkName = symLink;
+      } else {
+        cl.m_file = fopen(file.c_str(), "a");
+      }
+      m_cronOutput.push_back(cl);
     } else {
-      fp = fopen(file.c_str(), "a");
+      if (file[0] == '|') {
+        string plog = file.substr(1);
+        fp = popen(plog.c_str(), "w");
+      } else {
+        fp = fopen(file.c_str(), "a");
+      }
+      if (!fp) {
+        Logger::Error("Could not open access log file %s", file.c_str());
+      }
+      m_output.push_back(fp);
     }
-    if (!fp) {
-      Logger::Error("Could not open access log file %s", file.c_str());
-    }
-    m_output.push_back(fp);
   }
-  return !m_output.empty();
 }
 
 void AccessLog::log(Transport *transport, const VirtualHost *vhost) {
@@ -90,11 +102,20 @@ void AccessLog::log(Transport *transport, const VirtualHost *vhost) {
   if (threadLog) {
     writeLog(transport, vhost, threadLog, m_defaultFormat.c_str());
   }
-  for (uint i = 0; i < m_output.size(); ++i) {
-    FILE *outFile = m_output[i];
-    if (!outFile) continue;
-    const char *format = m_files[i].second.c_str();
-    writeLog(transport, vhost, outFile, format);
+  if (Logger::UseCronolog) {
+    for (uint i = 0; i < m_cronOutput.size(); ++i) {
+      FILE *outFile = m_cronOutput[i].getOutputFile();
+      if (!outFile) continue;
+      const char *format = m_files[i].format.c_str();
+      writeLog(transport, vhost, outFile, format);
+    }
+  } else {
+    for (uint i = 0; i < m_output.size(); ++i) {
+      FILE *outFile = m_output[i];
+      if (!outFile) continue;
+      const char *format = m_files[i].format.c_str();
+      writeLog(transport, vhost, outFile, format);
+    }
   }
 }
 

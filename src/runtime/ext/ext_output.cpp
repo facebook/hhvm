@@ -18,13 +18,16 @@
 #include <runtime/ext/ext_output.h>
 #include <runtime/base/runtime_option.h>
 #include <util/lock.h>
+#include <util/logger.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 static ReadWriteMutex s_loggers_mutex;
 typedef std::map<std::string, FILE*> LoggerMap;
+typedef std::map<std::string, Cronolog> CronLoggerMap;
 static LoggerMap s_loggers;
+static CronLoggerMap s_cronLoggers;
 
 bool f_hphp_log(CStrRef filename, CStrRef message) {
   if (!RuntimeOption::EnableApplicationLog) {
@@ -34,26 +37,52 @@ bool f_hphp_log(CStrRef filename, CStrRef message) {
   FILE *f = NULL;
   {
     ReadLock lock(s_loggers_mutex);
-    LoggerMap::const_iterator iter = s_loggers.find(filename.data());
-    if (iter != s_loggers.end()) {
-      f = iter->second;
+    if (Logger::UseCronolog) {
+      CronLoggerMap::iterator iter = s_cronLoggers.find(filename.data());
+      if (iter != s_cronLoggers.end()) {
+        f = iter->second.getOutputFile();
+      }
+    } else {
+      LoggerMap::const_iterator iter = s_loggers.find(filename.data());
+      if (iter != s_loggers.end()) {
+        f = iter->second;
+      }
     }
   }
   if (f == NULL) {
     WriteLock lock(s_loggers_mutex);
-    LoggerMap::const_iterator iter = s_loggers.find(filename.data());
-    if (iter != s_loggers.end()) {
-      f = iter->second;
-    } else {
-      if (filename.charAt(0) == '|') {
-        f = popen(filename.data() + 1, "w");
+    if (Logger::UseCronolog) {
+      CronLoggerMap::iterator iter = s_cronLoggers.find(filename.data());
+      if (iter != s_cronLoggers.end()) {
+        f = iter->second.getOutputFile();
       } else {
-        f = fopen(filename.data(), "a");
+        Cronolog cl;
+        if (strchr(filename.c_str(), '%')) {
+          cl.m_template = filename;
+        } else {
+          cl.m_file = fopen(filename.data(), "a");
+        }
+        s_cronLoggers[filename.data()] = cl;
+        f = cl.getOutputFile();
+        if (f == NULL) {
+          return false;
+        }
       }
-      if (f == NULL) {
-        return false;
+    } else {
+      LoggerMap::const_iterator iter = s_loggers.find(filename.data());
+      if (iter != s_loggers.end()) {
+        f = iter->second;
+      } else {
+        if (filename.charAt(0) == '|') {
+          f = popen(filename.data() + 1, "w");
+        } else {
+          f = fopen(filename.data(), "a");
+        }
+        if (f == NULL) {
+          return false;
+        }
+        s_loggers[filename.data()] = f;
       }
-      s_loggers[filename.data()] = f;
     }
   }
   bool ret = (fwrite(message.data(), message.size(), 1, f) == 1);

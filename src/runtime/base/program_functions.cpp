@@ -461,7 +461,8 @@ static int start_server(const std::string &username) {
   HttpRequestHandler::GetAccessLog().init
     (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::AccessLogs);
   AdminRequestHandler::GetAccessLog().init
-    (RuntimeOption::AdminLogFormat, RuntimeOption::AdminLogFile);
+    (RuntimeOption::AdminLogFormat, RuntimeOption::AdminLogSymLink,
+     RuntimeOption::AdminLogFile);
 
   void *sslCTX = NULL;
   if (RuntimeOption::EnableSSL) {
@@ -655,10 +656,19 @@ static int execute_program_impl(int argc, char **argv) {
   }
 
   if (!RuntimeOption::LogFile.empty()) {
-    if (RuntimeOption::LogFile[0] == '|') {
-      Logger::Output = popen(RuntimeOption::LogFile.substr(1).c_str(), "w");
+    if (Logger::UseCronolog) {
+      if (strchr(RuntimeOption::LogFile.c_str(), '%')) {
+        Logger::cronOutput.m_template = RuntimeOption::LogFile;
+        Logger::cronOutput.m_linkName = RuntimeOption::LogFileSymLink;
+      } else {
+        Logger::Output = fopen(RuntimeOption::LogFile.c_str(), "w");
+      }
     } else {
-      Logger::Output = fopen(RuntimeOption::LogFile.c_str(), "w");
+      if (RuntimeOption::LogFile[0] == '|') {
+        Logger::Output = popen(RuntimeOption::LogFile.substr(1).c_str(), "w");
+      } else {
+        Logger::Output = fopen(RuntimeOption::LogFile.c_str(), "w");
+      }
     }
   }
 

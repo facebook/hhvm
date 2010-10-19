@@ -16,6 +16,7 @@
 
 #include <runtime/eval/ast/foreach_statement.h>
 #include <runtime/eval/ast/lval_expression.h>
+#include <runtime/eval/ast/variable_expression.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
@@ -32,13 +33,25 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
   Variant map(m_source->eval(env));
   if (m_key) {
-    for (ArrayIterPtr iter = map.begin(env.currentContext()); !iter->end();
-         iter->next()) {
-      const Variant &value = iter->second();
-      m_key->set(env, iter->first());
-      m_value->set(env, value);
-      if (!m_body) continue;
-      EVAL_STMT_HANDLE_BREAK(m_body, env);
+    if (m_key->cast<VariableExpression>()) {
+      for (ArrayIterPtr iter = map.begin(env.currentContext()); !iter->end();
+           iter->next()) {
+        const Variant &value = iter->second();
+        const Variant &key = iter->first();
+        m_value->set(env, value);
+        m_key->set(env, key);
+        if (!m_body) continue;
+        EVAL_STMT_HANDLE_BREAK(m_body, env);
+      }
+    } else {
+      for (ArrayIterPtr iter = map.begin(env.currentContext()); !iter->end();
+           iter->next()) {
+        const Variant &value = iter->second();
+        m_key->set(env, iter->first());
+        m_value->set(env, value);
+        if (!m_body) continue;
+        EVAL_STMT_HANDLE_BREAK(m_body, env);
+      }
     }
   } else {
     for (ArrayIterPtr iter = map.begin(env.currentContext()); !iter->end();

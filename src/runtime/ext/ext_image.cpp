@@ -717,7 +717,7 @@ static int php_skip_variable(CObjRef stream) {
   return 1;
 }
 
-static int php_read_APP(CObjRef stream, unsigned int marker, Variant info) {
+static int php_read_APP(CObjRef stream, unsigned int marker, Variant &info) {
   unsigned short length;
   Variant buffer;
   unsigned char markername[16];
@@ -735,7 +735,8 @@ static int php_read_APP(CObjRef stream, unsigned int marker, Variant info) {
 
   snprintf((char*)markername, sizeof(markername), "APP%d", marker - M_APP0);
 
-  if (!info.toArray().exists((const char *)markername)) {
+  if (!(info.is(KindOfArray) &&
+        info.toArray().exists((const char *)markername))) {
     /* XXX we onyl catch the 1st tag of it's kind! */
     info.set(String((char*)markername, CopyString), buffer);
   }
@@ -743,7 +744,7 @@ static int php_read_APP(CObjRef stream, unsigned int marker, Variant info) {
   return 1;
 }
 
-static struct gfxinfo *php_handle_jpeg(CObjRef stream, Variant info) {
+static struct gfxinfo *php_handle_jpeg(CObjRef stream, Variant &info) {
   struct gfxinfo *result = NULL;
   unsigned int marker = M_PSEUDO;
   unsigned short length, ff_read=1;
@@ -775,7 +776,7 @@ static struct gfxinfo *php_handle_jpeg(CObjRef stream, Variant info) {
         result->height = php_read2(stream);
         result->width = php_read2(stream);
         result->channels = file->getc();
-        if (info.isNull() || length < 8) {
+        if (!info.isReferenced() || length < 8) {
           /* if we don't want an extanded info -> return */
           return result;
         }
@@ -806,7 +807,7 @@ static struct gfxinfo *php_handle_jpeg(CObjRef stream, Variant info) {
     case M_APP13:
     case M_APP14:
     case M_APP15:
-      if (!info.isNull()) {
+      if (info.isReferenced()) {
         if (!php_read_APP(stream, marker, info)) {
           /* read all the app markes... */
           return result;
@@ -1551,6 +1552,9 @@ String f_image_type_to_extension(int imagetype,
 Variant f_getimagesize(CStrRef filename, Variant imageinfo /* = null */) {
   int itype = 0;
   struct gfxinfo *result = NULL;
+  if (imageinfo.isReferenced()) {
+    imageinfo = null;
+  }
 
   Array ret;
   Variant stream = f_fopen(filename, "rb");

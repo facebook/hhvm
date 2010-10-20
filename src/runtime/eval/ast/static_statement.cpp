@@ -36,11 +36,9 @@ void StaticVariable::set(VariableEnvironment &env) const {
 void StaticVariable::dump(std::ostream &out) const {
   out << "$";
   m_name->dump(out);
-  out << " = ";
   if (m_val) {
+    out << " = ";
     m_val->dump(out);
-  } else {
-    out << "null";
   }
 }
 

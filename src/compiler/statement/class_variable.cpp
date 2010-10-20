@@ -64,16 +64,20 @@ void ClassVariable::onParse(AnalysisResultPtr ar) {
         dynamic_pointer_cast<SimpleVariable>(var)->getName();
       if (variables->isPresent(name)) {
         ar->getCodeError()->record(CodeError::DeclaredVariableTwice, exp);
+        m_declaration->removeElement(i--);
+      } else {
+        IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>(exp);
+        ph->onParse(ar);
       }
-      IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>(exp);
-      ph->onParse(ar);
     } else {
       const std::string &name =
         dynamic_pointer_cast<SimpleVariable>(exp)->getName();
       if (variables->isPresent(name)) {
         ar->getCodeError()->record(CodeError::DeclaredVariableTwice, exp);
+        m_declaration->removeElement(i--);
+      } else {
+        variables->add(name, Type::Variant, false, ar, exp, m_modifiers);
       }
-      variables->add(name, TypePtr(), false, ar, exp, m_modifiers);
     }
   }
 
@@ -108,6 +112,8 @@ void ClassVariable::analyzeProgramImpl(AnalysisResultPtr ar) {
       SimpleVariablePtr var =
         dynamic_pointer_cast<SimpleVariable>(exp);
       scope->getVariables()->markOverride(ar, var->getName());
+      scope->getVariables()->setClassInitVal(
+        var->getName(), Expression::MakeConstant(ar, getLocation(), "null"));
     }
   }
 }
@@ -169,7 +175,7 @@ StatementPtr ClassVariable::postOptimize(AnalysisResultPtr ar) {
 }
 
 void ClassVariable::inferTypes(AnalysisResultPtr ar) {
-  m_declaration->inferAndCheck(ar, Type::Some, false);
+  m_declaration->inferAndCheck(ar, Type::Variant, false);
 
   if (m_modifiers->isStatic()) {
     ClassScopePtr scope = ar->getClassScope();
@@ -197,17 +203,7 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
             setAttribute(VariableTable::ContainsDynamicStatic);
         }
       } else {
-        SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(exp);
-        TypePtr type = scope->getVariables()->getFinalType(var->getName());
-        // If the class variable's type is Object, we have to
-        // force it to be a Variant, because we don't include
-        // the class header files in global_variables.h
-        if (type->is(Type::KindOfObject)) {
-          scope->getVariables()->forceVariant(ar, var->getName(),
-                                              VariableTable::AnyVars);
-        }
-        const char *initializer = type->getCPPInitializer();
-        if (initializer) scope->setNeedStaticInitializer();
+        scope->setNeedStaticInitializer();
       }
     }
   }
@@ -262,9 +258,10 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg_printf("%sset(", Option::ObjectPrefix);
           cg_printString(var->getName(), ar);
           cg_printf(", null);\n");
-        } else  {
+        } else {
           type = scope->getVariables()->getFinalType(var->getName());
-          const char *initializer = type->getCPPInitializer();
+          const char *initializer = type->is(Type::KindOfVariant) ? "null" :
+            type->getCPPInitializer();
           if (initializer) {
             cg_printf("%s%s = %s;\n", Option::PropertyPrefix,
                       var->getName().c_str(), initializer);
@@ -286,6 +283,8 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             (assignment->getVariable());
           ExpressionPtr value = assignment->getValue();
           if (value->containsDynamicConstant(ar)) continue;
+          Symbol *sym = scope->getVariables()->getSymbol(var->getName());
+          if (sym->isOverride()) continue;
           cg_printf("g->%s%s%s%s = ",
                     Option::StaticPropertyPrefix, scope->getId(cg).c_str(),
                     Option::IdPrefix.c_str(), var->getName().c_str());
@@ -315,6 +314,8 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         var = dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
         ExpressionPtr value = assignment->getValue();
         if (!value->containsDynamicConstant(ar)) continue;
+        Symbol *sym = scope->getVariables()->getSymbol(var->getName());
+        if (sym->isOverride()) continue;
         value->outputCPPBegin(cg, ar);
         cg_printf("g->%s%s%s%s = ",
                   Option::StaticPropertyPrefix, scope->getId(cg).c_str(),

@@ -174,11 +174,6 @@ void Parser::onVariable(Token &out, Token *exprs, Token &var, Token *value,
   }
   if (value) {
     exp = NEW_EXP(AssignmentExpression, exp, value->exp, false);
-  } else {
-    // implicit null, #147156
-    static const std::string s_null ("null");
-    ExpressionPtr null_exp (NEW_EXP(ConstantExpression, s_null));
-    exp = NEW_EXP(AssignmentExpression, exp, null_exp, false);
   }
   expList->addElement(exp);
   out->exp = expList;

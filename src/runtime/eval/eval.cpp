@@ -124,14 +124,15 @@ bool eval_get_static_property_hook(Variant &res, const char *s,
 bool eval_get_static_property_lv_hook(Variant *&res, const char *s,
                                       const char *prop) {
   const Eval::ClassStatement *cls = Eval::RequestEvalState::findClass(s, true);
+  const Eval::ClassStatement *starter = cls;
   while (cls) {
     LVariableTable *statics = Eval::RequestEvalState::getClassStatics(cls);
     if (!statics) return false;
     if (statics->exists(prop)) {
       const char *context = FrameInjection::GetClassName(false);
       int mods;
-      if (!cls->attemptPropertyAccess(prop, context, mods)) {
-        cls->failPropertyAccess(prop, context, mods);
+      if (!starter->attemptPropertyAccess(prop, context, mods)) {
+        starter->failPropertyAccess(prop, context, mods);
       }
       res = &statics->get(prop);
       return true;

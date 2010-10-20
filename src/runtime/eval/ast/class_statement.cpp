@@ -53,17 +53,33 @@ void ClassVariable::set(VariableEnvironment &env, EvalObjectData *self) const {
 void ClassVariable::setStatic(VariableEnvironment &env, LVariableTable &st)
   const {
   if ((m_modifiers & ClassStatement::Static)) {
-    st.get(m_name.c_str()) = m_value ? m_value->eval(env) : Variant();
+    Variant val;
+    if (m_value) {
+      val = m_value->eval(env);
+    } else if (m_modifiers & ClassStatement::Public) {
+      const ClassStatement *parent = m_cls->parentStatement();
+      if (parent) {
+        const ClassVariable* var = parent->findVariable(m_name.c_str(), true);
+        if (var && (var->m_modifiers & ClassStatement::Protected) &&
+            (var->m_modifiers & ClassStatement::Static)) {
+          // When there is no initial value, and base class's property is
+          // protected and this class's same property is public, and both are
+          // static, they refer to the same property. In this case, we don't
+          // set the variable in st, so it will go to parent class for it.
+          return;
+        }
+      }
+    }
+    st.get(m_name.c_str()) = val;
   }
 }
 
 void ClassVariable::dump(std::ostream &out) const {
   ClassStatement::dumpModifiers(out, m_modifiers, true);
-  out << "$" << m_name << " = ";
+  out << "$" << m_name;
   if (m_value) {
+    out  << " = ";
     m_value->dump(out);
-  } else {
-    out << "null";
   }
   out << ";";
 }
@@ -609,8 +625,11 @@ bool ClassStatement::attemptPropertyAccess( CStrRef prop, const char *context,
   }
   mods = it->second->getModifiers();
   Modifier level = Public;
-  if (mods & Private) level = Private;
-  else if (mods & Protected) level = Protected;
+  if (mods & Private) {
+    level = Private;
+  } else if (mods & Protected) {
+    level = Protected;
+  }
   // Var is private in superclass, treat an new
   if (level == Private && rec) return true;
   return hasAccess(context, level);

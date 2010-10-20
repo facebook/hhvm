@@ -96,29 +96,29 @@ bool TestParserStmt::TestClassStatement() {
     "class Test {\n}\n");
 
   V("<?php class Test { public $data;}",
-    "class Test {\npublic $data = null;\n}\n");
+    "class Test {\npublic $data;\n}\n");
 
   V("<?php abstract class Test { public $data;}",
-    "abstract class Test {\npublic $data = null;\n}\n");
+    "abstract class Test {\npublic $data;\n}\n");
 
   V("<?php final class Test { public $data;}",
-    "final class Test {\npublic $data = null;\n}\n");
+    "final class Test {\npublic $data;\n}\n");
 
   V("<?php class Test extends Base { public $data;}",
-    "class Test extends Base {\npublic $data = null;\n}\n");
+    "class Test extends Base {\npublic $data;\n}\n");
 
   V("<?php class Test implements Base { public $data;}",
-    "class Test implements Base {\npublic $data = null;\n}\n");
+    "class Test implements Base {\npublic $data;\n}\n");
 
   V("<?php class Test implements Base,Base2 { public $data;}",
-    "class Test implements Base, Base2 {\npublic $data = null;\n}\n");
+    "class Test implements Base, Base2 {\npublic $data;\n}\n");
 
   V("<?php class Test { public $data; function test() {}}",
-    "class Test {\npublic $data = null;\n"
+    "class Test {\npublic $data;\n"
     "public function test() {\n}\n}\n");
 
   V("<?php class Test { private $data; function test() {}}",
-    "class Test {\nprivate $data = null;\n"
+    "class Test {\nprivate $data;\n"
     "public function test() {\n}\n}\n");
 
   V("<?php class Test { function test() {}}",
@@ -149,40 +149,40 @@ bool TestParserStmt::TestInterfaceStatement() {
 
 bool TestParserStmt::TestClassVariable() {
   V("<?php class Test { public $data;}",
-    "class Test {\npublic $data = null;\n}\n");
+    "class Test {\npublic $data;\n}\n");
 
   V("<?php class Test { protected $data;}",
-    "class Test {\nprotected $data = null;\n}\n");
+    "class Test {\nprotected $data;\n}\n");
 
   V("<?php class Test { private $data;}",
-    "class Test {\nprivate $data = null;\n}\n");
+    "class Test {\nprivate $data;\n}\n");
 
   V("<?php class Test { static $data;}",
-    "class Test {\npublic static $data = null;\n}\n");
+    "class Test {\npublic static $data;\n}\n");
 
   V("<?php class Test { abstract $data;}",
-    "class Test {\npublic abstract $data = null;\n}\n");
+    "class Test {\npublic abstract $data;\n}\n");
 
   V("<?php class Test { final $data;}",
-    "class Test {\npublic final $data = null;\n}\n");
+    "class Test {\npublic final $data;\n}\n");
 
   V("<?php class Test { private static $data;}",
-    "class Test {\nprivate static $data = null;\n}\n");
+    "class Test {\nprivate static $data;\n}\n");
 
   V("<?php class Test { private static $data=2;}",
     "class Test {\nprivate static $data = 2;\n}\n");
 
   V2("<?php class Test { var $data,$data2;}",
-     "class Test {\npublic $data = null, $data2 = null;\n}\n",
-     "class Test {\npublic $data = null;\npublic $data2 = null;\n}\n");
+     "class Test {\npublic $data, $data2;\n}\n",
+     "class Test {\npublic $data;\npublic $data2;\n}\n");
 
   V2("<?php class Test { var $data,$data2=2;}",
-     "class Test {\npublic $data = null, $data2 = 2;\n}\n",
-     "class Test {\npublic $data = null;\npublic $data2 = 2;\n}\n");
+     "class Test {\npublic $data, $data2 = 2;\n}\n",
+     "class Test {\npublic $data;\npublic $data2 = 2;\n}\n");
 
   V2("<?php class Test { var $data=2,$data2;}",
-     "class Test {\npublic $data = 2, $data2 = null;\n}\n",
-     "class Test {\npublic $data = 2;\npublic $data2 = null;\n}\n");
+     "class Test {\npublic $data = 2, $data2;\n}\n",
+     "class Test {\npublic $data = 2;\npublic $data2;\n}\n");
 
   V2("<?php class Test { var $data=2,$data2=3;}",
      "class Test {\npublic $data = 2, $data2 = 3;\n}\n",
@@ -532,19 +532,19 @@ bool TestParserStmt::TestGlobalStatement() {
 
 bool TestParserStmt::TestStaticStatement() {
   V("<?php static $a;",
-    "static $a = null;\n");
+    "static $a;\n");
 
   V("<?php static $a = 1;",
     "static $a = 1;\n");
 
   V("<?php static $a, $b;",
-    "static $a = null, $b = null;\n");
+    "static $a, $b;\n");
 
   V("<?php static $a = 1, $b;",
-    "static $a = 1, $b = null;\n");
+    "static $a = 1, $b;\n");
 
   V("<?php static $a, $b = 1;",
-    "static $a = null, $b = 1;\n");
+    "static $a, $b = 1;\n");
 
   V("<?php static $a = \"$-\";",
     "static $a = '$-';\n");

@@ -331,18 +331,18 @@ bool TestParserExpr::TestParameterExpression() {
 }
 
 bool TestParserExpr::TestModifierExpression() {
-  V("<?php class a { public $a;}",    "class a {\npublic $a = null;\n}\n");
-  V("<?php class a { protected $a;}", "class a {\nprotected $a = null;\n}\n");
-  V("<?php class a { private $a;}",   "class a {\nprivate $a = null;\n}\n");
+  V("<?php class a { public $a;}",    "class a {\npublic $a;\n}\n");
+  V("<?php class a { protected $a;}", "class a {\nprotected $a;\n}\n");
+  V("<?php class a { private $a;}",   "class a {\nprivate $a;\n}\n");
   V("<?php class a { static $a;}",
-    "class a {\npublic static $a = null;\n}\n");
+    "class a {\npublic static $a;\n}\n");
   V("<?php class a { abstract $a;}",
-    "class a {\npublic abstract $a = null;\n}\n");
+    "class a {\npublic abstract $a;\n}\n");
   V("<?php class a { final $a;}",
-    "class a {\npublic final $a = null;\n}\n");
+    "class a {\npublic final $a;\n}\n");
 
   V("<?php class a { public static $a;}",
-    "class a {\npublic static $a = null;\n}\n");
+    "class a {\npublic static $a;\n}\n");
 
   return true;
 }

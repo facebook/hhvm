@@ -357,12 +357,17 @@ void VariableTable::addStaticVariable(Symbol *sym,
 void VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
   Symbol *sym = getSymbol(name);
   assert(sym && sym->isPresent());
-  ClassScopePtr parent = findParent(ar, name);
-  if (parent) {
-    Symbol *s2 = parent->getVariables()->getSymbol(name);
-    assert(s2);
-    if (!s2->isPrivate()) {
-      sym->setOverride();
+  if (!sym->isStatic() ||
+      (sym->isPublic() && !sym->getClassInitVal())) {
+    ClassScopePtr parent = findParent(ar, name);
+    if (parent) {
+      Symbol *s2 = parent->getVariables()->getSymbol(name);
+      assert(s2);
+      if (!s2->isPrivate()) {
+        if (!sym->isStatic() || s2->isProtected()) {
+          sym->setOverride();
+        }
+      }
     }
   }
 }
@@ -477,7 +482,10 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
                                     ConstructPtr construct) {
   Symbol *sym = getSymbol(name);
   if (sym && sym->declarationSet()) {
-    return sym;
+    if (!sym->isOverride() || !sym->isStatic()) {
+      return sym;
+    }
+    sym = NULL;
   }
 
   if (!sym) {
@@ -1460,13 +1468,13 @@ void VariableTable::outputCPPPropertyDecl(CodeGenerator &cg,
     AnalysisResultPtr ar, bool dynamicObject /* = false */) {
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const Symbol *sym = m_symbolVec[i];
-    const string &name = sym->getName();
     if (dynamicObject && !sym->isPrivate()) continue;
 
     // we don't redefine a property that's already defined by a parent class
     // unless it is private or the parent's one is private
-    if (isStatic(name) || definedByParent(ar, name)) continue;
+    if (sym->isStatic() || sym->isOverride()) continue;
 
+    const string &name = sym->getName();
     sym->getFinalType()->outputCPPDecl(cg, ar);
     cg_printf(" %s%s;\n", Option::PropertyPrefix,
               cg.formatLabel(name).c_str());
@@ -1754,7 +1762,8 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
     const Symbol *sym = m_symbolVec[i];
     const string &name = sym->getName();
     bool stat = sym->isStatic();
-    if (!stat && (isInherited(name) || definedByParent(ar, name))) continue;
+    if (sym->isOverride()) continue;
+    if (!stat && isInherited(name)) continue;
     if (!stat &&
         (sym->isPrivate() && privateVar == NonPrivate ||
          !sym->isPrivate() && privateVar == Private)) continue;

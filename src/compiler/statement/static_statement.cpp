@@ -126,6 +126,17 @@ void StaticStatement::setNthKid(int n, ConstructPtr cp) {
 
 StatementPtr StaticStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_exp);
+
+  BlockScopePtr scope = ar->getScope();
+  for (int i = 0; i < m_exp->getCount(); i++) {
+    ExpressionPtr exp = (*m_exp)[i];
+    AssignmentExpressionPtr assignment_exp =
+      dynamic_pointer_cast<AssignmentExpression>(exp);
+    ExpressionPtr variable = assignment_exp->getVariable();
+    ExpressionPtr value = assignment_exp->getValue();
+    SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
+    scope->getVariables()->setStaticInitVal(var->getName(), value);
+  }
   return StatementPtr();
 }
 

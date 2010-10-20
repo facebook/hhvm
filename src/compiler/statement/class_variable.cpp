@@ -146,6 +146,19 @@ void ClassVariable::setNthKid(int n, ConstructPtr cp) {
 StatementPtr ClassVariable::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_modifiers);
   ar->preOptimize(m_declaration);
+
+  ClassScopePtr scope = ar->getClassScope();
+  for (int i = 0; i < m_declaration->getCount(); i++) {
+    ExpressionPtr exp = (*m_declaration)[i];
+    if (exp->is(Expression::KindOfAssignmentExpression)) {
+      AssignmentExpressionPtr assignment =
+        dynamic_pointer_cast<AssignmentExpression>(exp);
+      SimpleVariablePtr var =
+        dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
+      ExpressionPtr value = assignment->getValue();
+      scope->getVariables()->setClassInitVal(var->getName(), value);
+    }
+  }
   return StatementPtr();
 }
 

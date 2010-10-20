@@ -110,7 +110,7 @@ public:
   ConstructPtr getStaticInitVal() const {
     return m_flags.m_hasStaticInit ? m_initVal : ConstructPtr();
   }
-  ConstructPtr getClsInitVal() const {
+  ConstructPtr getClassInitVal() const {
     return m_flags.m_hasClassInit ? m_initVal : ConstructPtr();
   }
   void setStaticInitVal(ConstructPtr initVal) {
@@ -118,7 +118,7 @@ public:
     m_flags.m_hasStaticInit = true;
     m_initVal = initVal;
   }
-  void setClsInitVal(ConstructPtr initVal) {
+  void setClassInitVal(ConstructPtr initVal) {
     if (m_flags.m_hasStaticInit) initVal.reset();
     m_flags.m_hasClassInit = true;
     m_initVal = initVal;

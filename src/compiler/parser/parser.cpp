@@ -662,9 +662,6 @@ void Parser::saveParseTree(Token &tree) {
   }
   FileScopePtr fileScope = m_ar->getFileScope();
   fileScope->setTree(m_tree);
-  m_ar->pushScope(fileScope);
-  m_tree->preOptimize(m_ar);
-  m_ar->popScope();
 }
 
 void Parser::onStatementListStart(Token &out) {

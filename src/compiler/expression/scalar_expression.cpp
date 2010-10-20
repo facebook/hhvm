@@ -116,33 +116,11 @@ void ScalarExpression::onParse(AnalysisResultPtr ar) {
 // static analysis functions
 
 void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
-}
-
-unsigned ScalarExpression::getCanonHash() const {
-  int64 val = getHash();
-  if (val == -1) {
-    val = hash_string(m_value.c_str(), m_value.size());
-  }
-  return unsigned(val) ^ unsigned(val >> 32);
-}
-
-bool ScalarExpression::canonCompare(ExpressionPtr e) const {
-  if (!Expression::canonCompare(e)) return false;
-  ScalarExpressionPtr s =
-    static_pointer_cast<ScalarExpression>(e);
-
-  return
-    m_value == s->m_value &&
-    m_type == s->m_type &&
-    m_quoted == s->m_quoted;
-}
-
-ExpressionPtr ScalarExpression::preOptimize(AnalysisResultPtr ar) {
-  string id = Util::toLower(getIdentifier());
-  addUserFunction(ar, id, false);
-  addUserClass(ar, id, false);
-
   if (ar->isFirstPass()) {
+    string id = Util::toLower(getIdentifier());
+    addUserFunction(ar, id, false);
+    addUserClass(ar, id, false);
+
     switch (m_type) {
     case T_LINE:
       if (getLocation()) {
@@ -177,6 +155,28 @@ ExpressionPtr ScalarExpression::preOptimize(AnalysisResultPtr ar) {
       break;
     }
   }
+}
+
+unsigned ScalarExpression::getCanonHash() const {
+  int64 val = getHash();
+  if (val == -1) {
+    val = hash_string(m_value.c_str(), m_value.size());
+  }
+  return unsigned(val) ^ unsigned(val >> 32);
+}
+
+bool ScalarExpression::canonCompare(ExpressionPtr e) const {
+  if (!Expression::canonCompare(e)) return false;
+  ScalarExpressionPtr s =
+    static_pointer_cast<ScalarExpression>(e);
+
+  return
+    m_value == s->m_value &&
+    m_type == s->m_type &&
+    m_quoted == s->m_quoted;
+}
+
+ExpressionPtr ScalarExpression::preOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 

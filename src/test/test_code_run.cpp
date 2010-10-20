@@ -3707,6 +3707,16 @@ bool TestCodeRun::TestObjectProperty() {
        "var_dump(isset($x->pub_var));"
        "var_dump(empty($x->pub_var));");
 
+  MVCR("<?php "
+       "define('FOO', 'foo');"
+       "class X {"
+       "  const UNKNOWN = 1;"
+       "  public $foo = -1;"
+       "  static public $bar = FOO;"
+       "  public $baz = self::UNKNOWN;"
+       "}"
+       "var_dump(get_class_vars('X'));");
+
   return true;
 }
 

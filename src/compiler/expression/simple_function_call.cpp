@@ -244,6 +244,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   }
 
   if (m_safeDef) m_safeDef->analyzeProgram(ar);
+  if (m_params) m_params->analyzeProgram(ar);
 
   if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
 
@@ -374,8 +375,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
       markRefParams(m_funcScope, m_name, canInvokeFewArgs());
     }
-
-    m_params->analyzeProgram(ar);
   }
 }
 

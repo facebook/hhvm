@@ -129,7 +129,7 @@ ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultPtr ar) {
 
       sym = cls->findProperty(cls, name, ar, shared_from_this());
       if (sym && !sym->isIndirectAltered() && sym->isStatic()) {
-        ConstructPtr init = sym->getClsInitVal();
+        ConstructPtr init = sym->getClassInitVal();
         if (init) {
           ExpressionPtr rep = dynamic_pointer_cast<Expression>(init);
           if (rep->isScalar()) {

@@ -306,15 +306,15 @@ bool VariableTable::setStaticInitVal(string varName,
 
 ConstructPtr VariableTable::getClassInitVal(string varName) {
   if (Symbol *sym = getSymbol(varName)) {
-    return sym->getClsInitVal();
+    return sym->getClassInitVal();
   }
   return ConstructPtr();
 }
 
 bool VariableTable::setClassInitVal(string varName, ConstructPtr value) {
   Symbol *sym = getSymbol(varName, true);
-  bool exists = sym->getClsInitVal();
-  sym->setClsInitVal(value);
+  bool exists = sym->getClassInitVal();
+  sym->setClassInitVal(value);
   return exists;
 }
 

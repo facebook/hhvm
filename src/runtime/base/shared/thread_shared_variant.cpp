@@ -291,20 +291,42 @@ int ThreadSharedVariant::getIndex(CVarRef key) {
   return -1;
 }
 
-SharedVariant* ThreadSharedVariant::get(CVarRef key) {
-  int idx = getIndex(key);
-  if (idx != -1) {
-    if (getIsVector()) return m_data.vec->vals[idx];
-    if (RuntimeOption::ApcUseGnuMap) return m_data.gnuMap->vals[idx];
-    return m_data.map->getValIndex(idx);
+int ThreadSharedVariant::getIndex(CStrRef key) {
+  ASSERT(is(KindOfArray));
+  if (getIsVector()) return -1;
+  StringData *sd = key.get();
+  if (RuntimeOption::ApcUseGnuMap) {
+    StringDataToIntMap::const_iterator it = m_data.gnuMap->strMap->find(sd);
+    if (it == m_data.gnuMap->strMap->end()) return -1;
+    return it->second;
   }
-  return NULL;
+  return m_data.map->indexOf(sd);
 }
 
-bool ThreadSharedVariant::exists(CVarRef key) {
+int ThreadSharedVariant::getIndex(litstr key) {
   ASSERT(is(KindOfArray));
-  int idx = getIndex(key);
-  return idx != -1;
+  if (getIsVector()) return -1;
+  StringData sd(key);
+  if (RuntimeOption::ApcUseGnuMap) {
+    StringDataToIntMap::const_iterator it = m_data.gnuMap->strMap->find(&sd);
+    if (it == m_data.gnuMap->strMap->end()) return -1;
+    return it->second;
+  }
+  return m_data.map->indexOf(&sd);
+}
+
+int ThreadSharedVariant::getIndex(int64 key) {
+  ASSERT(is(KindOfArray));
+  if (getIsVector()) {
+    if (key < 0 || (size_t) key >= m_data.vec->size) return -1;
+    return key;
+  }
+  if (RuntimeOption::ApcUseGnuMap) {
+    Int64ToIntMap::const_iterator it = m_data.gnuMap->intMap->find(key);
+    if (it == m_data.gnuMap->intMap->end()) return -1;
+    return it->second;
+  }
+  return m_data.map->indexOf(key);
 }
 
 void ThreadSharedVariant::loadElems(ArrayData *&elems,

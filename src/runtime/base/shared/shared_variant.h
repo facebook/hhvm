@@ -64,8 +64,10 @@ public:
   virtual size_t arrSize() const = 0;
 
   virtual int getIndex(CVarRef key) = 0;
-  virtual SharedVariant* get(CVarRef key) = 0;
-  virtual bool exists(CVarRef key) = 0;
+  virtual int getIndex(CStrRef key) = 0;
+  virtual int getIndex(litstr key) = 0;
+  virtual int getIndex(int64 key) = 0;
+
   virtual void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
                          bool keepRef = false) = 0;
 

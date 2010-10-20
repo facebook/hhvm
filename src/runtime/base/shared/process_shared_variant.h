@@ -18,6 +18,7 @@
 #define __HPHP_PROCESS_SHARED_VARIANT_H__
 
 #include <runtime/base/types.h>
+#include <runtime/base/complex_types.h>
 #include <util/shared_memory_allocator.h>
 #include <runtime/base/memory/unsafe_pointer.h>
 #include <runtime/base/shared/shared_variant.h>
@@ -90,8 +91,16 @@ class ProcessSharedVariant : public SharedVariant {
   }
 
   int getIndex(CVarRef key);
-  SharedVariant* get(CVarRef key);
-  bool exists(CVarRef key);
+  int getIndex(CStrRef key) {
+    return getIndex(Variant(key));
+  }
+  int getIndex(litstr key) {
+    return getIndex(Variant(key));
+  }
+  int getIndex(int64 key) {
+    return getIndex(Variant(key));
+  }
+
   void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
                  bool keepRef = false);
 

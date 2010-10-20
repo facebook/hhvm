@@ -68,8 +68,9 @@ public:
 
   size_t arrSize() const;
   int getIndex(CVarRef key);
-  SharedVariant* get(CVarRef key);
-  bool exists(CVarRef key);
+  int getIndex(CStrRef key);
+  int getIndex(litstr key);
+  int getIndex(int64 key);
 
   void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
                  bool keepRef = false);

@@ -55,44 +55,24 @@ public:
     return v ? getLocal(v) : null;
   }
 
-  bool exists(int64 k) const {
-    return exists(Variant(k));
-  }
-  bool exists(litstr k) const {
-    return exists(Variant(k));
-  }
-  bool exists(CStrRef k) const {
-    return exists(Variant(k));
-  }
+  bool exists(int64 k) const;
+  bool exists(litstr k) const;
+  bool exists(CStrRef k) const;
   bool exists(CVarRef k) const;
 
   bool idxExists(ssize_t idx) const {
     return idx < size();
   }
 
-  Variant get(int64 k, bool error = false) const {
-    return get(Variant(k), error);
-  }
-  Variant get(litstr k, bool error = false) const {
-    return get(Variant(k), error);
-  }
-  Variant get(CStrRef k, bool error = false) const {
-    return get(Variant(k), error);
-  }
+  Variant get(int64 k, bool error = false) const;
+  Variant get(litstr k, bool error = false) const;
+  Variant get(CStrRef k, bool error = false) const;
   Variant get(CVarRef k, bool error = false) const;
 
-  ssize_t getIndex(int64 k) const {
-    return getIndex(Variant(k));
-  }
-  ssize_t getIndex(litstr k) const {
-    return getIndex(Variant(k));
-  }
-  ssize_t getIndex(CStrRef k) const {
-    return getIndex(Variant(k));
-  }
-  ssize_t getIndex(CVarRef k) const {
-    return m_arr->getIndex(k);
-  }
+  ssize_t getIndex(int64 k) const;
+  ssize_t getIndex(litstr k) const;
+  ssize_t getIndex(CStrRef k) const;
+  ssize_t getIndex(CVarRef k) const;
 
   ArrayData *lval(Variant *&ret, bool copy);
   virtual ArrayData *lval(int64   k, Variant *&ret, bool copy,

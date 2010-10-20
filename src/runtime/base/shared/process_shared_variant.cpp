@@ -328,20 +328,6 @@ int ProcessSharedVariant::getIndex(CVarRef key) {
   return it->second;
 }
 
-SharedVariant* ProcessSharedVariant::get(CVarRef key) {
-  int idx = getIndex(key);
-  if (idx != -1) {
-    return getPtr(vals()[idx]);
-  }
-  return NULL;
-}
-
-bool ProcessSharedVariant::exists(CVarRef key) {
-  ASSERT(is(KindOfArray));
-  ProcessSharedVariantToIntMap::const_iterator it = lookup(key);
-  return it != map().end();
-}
-
 Variant ProcessSharedVariant::getKey(ssize_t pos) const {
   return getPtr(keys()[pos])->toLocal();
 }

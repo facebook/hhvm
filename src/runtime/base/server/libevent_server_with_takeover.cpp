@@ -194,7 +194,8 @@ int LibEventServerWithTakeover::getAcceptSocket() {
     m_accept_sock = -1;
   }
 
-  ret = evhttp_bind_socket_with_fd(m_server, m_address.c_str(), m_port);
+  ret = evhttp_bind_socket_backlog_fd(m_server, m_address.c_str(),
+                                   m_port, RuntimeOption::ServerBacklog);
   if (ret >= 0) {
     Logger::Info("takeover: bound directly to port %d", m_port);
     m_accept_sock = ret;

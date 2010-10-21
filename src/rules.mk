@@ -227,6 +227,7 @@ CPPFLAGS += \
   -isystem $(EXT_DIR)/libmemcached/include \
   -isystem $(EXT_DIR)/jemalloc/include \
   -isystem $(EXT_DIR)/google-perftools/include \
+  -isystem $(EXT_DIR)/libcap/include \
   -I $(PROJECT_ROOT)/src \
   -I $(PROJECT_ROOT)/src/system/gen \
 
@@ -437,7 +438,7 @@ ifdef MAC_OS_X
 LINK_LIBS = -lpthread -lstdc++ -lz -ldl
 else
 BFD_LIBS = -L$(EXT_DIR)/binutils/ -lbfd -liberty -ldl -lz
-LINK_LIBS = -lpthread $(BFD_LIBS) -lrt -lstdc++ -lresolv -lcap -lbz2
+LINK_LIBS = -lpthread $(BFD_LIBS) -lrt -lstdc++ -lresolv -lbz2
 endif
 
 # 2. Common Libraries
@@ -478,6 +479,8 @@ MCC_LIBS = $(EXT_DIR)/libmcc/lib/libmcc.a $(EXT_DIR)/libch/lib/libch.a \
 	$(EXT_DIR)/libevent/lib/libevent.a
 
 LIBMEMCACHED_LIBS = $(EXT_DIR)/libmemcached/lib/libmemcached.a
+
+LIBCAP_LIBS = $(EXT_DIR)/libcap/lib64/libcap.a
 
 ifdef HPHP_DEV
 GD_LIBS = $(EXT_DIR)/gd/lib/libgd.a $(EXT_DIR)/libpng/lib/libpng.a \
@@ -567,6 +570,7 @@ ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
 	$(MCRYPT_LIBS) $(JEMALLOC_LIBS) $(GOOGLE_LIBS) $(ICU_LIBS) \
 	$(HTTP_LIBS) $(XHP_LIBS) $(TIME_LIBS) $(TBB_LIBS) $(FBI_LIBS) \
 	$(LDAP_LIBS) $(READLINE_LIBS) $(LIBMEMCACHED_LIBS) $(ORACLE_LIBS) \
+	$(LIBCAP_LIBS) \
 
 LIB_PATHS = $(HPHP_LIB) \
   $(HPHP_TEST_LIB_PATH) \

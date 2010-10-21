@@ -23,6 +23,7 @@
 #include <time.h>
 #include <runtime/base/comparisons.h>
 #include <runtime/base/time/datetime.h>
+#include <stack>
 
 #if defined(__APPLE__)
 # include <mach/mach_time.h>
@@ -307,20 +308,46 @@ public:
 
   virtual void writeFileHeader() = 0;
   virtual void writeFileFooter() = 0;
-  virtual void writeIndent() = 0;
-  virtual void writeHeader(const char *name) = 0;
-  virtual void writeFooter(const char *name) = 0;
+
+  // Begins writing an object which is different than a list in JSON.
+  virtual void beginObject(const char *name) = 0;
+
+  // Begins writing a list (an ordered set of potentially unnamed children)
+  // Defaults to begining an object.
+  virtual void beginList(const char *name) {
+    beginObject(name);
+  }
+
+  // Writes a string value with a given name.
   virtual void writeEntry(const char *name, const std::string &value) = 0;
+
+  // Writes a string value with a given name.
   virtual void writeEntry(const char *name, int64 value) = 0;
+
+  // Ends the writing of an object.
+  virtual void endObject(const char *name) = 0;
+
+  // Ends the writing of a list. Defaults to simply ending an Object.
+  virtual void endList(const char *name) {
+    endObject(name);
+  }
+
 
 protected:
   ostream &m_out;
   int m_indent;
+
+  virtual void writeIndent() {
+    for (int i = 0; i < m_indent; i++) {
+      m_out << "  ";
+    }
+  }
 };
 
 class XMLWriter : public Writer {
 public:
   XMLWriter(ostream &out) : Writer(out) {}
+
 
   virtual void writeFileHeader() {
     m_out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
@@ -334,19 +361,18 @@ public:
 
   virtual void writeFileFooter() {}
 
-  virtual void writeIndent() {
-    for (int i = 0; i < m_indent; i++) {
-      m_out << "  ";
-    }
-  }
 
-  virtual void writeHeader(const char *name) {
+  /**
+   * In XML/HTML there is no distinction between creating a list, and creating
+   * an object with keyed attributes. (unlike the JSON format).
+   */
+  virtual void beginObject(const char *name) {
     writeIndent();
     m_out << '<' << name << ">\n";
     ++m_indent;
   }
 
-  virtual void writeFooter(const char *name) {
+  virtual void endObject(const char *name) {
     --m_indent;
     writeIndent();
     m_out << "</" << name << ">\n";
@@ -379,44 +405,131 @@ private:
 };
 
 class JSONWriter : public Writer {
-public:
-  JSONWriter(ostream &out) : Writer(out) {}
 
-  virtual void writeFileHeader() {}
+protected:
+  // Whether or not we have skiped a comma for this current indent level. Valid
+  // json may not have trailing commas such as {"a":4, "b":5,} Since we are
+  // writing to a stream, we output *valid* json that has commas preceding all
+  // elements except the first, which is equivalent to outputing commas after
+  // each element except the last. Skip the preceding comma when m_justIndented.
+  bool m_justIndented;
 
-  virtual void writeFileFooter() {}
+  // Stack that determines whether or not at a given object depth level, we are
+  // to be listing child objects with keyed entries. For example, in Json,
+  // inside an array, entries are not keyed. Also at the json root node, we
+  // begin at a nameless context.
+  std::stack<bool> m_namelessContextStack;
 
-  virtual void writeIndent() {
-    for (int i = 0; i < m_indent; i++) {
-      m_out << "  ";
+  virtual void increaseIndent() {
+    ++m_indent;
+    m_justIndented = true;
+  }
+
+  /**
+   * It is *important* to set m_justIndented to false here in the event that we
+   * write objects with *no* members, we need to set it to false.
+   */
+  virtual void decreaseIndent() {
+    --m_indent;
+    m_justIndented = false;
+
+    // We should never pop off more than we pushed, but just in case someone
+    // called too many endObject's etc, we don't want a segfault.
+    if (m_namelessContextStack.size() != 0) {
+      m_namelessContextStack.pop();
     }
   }
 
-  virtual void writeHeader(const char *name) {
-    writeIndent();
-    m_out << '"' << name << "\": {\n";
-    ++m_indent;
+  /**
+   * Begins writing a containing entity (such as a list or object).
+   * See the 'isList' parameter.
+   */
+  virtual void beginContainer(const char *name, bool isList) {
+    char opener = isList ? '[' : '{';
+    beginEntity(name);
+    m_out << opener << '\n';
+
+    // Push on whether or not we're entering a nameless context
+    m_namelessContextStack.push(isList);
+    increaseIndent();
   }
 
-  virtual void writeFooter(const char *name) {
-    --m_indent;
+  virtual void endContainer(bool isList) {
+    char closer = isList ? ']' : '}';
+    decreaseIndent();
     writeIndent();
-    m_out << "},\n";
+    m_out << closer << '\n';
+  }
+
+  /**
+   * Writes any needed leading commas, and keyed name if appropriate.
+   * Reduces redundancy. Used whenever an entity is a child of another
+   * entity - does all the work of determining if the object should be
+   * written with/without a name and if we need a comma.
+   */
+  virtual void beginEntity(const char *name) {
+    writeIndent();
+    if (!m_justIndented) {
+      m_out << ", ";
+    }
+    if (m_namelessContextStack.size() != 0 && !m_namelessContextStack.top()) {
+      m_out << '"' << JSON::Escape(name) << "\": ";
+    }
+    m_justIndented = false;
+  }
+
+public:
+
+  JSONWriter(ostream &out) : Writer(out),
+      m_justIndented(true) {
+
+    // A valid json object begins in the nameless context. See
+    // json.org for JSON state machine.
+    m_namelessContextStack.push(true);
+  }
+
+  virtual void writeFileHeader() {
+    beginContainer("root", false);
+  }
+
+  virtual void writeFileFooter() {
+    endContainer(false);
+  }
+
+
+  virtual void beginObject(const char *name) {
+    beginContainer(name, false);
+  }
+
+  virtual void beginList(const char *name) {
+    beginContainer(name, true);
+  }
+
+  void endObject(const char *name) {
+    endContainer(false);
+  }
+
+  void endList(const char *name) {
+    endContainer(true);
   }
 
   virtual void writeEntry(const char *name, const string &value) {
-    writeIndent();
-    m_out << '"' << JSON::Escape(name) << "\": \"" <<
-      JSON::Escape(value.c_str()) << "\",\n";
+    beginEntity(name);
+
+    // Now write the actual value
+    m_out << "\"" << JSON::Escape(value.c_str()) << "\"\n";
   }
 
   virtual void writeEntry(const char *name, int64 value) {
-    writeIndent();
-    m_out << '"' << JSON::Escape(name) << "\": " << value << ",\n";
+    beginEntity(name);
+
+    // Now write the actual value
+    m_out << value << '\n';
   }
 };
 
 class HTMLWriter : public Writer {
+
 public:
   HTMLWriter(ostream &out) : Writer(out) {}
 
@@ -434,20 +547,19 @@ public:
     m_out << "</tbody>\n</table>\n</body>\n</html>\n";
   }
 
-  virtual void writeIndent() {
-    for (int i = 0; i < m_indent; i++) {
-      m_out << "  ";
-    }
-  }
 
-  virtual void writeHeader(const char *name) {
+  /**
+   * In XML/HTML there is no distinction between creating a list, and creating
+   * an object with keyed attributes. (unlike the JSON format).
+   */
+  virtual void beginObject(const char *name) {
     writeIndent();
     m_out << "<tr id='" << name << "'><td colspan=2>"
           << "<table><tbody><tr><th colspan=2>" << name << "</th></tr>\n";
     ++m_indent;
   }
 
-  virtual void writeFooter(const char *name) {
+  virtual void endObject(const char *name) {
     --m_indent;
     writeIndent();
     m_out << "</tbody></table></td></tr>\n";
@@ -630,38 +742,38 @@ void ServerStats::Report(string &output, Format format,
     }
 
     w->writeFileHeader();
-    w->writeHeader("stats");
+    w->beginObject("stats");
     for (list<TimeSlot*>::const_iterator iter = slots.begin();
          iter != slots.end(); ++iter) {
       TimeSlot *s = *iter;
       if (s->m_time) {
-        w->writeHeader("slot");
+        w->beginObject("slot");
         w->writeEntry("time", s->m_time * RuntimeOption::StatsSlotDuration);
       }
-      w->writeHeader("pages");
+      w->beginObject("pages");
       for (PageStatsMap::const_iterator piter = s->m_pages.begin();
            piter != s->m_pages.end(); ++piter) {
         const PageStats &ps = piter->second;
-        w->writeHeader("page");
+        w->beginObject("page");
         w->writeEntry("url", ps.m_url);
         w->writeEntry("code", ps.m_code);
         w->writeEntry("hit", ps.m_hit);
 
-        w->writeHeader("details");
+        w->beginObject("details");
         for (CounterMap::const_iterator viter =
                ps.m_values.begin(); viter != ps.m_values.end(); ++viter) {
           w->writeEntry(viter->first->getString().c_str(), viter->second);
         }
-        w->writeFooter("details");
+        w->endObject("details");
 
-        w->writeFooter("page");
+        w->endObject("page");
       }
-      w->writeFooter("pages");
+      w->endObject("pages");
       if (s->m_time) {
-        w->writeFooter("slot");
+        w->endObject("slot");
       }
     }
-    w->writeFooter("stats");
+    w->endObject("stats");
     w->writeFileFooter();
 
     delete w;
@@ -695,6 +807,21 @@ static std::string format_duration(int64 duration) {
   return ret;
 }
 
+/**
+ * Computes and returns a time difference in microseconds, or zero if the end
+ * time occurs before the start time.
+ *
+ * @return difference in time range, in millis
+ */
+static int compute_io_duration_micros(const timeval &timevalStart,
+        const timeval &timevalEnd) {
+    int64 ioDurationMicros = 0;
+    int64 sofarseconds = timevalEnd.tv_sec - timevalStart.tv_sec;
+    int64 sofarmicros = timevalEnd.tv_usec - timevalStart.tv_usec;
+    ioDurationMicros = sofarmicros + sofarseconds*1000*1000;
+    return ioDurationMicros > 0 ? ioDurationMicros : 0;
+}
+
 void ServerStats::ReportStatus(std::string &output, Format format) {
   ostringstream out;
   Writer *w;
@@ -710,9 +837,9 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
   time_t now = time(0);
 
   w->writeFileHeader();
-  w->writeHeader("status");
+  w->beginObject("status");
 
-  w->writeHeader("process");
+  w->beginObject("process");
   w->writeEntry("id", (int64)Process::GetProcessId());
   w->writeEntry("build", RuntimeOption::BuildId);
 
@@ -737,9 +864,9 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
   w->writeEntry("start", DateTime(HttpServer::StartTime).
                 toString(DateTime::DateFormatCookie).data());
   w->writeEntry("up", format_duration(now - HttpServer::StartTime));
-  w->writeFooter("process");
+  w->endObject("process");
 
-  w->writeHeader("threads");
+  w->beginList("threads");
   Lock lock(s_lock, false);
   for (unsigned int i = 0; i < s_loggers.size(); i++) {
     ThreadStatus &ts = s_loggers[i]->m_threadStatus;
@@ -748,7 +875,6 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
     if (ts.m_done > ts.m_start) {
       duration = ts.m_done - ts.m_start;
     }
-
     const char *mode = "(unknown)";
     switch (ts.m_mode) {
     case Idling:         mode = "idle";    break;
@@ -758,25 +884,32 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
     default: ASSERT(false);
     }
 
-    w->writeHeader("thread");
+    w->beginObject("thread");
     w->writeEntry("id", (int64)ts.m_threadId);
     w->writeEntry("req", ts.m_requestCount);
     w->writeEntry("bytes", ts.m_writeBytes);
     w->writeEntry("start", DateTime(ts.m_start).
                   toString(DateTime::DateFormatCookie).data());
     w->writeEntry("duration", format_duration(duration));
-    w->writeEntry("mode", mode);
-    if (ts.m_iostart) {
+    w->writeEntry("ioInProcess", ts.m_ioInProcess);
+
+    // Only in the event that we are currently in the process of an io, will
+    // we output the iostatus, and ioInProcessDuationMicros
+    if (ts.m_ioInProcess) {
+      timeval now;
+      gettimeofday(&now, NULL);
       w->writeEntry("iostatus", ts.m_iostatus);
-      w->writeEntry("ioduration", format_duration(now - ts.m_iostart));
+      w->writeEntry("ioInProcessDurationMicros",
+          compute_io_duration_micros(ts.m_ioStartTimeval, now));
     }
+    w->writeEntry("mode", mode);
     w->writeEntry("url", ts.m_url);
     w->writeEntry("client", ts.m_clientIP);
     w->writeEntry("vhost", ts.m_vhost);
-    w->writeFooter("thread");
+    w->endObject("thread");
   }
-  w->writeFooter("threads");
-  w->writeFooter("status");
+  w->endList("threads");
+  w->endObject("status");
   w->writeFileFooter();
 
   delete w;
@@ -787,7 +920,7 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
 
 ServerStats::ThreadStatus::ThreadStatus()
     : m_requestCount(0), m_writeBytes(0), m_start(0), m_done(0),
-      m_mode(Idling), m_iostart(0) {
+      m_mode(Idling), m_ioInProcess(false) {
   m_threadId = Process::GetThreadId();
   memset(m_iostatus, 0, sizeof(m_iostatus));
   memset(m_url, 0, sizeof(m_url));
@@ -918,9 +1051,15 @@ void ServerStats::setThreadIOStatus(const char *status) {
   if (status && *status) {
     safe_copy(m_threadStatus.m_iostatus, status,
               sizeof(m_threadStatus.m_iostatus));
-    m_threadStatus.m_iostart = time(NULL);
+
+    // Mark the current thread as being in the process of completing
+    // an io, and record the time that the io started.
+    m_threadStatus.m_ioInProcess = true;
+    gettimeofday(&(m_threadStatus.m_ioStartTimeval), NULL);
+
   } else {
-    m_threadStatus.m_iostart = 0;
+    m_threadStatus.m_ioInProcess = false;
+    // At this point, the ThreadStatus's m_ioStartTimeval is junk.
   }
 }
 

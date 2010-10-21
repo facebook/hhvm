@@ -19,6 +19,7 @@
 
 #include <util/lock.h>
 #include <util/thread_local.h>
+#include <time.h>
 #include <runtime/base/shared/shared_string.h>
 
 namespace HPHP {
@@ -144,7 +145,13 @@ private:
     time_t m_start;
     time_t m_done;
     ThreadMode m_mode;
-    time_t m_iostart;
+
+    // Whether or not an io is in process.
+    bool   m_ioInProcess;
+
+    // If an io is in process, the time that it started.
+    timeval m_ioStartTimeval;
+
     char m_iostatus[1024];
     char m_url[1024];
     char m_clientIP[256];

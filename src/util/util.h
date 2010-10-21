@@ -69,6 +69,12 @@ void syncdir(const std::string &dest, const std::string &src,
              bool keepSrc = false);
 
 /**
+ * Drop the cached pages associated with the file from the file system cache.
+ */
+int drop_cache(int fd, off_t len = 0);
+int drop_cache(FILE *f, off_t len = 0);
+
+/**
  * Copy srcfile to dstfile, return 0 on success, -1 otherwise
  */
 int copy(const char *srcfile, const char *dstfile);

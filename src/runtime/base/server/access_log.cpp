@@ -21,6 +21,8 @@
 #include <runtime/base/server/server_note.h>
 #include <runtime/base/server/request_uri.h>
 #include <util/process.h>
+#include <util/atomic.h>
+#include <util/util.h>
 
 namespace HPHP {
 using namespace std;
@@ -28,11 +30,11 @@ using namespace std;
 
 AccessLog::~AccessLog() {
   for (uint i = 0; i < m_output.size(); ++i) {
-    if (m_output[i]) {
+    if (m_output[i].log) {
       if (m_files[i].file[0] == '|') {
-        pclose(m_output[i]);
+        pclose(m_output[i].log);
       } else {
-        fclose(m_output[i]);
+        fclose(m_output[i].log);
       }
     }
   }
@@ -40,7 +42,7 @@ AccessLog::~AccessLog() {
 
 void AccessLog::init(const string &defaultFormat,
                      vector<AccessLogFileData> &files) {
-  Lock l(m_initLock);
+  Lock l(m_lock);
   if (m_initialized) return;
   m_initialized = true;
   m_defaultFormat = defaultFormat;
@@ -51,7 +53,7 @@ void AccessLog::init(const string &defaultFormat,
 void AccessLog::init(const string &format,
                      const string &symLink,
                      const string &file) {
-  Lock l(m_initLock);
+  Lock l(m_lock);
   if (m_initialized) return;
   m_initialized = true;
   m_defaultFormat = format;
@@ -89,7 +91,7 @@ void AccessLog::openFiles() {
       if (!fp) {
         Logger::Error("Could not open access log file %s", file.c_str());
       }
-      m_output.push_back(fp);
+      m_output.push_back(LogFileData(fp));
     }
   }
 }
@@ -98,29 +100,46 @@ void AccessLog::log(Transport *transport, const VirtualHost *vhost) {
   ASSERT(transport);
   if (!m_initialized) return;
 
-  FILE *threadLog = m_fGetThreadData()->log;
+  AccessLog::ThreadData *threadData = m_fGetThreadData();
+  FILE *threadLog = threadData->log;
   if (threadLog) {
-    writeLog(transport, vhost, threadLog, m_defaultFormat.c_str());
+    threadData->bytesWritten +=
+      writeLog(transport, vhost, threadLog, m_defaultFormat.c_str());
+    Logger::checkDropCache(threadData->bytesWritten,
+                           threadData->prevBytesWritten,
+                           threadLog);
   }
   if (Logger::UseCronolog) {
     for (uint i = 0; i < m_cronOutput.size(); ++i) {
       FILE *outFile = m_cronOutput[i].getOutputFile();
       if (!outFile) continue;
       const char *format = m_files[i].format.c_str();
-      writeLog(transport, vhost, outFile, format);
+      Cronolog &cronOutput = m_cronOutput[i];
+      int bytes = writeLog(transport, vhost, outFile, format);
+      atomic_add(cronOutput.m_bytesWritten, bytes);
+      Logger::checkDropCache(cronOutput.m_bytesWritten,
+                             cronOutput.m_prevBytesWritten,
+                             outFile);
     }
   } else {
     for (uint i = 0; i < m_output.size(); ++i) {
-      FILE *outFile = m_output[i];
+      LogFileData &output = m_output[i];
+      FILE *outFile = output.log;
       if (!outFile) continue;
       const char *format = m_files[i].format.c_str();
-      writeLog(transport, vhost, outFile, format);
+      int bytes = writeLog(transport, vhost, outFile, format);
+      atomic_add(output.bytesWritten, bytes);
+      if (m_files[i].file[0] != '|') {
+        Logger::checkDropCache(output.bytesWritten,
+                               output.prevBytesWritten,
+                               outFile);
+      }
     }
   }
 }
 
-void AccessLog::writeLog(Transport *transport, const VirtualHost *vhost,
-                         FILE *outFile, const char *format) {
+int AccessLog::writeLog(Transport *transport, const VirtualHost *vhost,
+                        FILE *outFile, const char *format) {
    char c;
    ostringstream out;
    while (c = *format++) {
@@ -141,8 +160,9 @@ void AccessLog::writeLog(Transport *transport, const VirtualHost *vhost,
    }
    out << endl;
    string output = out.str();
-   fprintf(outFile, "%s", output.c_str());
+   int nbytes = fprintf(outFile, "%s", output.c_str());
    fflush(outFile);
+   return nbytes;
 }
 
 bool AccessLog::parseConditions(const char* &format, int code) {

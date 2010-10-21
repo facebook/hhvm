@@ -443,6 +443,8 @@ void RuntimeOption::Load(Hdf &config) {
       LogFile = logger["File"].getString();
       LogFileSymLink = logger["SymLink"].getString();
     }
+    Logger::DropCacheChunkSize =
+      logger["DropCacheChunkSize"].getInt32(1 << 20);
 
     Hdf aggregator = logger["Aggregator"];
     Logger::UseLogAggregator = aggregator.getBool();

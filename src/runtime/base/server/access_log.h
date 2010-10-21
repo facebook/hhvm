@@ -25,23 +25,26 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-  class AccessLogFileData {
-  public:
-    AccessLogFileData(const std::string &fil,
-                      const std::string &lnk,
-                      const std::string &fmt) :
-      file(fil), symLink(lnk), format(fmt) {}
-    std::string file;
-    std::string symLink;
-    std::string format;
-  };
+class AccessLogFileData {
+public:
+  AccessLogFileData(const std::string &fil,
+                    const std::string &lnk,
+                    const std::string &fmt) :
+    file(fil), symLink(lnk), format(fmt) {}
+  std::string file;
+  std::string symLink;
+  std::string format;
+};
+
 class AccessLog {
 public:
   class ThreadData {
   public:
-    ThreadData() : log(NULL) {}
+    ThreadData() : log(NULL), bytesWritten(0), prevBytesWritten(0) {}
     FILE *log;
     int64 startTime;
+    int bytesWritten;
+    int prevBytesWritten;
   };
   typedef ThreadData* (*GetThreadDataFunc)();
   AccessLog(GetThreadDataFunc f) :
@@ -64,10 +67,10 @@ private:
                 Transport *transport, const VirtualHost *vhost,
                 const std::string &arg);
   void skipField(const char* &format);
-  void writeLog(Transport *transport, const VirtualHost *vhost,
-                FILE *outFile, const char *format);
+  int writeLog(Transport *transport, const VirtualHost *vhost,
+               FILE *outFile, const char *format);
 
-  std::vector<FILE*> m_output;
+  std::vector<LogFileData> m_output;
   std::vector<Cronolog> m_cronOutput;
   bool m_initialized;
   GetThreadDataFunc m_fGetThreadData;
@@ -75,7 +78,7 @@ private:
   std::vector<AccessLogFileData> m_files;
 
   void openFiles();
-  Mutex m_initLock;
+  Mutex m_lock;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

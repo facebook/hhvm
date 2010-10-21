@@ -287,12 +287,16 @@ static int force_sync(int fd) {
 #endif
 }
 
-static int drop_cache(int fd) {
+int Util::drop_cache(int fd, off_t len /* = 0 */) {
 #if defined(__FreeBSD__) || defined(__APPLE__)
   return 0;
 #else
-  return posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED);
+  return posix_fadvise(fd, 0, len, POSIX_FADV_DONTNEED);
 #endif
+}
+
+int Util::drop_cache(FILE *f, off_t len /* = 0 */) {
+  return drop_cache(fileno(f), len);
 }
 
 int Util::directCopy(const char *srcfile, const char *dstfile) {

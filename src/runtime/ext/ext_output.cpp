@@ -24,7 +24,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 static ReadWriteMutex s_loggers_mutex;
-typedef std::map<std::string, FILE*> LoggerMap;
+typedef std::map<std::string, LogFileData> LoggerMap;
 typedef std::map<std::string, Cronolog> CronLoggerMap;
 static LoggerMap s_loggers;
 static CronLoggerMap s_cronLoggers;
@@ -35,17 +35,25 @@ bool f_hphp_log(CStrRef filename, CStrRef message) {
   }
 
   FILE *f = NULL;
+  int *bytesWritten = NULL;
+  int *prevBytesWritten = NULL;
   {
     ReadLock lock(s_loggers_mutex);
     if (Logger::UseCronolog) {
       CronLoggerMap::iterator iter = s_cronLoggers.find(filename.data());
       if (iter != s_cronLoggers.end()) {
         f = iter->second.getOutputFile();
+        bytesWritten = &(iter->second.m_bytesWritten);
+        prevBytesWritten = &(iter->second.m_prevBytesWritten);
       }
     } else {
-      LoggerMap::const_iterator iter = s_loggers.find(filename.data());
+      LoggerMap::iterator iter = s_loggers.find(filename.data());
       if (iter != s_loggers.end()) {
-        f = iter->second;
+        f = iter->second.log;
+        if (filename.charAt(0) != '|') {
+          bytesWritten = &(iter->second.bytesWritten);
+          prevBytesWritten = &(iter->second.prevBytesWritten);
+        }
       }
     }
   }
@@ -55,6 +63,8 @@ bool f_hphp_log(CStrRef filename, CStrRef message) {
       CronLoggerMap::iterator iter = s_cronLoggers.find(filename.data());
       if (iter != s_cronLoggers.end()) {
         f = iter->second.getOutputFile();
+        bytesWritten = &(iter->second.m_bytesWritten);
+        prevBytesWritten = &(iter->second.m_prevBytesWritten);
       } else {
         Cronolog cl;
         if (strchr(filename.c_str(), '%')) {
@@ -67,11 +77,18 @@ bool f_hphp_log(CStrRef filename, CStrRef message) {
         if (f == NULL) {
           return false;
         }
+        iter = s_cronLoggers.find(filename.data());
+        bytesWritten = &(iter->second.m_bytesWritten);
+        prevBytesWritten = &(iter->second.m_prevBytesWritten);
       }
     } else {
-      LoggerMap::const_iterator iter = s_loggers.find(filename.data());
+      LoggerMap::iterator iter = s_loggers.find(filename.data());
       if (iter != s_loggers.end()) {
-        f = iter->second;
+        f = iter->second.log;
+        if (filename.charAt(0) != '|') {
+          bytesWritten = &(iter->second.bytesWritten);
+          prevBytesWritten = &(iter->second.prevBytesWritten);
+        }
       } else {
         if (filename.charAt(0) == '|') {
           f = popen(filename.data() + 1, "w");
@@ -81,13 +98,22 @@ bool f_hphp_log(CStrRef filename, CStrRef message) {
         if (f == NULL) {
           return false;
         }
-        s_loggers[filename.data()] = f;
+        s_loggers[filename.data()] = LogFileData(f);
+        if (filename.charAt(0) != '|') {
+          iter = s_loggers.find(filename.data());
+          bytesWritten = &(iter->second.bytesWritten);
+          prevBytesWritten = &(iter->second.prevBytesWritten);
+        }
       }
     }
   }
   bool ret = (fwrite(message.data(), message.size(), 1, f) == 1);
   if (ret) {
     fflush(f);
+    if (bytesWritten) {
+      atomic_add(*bytesWritten, message.size());
+      Logger::checkDropCache(*bytesWritten, *prevBytesWritten, f);
+    }
   }
   return ret;
 }

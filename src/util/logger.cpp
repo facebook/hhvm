@@ -22,6 +22,8 @@
 #include "util.h"
 #include "log_aggregator.h"
 #include "text_color.h"
+#include <util/atomic.h>
+#include <runtime/base/runtime_option.h>
 
 using namespace std;
 
@@ -53,9 +55,12 @@ IMPLEMENT_LOGLEVEL(Verbose);
 bool Logger::UseLogAggregator = false;
 bool Logger::UseLogFile = true;
 bool Logger::UseCronolog = true;
+int Logger::DropCacheChunkSize = (1 << 20);
 FILE *Logger::Output = NULL;
 Cronolog Logger::cronOutput;
 Logger::LogLevelType Logger::LogLevel = LogInfo;
+int Logger::bytesWritten = 0;
+int Logger::prevBytesWritten = 0;
 bool Logger::LogHeader = false;
 bool Logger::LogNativeStackTrace = true;
 std::string Logger::ExtraHeader;
@@ -153,17 +158,24 @@ void Logger::log(const std::string &msg, const StackTrace *stackTrace,
     }
     const char *escaped = escape ? EscapeString(msg) : msg.c_str();
     const char *ending = escapeMore ? "\\n" : "\n";
+    int bytes;
     if (f == stdout && Util::s_stderr_color) {
-      fprintf(f, "%s%s%s%s%s",
-              Util::s_stderr_color, sheader.c_str(), msg.c_str(), ending,
-              ANSI_COLOR_END);
+      bytes =
+        fprintf(f, "%s%s%s%s%s",
+                Util::s_stderr_color, sheader.c_str(), msg.c_str(), ending,
+                ANSI_COLOR_END);
     } else {
-      fprintf(f, "%s%s%s", sheader.c_str(), escaped, ending);
+      bytes = fprintf(f, "%s%s%s", sheader.c_str(), escaped, ending);
     }
+    atomic_add(bytesWritten, bytes);
     FILE *tf = threadData->log;
     if (tf) {
-      fprintf(tf, "%s%s%s", header.c_str(), escaped, ending);
+      threadData->bytesWritten +=
+        fprintf(tf, "%s%s%s", header.c_str(), escaped, ending);
       fflush(tf);
+      checkDropCache(threadData->bytesWritten,
+                     threadData->prevBytesWritten,
+                     tf);
     }
     if (threadData->hook) {
       threadData->hook(header.c_str(), escaped, ending, threadData->hookData);
@@ -173,6 +185,9 @@ void Logger::log(const std::string &msg, const StackTrace *stackTrace,
     }
 
     fflush(f);
+    if (UseCronolog || (Output && RuntimeOption::LogFile[0] != '|')) {
+      checkDropCache(bytesWritten, prevBytesWritten, f);
+    }
   }
 }
 
@@ -223,6 +238,16 @@ char *Logger::EscapeString(const std::string &msg) {
   }
   *target = 0;
   return new_str;
+}
+
+bool Logger::checkDropCache(int &bytesWritten, int &prevBytesWritten,
+                            FILE *f) {
+  if (bytesWritten - prevBytesWritten > Logger::DropCacheChunkSize) {
+    Util::drop_cache(f, (off_t)bytesWritten);
+    prevBytesWritten = bytesWritten;
+    return true;
+  }
+  return false;
 }
 
 bool Logger::SetThreadLog(const char *file) {

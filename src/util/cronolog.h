@@ -35,7 +35,9 @@ public:
     m_prevLinkName(NULL),
     m_timeOffset(0),
     m_nextPeriod(0),
-    m_file(NULL) {}
+    m_file(NULL),
+    m_bytesWritten(0),
+    m_prevBytesWritten(0) {}
 
   ~Cronolog() {
     if (m_file) fclose(m_file);
@@ -55,6 +57,8 @@ public:
   time_t m_timeOffset;
   time_t m_nextPeriod;
   FILE *m_file;
+  int m_bytesWritten;
+  int m_prevBytesWritten;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

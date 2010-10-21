@@ -27,6 +27,16 @@ namespace HPHP {
 
 class StackTrace;
 class Exception;
+
+class LogFileData {
+public:
+  LogFileData() : log(NULL), bytesWritten(0), prevBytesWritten(0) {}
+  LogFileData(FILE *f) : log(f), bytesWritten(0), prevBytesWritten(0) {}
+  FILE *log;
+  int bytesWritten;
+  int prevBytesWritten;
+};
+
 class Logger {
 public:
   enum LogLevelType {
@@ -40,10 +50,12 @@ public:
   static bool UseLogAggregator;
   static bool UseLogFile;
   static bool UseCronolog;
+  static int DropCacheChunkSize;
   static FILE *Output;
   static Cronolog cronOutput;
   static LogLevelType LogLevel;
-
+  static int bytesWritten;
+  static int prevBytesWritten;
   static bool LogHeader;
   static bool LogNativeStackTrace;
   static std::string ExtraHeader;
@@ -86,6 +98,9 @@ public:
     }
   }
 
+  static bool checkDropCache(int &bytesWritten, int &prevBytesWritten,
+                             FILE *f);
+
   virtual ~Logger() { }
 
 protected:
@@ -94,6 +109,8 @@ protected:
     ThreadData() : request(0), message(0), log(NULL), hook(NULL) {}
     int request;
     int message;
+    int bytesWritten;
+    int prevBytesWritten;
     FILE *log;
     PFUNC_LOG hook;
     void *hookData;
@@ -120,9 +137,9 @@ protected:
   static std::string GetHeader();
 
   static char *EscapeString(const std::string &msg);
-
 private:
   static Logger *s_logger;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

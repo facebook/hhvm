@@ -83,6 +83,7 @@ std::string RuntimeOption::ServerIP;
 std::string RuntimeOption::ServerPrimaryIP;
 int RuntimeOption::ServerPort;
 int RuntimeOption::ServerBacklog = 128;
+int RuntimeOption::ServerConnectionLimit = 0;
 int RuntimeOption::ServerThreadCount = 50;
 bool RuntimeOption::ServerThreadRoundRobin = false;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
@@ -526,6 +527,7 @@ void RuntimeOption::Load(Hdf &config) {
     ServerPrimaryIP = Util::GetPrimaryIP();
     ServerPort = server["Port"].getInt16(80);
     ServerBacklog = server["Backlog"].getInt16(128);
+    ServerConnectionLimit = server["ConnectionLimit"].getInt16(0);
     ServerThreadCount = server["ThreadCount"].getInt32(50);
     ServerThreadRoundRobin = server["ThreadRoundRobin"].getBool();
     ServerThreadDropCacheTimeoutSeconds =

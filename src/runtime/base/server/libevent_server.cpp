@@ -163,6 +163,7 @@ LibEventServer::LibEventServer(const std::string &address, int port,
   m_eventBase = event_base_new();
   m_server = evhttp_new(m_eventBase);
   m_server_ssl = NULL;
+  evhttp_set_connection_limit(m_server, RuntimeOption::ServerConnectionLimit);
   evhttp_set_gencb(m_server, on_request, this);
 #ifdef EVHTTP_PORTABLE_READ_LIMITING
   evhttp_set_read_limit(m_server, RuntimeOption::RequestBodyReadLimit);
@@ -298,6 +299,8 @@ bool LibEventServer::enableSSL(void *sslCTX, int port) {
     return false;
   }
   m_port_ssl = port;
+  evhttp_set_connection_limit(m_server_ssl,
+                              RuntimeOption::ServerConnectionLimit);
   evhttp_set_gencb(m_server_ssl, on_request, this);
   return true;
 #else

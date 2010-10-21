@@ -617,6 +617,8 @@ public:
                      bool overwrite = true);
   virtual int64 inc(CStrRef key, int64 step, bool &found);
   virtual bool cas(CStrRef key, int64 old, int64 val);
+  virtual bool exists(CStrRef key);
+
   virtual void prime(const std::vector<SharedStore::KeyValuePair> &vars);
   virtual SharedVariant* construct(litstr str, int len, CStrRef v,
                                    bool serialized) {
@@ -862,6 +864,44 @@ bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
  return true;
 }
 
+bool ConcurrentTableSharedStore::exists(CStrRef key) {
+ bool stats = RuntimeOption::EnableStats && RuntimeOption::EnableAPCStats;
+ const StoreValue *val;
+ ReadLock l(m_lock);
+ bool expired = false;
+ {
+   Map::const_accessor acc;
+   if (!m_vars.find(acc, key.data())) {
+     if (stats) ServerStats::Log("apc.miss", 1);
+     return false;
+   } else {
+     val = &acc->second;
+     if (val->expired()) {
+       // Because it only has a read lock on the data, deletion from
+       // expiration has to happen after the lock is released
+       expired = true;
+     } else {
+       // No need toLocal() here, avoiding the copy
+       if (RuntimeOption::EnableAPCSizeStats &&
+           RuntimeOption::EnableAPCSizeDetail &&
+           RuntimeOption::EnableAPCFetchStats) {
+         SharedStoreStats::onGet(key.get(), val->var);
+       }
+     }
+   }
+ }
+ if (expired) {
+   if (stats) {
+     ServerStats::Log("apc.miss", 1);
+   }
+   eraseImpl(key, true);
+   return false;
+ }
+ if (stats) {
+   ServerStats::Log("apc.hit", 1);
+ }
+ return true;
+}
 
 bool LfuTableSharedStore::get(CStrRef key, Variant &value) {
   class GetReader : public Map::AtomicReader {

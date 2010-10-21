@@ -53,6 +53,11 @@ public:
   bool erase(CStrRef key, bool expired = false);
   virtual int64 inc(CStrRef key, int64 step, bool &found) = 0;
   virtual bool cas(CStrRef key, int64 old, int64 val) = 0;
+  virtual bool exists(CStrRef key) {
+    // Default implementation does a copy
+    Variant tmp;
+    return get(key, tmp);
+  }
 
   // for priming only
   virtual SharedVariant* construct(litstr str, int len, CStrRef v,

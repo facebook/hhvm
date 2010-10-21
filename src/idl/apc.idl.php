@@ -457,6 +457,29 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "apc_exists",
+    'desc'   => "Checks if one ore more APC keys exist.",
+    'flags'  =>  HasDocComment | AllowIntercept,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "TRUE if the key exists, otherwise FALSE. If array is passed in, then an array is returned that contains all existing keys, or an empty array if none exist.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => Variant,
+        'desc'   => "The key to check existence. If an array is passed then each element is checked.",
+      ),
+      array(
+        'name'   => "cache_id",
+        'type'   => Int64,
+        'value'  => "0",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "apc_bin_dump",
     'desc'   => "Returns a binary dump of the given files and user variables from the APC cache. A NULL for files or user_vars signals a dump of every entry, whereas array() will dump nothing.",
     'flags'  =>  HasDocComment,

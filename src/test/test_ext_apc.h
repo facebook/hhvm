@@ -46,6 +46,7 @@ class TestExtApc : public TestCppExt {
   bool test_apc_bin_load();
   bool test_apc_bin_dumpfile();
   bool test_apc_bin_loadfile();
+  bool test_apc_exists();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

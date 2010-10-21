@@ -51,6 +51,7 @@ bool TestExtApc::RunTests(const std::string &which) {
   RUN_TEST(test_apc_bin_load);
   RUN_TEST(test_apc_bin_dumpfile);
   RUN_TEST(test_apc_bin_loadfile);
+  RUN_TEST(test_apc_exists);
 
   RuntimeOption::ApcUseSharedMemory = false;
   RuntimeOption::ApcTableType = RuntimeOption::ApcHashTable;
@@ -75,6 +76,7 @@ bool TestExtApc::RunTests(const std::string &which) {
   RUN_TEST(test_apc_bin_load);
   RUN_TEST(test_apc_bin_dumpfile);
   RUN_TEST(test_apc_bin_loadfile);
+  RUN_TEST(test_apc_exists);
 
   RuntimeOption::ApcTableType = RuntimeOption::ApcConcurrentTable;
   s_apc_store.reset();
@@ -98,6 +100,7 @@ bool TestExtApc::RunTests(const std::string &which) {
   RUN_TEST(test_apc_bin_load);
   RUN_TEST(test_apc_bin_dumpfile);
   RUN_TEST(test_apc_bin_loadfile);
+  RUN_TEST(test_apc_exists);
 
   s_apc_store.clear();
   RuntimeOption::ApcTableType = RuntimeOption::ApcHashTable;
@@ -122,6 +125,7 @@ bool TestExtApc::RunTests(const std::string &which) {
   RUN_TEST(test_apc_bin_load);
   RUN_TEST(test_apc_bin_dumpfile);
   RUN_TEST(test_apc_bin_loadfile);
+  RUN_TEST(test_apc_exists);
 
   return ret;
 }
@@ -375,4 +379,12 @@ bool TestExtApc::test_apc_bin_loadfile() {
     return Count(true);
   }
   return Count(false);
+}
+
+bool TestExtApc::test_apc_exists() {
+  f_apc_store("ts", "TestString");
+  VS(f_apc_exists("ts"), true);
+  VS(f_apc_exists("TestString"), false);
+  VS(f_apc_exists(CREATE_VECTOR2("ts", "TestString")), CREATE_VECTOR1("ts"));
+  return Count(true);
 }

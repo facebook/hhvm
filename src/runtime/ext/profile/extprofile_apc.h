@@ -100,6 +100,11 @@ inline bool x_apc_cas(CStrRef key, int64 old_cas, int64 new_cas, int64 cache_id 
   return f_apc_cas(key, old_cas, new_cas, cache_id);
 }
 
+inline Variant x_apc_exists(CVarRef key, int64 cache_id = 0) {
+  FUNCTION_INJECTION_BUILTIN(apc_exists);
+  return f_apc_exists(key, cache_id);
+}
+
 inline Variant x_apc_bin_dump(int64 cache_id = 0, CVarRef filter = null_variant) {
   FUNCTION_INJECTION_BUILTIN(apc_bin_dump);
   return f_apc_bin_dump(cache_id, filter);

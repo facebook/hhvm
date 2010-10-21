@@ -171,6 +171,34 @@ bool f_apc_cas(CStrRef key, int64 old_cas, int64 new_cas,
   return s_apc_store[cache_id].cas(key, old_cas, new_cas);
 }
 
+Variant f_apc_exists(CVarRef key, int64 cache_id /* = 0 */) {
+  if (!RuntimeOption::EnableApc) return false;
+
+  if (cache_id < 0 || cache_id >= MAX_SHARED_STORE) {
+    throw_invalid_argument("cache_id: %d", cache_id);
+    return false;
+  }
+
+  if (key.is(KindOfArray)) {
+    Array keys = key.toArray();
+    ArrayInit init(keys.size(), false);
+    for (ArrayIter iter(keys); iter; ++iter) {
+      Variant k = iter.second();
+      if (!k.isString()) {
+        throw_invalid_argument("apc key: (not a string)");
+        return false;
+      }
+      String strKey = k.toString();
+      if (s_apc_store[cache_id].exists(strKey)) {
+        init.set(strKey);
+      }
+    }
+    return init.create();
+  }
+
+  return s_apc_store[cache_id].exists(key.toString());
+}
+
 Variant f_apc_cache_info(int64 cache_id /* = 0 */, bool limited /* = false */) {
   return CREATE_MAP1("start_time", start_time());
 }

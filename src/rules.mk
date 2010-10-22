@@ -228,12 +228,9 @@ CPPFLAGS += \
   -isystem $(EXT_DIR)/jemalloc/include \
   -isystem $(EXT_DIR)/google-perftools/include \
   -isystem $(EXT_DIR)/libcap/include \
+  -isystem $(EXT_DIR)/libpng/include \
   -I $(PROJECT_ROOT)/src \
   -I $(PROJECT_ROOT)/src/system/gen \
-
-ifdef HPHP_DEV
-CPPFLAGS += -isystem $(EXT_DIR)/libpng/include
-endif
 
 ifdef GOOGLE_CPU_PROFILER
 GOOGLE_TOOLS = 1
@@ -482,12 +479,8 @@ LIBMEMCACHED_LIBS = $(EXT_DIR)/libmemcached/lib/libmemcached.a
 
 LIBCAP_LIBS = $(EXT_DIR)/libcap/lib64/libcap.a
 
-ifdef HPHP_DEV
 GD_LIBS = $(EXT_DIR)/gd/lib/libgd.a $(EXT_DIR)/libpng/lib/libpng.a \
 	-ljpeg -lfreetype -lfontconfig
-else
-GD_LIBS = $(EXT_DIR)/gd/lib/libgd.a -lpng -ljpeg -lfreetype -lfontconfig
-endif
 
 MOZILLA_LIBS = $(EXT_DIR)/mozilla/libmozutil_s.a \
                $(EXT_DIR)/mozilla/libexpat_s.a \

@@ -572,39 +572,8 @@ ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
 	$(LDAP_LIBS) $(READLINE_LIBS) $(LIBMEMCACHED_LIBS) $(ORACLE_LIBS) \
 	$(LIBCAP_LIBS) \
 
-LIB_PATHS = $(HPHP_LIB) \
-  $(HPHP_TEST_LIB_PATH) \
-  $(EXT_DIR)/libcurl/lib \
-  $(EXT_DIR)/mysql/lib/mysql \
-  $(EXT_DIR)/boost/lib \
-  $(EXT_DIR)/libmcc/lib \
-  $(EXT_DIR)/libmemcached/lib \
-  $(EXT_DIR)/gd/lib \
-  $(EXT_DIR)/iconv/lib \
-  $(EXT_DIR)/libevent/lib \
-  $(EXT_DIR)/libmbfl/lib \
-  $(EXT_DIR)/oniguruma/lib \
-  $(EXT_DIR)/google-perftools/lib \
-  $(EXT_DIR)/libunwind/lib \
-  $(EXT_DIR)/icu/lib \
-  $(EXT_DIR)/libch/lib \
-  $(EXT_DIR)/libafdt/lib \
-  $(EXT_DIR)/xhp/lib \
-  $(EXT_DIR)/binutils \
-  $(EXT_DIR)/libfbml/lib \
-  $(EXT_DIR)/mozilla \
-  $(EXT_DIR)/timelib/lib \
-  $(EXT_DIR)/sqlite/lib \
-  $(EXT_DIR)/tbb/lib \
-  $(EXT_DIR)/libfbi/lib \
-  $(EXT_DIR)/jemalloc/lib \
-  $(EXT_DIR)/readline/lib \
-  $(EXT_DIR)/ldap/lib \
-  $(EXT_DIR)/libxml2/lib \
-
-ifdef HPHP_DEV
-LIB_PATHS += $(EXT_DIR)/libpng/lib
-endif
+LIB_PATHS := $(HPHP_LIB) $(HPHP_TEST_LIB_PATH) $(EXT_DIR)/binutils \
+             $(sort $(foreach L,$(filter-out -%, $(ALL_LIBS)), $(dir $(L))))
 
 ###############################################################################
 # Dependencies

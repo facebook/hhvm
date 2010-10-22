@@ -263,7 +263,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     } else {
       m_value->outputCPP(cg, ar);
     }
-    cg_printf("); %s%d->advance();", Option::IterPrefix, iterId);
+    cg_printf(", true); %s%d->advance();", Option::IterPrefix, iterId);
   } else {
     if (passTemp) {
       cg_printf("ArrayIterPtr %s%d = %s%d.begin(",
@@ -272,8 +272,10 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       ClassScopePtr cls = ar->getClassScope();
       if (cls) {
         cg_printf("%sclass_name", Option::StaticPropertyPrefix);
+      } else {
+        cg_printf("null_string");
       }
-      cg_printf("); ");
+      cg_printf(", true); ");
       cg_printf("!%s%d->end(); %s%d->next()",
                 Option::IterPrefix, iterId,
                 Option::IterPrefix, iterId);
@@ -294,8 +296,10 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       ClassScopePtr cls = ar->getClassScope();
       if (cls) {
         cg_printf("%sclass_name", Option::StaticPropertyPrefix);
+      } else {
+        cg_printf("null_string");
       }
-      cg_printf("); ");
+      cg_printf(", true); ");
       if (isArray) {
         cg_printf("!%s%d.end(); ", Option::IterPrefix, iterId);
         cg_printf("++%s%d", Option::IterPrefix, iterId);

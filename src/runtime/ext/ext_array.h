@@ -276,21 +276,27 @@ inline int f_sizeof(CVarRef var, bool recursive = false) {
   return f_count(var, recursive);
 }
 inline Variant f_each(Variant array) {
+  array.array_iter_dirty_check();
   return array.array_iter_each();
 }
 inline Variant f_current(Variant array) {
+  array.array_iter_dirty_check();
   return array.array_iter_current();
 }
 inline Variant f_next(Variant array) {
+  array.array_iter_dirty_check();
   return array.array_iter_next();
 }
 inline Variant f_pos(Variant array) {
+  array.array_iter_dirty_check();
   return array.array_iter_current();
 }
 inline Variant f_prev(Variant array) {
+  array.array_iter_dirty_check();
   return array.array_iter_prev();
 }
 inline Variant f_reset(Variant array) {
+  array.array_iter_dirty_reset();
   return array.array_iter_reset();
 }
 inline Variant f_end(Variant array) {
@@ -304,6 +310,7 @@ inline bool f_in_array(CVarRef needle, CVarRef haystack, bool strict = false) {
   return toArray(haystack).valueExists(needle, strict);
 }
 inline Variant f_key(Variant array) {
+  array.array_iter_dirty_check();
   return array.array_iter_key();
 }
 

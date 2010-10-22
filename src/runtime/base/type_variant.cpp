@@ -664,6 +664,24 @@ Variant Variant::array_iter_each() {
   return null_variant;
 }
 
+void Variant::array_iter_dirty_set() const {
+  if (is(KindOfArray)) {
+    getArrayData()->iter_dirty_set();
+  }
+}
+
+void Variant::array_iter_dirty_reset() const {
+  if (is(KindOfArray)) {
+    getArrayData()->iter_dirty_reset();
+  }
+}
+
+void Variant::array_iter_dirty_check() const {
+  if (is(KindOfArray)) {
+    getArrayData()->iter_dirty_check();
+  }
+}
+
 inline DataType Variant::convertToNumeric(int64 *lval, double *dval) const {
   StringData *s = getStringData();
   ASSERT(s);
@@ -1402,8 +1420,10 @@ Variant Variant::operator--(int) {
 ///////////////////////////////////////////////////////////////////////////////
 // iterator functions
 
-ArrayIterPtr Variant::begin(CStrRef context /* = null_string */) const {
+ArrayIterPtr Variant::begin(CStrRef context /* = null_string */,
+                            bool setIterDirty /* = false */) const {
   if (is(KindOfArray)) {
+    if (setIterDirty) array_iter_dirty_set();
     return new ArrayIter(getArrayData());
   }
   if (is(KindOfObject)) {
@@ -1413,13 +1433,15 @@ ArrayIterPtr Variant::begin(CStrRef context /* = null_string */) const {
   return new ArrayIter(NULL);
 }
 
-MutableArrayIterPtr Variant::begin(Variant *key, Variant &val) {
+MutableArrayIterPtr Variant::begin(Variant *key, Variant &val,
+                                   bool setIterDirty /* = false */) {
   if (is(KindOfObject)) {
     return getObjectData()->begin(key, val);
   }
   // we are about to modify an array that has other weak references, so
   // we have to make a copy to preserve other instances
   if (is(KindOfArray)) {
+    if (setIterDirty) array_iter_dirty_set();
     ArrayData *arr = getArrayData();
     if (arr->getCount() > 1) {
       set(arr->copy());

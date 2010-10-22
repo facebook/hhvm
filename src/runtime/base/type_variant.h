@@ -376,9 +376,11 @@ class Variant {
   /**
    * Iterator functions. See array_iterator.h for end() and next().
    */
-  ArrayIterPtr begin(CStrRef context = null_string) const;
+  ArrayIterPtr begin(CStrRef context = null_string,
+                     bool setIterDirty = false) const;
   // used by generated code
-  MutableArrayIterPtr begin(Variant *key, Variant &val);
+  MutableArrayIterPtr begin(Variant *key, Variant &val,
+                            bool setIterDirty = false);
 
   // Mutable iteration requires the most escalation.
   void escalate(bool mutableIteration = false);
@@ -836,6 +838,13 @@ class Variant {
   Variant array_iter_end();
   Variant array_iter_key() const;
   Variant array_iter_each();
+
+  /**
+   * Purely for reset() missing error.
+   */
+  void array_iter_dirty_set() const;
+  void array_iter_dirty_reset() const;
+  void array_iter_dirty_check() const;
 
   /**
    * For C++ library users to write "var.cast<c_MyClass>()->mf_func()".

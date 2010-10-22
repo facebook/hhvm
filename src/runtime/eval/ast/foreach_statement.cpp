@@ -35,8 +35,8 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
   if (m_key) {
     TempExpressionList *texp = m_key->cast<TempExpressionList>();
     if (texp) {
-      for (ArrayIterPtr iter = map.begin(env.currentContext()); !iter->end();
-           iter->next()) {
+      for (ArrayIterPtr iter = map.begin(env.currentContext(), true);
+           !iter->end(); iter->next()) {
         {
           const Variant &value = iter->second();
           const Variant &key = iter->first();
@@ -48,8 +48,8 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
         EVAL_STMT_HANDLE_BREAK(m_body, env);
       }
     } else {
-      for (ArrayIterPtr iter = map.begin(env.currentContext()); !iter->end();
-           iter->next()) {
+      for (ArrayIterPtr iter = map.begin(env.currentContext(), true);
+           !iter->end(); iter->next()) {
         const Variant &value = iter->second();
         const Variant &key = iter->first();
         m_value->set(env, value);
@@ -59,8 +59,8 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
       }
     }
   } else {
-    for (ArrayIterPtr iter = map.begin(env.currentContext()); !iter->end();
-         iter->next()) {
+    for (ArrayIterPtr iter = map.begin(env.currentContext(), true);
+         !iter->end(); iter->next()) {
       m_value->set(env, iter->second());
       if (!m_body) continue;
       EVAL_STMT_HANDLE_BREAK(m_body, env);

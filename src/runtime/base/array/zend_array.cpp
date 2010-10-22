@@ -57,8 +57,8 @@ do {                                                                    \
   /* If there could be any strong iterators that are past the end, */   \
   /* we need to a pass and update these iterators to point to the */    \
   /* newly added element. */                                            \
-  if (m_siPastEnd) {                                                    \
-    m_siPastEnd = 0;                                                    \
+  if (m_flag & StrongIteratorPastEnd) {                                 \
+    m_flag &= ~StrongIteratorPastEnd;                                   \
     int sz = m_strongIterators.size();                                  \
     bool shouldWarn = false;                                            \
     for (int i = 0; i < sz; ++i) {                                      \
@@ -78,12 +78,12 @@ do {                                                                    \
 
 #define SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p)                   \
 do {                                                                    \
-  if (m_linear) {                                                       \
+  if (m_flag & LinearAllocated) {                                       \
     int nbytes = m_nTableSize * sizeof(Bucket *);                       \
     Bucket **t = (Bucket **)malloc(nbytes);                             \
     memcpy(t, m_arBuckets, nbytes);                                     \
     m_arBuckets = t;                                                    \
-    m_linear = 0;                                                       \
+    m_flag &= ~LinearAllocated;                                         \
   }                                                                     \
   m_arBuckets[nIndex] = (p);                                            \
 } while (0)
@@ -98,8 +98,7 @@ StaticEmptyZendArray StaticEmptyZendArray::s_theEmptyArray;
 
 ZendArray::ZendArray(uint nSize /* = 0 */) :
   m_nNumOfElements(0), m_nNextFreeElement(0),
-  m_pListHead(NULL), m_pListTail(NULL), m_arBuckets(NULL), m_siPastEnd(0),
-  m_linear(0) {
+  m_pListHead(NULL), m_pListTail(NULL), m_arBuckets(NULL), m_flag(0) {
 
   if (nSize >= 0x80000000) {
     m_nTableSize = 0x80000000; // prevent overflow
@@ -116,7 +115,7 @@ ZendArray::ZendArray(uint nSize /* = 0 */) :
 
 ZendArray::ZendArray(uint nSize, unsigned long n, Bucket *bkts[]) :
   m_nNumOfElements(nSize), m_nNextFreeElement(n),
-  m_pListHead(NULL), m_pListTail(NULL), m_siPastEnd(0), m_linear(false) {
+  m_pListHead(NULL), m_pListTail(NULL), m_flag(0) {
 
   if (nSize >= 0x80000000) {
     m_nTableSize = 0x80000000; // prevent overflow
@@ -146,13 +145,33 @@ ZendArray::~ZendArray() {
     p = p->pListNext;
     DELETE(Bucket)(q);
   }
-  if (!m_linear && m_arBuckets) {
+  if ((m_flag & LinearAllocated) == 0 && m_arBuckets) {
     free(m_arBuckets);
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // iterations
+
+void ZendArray::iter_dirty_set() const {
+  m_flag |= IterationDirty;
+}
+
+void ZendArray::iter_dirty_reset() const {
+  m_flag &= ~IterationDirty;
+}
+
+void ZendArray::iter_dirty_check() const {
+  if (RuntimeOption::EnableHipHopErrors && (m_flag & IterationDirty)) {
+    raise_notice("In PHP, mixing up foreach() and functional style array "
+                 "iteration by calling current(), each(), key(), value(), "
+                 "prev(), next() may lead to undefined behavior. In HipHop, "
+                 "this problem is less severe, but to avoid inconsistency "
+                 "between PHP and HipHop, please call reset() or end() "
+                 "after foreach and before calling any of those array "
+                 "iteration functions.");
+  }
+}
 
 ssize_t ZendArray::iter_begin() const {
   Bucket *p = m_pListHead;
@@ -516,9 +535,9 @@ void ZendArray::resize() {
   int curSize = m_nTableSize * sizeof(Bucket *);
   // No need to use calloc() or memset(), as rehash() is going to clear
   // m_arBuckets any way.
-  if (m_linear) {
+  if (m_flag & LinearAllocated) {
     m_arBuckets = (Bucket **)malloc(curSize << 1);
-    m_linear = 0;
+    m_flag &= ~LinearAllocated;
   } else {
     m_arBuckets = (Bucket **)realloc(m_arBuckets, curSize << 1);
   }
@@ -976,7 +995,7 @@ void ZendArray::erase(Bucket ** prev) {
         if (!(m_strongIterators[i]->primary)) {
           // Record that there is a strong iterator out there
           // that is past the end
-          m_siPastEnd = 1;
+          m_flag |= StrongIteratorPastEnd;
         }
       }
     }
@@ -992,12 +1011,12 @@ void ZendArray::erase(Bucket ** prev) {
 }
 
 void ZendArray::prepareBucketHeadsForWrite() {
-  if (m_linear) {
+  if (m_flag & LinearAllocated) {
     int nbytes = m_nTableSize * sizeof(Bucket *);
     Bucket **t = (Bucket **)malloc(nbytes);
     memcpy(t, m_arBuckets, nbytes);
     m_arBuckets = t;
-    m_linear = 0;
+    m_flag &= ~LinearAllocated;
   }
 }
 
@@ -1326,7 +1345,7 @@ void ZendArray::getFullPos(FullPos &pos) {
   if (!pos.primary) {
     // Record that there is a strong iterator out there
     // that is past the end
-    m_siPastEnd = 1;
+    m_flag |= StrongIteratorPastEnd;
   }
 }
 
@@ -1367,12 +1386,12 @@ void ZendArray::backup(LinearAllocator &allocator) {
 void ZendArray::restore(const char *&data) {
   m_arBuckets = (Bucket**)data;
   data += m_nTableSize * sizeof(Bucket *);
-  m_linear = 1;
+  m_flag |= LinearAllocated;
   m_strongIterators.m_data = NULL;
 }
 
 void ZendArray::sweep() {
-  if (!m_linear && m_arBuckets) {
+  if ((m_flag & LinearAllocated) == 0 && m_arBuckets) {
     free(m_arBuckets);
     m_arBuckets = NULL;
   }

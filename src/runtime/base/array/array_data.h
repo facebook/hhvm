@@ -206,6 +206,13 @@ class ArrayData : public Countable {
   virtual ssize_t iter_advance(ssize_t prev) const;
   virtual ssize_t iter_rewind(ssize_t prev) const;
 
+  /**
+   * Purely for reset() missing error.
+   */
+  virtual void iter_dirty_set() const {}
+  virtual void iter_dirty_reset() const {}
+  virtual void iter_dirty_check() const {}
+
   void newFullPos(FullPos &pos);
   void freeFullPos(FullPos &pos);
   virtual void getFullPos(FullPos &pos);

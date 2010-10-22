@@ -135,7 +135,11 @@ class Array : public SmartPtr<ArrayData> {
   /**
    * Iterator functions. See array_iterator.h for end() and next().
    */
-  ArrayIter begin(CStrRef context = null_string) const { return m_px;}
+  ArrayIter begin(CStrRef context = null_string,
+                  bool setIterDirty = false) const {
+    if (setIterDirty && m_px) m_px->iter_dirty_set();
+    return m_px;
+  }
 
   void escalate(bool mutableIteration = false);
 

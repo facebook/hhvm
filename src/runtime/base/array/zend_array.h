@@ -48,6 +48,10 @@ public:
   virtual ssize_t iter_advance(ssize_t prev) const;
   virtual ssize_t iter_rewind(ssize_t prev) const;
 
+  virtual void iter_dirty_set() const;
+  virtual void iter_dirty_reset() const;
+  virtual void iter_dirty_check() const;
+
   virtual Variant reset();
   virtual Variant prev();
   virtual Variant current() const;
@@ -157,6 +161,12 @@ public:
   ZendArray(uint nSize, unsigned long n, Bucket *bkts[]);
 
 private:
+  enum Flag {
+    LinearAllocated       = 1,
+    StrongIteratorPastEnd = 2,
+    IterationDirty        = 4,
+  };
+
   uint             m_nTableSize;
   uint             m_nTableMask;
   uint             m_nNumOfElements;
@@ -164,8 +174,7 @@ private:
   Bucket         * m_pListHead;
   Bucket         * m_pListTail;
   Bucket         **m_arBuckets;
-  char             m_siPastEnd;
-  char             m_linear;
+  mutable uint16   m_flag;
 
   Bucket *find(int64 h) const;
   Bucket *find(const char *k, int len, int64 prehash) const;

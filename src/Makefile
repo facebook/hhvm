@@ -51,4 +51,4 @@ INTERMEDIATE_DIRS += $(PROJECT_ROOT)/output_gd
 
 shared-lib-gd:
 	$(MAKE) OUTPUT_ROOT=output_gd OUTDIR_BY_TYPE= TLS_GD=1 DIRS_INCLUDED= $(ABS_PROJECT_ROOT)/output_gd/libhphp_runtime_gd.so
-	cp $(PROJECT_ROOT)/output_gd/libhphp_runtime_gd.so $(PROJECT_ROOT)/bin
+	cp $(PROJECT_ROOT)/output_gd/libhphp_runtime_gd.so $(LIB_DIR)

@@ -17,6 +17,7 @@
 #include <runtime/ext/ext_image.h>
 #include <runtime/ext/ext_file.h>
 #include <runtime/base/zend/zend_printf.h>
+#include <runtime/base/zend/zend_string.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/runtime_option.h>
 #include <gdfontt.h>  /* 1 Tiny font */
@@ -5175,29 +5176,6 @@ static const maker_note_type maker_note_array[] = {
     NULL, "OLYMP\x00\x01\x00", 8, 8, MN_ORDER_NORMAL, MN_OFFSET_NORMAL},
 };
 
-size_t php_strlcpy(char *dst, const char *src, size_t siz) {
-  char *d = dst;
-  const char *s = src;
-  size_t n = siz;
-
-  /* Copy as many bytes as will fit */
-  if (n != 0 && --n != 0) {
-    do {
-      if ((*d++ = *s++) == 0)
-        break;
-    } while (--n != 0);
-  }
-
-  /* Not enough room in dst, add NUL and traverse rest of src */
-  if (n == 0) {
-    if (siz != 0)
-      *d = '\0';    /* NUL-terminate dst */
-    while (*s++)
-      ;
-  }
-  return(s - src - 1);  /* count does not include NUL */
-}
-
 /* Get headername for tag_num or NULL if not defined */
 static char * exif_get_tagname(int tag_num, char *ret, int len,
                                tag_table_type tag_table) {
@@ -5207,7 +5185,7 @@ static char * exif_get_tagname(int tag_num, char *ret, int len,
   for (i = 0; (t = tag_table[i].Tag) != TAG_END_OF_LIST; i++) {
     if (t == tag_num) {
       if (ret && len)  {
-        php_strlcpy(ret, tag_table[i].Desc, abs(len));
+        string_copy(ret, tag_table[i].Desc, abs(len));
         if (len < 0) {
           memset(ret + strlen(ret), ' ', -len - strlen(ret) - 1);
           ret[-len - 1] = '\0';
@@ -5220,7 +5198,7 @@ static char * exif_get_tagname(int tag_num, char *ret, int len,
 
   if (ret && len) {
     snprintf(tmp, sizeof(tmp), "UndefinedTag:0x%04X", tag_num);
-    php_strlcpy(ret, tmp, abs(len));
+    string_copy(ret, tmp, abs(len));
     if (len < 0) {
       memset(ret + strlen(ret), ' ', -len - strlen(ret) - 1);
       ret[-len - 1] = '\0';

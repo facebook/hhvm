@@ -16,8 +16,574 @@
 */
 
 #include <runtime/ext/ext_imap.h>
+#include <runtime/base/zend/zend_string.h>
+#include <system/gen/php/classes/stdclass.h>
+#include <c-client.h> /* includes mail.h and rfc822.h */
+
+#define namespace namespace_
+#include <imap4r1.h>  /* location of c-client quota functions */
+#undef namespace
+
+using namespace std;
+
+#define PHP_EXPUNGE 32768
+#define PHP_IMAP_ADDRESS_SIZE_BUF 10
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+class ImapStream : public SweepableResourceData {
+public:
+  DECLARE_OBJECT_ALLOCATION(ImapStream);
+
+  ImapStream(MAILSTREAM *stream, int64 flag)
+      : m_stream(stream), m_flag(flag) {
+  }
+  ~ImapStream() {
+    close();
+  }
+
+  // overriding ResourceData
+  static StaticString s_class_name;
+  virtual CStrRef o_getClassName() const { return s_class_name; }
+
+  void close();
+
+  bool checkMsgNumber(int64 msgindex) {
+    if ((msgindex < 1) || ((unsigned) msgindex > m_stream->nmsgs)) {
+      Logger::Warning("Bad message number");
+      return false;
+    }
+    return true;
+  }
+
+  MAILSTREAM *m_stream;
+  int64 m_flag;
+};
+
+StaticString ImapStream::s_class_name("imap");
+IMPLEMENT_OBJECT_ALLOCATION(ImapStream);
+
+///////////////////////////////////////////////////////////////////////////////
+
+enum FolderListStyle {
+  FLIST_ARRAY,
+  FLIST_OBJECT
+};
+
+struct FOBJECTLIST {
+  SIZEDTEXT text;
+  int delimiter;
+  long attributes;
+  struct FOBJECTLIST *next;
+};
+
+struct ERRORLIST {
+  SIZEDTEXT text;
+  long errflg;
+  struct ERRORLIST *next;
+};
+static void mail_free_errorlist(ERRORLIST **errlist);
+
+struct MESSAGELIST {
+  unsigned long msgid;
+  struct MESSAGELIST *next;
+};
+
+class ImapRequestData : public RequestEventHandler {
+public:
+  virtual void requestInit() {
+    m_user.clear();
+    m_password.clear();
+
+    m_errorstack = NIL;
+    m_alertstack = NIL;
+    //m_gets_stream = NIL;
+  }
+  virtual void requestShutdown() {
+    if (m_errorstack != NIL) {
+      /* output any remaining errors at their original error level */
+      for (ERRORLIST *ecur = m_errorstack; ecur != NIL; ecur = ecur->next) {
+        Logger::Verbose("%s (errflg=%ld)", ecur->text.data, ecur->errflg);
+      }
+      mail_free_errorlist(&m_errorstack);
+      m_errorstack = NIL;
+    }
+
+    if (m_alertstack != NIL) {
+      /* output any remaining alerts at E_NOTICE level */
+      for (STRINGLIST *acur = m_alertstack; acur != NIL; acur = acur->next) {
+        Logger::Verbose("%s", acur->text.data);
+      }
+      mail_free_stringlist(&m_alertstack);
+      m_alertstack = NIL;
+    }
+  }
+
+  std::string m_user;
+  std::string m_password;
+
+  STRINGLIST  *m_alertstack;
+  ERRORLIST   *m_errorstack;
+
+  STRINGLIST  *m_folders;
+  STRINGLIST  *m_folders_tail;
+  STRINGLIST  *m_sfolders;
+  STRINGLIST  *m_sfolders_tail;
+  MESSAGELIST *m_messages;
+  MESSAGELIST *m_messages_tail;
+  FOBJECTLIST *m_folder_objects;
+  FOBJECTLIST *m_folder_objects_tail;
+  FOBJECTLIST *m_sfolder_objects;
+  FOBJECTLIST *m_sfolder_objects_tail;
+
+  FolderListStyle m_folderlist_style;
+  long m_status_flags;
+  unsigned long m_status_messages;
+  unsigned long m_status_recent;
+  unsigned long m_status_unseen;
+  unsigned long m_status_uidnext;
+  unsigned long m_status_uidvalidity;
+};
+IMPLEMENT_STATIC_REQUEST_LOCAL(ImapRequestData, s_imap_data);
+#define IMAPG(name) s_imap_data->m_ ## name
+
+///////////////////////////////////////////////////////////////////////////////
+
+static class imapExtension : public Extension {
+public:
+  imapExtension() : Extension("imap") {}
+} s_imap_extension;
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ImapStream::close() {
+  if (m_stream) {
+    mail_close_full(m_stream, m_flag);
+    IMAPG(user).clear();
+    IMAPG(password).clear();
+    m_stream = NULL;
+  }
+}
+
+/**
+ * Calculate string length based on imap's rfc822_cat function.
+ */
+static int _php_rfc822_len(char *str) {
+  if (!str || !*str) {
+    return 0;
+  }
+
+  /* strings with special characters will need to be quoted, as a safety
+   * measure we add 2 bytes for the quotes just in case.
+   */
+  int len = strlen(str) + 2;
+  char *p = str;
+
+  /* rfc822_cat() will escape all " and \ characters, therefor we need to
+   * increase our buffer length to account for these characters.
+   */
+  while ((p = strpbrk(p, "\\\""))) {
+    p++;
+    len++;
+  }
+
+  return len;
+}
+
+static int _php_imap_address_size (ADDRESS *addresslist) {
+  int ret=0, num_ent=0;
+
+  ADDRESS *tmp = addresslist;
+  if (tmp) {
+    do {
+      ret += _php_rfc822_len(tmp->personal);
+      ret += _php_rfc822_len(tmp->adl);
+      ret += _php_rfc822_len(tmp->mailbox);
+      ret += _php_rfc822_len(tmp->host);
+      num_ent++;
+    } while ((tmp = tmp->next));
+  }
+
+  /*
+   * rfc822_write_address_full() needs some extra space for '<>,', etc.
+   * for this perpouse we allocate additional PHP_IMAP_ADDRESS_SIZE_BUF bytes
+   * by default this buffer is 10 bytes long
+  */
+  ret += (ret) ? num_ent*PHP_IMAP_ADDRESS_SIZE_BUF : 0;
+
+  return ret;
+}
+
+static char *_php_rfc822_write_address(ADDRESS *addresslist) {
+  char address[SENDBUFLEN];
+  if (_php_imap_address_size(addresslist) >= SENDBUFLEN) {
+    Logger::Error("Address buffer overflow");
+    return NULL;
+  }
+  address[0] = 0;
+  rfc822_write_address(address, addresslist);
+  return strdup(address);
+}
+
+#define OBJ_SET_ENTRY(ret, obj, name, entry)                            \
+  if (obj->entry) ret.o_set(name, String((const char*)obj->entry, CopyString));
+
+static char* _php_imap_parse_address(ADDRESS *addresslist, Array &paddress) {
+  ADDRESS *addresstmp = addresslist;
+  char *fulladdress = _php_rfc822_write_address(addresstmp);
+  do {
+    Object tmpvals(NEW(c_stdClass)());
+    OBJ_SET_ENTRY(tmpvals, addresstmp, "personal", personal);
+    OBJ_SET_ENTRY(tmpvals, addresstmp, "adl",      adl);
+    OBJ_SET_ENTRY(tmpvals, addresstmp, "mailbox",  mailbox);
+    OBJ_SET_ENTRY(tmpvals, addresstmp, "host",     host);
+    paddress.append(tmpvals);
+  } while ((addresstmp = addresstmp->next));
+  return fulladdress;
+}
+
+static void set_address(Object &ret, const char *prop, ADDRESS *addr) {
+  if (addr) {
+    Array paddress(Array::Create());
+    char *fulladdress = _php_imap_parse_address(addr, paddress);
+    if (fulladdress) {
+      ret.o_set(String(prop) + "address", String(fulladdress, AttachString));
+    }
+    ret.o_set(prop, paddress);
+  }
+}
+
+static Object _php_make_header_object(ENVELOPE *en) {
+  Object ret(NEW(c_stdClass)());
+
+  OBJ_SET_ENTRY(ret, en, "remail",      remail);
+  OBJ_SET_ENTRY(ret, en, "date",        date);
+  OBJ_SET_ENTRY(ret, en, "Date",        date);
+  OBJ_SET_ENTRY(ret, en, "subject",     subject);
+  OBJ_SET_ENTRY(ret, en, "Subject",     subject);
+  OBJ_SET_ENTRY(ret, en, "in_reply_to", in_reply_to);
+  OBJ_SET_ENTRY(ret, en, "message_id",  message_id);
+  OBJ_SET_ENTRY(ret, en, "newsgroups",  newsgroups);
+  OBJ_SET_ENTRY(ret, en, "followup_to", followup_to);
+  OBJ_SET_ENTRY(ret, en, "references",  references);
+
+  set_address(ret, "to",          en->to);
+  set_address(ret, "from",        en->from);
+  set_address(ret, "cc",          en->cc);
+  set_address(ret, "bcc",         en->bcc);
+  set_address(ret, "reply_to",    en->reply_to);
+  set_address(ret, "sender",      en->sender);
+  set_address(ret, "return_path", en->return_path);
+
+  return ret;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// interfaces to C-client
+
+/* {{{ mail_newfolderobjectlist
+ *
+ * Mail instantiate FOBJECTLIST
+ * Returns: new FOBJECTLIST list
+ * Author: CJH
+ */
+static FOBJECTLIST *mail_newfolderobjectlist(void) {
+  return (FOBJECTLIST *)
+    memset(fs_get(sizeof(FOBJECTLIST)), 0, sizeof(FOBJECTLIST));
+}
+/* }}} */
+
+/* {{{ mail_free_foblist
+ *
+ * Mail garbage collect FOBJECTLIST
+ * Accepts: pointer to FOBJECTLIST pointer
+ * Author: CJH
+ */
+void mail_free_foblist(FOBJECTLIST **foblist, FOBJECTLIST **tail) {
+  FOBJECTLIST *cur, *next;
+  for (cur=*foblist, next=cur->next; cur; cur=next) {
+    next = cur->next;
+
+    if(cur->text.data)
+      fs_give((void **)&(cur->text.data));
+
+    fs_give((void **)&cur);
+  }
+
+  *tail = NIL;
+  *foblist = NIL;
+}
+/* }}} */
+
+/* {{{ mail_newerrorlist
+ *
+ * Mail instantiate ERRORLIST
+ * Returns: new ERRORLIST list
+ * Author: CJH
+ */
+static ERRORLIST *mail_newerrorlist(void) {
+  return (ERRORLIST *) memset(fs_get(sizeof(ERRORLIST)), 0, sizeof(ERRORLIST));
+}
+/* }}} */
+
+/* {{{ mail_free_errorlist
+ *
+ * Mail garbage collect FOBJECTLIST
+ * Accepts: pointer to FOBJECTLIST pointer
+ * Author: CJH
+ */
+static void mail_free_errorlist(ERRORLIST **errlist) {
+  if (*errlist) {    /* only free if exists */
+    if ((*errlist)->text.data) {
+      fs_give((void **) &(*errlist)->text.data);
+    }
+    mail_free_errorlist (&(*errlist)->next);
+    fs_give((void **) errlist);  /* return string to free storage */
+  }
+}
+/* }}} */
+
+/* {{{ mail_newmessagelist
+ *
+ * Mail instantiate MESSAGELIST
+ * Returns: new MESSAGELIST list
+ * Author: CJH
+ */
+static MESSAGELIST *mail_newmessagelist(void) {
+  return (MESSAGELIST *) memset(fs_get(sizeof(MESSAGELIST)), 0,
+                                sizeof(MESSAGELIST));
+}
+/* }}} */
+
+/* {{{ mail_free_messagelist
+ *
+ * Mail garbage collect MESSAGELIST
+ * Accepts: pointer to MESSAGELIST pointer
+ * Author: CJH
+ */
+void mail_free_messagelist(MESSAGELIST **msglist, MESSAGELIST **tail) {
+  MESSAGELIST *cur, *next;
+
+  for (cur = *msglist, next = cur->next; cur; cur = next) {
+    next = cur->next;
+    fs_give((void **)&cur);
+  }
+
+  *tail = NIL;
+  *msglist = NIL;
+}
+/* }}} */
+
+static int mm_strlen(unsigned char *str) {
+  return strlen((const char *)str);
+}
+
+static unsigned char *mm_cpystr(char *str) {
+  return (unsigned char *)cpystr(str);
+}
+
+extern "C" {
+
+void mm_searched(MAILSTREAM *stream, unsigned long number) {
+  MESSAGELIST *cur = NIL;
+  if (IMAPG(messages) == NIL) {
+    IMAPG(messages) = mail_newmessagelist();
+    IMAPG(messages)->msgid = number;
+    IMAPG(messages)->next = NIL;
+    IMAPG(messages_tail) = IMAPG(messages);
+  } else {
+    cur = IMAPG(messages_tail);
+    cur->next = mail_newmessagelist();
+    cur = cur->next;
+    cur->msgid = number;
+    cur->next = NIL;
+    IMAPG(messages_tail) = cur;
+  }
+}
+
+void mm_exists(MAILSTREAM *stream, unsigned long number) {}
+void mm_expunged(MAILSTREAM *stream, unsigned long number) {}
+void mm_flags(MAILSTREAM *stream, unsigned long number) {}
+
+/* Author: CJH */
+void mm_notify(MAILSTREAM *stream, char *str, long errflg) {
+  STRINGLIST *cur = NIL;
+  if (strncmp(str, "[ALERT] ", 8) == 0) {
+    if (IMAPG(alertstack) == NIL) {
+      IMAPG(alertstack) = mail_newstringlist();
+      IMAPG(alertstack)->text.size =
+        mm_strlen((IMAPG(alertstack)->text.data = mm_cpystr(str)));
+      IMAPG(alertstack)->next = NIL;
+    } else {
+      cur = IMAPG(alertstack);
+      while (cur->next != NIL) {
+        cur = cur->next;
+      }
+      cur->next = mail_newstringlist ();
+      cur = cur->next;
+      cur->text.size = mm_strlen(cur->text.data = mm_cpystr(str));
+      cur->next = NIL;
+    }
+  }
+}
+
+void mm_list(MAILSTREAM *stream, int delimiter, char *mailbox,
+             long attributes) {
+  STRINGLIST *cur=NIL;
+  FOBJECTLIST *ocur=NIL;
+
+  if (IMAPG(folderlist_style) == FLIST_OBJECT) {
+    /* build up a the new array of objects */
+    /* Author: CJH */
+    if (IMAPG(folder_objects) == NIL) {
+      IMAPG(folder_objects) = mail_newfolderobjectlist();
+      IMAPG(folder_objects)->text.size =
+        mm_strlen(IMAPG(folder_objects)->text.data=mm_cpystr(mailbox));
+      IMAPG(folder_objects)->delimiter = delimiter;
+      IMAPG(folder_objects)->attributes = attributes;
+      IMAPG(folder_objects)->next = NIL;
+      IMAPG(folder_objects_tail) = IMAPG(folder_objects);
+    } else {
+      ocur=IMAPG(folder_objects_tail);
+      ocur->next=mail_newfolderobjectlist();
+      ocur=ocur->next;
+      ocur->text.size = mm_strlen(ocur->text.data = mm_cpystr(mailbox));
+      ocur->delimiter = delimiter;
+      ocur->attributes = attributes;
+      ocur->next = NIL;
+      IMAPG(folder_objects_tail) = ocur;
+    }
+
+  } else {
+    /* build the old IMAPG(folders) variable to allow old
+       imap_listmailbox() to work */
+    if (!(attributes & LATT_NOSELECT)) {
+      if (IMAPG(folders) == NIL) {
+        IMAPG(folders)=mail_newstringlist();
+        IMAPG(folders)->text.size =
+          mm_strlen(IMAPG(folders)->text.data=mm_cpystr(mailbox));
+        IMAPG(folders)->next=NIL;
+        IMAPG(folders_tail) = IMAPG(folders);
+      } else {
+        cur=IMAPG(folders_tail);
+        cur->next=mail_newstringlist ();
+        cur=cur->next;
+        cur->text.size = mm_strlen (cur->text.data = mm_cpystr (mailbox));
+        cur->next = NIL;
+        IMAPG(folders_tail) = cur;
+      }
+    }
+  }
+}
+
+void mm_lsub(MAILSTREAM *stream, int delimiter, char *mailbox,
+             long attributes) {
+  STRINGLIST *cur=NIL;
+  FOBJECTLIST *ocur=NIL;
+
+  if (IMAPG(folderlist_style) == FLIST_OBJECT) {
+    /* build the array of objects */
+    /* Author: CJH */
+    if (IMAPG(sfolder_objects) == NIL) {
+      IMAPG(sfolder_objects) = mail_newfolderobjectlist();
+      IMAPG(sfolder_objects)->text.size =
+        mm_strlen(IMAPG(sfolder_objects)->text.data=mm_cpystr(mailbox));
+      IMAPG(sfolder_objects)->delimiter = delimiter;
+      IMAPG(sfolder_objects)->attributes = attributes;
+      IMAPG(sfolder_objects)->next = NIL;
+      IMAPG(sfolder_objects_tail) = IMAPG(sfolder_objects);
+    } else {
+      ocur=IMAPG(sfolder_objects_tail);
+      ocur->next=mail_newfolderobjectlist();
+      ocur=ocur->next;
+      ocur->text.size=mm_strlen(ocur->text.data = mm_cpystr(mailbox));
+      ocur->delimiter = delimiter;
+      ocur->attributes = attributes;
+      ocur->next = NIL;
+      IMAPG(sfolder_objects_tail) = ocur;
+    }
+  } else {
+    /* build the old simple array for imap_listsubscribed() */
+    if (IMAPG(sfolders) == NIL) {
+      IMAPG(sfolders)=mail_newstringlist();
+      IMAPG(sfolders)->text.size =
+        mm_strlen(IMAPG(sfolders)->text.data=mm_cpystr(mailbox));
+      IMAPG(sfolders)->next=NIL;
+      IMAPG(sfolders_tail) = IMAPG(sfolders);
+    } else {
+      cur=IMAPG(sfolders_tail);
+      cur->next=mail_newstringlist ();
+      cur=cur->next;
+      cur->text.size = mm_strlen (cur->text.data = mm_cpystr (mailbox));
+      cur->next = NIL;
+      IMAPG(sfolders_tail) = cur;
+    }
+  }
+}
+
+void mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status) {
+  IMAPG(status_flags)=status->flags;
+  if (IMAPG(status_flags) & SA_MESSAGES) {
+    IMAPG(status_messages)=status->messages;
+  }
+  if (IMAPG(status_flags) & SA_RECENT) {
+    IMAPG(status_recent)=status->recent;
+  }
+  if (IMAPG(status_flags) & SA_UNSEEN) {
+    IMAPG(status_unseen)=status->unseen;
+  }
+  if (IMAPG(status_flags) & SA_UIDNEXT) {
+    IMAPG(status_uidnext)=status->uidnext;
+  }
+  if (IMAPG(status_flags) & SA_UIDVALIDITY) {
+    IMAPG(status_uidvalidity)=status->uidvalidity;
+  }
+}
+
+void mm_log(char *str, long errflg) {
+  ERRORLIST *cur = NIL;
+
+  /* Author: CJH */
+  if (errflg != NIL) { /* CJH: maybe put these into a more comprehensive
+                          log for debugging purposes? */
+    if (IMAPG(errorstack) == NIL) {
+      IMAPG(errorstack) = mail_newerrorlist();
+      IMAPG(errorstack)->text.size =
+        mm_strlen(IMAPG(errorstack)->text.data = mm_cpystr(str));
+      IMAPG(errorstack)->errflg = errflg;
+      IMAPG(errorstack)->next = NIL;
+    } else {
+      cur = IMAPG(errorstack);
+      while (cur->next != NIL) {
+        cur = cur->next;
+      }
+      cur->next = mail_newerrorlist();
+      cur = cur->next;
+      cur->text.size = mm_strlen(cur->text.data = mm_cpystr(str));
+      cur->errflg = errflg;
+      cur->next = NIL;
+    }
+  }
+}
+
+void mm_login(NETMBX *mb, char *user, char *pwd, long trial) {
+  if (*mb->user) {
+    string_copy(user, mb->user, MAILTMPLEN);
+  } else {
+    IMAPG(user) = user;
+  }
+  IMAPG(password) = pwd;
+}
+
+void mm_dlog(char *str) {}
+void mm_critical(MAILSTREAM *stream) {}
+void mm_nocritical(MAILSTREAM *stream) {}
+long mm_diskerror(MAILSTREAM *stream, long errcode, long serious) { return 1;}
+void mm_fatal(char *str) {}
+
+} // extern "C"
+
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_imap_8bit(CStrRef str) {
@@ -28,7 +594,8 @@ Variant f_imap_alerts() {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_append(CObjRef imap_stream, CStrRef mailbox, CStrRef message, CStrRef options /* = "" */) {
+bool f_imap_append(CObjRef imap_stream, CStrRef mailbox, CStrRef message,
+                   CStrRef options /* = "" */) {
   throw NotImplementedException(__func__);
 }
 
@@ -40,11 +607,13 @@ Variant f_imap_binary(CStrRef str) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_body(CObjRef imap_stream, int64 msg_number, int64 options /* = 0 */) {
+Variant f_imap_body(CObjRef imap_stream, int64 msg_number,
+                    int64 options /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_bodystruct(CObjRef imap_stream, int64 msg_number, CStrRef section) {
+Variant f_imap_bodystruct(CObjRef imap_stream, int64 msg_number,
+                          CStrRef section) {
   throw NotImplementedException(__func__);
 }
 
@@ -52,19 +621,31 @@ Variant f_imap_check(CObjRef imap_stream) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_clearflag_full(CObjRef imap_stream, CStrRef sequence, CStrRef flag, int64 options /* = 0 */) {
+bool f_imap_clearflag_full(CObjRef imap_stream, CStrRef sequence, CStrRef flag,
+                           int64 options /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
 bool f_imap_close(CObjRef imap_stream, int64 flag /* = 0 */) {
-  throw NotImplementedException(__func__);
+  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  if (flag) {
+    if (flag != PHP_EXPUNGE) {
+      Logger::Warning("invalid value for the flags parameter");
+      return false;
+    }
+    flag = CL_EXPUNGE;
+  }
+  obj->m_flag = flag;
+  obj->close();
+  return true;
 }
 
 bool f_imap_createmailbox(CObjRef imap_stream, CStrRef mailbox) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_delete(CObjRef imap_stream, CStrRef msg_number, int64 options /* = 0 */) {
+bool f_imap_delete(CObjRef imap_stream, CStrRef msg_number,
+                   int64 options /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
@@ -80,19 +661,102 @@ bool f_imap_expunge(CObjRef imap_stream) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_fetch_overview(CObjRef imap_stream, CStrRef sequence, int64 options /* = 0 */) {
+Variant f_imap_fetch_overview(CObjRef imap_stream, CStrRef sequence,
+                              int64 options /* = 0 */) {
+  if (options && options != FT_UID) {
+    Logger::Warning("invalid value for the options parameter");
+    return false;
+  }
+
+  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+
+  Array ret(Array::Create());
+
+  long status = (options & FT_UID)
+    ? mail_uid_sequence(obj->m_stream, (unsigned char *)sequence.data())
+    : mail_sequence(obj->m_stream, (unsigned char *)sequence.data());
+
+  if (status) {
+    MESSAGECACHE *elt;
+    ENVELOPE *env;
+    for (unsigned long i = 1; i <= obj->m_stream->nmsgs; i++) {
+      if (((elt = mail_elt(obj->m_stream, i))->sequence) &&
+          (env = mail_fetch_structure(obj->m_stream, i, NIL, NIL))) {
+
+        Object myoverview(NEW(c_stdClass)());
+        OBJ_SET_ENTRY(myoverview, env, "subject", subject);
+
+        if (env->from) {
+          env->from->next = NULL;
+          char *address = _php_rfc822_write_address(env->from);
+          if (address) {
+            myoverview.o_set("from", String(address, AttachString));
+          }
+        }
+        if (env->to) {
+          env->to->next = NULL;
+          char *address = _php_rfc822_write_address(env->to);
+          if (address) {
+            myoverview.o_set("to", String(address, AttachString));
+          }
+        }
+
+        OBJ_SET_ENTRY(myoverview, env, "date",        date);
+        OBJ_SET_ENTRY(myoverview, env, "message_id",  message_id);
+        OBJ_SET_ENTRY(myoverview, env, "references",  references);
+        OBJ_SET_ENTRY(myoverview, env, "in_reply_to", in_reply_to);
+
+        myoverview.o_set("size",     (int64)elt->rfc822_size);
+        myoverview.o_set("uid",      (int64)mail_uid(obj->m_stream, i));
+        myoverview.o_set("msgno",    (int64)i);
+        myoverview.o_set("recent",   (int64)elt->recent);
+        myoverview.o_set("flagged",  (int64)elt->flagged);
+        myoverview.o_set("answered", (int64)elt->answered);
+        myoverview.o_set("deleted",  (int64)elt->deleted);
+        myoverview.o_set("seen",     (int64)elt->seen);
+        myoverview.o_set("draft",    (int64)elt->draft);
+
+        ret.append(myoverview);
+      }
+    }
+  }
+
+  return ret;
+}
+
+Variant f_imap_fetchbody(CObjRef imap_stream, int64 msg_number,
+                         CStrRef section, int64 options /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_fetchbody(CObjRef imap_stream, int64 msg_number, CStrRef section, int64 options /* = 0 */) {
-  throw NotImplementedException(__func__);
+Variant f_imap_fetchheader(CObjRef imap_stream, int64 msg_number,
+                           int64 options /* = 0 */) {
+  if (options && ((options & ~(FT_UID|FT_INTERNAL|FT_PREFETCHTEXT)) != 0)) {
+    Logger::Warning("invalid value for the options parameter");
+    return false;
+  }
+
+  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  int msgindex;
+  if (options & FT_UID) {
+    /* This should be cached; if it causes an extra RTT to the
+       IMAP server, then that's the price we pay for making sure
+       we don't crash. */
+    msgindex = mail_msgno(obj->m_stream, msg_number);
+  } else {
+    msgindex = msg_number;
+  }
+
+  if (!obj->checkMsgNumber(msgindex)) {
+    return false;
+  }
+
+  return String(mail_fetchheader_full(obj->m_stream, msgindex, NIL, NIL,
+                                      (options ? options : NIL)), CopyString);
 }
 
-Variant f_imap_fetchheader(CObjRef imap_stream, int64 msg_number, int64 options /* = 0 */) {
-  throw NotImplementedException(__func__);
-}
-
-Variant f_imap_fetchstructure(CObjRef imap_stream, int64 msg_number, int64 options /* = 0 */) {
+Variant f_imap_fetchstructure(CObjRef imap_stream, int64 msg_number,
+                              int64 options /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
@@ -112,20 +776,83 @@ Variant f_imap_getacl(CObjRef imap_stream, CStrRef mailbox) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_getmailboxes(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
+Variant f_imap_getmailboxes(CObjRef imap_stream, CStrRef ref,
+                            CStrRef pattern) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_getsubscribed(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
+Variant f_imap_getsubscribed(CObjRef imap_stream, CStrRef ref,
+                             CStrRef pattern) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_header(CObjRef imap_stream, int64 msg_number, int64 fromlength /* = 0 */, int64 subjectlength /* = 0 */, CStrRef defaulthost /* = "" */) {
+Variant f_imap_header(CObjRef imap_stream, int64 msg_number,
+                      int64 fromlength /* = 0 */,
+                      int64 subjectlength /* = 0 */,
+                      CStrRef defaulthost /* = "" */) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_headerinfo(CObjRef imap_stream, int64 msg_number, int64 fromlength /* = 0 */, int64 subjectlength /* = 0 */, CStrRef defaulthost /* = "" */) {
-  throw NotImplementedException(__func__);
+Variant f_imap_headerinfo(CObjRef imap_stream, int64 msg_number,
+                          int64 fromlength /* = 0 */,
+                          int64 subjectlength /* = 0 */,
+                          CStrRef defaulthost /* = "" */) {
+  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  if (fromlength < 0 || fromlength > MAILTMPLEN) {
+    Logger::Warning("From length has to be between 0 and %d", MAILTMPLEN);
+    return false;
+  }
+  if (subjectlength < 0 || subjectlength > MAILTMPLEN) {
+    Logger::Warning("Subject length has to be between 0 and %d", MAILTMPLEN);
+    return false;
+  }
+  if (!obj->checkMsgNumber(msg_number)) {
+    return false;
+  }
+  if (!mail_fetchstructure(obj->m_stream, msg_number, NIL)) {
+    return false;
+  }
+
+  MESSAGECACHE *cache = mail_elt(obj->m_stream, msg_number);
+  ENVELOPE *en = mail_fetchenvelope(obj->m_stream, msg_number);
+
+  /* call a function to parse all the text, so that we can use the
+     same function to parse text from other sources */
+  Object ret = _php_make_header_object(en);
+
+  /* now run through properties that are only going to be returned
+     from a server, not text headers */
+  ret.o_set("Recent",   cache->recent ? (cache->seen ? "R": "N") : " ");
+  ret.o_set("Unseen",   (cache->recent | cache->seen) ? " " : "U");
+  ret.o_set("Flagged",  cache->flagged  ? "F" : " ");
+  ret.o_set("Answered", cache->answered ? "A" : " ");
+  ret.o_set("Deleted",  cache->deleted  ? "D" : " ");
+  ret.o_set("Draft",    cache->draft    ? "X" : " ");
+
+  char dummy[2000], fulladdress[MAILTMPLEN + 1];
+  snprintf(dummy, sizeof(dummy), "%4ld", cache->msgno);
+  ret.o_set("Msgno", String(dummy, CopyString));
+
+  mail_date(dummy, cache);
+  ret.o_set("MailDate", String(dummy, CopyString));
+
+  snprintf(dummy, sizeof(dummy), "%ld", cache->rfc822_size);
+  ret.o_set("Size", String(dummy, CopyString));
+
+  ret.o_set("udate", (int64)mail_longdate(cache));
+
+  if (en->from && fromlength) {
+    fulladdress[0] = 0x00;
+    mail_fetchfrom(fulladdress, obj->m_stream, msg_number, fromlength);
+    ret.o_set("fetchfrom", String(fulladdress, CopyString));
+  }
+  if (en->subject && subjectlength) {
+    fulladdress[0] = 0x00;
+    mail_fetchsubject(fulladdress, obj->m_stream, msg_number, subjectlength);
+    ret.o_set("fetchsubject", String(fulladdress, CopyString));
+  }
+
+  return ret;
 }
 
 Variant f_imap_headers(CObjRef imap_stream) {
@@ -133,22 +860,50 @@ Variant f_imap_headers(CObjRef imap_stream) {
 }
 
 Variant f_imap_last_error() {
-  throw NotImplementedException(__func__);
+  if (IMAPG(errorstack) == NIL) {
+    return false;
+  }
+  for (ERRORLIST *cur = IMAPG(errorstack); cur != NIL;
+       cur = cur->next) {
+    if (cur->next == NIL) {
+      return String((const char *)cur->text.data, CopyString);
+    }
+  }
+  return null;
 }
 
 Variant f_imap_list(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
-  throw NotImplementedException(__func__);
+  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+
+  /* set flag for normal, old mailbox list */
+  IMAPG(folderlist_style) = FLIST_ARRAY;
+
+  IMAPG(folders) = IMAPG(folders_tail) = NIL;
+  mail_list(obj->m_stream, (char*)ref.data(), (char*)pattern.data());
+  if (IMAPG(folders) == NIL) {
+    return false;
+  }
+
+  Array ret(Array::Create());
+  for (STRINGLIST *cur = IMAPG(folders); cur != NIL; cur = cur->next) {
+    ret.append(String((const char *)cur->text.data, CopyString));
+  }
+  mail_free_stringlist(&IMAPG(folders));
+  IMAPG(folders) = IMAPG(folders_tail) = NIL;
+  return ret;
 }
 
 Variant f_imap_listmailbox(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_listscan(CObjRef imap_stream, CStrRef ref, CStrRef pattern, CStrRef content) {
+Variant f_imap_listscan(CObjRef imap_stream, CStrRef ref, CStrRef pattern,
+                        CStrRef content) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_listsubscribed(CObjRef imap_stream, CStrRef ref, CStrRef pattern) {
+Variant f_imap_listsubscribed(CObjRef imap_stream, CStrRef ref,
+                              CStrRef pattern) {
   throw NotImplementedException(__func__);
 }
 
@@ -160,15 +915,20 @@ Variant f_imap_mail_compose(CArrRef envelope, CArrRef body) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_mail_copy(CObjRef imap_stream, CStrRef msglist, CStrRef mailbox, int64 options /* = 0 */) {
+bool f_imap_mail_copy(CObjRef imap_stream, CStrRef msglist, CStrRef mailbox,
+                      int64 options /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_mail_move(CObjRef imap_stream, CStrRef msglist, CStrRef mailbox, int64 options /* = 0 */) {
+bool f_imap_mail_move(CObjRef imap_stream, CStrRef msglist, CStrRef mailbox,
+                      int64 options /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_mail(CStrRef to, CStrRef subject, CStrRef message, CStrRef additional_headers /* = "" */, CStrRef cc /* = "" */, CStrRef bcc /* = "" */, CStrRef rpath /* = "" */) {
+bool f_imap_mail(CStrRef to, CStrRef subject, CStrRef message,
+                 CStrRef additional_headers /* = "" */,
+                 CStrRef cc /* = "" */, CStrRef bcc /* = "" */,
+                 CStrRef rpath /* = "" */) {
   throw NotImplementedException(__func__);
 }
 
@@ -185,15 +945,41 @@ Variant f_imap_msgno(CObjRef imap_stream, int64 uid) {
 }
 
 Variant f_imap_num_msg(CObjRef imap_stream) {
-  throw NotImplementedException(__func__);
+  return (int64)imap_stream.getTyped<ImapStream>()->m_stream->nmsgs;
 }
 
 Variant f_imap_num_recent(CObjRef imap_stream) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_open(CStrRef mailbox, CStrRef username, CStrRef password, int64 options /* = 0 */, int64 retries /* = 0 */) {
-  throw NotImplementedException(__func__);
+Variant f_imap_open(CStrRef mailbox, CStrRef username, CStrRef password,
+                    int64 options /* = 0 */, int64 retries /* = 0 */) {
+  String filename = mailbox;
+  if (filename[0] != '{') {
+    filename = File::TranslatePath(filename);
+    if (filename.empty()) {
+      return false;
+    }
+  }
+
+  if (retries < 0) {
+    Logger::Warning("Retries must be greater or equal to 0");
+  } else {
+    mail_parameters(NIL, SET_MAXLOGINTRIALS, (void *) retries);
+  }
+
+  IMAPG(user)     = string(username.data(), username.size());
+  IMAPG(password) = string(password.data(), password.size());
+
+  MAILSTREAM *stream = mail_open(NIL, (char*)filename.data(), options);
+  if (stream == NIL) {
+    Logger::Warning("Couldn't open stream %s", filename.data());
+    IMAPG(user).clear();
+    IMAPG(password).clear();
+    return false;
+  }
+
+  return NEW(ImapStream)(stream, (options & PHP_EXPUNGE) ? CL_EXPUNGE : NIL);
 }
 
 bool f_imap_ping(CObjRef imap_stream) {
@@ -204,11 +990,13 @@ Variant f_imap_qprint(CStrRef str) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_renamemailbox(CObjRef imap_stream, CStrRef old_mbox, CStrRef new_mbox) {
+bool f_imap_renamemailbox(CObjRef imap_stream, CStrRef old_mbox,
+                          CStrRef new_mbox) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_reopen(CObjRef imap_stream, CStrRef mailbox, int64 options /* = 0 */, int64 retries /* = 0 */) {
+bool f_imap_reopen(CObjRef imap_stream, CStrRef mailbox,
+                   int64 options /* = 0 */, int64 retries /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
@@ -216,43 +1004,55 @@ Variant f_imap_rfc822_parse_adrlist(CStrRef address, CStrRef default_host) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_rfc822_parse_headers(CStrRef headers, CStrRef defaulthost /* = "" */) {
+Variant f_imap_rfc822_parse_headers(CStrRef headers,
+                                    CStrRef defaulthost /* = "" */) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_rfc822_write_address(CStrRef mailbox, CStrRef host, CStrRef personal) {
+Variant f_imap_rfc822_write_address(CStrRef mailbox, CStrRef host,
+                                    CStrRef personal) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_savebody(CObjRef imap_stream, CVarRef file, int64 msg_number, CStrRef part_number /* = "" */, int64 options /* = 0 */) {
+bool f_imap_savebody(CObjRef imap_stream, CVarRef file, int64 msg_number,
+                     CStrRef part_number /* = "" */, int64 options /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_scanmailbox(CObjRef imap_stream, CStrRef ref, CStrRef pattern, CStrRef content) {
+Variant f_imap_scanmailbox(CObjRef imap_stream, CStrRef ref, CStrRef pattern,
+                           CStrRef content) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_search(CObjRef imap_stream, CStrRef criteria, int64 options /* = 0 */, CStrRef charset /* = "" */) {
+Variant f_imap_search(CObjRef imap_stream, CStrRef criteria,
+                      int64 options /* = 0 */, CStrRef charset /* = "" */) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_set_quota(CObjRef imap_stream, CStrRef quota_root, int64 quota_limit) {
+bool f_imap_set_quota(CObjRef imap_stream, CStrRef quota_root,
+                      int64 quota_limit) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_setacl(CObjRef imap_stream, CStrRef mailbox, CStrRef id, CStrRef rights) {
+bool f_imap_setacl(CObjRef imap_stream, CStrRef mailbox, CStrRef id,
+                   CStrRef rights) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_setflag_full(CObjRef imap_stream, CStrRef sequence, CStrRef flag, int64 options /* = 0 */) {
+bool f_imap_setflag_full(CObjRef imap_stream, CStrRef sequence, CStrRef flag,
+                         int64 options /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_sort(CObjRef imap_stream, int64 criteria, int64 reverse, int64 options /* = 0 */, CStrRef search_criteria /* = "" */, CStrRef charset /* = "" */) {
+Variant f_imap_sort(CObjRef imap_stream, int64 criteria, int64 reverse,
+                    int64 options /* = 0 */,
+                    CStrRef search_criteria /* = "" */,
+                    CStrRef charset /* = "" */) {
   throw NotImplementedException(__func__);
 }
 
-Variant f_imap_status(CObjRef imap_stream, CStrRef mailbox, int64 options /* = 0 */) {
+Variant f_imap_status(CObjRef imap_stream, CStrRef mailbox,
+                      int64 options /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
@@ -272,7 +1072,8 @@ Variant f_imap_uid(CObjRef imap_stream, int64 msg_number) {
   throw NotImplementedException(__func__);
 }
 
-bool f_imap_undelete(CObjRef imap_stream, CStrRef msg_number, int64 flags /* = 0 */) {
+bool f_imap_undelete(CObjRef imap_stream, CStrRef msg_number,
+                     int64 flags /* = 0 */) {
   throw NotImplementedException(__func__);
 }
 
@@ -291,7 +1092,6 @@ Variant f_imap_utf7_encode(CStrRef data) {
 Variant f_imap_utf8(CStrRef mime_encoded_text) {
   throw NotImplementedException(__func__);
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 }

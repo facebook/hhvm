@@ -245,7 +245,7 @@ void nerr_log_error (NEOERR *err)
   }
 }
 
-void nerr_error_string (NEOERR *err, STRING *str)
+void nerr_error_string (NEOERR *err, NEOSTRING *str)
 {
   NEOERR *more;
   char buf[1024];
@@ -289,7 +289,7 @@ void nerr_error_string (NEOERR *err, STRING *str)
   }
 }
 
-void nerr_error_traceback (NEOERR *err, STRING *str)
+void nerr_error_traceback (NEOERR *err, NEOSTRING *str)
 {
   NEOERR *more;
   char buf[1024];

@@ -42,27 +42,27 @@ typedef struct _string
   char *buf;
   int len;
   int max;
-} STRING;
+} NEOSTRING;
 
 typedef struct _string_array
 {
   char **entries;
   int count;
   int max;
-} STRING_ARRAY;
+} NEOSTRING_ARRAY;
 
 /* At some point, we should add the concept of "max len" to these so we
  * can't get DoS'd by someone sending us a line without an end point,
  * etc. */
-void string_init (STRING *str);
-NEOERR *string_set (STRING *str, const char *buf);
-NEOERR *string_append (STRING *str, const char *buf);
-NEOERR *string_appendn (STRING *str, const char *buf, int l);
-NEOERR *string_append_char (STRING *str, char c);
-NEOERR *string_appendf (STRING *str, const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
-NEOERR *string_appendvf (STRING *str, const char *fmt, va_list ap);
-NEOERR *string_readline (STRING *str, FILE *fp);
-void string_clear (STRING *str);
+void string_init (NEOSTRING *str);
+NEOERR *string_set (NEOSTRING *str, const char *buf);
+NEOERR *string_append (NEOSTRING *str, const char *buf);
+NEOERR *string_appendn (NEOSTRING *str, const char *buf, int l);
+NEOERR *string_append_char (NEOSTRING *str, char c);
+NEOERR *string_appendf (NEOSTRING *str, const char *fmt, ...) ATTRIBUTE_PRINTF(2,3);
+NEOERR *string_appendvf (NEOSTRING *str, const char *fmt, va_list ap);
+NEOERR *string_readline (NEOSTRING *str, FILE *fp);
+void string_clear (NEOSTRING *str);
 
 /* typedef struct _ulist ULIST; */
 #include "ulist.h"

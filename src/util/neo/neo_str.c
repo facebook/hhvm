@@ -65,21 +65,21 @@ void neos_lower(char *s)
 }
 
 
-void string_init (STRING *str)
+void string_init (NEOSTRING *str)
 {
   str->buf = NULL;
   str->len = 0;
   str->max = 0;
 }
 
-void string_clear (STRING *str)
+void string_clear (NEOSTRING *str)
 {
   if (str->buf != NULL)
     free(str->buf);
   string_init(str);
 }
 
-static NEOERR* string_check_length (STRING *str, int l)
+static NEOERR* string_check_length (NEOSTRING *str, int l)
 {
   if (str->buf == NULL)
   {
@@ -103,7 +103,7 @@ static NEOERR* string_check_length (STRING *str, int l)
     } while (str->len + l >= new_max);
     new_ptr = realloc (str->buf, sizeof(char) * new_max);
     if (new_ptr == NULL) {
-      return nerr_raise (NERR_NOMEM, "Unable to allocate STRING buf of size %d",
+      return nerr_raise (NERR_NOMEM, "Unable to allocate NEOSTRING buf of size %d",
 	                       new_max);
     }
     str->buf = (char *) new_ptr;
@@ -113,13 +113,13 @@ static NEOERR* string_check_length (STRING *str, int l)
   return STATUS_OK;
 }
 
-NEOERR *string_set (STRING *str, const char *buf)
+NEOERR *string_set (NEOSTRING *str, const char *buf)
 {
   str->len = 0;
   return nerr_pass (string_append (str, buf));
 }
 
-NEOERR *string_append (STRING *str, const char *buf)
+NEOERR *string_append (NEOSTRING *str, const char *buf)
 {
   NEOERR *err;
   int l;
@@ -133,7 +133,7 @@ NEOERR *string_append (STRING *str, const char *buf)
   return STATUS_OK;
 }
 
-NEOERR *string_appendn (STRING *str, const char *buf, int l)
+NEOERR *string_appendn (NEOSTRING *str, const char *buf, int l)
 {
   NEOERR *err;
 
@@ -147,7 +147,7 @@ NEOERR *string_appendn (STRING *str, const char *buf, int l)
 }
 
 /* this is much more efficient with C99 snprintfs... */
-NEOERR *string_appendvf (STRING *str, const char *fmt, va_list ap)
+NEOERR *string_appendvf (NEOSTRING *str, const char *fmt, va_list ap)
 {
   NEOERR *err;
   char buf[4096];
@@ -186,7 +186,7 @@ NEOERR *string_appendvf (STRING *str, const char *fmt, va_list ap)
   return STATUS_OK;
 }
 
-NEOERR *string_appendf (STRING *str, const char *fmt, ...)
+NEOERR *string_appendf (NEOSTRING *str, const char *fmt, ...)
 {
   NEOERR *err;
   va_list ap;
@@ -197,7 +197,7 @@ NEOERR *string_appendf (STRING *str, const char *fmt, ...)
   return nerr_pass(err);
 }
 
-NEOERR *string_append_char (STRING *str, char c)
+NEOERR *string_append_char (NEOSTRING *str, char c)
 {
   NEOERR *err;
   err = string_check_length (str, 1);
@@ -209,7 +209,7 @@ NEOERR *string_append_char (STRING *str, char c)
   return STATUS_OK;
 }
 
-void string_array_init (STRING_ARRAY *arr)
+void string_array_init (NEOSTRING_ARRAY *arr)
 {
   arr->entries = NULL;
   arr->count = 0;
@@ -260,7 +260,7 @@ split_err:
   return err;
 }
 
-void string_array_clear (STRING_ARRAY *arr)
+void string_array_clear (NEOSTRING_ARRAY *arr)
 {
   int x;
 
@@ -411,7 +411,7 @@ BOOL reg_search (const char *re, const char *str)
   return FALSE;
 }
 
-NEOERR *string_readline (STRING *str, FILE *fp)
+NEOERR *string_readline (NEOSTRING *str, FILE *fp)
 {
   NEOERR *err;
 
@@ -765,7 +765,7 @@ NEOERR *neos_html_escape (const char *src, int slen,
                           char **out)
 {
   NEOERR *err = STATUS_OK;
-  STRING out_s;
+  NEOSTRING out_s;
   int x;
   char *ptr;
 
@@ -818,7 +818,7 @@ char *URL_PROTOCOLS[] = {"http://", "https://", "ftp://", "mailto:"};
 NEOERR *neos_url_validate (const char *in, char **esc)
 {
   NEOERR *err = STATUS_OK;
-  STRING out_s;
+  NEOSTRING out_s;
   int valid = 0;
   size_t i;
   size_t inlen;
@@ -862,7 +862,7 @@ NEOERR *neos_url_validate (const char *in, char **esc)
 
     }
   }
- 
+
   if (valid)
     return neos_html_escape(in, inlen, esc);
 

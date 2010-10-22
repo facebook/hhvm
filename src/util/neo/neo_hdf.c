@@ -1172,7 +1172,7 @@ static NEOERR *_fp_dump_cb (void *rock, const char *fmt, ...)
 static NEOERR *_string_dump_cb (void *rock, const char *fmt, ...)
 {
   NEOERR *err;
-  STRING *str = (STRING *)rock;
+  NEOSTRING *str = (NEOSTRING *)rock;
   va_list ap;
 
   va_start (ap, fmt);
@@ -1301,7 +1301,7 @@ static NEOERR* hdf_dump_cb(HDF *hdf, const char *prefix, int dtype, int lvl,
   return STATUS_OK;
 }
 
-NEOERR* hdf_dump_str (HDF *hdf, const char *prefix, int dtype, STRING *str)
+NEOERR* hdf_dump_str (HDF *hdf, const char *prefix, int dtype, NEOSTRING *str)
 {
   return nerr_pass(hdf_dump_cb(hdf, prefix, dtype, 0, str, _string_dump_cb));
 }
@@ -1369,7 +1369,7 @@ NEOERR *hdf_write_file_atomic (HDF *hdf, const char *path)
 
 NEOERR *hdf_write_string (HDF *hdf, char **s)
 {
-  STRING str;
+  NEOSTRING str;
   NEOERR *err;
 
   *s = NULL;
@@ -1416,7 +1416,7 @@ static int _copy_line (const char **s, char *buf, size_t buf_len)
 
 /* Copy the characters in the file (up to the next newline) into line
  * and advance s to the next line */
-static NEOERR *_copy_line_advance(const char **s, STRING *line)
+static NEOERR *_copy_line_advance(const char **s, NEOSTRING *line)
 {
   NEOERR *err;
   int x = 0;
@@ -1464,7 +1464,7 @@ static NEOERR* parse_attr(char **str, HDF_ATTR **attr)
   char *s = *str;
   char *k, *v;
   int k_l, v_l;
-  STRING buf;
+  NEOSTRING buf;
   char c;
   HDF_ATTR *ha, *hal = NULL;
 
@@ -1602,7 +1602,7 @@ static NEOERR* parse_attr(char **str, HDF_ATTR **attr)
 #define INCLUDE_FILE 0
 #define INCLUDE_MAX_DEPTH 50
 
-static NEOERR* _hdf_read_string (HDF *hdf, const char **str, STRING *line,
+static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
                                  const char *path, int *lineno,
                                  int include_handle, int expect_end_brace) {
   NEOERR *err;
@@ -1904,7 +1904,7 @@ NEOERR * hdf_read_string (HDF *hdf, const char *str)
 {
   NEOERR *err;
   int lineno = 0;
-  STRING line;
+  NEOSTRING line;
   string_init(&line);
   err = _hdf_read_string(hdf, &str, &line, "<string>", &lineno, INCLUDE_ERROR,
                          0);
@@ -1916,7 +1916,7 @@ NEOERR * hdf_read_string_ignore (HDF *hdf, const char *str, int ignore)
 {
   NEOERR *err;
   int lineno = 0;
-  STRING line;
+  NEOSTRING line;
   string_init(&line);
   err = _hdf_read_string(hdf, &str, &line, "<string>", &lineno,
                          (ignore ? INCLUDE_IGNORE : INCLUDE_ERROR), 0);
@@ -1967,7 +1967,7 @@ static NEOERR* hdf_read_file_internal (HDF *hdf, const char *path,
   char *ibuf = NULL;
   const char *ptr = NULL;
   HDF *top = hdf->top;
-  STRING line;
+  NEOSTRING line;
 
   string_init(&line);
 

@@ -164,7 +164,7 @@ void nerr_log_error (NEOERR *nerr);
  *            str - string to which the data is appended
  * returns: None - errors appending to the string are ignored
  */
-void nerr_error_string (NEOERR *nerr, STRING *str);
+void nerr_error_string (NEOERR *nerr, NEOSTRING *str);
 
 /* function: nerr_error_traceback - returns the full trackeback of the error
  *          chain
@@ -173,7 +173,7 @@ void nerr_error_string (NEOERR *nerr, STRING *str);
  *            str - string to which the data is appended
  * returns: None - errors appending to the string are ignored
  */
-void nerr_error_traceback (NEOERR *nerr, STRING *str);
+void nerr_error_traceback (NEOERR *nerr, NEOSTRING *str);
 
 /* function: nerr_ignore - free the error chain
  * description: you should only call this if you actually handle the

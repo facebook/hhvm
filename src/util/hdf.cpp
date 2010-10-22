@@ -625,7 +625,7 @@ HDF *Hdf::getRaw() const {
 
 void Hdf::CheckNeoError(NEOERR *err) {
   if (err != STATUS_OK) {
-    STRING str;
+    NEOSTRING str;
     string_init(&str);
     nerr_error_string(err, &str);
     throw HdfException(str.buf);

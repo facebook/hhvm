@@ -531,13 +531,13 @@ NEOERR* hdf_dump (HDF *hdf, const char *prefix);
 NEOERR* hdf_dump_format (HDF *hdf, int lvl, FILE *fp);
 
 /*
- * Function: hdf_dump_str - dump an HDF dataset to STRING
+ * Function: hdf_dump_str - dump an HDF dataset to NEOSTRING
  * Description:
  * Input:
  * Output:
  * Returns:
  */
-NEOERR* hdf_dump_str(HDF *hdf, const char *prefix, int compact, STRING *str);
+NEOERR* hdf_dump_str(HDF *hdf, const char *prefix, int compact, NEOSTRING *str);
 
 /*
  * Function: hdf_remove_tree - delete a subtree of an HDF dataset

@@ -181,6 +181,9 @@ LD = $(CXX)
 # Both $(CC) and $(CXX) will now generate .d dependency files.
 CPPFLAGS += -MMD -fPIC
 
+# allowing "and", "or" to be re-defined
+CXXFLAGS += -fno-operator-names
+
 # Include frame pointers to make it easier to generate callgraphs in oprofile
 CPPFLAGS += -fno-omit-frame-pointer
 
@@ -229,6 +232,7 @@ CPPFLAGS += \
   -isystem $(EXT_DIR)/google-perftools/include \
   -isystem $(EXT_DIR)/libcap/include \
   -isystem $(EXT_DIR)/libpng/include \
+  -isystem $(EXT_DIR)/imap/include \
   -I $(PROJECT_ROOT)/src \
   -I $(PROJECT_ROOT)/src/system/gen \
 
@@ -479,6 +483,8 @@ LIBMEMCACHED_LIBS = $(EXT_DIR)/libmemcached/lib/libmemcached.a
 
 LIBCAP_LIBS = $(EXT_DIR)/libcap/lib64/libcap.a
 
+IMAP_LIBS = $(EXT_DIR)/imap/lib/c-client.a -lpam
+
 GD_LIBS = $(EXT_DIR)/gd/lib/libgd.a $(EXT_DIR)/libpng/lib/libpng.a \
 	-ljpeg -lfreetype -lfontconfig
 
@@ -563,7 +569,7 @@ ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
 	$(MCRYPT_LIBS) $(JEMALLOC_LIBS) $(GOOGLE_LIBS) $(ICU_LIBS) \
 	$(HTTP_LIBS) $(XHP_LIBS) $(TIME_LIBS) $(TBB_LIBS) $(FBI_LIBS) \
 	$(LDAP_LIBS) $(READLINE_LIBS) $(LIBMEMCACHED_LIBS) $(ORACLE_LIBS) \
-	$(LIBCAP_LIBS) \
+	$(LIBCAP_LIBS) $(IMAP_LIBS) \
 
 LIB_PATHS := $(HPHP_LIB) $(HPHP_TEST_LIB_PATH) $(EXT_DIR)/binutils \
              $(sort $(foreach L,$(filter-out -%, $(ALL_LIBS)), $(dir $(L))))

@@ -364,10 +364,15 @@ void ClassStatement::addMethod(MethodStatementPtr m) {
                   m_name.c_str(), m->name().c_str(),
                   m->loc()->file, m->loc()->line1);
     }
-  } else if (!(m_modifiers & Interface) && !m->hasBody()) {
-    raise_error("Non-abstract %s::%s() must contain body in %s on line %d",
-        m_name.c_str(), m->name().c_str(),
-        m->loc()->file, m->loc()->line1);
+  } else if (!m->hasBody()) {
+    if (!(m_modifiers & Interface)) {
+      raise_error("Non-abstract %s::%s() must contain body in %s on line %d",
+                  m_name.c_str(), m->name().c_str(),
+                  m->loc()->file, m->loc()->line1);
+    } else if (m->getModifiers() & Protected) {
+      raise_error("Access type for interface method %s::%s() must be "
+                  "omitted", m_name.c_str(), m->name().c_str());
+    }
   }
 
   m_methods[m->lname().c_str()] = m;
@@ -906,6 +911,10 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
        it != m_basesVec.end(); ++it) {
     const ClassStatement *iface = RequestEvalState::findClass(it->c_str());
     if (iface) {
+      if ((iface->getModifiers() & Interface) == 0) {
+        raise_error("%s cannot implement %s - it is not an interface",
+                    name().c_str(), iface->name().c_str());
+      }
       iface->semanticCheck(cls);
     } else if (!f_interface_exists(it->c_str(), false)) {
       raise_error("Interface '%s' does not exist.", it->c_str());

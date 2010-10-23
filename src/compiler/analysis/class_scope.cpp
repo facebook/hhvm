@@ -814,6 +814,7 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
       cg_printf("if (eval_get_call_info_static_method_hook(mcp, foundClass)) "
           "return true;\n");
       cg_indentBegin("else if (foundClass) {\n");
+      cg_printf("mcp.fail();\n");
       cg_printf("return false;\n");
       cg_indentEnd("}\n");
     }
@@ -841,6 +842,7 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
       cg_printf("if (eval_get_call_info_static_method_hook(mcp, foundClass)) "
           "return true;\n");
       cg_indentBegin("else if (foundClass) {\n");
+      cg_printf("mcp.fail();\n");
       cg_printf("return false;\n");
       cg_indentEnd("}\n");
     }

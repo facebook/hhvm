@@ -26,62 +26,50 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline Array x_hphp_get_extension_info(CStrRef name) {
-  FUNCTION_INJECTION_BUILTIN(hphp_get_extension_info);
   return f_hphp_get_extension_info(name);
 }
 
 inline Array x_hphp_get_class_info(CVarRef name) {
-  FUNCTION_INJECTION_BUILTIN(hphp_get_class_info);
   return f_hphp_get_class_info(name);
 }
 
 inline Array x_hphp_get_function_info(CStrRef name) {
-  FUNCTION_INJECTION_BUILTIN(hphp_get_function_info);
   return f_hphp_get_function_info(name);
 }
 
 inline Variant x_hphp_invoke(CStrRef name, CArrRef params) {
-  FUNCTION_INJECTION_BUILTIN(hphp_invoke);
   return f_hphp_invoke(name, params);
 }
 
 inline Variant x_hphp_invoke_method(CVarRef obj, CStrRef cls, CStrRef name, CArrRef params) {
-  FUNCTION_INJECTION_BUILTIN(hphp_invoke_method);
   return f_hphp_invoke_method(obj, cls, name, params);
 }
 
 inline bool x_hphp_instanceof(CObjRef obj, CStrRef name) {
-  FUNCTION_INJECTION_BUILTIN(hphp_instanceof);
   return f_hphp_instanceof(obj, name);
 }
 
 inline Object x_hphp_create_object(CStrRef name, CArrRef params) {
-  FUNCTION_INJECTION_BUILTIN(hphp_create_object);
   return f_hphp_create_object(name, params);
 }
 
 inline Variant x_hphp_get_property(CObjRef obj, CStrRef cls, CStrRef prop) {
-  FUNCTION_INJECTION_BUILTIN(hphp_get_property);
   return f_hphp_get_property(obj, cls, prop);
 }
 
 inline void x_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop, CVarRef value) {
-  FUNCTION_INJECTION_BUILTIN(hphp_set_property);
   f_hphp_set_property(obj, cls, prop, value);
 }
 
 inline Variant x_hphp_get_static_property(CStrRef cls, CStrRef prop) {
-  FUNCTION_INJECTION_BUILTIN(hphp_get_static_property);
   return f_hphp_get_static_property(cls, prop);
 }
 
 inline void x_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value) {
-  FUNCTION_INJECTION_BUILTIN(hphp_set_static_property);
   f_hphp_set_static_property(cls, prop, value);
 }
 
 inline String x_hphp_get_original_class_name(CStrRef name) {
-  FUNCTION_INJECTION_BUILTIN(hphp_get_original_class_name);
   return f_hphp_get_original_class_name(name);
 }
 

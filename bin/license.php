@@ -9,6 +9,7 @@ $inputs = 'find . -regex ".*\.cpp" -or -regex ".*\.c"   -or -regex ".*\.h"';
 $excluded = array(
   'runtime/ext/bcmath/',
   'util/neo/',
+  'util/cronoutils',
 
   // non-PHP licenses
   'runtime/base/zend/utf8_decode.c',

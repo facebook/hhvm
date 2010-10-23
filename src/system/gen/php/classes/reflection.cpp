@@ -4796,7 +4796,7 @@ Array c_ReflectionClass::t_getstaticproperties() {
           if (tmp4) {
             {
               {
-                const Variant &tmp5((v_prop.o_get(NAMSTR(s_sys_ss77e35232, "name"), true)));
+                const Variant &tmp5((v_prop.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
                 Variant tmp6((v_prop));
                 v_ret.set(tmp5, (tmp6));
               }
@@ -4860,7 +4860,7 @@ Array c_ReflectionClass::t_getdefaultproperties() {
           if (tmp4) {
             {
               {
-                const Variant &tmp5((v_prop.o_get(NAMSTR(s_sys_ss77e35232, "name"), true)));
+                const Variant &tmp5((v_prop.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
                 Variant tmp6((v_prop));
                 v_ret.set(tmp5, (tmp6));
               }

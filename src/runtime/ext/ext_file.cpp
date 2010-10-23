@@ -323,7 +323,7 @@ Variant f_file_get_contents(CStrRef filename,
                             CObjRef context /* = null_object */,
                             int64 offset /* = 0 */,
                             int64 maxlen /* = 0 */) {
-  Variant stream = f_fopen(filename, "rb");
+  Variant stream = f_fopen(filename, "rb", use_include_path, context);
   if (same(stream, false)) return false;
   return f_stream_get_contents(stream, maxlen, offset);
 }
@@ -403,7 +403,8 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
 Variant f_file(CStrRef filename, int flags /* = 0 */,
                CObjRef context /* = null_object */) {
   Variant contents = f_file_get_contents(filename,
-                                         flags & PHP_FILE_USE_INCLUDE_PATH);
+                                         flags & PHP_FILE_USE_INCLUDE_PATH,
+                                         context);
   if (same(contents, false)) {
     return false;
   }
@@ -459,7 +460,7 @@ Variant f_file(CStrRef filename, int flags /* = 0 */,
 
 Variant f_readfile(CStrRef filename, bool use_include_path /* = false */,
                    CObjRef context /* = null_object */) {
-  Variant f = f_fopen(filename, "rb");
+  Variant f = f_fopen(filename, "rb", use_include_path, context);
   if (same(f, false)) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
                     Util::safe_strerror(errno).c_str());

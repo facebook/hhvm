@@ -392,7 +392,7 @@ do { \
 #define LOOP_COUNTER(n) int lc##n = 0;
 #define LOOP_COUNTER_CHECK(n)                                   \
   if ((++lc##n & 1023) == 0) {                                  \
-    RequestInjection ti(info);                                  \
+    check_request_timeout(info);                                \
     if (lc##n > 1000000) throw_infinite_loop_exception();       \
   }
 
@@ -402,13 +402,13 @@ do { \
 #endif
 
 #ifdef INFINITE_RECURSION_DETECTION
-#define RECURSION_INJECTION RecursionInjection ri(info);
+#define RECURSION_INJECTION check_recursion(info);
 #else
 #define RECURSION_INJECTION
 #endif
 
 #ifdef REQUEST_TIMEOUT_DETECTION
-#define REQUEST_TIMEOUT_INJECTION RequestInjection ti(info);
+#define REQUEST_TIMEOUT_INJECTION check_request_timeout(info);
 #else
 #define REQUEST_TIMEOUT_INJECTION
 #endif
@@ -531,7 +531,7 @@ do { \
   DECLARE_THREAD_INFO                           \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
-  HOTPROFILER_INJECTION(n)                      \
+  HOTPROFILER_INJECTION_BUILTIN(n)              \
   FRAME_INJECTION_FLAGS(empty_string, n, FrameInjection::PseudoMain) \
 
 #define INTERCEPT_INJECTION_ALWAYS(name, func, args, rr)                \

@@ -57,6 +57,7 @@ FunctionCall::FunctionCall
     m_origName = name;
     m_name = Util::toLower(name);
   }
+  m_clsNameTemp = -1;
 }
 
 void FunctionCall::reset() {
@@ -220,9 +221,24 @@ bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
   Expression::preOutputCPP(cg, ar, state & ~FixOrder);
   ar->wrapExpressionBegin(cg);
-  cg_printf("FrameInjection::SetStaticClassName(info, ");
-  cg_printString(m_origClassName, ar);
-  cg_printf(");\n");
+  if (m_classScope) {
+    string className;
+    if (m_redeclaredClass) {
+      className = cg.formatLabel(m_classScope->getName());
+    } else {
+      className = m_classScope->getId(cg);
+    }
+    cg_printf("FrameInjection::SetStaticClassName(info, "
+              "%s%s::s_class_name);\n",
+              Option::ClassPrefix, className.c_str());
+  } else {
+    m_clsNameTemp = cg.createNewId(ar);
+    cg_printf("CStrRef clsName%d(", m_clsNameTemp);
+    cg_printString(m_origClassName, ar);
+    cg_printf(");\n");
+    cg_printf("FrameInjection::SetStaticClassName(info, clsName%d);\n",
+              m_clsNameTemp);
+  }
   m_noStatic = true;
   preOutputStash(cg, ar, FixOrder);
   m_noStatic = false;
@@ -242,8 +258,19 @@ void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       m_origClassName != "static") {
     if (!m_className.empty()) {
       cg_printf("STATIC_CLASS_NAME_CALL(");
-      cg_printString(m_origClassName, ar);
-      cg_printf(", ");
+      if (m_classScope) {
+        string className;
+        if (m_redeclaredClass) {
+          className = cg.formatLabel(m_classScope->getName());
+        } else {
+          className = m_classScope->getId(cg);
+        }
+        cg_printf("%s%s::s_class_name, ",
+                  Option::ClassPrefix, className.c_str());
+      } else {
+        ASSERT(m_clsNameTemp >= 0);
+        cg_printf("clsName%d, ", m_clsNameTemp);
+      }
     } else {
       cg_printf("STATIC_CLASS_INVOKE_CALL(mcp%d.getClassName(), ",
           m_ciTemp);

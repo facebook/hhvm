@@ -42,7 +42,7 @@ public:
   static int GetLine(bool skip = false);
 
   // what does "static::" resolve to?
-  static String GetStaticClassName(ThreadInfo *info);
+  static CStrRef GetStaticClassName(ThreadInfo *info);
   static void SetStaticClassName(ThreadInfo *info, CStrRef cls);
   static void ResetStaticClassName(ThreadInfo *info);
   static void SetCallingObject(ThreadInfo* info, ObjectData *obj);
@@ -56,7 +56,8 @@ public:
   FrameInjection(ThreadInfo *info, CStrRef cls, const char *name,
                  ObjectData *obj = NULL, int fs = 0)
       : m_info(info), m_class(cls), m_name(name),
-        m_object(obj), m_line(0), m_flags(fs) {
+        m_object(obj), m_line(0), m_flags(fs),
+        m_staticClass(NULL), m_callingObject(NULL) {
     ASSERT(m_class.get());
     ASSERT(m_name);
     m_prev = m_info->m_top;
@@ -122,8 +123,8 @@ private:
   int             m_flags;
 
   // for static late binding
-  String          m_staticClass;
-  Object          m_callingObject;
+  const String   *m_staticClass;
+  ObjectData     *m_callingObject;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

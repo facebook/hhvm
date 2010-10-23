@@ -89,6 +89,9 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
     } else {
       m_validClass = true;
     }
+    if (cls) {
+      m_classScope = cls;
+    }
   }
 
   ar->containsDynamicFunctionCall();
@@ -162,7 +165,7 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf("void *vt%d;\n", m_ciTemp);
     cg_printf("get_call_info_or_fail(cit%d, vt%d, ", m_ciTemp, m_ciTemp);
   } else {
-      cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp);
+    cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp);
     if (m_class) {
       if (m_class->is(KindOfScalarExpression)) {
         ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
@@ -182,6 +185,17 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_printf("mcp%d.staticMethodCall(\"%s\", ", m_ciTemp,
           m_className.c_str());
     }
+  }
+
+  if (!cls && !m_className.empty() && m_cppTemp.empty() &&
+      m_origClassName != "self" && m_origClassName != "parent" &&
+      m_origClassName != "static") {
+    // Create a temporary to hold the class name, in case it is not a
+    // StaticString.
+    m_clsNameTemp = cg.createNewId(ar);
+    cg_printf("CStrRef clsName%d(", m_clsNameTemp);
+    cg_printString(m_origClassName, ar);
+    cg_printf(");\n");
   }
 
   if (m_nameExp->is(Expression::KindOfSimpleVariable)) {

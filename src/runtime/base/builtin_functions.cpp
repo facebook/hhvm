@@ -275,7 +275,17 @@ Object create_object(const char *s, const Array &params,
   return o;
 }
 
-void RequestInjection::checkSurprise(ThreadInfo *info) {
+void pause_and_exit() {
+  // NOTE: This is marked as __attribute__((noreturn)) in base/types.h
+  // Signal sent, nothing can be trusted, don't do anything, as we might
+  // write bad data, including calling exit handlers or destructors until the
+  // signal handler (StackTrace) has had a chance to exit.
+  sleep(300);
+  // Should abort first, but it not try to exit
+  pthread_exit(0);
+}
+
+void check_request_surprise(ThreadInfo *info) {
   RequestInjectionData &p = info->m_reqInjectionData;
   bool do_timedout, do_memExceeded, do_signaled;
 

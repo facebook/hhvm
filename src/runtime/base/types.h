@@ -193,8 +193,14 @@ public:
   FrameInjection *m_top;
   RequestInjectionData m_reqInjectionData;
 
+  // For infinite recursion detection
   size_t m_stacksize;
   char *m_stacklimit;
+
+  // This is the amount of "slack" in stack usage checks - if the
+  // stack pointer gets within this distance from the end (minus
+  // overhead), throw an infinite recursion exception.
+  static const int StackSlack = 1024 * 1024;
 
   // This pointer is set by ProfilerFactory
   Profiler *m_profiler;
@@ -208,49 +214,39 @@ public:
 };
 
 extern void throw_infinite_recursion_exception();
-class RecursionInjection {
-public:
-  // This is the amount of "slack" in stack usage checks - if the
-  // stack pointer gets within this distance from the end (minus
-  // overhead), throw an infinite recursion exception.
-  static const int StackSlack = 1024 * 1024;
 
-  RecursionInjection(ThreadInfo *info) : m_info(info) {
-    char marker;
-    if (&marker < m_info->m_stacklimit) {
-      throw_infinite_recursion_exception();
-    }
+// The ThreadInfo pointer itself must be from the current stack frame.
+inline void check_recursion(ThreadInfo *&info) {
+  if ((char *)&info < info->m_stacklimit) {
+    throw_infinite_recursion_exception();
   }
-  ~RecursionInjection() {
-  }
+}
 
-private:
-  ThreadInfo *m_info;
-};
-
-// implemented in runtime/base/timeout_thread
-extern void throw_request_timeout_exception() ATTRIBUTE_COLD;
-extern void throw_memory_exceeded_exception() ATTRIBUTE_COLD
-                                              __attribute__((noreturn));
-extern bool f_pcntl_signal_dispatch() ATTRIBUTE_COLD;
+// implemented in runtime/base/builtin_functions.cpp
+extern void pause_and_exit() ATTRIBUTE_COLD __attribute__((noreturn));
+extern void check_request_surprise(ThreadInfo *info) ATTRIBUTE_COLD;
 
 extern bool SegFaulting;
-class RequestInjection {
-public:
-  RequestInjection(ThreadInfo *info) {
-    if (SegFaulting) pauseAndExit();
-    if (info->m_reqInjectionData.surprised) checkSurprise(info);
-  }
-private:
-  void checkSurprise(ThreadInfo *info) ATTRIBUTE_COLD;
-  void pauseAndExit() ATTRIBUTE_COLD __attribute__((noreturn));
-};
+
+inline void check_request_timeout(ThreadInfo *info) {
+  if (SegFaulting) pause_and_exit();
+  if (info->m_reqInjectionData.surprised) check_request_surprise(info);
+}
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
+extern void begin_profiler_frame(Profiler *p, const char *symbol);
+extern void end_profiler_frame(Profiler *p);
+
 class ProfilerInjection {
 public:
-  ProfilerInjection(ThreadInfo *info, const char *symbol);
-  ~ProfilerInjection();
+  ProfilerInjection(ThreadInfo *info, const char *symbol) : m_info(info) {
+    Profiler *prof = m_info->m_profiler;
+    if (prof) begin_profiler_frame(prof, symbol);
+  }
+  ~ProfilerInjection() {
+    Profiler *prof = m_info->m_profiler;
+    if (prof) end_profiler_frame(prof);
+  }
 private:
   ThreadInfo *m_info;
 };

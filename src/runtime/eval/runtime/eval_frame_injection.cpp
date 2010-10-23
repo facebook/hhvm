@@ -32,19 +32,19 @@ Array EvalFrameInjection::getArgs() {
 EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
 (CStrRef name, bool sp) : m_set(false) {
   if (!sp) {
-    FrameInjection::SetStaticClassName(NULL, name);
+    FrameInjection::SetStaticClassName(ThreadInfo::s_threadInfo.get(), name);
     m_set = true;
   }
 }
 
 EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
 (CObjRef obj) : m_set(false) {
-  FrameInjection::SetCallingObject(NULL, obj.get());
+  FrameInjection::SetCallingObject(ThreadInfo::s_threadInfo.get(), obj.get());
 }
 
 EvalFrameInjection::EvalStaticClassNameHelper::~EvalStaticClassNameHelper() {
   if (m_set) {
-    FrameInjection::ResetStaticClassName(NULL);
+    FrameInjection::ResetStaticClassName(ThreadInfo::s_threadInfo.get());
   }
 }
 

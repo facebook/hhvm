@@ -1107,6 +1107,16 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       }
     } else {
       className = cg.formatLabel(m_className);
+      if (!m_className.empty() && m_cppTemp.empty() &&
+          m_origClassName != "self" && m_origClassName != "parent" &&
+          m_origClassName != "static") {
+        // Create a temporary to hold the class name, in case it is not a
+        // StaticString.
+        m_clsNameTemp = cg.createNewId(ar);
+        cg_printf("CStrRef clsName%d(", m_clsNameTemp);
+        cg_printString(m_origClassName, ar);
+        cg_printf(");\n");
+      }
     }
     if (cscope && cscope->derivesFromRedeclaring()) {
       // In a derived from redeclaring class

@@ -55,7 +55,7 @@ void ThreadInfo::onSessionInit() {
   // then, use that to calculate where the bottom of the stack should be,
   // allowing some slack for (a) stack usage above the caller of reset() and
   // (b) stack usage after the position gets checked.
-  m_stacklimit = &marker - (m_stacksize - RecursionInjection::StackSlack);
+  m_stacklimit = &marker - (m_stacksize - StackSlack);
 }
 
 void ThreadInfo::onSessionExit() {

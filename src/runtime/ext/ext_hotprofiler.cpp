@@ -1521,19 +1521,12 @@ const int64 k_XHPROF_FLAGS_GET_TRACE = HierarchicalProfiler::GetTrace;
 ///////////////////////////////////////////////////////////////////////////////
 // injected code
 
-ProfilerInjection::ProfilerInjection(ThreadInfo *info, const char *symbol)
-  : m_info(info) {
-  Profiler *profiler = m_info->m_profiler;
-  if (profiler) {
-    profiler->beginFrame(symbol);
-  }
+void begin_profiler_frame(Profiler *p, const char *symbol) {
+  p->beginFrame(symbol);
 }
 
-ProfilerInjection::~ProfilerInjection() {
-  Profiler *profiler = m_info->m_profiler;
-  if (profiler) {
-    profiler->endFrame();
-  }
+void end_profiler_frame(Profiler *p) {
+  p->endFrame();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

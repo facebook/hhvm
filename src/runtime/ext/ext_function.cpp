@@ -208,8 +208,8 @@ Variant f_forward_static_call_array(CVarRef function, CArrRef params) {
 
 Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv /* = null_array */) {
 #ifdef ENABLE_LATE_STATIC_BINDING
-  const char *cls = FrameInjection::GetClassName();
-  if (!cls || !*cls) {
+  CStrRef cls = FrameInjection::GetClassName();
+  if (cls.empty()) {
     raise_error("Cannot call forward_static_call() "
                 "when no class scope is active");
     return null;

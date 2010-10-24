@@ -212,10 +212,11 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
               "    file          optional, filesystem path\n"
               );
         }
+#endif
+
       transport->sendString(usage);
       break;
     }
-#endif
 
     if (!RuntimeOption::AdminPassword.empty() &&
         RuntimeOption::AdminPassword != transport->getParam("auth")) {
@@ -414,8 +415,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         transport->sendString("OK\n");
         break;
       }
-#endif
     }
+#endif
 
     transport->sendString("Unknown command: " + cmd + "\n", 404);
   } while (0);

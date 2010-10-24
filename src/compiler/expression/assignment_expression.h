@@ -33,7 +33,7 @@ public:
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultPtr ar);
+  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
 
   virtual bool isRefable(bool checkError = false) const {
     if (checkError) return true;

@@ -23,6 +23,7 @@
 #include <util/parser/hphp.tab.hpp>
 #include <compiler/expression/function_call.h>
 #include <compiler/analysis/analysis_result.h>
+#include <compiler/analysis/file_scope.h>
 
 using namespace HPHP;
 using namespace std;
@@ -72,15 +73,15 @@ void ExpStatement::analyzeAutoload(AnalysisResultPtr ar) {
     file = path + file;
   }
   ScalarExpressionPtr exp
-    (new ScalarExpression(assign->getValue()->getLocation(),
+    (new ScalarExpression(getScope(), assign->getValue()->getLocation(),
                           Expression::KindOfScalarExpression,
                           T_STRING, file, true));
   IncludeExpressionPtr include
-    (new IncludeExpression(assign->getLocation(),
+    (new IncludeExpression(getScope(), assign->getLocation(),
                            Expression::KindOfIncludeExpression,
                            exp, T_INCLUDE_ONCE));
   include->setDocumentRoot(); // autoload always starts from document root
-  include->onParse(ar);
+  include->onParse(ar, getFileScope());
   m_exp = include;
 }
 

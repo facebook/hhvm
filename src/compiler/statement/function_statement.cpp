@@ -56,12 +56,12 @@ StatementPtr FunctionStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void FunctionStatement::onParse(AnalysisResultPtr ar) {
-   // note it's important to add to file scope, not a pushed FunctionContainer,
+void FunctionStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
+  // note it's important to add to file scope, not a pushed FunctionContainer,
   // as a function may be declared inside a class's method, yet this function
   // is a global function, not a class method.
-  FileScopePtr fileScope = ar->getFileScope();
-  if (!fileScope->addFunction(ar, onParseImpl(ar))) {
+  FileScopePtr fileScope = dynamic_pointer_cast<FileScope>(scope);
+  if (!fileScope->addFunction(ar, onInitialParse(ar, fileScope, false))) {
     m_ignored = true;
     return;
   }
@@ -85,8 +85,9 @@ void FunctionStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
                                           "", m_name, shared_from_this());
     } // else it's pseudoMain or artificial functions we added
   }
-  FunctionScopePtr func = ar->getFunctionScope(); // containing function scope
-  FunctionScopePtr fs = m_funcScope.lock();
+  FunctionScopePtr func =
+    Construct::getFunctionScope(); // containing function scope
+  FunctionScopePtr fs = getFunctionScope();
   // redeclared functions are automatically volatile
   if (func && fs->isVolatile()) {
     func->getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
@@ -112,7 +113,6 @@ void FunctionStatement::inferTypes(AnalysisResultPtr ar) {
 void FunctionStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   FunctionScopePtr funcScope = m_funcScope.lock();
   if (!funcScope->isUserFunction()) return;
-  if (ar) ar->pushScope(funcScope);
 
   cg_printf("function ");
   if (m_ref) cg_printf("&");
@@ -123,8 +123,6 @@ void FunctionStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_funcScope.lock()->outputPHP(cg, ar);
   if (m_stmt) m_stmt->outputPHP(cg, ar);
   cg_indentEnd("}\n");
-
-  if (ar) ar->popScope();
 }
 
 bool FunctionStatement::hasImpl() const {
@@ -152,7 +150,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
     }
     if (funcScope->isVolatile()) {
       cg_printf("g->declareFunctionLit(");
-      cg_printString(m_name, ar);
+      cg_printString(m_name, ar, shared_from_this());
       cg_printf(");\n");
       cg_printf("g->FVF(%s) = true;\n", rname.c_str());
     }
@@ -166,7 +164,6 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
       !pseudoMain) return;
   if (context == CodeGenerator::CppImplementation &&
       (funcScope->isInlined() || pseudoMain)) return;
-  ar->pushScope(funcScope);
 
   cg.setPHPLineNo(-1);
 
@@ -178,7 +175,6 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
         outputCPPStmt(cg, ar);
         funcScope->getVariables()->clearAttribute(VariableTable::ForceGlobal);
         cg.setContext(CodeGenerator::CppPseudoMain);
-        ar->popScope();
         return;
       }
     } else if (context == CodeGenerator::CppForwardDeclaration &&
@@ -256,6 +252,4 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
   default:
     ASSERT(false);
   }
-
-  ar->popScope();
 }

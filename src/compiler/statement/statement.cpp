@@ -20,9 +20,9 @@ using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Statement::Statement(LocationPtr loc, KindOf kindOf)
-  : Construct(loc), m_kindOf(kindOf), m_silencerCountMax(0),
-    m_silencerCountCurrent(0) {
+Statement::Statement(STATEMENT_CONSTRUCTOR_PARAMETERS)
+    : Construct(scope, loc), m_kindOf(kindOf), m_silencerCountMax(0),
+      m_silencerCountCurrent(0) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -220,7 +220,7 @@ void AliasManager::beginScopeHelper(BucketMap::value_type &it) {
 
 void AliasManager::beginScope() {
   if (m_noAdd) return;
-  ExpressionPtr e(new ScalarExpression(LocationPtr(),
+  ExpressionPtr e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
                                        Expression::KindOfScalarExpression,
                                        T_STRING, string("begin")));
   m_bucketMap[0].add(e);
@@ -256,7 +256,7 @@ void AliasManager::endScope() {
     BucketMapEntry &bm = m_bucketMap[0];
     bm.import(cs.m_exprs);
     ExpressionPtr
-      e(new ScalarExpression(LocationPtr(),
+      e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
                              Expression::KindOfScalarExpression,
                              T_STRING, string("end")));
     bm.add(e);
@@ -544,8 +544,7 @@ void AliasManager::killLocals() {
         if (e->hasContext(Expression::UnsetContext) &&
             e->hasContext(Expression::LValue)) {
           if (!(effects & emask) && okToKill(e, true)) {
-            e->setReplacement(
-              Expression::MakeConstant(m_arp, e->getLocation(), "null"));
+            e->setReplacement(e->makeConstant(m_arp, "null"));
             m_replaced++;
           } else {
             effects |= Expression::UnknownEffect;
@@ -789,7 +788,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
 
             b->setReplacement(
               ExpressionPtr(new BinaryOpExpression(
-                              b->getLocation(),
+                              b->getScope(), b->getLocation(),
                               Expression::KindOfBinaryOpExpression,
                               lhs, rhs, getOpForAssignmentOp(b->getOp()))));
             m_replaced++;
@@ -804,12 +803,12 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
             val->clearContext();
             if (u->getFront()) {
               ExpressionPtr inc
-                (new ScalarExpression(u->getLocation(),
+                (new ScalarExpression(u->getScope(), u->getLocation(),
                                       Expression::KindOfScalarExpression,
                                       T_LNUMBER, string("1")));
 
               val = ExpressionPtr
-                (new BinaryOpExpression(u->getLocation(),
+                (new BinaryOpExpression(u->getScope(), u->getLocation(),
                                         Expression::KindOfBinaryOpExpression,
                                         val, inc,
                                         u->getOp() == T_INC ? '+' : '-'));
@@ -843,8 +842,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
             // we can delete this one
             if (rep->hasContext(Expression::UnsetContext) &&
                 rep->hasContext(Expression::LValue)) {
-              return canonicalizeRecurNonNull(
-                Expression::MakeConstant(m_arp, e->getLocation(), "null"));
+              return canonicalizeRecurNonNull(e->makeConstant(m_arp, "null"));
             }
           } else {
             switch (rep->getKindOf()) {
@@ -893,23 +891,19 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
                         if (a->isUnused() && rhs == value) {
                           value = value->replaceValue(
                             canonicalizeRecurNonNull(
-                              Expression::MakeConstant(
-                                m_arp, value->getLocation(), "null")));
+                              value->makeConstant(m_arp, "null")));
                           a->setNthKid(1, value);
                           m_changes++;
                         } else {
                           ExpressionListPtr el(
                             new ExpressionList(
-                              a->getLocation(),
+                              a->getScope(), a->getLocation(),
                               Expression::KindOfExpressionList,
                               ExpressionList::ListKindWrapped));
                           a = spc(AssignmentExpression, a->clone());
                           el->addElement(a);
                           el->addElement(a->getValue());
-                          a->setNthKid(
-                            1, Expression::MakeConstant(m_arp,
-                                                        value->getLocation(),
-                                                        "null"));
+                          a->setNthKid(1, value->makeConstant(m_arp, "null"));
                           rep->setReplacement(el);
                           m_replaced++;
                         }
@@ -991,12 +985,8 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
             if (ae->isUnused() && m_bucketMap[0].isLast(ae)) {
               rep = ae->clone();
               ae->setContext(Expression::DeadStore);
-              ae->setNthKid(1, Expression::MakeConstant(m_arp,
-                                                        ae->getLocation(),
-                                                        "null"));
-              ae->setNthKid(0, Expression::MakeConstant(m_arp,
-                                                        ae->getLocation(),
-                                                        "null"));
+              ae->setNthKid(1, ae->makeConstant(m_arp, "null"));
+              ae->setNthKid(0, ae->makeConstant(m_arp, "null"));
               Expression::recomputeEffects();
               m_replaced++;
               return e->replaceValue(canonicalizeRecurNonNull(rep));
@@ -1022,7 +1012,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
       return bop->replaceValue(
         canonicalizeNonNull(ExpressionPtr(
                               new BinaryOpExpression(
-                                bop->getLocation(),
+                                bop->getScope(), bop->getLocation(),
                                 Expression::KindOfBinaryOpExpression,
                                 lhs, rhs, rop))));
     }
@@ -1036,16 +1026,16 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
         if (op0->isScalar()) {
           ExpressionPtr op1 = bop->getExp2();
           ExpressionPtr rhs(
-              (new BinaryOpExpression(e->getLocation(),
-                                      Expression::KindOfBinaryOpExpression,
-                                      op0->clone(), op1->clone(), rop)));
+            (new BinaryOpExpression(e->getScope(), e->getLocation(),
+                                    Expression::KindOfBinaryOpExpression,
+                                    op0->clone(), op1->clone(), rop)));
 
           lhs = lhs->clone();
           lhs->clearContext(Expression::OprLValue);
           return e->replaceValue(
             canonicalizeRecurNonNull(
               ExpressionPtr(new AssignmentExpression(
-                              e->getLocation(),
+                              e->getScope(), e->getLocation(),
                               Expression::KindOfAssignmentExpression,
                               lhs, rhs, false))));
         }
@@ -1287,7 +1277,7 @@ int AliasManager::canonicalizeRecur(StatementPtr s) {
       ExpressionListPtr exprs = es->getExpressionList();
       for (int i = 0; i < exprs->getCount(); i++) {
         canonicalizeKid(exprs, exprs->getNthExpr(i), i);
-        ExpressionPtr e(new ScalarExpression(LocationPtr(),
+        ExpressionPtr e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
                                              Expression::KindOfScalarExpression,
                                              T_STRING, string("io")));
         add(m_bucketMap[0], e);
@@ -1501,7 +1491,8 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
 int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
   m_arp = ar;
 
-  m_variables = ar->getScope()->getVariables();
+  FunctionScopePtr func = m->getFunctionScope();
+  m_variables = func->getVariables();
   if (!m_variables->isPseudoMainTable()) {
     m_variables->clearUsed();
   }
@@ -1519,7 +1510,6 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
   }
 
   collectAliasInfoRecur(m->getStmts(), false);
-  FunctionScopePtr func = ar->getFunctionScope();
   if (func) {
     if (m_inlineAsExpr) {
       if (!Option::AutoInline ||

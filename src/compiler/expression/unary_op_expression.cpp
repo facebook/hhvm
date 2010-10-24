@@ -157,11 +157,12 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void UnaryOpExpression::onParse(AnalysisResultPtr ar) {
+void UnaryOpExpression::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   if (m_op == T_EVAL) {
     ConstructPtr self = shared_from_this();
     Compiler::Error(Compiler::UseEvaluation, self);
-    ar->getFileScope()->setAttribute(FileScope::ContainsLDynamicVariable);
+    dynamic_pointer_cast<FileScope>(scope)->
+      setAttribute(FileScope::ContainsLDynamicVariable);
   }
 }
 
@@ -276,7 +277,7 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
       m_exp->isScalar() &&
       m_exp->getScalarValue(value) &&
       preCompute(value, result)) {
-    return replaceValue(MakeScalarExpression(ar, getLocation(), result));
+    return replaceValue(makeScalarExpression(ar, result));
   }
   return ExpressionPtr();
 }
@@ -355,7 +356,7 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_EVAL:
     et = Type::String;
     rt = Type::Any;
-    ar->getScope()->getVariables()->forceVariants(ar, VariableTable::AnyVars);
+    getScope()->getVariables()->forceVariants(ar, VariableTable::AnyVars);
     break;
   case T_FILE:          et = rt = Type::String;                      break;
   default:
@@ -601,9 +602,9 @@ bool UnaryOpExpression::outputCPPImplOpEqual(CodeGenerator &cg,
     cg_printf("o_assign_op<%s,%d>(",
               isUnused() ? "void" : "Variant", m_op);
     var->outputCPPProperty(cg, ar);
-    cg_printf(", %s, %s)",
+    cg_printf(", %s%s)",
               isUnused() || m_front ? "null_variant" : "Variant(0)",
-              ar->getClassScope() ? "s_class_name" : "empty_string");
+              originalClassName(cg, true).c_str());
     return true;
   }
   return false;
@@ -625,15 +626,16 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       ExpressionListPtr pairs = dynamic_pointer_cast<ExpressionList>(m_exp);
       Variant v;
       if (pairs && pairs->isScalarArrayPairs() && pairs->getScalarValue(v)) {
-        id = ar->registerScalarArray(m_exp, hash, index, text);
+        id = ar->registerScalarArray(getFileScope(), m_exp, hash, index, text);
       }
     } else {
-      id = ar->registerScalarArray(m_exp, hash, index, text); // empty array
+      id = ar->registerScalarArray(getFileScope(), m_exp,
+                                   hash, index, text); // empty array
     }
     if (id != -1) {
       if (Option::UseNamedScalarArray &&
           cg.getContext() == CodeGenerator::CppParameterDefaultValueDecl) {
-        ar->getFileScope()->addUsedDefaultValueScalarArray(text);
+        getFileScope()->addUsedDefaultValueScalarArray(text);
       }
       ar->outputCPPScalarArrayId(cg, id, hash, index);
       return;
@@ -702,14 +704,14 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     case T_EVAL:
       if (Option::EnableEval > Option::NoEval) {
         bool instance;
-        if (ar->getClassScope()) {
-          FunctionScopePtr fs = ar->getFunctionScope();
+        if (getClassScope()) {
+          FunctionScopePtr fs = getFunctionScope();
           instance = fs && !fs->isStatic();
         } else {
           instance = false;
         }
         cg_printf("eval(%s, Object(%s), ",
-                  ar->getScope()->inPseudoMain() ?
+                  getScope()->inPseudoMain() ?
                   "get_variable_table()" : "variables",
                   instance ? "this" : "");
       } else {

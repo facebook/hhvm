@@ -167,8 +167,7 @@ bool VariableTable::isLocal(const string &name) const {
 
 bool VariableTable::isLocal(const Symbol *sym) const {
   if (!sym) return false;
-  FunctionScope *func = dynamic_cast<FunctionScope*>(getScope());
-  if (func) {
+  if (getScopePtr()->is(BlockScope::FunctionScope)) {
     /*
       isSuperGlobal is not wanted here. It just means that
       $GLOBALS[name] was referenced in this scope.
@@ -333,8 +332,8 @@ void VariableTable::addStaticVariable(Symbol *sym,
   StaticGlobalInfoPtr sgi(new StaticGlobalInfo());
   sgi->name = sym->getName();
   sgi->variables = this;
-  sgi->cls = ar->getClassScope();
-  sgi->func = member ? FunctionScopePtr() : ar->getFunctionScope();
+  sgi->cls = getClassScope();
+  sgi->func = member ? FunctionScopePtr() : getFunctionScope();
 
   string id = StaticGlobalInfo::getName(sgi->cls, sgi->func, sym->getName());
   ASSERT(globalVariables->m_staticGlobals.find(id) ==
@@ -368,7 +367,7 @@ TypePtr VariableTable::add(const string &name, TypePtr type,
   Symbol *sym = getSymbol(name, true);
   if (getAttribute(InsideStaticStatement)) {
     addStaticVariable(sym, ar);
-    if (ar->needStaticArray(ar->getClassScope(), ar->getFunctionScope())) {
+    if (ar->needStaticArray(getClassScope(), getFunctionScope())) {
       forceVariant(ar, name, AnyVars);
     }
   } else if (getAttribute(InsideGlobalStatement)) {
@@ -441,7 +440,7 @@ TypePtr VariableTable::checkVariable(const string &name, TypePtr type,
     bool isLocal = !sym->isGlobal() && !sym->isSystem();
     if (isLocal && !getAttribute(ContainsLDynamicVariable) &&
         ar->isFirstPass()) {
-      if (ar->getScope()->getLoopNestedLevel() == 0) {
+      if (construct->getScope()->getLoopNestedLevel() == 0) {
         Compiler::Error(Compiler::UseUndeclaredVariable, construct);
       }
       type = Type::Variant;
@@ -1176,7 +1175,7 @@ void VariableTable::outputCPPVariableInit(CodeGenerator &cg,
     cg_printf(" __attribute__((__unused__)) = ");
     if (cg.getOutput() != CodeGenerator::SystemCPP) {
       cg_printf("(variables != gVariables) ? variables->get(");
-      cg_printString(name, ar);
+      cg_printString(name, ar, getBlockScope());
       cg_printf(") : ");
     }
     cg_printf("g->");
@@ -1212,12 +1211,12 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
     if (sym->isStatic()) {
       string id = StaticGlobalInfo::getId
-        (cg, ar->getClassScope(), ar->getFunctionScope(), name);
+        (cg, getClassScope(), getFunctionScope(), name);
 
       TypePtr type = sym->getFinalType();
       type->outputCPPDecl(cg, ar);
-      if (ar->needStaticArray(ar->getClassScope(), ar->getFunctionScope())) {
-        const char *cname = ar->getFunctionScope()->isStatic() ? "cls" :
+      if (ar->needStaticArray(getClassScope(), getFunctionScope())) {
+        const char *cname = getFunctionScope()->isStatic() ? "cls" :
           "this->o_getClassName()";
         cg_printf(" &%s%s __attribute__((__unused__)) = "
                   "g->%s%s.lvalAt(%s);\n",
@@ -1300,7 +1299,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (Option::GenerateCPPMacros && getAttribute(ContainsDynamicVariable) &&
       cg.getOutput() != CodeGenerator::SystemCPP && !inPseudoMain) {
     outputCPPVariableTable(cg, ar);
-    ar->m_variableTableFunctions.insert(getScope()->getName());
+    ar->m_variableTableFunctions.insert(getScopePtr()->getName());
   }
 }
 
@@ -1482,10 +1481,10 @@ void VariableTable::outputCPPPropertyClone(CodeGenerator &cg,
                   Option::PropertyPrefix, formatted.c_str());
       } else {
         cg_printf("Variant v%d = o_get(", i);
-        cg_printString(name, ar);
+        cg_printString(name, ar, getBlockScope());
         cg_printf(");\n");
         cg_printf("clone->o_set(");
-        cg_printString(name, ar);
+        cg_printString(name, ar, getBlockScope());
         cg_printf(", v%d.isReferenced() ? ref(v%d) : v%d);\n", i, i, i);
       }
     } else {
@@ -1580,19 +1579,19 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
            but we need to set the entry here, to get the
            iteration order right */
         cg_printf("props.set(");
-        cg_printString(prop, ar);
+        cg_printString(prop, ar, getBlockScope());
         cg_printf(", null_variant, true);\n");
       } else if (sym->getFinalType()->is(Type::KindOfVariant)) {
         cg_printf("if (isInitialized(%s%s)) props.%s(",
                   Option::PropertyPrefix, s, priv ? "add" : "set");
-        cg_printString(prop, ar);
+        cg_printString(prop, ar, getBlockScope());
         cg_printf(", %s%s.isReferenced() ? ref(%s%s) : %s%s, "
                   "true);\n",
                   Option::PropertyPrefix, s, Option::PropertyPrefix, s,
                   Option::PropertyPrefix, s);
       } else {
         cg_printf("props.%s(", priv ? "add" : "set");
-        cg_printString(prop, ar);
+        cg_printString(prop, ar, getBlockScope());
         cg_printf(", %s%s, true);\n", Option::PropertyPrefix, s);
       }
     }
@@ -1616,13 +1615,13 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
     string prop = '\0' + clsScope.getOriginalName() + '\0' + sym->getName();
     if (sym->getFinalType()->is(Type::KindOfVariant)) {
       cg_printf("props->load(");
-      cg_printString(prop, ar);
+      cg_printString(prop, ar, getBlockScope());
       cg_printf(", %s%s);\n", Option::PropertyPrefix, s);
     } else {
       cg_printf("if (props->exists(");
-      cg_printString(prop, ar);
+      cg_printString(prop, ar, getBlockScope());
       cg_printf(")) %s%s = props->get(", Option::PropertyPrefix, s);
-      cg_printString(prop, ar);
+      cg_printString(prop, ar, getBlockScope());
       cg_printf(");\n");
     }
   }
@@ -1640,7 +1639,7 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
 bool VariableTable::outputCPPPrivateSelector(CodeGenerator &cg,
                                              AnalysisResultPtr ar,
                                              const char *op, const char *args) {
-  ClassScopePtr cls = ar->getClassScope();
+  ClassScopePtr cls = getClassScope();
   vector<const char *> classes;
   do {
     // Note: outputCPPPrivateSelector() is only used for non-static properties.
@@ -1655,7 +1654,7 @@ bool VariableTable::outputCPPPrivateSelector(CodeGenerator &cg,
             "FrameInjection::GetClassName(false) : context;\n");
   for (JumpTable jt(cg, classes, true, false, true); jt.ready(); jt.next()) {
     const char *name = jt.key();
-    if (!strcasecmp(name, ar->getClassScope()->getOriginalName().c_str())) {
+    if (!strcasecmp(name, getClassScope()->getOriginalName().c_str())) {
       cg_printf("HASH_GUARD_STRING(0x%016llXLL, %s) "
                 "{ return %s%sPrivate(prop%s); }\n",
                 hash_string(name), name, Option::ObjectPrefix, op, args);
@@ -1770,7 +1769,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   if (hasStatic) {
-    ClassScopePtr cls = ar->getClassScope();
+    ClassScopePtr cls = getClassScope();
     if (cls && cls->needLazyStaticInitializer()) {
       cg_printf("lazy_initializer(g);\n");
     }
@@ -1787,7 +1786,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       prefix ? prefix : getVariablePrefix(ar, name);
     string varName;
     if (prefix == Option::StaticPropertyPrefix) {
-      varName = string(prefix) + ar->getClassScope()->getId(cg) +
+      varName = string(prefix) + getClassScope()->getId(cg) +
         Option::IdPrefix + cg.formatLabel(name);
     } else {
       varName = string(symbol_prefix) + cg.formatLabel(name);
@@ -1824,7 +1823,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       break;
     case VariableTable::JumpInitializedString: {
       int index = -1;
-      int stringId = cg.checkLiteralString(name, index, ar);
+      int stringId = cg.checkLiteralString(name, index, ar, getBlockScope());
       if (stringId >= 0) {
         if (index == -1) {
           cg_printf("HASH_INITIALIZED_LITSTR(0x%016llXLL, %d, %s,\n",
@@ -1855,7 +1854,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       break;
     case VariableTable::JumpReturnString: {
       int index = -1;
-      int stringId = cg.checkLiteralString(name, index, ar);
+      int stringId = cg.checkLiteralString(name, index, ar, getBlockScope());
       if (stringId >= 0) {
         if (index == -1) {
           cg_printf("HASH_RETURN_LITSTR(0x%016llXLL, %d, %s,\n",
@@ -1880,7 +1879,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
         dynamic_pointer_cast<Expression>(getClassInitVal(name));
       if (value) {
         cg_printf("HASH_RETURN_NAMSTR(0x%016llXLL, ", hash_string(name));
-        cg_printString(name, ar);
+        cg_printString(name, ar, getBlockScope());
         cg_printf(",\n");
         cg_printf("                   ");
         CodeGenerator::Context oldContext = cg.getContext();

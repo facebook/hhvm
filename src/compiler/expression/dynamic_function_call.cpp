@@ -76,11 +76,11 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
   reset();
   ConstructPtr self = shared_from_this();
   if (!m_className.empty()) {
-    ClassScopePtr cls = ar->resolveClass(m_className);
+    ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_className);
     if (!cls || cls->isRedeclaring()) {
       if (cls) {
         m_redeclared = true;
-        ar->getScope()->getVariables()->
+        getScope()->getVariables()->
           setAttribute(VariableTable::NeedGlobalPointer);
       }
       if (!cls && ar->isFirstPass()) {
@@ -151,7 +151,7 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   m_nameExp->preOutputCPP(cg, ar, state);
 
   ar->wrapExpressionBegin(cg);
-  m_ciTemp = cg.createNewId(ar);
+  m_ciTemp = cg.createNewId(shared_from_this());
   bool lsb = false;
   ClassScopePtr cls;
   if (m_validClass) {
@@ -163,9 +163,9 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       m_origClassName != "static") {
     // Create a temporary to hold the class name, in case it is not a
     // StaticString.
-    m_clsNameTemp = cg.createNewId(ar);
+    m_clsNameTemp = cg.createNewId(shared_from_this());
     cg_printf("CStrRef clsName%d(", m_clsNameTemp);
-    cg_printString(m_origClassName, ar);
+    cg_printString(m_origClassName, ar, shared_from_this());
     cg_printf(");\n");
   }
 

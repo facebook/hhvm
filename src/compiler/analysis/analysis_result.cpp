@@ -77,9 +77,8 @@ void AnalysisResult::appendExtraCode(const std::string &code) {
 ///////////////////////////////////////////////////////////////////////////////
 // general functions
 
-void AnalysisResult::setFileScope(FileScopePtr fileScope) {
+void AnalysisResult::addFileScope(FileScopePtr fileScope) {
   ASSERT(fileScope);
-  m_file = fileScope;
 
   StringToFileScopePtrMap::const_iterator iter =
     m_files.find(fileScope->getName());
@@ -103,39 +102,19 @@ FileScopePtr AnalysisResult::findFileScope(const std::string &name,
   StringToFileScopePtrMap::const_iterator iter = m_files.find(name);
   if (iter != m_files.end()) return iter->second;
 
-  if (parseOnDemand &&
+  if (!parseOnDemand ||
       Option::PackageExcludeFiles.find(name) !=
       Option::PackageExcludeFiles.end()) {
     return FileScopePtr();
   }
 
-  FileScopePtr curr = m_file;
   if (parseOnDemand && (m_parseOnDemand || inParseOnDemandDirs(name)) &&
       m_package && m_package->parse(name.c_str())) {
-    m_file = curr;
     iter = m_files.find(name);
     ASSERT(iter != m_files.end());
     return iter->second;
   }
   return FileScopePtr();
-}
-
-void AnalysisResult::pushScope(BlockScopePtr scope) {
-  m_scope = scope;
-  m_scopes.push_back(scope);
-  if (scope->is(BlockScope::FileScope)) {
-    m_file = dynamic_pointer_cast<HPHP::FileScope>(scope);
-  }
-}
-
-void AnalysisResult::popScope() {
-  ASSERT(!m_scopes.empty());
-  m_scopes.pop_back();
-  if (m_scopes.empty()) {
-    m_scope.reset();
-  } else {
-    m_scope = m_scopes.back();
-  }
 }
 
 void AnalysisResult::pushStatement(StatementPtr stmt) {
@@ -169,29 +148,17 @@ StatementPtr AnalysisResult::getStatementForSilencer() const {
   return m_stmt;
 }
 
-ClassScopePtr AnalysisResult::getClassScope() const {
-  for (int i = m_scopes.size() - 1; i >= 0; i--) {
-    ClassScopePtr classScope =
-      dynamic_pointer_cast<HPHP::ClassScope>(m_scopes[i]);
-    if (classScope) return classScope;
-  }
-  return ClassScopePtr();
-}
-
-FunctionScopePtr AnalysisResult::getFunctionScope() const {
-  return dynamic_pointer_cast<HPHP::FunctionScope>(getScope());
-}
-
-ClassScopePtr AnalysisResult::resolveClass(std::string &className) {
+ClassScopePtr AnalysisResult::resolveClass(ConstructPtr cs,
+                                           std::string &className) {
   // resolving self and parent
   if (className == "self") {
-    ClassScopePtr cls = getClassScope();
+    ClassScopePtr cls = cs->getClassScope();
     if (cls) {
       className = cls->getName();
       return cls;
     }
   } else if (className == "parent") {
-    ClassScopePtr cls = getClassScope();
+    ClassScopePtr cls = cs->getClassScope();
     if (cls && !cls->getParent().empty()) {
       className = cls->getParent();
     }
@@ -303,16 +270,17 @@ bool AnalysisResult::classMemberExists(const std::string &name,
   return m_classDecs.find(name) != m_classDecs.end();
 }
 
-ClassScopePtr AnalysisResult::findExactClass(const std::string &name) {
+ClassScopePtr AnalysisResult::findExactClass(ConstructPtr cs,
+                                             const std::string &name) {
   ClassScopePtr cls = findClass(name);
   if (!cls || !cls->isRedeclaring()) return cls;
   std::string lowerName = Util::toLower(name);
-  if (ClassScopePtr currentCls = getClassScope()) {
+  if (ClassScopePtr currentCls = cs->getClassScope()) {
     if (lowerName == currentCls->getName()) {
       return currentCls;
     }
   }
-  if (FileScopePtr currentFile = getFileScope()) {
+  if (FileScopePtr currentFile = cs->getFileScope()) {
     StatementList &stmts = *currentFile->getStmt();
     for (int i = stmts.getCount(); i--; ) {
       StatementPtr s = stmts[i];
@@ -328,17 +296,18 @@ ClassScopePtr AnalysisResult::findExactClass(const std::string &name) {
   return ClassScopePtr();
 }
 
-bool AnalysisResult::checkClassPresent(const std::string &name) {
+bool AnalysisResult::checkClassPresent(ConstructPtr cs,
+                                       const std::string &name) {
   if (name == "self" || name == "parent") return true;
   std::string lowerName = Util::toLower(name);
-  if (ClassScopePtr currentCls = getClassScope()) {
+  if (ClassScopePtr currentCls = cs->getClassScope()) {
     if (lowerName == currentCls->getName() ||
         currentCls->derivesFrom(shared_from_this(), lowerName,
                                 true, false)) {
       return true;
     }
   }
-  if (FileScopePtr currentFile = getFileScope()) {
+  if (FileScopePtr currentFile = cs->getFileScope()) {
     StatementList &stmts = *currentFile->getStmt();
     for (int i = stmts.getCount(); i--; ) {
       StatementPtr s = stmts[i];
@@ -356,12 +325,6 @@ bool AnalysisResult::checkClassPresent(const std::string &name) {
     }
   }
   return false;
-}
-
-FunctionContainerPtr AnalysisResult::getFunctionContainer() {
-  ClassScopePtr cls = getClassScope();
-  if (cls) return cls;
-  return getFileScope();
 }
 
 int AnalysisResult::getFunctionCount() const {
@@ -594,7 +557,6 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   getVariables()->forceVariants(ar, VariableTable::AnyVars);
   getVariables()->setAttribute(VariableTable::ContainsLDynamicVariable);
   getVariables()->setAttribute(VariableTable::ContainsExtract);
-  pushScope(ar);
 
   checkClassDerivations();
 
@@ -606,8 +568,9 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
     m_fileScopes[i]->analyzeProgram(ar);
   }
   if (!m_extraCode.empty()) {
-    string filename = Option::LambdaPrefix + "lambda";
-    Compiler::Parser::ParseString(m_extraCode.c_str(), ar, filename.c_str());
+    m_extraCodeFileName = Option::LambdaPrefix + "lambda";
+    Compiler::Parser::ParseString(m_extraCode.c_str(), ar,
+                                  m_extraCodeFileName.c_str());
   }
   for (; i < m_fileScopes.size(); i++) {
     m_fileScopes[i]->analyzeProgram(ar);
@@ -758,6 +721,7 @@ void AnalysisResult::analyzeProgramFinal() {
   for (uint i = 0; i < m_fileScopes.size(); i++) {
     m_fileScopes[i]->analyzeProgram(ar);
   }
+  setPhase(AnalysisResult::CodeGen);
 }
 
 void AnalysisResult::inferTypes(int maxPass /* = 100 */) {
@@ -770,9 +734,7 @@ void AnalysisResult::inferTypes(int maxPass /* = 100 */) {
     for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
          iter != m_files.end(); ++iter) {
       FileScopePtr file = iter->second;
-      pushScope(file);
       file->inferTypes(ar);
-      popScope();
     }
     if (lastInference) {
       return;
@@ -825,9 +787,7 @@ void AnalysisResult::preOptimize(int maxPass /* = 100 */) {
       for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
            iter != m_files.end(); ++iter) {
         FileScopePtr file = iter->second;
-        pushScope(file);
         file->preOptimize(ar);
-        popScope();
       }
       if (lastOptCounter == m_optCounter) break;
     }
@@ -850,9 +810,7 @@ void AnalysisResult::postOptimize(int maxPass /* = 100 */) {
     for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
          iter != m_files.end(); ++iter) {
       FileScopePtr file = iter->second;
-      pushScope(file);
       file->postOptimize(ar);
-      popScope();
     }
     if (lastOptCounter == m_optCounter) break;
   }
@@ -862,7 +820,8 @@ void AnalysisResult::postOptimize(int maxPass /* = 100 */) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-int AnalysisResult::registerScalarArray(ExpressionPtr pairs, int &hash,
+int AnalysisResult::registerScalarArray(FileScopePtr scope,
+                                        ExpressionPtr pairs, int &hash,
                                         int &index, string &text) {
   int id = -1;
   hash = -1;
@@ -899,7 +858,7 @@ int AnalysisResult::registerScalarArray(ExpressionPtr pairs, int &hash,
       strings.push_back(text);
     }
     index = i;
-    getFileScope()->addUsedScalarArray(text);
+    scope->addUsedScalarArray(text);
   }
   return id;
 }
@@ -1305,7 +1264,6 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
 
     // for each file, generate one header and a list of class headers
     BOOST_FOREACH(FileScopePtr fs, iter->second) {
-      pushScope(fs);
       string fileBase = fs->outputFilebase();
       Util::mkdir(root + fileBase);
       string header = fileBase + ".h";
@@ -1333,7 +1291,6 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
         fs->outputCPPForwardStaticDecl(cg, ar);
         f.close();
       }
-      popScope();
     }
   }
 
@@ -1425,27 +1382,19 @@ void AnalysisResult::outputAllCPP(CodeGenerator &cg) {
 
   cg.setContext(CodeGenerator::CppImplementation);
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    pushScope(fs);
     fs->outputCPPImpl(cg, ar);
-    popScope();
   }
   cg.setContext(CodeGenerator::CppPseudoMain);
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    pushScope(fs);
     fs->outputCPPPseudoMain(cg, ar);
-    popScope();
   }
   cg.setContext(CodeGenerator::CppForwardDeclaration);
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    pushScope(fs);
     fs->outputCPPForwardDeclarations(cg, ar);
-    popScope();
   }
   cg.setContext(CodeGenerator::CppDeclaration);
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    pushScope(fs);
     fs->outputCPPDeclarations(cg, ar);
-    popScope();
   }
   cg.namespaceEnd();
 
@@ -1474,9 +1423,7 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
     merged[cls->getName()].push_back(cls);
     cls->outputCPPDynamicClassImpl(cg, ar);
     if (extension) {
-      pushScope(cls);
       cls->outputCPPSupportMethodsImpl(cg, ar);
-      popScope();
     }
   }
 
@@ -2205,7 +2152,6 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       }
     }
     BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-      pushScope(fs);
       ConstantTablePtr ct = fs->getConstants();
       vector<string> syms;
       ct->getSymbols(syms);
@@ -2215,7 +2161,6 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
         dyns[sym.c_str()] = ct->isDynamic(sym);
       }
       ct->outputCPP(cg, ar);
-      popScope();
     }
 
     cg.printSection("Get Constant Table");
@@ -2461,9 +2406,7 @@ void AnalysisResult::outputCPPDynamicConstantDecl(CodeGenerator &cg) {
     for (vector<ClassScopePtr>::const_iterator viter = iter->second.begin();
          viter != iter->second.end(); ++viter) {
       const ClassScopePtr &cls = *viter;
-      pushScope(cls);
       cls->getConstants()->outputCPPDynamicDecl(cg, ar);
-      popScope();
     }
   }
 }
@@ -3395,12 +3338,10 @@ void AnalysisResult::outputCPPClusterImpl(CodeGenerator &cg,
   // implementations
   cg.namespaceBegin();
   BOOST_FOREACH(FileScopePtr fs, files) {
-    pushScope(fs);
     cg.setContext(CodeGenerator::CppImplementation);
     fs->outputCPPImpl(cg, ar);
     cg.setContext(CodeGenerator::CppPseudoMain);
     fs->outputCPPPseudoMain(cg, ar);
-    popScope();
   }
   cg.namespaceEnd();
 }
@@ -3428,9 +3369,7 @@ void AnalysisResult::outputCPPFFIStubs() {
   cg_printf("/* preface finishes */\n");
 
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    pushScope(fs);
     fs->outputCPPFFI(cg, ar);
-    popScope();
   }
 
   cg.useStream(CodeGenerator::PrimaryStream);
@@ -3471,9 +3410,7 @@ void AnalysisResult::outputHSFFIStubs() {
   cg_printf("import Foreign.Marshal.Alloc (alloca)\n");
   cg_printf("import Foreign.Storable (peek)\n");
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    pushScope(fs);
     fs->outputHSFFI(cg, ar);
-    popScope();
   }
   f.close();
 }
@@ -3511,9 +3448,7 @@ void AnalysisResult::outputJavaFFIStubs() {
   cg_printf("public static native HphpVariant identify(long ptr);\n\n");
 
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    pushScope(fs);
     fs->outputJavaFFI(cg, ar);
-    popScope();
   }
 
   cg_indentEnd("}\n");
@@ -3540,9 +3475,7 @@ void AnalysisResult::outputJavaFFICppDecl() {
             mangledName.c_str());
 
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    pushScope(fs);
     fs->outputJavaFFICPPStub(cg, ar);
-    popScope();
   }
 
   cg_printf("}\n");
@@ -3594,9 +3527,7 @@ void AnalysisResult::outputJavaFFICppImpl() {
   cg_indentEnd("}\n\n");
 
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    pushScope(fs);
     fs->outputJavaFFICPPStub(cg, ar);
-    popScope();
   }
 
   f.close();
@@ -3618,9 +3549,7 @@ void AnalysisResult::outputSwigFFIStubs() {
   cg.setContext(CodeGenerator::SwigFFIImpl);
 
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    pushScope(fs);
     fs->outputSwigFFIStubs(cg, ar);
-    popScope();
   }
 
   cg_printf("%%}\n\n");
@@ -3638,9 +3567,7 @@ void AnalysisResult::outputSwigFFIStubs() {
   cg.setContext(CodeGenerator::SwigFFIDecl);
 
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    pushScope(fs);
     fs->outputSwigFFIStubs(cg, ar);
-    popScope();
   }
 
   f.close();
@@ -3782,7 +3709,7 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
       string name = getLiteralStringName(hash, i);
       if (genStatic) {
         cg_printf("static StaticString %s(", name.c_str());
-        cg_printString(strings[i], ar, false, false);
+        cg_printString(strings[i], ar, BlockScopePtr(), false);
         cg_printf(");\n");
       } else {
         cg_printf("extern StaticString %s;\n", name.c_str());
@@ -3813,7 +3740,7 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
     for (unsigned int i = 0; i < strings.size(); i++) {
       string name = getLiteralStringName(hash, i);
       cg_printf("StaticString %s(", name.c_str());
-      cg_printString(strings[i], ar, false, false);
+      cg_printString(strings[i], ar, BlockScopePtr(), false);
       cg_printf(");\n");
     }
   }
@@ -3899,10 +3826,8 @@ void AnalysisResult::outputCPPSepExtensionImpl(const std::string &filename) {
        iter != m_systemClasses.end(); ++iter) {
     ClassScopePtr cls = iter->second;
     if (cls->isSepExtension()) {
-      pushScope(cls);
       cls->outputCPPDynamicClassImpl(cg, ar);
       cls->outputCPPSupportMethodsImpl(cg, ar);
-      popScope();
     }
   }
 

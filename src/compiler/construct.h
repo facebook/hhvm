@@ -24,10 +24,15 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class Variant;
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(IParseHandler);
 DECLARE_BOOST_TYPES(Location);
 DECLARE_BOOST_TYPES(AnalysisResult);
+DECLARE_BOOST_TYPES(BlockScope);
+DECLARE_BOOST_TYPES(ClassScope);
+DECLARE_BOOST_TYPES(FunctionScope);
+DECLARE_BOOST_TYPES(FileScope);
 
 class IParseHandler {
 public:
@@ -37,7 +42,7 @@ public:
    * To avoid iteration of parse tree, we move any work that can be done
    * in parse phase into this function, so to speed up static analysis.
    */
-  virtual void onParse(AnalysisResultPtr ar) = 0;
+  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope) = 0;
 };
 
 /**
@@ -46,7 +51,7 @@ public:
 class Construct : public boost::enable_shared_from_this<Construct>,
                   public JSON::ISerializable {
 public:
-  Construct(LocationPtr loc);
+  Construct(BlockScopePtr scope, LocationPtr loc);
   virtual ~Construct() {}
 
   enum Effect {
@@ -72,12 +77,19 @@ public:
     UnknownEffect = 0xfff        // any of the above
   };
 
-  LocationPtr getLocation() { return m_loc;}
+  LocationPtr getLocation() const { return m_loc;}
   void setLocation(LocationPtr loc) { m_loc = loc;}
   void setFileLevel() { m_topLevel = m_fileLevel = true;}
   void setTopLevel() { m_topLevel = true;}
   bool isFileLevel() const { return m_fileLevel;}
   bool isTopLevel() const { return m_topLevel;}
+  BlockScopePtr getScope() const { return m_blockScope.lock(); }
+  void setBlockScope(BlockScopePtr scope) { m_blockScope = scope; }
+  FileScopePtr getFileScope() const;
+  FunctionScopePtr getFunctionScope() const;
+  ClassScopePtr getClassScope() const;
+  void resetScope(BlockScopePtr scope);
+
   virtual int getLocalEffects() const { return UnknownEffect;}
   int getChildrenEffects() const;
   int getContainedEffects() const;
@@ -90,6 +102,15 @@ public:
       return boost::dynamic_pointer_cast<T>(constr->clone());
     }
     return boost::shared_ptr<T>();
+  }
+
+  template<typename T>
+  boost::shared_ptr<T> Clone(boost::shared_ptr<T> constr, BlockScopePtr scope) {
+    if (constr) {
+      constr = constr->clone();
+      constr->resetScope(scope);
+    }
+    return constr;
   }
 
   /**
@@ -138,9 +159,13 @@ public:
    * Write where this construct was in PHP files.
    */
   void printSource(CodeGenerator &cg);
-
+  ExpressionPtr makeConstant(AnalysisResultPtr ar,
+                             const std::string &value) const;
+  ExpressionPtr makeScalarExpression(AnalysisResultPtr ar,
+                                     const Variant &value) const;
 private:
   std::string m_text;
+  BlockScopeWeakPtr m_blockScope;
 
 protected:
   LocationPtr m_loc;

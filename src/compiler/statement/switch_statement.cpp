@@ -178,7 +178,7 @@ void SwitchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  int labelId = cg.createNewLocalId(ar);
+  int labelId = cg.createNewLocalId(shared_from_this());
 
   bool staticCases = true;
   if (!m_exp->getType()->isInteger()) {
@@ -217,7 +217,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   int varId = -1;
 
   if (m_exp->preOutputCPP(cg, ar, 0)) {
-    varId = cg.createNewLocalId(ar);
+    varId = cg.createNewLocalId(shared_from_this());
     m_exp->getType()->outputCPPDecl(cg, ar);
     cg_printf(" %s%d;\n", Option::TempPrefix, varId);
 
@@ -240,7 +240,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("}\n");
   } else {
     if (varId < 0) {
-      varId = cg.createNewLocalId(ar);
+      varId = cg.createNewLocalId(shared_from_this());
       m_exp->getType()->outputCPPDecl(cg, ar);
       cg_printf(" %s%d = (", Option::TempPrefix, varId);
       m_exp->outputCPP(cg, ar);

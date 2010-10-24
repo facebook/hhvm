@@ -47,7 +47,8 @@ FileScope::FileScope(const string &fileName, int fileSize)
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void FileScope::setTree(StatementListPtr tree) {
+FunctionScopePtr FileScope::setTree(AnalysisResultPtr ar,
+                                    StatementListPtr tree) {
   m_tree = tree;
 
   for (int i = 0; i < tree->getCount(); i++) {
@@ -59,6 +60,7 @@ void FileScope::setTree(StatementListPtr tree) {
       exp->setFileLevel();
     }
   }
+  return createPseudoMain(ar);
 }
 
 bool FileScope::addClass(AnalysisResultPtr ar, ClassScopePtr classScope) {
@@ -172,10 +174,6 @@ void FileScope::addConstantDependency(AnalysisResultPtr ar,
 }
 
 void FileScope::analyzeProgram(AnalysisResultPtr ar) {
-  if (ar->getPhase() == AnalysisResult::AnalyzeInclude)
-      createPseudoMain(ar);
-
-  ar->pushScope(shared_from_this());
   for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
        it != m_functions.end(); ++it) {
     if (it->second[0]->inPseudoMain()) {
@@ -183,7 +181,6 @@ void FileScope::analyzeProgram(AnalysisResultPtr ar) {
       break;
     }
   }
-  ar->popScope();
 }
 
 void FileScope::visit(AnalysisResultPtr ar,
@@ -236,10 +233,10 @@ const string &FileScope::pseudoMainName() {
   return m_pseudoMainName;
 }
 
-void FileScope::createPseudoMain(AnalysisResultPtr ar) {
+FunctionScopePtr FileScope::createPseudoMain(AnalysisResultPtr ar) {
   StatementListPtr st = m_tree;
   FunctionStatementPtr f
-    (new FunctionStatement(LocationPtr(),
+    (new FunctionStatement(BlockScopePtr(), LocationPtr(),
                            Statement::KindOfFunctionStatement,
                            false, pseudoMainName(),
                            ExpressionListPtr(), st, 0, ""));
@@ -254,6 +251,7 @@ void FileScope::createPseudoMain(AnalysisResultPtr ar) {
                              true));
   f->setFunctionScope(pseudoMain);
   m_functions[pseudoMainName()].push_back(pseudoMain);
+  return pseudoMain;
 }
 
 string FileScope::outputFilebase() {
@@ -273,18 +271,14 @@ void FileScope::outputCPPHelper(CodeGenerator &cg, AnalysisResultPtr ar,
     for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
          it != m_classes.end(); ++it) {
       BOOST_FOREACH(ClassScopePtr cls, it->second) {
-        ar->pushScope(cls);
         cls->getStmt()->outputCPP(cg, ar);
-        ar->popScope();
       }
     }
   }
   for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
        it != m_functions.end(); ++it) {
     BOOST_FOREACH(FunctionScopePtr func, it->second) {
-      ar->pushScope(func);
       func->getStmt()->outputCPP(cg, ar);
-      ar->popScope();
     }
   }
 }
@@ -368,7 +362,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   string str;
   BOOST_FOREACH(str, m_usedLiteralStringsHeader) {
     int index = -1;
-    int stringId = cg.checkLiteralString(str, index, ar);
+    int stringId = cg.checkLiteralString(str, index, ar, BlockScopePtr());
     assert(index != -1);
     string lisnam = ar->getLiteralStringName(stringId, index);
     cg_printf("extern StaticString %s;\n", lisnam.c_str());
@@ -394,9 +388,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
        it != m_classes.end(); ++it) {
     BOOST_FOREACH(ClassScopePtr cls, it->second) {
-      ar->pushScope(cls);
       cls->getStmt()->outputCPP(cg, ar);
-      ar->popScope();
     }
   }
 
@@ -513,7 +505,7 @@ void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
       continue;
     }
     int index = -1;
-    int stringId = cg.checkLiteralString(str, index, ar);
+    int stringId = cg.checkLiteralString(str, index, ar, BlockScopePtr());
     assert(index != -1);
     string lisnam = ar->getLiteralStringName(stringId, index);
     cg_printf("extern StaticString %s;\n", lisnam.c_str());
@@ -586,9 +578,7 @@ void FileScope::outputJavaFFI(CodeGenerator &cg, AnalysisResultPtr ar) {
   for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
        it != m_functions.end(); ++it) {
     BOOST_FOREACH(FunctionScopePtr func, it->second) {
-      ar->pushScope(func);
       func->getStmt()->outputCPP(cg, ar);
-      ar->popScope();
     }
   }
 
@@ -596,9 +586,7 @@ void FileScope::outputJavaFFI(CodeGenerator &cg, AnalysisResultPtr ar) {
   for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
        it != m_classes.end(); ++it) {
     BOOST_FOREACH(ClassScopePtr cls, it->second) {
-      ar->pushScope(cls);
       cls->getStmt()->outputCPP(cg, ar);
-      ar->popScope();
     }
   }
 }

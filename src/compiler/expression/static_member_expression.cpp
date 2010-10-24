@@ -43,7 +43,7 @@ StaticMemberExpression::StaticMemberExpression
   if (exp->is(KindOfSimpleVariable)) {
     SimpleVariablePtr s(dynamic_pointer_cast<SimpleVariable>(exp));
     m_exp = ExpressionPtr
-      (new ScalarExpression(getLocation(),
+      (new ScalarExpression(getScope(), getLocation(),
                             KindOfScalarExpression,
                             T_STRING, s->getName(), true));
 
@@ -122,8 +122,9 @@ ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultPtr ar) {
     ar->postOptimize(m_class);
   } else if (!m_redeclared && m_valid &&
              m_exp->is(Expression::KindOfScalarExpression)) {
-    ClassScopePtr cls = ar->findExactClass(m_className);
-    if (cls && (!cls->isVolatile() || ar->checkClassPresent(m_className))) {
+    ClassScopePtr cls = ar->findExactClass(shared_from_this(), m_className);
+    if (cls && (!cls->isVolatile() ||
+                ar->checkClassPresent(shared_from_this(), m_className))) {
       ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
       const std::string &name = var->getString();
 
@@ -133,7 +134,7 @@ ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultPtr ar) {
         if (init) {
           ExpressionPtr rep = dynamic_pointer_cast<Expression>(init);
           if (rep->isScalar()) {
-            return replaceValue(rep->clone());
+            return replaceValue(Clone(rep, getScope()));
           }
         }
       }
@@ -162,9 +163,9 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
       if (m_exp->is(Expression::KindOfScalarExpression)) {
         ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
         const std::string &name = var->getString();
-        ar->forceClassVariants(name, getOriginalScope(ar), true);
+        ar->forceClassVariants(name, getOriginalScope(), true);
       } else {
-        ar->forceClassVariants(getOriginalScope(ar), true);
+        ar->forceClassVariants(getOriginalScope(), true);
       }
     }
     m_class->inferAndCheck(ar, Type::Any, false);
@@ -174,7 +175,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
 
   m_exp->inferAndCheck(ar, Type::String, false);
 
-  ClassScopePtr cls = ar->resolveClass(m_className);
+  ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_className);
   m_valid = true;
 
   if (!cls) {
@@ -184,7 +185,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
     m_valid = false;
   }
 
-  VariableTablePtr variables = ar->getScope()->getVariables();
+  VariableTablePtr variables = getScope()->getVariables();
   variables->setAttribute(VariableTable::NeedGlobalPointer);
   if (cls) {
     if (cls->isRedeclaring()) {
@@ -236,7 +237,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
     return m_implementedType = tp;
   } else if (cls) {
     if (modified) {
-      int mask = cls == getOriginalScope(ar) ?
+      int mask = cls == getOriginalScope() ?
         VariableTable::AnyStaticVars : VariableTable::NonPrivateStaticVars;
       cls->getVariables()->forceVariants(ar, mask);
     }
@@ -335,14 +336,16 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
   }
 
   bool volatileCheck = false;
-  bool outsideClass = !ar->checkClassPresent(m_origClassName);
+  bool outsideClass = !ar->checkClassPresent(shared_from_this(),
+                                             m_origClassName);
   ClassScopePtr cls = ClassScopePtr();
   if (!m_resolvedClassName.empty()) {
     cls = ar->findClass(m_resolvedClassName);
     if (cls && outsideClass) {
       volatileCheck = cls->isVolatile();
       if (volatileCheck) {
-        ClassScope::OutputVolatileCheckBegin(cg, ar, m_origClassName);
+        ClassScope::OutputVolatileCheckBegin(cg, ar, getScope(),
+                                             m_origClassName);
       }
     }
   }

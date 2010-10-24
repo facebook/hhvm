@@ -14,13 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
+#include <compiler/expression/expression.h>
+
 #include <compiler/analysis/block_scope.h>
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/statement/statement_list.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/analysis/constant_table.h>
+#include <compiler/analysis/class_scope.h>
+#include <compiler/analysis/function_scope.h>
+#include <compiler/analysis/file_scope.h>
 
 using namespace HPHP;
+using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -49,6 +55,38 @@ void BlockScope::decLoopNestedLevel() {
   m_loopNestedLevel--;
 }
 
+FileScopePtr BlockScope::getContainingFile() {
+  BlockScopePtr bs(shared_from_this());
+  while (bs) {
+    if (bs->is(BlockScope::FileScope)) {
+      return dynamic_pointer_cast<HPHP::FileScope>(bs);
+    }
+    bs = bs->getOuterScope();
+  }
+
+  return FileScopePtr();
+}
+
+ClassScopePtr BlockScope::getContainingClass() {
+  int nfunc = 0;
+  BlockScopePtr bs = shared_from_this();
+  while (bs) {
+    if (bs->is(BlockScope::ClassScope)) {
+      return dynamic_pointer_cast<HPHP::ClassScope>(bs);
+    } else if (bs->is(BlockScope::FunctionScope) &&
+               nfunc++) {
+      break;
+    }
+    bs = bs->getOuterScope();
+  }
+
+  return ClassScopePtr();
+}
+
+FunctionScopePtr BlockScope::getContainingFunction() {
+  return dynamic_pointer_cast<HPHP::FunctionScope>(shared_from_this());
+}
+
 ModifierExpressionPtr
 BlockScope::setModifiers(ModifierExpressionPtr modifiers) {
   ModifierExpressionPtr oldModifiers = m_modifiers;
@@ -56,19 +94,9 @@ BlockScope::setModifiers(ModifierExpressionPtr modifiers) {
   return oldModifiers;
 }
 
-void BlockScope::addMovableInclude(StatementPtr include) {
-  if (!m_includes) {
-    m_includes = StatementListPtr
-      (new StatementList(LocationPtr(), Statement::KindOfStatementList));
-  }
-  m_includes->addElement(include);
-}
-
 void BlockScope::inferTypes(AnalysisResultPtr ar) {
   if (m_stmt) {
-    ar->pushScope(shared_from_this());
     m_stmt->inferTypes(ar);
-    ar->popScope();
   }
 }
 

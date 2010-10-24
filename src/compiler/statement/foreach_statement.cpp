@@ -146,13 +146,13 @@ void ForEachStatement::inferTypes(AnalysisResultPtr ar) {
     if (!actualType ||
         actualType->is(Type::KindOfVariant) ||
         actualType->is(Type::KindOfObject)) {
-      ar->forceClassVariants(ar->getClassScope(), false);
+      ar->forceClassVariants(getClassScope(), false);
     }
   }
   if (m_stmt) {
-    ar->getScope()->incLoopNestedLevel();
+    getScope()->incLoopNestedLevel();
     m_stmt->inferTypes(ar);
-    ar->getScope()->decLoopNestedLevel();
+    getScope()->decLoopNestedLevel();
   }
 }
 
@@ -179,10 +179,10 @@ void ForEachStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_indentBegin("{\n");
-  int labelId = cg.createNewLocalId(ar);
+  int labelId = cg.createNewLocalId(shared_from_this());
   cg.pushBreakScope(labelId);
 
-  int mapId = cg.createNewLocalId(ar);
+  int mapId = cg.createNewLocalId(shared_from_this());
   bool passTemp = true;
   bool isArray = false;
   bool nameSimple = !m_name || m_name->is(Expression::KindOfSimpleVariable);
@@ -236,7 +236,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool orderValue = m_value->preOutputCPP(cg, ar, 0);
 
   cppDeclareBufs(cg, ar);
-  int iterId = cg.createNewLocalId(ar);
+  int iterId = cg.createNewLocalId(shared_from_this());
   cg_printf("for (");
   if (m_ref) {
     cg_printf("MutableArrayIterPtr %s%d = %s%d.begin(",
@@ -261,7 +261,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("ArrayIterPtr %s%d = %s%d.begin(",
                 Option::IterPrefix, iterId,
                 Option::MapPrefix, mapId);
-      ClassScopePtr cls = ar->getClassScope();
+      ClassScopePtr cls = getClassScope();
       if (cls) {
         cg_printf("%sclass_name", Option::StaticPropertyPrefix);
       } else {
@@ -285,7 +285,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       m_array->outputCPP(cg, ar);
       m_array->setExpectedType(expectedType);
       cg_printf(".begin(");
-      ClassScopePtr cls = ar->getClassScope();
+      ClassScopePtr cls = getClassScope();
       if (cls) {
         cg_printf("%sclass_name", Option::StaticPropertyPrefix);
       } else {

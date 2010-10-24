@@ -105,6 +105,22 @@ void SymbolTable::import(SymbolTablePtr src) {
   }
 }
 
+BlockScopePtr SymbolTable::getBlockScope() {
+  return m_blockScope.shared_from_this();
+}
+
+FileScopePtr SymbolTable::getFileScope() {
+  return m_blockScope.getContainingFile();
+}
+
+FunctionScopePtr SymbolTable::getFunctionScope() {
+  return m_blockScope.getContainingFunction();
+}
+
+ClassScopePtr SymbolTable::getClassScope() {
+  return m_blockScope.getContainingClass();
+}
+
 bool SymbolTable::isPresent(const std::string &name) const {
   if (Symbol *sym = getSymbol(name)) {
     return sym->isPresent();

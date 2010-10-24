@@ -434,7 +434,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
     // parse globals/variables.php and globals/constants.php
     NoSuperGlobals = true;
     s_variables = LoadGlobalSymbols("symbols.php")->getVariables();
-    const FileScopePtrVec &fileScopes =
+    const FileScopePtrVec fileScopes =
       LoadGlobalSymbols("constants.php")->getAllFilesVector();
     if (!fileScopes.empty()) {
       s_constants = fileScopes[0]->getConstants();

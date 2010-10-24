@@ -63,6 +63,8 @@ public:
 
     // post-optimize
     PostOptimize,
+
+    CodeGen,
   };
 
   enum FindClassBy {
@@ -177,8 +179,8 @@ public:
   /**
    * Scalar array handling.
    */
-  int registerScalarArray(ExpressionPtr pairs, int &hash, int &index,
-                          std::string &text);
+  int registerScalarArray(FileScopePtr scope, ExpressionPtr pairs,
+                          int &hash, int &index, std::string &text);
   int checkScalarArray(const std::string &text, int &index);
   int getScalarArrayId(const std::string &text);
   void outputCPPNamedScalarArrays(const std::string &file);
@@ -236,14 +238,15 @@ public:
   /**
    * Parser creates a FileScope upon parsing a new file.
    */
-  void setFileScope(FileScopePtr fileScope);
-  FileScopePtr getFileScope() { return m_file;}
   FileScopePtr findFileScope(const std::string &name, bool parseOnDemand);
   const StringToFileScopePtrMap &getAllFiles() { return m_files;}
   const std::vector<FileScopePtr> &getAllFilesVector() {
     return m_fileScopes;
   }
 
+  void addFileScope(FileScopePtr fileScope);
+#if 0
+  FileScopePtr getFileScope() { return m_file;}
   /**
    * When inferring types, it's important to push/pop correct a BlockScope
    * that has the right variable and constant symbol tables to look up and
@@ -254,6 +257,7 @@ public:
   BlockScopePtr getScope() const { return m_scope;}
   ClassScopePtr getClassScope() const;
   FunctionScopePtr getFunctionScope() const;
+#endif
 
   /**
    * To implement the silence operator correctly, we need to keep trace
@@ -289,7 +293,7 @@ public:
    * Find class by that name, and update class name if it's "self" or
    * "parent".
    */
-  ClassScopePtr resolveClass(std::string &className);
+  ClassScopePtr resolveClass(ConstructPtr cs, std::string &className);
   ClassScopePtr findClass(const std::string &className,
                           FindClassBy by = ClassName);
   /**
@@ -302,8 +306,8 @@ public:
    */
   ClassScopePtrVec findClasses(const std::string &className);
   bool classMemberExists(const std::string &name, FindClassBy by);
-  ClassScopePtr findExactClass(const std::string &name);
-  bool checkClassPresent(const std::string &name);
+  ClassScopePtr findExactClass(ConstructPtr cs, const std::string &name);
+  bool checkClassPresent(ConstructPtr cs, const std::string &name);
   FunctionScopePtr findFunction(const std::string &funcName);
   FunctionScopePtr findHelperFunction(const std::string &funcName);
   BlockScopePtr findConstantDeclarer(const std::string &constName);
@@ -318,7 +322,6 @@ public:
   /**
    * For function declaration parsing.
    */
-  FunctionContainerPtr getFunctionContainer();
   static std::string prepareFile(const char *root,
                                  const std::string &fileName, bool chop);
 
@@ -387,7 +390,8 @@ private:
   DependencyGraphPtr m_dependencyGraph;
   StringToFileScopePtrMap m_files;
   FileScopePtrVec m_fileScopes;
-  FileScopePtr m_file;
+//  FileScopePtr m_file;
+  std::string m_extraCodeFileName;
   std::string m_extraCode;
 
   StringToClassScopePtrMap m_systemClasses;
@@ -403,8 +407,8 @@ private:
   bool m_dynamicFunction;
   bool m_classForcedVariants[2];
 
-  BlockScopePtrVec m_scopes;
-  BlockScopePtr m_scope;
+//  BlockScopePtrVec m_scopes;
+//  BlockScopePtr m_scope;
 
   StatementPtrVec m_stmts;
   StatementPtr m_stmt;

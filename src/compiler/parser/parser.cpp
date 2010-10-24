@@ -70,6 +70,8 @@
 #include <compiler/statement/try_statement.h>
 #include <compiler/statement/throw_statement.h>
 
+#include <compiler/analysis/function_scope.h>
+
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/analysis_result.h>
 
@@ -86,13 +88,14 @@ using namespace std;
 using namespace boost;
 
 #define NEW_EXP0(cls)                                           \
-  cls##Ptr(new cls(getLocation(), Expression::KindOf##cls))
+  cls##Ptr(new cls(BlockScopePtr(), getLocation(), Expression::KindOf##cls))
 #define NEW_EXP(cls, e...)                                      \
-  cls##Ptr(new cls(getLocation(), Expression::KindOf##cls, ##e))
+  cls##Ptr(new cls(BlockScopePtr(), getLocation(), \
+                   Expression::KindOf##cls, ##e))
 #define NEW_STMT0(cls)                                          \
-  cls##Ptr(new cls(getLocation(), Statement::KindOf##cls))
+  cls##Ptr(new cls(BlockScopePtr(), getLocation(), Statement::KindOf##cls))
 #define NEW_STMT(cls, e...)                                     \
-  cls##Ptr(new cls(getLocation(), Statement::KindOf##cls, ##e))
+  cls##Ptr(new cls(BlockScopePtr(), getLocation(), Statement::KindOf##cls, ##e))
 
 namespace HPHP { namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
@@ -119,8 +122,9 @@ StatementListPtr Parser::ParseString(const char *input, AnalysisResultPtr ar,
 Parser::Parser(Scanner &scanner, const char *fileName,
                AnalysisResultPtr ar, int fileSize /* = 0 */)
     : ParserBase(scanner, fileName), m_ar(ar) {
-  FileScopePtr fileScope(new FileScope(m_fileName, fileSize));
-  m_ar->setFileScope(fileScope);
+  m_file = FileScopePtr(new FileScope(m_fileName, fileSize));
+  m_ar->addFileScope(m_file);
+  newScope();
 }
 
 void Parser::pushComment() {
@@ -131,6 +135,24 @@ std::string Parser::popComment() {
   std::string ret = m_comments.back();
   m_comments.pop_back();
   return ret;
+}
+
+void Parser::newScope() {
+  m_scopes.push_back(BlockScopePtrVec());
+}
+
+void Parser::completeScope(BlockScopePtr inner) {
+  assert(inner);
+  BlockScopePtrVec &sv = m_scopes.back();
+  for (int i = 0, n = sv.size(); i < n; i++) {
+    BlockScopePtr scope = sv[i];
+    scope->setOuterScope(inner);
+  }
+  inner->getStmt()->resetScope(inner);
+  m_scopes.pop_back();
+  if (m_scopes.size()) {
+    m_scopes.back().push_back(inner);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -234,7 +256,7 @@ ExpressionPtr Parser::getDynamicVariable(ExpressionPtr exp, bool encap) {
 }
 
 ExpressionPtr Parser::createDynamicVariable(ExpressionPtr exp) {
-  m_ar->getFileScope()->setAttribute(FileScope::ContainsDynamicVariable);
+  m_file->setAttribute(FileScope::ContainsDynamicVariable);
   return NEW_EXP(DynamicVariable, exp);
 }
 
@@ -264,10 +286,11 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
   } else {
     SimpleFunctionCallPtr call
       (new RealSimpleFunctionCall
-       (getLocation(), Expression::KindOfSimpleFunctionCall, name->text(),
+       (BlockScopePtr(), getLocation(),
+        Expression::KindOfSimpleFunctionCall, name->text(),
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
     out->exp = call;
-    call->onParse(m_ar);
+    call->onParse(m_ar, m_file);
   }
 }
 
@@ -469,7 +492,7 @@ void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
     {
       IncludeExpressionPtr exp = NEW_EXP(IncludeExpression, operand->exp, op);
       out->exp = exp;
-      exp->onParse(m_ar);
+      exp->onParse(m_ar, m_file);
     }
     break;
   default:
@@ -477,7 +500,7 @@ void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
       UnaryOpExpressionPtr exp = NEW_EXP(UnaryOpExpression, operand->exp, op,
                                          front);
       out->exp = exp;
-      exp->onParse(m_ar);
+      exp->onParse(m_ar, m_file);
     }
     break;
   }
@@ -520,8 +543,9 @@ void Parser::onClassConst(Token &out, Token &cls, Token &name, bool text) {
 // function/method declaration
 
 void Parser::onFunctionStart(Token &name) {
-  m_ar->getFileScope()->pushAttribute();
+  m_file->pushAttribute();
   pushComment();
+  newScope();
 }
 
 void Parser::onMethodStart(Token &name, Token &mods) {
@@ -537,10 +561,11 @@ void Parser::onFunction(Token &out, Token &ref, Token &name, Token &params,
     (FunctionStatement, ref->num(), name->text(),
      dynamic_pointer_cast<ExpressionList>(params->exp),
      dynamic_pointer_cast<StatementList>(stmt->stmt),
-     m_ar->getFileScope()->popAttribute(),
+     m_file->popAttribute(),
      popComment());
   out->stmt = func;
-  func->onParse(m_ar);
+  func->onParse(m_ar, m_file);
+  completeScope(func->getFunctionScope());
   if (func->ignored()) {
     out->stmt = NEW_STMT0(StatementList);
   }
@@ -562,6 +587,7 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
 
 void Parser::onClassStart(int type, Token &name, Token *parent) {
   pushComment();
+  newScope();
 }
 
 void Parser::onClass(Token &out, Token &type, Token &name, Token &base,
@@ -576,7 +602,8 @@ void Parser::onClass(Token &out, Token &type, Token &name, Token &base,
      dynamic_pointer_cast<ExpressionList>(baseInterface->exp),
      popComment(), stmtList);
   out->stmt = cls;
-  cls->onParse(m_ar);
+  cls->onParse(m_ar, m_file);
+  completeScope(cls->getClassScope());
   if (cls->ignored()) {
     out->stmt = NEW_STMT0(StatementList);
   }
@@ -592,7 +619,8 @@ void Parser::onInterface(Token &out, Token &name, Token &base, Token &stmt) {
     (InterfaceStatement, name->text(),
      dynamic_pointer_cast<ExpressionList>(base->exp), popComment(), stmtList);
   out->stmt = intf;
-  intf->onParse(m_ar);
+  intf->onParse(m_ar, m_file);
+  completeScope(intf->getClassScope());
 }
 
 void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
@@ -633,11 +661,14 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ref, Token &name,
     stmts = dynamic_pointer_cast<StatementList>(stmt->stmt);
   }
 
-  out->stmt = NEW_STMT
+  MethodStatementPtr mth = NEW_STMT
     (MethodStatement, exp, ref->num(), name->text(),
      dynamic_pointer_cast<ExpressionList>(params->exp), stmts,
-     m_ar->getFileScope()->popAttribute(),
+     m_file->popAttribute(),
      popComment());
+
+  completeScope(mth->onInitialParse(m_ar, m_file, true));
+  out->stmt = mth;
 }
 
 void Parser::onMemberModifier(Token &out, Token *modifiers, Token &modifier) {
@@ -660,8 +691,10 @@ void Parser::saveParseTree(Token &tree) {
   } else {
     m_tree = NEW_STMT0(StatementList);
   }
-  FileScopePtr fileScope = m_ar->getFileScope();
-  fileScope->setTree(m_tree);
+  FunctionScopePtr pseudoMain = m_file->setTree(m_ar, m_tree);
+  completeScope(pseudoMain);
+  pseudoMain->setOuterScope(m_file);
+  m_file->setOuterScope(m_ar);
 }
 
 void Parser::onStatementListStart(Token &out) {
@@ -839,7 +872,7 @@ void Parser::onEcho(Token &out, Token &expr, bool html) {
 void Parser::onUnset(Token &out, Token &expr) {
   out->stmt = NEW_STMT(UnsetStatement,
                        dynamic_pointer_cast<ExpressionList>(expr->exp));
-  m_ar->getFileScope()->setAttribute(FileScope::ContainsUnset);
+  m_file->setAttribute(FileScope::ContainsUnset);
 }
 
 void Parser::onExpStatement(Token &out, Token &expr) {

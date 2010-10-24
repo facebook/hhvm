@@ -34,9 +34,42 @@ using namespace std;
 
 int Construct::s_effectsTag = 1;
 
-Construct::Construct(LocationPtr loc)
- : m_loc(loc), m_fileLevel(false), m_topLevel(false),
-   m_containedEffects(0), m_effectsTag(0)  {
+Construct::Construct(BlockScopePtr scope, LocationPtr loc)
+    : m_blockScope(scope), m_loc(loc),
+      m_fileLevel(false), m_topLevel(false),
+      m_containedEffects(0), m_effectsTag(0) {
+}
+
+FileScopePtr Construct::getFileScope() const {
+  return getScope()->getContainingFile();
+}
+
+FunctionScopePtr Construct::getFunctionScope() const {
+  return boost::dynamic_pointer_cast<FunctionScope>(getScope());
+}
+
+ClassScopePtr Construct::getClassScope() const {
+  return getScope()->getContainingClass();
+}
+
+void Construct::resetScope(BlockScopePtr scope) {
+  setBlockScope(scope);
+  for (int i = 0, n = getKidCount(); i < n; i++) {
+    if (ConstructPtr kid = getNthKid(i)) {
+      if (StatementPtr s = boost::dynamic_pointer_cast<Statement>(kid)) {
+        switch (s->getKindOf()) {
+          case Statement::KindOfClassStatement:
+          case Statement::KindOfInterfaceStatement:
+          case Statement::KindOfMethodStatement:
+          case Statement::KindOfFunctionStatement:
+            continue;
+          default:
+            break;
+        }
+      }
+      kid->resetScope(scope);
+    }
+  }
 }
 
 int Construct::getChildrenEffects() const {
@@ -59,6 +92,16 @@ int Construct::getContainedEffects() const {
     m_containedEffects = getLocalEffects() | getChildrenEffects();
   }
   return m_containedEffects;
+}
+
+ExpressionPtr Construct::makeConstant(AnalysisResultPtr ar,
+                                      const std::string &value) const {
+  return Expression::MakeConstant(ar, getScope(), getLocation(), value);
+}
+
+ExpressionPtr Construct::makeScalarExpression(AnalysisResultPtr ar,
+                                               const Variant &value) const {
+  return Expression::MakeScalarExpression(ar, getScope(), getLocation(), value);
 }
 
 std::string Construct::getText(bool useCache /* = false */,
@@ -91,9 +134,9 @@ void Construct::addUserFunction(AnalysisResultPtr ar,
       ar->addCallee(func->getStmt());
     }
     if (strong && ar->getPhase() == AnalysisResult::AnalyzeAll) {
-      FunctionScopePtr func = ar->getFunctionScope();
-      ar->getFileScope()->addFunctionDependency(ar, name, func &&
-                                                func->isInlined());
+      FunctionScopePtr func = getFunctionScope();
+      getFileScope()->addFunctionDependency(ar, name, func &&
+                                            func->isInlined());
     }
   }
 }
@@ -107,7 +150,7 @@ void Construct::addUserClass(AnalysisResultPtr ar,
       ar->addCallee(cls->getStmt());
     }
     if (strong && !ar->isFirstPass()) {
-      ar->getFileScope()->addClassDependency(ar, name);
+      getFileScope()->addClassDependency(ar, name);
     }
   }
 }

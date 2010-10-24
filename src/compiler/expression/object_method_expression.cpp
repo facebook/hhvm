@@ -87,7 +87,7 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     FunctionScopePtr func = m_funcScope;
     if (!func && m_object->isThis() && !m_name.empty()) {
-      ClassScopePtr cls = ar->getClassScope();
+      ClassScopePtr cls = getClassScope();
       if (cls) {
         m_classScope = cls;
         m_funcScope = func = cls->findFunction(ar, m_name, true, true);
@@ -188,7 +188,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
 
   ClassScopePtr cls = m_classScope;
   if (objectType && !objectType->getName().empty()) {
-    cls = ar->findExactClass(objectType->getName());
+    cls = ar->findExactClass(shared_from_this(), objectType->getName());
   }
 
   if (!cls) {
@@ -237,7 +237,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
 
   // use $this inside a static function
   if (m_object->isThis()) {
-    FunctionScopePtr localfunc = ar->getFunctionScope();
+    FunctionScopePtr localfunc = getFunctionScope();
     if (localfunc->isStatic()) {
       if (ar->isFirstPass()) {
         Compiler::Error(Compiler::MissingObjectContext, self);
@@ -293,8 +293,7 @@ bool ObjectMethodExpression::directVariantProxy(AnalysisResultPtr ar) {
       SimpleVariablePtr var =
         dynamic_pointer_cast<SimpleVariable>(m_object);
       const std::string &name = var->getName();
-      FunctionScopePtr func =
-        dynamic_pointer_cast<FunctionScope>(ar->getScope());
+      FunctionScopePtr func = getFunctionScope();
       VariableTablePtr variables = func->getVariables();
       if (!variables->isParameter(name) || variables->isLvalParam(name)) {
         return true;
@@ -312,7 +311,7 @@ bool ObjectMethodExpression::directVariantProxy(AnalysisResultPtr ar) {
 void ObjectMethodExpression::outputCPPObject(CodeGenerator &cg,
     AnalysisResultPtr ar) {
   bool isThis = m_object->isThis();
-  if (isThis && ar->getFunctionScope()->isStatic()) {
+  if (isThis && getFunctionScope()->isStatic()) {
     cg_printf("GET_THIS_ARROW()");
   }
 
@@ -369,7 +368,7 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
   }
   // Short circuit out if inExpression() returns false
   if (!ar->inExpression()) return true;
-  m_ciTemp = cg.createNewId(ar);
+  m_ciTemp = cg.createNewId(shared_from_this());
 
   ar->wrapExpressionBegin(cg);
   bool isThis = m_object->isThis();
@@ -398,7 +397,7 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
   cg_printf("), ");
   if (!m_name.empty()) {
     uint64 hash = hash_string_i(m_name.c_str());
-    cg_printString(m_origName, ar);
+    cg_printString(m_origName, ar, shared_from_this());
     if (ms) {
       cg_printf(", %s", ms->runObjParam().c_str());
     }

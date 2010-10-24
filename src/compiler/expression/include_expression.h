@@ -33,7 +33,7 @@ public:
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultPtr ar);
+  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
 
   void setDocumentRoot() { m_documentRoot = true;}
   bool isDocumentRoot() { return m_documentRoot;}

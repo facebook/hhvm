@@ -104,7 +104,7 @@ bool ConstantExpression::canonCompare(ExpressionPtr e) const {
 void ConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (ar->getPhase() == AnalysisResult::AnalyzeAll &&
       !(m_context & LValue)) {
-    ar->getFileScope()->addConstantDependency(ar, m_name);
+    getFileScope()->addConstantDependency(ar, m_name);
     if (!m_dynamic) {
       ConstantTablePtr constants = ar->getConstants();
       if (!constants->getValue(m_name)) {
@@ -145,7 +145,7 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultPtr ar) {
         // inline the value
         if (value->is(Expression::KindOfScalarExpression)) {
           ScalarExpressionPtr exp =
-            dynamic_pointer_cast<ScalarExpression>(Clone(value));
+            dynamic_pointer_cast<ScalarExpression>(Clone(value, getScope()));
           bool annotate = Option::FlAnnotate;
           Option::FlAnnotate = false; // avoid nested comments on getText
           exp->setComment(getText());
@@ -156,7 +156,7 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultPtr ar) {
         } else if (value->is(Expression::KindOfConstantExpression)) {
           // inline the value
           ConstantExpressionPtr exp =
-            dynamic_pointer_cast<ConstantExpression>(Clone(value));
+            dynamic_pointer_cast<ConstantExpression>(Clone(value, getScope()));
           bool annotate = Option::FlAnnotate;
           Option::FlAnnotate = false; // avoid nested comments on getText
           exp->setComment(getText());
@@ -202,8 +202,8 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   } else {
     BlockScopePtr scope = ar->findConstantDeclarer(m_name);
     if (!scope) {
-      scope = ar->getFileScope();
-      ar->getFileScope()->declareConstant(ar, m_name);
+      scope = getFileScope();
+      getFileScope()->declareConstant(ar, m_name);
     }
     ConstantTablePtr constants = scope->getConstants();
     ConstructPtr decl = constants->getDeclaration(m_name);
@@ -225,7 +225,7 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       actualType = Type::Variant;
     }
     if (m_dynamic) {
-      ar->getScope()->getVariables()->
+      getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
     }
   }
@@ -257,7 +257,7 @@ void ConstantExpression::outputCPPImpl(CodeGenerator &cg,
       cg_printf("getDynamicConstant(%s->%s%s, ",
                 cg.getGlobals(ar), Option::ConstantPrefix,
                 cg.formatLabel(m_name).c_str());
-      cg_printString(m_name, ar);
+      cg_printString(m_name, ar, shared_from_this());
       cg_printf(")");
     } else {
       cg_printf("%s%s", Option::ConstantPrefix,

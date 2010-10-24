@@ -48,7 +48,7 @@ public:
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar, int state);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
   bool isTemporary() const;
-  bool isNonPrivate(AnalysisResultPtr ar) const;
+  bool isNonPrivate(AnalysisResultPtr ar);
   bool isValid() const { return m_valid; }
   void outputCPPProperty(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPObject(CodeGenerator &cg, AnalysisResultPtr ar,

@@ -327,7 +327,7 @@ void ExpressionList::optimize(AnalysisResultPtr ar) {
           SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(e);
           if (var->checkUnused(ar)) {
             const std::string &name = var->getName();
-            VariableTablePtr variables = ar->getScope()->getVariables();
+            VariableTablePtr variables = getScope()->getVariables();
             if (!variables->isNeeded(name)) {
               removeElement(i);
               changed = true;

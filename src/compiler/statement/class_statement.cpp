@@ -61,7 +61,7 @@ StatementPtr ClassStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ClassStatement::onParse(AnalysisResultPtr ar) {
+void ClassStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   ClassScope::KindOf kindOf = ClassScope::KindOfObjectClass;
   switch (m_type) {
   case T_CLASS:     kindOf = ClassScope::KindOfObjectClass;   break;
@@ -71,6 +71,7 @@ void ClassStatement::onParse(AnalysisResultPtr ar) {
     ASSERT(false);
   }
 
+  FileScopePtr fs = dynamic_pointer_cast<FileScope>(scope);
   vector<string> bases;
   if (!m_parent.empty()) {
     bases.push_back(m_parent);
@@ -80,16 +81,15 @@ void ClassStatement::onParse(AnalysisResultPtr ar) {
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
   ClassScopePtr classScope(new ClassScope(kindOf, m_originalName, m_parent,
                                           bases, m_docComment,
-                                          stmt, ar->getFileScope()));
+                                          stmt, fs));
   m_classScope = classScope;
-  if (!ar->getFileScope()->addClass(ar, classScope)) {
+  if (!fs->addClass(ar, classScope)) {
     m_ignored = true;
     return;
   }
-  ar->recordClassSource(m_name, m_loc, ar->getFileScope()->getName());
+  ar->recordClassSource(m_name, m_loc, fs->getName());
 
   if (m_stmt) {
-    ar->pushScope(classScope);
     bool seenConstruct = false;
     for (int i = 0; i < m_stmt->getCount(); i++) {
       MethodStatementPtr meth =
@@ -110,9 +110,8 @@ void ClassStatement::onParse(AnalysisResultPtr ar) {
         }
       }
       IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>((*m_stmt)[i]);
-      ph->onParse(ar);
+      ph->onParse(ar, classScope);
     }
-    ar->popScope();
   }
 }
 
@@ -136,9 +135,7 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   checkVolatile(ar);
 
   if (m_stmt) {
-    ar->pushScope(classScope);
     m_stmt->analyzeProgram(ar);
-    ar->popScope();
   }
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
   DependencyGraphPtr dependencies = ar->getDependencyGraph();
@@ -179,9 +176,7 @@ StatementPtr ClassStatement::postOptimize(AnalysisResultPtr ar) {
 void ClassStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_stmt) {
     ClassScopePtr classScope = m_classScope.lock();
-    ar->pushScope(classScope);
     m_stmt->inferTypes(ar);
-    ar->popScope();
   }
 }
 
@@ -218,7 +213,6 @@ void ClassStatement::getAllParents(AnalysisResultPtr ar,
 void ClassStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   ClassScopePtr classScope = m_classScope.lock();
   if (!classScope->isUserClass()) return;
-  if (ar) ar->pushScope(classScope);
 
   switch (m_type) {
   case T_CLASS:                              break;
@@ -242,8 +236,6 @@ void ClassStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_classScope.lock()->outputPHP(cg, ar);
   if (m_stmt) m_stmt->outputPHP(cg, ar);
   cg_indentEnd("}\n");
-
-  if (ar) ar->popScope();
 }
 
 bool ClassStatement::hasImpl() const {
@@ -379,7 +371,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       ClassScopePtr base = ar->findClass(*it);
       if (base && base->isVolatile()) {
         cg_printf("checkClassExists(");
-        cg_printString(base->getOriginalName(), ar);
+        cg_printString(base->getOriginalName(), ar, shared_from_this());
         string lname = Util::toLower(base->getOriginalName());
         cg_printf(", &%s->CDEC(%s), %s->FVF(__autoload));\n",
                   cg.getGlobals(ar), cg.formatLabel(lname).c_str(),
@@ -393,7 +385,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     printSource(cg);
   }
 
-  ar->pushScope(classScope);
   string clsNameStr = classScope->getId(cg);
   const char *clsName = clsNameStr.c_str();
   bool redeclared = classScope->isRedeclaring();
@@ -549,9 +540,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         FunctionScopePtr func = classScope->findFunction(ar, "__construct",
                                                          false);
         if (func && !func->isAbstract() && !classScope->isInterface()) {
-          ar->pushScope(func);
           func->outputCPPCreateDecl(cg, ar);
-          ar->popScope();
         }
       }
       if (classScope->getAttribute(ClassScope::HasDestructor)) {
@@ -829,8 +818,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     ASSERT(false);
     break;
   }
-
-  ar->popScope();
 }
 
 void ClassStatement::outputJavaFFIConstructor(CodeGenerator &cg,

@@ -71,9 +71,7 @@ ExpressionPtr AssignmentExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void AssignmentExpression::onParse(AnalysisResultPtr ar) {
-  BlockScopePtr scope = ar->getScope();
-
+void AssignmentExpression::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   // This is that much we can do during parse phase.
   TypePtr type;
   if (m_value->is(Expression::KindOfScalarExpression)) {
@@ -95,7 +93,7 @@ void AssignmentExpression::onParse(AnalysisResultPtr ar) {
       dynamic_pointer_cast<ConstantExpression>(m_variable);
     scope->getConstants()->add(exp->getName(), type, m_value, ar, m_variable);
 
-    string name = ar->getClassScope()->getName() + "::" + exp->getName();
+    string name = scope->getName() + "::" + exp->getName();
     ar->getDependencyGraph()->
       addParent(DependencyGraph::KindOfConstant, "", name, exp);
   } else if (m_variable->is(Expression::KindOfSimpleVariable)) {
@@ -123,14 +121,14 @@ void AssignmentExpression::analyzeProgram(AnalysisResultPtr ar) {
       SimpleVariablePtr var =
         dynamic_pointer_cast<SimpleVariable>(m_variable);
       const std::string &name = var->getName();
-      VariableTablePtr variables = ar->getScope()->getVariables();
+      VariableTablePtr variables = getScope()->getVariables();
       variables->addUsed(name);
     }
     if (m_variable->is(Expression::KindOfConstantExpression)) {
       ConstantExpressionPtr exp =
         dynamic_pointer_cast<ConstantExpression>(m_variable);
       if (!m_value->isScalar()) {
-        ar->getScope()->getConstants()->setDynamic(ar, exp->getName());
+        getScope()->getConstants()->setDynamic(ar, exp->getName());
       }
     }
   }
@@ -308,9 +306,9 @@ bool AssignmentExpression::SpecialAssignment(CodeGenerator &cg,
         cg_printf("%s)", ref ? ")" : "");
       }
       else {
-        cg_printf("%s, %s)",
+        cg_printf("%s%s)",
                   ref ? ")" : "",
-                  ar->getClassScope() ? "s_class_name" : "empty_string");
+                  lval->originalClassName(cg, true).c_str());
       }
       return true;
     }

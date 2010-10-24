@@ -50,7 +50,8 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
                              FileScopePtr file,
                              bool inPseudoMain /* = false */)
     : BlockScope(name, docComment, stmt, BlockScope::FunctionScope),
-      m_method(method), m_file(file), m_minParam(0), m_maxParam(0),
+      m_method(method), m_file(file),
+      m_minParam(minParam), m_maxParam(maxParam),
       m_attribute(attribute), m_refReturn(reference), m_modifiers(modifiers),
       m_virtual(false), m_perfectVirtual(false), m_overriding(false),
       m_redeclaring(-1), m_volatile(false), m_pseudoMain(inPseudoMain),
@@ -64,7 +65,9 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
     m_variables->forceVariants(ar, VariableTable::AnyVars);
     setReturnType(ar, Type::Variant);
   }
-  setParamCounts(ar, minParam, maxParam);
+  if (!method) {
+    setParamCounts(ar, -1, -1);
+  }
 
   if (m_refReturn) {
     m_returnType = Type::Variant;
@@ -149,8 +152,12 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
 
 void FunctionScope::setParamCounts(AnalysisResultPtr ar, int minParam,
                                    int maxParam) {
-  m_minParam = minParam;
-  m_maxParam = maxParam;
+  if (minParam >= 0) {
+    m_minParam = minParam;
+    m_maxParam = maxParam;
+  } else {
+    ASSERT(maxParam == minParam);
+  }
   ASSERT(m_minParam >= 0 && m_maxParam >= m_minParam);
   if (m_maxParam > 0) {
     m_paramNames.resize(m_maxParam);
@@ -280,6 +287,7 @@ bool FunctionScope::isMagic() const {
 
 void FunctionScope::setClass(ClassScopePtr cls) {
   m_class = cls;
+  setOuterScope(cls);
 }
 
 ClassScopePtr FunctionScope::getClass() {
@@ -517,7 +525,8 @@ void FunctionScope::setParamDefault(int index, const std::string &value,
 void FunctionScope::addModifier(int mod) {
   if (!m_modifiers) {
     m_modifiers =
-      ModifierExpressionPtr(new ModifierExpression(LocationPtr(),
+      ModifierExpressionPtr(new ModifierExpression(
+                              shared_from_this(), LocationPtr(),
                               Expression::KindOfModifierExpression));
   }
   m_modifiers->add(mod);
@@ -617,7 +626,7 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     } else if (specType->is(Type::KindOfObject)) {
       cg_printf("if(!%s%s.instanceof(", Option::VariablePrefix,
                 param->getName().c_str());
-      cg_printString(specType->getName(), ar);
+      cg_printString(specType->getName(), ar, shared_from_this());
       cg_printf("))\n");
       cg_printf("  throw_unexpected_argument_type(%d,\"%s\",\"%s\",%s%s);\n",
                 i, m_name.c_str(), specType->getName().c_str(),
@@ -881,7 +890,7 @@ bool FunctionScope::outputCPPInvokeArgCountCheck(CodeGenerator &cg,
   bool system = (m_system || m_sep ||
                  cg.getOutput() == CodeGenerator::SystemCPP);
   if (!system) {
-    ClassScopePtr scope = ar->getClassScope();
+    ClassScopePtr scope = getContainingClass();
     if (scope) system = (!scope->isUserClass() || scope->isExtensionClass() ||
                          scope->isSepExtension());
   }
@@ -972,7 +981,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
   callss << retrn << (m_refReturn ? "ref(" : "(");
   if (instance) callss << instance;
   if (m_perfectVirtual) {
-    ClassScopePtr cls = ar->getClassScope();
+    ClassScopePtr cls = getContainingClass();
     callss << Option::ClassPrefix << cls->getId(cg) << "::";
   }
   callss << funcPrefix << name << "(";
@@ -1182,7 +1191,7 @@ void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
   cg_indentEnd("}\n");
 
   if (m_attributeClassInfo & ClassInfo::AllowIntercept) {
-    ClassScopePtr cls = ar->getClassScope();
+    ClassScopePtr cls = getContainingClass();
     if (cls) {
       cg_printf("INTERCEPT_INJECTION_ALWAYS(\"%s::%s\", \"%s::%s\", ",
                 cls->getName().c_str(), name, cls->getName().c_str(), name);
@@ -1276,7 +1285,7 @@ void FunctionScope::serialize(JSON::OutputStream &out) const {
 
 void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
-  ClassScopePtr scope = ar->getClassScope();
+  ClassScopePtr scope = getContainingClass();
 
   cg_printf("public: %s%s *create(",
             Option::ClassPrefix, scope->getId(cg).c_str());
@@ -1299,7 +1308,7 @@ void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
 
 void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
-  ClassScopePtr scope = ar->getClassScope();
+  ClassScopePtr scope = getContainingClass();
   string clsNameStr = scope->getId(cg);
   const char *clsName = clsNameStr.c_str();
   const char *consName = scope->classNameCtor() ? scope->getName().c_str()
@@ -1490,7 +1499,7 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
     if (isStatic()) {
       flags |= CallInfo::StaticMethod;
     }
-    ClassScopePtr scope = ar->getClassScope();
+    ClassScopePtr scope = getContainingClass();
     string clsName = scope->getId(cg);
     cg.printf("CallInfo %s%s::%s%s((void*)&%s%s::%s%s, ", Option::ClassPrefix,
         clsName.c_str(), Option::CallInfoPrefix, id.c_str(),

@@ -20,9 +20,9 @@
 #include <compiler/expression/expression.h>
 
 #define STATEMENT_CONSTRUCTOR_PARAMETERS        \
-  LocationPtr loc, Statement::KindOf kindOf
+  BlockScopePtr scope, LocationPtr loc, Statement::KindOf kindOf
 #define STATEMENT_CONSTRUCTOR_PARAMETER_VALUES  \
-  loc, kindOf
+  scope, loc, kindOf
 #define DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS                        \
   virtual void analyzeProgramImpl(AnalysisResultPtr ar);                \
   virtual StatementPtr clone();                                         \
@@ -37,7 +37,8 @@
   virtual int getKidCount() const;                                      \
   virtual void setNthKid(int n, ConstructPtr cp)
 #define NULL_STATEMENT()                                                \
-  BlockStatementPtr(new BlockStatement(getLocation(), KindOfBlockStatement, \
+  BlockStatementPtr(new BlockStatement(getScope(), getLocation(), \
+                                       KindOfBlockStatement,      \
                                        StatementListPtr()))
 
 namespace HPHP {

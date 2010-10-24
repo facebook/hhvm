@@ -362,12 +362,13 @@ static ExpressionPtr makeIsNull(LocationPtr loc, ExpressionPtr exp,
   /* Replace "$x === null" with an is_null call; this requires slightly
    * less work at runtime. */
   ExpressionListPtr expList =
-    ExpressionListPtr(new ExpressionList(loc,
+    ExpressionListPtr(new ExpressionList(exp->getScope(), loc,
       Expression::KindOfExpressionList));
   expList->insertElement(exp);
 
   SimpleFunctionCallPtr call
-    (new SimpleFunctionCall(loc, Expression::KindOfSimpleFunctionCall,
+    (new SimpleFunctionCall(exp->getScope(), loc,
+                            Expression::KindOfSimpleFunctionCall,
                             "is_null", expList, ExpressionPtr()));
 
   call->setValid();
@@ -376,7 +377,8 @@ static ExpressionPtr makeIsNull(LocationPtr loc, ExpressionPtr exp,
   ExpressionPtr result(call);
   if (invert) {
     result = ExpressionPtr(new UnaryOpExpression(
-                             loc, Expression::KindOfUnaryOpExpression,
+                             exp->getScope(), loc,
+                             Expression::KindOfUnaryOpExpression,
                              result, '!', true));
   }
 
@@ -470,7 +472,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultPtr ar) {
         default:
           return ExpressionPtr();
       }
-      return MakeScalarExpression(ar, getLocation(), result);
+      return makeScalarExpression(ar, result);
     } catch (...) {
     }
   } else {
@@ -518,13 +520,14 @@ BinaryOpExpression::foldConstRightAssoc(AnalysisResultPtr ar) {
         ExpressionPtr bExp = binOpExp->m_exp2;
         ExpressionPtr cExp = m_exp2;
         BinaryOpExpressionPtr bcExp =
-          BinaryOpExpressionPtr(new BinaryOpExpression(getLocation(),
-            Expression::KindOfBinaryOpExpression,
-            bExp, cExp, m_op));
+          BinaryOpExpressionPtr(new BinaryOpExpression(
+                                  getScope(), getLocation(),
+                                  Expression::KindOfBinaryOpExpression,
+                                  bExp, cExp, m_op));
         ExpressionPtr optExp = bcExp->foldConst(ar);
         if (optExp) {
           BinaryOpExpressionPtr a_bcExp
-            (new BinaryOpExpression(getLocation(),
+            (new BinaryOpExpression(getScope(), getLocation(),
                                     Expression::KindOfBinaryOpExpression,
                                     aExp, optExp, m_op));
           optExp = a_bcExp->foldConstRightAssoc(ar);
@@ -759,7 +762,7 @@ static const char *stringBufferPrefix(AnalysisResultPtr ar, ExpressionPtr var) {
     if (LoopStatementPtr loop = ar->getLoopStatement()) {
       SimpleVariablePtr sv = static_pointer_cast<SimpleVariable>(var);
       if (loop->checkStringBuf(sv->getName())) {
-        return ar->getScope()->getVariables()->
+        return loop->getScope()->getVariables()->
           getVariablePrefix(ar, sv->getName());
       }
     }
@@ -1025,7 +1028,7 @@ bool BinaryOpExpression::outputCPPImplOpEqual(CodeGenerator &cg,
     var->outputCPPProperty(cg, ar);
     cg_printf(", ");
     m_exp2->outputCPP(cg, ar);
-    cg_printf(", %s)", ar->getClassScope() ? "s_class_name" : "empty_string");
+    cg_printf("%s)", originalClassName(cg, true).c_str());
     return true;
   }
 
@@ -1198,7 +1201,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
         std::string s = second->getLiteralString();
         std::string sLower = Util::toLower(s);
         if (sLower != "") {
-          cg_printString(sLower, ar);
+          cg_printString(sLower, ar, shared_from_this());
         } else {
           second->outputCPP(cg, ar);
         }

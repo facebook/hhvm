@@ -90,14 +90,16 @@ ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultPtr ar) {
     // turn into cascaded concat
     if (count > 2) {
       ExpressionPtr exp =
-        BinaryOpExpressionPtr(new BinaryOpExpression(getLocation(),
-          Expression::KindOfBinaryOpExpression,
-          (*m_exps)[0], (*m_exps)[1], '.'));
+        BinaryOpExpressionPtr(new BinaryOpExpression(
+                                getScope(), getLocation(),
+                                Expression::KindOfBinaryOpExpression,
+                                (*m_exps)[0], (*m_exps)[1], '.'));
       for (int i = 2; i < count; i++) {
         exp =
-          BinaryOpExpressionPtr(new BinaryOpExpression(getLocation(),
-            Expression::KindOfBinaryOpExpression,
-            exp, (*m_exps)[i], '.'));
+          BinaryOpExpressionPtr(new BinaryOpExpression(
+                                  getScope(), getLocation(),
+                                  Expression::KindOfBinaryOpExpression,
+                                  exp, (*m_exps)[i], '.'));
       }
       return exp;
     }

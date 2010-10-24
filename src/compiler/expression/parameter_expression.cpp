@@ -69,7 +69,7 @@ void ParameterExpression::analyzeProgram(AnalysisResultPtr ar) {
 
   if (ar->isFirstPass()) {
     // Have to use non const ref params for magic methods
-    FunctionScopePtr fs = ar->getFunctionScope();
+    FunctionScopePtr fs = getFunctionScope();
     if (fs->isMagicMethod() || fs->getName() == "offsetget") {
       fs->getVariables()->addLvalParam(m_name);
     }
@@ -149,15 +149,15 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   // parameters are like variables, but we need to remember these are
   // parameters so when variable table is generated, they are not generated
   // as declared variables.
-  VariableTablePtr variables = ar->getScope()->getVariables();
+  VariableTablePtr variables = getScope()->getVariables();
   if (ar->isFirstPass()) {
     ret = variables->addParam(m_name, ret, ar, shared_from_this());
   } else {
     // Functions that can be called dynamically have to have
     // variant parameters, even if they have a type hint
-    if (ar->getFunctionScope()->isDynamic() ||
-        ar->getFunctionScope()->isRedeclaring() ||
-        ar->getFunctionScope()->isVirtual()) {
+    if (getFunctionScope()->isDynamic() ||
+        getFunctionScope()->isRedeclaring() ||
+        getFunctionScope()->isVirtual()) {
       variables->forceVariant(ar, m_name, VariableTable::AnyVars);
     }
     int p;
@@ -193,8 +193,7 @@ void ParameterExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
-  FunctionScopePtr func =
-    dynamic_pointer_cast<FunctionScope>(ar->getScope());
+  FunctionScopePtr func = getFunctionScope();
   VariableTablePtr variables = func->getVariables();
   TypePtr paramType = func->getParamType(cg.getItemIndex());
   bool isCVarRef = false;

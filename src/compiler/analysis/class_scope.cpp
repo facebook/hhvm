@@ -561,10 +561,8 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf("NULL,\n");
 
   // properties && constants
-  ar->pushScope(shared_from_this());
   m_variables->outputCPPClassMap(cg, ar);
   m_constants->outputCPPClassMap(cg, ar);
-  ar->popScope();
 }
 
 bool ClassScope::hasConst(const string &name) {
@@ -585,10 +583,8 @@ TypePtr ClassScope::checkProperty(Symbol *sym, TypePtr type,
 TypePtr ClassScope::checkStatic(const std::string &name, TypePtr type,
                                 bool coerce, AnalysisResultPtr ar,
                                 ConstructPtr construct, int &properties) {
-  ar->pushScope(shared_from_this());
   TypePtr ret = getVariables()->checkVariable(name, type, coerce,
                                               ar, construct, properties);
-  ar->popScope();
   return ret;
 }
 
@@ -1049,10 +1045,8 @@ void ClassScope::outputCPPHeader(CodeGenerator &old_cg, AnalysisResultPtr ar,
 
   // 2. Declarations
   cg.namespaceBegin();
-  ar->pushScope(shared_from_this());
   cg.setContext(CodeGenerator::CppDeclaration);
   getStmt()->outputCPP(cg, ar);
-  ar->popScope();
   cg.namespaceEnd();
 
   cg.headerEnd(filename);
@@ -1140,7 +1134,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
       const char *name = jt.key();
       string nameStr(name);
       cg_printf("HASH_INSTANCEOF(0x%016llXLL, ", hash_string_i(name));
-      cg_printString(nameStr, ar);
+      cg_printString(nameStr, ar, shared_from_this());
       cg_printf(");\n");
     }
     if (derivesFromRedeclaring()) {
@@ -1214,9 +1208,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     if (func && !func->isAbstract() && !isInterface()) {
       // abstract methods are not generated, neither should the create method
       // for an abstract constructor
-      ar->pushScope(func);
       func->outputCPPCreateImpl(cg, ar);
-      ar->popScope();
     }
   }
 
@@ -1408,9 +1400,9 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
           ms->getOverloadIndex());
     } else  {
       int index = -1;
-      if (cg.checkLiteralString(origName, index, ar) >= 0) {
+      if (cg.checkLiteralString(origName, index, ar, shared_from_this()) >= 0) {
         cg_indentBegin("HASH_GUARD_LITSTR(0x%016llXLL, ", hash_string_i(name));
-        cg_printString(origName, ar);
+        cg_printString(origName, ar, shared_from_this());
         cg_printf(") {\n");
       } else {
         cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
@@ -1666,9 +1658,10 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
 
 void ClassScope::outputVolatileCheckBegin(CodeGenerator &cg,
                                           AnalysisResultPtr ar,
+                                          BlockScopePtr bs,
                                           const std::string &name) {
   if (isVolatile()) {
-    OutputVolatileCheckBegin(cg, ar, name);
+    OutputVolatileCheckBegin(cg, ar, bs, name);
   }
 }
 void ClassScope::outputVolatileCheckEnd(CodeGenerator &cg) {
@@ -1679,9 +1672,10 @@ void ClassScope::outputVolatileCheckEnd(CodeGenerator &cg) {
 
 void ClassScope::OutputVolatileCheckBegin(CodeGenerator &cg,
                                           AnalysisResultPtr ar,
+                                          BlockScopePtr bs,
                                           const string &origName) {
   cg_printf("((");
-  OutputVolatileCheck(cg, ar, origName, false);
+  OutputVolatileCheck(cg, ar, bs, origName, false);
   cg_printf("), (");
 }
 
@@ -1689,10 +1683,11 @@ void ClassScope::OutputVolatileCheckEnd(CodeGenerator &cg) {
   cg_printf("))");
 }
 void ClassScope::OutputVolatileCheck(CodeGenerator &cg, AnalysisResultPtr ar,
-    const string &origName, bool noThrow) {
+                                     BlockScopePtr bs, const string &origName,
+                                     bool noThrow) {
   string lwrName(Util::toLower(origName));
   cg_printf("checkClassExists(");
-  cg_printString(origName, ar);
+  cg_printString(origName, ar, bs);
   if (ar->findClass(lwrName)) {
     cg_printf(", &%s->CDEC(%s)",
               cg.getGlobals(ar), cg.formatLabel(lwrName).c_str());

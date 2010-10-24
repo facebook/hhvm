@@ -35,7 +35,7 @@ public:
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultPtr ar);
+  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
 
 private:
   ModifierExpressionPtr m_modifiers;

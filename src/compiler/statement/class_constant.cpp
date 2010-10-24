@@ -45,10 +45,10 @@ StatementPtr ClassConstant::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ClassConstant::onParse(AnalysisResultPtr ar) {
+void ClassConstant::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   for (int i = 0; i < m_exp->getCount(); i++) {
     IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>((*m_exp)[i]);
-    ph->onParse(ar);
+    ph->onParse(ar, scope);
   }
 }
 
@@ -116,7 +116,7 @@ void ClassConstant::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     return;
   }
 
-  ClassScopePtr scope = ar->getClassScope();
+  ClassScopePtr scope = getClassScope();
   for (int i = 0; i < m_exp->getCount(); i++) {
     AssignmentExpressionPtr exp =
       dynamic_pointer_cast<AssignmentExpression>((*m_exp)[i]);

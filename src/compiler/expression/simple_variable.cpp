@@ -54,7 +54,7 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
   Expression::analyzeProgram(ar);
   if (m_name == "argc" || m_name == "argv") {
     // special case: they are NOT superglobals when not in global scope
-    if (ar->getScope() == ar) {
+    if (getScope() == ar) {
       m_superGlobal = BuiltinSymbols::IsSuperGlobal(m_name);
       m_superGlobalType = BuiltinSymbols::GetSuperGlobalType(m_name);
     }
@@ -64,21 +64,19 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
   }
 
   if (m_superGlobal) {
-    ar->getScope()->getVariables()->
+    getScope()->getVariables()->
       setAttribute(VariableTable::NeedGlobalPointer);
   }
 
-  if (m_name == "this" && ar->getClassScope()) {
-    FunctionScopePtr func =
-      dynamic_pointer_cast<FunctionScope>(ar->getScope());
+  if (m_name == "this" && getClassScope()) {
+    FunctionScopePtr func = getFunctionScope();
     func->setContainsThis();
     m_this = true;
   } else if (m_name == "GLOBALS") {
     m_globals = true;
   }
   if (!(m_context & AssignmentLHS)) {
-    BlockScopePtr scope = ar->getScope();
-    FunctionScopePtr func = dynamic_pointer_cast<FunctionScope>(scope);
+    FunctionScopePtr func = getFunctionScope();
     if (func) {
       func->getVariables()->addUsed(m_name);
     }
@@ -105,7 +103,7 @@ TypePtr SimpleVariable::inferTypes(AnalysisResultPtr ar, TypePtr type,
 }
 
 bool SimpleVariable::checkUnused(AnalysisResultPtr ar) const {
-  VariableTablePtr variables = ar->getScope()->getVariables();
+  VariableTablePtr variables = getScope()->getVariables();
   return !m_superGlobal && variables->checkUnused(m_name);
 }
 
@@ -113,7 +111,7 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                       bool coerce) {
   TypePtr ret;
   ConstructPtr construct = shared_from_this();
-  BlockScopePtr scope = ar->getScope();
+  BlockScopePtr scope = getScope();
   VariableTablePtr variables = scope->getVariables();
 
   // check function parameter that can occur in lval context
@@ -127,7 +125,7 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
   }
   if (m_name == "this") {
-    ClassScopePtr cls = getOriginalScope(ar);
+    ClassScopePtr cls = getOriginalScope();
     if (cls) {
       bool isStaticFunc = false;
       FunctionScopePtr func = dynamic_pointer_cast<FunctionScope>(scope);
@@ -168,7 +166,7 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         // ClassVariable expression will come to this block of code
         ClassScopePtr cls;
         if (Symbol *sym = variables->findProperty(cls, m_name, ar, construct)) {
-          if (!cls) cls = ar->getClassScope();
+          if (!cls) cls = getClassScope();
           ret = cls->checkProperty(sym, type, true, ar);
         }
       } else {
@@ -220,14 +218,14 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("GET_THIS()");
     }
   } else if (m_superGlobal) {
-    VariableTablePtr variables = ar->getScope()->getVariables();
+    VariableTablePtr variables = getScope()->getVariables();
     string name = variables->getGlobalVariableName(cg, ar, m_name);
     cg_printf("g->%s", name.c_str());
   } else if (m_globals) {
     cg_printf("get_global_array_wrapper()");
   } else {
     const char *prefix =
-      ar->getScope()->getVariables()->getVariablePrefix(ar, m_name);
+      getScope()->getVariables()->getVariablePrefix(ar, m_name);
     cg_printf("%s%s", prefix, cg.formatLabel(m_name).c_str());
   }
 }

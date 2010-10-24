@@ -96,7 +96,7 @@ StatementPtr GlobalStatement::postOptimize(AnalysisResultPtr ar) {
 }
 
 void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
-  BlockScopePtr scope = ar->getScope();
+  BlockScopePtr scope = getScope();
   for (int i = 0; i < m_exp->getCount(); i++) {
     ExpressionPtr exp = (*m_exp)[i];
     VariableTablePtr variables = scope->getVariables();
@@ -134,7 +134,7 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
       }
     }
   }
-  FunctionScopePtr func = ar->getFunctionScope();
+  FunctionScopePtr func = getFunctionScope();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -147,7 +147,7 @@ void GlobalStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void GlobalStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  BlockScopePtr scope = ar->getScope();
+  BlockScopePtr scope = getScope();
   if (m_exp->getCount() > 1) cg_indentBegin("{\n");
   for (int i = 0; i < m_exp->getCount(); i++) {
     ExpressionPtr exp = (*m_exp)[i];
@@ -164,7 +164,7 @@ void GlobalStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       DynamicVariablePtr var = dynamic_pointer_cast<DynamicVariable>(exp);
       ExpressionPtr exp = var->getSubExpression();
       exp->outputCPPBegin(cg, ar);
-      int id = cg.createNewLocalId(ar);
+      int id = cg.createNewLocalId(shared_from_this());
       cg_printf("CStrRef dgv_%d((", id);
       exp->outputCPP(cg, ar);
       cg_printf("));\n");

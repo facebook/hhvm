@@ -67,24 +67,23 @@ int InterfaceStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void InterfaceStatement::onParse(AnalysisResultPtr ar) {
+void InterfaceStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   vector<string> bases;
   if (m_base) m_base->getStrings(bases);
 
+  FileScopePtr fs = dynamic_pointer_cast<FileScope>(scope);
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
   ClassScopePtr classScope
     (new ClassScope(ClassScope::KindOfInterface, m_name, "", bases,
-                    m_docComment, stmt, ar->getFileScope()));
+                    m_docComment, stmt, fs));
   m_classScope = classScope;
-  ar->getFileScope()->addClass(ar, classScope);
+  fs->addClass(ar, classScope);
 
   if (m_stmt) {
-    ar->pushScope(classScope);
     for (int i = 0; i < m_stmt->getCount(); i++) {
       IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>((*m_stmt)[i]);
-      ph->onParse(ar);
+      ph->onParse(ar, classScope);
     }
-    ar->popScope();
   }
 }
 
@@ -117,7 +116,7 @@ void InterfaceStatement::checkVolatile(AnalysisResultPtr ar) {
      }
   }
   if (classScope->isVolatile()) {
-     ar->getFunctionScope()->getVariables()->
+    classScope->getOuterScope()->getVariables()->
        setAttribute(VariableTable::NeedGlobalPointer);
   }
 }
@@ -126,11 +125,9 @@ void InterfaceStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   ClassScopePtr classScope = m_classScope.lock();
   if (m_stmt) {
     classScope->setIncludeLevel(ar->getIncludeLevel());
-    ar->pushScope(classScope);
     m_stmt->analyzeProgram(ar);
-    ar->popScope();
   }
-  ar->recordClassSource(m_name, m_loc, ar->getFileScope()->getName());
+  ar->recordClassSource(m_name, m_loc, getFileScope()->getName());
 
   checkVolatile(ar);
 
@@ -198,9 +195,7 @@ StatementPtr InterfaceStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_base);
   if (m_stmt) {
     ClassScopePtr classScope = m_classScope.lock();
-    ar->pushScope(classScope);
     ar->preOptimize(m_stmt);
-    ar->popScope();
   }
   if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
     checkVolatile(ar);
@@ -212,9 +207,7 @@ StatementPtr InterfaceStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_base);
   if (m_stmt) {
     ClassScopePtr classScope = m_classScope.lock();
-    ar->pushScope(classScope);
     ar->postOptimize(m_stmt);
-    ar->popScope();
   }
   return StatementPtr();
 }
@@ -228,9 +221,7 @@ void InterfaceStatement::inferTypes(AnalysisResultPtr ar) {
 
   if (m_stmt) {
     ClassScopePtr classScope = m_classScope.lock();
-    ar->pushScope(classScope);
     m_stmt->inferTypes(ar);
-    ar->popScope();
   }
 }
 
@@ -264,8 +255,6 @@ void InterfaceStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
   }
 
-  if (ar) ar->pushScope(classScope);
-
   cg_printf("interface %s", m_originalName.c_str());
   if (m_base) {
     cg_printf(" extends ");
@@ -275,8 +264,6 @@ void InterfaceStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_classScope.lock()->outputPHP(cg, ar);
   if (m_stmt) m_stmt->outputPHP(cg, ar);
   cg_indentEnd("}\n");
-
-  if (ar) ar->popScope();
 }
 
 void InterfaceStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
@@ -288,7 +275,6 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) 
     return;
   }
 
-  ar->pushScope(classScope);
   string clsNameStr = classScope->getId(cg);
   const char *clsName = clsNameStr.c_str();
 
@@ -392,6 +378,4 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) 
     ASSERT(false);
     break;
   }
-
-  ar->popScope();
 }

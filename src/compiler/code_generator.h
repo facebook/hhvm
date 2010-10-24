@@ -24,6 +24,8 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(Statement);
+DECLARE_BOOST_TYPES(Construct);
+DECLARE_BOOST_TYPES(BlockScope);
 
 class CodeGenerator {
 public:
@@ -152,8 +154,8 @@ public:
    */
   void resetIdCount(const std::string &key);
   int createNewId(const std::string &key);
-  int createNewId(AnalysisResultPtr ar);
-  int createNewLocalId(AnalysisResultPtr ar);
+  int createNewId(ConstructPtr ar);
+  int createNewLocalId(ConstructPtr ar);
   static std::string GetNewLambda(); // for create_function()
 
   /**
@@ -198,9 +200,11 @@ public:
   void translatePredefined(bool flag) { m_translatePredefined = flag; }
 
   int checkLiteralString(const std::string &str, int &index,
-                         AnalysisResultPtr ar);
+                         AnalysisResultPtr ar, BlockScopePtr bs);
   void printString(const std::string &str, AnalysisResultPtr ar,
-                   bool stringWrapper = true, bool check = true);
+                   BlockScopePtr check, bool stringWrapper = true);
+  void printString(const std::string &str, AnalysisResultPtr ar,
+                   ConstructPtr check, bool stringWrapper = true);
   int getCurrentIndentation() const { return m_indentation[m_curStream];}
 private:
   std::string m_filename;

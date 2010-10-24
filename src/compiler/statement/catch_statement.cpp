@@ -58,7 +58,7 @@ StatementPtr CatchStatement::clone() {
 void CatchStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   addUserClass(ar, m_className);
   if (ar->isFirstPass()) {
-    ar->getScope()->getVariables()->addUsed(m_variable);
+    getScope()->getVariables()->addUsed(m_variable);
   }
   if (m_stmt) m_stmt->analyzeProgram(ar);
 }
@@ -113,7 +113,7 @@ void CatchStatement::inferTypes(AnalysisResultPtr ar) {
   // DynamicObjectData: p_exception v_e = e;
   type = Type::Object;
 
-  BlockScopePtr scope = ar->getScope();
+  BlockScopePtr scope = getScope();
   VariableTablePtr variables = scope->getVariables();
   variables->add(m_variable, type, false, ar, shared_from_this(),
                  ModifierExpressionPtr(), false);
@@ -140,9 +140,9 @@ void CatchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void CatchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_valid) {
     cg_printf("if (e.instanceof(");
-    cg_printString(m_className, ar);
+    cg_printString(m_className, ar, shared_from_this());
     cg_indentBegin(")) {\n");
-    VariableTablePtr variables = ar->getScope()->getVariables();
+    VariableTablePtr variables = getScope()->getVariables();
     string name = variables->getVariableName(cg, ar, m_variable);
     cg_printf("%s = e;\n", name.c_str());
   } else {

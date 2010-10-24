@@ -341,15 +341,15 @@ int CodeGenerator::createNewId(const std::string &key) {
   return ++m_idCounters[key];
 }
 
-int CodeGenerator::createNewId(AnalysisResultPtr ar) {
-  FileScopePtr fs = ar->getFileScope();
+int CodeGenerator::createNewId(ConstructPtr cs) {
+  FileScopePtr fs = cs->getFileScope();
   if (fs) {
     return createNewId(fs->getName());
   }
   return createNewId("");
 }
 
-int CodeGenerator::createNewLocalId(AnalysisResultPtr ar) {
+int CodeGenerator::createNewLocalId(ConstructPtr ar) {
   FunctionScopePtr func = ar->getFunctionScope();
   if (func) {
     return func->nextInlineIndex();
@@ -399,14 +399,19 @@ bool CodeGenerator::findLabelId(const char *name, int labelId) {
 }
 
 int CodeGenerator::checkLiteralString(const std::string &str, int &index,
-                                      AnalysisResultPtr ar) {
+                                      AnalysisResultPtr ar, BlockScopePtr bs) {
   if (getContext() != CodeGenerator::CppConstantsDecl &&
       getContext() != CodeGenerator::CppClassConstantsImpl) {
     int stringId = ar->getLiteralStringId(str, index);
-    ar->getFileScope()->addUsedLiteralString(str);
-    if (m_context == CppParameterDefaultValueDecl ||
-        m_context == CppStaticMethodWrapper) {
-      ar->getFileScope()->addUsedLiteralStringHeader(str);
+    if (bs && bs != ar) {
+      FileScopePtr fs = bs->getContainingFile();
+      if (fs) {
+        fs->addUsedLiteralString(str);
+        if (m_context == CppParameterDefaultValueDecl ||
+            m_context == CppStaticMethodWrapper) {
+          bs->getContainingFile()->addUsedLiteralStringHeader(str);
+        }
+      }
     }
     if (stringId >= 0) return stringId;
   }
@@ -415,10 +420,10 @@ int CodeGenerator::checkLiteralString(const std::string &str, int &index,
 }
 
 void CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
-                                bool stringWrapper /* = true */,
-                                bool check /* = true */) {
+                                BlockScopePtr bs,
+                                bool stringWrapper /* = true */) {
   int index = -1;
-  int stringId = check ? checkLiteralString(str, index, ar) : -1;
+  int stringId = bs ? checkLiteralString(str, index, ar, bs) : -1;
   bool isBinary = false;
   string escaped = escapeLabel(str, &isBinary);
   if (stringId >= 0) {
@@ -439,4 +444,10 @@ void CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
   } else {
     printf("\"%s\"", escaped.c_str());
   }
+}
+
+void CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
+                                ConstructPtr cs,
+                                bool stringWrapper /* = true */) {
+  printString(str, ar, cs->getScope(), stringWrapper);
 }

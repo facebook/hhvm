@@ -224,7 +224,7 @@ void ConstantTable::outputCPPDynamicDecl(CodeGenerator &cg,
   const char *prefix = Option::ConstantPrefix;
   string classId;
   const char *fmt = "Variant %s%s%s;\n";
-  ClassScopePtr scope = ar->getClassScope();
+  ClassScopePtr scope = getClassScope();
   if (scope) {
     prefix = Option::ClassConstantPrefix;
     classId = scope->getId(cg);
@@ -344,7 +344,7 @@ void ConstantTable::outputCPPJumpTable(CodeGenerator &cg,
       if (needsGlobals) {
         cg.printDeclareGlobals();
       }
-      ClassScopePtr cls = ar->getClassScope();
+      ClassScopePtr cls = getClassScope();
       if (cls && cls->needLazyStaticInitializer()) {
         cg_printf("lazy_initializer(g);\n");
       }
@@ -353,7 +353,7 @@ void ConstantTable::outputCPPJumpTable(CodeGenerator &cg,
          jt.next()) {
       const char *name = jt.key();
       string varName = string(Option::ClassConstantPrefix) +
-        getScope()->getId(cg) + "_" + cg.formatLabel(name);
+        getScopePtr()->getId(cg) + "_" + cg.formatLabel(name);
       if (isDynamic(name)) {
         varName = string("g->") + varName;
       }
@@ -371,7 +371,7 @@ void ConstantTable::outputCPPJumpTable(CodeGenerator &cg,
 void ConstantTable::outputCPPConstantSymbol(CodeGenerator &cg,
                                             AnalysisResultPtr ar,
                                             Symbol *sym) {
-  bool cls = ar->getClassScope();
+  bool cls = getClassScope();
   if (sym->valueSet() &&
       (!sym->isDynamic() || cls)  &&
       !ar->isConstantRedeclared(sym->getName())) {

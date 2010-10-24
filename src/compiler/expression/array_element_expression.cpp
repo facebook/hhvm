@@ -122,9 +122,9 @@ bool ArrayElementExpression::appendClass(ExpressionPtr cls) {
   }
   if (m_variable->is(Expression::KindOfSimpleVariable)) {
     m_variable = StaticMemberExpressionPtr
-      (new StaticMemberExpression(m_variable->getLocation(),
-                                  Expression::KindOfStaticMemberExpression,
-                                  cls, m_variable));
+      (new StaticMemberExpression(
+        m_variable->getScope(), m_variable->getLocation(),
+        Expression::KindOfStaticMemberExpression, cls, m_variable));
     return true;
   }
   return false;
@@ -226,7 +226,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
       clearEffect(AccessorEffect);
       m_global = true;
       m_dynamicGlobal = true;
-      ar->getScope()->getVariables()->
+      getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
       VariableTablePtr vars = ar->getVariables();
 
@@ -239,7 +239,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
           m_globalName = offset->getIdentifier();
           if (!m_globalName.empty()) {
             m_dynamicGlobal = false;
-            ar->getScope()->getVariables()->
+            getScope()->getVariables()->
               setAttribute(VariableTable::NeedGlobalPointer);
             TypePtr ret;
             ConstructPtr decl = vars->getDeclaration(m_globalName);
@@ -256,7 +256,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
               ret =
                 vars->checkVariable(m_globalName, type, coerce, ar, self, p);
             }
-            ar->getScope()->getVariables()->addSuperGlobal(m_globalName);
+            getScope()->getVariables()->addSuperGlobal(m_globalName);
             return ret;
           }
         }
@@ -315,8 +315,9 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
 void ArrayElementExpression::outputPHP(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
   if (Option::ConvertSuperGlobals && m_global && !m_dynamicGlobal &&
-      ar && (ar->getScope() == ar || ar->getScope()->
-             getVariables()->isConvertibleSuperGlobal(m_globalName))) {
+      getScope() && (getScope()->is(BlockScope::ProgramScope) ||
+                     getScope()-> getVariables()->
+                     isConvertibleSuperGlobal(m_globalName))) {
     cg_printf("$%s", m_globalName.c_str());
   } else {
     m_variable->outputPHP(cg, ar);
@@ -335,7 +336,7 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
   if (m_global) {
     if (!m_globalName.empty()) {
-      VariableTablePtr variables = ar->getScope()->getVariables();
+      VariableTablePtr variables = getScope()->getVariables();
       string name = variables->getGlobalVariableName(cg, ar, m_globalName);
       cg_printf("g->%s", name.c_str());
     } else {
@@ -421,7 +422,7 @@ void ArrayElementExpression::outputCPPExistTest(CodeGenerator &cg,
 
   if (m_global) {
     if (!m_globalName.empty()) {
-      VariableTablePtr variables = ar->getScope()->getVariables();
+      VariableTablePtr variables = getScope()->getVariables();
       string name = variables->getGlobalVariableName(cg, ar, m_globalName);
       cg_printf("g->%s", name.c_str());
     } else {

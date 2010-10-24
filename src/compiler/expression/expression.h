@@ -22,9 +22,9 @@
 #include <compiler/analysis/analysis_result.h>
 
 #define EXPRESSION_CONSTRUCTOR_PARAMETERS       \
-  LocationPtr loc, Expression::KindOf kindOf
+  BlockScopePtr scope, LocationPtr loc, Expression::KindOf kindOf
 #define EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES \
-  loc, kindOf
+  scope, loc, kindOf
 #define DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS                       \
   virtual void analyzeProgram(AnalysisResultPtr ar);                    \
   virtual ExpressionPtr clone();                                        \
@@ -167,7 +167,8 @@ public:
   const std::string &cppTemp() const { return m_cppTemp; }
   std::string genCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar);
   void setCPPTemp(const std::string &s) { m_cppTemp = s; }
-  ClassScopePtr getOriginalScope(AnalysisResultPtr ar);
+  ClassScopePtr getOriginalScope();
+  std::string originalClassName(CodeGenerator &cg, bool withComma);
 
   /**
     * For generic walks
@@ -291,9 +292,11 @@ public:
   TypePtr getType();
 
   static ExpressionPtr MakeConstant(AnalysisResultPtr ar,
+                                    BlockScopePtr scope,
                                     LocationPtr loc,
                                     const std::string &value);
   static ExpressionPtr MakeScalarExpression(AnalysisResultPtr ar,
+                                            BlockScopePtr scope,
                                             LocationPtr loc,
                                             const Variant &value);
   static void CheckPassByReference(AnalysisResultPtr ar,

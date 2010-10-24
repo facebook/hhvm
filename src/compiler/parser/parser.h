@@ -33,6 +33,7 @@ DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(Location);
 DECLARE_BOOST_TYPES(AnalysisResult);
+DECLARE_BOOST_TYPES(BlockScope);
 
 namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
@@ -180,13 +181,19 @@ public:
 
 private:
   AnalysisResultPtr m_ar;
+  FileScopePtr m_file;
   ExpressionPtrVec m_objects; // for parsing object property/method calls
   std::vector<std::string> m_comments; // for docComment stack
+  std::vector<BlockScopePtrVec> m_scopes;
+
   // parser output
   StatementListPtr m_tree;
 
   void pushComment();
   std::string popComment();
+
+  void newScope();
+  void completeScope(BlockScopePtr inner);
 
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);

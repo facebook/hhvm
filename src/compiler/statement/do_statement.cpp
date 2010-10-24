@@ -95,10 +95,10 @@ StatementPtr DoStatement::postOptimize(AnalysisResultPtr ar) {
 
 void DoStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_stmt) {
-    ar->getScope()->incLoopNestedLevel();
+    getScope()->incLoopNestedLevel();
     m_stmt->inferTypes(ar);
     m_condition->inferAndCheck(ar, Type::Boolean, false);
-    ar->getScope()->decLoopNestedLevel();
+    getScope()->decLoopNestedLevel();
   } else {
     m_condition->inferAndCheck(ar, Type::Boolean, false);
   }
@@ -123,7 +123,7 @@ void DoStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_indentBegin("{\n");
   bool e_order = m_condition->preOutputCPP(cg, ar, 0);
 
-  int labelId = cg.createNewLocalId(ar);
+  int labelId = cg.createNewLocalId(shared_from_this());
   cg.pushBreakScope(e_order ? labelId | CodeGenerator::InsideSwitch : labelId);
 
   cppDeclareBufs(cg, ar);

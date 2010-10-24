@@ -114,9 +114,9 @@ StatementPtr ForStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_exp2);
   ar->preOptimize(m_exp3);
   if (m_stmt) {
-    ar->getScope()->incLoopNestedLevel();
+    getScope()->incLoopNestedLevel();
     ar->preOptimize(m_stmt);
-    ar->getScope()->decLoopNestedLevel();
+    getScope()->decLoopNestedLevel();
   }
   return StatementPtr();
 }
@@ -126,9 +126,9 @@ StatementPtr ForStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_exp2);
   ar->postOptimize(m_exp3);
   if (m_stmt) {
-    ar->getScope()->incLoopNestedLevel();
+    getScope()->incLoopNestedLevel();
     ar->postOptimize(m_stmt);
-    ar->getScope()->decLoopNestedLevel();
+    getScope()->decLoopNestedLevel();
   }
   return StatementPtr();
 }
@@ -137,10 +137,10 @@ void ForStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_exp1) m_exp1->inferAndCheck(ar, Type::Any, false);
   if (m_exp2) m_exp2->inferAndCheck(ar, Type::Boolean, false);
   if (m_stmt) {
-    ar->getScope()->incLoopNestedLevel();
+    getScope()->incLoopNestedLevel();
     m_stmt->inferTypes(ar);
     if (m_exp3) m_exp3->inferAndCheck(ar, Type::Any, false);
-    ar->getScope()->decLoopNestedLevel();
+    getScope()->decLoopNestedLevel();
   } else {
     if (m_exp3) m_exp3->inferAndCheck(ar, Type::Any, false);
   }
@@ -178,7 +178,7 @@ void ForStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool e2_order = m_exp2 && m_exp2->preOutputCPP(cg, ar, 0);
   bool e3_order = m_exp3 && m_exp3->preOutputCPP(cg, ar, 0);
 
-  int labelId = cg.createNewLocalId(ar);
+  int labelId = cg.createNewLocalId(shared_from_this());
 
   cg.pushBreakScope(e3_order ? labelId | CodeGenerator::InsideSwitch : labelId);
 

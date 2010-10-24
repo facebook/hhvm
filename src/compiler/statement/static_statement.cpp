@@ -51,7 +51,7 @@ StatementPtr StaticStatement::clone() {
 
 void StaticStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   m_exp->analyzeProgram(ar);
-  BlockScopePtr scope = ar->getScope();
+  BlockScopePtr scope = getScope();
   for (int i = 0; i < m_exp->getCount(); i++) {
     ExpressionPtr exp = (*m_exp)[i];
     ExpressionPtr variable;
@@ -61,7 +61,7 @@ void StaticStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
       if (exp->is(Expression::KindOfSimpleVariable)) {
         variable = dynamic_pointer_cast<SimpleVariable>(exp);
         exp = AssignmentExpressionPtr
-          (new AssignmentExpression(exp->getLocation(),
+          (new AssignmentExpression(exp->getScope(), exp->getLocation(),
                                     Expression::KindOfAssignmentExpression,
                                     variable,
                                     CONSTANT("null"),
@@ -87,7 +87,7 @@ void StaticStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
         (dynamic_pointer_cast<Expression>
           (scope->getVariables()->getStaticInitVal(name)))->clone();
       exp = AssignmentExpressionPtr
-        (new AssignmentExpression(exp->getLocation(),
+        (new AssignmentExpression(exp->getScope(), exp->getLocation(),
                                   Expression::KindOfAssignmentExpression,
                                   variable, initValue, false));
       (*m_exp)[i] = exp;
@@ -124,7 +124,7 @@ void StaticStatement::setNthKid(int n, ConstructPtr cp) {
 StatementPtr StaticStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_exp);
 
-  BlockScopePtr scope = ar->getScope();
+  BlockScopePtr scope = getScope();
   for (int i = 0; i < m_exp->getCount(); i++) {
     ExpressionPtr exp = (*m_exp)[i];
     AssignmentExpressionPtr assignment_exp =
@@ -143,7 +143,7 @@ StatementPtr StaticStatement::postOptimize(AnalysisResultPtr ar) {
 }
 
 void StaticStatement::inferTypes(AnalysisResultPtr ar) {
-  BlockScopePtr scope = ar->getScope();
+  BlockScopePtr scope = getScope();
   if (scope->inPseudoMain()) { // static just means to unset at global level
     for (int i = 0; i < m_exp->getCount(); i++) {
       ExpressionPtr exp = (*m_exp)[i];
@@ -221,7 +221,7 @@ void StaticStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void StaticStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  BlockScopePtr scope = ar->getScope();
+  BlockScopePtr scope = getScope();
   if (scope->inPseudoMain()) {
     if (m_exp->getCount() > 1) cg_indentBegin("{\n");
     for (int i = 0; i < m_exp->getCount(); i++) {

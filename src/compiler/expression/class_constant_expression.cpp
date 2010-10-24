@@ -107,11 +107,12 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
     return ExpressionPtr();
   }
   string currentClsName;
-  ClassScopePtr currentCls = ar->getClassScope();
+  ClassScopePtr currentCls = getClassScope();
   if (currentCls) currentClsName = currentCls->getName();
   bool inCurrentClass = currentClsName == m_className;
   ClassScopePtr cls =
-    inCurrentClass ? currentCls : ar->resolveClass(m_className);
+    inCurrentClass ? currentCls : ar->resolveClass(shared_from_this(),
+                                                   m_className);
   if (!cls) return ExpressionPtr();
   if (!inCurrentClass) {
     if (m_redeclared) return ExpressionPtr();
@@ -125,9 +126,7 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
     ExpressionPtr value = dynamic_pointer_cast<Expression>(decl);
     if (!m_visited) {
       m_visited = true;
-      ar->pushScope(cls);
       ExpressionPtr optExp = value->preOptimize(ar);
-      ar->popScope();
       m_visited = false;
       if (optExp) value = optExp;
     }
@@ -135,7 +134,7 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
       // inline the value
       if (value->is(Expression::KindOfScalarExpression)) {
         ScalarExpressionPtr exp =
-          dynamic_pointer_cast<ScalarExpression>(Clone(value));
+          dynamic_pointer_cast<ScalarExpression>(Clone(value, getScope()));
         bool annotate = Option::FlAnnotate;
         Option::FlAnnotate = false; // avoid nested comments on getText()
         exp->setComment(getText());
@@ -145,7 +144,7 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
       } else if (value->is(Expression::KindOfConstantExpression)) {
         // inline the value
         ConstantExpressionPtr exp =
-          dynamic_pointer_cast<ConstantExpression>(Clone(value));
+          dynamic_pointer_cast<ConstantExpression>(Clone(value, getScope()));
         bool annotate = Option::FlAnnotate;
         Option::FlAnnotate = false; // avoid nested comments
         exp->setComment(getText());
@@ -173,11 +172,11 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
     return Type::Variant;
   }
 
-  ClassScopePtr cls = ar->resolveClass(m_className);
+  ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_className);
   if (!cls || cls->isRedeclaring()) {
     if (cls) {
       m_redeclared = true;
-      ar->getScope()->getVariables()->
+      getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
     }
     if (!cls && ar->isFirstPass()) {
@@ -186,7 +185,7 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
     return Type::Variant;
   }
   if (cls->getConstants()->isDynamic(m_varName) || cls->isVolatile()) {
-    ar->getScope()->getVariables()->
+    getScope()->getVariables()->
       setAttribute(VariableTable::NeedGlobalPointer);
   }
   ClassScopePtr defClass = cls;
@@ -252,7 +251,8 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
     return;
   }
 
-  bool outsideClass = !ar->checkClassPresent(m_origClassName);
+  bool outsideClass = !ar->checkClassPresent(shared_from_this(),
+                                             m_origClassName);
   if (m_valid) {
     string trueClassName;
 
@@ -261,11 +261,12 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
     trueClassName = cls->getName();
     ASSERT(!trueClassName.empty());
     if (outsideClass) {
-      cls->outputVolatileCheckBegin(cg, ar, m_origClassName);
+      cls->outputVolatileCheckBegin(cg, ar, getScope(), m_origClassName);
     }
-    ConstructPtr decl = m_defScope->getConstants()->getValue(m_varName);
+    ExpressionPtr decl = dynamic_pointer_cast<Expression>(
+      m_defScope->getConstants()->getValue(m_varName));
     if (decl) {
-      decl->outputCPP(cg, ar);
+      Clone(decl, getScope())->outputCPP(cg, ar);
       if (cg.getContext() == CodeGenerator::CppImplementation ||
           cg.getContext() == CodeGenerator::CppParameterDefaultValueImpl) {
         cg_printf("(%s::%s)", m_className.c_str(), m_varName.c_str());
@@ -285,7 +286,7 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
     }
   } else if (m_redeclared) {
     if (outsideClass) {
-      ClassScope::OutputVolatileCheckBegin(cg, ar, m_origClassName);
+      ClassScope::OutputVolatileCheckBegin(cg, ar, getScope(), m_origClassName);
     }
     cg_printf("%s->%s%s->os_constant(\"%s\")", cg.getGlobals(ar),
               Option::ClassStaticsObjectPrefix,

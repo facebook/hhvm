@@ -48,7 +48,7 @@ StatementPtr ReturnStatement::clone() {
 
 void ReturnStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   if (m_exp) {
-    FunctionScopePtr funcScope = ar->getFunctionScope();
+    FunctionScopePtr funcScope = getFunctionScope();
     if (funcScope) {
       if (funcScope->isRefReturn()) {
         m_exp->setContext(Expression::RefValue);
@@ -105,7 +105,7 @@ StatementPtr ReturnStatement::postOptimize(AnalysisResultPtr ar) {
 
 void ReturnStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_exp) {
-    FunctionScopePtr funcScope = ar->getFunctionScope();
+    FunctionScopePtr funcScope = getFunctionScope();
     if (funcScope) {
       TypePtr ret;
       if (funcScope->isOverriding()) {
@@ -128,7 +128,7 @@ void ReturnStatement::inferTypes(AnalysisResultPtr ar) {
       m_exp->inferAndCheck(ar, Type::Int64, false);
     }
   } else {
-    FunctionScopePtr funcScope = ar->getFunctionScope();
+    FunctionScopePtr funcScope = getFunctionScope();
     if (funcScope->getReturnType()) {
       // return; means return null;
       funcScope->setReturnType(ar, Type::Variant);
@@ -174,8 +174,8 @@ static bool checkCopyElision(FunctionScopePtr func, ExpressionPtr exp) {
 
 void ReturnStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool braced = false;
-  FunctionScopePtr func = dynamic_pointer_cast<FunctionScope>(ar->getScope());
-  ClassScopePtr cls = ar->getClassScope();
+  FunctionScopePtr func = getFunctionScope();
+  ClassScopePtr cls = getClassScope();
   if (func->isConstructor(cls)) {
     cg_indentBegin("{\n"); braced = true;
     cg_printf("gasInCtor(oldInCtor);\n");

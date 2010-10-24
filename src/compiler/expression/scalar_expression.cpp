@@ -112,15 +112,15 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
       }
       break;
     case T_CLASS_C:
-      if (ar->getClassScope()) {
-        m_translated = ar->getClassScope()->getOriginalName();
+      if (getClassScope()) {
+        m_translated = getClassScope()->getOriginalName();
       }
       break;
     case T_METHOD_C:
-      if (ar->getFunctionScope()) {
+      if (getFunctionScope()) {
         m_translated.clear();
-        FunctionScopePtr func = ar->getFunctionScope();
-        ClassScopePtr cls = ar->getClassScope();
+        FunctionScopePtr func = getFunctionScope();
+        ClassScopePtr cls = getClassScope();
         if (cls) {
           m_translated = cls->getOriginalName();
           m_translated += "::";
@@ -129,8 +129,8 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
       }
       break;
     case T_FUNC_C:
-      if (ar->getFunctionScope()) {
-        m_translated = ar->getFunctionScope()->getOriginalName();
+      if (getFunctionScope()) {
+        m_translated = getFunctionScope()->getOriginalName();
       }
       break;
     default:
@@ -170,7 +170,7 @@ ExpressionPtr ScalarExpression::postOptimize(AnalysisResultPtr ar) {
       Variant &value = getVariant();
       string svalue(value.toString()->data(), value.toString()->size());
       ScalarExpressionPtr sc
-        (new ScalarExpression(getLocation(),
+        (new ScalarExpression(getScope(), getLocation(),
                               Expression::KindOfScalarExpression,
                               T_STRING, svalue, true));
       sc->setActualType(Type::String);
@@ -386,7 +386,7 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
       bool constant =
         (cg.getContext() == CodeGenerator::CppConstantsDecl) ||
         (cg.getContext() == CodeGenerator::CppClassConstantsImpl);
-      cg_printString(output, ar, constant);
+      cg_printString(output, ar, shared_from_this(), constant);
     } else {
       cg_printf("%s", m_value.c_str());
     }
@@ -395,7 +395,7 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
   case T_CLASS_C:
   case T_METHOD_C:
   case T_FUNC_C:
-    cg_printString(m_translated, ar);
+    cg_printString(m_translated, ar, shared_from_this());
     break;
   default:
     ASSERT(false);

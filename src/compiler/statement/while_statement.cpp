@@ -84,9 +84,9 @@ void WhileStatement::setNthKid(int n, ConstructPtr cp) {
 StatementPtr WhileStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_condition);
   if (m_stmt) {
-    ar->getScope()->incLoopNestedLevel();
+    getScope()->incLoopNestedLevel();
     ar->preOptimize(m_stmt);
-    ar->getScope()->decLoopNestedLevel();
+    getScope()->decLoopNestedLevel();
   }
   return StatementPtr();
 }
@@ -94,9 +94,9 @@ StatementPtr WhileStatement::preOptimize(AnalysisResultPtr ar) {
 StatementPtr WhileStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_condition);
   if (m_stmt) {
-    ar->getScope()->incLoopNestedLevel();
+    getScope()->incLoopNestedLevel();
     ar->postOptimize(m_stmt);
-    ar->getScope()->decLoopNestedLevel();
+    getScope()->decLoopNestedLevel();
   }
   return StatementPtr();
 }
@@ -104,9 +104,9 @@ StatementPtr WhileStatement::postOptimize(AnalysisResultPtr ar) {
 void WhileStatement::inferTypes(AnalysisResultPtr ar) {
   m_condition->inferAndCheck(ar, Type::Boolean, false);
   if (m_stmt) {
-    ar->getScope()->incLoopNestedLevel();
+    getScope()->incLoopNestedLevel();
     m_stmt->inferTypes(ar);
-    ar->getScope()->decLoopNestedLevel();
+    getScope()->decLoopNestedLevel();
   }
 }
 
@@ -125,7 +125,7 @@ void WhileStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void WhileStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  int labelId = cg.createNewLocalId(ar);
+  int labelId = cg.createNewLocalId(shared_from_this());
   cg.pushBreakScope(labelId);
   cg_indentBegin("{\n");
 

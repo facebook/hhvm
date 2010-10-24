@@ -31,7 +31,7 @@ public:
                     ExpressionPtr exp, int op, bool front);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  virtual void onParse(AnalysisResultPtr ar);
+  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
   virtual int getLocalEffects() const;
   virtual bool isTemporary() const;
   virtual bool isRefable(bool checkError = false) const;

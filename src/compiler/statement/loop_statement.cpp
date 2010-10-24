@@ -41,7 +41,7 @@ void LoopStatement::cppDeclareBufs(CodeGenerator &cg, AnalysisResultPtr ar) {
     for (std::set<std::string>::iterator it = m_string_bufs.begin(),
            end = m_string_bufs.end(); it != end; ++it) {
       const char *prefix =
-        ar->getScope()->getVariables()->getVariablePrefix(ar, *it);
+        getScope()->getVariables()->getVariablePrefix(ar, *it);
       cg_printf("StringBuffer %s_sbuf_%s%s(512);\n",
                 Option::TempPrefix, prefix, it->c_str());
     }
@@ -59,7 +59,7 @@ void LoopStatement::cppEndBufs(CodeGenerator &cg, AnalysisResultPtr ar) {
            end = m_string_bufs.end(); it != end; ++it) {
 
       const char *prefix =
-        ar->getScope()->getVariables()->getVariablePrefix(ar, *it);
+        getScope()->getVariables()->getVariablePrefix(ar, *it);
 
       cg_printf("concat_assign(%s%s, %s_sbuf_%s%s.detach());\n",
                 prefix, it->c_str(),

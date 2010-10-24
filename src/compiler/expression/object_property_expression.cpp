@@ -66,9 +66,9 @@ bool ObjectPropertyExpression::isTemporary() const {
   return !m_valid && !(m_context & (LValue | RefValue | UnsetContext));
 }
 
-bool ObjectPropertyExpression::isNonPrivate(AnalysisResultPtr ar) const {
+bool ObjectPropertyExpression::isNonPrivate(AnalysisResultPtr ar) {
   // To tell whether a property is declared as private in the context
-  ClassScopePtr cls = ar->getClassScope();
+  ClassScopePtr cls = getOriginalScope();
   if (!cls || !cls->getVariables()->hasNonStaticPrivate()) return true;
   if (m_property->getKindOf() != Expression::KindOfScalarExpression) {
     return false;
@@ -216,7 +216,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     // any type inference could be wrong. Instead, we just force variants on
     // all class variables.
     if (m_context & (LValue | RefValue)) {
-      ar->forceClassVariants(getOriginalScope(ar), false);
+      ar->forceClassVariants(getOriginalScope(), false);
     }
 
     return Type::Variant; // we have to use a variant to hold dynamic value
@@ -231,7 +231,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   ClassScopePtr cls;
   if (objectType && !objectType->getName().empty()) {
     // what object-> has told us
-    cls = ar->findExactClass(objectType->getName());
+    cls = ar->findExactClass(shared_from_this(), objectType->getName());
   } else {
     // what ->property has told us
     cls = ar->findClass(name, AnalysisResult::PropertyName);
@@ -251,7 +251,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
 
   if (!cls) {
     if (m_context & (LValue | RefValue | UnsetContext)) {
-      ar->forceClassVariants(name, getOriginalScope(ar), false);
+      ar->forceClassVariants(name, getOriginalScope(), false);
     }
     return Type::Variant;
   }
@@ -269,8 +269,8 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
 
   // use $this inside a static function
   if (m_object->isThis()) {
-    FunctionScopePtr func = ar->getFunctionScope();
-    if (func->isStatic()) {
+    FunctionScopePtr func = getFunctionScope();
+    if (!func || func->isStatic()) {
       if (ar->isFirstPass()) {
         Compiler::Error(Compiler::MissingObjectContext, self);
       }
@@ -289,7 +289,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     }
     m_propSymValid = m_propSym->isPresent() &&
       (!m_propSym->isPrivate() ||
-       getOriginalScope(ar) == parent) &&
+       getOriginalScope() == parent) &&
       !m_propSym->isStatic();
 
     m_objectClass = cls;
@@ -340,8 +340,7 @@ bool ObjectPropertyExpression::directVariantProxy(AnalysisResultPtr ar) {
       SimpleVariablePtr var =
         dynamic_pointer_cast<SimpleVariable>(m_object);
       const std::string &name = var->getName();
-      FunctionScopePtr func =
-        dynamic_pointer_cast<FunctionScope>(ar->getScope());
+      FunctionScopePtr func = getFunctionScope();
       VariableTablePtr variables = func->getVariables();
       if (!variables->isParameter(name) || variables->isLvalParam(name)) {
         return true;
@@ -383,17 +382,10 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
                                                     int doExist) {
   string func = Option::ObjectPrefix;
   const char *error = ", true";
-  ClassScopePtr cls = ar->getClassScope();
   std::string context = "";
 
   if (cg.getOutput() != CodeGenerator::SystemCPP) {
-    if (cls) {
-      context = ", s_class_name";
-    } else if (FunctionScopePtr funcScope = ar->getFunctionScope()) {
-      if (!funcScope->inPseudoMain()) {
-        context = ", empty_string";
-      }
-    }
+    context = originalClassName(cg, true);
   }
   if (doExist) {
     func = doExist > 0 ? "o_isset" : "o_empty";
@@ -451,7 +443,7 @@ void ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
   bool bThis = m_object->isThis();
   bool useGetThis = false;
   if (bThis) {
-    FunctionScopePtr funcScope = ar->getFunctionScope();
+    FunctionScopePtr funcScope = getFunctionScope();
     if (funcScope && funcScope->isStatic()) {
       cg_printf("GET_THIS_ARROW()");
     } else {
@@ -489,7 +481,7 @@ void ObjectPropertyExpression::outputCPPProperty(CodeGenerator &cg,
   if (m_property->getKindOf() == Expression::KindOfScalarExpression) {
     ScalarExpressionPtr name =
       dynamic_pointer_cast<ScalarExpression>(m_property);
-    cg_printString(name->getString(), ar);
+    cg_printString(name->getString(), ar, shared_from_this());
   } else {
     m_property->outputCPP(cg, ar);
   }

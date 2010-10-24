@@ -53,7 +53,7 @@ ExpressionPtr IncludeExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void IncludeExpression::onParse(AnalysisResultPtr ar) {
+void IncludeExpression::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   // See if we can get a string literal
   preOptimize(ar);
   m_include = ar->getDependencyGraph()->add
@@ -77,9 +77,9 @@ void IncludeExpression::analyzeInclude(AnalysisResultPtr ar,
     Compiler::Error(Compiler::PHPIncludeFileNotFound, self);
     return;
   }
-  FunctionScopePtr func = ar->getFunctionScope();
-  ar->getFileScope()->addIncludeDependency(ar, m_include,
-                                           func && func->isInlined());
+  FunctionScopePtr func = getFunctionScope();
+  getFileScope()->addIncludeDependency(ar, m_include,
+                                       func && func->isInlined());
 }
 
 void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
@@ -89,9 +89,9 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
       analyzeInclude(ar, include);
     }
   }
-  if (!ar->getScope()->inPseudoMain() &&
+  if (!getScope()->inPseudoMain() &&
       !m_privateScope) {
-    VariableTablePtr var = ar->getScope()->getVariables();
+    VariableTablePtr var = getScope()->getVariables();
     var->setAttribute(VariableTable::ContainsLDynamicVariable);
     var->forceVariants(ar, VariableTable::AnyVars);
   }

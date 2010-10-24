@@ -123,10 +123,12 @@ ExpressionPtr SimpleFunctionCall::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void SimpleFunctionCall::onParse(AnalysisResultPtr ar) {
+void SimpleFunctionCall::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   if (m_class) return;
 
-  FileScopePtr fs = ar->getFileScope();
+  FileScopePtr fs = dynamic_pointer_cast<FileScope>(scope);
+  assert(fs);
+
   ConstructPtr self = shared_from_this();
   if (m_className.empty()) {
     switch (m_type) {
@@ -134,8 +136,6 @@ void SimpleFunctionCall::onParse(AnalysisResultPtr ar) {
       if (m_params->getCount() == 2 &&
           (*m_params)[0]->isLiteralString() &&
           (*m_params)[1]->isLiteralString()) {
-        FunctionScopePtr func = ar->getFunctionScope();
-        if (func) func->disableInline();
         string params = (*m_params)[0]->getLiteralString();
         string body = (*m_params)[1]->getLiteralString();
         m_lambda = CodeGenerator::GetNewLambda();
@@ -154,20 +154,20 @@ void SimpleFunctionCall::onParse(AnalysisResultPtr ar) {
         But note that later phases should set/get the attribute
         directly on the FunctionScope, rather than on the FileScope
       */
-      ar->getFileScope()->setAttribute(FileScope::VariableArgument);
+      fs->setAttribute(FileScope::VariableArgument);
       break;
     case ExtractFunction:
-      ar->getFileScope()->setAttribute(FileScope::ContainsLDynamicVariable);
-      ar->getFileScope()->setAttribute(FileScope::ContainsExtract);
+      fs->setAttribute(FileScope::ContainsLDynamicVariable);
+      fs->setAttribute(FileScope::ContainsExtract);
       break;
     case CompactFunction:
-      ar->getFileScope()->setAttribute(FileScope::ContainsDynamicVariable);
-      ar->getFileScope()->setAttribute(FileScope::ContainsCompact);
+      fs->setAttribute(FileScope::ContainsDynamicVariable);
+      fs->setAttribute(FileScope::ContainsCompact);
       break;
     case GetDefinedVarsFunction:
-      ar->getFileScope()->setAttribute(FileScope::ContainsDynamicVariable);
-      ar->getFileScope()->setAttribute(FileScope::ContainsGetDefinedVars);
-      ar->getFileScope()->setAttribute(FileScope::ContainsCompact);
+      fs->setAttribute(FileScope::ContainsDynamicVariable);
+      fs->setAttribute(FileScope::ContainsGetDefinedVars);
+      fs->setAttribute(FileScope::ContainsCompact);
       break;
     default:
       break;
@@ -243,7 +243,8 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
           dynamic_pointer_cast<ConstantExpression>(ename)) {
 
         ename = ExpressionPtr(
-          new ScalarExpression(cname->getLocation(), KindOfScalarExpression,
+          new ScalarExpression(cname->getScope(), cname->getLocation(),
+                               KindOfScalarExpression,
                                T_STRING, cname->getName(), true));
         m_params->removeElement(0);
         m_params->insertElement(ename);
@@ -253,7 +254,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       if (name) {
         string varName = name->getIdentifier();
         if (!varName.empty()) {
-          ar->getFileScope()->declareConstant(ar, varName);
+          getFileScope()->declareConstant(ar, varName);
 
           // handling define("CONSTANT", ...);
           ExpressionPtr value = (*m_params)[1];
@@ -267,7 +268,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     }
 
     if (m_type == UnserializeFunction) {
-      ar->forceClassVariants(getOriginalScope(ar), false);
+      ar->forceClassVariants(getOriginalScope(), false);
     }
   }
 
@@ -280,9 +281,9 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       if (!m_class && m_className.empty()) {
         func = ar->findFunction(m_name);
       } else {
-        cls = ar->resolveClass(m_className);
+        cls = ar->resolveClass(shared_from_this(), m_className);
         if (cls && cls->isRedeclaring()) {
-          cls = ar->findExactClass(m_className);
+          cls = ar->findExactClass(shared_from_this(), m_className);
         }
         if (cls) {
           m_classScope = cls;
@@ -391,8 +392,9 @@ static ExpressionPtr cloneForInlineRecur(ExpressionPtr exp,
       SimpleVariablePtr sv(dynamic_pointer_cast<SimpleVariable>(exp));
       if (!sv->isThis() && !sv->isSuperGlobal()) {
         string name = prefix + sv->getName();
-        ExpressionPtr rep(new SimpleVariable(exp->getLocation(),
-                                             exp->getKindOf(), name));
+        ExpressionPtr rep(new SimpleVariable(
+                            exp->getScope(), exp->getLocation(),
+                            exp->getKindOf(), name));
         rep->copyContext(exp);
         sepm[name] = rep;
         exp = rep;
@@ -471,7 +473,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
         Variant v = invoke_builtin(m_funcScope->getName().c_str(),
                                    arr, -1, true);
         g_context->setThrowAllErrors(false);
-        return MakeScalarExpression(ar, getLocation(), v);
+        return makeScalarExpression(ar, v);
       } catch (...) {
         g_context->setThrowAllErrors(false);
       }
@@ -491,7 +493,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
     return ExpressionPtr();
   }
 
-  FunctionScopePtr fs = ar->getFunctionScope();
+  FunctionScopePtr fs = getFunctionScope();
   if (!fs || fs->inPseudoMain()) return ExpressionPtr();
   VariableTablePtr vt = fs->getVariables();
   int nAct = m_params ? m_params->getCount() : 0;
@@ -504,7 +506,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
     return ExpressionPtr();
   }
 
-  ExpressionListPtr elist(new ExpressionList(getLocation(),
+  ExpressionListPtr elist(new ExpressionList(getScope(), getLocation(),
                                              KindOfExpressionList,
                                              ExpressionList::ListKindWrapped));
 
@@ -525,12 +527,14 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
     ExpressionPtr arg = i < nAct ? (*m_params)[i] :
       param->defaultValue()->clone();
     SimpleVariablePtr var
-      (new SimpleVariable((i < nAct ? arg.get() : this)->getLocation(),
+      (new SimpleVariable(getScope(),
+                          (i < nAct ? arg.get() : this)->getLocation(),
                           KindOfSimpleVariable,
                           prefix + param->getName()));
     bool ref = m_funcScope->isRefParam(i);
     AssignmentExpressionPtr ae
-      (new AssignmentExpression(arg->getLocation(), KindOfAssignmentExpression,
+      (new AssignmentExpression(getScope(),
+                                arg->getLocation(), KindOfAssignmentExpression,
                                 var, arg, ref));
     elist->addElement(ae);
     if (i < nAct && (ref || !arg->isScalar())) {
@@ -544,7 +548,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
 
   if (sepm.size()) {
     ExpressionListPtr unset_list
-      (new ExpressionList(this->getLocation(), KindOfExpressionList));
+      (new ExpressionList(getScope(), getLocation(), KindOfExpressionList));
 
     for (StringToExpressionPtrMap::iterator it = sepm.begin(), end = sepm.end();
          it != end; ++it) {
@@ -554,7 +558,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
     }
 
     ExpressionPtr unset(
-      new UnaryOpExpression(this->getLocation(), KindOfUnaryOpExpression,
+      new UnaryOpExpression(getScope(), getLocation(), KindOfUnaryOpExpression,
                             unset_list, T_UNSET, true));
     i = elist->getCount();
     ExpressionPtr ret = (*elist)[--i];
@@ -562,7 +566,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
       elist->insertElement(unset, i);
     } else {
       ExpressionListPtr result_list
-        (new ExpressionList(this->getLocation(), KindOfExpressionList,
+        (new ExpressionList(getScope(), getLocation(), KindOfExpressionList,
                             ExpressionList::ListKindLeft));
       result_list->addElement(ret);
       result_list->addElement(unset);
@@ -746,7 +750,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
   }
 
   if (m_safe) {
-    ar->getScope()->getVariables()->
+    getScope()->getVariables()->
       setAttribute(VariableTable::NeedGlobalPointer);
   }
 
@@ -768,7 +772,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                       ar->getName(), varName, self);
           BlockScopePtr block = ar->findConstantDeclarer(varName);
           if (!block) {
-            ar->getFileScope()->declareConstant(ar, varName);
+            getFileScope()->declareConstant(ar, varName);
             block = ar->findConstantDeclarer(varName);
             ASSERT(block);
           }
@@ -780,7 +784,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
             }
             if (constants->isDynamic(varName)) {
               m_dynamicConstant = true;
-              ar->getScope()->getVariables()->
+              getScope()->getVariables()->
                 setAttribute(VariableTable::NeedGlobalPointer);
             } else {
               constants->setType(ar, varName, varType, true);
@@ -795,8 +799,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         Compiler::Error(Compiler::BadDefine, self);
       }
     } else if (m_type == ExtractFunction) {
-      ar->getScope()->getVariables()->
-        forceVariants(ar, VariableTable::AnyVars);
+      getScope()->getVariables()->forceVariants(ar, VariableTable::AnyVars);
     }
   }
 
@@ -810,13 +813,13 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       func = ar->findFunction(m_name);
     }
   } else {
-    ClassScopePtr cls = ar->resolveClass(m_className);
+    ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_className);
     if (cls && cls->isVolatile()) {
-      ar->getScope()->getVariables()
+      getScope()->getVariables()
         ->setAttribute(VariableTable::NeedGlobalPointer);
 
       if (cls->isRedeclaring()) {
-        cls = ar->findExactClass(m_className);
+        cls = ar->findExactClass(shared_from_this(), m_className);
         if (!cls) {
           m_redeclaredClass = true;
         }
@@ -844,8 +847,8 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
 
     if (func && !func->isStatic()) {
-      ClassScopePtr clsThis = ar->getClassScope();
-      FunctionScopePtr funcThis = ar->getFunctionScope();
+      ClassScopePtr clsThis = getClassScope();
+      FunctionScopePtr funcThis = getFunctionScope();
       if (!clsThis ||
           (clsThis->getName() != m_className &&
            !clsThis->derivesFrom(ar, m_className, true, false)) ||
@@ -866,7 +869,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
     if (func) {
       m_redeclared = true;
-      ar->getScope()->getVariables()->
+      getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
     }
     if (!func && !errorFlagged && ar->isFirstPass()) {
@@ -1006,16 +1009,18 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     return FunctionCall::preOutputCPP(cg, ar, state);
   // Short circuit out if inExpression() returns false
   if (!ar->inExpression()) return true;
-  m_ciTemp = cg.createNewId(ar);
+  m_ciTemp = cg.createNewId(shared_from_this());
   bool needHash = true;
   string escapedName(cg.escapeLabel(m_name));
   string escapedClass;
   ClassScopePtr cls;
   if (!m_className.empty()) {
     cls = ar->findClass(m_className);
-    if (!m_safe && cls && !ar->checkClassPresent(m_origClassName) &&
+    if (!m_safe && cls &&
+        !ar->checkClassPresent(shared_from_this(), m_origClassName) &&
         cls->isVolatile()) {
-      ClassScope::OutputVolatileCheck(cg, ar, cls->getOriginalName(), false);
+      ClassScope::OutputVolatileCheck(cg, ar, getScope(),
+                                      cls->getOriginalName(), false);
       cg_printf(";\n");
     }
     escapedClass = cg.escapeLabel(m_className);
@@ -1031,9 +1036,9 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   if (m_safe) {
     if (!m_className.empty()) {
       if ((!cls || cls->isVolatile()) &&
-          !ar->checkClassPresent(m_origClassName)) {
+          !ar->checkClassPresent(shared_from_this(), m_origClassName)) {
         cg_indentBegin("if (");
-        ClassScope::OutputVolatileCheck(cg, ar, m_className, true);
+        ClassScope::OutputVolatileCheck(cg, ar, getScope(), m_className, true);
         safeCheck = true;
       }
     } else if (!m_funcScope || m_funcScope->isVolatile()) {
@@ -1059,7 +1064,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       }
     } else {
       cg_printf("get_call_info_or_fail(cit%d, vt%d, ", m_ciTemp, m_ciTemp);
-      cg_printString(m_name, ar);
+      cg_printString(m_name, ar, shared_from_this());
       cg_printf(");\n");
       needHash = false;
     }
@@ -1072,9 +1077,9 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     if (safeCheck) {
       cg_printf("mcp%d.noFatal();\n", m_ciTemp);
     }
-    ClassScopePtr cscope = ar->getClassScope();
+    ClassScopePtr cscope = getClassScope();
     // The call is happening in an instance method
-    bool inObj = cscope && !ar->getFunctionScope()->isStatic();
+    bool inObj = cscope && !getFunctionScope()->isStatic();
     // The call was like parent::
     bool parentCall = m_parentClass && inObj;
     string className;
@@ -1091,9 +1096,9 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           m_origClassName != "static") {
         // Create a temporary to hold the class name, in case it is not a
         // StaticString.
-        m_clsNameTemp = cg.createNewId(ar);
+        m_clsNameTemp = cg.createNewId(shared_from_this());
         cg_printf("CStrRef clsName%d(", m_clsNameTemp);
-        cg_printString(m_origClassName, ar);
+        cg_printString(m_origClassName, ar, shared_from_this());
         cg_printf(");\n");
       }
     }
@@ -1118,7 +1123,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       }
     } else if (m_validClass) {
       // In an object, calling a superclass's method
-      bool exCall = inObj && ar->getClassScope()->derivesFrom(ar, m_className,
+      bool exCall = inObj && getClassScope()->derivesFrom(ar, m_className,
           true, false);
       if (exCall) {
         cg_printf("mcp%d.methodCallEx(this, \"%s\");\n", m_ciTemp,
@@ -1208,10 +1213,11 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
   if (m_safe) {
     if (!m_className.empty()) {
       if ((!cls || cls->isVolatile()) &&
-          !ar->checkClassPresent(m_origClassName)) {
+          !ar->checkClassPresent(shared_from_this(), m_origClassName)) {
         if (m_valid) {
           cg_printf("(");
-          ClassScope::OutputVolatileCheck(cg, ar, m_className, true);
+          ClassScope::OutputVolatileCheck(cg, ar, getScope(),
+                                          m_className, true);
         }
         volatileCheck = true;
       }
@@ -1254,9 +1260,9 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
     }
   } else if (!m_className.empty()) {
     if ((!cls || cls->isVolatile()) &&
-        !ar->checkClassPresent(m_origClassName)) {
+        !ar->checkClassPresent(shared_from_this(), m_origClassName)) {
       volatileCheck = true;
-      ClassScope::OutputVolatileCheckBegin(cg, ar, m_origClassName);
+      ClassScope::OutputVolatileCheckBegin(cg, ar, getScope(), m_origClassName);
     }
   }
 
@@ -1272,15 +1278,16 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       cg_printf("%s%s(", Option::MethodPrefix, name.c_str());
     } else {
       int paramCount = m_params ? m_params->getCount() : 0;
-      if (m_name == "get_class" && ar->getClassScope() && paramCount == 0) {
+      if (m_name == "get_class" && getClassScope() && paramCount == 0) {
         cg_printf("(");
-        cg_printString(ar->getClassScope()->getOriginalName(), ar);
-      } else if (m_name == "get_parent_class" && ar->getClassScope() &&
+        cg_printString(getClassScope()->getOriginalName(), ar,
+                       shared_from_this());
+      } else if (m_name == "get_parent_class" && getClassScope() &&
                  paramCount == 0) {
-        const std::string parentClass = ar->getClassScope()->getParent();
+        const std::string parentClass = getClassScope()->getParent();
         cg_printf("(");
         if (!parentClass.empty()) {
-          cg_printString(ar->getClassScope()->getParent(), ar);
+          cg_printString(getClassScope()->getParent(), ar, shared_from_this());
         } else {
           cg_printf("false");
         }
@@ -1379,8 +1386,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
           } else {
             Array ret(Array::Create(0, false));
             ret.set(1, Variant());
-            ExpressionPtr t = Expression::MakeScalarExpression(
-              ar, this->getLocation(), ret);
+            ExpressionPtr t = makeScalarExpression(ar, ret);
             t->outputCPP(cg, ar);
           }
         }
@@ -1451,8 +1457,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
     switch (m_type) {
     case VariableArgumentFunction:
       {
-        FunctionScopePtr func =
-          dynamic_pointer_cast<FunctionScope>(ar->getScope());
+        FunctionScopePtr func = getFunctionScope();
         if (func) {
           cg_printf("%s(", m_name.c_str());
           func->outputCPPParamsCall(cg, ar, true);
@@ -1506,7 +1511,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                 }
               }
               cg_printf("f_function_exists(");
-              cg_printString(symbol, ar);
+              cg_printString(symbol, ar, shared_from_this());
               cg_printf(")");
             }
             break;
@@ -1537,7 +1542,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                   } else {
                     cg_printf("checkInterfaceExists(");
                   }
-                  cg_printString(symbol, ar);
+                  cg_printString(symbol, ar, shared_from_this());
                   cg_printf(", &%s->CDEC(%s), %s->FVF(__autoload), true)",
                             cg.getGlobals(ar),
                             cg.formatLabel(lname).c_str(),
@@ -1549,7 +1554,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                 } else {
                   cg_printf("f_interface_exists(");
                 }
-                cg_printString(symbol, ar);
+                cg_printString(symbol, ar, shared_from_this());
                 cg_printf(")");
               }
             }
@@ -1605,10 +1610,9 @@ SimpleFunctionCallPtr SimpleFunctionCall::getFunctionCallForCallUserFunc(
           ExpressionListPtr p2;
           if (testOnly) {
             p2 = ExpressionListPtr(
-              new ExpressionList(call->getLocation(),
+              new ExpressionList(call->getScope(), call->getLocation(),
                                  Expression::KindOfExpressionList));
-            p2->addElement(Expression::MakeScalarExpression(
-                            ar, call->getLocation(), v));
+            p2->addElement(call->makeScalarExpression(ar, v));
             name = "function_exists";
           } else {
             p2 = static_pointer_cast<ExpressionList>(params->clone());
@@ -1617,7 +1621,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::getFunctionCallForCallUserFunc(
             }
           }
           SimpleFunctionCallPtr rep(
-            new SimpleFunctionCall(call->getLocation(),
+            new SimpleFunctionCall(call->getScope(), call->getLocation(),
                                    Expression::KindOfSimpleFunctionCall,
                                    name, p2, ExpressionPtr()));
           return rep;
@@ -1648,9 +1652,9 @@ SimpleFunctionCallPtr SimpleFunctionCall::getFunctionCallForCallUserFunc(
           return SimpleFunctionCallPtr();
         }
         if (cls->isRedeclaring()) {
-          cls = ar->findExactClass(sclass);
+          cls = ar->findExactClass(call->shared_from_this(), sclass);
         } else if (!cls->isVolatile() && cls->isUserClass() &&
-                   !ar->checkClassPresent(sclass)) {
+                   !ar->checkClassPresent(call->shared_from_this(), sclass)) {
           cls->setVolatile();
         }
         if (!cls) {
@@ -1675,20 +1679,20 @@ SimpleFunctionCallPtr SimpleFunctionCall::getFunctionCallForCallUserFunc(
           return SimpleFunctionCallPtr();
         }
         if (func->isPrivate() ?
-            (cls != ar->getClassScope() ||
+            (cls != call->getOriginalScope() ||
              !cls->findFunction(ar, smethod, false)) :
             (func->isProtected() &&
-             (!ar->getClassScope() ||
-              !ar->getClassScope()->derivesFrom(ar, sclass, true, false)))) {
+             (!call->getOriginalScope() ||
+              !call->getOriginalScope()->derivesFrom(ar, sclass,
+                                                     true, false)))) {
           error = true;
           return SimpleFunctionCallPtr();
         }
-        ExpressionPtr cl(
-          Expression::MakeScalarExpression(ar, call->getLocation(), classname));
+        ExpressionPtr cl(call->makeScalarExpression(ar, classname));
         ExpressionListPtr p2;
         if (testOnly) {
           p2 = ExpressionListPtr(
-            new ExpressionList(call->getLocation(),
+            new ExpressionList(call->getScope(), call->getLocation(),
                                Expression::KindOfExpressionList));
           p2->addElement(cl);
           cl.reset();
@@ -1700,7 +1704,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::getFunctionCallForCallUserFunc(
           }
         }
         SimpleFunctionCallPtr rep(
-          new SimpleFunctionCall(call->getLocation(),
+          new SimpleFunctionCall(call->getScope(), call->getLocation(),
                                  Expression::KindOfSimpleFunctionCall,
                                  smethod, p2, cl));
         return rep;
@@ -1754,7 +1758,7 @@ ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
         } else {
           Array ret(Array::Create(0, false));
           ret.set(1, Variant());
-          return Expression::MakeScalarExpression(ar, call->getLocation(), ret);
+          return call->makeScalarExpression(ar, ret);
         }
       }
       if (rep) {
@@ -1781,7 +1785,7 @@ ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg,
       SimpleFunctionCall::getFunctionCallForCallUserFunc(
         ar, call, true, 1, error));
     if (error) {
-      return Expression::MakeConstant(ar, call->getLocation(), "false");
+      return call->makeConstant(ar, "false");
     }
     return rep;
   }

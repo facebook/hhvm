@@ -32,6 +32,8 @@ DECLARE_BOOST_TYPES(IncludeExpression);
 DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(BlockScope);
 DECLARE_BOOST_TYPES(ClassScope);
+DECLARE_BOOST_TYPES(FunctionScope);
+DECLARE_BOOST_TYPES(FileScope);
 
 /**
  * Base class of ClassScope and FunctionScope.
@@ -55,6 +57,9 @@ public:
   StatementPtr getStmt() { return m_stmt;}
   VariableTablePtr getVariables() { return m_variables;}
   ConstantTablePtr getConstants() { return m_constants;}
+  ClassScopePtr getContainingClass();
+  FunctionScopePtr getContainingFunction();
+  FileScopePtr getContainingFile();
 
   /**
    * Helpers for keeping track of break/continue nested level.
@@ -82,12 +87,6 @@ public:
   void setDocComment(const std::string &doc) { m_docComment = doc;}
 
   /**
-   * Movable includes.
-   */
-  void addMovableInclude(StatementPtr include);
-  StatementListPtr getMovableIncludes() { return m_includes;}
-
-  /**
    * Triggers type inference of all statements inside this block.
    */
   void inferTypes(AnalysisResultPtr ar);
@@ -106,6 +105,10 @@ public:
     return ClassScopePtr();
   }
 
+  void setOuterScope(BlockScopePtr o) { m_outerScope = o; }
+  BlockScopePtr getOuterScope() { return m_outerScope.lock(); }
+  bool isOuterScope() { return m_outerScope.expired(); }
+
 protected:
   std::string m_originalName;
   std::string m_name;
@@ -115,6 +118,7 @@ protected:
   KindOf m_kind;
   VariableTablePtr m_variables;
   ConstantTablePtr m_constants;
+  BlockScopeWeakPtr m_outerScope;
 
   int m_loopNestedLevel;
   int m_incLevel;

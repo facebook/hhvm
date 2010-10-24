@@ -106,7 +106,7 @@ ExpressionPtr StatementList::getEffectiveImpl(AnalysisResultPtr ar) const {
     if (s->is(KindOfReturnStatement)) {
       ExpressionPtr e = static_pointer_cast<ReturnStatement>(s)->getRetExp();
       if (!e) {
-        e = Expression::MakeConstant(ar, s->getLocation(), "null");
+        e = CONSTANT("null");
       } else if (!e->isScalar()) {
         break;
       }
@@ -253,24 +253,24 @@ bool StatementList::mergeConcatAssign(AnalysisResultPtr ar) {
           binaryOpExp = dynamic_pointer_cast<BinaryOpExpression>(exp);
           exp2 = binaryOpExp->getExp2();
           exp1 = BinaryOpExpressionPtr
-            (new BinaryOpExpression(getLocation(),
+            (new BinaryOpExpression(getScope(), getLocation(),
                                     Expression::KindOfBinaryOpExpression,
                                     exp1, exp2, '.'));
         }
         if (isAssignment) {
           exp = AssignmentExpressionPtr
-            (new AssignmentExpression(exp->getLocation(),
+            (new AssignmentExpression(exp->getScope(), exp->getLocation(),
                                       Expression::KindOfAssignmentExpression,
                                       var, exp1,
                                       false));
         } else {
           exp = BinaryOpExpressionPtr
-            (new BinaryOpExpression(getLocation(),
+            (new BinaryOpExpression(getScope(), getLocation(),
                                     Expression::KindOfBinaryOpExpression,
                                     var, exp1, T_CONCAT_EQUAL));
         }
         expStmt = ExpStatementPtr
-          (new ExpStatement(getLocation(),
+          (new ExpStatement(getScope(), getLocation(),
                             Statement::KindOfExpStatement, exp));
 
         m_stmts[i - length] = expStmt;
@@ -423,7 +423,7 @@ void StatementList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void StatementList::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  FunctionScopePtr func = ar->getFunctionScope();
+  FunctionScopePtr func = getFunctionScope();
   bool inPseudoMain = func && func->inPseudoMain();
   std::vector<bool> isDeclaration;
 
@@ -459,7 +459,7 @@ void StatementList::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           dynamic_pointer_cast<MethodStatement>(stmt);
         std::string methodName = methodStmt->getName();
         if (methodName == "offsetget") {
-          ClassScopePtr cls = ar->getClassScope();
+          ClassScopePtr cls = getClassScope();
           std::string arrayAccess("arrayaccess");
           if (cls->derivesFrom(ar, arrayAccess, false, false)) {
             FunctionScopePtr funcScope = methodStmt->getFunctionScope();

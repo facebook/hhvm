@@ -49,12 +49,12 @@ StatementPtr ClassVariable::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ClassVariable::onParse(AnalysisResultPtr ar) {
+void ClassVariable::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   ModifierExpressionPtr modifiers =
-    ar->getScope()->setModifiers(m_modifiers);
+    scope->setModifiers(m_modifiers);
 
   for (int i = 0; i < m_declaration->getCount(); i++) {
-    VariableTablePtr variables = ar->getScope()->getVariables();
+    VariableTablePtr variables = scope->getVariables();
     ExpressionPtr exp = (*m_declaration)[i];
     if (exp->is(Expression::KindOfAssignmentExpression)) {
       AssignmentExpressionPtr assignment =
@@ -66,8 +66,7 @@ void ClassVariable::onParse(AnalysisResultPtr ar) {
         Compiler::Error(Compiler::DeclaredVariableTwice, exp);
         m_declaration->removeElement(i--);
       } else {
-        IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>(exp);
-        ph->onParse(ar);
+        assignment->onParse(ar, scope);
       }
     } else {
       const std::string &name =
@@ -81,7 +80,7 @@ void ClassVariable::onParse(AnalysisResultPtr ar) {
     }
   }
 
-  ar->getScope()->setModifiers(modifiers);
+  scope->setModifiers(modifiers);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -94,7 +93,7 @@ void ClassVariable::analyzeProgramImpl(AnalysisResultPtr ar) {
       phase != AnalysisResult::AnalyzeAll) {
     return;
   }
-  ClassScopePtr scope = ar->getClassScope();
+  ClassScopePtr scope = getClassScope();
   for (int i = 0; i < m_declaration->getCount(); i++) {
     ExpressionPtr exp = (*m_declaration)[i];
     if (exp->is(Expression::KindOfAssignmentExpression)) {
@@ -112,8 +111,8 @@ void ClassVariable::analyzeProgramImpl(AnalysisResultPtr ar) {
       SimpleVariablePtr var =
         dynamic_pointer_cast<SimpleVariable>(exp);
       scope->getVariables()->markOverride(ar, var->getName());
-      scope->getVariables()->setClassInitVal(
-        var->getName(), Expression::MakeConstant(ar, getLocation(), "null"));
+      scope->getVariables()->setClassInitVal(var->getName(),
+                                             makeConstant(ar, "null"));
     }
   }
 }
@@ -153,7 +152,7 @@ StatementPtr ClassVariable::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_modifiers);
   ar->preOptimize(m_declaration);
 
-  ClassScopePtr scope = ar->getClassScope();
+  ClassScopePtr scope = getClassScope();
   for (int i = 0; i < m_declaration->getCount(); i++) {
     ExpressionPtr exp = (*m_declaration)[i];
     if (exp->is(Expression::KindOfAssignmentExpression)) {
@@ -178,7 +177,7 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
   m_declaration->inferAndCheck(ar, Type::Variant, false);
 
   if (m_modifiers->isStatic()) {
-    ClassScopePtr scope = ar->getClassScope();
+    ClassScopePtr scope = getClassScope();
     for (int i = 0; i < m_declaration->getCount(); i++) {
       ExpressionPtr exp = (*m_declaration)[i];
       if (exp->is(Expression::KindOfAssignmentExpression)) {
@@ -220,7 +219,7 @@ void ClassVariable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  ClassScopePtr scope = ar->getClassScope();
+  ClassScopePtr scope = getClassScope();
   bool derivFromRedec = scope->derivesFromRedeclaring() &&
     !m_modifiers->isPrivate();
   for (int i = 0; i < m_declaration->getCount(); i++) {
@@ -242,7 +241,7 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         value->outputCPPBegin(cg, ar);
         if (derivFromRedec) {
           cg_printf("%sset(", Option::ObjectPrefix);
-          cg_printString(var->getName(), ar);
+          cg_printString(var->getName(), ar, shared_from_this());
           cg_printf(", ");
           value->outputCPP(cg, ar);
           cg_printf(")");
@@ -256,7 +255,7 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         var = dynamic_pointer_cast<SimpleVariable>(exp);
         if (derivFromRedec) {
           cg_printf("%sset(", Option::ObjectPrefix);
-          cg_printString(var->getName(), ar);
+          cg_printString(var->getName(), ar, shared_from_this());
           cg_printf(", null);\n");
         } else {
           type = scope->getVariables()->getFinalType(var->getName());

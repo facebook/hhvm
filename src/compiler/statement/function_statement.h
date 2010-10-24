@@ -42,7 +42,7 @@ public:
   virtual std::string getName() const;
 
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultPtr ar);
+  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
   bool ignored() const { return m_ignored;}
 
 private:

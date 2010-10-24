@@ -129,7 +129,7 @@ void BreakStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     unsigned size = labelIds.size();
     int labelId;
 
-    int varId = cg.createNewLocalId(ar);
+    int varId = cg.createNewLocalId(shared_from_this());
     cg_printf("int64 %s%d;\n", Option::TempPrefix, varId);
 
     m_exp->outputCPPBegin(cg, ar);

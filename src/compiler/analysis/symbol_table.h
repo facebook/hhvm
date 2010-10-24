@@ -31,6 +31,10 @@ DECLARE_BOOST_TYPES(Construct);
 DECLARE_BOOST_TYPES(Type);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(SymbolTable);
+DECLARE_BOOST_TYPES(FunctionScope);
+DECLARE_BOOST_TYPES(ClassScope);
+DECLARE_BOOST_TYPES(FileScope);
+DECLARE_BOOST_TYPES(BlockScope);
 
 class Symbol {
 public:
@@ -178,8 +182,8 @@ class SymbolTable : public boost::enable_shared_from_this<SymbolTable>,
 public:
   static SymbolTablePtrVec AllSymbolTables; // for stats purpose
   static void CountTypes(std::map<std::string, int> &counts);
-  BlockScope *getScope() const { return &m_blockScope; }
-
+  BlockScope *getScopePtr() const { return &m_blockScope; }
+  BlockScopePtr getBlockScope();
 public:
   SymbolTable(BlockScope &blockScope);
   SymbolTable();
@@ -247,6 +251,10 @@ public:
                           TypePtr type, bool coerced);
   Symbol *getSymbol(const std::string &name) const;
   Symbol *getSymbol(const std::string &name, bool add);
+
+  FunctionScopePtr getFunctionScope();
+  ClassScopePtr getClassScope();
+  FileScopePtr getFileScope();
 protected:
   typedef std::map<std::string,Symbol> StringToSymbolMap;
   BlockScope &m_blockScope;     // parent

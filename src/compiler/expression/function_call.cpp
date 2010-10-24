@@ -227,9 +227,9 @@ bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
               "%s%s::s_class_name);\n",
               Option::ClassPrefix, className.c_str());
   } else {
-    m_clsNameTemp = cg.createNewId(ar);
+    m_clsNameTemp = cg.createNewId(shared_from_this());
     cg_printf("CStrRef clsName%d(", m_clsNameTemp);
-    cg_printString(m_origClassName, ar);
+    cg_printString(m_origClassName, ar, shared_from_this());
     cg_printf(");\n");
     cg_printf("FrameInjection::SetStaticClassName(info, clsName%d);\n",
               m_clsNameTemp);
@@ -304,18 +304,19 @@ void FunctionCall::optimizeArgArray(AnalysisResultPtr ar) {
   }
   if (isScalar) {
     ExpressionPtr argArrayPairs =
-      ExpressionListPtr(new ExpressionList(getLocation(),
+      ExpressionListPtr(new ExpressionList(getScope(), getLocation(),
                                            Expression::KindOfExpressionList));
     for (int i = iMax; i < paramCount; i++) {
       ExpressionPtr param = (*m_params)[i];
-      argArrayPairs->addElement(ArrayPairExpressionPtr(
-        new ArrayPairExpression(param->getLocation(),
-                                Expression::KindOfArrayPairExpression,
-                                ExpressionPtr(), param, false)));
+      argArrayPairs->addElement(
+        ArrayPairExpressionPtr(new ArrayPairExpression(
+                                 getScope(), param->getLocation(),
+                                 Expression::KindOfArrayPairExpression,
+                                 ExpressionPtr(), param, false)));
     }
     string text;
     m_argArrayId =
-      ar->registerScalarArray(argArrayPairs, m_argArrayHash, m_argArrayIndex,
-                              text);
+      ar->registerScalarArray(getFileScope(), argArrayPairs,
+                              m_argArrayHash, m_argArrayIndex, text);
   }
 }

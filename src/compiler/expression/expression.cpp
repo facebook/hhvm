@@ -40,10 +40,10 @@ using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Expression::Expression(LocationPtr loc, KindOf kindOf)
-  : Construct(loc), m_kindOf(kindOf), m_context(RValue),
-    m_originalScopeSet(false), m_canon_id(0), m_canonPtr(), m_error(0),
-    m_unused(false) {
+Expression::Expression(EXPRESSION_CONSTRUCTOR_PARAMETERS)
+    : Construct(scope, loc), m_kindOf(kindOf), m_context(RValue),
+      m_originalScopeSet(false), m_canon_id(0), m_canonPtr(), m_error(0),
+      m_unused(false) {
 }
 
 ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
@@ -53,7 +53,7 @@ ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
       An assignment isRefable, but the rhs may not be. Need this to
       prevent "bad pass by reference" errors.
     */
-    ExpressionListPtr el(new ExpressionList(getLocation(),
+    ExpressionListPtr el(new ExpressionList(getScope(), getLocation(),
                                             Expression::KindOfExpressionList,
                                             ExpressionList::ListKindWrapped));
     el->addElement(rep);
@@ -69,6 +69,10 @@ ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
         rep->setExpectedType(t1);
       }
     }
+  }
+
+  if (rep->getScope() != getScope()) {
+    rep->resetScope(getScope());
   }
 
   return rep;
@@ -133,7 +137,8 @@ void Expression::insertElement(ExpressionPtr exp, int index /* = 0 */) {
 
 ExpressionPtr Expression::unneededHelper(AnalysisResultPtr ar) {
   ExpressionListPtr elist = ExpressionListPtr
-    (new ExpressionList(getLocation(), Expression::KindOfExpressionList,
+    (new ExpressionList(getScope(), getLocation(),
+                        Expression::KindOfExpressionList,
                         ExpressionList::ListKindWrapped));
 
   bool change = false;
@@ -172,7 +177,7 @@ ExpressionPtr Expression::unneeded(AnalysisResultPtr ar) {
   if (!getContainedEffects()) {
     ar->incOptCounter();
     return ScalarExpressionPtr
-      (new ScalarExpression(getLocation(),
+      (new ScalarExpression(getScope(), getLocation(),
                             Expression::KindOfScalarExpression,
                             T_LNUMBER, string("0")));
   }
@@ -225,18 +230,30 @@ TypePtr Expression::propagateTypes(AnalysisResultPtr ar, TypePtr inType) {
 }
 
 void Expression::analyzeProgram(AnalysisResultPtr ar) {
-  if (ar->isFirstPass()) {
-    m_originalScope = ar->getClassScope();
-    m_originalScopeSet = true;
-  }
 }
 
-ClassScopePtr Expression::getOriginalScope(AnalysisResultPtr ar) {
+ClassScopePtr Expression::getOriginalScope() {
   if (!m_originalScopeSet) {
     m_originalScopeSet = true;
-    m_originalScope = ar->getClassScope();
+    m_originalScope = getClassScope();
   }
   return m_originalScope.lock();
+}
+
+string Expression::originalClassName(CodeGenerator &cg, bool withComma) {
+  ClassScopePtr cls = getOriginalScope();
+  string ret = withComma ? ", " : "";
+  if (cls) {
+    if (cls == getClassScope()) {
+      return ret + "s_class_name";
+    }
+    return ret + cls->getId(cg) + "::s_class_name";
+  } else if (FunctionScopePtr funcScope = getFunctionScope()) {
+    if (!funcScope->inPseudoMain()) {
+      return ret + "empty_string";
+    }
+  }
+  return withComma ? "" : "null_string";
 }
 
 TypePtr Expression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
@@ -335,7 +352,7 @@ bool Expression::CheckNeeded(AnalysisResultPtr ar,
     SimpleVariablePtr var =
       dynamic_pointer_cast<SimpleVariable>(variable);
     const std::string &name = var->getName();
-    VariableTablePtr variables = ar->getScope()->getVariables();
+    VariableTablePtr variables = var->getScope()->getVariables();
     if (needed) {
       variables->addNeeded(name);
     } else {
@@ -354,7 +371,7 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
     ret = value->inferAndCheck(ar, Type::Some, false);
   }
 
-  BlockScopePtr scope = ar->getScope();
+  BlockScopePtr scope = getScope();
   if (variable->is(Expression::KindOfConstantExpression)) {
     // ...as in ClassConstant statement
     ConstantExpressionPtr exp =
@@ -365,10 +382,10 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
                                  bases, defScope);
   } else if (variable->is(Expression::KindOfDynamicVariable)) {
     // simptodo: not too sure about this
-    ar->getFileScope()->setAttribute(FileScope::ContainsLDynamicVariable);
+    getFileScope()->setAttribute(FileScope::ContainsLDynamicVariable);
   } else if (variable->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
-    if (var->getName() == "this" && ar->getClassScope()) {
+    if (var->getName() == "this" && getClassScope()) {
       if (ar->isFirstPass()) {
         Compiler::Error(Compiler::ReassignThis, variable);
       }
@@ -402,11 +419,13 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
 }
 
 ExpressionPtr Expression::MakeConstant(AnalysisResultPtr ar,
+                                       BlockScopePtr scope,
                                        LocationPtr loc,
                                        const std::string &value) {
-  ConstantExpressionPtr exp(new ConstantExpression(loc,
-                            Expression::KindOfConstantExpression,
-                            value));
+  ConstantExpressionPtr exp(new ConstantExpression(
+                              scope, loc,
+                              Expression::KindOfConstantExpression,
+                              value));
   if (value == "true" || value == "false") {
     if (ar->getPhase() >= AnalysisResult::PostOptimize) {
       exp->m_actualType = Type::Boolean;
@@ -487,33 +506,34 @@ bool Expression::isUnquotedScalar() const {
 }
 
 ExpressionPtr Expression::MakeScalarExpression(AnalysisResultPtr ar,
+                                               BlockScopePtr scope,
                                                LocationPtr loc,
                                                CVarRef value) {
   if (value.isArray()) {
-    ExpressionListPtr el(new ExpressionList(loc,
+    ExpressionListPtr el(new ExpressionList(scope, loc,
                                             KindOfExpressionList,
                                             ExpressionList::ListKindParam));
 
     for (ArrayIter iter(value); iter; ++iter) {
-      ExpressionPtr k(MakeScalarExpression(ar, loc, iter.first()));
-      ExpressionPtr v(MakeScalarExpression(ar, loc, iter.second()));
+      ExpressionPtr k(MakeScalarExpression(ar, scope, loc, iter.first()));
+      ExpressionPtr v(MakeScalarExpression(ar, scope, loc, iter.second()));
       if (!k || !v) return ExpressionPtr();
       ArrayPairExpressionPtr ap(
-        new ArrayPairExpression(loc, KindOfArrayPairExpression,
+        new ArrayPairExpression(scope, loc, KindOfArrayPairExpression,
                                 k, v, false));
       el->addElement(ap);
     }
     if (!el->getCount()) el.reset();
     return ExpressionPtr(
-      new UnaryOpExpression(loc, KindOfUnaryOpExpression,
+      new UnaryOpExpression(scope, loc, KindOfUnaryOpExpression,
                             el, T_ARRAY, true));
   } else if (value.isNull()) {
-    return MakeConstant(ar, loc, "null");
+    return MakeConstant(ar, scope, loc, "null");
   } else if (value.isBoolean()) {
-    return MakeConstant(ar, loc, value ? "true" : "false");
+    return MakeConstant(ar, scope, loc, value ? "true" : "false");
   } else {
     return ScalarExpressionPtr
-      (new ScalarExpression(loc,
+      (new ScalarExpression(scope, loc,
                             Expression::KindOfScalarExpression,
                             value));
   }
@@ -573,7 +593,7 @@ void Expression::outputCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 std::string Expression::genCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar) {
   std::ostringstream os;
-  os << Option::TempPrefix << cg.createNewLocalId(ar);
+  os << Option::TempPrefix << cg.createNewLocalId(shared_from_this());
   return os.str();
 }
 

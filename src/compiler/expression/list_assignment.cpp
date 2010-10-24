@@ -75,7 +75,7 @@ void ListAssignment::setLValue() {
 void ListAssignment::analyzeProgram(AnalysisResultPtr ar) {
   if (m_variables) m_variables->analyzeProgram(ar);
   if (m_array) m_array->analyzeProgram(ar);
-  FunctionScopePtr func = ar->getFunctionScope();
+  FunctionScopePtr func = getFunctionScope();
   if (func) func->disableInline();
 }
 
@@ -194,7 +194,7 @@ void ListAssignment::outputCPPAssignment(CodeGenerator &cg,
             var->outputCPPProperty(cg, ar);
             cg_printf(", %s[%d], %s);\n",
                       arrTmp.c_str(), i,
-                      ar->getClassScope() ? "s_class_name" : "empty_string");
+                      getClassScope() ? "s_class_name" : "empty_string");
             done = true;
           }
         }

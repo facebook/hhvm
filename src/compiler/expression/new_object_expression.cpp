@@ -55,7 +55,7 @@ void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
   FunctionScopePtr func;
   if (!m_name.empty()) {
     addUserClass(ar, m_name);
-    if (ClassScopePtr cls = ar->resolveClass(m_name)) {
+    if (ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_name)) {
       if (!cls->isRedeclaring()) {
         func = cls->findConstructor(ar, true);
       }
@@ -82,14 +82,14 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   reset();
   ConstructPtr self = shared_from_this();
   if (!m_name.empty()) {
-    ClassScopePtr cls = ar->resolveClass(m_name);
+    ClassScopePtr cls = ar->resolveClass(self, m_name);
     if (cls) {
       m_name = cls->getName();
     }
     if (!cls || cls->isRedeclaring()) {
       if (cls) {
         m_redeclared = true;
-        ar->getScope()->getVariables()->
+        getScope()->getVariables()->
           setAttribute(VariableTable::NeedGlobalPointer);
       }
       if (!cls && ar->isFirstPass()) {
@@ -99,7 +99,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       return Type::Object;
     }
     if (cls->isVolatile()) {
-      ar->getScope()->getVariables()->
+      getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
     }
     m_dynamic = cls->derivesFromRedeclaring();
@@ -173,13 +173,13 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   string &cname = (m_origName == "self" || m_origName == "parent") ?
     m_name : m_origName;
-  bool outsideClass = !ar->checkClassPresent(m_origName);
+  bool outsideClass = !ar->checkClassPresent(shared_from_this(), m_origName);
   if (!m_name.empty() && !m_redeclared && m_validClass && !m_dynamic) {
-    ClassScopePtr cls = ar->resolveClass(m_name);
+    ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_name);
     ASSERT(cls);
     if (m_receiverTemp.empty()) {
       if (outsideClass) {
-        cls->outputVolatileCheckBegin(cg, ar, cname);
+        cls->outputVolatileCheckBegin(cg, ar, getScope(), cname);
       }
       cg_printf("%s%s((NEWOBJ(%s%s)())->create(",
                 Option::SmartPtrPrefix, cls->getId(cg).c_str(),
@@ -227,15 +227,16 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
     if (m_nameExp) m_nameExp->preOutputCPP(cg, ar, state);
     ar->wrapExpressionBegin(cg);
-    m_ciTemp = cg.createNewId(ar);
-    m_objectTemp = cg.createNewId(ar);
+    m_ciTemp = cg.createNewId(shared_from_this());
+    m_objectTemp = cg.createNewId(shared_from_this());
     cg_printf("Object obj%d(", m_objectTemp);
     if (m_redeclared) {
-      bool outsideClass = !ar->checkClassPresent(m_origName);
-      ClassScopePtr cls = ar->resolveClass(m_name);
+      bool outsideClass = !ar->checkClassPresent(shared_from_this(),
+                                                 m_origName);
+      ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_name);
       ASSERT(cls);
       if (outsideClass) {
-        cls->outputVolatileCheckBegin(cg, ar, cname);
+        cls->outputVolatileCheckBegin(cg, ar, getScope(), cname);
       }
       cg_printf("g->%s%s->createOnly()", Option::ClassStaticsObjectPrefix,
                 m_name.c_str());
@@ -304,15 +305,16 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     }
 
     if (tempRcvr && ar->inExpression()) {
-      bool outsideClass = !ar->checkClassPresent(m_origName);
-      ClassScopePtr cls = ar->resolveClass(m_name);
+      bool outsideClass = !ar->checkClassPresent(shared_from_this(),
+                                                 m_origName);
+      ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_name);
       ASSERT(cls);
       ar->wrapExpressionBegin(cg);
       m_receiverTemp = genCPPTemp(cg, ar);
       cg_printf("%s%s %s = ", Option::SmartPtrPrefix, cls->getId(cg).c_str(),
           m_receiverTemp.c_str());
       if (outsideClass) {
-        cls->outputVolatileCheckBegin(cg, ar, cname);
+        cls->outputVolatileCheckBegin(cg, ar, getScope(), cname);
       }
       cg_printf("NEWOBJ(%s%s)()", Option::ClassPrefix, cls->getId(cg).c_str());
       if (outsideClass) {

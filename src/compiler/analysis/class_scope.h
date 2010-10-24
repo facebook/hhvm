@@ -356,14 +356,17 @@ public:
 
   void outputVolatileCheckBegin(CodeGenerator &cg,
                                 AnalysisResultPtr ar,
+                                BlockScopePtr bs,
                                 const std::string &name);
   void outputVolatileCheckEnd(CodeGenerator &cg);
   static void OutputVolatileCheckBegin(CodeGenerator &cg,
                                        AnalysisResultPtr ar,
+                                       BlockScopePtr bs,
                                        const std::string &origName);
   static void OutputVolatileCheckEnd(CodeGenerator &cg);
   static void OutputVolatileCheck(CodeGenerator &cg, AnalysisResultPtr ar,
-      const std::string &origName, bool noThrow);
+                                  BlockScopePtr bs,
+                                  const std::string &origName, bool noThrow);
 
 
   /**

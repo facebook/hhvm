@@ -61,6 +61,7 @@ public:
 
 public:
   FileScope(const std::string &fileName, int fileSize);
+  ~FileScope() {}
   int getSize() const { return m_size;}
 
   // implementing FunctionContainer
@@ -94,7 +95,7 @@ public:
    * Parser functions. Parser only deals with a FileScope object, and these
    * are the only functions a parser calls upon analysis results.
    */
-  void setTree(StatementListPtr tree);
+  FunctionScopePtr setTree(AnalysisResultPtr ar, StatementListPtr tree);
   bool addClass(AnalysisResultPtr ar, ClassScopePtr classScope);
 
   void addDeclare(std::string d) { m_declares.push_back(d); }
@@ -225,7 +226,7 @@ private:
 
   std::vector<lambda> m_lambdas;
 
-  void createPseudoMain(AnalysisResultPtr ar);
+  FunctionScopePtr createPseudoMain(AnalysisResultPtr ar);
   void outputCPPHelper(CodeGenerator &cg, AnalysisResultPtr ar,
                        bool classes = true);
 

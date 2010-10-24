@@ -39,7 +39,7 @@ public:
   virtual bool hasImpl() const;
   virtual int getRecursiveCount() const;
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultPtr ar);
+  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
 
   virtual BlockScopePtr getScope();
   ClassScopePtr getClassScope() { return m_classScope.lock();}

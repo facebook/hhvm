@@ -46,9 +46,12 @@ hphp: compiler
 hphpi: hphp
 test-setup: compiler-setup
 test: compiler
+shared-lib-target: $(if $(TLS_GD),$(SHARED_LIB_GD),$(SHARED_LIB))
+	cp $< $(SHARED_LIB_TARGET)
+
+.PHONY: shared-lib-target
 
 INTERMEDIATE_DIRS += $(PROJECT_ROOT)/output_gd
 
 shared-lib-gd:
-	$(MAKE) OUTPUT_ROOT=output_gd OUTDIR_BY_TYPE= TLS_GD=1 DIRS_INCLUDED= $(ABS_PROJECT_ROOT)/output_gd/libhphp_runtime_gd.so
-	cp $(PROJECT_ROOT)/output_gd/libhphp_runtime_gd.so $(LIB_DIR)
+	$(MAKE) $(if $(OUTDIR_BY_TYPE),,OUTPUT_ROOT=output_gd) TLS_GD=1 DIRS_INCLUDED= shared-lib-target SHARED_LIB_TARGET=$(LIB_DIR)

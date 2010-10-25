@@ -72,7 +72,8 @@ endif
 
 # Only use jemalloc *or* tcmalloc.
 ifdef USE_JEMALLOC
-NO_TCMALLOC = 1
+override NO_TCMALLOC = 1
+override GOOGLE_TCMALLOC=
 endif
 
 ifndef NO_TCMALLOC
@@ -106,7 +107,16 @@ ifdef OUTDIR_BY_TYPE
 ifndef OUTPUT_ROOT
 OUTPUT_ROOT := bin
 endif
-OUT_EXT=$(if $(USE_ICC),-icc)$(if $(DEBUG),-g,-O)
+OUT_EXTS := \
+	$(if $(USE_ICC),-icc) \
+	$(if $(USE_JEMALLOC),-je) \
+	$(if $(NO_TCMALLOC),,-tc) \
+	$(if $(TLS_GD),-gd) \
+	$(if $(DEBUG),-g,-O)
+
+EMPTY:=
+SPACE:=$(EMPTY) $(EMPTY)
+OUT_EXT := $(subst $(SPACE),,$(strip $(OUT_EXTS)))
 endif
 
 ABS_PROJECT_ROOT := $(shell cd $(PROJECT_ROOT) && readlink -f `pwd`)

@@ -29,7 +29,7 @@ char *strndup(const char* str, size_t len);
 int dprintf(int fd, const char *format, ...);
 #endif
 
-void gettime(struct timespec &ts);
+void gettime(clockid_t which_clock, struct timespec *tp);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

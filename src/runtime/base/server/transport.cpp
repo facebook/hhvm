@@ -19,14 +19,15 @@
 #include <runtime/base/server/upload.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/file/file.h>
-#include <util/compression.h>
-#include <util/util.h>
-#include <util/logger.h>
 #include <runtime/base/string_util.h>
 #include <runtime/base/time/datetime.h>
 #include <runtime/base/zend/zend_url.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/access_log.h>
+#include <util/compression.h>
+#include <util/util.h>
+#include <util/logger.h>
+#include <util/compatibility.h>
 
 using namespace std;
 
@@ -40,6 +41,9 @@ Transport::Transport()
     m_responseSize(0), m_sendContentType(true),
     m_compression(true), m_compressor(NULL), m_isSSL(false),
     m_compressionDecision(NotDecidedYet), m_threadType(RequestThread) {
+  memset(&m_queueTime, 0, sizeof(m_queueTime));
+  memset(&m_wallTime, 0, sizeof(m_wallTime));
+  memset(&m_cpuTime, 0, sizeof(m_cpuTime));
 }
 
 Transport::~Transport() {
@@ -52,6 +56,12 @@ Transport::~Transport() {
   if (m_compressor) {
     delete m_compressor;
   }
+}
+
+void Transport::onRequestStart(const timespec &queueTime) {
+  m_queueTime = queueTime;
+  gettime(CLOCK_MONOTONIC, &m_wallTime);
+  gettime(CLOCK_THREAD_CPUTIME_ID, &m_cpuTime);
 }
 
 const char *Transport::getMethodName() {

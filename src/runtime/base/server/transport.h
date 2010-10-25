@@ -84,6 +84,11 @@ public:
   Transport();
   virtual ~Transport();
 
+  void onRequestStart(const timespec &queueTime);
+  const timespec &getQueueTime() const { return m_queueTime;}
+  const timespec &getWallTime() const { return m_wallTime;}
+  const timespec &getCpuTime() const { return m_cpuTime;}
+
   ///////////////////////////////////////////////////////////////////////////
   // Functions sub-classes have to implement.
 
@@ -318,6 +323,11 @@ protected:
    */
   typedef __gnu_cxx::hash_map<const char *, std::vector<const char *>,
                               __gnu_cxx::hash<const char *>, eqstr> ParamMap;
+
+  // timers
+  timespec m_queueTime;
+  timespec m_wallTime;
+  timespec m_cpuTime;
 
   // input
   char *m_url;

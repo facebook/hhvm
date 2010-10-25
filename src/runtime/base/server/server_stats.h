@@ -172,24 +172,12 @@ public:
 
 private:
   const char *m_section;
-#if defined(__APPLE__)
-  timeval m_wallStart;
-  int64 m_cpuStart;
-#else
   timespec m_wallStart;
   timespec m_cpuStart;
-#endif
   bool m_trackMemory;
 
-#if defined(__APPLE__)
-  void logTime(const std::string &prefix, const timeval &start,
-               const timeval &end);
-  void logTime(const std::string &prefix, const int64 start,
-               const int64 end);
-#else
   void logTime(const std::string &prefix, const timespec &start,
                const timespec &end);
-#endif
 };
 
 /**

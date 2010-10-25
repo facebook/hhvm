@@ -16,6 +16,10 @@
 
 #include "compatibility.h"
 
+#if defined(__APPLE__)
+# include <mach/mach_time.h>
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -52,14 +56,19 @@ int dprintf(int fd, const char *format, ...) {
 }
 #endif
 
-void gettime(struct timespec &ts) {
+void gettime(clockid_t which_clock, struct timespec *tp) {
 #if defined(__APPLE__)
-  struct timeval tv;
-  gettimeofday(&tv, NULL);
-  ts.tv_sec = tv.tv_sec;
-  ts.tv_nsec = tv.tv_usec * 1000;
+  if (which_clock == CLOCK_THREAD_CPUTIME_ID) {
+    tp->tv_sec = 0;
+    tp->tv_nsec = mach_absolute_time();
+  } else {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    tp->tv_sec = tv.tv_sec;
+    tp->tv_nsec = tv.tv_usec * 1000;
+  }
 #else
-  clock_gettime(CLOCK_REALTIME, &ts);
+  clock_gettime(which_clock, tp);
 #endif
 }
 

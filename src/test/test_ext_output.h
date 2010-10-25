@@ -45,8 +45,10 @@ class TestExtOutput : public TestCppExt {
   bool test_output_add_rewrite_var();
   bool test_output_reset_rewrite_vars();
   bool test_hphp_log();
+  bool test_hphp_crash_log();
   bool test_hphp_stats();
   bool test_hphp_get_stats();
+  bool test_hphp_get_timers();
   bool test_hphp_output_global_state();
 };
 

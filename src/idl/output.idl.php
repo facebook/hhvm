@@ -379,6 +379,25 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "hphp_get_timers",
+    'desc'   => "Returns timestamps of different request events.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "An array of three timestamps: 'queue', the time a request is received and queued up; 'process-wall', the wall clock time a request starts to get processed; and 'process-cpu', the CPU clock time a request starts to get processed.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "get_as_float",
+        'type'   => Boolean,
+        'value'  => "true",
+        'desc'   => "same as in microtime() to specify output format, except it defaults to true for float format.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "hphp_output_global_state",
     'desc'   => "Dumps all variables in global state, including global variables, static variables, class statics and others.",
     'flags'  =>  HasDocComment | HipHopSpecific,

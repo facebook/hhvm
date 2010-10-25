@@ -62,7 +62,7 @@ class c_ReflectionObject : public c_ReflectionClass {
   DECLARE_INVOKES_FROM_EVAL
   void init();
   public: static Variant ti_export(CStrRef cls, Variant v_obj, CVarRef v_ret);
-  public: static Variant t_export(CVarRef v_obj, CVarRef v_ret) { return ti_export(NAMSTR(s_sys_ss1254dd7a_1, "ReflectionObject"), v_obj, v_ret); }
+  public: static Variant t_export(CVarRef v_obj, CVarRef v_ret) { return ti_export(c_ReflectionObject::s_class_name, v_obj, v_ret); }
   DECLARE_METHOD_INVOKE_HELPERS(export);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionObject;

@@ -19,6 +19,7 @@
 #include <runtime/base/memory/memory_manager.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/server/http_protocol.h>
+#include <util/compatibility.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // static handler
@@ -46,30 +47,16 @@ namespace HPHP {
 // LibEventJob
 
 LibEventJob::LibEventJob(evhttp_request *req) : request(req) {
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
-#if defined(__APPLE__)
-    gettimeofday(&start, NULL);
-#else
-    clock_gettime(CLOCK_MONOTONIC, &start);
-#endif
-  }
+  gettime(CLOCK_MONOTONIC, &start);
 }
 
 void LibEventJob::stopTimer() {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
-#if defined(__APPLE__)
-    timeval end;
-    gettimeofday(&end, NULL);
-    time_t dsec = end.tv_sec - start.tv_sec;
-    long dnsec = end.tv_usec - start.tv_usec;
-    int64 dusec = dsec * 1000000 + dnsec;
-#else
     timespec end;
-    clock_gettime(CLOCK_MONOTONIC, &end);
+    gettime(CLOCK_MONOTONIC, &end);
     time_t dsec = end.tv_sec - start.tv_sec;
     long dnsec = end.tv_nsec - start.tv_nsec;
     int64 dusec = dsec * 1000000 + dnsec / 1000;
-#endif
     ServerStats::Log("page.wall.queuing", dusec);
   }
 }
@@ -106,6 +93,7 @@ void LibEventWorker::doJob(LibEventJobPtr job) {
     std::string cmd = transport.getCommand();
     cmd = std::string("/") + cmd;
     if (server->shouldHandle(cmd)) {
+      transport.onRequestStart(job->getStartTimer());
       m_handler->handleRequest(&transport);
       error = false;
     } else {

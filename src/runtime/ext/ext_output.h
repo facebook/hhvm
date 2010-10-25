@@ -96,6 +96,7 @@ inline void f_hphp_stats(CStrRef name, int64 value) {
 inline int64 f_hphp_get_stats(CStrRef name) {
   return ServerStats::Get(name.data());
 }
+Variant f_hphp_get_timers(bool get_as_float = true);
 Variant f_hphp_output_global_state(bool serialize = true);
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -32248,6 +32248,23 @@ Variant ifa_magickmontageimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS
   if (count != 6) return throw_wrong_arguments("magickmontageimage", count, 6, 6, 1);
   return (f_magickmontageimage(a0, a1, a2, a3, a4, a5));
 }
+Variant i_hphp_get_timers(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(hphp_get_timers);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) return throw_toomany_arguments("hphp_get_timers", 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (f_hphp_get_timers());
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_hphp_get_timers(arg0));
+  }
+}
+Variant ifa_hphp_get_timers(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 1) return throw_toomany_arguments("hphp_get_timers", 1, 1);
+  if (count <= 0) return (f_hphp_get_timers());
+  return (f_hphp_get_timers(a0));
+}
 Variant i_session_commit(void *extra, CArrRef params) {
   FUNCTION_INJECTION(session_commit);
   int count __attribute__((__unused__)) = params.size();
@@ -74736,6 +74753,23 @@ Variant ei_magickmontageimage(Eval::VariableEnvironment &env, const Eval::Functi
   }
   return (x_magickmontageimage(a0, a1, a2, a3, a4, a5));
 }
+Variant ei_hphp_get_timers(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) return throw_toomany_arguments("hphp_get_timers", 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 0) return (x_hphp_get_timers());
+  else return (x_hphp_get_timers(a0));
+}
 Variant ei_session_commit(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
@@ -79608,6 +79642,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1891:
       HASH_INVOKE_FROM_EVAL(0x7FCE6DD53FED6763LL, intl_is_failure);
+      HASH_INVOKE_FROM_EVAL(0x19DCB392D4686763LL, hphp_get_timers);
       break;
     case 1895:
       HASH_INVOKE_FROM_EVAL(0x2FC27987B3F88767LL, dom_node_clone_node);
@@ -86022,6 +86057,7 @@ CallInfo ci_get_declared_interfaces((void*)&i_get_declared_interfaces, (void*)&i
 CallInfo ci_output_reset_rewrite_vars((void*)&i_output_reset_rewrite_vars, (void*)&ifa_output_reset_rewrite_vars, 0, 0, 0x0000000000000000LL);
 CallInfo ci_passthru((void*)&i_passthru, (void*)&ifa_passthru, 2, 0, 0x0000000000000002LL);
 CallInfo ci_magickmontageimage((void*)&i_magickmontageimage, (void*)&ifa_magickmontageimage, 6, 0, 0x0000000000000000LL);
+CallInfo ci_hphp_get_timers((void*)&i_hphp_get_timers, (void*)&ifa_hphp_get_timers, 1, 0, 0x0000000000000000LL);
 CallInfo ci_session_commit((void*)&i_session_commit, (void*)&ifa_session_commit, 0, 0, 0x0000000000000000LL);
 CallInfo ci_apc_cache_info((void*)&i_apc_cache_info, (void*)&ifa_apc_cache_info, 2, 0, 0x0000000000000000LL);
 CallInfo ci_convert_cyr_string((void*)&i_convert_cyr_string, (void*)&ifa_convert_cyr_string, 3, 0, 0x0000000000000000LL);
@@ -88846,6 +88882,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1891:
       HASH_GUARD(0x7FCE6DD53FED6763LL, intl_is_failure) {
         ci = &ci_intl_is_failure;
+        return true;
+      }
+      HASH_GUARD(0x19DCB392D4686763LL, hphp_get_timers) {
+        ci = &ci_hphp_get_timers;
         return true;
       }
       break;

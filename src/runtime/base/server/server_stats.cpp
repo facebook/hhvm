@@ -18,16 +18,11 @@
 #include <runtime/base/server/http_server.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/memory/memory_manager.h>
-#include <util/json.h>
 #include <runtime/base/preg.h>
-#include <time.h>
 #include <runtime/base/comparisons.h>
 #include <runtime/base/time/datetime.h>
-#include <stack>
-
-#if defined(__APPLE__)
-# include <mach/mach_time.h>
-#endif
+#include <util/json.h>
+#include <util/compatibility.h>
 
 using namespace std;
 using namespace boost;
@@ -1069,29 +1064,16 @@ ServerStatsHelper::ServerStatsHelper(const char *section,
                                      bool trackMem /* = false */)
   : m_section(section), m_trackMemory(trackMem) {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
-#if defined(__APPLE__)
-    gettimeofday(&m_wallStart, NULL);
-    m_cpuStart = mach_absolute_time();
-#else
-    clock_gettime(CLOCK_MONOTONIC, &m_wallStart);
-    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &m_cpuStart);
-#endif
+    gettime(CLOCK_MONOTONIC, &m_wallStart);
+    gettime(CLOCK_THREAD_CPUTIME_ID, &m_cpuStart);
   }
 }
 
 ServerStatsHelper::~ServerStatsHelper() {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
-
-#if defined(__APPLE__)
-    timeval wallEnd;
-    int64 cpuEnd;
-    gettimeofday(&wallEnd, NULL);
-    cpuEnd = mach_absolute_time();
-#else
     timespec wallEnd, cpuEnd;
-    clock_gettime(CLOCK_MONOTONIC, &wallEnd);
-    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &cpuEnd);
-#endif
+    gettime(CLOCK_MONOTONIC, &wallEnd);
+    gettime(CLOCK_THREAD_CPUTIME_ID, &cpuEnd);
 
     logTime("page.wall.", m_wallStart, wallEnd);
     logTime("page.cpu.", m_cpuStart, cpuEnd);
@@ -1104,22 +1086,6 @@ ServerStatsHelper::~ServerStatsHelper() {
   }
 }
 
-#if defined(__APPLE__)
-void ServerStatsHelper::logTime(const std::string &prefix,
-                                const timeval &start, const timeval &end) {
-  time_t dsec = end.tv_sec - start.tv_sec;
-  long dnsec = end.tv_usec - start.tv_usec;
-  int64 dusec = dsec * 1000000 + dnsec;
-  ServerStats::Log(prefix + m_section, dusec);
-}
-
-void ServerStatsHelper::logTime(const std::string &prefix,
-                                const int64 start, const int64 end) {
-  int64 dusec = (end-start)/1000;
-  ServerStats::Log(prefix + m_section, dusec);
-}
-
-#else
 void ServerStatsHelper::logTime(const std::string &prefix,
                                 const timespec &start, const timespec &end) {
   time_t dsec = end.tv_sec - start.tv_sec;
@@ -1127,7 +1093,6 @@ void ServerStatsHelper::logTime(const std::string &prefix,
   int64 dusec = dsec * 1000000 + dnsec / 1000;
   ServerStats::Log(prefix + m_section, dusec);
 }
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 

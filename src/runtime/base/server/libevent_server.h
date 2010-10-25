@@ -34,16 +34,14 @@ DECLARE_BOOST_TYPES(LibEventJob);
 class LibEventJob {
 public:
   LibEventJob(evhttp_request *req);
+
+  const timespec &getStartTimer() const { return start;}
   void stopTimer();
 
   evhttp_request *request;
 
 private:
-#if defined(__APPLE__)
-  timeval start;
-#else
   timespec start;
-#endif
 };
 
 /**

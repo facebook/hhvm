@@ -17,6 +17,7 @@
 #include <test/test_ext_output.h>
 #include <runtime/ext/ext_output.h>
 
+IMPLEMENT_SEP_EXTENSION_TEST(Output);
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtOutput::RunTests(const std::string &which) {
@@ -40,8 +41,10 @@ bool TestExtOutput::RunTests(const std::string &which) {
   RUN_TEST(test_output_add_rewrite_var);
   RUN_TEST(test_output_reset_rewrite_vars);
   RUN_TEST(test_hphp_log);
+  RUN_TEST(test_hphp_crash_log);
   RUN_TEST(test_hphp_stats);
   RUN_TEST(test_hphp_get_stats);
+  RUN_TEST(test_hphp_get_timers);
   RUN_TEST(test_hphp_output_global_state);
 
   return ret;
@@ -204,11 +207,19 @@ bool TestExtOutput::test_hphp_log() {
   return Count(true);
 }
 
+bool TestExtOutput::test_hphp_crash_log() {
+  return Count(true);
+}
+
 bool TestExtOutput::test_hphp_stats() {
   return Count(true);
 }
 
 bool TestExtOutput::test_hphp_get_stats() {
+  return Count(true);
+}
+
+bool TestExtOutput::test_hphp_get_timers() {
   return Count(true);
 }
 

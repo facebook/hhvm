@@ -47,7 +47,7 @@ bool SynchronizableMulti::wait(int id, bool front, long seconds) {
 bool SynchronizableMulti::wait(int id, bool front, long seconds,
                                long long nanosecs) {
   struct timespec ts;
-  gettime(ts);
+  gettime(CLOCK_REALTIME, &ts);
   ts.tv_sec += seconds;
   ts.tv_nsec += nanosecs;
   return waitImpl(id, front, &ts);

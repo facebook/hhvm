@@ -43,7 +43,7 @@ bool Synchronizable::wait(long seconds) {
 
 bool Synchronizable::wait(long seconds, long long nanosecs) {
   struct timespec ts;
-  gettime(ts);
+  gettime(CLOCK_REALTIME, &ts);
   ts.tv_sec += seconds;
   ts.tv_nsec += nanosecs;
 

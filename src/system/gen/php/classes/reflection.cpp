@@ -941,7 +941,7 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
   {
     LOOP_COUNTER(1);
     Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss5646283f, "params"), true, true);
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_info);
       v_name = iter3->first();
@@ -980,7 +980,7 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
   }
   {
     LOOP_COUNTER(2);
-    for (ArrayIter iter4 = v_params.begin(s_class_name); !iter4.end(); ++iter4) {
+    for (ArrayIter iter4 = v_params.begin(s_class_name, true); !iter4.end(); ++iter4) {
       LOOP_COUNTER_CHECK(2);
       iter4.second(v_param);
       v_name = iter4.first();
@@ -4180,7 +4180,7 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
       {
         LOOP_COUNTER(3);
         Variant map4 = m_info.rvalAt(NAMSTR(s_sys_ss56221a08, "interfaces"), true, true);
-        for (ArrayIterPtr iter5 = map4.begin(s_class_name); !iter5->end(); iter5->next()) {
+        for (ArrayIterPtr iter5 = map4.begin(s_class_name, true); !iter5->end(); iter5->next()) {
           LOOP_COUNTER_CHECK(3);
           iter5->second(v__);
           v_interface = iter5->first();
@@ -4447,7 +4447,7 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = 65535LL
   }
   {
     LOOP_COUNTER(2);
-    for (ArrayIterPtr iter4 = v_methods.begin(s_class_name); !iter4->end(); iter4->next()) {
+    for (ArrayIterPtr iter4 = v_methods.begin(s_class_name, true); !iter4->end(); iter4->next()) {
       LOOP_COUNTER_CHECK(2);
       iter4->second(v__);
       v_name = iter4->first();
@@ -4518,7 +4518,7 @@ Array c_ReflectionClass::t_getproperties() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMSTR(s_sys_ss749653da, "properties"));
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v__);
       v_name = iter3->first();
@@ -4573,7 +4573,7 @@ Array c_ReflectionClass::t_getinterfaces() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v__);
       v_name = iter3->first();
@@ -4609,7 +4609,7 @@ Array c_ReflectionClass::t_getinterfacenames() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v__);
       v_name = iter3->first();
@@ -4718,7 +4718,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   {
     LOOP_COUNTER(2);
     Variant map3 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
-    for (ArrayIterPtr iter4 = map3.begin(s_class_name); !iter4->end(); iter4->next()) {
+    for (ArrayIterPtr iter4 = map3.begin(s_class_name, true); !iter4->end(); iter4->next()) {
       LOOP_COUNTER_CHECK(2);
       iter4->second(v__);
       v_name = iter4->first();
@@ -4781,7 +4781,7 @@ Array c_ReflectionClass::t_getstaticproperties() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_getproperties();
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_prop);
       {
@@ -4845,7 +4845,7 @@ Array c_ReflectionClass::t_getdefaultproperties() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_getproperties();
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_prop);
       {
@@ -4918,7 +4918,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   {
     LOOP_COUNTER(6);
     Variant map7 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
-    for (ArrayIterPtr iter8 = map7.begin(s_class_name); !iter8->end(); iter8->next()) {
+    for (ArrayIterPtr iter8 = map7.begin(s_class_name, true); !iter8->end(); iter8->next()) {
       LOOP_COUNTER_CHECK(6);
       iter8->second(v__);
       v_name = iter8->first();
@@ -5888,7 +5888,7 @@ Array c_ReflectionExtension::t_getclassnames() {
   {
     LOOP_COUNTER(1);
     Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss251b7f2b, "classes"), true, true);
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name); !iter3->end(); iter3->next()) {
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_cls);
       {

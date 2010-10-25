@@ -9259,6 +9259,24 @@ Variant ifa_bzdecompress(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 1) return (f_bzdecompress(a0));
   return (f_bzdecompress(a0, a1));
 }
+Variant i_apc_exists(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(apc_exists);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("apc_exists", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_apc_exists(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_apc_exists(arg0, arg1));
+  }
+}
+Variant ifa_apc_exists(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 1 || count > 2) return throw_wrong_arguments("apc_exists", count, 1, 2, 1);
+  if (count <= 1) return (f_apc_exists(a0));
+  return (f_apc_exists(a0, a1));
+}
 Variant i_urldecode(void *extra, CArrRef params) {
   FUNCTION_INJECTION(urldecode);
   int count __attribute__((__unused__)) = params.size();
@@ -46263,6 +46281,28 @@ Variant ei_bzdecompress(Eval::VariableEnvironment &env, const Eval::FunctionCall
   }
   if (count <= 1) return (x_bzdecompress(a0));
   else return (x_bzdecompress(a0, a1));
+}
+Variant ei_apc_exists(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("apc_exists", count, 1, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  INTERCEPT_INJECTION_ALWAYS("apc_exists", "apc_exists", ArrayUtil::Slice(Array(ArrayInit(2, true).set(0, a0).set(1, a1).create()), 0, count, false), r);
+  if (count <= 1) return (x_apc_exists(a0));
+  else return (x_apc_exists(a0, a1));
 }
 Variant ei_urldecode(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -83568,6 +83608,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 7672:
       HASH_INVOKE_FROM_EVAL(0x5E43280BC8DD1DF8LL, magicktrimimage);
       break;
+    case 7674:
+      HASH_INVOKE_FROM_EVAL(0x4FB6B5C2636D1DFALL, apc_exists);
+      break;
     case 7675:
       HASH_INVOKE_FROM_EVAL(0x47C62D58B0B65DFBLL, thrift_protocol_write_binary);
       break;
@@ -84466,6 +84509,7 @@ CallInfo ci_fileperms((void*)&i_fileperms, (void*)&ifa_fileperms, 1, 0, 0x000000
 CallInfo ci_hphp_splfileobject_fstat((void*)&i_hphp_splfileobject_fstat, (void*)&ifa_hphp_splfileobject_fstat, 1, 0, 0x0000000000000000LL);
 CallInfo ci_unserialize((void*)&i_unserialize, (void*)&ifa_unserialize, 1, 0, 0x0000000000000000LL);
 CallInfo ci_bzdecompress((void*)&i_bzdecompress, (void*)&ifa_bzdecompress, 2, 0, 0x0000000000000000LL);
+CallInfo ci_apc_exists((void*)&i_apc_exists, (void*)&ifa_apc_exists, 2, 0, 0x0000000000000000LL);
 CallInfo ci_urldecode((void*)&i_urldecode, (void*)&ifa_urldecode, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickannotateimage((void*)&i_magickannotateimage, (void*)&ifa_magickannotateimage, 6, 0, 0x0000000000000000LL);
 CallInfo ci_mailparse_msg_create((void*)&i_mailparse_msg_create, (void*)&ifa_mailparse_msg_create, 0, 0, 0x0000000000000000LL);
@@ -97271,6 +97315,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 7672:
       HASH_GUARD(0x5E43280BC8DD1DF8LL, magicktrimimage) {
         ci = &ci_magicktrimimage;
+        return true;
+      }
+      break;
+    case 7674:
+      HASH_GUARD(0x4FB6B5C2636D1DFALL, apc_exists) {
+        ci = &ci_apc_exists;
         return true;
       }
       break;

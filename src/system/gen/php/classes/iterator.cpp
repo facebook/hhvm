@@ -540,10 +540,7 @@ Variant c_ArrayIterator::i_getarraycopy(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::getArrayCopy", 0, 1);
   return (self->t_getarraycopy());
@@ -555,10 +552,7 @@ Variant c_ArrayIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::next", 0, 1);
   return (self->t_next());
@@ -570,10 +564,7 @@ Variant c_ArrayIterator::i_count(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::count", 0, 1);
   return (self->t_count());
@@ -585,10 +576,7 @@ Variant c_ArrayIterator::i_natsort(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::natsort", 0, 1);
   return (self->t_natsort());
@@ -600,10 +588,7 @@ Variant c_ArrayIterator::i_key(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::key", 0, 1);
   return (self->t_key());
@@ -615,10 +600,7 @@ Variant c_ArrayIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::valid", 0, 1);
   return (self->t_valid());
@@ -630,10 +612,7 @@ Variant c_ArrayIterator::i_append(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::append", count, 1, 1, 1);
   {
@@ -650,10 +629,7 @@ Variant c_ArrayIterator::i_setflags(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::setFlags", count, 1, 1, 1);
   {
@@ -670,10 +646,7 @@ Variant c_ArrayIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 2);
   {
@@ -692,10 +665,7 @@ Variant c_ArrayIterator::i_offsetexists(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetExists", count, 1, 1, 1);
   {
@@ -712,10 +682,7 @@ Variant c_ArrayIterator::i_uksort(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::uksort", count, 1, 1, 1);
   {
@@ -732,10 +699,7 @@ Variant c_ArrayIterator::i_offsetget(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetGet", count, 1, 1, 1);
   {
@@ -752,10 +716,7 @@ Variant c_ArrayIterator::i_natcasesort(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::natcasesort", 0, 1);
   return (self->t_natcasesort());
@@ -767,10 +728,7 @@ Variant c_ArrayIterator::i_asort(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::asort", 0, 1);
   return (self->t_asort());
@@ -782,10 +740,7 @@ Variant c_ArrayIterator::i_offsetunset(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetUnset", count, 1, 1, 1);
   {
@@ -802,10 +757,7 @@ Variant c_ArrayIterator::i_seek(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::seek", count, 1, 1, 1);
   {
@@ -822,10 +774,7 @@ Variant c_ArrayIterator::i_getflags(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::getFlags", 0, 1);
   return (self->t_getflags());
@@ -837,10 +786,7 @@ Variant c_ArrayIterator::i_current(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::current", 0, 1);
   return (self->t_current());
@@ -852,10 +798,7 @@ Variant c_ArrayIterator::i_ksort(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::ksort", 0, 1);
   return (self->t_ksort());
@@ -867,10 +810,7 @@ Variant c_ArrayIterator::i_uasort(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::uasort", count, 1, 1, 1);
   {
@@ -887,10 +827,7 @@ Variant c_ArrayIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::rewind", 0, 1);
   return (self->t_rewind());
@@ -902,10 +839,7 @@ Variant c_ArrayIterator::i_offsetset(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ArrayIterator::offsetSet", count, 2, 2, 1);
   {
@@ -922,10 +856,7 @@ Variant c_ArrayIterator::ifa_getarraycopy(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::getArrayCopy", 0, 1);
   return (self->t_getarraycopy());
@@ -936,10 +867,7 @@ Variant c_ArrayIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::next", 0, 1);
   return (self->t_next());
@@ -950,10 +878,7 @@ Variant c_ArrayIterator::ifa_count(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::count", 0, 1);
   return (self->t_count());
@@ -964,10 +889,7 @@ Variant c_ArrayIterator::ifa_natsort(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::natsort", 0, 1);
   return (self->t_natsort());
@@ -978,10 +900,7 @@ Variant c_ArrayIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::key", 0, 1);
   return (self->t_key());
@@ -992,10 +911,7 @@ Variant c_ArrayIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::valid", 0, 1);
   return (self->t_valid());
@@ -1006,10 +922,7 @@ Variant c_ArrayIterator::ifa_append(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::append", count, 1, 1, 1);
   return (self->t_append(a0), null);
@@ -1020,10 +933,7 @@ Variant c_ArrayIterator::ifa_setflags(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::setFlags", count, 1, 1, 1);
   return (self->t_setflags(a0), null);
@@ -1034,10 +944,7 @@ Variant c_ArrayIterator::ifa___construct(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 2);
   if (count <= 1) return (self->t___construct(a0), null);
@@ -1049,10 +956,7 @@ Variant c_ArrayIterator::ifa_offsetexists(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetExists", count, 1, 1, 1);
   return (self->t_offsetexists(a0));
@@ -1063,10 +967,7 @@ Variant c_ArrayIterator::ifa_uksort(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::uksort", count, 1, 1, 1);
   return (self->t_uksort(a0));
@@ -1077,10 +978,7 @@ Variant c_ArrayIterator::ifa_offsetget(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetGet", count, 1, 1, 1);
   return (self->t_offsetget(a0));
@@ -1091,10 +989,7 @@ Variant c_ArrayIterator::ifa_natcasesort(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::natcasesort", 0, 1);
   return (self->t_natcasesort());
@@ -1105,10 +1000,7 @@ Variant c_ArrayIterator::ifa_asort(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::asort", 0, 1);
   return (self->t_asort());
@@ -1119,10 +1011,7 @@ Variant c_ArrayIterator::ifa_offsetunset(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetUnset", count, 1, 1, 1);
   return (self->t_offsetunset(a0));
@@ -1133,10 +1022,7 @@ Variant c_ArrayIterator::ifa_seek(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::seek", count, 1, 1, 1);
   return (self->t_seek(a0), null);
@@ -1147,10 +1033,7 @@ Variant c_ArrayIterator::ifa_getflags(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::getFlags", 0, 1);
   return (self->t_getflags());
@@ -1161,10 +1044,7 @@ Variant c_ArrayIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::current", 0, 1);
   return (self->t_current());
@@ -1175,10 +1055,7 @@ Variant c_ArrayIterator::ifa_ksort(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::ksort", 0, 1);
   return (self->t_ksort());
@@ -1189,10 +1066,7 @@ Variant c_ArrayIterator::ifa_uasort(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::uasort", count, 1, 1, 1);
   return (self->t_uasort(a0));
@@ -1203,10 +1077,7 @@ Variant c_ArrayIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::rewind", 0, 1);
   return (self->t_rewind());
@@ -1217,10 +1088,7 @@ Variant c_ArrayIterator::ifa_offsetset(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_ArrayIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ArrayIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ArrayIterator::offsetSet", count, 2, 2, 1);
   return (self->t_offsetset(a0, a1));
@@ -2034,10 +1902,7 @@ Variant c_AppendIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("AppendIterator::next", 0, 1);
   return (self->t_next(), null);
@@ -2049,10 +1914,7 @@ Variant c_AppendIterator::i_key(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("AppendIterator::key", 0, 1);
   return (self->t_key());
@@ -2064,10 +1926,7 @@ Variant c_AppendIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("AppendIterator::valid", 0, 1);
   return (self->t_valid());
@@ -2079,10 +1938,7 @@ Variant c_AppendIterator::i_getinneriterator(MethodCallPackage &mcp, CArrRef par
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("AppendIterator::getInnerIterator", 0, 1);
   return (self->t_getinneriterator());
@@ -2094,10 +1950,7 @@ Variant c_AppendIterator::i_append(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("AppendIterator::append", count, 1, 1, 1);
   {
@@ -2114,10 +1967,7 @@ Variant c_AppendIterator::i___construct(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("AppendIterator::__construct", 0, 2);
   return (self->t___construct(), null);
@@ -2129,10 +1979,7 @@ Variant c_AppendIterator::i_current(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("AppendIterator::current", 0, 1);
   return (self->t_current());
@@ -2144,10 +1991,7 @@ Variant c_AppendIterator::i___call(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("AppendIterator::__call", count, 2, 2, 1);
   {
@@ -2165,10 +2009,7 @@ Variant c_AppendIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("AppendIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
@@ -2179,10 +2020,7 @@ Variant c_AppendIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("AppendIterator::next", 0, 1);
   return (self->t_next(), null);
@@ -2193,10 +2031,7 @@ Variant c_AppendIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("AppendIterator::key", 0, 1);
   return (self->t_key());
@@ -2207,10 +2042,7 @@ Variant c_AppendIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("AppendIterator::valid", 0, 1);
   return (self->t_valid());
@@ -2221,10 +2053,7 @@ Variant c_AppendIterator::ifa_getinneriterator(MethodCallPackage &mcp, int count
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("AppendIterator::getInnerIterator", 0, 1);
   return (self->t_getinneriterator());
@@ -2235,10 +2064,7 @@ Variant c_AppendIterator::ifa_append(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("AppendIterator::append", count, 1, 1, 1);
   return (self->t_append(a0), null);
@@ -2249,10 +2075,7 @@ Variant c_AppendIterator::ifa___construct(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("AppendIterator::__construct", 0, 2);
   return (self->t___construct(), null);
@@ -2263,10 +2086,7 @@ Variant c_AppendIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("AppendIterator::current", 0, 1);
   return (self->t_current());
@@ -2277,10 +2097,7 @@ Variant c_AppendIterator::ifa___call(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("AppendIterator::__call", count, 2, 2, 1);
   return (self->t___call(a0, a1));
@@ -2291,10 +2108,7 @@ Variant c_AppendIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_AppendIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_AppendIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("AppendIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
@@ -3037,10 +2851,7 @@ Variant c_RecursiveDirectoryIterator::i_next(MethodCallPackage &mcp, CArrRef par
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::next", 0, 1);
   return (self->t_next(), null);
@@ -3052,10 +2863,7 @@ Variant c_RecursiveDirectoryIterator::i_key(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::key", 0, 1);
   return (self->t_key());
@@ -3067,10 +2875,7 @@ Variant c_RecursiveDirectoryIterator::i_valid(MethodCallPackage &mcp, CArrRef pa
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::valid", 0, 1);
   return (self->t_valid());
@@ -3082,10 +2887,7 @@ Variant c_RecursiveDirectoryIterator::i___tostring(MethodCallPackage &mcp, CArrR
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::__toString", 0, 1);
   return (self->t___tostring());
@@ -3097,10 +2899,7 @@ Variant c_RecursiveDirectoryIterator::i_getsubpathname(MethodCallPackage &mcp, C
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPathname", 0, 1);
   return (self->t_getsubpathname());
@@ -3112,10 +2911,7 @@ Variant c_RecursiveDirectoryIterator::i_getsubpath(MethodCallPackage &mcp, CArrR
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPath", 0, 1);
   return (self->t_getsubpath());
@@ -3127,10 +2923,7 @@ Variant c_RecursiveDirectoryIterator::i___construct(MethodCallPackage &mcp, CArr
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 2);
   {
@@ -3149,10 +2942,7 @@ Variant c_RecursiveDirectoryIterator::i_haschildren(MethodCallPackage &mcp, CArr
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::hasChildren", 0, 1);
   return (self->t_haschildren());
@@ -3164,10 +2954,7 @@ Variant c_RecursiveDirectoryIterator::i_seek(MethodCallPackage &mcp, CArrRef par
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("RecursiveDirectoryIterator::seek", count, 1, 1, 1);
   {
@@ -3184,10 +2971,7 @@ Variant c_RecursiveDirectoryIterator::i_getchildren(MethodCallPackage &mcp, CArr
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getChildren", 0, 1);
   return (self->t_getchildren());
@@ -3199,10 +2983,7 @@ Variant c_RecursiveDirectoryIterator::i_current(MethodCallPackage &mcp, CArrRef 
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::current", 0, 1);
   return (self->t_current());
@@ -3214,10 +2995,7 @@ Variant c_RecursiveDirectoryIterator::i_rewind(MethodCallPackage &mcp, CArrRef p
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
@@ -3228,10 +3006,7 @@ Variant c_RecursiveDirectoryIterator::ifa_next(MethodCallPackage &mcp, int count
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::next", 0, 1);
   return (self->t_next(), null);
@@ -3242,10 +3017,7 @@ Variant c_RecursiveDirectoryIterator::ifa_key(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::key", 0, 1);
   return (self->t_key());
@@ -3256,10 +3028,7 @@ Variant c_RecursiveDirectoryIterator::ifa_valid(MethodCallPackage &mcp, int coun
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::valid", 0, 1);
   return (self->t_valid());
@@ -3270,10 +3039,7 @@ Variant c_RecursiveDirectoryIterator::ifa___tostring(MethodCallPackage &mcp, int
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::__toString", 0, 1);
   return (self->t___tostring());
@@ -3284,10 +3050,7 @@ Variant c_RecursiveDirectoryIterator::ifa_getsubpathname(MethodCallPackage &mcp,
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPathname", 0, 1);
   return (self->t_getsubpathname());
@@ -3298,10 +3061,7 @@ Variant c_RecursiveDirectoryIterator::ifa_getsubpath(MethodCallPackage &mcp, int
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPath", 0, 1);
   return (self->t_getsubpath());
@@ -3312,10 +3072,7 @@ Variant c_RecursiveDirectoryIterator::ifa___construct(MethodCallPackage &mcp, in
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 2);
   if (count <= 1) return (self->t___construct(a0), null);
@@ -3327,10 +3084,7 @@ Variant c_RecursiveDirectoryIterator::ifa_haschildren(MethodCallPackage &mcp, in
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::hasChildren", 0, 1);
   return (self->t_haschildren());
@@ -3341,10 +3095,7 @@ Variant c_RecursiveDirectoryIterator::ifa_seek(MethodCallPackage &mcp, int count
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("RecursiveDirectoryIterator::seek", count, 1, 1, 1);
   return (self->t_seek(a0), null);
@@ -3355,10 +3106,7 @@ Variant c_RecursiveDirectoryIterator::ifa_getchildren(MethodCallPackage &mcp, in
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getChildren", 0, 1);
   return (self->t_getchildren());
@@ -3369,10 +3117,7 @@ Variant c_RecursiveDirectoryIterator::ifa_current(MethodCallPackage &mcp, int co
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::current", 0, 1);
   return (self->t_current());
@@ -3383,10 +3128,7 @@ Variant c_RecursiveDirectoryIterator::ifa_rewind(MethodCallPackage &mcp, int cou
   if (mcp.obj) {
     self = static_cast<c_RecursiveDirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveDirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
@@ -3957,10 +3699,7 @@ Variant c_DirectoryIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("DirectoryIterator::next", 0, 1);
   return (self->t_next(), null);
@@ -3972,10 +3711,7 @@ Variant c_DirectoryIterator::i_key(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("DirectoryIterator::key", 0, 1);
   return (self->t_key());
@@ -3987,10 +3723,7 @@ Variant c_DirectoryIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("DirectoryIterator::valid", 0, 1);
   return (self->t_valid());
@@ -4002,10 +3735,7 @@ Variant c_DirectoryIterator::i___tostring(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("DirectoryIterator::__toString", 0, 1);
   return (self->t___tostring());
@@ -4017,10 +3747,7 @@ Variant c_DirectoryIterator::i___construct(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 2);
   {
@@ -4037,10 +3764,7 @@ Variant c_DirectoryIterator::i_seek(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("DirectoryIterator::seek", count, 1, 1, 1);
   {
@@ -4057,10 +3781,7 @@ Variant c_DirectoryIterator::i_current(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("DirectoryIterator::current", 0, 1);
   return (self->t_current());
@@ -4072,10 +3793,7 @@ Variant c_DirectoryIterator::i_isdot(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
   return (self->t_isdot());
@@ -4087,10 +3805,7 @@ Variant c_DirectoryIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("DirectoryIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
@@ -4101,10 +3816,7 @@ Variant c_DirectoryIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("DirectoryIterator::next", 0, 1);
   return (self->t_next(), null);
@@ -4115,10 +3827,7 @@ Variant c_DirectoryIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("DirectoryIterator::key", 0, 1);
   return (self->t_key());
@@ -4129,10 +3838,7 @@ Variant c_DirectoryIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("DirectoryIterator::valid", 0, 1);
   return (self->t_valid());
@@ -4143,10 +3849,7 @@ Variant c_DirectoryIterator::ifa___tostring(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("DirectoryIterator::__toString", 0, 1);
   return (self->t___tostring());
@@ -4157,10 +3860,7 @@ Variant c_DirectoryIterator::ifa___construct(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 2);
   return (self->t___construct(a0), null);
@@ -4171,10 +3871,7 @@ Variant c_DirectoryIterator::ifa_seek(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("DirectoryIterator::seek", count, 1, 1, 1);
   return (self->t_seek(a0), null);
@@ -4185,10 +3882,7 @@ Variant c_DirectoryIterator::ifa_current(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("DirectoryIterator::current", 0, 1);
   return (self->t_current());
@@ -4199,10 +3893,7 @@ Variant c_DirectoryIterator::ifa_isdot(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
   return (self->t_isdot());
@@ -4213,10 +3904,7 @@ Variant c_DirectoryIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_DirectoryIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DirectoryIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("DirectoryIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
@@ -4708,10 +4396,7 @@ Variant c_RecursiveIteratorIterator::i_next(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveIteratorIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::next", 0, 1);
   return (self->t_next(), null);
@@ -4723,10 +4408,7 @@ Variant c_RecursiveIteratorIterator::i_key(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveIteratorIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::key", 0, 1);
   return (self->t_key());
@@ -4738,10 +4420,7 @@ Variant c_RecursiveIteratorIterator::i_valid(MethodCallPackage &mcp, CArrRef par
   if (mcp.obj) {
     self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveIteratorIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::valid", 0, 1);
   return (self->t_valid());
@@ -4753,10 +4432,7 @@ Variant c_RecursiveIteratorIterator::i_getinneriterator(MethodCallPackage &mcp, 
   if (mcp.obj) {
     self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveIteratorIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::getInnerIterator", 0, 1);
   return (self->t_getinneriterator());
@@ -4768,10 +4444,7 @@ Variant c_RecursiveIteratorIterator::i___construct(MethodCallPackage &mcp, CArrR
   if (mcp.obj) {
     self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveIteratorIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 3) return throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 2);
   {
@@ -4792,10 +4465,7 @@ Variant c_RecursiveIteratorIterator::i_current(MethodCallPackage &mcp, CArrRef p
   if (mcp.obj) {
     self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveIteratorIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::current", 0, 1);
   return (self->t_current());
@@ -4807,10 +4477,7 @@ Variant c_RecursiveIteratorIterator::i_rewind(MethodCallPackage &mcp, CArrRef pa
   if (mcp.obj) {
     self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveIteratorIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::rewind", 0, 1);
   return (self->t_rewind(), null);
@@ -4821,10 +4488,7 @@ Variant c_RecursiveIteratorIterator::ifa_next(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveIteratorIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::next", 0, 1);
   return (self->t_next(), null);
@@ -4835,10 +4499,7 @@ Variant c_RecursiveIteratorIterator::ifa_key(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveIteratorIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::key", 0, 1);
   return (self->t_key());
@@ -4849,10 +4510,7 @@ Variant c_RecursiveIteratorIterator::ifa_valid(MethodCallPackage &mcp, int count
   if (mcp.obj) {
     self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveIteratorIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::valid", 0, 1);
   return (self->t_valid());
@@ -4863,10 +4521,7 @@ Variant c_RecursiveIteratorIterator::ifa_getinneriterator(MethodCallPackage &mcp
   if (mcp.obj) {
     self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveIteratorIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::getInnerIterator", 0, 1);
   return (self->t_getinneriterator());
@@ -4877,10 +4532,7 @@ Variant c_RecursiveIteratorIterator::ifa___construct(MethodCallPackage &mcp, int
   if (mcp.obj) {
     self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveIteratorIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 3) return throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 2);
   if (count <= 1) return (self->t___construct(a0), null);
@@ -4893,10 +4545,7 @@ Variant c_RecursiveIteratorIterator::ifa_current(MethodCallPackage &mcp, int cou
   if (mcp.obj) {
     self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveIteratorIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::current", 0, 1);
   return (self->t_current());
@@ -4907,10 +4556,7 @@ Variant c_RecursiveIteratorIterator::ifa_rewind(MethodCallPackage &mcp, int coun
   if (mcp.obj) {
     self = static_cast<c_RecursiveIteratorIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_RecursiveIteratorIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::rewind", 0, 1);
   return (self->t_rewind(), null);

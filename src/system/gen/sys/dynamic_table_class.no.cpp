@@ -597,10 +597,7 @@ Variant c_PDOException::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOException*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOException)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -612,10 +609,7 @@ Variant c_PDOException::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOException*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOException)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -626,10 +620,7 @@ Variant c_PDOException::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_PDOException*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOException)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -640,10 +631,7 @@ Variant c_PDOException::ifa___construct(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_PDOException*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOException)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -870,10 +858,7 @@ Variant c_DOMDocumentFragment::i___destruct(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_DOMDocumentFragment*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocumentFragment)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -885,10 +870,7 @@ Variant c_DOMDocumentFragment::i___construct(MethodCallPackage &mcp, CArrRef par
   if (mcp.obj) {
     self = static_cast<c_DOMDocumentFragment*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocumentFragment)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -900,10 +882,7 @@ Variant c_DOMDocumentFragment::i_appendxml(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_DOMDocumentFragment*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocumentFragment)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("appendxml", count, 1, 1, 1);
   {
@@ -919,10 +898,7 @@ Variant c_DOMDocumentFragment::ifa___destruct(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_DOMDocumentFragment*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocumentFragment)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -933,10 +909,7 @@ Variant c_DOMDocumentFragment::ifa___construct(MethodCallPackage &mcp, int count
   if (mcp.obj) {
     self = static_cast<c_DOMDocumentFragment*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocumentFragment)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -947,10 +920,7 @@ Variant c_DOMDocumentFragment::ifa_appendxml(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_DOMDocumentFragment*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocumentFragment)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("appendxml", count, 1, 1, 1);
   return (self->t_appendxml(a0));
@@ -1254,10 +1224,7 @@ Variant c_DOMText::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMText*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMText)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -1269,10 +1236,7 @@ Variant c_DOMText::i___set(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMText*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMText)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   {
@@ -1290,10 +1254,7 @@ Variant c_DOMText::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMText*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMText)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
   {
@@ -1311,10 +1272,7 @@ Variant c_DOMText::i___get(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMText*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMText)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   {
@@ -1331,10 +1289,7 @@ Variant c_DOMText::i_iswhitespaceinelementcontent(MethodCallPackage &mcp, CArrRe
   if (mcp.obj) {
     self = static_cast<c_DOMText*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMText)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
   return (self->t_iswhitespaceinelementcontent());
@@ -1346,10 +1301,7 @@ Variant c_DOMText::i_splittext(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMText*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMText)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("splittext", count, 1, 1, 1);
   {
@@ -1365,10 +1317,7 @@ Variant c_DOMText::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_DOMText*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMText)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -1379,10 +1328,7 @@ Variant c_DOMText::ifa___set(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_
   if (mcp.obj) {
     self = static_cast<c_DOMText*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMText)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   return (self->t___set(a0, a1));
@@ -1393,10 +1339,7 @@ Variant c_DOMText::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DOMText*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMText)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
   if (count <= 0) return (self->t___construct(), null);
@@ -1408,10 +1351,7 @@ Variant c_DOMText::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_
   if (mcp.obj) {
     self = static_cast<c_DOMText*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMText)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   return (self->t___get(a0));
@@ -1422,10 +1362,7 @@ Variant c_DOMText::ifa_iswhitespaceinelementcontent(MethodCallPackage &mcp, int 
   if (mcp.obj) {
     self = static_cast<c_DOMText*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMText)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
   return (self->t_iswhitespaceinelementcontent());
@@ -1436,10 +1373,7 @@ Variant c_DOMText::ifa_splittext(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_DOMText*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMText)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("splittext", count, 1, 1, 1);
   return (self->t_splittext(a0));
@@ -2272,10 +2206,7 @@ Variant c_DebuggerClient::i_argcount(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("argcount", 0, 1);
   return (self->t_argcount());
@@ -2287,10 +2218,7 @@ Variant c_DebuggerClient::i_arg(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("arg", count, 2, 2, 1);
   {
@@ -2308,10 +2236,7 @@ Variant c_DebuggerClient::i_helpcmds(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2) return throw_missing_arguments("helpcmds", count+1, 1);
   {
@@ -2330,10 +2255,7 @@ Variant c_DebuggerClient::i_ask(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("ask", count+1, 1);
   {
@@ -2351,10 +2273,7 @@ Variant c_DebuggerClient::i_error(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("error", count+1, 1);
   {
@@ -2372,10 +2291,7 @@ Variant c_DebuggerClient::i_xend(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("xend", count, 1, 1, 1);
   {
@@ -2392,10 +2308,7 @@ Variant c_DebuggerClient::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -2407,10 +2320,7 @@ Variant c_DebuggerClient::i_helptitle(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("helptitle", count, 1, 1, 1);
   {
@@ -2427,10 +2337,7 @@ Variant c_DebuggerClient::i_getcommand(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getcommand", 0, 1);
   return (self->t_getcommand());
@@ -2442,10 +2349,7 @@ Variant c_DebuggerClient::i_tutorial(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("tutorial", count, 1, 1, 1);
   {
@@ -2462,10 +2366,7 @@ Variant c_DebuggerClient::i___construct(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -2477,10 +2378,7 @@ Variant c_DebuggerClient::i_getcode(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getcode", 0, 1);
   return (self->t_getcode());
@@ -2492,10 +2390,7 @@ Variant c_DebuggerClient::i_argvalue(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("argvalue", count, 1, 1, 1);
   {
@@ -2512,10 +2407,7 @@ Variant c_DebuggerClient::i_output(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("output", count+1, 1);
   {
@@ -2533,10 +2425,7 @@ Variant c_DebuggerClient::i_getstacktrace(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getstacktrace", 0, 1);
   return (self->t_getstacktrace());
@@ -2548,10 +2437,7 @@ Variant c_DebuggerClient::i_info(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("info", count+1, 1);
   {
@@ -2569,10 +2455,7 @@ Variant c_DebuggerClient::i_printframe(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("printframe", count, 1, 1, 1);
   {
@@ -2589,10 +2472,7 @@ Variant c_DebuggerClient::i_print(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("print", count+1, 1);
   {
@@ -2610,10 +2490,7 @@ Variant c_DebuggerClient::i_code(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 4) return throw_wrong_arguments("code", count, 1, 4, 1);
   {
@@ -2636,10 +2513,7 @@ Variant c_DebuggerClient::i_helpsection(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("helpsection", count, 1, 1, 1);
   {
@@ -2656,10 +2530,7 @@ Variant c_DebuggerClient::i_quit(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("quit", 0, 1);
   return (self->t_quit(), null);
@@ -2671,10 +2542,7 @@ Variant c_DebuggerClient::i_helpbody(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("helpbody", count, 1, 1, 1);
   {
@@ -2691,10 +2559,7 @@ Variant c_DebuggerClient::i_getframe(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getframe", 0, 1);
   return (self->t_getframe());
@@ -2706,10 +2571,7 @@ Variant c_DebuggerClient::i_help(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("help", count+1, 1);
   {
@@ -2727,10 +2589,7 @@ Variant c_DebuggerClient::i_args(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("args", 0, 1);
   return (self->t_args());
@@ -2742,10 +2601,7 @@ Variant c_DebuggerClient::i_addcompletion(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("addcompletion", count, 1, 1, 1);
   {
@@ -2762,10 +2618,7 @@ Variant c_DebuggerClient::i_argrest(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("argrest", count, 1, 1, 1);
   {
@@ -2782,10 +2635,7 @@ Variant c_DebuggerClient::i_getcurrentlocation(MethodCallPackage &mcp, CArrRef p
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getcurrentlocation", 0, 1);
   return (self->t_getcurrentlocation());
@@ -2797,10 +2647,7 @@ Variant c_DebuggerClient::i_send(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
   {
@@ -2817,10 +2664,7 @@ Variant c_DebuggerClient::i_wrap(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("wrap", count, 1, 1, 1);
   {
@@ -2836,10 +2680,7 @@ Variant c_DebuggerClient::ifa_argcount(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("argcount", 0, 1);
   return (self->t_argcount());
@@ -2850,10 +2691,7 @@ Variant c_DebuggerClient::ifa_arg(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("arg", count, 2, 2, 1);
   return (self->t_arg(a0, a1));
@@ -2864,10 +2702,7 @@ Variant c_DebuggerClient::ifa_helpcmds(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2) return throw_missing_arguments("helpcmds", count+1, 1);
   if (count <= 2) return (self->t_helpcmds(count, a0, a1), null);
@@ -2884,10 +2719,7 @@ Variant c_DebuggerClient::ifa_ask(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("ask", count+1, 1);
   if (count <= 1) return (self->t_ask(count, a0));
@@ -2905,10 +2737,7 @@ Variant c_DebuggerClient::ifa_error(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("error", count+1, 1);
   if (count <= 1) return (self->t_error(count, a0), null);
@@ -2926,10 +2755,7 @@ Variant c_DebuggerClient::ifa_xend(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("xend", count, 1, 1, 1);
   return (self->t_xend(a0));
@@ -2940,10 +2766,7 @@ Variant c_DebuggerClient::ifa___destruct(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -2954,10 +2777,7 @@ Variant c_DebuggerClient::ifa_helptitle(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("helptitle", count, 1, 1, 1);
   return (self->t_helptitle(a0), null);
@@ -2968,10 +2788,7 @@ Variant c_DebuggerClient::ifa_getcommand(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getcommand", 0, 1);
   return (self->t_getcommand());
@@ -2982,10 +2799,7 @@ Variant c_DebuggerClient::ifa_tutorial(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("tutorial", count, 1, 1, 1);
   return (self->t_tutorial(a0), null);
@@ -2996,10 +2810,7 @@ Variant c_DebuggerClient::ifa___construct(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -3010,10 +2821,7 @@ Variant c_DebuggerClient::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getcode", 0, 1);
   return (self->t_getcode());
@@ -3024,10 +2832,7 @@ Variant c_DebuggerClient::ifa_argvalue(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("argvalue", count, 1, 1, 1);
   return (self->t_argvalue(a0));
@@ -3038,10 +2843,7 @@ Variant c_DebuggerClient::ifa_output(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("output", count+1, 1);
   if (count <= 1) return (self->t_output(count, a0), null);
@@ -3059,10 +2861,7 @@ Variant c_DebuggerClient::ifa_getstacktrace(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getstacktrace", 0, 1);
   return (self->t_getstacktrace());
@@ -3073,10 +2872,7 @@ Variant c_DebuggerClient::ifa_info(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("info", count+1, 1);
   if (count <= 1) return (self->t_info(count, a0), null);
@@ -3094,10 +2890,7 @@ Variant c_DebuggerClient::ifa_printframe(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("printframe", count, 1, 1, 1);
   return (self->t_printframe(a0), null);
@@ -3108,10 +2901,7 @@ Variant c_DebuggerClient::ifa_print(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("print", count+1, 1);
   if (count <= 1) return (self->t_print(count, a0), null);
@@ -3129,10 +2919,7 @@ Variant c_DebuggerClient::ifa_code(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 4) return throw_wrong_arguments("code", count, 1, 4, 1);
   if (count <= 1) return (self->t_code(a0), null);
@@ -3146,10 +2933,7 @@ Variant c_DebuggerClient::ifa_helpsection(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("helpsection", count, 1, 1, 1);
   return (self->t_helpsection(a0), null);
@@ -3160,10 +2944,7 @@ Variant c_DebuggerClient::ifa_quit(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("quit", 0, 1);
   return (self->t_quit(), null);
@@ -3174,10 +2955,7 @@ Variant c_DebuggerClient::ifa_helpbody(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("helpbody", count, 1, 1, 1);
   return (self->t_helpbody(a0), null);
@@ -3188,10 +2966,7 @@ Variant c_DebuggerClient::ifa_getframe(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getframe", 0, 1);
   return (self->t_getframe());
@@ -3202,10 +2977,7 @@ Variant c_DebuggerClient::ifa_help(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("help", count+1, 1);
   if (count <= 1) return (self->t_help(count, a0), null);
@@ -3223,10 +2995,7 @@ Variant c_DebuggerClient::ifa_args(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("args", 0, 1);
   return (self->t_args());
@@ -3237,10 +3006,7 @@ Variant c_DebuggerClient::ifa_addcompletion(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("addcompletion", count, 1, 1, 1);
   return (self->t_addcompletion(a0), null);
@@ -3251,10 +3017,7 @@ Variant c_DebuggerClient::ifa_argrest(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("argrest", count, 1, 1, 1);
   return (self->t_argrest(a0));
@@ -3265,10 +3028,7 @@ Variant c_DebuggerClient::ifa_getcurrentlocation(MethodCallPackage &mcp, int cou
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getcurrentlocation", 0, 1);
   return (self->t_getcurrentlocation());
@@ -3279,10 +3039,7 @@ Variant c_DebuggerClient::ifa_send(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
   return (self->t_send(a0));
@@ -3293,10 +3050,7 @@ Variant c_DebuggerClient::ifa_wrap(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DebuggerClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("wrap", count, 1, 1, 1);
   return (self->t_wrap(a0));
@@ -3842,10 +3596,7 @@ Variant c_DOMCDATASection::i___destruct(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_DOMCDATASection*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCDATASection)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -3857,10 +3608,7 @@ Variant c_DOMCDATASection::i___construct(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMCDATASection*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCDATASection)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
   {
@@ -3876,10 +3624,7 @@ Variant c_DOMCDATASection::ifa___destruct(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_DOMCDATASection*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCDATASection)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -3890,10 +3635,7 @@ Variant c_DOMCDATASection::ifa___construct(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMCDATASection*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCDATASection)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
   return (self->t___construct(a0), null);
@@ -4122,10 +3864,7 @@ Variant c_Locale::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Locale*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Locale)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -4137,10 +3876,7 @@ Variant c_Locale::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Locale*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Locale)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -4151,10 +3887,7 @@ Variant c_Locale::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_Locale*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Locale)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -4165,10 +3898,7 @@ Variant c_Locale::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_Locale*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Locale)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -4416,10 +4146,7 @@ Variant c_DOMDocumentType::i___destruct(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_DOMDocumentType*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocumentType)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -4431,10 +4158,7 @@ Variant c_DOMDocumentType::i___set(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocumentType*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocumentType)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   {
@@ -4452,10 +4176,7 @@ Variant c_DOMDocumentType::i___construct(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMDocumentType*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocumentType)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -4467,10 +4188,7 @@ Variant c_DOMDocumentType::i___get(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocumentType*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocumentType)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   {
@@ -4486,10 +4204,7 @@ Variant c_DOMDocumentType::ifa___destruct(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_DOMDocumentType*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocumentType)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -4500,10 +4215,7 @@ Variant c_DOMDocumentType::ifa___set(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_DOMDocumentType*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocumentType)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   return (self->t___set(a0, a1));
@@ -4514,10 +4226,7 @@ Variant c_DOMDocumentType::ifa___construct(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMDocumentType*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocumentType)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -4528,10 +4237,7 @@ Variant c_DOMDocumentType::ifa___get(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_DOMDocumentType*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocumentType)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   return (self->t___get(a0));
@@ -4904,10 +4610,7 @@ Variant c_SQLite3Stmt::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -4919,10 +4622,7 @@ Variant c_SQLite3Stmt::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
   {
@@ -4940,10 +4640,7 @@ Variant c_SQLite3Stmt::i_close(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("close", 0, 1);
   return (self->t_close());
@@ -4955,10 +4652,7 @@ Variant c_SQLite3Stmt::i_paramcount(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("paramcount", 0, 1);
   return (self->t_paramcount());
@@ -4970,10 +4664,7 @@ Variant c_SQLite3Stmt::i_bindparam(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("bindparam", count, 2, 3, 1);
   const_cast<Array&>(params).escalate(true);
@@ -4994,10 +4685,7 @@ Variant c_SQLite3Stmt::i_execute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("execute", 0, 1);
   return (self->t_execute());
@@ -5009,10 +4697,7 @@ Variant c_SQLite3Stmt::i_reset(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("reset", 0, 1);
   return (self->t_reset());
@@ -5024,10 +4709,7 @@ Variant c_SQLite3Stmt::i_clear(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("clear", 0, 1);
   return (self->t_clear());
@@ -5039,10 +4721,7 @@ Variant c_SQLite3Stmt::i_bindvalue(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
   {
@@ -5061,10 +4740,7 @@ Variant c_SQLite3Stmt::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -5075,10 +4751,7 @@ Variant c_SQLite3Stmt::ifa___construct(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
   return (self->t___construct(a0, a1), null);
@@ -5089,10 +4762,7 @@ Variant c_SQLite3Stmt::ifa_close(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("close", 0, 1);
   return (self->t_close());
@@ -5103,10 +4773,7 @@ Variant c_SQLite3Stmt::ifa_paramcount(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("paramcount", 0, 1);
   return (self->t_paramcount());
@@ -5117,10 +4784,7 @@ Variant c_SQLite3Stmt::ifa_bindparam(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("bindparam", count, 2, 3, 1);
   if (count <= 2) return (self->t_bindparam(a0, ref(a1)));
@@ -5132,10 +4796,7 @@ Variant c_SQLite3Stmt::ifa_execute(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("execute", 0, 1);
   return (self->t_execute());
@@ -5146,10 +4807,7 @@ Variant c_SQLite3Stmt::ifa_reset(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("reset", 0, 1);
   return (self->t_reset());
@@ -5160,10 +4818,7 @@ Variant c_SQLite3Stmt::ifa_clear(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("clear", 0, 1);
   return (self->t_clear());
@@ -5174,10 +4829,7 @@ Variant c_SQLite3Stmt::ifa_bindvalue(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_SQLite3Stmt*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Stmt)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
   if (count <= 2) return (self->t_bindvalue(a0, a1));
@@ -5573,10 +5225,7 @@ Variant c_DOMNodeList::i_item(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNodeList*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeList)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
   {
@@ -5593,10 +5242,7 @@ Variant c_DOMNodeList::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNodeList*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeList)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -5608,10 +5254,7 @@ Variant c_DOMNodeList::i___set(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNodeList*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeList)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   {
@@ -5629,10 +5272,7 @@ Variant c_DOMNodeList::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNodeList*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeList)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -5644,10 +5284,7 @@ Variant c_DOMNodeList::i_getiterator(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNodeList*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeList)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
   return (self->t_getiterator());
@@ -5659,10 +5296,7 @@ Variant c_DOMNodeList::i___get(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNodeList*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeList)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   {
@@ -5678,10 +5312,7 @@ Variant c_DOMNodeList::ifa_item(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_DOMNodeList*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeList)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
   return (self->t_item(a0));
@@ -5692,10 +5323,7 @@ Variant c_DOMNodeList::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_DOMNodeList*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeList)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -5706,10 +5334,7 @@ Variant c_DOMNodeList::ifa___set(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_DOMNodeList*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeList)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   return (self->t___set(a0, a1));
@@ -5720,10 +5345,7 @@ Variant c_DOMNodeList::ifa___construct(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DOMNodeList*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeList)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -5734,10 +5356,7 @@ Variant c_DOMNodeList::ifa_getiterator(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DOMNodeList*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeList)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
   return (self->t_getiterator());
@@ -5748,10 +5367,7 @@ Variant c_DOMNodeList::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_DOMNodeList*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeList)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   return (self->t___get(a0));
@@ -6132,10 +5748,7 @@ Variant c_Normalizer::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Normalizer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Normalizer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -6147,10 +5760,7 @@ Variant c_Normalizer::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Normalizer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Normalizer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -6197,10 +5807,7 @@ Variant c_Normalizer::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_Normalizer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Normalizer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -6211,10 +5818,7 @@ Variant c_Normalizer::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_Normalizer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Normalizer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -6631,10 +6235,7 @@ Variant c_DOMCharacterData::i___destruct(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -6646,10 +6247,7 @@ Variant c_DOMCharacterData::i_substringdata(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
   {
@@ -6667,10 +6265,7 @@ Variant c_DOMCharacterData::i___set(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   {
@@ -6688,10 +6283,7 @@ Variant c_DOMCharacterData::i_insertdata(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
   {
@@ -6709,10 +6301,7 @@ Variant c_DOMCharacterData::i___construct(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -6724,10 +6313,7 @@ Variant c_DOMCharacterData::i_appenddata(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
   {
@@ -6744,10 +6330,7 @@ Variant c_DOMCharacterData::i___get(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   {
@@ -6764,10 +6347,7 @@ Variant c_DOMCharacterData::i_replacedata(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
   {
@@ -6786,10 +6366,7 @@ Variant c_DOMCharacterData::i_deletedata(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
   {
@@ -6806,10 +6383,7 @@ Variant c_DOMCharacterData::ifa___destruct(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -6820,10 +6394,7 @@ Variant c_DOMCharacterData::ifa_substringdata(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
   return (self->t_substringdata(a0, a1));
@@ -6834,10 +6405,7 @@ Variant c_DOMCharacterData::ifa___set(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   return (self->t___set(a0, a1));
@@ -6848,10 +6416,7 @@ Variant c_DOMCharacterData::ifa_insertdata(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
   return (self->t_insertdata(a0, a1));
@@ -6862,10 +6427,7 @@ Variant c_DOMCharacterData::ifa___construct(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -6876,10 +6438,7 @@ Variant c_DOMCharacterData::ifa_appenddata(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
   return (self->t_appenddata(a0));
@@ -6890,10 +6449,7 @@ Variant c_DOMCharacterData::ifa___get(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   return (self->t___get(a0));
@@ -6904,10 +6460,7 @@ Variant c_DOMCharacterData::ifa_replacedata(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
   return (self->t_replacedata(a0, a1, a2));
@@ -6918,10 +6471,7 @@ Variant c_DOMCharacterData::ifa_deletedata(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMCharacterData*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMCharacterData)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
   return (self->t_deletedata(a0, a1));
@@ -7226,10 +6776,7 @@ Variant c_DOMEntityReference::i___destruct(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_DOMEntityReference*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMEntityReference)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -7241,10 +6788,7 @@ Variant c_DOMEntityReference::i___construct(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_DOMEntityReference*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMEntityReference)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
   {
@@ -7260,10 +6804,7 @@ Variant c_DOMEntityReference::ifa___destruct(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_DOMEntityReference*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMEntityReference)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -7274,10 +6815,7 @@ Variant c_DOMEntityReference::ifa___construct(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_DOMEntityReference*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMEntityReference)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
   return (self->t___construct(a0), null);
@@ -7574,10 +7112,7 @@ Variant c_SimpleXMLElementIterator::i_next(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElementIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElementIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("next", 0, 1);
   return (self->t_next());
@@ -7589,10 +7124,7 @@ Variant c_SimpleXMLElementIterator::i_key(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElementIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElementIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("key", 0, 1);
   return (self->t_key());
@@ -7604,10 +7136,7 @@ Variant c_SimpleXMLElementIterator::i_valid(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElementIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElementIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("valid", 0, 1);
   return (self->t_valid());
@@ -7619,10 +7148,7 @@ Variant c_SimpleXMLElementIterator::i___destruct(MethodCallPackage &mcp, CArrRef
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElementIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElementIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -7634,10 +7160,7 @@ Variant c_SimpleXMLElementIterator::i___construct(MethodCallPackage &mcp, CArrRe
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElementIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElementIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -7649,10 +7172,7 @@ Variant c_SimpleXMLElementIterator::i_current(MethodCallPackage &mcp, CArrRef pa
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElementIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElementIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("current", 0, 1);
   return (self->t_current());
@@ -7664,10 +7184,7 @@ Variant c_SimpleXMLElementIterator::i_rewind(MethodCallPackage &mcp, CArrRef par
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElementIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElementIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
   return (self->t_rewind());
@@ -7678,10 +7195,7 @@ Variant c_SimpleXMLElementIterator::ifa_next(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElementIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElementIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("next", 0, 1);
   return (self->t_next());
@@ -7692,10 +7206,7 @@ Variant c_SimpleXMLElementIterator::ifa_key(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElementIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElementIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("key", 0, 1);
   return (self->t_key());
@@ -7706,10 +7217,7 @@ Variant c_SimpleXMLElementIterator::ifa_valid(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElementIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElementIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("valid", 0, 1);
   return (self->t_valid());
@@ -7720,10 +7228,7 @@ Variant c_SimpleXMLElementIterator::ifa___destruct(MethodCallPackage &mcp, int c
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElementIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElementIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -7734,10 +7239,7 @@ Variant c_SimpleXMLElementIterator::ifa___construct(MethodCallPackage &mcp, int 
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElementIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElementIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -7748,10 +7250,7 @@ Variant c_SimpleXMLElementIterator::ifa_current(MethodCallPackage &mcp, int coun
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElementIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElementIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("current", 0, 1);
   return (self->t_current());
@@ -7762,10 +7261,7 @@ Variant c_SimpleXMLElementIterator::ifa_rewind(MethodCallPackage &mcp, int count
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElementIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElementIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
   return (self->t_rewind());
@@ -8199,10 +7695,7 @@ Variant c_DateTimeZone::i_gettransitions(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DateTimeZone*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTimeZone)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("gettransitions", 0, 1);
   return (self->t_gettransitions());
@@ -8225,10 +7718,7 @@ Variant c_DateTimeZone::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DateTimeZone*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTimeZone)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -8240,10 +7730,7 @@ Variant c_DateTimeZone::i_getoffset(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DateTimeZone*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTimeZone)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getoffset", count, 1, 1, 1);
   {
@@ -8260,10 +7747,7 @@ Variant c_DateTimeZone::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DateTimeZone*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTimeZone)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
   {
@@ -8291,10 +7775,7 @@ Variant c_DateTimeZone::i_getname(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DateTimeZone*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTimeZone)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getname", 0, 1);
   return (self->t_getname());
@@ -8305,10 +7786,7 @@ Variant c_DateTimeZone::ifa_gettransitions(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DateTimeZone*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTimeZone)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("gettransitions", 0, 1);
   return (self->t_gettransitions());
@@ -8329,10 +7807,7 @@ Variant c_DateTimeZone::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DateTimeZone*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTimeZone)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -8343,10 +7818,7 @@ Variant c_DateTimeZone::ifa_getoffset(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_DateTimeZone*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTimeZone)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getoffset", count, 1, 1, 1);
   return (self->t_getoffset(a0));
@@ -8357,10 +7829,7 @@ Variant c_DateTimeZone::ifa___construct(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_DateTimeZone*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTimeZone)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
   return (self->t___construct(a0), null);
@@ -8381,10 +7850,7 @@ Variant c_DateTimeZone::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DateTimeZone*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTimeZone)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getname", 0, 1);
   return (self->t_getname());
@@ -8746,10 +8212,7 @@ Variant c_DOMNodeIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNodeIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("next", 0, 1);
   return (self->t_next());
@@ -8761,10 +8224,7 @@ Variant c_DOMNodeIterator::i_key(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNodeIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("key", 0, 1);
   return (self->t_key());
@@ -8776,10 +8236,7 @@ Variant c_DOMNodeIterator::i_valid(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNodeIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("valid", 0, 1);
   return (self->t_valid());
@@ -8791,10 +8248,7 @@ Variant c_DOMNodeIterator::i___destruct(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_DOMNodeIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -8806,10 +8260,7 @@ Variant c_DOMNodeIterator::i___construct(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMNodeIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -8821,10 +8272,7 @@ Variant c_DOMNodeIterator::i_current(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNodeIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("current", 0, 1);
   return (self->t_current());
@@ -8836,10 +8284,7 @@ Variant c_DOMNodeIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNodeIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
   return (self->t_rewind());
@@ -8850,10 +8295,7 @@ Variant c_DOMNodeIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DOMNodeIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("next", 0, 1);
   return (self->t_next());
@@ -8864,10 +8306,7 @@ Variant c_DOMNodeIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DOMNodeIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("key", 0, 1);
   return (self->t_key());
@@ -8878,10 +8317,7 @@ Variant c_DOMNodeIterator::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_DOMNodeIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("valid", 0, 1);
   return (self->t_valid());
@@ -8892,10 +8328,7 @@ Variant c_DOMNodeIterator::ifa___destruct(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_DOMNodeIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -8906,10 +8339,7 @@ Variant c_DOMNodeIterator::ifa___construct(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMNodeIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -8920,10 +8350,7 @@ Variant c_DOMNodeIterator::ifa_current(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DOMNodeIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("current", 0, 1);
   return (self->t_current());
@@ -8934,10 +8361,7 @@ Variant c_DOMNodeIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_DOMNodeIterator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNodeIterator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
   return (self->t_rewind());
@@ -9293,10 +8717,7 @@ Variant c_DOMImplementation::i_createdocument(MethodCallPackage &mcp, CArrRef pa
   if (mcp.obj) {
     self = static_cast<c_DOMImplementation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMImplementation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("createdocument", 3, 1);
   {
@@ -9318,10 +8739,7 @@ Variant c_DOMImplementation::i_createdocumenttype(MethodCallPackage &mcp, CArrRe
   if (mcp.obj) {
     self = static_cast<c_DOMImplementation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMImplementation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("createdocumenttype", 3, 1);
   {
@@ -9343,10 +8761,7 @@ Variant c_DOMImplementation::i___destruct(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_DOMImplementation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMImplementation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -9358,10 +8773,7 @@ Variant c_DOMImplementation::i___construct(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_DOMImplementation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMImplementation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -9373,10 +8785,7 @@ Variant c_DOMImplementation::i_hasfeature(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_DOMImplementation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMImplementation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("hasfeature", count, 2, 2, 1);
   {
@@ -9393,10 +8802,7 @@ Variant c_DOMImplementation::ifa_createdocument(MethodCallPackage &mcp, int coun
   if (mcp.obj) {
     self = static_cast<c_DOMImplementation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMImplementation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("createdocument", 3, 1);
   if (count <= 0) return (self->t_createdocument());
@@ -9410,10 +8816,7 @@ Variant c_DOMImplementation::ifa_createdocumenttype(MethodCallPackage &mcp, int 
   if (mcp.obj) {
     self = static_cast<c_DOMImplementation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMImplementation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("createdocumenttype", 3, 1);
   if (count <= 0) return (self->t_createdocumenttype());
@@ -9427,10 +8830,7 @@ Variant c_DOMImplementation::ifa___destruct(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_DOMImplementation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMImplementation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -9441,10 +8841,7 @@ Variant c_DOMImplementation::ifa___construct(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_DOMImplementation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMImplementation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -9455,10 +8852,7 @@ Variant c_DOMImplementation::ifa_hasfeature(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_DOMImplementation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMImplementation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("hasfeature", count, 2, 2, 1);
   return (self->t_hasfeature(a0, a1));
@@ -9722,10 +9116,7 @@ Variant c_SoapHeader::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapHeader*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapHeader)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -9737,10 +9128,7 @@ Variant c_SoapHeader::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapHeader*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapHeader)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 5) return throw_wrong_arguments("__construct", count, 2, 5, 1);
   {
@@ -9763,10 +9151,7 @@ Variant c_SoapHeader::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_SoapHeader*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapHeader)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -9777,10 +9162,7 @@ Variant c_SoapHeader::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SoapHeader*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapHeader)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 5) return throw_wrong_arguments("__construct", count, 2, 5, 1);
   if (count <= 2) return (self->t___construct(a0, a1), null);
@@ -10096,10 +9478,7 @@ Variant c_DOMNotation::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNotation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNotation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -10111,10 +9490,7 @@ Variant c_DOMNotation::i___set(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNotation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNotation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   {
@@ -10132,10 +9508,7 @@ Variant c_DOMNotation::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNotation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNotation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -10147,10 +9520,7 @@ Variant c_DOMNotation::i___get(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNotation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNotation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   {
@@ -10166,10 +9536,7 @@ Variant c_DOMNotation::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_DOMNotation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNotation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -10180,10 +9547,7 @@ Variant c_DOMNotation::ifa___set(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_DOMNotation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNotation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   return (self->t___set(a0, a1));
@@ -10194,10 +9558,7 @@ Variant c_DOMNotation::ifa___construct(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DOMNotation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNotation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -10208,10 +9569,7 @@ Variant c_DOMNotation::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_DOMNotation*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNotation)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   return (self->t___get(a0));
@@ -10479,10 +9837,7 @@ Variant c_DebuggerProxy::i_islocal(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerProxy*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerProxy)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("islocal", 0, 1);
   return (self->t_islocal());
@@ -10494,10 +9849,7 @@ Variant c_DebuggerProxy::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerProxy*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerProxy)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -10509,10 +9861,7 @@ Variant c_DebuggerProxy::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerProxy*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerProxy)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -10524,10 +9873,7 @@ Variant c_DebuggerProxy::i_send(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DebuggerProxy*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerProxy)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
   {
@@ -10543,10 +9889,7 @@ Variant c_DebuggerProxy::ifa_islocal(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_DebuggerProxy*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerProxy)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("islocal", 0, 1);
   return (self->t_islocal());
@@ -10557,10 +9900,7 @@ Variant c_DebuggerProxy::ifa___destruct(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_DebuggerProxy*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerProxy)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -10571,10 +9911,7 @@ Variant c_DebuggerProxy::ifa___construct(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_DebuggerProxy*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerProxy)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -10585,10 +9922,7 @@ Variant c_DebuggerProxy::ifa_send(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_DebuggerProxy*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DebuggerProxy)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
   return (self->t_send(a0));
@@ -10829,10 +10163,7 @@ Variant c_DOMComment::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMComment*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMComment)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -10844,10 +10175,7 @@ Variant c_DOMComment::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMComment*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMComment)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
   {
@@ -10864,10 +10192,7 @@ Variant c_DOMComment::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_DOMComment*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMComment)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -10878,10 +10203,7 @@ Variant c_DOMComment::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_DOMComment*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMComment)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
   if (count <= 0) return (self->t___construct(), null);
@@ -11441,10 +10763,7 @@ Variant c_SQLite3::i_exec(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
   {
@@ -11461,10 +10780,7 @@ Variant c_SQLite3::i_version(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("version", 0, 1);
   return (self->t_version());
@@ -11476,10 +10792,7 @@ Variant c_SQLite3::i_loadextension(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("loadextension", count, 1, 1, 1);
   {
@@ -11496,10 +10809,7 @@ Variant c_SQLite3::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -11511,10 +10821,7 @@ Variant c_SQLite3::i_createfunction(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("createfunction", count, 2, 3, 1);
   {
@@ -11534,10 +10841,7 @@ Variant c_SQLite3::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -11549,10 +10853,7 @@ Variant c_SQLite3::i_lastinsertrowid(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("lastinsertrowid", 0, 1);
   return (self->t_lastinsertrowid());
@@ -11564,10 +10865,7 @@ Variant c_SQLite3::i_query(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
   {
@@ -11584,10 +10882,7 @@ Variant c_SQLite3::i_close(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("close", 0, 1);
   return (self->t_close());
@@ -11599,10 +10894,7 @@ Variant c_SQLite3::i_escapestring(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("escapestring", count, 1, 1, 1);
   {
@@ -11619,10 +10911,7 @@ Variant c_SQLite3::i_lasterrormsg(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("lasterrormsg", 0, 1);
   return (self->t_lasterrormsg());
@@ -11634,10 +10923,7 @@ Variant c_SQLite3::i_createaggregate(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 3 || count > 4) return throw_wrong_arguments("createaggregate", count, 3, 4, 1);
   {
@@ -11658,10 +10944,7 @@ Variant c_SQLite3::i_open(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 3) return throw_wrong_arguments("open", count, 1, 3, 1);
   {
@@ -11682,10 +10965,7 @@ Variant c_SQLite3::i_changes(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("changes", 0, 1);
   return (self->t_changes());
@@ -11697,10 +10977,7 @@ Variant c_SQLite3::i_openblob(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 3 || count > 4) return throw_wrong_arguments("openblob", count, 3, 4, 1);
   {
@@ -11721,10 +10998,7 @@ Variant c_SQLite3::i_lasterrorcode(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("lasterrorcode", 0, 1);
   return (self->t_lasterrorcode());
@@ -11736,10 +11010,7 @@ Variant c_SQLite3::i_prepare(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("prepare", count, 1, 1, 1);
   {
@@ -11756,10 +11027,7 @@ Variant c_SQLite3::i_querysingle(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("querysingle", count, 1, 2, 1);
   {
@@ -11777,10 +11045,7 @@ Variant c_SQLite3::ifa_exec(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_I
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
   return (self->t_exec(a0));
@@ -11791,10 +11056,7 @@ Variant c_SQLite3::ifa_version(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("version", 0, 1);
   return (self->t_version());
@@ -11805,10 +11067,7 @@ Variant c_SQLite3::ifa_loadextension(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("loadextension", count, 1, 1, 1);
   return (self->t_loadextension(a0));
@@ -11819,10 +11078,7 @@ Variant c_SQLite3::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -11833,10 +11089,7 @@ Variant c_SQLite3::ifa_createfunction(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("createfunction", count, 2, 3, 1);
   if (count <= 2) return (self->t_createfunction(a0, a1));
@@ -11848,10 +11101,7 @@ Variant c_SQLite3::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -11862,10 +11112,7 @@ Variant c_SQLite3::ifa_lastinsertrowid(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("lastinsertrowid", 0, 1);
   return (self->t_lastinsertrowid());
@@ -11876,10 +11123,7 @@ Variant c_SQLite3::ifa_query(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
   return (self->t_query(a0));
@@ -11890,10 +11134,7 @@ Variant c_SQLite3::ifa_close(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("close", 0, 1);
   return (self->t_close());
@@ -11904,10 +11145,7 @@ Variant c_SQLite3::ifa_escapestring(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("escapestring", count, 1, 1, 1);
   return (self->t_escapestring(a0));
@@ -11918,10 +11156,7 @@ Variant c_SQLite3::ifa_lasterrormsg(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("lasterrormsg", 0, 1);
   return (self->t_lasterrormsg());
@@ -11932,10 +11167,7 @@ Variant c_SQLite3::ifa_createaggregate(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 3 || count > 4) return throw_wrong_arguments("createaggregate", count, 3, 4, 1);
   if (count <= 3) return (self->t_createaggregate(a0, a1, a2));
@@ -11947,10 +11179,7 @@ Variant c_SQLite3::ifa_open(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_I
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 3) return throw_wrong_arguments("open", count, 1, 3, 1);
   if (count <= 1) return (self->t_open(a0), null);
@@ -11963,10 +11192,7 @@ Variant c_SQLite3::ifa_changes(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("changes", 0, 1);
   return (self->t_changes());
@@ -11977,10 +11203,7 @@ Variant c_SQLite3::ifa_openblob(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 3 || count > 4) return throw_wrong_arguments("openblob", count, 3, 4, 1);
   if (count <= 3) return (self->t_openblob(a0, a1, a2));
@@ -11992,10 +11215,7 @@ Variant c_SQLite3::ifa_lasterrorcode(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("lasterrorcode", 0, 1);
   return (self->t_lasterrorcode());
@@ -12006,10 +11226,7 @@ Variant c_SQLite3::ifa_prepare(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("prepare", count, 1, 1, 1);
   return (self->t_prepare(a0));
@@ -12020,10 +11237,7 @@ Variant c_SQLite3::ifa_querysingle(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_SQLite3*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("querysingle", count, 1, 2, 1);
   if (count <= 1) return (self->t_querysingle(a0));
@@ -12504,10 +11718,7 @@ Variant c_DOMAttr::i_isid(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMAttr*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMAttr)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("isid", 0, 1);
   return (self->t_isid());
@@ -12519,10 +11730,7 @@ Variant c_DOMAttr::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMAttr*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMAttr)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -12534,10 +11742,7 @@ Variant c_DOMAttr::i___set(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMAttr*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMAttr)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   {
@@ -12555,10 +11760,7 @@ Variant c_DOMAttr::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMAttr*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMAttr)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
   {
@@ -12577,10 +11779,7 @@ Variant c_DOMAttr::i___get(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMAttr*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMAttr)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   {
@@ -12596,10 +11795,7 @@ Variant c_DOMAttr::ifa_isid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_I
   if (mcp.obj) {
     self = static_cast<c_DOMAttr*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMAttr)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("isid", 0, 1);
   return (self->t_isid());
@@ -12610,10 +11806,7 @@ Variant c_DOMAttr::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_DOMAttr*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMAttr)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -12624,10 +11817,7 @@ Variant c_DOMAttr::ifa___set(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_
   if (mcp.obj) {
     self = static_cast<c_DOMAttr*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMAttr)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   return (self->t___set(a0, a1));
@@ -12638,10 +11828,7 @@ Variant c_DOMAttr::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DOMAttr*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMAttr)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
   if (count <= 1) return (self->t___construct(a0), null);
@@ -12653,10 +11840,7 @@ Variant c_DOMAttr::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_
   if (mcp.obj) {
     self = static_cast<c_DOMAttr*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMAttr)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   return (self->t___get(a0));
@@ -12958,10 +12142,7 @@ Variant c_SoapVar::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapVar*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapVar)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -12973,10 +12154,7 @@ Variant c_SoapVar::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapVar*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapVar)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
   {
@@ -13001,10 +12179,7 @@ Variant c_SoapVar::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_SoapVar*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapVar)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -13015,10 +12190,7 @@ Variant c_SoapVar::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_SoapVar*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapVar)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
   if (count <= 2) return (self->t___construct(a0, a1), null);
@@ -13424,10 +12596,7 @@ Variant c_DOMNamedNodeMap::i_item(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
   {
@@ -13444,10 +12613,7 @@ Variant c_DOMNamedNodeMap::i_getnameditem(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getnameditem", count, 1, 1, 1);
   {
@@ -13464,10 +12630,7 @@ Variant c_DOMNamedNodeMap::i___destruct(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -13479,10 +12642,7 @@ Variant c_DOMNamedNodeMap::i___set(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   {
@@ -13500,10 +12660,7 @@ Variant c_DOMNamedNodeMap::i___construct(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -13515,10 +12672,7 @@ Variant c_DOMNamedNodeMap::i_getiterator(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
   return (self->t_getiterator());
@@ -13530,10 +12684,7 @@ Variant c_DOMNamedNodeMap::i___get(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   {
@@ -13550,10 +12701,7 @@ Variant c_DOMNamedNodeMap::i_getnameditemns(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("getnameditemns", count, 2, 2, 1);
   {
@@ -13570,10 +12718,7 @@ Variant c_DOMNamedNodeMap::ifa_item(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
   return (self->t_item(a0));
@@ -13584,10 +12729,7 @@ Variant c_DOMNamedNodeMap::ifa_getnameditem(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getnameditem", count, 1, 1, 1);
   return (self->t_getnameditem(a0));
@@ -13598,10 +12740,7 @@ Variant c_DOMNamedNodeMap::ifa___destruct(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -13612,10 +12751,7 @@ Variant c_DOMNamedNodeMap::ifa___set(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   return (self->t___set(a0, a1));
@@ -13626,10 +12762,7 @@ Variant c_DOMNamedNodeMap::ifa___construct(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -13640,10 +12773,7 @@ Variant c_DOMNamedNodeMap::ifa_getiterator(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
   return (self->t_getiterator());
@@ -13654,10 +12784,7 @@ Variant c_DOMNamedNodeMap::ifa___get(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   return (self->t___get(a0));
@@ -13668,10 +12795,7 @@ Variant c_DOMNamedNodeMap::ifa_getnameditemns(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNamedNodeMap)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("getnameditemns", count, 2, 2, 1);
   return (self->t_getnameditemns(a0, a1));
@@ -14056,10 +13180,7 @@ Variant c_SQLite3Result::i_columnname(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("columnname", count, 1, 1, 1);
   {
@@ -14076,10 +13197,7 @@ Variant c_SQLite3Result::i_columntype(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("columntype", count, 1, 1, 1);
   {
@@ -14096,10 +13214,7 @@ Variant c_SQLite3Result::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -14111,10 +13226,7 @@ Variant c_SQLite3Result::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -14126,10 +13238,7 @@ Variant c_SQLite3Result::i_numcolumns(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("numcolumns", 0, 1);
   return (self->t_numcolumns());
@@ -14141,10 +13250,7 @@ Variant c_SQLite3Result::i_fetcharray(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("fetcharray", 1, 1);
   {
@@ -14162,10 +13268,7 @@ Variant c_SQLite3Result::i_reset(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("reset", 0, 1);
   return (self->t_reset());
@@ -14177,10 +13280,7 @@ Variant c_SQLite3Result::i_finalize(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("finalize", 0, 1);
   return (self->t_finalize());
@@ -14191,10 +13291,7 @@ Variant c_SQLite3Result::ifa_columnname(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("columnname", count, 1, 1, 1);
   return (self->t_columnname(a0));
@@ -14205,10 +13302,7 @@ Variant c_SQLite3Result::ifa_columntype(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("columntype", count, 1, 1, 1);
   return (self->t_columntype(a0));
@@ -14219,10 +13313,7 @@ Variant c_SQLite3Result::ifa___destruct(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -14233,10 +13324,7 @@ Variant c_SQLite3Result::ifa___construct(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -14247,10 +13335,7 @@ Variant c_SQLite3Result::ifa_numcolumns(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("numcolumns", 0, 1);
   return (self->t_numcolumns());
@@ -14261,10 +13346,7 @@ Variant c_SQLite3Result::ifa_fetcharray(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("fetcharray", 1, 1);
   if (count <= 0) return (self->t_fetcharray());
@@ -14276,10 +13358,7 @@ Variant c_SQLite3Result::ifa_reset(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("reset", 0, 1);
   return (self->t_reset());
@@ -14290,10 +13369,7 @@ Variant c_SQLite3Result::ifa_finalize(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SQLite3Result*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SQLite3Result)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("finalize", 0, 1);
   return (self->t_finalize());
@@ -15033,10 +14109,7 @@ Variant c_SimpleXMLElement::i_addattribute(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 3) return throw_wrong_arguments("addattribute", count, 1, 3, 1);
   {
@@ -15057,10 +14130,7 @@ Variant c_SimpleXMLElement::i_count(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("count", 0, 1);
   return (self->t_count());
@@ -15072,10 +14142,7 @@ Variant c_SimpleXMLElement::i___tostring(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
   return (self->t___tostring());
@@ -15087,10 +14154,7 @@ Variant c_SimpleXMLElement::i_xpath(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("xpath", count, 1, 1, 1);
   {
@@ -15107,10 +14171,7 @@ Variant c_SimpleXMLElement::i___destruct(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -15122,10 +14183,7 @@ Variant c_SimpleXMLElement::i___set(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   {
@@ -15143,10 +14201,7 @@ Variant c_SimpleXMLElement::i___construct(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 5) return throw_wrong_arguments("__construct", count, 1, 5, 1);
   {
@@ -15171,10 +14226,7 @@ Variant c_SimpleXMLElement::i_offsetexists(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("offsetexists", count, 1, 1, 1);
   {
@@ -15191,10 +14243,7 @@ Variant c_SimpleXMLElement::i_getiterator(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
   return (self->t_getiterator());
@@ -15206,10 +14255,7 @@ Variant c_SimpleXMLElement::i_registerxpathnamespace(MethodCallPackage &mcp, CAr
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("registerxpathnamespace", count, 2, 2, 1);
   {
@@ -15227,10 +14273,7 @@ Variant c_SimpleXMLElement::i_offsetget(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("offsetget", count, 1, 1, 1);
   {
@@ -15247,10 +14290,7 @@ Variant c_SimpleXMLElement::i_getnamespaces(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("getnamespaces", 1, 1);
   {
@@ -15268,10 +14308,7 @@ Variant c_SimpleXMLElement::i___unset(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__unset", count, 1, 1, 1);
   {
@@ -15288,10 +14325,7 @@ Variant c_SimpleXMLElement::i_asxml(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("asxml", 1, 1);
   {
@@ -15309,10 +14343,7 @@ Variant c_SimpleXMLElement::i_getdocnamespaces(MethodCallPackage &mcp, CArrRef p
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("getdocnamespaces", 1, 1);
   {
@@ -15330,10 +14361,7 @@ Variant c_SimpleXMLElement::i_offsetunset(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("offsetunset", count, 1, 1, 1);
   {
@@ -15350,10 +14378,7 @@ Variant c_SimpleXMLElement::i___get(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   {
@@ -15370,10 +14395,7 @@ Variant c_SimpleXMLElement::i_children(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("children", 2, 1);
   {
@@ -15393,10 +14415,7 @@ Variant c_SimpleXMLElement::i_addchild(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 3) return throw_wrong_arguments("addchild", count, 1, 3, 1);
   {
@@ -15417,10 +14436,7 @@ Variant c_SimpleXMLElement::i___isset(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
   {
@@ -15437,10 +14453,7 @@ Variant c_SimpleXMLElement::i_getname(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getname", 0, 1);
   return (self->t_getname());
@@ -15452,10 +14465,7 @@ Variant c_SimpleXMLElement::i_attributes(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("attributes", 2, 1);
   {
@@ -15475,10 +14485,7 @@ Variant c_SimpleXMLElement::i_offsetset(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("offsetset", count, 2, 2, 1);
   {
@@ -15495,10 +14502,7 @@ Variant c_SimpleXMLElement::ifa_addattribute(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 3) return throw_wrong_arguments("addattribute", count, 1, 3, 1);
   if (count <= 1) return (self->t_addattribute(a0), null);
@@ -15511,10 +14515,7 @@ Variant c_SimpleXMLElement::ifa_count(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("count", 0, 1);
   return (self->t_count());
@@ -15525,10 +14526,7 @@ Variant c_SimpleXMLElement::ifa___tostring(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
   return (self->t___tostring());
@@ -15539,10 +14537,7 @@ Variant c_SimpleXMLElement::ifa_xpath(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("xpath", count, 1, 1, 1);
   return (self->t_xpath(a0));
@@ -15553,10 +14548,7 @@ Variant c_SimpleXMLElement::ifa___destruct(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -15567,10 +14559,7 @@ Variant c_SimpleXMLElement::ifa___set(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   return (self->t___set(a0, a1));
@@ -15581,10 +14570,7 @@ Variant c_SimpleXMLElement::ifa___construct(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 5) return throw_wrong_arguments("__construct", count, 1, 5, 1);
   if (count <= 1) return (self->t___construct(a0), null);
@@ -15599,10 +14585,7 @@ Variant c_SimpleXMLElement::ifa_offsetexists(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("offsetexists", count, 1, 1, 1);
   return (self->t_offsetexists(a0));
@@ -15613,10 +14596,7 @@ Variant c_SimpleXMLElement::ifa_getiterator(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
   return (self->t_getiterator());
@@ -15627,10 +14607,7 @@ Variant c_SimpleXMLElement::ifa_registerxpathnamespace(MethodCallPackage &mcp, i
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("registerxpathnamespace", count, 2, 2, 1);
   return (self->t_registerxpathnamespace(a0, a1));
@@ -15641,10 +14618,7 @@ Variant c_SimpleXMLElement::ifa_offsetget(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("offsetget", count, 1, 1, 1);
   return (self->t_offsetget(a0));
@@ -15655,10 +14629,7 @@ Variant c_SimpleXMLElement::ifa_getnamespaces(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("getnamespaces", 1, 1);
   if (count <= 0) return (self->t_getnamespaces());
@@ -15670,10 +14641,7 @@ Variant c_SimpleXMLElement::ifa___unset(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__unset", count, 1, 1, 1);
   return (self->t___unset(a0));
@@ -15684,10 +14652,7 @@ Variant c_SimpleXMLElement::ifa_asxml(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("asxml", 1, 1);
   if (count <= 0) return (self->t_asxml());
@@ -15699,10 +14664,7 @@ Variant c_SimpleXMLElement::ifa_getdocnamespaces(MethodCallPackage &mcp, int cou
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("getdocnamespaces", 1, 1);
   if (count <= 0) return (self->t_getdocnamespaces());
@@ -15714,10 +14676,7 @@ Variant c_SimpleXMLElement::ifa_offsetunset(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("offsetunset", count, 1, 1, 1);
   return (self->t_offsetunset(a0), null);
@@ -15728,10 +14687,7 @@ Variant c_SimpleXMLElement::ifa___get(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   return (self->t___get(a0));
@@ -15742,10 +14698,7 @@ Variant c_SimpleXMLElement::ifa_children(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("children", 2, 1);
   if (count <= 0) return (self->t_children());
@@ -15758,10 +14711,7 @@ Variant c_SimpleXMLElement::ifa_addchild(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 3) return throw_wrong_arguments("addchild", count, 1, 3, 1);
   if (count <= 1) return (self->t_addchild(a0));
@@ -15774,10 +14724,7 @@ Variant c_SimpleXMLElement::ifa___isset(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
   return (self->t___isset(a0));
@@ -15788,10 +14735,7 @@ Variant c_SimpleXMLElement::ifa_getname(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getname", 0, 1);
   return (self->t_getname());
@@ -15802,10 +14746,7 @@ Variant c_SimpleXMLElement::ifa_attributes(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("attributes", 2, 1);
   if (count <= 0) return (self->t_attributes());
@@ -15818,10 +14759,7 @@ Variant c_SimpleXMLElement::ifa_offsetset(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_SimpleXMLElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SimpleXMLElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("offsetset", count, 2, 2, 1);
   return (self->t_offsetset(a0, a1), null);
@@ -16913,10 +15851,7 @@ Variant c_Memcache::i_addserver(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 9) return throw_wrong_arguments("addserver", count, 1, 9, 1);
   {
@@ -16949,10 +15884,7 @@ Variant c_Memcache::i_set(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 4) return throw_wrong_arguments("set", count, 2, 4, 1);
   {
@@ -16974,10 +15906,7 @@ Variant c_Memcache::i_setserverparams(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 6) return throw_wrong_arguments("setserverparams", count, 1, 6, 1);
   {
@@ -17004,10 +15933,7 @@ Variant c_Memcache::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -17019,10 +15945,7 @@ Variant c_Memcache::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -17034,10 +15957,7 @@ Variant c_Memcache::i_increment(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("increment", count, 1, 2, 1);
   {
@@ -17056,10 +15976,7 @@ Variant c_Memcache::i_decrement(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("decrement", count, 1, 2, 1);
   {
@@ -17078,10 +15995,7 @@ Variant c_Memcache::i_getstats(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("getstats", 3, 1);
   {
@@ -17103,10 +16017,7 @@ Variant c_Memcache::i_getserverstatus(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("getserverstatus", count, 1, 2, 1);
   {
@@ -17125,10 +16036,7 @@ Variant c_Memcache::i_close(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("close", 0, 1);
   return (self->t_close());
@@ -17140,10 +16048,7 @@ Variant c_Memcache::i_setoptimeout(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setoptimeout", count, 1, 1, 1);
   {
@@ -17160,10 +16065,7 @@ Variant c_Memcache::i_setcompressthreshold(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("setcompressthreshold", count, 1, 2, 1);
   {
@@ -17182,10 +16084,7 @@ Variant c_Memcache::i_get(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("get", count, 1, 2, 1);
   const_cast<Array&>(params).escalate(true);
@@ -17205,10 +16104,7 @@ Variant c_Memcache::i_add(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 4) return throw_wrong_arguments("add", count, 2, 4, 1);
   {
@@ -17230,10 +16126,7 @@ Variant c_Memcache::i_pconnect(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 4) return throw_wrong_arguments("pconnect", count, 1, 4, 1);
   {
@@ -17256,10 +16149,7 @@ Variant c_Memcache::i_getversion(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getversion", 0, 1);
   return (self->t_getversion());
@@ -17271,10 +16161,7 @@ Variant c_Memcache::i_delete(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("delete", count, 1, 2, 1);
   {
@@ -17293,10 +16180,7 @@ Variant c_Memcache::i_connect(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 4) return throw_wrong_arguments("connect", count, 1, 4, 1);
   {
@@ -17319,10 +16203,7 @@ Variant c_Memcache::i_flush(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("flush", 1, 1);
   {
@@ -17340,10 +16221,7 @@ Variant c_Memcache::i_replace(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 4) return throw_wrong_arguments("replace", count, 2, 4, 1);
   {
@@ -17365,10 +16243,7 @@ Variant c_Memcache::i_getextendedstats(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("getextendedstats", 3, 1);
   {
@@ -17389,10 +16264,7 @@ Variant c_Memcache::ifa_addserver(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 9) return throw_wrong_arguments("addserver", count, 1, 9, 1);
   if (count <= 1) return (self->t_addserver(a0));
@@ -17408,10 +16280,7 @@ Variant c_Memcache::ifa_set(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_I
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 4) return throw_wrong_arguments("set", count, 2, 4, 1);
   if (count <= 2) return (self->t_set(a0, a1));
@@ -17424,10 +16293,7 @@ Variant c_Memcache::ifa_setserverparams(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 6) return throw_wrong_arguments("setserverparams", count, 1, 6, 1);
   if (count <= 1) return (self->t_setserverparams(a0));
@@ -17443,10 +16309,7 @@ Variant c_Memcache::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -17457,10 +16320,7 @@ Variant c_Memcache::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -17471,10 +16331,7 @@ Variant c_Memcache::ifa_increment(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("increment", count, 1, 2, 1);
   if (count <= 1) return (self->t_increment(a0));
@@ -17486,10 +16343,7 @@ Variant c_Memcache::ifa_decrement(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("decrement", count, 1, 2, 1);
   if (count <= 1) return (self->t_decrement(a0));
@@ -17501,10 +16355,7 @@ Variant c_Memcache::ifa_getstats(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("getstats", 3, 1);
   if (count <= 0) return (self->t_getstats());
@@ -17518,10 +16369,7 @@ Variant c_Memcache::ifa_getserverstatus(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("getserverstatus", count, 1, 2, 1);
   if (count <= 1) return (self->t_getserverstatus(a0));
@@ -17533,10 +16381,7 @@ Variant c_Memcache::ifa_close(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("close", 0, 1);
   return (self->t_close());
@@ -17547,10 +16392,7 @@ Variant c_Memcache::ifa_setoptimeout(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setoptimeout", count, 1, 1, 1);
   return (self->t_setoptimeout(a0));
@@ -17561,10 +16403,7 @@ Variant c_Memcache::ifa_setcompressthreshold(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("setcompressthreshold", count, 1, 2, 1);
   if (count <= 1) return (self->t_setcompressthreshold(a0));
@@ -17576,10 +16415,7 @@ Variant c_Memcache::ifa_get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_I
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("get", count, 1, 2, 1);
   if (count <= 1) return (self->t_get(a0));
@@ -17591,10 +16427,7 @@ Variant c_Memcache::ifa_add(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_I
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 4) return throw_wrong_arguments("add", count, 2, 4, 1);
   if (count <= 2) return (self->t_add(a0, a1));
@@ -17607,10 +16440,7 @@ Variant c_Memcache::ifa_pconnect(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 4) return throw_wrong_arguments("pconnect", count, 1, 4, 1);
   if (count <= 1) return (self->t_pconnect(a0));
@@ -17624,10 +16454,7 @@ Variant c_Memcache::ifa_getversion(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getversion", 0, 1);
   return (self->t_getversion());
@@ -17638,10 +16465,7 @@ Variant c_Memcache::ifa_delete(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("delete", count, 1, 2, 1);
   if (count <= 1) return (self->t_delete(a0));
@@ -17653,10 +16477,7 @@ Variant c_Memcache::ifa_connect(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 4) return throw_wrong_arguments("connect", count, 1, 4, 1);
   if (count <= 1) return (self->t_connect(a0));
@@ -17670,10 +16491,7 @@ Variant c_Memcache::ifa_flush(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("flush", 1, 1);
   if (count <= 0) return (self->t_flush());
@@ -17685,10 +16503,7 @@ Variant c_Memcache::ifa_replace(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 4) return throw_wrong_arguments("replace", count, 2, 4, 1);
   if (count <= 2) return (self->t_replace(a0, a1));
@@ -17701,10 +16516,7 @@ Variant c_Memcache::ifa_getextendedstats(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_Memcache*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Memcache)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("getextendedstats", 3, 1);
   if (count <= 0) return (self->t_getextendedstats());
@@ -18211,10 +17023,7 @@ Variant c_DOMProcessingInstruction::i___destruct(MethodCallPackage &mcp, CArrRef
   if (mcp.obj) {
     self = static_cast<c_DOMProcessingInstruction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMProcessingInstruction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -18226,10 +17035,7 @@ Variant c_DOMProcessingInstruction::i___set(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_DOMProcessingInstruction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMProcessingInstruction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   {
@@ -18247,10 +17053,7 @@ Variant c_DOMProcessingInstruction::i___construct(MethodCallPackage &mcp, CArrRe
   if (mcp.obj) {
     self = static_cast<c_DOMProcessingInstruction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMProcessingInstruction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
   {
@@ -18269,10 +17072,7 @@ Variant c_DOMProcessingInstruction::i___get(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_DOMProcessingInstruction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMProcessingInstruction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   {
@@ -18288,10 +17088,7 @@ Variant c_DOMProcessingInstruction::ifa___destruct(MethodCallPackage &mcp, int c
   if (mcp.obj) {
     self = static_cast<c_DOMProcessingInstruction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMProcessingInstruction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -18302,10 +17099,7 @@ Variant c_DOMProcessingInstruction::ifa___set(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_DOMProcessingInstruction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMProcessingInstruction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   return (self->t___set(a0, a1));
@@ -18316,10 +17110,7 @@ Variant c_DOMProcessingInstruction::ifa___construct(MethodCallPackage &mcp, int 
   if (mcp.obj) {
     self = static_cast<c_DOMProcessingInstruction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMProcessingInstruction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
   if (count <= 1) return (self->t___construct(a0), null);
@@ -18331,10 +17122,7 @@ Variant c_DOMProcessingInstruction::ifa___get(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_DOMProcessingInstruction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMProcessingInstruction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   return (self->t___get(a0));
@@ -19112,10 +17900,7 @@ Variant c_PDOStatement::i_next(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("next", 0, 1);
   return (self->t_next());
@@ -19127,10 +17912,7 @@ Variant c_PDOStatement::i_errorcode(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
   return (self->t_errorcode());
@@ -19142,10 +17924,7 @@ Variant c_PDOStatement::i_getattribute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
   {
@@ -19162,10 +17941,7 @@ Variant c_PDOStatement::i_fetchcolumn(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("fetchcolumn", 1, 1);
   {
@@ -19183,10 +17959,7 @@ Variant c_PDOStatement::i_key(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("key", 0, 1);
   return (self->t_key());
@@ -19198,10 +17971,7 @@ Variant c_PDOStatement::i_getcolumnmeta(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getcolumnmeta", count, 1, 1, 1);
   {
@@ -19218,10 +17988,7 @@ Variant c_PDOStatement::i_valid(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("valid", 0, 1);
   return (self->t_valid());
@@ -19233,10 +18000,7 @@ Variant c_PDOStatement::i_nextrowset(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("nextrowset", 0, 1);
   return (self->t_nextrowset());
@@ -19248,10 +18012,7 @@ Variant c_PDOStatement::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -19263,10 +18024,7 @@ Variant c_PDOStatement::i___wakeup(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
   return (self->t___wakeup());
@@ -19278,10 +18036,7 @@ Variant c_PDOStatement::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -19293,10 +18048,7 @@ Variant c_PDOStatement::i_bindcolumn(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 5) return throw_wrong_arguments("bindcolumn", count, 2, 5, 1);
   const_cast<Array&>(params).escalate(true);
@@ -19321,10 +18073,7 @@ Variant c_PDOStatement::i_setfetchmode(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("setfetchmode", count+1, 1);
   {
@@ -19342,10 +18091,7 @@ Variant c_PDOStatement::i_columncount(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("columncount", 0, 1);
   return (self->t_columncount());
@@ -19357,10 +18103,7 @@ Variant c_PDOStatement::i_bindparam(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 5) return throw_wrong_arguments("bindparam", count, 2, 5, 1);
   const_cast<Array&>(params).escalate(true);
@@ -19385,10 +18128,7 @@ Variant c_PDOStatement::i_closecursor(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("closecursor", 0, 1);
   return (self->t_closecursor());
@@ -19400,10 +18140,7 @@ Variant c_PDOStatement::i_setattribute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
   {
@@ -19421,10 +18158,7 @@ Variant c_PDOStatement::i_rowcount(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("rowcount", 0, 1);
   return (self->t_rowcount());
@@ -19436,10 +18170,7 @@ Variant c_PDOStatement::i_execute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("execute", 1, 1);
   {
@@ -19457,10 +18188,7 @@ Variant c_PDOStatement::i_fetchobject(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("fetchobject", 2, 1);
   {
@@ -19480,10 +18208,7 @@ Variant c_PDOStatement::i_bindvalue(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
   {
@@ -19503,10 +18228,7 @@ Variant c_PDOStatement::i_fetchall(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("fetchall", 3, 1);
   {
@@ -19528,10 +18250,7 @@ Variant c_PDOStatement::i_fetch(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("fetch", 3, 1);
   {
@@ -19553,10 +18272,7 @@ Variant c_PDOStatement::i_current(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("current", 0, 1);
   return (self->t_current());
@@ -19568,10 +18284,7 @@ Variant c_PDOStatement::i_errorinfo(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
   return (self->t_errorinfo());
@@ -19583,10 +18296,7 @@ Variant c_PDOStatement::i___sleep(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
   return (self->t___sleep());
@@ -19598,10 +18308,7 @@ Variant c_PDOStatement::i_debugdumpparams(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("debugdumpparams", 0, 1);
   return (self->t_debugdumpparams());
@@ -19613,10 +18320,7 @@ Variant c_PDOStatement::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
   return (self->t_rewind());
@@ -19627,10 +18331,7 @@ Variant c_PDOStatement::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("next", 0, 1);
   return (self->t_next());
@@ -19641,10 +18342,7 @@ Variant c_PDOStatement::ifa_errorcode(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
   return (self->t_errorcode());
@@ -19655,10 +18353,7 @@ Variant c_PDOStatement::ifa_getattribute(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
   return (self->t_getattribute(a0));
@@ -19669,10 +18364,7 @@ Variant c_PDOStatement::ifa_fetchcolumn(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("fetchcolumn", 1, 1);
   if (count <= 0) return (self->t_fetchcolumn());
@@ -19684,10 +18376,7 @@ Variant c_PDOStatement::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("key", 0, 1);
   return (self->t_key());
@@ -19698,10 +18387,7 @@ Variant c_PDOStatement::ifa_getcolumnmeta(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getcolumnmeta", count, 1, 1, 1);
   return (self->t_getcolumnmeta(a0));
@@ -19712,10 +18398,7 @@ Variant c_PDOStatement::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("valid", 0, 1);
   return (self->t_valid());
@@ -19726,10 +18409,7 @@ Variant c_PDOStatement::ifa_nextrowset(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("nextrowset", 0, 1);
   return (self->t_nextrowset());
@@ -19740,10 +18420,7 @@ Variant c_PDOStatement::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -19754,10 +18431,7 @@ Variant c_PDOStatement::ifa___wakeup(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
   return (self->t___wakeup());
@@ -19768,10 +18442,7 @@ Variant c_PDOStatement::ifa___construct(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -19782,10 +18453,7 @@ Variant c_PDOStatement::ifa_bindcolumn(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 5) return throw_wrong_arguments("bindcolumn", count, 2, 5, 1);
   if (count <= 2) return (self->t_bindcolumn(a0, ref(a1)));
@@ -19799,10 +18467,7 @@ Variant c_PDOStatement::ifa_setfetchmode(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("setfetchmode", count+1, 1);
   if (count <= 1) return (self->t_setfetchmode(count, a0));
@@ -19820,10 +18485,7 @@ Variant c_PDOStatement::ifa_columncount(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("columncount", 0, 1);
   return (self->t_columncount());
@@ -19834,10 +18496,7 @@ Variant c_PDOStatement::ifa_bindparam(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 5) return throw_wrong_arguments("bindparam", count, 2, 5, 1);
   if (count <= 2) return (self->t_bindparam(a0, ref(a1)));
@@ -19851,10 +18510,7 @@ Variant c_PDOStatement::ifa_closecursor(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("closecursor", 0, 1);
   return (self->t_closecursor());
@@ -19865,10 +18521,7 @@ Variant c_PDOStatement::ifa_setattribute(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
   return (self->t_setattribute(a0, a1));
@@ -19879,10 +18532,7 @@ Variant c_PDOStatement::ifa_rowcount(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("rowcount", 0, 1);
   return (self->t_rowcount());
@@ -19893,10 +18543,7 @@ Variant c_PDOStatement::ifa_execute(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("execute", 1, 1);
   if (count <= 0) return (self->t_execute());
@@ -19908,10 +18555,7 @@ Variant c_PDOStatement::ifa_fetchobject(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("fetchobject", 2, 1);
   if (count <= 0) return (self->t_fetchobject());
@@ -19924,10 +18568,7 @@ Variant c_PDOStatement::ifa_bindvalue(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
   if (count <= 2) return (self->t_bindvalue(a0, a1));
@@ -19939,10 +18580,7 @@ Variant c_PDOStatement::ifa_fetchall(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("fetchall", 3, 1);
   if (count <= 0) return (self->t_fetchall());
@@ -19956,10 +18594,7 @@ Variant c_PDOStatement::ifa_fetch(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("fetch", 3, 1);
   if (count <= 0) return (self->t_fetch());
@@ -19973,10 +18608,7 @@ Variant c_PDOStatement::ifa_current(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("current", 0, 1);
   return (self->t_current());
@@ -19987,10 +18619,7 @@ Variant c_PDOStatement::ifa_errorinfo(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
   return (self->t_errorinfo());
@@ -20001,10 +18630,7 @@ Variant c_PDOStatement::ifa___sleep(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
   return (self->t___sleep());
@@ -20015,10 +18641,7 @@ Variant c_PDOStatement::ifa_debugdumpparams(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("debugdumpparams", 0, 1);
   return (self->t_debugdumpparams());
@@ -20029,10 +18652,7 @@ Variant c_PDOStatement::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_PDOStatement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDOStatement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
   return (self->t_rewind());
@@ -20825,10 +19445,7 @@ Variant c_SoapClient::i___dorequest(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 4 || count > 5) return throw_wrong_arguments("__dorequest", count, 4, 5, 1);
   {
@@ -20850,10 +19467,7 @@ Variant c_SoapClient::i___getlastrequest(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__getlastrequest", 0, 1);
   return (self->t___getlastrequest());
@@ -20865,10 +19479,7 @@ Variant c_SoapClient::i___setsoapheaders(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("__setsoapheaders", 1, 1);
   {
@@ -20886,10 +19497,7 @@ Variant c_SoapClient::i___setcookie(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("__setcookie", count, 1, 2, 1);
   {
@@ -20908,10 +19516,7 @@ Variant c_SoapClient::i___soapcall(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 5) return throw_wrong_arguments("__soapcall", count, 2, 5, 1);
   const_cast<Array&>(params).escalate(true);
@@ -20936,10 +19541,7 @@ Variant c_SoapClient::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -20951,10 +19553,7 @@ Variant c_SoapClient::i___setlocation(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("__setlocation", 1, 1);
   {
@@ -20972,10 +19571,7 @@ Variant c_SoapClient::i___getlastrequestheaders(MethodCallPackage &mcp, CArrRef 
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__getlastrequestheaders", 0, 1);
   return (self->t___getlastrequestheaders());
@@ -20987,10 +19583,7 @@ Variant c_SoapClient::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
   {
@@ -21009,10 +19602,7 @@ Variant c_SoapClient::i___getfunctions(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__getfunctions", 0, 1);
   return (self->t___getfunctions());
@@ -21024,10 +19614,7 @@ Variant c_SoapClient::i___getlastresponseheaders(MethodCallPackage &mcp, CArrRef
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__getlastresponseheaders", 0, 1);
   return (self->t___getlastresponseheaders());
@@ -21039,10 +19626,7 @@ Variant c_SoapClient::i___getlastresponse(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__getlastresponse", 0, 1);
   return (self->t___getlastresponse());
@@ -21054,10 +19638,7 @@ Variant c_SoapClient::i___gettypes(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__gettypes", 0, 1);
   return (self->t___gettypes());
@@ -21069,10 +19650,7 @@ Variant c_SoapClient::i___call(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__call", count, 2, 2, 1);
   {
@@ -21089,10 +19667,7 @@ Variant c_SoapClient::ifa___dorequest(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 4 || count > 5) return throw_wrong_arguments("__dorequest", count, 4, 5, 1);
   if (count <= 4) return (self->t___dorequest(a0, a1, a2, a3));
@@ -21104,10 +19679,7 @@ Variant c_SoapClient::ifa___getlastrequest(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__getlastrequest", 0, 1);
   return (self->t___getlastrequest());
@@ -21118,10 +19690,7 @@ Variant c_SoapClient::ifa___setsoapheaders(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("__setsoapheaders", 1, 1);
   if (count <= 0) return (self->t___setsoapheaders());
@@ -21133,10 +19702,7 @@ Variant c_SoapClient::ifa___setcookie(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("__setcookie", count, 1, 2, 1);
   if (count <= 1) return (self->t___setcookie(a0));
@@ -21148,10 +19714,7 @@ Variant c_SoapClient::ifa___soapcall(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 5) return throw_wrong_arguments("__soapcall", count, 2, 5, 1);
   if (count <= 2) return (self->t___soapcall(a0, a1));
@@ -21165,10 +19728,7 @@ Variant c_SoapClient::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -21179,10 +19739,7 @@ Variant c_SoapClient::ifa___setlocation(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("__setlocation", 1, 1);
   if (count <= 0) return (self->t___setlocation());
@@ -21194,10 +19751,7 @@ Variant c_SoapClient::ifa___getlastrequestheaders(MethodCallPackage &mcp, int co
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__getlastrequestheaders", 0, 1);
   return (self->t___getlastrequestheaders());
@@ -21208,10 +19762,7 @@ Variant c_SoapClient::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
   if (count <= 1) return (self->t___construct(a0), null);
@@ -21223,10 +19774,7 @@ Variant c_SoapClient::ifa___getfunctions(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__getfunctions", 0, 1);
   return (self->t___getfunctions());
@@ -21237,10 +19785,7 @@ Variant c_SoapClient::ifa___getlastresponseheaders(MethodCallPackage &mcp, int c
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__getlastresponseheaders", 0, 1);
   return (self->t___getlastresponseheaders());
@@ -21251,10 +19796,7 @@ Variant c_SoapClient::ifa___getlastresponse(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__getlastresponse", 0, 1);
   return (self->t___getlastresponse());
@@ -21265,10 +19807,7 @@ Variant c_SoapClient::ifa___gettypes(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__gettypes", 0, 1);
   return (self->t___gettypes());
@@ -21279,10 +19818,7 @@ Variant c_SoapClient::ifa___call(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_SoapClient*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapClient)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__call", count, 2, 2, 1);
   return (self->t___call(a0, a1));
@@ -21669,10 +20205,7 @@ Variant c_SoapParam::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapParam*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapParam)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -21684,10 +20217,7 @@ Variant c_SoapParam::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapParam*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapParam)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
   {
@@ -21704,10 +20234,7 @@ Variant c_SoapParam::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_SoapParam*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapParam)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -21718,10 +20245,7 @@ Variant c_SoapParam::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_SoapParam*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapParam)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
   return (self->t___construct(a0, a1), null);
@@ -22157,10 +20681,7 @@ Variant c_DateTime::i_format(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("format", count, 1, 1, 1);
   {
@@ -22177,10 +20698,7 @@ Variant c_DateTime::i_setdate(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 3) return throw_wrong_arguments("setdate", count, 3, 3, 1);
   {
@@ -22199,10 +20717,7 @@ Variant c_DateTime::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -22214,10 +20729,7 @@ Variant c_DateTime::i_getoffset(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getoffset", 0, 1);
   return (self->t_getoffset());
@@ -22229,10 +20741,7 @@ Variant c_DateTime::i_settime(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("settime", count, 2, 3, 1);
   {
@@ -22252,10 +20761,7 @@ Variant c_DateTime::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
   {
@@ -22275,10 +20781,7 @@ Variant c_DateTime::i_gettimezone(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("gettimezone", 0, 1);
   return (self->t_gettimezone());
@@ -22290,10 +20793,7 @@ Variant c_DateTime::i_setisodate(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("setisodate", count, 2, 3, 1);
   {
@@ -22313,10 +20813,7 @@ Variant c_DateTime::i_settimezone(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("settimezone", count, 1, 1, 1);
   {
@@ -22333,10 +20830,7 @@ Variant c_DateTime::i_modify(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("modify", count, 1, 1, 1);
   {
@@ -22352,10 +20846,7 @@ Variant c_DateTime::ifa_format(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("format", count, 1, 1, 1);
   return (self->t_format(a0));
@@ -22366,10 +20857,7 @@ Variant c_DateTime::ifa_setdate(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 3) return throw_wrong_arguments("setdate", count, 3, 3, 1);
   return (self->t_setdate(a0, a1, a2));
@@ -22380,10 +20868,7 @@ Variant c_DateTime::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -22394,10 +20879,7 @@ Variant c_DateTime::ifa_getoffset(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getoffset", 0, 1);
   return (self->t_getoffset());
@@ -22408,10 +20890,7 @@ Variant c_DateTime::ifa_settime(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("settime", count, 2, 3, 1);
   if (count <= 2) return (self->t_settime(a0, a1));
@@ -22423,10 +20902,7 @@ Variant c_DateTime::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
   if (count <= 0) return (self->t___construct(), null);
@@ -22439,10 +20915,7 @@ Variant c_DateTime::ifa_gettimezone(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("gettimezone", 0, 1);
   return (self->t_gettimezone());
@@ -22453,10 +20926,7 @@ Variant c_DateTime::ifa_setisodate(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("setisodate", count, 2, 3, 1);
   if (count <= 2) return (self->t_setisodate(a0, a1));
@@ -22468,10 +20938,7 @@ Variant c_DateTime::ifa_settimezone(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("settimezone", count, 1, 1, 1);
   return (self->t_settimezone(a0));
@@ -22482,10 +20949,7 @@ Variant c_DateTime::ifa_modify(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   if (mcp.obj) {
     self = static_cast<c_DateTime*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DateTime)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("modify", count, 1, 1, 1);
   return (self->t_modify(a0));
@@ -23156,10 +21620,7 @@ Variant c_Collator::i_getattribute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
   {
@@ -23176,10 +21637,7 @@ Variant c_Collator::i_sortwithsortkeys(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("sortwithsortkeys", count, 1, 1, 1);
   const_cast<Array&>(params).escalate(true);
@@ -23197,10 +21655,7 @@ Variant c_Collator::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -23212,10 +21667,7 @@ Variant c_Collator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
   {
@@ -23232,10 +21684,7 @@ Variant c_Collator::i_sort(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("sort", count, 1, 2, 1);
   const_cast<Array&>(params).escalate(true);
@@ -23255,10 +21704,7 @@ Variant c_Collator::i_geterrorcode(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("geterrorcode", 0, 1);
   return (self->t_geterrorcode());
@@ -23270,10 +21716,7 @@ Variant c_Collator::i_getstrength(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getstrength", 0, 1);
   return (self->t_getstrength());
@@ -23285,10 +21728,7 @@ Variant c_Collator::i_asort(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("asort", count, 1, 2, 1);
   const_cast<Array&>(params).escalate(true);
@@ -23308,10 +21748,7 @@ Variant c_Collator::i_setstrength(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setstrength", count, 1, 1, 1);
   {
@@ -23344,10 +21781,7 @@ Variant c_Collator::i_setattribute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
   {
@@ -23365,10 +21799,7 @@ Variant c_Collator::i_getlocale(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("getlocale", 1, 1);
   {
@@ -23386,10 +21817,7 @@ Variant c_Collator::i_geterrormessage(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("geterrormessage", 0, 1);
   return (self->t_geterrormessage());
@@ -23401,10 +21829,7 @@ Variant c_Collator::i_compare(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("compare", count, 2, 2, 1);
   {
@@ -23421,10 +21846,7 @@ Variant c_Collator::ifa_getattribute(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
   return (self->t_getattribute(a0));
@@ -23435,10 +21857,7 @@ Variant c_Collator::ifa_sortwithsortkeys(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("sortwithsortkeys", count, 1, 1, 1);
   return (self->t_sortwithsortkeys(ref(a0)));
@@ -23449,10 +21868,7 @@ Variant c_Collator::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -23463,10 +21879,7 @@ Variant c_Collator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
   return (self->t___construct(a0), null);
@@ -23477,10 +21890,7 @@ Variant c_Collator::ifa_sort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("sort", count, 1, 2, 1);
   if (count <= 1) return (self->t_sort(ref(a0)));
@@ -23492,10 +21902,7 @@ Variant c_Collator::ifa_geterrorcode(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("geterrorcode", 0, 1);
   return (self->t_geterrorcode());
@@ -23506,10 +21913,7 @@ Variant c_Collator::ifa_getstrength(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getstrength", 0, 1);
   return (self->t_getstrength());
@@ -23520,10 +21924,7 @@ Variant c_Collator::ifa_asort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("asort", count, 1, 2, 1);
   if (count <= 1) return (self->t_asort(ref(a0)));
@@ -23535,10 +21936,7 @@ Variant c_Collator::ifa_setstrength(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setstrength", count, 1, 1, 1);
   return (self->t_setstrength(a0));
@@ -23559,10 +21957,7 @@ Variant c_Collator::ifa_setattribute(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
   return (self->t_setattribute(a0, a1));
@@ -23573,10 +21968,7 @@ Variant c_Collator::ifa_getlocale(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("getlocale", 1, 1);
   if (count <= 0) return (self->t_getlocale());
@@ -23588,10 +21980,7 @@ Variant c_Collator::ifa_geterrormessage(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("geterrormessage", 0, 1);
   return (self->t_geterrormessage());
@@ -23602,10 +21991,7 @@ Variant c_Collator::ifa_compare(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_Collator*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Collator)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("compare", count, 2, 2, 1);
   return (self->t_compare(a0, a1));
@@ -24521,10 +22907,7 @@ Variant c_PDO::i_errorcode(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
   return (self->t_errorcode());
@@ -24536,10 +22919,7 @@ Variant c_PDO::i_getattribute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
   {
@@ -24556,10 +22936,7 @@ Variant c_PDO::i_exec(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
   {
@@ -24576,10 +22953,7 @@ Variant c_PDO::i_lastinsertid(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("lastinsertid", 1, 1);
   {
@@ -24597,10 +22971,7 @@ Variant c_PDO::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -24612,10 +22983,7 @@ Variant c_PDO::i___wakeup(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
   return (self->t___wakeup());
@@ -24627,10 +22995,7 @@ Variant c_PDO::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 4) return throw_wrong_arguments("__construct", count, 1, 4, 1);
   {
@@ -24653,10 +23018,7 @@ Variant c_PDO::i_query(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
   {
@@ -24673,10 +23035,7 @@ Variant c_PDO::i_rollback(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("rollback", 0, 1);
   return (self->t_rollback());
@@ -24688,10 +23047,7 @@ Variant c_PDO::i_commit(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("commit", 0, 1);
   return (self->t_commit());
@@ -24714,10 +23070,7 @@ Variant c_PDO::i_quote(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("quote", count, 1, 2, 1);
   {
@@ -24736,10 +23089,7 @@ Variant c_PDO::i_setattribute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
   {
@@ -24757,10 +23107,7 @@ Variant c_PDO::i_begintransaction(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("begintransaction", 0, 1);
   return (self->t_begintransaction());
@@ -24772,10 +23119,7 @@ Variant c_PDO::i_prepare(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("prepare", count, 1, 2, 1);
   {
@@ -24794,10 +23138,7 @@ Variant c_PDO::i_errorinfo(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
   return (self->t_errorinfo());
@@ -24809,10 +23150,7 @@ Variant c_PDO::i___sleep(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
   return (self->t___sleep());
@@ -24823,10 +23161,7 @@ Variant c_PDO::ifa_errorcode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
   return (self->t_errorcode());
@@ -24837,10 +23172,7 @@ Variant c_PDO::ifa_getattribute(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
   return (self->t_getattribute(a0));
@@ -24851,10 +23183,7 @@ Variant c_PDO::ifa_exec(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
   return (self->t_exec(a0));
@@ -24865,10 +23194,7 @@ Variant c_PDO::ifa_lastinsertid(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("lastinsertid", 1, 1);
   if (count <= 0) return (self->t_lastinsertid());
@@ -24880,10 +23206,7 @@ Variant c_PDO::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -24894,10 +23217,7 @@ Variant c_PDO::ifa___wakeup(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_I
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
   return (self->t___wakeup());
@@ -24908,10 +23228,7 @@ Variant c_PDO::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 4) return throw_wrong_arguments("__construct", count, 1, 4, 1);
   if (count <= 1) return (self->t___construct(a0), null);
@@ -24925,10 +23242,7 @@ Variant c_PDO::ifa_query(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
   return (self->t_query(a0));
@@ -24939,10 +23253,7 @@ Variant c_PDO::ifa_rollback(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_I
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("rollback", 0, 1);
   return (self->t_rollback());
@@ -24953,10 +23264,7 @@ Variant c_PDO::ifa_commit(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMP
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("commit", 0, 1);
   return (self->t_commit());
@@ -24977,10 +23285,7 @@ Variant c_PDO::ifa_quote(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("quote", count, 1, 2, 1);
   if (count <= 1) return (self->t_quote(a0));
@@ -24992,10 +23297,7 @@ Variant c_PDO::ifa_setattribute(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
   return (self->t_setattribute(a0, a1));
@@ -25006,10 +23308,7 @@ Variant c_PDO::ifa_begintransaction(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("begintransaction", 0, 1);
   return (self->t_begintransaction());
@@ -25020,10 +23319,7 @@ Variant c_PDO::ifa_prepare(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IM
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("prepare", count, 1, 2, 1);
   if (count <= 1) return (self->t_prepare(a0));
@@ -25035,10 +23331,7 @@ Variant c_PDO::ifa_errorinfo(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
   return (self->t_errorinfo());
@@ -25049,10 +23342,7 @@ Variant c_PDO::ifa___sleep(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IM
   if (mcp.obj) {
     self = static_cast<c_PDO*>(mcp.obj);
   } else {
-    pobj = (NEW(c_PDO)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
   return (self->t___sleep());
@@ -25751,10 +24041,7 @@ Variant c_ImageSprite::i_addstring(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("addstring", count, 2, 3, 1);
   {
@@ -25774,10 +24061,7 @@ Variant c_ImageSprite::i_loaddims(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("loaddims", 1, 1);
   {
@@ -25795,10 +24079,7 @@ Variant c_ImageSprite::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -25810,10 +24091,7 @@ Variant c_ImageSprite::i_mapping(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("mapping", 0, 1);
   return (self->t_mapping());
@@ -25825,10 +24103,7 @@ Variant c_ImageSprite::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -25840,10 +24115,7 @@ Variant c_ImageSprite::i_css(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 4) return throw_wrong_arguments("css", count, 1, 4, 1);
   {
@@ -25866,10 +24138,7 @@ Variant c_ImageSprite::i_output(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("output", 3, 1);
   {
@@ -25891,10 +24160,7 @@ Variant c_ImageSprite::i_loadimages(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("loadimages", 1, 1);
   {
@@ -25912,10 +24178,7 @@ Variant c_ImageSprite::i_clear(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("clear", 1, 1);
   {
@@ -25933,10 +24196,7 @@ Variant c_ImageSprite::i_geterrors(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("geterrors", 0, 1);
   return (self->t_geterrors());
@@ -25948,10 +24208,7 @@ Variant c_ImageSprite::i_addurl(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 3) return throw_wrong_arguments("addurl", count, 1, 3, 1);
   {
@@ -25972,10 +24229,7 @@ Variant c_ImageSprite::i_addfile(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("addfile", count, 1, 2, 1);
   {
@@ -25993,10 +24247,7 @@ Variant c_ImageSprite::ifa_addstring(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("addstring", count, 2, 3, 1);
   if (count <= 2) return (self->t_addstring(a0, a1));
@@ -26008,10 +24259,7 @@ Variant c_ImageSprite::ifa_loaddims(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("loaddims", 1, 1);
   if (count <= 0) return (self->t_loaddims());
@@ -26023,10 +24271,7 @@ Variant c_ImageSprite::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -26037,10 +24282,7 @@ Variant c_ImageSprite::ifa_mapping(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("mapping", 0, 1);
   return (self->t_mapping());
@@ -26051,10 +24293,7 @@ Variant c_ImageSprite::ifa___construct(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -26065,10 +24304,7 @@ Variant c_ImageSprite::ifa_css(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 4) return throw_wrong_arguments("css", count, 1, 4, 1);
   if (count <= 1) return (self->t_css(a0));
@@ -26082,10 +24318,7 @@ Variant c_ImageSprite::ifa_output(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("output", 3, 1);
   if (count <= 0) return (self->t_output());
@@ -26099,10 +24332,7 @@ Variant c_ImageSprite::ifa_loadimages(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("loadimages", 1, 1);
   if (count <= 0) return (self->t_loadimages());
@@ -26114,10 +24344,7 @@ Variant c_ImageSprite::ifa_clear(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("clear", 1, 1);
   if (count <= 0) return (self->t_clear());
@@ -26129,10 +24356,7 @@ Variant c_ImageSprite::ifa_geterrors(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("geterrors", 0, 1);
   return (self->t_geterrors());
@@ -26143,10 +24367,7 @@ Variant c_ImageSprite::ifa_addurl(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 3) return throw_wrong_arguments("addurl", count, 1, 3, 1);
   if (count <= 1) return (self->t_addurl(a0));
@@ -26159,10 +24380,7 @@ Variant c_ImageSprite::ifa_addfile(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_ImageSprite*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ImageSprite)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("addfile", count, 1, 2, 1);
   if (count <= 1) return (self->t_addfile(a0));
@@ -26541,10 +24759,7 @@ Variant c_DOMEntity::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMEntity*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMEntity)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -26556,10 +24771,7 @@ Variant c_DOMEntity::i___set(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMEntity*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMEntity)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   {
@@ -26577,10 +24789,7 @@ Variant c_DOMEntity::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMEntity*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMEntity)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -26592,10 +24801,7 @@ Variant c_DOMEntity::i___get(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMEntity*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMEntity)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   {
@@ -26611,10 +24817,7 @@ Variant c_DOMEntity::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DOMEntity*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMEntity)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -26625,10 +24828,7 @@ Variant c_DOMEntity::ifa___set(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   if (mcp.obj) {
     self = static_cast<c_DOMEntity*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMEntity)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   return (self->t___set(a0, a1));
@@ -26639,10 +24839,7 @@ Variant c_DOMEntity::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_DOMEntity*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMEntity)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -26653,10 +24850,7 @@ Variant c_DOMEntity::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   if (mcp.obj) {
     self = static_cast<c_DOMEntity*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMEntity)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   return (self->t___get(a0));
@@ -27754,10 +25948,7 @@ Variant c_XMLWriter::i_writeelementns(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 3 || count > 4) return throw_wrong_arguments("writeelementns", count, 3, 4, 1);
   {
@@ -27778,10 +25969,7 @@ Variant c_XMLWriter::i_outputmemory(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("outputmemory", 1, 1);
   {
@@ -27799,10 +25987,7 @@ Variant c_XMLWriter::i_enddtdattlist(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("enddtdattlist", 0, 1);
   return (self->t_enddtdattlist());
@@ -27814,10 +25999,7 @@ Variant c_XMLWriter::i_fullendelement(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("fullendelement", 0, 1);
   return (self->t_fullendelement());
@@ -27829,10 +26011,7 @@ Variant c_XMLWriter::i_startdocument(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("startdocument", 3, 1);
   {
@@ -27854,10 +26033,7 @@ Variant c_XMLWriter::i_startdtdentity(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("startdtdentity", count, 2, 2, 1);
   {
@@ -27875,10 +26051,7 @@ Variant c_XMLWriter::i_endcdata(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("endcdata", 0, 1);
   return (self->t_endcdata());
@@ -27890,10 +26063,7 @@ Variant c_XMLWriter::i_writecomment(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("writecomment", count, 1, 1, 1);
   {
@@ -27910,10 +26080,7 @@ Variant c_XMLWriter::i_writeattribute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("writeattribute", count, 2, 2, 1);
   {
@@ -27931,10 +26098,7 @@ Variant c_XMLWriter::i_endcomment(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("endcomment", 0, 1);
   return (self->t_endcomment());
@@ -27946,10 +26110,7 @@ Variant c_XMLWriter::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -27961,10 +26122,7 @@ Variant c_XMLWriter::i_writedtd(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 4) return throw_wrong_arguments("writedtd", count, 1, 4, 1);
   {
@@ -27987,10 +26145,7 @@ Variant c_XMLWriter::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -28002,10 +26157,7 @@ Variant c_XMLWriter::i_enddtdentity(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("enddtdentity", 0, 1);
   return (self->t_enddtdentity());
@@ -28017,10 +26169,7 @@ Variant c_XMLWriter::i_startattributens(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 3) return throw_wrong_arguments("startattributens", count, 3, 3, 1);
   {
@@ -28039,10 +26188,7 @@ Variant c_XMLWriter::i_startelement(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("startelement", count, 1, 1, 1);
   {
@@ -28059,10 +26205,7 @@ Variant c_XMLWriter::i_startelementns(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 3) return throw_wrong_arguments("startelementns", count, 3, 3, 1);
   {
@@ -28081,10 +26224,7 @@ Variant c_XMLWriter::i_startdtdelement(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("startdtdelement", count, 1, 1, 1);
   {
@@ -28101,10 +26241,7 @@ Variant c_XMLWriter::i_enddocument(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("enddocument", 0, 1);
   return (self->t_enddocument());
@@ -28116,10 +26253,7 @@ Variant c_XMLWriter::i_writecdata(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("writecdata", count, 1, 1, 1);
   {
@@ -28136,10 +26270,7 @@ Variant c_XMLWriter::i_writedtdelement(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("writedtdelement", count, 2, 2, 1);
   {
@@ -28157,10 +26288,7 @@ Variant c_XMLWriter::i_writeattributens(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 4) return throw_wrong_arguments("writeattributens", count, 4, 4, 1);
   {
@@ -28180,10 +26308,7 @@ Variant c_XMLWriter::i_writepi(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("writepi", count, 2, 2, 1);
   {
@@ -28201,10 +26326,7 @@ Variant c_XMLWriter::i_setindentstring(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setindentstring", count, 1, 1, 1);
   {
@@ -28221,10 +26343,7 @@ Variant c_XMLWriter::i_startattribute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("startattribute", count, 1, 1, 1);
   {
@@ -28241,10 +26360,7 @@ Variant c_XMLWriter::i_writeelement(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("writeelement", count, 1, 2, 1);
   {
@@ -28263,10 +26379,7 @@ Variant c_XMLWriter::i_endelement(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("endelement", 0, 1);
   return (self->t_endelement());
@@ -28278,10 +26391,7 @@ Variant c_XMLWriter::i_writeraw(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("writeraw", count, 1, 1, 1);
   {
@@ -28298,10 +26408,7 @@ Variant c_XMLWriter::i_writedtdentity(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 6) return throw_wrong_arguments("writedtdentity", count, 2, 6, 1);
   {
@@ -28327,10 +26434,7 @@ Variant c_XMLWriter::i_endpi(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("endpi", 0, 1);
   return (self->t_endpi());
@@ -28342,10 +26446,7 @@ Variant c_XMLWriter::i_startdtd(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 3) return throw_wrong_arguments("startdtd", count, 1, 3, 1);
   {
@@ -28366,10 +26467,7 @@ Variant c_XMLWriter::i_setindent(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setindent", count, 1, 1, 1);
   {
@@ -28386,10 +26484,7 @@ Variant c_XMLWriter::i_enddtdelement(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("enddtdelement", 0, 1);
   return (self->t_enddtdelement());
@@ -28401,10 +26496,7 @@ Variant c_XMLWriter::i_startdtdattlist(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("startdtdattlist", count, 1, 1, 1);
   {
@@ -28421,10 +26513,7 @@ Variant c_XMLWriter::i_startcdata(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("startcdata", 0, 1);
   return (self->t_startcdata());
@@ -28436,10 +26525,7 @@ Variant c_XMLWriter::i_writedtdattlist(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("writedtdattlist", count, 2, 2, 1);
   {
@@ -28457,10 +26543,7 @@ Variant c_XMLWriter::i_enddtd(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("enddtd", 0, 1);
   return (self->t_enddtd());
@@ -28472,10 +26555,7 @@ Variant c_XMLWriter::i_openuri(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("openuri", count, 1, 1, 1);
   {
@@ -28492,10 +26572,7 @@ Variant c_XMLWriter::i_openmemory(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("openmemory", 0, 1);
   return (self->t_openmemory());
@@ -28507,10 +26584,7 @@ Variant c_XMLWriter::i_endattribute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("endattribute", 0, 1);
   return (self->t_endattribute());
@@ -28522,10 +26596,7 @@ Variant c_XMLWriter::i_startpi(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("startpi", count, 1, 1, 1);
   {
@@ -28542,10 +26613,7 @@ Variant c_XMLWriter::i_text(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("text", count, 1, 1, 1);
   {
@@ -28562,10 +26630,7 @@ Variant c_XMLWriter::i_flush(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("flush", 1, 1);
   {
@@ -28583,10 +26648,7 @@ Variant c_XMLWriter::i_startcomment(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("startcomment", 0, 1);
   return (self->t_startcomment());
@@ -28597,10 +26659,7 @@ Variant c_XMLWriter::ifa_writeelementns(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 3 || count > 4) return throw_wrong_arguments("writeelementns", count, 3, 4, 1);
   if (count <= 3) return (self->t_writeelementns(a0, a1, a2));
@@ -28612,10 +26671,7 @@ Variant c_XMLWriter::ifa_outputmemory(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("outputmemory", 1, 1);
   if (count <= 0) return (self->t_outputmemory());
@@ -28627,10 +26683,7 @@ Variant c_XMLWriter::ifa_enddtdattlist(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("enddtdattlist", 0, 1);
   return (self->t_enddtdattlist());
@@ -28641,10 +26694,7 @@ Variant c_XMLWriter::ifa_fullendelement(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("fullendelement", 0, 1);
   return (self->t_fullendelement());
@@ -28655,10 +26705,7 @@ Variant c_XMLWriter::ifa_startdocument(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 3) return throw_toomany_arguments("startdocument", 3, 1);
   if (count <= 0) return (self->t_startdocument());
@@ -28672,10 +26719,7 @@ Variant c_XMLWriter::ifa_startdtdentity(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("startdtdentity", count, 2, 2, 1);
   return (self->t_startdtdentity(a0, a1));
@@ -28686,10 +26730,7 @@ Variant c_XMLWriter::ifa_endcdata(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("endcdata", 0, 1);
   return (self->t_endcdata());
@@ -28700,10 +26741,7 @@ Variant c_XMLWriter::ifa_writecomment(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("writecomment", count, 1, 1, 1);
   return (self->t_writecomment(a0));
@@ -28714,10 +26752,7 @@ Variant c_XMLWriter::ifa_writeattribute(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("writeattribute", count, 2, 2, 1);
   return (self->t_writeattribute(a0, a1));
@@ -28728,10 +26763,7 @@ Variant c_XMLWriter::ifa_endcomment(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("endcomment", 0, 1);
   return (self->t_endcomment());
@@ -28742,10 +26774,7 @@ Variant c_XMLWriter::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -28756,10 +26785,7 @@ Variant c_XMLWriter::ifa_writedtd(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 4) return throw_wrong_arguments("writedtd", count, 1, 4, 1);
   if (count <= 1) return (self->t_writedtd(a0));
@@ -28773,10 +26799,7 @@ Variant c_XMLWriter::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -28787,10 +26810,7 @@ Variant c_XMLWriter::ifa_enddtdentity(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("enddtdentity", 0, 1);
   return (self->t_enddtdentity());
@@ -28801,10 +26821,7 @@ Variant c_XMLWriter::ifa_startattributens(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 3) return throw_wrong_arguments("startattributens", count, 3, 3, 1);
   return (self->t_startattributens(a0, a1, a2));
@@ -28815,10 +26832,7 @@ Variant c_XMLWriter::ifa_startelement(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("startelement", count, 1, 1, 1);
   return (self->t_startelement(a0));
@@ -28829,10 +26843,7 @@ Variant c_XMLWriter::ifa_startelementns(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 3) return throw_wrong_arguments("startelementns", count, 3, 3, 1);
   return (self->t_startelementns(a0, a1, a2));
@@ -28843,10 +26854,7 @@ Variant c_XMLWriter::ifa_startdtdelement(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("startdtdelement", count, 1, 1, 1);
   return (self->t_startdtdelement(a0));
@@ -28857,10 +26865,7 @@ Variant c_XMLWriter::ifa_enddocument(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("enddocument", 0, 1);
   return (self->t_enddocument());
@@ -28871,10 +26876,7 @@ Variant c_XMLWriter::ifa_writecdata(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("writecdata", count, 1, 1, 1);
   return (self->t_writecdata(a0));
@@ -28885,10 +26887,7 @@ Variant c_XMLWriter::ifa_writedtdelement(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("writedtdelement", count, 2, 2, 1);
   return (self->t_writedtdelement(a0, a1));
@@ -28899,10 +26898,7 @@ Variant c_XMLWriter::ifa_writeattributens(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 4) return throw_wrong_arguments("writeattributens", count, 4, 4, 1);
   return (self->t_writeattributens(a0, a1, a2, a3));
@@ -28913,10 +26909,7 @@ Variant c_XMLWriter::ifa_writepi(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("writepi", count, 2, 2, 1);
   return (self->t_writepi(a0, a1));
@@ -28927,10 +26920,7 @@ Variant c_XMLWriter::ifa_setindentstring(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setindentstring", count, 1, 1, 1);
   return (self->t_setindentstring(a0));
@@ -28941,10 +26931,7 @@ Variant c_XMLWriter::ifa_startattribute(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("startattribute", count, 1, 1, 1);
   return (self->t_startattribute(a0));
@@ -28955,10 +26942,7 @@ Variant c_XMLWriter::ifa_writeelement(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("writeelement", count, 1, 2, 1);
   if (count <= 1) return (self->t_writeelement(a0));
@@ -28970,10 +26954,7 @@ Variant c_XMLWriter::ifa_endelement(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("endelement", 0, 1);
   return (self->t_endelement());
@@ -28984,10 +26965,7 @@ Variant c_XMLWriter::ifa_writeraw(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("writeraw", count, 1, 1, 1);
   return (self->t_writeraw(a0));
@@ -28998,10 +26976,7 @@ Variant c_XMLWriter::ifa_writedtdentity(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 6) return throw_wrong_arguments("writedtdentity", count, 2, 6, 1);
   if (count <= 2) return (self->t_writedtdentity(a0, a1));
@@ -29016,10 +26991,7 @@ Variant c_XMLWriter::ifa_endpi(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("endpi", 0, 1);
   return (self->t_endpi());
@@ -29030,10 +27002,7 @@ Variant c_XMLWriter::ifa_startdtd(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 3) return throw_wrong_arguments("startdtd", count, 1, 3, 1);
   if (count <= 1) return (self->t_startdtd(a0));
@@ -29046,10 +27015,7 @@ Variant c_XMLWriter::ifa_setindent(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setindent", count, 1, 1, 1);
   return (self->t_setindent(a0));
@@ -29060,10 +27026,7 @@ Variant c_XMLWriter::ifa_enddtdelement(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("enddtdelement", 0, 1);
   return (self->t_enddtdelement());
@@ -29074,10 +27037,7 @@ Variant c_XMLWriter::ifa_startdtdattlist(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("startdtdattlist", count, 1, 1, 1);
   return (self->t_startdtdattlist(a0));
@@ -29088,10 +27048,7 @@ Variant c_XMLWriter::ifa_startcdata(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("startcdata", 0, 1);
   return (self->t_startcdata());
@@ -29102,10 +27059,7 @@ Variant c_XMLWriter::ifa_writedtdattlist(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("writedtdattlist", count, 2, 2, 1);
   return (self->t_writedtdattlist(a0, a1));
@@ -29116,10 +27070,7 @@ Variant c_XMLWriter::ifa_enddtd(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("enddtd", 0, 1);
   return (self->t_enddtd());
@@ -29130,10 +27081,7 @@ Variant c_XMLWriter::ifa_openuri(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("openuri", count, 1, 1, 1);
   return (self->t_openuri(a0));
@@ -29144,10 +27092,7 @@ Variant c_XMLWriter::ifa_openmemory(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("openmemory", 0, 1);
   return (self->t_openmemory());
@@ -29158,10 +27103,7 @@ Variant c_XMLWriter::ifa_endattribute(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("endattribute", 0, 1);
   return (self->t_endattribute());
@@ -29172,10 +27114,7 @@ Variant c_XMLWriter::ifa_startpi(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("startpi", count, 1, 1, 1);
   return (self->t_startpi(a0));
@@ -29186,10 +27125,7 @@ Variant c_XMLWriter::ifa_text(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("text", count, 1, 1, 1);
   return (self->t_text(a0));
@@ -29200,10 +27136,7 @@ Variant c_XMLWriter::ifa_flush(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("flush", 1, 1);
   if (count <= 0) return (self->t_flush());
@@ -29215,10 +27148,7 @@ Variant c_XMLWriter::ifa_startcomment(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_XMLWriter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_XMLWriter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("startcomment", 0, 1);
   return (self->t_startcomment());
@@ -29972,10 +27902,7 @@ Variant c_DOMException::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMException*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMException)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -29987,10 +27914,7 @@ Variant c_DOMException::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMException*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMException)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
   {
@@ -30009,10 +27933,7 @@ Variant c_DOMException::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DOMException*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMException)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -30023,10 +27944,7 @@ Variant c_DOMException::ifa___construct(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_DOMException*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMException)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
   if (count <= 0) return (self->t___construct(), null);
@@ -30407,10 +28325,7 @@ Variant c_DOMXPath::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -30422,10 +28337,7 @@ Variant c_DOMXPath::i___set(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   {
@@ -30443,10 +28355,7 @@ Variant c_DOMXPath::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
   {
@@ -30463,10 +28372,7 @@ Variant c_DOMXPath::i_query(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("query", count, 1, 2, 1);
   {
@@ -30485,10 +28391,7 @@ Variant c_DOMXPath::i_evaluate(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("evaluate", count, 1, 2, 1);
   {
@@ -30507,10 +28410,7 @@ Variant c_DOMXPath::i_registerphpfunctions(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("registerphpfunctions", 1, 1);
   {
@@ -30528,10 +28428,7 @@ Variant c_DOMXPath::i___get(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   {
@@ -30548,10 +28445,7 @@ Variant c_DOMXPath::i_registernamespace(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("registernamespace", count, 2, 2, 1);
   {
@@ -30568,10 +28462,7 @@ Variant c_DOMXPath::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -30582,10 +28473,7 @@ Variant c_DOMXPath::ifa___set(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   return (self->t___set(a0, a1));
@@ -30596,10 +28484,7 @@ Variant c_DOMXPath::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
   return (self->t___construct(a0), null);
@@ -30610,10 +28495,7 @@ Variant c_DOMXPath::ifa_query(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("query", count, 1, 2, 1);
   if (count <= 1) return (self->t_query(a0));
@@ -30625,10 +28507,7 @@ Variant c_DOMXPath::ifa_evaluate(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("evaluate", count, 1, 2, 1);
   if (count <= 1) return (self->t_evaluate(a0));
@@ -30640,10 +28519,7 @@ Variant c_DOMXPath::ifa_registerphpfunctions(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("registerphpfunctions", 1, 1);
   if (count <= 0) return (self->t_registerphpfunctions());
@@ -30655,10 +28531,7 @@ Variant c_DOMXPath::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   return (self->t___get(a0));
@@ -30669,10 +28542,7 @@ Variant c_DOMXPath::ifa_registernamespace(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_DOMXPath*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMXPath)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("registernamespace", count, 2, 2, 1);
   return (self->t_registernamespace(a0, a1));
@@ -31145,10 +29015,7 @@ Variant c_SoapServer::i_addfunction(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("addfunction", count, 1, 1, 1);
   {
@@ -31165,10 +29032,7 @@ Variant c_SoapServer::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -31180,10 +29044,7 @@ Variant c_SoapServer::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
   {
@@ -31202,10 +29063,7 @@ Variant c_SoapServer::i_getfunctions(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getfunctions", 0, 1);
   return (self->t_getfunctions());
@@ -31217,10 +29075,7 @@ Variant c_SoapServer::i_addsoapheader(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("addsoapheader", count, 1, 1, 1);
   {
@@ -31237,10 +29092,7 @@ Variant c_SoapServer::i_setpersistence(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setpersistence", count, 1, 1, 1);
   {
@@ -31257,10 +29109,7 @@ Variant c_SoapServer::i_handle(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("handle", 1, 1);
   {
@@ -31278,10 +29127,7 @@ Variant c_SoapServer::i_setobject(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setobject", count, 1, 1, 1);
   {
@@ -31298,10 +29144,7 @@ Variant c_SoapServer::i_fault(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 5) return throw_wrong_arguments("fault", count, 2, 5, 1);
   {
@@ -31325,10 +29168,7 @@ Variant c_SoapServer::i_setclass(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("setclass", count+1, 1);
   {
@@ -31345,10 +29185,7 @@ Variant c_SoapServer::ifa_addfunction(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("addfunction", count, 1, 1, 1);
   return (self->t_addfunction(a0), null);
@@ -31359,10 +29196,7 @@ Variant c_SoapServer::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -31373,10 +29207,7 @@ Variant c_SoapServer::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
   if (count <= 1) return (self->t___construct(a0), null);
@@ -31388,10 +29219,7 @@ Variant c_SoapServer::ifa_getfunctions(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getfunctions", 0, 1);
   return (self->t_getfunctions());
@@ -31402,10 +29230,7 @@ Variant c_SoapServer::ifa_addsoapheader(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("addsoapheader", count, 1, 1, 1);
   return (self->t_addsoapheader(a0), null);
@@ -31416,10 +29241,7 @@ Variant c_SoapServer::ifa_setpersistence(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setpersistence", count, 1, 1, 1);
   return (self->t_setpersistence(a0), null);
@@ -31430,10 +29252,7 @@ Variant c_SoapServer::ifa_handle(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("handle", 1, 1);
   if (count <= 0) return (self->t_handle(), null);
@@ -31445,10 +29264,7 @@ Variant c_SoapServer::ifa_setobject(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setobject", count, 1, 1, 1);
   return (self->t_setobject(a0), null);
@@ -31459,10 +29275,7 @@ Variant c_SoapServer::ifa_fault(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 5) return throw_wrong_arguments("fault", count, 2, 5, 1);
   if (count <= 2) return (self->t_fault(a0, a1), null);
@@ -31476,10 +29289,7 @@ Variant c_SoapServer::ifa_setclass(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_SoapServer*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapServer)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("setclass", count+1, 1);
   if (count <= 1) return (self->t_setclass(count, a0), null);
@@ -32214,10 +30024,7 @@ Variant c_DOMNode::i_getlineno(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
   return (self->t_getlineno());
@@ -32229,10 +30036,7 @@ Variant c_DOMNode::i_insertbefore(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
   {
@@ -32251,10 +30055,7 @@ Variant c_DOMNode::i_isdefaultnamespace(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
   {
@@ -32271,10 +30072,7 @@ Variant c_DOMNode::i_lookupnamespaceuri(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
   {
@@ -32291,10 +30089,7 @@ Variant c_DOMNode::i_appendchild(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
   {
@@ -32311,10 +30106,7 @@ Variant c_DOMNode::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -32326,10 +30118,7 @@ Variant c_DOMNode::i___set(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   {
@@ -32347,10 +30136,7 @@ Variant c_DOMNode::i_clonenode(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
   {
@@ -32368,10 +30154,7 @@ Variant c_DOMNode::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -32383,10 +30166,7 @@ Variant c_DOMNode::i_replacechild(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
   {
@@ -32404,10 +30184,7 @@ Variant c_DOMNode::i_c14n(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
   {
@@ -32431,10 +30208,7 @@ Variant c_DOMNode::i_hasattributes(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
   return (self->t_hasattributes());
@@ -32446,10 +30220,7 @@ Variant c_DOMNode::i_lookupprefix(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
   {
@@ -32466,10 +30237,7 @@ Variant c_DOMNode::i_normalize(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
   return (self->t_normalize(), null);
@@ -32481,10 +30249,7 @@ Variant c_DOMNode::i_getnodepath(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
   return (self->t_getnodepath());
@@ -32496,10 +30261,7 @@ Variant c_DOMNode::i_c14nfile(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
   {
@@ -32524,10 +30286,7 @@ Variant c_DOMNode::i_issamenode(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
   {
@@ -32544,10 +30303,7 @@ Variant c_DOMNode::i_removechild(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
   {
@@ -32564,10 +30320,7 @@ Variant c_DOMNode::i___get(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   {
@@ -32584,10 +30337,7 @@ Variant c_DOMNode::i_issupported(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
   {
@@ -32605,10 +30355,7 @@ Variant c_DOMNode::i_haschildnodes(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
   return (self->t_haschildnodes());
@@ -32619,10 +30366,7 @@ Variant c_DOMNode::ifa_getlineno(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
   return (self->t_getlineno());
@@ -32633,10 +30377,7 @@ Variant c_DOMNode::ifa_insertbefore(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
   if (count <= 1) return (self->t_insertbefore(a0));
@@ -32648,10 +30389,7 @@ Variant c_DOMNode::ifa_isdefaultnamespace(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
   return (self->t_isdefaultnamespace(a0));
@@ -32662,10 +30400,7 @@ Variant c_DOMNode::ifa_lookupnamespaceuri(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
   return (self->t_lookupnamespaceuri(a0));
@@ -32676,10 +30411,7 @@ Variant c_DOMNode::ifa_appendchild(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
   return (self->t_appendchild(a0));
@@ -32690,10 +30422,7 @@ Variant c_DOMNode::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -32704,10 +30433,7 @@ Variant c_DOMNode::ifa___set(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   return (self->t___set(a0, a1));
@@ -32718,10 +30444,7 @@ Variant c_DOMNode::ifa_clonenode(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
   if (count <= 0) return (self->t_clonenode());
@@ -32733,10 +30456,7 @@ Variant c_DOMNode::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -32747,10 +30467,7 @@ Variant c_DOMNode::ifa_replacechild(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
   return (self->t_replacechild(a0, a1));
@@ -32761,10 +30478,7 @@ Variant c_DOMNode::ifa_c14n(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_I
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
   if (count <= 0) return (self->t_c14n());
@@ -32779,10 +30493,7 @@ Variant c_DOMNode::ifa_hasattributes(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
   return (self->t_hasattributes());
@@ -32793,10 +30504,7 @@ Variant c_DOMNode::ifa_lookupprefix(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
   return (self->t_lookupprefix(a0));
@@ -32807,10 +30515,7 @@ Variant c_DOMNode::ifa_normalize(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
   return (self->t_normalize(), null);
@@ -32821,10 +30526,7 @@ Variant c_DOMNode::ifa_getnodepath(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
   return (self->t_getnodepath());
@@ -32835,10 +30537,7 @@ Variant c_DOMNode::ifa_c14nfile(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
   if (count <= 1) return (self->t_c14nfile(a0));
@@ -32853,10 +30552,7 @@ Variant c_DOMNode::ifa_issamenode(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
   return (self->t_issamenode(a0));
@@ -32867,10 +30563,7 @@ Variant c_DOMNode::ifa_removechild(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
   return (self->t_removechild(a0));
@@ -32881,10 +30574,7 @@ Variant c_DOMNode::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   return (self->t___get(a0));
@@ -32895,10 +30585,7 @@ Variant c_DOMNode::ifa_issupported(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
   return (self->t_issupported(a0, a1));
@@ -32909,10 +30596,7 @@ Variant c_DOMNode::ifa_haschildnodes(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_DOMNode*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMNode)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
   return (self->t_haschildnodes());
@@ -34007,10 +31691,7 @@ Variant c_DOMDocument::i_getelementsbytagname(MethodCallPackage &mcp, CArrRef pa
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
   {
@@ -34027,10 +31708,7 @@ Variant c_DOMDocument::i_createcdatasection(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("createcdatasection", count, 1, 1, 1);
   {
@@ -34047,10 +31725,7 @@ Variant c_DOMDocument::i_validate(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("validate", 0, 1);
   return (self->t_validate());
@@ -34062,10 +31737,7 @@ Variant c_DOMDocument::i_getelementsbytagnamens(MethodCallPackage &mcp, CArrRef 
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
   {
@@ -34083,10 +31755,7 @@ Variant c_DOMDocument::i_schemavalidatesource(MethodCallPackage &mcp, CArrRef pa
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("schemavalidatesource", count, 1, 1, 1);
   {
@@ -34103,10 +31772,7 @@ Variant c_DOMDocument::i_relaxngvalidate(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("relaxngvalidate", count, 1, 1, 1);
   {
@@ -34123,10 +31789,7 @@ Variant c_DOMDocument::i_loadhtml(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("loadhtml", count, 1, 1, 1);
   {
@@ -34143,10 +31806,7 @@ Variant c_DOMDocument::i_createentityreference(MethodCallPackage &mcp, CArrRef p
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("createentityreference", count, 1, 1, 1);
   {
@@ -34163,10 +31823,7 @@ Variant c_DOMDocument::i_schemavalidate(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("schemavalidate", count, 1, 1, 1);
   {
@@ -34183,10 +31840,7 @@ Variant c_DOMDocument::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -34198,10 +31852,7 @@ Variant c_DOMDocument::i___set(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   {
@@ -34219,10 +31870,7 @@ Variant c_DOMDocument::i_savexml(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("savexml", 2, 1);
   {
@@ -34242,10 +31890,7 @@ Variant c_DOMDocument::i_createprocessinginstruction(MethodCallPackage &mcp, CAr
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("createprocessinginstruction", count, 1, 2, 1);
   {
@@ -34264,10 +31909,7 @@ Variant c_DOMDocument::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
   {
@@ -34287,10 +31929,7 @@ Variant c_DOMDocument::i_registernodeclass(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("registernodeclass", count, 2, 2, 1);
   {
@@ -34308,10 +31947,7 @@ Variant c_DOMDocument::i_load(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("load", count, 1, 2, 1);
   {
@@ -34330,10 +31966,7 @@ Variant c_DOMDocument::i_createattributens(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("createattributens", count, 2, 2, 1);
   {
@@ -34351,10 +31984,7 @@ Variant c_DOMDocument::i_createelement(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("createelement", count, 1, 2, 1);
   {
@@ -34373,10 +32003,7 @@ Variant c_DOMDocument::i_createelementns(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("createelementns", count, 2, 3, 1);
   {
@@ -34396,10 +32023,7 @@ Variant c_DOMDocument::i_importnode(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("importnode", count, 1, 2, 1);
   {
@@ -34418,10 +32042,7 @@ Variant c_DOMDocument::i_relaxngvalidatesource(MethodCallPackage &mcp, CArrRef p
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("relaxngvalidatesource", count, 1, 1, 1);
   {
@@ -34438,10 +32059,7 @@ Variant c_DOMDocument::i_createtextnode(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("createtextnode", count, 1, 1, 1);
   {
@@ -34458,10 +32076,7 @@ Variant c_DOMDocument::i_savehtml(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("savehtml", 0, 1);
   return (self->t_savehtml());
@@ -34473,10 +32088,7 @@ Variant c_DOMDocument::i_loadxml(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("loadxml", count, 1, 2, 1);
   {
@@ -34495,10 +32107,7 @@ Variant c_DOMDocument::i_save(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("save", count, 1, 2, 1);
   {
@@ -34517,10 +32126,7 @@ Variant c_DOMDocument::i_createattribute(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("createattribute", count, 1, 1, 1);
   {
@@ -34537,10 +32143,7 @@ Variant c_DOMDocument::i_xinclude(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("xinclude", 1, 1);
   {
@@ -34558,10 +32161,7 @@ Variant c_DOMDocument::i___get(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   {
@@ -34578,10 +32178,7 @@ Variant c_DOMDocument::i_loadhtmlfile(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("loadhtmlfile", count, 1, 1, 1);
   {
@@ -34598,10 +32195,7 @@ Variant c_DOMDocument::i_savehtmlfile(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("savehtmlfile", count, 1, 1, 1);
   {
@@ -34618,10 +32212,7 @@ Variant c_DOMDocument::i_getelementbyid(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getelementbyid", count, 1, 1, 1);
   {
@@ -34638,10 +32229,7 @@ Variant c_DOMDocument::i_createcomment(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("createcomment", count, 1, 1, 1);
   {
@@ -34658,10 +32246,7 @@ Variant c_DOMDocument::i_normalizedocument(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("normalizedocument", 0, 1);
   return (self->t_normalizedocument(), null);
@@ -34673,10 +32258,7 @@ Variant c_DOMDocument::i_createdocumentfragment(MethodCallPackage &mcp, CArrRef 
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("createdocumentfragment", 0, 1);
   return (self->t_createdocumentfragment());
@@ -34687,10 +32269,7 @@ Variant c_DOMDocument::ifa_getelementsbytagname(MethodCallPackage &mcp, int coun
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
   return (self->t_getelementsbytagname(a0));
@@ -34701,10 +32280,7 @@ Variant c_DOMDocument::ifa_createcdatasection(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("createcdatasection", count, 1, 1, 1);
   return (self->t_createcdatasection(a0));
@@ -34715,10 +32291,7 @@ Variant c_DOMDocument::ifa_validate(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("validate", 0, 1);
   return (self->t_validate());
@@ -34729,10 +32302,7 @@ Variant c_DOMDocument::ifa_getelementsbytagnamens(MethodCallPackage &mcp, int co
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
   return (self->t_getelementsbytagnamens(a0, a1));
@@ -34743,10 +32313,7 @@ Variant c_DOMDocument::ifa_schemavalidatesource(MethodCallPackage &mcp, int coun
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("schemavalidatesource", count, 1, 1, 1);
   return (self->t_schemavalidatesource(a0));
@@ -34757,10 +32324,7 @@ Variant c_DOMDocument::ifa_relaxngvalidate(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("relaxngvalidate", count, 1, 1, 1);
   return (self->t_relaxngvalidate(a0));
@@ -34771,10 +32335,7 @@ Variant c_DOMDocument::ifa_loadhtml(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("loadhtml", count, 1, 1, 1);
   return (self->t_loadhtml(a0));
@@ -34785,10 +32346,7 @@ Variant c_DOMDocument::ifa_createentityreference(MethodCallPackage &mcp, int cou
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("createentityreference", count, 1, 1, 1);
   return (self->t_createentityreference(a0));
@@ -34799,10 +32357,7 @@ Variant c_DOMDocument::ifa_schemavalidate(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("schemavalidate", count, 1, 1, 1);
   return (self->t_schemavalidate(a0));
@@ -34813,10 +32368,7 @@ Variant c_DOMDocument::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -34827,10 +32379,7 @@ Variant c_DOMDocument::ifa___set(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   return (self->t___set(a0, a1));
@@ -34841,10 +32390,7 @@ Variant c_DOMDocument::ifa_savexml(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("savexml", 2, 1);
   if (count <= 0) return (self->t_savexml());
@@ -34857,10 +32403,7 @@ Variant c_DOMDocument::ifa_createprocessinginstruction(MethodCallPackage &mcp, i
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("createprocessinginstruction", count, 1, 2, 1);
   if (count <= 1) return (self->t_createprocessinginstruction(a0));
@@ -34872,10 +32415,7 @@ Variant c_DOMDocument::ifa___construct(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
   if (count <= 0) return (self->t___construct(), null);
@@ -34888,10 +32428,7 @@ Variant c_DOMDocument::ifa_registernodeclass(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("registernodeclass", count, 2, 2, 1);
   return (self->t_registernodeclass(a0, a1));
@@ -34902,10 +32439,7 @@ Variant c_DOMDocument::ifa_load(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("load", count, 1, 2, 1);
   if (count <= 1) return (self->t_load(a0));
@@ -34917,10 +32451,7 @@ Variant c_DOMDocument::ifa_createattributens(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("createattributens", count, 2, 2, 1);
   return (self->t_createattributens(a0, a1));
@@ -34931,10 +32462,7 @@ Variant c_DOMDocument::ifa_createelement(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("createelement", count, 1, 2, 1);
   if (count <= 1) return (self->t_createelement(a0));
@@ -34946,10 +32474,7 @@ Variant c_DOMDocument::ifa_createelementns(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 3) return throw_wrong_arguments("createelementns", count, 2, 3, 1);
   if (count <= 2) return (self->t_createelementns(a0, a1));
@@ -34961,10 +32486,7 @@ Variant c_DOMDocument::ifa_importnode(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("importnode", count, 1, 2, 1);
   if (count <= 1) return (self->t_importnode(a0));
@@ -34976,10 +32498,7 @@ Variant c_DOMDocument::ifa_relaxngvalidatesource(MethodCallPackage &mcp, int cou
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("relaxngvalidatesource", count, 1, 1, 1);
   return (self->t_relaxngvalidatesource(a0));
@@ -34990,10 +32509,7 @@ Variant c_DOMDocument::ifa_createtextnode(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("createtextnode", count, 1, 1, 1);
   return (self->t_createtextnode(a0));
@@ -35004,10 +32520,7 @@ Variant c_DOMDocument::ifa_savehtml(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("savehtml", 0, 1);
   return (self->t_savehtml());
@@ -35018,10 +32531,7 @@ Variant c_DOMDocument::ifa_loadxml(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("loadxml", count, 1, 2, 1);
   if (count <= 1) return (self->t_loadxml(a0));
@@ -35033,10 +32543,7 @@ Variant c_DOMDocument::ifa_save(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("save", count, 1, 2, 1);
   if (count <= 1) return (self->t_save(a0));
@@ -35048,10 +32555,7 @@ Variant c_DOMDocument::ifa_createattribute(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("createattribute", count, 1, 1, 1);
   return (self->t_createattribute(a0));
@@ -35062,10 +32566,7 @@ Variant c_DOMDocument::ifa_xinclude(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("xinclude", 1, 1);
   if (count <= 0) return (self->t_xinclude());
@@ -35077,10 +32578,7 @@ Variant c_DOMDocument::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   return (self->t___get(a0));
@@ -35091,10 +32589,7 @@ Variant c_DOMDocument::ifa_loadhtmlfile(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("loadhtmlfile", count, 1, 1, 1);
   return (self->t_loadhtmlfile(a0));
@@ -35105,10 +32600,7 @@ Variant c_DOMDocument::ifa_savehtmlfile(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("savehtmlfile", count, 1, 1, 1);
   return (self->t_savehtmlfile(a0));
@@ -35119,10 +32611,7 @@ Variant c_DOMDocument::ifa_getelementbyid(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getelementbyid", count, 1, 1, 1);
   return (self->t_getelementbyid(a0));
@@ -35133,10 +32622,7 @@ Variant c_DOMDocument::ifa_createcomment(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("createcomment", count, 1, 1, 1);
   return (self->t_createcomment(a0));
@@ -35147,10 +32633,7 @@ Variant c_DOMDocument::ifa_normalizedocument(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("normalizedocument", 0, 1);
   return (self->t_normalizedocument(), null);
@@ -35161,10 +32644,7 @@ Variant c_DOMDocument::ifa_createdocumentfragment(MethodCallPackage &mcp, int co
   if (mcp.obj) {
     self = static_cast<c_DOMDocument*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMDocument)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("createdocumentfragment", 0, 1);
   return (self->t_createdocumentfragment());
@@ -35804,10 +33284,7 @@ Variant c_LibXMLError::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_LibXMLError*>(mcp.obj);
   } else {
-    pobj = (NEW(c_LibXMLError)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -35819,10 +33296,7 @@ Variant c_LibXMLError::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_LibXMLError*>(mcp.obj);
   } else {
-    pobj = (NEW(c_LibXMLError)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -35833,10 +33307,7 @@ Variant c_LibXMLError::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_LibXMLError*>(mcp.obj);
   } else {
-    pobj = (NEW(c_LibXMLError)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -35847,10 +33318,7 @@ Variant c_LibXMLError::ifa___construct(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_LibXMLError*>(mcp.obj);
   } else {
-    pobj = (NEW(c_LibXMLError)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
   return (self->t___construct(), null);
@@ -36099,10 +33567,7 @@ Variant c_SoapFault::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapFault*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapFault)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
   return (self->t___tostring());
@@ -36114,10 +33579,7 @@ Variant c_SoapFault::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapFault*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapFault)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -36129,10 +33591,7 @@ Variant c_SoapFault::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SoapFault*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapFault)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
   {
@@ -36157,10 +33616,7 @@ Variant c_SoapFault::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_SoapFault*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapFault)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
   return (self->t___tostring());
@@ -36171,10 +33627,7 @@ Variant c_SoapFault::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_SoapFault*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapFault)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -36185,10 +33638,7 @@ Variant c_SoapFault::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_SoapFault*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SoapFault)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
   if (count <= 2) return (self->t___construct(a0, a1), null);
@@ -36929,10 +34379,7 @@ Variant c_DOMElement::i_getelementsbytagname(MethodCallPackage &mcp, CArrRef par
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
   {
@@ -36949,10 +34396,7 @@ Variant c_DOMElement::i_setidattributens(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 3) return throw_wrong_arguments("setidattributens", count, 3, 3, 1);
   {
@@ -36971,10 +34415,7 @@ Variant c_DOMElement::i_getattribute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
   {
@@ -36991,10 +34432,7 @@ Variant c_DOMElement::i_getelementsbytagnamens(MethodCallPackage &mcp, CArrRef p
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
   {
@@ -37012,10 +34450,7 @@ Variant c_DOMElement::i_getattributenodens(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("getattributenodens", count, 2, 2, 1);
   {
@@ -37033,10 +34468,7 @@ Variant c_DOMElement::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -37048,10 +34480,7 @@ Variant c_DOMElement::i___set(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   {
@@ -37069,10 +34498,7 @@ Variant c_DOMElement::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 3) return throw_wrong_arguments("__construct", count, 1, 3, 1);
   {
@@ -37093,10 +34519,7 @@ Variant c_DOMElement::i_hasattribute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("hasattribute", count, 1, 1, 1);
   {
@@ -37113,10 +34536,7 @@ Variant c_DOMElement::i_hasattributens(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("hasattributens", count, 2, 2, 1);
   {
@@ -37134,10 +34554,7 @@ Variant c_DOMElement::i_setattributenodens(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setattributenodens", count, 1, 1, 1);
   {
@@ -37154,10 +34571,7 @@ Variant c_DOMElement::i_setattributens(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 3) return throw_wrong_arguments("setattributens", count, 3, 3, 1);
   {
@@ -37176,10 +34590,7 @@ Variant c_DOMElement::i_getattributens(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("getattributens", count, 2, 2, 1);
   {
@@ -37197,10 +34608,7 @@ Variant c_DOMElement::i_removeattributens(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("removeattributens", count, 2, 2, 1);
   {
@@ -37218,10 +34626,7 @@ Variant c_DOMElement::i_getattributenode(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getattributenode", count, 1, 1, 1);
   {
@@ -37238,10 +34643,7 @@ Variant c_DOMElement::i_setidattribute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("setidattribute", count, 2, 2, 1);
   {
@@ -37259,10 +34661,7 @@ Variant c_DOMElement::i_setidattributenode(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("setidattributenode", count, 2, 2, 1);
   {
@@ -37280,10 +34679,7 @@ Variant c_DOMElement::i_setattribute(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
   {
@@ -37301,10 +34697,7 @@ Variant c_DOMElement::i_removeattributenode(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("removeattributenode", count, 1, 1, 1);
   {
@@ -37321,10 +34714,7 @@ Variant c_DOMElement::i___get(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   {
@@ -37341,10 +34731,7 @@ Variant c_DOMElement::i_removeattribute(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("removeattribute", count, 1, 1, 1);
   {
@@ -37361,10 +34748,7 @@ Variant c_DOMElement::i_setattributenode(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setattributenode", count, 1, 1, 1);
   {
@@ -37380,10 +34764,7 @@ Variant c_DOMElement::ifa_getelementsbytagname(MethodCallPackage &mcp, int count
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
   return (self->t_getelementsbytagname(a0));
@@ -37394,10 +34775,7 @@ Variant c_DOMElement::ifa_setidattributens(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 3) return throw_wrong_arguments("setidattributens", count, 3, 3, 1);
   return (self->t_setidattributens(a0, a1, a2));
@@ -37408,10 +34786,7 @@ Variant c_DOMElement::ifa_getattribute(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
   return (self->t_getattribute(a0));
@@ -37422,10 +34797,7 @@ Variant c_DOMElement::ifa_getelementsbytagnamens(MethodCallPackage &mcp, int cou
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
   return (self->t_getelementsbytagnamens(a0, a1));
@@ -37436,10 +34808,7 @@ Variant c_DOMElement::ifa_getattributenodens(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("getattributenodens", count, 2, 2, 1);
   return (self->t_getattributenodens(a0, a1));
@@ -37450,10 +34819,7 @@ Variant c_DOMElement::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
   return (self->t___destruct());
@@ -37464,10 +34830,7 @@ Variant c_DOMElement::ifa___set(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
   return (self->t___set(a0, a1));
@@ -37478,10 +34841,7 @@ Variant c_DOMElement::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 3) return throw_wrong_arguments("__construct", count, 1, 3, 1);
   if (count <= 1) return (self->t___construct(a0), null);
@@ -37494,10 +34854,7 @@ Variant c_DOMElement::ifa_hasattribute(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("hasattribute", count, 1, 1, 1);
   return (self->t_hasattribute(a0));
@@ -37508,10 +34865,7 @@ Variant c_DOMElement::ifa_hasattributens(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("hasattributens", count, 2, 2, 1);
   return (self->t_hasattributens(a0, a1));
@@ -37522,10 +34876,7 @@ Variant c_DOMElement::ifa_setattributenodens(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setattributenodens", count, 1, 1, 1);
   return (self->t_setattributenodens(a0));
@@ -37536,10 +34887,7 @@ Variant c_DOMElement::ifa_setattributens(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 3) return throw_wrong_arguments("setattributens", count, 3, 3, 1);
   return (self->t_setattributens(a0, a1, a2));
@@ -37550,10 +34898,7 @@ Variant c_DOMElement::ifa_getattributens(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("getattributens", count, 2, 2, 1);
   return (self->t_getattributens(a0, a1));
@@ -37564,10 +34909,7 @@ Variant c_DOMElement::ifa_removeattributens(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("removeattributens", count, 2, 2, 1);
   return (self->t_removeattributens(a0, a1));
@@ -37578,10 +34920,7 @@ Variant c_DOMElement::ifa_getattributenode(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("getattributenode", count, 1, 1, 1);
   return (self->t_getattributenode(a0));
@@ -37592,10 +34931,7 @@ Variant c_DOMElement::ifa_setidattribute(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("setidattribute", count, 2, 2, 1);
   return (self->t_setidattribute(a0, a1));
@@ -37606,10 +34942,7 @@ Variant c_DOMElement::ifa_setidattributenode(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("setidattributenode", count, 2, 2, 1);
   return (self->t_setidattributenode(a0, a1));
@@ -37620,10 +34953,7 @@ Variant c_DOMElement::ifa_setattribute(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
   return (self->t_setattribute(a0, a1));
@@ -37634,10 +34964,7 @@ Variant c_DOMElement::ifa_removeattributenode(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("removeattributenode", count, 1, 1, 1);
   return (self->t_removeattributenode(a0));
@@ -37648,10 +34975,7 @@ Variant c_DOMElement::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
   return (self->t___get(a0));
@@ -37662,10 +34986,7 @@ Variant c_DOMElement::ifa_removeattribute(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("removeattribute", count, 1, 1, 1);
   return (self->t_removeattribute(a0));
@@ -37676,10 +34997,7 @@ Variant c_DOMElement::ifa_setattributenode(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_DOMElement*>(mcp.obj);
   } else {
-    pobj = (NEW(c_DOMElement)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("setattributenode", count, 1, 1, 1);
   return (self->t_setattributenode(a0));

@@ -201,10 +201,7 @@ Variant c_Directory::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Directory*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Directory)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
   {
@@ -221,10 +218,7 @@ Variant c_Directory::i_close(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Directory*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Directory)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
   return (self->t_close(), null);
@@ -236,10 +230,7 @@ Variant c_Directory::i_read(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Directory*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Directory)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
   return (self->t_read());
@@ -251,10 +242,7 @@ Variant c_Directory::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Directory*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Directory)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
   return (self->t_rewind(), null);
@@ -265,10 +253,7 @@ Variant c_Directory::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_Directory*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Directory)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
   return (self->t___construct(a0), null);
@@ -279,10 +264,7 @@ Variant c_Directory::ifa_close(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   if (mcp.obj) {
     self = static_cast<c_Directory*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Directory)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
   return (self->t_close(), null);
@@ -293,10 +275,7 @@ Variant c_Directory::ifa_read(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS
   if (mcp.obj) {
     self = static_cast<c_Directory*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Directory)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
   return (self->t_read());
@@ -307,10 +286,7 @@ Variant c_Directory::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   if (mcp.obj) {
     self = static_cast<c_Directory*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Directory)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
   return (self->t_rewind(), null);

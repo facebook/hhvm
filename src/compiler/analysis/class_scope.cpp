@@ -1358,10 +1358,7 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
       cg_indentEnd("");
       // Instance method called statically
       cg_indentBegin("} else {\n");
-      cg_printf("pobj = (NEW(%s%s)());\n", Option::ClassPrefix, id.c_str());
-      cg_printf("pobj->init();\n");
-      cg_printf("pobj->setDummy();\n");
-      cg_printf("self = pobj.get();\n");
+      cg_printf("self = createDummy(pobj);\n");
       cg_indentEnd("}\n");
     } else {
       // If rootObj is an object, was a static method invoked instance style.

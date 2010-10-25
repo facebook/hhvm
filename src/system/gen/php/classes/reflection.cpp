@@ -323,10 +323,7 @@ Variant c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters(MethodCall
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
   return (self->t_getnumberofrequiredparameters());
@@ -338,10 +335,7 @@ Variant c_ReflectionFunctionAbstract::i_isuserdefined(MethodCallPackage &mcp, CA
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
   return (self->t_isuserdefined());
@@ -353,10 +347,7 @@ Variant c_ReflectionFunctionAbstract::i_getnumberofparameters(MethodCallPackage 
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
   return (self->t_getnumberofparameters());
@@ -368,10 +359,7 @@ Variant c_ReflectionFunctionAbstract::i_getendline(MethodCallPackage &mcp, CArrR
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
   return (self->t_getendline());
@@ -383,10 +371,7 @@ Variant c_ReflectionFunctionAbstract::i_getstaticvariables(MethodCallPackage &mc
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
   return (self->t_getstaticvariables());
@@ -398,10 +383,7 @@ Variant c_ReflectionFunctionAbstract::i_getparameters(MethodCallPackage &mcp, CA
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
   return (self->t_getparameters());
@@ -413,10 +395,7 @@ Variant c_ReflectionFunctionAbstract::i_returnsreference(MethodCallPackage &mcp,
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
   return (self->t_returnsreference());
@@ -428,10 +407,7 @@ Variant c_ReflectionFunctionAbstract::i_getfilename(MethodCallPackage &mcp, CArr
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
   return (self->t_getfilename());
@@ -443,10 +419,7 @@ Variant c_ReflectionFunctionAbstract::i_getstartline(MethodCallPackage &mcp, CAr
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
   return (self->t_getstartline());
@@ -458,10 +431,7 @@ Variant c_ReflectionFunctionAbstract::i_getdoccomment(MethodCallPackage &mcp, CA
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
   return (self->t_getdoccomment());
@@ -473,10 +443,7 @@ Variant c_ReflectionFunctionAbstract::i_getclosure(MethodCallPackage &mcp, CArrR
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
   return (self->t_getclosure());
@@ -488,10 +455,7 @@ Variant c_ReflectionFunctionAbstract::i_getname(MethodCallPackage &mcp, CArrRef 
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
   return (self->t_getname());
@@ -503,10 +467,7 @@ Variant c_ReflectionFunctionAbstract::i_isinternal(MethodCallPackage &mcp, CArrR
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
   return (self->t_isinternal());
@@ -517,10 +478,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters(MethodCa
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
   return (self->t_getnumberofrequiredparameters());
@@ -531,10 +489,7 @@ Variant c_ReflectionFunctionAbstract::ifa_isuserdefined(MethodCallPackage &mcp, 
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
   return (self->t_isuserdefined());
@@ -545,10 +500,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getnumberofparameters(MethodCallPackag
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
   return (self->t_getnumberofparameters());
@@ -559,10 +511,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getendline(MethodCallPackage &mcp, int
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
   return (self->t_getendline());
@@ -573,10 +522,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getstaticvariables(MethodCallPackage &
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
   return (self->t_getstaticvariables());
@@ -587,10 +533,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getparameters(MethodCallPackage &mcp, 
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
   return (self->t_getparameters());
@@ -601,10 +544,7 @@ Variant c_ReflectionFunctionAbstract::ifa_returnsreference(MethodCallPackage &mc
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
   return (self->t_returnsreference());
@@ -615,10 +555,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getfilename(MethodCallPackage &mcp, in
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
   return (self->t_getfilename());
@@ -629,10 +566,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getstartline(MethodCallPackage &mcp, i
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
   return (self->t_getstartline());
@@ -643,10 +577,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getdoccomment(MethodCallPackage &mcp, 
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
   return (self->t_getdoccomment());
@@ -657,10 +588,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getclosure(MethodCallPackage &mcp, int
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
   return (self->t_getclosure());
@@ -671,10 +599,7 @@ Variant c_ReflectionFunctionAbstract::ifa_getname(MethodCallPackage &mcp, int co
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
   return (self->t_getname());
@@ -685,10 +610,7 @@ Variant c_ReflectionFunctionAbstract::ifa_isinternal(MethodCallPackage &mcp, int
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunctionAbstract)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
   return (self->t_isinternal());
@@ -2203,10 +2125,7 @@ Variant c_ReflectionClass::i_getmethods(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
   {
@@ -2224,10 +2143,7 @@ Variant c_ReflectionClass::i_isiterateable(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
   return (self->t_isiterateable());
@@ -2239,10 +2155,7 @@ Variant c_ReflectionClass::i_getstaticpropertyvalue(MethodCallPackage &mcp, CArr
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
   {
@@ -2261,10 +2174,7 @@ Variant c_ReflectionClass::i_isuserdefined(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
   return (self->t_isuserdefined());
@@ -2276,10 +2186,7 @@ Variant c_ReflectionClass::i_newinstance(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count <= 0) return (self->t_newinstance(count));
   return (self->t_newinstance(count,params.slice(0, count - 0, false)));
@@ -2291,10 +2198,7 @@ Variant c_ReflectionClass::i_getextension(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
   return (self->t_getextension());
@@ -2306,10 +2210,7 @@ Variant c_ReflectionClass::i_getconstructor(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
   return (self->t_getconstructor());
@@ -2321,10 +2222,7 @@ Variant c_ReflectionClass::i___tostring(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
   return (self->t___tostring());
@@ -2336,10 +2234,7 @@ Variant c_ReflectionClass::i_newinstanceargs(MethodCallPackage &mcp, CArrRef par
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
   {
@@ -2356,10 +2251,7 @@ Variant c_ReflectionClass::i_getendline(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
   return (self->t_getendline());
@@ -2371,10 +2263,7 @@ Variant c_ReflectionClass::i_isinstance(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
   {
@@ -2391,10 +2280,7 @@ Variant c_ReflectionClass::i_hasmethod(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
   {
@@ -2411,10 +2297,7 @@ Variant c_ReflectionClass::i___construct(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
   {
@@ -2431,10 +2314,7 @@ Variant c_ReflectionClass::i_isfinal(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
   return (self->t_isfinal());
@@ -2446,10 +2326,7 @@ Variant c_ReflectionClass::i_getmodifiers(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
   return (self->t_getmodifiers());
@@ -2478,10 +2355,7 @@ Variant c_ReflectionClass::i_getproperties(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
   return (self->t_getproperties());
@@ -2493,10 +2367,7 @@ Variant c_ReflectionClass::i_hasconstant(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
   {
@@ -2513,10 +2384,7 @@ Variant c_ReflectionClass::i_getmethod(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
   {
@@ -2533,10 +2401,7 @@ Variant c_ReflectionClass::i_getextensionname(MethodCallPackage &mcp, CArrRef pa
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
   return (self->t_getextensionname());
@@ -2548,10 +2413,7 @@ Variant c_ReflectionClass::i_getparentclass(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
   return (self->t_getparentclass());
@@ -2563,10 +2425,7 @@ Variant c_ReflectionClass::i_getfilename(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
   return (self->t_getfilename());
@@ -2578,10 +2437,7 @@ Variant c_ReflectionClass::i_implementsinterface(MethodCallPackage &mcp, CArrRef
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
   {
@@ -2598,10 +2454,7 @@ Variant c_ReflectionClass::i_getinterfacenames(MethodCallPackage &mcp, CArrRef p
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
   return (self->t_getinterfacenames());
@@ -2613,10 +2466,7 @@ Variant c_ReflectionClass::i_getconstant(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
   {
@@ -2633,10 +2483,7 @@ Variant c_ReflectionClass::i_getstartline(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
   return (self->t_getstartline());
@@ -2648,10 +2495,7 @@ Variant c_ReflectionClass::i_getconstants(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
   return (self->t_getconstants());
@@ -2663,10 +2507,7 @@ Variant c_ReflectionClass::i_getdoccomment(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
   return (self->t_getdoccomment());
@@ -2678,10 +2519,7 @@ Variant c_ReflectionClass::i_isinterface(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
   return (self->t_isinterface());
@@ -2693,10 +2531,7 @@ Variant c_ReflectionClass::i_issubclassof(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
   {
@@ -2713,10 +2548,7 @@ Variant c_ReflectionClass::i_hasproperty(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
   {
@@ -2733,10 +2565,7 @@ Variant c_ReflectionClass::i_getstaticproperties(MethodCallPackage &mcp, CArrRef
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
   return (self->t_getstaticproperties());
@@ -2748,10 +2577,7 @@ Variant c_ReflectionClass::i_test(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
   {
@@ -2769,10 +2595,7 @@ Variant c_ReflectionClass::i_getdefaultproperties(MethodCallPackage &mcp, CArrRe
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
   return (self->t_getdefaultproperties());
@@ -2784,10 +2607,7 @@ Variant c_ReflectionClass::i_setstaticpropertyvalue(MethodCallPackage &mcp, CArr
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
   {
@@ -2805,10 +2625,7 @@ Variant c_ReflectionClass::i_isinstantiable(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
   return (self->t_isinstantiable());
@@ -2820,10 +2637,7 @@ Variant c_ReflectionClass::i_getinterfaces(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
   return (self->t_getinterfaces());
@@ -2835,10 +2649,7 @@ Variant c_ReflectionClass::i_fetch(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
   {
@@ -2855,10 +2666,7 @@ Variant c_ReflectionClass::i_isabstract(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
   return (self->t_isabstract());
@@ -2870,10 +2678,7 @@ Variant c_ReflectionClass::i_getname(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
   return (self->t_getname());
@@ -2885,10 +2690,7 @@ Variant c_ReflectionClass::i_getproperty(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
   {
@@ -2905,10 +2707,7 @@ Variant c_ReflectionClass::i_isinternal(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
   return (self->t_isinternal());
@@ -2919,10 +2718,7 @@ Variant c_ReflectionClass::ifa_getmethods(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
   if (count <= 0) return (self->t_getmethods());
@@ -2934,10 +2730,7 @@ Variant c_ReflectionClass::ifa_isiterateable(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
   return (self->t_isiterateable());
@@ -2948,10 +2741,7 @@ Variant c_ReflectionClass::ifa_getstaticpropertyvalue(MethodCallPackage &mcp, in
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
   if (count <= 1) return (self->t_getstaticpropertyvalue(a0));
@@ -2963,10 +2753,7 @@ Variant c_ReflectionClass::ifa_isuserdefined(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
   return (self->t_isuserdefined());
@@ -2977,10 +2764,7 @@ Variant c_ReflectionClass::ifa_newinstance(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count <= 0) return (self->t_newinstance(count));
   Array params;
@@ -2998,10 +2782,7 @@ Variant c_ReflectionClass::ifa_getextension(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
   return (self->t_getextension());
@@ -3012,10 +2793,7 @@ Variant c_ReflectionClass::ifa_getconstructor(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
   return (self->t_getconstructor());
@@ -3026,10 +2804,7 @@ Variant c_ReflectionClass::ifa___tostring(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
   return (self->t___tostring());
@@ -3040,10 +2815,7 @@ Variant c_ReflectionClass::ifa_newinstanceargs(MethodCallPackage &mcp, int count
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
   return (self->t_newinstanceargs(a0));
@@ -3054,10 +2826,7 @@ Variant c_ReflectionClass::ifa_getendline(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
   return (self->t_getendline());
@@ -3068,10 +2837,7 @@ Variant c_ReflectionClass::ifa_isinstance(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
   return (self->t_isinstance(a0));
@@ -3082,10 +2848,7 @@ Variant c_ReflectionClass::ifa_hasmethod(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
   return (self->t_hasmethod(a0));
@@ -3096,10 +2859,7 @@ Variant c_ReflectionClass::ifa___construct(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
   return (self->t___construct(a0), null);
@@ -3110,10 +2870,7 @@ Variant c_ReflectionClass::ifa_isfinal(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
   return (self->t_isfinal());
@@ -3124,10 +2881,7 @@ Variant c_ReflectionClass::ifa_getmodifiers(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
   return (self->t_getmodifiers());
@@ -3148,10 +2902,7 @@ Variant c_ReflectionClass::ifa_getproperties(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
   return (self->t_getproperties());
@@ -3162,10 +2913,7 @@ Variant c_ReflectionClass::ifa_hasconstant(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
   return (self->t_hasconstant(a0));
@@ -3176,10 +2924,7 @@ Variant c_ReflectionClass::ifa_getmethod(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
   return (self->t_getmethod(a0));
@@ -3190,10 +2935,7 @@ Variant c_ReflectionClass::ifa_getextensionname(MethodCallPackage &mcp, int coun
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
   return (self->t_getextensionname());
@@ -3204,10 +2946,7 @@ Variant c_ReflectionClass::ifa_getparentclass(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
   return (self->t_getparentclass());
@@ -3218,10 +2957,7 @@ Variant c_ReflectionClass::ifa_getfilename(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
   return (self->t_getfilename());
@@ -3232,10 +2968,7 @@ Variant c_ReflectionClass::ifa_implementsinterface(MethodCallPackage &mcp, int c
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
   return (self->t_implementsinterface(a0));
@@ -3246,10 +2979,7 @@ Variant c_ReflectionClass::ifa_getinterfacenames(MethodCallPackage &mcp, int cou
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
   return (self->t_getinterfacenames());
@@ -3260,10 +2990,7 @@ Variant c_ReflectionClass::ifa_getconstant(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
   return (self->t_getconstant(a0));
@@ -3274,10 +3001,7 @@ Variant c_ReflectionClass::ifa_getstartline(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
   return (self->t_getstartline());
@@ -3288,10 +3012,7 @@ Variant c_ReflectionClass::ifa_getconstants(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
   return (self->t_getconstants());
@@ -3302,10 +3023,7 @@ Variant c_ReflectionClass::ifa_getdoccomment(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
   return (self->t_getdoccomment());
@@ -3316,10 +3034,7 @@ Variant c_ReflectionClass::ifa_isinterface(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
   return (self->t_isinterface());
@@ -3330,10 +3045,7 @@ Variant c_ReflectionClass::ifa_issubclassof(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
   return (self->t_issubclassof(a0));
@@ -3344,10 +3056,7 @@ Variant c_ReflectionClass::ifa_hasproperty(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
   return (self->t_hasproperty(a0));
@@ -3358,10 +3067,7 @@ Variant c_ReflectionClass::ifa_getstaticproperties(MethodCallPackage &mcp, int c
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
   return (self->t_getstaticproperties());
@@ -3372,10 +3078,7 @@ Variant c_ReflectionClass::ifa_test(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
   return (self->t_test(a0, a1));
@@ -3386,10 +3089,7 @@ Variant c_ReflectionClass::ifa_getdefaultproperties(MethodCallPackage &mcp, int 
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
   return (self->t_getdefaultproperties());
@@ -3400,10 +3100,7 @@ Variant c_ReflectionClass::ifa_setstaticpropertyvalue(MethodCallPackage &mcp, in
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
   return (self->t_setstaticpropertyvalue(a0, a1), null);
@@ -3414,10 +3111,7 @@ Variant c_ReflectionClass::ifa_isinstantiable(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
   return (self->t_isinstantiable());
@@ -3428,10 +3122,7 @@ Variant c_ReflectionClass::ifa_getinterfaces(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
   return (self->t_getinterfaces());
@@ -3442,10 +3133,7 @@ Variant c_ReflectionClass::ifa_fetch(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
   return (self->t_fetch(a0));
@@ -3456,10 +3144,7 @@ Variant c_ReflectionClass::ifa_isabstract(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
   return (self->t_isabstract());
@@ -3470,10 +3155,7 @@ Variant c_ReflectionClass::ifa_getname(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
   return (self->t_getname());
@@ -3484,10 +3166,7 @@ Variant c_ReflectionClass::ifa_getproperty(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
   return (self->t_getproperty(a0));
@@ -3498,10 +3177,7 @@ Variant c_ReflectionClass::ifa_isinternal(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_ReflectionClass*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionClass)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
   return (self->t_isinternal());
@@ -5281,10 +4957,7 @@ Variant c_ReflectionExtension::i___tostring(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
   return (self->t___tostring());
@@ -5296,10 +4969,7 @@ Variant c_ReflectionExtension::i___construct(MethodCallPackage &mcp, CArrRef par
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
   {
@@ -5316,10 +4986,7 @@ Variant c_ReflectionExtension::i_getfunctions(MethodCallPackage &mcp, CArrRef pa
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
   return (self->t_getfunctions());
@@ -5348,10 +5015,7 @@ Variant c_ReflectionExtension::i_info(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
   return (self->t_info());
@@ -5363,10 +5027,7 @@ Variant c_ReflectionExtension::i_getinientries(MethodCallPackage &mcp, CArrRef p
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
   return (self->t_getinientries());
@@ -5378,10 +5039,7 @@ Variant c_ReflectionExtension::i_getconstants(MethodCallPackage &mcp, CArrRef pa
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
   return (self->t_getconstants());
@@ -5393,10 +5051,7 @@ Variant c_ReflectionExtension::i_getclassnames(MethodCallPackage &mcp, CArrRef p
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
   return (self->t_getclassnames());
@@ -5408,10 +5063,7 @@ Variant c_ReflectionExtension::i_getversion(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
   return (self->t_getversion());
@@ -5423,10 +5075,7 @@ Variant c_ReflectionExtension::i_getname(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
   return (self->t_getname());
@@ -5438,10 +5087,7 @@ Variant c_ReflectionExtension::i_getclasses(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
   return (self->t_getclasses());
@@ -5452,10 +5098,7 @@ Variant c_ReflectionExtension::ifa___tostring(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
   return (self->t___tostring());
@@ -5466,10 +5109,7 @@ Variant c_ReflectionExtension::ifa___construct(MethodCallPackage &mcp, int count
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
   return (self->t___construct(a0), null);
@@ -5480,10 +5120,7 @@ Variant c_ReflectionExtension::ifa_getfunctions(MethodCallPackage &mcp, int coun
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
   return (self->t_getfunctions());
@@ -5504,10 +5141,7 @@ Variant c_ReflectionExtension::ifa_info(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
   return (self->t_info());
@@ -5518,10 +5152,7 @@ Variant c_ReflectionExtension::ifa_getinientries(MethodCallPackage &mcp, int cou
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
   return (self->t_getinientries());
@@ -5532,10 +5163,7 @@ Variant c_ReflectionExtension::ifa_getconstants(MethodCallPackage &mcp, int coun
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
   return (self->t_getconstants());
@@ -5546,10 +5174,7 @@ Variant c_ReflectionExtension::ifa_getclassnames(MethodCallPackage &mcp, int cou
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
   return (self->t_getclassnames());
@@ -5560,10 +5185,7 @@ Variant c_ReflectionExtension::ifa_getversion(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
   return (self->t_getversion());
@@ -5574,10 +5196,7 @@ Variant c_ReflectionExtension::ifa_getname(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
   return (self->t_getname());
@@ -5588,10 +5207,7 @@ Variant c_ReflectionExtension::ifa_getclasses(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_ReflectionExtension*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionExtension)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
   return (self->t_getclasses());
@@ -6358,10 +5974,7 @@ Variant c_ReflectionMethod::i_isprivate(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
   return (self->t_isprivate());
@@ -6373,10 +5986,7 @@ Variant c_ReflectionMethod::i___tostring(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
   return (self->t___tostring());
@@ -6388,10 +5998,7 @@ Variant c_ReflectionMethod::i_isprotected(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
   return (self->t_isprotected());
@@ -6403,10 +6010,7 @@ Variant c_ReflectionMethod::i_isstatic(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
   return (self->t_isstatic());
@@ -6418,10 +6022,7 @@ Variant c_ReflectionMethod::i_getdeclaringclass(MethodCallPackage &mcp, CArrRef 
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
   return (self->t_getdeclaringclass());
@@ -6433,10 +6034,7 @@ Variant c_ReflectionMethod::i_isconstructor(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
   return (self->t_isconstructor());
@@ -6448,10 +6046,7 @@ Variant c_ReflectionMethod::i___construct(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
   {
@@ -6469,10 +6064,7 @@ Variant c_ReflectionMethod::i_isfinal(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
   return (self->t_isfinal());
@@ -6484,10 +6076,7 @@ Variant c_ReflectionMethod::i_invokeargs(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
   {
@@ -6505,10 +6094,7 @@ Variant c_ReflectionMethod::i_getmodifiers(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
   return (self->t_getmodifiers());
@@ -6538,10 +6124,7 @@ Variant c_ReflectionMethod::i_invoke(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
   {
@@ -6559,10 +6142,7 @@ Variant c_ReflectionMethod::i_ispublic(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
   return (self->t_ispublic());
@@ -6574,10 +6154,7 @@ Variant c_ReflectionMethod::i_isdestructor(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
   return (self->t_isdestructor());
@@ -6589,10 +6166,7 @@ Variant c_ReflectionMethod::i_getclosure(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
   return (self->t_getclosure());
@@ -6604,10 +6178,7 @@ Variant c_ReflectionMethod::i_isabstract(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
   return (self->t_isabstract());
@@ -6618,10 +6189,7 @@ Variant c_ReflectionMethod::ifa_isprivate(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
   return (self->t_isprivate());
@@ -6632,10 +6200,7 @@ Variant c_ReflectionMethod::ifa___tostring(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
   return (self->t___tostring());
@@ -6646,10 +6211,7 @@ Variant c_ReflectionMethod::ifa_isprotected(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
   return (self->t_isprotected());
@@ -6660,10 +6222,7 @@ Variant c_ReflectionMethod::ifa_isstatic(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
   return (self->t_isstatic());
@@ -6674,10 +6233,7 @@ Variant c_ReflectionMethod::ifa_getdeclaringclass(MethodCallPackage &mcp, int co
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
   return (self->t_getdeclaringclass());
@@ -6688,10 +6244,7 @@ Variant c_ReflectionMethod::ifa_isconstructor(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
   return (self->t_isconstructor());
@@ -6702,10 +6255,7 @@ Variant c_ReflectionMethod::ifa___construct(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
   return (self->t___construct(a0, a1), null);
@@ -6716,10 +6266,7 @@ Variant c_ReflectionMethod::ifa_isfinal(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
   return (self->t_isfinal());
@@ -6730,10 +6277,7 @@ Variant c_ReflectionMethod::ifa_invokeargs(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
   return (self->t_invokeargs(a0, a1));
@@ -6744,10 +6288,7 @@ Variant c_ReflectionMethod::ifa_getmodifiers(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
   return (self->t_getmodifiers());
@@ -6768,10 +6309,7 @@ Variant c_ReflectionMethod::ifa_invoke(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
   if (count <= 1) return (self->t_invoke(count, a0));
@@ -6789,10 +6327,7 @@ Variant c_ReflectionMethod::ifa_ispublic(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
   return (self->t_ispublic());
@@ -6803,10 +6338,7 @@ Variant c_ReflectionMethod::ifa_isdestructor(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
   return (self->t_isdestructor());
@@ -6817,10 +6349,7 @@ Variant c_ReflectionMethod::ifa_getclosure(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
   return (self->t_getclosure());
@@ -6831,10 +6360,7 @@ Variant c_ReflectionMethod::ifa_isabstract(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionMethod*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionMethod)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
   return (self->t_isabstract());
@@ -7732,10 +7258,7 @@ Variant c_ReflectionProperty::i_isprivate(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
   return (self->t_isprivate());
@@ -7747,10 +7270,7 @@ Variant c_ReflectionProperty::i_getvalue(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
   {
@@ -7768,10 +7288,7 @@ Variant c_ReflectionProperty::i___tostring(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
   return (self->t___tostring());
@@ -7783,10 +7300,7 @@ Variant c_ReflectionProperty::i_isprotected(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
   return (self->t_isprotected());
@@ -7798,10 +7312,7 @@ Variant c_ReflectionProperty::i_isstatic(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
   return (self->t_isstatic());
@@ -7813,10 +7324,7 @@ Variant c_ReflectionProperty::i_getdeclaringclass(MethodCallPackage &mcp, CArrRe
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
   return (self->t_getdeclaringclass());
@@ -7828,10 +7336,7 @@ Variant c_ReflectionProperty::i_isdefault(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
   return (self->t_isdefault());
@@ -7843,10 +7348,7 @@ Variant c_ReflectionProperty::i___construct(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
   {
@@ -7864,10 +7366,7 @@ Variant c_ReflectionProperty::i_getmodifiers(MethodCallPackage &mcp, CArrRef par
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
   return (self->t_getmodifiers());
@@ -7897,10 +7396,7 @@ Variant c_ReflectionProperty::i_ispublic(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
   return (self->t_ispublic());
@@ -7912,10 +7408,7 @@ Variant c_ReflectionProperty::i_setaccessible(MethodCallPackage &mcp, CArrRef pa
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::setAccessible", 0, 1);
   return (self->t_setaccessible(), null);
@@ -7927,10 +7420,7 @@ Variant c_ReflectionProperty::i_getdoccomment(MethodCallPackage &mcp, CArrRef pa
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
   return (self->t_getdoccomment());
@@ -7942,10 +7432,7 @@ Variant c_ReflectionProperty::i_setvalue(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
   {
@@ -7963,10 +7450,7 @@ Variant c_ReflectionProperty::i_getname(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
   return (self->t_getname());
@@ -7977,10 +7461,7 @@ Variant c_ReflectionProperty::ifa_isprivate(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
   return (self->t_isprivate());
@@ -7991,10 +7472,7 @@ Variant c_ReflectionProperty::ifa_getvalue(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
   if (count <= 0) return (self->t_getvalue());
@@ -8006,10 +7484,7 @@ Variant c_ReflectionProperty::ifa___tostring(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
   return (self->t___tostring());
@@ -8020,10 +7495,7 @@ Variant c_ReflectionProperty::ifa_isprotected(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
   return (self->t_isprotected());
@@ -8034,10 +7506,7 @@ Variant c_ReflectionProperty::ifa_isstatic(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
   return (self->t_isstatic());
@@ -8048,10 +7517,7 @@ Variant c_ReflectionProperty::ifa_getdeclaringclass(MethodCallPackage &mcp, int 
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
   return (self->t_getdeclaringclass());
@@ -8062,10 +7528,7 @@ Variant c_ReflectionProperty::ifa_isdefault(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
   return (self->t_isdefault());
@@ -8076,10 +7539,7 @@ Variant c_ReflectionProperty::ifa___construct(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
   return (self->t___construct(a0, a1), null);
@@ -8090,10 +7550,7 @@ Variant c_ReflectionProperty::ifa_getmodifiers(MethodCallPackage &mcp, int count
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
   return (self->t_getmodifiers());
@@ -8114,10 +7571,7 @@ Variant c_ReflectionProperty::ifa_ispublic(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
   return (self->t_ispublic());
@@ -8128,10 +7582,7 @@ Variant c_ReflectionProperty::ifa_setaccessible(MethodCallPackage &mcp, int coun
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::setAccessible", 0, 1);
   return (self->t_setaccessible(), null);
@@ -8142,10 +7593,7 @@ Variant c_ReflectionProperty::ifa_getdoccomment(MethodCallPackage &mcp, int coun
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
   return (self->t_getdoccomment());
@@ -8156,10 +7604,7 @@ Variant c_ReflectionProperty::ifa_setvalue(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
   return (self->t_setvalue(a0, a1), null);
@@ -8170,10 +7615,7 @@ Variant c_ReflectionProperty::ifa_getname(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_ReflectionProperty*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionProperty)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
   return (self->t_getname());
@@ -8851,10 +8293,7 @@ Variant c_ReflectionFunction::i___tostring(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
   return (self->t___tostring());
@@ -8866,10 +8305,7 @@ Variant c_ReflectionFunction::i___construct(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
   {
@@ -8886,10 +8322,7 @@ Variant c_ReflectionFunction::i_invokeargs(MethodCallPackage &mcp, CArrRef param
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
   {
@@ -8923,10 +8356,7 @@ Variant c_ReflectionFunction::i_invoke(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count <= 0) return (self->t_invoke(count));
   return (self->t_invoke(count,params.slice(0, count - 0, false)));
@@ -8937,10 +8367,7 @@ Variant c_ReflectionFunction::ifa___tostring(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
   return (self->t___tostring());
@@ -8951,10 +8378,7 @@ Variant c_ReflectionFunction::ifa___construct(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
   return (self->t___construct(a0), null);
@@ -8965,10 +8389,7 @@ Variant c_ReflectionFunction::ifa_invokeargs(MethodCallPackage &mcp, int count, 
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
   return (self->t_invokeargs(a0));
@@ -8989,10 +8410,7 @@ Variant c_ReflectionFunction::ifa_invoke(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_ReflectionFunction*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionFunction)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count <= 0) return (self->t_invoke(count));
   Array params;
@@ -9564,10 +8982,7 @@ Variant c_ReflectionParameter::i___tostring(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
   return (self->t___tostring());
@@ -9579,10 +8994,7 @@ Variant c_ReflectionParameter::i_getdeclaringclass(MethodCallPackage &mcp, CArrR
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
   return (self->t_getdeclaringclass());
@@ -9594,10 +9006,7 @@ Variant c_ReflectionParameter::i_isdefaultvalueavailable(MethodCallPackage &mcp,
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
   return (self->t_isdefaultvalueavailable());
@@ -9609,10 +9018,7 @@ Variant c_ReflectionParameter::i___construct(MethodCallPackage &mcp, CArrRef par
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
   {
@@ -9630,10 +9036,7 @@ Variant c_ReflectionParameter::i_getclass(MethodCallPackage &mcp, CArrRef params
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
   return (self->t_getclass());
@@ -9663,10 +9066,7 @@ Variant c_ReflectionParameter::i_allowsnull(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
   return (self->t_allowsnull());
@@ -9678,10 +9078,7 @@ Variant c_ReflectionParameter::i_getposition(MethodCallPackage &mcp, CArrRef par
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
   return (self->t_getposition());
@@ -9693,10 +9090,7 @@ Variant c_ReflectionParameter::i_isarray(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
   return (self->t_isarray());
@@ -9708,10 +9102,7 @@ Variant c_ReflectionParameter::i_isoptional(MethodCallPackage &mcp, CArrRef para
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
   return (self->t_isoptional());
@@ -9723,10 +9114,7 @@ Variant c_ReflectionParameter::i_getdefaultvalue(MethodCallPackage &mcp, CArrRef
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
   return (self->t_getdefaultvalue());
@@ -9738,10 +9126,7 @@ Variant c_ReflectionParameter::i_getname(MethodCallPackage &mcp, CArrRef params)
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
   return (self->t_getname());
@@ -9753,10 +9138,7 @@ Variant c_ReflectionParameter::i_ispassedbyreference(MethodCallPackage &mcp, CAr
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
   return (self->t_ispassedbyreference());
@@ -9767,10 +9149,7 @@ Variant c_ReflectionParameter::ifa___tostring(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
   return (self->t___tostring());
@@ -9781,10 +9160,7 @@ Variant c_ReflectionParameter::ifa_getdeclaringclass(MethodCallPackage &mcp, int
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
   return (self->t_getdeclaringclass());
@@ -9795,10 +9171,7 @@ Variant c_ReflectionParameter::ifa_isdefaultvalueavailable(MethodCallPackage &mc
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
   return (self->t_isdefaultvalueavailable());
@@ -9809,10 +9182,7 @@ Variant c_ReflectionParameter::ifa___construct(MethodCallPackage &mcp, int count
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
   return (self->t___construct(a0, a1), null);
@@ -9823,10 +9193,7 @@ Variant c_ReflectionParameter::ifa_getclass(MethodCallPackage &mcp, int count, I
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
   return (self->t_getclass());
@@ -9847,10 +9214,7 @@ Variant c_ReflectionParameter::ifa_allowsnull(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
   return (self->t_allowsnull());
@@ -9861,10 +9225,7 @@ Variant c_ReflectionParameter::ifa_getposition(MethodCallPackage &mcp, int count
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
   return (self->t_getposition());
@@ -9875,10 +9236,7 @@ Variant c_ReflectionParameter::ifa_isarray(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
   return (self->t_isarray());
@@ -9889,10 +9247,7 @@ Variant c_ReflectionParameter::ifa_isoptional(MethodCallPackage &mcp, int count,
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
   return (self->t_isoptional());
@@ -9903,10 +9258,7 @@ Variant c_ReflectionParameter::ifa_getdefaultvalue(MethodCallPackage &mcp, int c
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
   return (self->t_getdefaultvalue());
@@ -9917,10 +9269,7 @@ Variant c_ReflectionParameter::ifa_getname(MethodCallPackage &mcp, int count, IN
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
   return (self->t_getname());
@@ -9931,10 +9280,7 @@ Variant c_ReflectionParameter::ifa_ispassedbyreference(MethodCallPackage &mcp, i
   if (mcp.obj) {
     self = static_cast<c_ReflectionParameter*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ReflectionParameter)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
   return (self->t_ispassedbyreference());

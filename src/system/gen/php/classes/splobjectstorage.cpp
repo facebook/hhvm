@@ -305,10 +305,7 @@ Variant c_SplObjectStorage::i_next(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::next", 0, 1);
   return (self->t_next(), null);
@@ -320,10 +317,7 @@ Variant c_SplObjectStorage::i_detach(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
   {
@@ -340,10 +334,7 @@ Variant c_SplObjectStorage::i_attach(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
   {
@@ -360,10 +351,7 @@ Variant c_SplObjectStorage::i_count(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::count", 0, 1);
   return (self->t_count());
@@ -375,10 +363,7 @@ Variant c_SplObjectStorage::i_key(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::key", 0, 1);
   return (self->t_key());
@@ -390,10 +375,7 @@ Variant c_SplObjectStorage::i_valid(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::valid", 0, 1);
   return (self->t_valid());
@@ -405,10 +387,7 @@ Variant c_SplObjectStorage::i_contains(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
   {
@@ -425,10 +404,7 @@ Variant c_SplObjectStorage::i_current(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::current", 0, 1);
   return (self->t_current());
@@ -440,10 +416,7 @@ Variant c_SplObjectStorage::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::rewind", 0, 1);
   return (self->t_rewind(), null);
@@ -454,10 +427,7 @@ Variant c_SplObjectStorage::ifa_next(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::next", 0, 1);
   return (self->t_next(), null);
@@ -468,10 +438,7 @@ Variant c_SplObjectStorage::ifa_detach(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
   return (self->t_detach(a0), null);
@@ -482,10 +449,7 @@ Variant c_SplObjectStorage::ifa_attach(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
   return (self->t_attach(a0), null);
@@ -496,10 +460,7 @@ Variant c_SplObjectStorage::ifa_count(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::count", 0, 1);
   return (self->t_count());
@@ -510,10 +471,7 @@ Variant c_SplObjectStorage::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::key", 0, 1);
   return (self->t_key());
@@ -524,10 +482,7 @@ Variant c_SplObjectStorage::ifa_valid(MethodCallPackage &mcp, int count, INVOKE_
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::valid", 0, 1);
   return (self->t_valid());
@@ -538,10 +493,7 @@ Variant c_SplObjectStorage::ifa_contains(MethodCallPackage &mcp, int count, INVO
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
   return (self->t_contains(a0));
@@ -552,10 +504,7 @@ Variant c_SplObjectStorage::ifa_current(MethodCallPackage &mcp, int count, INVOK
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::current", 0, 1);
   return (self->t_current());
@@ -566,10 +515,7 @@ Variant c_SplObjectStorage::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE
   if (mcp.obj) {
     self = static_cast<c_SplObjectStorage*>(mcp.obj);
   } else {
-    pobj = (NEW(c_SplObjectStorage)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("SplObjectStorage::rewind", 0, 1);
   return (self->t_rewind(), null);

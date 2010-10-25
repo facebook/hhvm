@@ -1262,10 +1262,7 @@ Variant c_Exception::i_getmessage(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
   return (self->t_getmessage());
@@ -1277,10 +1274,7 @@ Variant c_Exception::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
   return (self->t___tostring());
@@ -1292,10 +1286,7 @@ Variant c_Exception::i___construct(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
   {
@@ -1315,10 +1306,7 @@ Variant c_Exception::i_getcode(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
   return (self->t_getcode());
@@ -1330,10 +1318,7 @@ Variant c_Exception::i_getline(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
   return (self->t_getline());
@@ -1345,10 +1330,7 @@ Variant c_Exception::i___init__(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
   return (self->t___init__(), null);
@@ -1360,10 +1342,7 @@ Variant c_Exception::i_getfile(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
   return (self->t_getfile());
@@ -1375,10 +1354,7 @@ Variant c_Exception::i_gettraceasstring(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
   return (self->t_gettraceasstring());
@@ -1390,10 +1366,7 @@ Variant c_Exception::i_gettrace(MethodCallPackage &mcp, CArrRef params) {
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
   return (self->t_gettrace());
@@ -1404,10 +1377,7 @@ Variant c_Exception::ifa_getmessage(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
   return (self->t_getmessage());
@@ -1418,10 +1388,7 @@ Variant c_Exception::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FE
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
   return (self->t___tostring());
@@ -1432,10 +1399,7 @@ Variant c_Exception::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
   if (count <= 0) return (self->t___construct(), null);
@@ -1448,10 +1412,7 @@ Variant c_Exception::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
   return (self->t_getcode());
@@ -1462,10 +1423,7 @@ Variant c_Exception::ifa_getline(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
   return (self->t_getline());
@@ -1476,10 +1434,7 @@ Variant c_Exception::ifa___init__(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
   return (self->t___init__(), null);
@@ -1490,10 +1445,7 @@ Variant c_Exception::ifa_getfile(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
   return (self->t_getfile());
@@ -1504,10 +1456,7 @@ Variant c_Exception::ifa_gettraceasstring(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
   return (self->t_gettraceasstring());
@@ -1518,10 +1467,7 @@ Variant c_Exception::ifa_gettrace(MethodCallPackage &mcp, int count, INVOKE_FEW_
   if (mcp.obj) {
     self = static_cast<c_Exception*>(mcp.obj);
   } else {
-    pobj = (NEW(c_Exception)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
   return (self->t_gettrace());
@@ -2090,10 +2036,7 @@ Variant c_ErrorException::i___construct(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_ErrorException*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ErrorException)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
   {
@@ -2119,10 +2062,7 @@ Variant c_ErrorException::i_getseverity(MethodCallPackage &mcp, CArrRef params) 
   if (mcp.obj) {
     self = static_cast<c_ErrorException*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ErrorException)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
   return (self->t_getseverity());
@@ -2133,10 +2073,7 @@ Variant c_ErrorException::ifa___construct(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_ErrorException*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ErrorException)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
   if (count <= 0) return (self->t___construct(), null);
@@ -2152,10 +2089,7 @@ Variant c_ErrorException::ifa_getseverity(MethodCallPackage &mcp, int count, INV
   if (mcp.obj) {
     self = static_cast<c_ErrorException*>(mcp.obj);
   } else {
-    pobj = (NEW(c_ErrorException)());
-    pobj->init();
-    pobj->setDummy();
-    self = pobj.get();
+    self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
   return (self->t_getseverity());

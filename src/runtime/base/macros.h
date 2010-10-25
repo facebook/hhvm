@@ -161,6 +161,7 @@ namespace HPHP {
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \
   virtual CStrRef o_getClassName() const { return s_class_name; }       \
+  static c_##cls *createDummy(p_##cls &pobj);                           \
 
 #define DECLARE_CLASS(cls, originalName, parent)                        \
   DECLARE_CLASS_COMMON(cls, originalName)                               \
@@ -197,14 +198,19 @@ namespace HPHP {
 
 #define IMPLEMENT_CLASS(cls)                                            \
   StaticString c_##cls::s_class_name(c_##cls::GetClassName());          \
-  IMPLEMENT_OBJECT_ALLOCATION(c_##cls)
+  c_##cls *c_##cls::createDummy(p_##cls &pobj) {                        \
+    pobj = NEW(c_##cls)();                                              \
+    pobj->init();                                                       \
+    pobj->setDummy();                                                   \
+    return pobj.get();                                                  \
+  }                                                                     \
+  IMPLEMENT_OBJECT_ALLOCATION(c_##cls)                                  \
 
-#define DECLARE_METHOD_INVOKE_HELPERS(methname)               \
-  static CallInfo ci_##methname;                           \
-  static Variant ifa_##methname(MethodCallPackage &mcp,           \
-      int count, INVOKE_FEW_ARGS_IMPL_ARGS);                            \
-  static Variant i_##methname(MethodCallPackage &mcp,             \
-      CArrRef params);
+#define DECLARE_METHOD_INVOKE_HELPERS(methname)                         \
+  static CallInfo ci_##methname;                                        \
+  static Variant ifa_##methname(MethodCallPackage &mcp,                 \
+                                int count, INVOKE_FEW_ARGS_IMPL_ARGS);  \
+  static Variant i_##methname(MethodCallPackage &mcp, CArrRef params);  \
 
 //////////////////////////////////////////////////////////////////////////////
 // jump table entries

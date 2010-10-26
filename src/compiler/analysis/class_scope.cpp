@@ -1100,6 +1100,17 @@ void ClassScope::outputCPPForwardHeader(CodeGenerator &old_cg,
     cg_printf("extern StaticString %s;\n", lisnam.c_str());
   }
 
+  first = true;
+  BOOST_FOREACH(const string &str, m_usedDefaultValueScalarArrays) {
+    int index = -1;
+    int hash = ar->checkScalarArray(str, index);
+    assert(hash != -1 && index != -1);
+    string name = ar->getScalarArrayName(hash, index);
+    if (!cg.ensureInNamespace() && first) cg_printf("\n");
+    first = false;
+    cg_printf("extern StaticArray %s;\n", name.c_str());
+  }
+
   cg.ensureOutOfNamespace();
   cg.headerEnd(filename);
 }

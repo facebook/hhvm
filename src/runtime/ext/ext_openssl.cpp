@@ -2282,5 +2282,159 @@ Variant f_openssl_random_pseudo_bytes(int length,
   }
 }
 
+Variant f_openssl_cipher_iv_length(CStrRef method) {
+  if (method.empty()) {
+    raise_warning("Unknown cipher algorithm");
+    return false;
+  }
+
+  const EVP_CIPHER *cipher_type = EVP_get_cipherbyname(method.c_str());
+  if (!cipher_type) {
+    raise_warning("Unknown cipher algorithm");
+    return false;
+  }
+
+  return EVP_CIPHER_iv_length(cipher_type);
+}
+
+static String php_openssl_validate_iv(String piv, int iv_required_len) {
+  char *iv_new;
+
+  /* Best case scenario, user behaved */
+  if (piv.size() == iv_required_len) {
+    return piv;
+  }
+
+  iv_new = (char*)calloc(1, iv_required_len + 1);
+
+  if (piv.size() <= 0) {
+    /* BC behavior */
+    return String(iv_new, iv_required_len, AttachString);
+  }
+
+  if (piv.size() < iv_required_len) {
+    raise_warning("IV passed is only %d bytes long, cipher "
+                  "expects an IV of precisely %d bytes, padding with \\0",
+                  piv.size(), iv_required_len);
+    memcpy(iv_new, piv.data(), piv.size());
+    return String(iv_new, iv_required_len, AttachString);
+  }
+
+  raise_warning("IV passed is %d bytes long which is longer than the %d "
+                "expected by selected cipher, truncating", piv.size(),
+                iv_required_len);
+  memcpy(iv_new, piv.data(), iv_required_len);
+  return String(iv_new, iv_required_len, AttachString);
+}
+
+Variant f_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password,
+                          bool raw_output /* = false */,
+                          CStrRef iv /* = null_string */) {
+  const EVP_CIPHER *cipher_type = EVP_get_cipherbyname(method);
+  if (!cipher_type) {
+    raise_warning("Unknown cipher algorithm");
+    return false;
+  }
+
+  int keylen = EVP_CIPHER_key_length(cipher_type);
+  unsigned char *key;
+
+  if (keylen > password.size()) {
+    key = (unsigned char*)malloc(keylen);
+    memset(key, 0, keylen);
+    memcpy(key, password, password.size());
+  } else {
+    key = (unsigned char*)password.c_str();
+  }
+
+  int max_iv_len = EVP_CIPHER_iv_length(cipher_type);
+  if (iv.size() <= 0 && max_iv_len > 0) {
+    raise_warning("Using an empty Initialization Vector (iv) is potentially "
+                  "insecure and not recommended");
+  }
+
+  int result_len = 0;
+
+  String new_iv  = php_openssl_validate_iv(iv, max_iv_len);
+
+  int outlen = data.size() + EVP_CIPHER_block_size(cipher_type);
+  unsigned char *outbuf = (unsigned char*)malloc(outlen + 1);
+
+  EVP_CIPHER_CTX cipher_ctx;
+  EVP_EncryptInit(&cipher_ctx, cipher_type, key,
+                  (unsigned char *)new_iv.data());
+  EVP_EncryptUpdate(&cipher_ctx, outbuf, &result_len,
+                    (unsigned char *)data.data(), data.size());
+  outlen = result_len;
+
+  if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)outbuf + result_len,
+                       &result_len)) {
+    outlen += result_len;
+    outbuf[outlen] = '\0';
+    String rv = String((char*)outbuf, outlen, AttachString);
+
+    if (raw_output) {
+      return rv;
+    } else {
+      return StringUtil::Base64Encode(rv);
+    }
+  }
+
+  free(outbuf);
+  return false;
+}
+
+Variant f_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password,
+                          bool raw_input /* = false */,
+                          CStrRef iv /* = null_string */) {
+  const EVP_CIPHER *cipher_type = EVP_get_cipherbyname(method);
+  if (!cipher_type) {
+    raise_warning("Unknown cipher algorithm");
+    return false;
+  }
+
+  String decoded_data = data;
+
+  if (!raw_input) {
+    decoded_data = StringUtil::Base64Decode(data);
+  }
+
+  int keylen = EVP_CIPHER_key_length(cipher_type);
+  unsigned char *key;
+
+  if (keylen > password.size()) {
+    key = (unsigned char*)malloc(keylen);
+    memset(key, 0, keylen);
+    memcpy(key, password, password.size());
+  } else {
+    key = (unsigned char*)password.c_str();
+  }
+
+  int result_len = 0;
+
+  String new_iv  = php_openssl_validate_iv(iv,
+                                           EVP_CIPHER_iv_length(cipher_type));
+
+  int outlen = decoded_data.size() + EVP_CIPHER_block_size(cipher_type);
+  unsigned char *outbuf = (unsigned char*)malloc(outlen + 1);
+
+  EVP_CIPHER_CTX cipher_ctx;
+  EVP_DecryptInit(&cipher_ctx, cipher_type, key,
+                  (unsigned char *)new_iv.data());
+  EVP_DecryptUpdate(&cipher_ctx, outbuf, &result_len,
+                    (unsigned char *)decoded_data.data(), decoded_data.size());
+  outlen = result_len;
+
+  if (EVP_DecryptFinal(&cipher_ctx, (unsigned char *)outbuf + result_len,
+                       &result_len)) {
+    outlen += result_len;
+    outbuf[outlen] = '\0';
+    return String((char*)outbuf, outlen, AttachString);
+  } else {
+    free(outbuf);
+    return false;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

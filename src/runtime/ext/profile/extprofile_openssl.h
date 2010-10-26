@@ -220,10 +220,24 @@ inline Variant x_openssl_x509_read(CVarRef x509certdata) {
   return f_openssl_x509_read(x509certdata);
 }
 
-inline Variant x_openssl_random_pseudo_bytes(int length,
-                                             CVarRef crypto_strong = false) {
+inline Variant x_openssl_random_pseudo_bytes(int length, CVarRef crypto_strong = false) {
   FUNCTION_INJECTION_BUILTIN(openssl_random_pseudo_bytes);
   return f_openssl_random_pseudo_bytes(length, crypto_strong);
+}
+
+inline Variant x_openssl_cipher_iv_length(CStrRef method) {
+  FUNCTION_INJECTION_BUILTIN(openssl_cipher_iv_length);
+  return f_openssl_cipher_iv_length(method);
+}
+
+inline Variant x_openssl_encrypt(CStrRef data, CStrRef method, CStrRef password, bool raw_output = false, CStrRef iv = null_string) {
+  FUNCTION_INJECTION_BUILTIN(openssl_encrypt);
+  return f_openssl_encrypt(data, method, password, raw_output, iv);
+}
+
+inline Variant x_openssl_decrypt(CStrRef data, CStrRef method, CStrRef password, bool raw_input = false, CStrRef iv = null_string) {
+  FUNCTION_INJECTION_BUILTIN(openssl_decrypt);
+  return f_openssl_decrypt(data, method, password, raw_input, iv);
 }
 
 

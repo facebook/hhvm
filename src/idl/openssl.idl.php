@@ -7,6 +7,8 @@
  * any changes that are not part of schema. Use "note" field to comment on
  * schema itself, and "note" fields are not used in any code generation but
  * only staying within this file.
+ *
+ * @nolint
  */
 ///////////////////////////////////////////////////////////////////////////////
 // Preamble: C++ code inserted at beginning of ext_{name}.h
@@ -1159,6 +1161,104 @@ DefineFunction(
         'type'   => Variant | Reference,
         'value'  => "false",
         'desc'   => "If passed into the function, this will hold a boolean value that determines if the algorithm used was \"cryptographically strong\", e.g., safe for usage with GPG, passwords, etc. TRUE if it did, otherwise FALSE",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "openssl_cipher_iv_length",
+    'desc'   => "Returns the required initialisation vector length for the cipher determined by the mode parameter.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns the iv length of a cipher, or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "method",
+        'type'   => String,
+        'desc'   => "The cipher method.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "openssl_encrypt",
+    'desc'   => "Encrypts given data with given method and key, returns a raw or base64 encoded string WarningThis function is currently not documented; only its argument list is available.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns the encrypted string on success or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "data",
+        'type'   => String,
+        'desc'   => "The data.",
+      ),
+      array(
+        'name'   => "method",
+        'type'   => String,
+        'desc'   => "The cipher method.",
+      ),
+      array(
+        'name'   => "password",
+        'type'   => String,
+        'desc'   => "The password.",
+      ),
+      array(
+        'name'   => "raw_output",
+        'type'   => Boolean,
+        'value'  => "false",
+        'desc'   => "Setting to TRUE will return as raw output data, otherwise the return value is base64 encoded.",
+      ),
+      array(
+        'name'   => "iv",
+        'type'   => String,
+        'value'  => "null_string",
+        'desc'   => "The initialisation vector.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "openssl_decrypt",
+    'desc'   => "Takes a raw or base64 encoded string and decrypts it using a given method and key.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "The decrypted string on success or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "data",
+        'type'   => String,
+        'desc'   => "The data.",
+      ),
+      array(
+        'name'   => "method",
+        'type'   => String,
+        'desc'   => "The cipher method.",
+      ),
+      array(
+        'name'   => "password",
+        'type'   => String,
+        'desc'   => "The password.",
+      ),
+      array(
+        'name'   => "raw_input",
+        'type'   => Boolean,
+        'value'  => "false",
+        'desc'   => "Setting to TRUE will take a raw encoded string, otherwise a base64 string is assumed for the data parameter.",
+      ),
+      array(
+        'name'   => "iv",
+        'type'   => String,
+        'value'  => "null_string",
+        'desc'   => "The initialisation vector.",
       ),
     ),
   ));

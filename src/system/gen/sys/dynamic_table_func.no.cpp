@@ -9438,6 +9438,21 @@ Variant ifa_magickgetimagewhitepoint(void *extra, int count, INVOKE_FEW_ARGS_IMP
   if (count != 1) return throw_wrong_arguments("magickgetimagewhitepoint", count, 1, 1, 1);
   return (f_magickgetimagewhitepoint(a0));
 }
+Variant i_openssl_cipher_iv_length(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(openssl_cipher_iv_length);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("openssl_cipher_iv_length", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_openssl_cipher_iv_length(arg0));
+  }
+}
+Variant ifa_openssl_cipher_iv_length(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("openssl_cipher_iv_length", count, 1, 1, 1);
+  return (f_openssl_cipher_iv_length(a0));
+}
 Variant i_magickseparateimagechannel(void *extra, CArrRef params) {
   FUNCTION_INJECTION(magickseparateimagechannel);
   int count __attribute__((__unused__)) = params.size();
@@ -17189,6 +17204,29 @@ Variant ifa_expm1(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("expm1", count, 1, 1, 1);
   return (f_expm1(a0));
 }
+Variant i_openssl_decrypt(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(openssl_decrypt);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 5) return throw_wrong_arguments("openssl_decrypt", count, 3, 5, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_openssl_decrypt(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_openssl_decrypt(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_decrypt(arg0, arg1, arg2, arg3, arg4));
+  }
+}
+Variant ifa_openssl_decrypt(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 3 || count > 5) return throw_wrong_arguments("openssl_decrypt", count, 3, 5, 1);
+  if (count <= 3) return (f_openssl_decrypt(a0, a1, a2));
+  if (count == 4) return (f_openssl_decrypt(a0, a1, a2, a3));
+  return (f_openssl_decrypt(a0, a1, a2, a3, a4));
+}
 Variant i_ldap_first_entry(void *extra, CArrRef params) {
   FUNCTION_INJECTION(ldap_first_entry);
   int count __attribute__((__unused__)) = params.size();
@@ -23865,6 +23903,29 @@ Variant ifa_mb_strtolower(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 1) return (f_mb_strtolower(a0));
   return (f_mb_strtolower(a0, a1));
 }
+Variant i_openssl_encrypt(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(openssl_encrypt);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 5) return throw_wrong_arguments("openssl_encrypt", count, 3, 5, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_openssl_encrypt(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_openssl_encrypt(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_encrypt(arg0, arg1, arg2, arg3, arg4));
+  }
+}
+Variant ifa_openssl_encrypt(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 3 || count > 5) return throw_wrong_arguments("openssl_encrypt", count, 3, 5, 1);
+  if (count <= 3) return (f_openssl_encrypt(a0, a1, a2));
+  if (count == 4) return (f_openssl_encrypt(a0, a1, a2, a3));
+  return (f_openssl_encrypt(a0, a1, a2, a3, a4));
+}
 Variant i_localtime(void *extra, CArrRef params) {
   FUNCTION_INJECTION(localtime);
   int count __attribute__((__unused__)) = params.size();
@@ -29757,6 +29818,21 @@ Variant ifa_register_postsend_function(void *extra, int count, INVOKE_FEW_ARGS_I
   if (count >= 6) params.append(a5);
   return (f_register_postsend_function(count,a0, params), null);
 }
+Variant i_long2ip(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(long2ip);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("long2ip", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_long2ip(arg0));
+  }
+}
+Variant ifa_long2ip(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("long2ip", count, 1, 1, 1);
+  return (f_long2ip(a0));
+}
 Variant i_getrusage(void *extra, CArrRef params) {
   FUNCTION_INJECTION(getrusage);
   int count __attribute__((__unused__)) = params.size();
@@ -29773,21 +29849,6 @@ Variant ifa_getrusage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 1) return throw_toomany_arguments("getrusage", 1, 1);
   if (count <= 0) return (f_getrusage());
   return (f_getrusage(a0));
-}
-Variant i_long2ip(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(long2ip);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("long2ip", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_long2ip(arg0));
-  }
-}
-Variant ifa_long2ip(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 1) return throw_wrong_arguments("long2ip", count, 1, 1, 1);
-  return (f_long2ip(a0));
 }
 Variant i_evhttp_set_cache(void *extra, CArrRef params) {
   FUNCTION_INJECTION(evhttp_set_cache);
@@ -46533,6 +46594,22 @@ Variant ei_magickgetimagewhitepoint(Eval::VariableEnvironment &env, const Eval::
   }
   return (x_magickgetimagewhitepoint(a0));
 }
+Variant ei_openssl_cipher_iv_length(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("openssl_cipher_iv_length", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_openssl_cipher_iv_length(a0));
+}
 Variant ei_magickseparateimagechannel(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -56150,6 +56227,40 @@ Variant ei_expm1(Eval::VariableEnvironment &env, const Eval::FunctionCallExpress
   }
   return (x_expm1(a0));
 }
+Variant ei_openssl_decrypt(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 5) return throw_wrong_arguments("openssl_decrypt", count, 3, 5, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_openssl_decrypt(a0, a1, a2));
+  else if (count == 4) return (x_openssl_decrypt(a0, a1, a2, a3));
+  else return (x_openssl_decrypt(a0, a1, a2, a3, a4));
+}
 Variant ei_ldap_first_entry(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -64252,6 +64363,40 @@ Variant ei_mb_strtolower(Eval::VariableEnvironment &env, const Eval::FunctionCal
   if (count <= 1) return (x_mb_strtolower(a0));
   else return (x_mb_strtolower(a0, a1));
 }
+Variant ei_openssl_encrypt(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 5) return throw_wrong_arguments("openssl_encrypt", count, 3, 5, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_openssl_encrypt(a0, a1, a2));
+  else if (count == 4) return (x_openssl_encrypt(a0, a1, a2, a3));
+  else return (x_openssl_encrypt(a0, a1, a2, a3, a4));
+}
 Variant ei_localtime(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -71576,6 +71721,22 @@ Variant ei_register_postsend_function(Eval::VariableEnvironment &env, const Eval
   if (count <= 1) return (x_register_postsend_function(count, a0), null);
   return (x_register_postsend_function(count, a0,vargs), null);
 }
+Variant ei_long2ip(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("long2ip", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_long2ip(a0));
+}
 Variant ei_getrusage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -71592,22 +71753,6 @@ Variant ei_getrusage(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   }
   if (count <= 0) return (x_getrusage());
   else return (x_getrusage(a0));
-}
-Variant ei_long2ip(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("long2ip", count, 1, 1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_long2ip(a0));
 }
 Variant ei_evhttp_set_cache(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -80491,6 +80636,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3290:
       HASH_INVOKE_FROM_EVAL(0x674AA2DBDA5E4CDALL, imageloadfont);
       break;
+    case 3296:
+      HASH_INVOKE_FROM_EVAL(0x28FB6C2FF0372CE0LL, openssl_decrypt);
+      break;
     case 3298:
       HASH_INVOKE_FROM_EVAL(0x6B92530A9ABA0CE2LL, session_commit);
       HASH_INVOKE_FROM_EVAL(0x2D5A5580B9FD2CE2LL, imap_setacl);
@@ -80876,6 +81024,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3803:
       HASH_INVOKE_FROM_EVAL(0x16331E18B5CD8EDBLL, timezone_open);
+      break;
+    case 3804:
+      HASH_INVOKE_FROM_EVAL(0x0B8B6A66FE646EDCLL, openssl_encrypt);
       break;
     case 3808:
       HASH_INVOKE_FROM_EVAL(0x7A1C6E429399CEE0LL, iconv_set_encoding);
@@ -81919,6 +82070,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 5185:
       HASH_INVOKE_FROM_EVAL(0x05892E3C5B9EB441LL, closedir);
+      break;
+    case 5198:
+      HASH_INVOKE_FROM_EVAL(0x3D3BE7A6EBB6544ELL, openssl_cipher_iv_length);
       break;
     case 5201:
       HASH_INVOKE_FROM_EVAL(0x7539134E1CC61451LL, xmlwriter_start_cdata);
@@ -84519,6 +84673,7 @@ CallInfo ci_xmlwriter_write_element_ns((void*)&i_xmlwriter_write_element_ns, (vo
 CallInfo ci_magicksetcompressionquality((void*)&i_magicksetcompressionquality, (void*)&ifa_magicksetcompressionquality, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magickaddnoiseimage((void*)&i_magickaddnoiseimage, (void*)&ifa_magickaddnoiseimage, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimagewhitepoint((void*)&i_magickgetimagewhitepoint, (void*)&ifa_magickgetimagewhitepoint, 1, 0, 0x0000000000000000LL);
+CallInfo ci_openssl_cipher_iv_length((void*)&i_openssl_cipher_iv_length, (void*)&ifa_openssl_cipher_iv_length, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickseparateimagechannel((void*)&i_magickseparateimagechannel, (void*)&ifa_magickseparateimagechannel, 2, 0, 0x0000000000000000LL);
 CallInfo ci_array_push((void*)&i_array_push, (void*)&ifa_array_push, 2, 1, 0x0000000000000001LL);
 CallInfo ci_flush((void*)&i_flush, (void*)&ifa_flush, 0, 0, 0x0000000000000000LL);
@@ -84976,6 +85131,7 @@ CallInfo ci_dom_node_is_same_node((void*)&i_dom_node_is_same_node, (void*)&ifa_d
 CallInfo ci_clonedrawingwand((void*)&i_clonedrawingwand, (void*)&ifa_clonedrawingwand, 1, 0, 0x0000000000000000LL);
 CallInfo ci_ob_get_clean((void*)&i_ob_get_clean, (void*)&ifa_ob_get_clean, 0, 0, 0x0000000000000000LL);
 CallInfo ci_expm1((void*)&i_expm1, (void*)&ifa_expm1, 1, 0, 0x0000000000000000LL);
+CallInfo ci_openssl_decrypt((void*)&i_openssl_decrypt, (void*)&ifa_openssl_decrypt, 5, 0, 0x0000000000000000LL);
 CallInfo ci_ldap_first_entry((void*)&i_ldap_first_entry, (void*)&ifa_ldap_first_entry, 2, 0, 0x0000000000000000LL);
 CallInfo ci_curl_multi_select((void*)&i_curl_multi_select, (void*)&ifa_curl_multi_select, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magickswirlimage((void*)&i_magickswirlimage, (void*)&ifa_magickswirlimage, 2, 0, 0x0000000000000000LL);
@@ -85374,6 +85530,7 @@ CallInfo ci_posix_times((void*)&i_posix_times, (void*)&ifa_posix_times, 0, 0, 0x
 CallInfo ci_drawgetfillcolor((void*)&i_drawgetfillcolor, (void*)&ifa_drawgetfillcolor, 1, 0, 0x0000000000000000LL);
 CallInfo ci_dom_document_save_html((void*)&i_dom_document_save_html, (void*)&ifa_dom_document_save_html, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mb_strtolower((void*)&i_mb_strtolower, (void*)&ifa_mb_strtolower, 2, 0, 0x0000000000000000LL);
+CallInfo ci_openssl_encrypt((void*)&i_openssl_encrypt, (void*)&ifa_openssl_encrypt, 5, 0, 0x0000000000000000LL);
 CallInfo ci_localtime((void*)&i_localtime, (void*)&ifa_localtime, 2, 0, 0x0000000000000000LL);
 CallInfo ci_fb_thrift_unserialize((void*)&i_fb_thrift_unserialize, (void*)&ifa_fb_thrift_unserialize, 3, 0, 0x0000000000000006LL);
 CallInfo ci_sha1((void*)&i_sha1, (void*)&ifa_sha1, 2, 0, 0x0000000000000000LL);
@@ -85722,8 +85879,8 @@ CallInfo ci_mb_send_mail((void*)&i_mb_send_mail, (void*)&ifa_mb_send_mail, 5, 0,
 CallInfo ci_hphp_splfileinfo___construct((void*)&i_hphp_splfileinfo___construct, (void*)&ifa_hphp_splfileinfo___construct, 2, 0, 0x0000000000000000LL);
 CallInfo ci_imap_msgno((void*)&i_imap_msgno, (void*)&ifa_imap_msgno, 2, 0, 0x0000000000000000LL);
 CallInfo ci_register_postsend_function((void*)&i_register_postsend_function, (void*)&ifa_register_postsend_function, 1, 1, 0x0000000000000000LL);
-CallInfo ci_getrusage((void*)&i_getrusage, (void*)&ifa_getrusage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_long2ip((void*)&i_long2ip, (void*)&ifa_long2ip, 1, 0, 0x0000000000000000LL);
+CallInfo ci_getrusage((void*)&i_getrusage, (void*)&ifa_getrusage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_evhttp_set_cache((void*)&i_evhttp_set_cache, (void*)&ifa_evhttp_set_cache, 3, 0, 0x0000000000000000LL);
 CallInfo ci_magickoilpaintimage((void*)&i_magickoilpaintimage, (void*)&ifa_magickoilpaintimage, 2, 0, 0x0000000000000000LL);
 CallInfo ci_strripos((void*)&i_strripos, (void*)&ifa_strripos, 3, 0, 0x0000000000000000LL);
@@ -90832,6 +90989,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 3296:
+      HASH_GUARD(0x28FB6C2FF0372CE0LL, openssl_decrypt) {
+        ci = &ci_openssl_decrypt;
+        return true;
+      }
+      break;
     case 3298:
       HASH_GUARD(0x6B92530A9ABA0CE2LL, session_commit) {
         ci = &ci_session_commit;
@@ -91635,6 +91798,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3803:
       HASH_GUARD(0x16331E18B5CD8EDBLL, timezone_open) {
         ci = &ci_timezone_open;
+        return true;
+      }
+      break;
+    case 3804:
+      HASH_GUARD(0x0B8B6A66FE646EDCLL, openssl_encrypt) {
+        ci = &ci_openssl_encrypt;
         return true;
       }
       break;
@@ -93815,6 +93984,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 5185:
       HASH_GUARD(0x05892E3C5B9EB441LL, closedir) {
         ci = &ci_closedir;
+        return true;
+      }
+      break;
+    case 5198:
+      HASH_GUARD(0x3D3BE7A6EBB6544ELL, openssl_cipher_iv_length) {
+        ci = &ci_openssl_cipher_iv_length;
         return true;
       }
       break;

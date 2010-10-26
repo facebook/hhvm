@@ -66,6 +66,7 @@ class TestExtOpenssl : public TestCppExt {
   bool test_openssl_x509_free();
   bool test_openssl_x509_parse();
   bool test_openssl_x509_read();
+  bool test_openssl_encrypt();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

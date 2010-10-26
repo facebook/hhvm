@@ -62,7 +62,7 @@ bool TestExtOpenssl::RunTests(const std::string &which) {
   RUN_TEST(test_openssl_x509_free);
   RUN_TEST(test_openssl_x509_parse);
   RUN_TEST(test_openssl_x509_read);
-
+  RUN_TEST(test_openssl_encrypt);
   return ret;
 }
 
@@ -520,5 +520,20 @@ bool TestExtOpenssl::test_openssl_x509_read() {
   Variant fcert = f_file_get_contents("test/test_x509.crt");
   Variant cert = f_openssl_x509_read(fcert);
   VERIFY(!cert.toObject().isNull());
+  return Count(true);
+}
+
+bool TestExtOpenssl::test_openssl_encrypt() {
+  String test = "OpenSSL is good for encrypting things";
+  String secret = "supersecretthing";
+  String cipher = "AES-256-CBC";
+  int iv_len = f_openssl_cipher_iv_length(cipher);
+  String iv = f_openssl_random_pseudo_bytes(iv_len);
+
+  Variant data = f_openssl_encrypt(test, cipher, secret, false, iv);
+  VS(test, f_openssl_decrypt(data, cipher, secret, false, iv));
+
+  data = f_openssl_encrypt(test, cipher, secret, true, iv);
+  VS(test, f_openssl_decrypt(data, cipher, secret, true, iv));
   return Count(true);
 }

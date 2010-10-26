@@ -231,6 +231,26 @@ void CodeGenerator::printInclude(const std::string &file) {
   printf("#include %s\n", formatted.c_str());
 }
 
+void CodeGenerator::printBasicIncludes() {
+  if (Option::GenerateCPPMain) {
+    printInclude("<runtime/base/hphp.h>");
+    printInclude(string(Option::SystemFilePrefix) +
+                 "literal_strings_remap.h");
+    printInclude(string(Option::SystemFilePrefix) +
+                 "scalar_arrays_remap.h");
+    printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
+    if (Option::GenConcat || Option::GenArrayCreate) {
+      printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
+    }
+  } else if (getOutput() == CodeGenerator::SystemCPP) {
+    printInclude("<runtime/base/hphp_system.h>");
+    printInclude(string(Option::SystemFilePrefix) +
+                 "literal_strings_remap.h");
+    printInclude(string(Option::SystemFilePrefix) +
+                 "scalar_arrays_remap.h");
+  }
+}
+
 void CodeGenerator::printDeclareGlobals() {
   if (getOutput() == SystemCPP) {
     printf("DECLARE_SYSTEM_GLOBALS(g);\n");

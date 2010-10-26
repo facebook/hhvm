@@ -149,6 +149,7 @@ public:
   void ifdefBegin(bool ifdef, const char *fmt, ...);
   void ifdefEnd(const char *fmt, ...);
   void printInclude(const std::string &file);
+  void printBasicIncludes();
   void printDeclareGlobals();
   void printStartOfJumpTable(int tableSize);
   void printDocComment(const std::string comment);

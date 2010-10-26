@@ -56,12 +56,51 @@ AccessLog AdminRequestHandler::s_accessLog(
 AdminRequestHandler::AdminRequestHandler() {
 }
 
-#define MALLOC_WRITE_CB_BUFLEN 1024*1024
-static void
-malloc_write_cb(void *cbopaque, const char *s) {
-  char *buf = (char *)cbopaque;
-  strncat(buf, s, MALLOC_WRITE_CB_BUFLEN - 1);
+// Helper machinery for jemalloc-stats-print command.
+#ifndef NO_JEMALLOC
+struct malloc_write {
+  char *s;
+  size_t slen;
+  size_t smax;
+  bool oom;
+};
+
+void malloc_write_init(malloc_write *mw) {
+  mw->s = NULL;
+  mw->slen = 0;
+  mw->smax = 0;
+  mw->oom = false;
 }
+
+void malloc_write_fini(malloc_write *mw) {
+  if (mw->s != NULL) {
+    free(mw->s);
+    malloc_write_init(mw);
+  }
+}
+
+static void malloc_write_cb(void *cbopaque, const char *s) {
+  malloc_write* mw = (malloc_write*)cbopaque;
+  size_t slen = strlen(s);
+
+  if (mw->oom) {
+    return;
+  }
+
+  if (mw->slen + slen+1 >= mw->smax) {
+    ASSERT(mw->slen + slen > 0);
+    char* ts = (char*)realloc(mw->s, (mw->slen + slen) << 1);
+    if (ts == NULL) {
+      mw->oom = true;
+      return;
+    }
+    mw->s = ts;
+    mw->smax = (mw->slen + slen) << 1;
+  }
+  memcpy(&mw->s[mw->slen], s, slen+1);
+  mw->slen += slen;
+}
+#endif
 
 void AdminRequestHandler::handleRequest(Transport *transport) {
   GetAccessLog().onNewRequest();
@@ -271,6 +310,19 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
 #ifndef NO_JEMALLOC
     if (mallctl) {
+      if (cmd == "free-mem") {
+        // Purge all dirty unused pages.
+        int err = mallctl("arenas.purge", NULL, NULL, NULL, 0);
+        if (err) {
+          ostringstream estr;
+          estr << "Error " << err << " in mallctl(\"arenas.purge\", ...)"
+            << endl;
+          transport->sendString(estr.str());
+        } else {
+          transport->sendString("OK\n");
+        }
+        break;
+      }
       if (cmd == "jemalloc-stats") {
         // Force jemalloc to update stats cached for use by mallctl().
         uint64_t epoch = 1;
@@ -296,16 +348,18 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         break;
       }
       if (cmd == "jemalloc-stats-print") {
-        char *buf = (char *)malloc(MALLOC_WRITE_CB_BUFLEN);
-        if (buf == NULL) {
+        malloc_write mwo;
+
+        malloc_write_init(&mwo);
+        malloc_stats_print(malloc_write_cb, (void *)&mwo, "");
+        if (mwo.oom) {
+          malloc_write_fini(&mwo);
           transport->sendString("OOM\n");
           break;
         }
 
-        buf[0] = '\0';
-        malloc_stats_print(malloc_write_cb, (void *)buf, "");
-        transport->sendString(buf);
-        free(buf);
+        transport->sendString(mwo.s);
+        malloc_write_fini(&mwo);
         break;
       }
       if (cmd == "jemalloc-prof-activate") {

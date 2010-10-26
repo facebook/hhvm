@@ -116,6 +116,10 @@ public:
     m_usedDefaultValueScalarArrays.insert(s);
   }
 
+  void addUsedConstHeader(const std::string &s) {
+    m_usedConstsHeader.insert(s);
+  }
+
   /**
    * For separate compilation
    * These add edges between filescopes in the other dep graph and
@@ -218,6 +222,7 @@ private:
   std::set<std::string> m_usedFuncsInline;
   std::set<std::string> m_usedClasses;
   std::set<std::string> m_usedConsts;
+  std::set<std::string> m_usedConstsHeader;
   std::set<std::string> m_usedIncludesInline;
   std::set<std::string> m_usedLiteralStrings;
   std::set<std::string> m_usedLiteralStringsHeader;

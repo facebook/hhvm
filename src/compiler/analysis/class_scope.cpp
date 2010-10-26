@@ -1111,6 +1111,16 @@ void ClassScope::outputCPPForwardHeader(CodeGenerator &old_cg,
     cg_printf("extern StaticArray %s;\n", name.c_str());
   }
 
+  first = true;
+  BOOST_FOREACH(const string &str, m_usedConstsHeader) {
+    BlockScopeConstPtr block = ar->findConstantDeclarer(str);
+    assert(block);
+    ConstantTablePtr constants = block->getConstants();
+    if (!cg.ensureInNamespace() && first) cg_printf("\n");
+    first = false;
+    constants->outputSingleConstant(cg, ar, str);
+  }
+
   cg.ensureOutOfNamespace();
   cg.headerEnd(filename);
 }

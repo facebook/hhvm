@@ -272,6 +272,10 @@ public:
     m_usedDefaultValueScalarArrays.insert(s);
   }
 
+  void addUsedConstHeader(const std::string &s) {
+    m_usedConstsHeader.insert(s);
+  }
+
   /**
    * Output class meta info for g_class_map.
    */
@@ -414,6 +418,7 @@ private:
   std::set<JumpTableName> m_emptyJumpTables;
   std::set<std::string> m_usedLiteralStringsHeader;
   std::set<std::string> m_usedDefaultValueScalarArrays;
+  std::set<std::string> m_usedConstsHeader;
 
   std::string getBaseHeaderFilename(CodeGenerator &cg);
 

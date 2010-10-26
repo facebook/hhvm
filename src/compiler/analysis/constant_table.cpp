@@ -291,66 +291,80 @@ void ConstantTable::collectCPPGlobalSymbols(StringPairVec &symbols,
 }
 
 void ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
+  bool printed = false;
+  for (StringToSymbolMap::iterator iter = m_symbolMap.begin(),
+         end = m_symbolMap.end(); iter != end; ++iter) {
+    Symbol *sym = &iter->second;
+    if (outputCPP(cg, ar, sym)) printed = true;
+  }
+  if (printed) {
+    cg_printf("\n");
+  }
+}
+
+bool ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
+                              Symbol *sym) {
   bool decl = true;
   if (cg.getContext() == CodeGenerator::CppConstantsDecl) {
     decl = false;
   }
 
-  bool printed = false;
-  for (StringToSymbolMap::iterator iter = m_symbolMap.begin(),
-         end = m_symbolMap.end(); iter != end; ++iter) {
-    Symbol *sym = &iter->second;
-    if (!sym->declarationSet() || sym->isDynamic()) continue;
-    if (sym->isSystem() && cg.getOutput() != CodeGenerator::SystemCPP) continue;
-    const string &name = sym->getName();
-    ConstructPtr value = sym->getValue();
-    printed = true;
+  if (!sym->declarationSet() || sym->isDynamic()) return false;
+  if (sym->isSystem() && cg.getOutput() != CodeGenerator::SystemCPP) {
+    return false;
+  }
+  const string &name = sym->getName();
+  ConstructPtr value = sym->getValue();
 
-    cg_printf(decl ? "extern const " : "const ");
-    TypePtr type = sym->getFinalType();
-    bool isString = type->is(Type::KindOfString);
-    if (isString) {
-      cg_printf("StaticString");
-    } else {
-      type->outputCPPDecl(cg, ar, getBlockScope());
-    }
-    if (decl) {
-      cg_printf(" %s%s", Option::ConstantPrefix,
-                cg.formatLabel(name).c_str());
-    } else {
-      cg_printf(" %s%s", Option::ConstantPrefix,
-                cg.formatLabel(name).c_str());
-      cg_printf(isString ? "(" : " = ");
-      if (value) {
-        ExpressionPtr exp = dynamic_pointer_cast<Expression>(value);
-        ASSERT(!exp->getExpectedType());
-        if (isString && exp->isScalar()) {
-          ScalarExpressionPtr scalarExp =
-            dynamic_pointer_cast<ScalarExpression>(exp);
-          if (scalarExp) {
-            cg_printf("LITSTR_INIT(%s)",
-                      scalarExp->getCPPLiteralString(cg).c_str());
-          } else {
-            Variant v;
-            exp->getScalarValue(v);
-            cg_printf("LITSTR_INIT(\"%s\")",
-                      cg.escapeLabel(v.toString().data()).c_str());
-          }
+  cg_printf(decl ? "extern const " : "const ");
+  TypePtr type = sym->getFinalType();
+  bool isString = type->is(Type::KindOfString);
+  if (isString) {
+    cg_printf("StaticString");
+  } else {
+    type->outputCPPDecl(cg, ar, getBlockScope());
+  }
+  if (decl) {
+    cg_printf(" %s%s", Option::ConstantPrefix,
+              cg.formatLabel(name).c_str());
+  } else {
+    cg_printf(" %s%s", Option::ConstantPrefix,
+              cg.formatLabel(name).c_str());
+    cg_printf(isString ? "(" : " = ");
+    if (value) {
+      ExpressionPtr exp = dynamic_pointer_cast<Expression>(value);
+      ASSERT(!exp->getExpectedType());
+      if (isString && exp->isScalar()) {
+        ScalarExpressionPtr scalarExp =
+          dynamic_pointer_cast<ScalarExpression>(exp);
+        if (scalarExp) {
+          cg_printf("LITSTR_INIT(%s)",
+                    scalarExp->getCPPLiteralString(cg).c_str());
         } else {
-          exp->outputCPP(cg, ar);
+          Variant v;
+          exp->getScalarValue(v);
+          cg_printf("LITSTR_INIT(\"%s\")",
+                    cg.escapeLabel(v.toString().data()).c_str());
         }
       } else {
-        cg_printf("\"%s\"", cg.escapeLabel(name).c_str());
+        exp->outputCPP(cg, ar);
       }
-      if (isString) {
-        cg_printf(")");
-      }
+    } else {
+      cg_printf("\"%s\"", cg.escapeLabel(name).c_str());
     }
-    cg_printf(";\n");
+    if (isString) {
+      cg_printf(")");
+    }
   }
-  if (printed) {
-    cg_printf("\n");
-  }
+  cg_printf(";\n");
+  return true;
+}
+
+bool ConstantTable::outputSingleConstant(CodeGenerator &cg,
+                                         AnalysisResultPtr ar,
+                                         const std::string &name) {
+  Symbol *sym = getSymbol(name);
+  return sym && outputCPP(cg, ar, sym);
 }
 
 void ConstantTable::outputCPPJumpTable(CodeGenerator &cg,

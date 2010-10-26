@@ -385,11 +385,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg_printf("FORWARD_DECLARE_REDECLARED_CLASS(%s);\n", clsName);
         }
       }
-      if (m_stmt) {
-        cg.setContext(CodeGenerator::CppClassConstantsDecl);
-        m_stmt->outputCPP(cg, ar);
-        cg.setContext(CodeGenerator::CppForwardDeclaration);
-      }
     }
     break;
   case CodeGenerator::CppDeclaration:
@@ -625,6 +620,12 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             Option::ClassPrefix, clsName, Option::ObjectStaticPrefix);
         cg_indentEnd("}\n");
         cg_indentEnd("};\n");
+      }
+
+      if (m_stmt) {
+        cg.setContext(CodeGenerator::CppClassConstantsDecl);
+        m_stmt->outputCPP(cg, ar);
+        cg.setContext(CodeGenerator::CppDeclaration);
       }
 
       classScope->outputCPPGlobalTableWrappersDecl(cg, ar);

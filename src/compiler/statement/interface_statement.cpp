@@ -248,11 +248,6 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
         cg_printf("FORWARD_DECLARE_INTERFACE(%s);\n", clsName);
       }
     }
-    if (m_stmt) {
-      cg.setContext(CodeGenerator::CppClassConstantsDecl);
-      m_stmt->outputCPP(cg, ar);
-      cg.setContext(CodeGenerator::CppForwardDeclaration);
-    }
     break;
   case CodeGenerator::CppDeclaration:
     {
@@ -277,6 +272,11 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
       cg_indentBegin(" {\n");
       if (m_stmt) m_stmt->outputCPP(cg, ar);
       cg_indentEnd("};\n");
+      if (m_stmt) {
+        cg.setContext(CodeGenerator::CppClassConstantsDecl);
+        m_stmt->outputCPP(cg, ar);
+        cg.setContext(CodeGenerator::CppDeclaration);
+      }
     }
     break;
   case CodeGenerator::CppImplementation:

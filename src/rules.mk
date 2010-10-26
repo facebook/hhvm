@@ -742,6 +742,9 @@ endif
 do-setup: quiet
 
 
+ifdef LINK_LOCAL
+#pragma runlocal
+endif
 $(APP_TARGET): $(OBJECTS) $(DEP_LIBS) $(FORCE_RELINK)
 	$(LINK_OBJECTS) $(LINK_LIBS)
 

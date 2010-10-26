@@ -643,9 +643,12 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
                                    m_exp, hash, index, text); // empty array
     }
     if (id != -1) {
-      if (Option::UseNamedScalarArray &&
-          cg.getContext() == CodeGenerator::CppParameterDefaultValueDecl) {
-        getFileScope()->addUsedDefaultValueScalarArray(text);
+      if (Option::UseNamedScalarArray && cg.isFileOrClassHeader()) {
+        if (getClassScope()) {
+          getClassScope()->addUsedDefaultValueScalarArray(text);
+        } else {
+          getFileScope()->addUsedDefaultValueScalarArray(text);
+        }
       }
       ar->outputCPPScalarArrayId(cg, id, hash, index);
       return;

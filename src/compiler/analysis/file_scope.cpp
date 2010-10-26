@@ -329,14 +329,6 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   }
   cg_printf("\n");
 
-  cg.printSection("4. Classes");
-  for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
-       it != m_classes.end(); ++it) {
-    BOOST_FOREACH(ClassScopePtr cls, it->second) {
-      cls->getStmt()->outputCPP(cg, ar);
-    }
-  }
-
   cg.printSection("5. Used constants");
   BOOST_FOREACH(str, m_usedConstsHeader) {
     BlockScopeConstPtr block = ar->findConstantDeclarer(str);

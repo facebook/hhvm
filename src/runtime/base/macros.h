@@ -43,9 +43,6 @@ namespace HPHP {
   class c_##cls;                                        \
   typedef Object               p_##cls                  \
 
-#define FORWARD_DECLARE_REDECLARED_CLASS(cls)           \
-  class cs_##cls                                        \
-
 #define BEGIN_CLASS_MAP(cls)                            \
   public:                                               \
   virtual bool o_instanceof(CStrRef s) const {          \

@@ -229,6 +229,9 @@ public:
   void setInsideScalarArray(bool flag);
   bool getInsideScalarArray();
 
+  void setFileOrClassHeader(bool value) { m_inFileOrClassHeader = value; }
+  bool isFileOrClassHeader() { return m_inFileOrClassHeader; }
+
 private:
   std::string m_filename;
   Stream m_curStream;
@@ -243,6 +246,7 @@ private:
   int m_inComments[StreamCount];
   bool m_wrappedExpression[StreamCount];
   bool m_inExpression[StreamCount];
+  bool m_inFileOrClassHeader;
   bool m_inNamespace;
 
   static int s_idLambda;

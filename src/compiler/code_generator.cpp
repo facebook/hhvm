@@ -74,6 +74,7 @@ CodeGenerator::CodeGenerator(std::ostream *primary,
 
   if (filename) m_filename = *filename;
   m_translatePredefined = false;
+  m_inFileOrClassHeader = false;
   m_inNamespace = false;
 }
 
@@ -498,9 +499,13 @@ int CodeGenerator::checkLiteralString(const std::string &str, int &index,
     FileScopePtr fs = bs->getContainingFile();
     if (fs) {
       fs->addUsedLiteralString(str);
-      if (m_context == CppParameterDefaultValueDecl ||
-          m_context == CppStaticMethodWrapper) {
-        fs->addUsedLiteralStringHeader(str);
+      if (isFileOrClassHeader()) {
+        ClassScopePtr cs = bs->getContainingClass();
+        if (cs) {
+          cs->addUsedLiteralStringHeader(str);
+        } else {
+          fs->addUsedLiteralStringHeader(str);
+        }
       }
     }
   }

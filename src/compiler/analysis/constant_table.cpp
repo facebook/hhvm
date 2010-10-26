@@ -290,14 +290,15 @@ void ConstantTable::collectCPPGlobalSymbols(StringPairVec &symbols,
   }
 }
 
-void ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
+void ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
+                              bool newline /* = true */) {
   bool printed = false;
   for (StringToSymbolMap::iterator iter = m_symbolMap.begin(),
          end = m_symbolMap.end(); iter != end; ++iter) {
     Symbol *sym = &iter->second;
     if (outputCPP(cg, ar, sym)) printed = true;
   }
-  if (printed) {
+  if (newline && printed) {
     cg_printf("\n");
   }
 }

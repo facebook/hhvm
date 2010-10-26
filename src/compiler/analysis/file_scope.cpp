@@ -328,12 +328,6 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
     cg_printf("extern StaticArray %s;\n", name.c_str());
   }
   cg_printf("\n");
-  cg.printSection("3. Constants", false);
-  if (cg.getOutput() != CodeGenerator::MonoCPP) {
-    getConstants()->outputCPP(cg, ar);
-  } else {
-    cg_printf("// (omitted in MonoCPP mode)\n");
-  }
 
   cg.printSection("4. Classes");
   for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
@@ -413,6 +407,13 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
     outputCPPHelper(cg, ar, false); // function forward declarations
     cg.setContext(CodeGenerator::CppDeclaration);
     outputCPPHelper(cg, ar, false); // function declarations (only inline)
+
+    cg.printSection("Constants");
+    if (cg.getOutput() != CodeGenerator::MonoCPP) {
+      getConstants()->outputCPP(cg, ar, false);
+    } else {
+      cg_printf("// (omitted in MonoCPP mode)\n");
+    }
 
     cg.printSection("Redeclared Functions");
     outputCPPJumpTableDecl(cg, ar);

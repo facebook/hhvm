@@ -78,7 +78,7 @@ public:
    * Generate all constant declarations for this symbol table.
    */
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar, bool newline = true);
   void outputCPPDynamicDecl(CodeGenerator &cg, AnalysisResultPtr ar,
                             Type2SymbolListMap &type2names);
   void outputCPPDynamicImpl(CodeGenerator &cg, AnalysisResultPtr ar);

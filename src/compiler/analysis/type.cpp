@@ -18,6 +18,7 @@
 #include <compiler/code_generator.h>
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/class_scope.h>
+#include <compiler/analysis/file_scope.h>
 #include <compiler/expression/expression.h>
 #include <boost/format.hpp>
 
@@ -491,6 +492,14 @@ string Type::getCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
 void Type::outputCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
                          BlockScopeRawPtr scope) {
   cg_printf(getCPPDecl(cg, ar, scope).c_str());
+
+  if (isSpecificObject() && cg.isFileOrClassHeader() && scope) {
+    if (scope->getContainingClass()) {
+      scope->getContainingClass()->addUsedClassHeader(m_name);
+    } else if (scope->getContainingFile()) {
+      scope->getContainingFile()->addUsedClassHeader(m_name);
+    }
+  }
 }
 
 void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultConstPtr ar,

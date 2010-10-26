@@ -280,6 +280,10 @@ public:
     m_usedClassConstsHeader.insert(UsedClassConst(cls, s));
   }
 
+  void addUsedClassHeader(const std::string &s) {
+    m_usedClassesHeader.insert(s);
+  }
+
   /**
    * Output class meta info for g_class_map.
    */
@@ -425,6 +429,7 @@ private:
   std::set<std::string> m_usedConstsHeader;
   typedef std::pair<std::string, std::string> UsedClassConst;
   std::set<UsedClassConst> m_usedClassConstsHeader;
+  std::set<std::string> m_usedClassesHeader;
 
   std::string getBaseHeaderFilename(CodeGenerator &cg);
 

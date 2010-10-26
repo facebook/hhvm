@@ -377,6 +377,13 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
     cls->getConstants()->outputSingleConstant(cg, ar, item.second);
   }
 
+  cg.printSection("6. Used Classes");
+  BOOST_FOREACH(str, m_usedClassesHeader) {
+    ClassScopePtr usedClass = ar->findClass(str);
+    string usedClassName = usedClass->getId(cg);
+    cg_printf("FORWARD_DECLARE_CLASS(%s);\n", usedClassName.c_str());
+  }
+
   cg.namespaceEnd();
   // Includes must come after classes and constants
   for (map<string, FileScopeConstPtr>::const_iterator iter = extraIncs.begin();

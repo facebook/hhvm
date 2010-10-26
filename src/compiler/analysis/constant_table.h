@@ -82,6 +82,8 @@ public:
   void outputCPPDynamicDecl(CodeGenerator &cg, AnalysisResultPtr ar,
                             Type2SymbolListMap &type2names);
   void outputCPPDynamicImpl(CodeGenerator &cg, AnalysisResultPtr ar);
+  bool outputSingleConstant(CodeGenerator &cg, AnalysisResultPtr ar,
+                            const std::string &name);
 
   void collectCPPGlobalSymbols(StringPairVec &symbols, CodeGenerator &cg,
                                AnalysisResultPtr ar);
@@ -116,6 +118,7 @@ private:
   bool m_hasDynamic;
 
   ClassScopePtr findParent(AnalysisResultConstPtr ar, const std::string &name);
+  bool outputCPP(CodeGenerator &cg, AnalysisResultPtr ar, Symbol *sym);
   void outputCPPConstantSymbol(CodeGenerator &cg, AnalysisResultPtr ar,
                                Symbol *sym);
 

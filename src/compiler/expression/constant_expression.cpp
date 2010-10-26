@@ -240,6 +240,7 @@ void ConstantExpression::outputCPPImpl(CodeGenerator &cg,
   }
 
   string lower = Util::toLower(m_name);
+  bool requireFwDeclaration = false;
   if (lower == "true" || lower == "false" || lower == "null") {
     cg_printf("%s", lower.c_str());
   } else if (m_valid) {
@@ -252,9 +253,19 @@ void ConstantExpression::outputCPPImpl(CodeGenerator &cg,
     } else {
       cg_printf("%s%s", Option::ConstantPrefix,
                 cg.formatLabel(m_name).c_str());
+      requireFwDeclaration = true;
     }
   } else {
     cg_printf("getUndefinedConstant(%s%s)",
               Option::ConstantPrefix, cg.formatLabel(m_name).c_str());
+    requireFwDeclaration = true;
+  }
+
+  if (requireFwDeclaration && cg.isFileOrClassHeader()) {
+    if (getClassScope()) {
+      getClassScope()->addUsedConstHeader(m_name);
+    } else {
+      getFileScope()->addUsedConstHeader(m_name);
+    }
   }
 }

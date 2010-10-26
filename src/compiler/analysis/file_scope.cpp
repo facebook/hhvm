@@ -363,6 +363,14 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
     }
   }
 
+  cg.printSection("5. Used constants");
+  BOOST_FOREACH(str, m_usedConstsHeader) {
+    BlockScopeConstPtr block = ar->findConstantDeclarer(str);
+    assert(block);
+    ConstantTablePtr constants = block->getConstants();
+    constants->outputSingleConstant(cg, ar, str);
+  }
+
   cg.namespaceEnd();
   // Includes must come after classes and constants
   for (map<string, FileScopeConstPtr>::const_iterator iter = extraIncs.begin();
@@ -496,6 +504,7 @@ void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
 }
 
 void FileScope::outputCPPDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar) {
+  cg.setFileOrClassHeader(true);
   string fwheader = outputFilebase() + ".fw.h";
   string header = outputFilebase() + ".h";
   cg.headerBegin(header);

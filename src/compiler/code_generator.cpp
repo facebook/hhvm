@@ -74,6 +74,7 @@ CodeGenerator::CodeGenerator(std::ostream *primary,
 
   if (filename) m_filename = *filename;
   m_translatePredefined = false;
+  m_inNamespace = false;
 }
 
 void CodeGenerator::useStream(Stream stream) {
@@ -168,6 +169,8 @@ void CodeGenerator::printSeparator() {
 }
 
 void CodeGenerator::namespaceBegin() {
+  assert(!m_inNamespace);
+  m_inNamespace = true;
   printf("\n");
   printf("namespace HPHP {\n");
   printSeparator();
@@ -175,6 +178,8 @@ void CodeGenerator::namespaceBegin() {
 }
 
 void CodeGenerator::namespaceEnd() {
+  assert(m_inNamespace);
+  m_inNamespace = false;
   printf("\n");
   printSeparator();
   printf("}\n");
@@ -190,6 +195,18 @@ std::string CodeGenerator::getFormattedName(const std::string &file) {
   int hash = hash_string(file.data(), file.size());
   formatted += boost::str(boost::format("%08x") % hash);
   return formatted;
+}
+
+bool CodeGenerator::ensureInNamespace() {
+  if (m_inNamespace) return false;
+  namespaceBegin();
+  return true;
+}
+
+bool CodeGenerator::ensureOutOfNamespace() {
+  if (!m_inNamespace) return false;
+  namespaceEnd();
+  return true;
 }
 
 void CodeGenerator::headerBegin(const std::string &file) {

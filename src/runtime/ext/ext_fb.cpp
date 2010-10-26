@@ -902,6 +902,7 @@ void const_load() {
   // after all loading
   const_load_set("zend_array_size", const_data.size());
   const_data.setStatic();
+  const_data.onSetStatic();
 }
 
 bool const_dump(const char *filename) {

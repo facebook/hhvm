@@ -163,10 +163,7 @@ void FileScope::addFunctionDependency(AnalysisResultPtr ar,
 }
 void FileScope::addConstantDependency(AnalysisResultPtr ar,
                                       const string &decname) {
-  if (m_usedConsts.find(decname) == m_usedConsts.end()) {
-    m_usedConsts.insert(decname);
-    ar->addConstantDependency(shared_from_this(), decname);
-  }
+  ar->addConstantDependency(shared_from_this(), decname);
 }
 
 void FileScope::analyzeProgram(AnalysisResultPtr ar) {
@@ -311,16 +308,6 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
     }
   }
 
-  string name;
-  map<string, FileScopeConstPtr> extraIncs;
-  BOOST_FOREACH(name, m_usedConsts) {
-    BlockScopeConstPtr block = ar->findConstantDeclarer(name);
-    if (block && block->is(BlockScope::FileScope)) {
-      FileScopeConstPtr fs = dynamic_pointer_cast<const FileScope>(block);
-      extraIncs[fs->getName()] = fs;
-    }
-  }
-
   cg.namespaceBegin();
   cg.printSection("1. Static Strings", false);
   string str;
@@ -378,14 +365,6 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   }
 
   cg.namespaceEnd();
-  // Includes must come after classes and constants
-  for (map<string, FileScopeConstPtr>::const_iterator iter = extraIncs.begin();
-       iter != extraIncs.end(); ++iter) {
-    FileScopeConstPtr fs = iter->second;
-    if (fs != shared_from_this()) {
-      cg_printInclude(fs->outputFilebase() + ".fw.h");
-    }
-  }
 }
 
 void FileScope::outputCPPDeclarations(CodeGenerator &cg,

@@ -222,12 +222,7 @@ bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   Expression::preOutputCPP(cg, ar, state & ~FixOrder);
   ar->wrapExpressionBegin(cg);
   if (m_classScope) {
-    string className;
-    if (m_redeclaredClass) {
-      className = cg.formatLabel(m_classScope->getName());
-    } else {
-      className = m_classScope->getId(cg);
-    }
+    string className = m_classScope->getId(cg);
     cg_printf("FrameInjection::SetStaticClassName(info, "
               "%s%s::s_class_name);\n",
               Option::ClassPrefix, className.c_str());
@@ -259,12 +254,7 @@ void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (!m_className.empty()) {
       cg_printf("STATIC_CLASS_NAME_CALL(");
       if (m_classScope) {
-        string className;
-        if (m_redeclaredClass) {
-          className = cg.formatLabel(m_classScope->getName());
-        } else {
-          className = m_classScope->getId(cg);
-        }
+        string className = m_classScope->getId(cg);
         cg_printf("%s%s::s_class_name, ",
                   Option::ClassPrefix, className.c_str());
       } else {

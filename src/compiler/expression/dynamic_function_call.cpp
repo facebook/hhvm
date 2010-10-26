@@ -160,6 +160,18 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   if (m_validClass) {
     cls = ar->findClass(m_className);
   }
+
+  if (!m_classScope && !m_className.empty() && m_cppTemp.empty() &&
+      m_origClassName != "self" && m_origClassName != "parent" &&
+      m_origClassName != "static") {
+    // Create a temporary to hold the class name, in case it is not a
+    // StaticString.
+    m_clsNameTemp = cg.createNewId(ar);
+    cg_printf("CStrRef clsName%d(", m_clsNameTemp);
+    cg_printString(m_origClassName, ar);
+    cg_printf(");\n");
+  }
+
   if (nonStatic) {
     cg_printf("const CallInfo *cit%d;\n", m_ciTemp);
     cg_printf("void *vt%d;\n", m_ciTemp);
@@ -185,17 +197,6 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_printf("mcp%d.staticMethodCall(\"%s\", ", m_ciTemp,
           m_className.c_str());
     }
-  }
-
-  if (!cls && !m_className.empty() && m_cppTemp.empty() &&
-      m_origClassName != "self" && m_origClassName != "parent" &&
-      m_origClassName != "static") {
-    // Create a temporary to hold the class name, in case it is not a
-    // StaticString.
-    m_clsNameTemp = cg.createNewId(ar);
-    cg_printf("CStrRef clsName%d(", m_clsNameTemp);
-    cg_printString(m_origClassName, ar);
-    cg_printf(");\n");
   }
 
   if (m_nameExp->is(Expression::KindOfSimpleVariable)) {

@@ -1118,6 +1118,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         cg_printf(");\n");
       }
     }
+
     if (cscope && cscope->derivesFromRedeclaring()) {
       // In a derived from redeclaring class
       cg_printf("mcp%d.dynamicNamedCall%s(\"%s\", \"%s\"", m_ciTemp,

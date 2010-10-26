@@ -898,8 +898,10 @@ void RuntimeOption::Load(Hdf &config) {
     }
     // Following two lines are added for compatibility, will be removed
     // when new config format is pushed.
-    EnableAPCSizeStats = stats["EnableAPCSizeStats"].getBool();
-    APCSizeCountPrime = stats["APCSizeCountPrime"].getBool();
+    EnableAPCSizeStats =
+      stats["EnableAPCSizeStats"].getBool(EnableAPCSizeStats);
+    APCSizeCountPrime = stats["APCSizeCountPrime"].getBool(APCSizeCountPrime);
+
     ProfilerTraceBuffer = stats["ProfilerTraceBuffer"].getInt32(2000000);
   }
   {

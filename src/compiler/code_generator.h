@@ -144,6 +144,8 @@ public:
   void printSeparator();
   void namespaceBegin();
   void namespaceEnd();
+  bool ensureInNamespace();
+  bool ensureOutOfNamespace();
   void headerBegin(const std::string &file);
   void headerEnd(const std::string &file);
   void ifdefBegin(bool ifdef, const char *fmt, ...);
@@ -241,6 +243,7 @@ private:
   int m_inComments[StreamCount];
   bool m_wrappedExpression[StreamCount];
   bool m_inExpression[StreamCount];
+  bool m_inNamespace;
 
   static int s_idLambda;
   std::map<std::string, int> m_idCounters;

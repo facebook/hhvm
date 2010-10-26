@@ -154,10 +154,7 @@ void FileScope::addIncludeDependency(AnalysisResultPtr ar,
 }
 void FileScope::addClassDependency(AnalysisResultPtr ar,
                                    const string &classname) {
-  if (m_usedClasses.find(classname) == m_usedClasses.end()) {
-    m_usedClasses.insert(classname);
-    ar->addClassDependency(shared_from_this(), classname);
-  }
+  ar->addClassDependency(shared_from_this(), classname);
 }
 void FileScope::addFunctionDependency(AnalysisResultPtr ar,
                                       const string &funcname, bool byInlined) {
@@ -315,18 +312,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   }
 
   string name;
-  ClassScopePtr cls;
-
   map<string, FileScopeConstPtr> extraIncs;
-  BOOST_FOREACH(name, m_usedClasses) {
-    cls = ar->findClass(name, AnalysisResult::ClassName);
-    if (cls && cls->isUserClass()) {
-      FileScopePtr fs = cls->getContainingFile();
-      if (fs) {
-        extraIncs[fs->getName()] = fs;
-      }
-    }
-  }
   BOOST_FOREACH(name, m_usedConsts) {
     BlockScopeConstPtr block = ar->findConstantDeclarer(name);
     if (block && block->is(BlockScope::FileScope)) {
@@ -421,17 +407,6 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
          it != m_classes.end(); ++it) {
       BOOST_FOREACH(ClassScopePtr cls, it->second) {
         cg_printInclude(cls->getHeaderFilename(cg));
-      }
-    }
-
-    BOOST_FOREACH(string name, m_usedClasses) {
-      ClassScopePtr cls = ar->findClass(name, AnalysisResult::ClassName);
-      if (cls && cls->isUserClass()) {
-        FileScopePtr fs = cls->getContainingFile();
-        if (fs && done.find(fs) == done.end()) {
-          done.insert(fs);
-          cg_printInclude(fs->outputFilebase());
-        }
       }
     }
 

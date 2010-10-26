@@ -87,9 +87,33 @@ class Variant {
    */
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
-  Variant() : _count(0), m_type(KindOfNull) {
-    // uninitialized
+  /**
+   * setUninitNull occurs frequently; use this version where possible.
+   */
+  inline void setUninitNull() {
+    CT_ASSERT(offsetof(Variant, m_data) == 0     &&
+              offsetof(Variant, _count) == 8     &&
+              offsetof(Variant, m_type) == 12    &&
+              sizeof(m_data) == sizeof(uint64_t) &&
+              sizeof(_count) == sizeof(uint32_t) &&
+              sizeof(m_type) == sizeof(uint32_t) &&
+              sizeof(Variant) == 2 * sizeof(uint64_t));
+    /**
+     * Two qword stores are faster than the three stores needed for
+     * assigning the three members, and gcc can't figure it out.
+     * Note that there are no endianness assumptions: the only "split"
+     * integer field is m_typeAndCount, and we're writing all 0's to it.
+     *
+     * The dance with the union is needed to explain to g++ 4.4 that the
+     * store through m_countAndTypeUnion aliases _count and m_type.
+     */
     m_data.num = 1;
+    m_countAndTypeUnion = 0;
+    ASSERT(!isInitialized());
+  }
+
+  Variant() {
+    setUninitNull();
   }
 
   void destruct();
@@ -967,10 +991,16 @@ class Variant {
     Variant     *pvar; // shared data between strongly bound Variants
   } m_data;
  protected:
-  mutable int _count;
- private:
-  mutable DataType m_type;
+  union {
+    // Anonymous: just use _count, m_type
+    struct {
+      mutable int _count;
+      mutable DataType m_type;
+    };
+    uint64 m_countAndTypeUnion;
+  };
 
+ private:
   bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }
   bool isObjectConvertable() {
     return isNull() ||

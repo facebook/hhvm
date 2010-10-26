@@ -117,7 +117,8 @@ public:
 
   void checkDerivation(AnalysisResultPtr ar, hphp_string_set &seen);
   const std::string &getParent() const { return m_parent;}
-  std::string getHeaderFilename(CodeGenerator &cg);
+  std::string getHeaderFilename(CodeGenerator &old_cg);
+  std::string getForwardHeaderFilename(CodeGenerator &old_cg);
 
   /**
    * Returns topmost parent class that has the method.
@@ -303,6 +304,8 @@ public:
   bool hasConst(const std::string &name);
   void outputCPPHeader(CodeGenerator &cg, AnalysisResultPtr ar,
                        CodeGenerator::Output output);
+  void outputCPPForwardHeader(CodeGenerator &old_cg, AnalysisResultPtr ar,
+                              CodeGenerator::Output output);
   void outputCPPJumpTableDecl(CodeGenerator &cg, AnalysisResultPtr ar);
 
   void outputMethodWrappers(CodeGenerator &cg, AnalysisResultPtr ar);
@@ -401,6 +404,8 @@ private:
   bool m_sep;
 
   std::set<JumpTableName> m_emptyJumpTables;
+
+  std::string getBaseHeaderFilename(CodeGenerator &cg);
 
   static void outputCPPClassJumpTable
   (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,

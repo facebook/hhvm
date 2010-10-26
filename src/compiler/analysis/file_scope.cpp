@@ -452,23 +452,7 @@ void FileScope::outputCPPForwardDeclHeader(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
   string header = outputFilebase() + ".fw.h";
   cg.headerBegin(header);
-  if (Option::GenerateCPPMain) {
-    cg_printInclude("<runtime/base/hphp.h>");
-    cg_printInclude(string(Option::SystemFilePrefix) +
-                    "literal_strings_remap.h");
-    cg_printInclude(string(Option::SystemFilePrefix) +
-                    "scalar_arrays_remap.h");
-    cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-    if (Option::GenConcat || Option::GenArrayCreate) {
-      cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-    }
-  } else if (cg.getOutput() == CodeGenerator::SystemCPP) {
-    cg_printInclude("<runtime/base/hphp_system.h>");
-    cg_printInclude(string(Option::SystemFilePrefix) +
-                    "literal_strings_remap.h");
-    cg_printInclude(string(Option::SystemFilePrefix) +
-                    "scalar_arrays_remap.h");
-  }
+  cg.printBasicIncludes();
   outputCPPForwardDeclarations(cg, ar);
   cg.headerEnd(header);
 }
@@ -529,12 +513,23 @@ void FileScope::outputCPPDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void FileScope::outputCPPClassHeaders(CodeGenerator &cg, AnalysisResultPtr ar,
                                       CodeGenerator::Output output) {
-  string name;
   ClassScopePtr cls;
   for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
        it != m_classes.end(); ++it) {
     BOOST_FOREACH(ClassScopePtr cls, it->second) {
       cls->outputCPPHeader(cg, ar, output);
+    }
+  }
+}
+
+void FileScope::outputCPPForwardClassHeaders(CodeGenerator &cg,
+                                             AnalysisResultPtr ar,
+                                             CodeGenerator::Output output) {
+  ClassScopePtr cls;
+  for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
+       it != m_classes.end(); ++it) {
+    BOOST_FOREACH(ClassScopePtr cls, it->second) {
+      cls->outputCPPForwardHeader(cg, ar, output);
     }
   }
 }

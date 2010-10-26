@@ -1029,13 +1029,21 @@ void ClassScope::getRootParents(AnalysisResultConstPtr ar,
   }
 }
 
-string ClassScope::getHeaderFilename(CodeGenerator &cg) {
+string ClassScope::getBaseHeaderFilename(CodeGenerator &cg) {
   FileScopePtr file = getContainingFile();
   ASSERT(file);
   string fileBase = file->outputFilebase();
   string headerFile = Option::ClassHeaderPrefix;
-  headerFile += getId(cg) + ".h";
+  headerFile += getId(cg);
   return headerFile;
+}
+
+string ClassScope::getHeaderFilename(CodeGenerator &cg) {
+  return getBaseHeaderFilename(cg) + ".h";
+}
+
+std::string ClassScope::getForwardHeaderFilename(CodeGenerator &cg) {
+  return getBaseHeaderFilename(cg) + ".fw.h";
 }
 
 void ClassScope::outputCPPHeader(CodeGenerator &old_cg, AnalysisResultPtr ar,
@@ -1047,6 +1055,8 @@ void ClassScope::outputCPPHeader(CodeGenerator &old_cg, AnalysisResultPtr ar,
   CodeGenerator cg(&f, output);
 
   cg.headerBegin(filename);
+
+  cg_printInclude(getForwardHeaderFilename(cg));
 
   // 1. includes
   BOOST_FOREACH(string base, m_bases) {
@@ -1061,6 +1071,22 @@ void ClassScope::outputCPPHeader(CodeGenerator &old_cg, AnalysisResultPtr ar,
   cg.setContext(CodeGenerator::CppDeclaration);
   getStmt()->outputCPP(cg, ar);
   cg.namespaceEnd();
+
+  cg.headerEnd(filename);
+}
+
+void ClassScope::outputCPPForwardHeader(CodeGenerator &old_cg,
+                                        AnalysisResultPtr ar,
+                                        CodeGenerator::Output output) {
+  string filename = getForwardHeaderFilename(old_cg);
+  string root = ar->getOutputPath() + "/";
+  Util::mkdir(root + filename);
+  ofstream f((root + filename).c_str());
+  CodeGenerator cg(&f, output);
+  cg.setContext(CodeGenerator::CppForwardDeclaration);
+
+  cg.headerBegin(filename);
+  cg.printBasicIncludes();
 
   cg.headerEnd(filename);
 }

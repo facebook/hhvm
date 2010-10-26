@@ -1584,6 +1584,7 @@ public:
         f.close();
       }
       fs->outputCPPClassHeaders(cg, m_ar, m_output);
+      fs->outputCPPForwardClassHeaders(cg, m_ar, m_output);
       {
         ofstream f(fwFileHeader.c_str());
         CodeGenerator cg(&f, m_output);

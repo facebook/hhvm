@@ -463,15 +463,6 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
     cg.printSection("Redeclared Functions");
     outputCPPJumpTableDecl(cg, ar);
 
-    cg.printSection("Dynamic Class Declarations");
-    for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
-         it != m_classes.end(); ++it) {
-      BOOST_FOREACH(ClassScopePtr cls, it->second) {
-        if (!cls->isInterface()) {
-          cls->outputCPPDynamicClassDecl(cg);
-        }
-      }
-    }
     cg.namespaceEnd();
   }
 }

@@ -377,18 +377,12 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   const char *clsName = clsNameStr.c_str();
   bool redeclared = classScope->isRedeclaring();
   switch (cg.getContext()) {
-  case CodeGenerator::CppForwardDeclaration:
+  case CodeGenerator::CppDeclaration:
     {
       if (Option::GenerateCPPMacros) {
         cg_printf("FORWARD_DECLARE_CLASS(%s);\n", clsName);
-        if (redeclared) {
-          cg_printf("FORWARD_DECLARE_REDECLARED_CLASS(%s);\n", clsName);
-        }
       }
-    }
-    break;
-  case CodeGenerator::CppDeclaration:
-    {
+
       bool system = cg.getOutput() == CodeGenerator::SystemCPP;
       ClassScopePtr parCls;
       if (!m_parent.empty()) {

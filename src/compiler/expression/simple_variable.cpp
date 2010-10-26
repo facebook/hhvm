@@ -199,7 +199,7 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
   }
 
   TypePtr actual = propagateTypes(ar, ret);
-  setTypes(actual, type);
+  setTypes(ar, actual, type);
   if (Type::SameType(actual, ret)) {
     m_implementedType.reset();
   } else {

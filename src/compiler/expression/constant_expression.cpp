@@ -101,9 +101,9 @@ bool ConstantExpression::canonCompare(ExpressionPtr e) const {
 // static analysis functions
 
 void ConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
+  getFileScope()->addConstantDependency(ar, m_name);
   if (ar->getPhase() == AnalysisResult::AnalyzeAll &&
       !(m_context & LValue)) {
-    getFileScope()->addConstantDependency(ar, m_name);
     if (!m_dynamic) {
       ConstantTablePtr constants = ar->getConstants();
       if (!constants->getValue(m_name)) {

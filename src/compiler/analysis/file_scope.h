@@ -128,6 +128,10 @@ public:
     m_usedClassesHeader.insert(s);
   }
 
+  void addUsedClassFullHeader(const std::string &s) {
+    m_usedClassesFullHeader.insert(s);
+  }
+
   /**
    * For separate compilation
    * These add edges between filescopes in the other dep graph and
@@ -230,6 +234,7 @@ private:
   std::set<std::string> m_usedFuncsInline;
   std::set<std::string> m_usedClasses;
   std::set<std::string> m_usedClassesHeader;
+  std::set<std::string> m_usedClassesFullHeader;
   std::set<std::string> m_usedConsts;
   std::set<std::string> m_usedConstsHeader;
   typedef std::pair<std::string, std::string> UsedClassConst;

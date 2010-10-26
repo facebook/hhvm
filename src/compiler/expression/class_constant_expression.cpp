@@ -238,6 +238,13 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
     if (cls->getConstants()->isDynamic(m_varName)) {
       cg_printf("%s%s::lazy_initializer(%s)->", Option::ClassPrefix,
                 cls->getId(cg).c_str(), cg.getGlobals(ar));
+      if (cg.isFileOrClassHeader()) {
+        if (getClassScope()) {
+          getClassScope()->addUsedClassFullHeader(trueClassName);
+        } else {
+          getFileScope()->addUsedClassFullHeader(trueClassName);
+        }
+      }
     } else if (cg.isFileOrClassHeader()) {
       if (getClassScope()) {
         getClassScope()->addUsedClassConstHeader(trueClassName, m_varName);

@@ -1089,6 +1089,13 @@ void ClassScope::outputCPPForwardHeader(CodeGenerator &old_cg,
   cg.headerBegin(filename);
   cg.printBasicIncludes();
 
+  BOOST_FOREACH(const string &dep, m_usedClassesFullHeader) {
+    ClassScopePtr cls = ar->findClass(dep);
+    if (cls && cls->isUserClass()) {
+      cg_printInclude(cls->getHeaderFilename(cg));
+    }
+  }
+
   bool first = true;
   BOOST_FOREACH(const string &str, m_usedLiteralStringsHeader) {
     int index = -1;

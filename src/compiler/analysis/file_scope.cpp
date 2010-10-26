@@ -307,6 +307,13 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   cg.printSection("Forward Declarations");
   cg.setContext(CodeGenerator::CppForwardDeclaration);
 
+  BOOST_FOREACH(const string &dep, m_usedClassesFullHeader) {
+    ClassScopePtr cls = ar->findClass(dep);
+    if (cls && cls->isUserClass()) {
+      cg_printInclude(cls->getHeaderFilename(cg));
+    }
+  }
+
   string name;
   ClassScopePtr cls;
 

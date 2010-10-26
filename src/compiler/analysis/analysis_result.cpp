@@ -3707,17 +3707,17 @@ void AnalysisResult::outputCPPClusterImpl(CodeGenerator &cg,
   map<string, FileScopePtr> toInclude;
   BOOST_FOREACH(FileScopePtr fs, files) {
     getTrueDeps(fs, toInclude);
-    toInclude[fs->getName()] = fs;
   }
+  BOOST_FOREACH(FileScopePtr fs, files) {
+    cg_printInclude(fs->outputFilebase());
+    cg_printInclude(fs->outputFilebase() + ".fws");
+    toInclude.erase(fs->getName());
+  }
+  cg.printSection("Dependencies");
   for (map<string, FileScopePtr>::const_iterator iter = toInclude.begin();
        iter != toInclude.end(); ++iter) {
     FileScopePtr fs = iter->second;
     cg_printInclude(fs->outputFilebase());
-  }
-  for (map<string, FileScopePtr>::const_iterator iter = toInclude.begin();
-       iter != toInclude.end(); ++iter) {
-    FileScopePtr fs = iter->second;
-    cg_printInclude(fs->outputFilebase() + ".fws");
   }
   cg_printInclude("<runtime/ext/ext.h>");
   outputCPPSepExtensionIncludes(cg);

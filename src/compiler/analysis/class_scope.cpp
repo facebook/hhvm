@@ -1071,6 +1071,11 @@ void ClassScope::outputCPPHeader(CodeGenerator &old_cg, AnalysisResultPtr ar,
   cg.namespaceBegin();
   cg.setContext(CodeGenerator::CppDeclaration);
   getStmt()->outputCPP(cg, ar);
+
+  if (!isInterface()) {
+    outputCPPDynamicClassDecl(cg);
+  }
+
   cg.namespaceEnd();
 
   cg.headerEnd(filename);

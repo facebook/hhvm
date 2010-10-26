@@ -52,6 +52,7 @@ shared-lib-target: $(if $(TLS_GD),$(SHARED_LIB_GD),$(SHARED_LIB))
 .PHONY: shared-lib-target
 
 INTERMEDIATE_DIRS += $(PROJECT_ROOT)/output_gd
+INTERMEDIATE_FILES += $(LIB_DIR)/libhphp_runtime_gd.so
 
 shared-lib-gd:
 	$(MAKE) $(if $(OUTDIR_BY_TYPE),,OUTPUT_ROOT=output_gd) TLS_GD=1 DIRS_INCLUDED= shared-lib-target SHARED_LIB_TARGET=$(LIB_DIR)

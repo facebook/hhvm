@@ -22,13 +22,16 @@ SLOW_TESTS := TestCodeRun TestServer
 
 all: fast_tests
 
-$(FAST_TESTS) $(SLOW_TESTS): % : setup $(LIB_DIR)/libhphp_runtime_gd.so
+SETUP_TARGETS := all
+
+$(FAST_TESTS) $(SLOW_TESTS): % : setup
 	cd src && $(TEST) $(if $($@),$($@),$@)
 
-$(LIB_DIR)/libhphp_runtime_gd.so:
-	$(MAKE) -C src shared-lib-gd
+$(SLOW_TESTS): SETUP_TARGETS += shared-lib-gd
+
 setup:
-	$(MAKE) -C src $(COPY)
+	$(MAKE) -C src $(SETUP_TARGETS) $(COPY)
+
 fast_tests: $(FAST_TESTS)
 slow_tests: $(SLOW_TESTS)
 

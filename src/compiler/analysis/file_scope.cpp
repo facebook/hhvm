@@ -519,15 +519,6 @@ void FileScope::outputCPPDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar) {
   string fwheader = outputFilebase() + ".fw.h";
   string header = outputFilebase() + ".h";
   cg.headerBegin(header);
-  if (Option::GenerateCPPMain) {
-    cg_printInclude("<runtime/base/hphp.h>");
-    cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-    if (Option::GenConcat || Option::GenArrayCreate) {
-      cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-    }
-  } else if (cg.getOutput() == CodeGenerator::SystemCPP) {
-    cg_printInclude("<runtime/base/hphp_system.h>");
-  }
   cg_printInclude(fwheader);
   outputCPPDeclarations(cg, ar);
   cg.headerEnd(header);

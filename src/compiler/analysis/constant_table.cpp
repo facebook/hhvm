@@ -324,12 +324,25 @@ bool ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   } else {
     type->outputCPPDecl(cg, ar, getBlockScope());
   }
+  ClassScope *cls = dynamic_cast<ClassScope*>(&m_blockScope);
   if (decl) {
-    cg_printf(" %s%s", Option::ConstantPrefix,
-              cg.formatLabel(name).c_str());
+    if (!cls) {
+      cg_printf(" %s%s", Option::ConstantPrefix,
+                cg.formatLabel(name).c_str());
+    } else {
+      cg_printf(" %s%s_%s", Option::ClassConstantPrefix,
+                cls->getId(cg).c_str(),
+                cg.formatLabel(name).c_str());
+    }
   } else {
-    cg_printf(" %s%s", Option::ConstantPrefix,
-              cg.formatLabel(name).c_str());
+    if (!cls) {
+      cg_printf(" %s%s", Option::ConstantPrefix,
+                cg.formatLabel(name).c_str());
+    } else {
+      cg_printf(" %s%s_%s", Option::ClassConstantPrefix,
+                cls->getId(cg).c_str(),
+                cg.formatLabel(name).c_str());
+    }
     cg_printf(isString ? "(" : " = ");
     if (value) {
       ExpressionPtr exp = dynamic_pointer_cast<Expression>(value);

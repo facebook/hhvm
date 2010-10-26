@@ -16,6 +16,7 @@
 
 #include <compiler/expression/class_constant_expression.h>
 #include <compiler/analysis/class_scope.h>
+#include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/constant_table.h>
 #include <compiler/analysis/code_error.h>
 #include <util/hash.h>
@@ -234,24 +235,18 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
     if (outsideClass) {
       cls->outputVolatileCheckBegin(cg, ar, getScope(), m_origClassName);
     }
-    ExpressionPtr decl = dynamic_pointer_cast<Expression>(
-      m_defScope->getConstants()->getValue(m_varName));
-    if (decl) {
-      Clone(decl, getScope())->outputCPP(cg, ar);
-      if (cg.getContext() == CodeGenerator::CppImplementation ||
-          cg.getContext() == CodeGenerator::CppParameterDefaultValueImpl) {
-        cg_printf("(%s::%s)", m_className.c_str(), m_varName.c_str());
+    if (cls->getConstants()->isDynamic(m_varName)) {
+      cg_printf("%s%s::lazy_initializer(%s)->", Option::ClassPrefix,
+                cls->getId(cg).c_str(), cg.getGlobals(ar));
+    } else if (cg.isFileOrClassHeader()) {
+      if (getClassScope()) {
+        getClassScope()->addUsedClassConstHeader(trueClassName, m_varName);
       } else {
-        cg_printf("/* %s::%s */", m_className.c_str(), m_varName.c_str());
+        getFileScope()->addUsedClassConstHeader(trueClassName, m_varName);
       }
-    } else {
-      if (cls->getConstants()->isDynamic(m_varName)) {
-        cg_printf("%s%s::lazy_initializer(%s)->", Option::ClassPrefix,
-                  cls->getId(cg).c_str(), cg.getGlobals(ar));
-      }
-      cg_printf("%s%s_%s", Option::ClassConstantPrefix, cls->getId(cg).c_str(),
-                m_varName.c_str());
     }
+    cg_printf("%s%s_%s", Option::ClassConstantPrefix, cls->getId(cg).c_str(),
+              m_varName.c_str());
     if (outsideClass) {
       cls->outputVolatileCheckEnd(cg);
     }

@@ -371,6 +371,12 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
     constants->outputSingleConstant(cg, ar, str);
   }
 
+  BOOST_FOREACH(const UsedClassConst& item, m_usedClassConstsHeader) {
+    ClassScopePtr cls = ar->findClass(item.first);
+    assert(cls);
+    cls->getConstants()->outputSingleConstant(cg, ar, item.second);
+  }
+
   cg.namespaceEnd();
   // Includes must come after classes and constants
   for (map<string, FileScopeConstPtr>::const_iterator iter = extraIncs.begin();

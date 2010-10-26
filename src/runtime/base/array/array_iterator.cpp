@@ -92,33 +92,33 @@ CVarRef ArrayIter::secondRef() {
 
 MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
                                    Variant &val)
-  : m_var(var), m_data(NULL), m_key(key), m_val(val), m_pos() {
+  : m_var(var), m_data(NULL), m_key(key), m_val(val), m_fp() {
   ASSERT(m_var);
   ArrayData *data = getData();
   if (data) {
     data->reset();
-    data->newFullPos(m_pos);
-    ASSERT(m_pos.container == data);
+    data->newFullPos(m_fp);
+    ASSERT(m_fp.container == data);
   }
 }
 
 MutableArrayIter::MutableArrayIter(ArrayData *data, Variant *key,
                                    Variant &val)
-  : m_var(NULL), m_data(data), m_key(key), m_val(val), m_pos() {
+  : m_var(NULL), m_data(data), m_key(key), m_val(val), m_fp() {
   if (data) {
     // protect the data which may be owned by a C++ temp
     data->incRefCount();
     data->reset();
-    data->newFullPos(m_pos);
-    ASSERT(m_pos.container == data);
+    data->newFullPos(m_fp);
+    ASSERT(m_fp.container == data);
   }
 }
 
 MutableArrayIter::~MutableArrayIter() {
   // free the iterator
-  if (m_pos.container != NULL) {
-    m_pos.container->freeFullPos(m_pos);
-    ASSERT(m_pos.container == NULL);
+  if (m_fp.container != NULL) {
+    m_fp.container->freeFullPos(m_fp);
+    ASSERT(m_fp.container == NULL);
   }
   // unprotect the data
   if (m_data && m_data->decRefCount() == 0) m_data->release();
@@ -131,23 +131,23 @@ bool MutableArrayIter::advance() {
   // we recover by creating a new strong iterator for the new array,
   // starting with at the position indicated by the new array's internal
   // pointer.
-  if (m_pos.container != data) {
+  if (m_fp.container != data) {
     // Free the current strong iterator if its valid
-    if (m_pos.container != NULL) {
-      m_pos.container->freeFullPos(m_pos);
+    if (m_fp.container != NULL) {
+      m_fp.container->freeFullPos(m_fp);
     }
     // Create a new strong iterator for the new array
-    ASSERT(m_pos.container == NULL);
-    data->newFullPos(m_pos);
+    ASSERT(m_fp.container == NULL);
+    data->newFullPos(m_fp);
   }
-  ASSERT(m_pos.container == data);
-  if (!data->setFullPos(m_pos)) return false;
+  ASSERT(m_fp.container == data);
+  if (!data->setFullPos(m_fp)) return false;
   CVarRef curr = data->currentRef();
   curr.setContagious();
   m_val = curr;
   if (m_key) *m_key = data->key();
   data->next();
-  data->getFullPos(m_pos);
+  data->getFullPos(m_fp);
   return true;
 }
 

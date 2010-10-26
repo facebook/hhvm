@@ -218,55 +218,55 @@ ArrayData *ArrayData::dequeue(Variant &value) {
 ///////////////////////////////////////////////////////////////////////////////
 // MutableArrayIter related functions
 
-void ArrayData::newFullPos(FullPos &pos) {
-  ASSERT(pos.container == NULL);
-  m_strongIterators.push(&pos);
-  pos.container = (ArrayData*)this;
-  getFullPos(pos);
+void ArrayData::newFullPos(FullPos &fp) {
+  ASSERT(fp.container == NULL);
+  m_strongIterators.push(&fp);
+  fp.container = (ArrayData*)this;
+  getFullPos(fp);
 }
 
-void ArrayData::freeFullPos(FullPos &pos) {
-  ASSERT(pos.container == (ArrayData*)this);
+void ArrayData::freeFullPos(FullPos &fp) {
+  ASSERT(fp.container == (ArrayData*)this);
   int sz = m_strongIterators.size();
   if (sz > 0) {
-    // Common case: pos is at the end of the list
-    if (m_strongIterators[sz - 1] == &pos) {
+    // Common case: fp is at the end of the list
+    if (m_strongIterators.get(sz - 1) == &fp) {
       m_strongIterators.pop();
-      pos.container = NULL;
+      fp.container = NULL;
       return;
     }
     // Unusual case: somehow the strong iterator for an foreach loop
     // was freed before a strong iterator from a nested foreach loop,
-    // so do a linear search for pos
+    // so do a linear search for fp
     for (int k = sz - 2; k >= 0; --k) {
-      if (m_strongIterators[k] == &pos) {
-        // Swap pos with the last element in the list and then pop
-        m_strongIterators[k] = m_strongIterators[sz - 1];
+      if (m_strongIterators.get(k) == &fp) {
+        // Swap fp with the last element in the list and then pop
+        m_strongIterators.set(k, m_strongIterators.get(sz - 1));
         m_strongIterators.pop();
-        pos.container = NULL;
+        fp.container = NULL;
         return;
       }
     }
   }
-  // If the strong iterator list was empty or if pos could not be
+  // If the strong iterator list was empty or if fp could not be
   // found in the strong iterator list, then we are in a bad state
   ASSERT(false);
 }
 
-void ArrayData::getFullPos(FullPos &pos) {
-  ASSERT(pos.container == (ArrayData*)this);
-  pos.primary = ArrayData::invalid_index;
+void ArrayData::getFullPos(FullPos &fp) {
+  ASSERT(fp.container == (ArrayData*)this);
+  fp.pos = ArrayData::invalid_index;
 }
 
-bool ArrayData::setFullPos(const FullPos &pos) {
-  ASSERT(pos.container == (ArrayData*)this);
+bool ArrayData::setFullPos(const FullPos &fp) {
+  ASSERT(fp.container == (ArrayData*)this);
   return false;
 }
 
 void ArrayData::freeStrongIterators() {
   int sz = m_strongIterators.size();
   for (int i = 0; i < sz; ++i) {
-    m_strongIterators[i]->container = NULL;
+    m_strongIterators.get(i)->container = NULL;
   }
   m_strongIterators.clear();
 }

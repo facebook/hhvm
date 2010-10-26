@@ -213,10 +213,10 @@ class ArrayData : public Countable {
   virtual void iter_dirty_reset() const {}
   virtual void iter_dirty_check() const {}
 
-  void newFullPos(FullPos &pos);
-  void freeFullPos(FullPos &pos);
-  virtual void getFullPos(FullPos &pos);
-  virtual bool setFullPos(const FullPos &pos);
+  void newFullPos(FullPos &fp);
+  void freeFullPos(FullPos &fp);
+  virtual void getFullPos(FullPos &fp);
+  virtual bool setFullPos(const FullPos &fp);
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
 

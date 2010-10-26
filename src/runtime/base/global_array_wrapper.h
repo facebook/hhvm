@@ -93,9 +93,9 @@ public:
 
   virtual Variant next();
 
-  virtual void getFullPos(FullPos &pos);
+  virtual void getFullPos(FullPos &fp);
 
-  virtual bool setFullPos(const FullPos &pos);
+  virtual bool setFullPos(const FullPos &fp);
 
 private:
   Globals* m_globals;

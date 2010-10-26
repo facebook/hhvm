@@ -81,10 +81,9 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 struct FullPos {
-  ssize_t primary;
-  ssize_t secondary;
+  ssize_t pos;
   ArrayData * container;
-  FullPos() : primary(0), secondary(0), container(NULL) {}
+  FullPos() : pos(0), container(NULL) {}
 };
 
 /**
@@ -106,7 +105,7 @@ private:
   ArrayData* m_data;
   Variant* m_key;
   Variant& m_val;
-  FullPos m_pos;
+  FullPos m_fp;
   int size();
   ArrayData* getData();
 };

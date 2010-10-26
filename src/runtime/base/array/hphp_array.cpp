@@ -717,22 +717,22 @@ HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
   if (m_pos == ArrayData::invalid_index) {
     m_pos = ssize_t(m_lastE);
   }
-  // If there could be any strong iterators that are past the end, we need to a
-  // pass and update these iterators to point to the newly added element.
+  // If there could be any strong iterators that are past the end, we need to
+  // do a pass and update these iterators to point to the newly added element.
   if (m_siPastEnd) {
     m_siPastEnd = false;
     int sz = m_strongIterators.size();
     bool shouldWarn = false;
     for (int i = 0; i < sz; ++i) {
-      if (m_strongIterators[i]->primary == ssize_t(ElmIndEmpty)) {
-        m_strongIterators[i]->primary = ssize_t(*ei);
+      if (m_strongIterators.get(i)->pos == ssize_t(ElmIndEmpty)) {
+        m_strongIterators.get(i)->pos = ssize_t(*ei);
         shouldWarn = true;
       }
     }
     if (shouldWarn) {
-      raise_warning("An element was added to an array while a foreach by"
-                    " reference loop was iterating over the last element of the"
-                    " array. This may lead to unexpeced results.");
+      raise_warning("An element was added to an array inside foreach "
+                    "by reference when iterating over the last "
+                    "element. This may lead to unexpeced results.");
     }
   }
   return e;
@@ -874,9 +874,9 @@ void HphpArray::compact(bool renumber /* = false */) {
     Elm* elms = data2Elms(m_data);
     siKeys = (ElmKey*)malloc(nsi * sizeof(ElmKey));
     for (int i = 0; i < nsi; ++i) {
-      ElmInd ei = (ElmInd)m_strongIterators[i]->primary;
+      ElmInd ei = (ElmInd)m_strongIterators.get(i)->pos;
       if (ei != ElmIndEmpty) {
-        siKeys[i] = *(ElmKey*)&elms[(ElmInd)m_strongIterators[i]->primary];
+        siKeys[i] = *(ElmKey*)&elms[(ElmInd)m_strongIterators.get(i)->pos];
       }
     }
   }
@@ -934,7 +934,7 @@ void HphpArray::compact(bool renumber /* = false */) {
   if (nsi > 0) {
     // Update strong iterators, now that compaction is complete.
     for (int i = 0; i < nsi; ++i) {
-      ssize_t* siPos = &m_strongIterators[i]->primary;
+      ssize_t* siPos = &m_strongIterators.get(i)->pos;
       if (*siPos != ArrayData::invalid_index) {
         if (siKeys[i].key != NULL) {
           *siPos = ssize_t(find(siKeys[i].key->data(),
@@ -1406,7 +1406,7 @@ void HphpArray::erase(ElmInd* ei) {
   int nsi = m_strongIterators.size();
   ElmInd eINext = ElmIndTombstone;
   for (int i = 0; i < nsi; ++i) {
-    if (m_strongIterators[i]->primary == ssize_t(pos)) {
+    if (m_strongIterators.get(i)->pos == ssize_t(pos)) {
       nextElementUnsetInsideForeachByReference = true;
       if (eINext == ElmIndTombstone) {
         // eINext will actually be used, so properly initialize it with the
@@ -1418,7 +1418,7 @@ void HphpArray::erase(ElmInd* ei) {
           m_siPastEnd = true;
         }
       }
-      m_strongIterators[i]->primary = ssize_t(eINext);
+      m_strongIterators.get(i)->pos = ssize_t(eINext);
     }
   }
 
@@ -1465,7 +1465,8 @@ void HphpArray::erase(ElmInd* ei) {
 
   if (nextElementUnsetInsideForeachByReference) {
     if (RuntimeOption::EnableHipHopErrors) {
-      raise_error("Cannot unset the next element inside foreach by reference");
+      raise_warning("The next element was unset inside foreach by reference. "
+                    "This may lead to unexpeced results.");
     }
   }
 }
@@ -1774,7 +1775,7 @@ ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
   compact(true);
   // To match PHP-like semantics, the prepend operation resets the array's
   // internal iterator.
-  m_pos = 0;
+  m_pos = ArrayData::invalid_index;
 
   return NULL;
 }
@@ -1795,19 +1796,19 @@ void HphpArray::onSetStatic() {
   }
 }
 
-void HphpArray::getFullPos(FullPos& pos) {
-  ASSERT(pos.container == (ArrayData*)this);
-  pos.primary = m_pos;
-  if (pos.primary == ssize_t(ElmIndEmpty)) {
+void HphpArray::getFullPos(FullPos& fp) {
+  ASSERT(fp.container == (ArrayData*)this);
+  fp.pos = m_pos;
+  if (fp.pos == ssize_t(ElmIndEmpty)) {
     // Record that there is a strong iterator out there that is past the end.
     m_siPastEnd = true;
   }
 }
 
-bool HphpArray::setFullPos(const FullPos& pos) {
-  ASSERT(pos.container == (ArrayData*)this);
-  if (pos.primary != ssize_t(ElmIndEmpty)) {
-    m_pos = pos.primary;
+bool HphpArray::setFullPos(const FullPos& fp) {
+  ASSERT(fp.container == (ArrayData*)this);
+  if (fp.pos != ssize_t(ElmIndEmpty)) {
+    m_pos = fp.pos;
     return true;
   }
   return false;

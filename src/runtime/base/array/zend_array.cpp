@@ -62,16 +62,15 @@ do {                                                                    \
     int sz = m_strongIterators.size();                                  \
     bool shouldWarn = false;                                            \
     for (int i = 0; i < sz; ++i) {                                      \
-      if (m_strongIterators[i]->primary == 0) {                         \
-        m_strongIterators[i]->primary = (ssize_t)(element);             \
+      if (m_strongIterators.get(i)->pos == 0) {                         \
+        m_strongIterators.get(i)->pos = (ssize_t)(element);             \
         shouldWarn = true;                                              \
       }                                                                 \
     }                                                                   \
     if (shouldWarn) {                                                   \
-      raise_warning("An element was added to an array while a foreach " \
-                    "by reference loop was iterating over the last "    \
-                    "element of the array. This may lead to "           \
-                    "unexpeced results.");                              \
+      raise_warning("An element was added to an array inside foreach "  \
+                    "by reference when iterating over the last "        \
+                    "element. This may lead to unexpeced results.");    \
     }                                                                   \
   }                                                                     \
 } while (false)
@@ -989,10 +988,10 @@ void ZendArray::erase(Bucket ** prev) {
     }
     int sz = m_strongIterators.size();
     for (int i = 0; i < sz; ++i) {
-      if (m_strongIterators[i]->primary == (ssize_t)p) {
+      if (m_strongIterators.get(i)->pos == (ssize_t)p) {
         nextElementUnsetInsideForeachByReference = true;
-        m_strongIterators[i]->primary = (ssize_t)p->pListNext;
-        if (!(m_strongIterators[i]->primary)) {
+        m_strongIterators.get(i)->pos = (ssize_t)p->pListNext;
+        if (!(m_strongIterators.get(i)->pos)) {
           // Record that there is a strong iterator out there
           // that is past the end
           m_flag |= StrongIteratorPastEnd;
@@ -1005,7 +1004,8 @@ void ZendArray::erase(Bucket ** prev) {
   }
   if (nextElementUnsetInsideForeachByReference) {
     if (RuntimeOption::EnableHipHopErrors) {
-      raise_error("Cannot unset the next element inside foreach by reference");
+      raise_warning("The next element was unset inside foreach by reference. "
+                    "This may lead to unexpeced results.");
     }
   }
 }
@@ -1339,20 +1339,20 @@ void ZendArray::onSetStatic() {
   }
 }
 
-void ZendArray::getFullPos(FullPos &pos) {
-  ASSERT(pos.container == (ArrayData*)this);
-  pos.primary = m_pos;
-  if (!pos.primary) {
+void ZendArray::getFullPos(FullPos &fp) {
+  ASSERT(fp.container == (ArrayData*)this);
+  fp.pos = m_pos;
+  if (!fp.pos) {
     // Record that there is a strong iterator out there
     // that is past the end
     m_flag |= StrongIteratorPastEnd;
   }
 }
 
-bool ZendArray::setFullPos(const FullPos &pos) {
-  ASSERT(pos.container == (ArrayData*)this);
-  if (pos.primary) {
-    m_pos = pos.primary;
+bool ZendArray::setFullPos(const FullPos &fp) {
+  ASSERT(fp.container == (ArrayData*)this);
+  if (fp.pos) {
+    m_pos = fp.pos;
     return true;
   }
   return false;

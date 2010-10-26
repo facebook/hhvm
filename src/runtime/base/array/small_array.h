@@ -112,8 +112,8 @@ public:
   virtual void renumber();
   virtual void onSetStatic();
 
-  virtual void getFullPos(FullPos &pos);
-  virtual bool setFullPos(const FullPos &pos);
+  virtual void getFullPos(FullPos &fp);
+  virtual bool setFullPos(const FullPos &fp);
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
 

@@ -211,19 +211,18 @@ Variant GlobalArrayWrapper::next() {
   return value(m_pos);
 }
 
-void GlobalArrayWrapper::getFullPos(FullPos &pos) {
+void GlobalArrayWrapper::getFullPos(FullPos &fp) {
   if (m_pos == ArrayData::invalid_index) {
-    pos.primary = ArrayData::invalid_index;
+    fp.pos = ArrayData::invalid_index;
   } else if (m_pos < m_globals->staticSize()) {
-    pos.primary = m_pos;
-    pos.secondary = ArrayData::invalid_index;
+    fp.pos = m_pos;
   } else {
-    m_globals->getFullPos(pos);
+    m_globals->getFullPos(fp);
   }
 }
 
-bool GlobalArrayWrapper::setFullPos(const FullPos &pos) {
-  if (pos.primary != ArrayData::invalid_index) {
+bool GlobalArrayWrapper::setFullPos(const FullPos &fp) {
+  if (fp.pos != ArrayData::invalid_index) {
     if (m_pos < m_globals->staticSize()) return true;
     ArrayData *data = m_globals->getArrayData();
     if (data) {

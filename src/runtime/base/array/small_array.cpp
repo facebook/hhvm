@@ -223,24 +223,24 @@ Variant SmallArray::each() {
   return false;
 }
 
-void SmallArray::getFullPos(FullPos &pos) {
-  ASSERT(pos.container == (ArrayData *)this);
+void SmallArray::getFullPos(FullPos &fp) {
+  ASSERT(fp.container == (ArrayData *)this);
   ASSERT(m_pos == ArrayData::invalid_index ||
          m_pos >= 0 && m_pos < SARR_TABLE_SIZE &&
          m_arBuckets[m_pos].kind != Empty);
-  pos.primary = m_pos;
-  if (pos.primary == ArrayData::invalid_index) {
+  fp.pos = m_pos;
+  if (fp.pos == ArrayData::invalid_index) {
     // Record that there is a strong iterator out there
     // that is past the end
     m_siPastEnd = 1;
   }
 }
 
-bool SmallArray::setFullPos(const FullPos &pos) {
-  ASSERT(pos.container == (ArrayData *) this);
-  if (pos.primary >= 0) {
-    Bucket &b = m_arBuckets[pos.primary];
-    if (b.kind != Empty) m_pos = pos.primary;
+bool SmallArray::setFullPos(const FullPos &fp) {
+  ASSERT(fp.container == (ArrayData *) this);
+  if (fp.pos >= 0) {
+    Bucket &b = m_arBuckets[fp.pos];
+    if (b.kind != Empty) m_pos = fp.pos;
   }
   return m_pos >= 0;
 }
@@ -251,16 +251,15 @@ void SmallArray::updateStrongIterators(int p) {
   int sz = m_strongIterators.size();
   bool shouldWarn = false;
   for (int i = 0; i < sz; i++) {
-    if (m_strongIterators[i]->primary == ArrayData::invalid_index) {
-      m_strongIterators[i]->primary = p;
+    if (m_strongIterators.get(i)->pos == ArrayData::invalid_index) {
+      m_strongIterators.get(i)->pos = p;
       shouldWarn = true;
     }
   }
   if (shouldWarn) {
-    raise_warning("An element was added to an array while a foreach "
-                  "by reference loop was iterating over the last "
-                  "element of the array. This may lead to "
-                  "unexpeced results.");
+    raise_warning("An element was added to an array inside foreach "
+                  "by reference when iterating over the last "
+                  "element. This may lead to unexpeced results.");
   }
 }
 
@@ -1080,17 +1079,18 @@ void SmallArray::erase(Bucket *pb) {
   int p = pb - m_arBuckets;
   int sz = m_strongIterators.size();
   for (int i = 0; i < sz; ++i) {
-    if (m_strongIterators[i]->primary == p) {
+    if (m_strongIterators.get(i)->pos == p) {
       nextElementUnsetInsideForeachByReference = true;
-      m_strongIterators[i]->primary = pb->next;
-      if (m_strongIterators[i]->primary == ArrayData::invalid_index) {
+      m_strongIterators.get(i)->pos = pb->next;
+      if (m_strongIterators.get(i)->pos == ArrayData::invalid_index) {
         m_siPastEnd = 1;
       }
     }
   }
   if (nextElementUnsetInsideForeachByReference) {
     if (RuntimeOption::EnableHipHopErrors) {
-      raise_error("Cannot unset the next element inside foreach by reference");
+      raise_warning("The next element was unset inside foreach by reference. "
+                    "This may lead to unexpeced results.");
     }
   }
 }

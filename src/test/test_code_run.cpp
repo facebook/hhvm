@@ -2700,6 +2700,25 @@ bool TestCodeRun::TestArrayForEach() {
        "}\n"
        "g11();\n");
 
+  MVCR("<?php\n"
+       "function h1(&$arr, $i) {\n"
+       "  foreach ($arr as $k => &$v) {\n"
+       "    echo \"i=$i key=$k\\n\";\n"
+       "    if ($k == 0) {\n"
+       "      if ($i > 0) {\n"
+       "        h1($arr, $i-1);\n"
+       "      } else if ($i == 0) {\n"
+       "        echo \"Unsetting key 1\\n\";\n"
+       "        unset($arr[1]);\n"
+       "      }\n"
+       "    }\n"
+       "  }\n"
+       "  end($arr);\n"
+       "}\n"
+       "$arr = array('a','b','c');\n"
+       "h1($arr, 40);\n"
+       "var_dump($arr);\n");
+
   /**
    * Zend PHP 5.2 outputs:
    *   val=0

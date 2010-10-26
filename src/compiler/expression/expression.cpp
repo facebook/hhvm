@@ -294,15 +294,16 @@ TypePtr Expression::checkTypesImpl(AnalysisResultPtr ar, TypePtr expectedType,
   actualType = propagateTypes(ar, actualType);
   if (coerce) {
     ret = Type::Coerce(ar, expectedType, actualType);
-    setTypes(actualType, expectedType);
+    setTypes(ar, actualType, expectedType);
   } else {
     ret = Type::Intersection(ar, actualType, expectedType);
-    setTypes(actualType, ret);
+    setTypes(ar, actualType, ret);
   }
   return ret;
 }
 
-void Expression::setTypes(TypePtr actualType, TypePtr expectedType) {
+void Expression::setTypes(AnalysisResultPtr ar, TypePtr actualType,
+                          TypePtr expectedType) {
   m_actualType = actualType;
   if (!Type::SameType(expectedType, actualType) &&
       !expectedType->is(Type::KindOfAny) &&
@@ -318,6 +319,10 @@ void Expression::setTypes(TypePtr actualType, TypePtr expectedType) {
       !m_expectedType->isSpecificObject() &&
       m_actualType->isSpecificObject()) {
     m_expectedType.reset();
+  }
+
+  if (m_actualType->isSpecificObject()) {
+    ar->addClassDependency(getFileScope(), m_actualType->getName());
   }
 }
 

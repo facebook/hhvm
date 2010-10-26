@@ -19,6 +19,7 @@
 #include <compiler/analysis/analysis_result.h>
 #include <util/logger.h>
 #include <compiler/analysis/class_scope.h>
+#include <compiler/analysis/file_scope.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/variable_serializer.h>
 

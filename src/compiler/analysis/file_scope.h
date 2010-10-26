@@ -234,7 +234,6 @@ private:
   std::set<std::string> m_usedFuncsInline;
   std::set<std::string> m_usedClassesHeader;
   std::set<std::string> m_usedClassesFullHeader;
-  std::set<std::string> m_usedConsts;
   std::set<std::string> m_usedConstsHeader;
   typedef std::pair<std::string, std::string> UsedClassConst;
   std::set<UsedClassConst> m_usedClassConstsHeader;

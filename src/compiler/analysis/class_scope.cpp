@@ -1053,6 +1053,7 @@ void ClassScope::outputCPPHeader(CodeGenerator &old_cg, AnalysisResultPtr ar,
   Util::mkdir(root + filename);
   ofstream f((root + filename).c_str());
   CodeGenerator cg(&f, output);
+  cg.setFileOrClassHeader(true);
 
   cg.headerBegin(filename);
 
@@ -1088,6 +1089,18 @@ void ClassScope::outputCPPForwardHeader(CodeGenerator &old_cg,
   cg.headerBegin(filename);
   cg.printBasicIncludes();
 
+  bool first = true;
+  BOOST_FOREACH(const string &str, m_usedLiteralStringsHeader) {
+    int index = -1;
+    int stringId = cg.checkLiteralString(str, index, ar, BlockScopePtr());
+    assert(index != -1);
+    string lisnam = ar->getLiteralStringName(stringId, index);
+    if (!cg.ensureInNamespace() && first) cg_printf("\n");
+    first = false;
+    cg_printf("extern StaticString %s;\n", lisnam.c_str());
+  }
+
+  cg.ensureOutOfNamespace();
   cg.headerEnd(filename);
 }
 

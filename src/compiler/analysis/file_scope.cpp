@@ -450,11 +450,13 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
 
 void FileScope::outputCPPForwardDeclHeader(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
+  cg.setFileOrClassHeader(true);
   string header = outputFilebase() + ".fw.h";
   cg.headerBegin(header);
   cg.printBasicIncludes();
   outputCPPForwardDeclarations(cg, ar);
   cg.headerEnd(header);
+  cg.setFileOrClassHeader(false);
 }
 
 void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,

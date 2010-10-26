@@ -264,6 +264,10 @@ public:
 
   ClassScopePtr getParentScope(AnalysisResultConstPtr ar);
 
+  void addUsedLiteralStringHeader(const std::string &s) {
+    m_usedLiteralStringsHeader.insert(s);
+  }
+
   /**
    * Output class meta info for g_class_map.
    */
@@ -404,6 +408,7 @@ private:
   bool m_sep;
 
   std::set<JumpTableName> m_emptyJumpTables;
+  std::set<std::string> m_usedLiteralStringsHeader;
 
   std::string getBaseHeaderFilename(CodeGenerator &cg);
 

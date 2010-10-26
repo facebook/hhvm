@@ -120,6 +120,10 @@ public:
     m_usedConstsHeader.insert(s);
   }
 
+  void addUsedClassConstHeader(const std::string &cls, const std::string &s) {
+    m_usedClassConstsHeader.insert(UsedClassConst(cls, s));
+  }
+
   /**
    * For separate compilation
    * These add edges between filescopes in the other dep graph and
@@ -223,6 +227,8 @@ private:
   std::set<std::string> m_usedClasses;
   std::set<std::string> m_usedConsts;
   std::set<std::string> m_usedConstsHeader;
+  typedef std::pair<std::string, std::string> UsedClassConst;
+  std::set<UsedClassConst> m_usedClassConstsHeader;
   std::set<std::string> m_usedIncludesInline;
   std::set<std::string> m_usedLiteralStrings;
   std::set<std::string> m_usedLiteralStringsHeader;

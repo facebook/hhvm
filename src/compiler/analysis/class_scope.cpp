@@ -1121,6 +1121,15 @@ void ClassScope::outputCPPForwardHeader(CodeGenerator &old_cg,
     constants->outputSingleConstant(cg, ar, str);
   }
 
+  first = true;
+  BOOST_FOREACH(const UsedClassConst& item, m_usedClassConstsHeader) {
+    ClassScopePtr cls = ar->findClass(item.first);
+    assert(cls);
+    if (!cg.ensureInNamespace() && first) cg_printf("\n");
+    first = false;
+    cls->getConstants()->outputSingleConstant(cg, ar, item.second);
+  }
+
   cg.ensureOutOfNamespace();
   cg.headerEnd(filename);
 }

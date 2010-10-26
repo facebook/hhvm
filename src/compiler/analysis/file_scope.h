@@ -232,7 +232,6 @@ private:
   vertex_descriptor m_vertex;
 
   std::set<std::string> m_usedFuncsInline;
-  std::set<std::string> m_usedClasses;
   std::set<std::string> m_usedClassesHeader;
   std::set<std::string> m_usedClassesFullHeader;
   std::set<std::string> m_usedConsts;

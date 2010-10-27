@@ -73,6 +73,7 @@ If program was compiled with GOOGLE_TCMALLOC, these commands will become availab
 
 If program was compiled with USE_JEMALLOC, these commands will become available,
 
+/free-mem:        ask jemalloc to release memory to system
 /jemalloc-stats:  get internal jemalloc stats
 /jemalloc-stats-print:
                   get comprehensive jemalloc stats in human-readable form

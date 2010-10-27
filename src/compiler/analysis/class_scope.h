@@ -50,16 +50,19 @@ public:
   };
 
   enum Attribute {
-    HasConstructor = 1, // set iff there is a __construct method.
-                        // check classNameConstructor if you want to know
-                        // whether there is a class-name constructor.
-    HasDestructor  = 2,
-    HasUnknownMethodHandler = 4,
-    System = 8,
-    Extension = 16,
-    classNameConstructor = 32,
-    HasUnknownPropGetter = 64,
-    HasUnknownPropSetter = 128
+    System                        = 1,
+    Extension                     = 2,
+    /**
+     * set iff there is a __construct method. check ClassNameConstructor if
+     * you want to know whether there is a class-name constructor.
+     */
+    HasConstructor                = 4,
+    ClassNameConstructor          = 8,
+    HasDestructor                 = 16,
+    HasUnknownPropGetter          = 32,   // __get
+    HasUnknownPropSetter          = 64,   // __set
+    HasUnknownMethodHandler       = 128,  // __call
+    HasUnknownStaticMethodHandler = 256,  // __callStatic
   };
   enum Modifier {
     Public = 1,
@@ -96,7 +99,7 @@ public:
              const FunctionScopePtrVec &methods);
 
   bool classNameCtor() const {
-    return getAttribute(classNameConstructor);
+    return getAttribute(ClassNameConstructor);
   }
   const std::string &getOriginalName() const;
 

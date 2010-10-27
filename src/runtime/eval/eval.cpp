@@ -178,7 +178,7 @@ Array Eval::eval_get_params(VariableEnvironment &env,
 }
 
 bool eval_get_call_info_hook(const CallInfo *&ci, void *&extra, const char *s,
-  int64 hash /* = -1 */) {
+                             int64 hash /* = -1 */) {
   const Eval::Function *fs = Eval::RequestEvalState::findFunction(s);
   if (fs) {
     ci = fs->getCallInfo();
@@ -187,8 +187,9 @@ bool eval_get_call_info_hook(const CallInfo *&ci, void *&extra, const char *s,
   }
   return false;
 }
+
 bool eval_get_call_info_static_method_hook(MethodCallPackage &info,
-    bool &foundClass) {
+                                           bool &foundClass) {
   const char *s __attribute__((__unused__)) (info.rootObj.getCStr());
   const MethodStatement *ms = Eval::RequestEvalState::findMethod(s,
       info.name.data(), foundClass, true);
@@ -196,6 +197,10 @@ bool eval_get_call_info_static_method_hook(MethodCallPackage &info,
     info.ci = ms->getCallInfo();
     info.extra = (void*)ms;
     return true;
+  }
+
+  if (foundClass) {
+    return ObjectData::os_get_call_info(info);
   }
   return false;
 }

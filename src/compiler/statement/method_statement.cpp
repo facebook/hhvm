@@ -232,6 +232,10 @@ void MethodStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
     classScope->setAttribute(ClassScope::HasUnknownPropGetter);
   } else if (m_name == "__set") {
     classScope->setAttribute(ClassScope::HasUnknownPropSetter);
+  } else if (m_name == "__call") {
+    classScope->setAttribute(ClassScope::HasUnknownMethodHandler);
+  } else if (m_name == "__callstatic") {
+    classScope->setAttribute(ClassScope::HasUnknownStaticMethodHandler);
   }
 
   m_className = classScope->getName();

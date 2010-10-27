@@ -61,11 +61,10 @@ ClassScopePtr ObjectMethodExpression::resolveClass(AnalysisResultPtr ar,
     return cls;
   }
   string construct("__construct");
-  cls = ar->findClass(construct,
-                      AnalysisResult::MethodName);
+  cls = ar->findClass(construct, AnalysisResult::MethodName);
   if (cls && name == cls->getName()) {
     name = "__construct";
-    cls->setAttribute(ClassScope::classNameConstructor);
+    cls->setAttribute(ClassScope::ClassNameConstructor);
     return cls;
   }
   return ClassScopePtr();

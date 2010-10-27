@@ -84148,7 +84148,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     default:
       break;
   }
-  return invoke_failed(s, eval_get_params(env, caller), -1, fatal);
+  Variant ret = invoke_failed(s, null_array, -1, fatal);
+  eval_get_params(env, caller);
+  return ret;
 }
 CallInfo ci_utf8_encode((void*)&i_utf8_encode, (void*)&ifa_utf8_encode, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileobject___construct((void*)&i_hphp_splfileobject___construct, (void*)&ifa_hphp_splfileobject___construct, 5, 0, 0x0000000000000000LL);

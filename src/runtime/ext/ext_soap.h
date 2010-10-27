@@ -93,7 +93,7 @@ class c_SoapServer : public ExtObjectData {
 // class SoapClient
 
 FORWARD_DECLARE_CLASS(SoapClient);
-class c_SoapClient : public ExtObjectData {
+class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
  public:
   BEGIN_CLASS_MAP(SoapClient)
   END_CLASS_MAP(SoapClient)

@@ -1011,7 +1011,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   if (!ar->inExpression()) return true;
   m_ciTemp = cg.createNewId(shared_from_this());
   bool needHash = true;
-  string escapedName(cg.escapeLabel(m_name));
+  string escapedName(cg.escapeLabel(m_origName));
   string escapedClass;
   ClassScopePtr cls;
   if (!m_className.empty()) {
@@ -1060,7 +1060,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       if (!safeCheck) {
         // If m_safe, check cit later, if null then yield null or safeDef
         cg_printf("if (!cit%d) invoke_failed(\"%s\", null_array, -1);\n",
-            m_ciTemp, escapedName.c_str());
+                  m_ciTemp, escapedName.c_str());
       }
     } else {
       cg_printf("get_call_info_or_fail(cit%d, vt%d, ", m_ciTemp, m_ciTemp);
@@ -1106,37 +1106,39 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     if (cscope && cscope->derivesFromRedeclaring()) {
       // In a derived from redeclaring class
       cg_printf("mcp%d.dynamicNamedCall%s(\"%s\", \"%s\"", m_ciTemp,
-          ms ? "WithIndex" : "", escapedClass.c_str(), escapedName.c_str());
+                ms ? "WithIndex" : "",
+                escapedClass.c_str(), escapedName.c_str());
     } else if (m_redeclaredClass) {
       if (parentCall) {
         cg_printf("mcp%d.methodCallEx(this, \"%s\");\n", m_ciTemp,
-            escapedName.c_str());
+                  escapedName.c_str());
         cg_printf("parent->%sget_call_info%s(mcp%d", Option::ClassPrefix,
-            ms ? "_with_index" : "", m_ciTemp);
+                  ms ? "_with_index" : "", m_ciTemp);
       } else {
         cg_printf("mcp%d.staticMethodCall(\"%s\", \"%s\");\n", m_ciTemp,
-            escapedClass.c_str(), escapedName.c_str());
+                  escapedClass.c_str(), escapedName.c_str());
         cg_printf("%s->%s%s->%sget_call_info%s(mcp%d",
-            cg.getGlobals(ar), Option::ClassStaticsObjectPrefix,
-            className.c_str(), Option::ObjectStaticPrefix,
-            ms ? "with_index" : "", m_ciTemp);
+                  cg.getGlobals(ar), Option::ClassStaticsObjectPrefix,
+                  className.c_str(), Option::ObjectStaticPrefix,
+                  ms ? "with_index" : "", m_ciTemp);
       }
     } else if (m_validClass) {
       // In an object, calling a superclass's method
       bool exCall = inObj && getClassScope()->derivesFrom(ar, m_className,
-          true, false);
+                                                          true, false);
       if (exCall) {
         cg_printf("mcp%d.methodCallEx(this, \"%s\");\n", m_ciTemp,
-            escapedName.c_str());
+                  escapedName.c_str());
         cg_printf("%s%s::%sget_call_info%s(mcp%d",
-            Option::ClassPrefix, className.c_str(), Option::ObjectPrefix,
-            ms ? "_with_index" : "", m_ciTemp);
+                  Option::ClassPrefix, className.c_str(), Option::ObjectPrefix,
+                  ms ? "_with_index" : "", m_ciTemp);
       } else {
         cg_printf("mcp%d.staticMethodCall(\"%s\", \"%s\");\n", m_ciTemp,
-            escapedClass.c_str(), escapedName.c_str());
+                  escapedClass.c_str(), escapedName.c_str());
         cg_printf("%s%s::%sget_call_info%s(mcp%d",
-            Option::ClassPrefix, className.c_str(), Option::ObjectStaticPrefix,
-            ms ? "_with_index" : "", m_ciTemp);
+                  Option::ClassPrefix, className.c_str(),
+                  Option::ObjectStaticPrefix,
+                  ms ? "_with_index" : "", m_ciTemp);
       }
     } else {
       if (m_class) {
@@ -1158,8 +1160,8 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       } else {
         // Nonexistent method
         cg_printf("mcp%d.dynamicNamedCall%s(\"%s\", \"%s\"", m_ciTemp,
-            ms ? "_with_index" : "", escapedClass.c_str(),
-            escapedName.c_str());
+                  ms ? "_with_index" : "", escapedClass.c_str(),
+                  escapedName.c_str());
       }
     }
     if (ms) {

@@ -36076,8 +36076,7 @@ bool get_call_info_static_method_builtin(MethodCallPackage &mcp) {
     default:
       break;
   }
-  mcp.fail();
-  return false;
+  return ObjectData::os_get_call_info(mcp);
 }
 bool get_call_info_static_method_with_index_builtin(MethodCallPackage &mcp, MethodIndex mi) {
   return get_call_info_static_method_builtin(mcp);

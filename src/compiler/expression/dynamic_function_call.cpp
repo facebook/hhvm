@@ -189,10 +189,10 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_printf(", ");
     } else if (m_validClass) {
       cg_printf("mcp%d.staticMethodCall(\"%s\", ", m_ciTemp,
-          cls->getId(cg).c_str());
+                cls->getId(cg).c_str());
     } else {
       cg_printf("mcp%d.staticMethodCall(\"%s\", ", m_ciTemp,
-          m_className.c_str());
+                m_className.c_str());
     }
   }
 
@@ -210,12 +210,12 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf("const CallInfo *&cit%d = mcp%d.ci;\n", m_ciTemp, m_ciTemp);
     if (m_validClass) {
       cg_printf("%s%s::%sget_call_info(mcp%d",
-          Option::ClassPrefix, cls->getId(cg).c_str(),
-          Option::ObjectStaticPrefix, m_ciTemp, m_className.c_str());
+                Option::ClassPrefix, cls->getId(cg).c_str(),
+                Option::ObjectStaticPrefix, m_ciTemp, m_className.c_str());
     } else if (m_redeclared) {
       cg_printf("g->%s%s->%sget_call_info(mcp%d",
-          Option::ClassStaticsObjectPrefix, m_className.c_str(),
-          Option::ObjectStaticPrefix, m_ciTemp, m_className.c_str());
+                Option::ClassStaticsObjectPrefix, m_className.c_str(),
+                Option::ObjectStaticPrefix, m_ciTemp, m_className.c_str());
     }
   }
   if (nonStatic || !m_class) {

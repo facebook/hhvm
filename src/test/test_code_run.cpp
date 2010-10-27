@@ -495,6 +495,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   // PHP 5.3 features
   RUN_TEST(TestVariableClassName);
   RUN_TEST(TestLateStaticBinding); // requires ENABLE_LATE_STATIC_BINDING
+  RUN_TEST(TestCallStatic);
 
   RUN_TEST(TestAdHoc);
   return ret;
@@ -9866,6 +9867,20 @@ bool TestCodeRun::TestClone() {
 }
 
 bool TestCodeRun::TestEvalOrder() {
+  MVCRO("<?php\n"
+        "set_error_handler('h');\n"
+        "foo(var_dump('123'));\n"
+        "var_dump('end');\n"
+        "function h() { var_dump('errored');}",
+        "string(7) \"errored\"\n");
+
+  MVCRO("<?php\n"
+        "set_error_handler('h');\n"
+        "class A {} $obj = new A; $obj->foo(var_dump('123'));\n"
+        "var_dump('end');\n"
+        "function h() { var_dump('errored');}",
+        "string(7) \"errored\"\n");
+
   MVCR("<?php "
        "$a = array(123); "
        "foreach ($a as $x => $x) { "
@@ -14897,6 +14912,212 @@ bool TestCodeRun::TestLateStaticBinding() {
         "$b->g();\n",
 
         "B");
+
+  return true;
+}
+
+bool TestCodeRun::TestCallStatic() {
+  MVCRO("<?php\n"
+        "class c3 {\n"
+        "  public function __call($func, $args) {\n"
+        "    echo \"c3::__call\n\";\n"
+        "  }\n"
+        "  public static function __callStatic($func, $args) {\n"
+        "    echo \"c3::__callStatic\n\";\n"
+        "  }\n"
+        "  public function test1b() {\n"
+        "    c3::foo(); // invokes c3::__callStatic\n"
+        "  }\n"
+        "}\n"
+        "class d3 extends c3 {\n"
+        "  public function test1b() {\n"
+        "    c3::foo(); // invokes c3::__callStatic\n"
+        "  }\n"
+        "}\n"
+        "\n"
+        "c3::test1b();\n"
+        "d3::test1b();\n",
+        "c3::__callStatic\n"
+        "c3::__callStatic\n"
+       );
+
+  MVCRO("<?php\n"
+        "class a1 {\n"
+        "  public function __call($func, $args) {\n"
+        "    var_dump('a1::__call');\n"
+        "  }\n"
+        "  public function test() {\n"
+        "    a1::foo();\n"
+        "  }\n"
+        "}\n"
+        "$obj = new a1;\n"
+        "$obj->test();\n",
+
+        "string(10) \"a1::__call\"\n"
+       );
+
+  MVCRO("<?php\n"
+        "class a1 {\n"
+        "  public function __call($func, $args) {\n"
+        "    var_dump('a1::__call');\n"
+        "  }\n"
+        "}\n"
+        "class b1 {\n"
+        "  public function test() {\n"
+        "    a1::foo();\n"
+        "  }\n"
+        "}\n"
+        "set_error_handler('h'); function h() { var_dump('errored');}"
+        "$obj = new b1;\n"
+        "$obj->test();\n"
+        "var_dump('end');\n",
+
+        "string(7) \"errored\"\n"
+       );
+
+  MVCRO("<?php\n"
+        "class a2 {\n"
+        "  public function __call($func, $args) {\n"
+        "    var_dump('a2::__call');\n"
+        "  }\n"
+        "  public function test() {\n"
+        "    a2::foo();\n"
+        "  }\n"
+        "}\n"
+        "class b2 extends a2 {\n"
+        "  public function test() {\n"
+        "    a2::foo();\n"
+        "    b2::foo();\n"
+        "  }\n"
+        "}\n"
+        "$obj = new a2;\n"
+        "$obj->test();\n"
+        "$obj = new b2;\n"
+        "$obj->test();\n",
+
+        "string(10) \"a2::__call\"\n"
+        "string(10) \"a2::__call\"\n"
+        "string(10) \"a2::__call\"\n"
+      );
+
+  MVCRO("<?php\n"
+        "class a1 {\n"
+        "  public function __call($func, $args) {\n"
+        "    var_dump('a1::__call');\n"
+        "  }\n"
+        "  public static function __callStatic($func, $args) {\n"
+        "    var_dump('a1::__callStatic');\n"
+        "  }\n"
+        "  public function test() {\n"
+        "    a1::foo();\n"
+        "  }\n"
+        "}\n"
+        "class b1 {\n"
+        "  public function test() {\n"
+        "    a1::foo();\n"
+        "  }\n"
+        "}\n"
+        "$obj = new a1;\n"
+        "$obj->test();\n"
+        "$obj = new b1;\n"
+        "$obj->test();\n",
+
+        "string(10) \"a1::__call\"\n"
+        "string(16) \"a1::__callStatic\"\n"
+       );
+
+  MVCRO("<?php\n"
+        "class a2 {\n"
+        "  public function __call($func, $args) {\n"
+        "    var_dump('a2::__call');\n"
+        "  }\n"
+        "  public static function __callStatic($func, $args) {\n"
+        "    var_dump('a2::__callStatic');\n"
+        "  }\n"
+        "  public function test() {\n"
+        "    a2::foo();\n"
+        "  }\n"
+        "}\n"
+        "class b2 extends a2 {\n"
+        "  public function test() {\n"
+        "    a2::foo();\n"
+        "    b2::foo();\n"
+        "  }\n"
+        "}\n"
+        "$obj = new a2;\n"
+        "$obj->test();\n"
+        "$obj = new b2;\n"
+        "$obj->test();\n",
+
+        "string(10) \"a2::__call\"\n"
+        "string(10) \"a2::__call\"\n"
+        "string(10) \"a2::__call\"\n"
+       );
+
+  MVCRO("<?php\n"
+        "class a1 {\n"
+        "  public static function __callStatic($func, $args) {\n"
+        "    var_dump('a1::__callStatic');\n"
+        "  }\n"
+        "  public function test() {\n"
+        "    a1::foo();\n"
+        "  }\n"
+        "}\n"
+        "class b1 {\n"
+        "  public function test() {\n"
+        "    a1::foo();\n"
+        "  }\n"
+        "}\n"
+        "$obj = new a1;\n"
+        "$obj->test();\n"
+        "$obj = new b1;\n"
+        "$obj->test();\n",
+
+        "string(16) \"a1::__callStatic\"\n"
+        "string(16) \"a1::__callStatic\"\n"
+       );
+
+  MVCRO("<?php\n"
+        "class a2 {\n"
+        "  public static function __callStatic($func, $args) {\n"
+        "    var_dump('a2::__callStatic');\n"
+        "  }\n"
+        "  public function test() {\n"
+        "    a2::foo();\n"
+        "  }\n"
+        "}\n"
+        "class b2 extends a2 {\n"
+        "  public function test() {\n"
+        "    a2::foo();\n"
+        "    b2::foo();\n"
+        "  }\n"
+        "}\n"
+        "$obj = new a2;\n"
+        "$obj->test();\n"
+        "$obj = new b2;\n"
+        "$obj->test();\n",
+
+        "string(16) \"a2::__callStatic\"\n"
+        "string(16) \"a2::__callStatic\"\n"
+        "string(16) \"a2::__callStatic\"\n"
+       );
+
+  MVCRO("<?php\n"
+        "class MethodTest {\n"
+        "    public function __call($name, $arguments) {\n"
+        "        var_dump($name, implode(', ', $arguments));\n"
+        "    }\n"
+        "    public static function __callStatic($name, $arguments) {\n"
+        "        var_dump($name, implode(', ', $arguments));\n"
+        "    }\n"
+        "}\n"
+        "$obj = new MethodTest;\n"
+        "$obj->runTest('in object context');\n"
+        "MethodTest::runTest('in static context');\n",
+        "string(7) \"runTest\"\n"
+        "string(17) \"in object context\"\n"
+        "string(7) \"runTest\"\n"
+        "string(17) \"in static context\"\n");
 
   return true;
 }

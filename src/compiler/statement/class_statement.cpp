@@ -106,7 +106,7 @@ void ClassStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
         if (meth && classScope && meth->getName() == classScope->getName()
          && !meth->getModifiers()->isStatic()) {
           // class-name constructor
-          classScope->setAttribute(ClassScope::classNameConstructor);
+          classScope->setAttribute(ClassScope::ClassNameConstructor);
         }
       }
       IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>((*m_stmt)[i]);
@@ -491,8 +491,13 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           ClassScope::HasUnknownPropGetter);
         bool hasSet = classScope->getAttribute(
           ClassScope::HasUnknownPropSetter);
+        bool hasCall = classScope->getAttribute(
+          ClassScope::HasUnknownMethodHandler);
+        bool hasCallStatic = classScope->getAttribute(
+          ClassScope::HasUnknownStaticMethodHandler);
 
-        if (dyn || idyn || redec || hasGet || hasSet) {
+        if (dyn || idyn || redec || hasGet || hasSet ||
+            hasCall || hasCallStatic) {
           if (redec && classScope->derivedByDynamic()) {
             cg_printf("DECLARE_ROOT;\n");
              if (!dyn && !idyn) {
@@ -525,6 +530,8 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                          hasGet || hasSet ? "\n" : "");
           if (hasGet) cg_printf("setAttribute(UseGet);\n");
           if (hasSet) cg_printf("setAttribute(UseSet);\n");
+          if (hasCall) cg_printf("setAttribute(HasCall);\n");
+          if (hasCallStatic) cg_printf("setAttribute(HasCallStatic);\n");
           cg_indentEnd("}\n");
         }
       }

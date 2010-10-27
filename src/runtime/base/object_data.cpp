@@ -35,6 +35,10 @@ namespace HPHP {
 // current maximum object identifier
 static IMPLEMENT_THREAD_LOCAL(int, os_max_id);
 
+static CallInfo s_ObjectData_call_handler((void*)ObjectData::callHandler,
+    (void*)ObjectData::callHandlerFewArgs, 0,
+    CallInfo::VarArgs | CallInfo::Method | CallInfo::CallMagicMethod, 0);
+
 ///////////////////////////////////////////////////////////////////////////////
 // constructor/destructor
 
@@ -140,15 +144,29 @@ ObjectData::os_invoke_from_eval(const char *c, const char *s,
 }
 
 bool ObjectData::os_get_call_info(MethodCallPackage &info,
-    int64 hash /* = -1 */) {
-  info.fail();
-  return false;
+                                  int64 hash /* = -1 */) {
+  Object obj = FrameInjection::GetThis();
+  String cls = info.rootObj.toString();
+  if (obj.isNull() || !obj->o_instanceof(cls)) {
+    obj = create_object(cls, Array::Create(), false);
+    obj->setDummy();
+  } else {
+    return obj->o_get_call_info(info, hash);
+  }
+  if (!obj->hasCallStatic()) {
+    info.fail();
+    return false;
+  }
+
+  info.ci = &s_ObjectData_call_handler;
+  info.obj = NULL;
+  return true;
 }
 
 bool ObjectData::os_get_call_info_with_index(MethodCallPackage &info,
-    MethodIndex mi, int64 hash /* = -1 */) {
-  info.fail();
-  return false;
+                                             MethodIndex mi,
+                                             int64 hash /* = -1 */) {
+  return os_get_call_info(info, hash);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -601,51 +619,73 @@ Variant ObjectData::o_invoke_few_args(const char *s, int64 hash, int count,
   return (mcp.ci->getMethFewArgs())(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
-Variant ObjectData::o_root_invoke_few_args(const char *s, int64 hash, int count,
+Variant ObjectData::o_root_invoke_few_args(const char *s, int64 hash,
+                                           int count,
                                            INVOKE_FEW_ARGS_IMPL_ARGS) {
   return o_invoke_few_args(s, hash, count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
-Variant ObjectData::o_invoke_from_eval(const char *s,
-                                       Eval::VariableEnvironment &env,
-                                       const Eval::FunctionCallExpression *call,
-                                       int64 hash,
-                                       bool fatal /* = true */) {
-  return o_invoke(s, call->getParams(env), hash, fatal);
+Variant
+ObjectData::o_invoke_from_eval(const char *s,
+                               Eval::VariableEnvironment &env,
+                               const Eval::FunctionCallExpression *call,
+                               int64 hash,
+                               bool fatal /* = true */) {
+  MethodCallPackage mcp;
+  if (!fatal) mcp.noFatal();
+  mcp.methodCall(this, s, hash);
+  if (fatal && mcp.ci == &s_ObjectData_call_handler &&
+      !hasCall() && !hasCallStatic()) {
+    o_invoke_failed(o_getClassName().c_str(), s, true);
+    return null;
+  }
+  return (mcp.ci->getMeth())(mcp, call->getParams(env));
 }
 
-static CallInfo s_ObjectData_call_handler((void*)ObjectData::callHandler,
-    (void*)ObjectData::callHandlerFewArgs, 0,
-    CallInfo::VarArgs | CallInfo::Method | CallInfo::CallMagicMethod, 0);
-
 bool ObjectData::o_get_call_info(MethodCallPackage &mcp,
-    int64 hash /* = -1 */) {
+                                 int64 hash /* = -1 */) {
   // If UseMethodIndex is on, classes will define o_get_call_info_with_index
   // and this will be a virtual call to the class' version.
   // If it's off, this will go to ObjectData's version.
-  return o_get_call_info_with_index(mcp,
-      methodIndexExists(mcp.name.c_str()), hash);
+  return o_get_call_info_with_index
+    (mcp, methodIndexExists(mcp.name.c_str()), hash);
 }
 
 bool ObjectData::o_get_call_info_ex(const char *clsname,
-    MethodCallPackage &mcp, int64 hash) {
+                                    MethodCallPackage &mcp, int64 hash) {
   return ObjectData::o_get_call_info(mcp, hash);
 }
 
 bool ObjectData::o_get_call_info_with_index(MethodCallPackage &mcp,
-    MethodIndex mi, int64 hash /* = -1 */) {
+                                            MethodIndex mi,
+                                            int64 hash /* = -1 */) {
   mcp.ci = &s_ObjectData_call_handler;
   mcp.obj = this;
+  if (!hasCall() && !hasCallStatic()) {
+    mcp.fail();
+    return false;
+  }
   return true;
 }
+
 bool ObjectData::o_get_call_info_with_index_ex(const char *clsname,
-    MethodCallPackage &mcp, MethodIndex mi, int64 hash /* = -1 */) {
+                                               MethodCallPackage &mcp,
+                                               MethodIndex mi,
+                                               int64 hash /* = -1 */) {
   return ObjectData::o_get_call_info_with_index(mcp, mi, hash);
 }
 
 Variant ObjectData::o_throw_fatal(const char *msg) {
   throw_fatal(msg);
   return null;
+}
+
+bool ObjectData::hasCall() {
+  return getRoot()->getAttribute(HasCall);
+}
+
+bool ObjectData::hasCallStatic() {
+  return getRoot()->getAttribute(HasCallStatic);
 }
 
 bool ObjectData::php_sleep(Variant &ret) {
@@ -859,74 +899,22 @@ Variant ObjectData::t___clone() {
 }
 
 Variant ObjectData::callHandler(MethodCallPackage &info, CArrRef params) {
-  return info.obj->doRootCall(info.name, params, true);
+  if (info.obj && info.obj->o_getId() && info.obj->hasCall()) {
+    return info.obj->doRootCall(info.name, params, true);
+  }
+  String clsname;
+  if (!info.obj) {
+    clsname = info.rootObj.toString();
+  } else {
+    clsname = info.obj->o_getClassName();
+  }
+  return invoke_static_method(clsname.data(), "__callstatic",
+                              CREATE_VECTOR2(info.name, params));
 }
+
 Variant ObjectData::callHandlerFewArgs(MethodCallPackage &info, int count,
-    INVOKE_FEW_ARGS_IMPL_ARGS) {
-  switch (count) {
-  case 0: {
-    return info.obj->doRootCall(info.name, Array(), true);
-  }
-  case 1: {
-    Array params(ArrayInit(1, true).set(0, a0).create());
-    return info.obj->doRootCall(info.name, params, true);
-  }
-  case 2: {
-    Array params(ArrayInit(2, true).set(0, a0).set(1, a1).create());
-    return info.obj->doRootCall(info.name, params, true);
-  }
-  case 3: {
-    Array params(ArrayInit(3, true).set(0, a0).set(1, a1).set(2, a2).create());
-    return info.obj->doRootCall(info.name, params, true);
-  }
-#if INVOKE_FEW_ARGS_COUNT > 3
-  case 4: {
-    Array params(ArrayInit(4, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).create());
-    return info.obj->doRootCall(info.name, params, true);
-  }
-  case 5: {
-    Array params(ArrayInit(5, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).create());
-    return info.obj->doRootCall(info.name, params, true);
-  }
-  case 6: {
-    Array params(ArrayInit(6, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).create());
-    return info.obj->doRootCall(info.name, params, true);
-  }
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-  case 7: {
-    Array params(ArrayInit(7, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).create());
-    return info.obj->doRootCall(info.name, params, true);
-  }
-  case 8: {
-    Array params(ArrayInit(8, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).set(7, a7).create());
-    return info.obj->doRootCall(info.name, params, true);
-  }
-  case 9: {
-    Array params(ArrayInit(9, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).set(7, a7).set(8, a8).create());
-    return info.obj->doRootCall(info.name, params, true);
-  }
-  case 10: {
-    Array params(ArrayInit(10, true).set(0, a0).set(1, a1).set(2, a2).
-                                     set(3, a3).set(4, a4).set(5, a5).
-                                     set(6, a6).set(7, a7).set(8, a8).
-                                     set(9, a9).create());
-    return info.obj->doRootCall(info.name, params, true);
-  }
-#endif
-  default:
-    ASSERT(false);
-  }
-  return null;
+                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
+  return callHandler(info, collect_few_args(count, INVOKE_FEW_ARGS_PASS_ARGS));
 }
 
 Variant ObjectData::NullConstructor(MethodCallPackage &info, CArrRef params) {

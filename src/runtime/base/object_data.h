@@ -60,13 +60,15 @@ typedef SmartPtr<MutableArrayIter> MutableArrayIterPtr;
 class ObjectData : public Countable {
  public:
   enum Attribute {
-    InConstructor = 1,  // __construct()
-    InDestructor  = 2,  // __destruct()
-    HasSleep      = 4,  // __sleep()
-    UseSet        = 8,  // __set()
-    UseGet        = 16, // __get()
-    UseUnset      = 32, // __unset()
-    HasLval       = 64, // defines ___lval
+    InConstructor = 1,    // __construct()
+    InDestructor  = 2,    // __destruct()
+    HasSleep      = 4,    // __sleep()
+    UseSet        = 8,    // __set()
+    UseGet        = 16,   // __get()
+    UseUnset      = 32,   // __unset()
+    HasLval       = 64,   // defines ___lval
+    HasCall       = 128,  // defines __call
+    HasCallStatic = 256,  // defines __callStatic
   };
   enum {
     RealPropCreate = 1,   // Property should be created if it doesnt exist
@@ -294,6 +296,9 @@ class ObjectData : public Countable {
  protected:
   virtual ObjectData* cloneImpl() = 0;
   void cloneSet(ObjectData *clone);
+
+  virtual bool hasCall();
+  virtual bool hasCallStatic();
   virtual bool php_sleep(Variant &ret);
 
  private:

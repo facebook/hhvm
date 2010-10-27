@@ -176,6 +176,7 @@ class TestCodeRun : public TestBase {
   // PHP 5.3
   bool TestVariableClassName();
   bool TestLateStaticBinding();
+  bool TestCallStatic();
 
   // debugging purpose
   bool TestAdHoc();

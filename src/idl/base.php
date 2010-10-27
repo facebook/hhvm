@@ -628,6 +628,8 @@ EOT
   fprintf($f, "class c_%s", $clsname);
   $magic_methods = array('__get' => 'ObjectData::UseGet',
                          '__set' => 'ObjectData::UseSet',
+                         '__call' => 'ObjectData::HasCall',
+                         '__callStatic' => 'ObjectData::HasCallStatic',
                          '__unset' => 'ObjectData::UseUnset');
   $flags = array();
   foreach ($class['methods'] as $m) {
@@ -1109,7 +1111,7 @@ function phpnet_get_extension_functions($name) {
   if ($doc === false) {
     return false;
   }
-  
+
   preg_match_all('#<li><a href="function\..*?\.php">(.*?)</a>.*?</li>#',
                  $doc, $m);
   return $m[1];

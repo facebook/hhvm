@@ -81,6 +81,8 @@ public:
 protected:
   virtual ObjectData* cloneImpl();
 
+  virtual bool hasCall();
+  virtual bool hasCallStatic();
   virtual bool php_sleep(Variant &ret);
 
 private:

@@ -73,8 +73,12 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
     else if (f->getName() == "__call") setAttribute(HasUnknownMethodHandler);
-    else if (f->getName() == "__get") setAttribute(HasUnknownPropGetter);
-    else if (f->getName() == "__set") setAttribute(HasUnknownPropSetter);
+    else if (f->getName() == "__get")  setAttribute(HasUnknownPropGetter);
+    else if (f->getName() == "__set")  setAttribute(HasUnknownPropSetter);
+    else if (f->getName() == "__call") setAttribute(HasUnknownMethodHandler);
+    else if (f->getName() == "__callstatic") {
+      setAttribute(HasUnknownStaticMethodHandler);
+    }
     addFunction(ar, f);
   }
   setAttribute(Extension);
@@ -817,8 +821,7 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
     if (!system) {
       cg_printf("return get_call_info_static_method_builtin(mcp);\n");
     } else {
-      cg_printf("mcp.fail();\n");
-      cg_printf("return false;\n");
+      cg_printf("return ObjectData::os_get_call_info(mcp);\n");
     }
   }
   cg_indentEnd("}\n");
@@ -1201,8 +1204,8 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
   }
 
   // Create method
-  if (getAttribute(ClassScope::HasConstructor)
-   || getAttribute(ClassScope::classNameConstructor)) {
+  if (getAttribute(ClassScope::HasConstructor) ||
+      getAttribute(ClassScope::ClassNameConstructor)) {
     FunctionScopePtr func = findConstructor(ar, false);
     if (func && !func->isAbstract() && !isInterface()) {
       // abstract methods are not generated, neither should the create method

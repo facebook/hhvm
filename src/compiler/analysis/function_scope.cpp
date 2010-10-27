@@ -1464,7 +1464,6 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_variables->outputCPPStaticVariables(cg, ar);
 }
 
-
 void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
     AnalysisResultPtr ar) {
   if (isAbstract()) return;
@@ -1487,6 +1486,10 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
     flags |= CallInfo::VarArgs;
   }
   if (m_method) {
+    flags |= CallInfo::Method;
+    if (isStatic()) {
+      flags |= CallInfo::StaticMethod;
+    }
     ClassScopePtr scope = ar->getClassScope();
     string clsName = scope->getId(cg);
     cg.printf("CallInfo %s%s::%s%s((void*)&%s%s::%s%s, ", Option::ClassPrefix,

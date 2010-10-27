@@ -190,10 +190,10 @@ Variant c_Directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
 Variant c_Directory::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_Directory::ci___construct((void*)&c_Directory::i___construct, (void*)&c_Directory::ifa___construct, 1, 0, 0x0000000000000000LL);
-CallInfo c_Directory::ci_close((void*)&c_Directory::i_close, (void*)&c_Directory::ifa_close, 0, 0, 0x0000000000000000LL);
-CallInfo c_Directory::ci_read((void*)&c_Directory::i_read, (void*)&c_Directory::ifa_read, 0, 0, 0x0000000000000000LL);
-CallInfo c_Directory::ci_rewind((void*)&c_Directory::i_rewind, (void*)&c_Directory::ifa_rewind, 0, 0, 0x0000000000000000LL);
+CallInfo c_Directory::ci___construct((void*)&c_Directory::i___construct, (void*)&c_Directory::ifa___construct, 1, 4, 0x0000000000000000LL);
+CallInfo c_Directory::ci_close((void*)&c_Directory::i_close, (void*)&c_Directory::ifa_close, 0, 4, 0x0000000000000000LL);
+CallInfo c_Directory::ci_read((void*)&c_Directory::i_read, (void*)&c_Directory::ifa_read, 0, 4, 0x0000000000000000LL);
+CallInfo c_Directory::ci_rewind((void*)&c_Directory::i_rewind, (void*)&c_Directory::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_Directory::i___construct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_Directory *self = NULL;

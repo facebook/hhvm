@@ -272,35 +272,15 @@ Object &FrameInjection::getThisForArrow() {
 CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
   ASSERT(info);
   for (FrameInjection *t = info->m_top; t; t = t->m_prev) {
-    if (t == info->m_top && !t->m_object.isNull() && t->m_object->o_getId()) {
+    if (t != info->m_top) {
+      if (t->m_staticClass) return *t->m_staticClass;
+      if (t->m_callingObject) return t->m_callingObject->o_getClassName();
+    }
+    if (!t->m_object.isNull() && t->m_object->o_getId()) {
       return t->m_object->o_getClassName();
-    }
-    if (t->m_staticClass) {
-      return *t->m_staticClass;
-    }
-    if (t != info->m_top && t->m_callingObject) {
-      return t->m_callingObject->o_getClassName();
     }
   }
   return empty_string;
-}
-
-void FrameInjection::SetStaticClassName(ThreadInfo *info, CStrRef cls) {
-  ASSERT(info);
-  FrameInjection *t = info->m_top;
-  if (t) t->m_staticClass = &cls;
-}
-
-void FrameInjection::ResetStaticClassName(ThreadInfo *info) {
-  ASSERT(info);
-  FrameInjection *t = info->m_top;
-  if (t) t->m_staticClass = NULL;
-}
-
-void FrameInjection::SetCallingObject(ThreadInfo* info, ObjectData *obj) {
-  ASSERT(info);
-  FrameInjection *t = info->m_top;
-  if (t) t->m_callingObject = obj;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

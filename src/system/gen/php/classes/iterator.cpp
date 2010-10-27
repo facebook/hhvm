@@ -511,28 +511,28 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
 Variant c_ArrayIterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_ArrayIterator::ci_getarraycopy((void*)&c_ArrayIterator::i_getarraycopy, (void*)&c_ArrayIterator::ifa_getarraycopy, 0, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_next((void*)&c_ArrayIterator::i_next, (void*)&c_ArrayIterator::ifa_next, 0, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_count((void*)&c_ArrayIterator::i_count, (void*)&c_ArrayIterator::ifa_count, 0, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_natsort((void*)&c_ArrayIterator::i_natsort, (void*)&c_ArrayIterator::ifa_natsort, 0, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_key((void*)&c_ArrayIterator::i_key, (void*)&c_ArrayIterator::ifa_key, 0, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_valid((void*)&c_ArrayIterator::i_valid, (void*)&c_ArrayIterator::ifa_valid, 0, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_append((void*)&c_ArrayIterator::i_append, (void*)&c_ArrayIterator::ifa_append, 1, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_setflags((void*)&c_ArrayIterator::i_setflags, (void*)&c_ArrayIterator::ifa_setflags, 1, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci___construct((void*)&c_ArrayIterator::i___construct, (void*)&c_ArrayIterator::ifa___construct, 2, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_offsetexists((void*)&c_ArrayIterator::i_offsetexists, (void*)&c_ArrayIterator::ifa_offsetexists, 1, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_uksort((void*)&c_ArrayIterator::i_uksort, (void*)&c_ArrayIterator::ifa_uksort, 1, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_offsetget((void*)&c_ArrayIterator::i_offsetget, (void*)&c_ArrayIterator::ifa_offsetget, 1, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_natcasesort((void*)&c_ArrayIterator::i_natcasesort, (void*)&c_ArrayIterator::ifa_natcasesort, 0, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_asort((void*)&c_ArrayIterator::i_asort, (void*)&c_ArrayIterator::ifa_asort, 0, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_offsetunset((void*)&c_ArrayIterator::i_offsetunset, (void*)&c_ArrayIterator::ifa_offsetunset, 1, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_seek((void*)&c_ArrayIterator::i_seek, (void*)&c_ArrayIterator::ifa_seek, 1, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_getflags((void*)&c_ArrayIterator::i_getflags, (void*)&c_ArrayIterator::ifa_getflags, 0, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_current((void*)&c_ArrayIterator::i_current, (void*)&c_ArrayIterator::ifa_current, 0, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_ksort((void*)&c_ArrayIterator::i_ksort, (void*)&c_ArrayIterator::ifa_ksort, 0, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_uasort((void*)&c_ArrayIterator::i_uasort, (void*)&c_ArrayIterator::ifa_uasort, 1, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_rewind((void*)&c_ArrayIterator::i_rewind, (void*)&c_ArrayIterator::ifa_rewind, 0, 0, 0x0000000000000000LL);
-CallInfo c_ArrayIterator::ci_offsetset((void*)&c_ArrayIterator::i_offsetset, (void*)&c_ArrayIterator::ifa_offsetset, 2, 0, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_getarraycopy((void*)&c_ArrayIterator::i_getarraycopy, (void*)&c_ArrayIterator::ifa_getarraycopy, 0, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_next((void*)&c_ArrayIterator::i_next, (void*)&c_ArrayIterator::ifa_next, 0, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_count((void*)&c_ArrayIterator::i_count, (void*)&c_ArrayIterator::ifa_count, 0, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_natsort((void*)&c_ArrayIterator::i_natsort, (void*)&c_ArrayIterator::ifa_natsort, 0, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_key((void*)&c_ArrayIterator::i_key, (void*)&c_ArrayIterator::ifa_key, 0, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_valid((void*)&c_ArrayIterator::i_valid, (void*)&c_ArrayIterator::ifa_valid, 0, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_append((void*)&c_ArrayIterator::i_append, (void*)&c_ArrayIterator::ifa_append, 1, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_setflags((void*)&c_ArrayIterator::i_setflags, (void*)&c_ArrayIterator::ifa_setflags, 1, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci___construct((void*)&c_ArrayIterator::i___construct, (void*)&c_ArrayIterator::ifa___construct, 2, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_offsetexists((void*)&c_ArrayIterator::i_offsetexists, (void*)&c_ArrayIterator::ifa_offsetexists, 1, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_uksort((void*)&c_ArrayIterator::i_uksort, (void*)&c_ArrayIterator::ifa_uksort, 1, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_offsetget((void*)&c_ArrayIterator::i_offsetget, (void*)&c_ArrayIterator::ifa_offsetget, 1, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_natcasesort((void*)&c_ArrayIterator::i_natcasesort, (void*)&c_ArrayIterator::ifa_natcasesort, 0, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_asort((void*)&c_ArrayIterator::i_asort, (void*)&c_ArrayIterator::ifa_asort, 0, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_offsetunset((void*)&c_ArrayIterator::i_offsetunset, (void*)&c_ArrayIterator::ifa_offsetunset, 1, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_seek((void*)&c_ArrayIterator::i_seek, (void*)&c_ArrayIterator::ifa_seek, 1, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_getflags((void*)&c_ArrayIterator::i_getflags, (void*)&c_ArrayIterator::ifa_getflags, 0, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_current((void*)&c_ArrayIterator::i_current, (void*)&c_ArrayIterator::ifa_current, 0, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_ksort((void*)&c_ArrayIterator::i_ksort, (void*)&c_ArrayIterator::ifa_ksort, 0, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_uasort((void*)&c_ArrayIterator::i_uasort, (void*)&c_ArrayIterator::ifa_uasort, 1, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_rewind((void*)&c_ArrayIterator::i_rewind, (void*)&c_ArrayIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
+CallInfo c_ArrayIterator::ci_offsetset((void*)&c_ArrayIterator::i_offsetset, (void*)&c_ArrayIterator::ifa_offsetset, 2, 4, 0x0000000000000000LL);
 Variant c_ArrayIterator::i_getarraycopy(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_ArrayIterator *self = NULL;
@@ -1886,15 +1886,15 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
 Variant c_AppendIterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_AppendIterator::ci_next((void*)&c_AppendIterator::i_next, (void*)&c_AppendIterator::ifa_next, 0, 0, 0x0000000000000000LL);
-CallInfo c_AppendIterator::ci_key((void*)&c_AppendIterator::i_key, (void*)&c_AppendIterator::ifa_key, 0, 0, 0x0000000000000000LL);
-CallInfo c_AppendIterator::ci_valid((void*)&c_AppendIterator::i_valid, (void*)&c_AppendIterator::ifa_valid, 0, 0, 0x0000000000000000LL);
-CallInfo c_AppendIterator::ci_getinneriterator((void*)&c_AppendIterator::i_getinneriterator, (void*)&c_AppendIterator::ifa_getinneriterator, 0, 0, 0x0000000000000000LL);
-CallInfo c_AppendIterator::ci_append((void*)&c_AppendIterator::i_append, (void*)&c_AppendIterator::ifa_append, 1, 0, 0x0000000000000000LL);
-CallInfo c_AppendIterator::ci___construct((void*)&c_AppendIterator::i___construct, (void*)&c_AppendIterator::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_AppendIterator::ci_current((void*)&c_AppendIterator::i_current, (void*)&c_AppendIterator::ifa_current, 0, 0, 0x0000000000000000LL);
-CallInfo c_AppendIterator::ci___call((void*)&c_AppendIterator::i___call, (void*)&c_AppendIterator::ifa___call, 2, 0, 0x0000000000000000LL);
-CallInfo c_AppendIterator::ci_rewind((void*)&c_AppendIterator::i_rewind, (void*)&c_AppendIterator::ifa_rewind, 0, 0, 0x0000000000000000LL);
+CallInfo c_AppendIterator::ci_next((void*)&c_AppendIterator::i_next, (void*)&c_AppendIterator::ifa_next, 0, 4, 0x0000000000000000LL);
+CallInfo c_AppendIterator::ci_key((void*)&c_AppendIterator::i_key, (void*)&c_AppendIterator::ifa_key, 0, 4, 0x0000000000000000LL);
+CallInfo c_AppendIterator::ci_valid((void*)&c_AppendIterator::i_valid, (void*)&c_AppendIterator::ifa_valid, 0, 4, 0x0000000000000000LL);
+CallInfo c_AppendIterator::ci_getinneriterator((void*)&c_AppendIterator::i_getinneriterator, (void*)&c_AppendIterator::ifa_getinneriterator, 0, 4, 0x0000000000000000LL);
+CallInfo c_AppendIterator::ci_append((void*)&c_AppendIterator::i_append, (void*)&c_AppendIterator::ifa_append, 1, 4, 0x0000000000000000LL);
+CallInfo c_AppendIterator::ci___construct((void*)&c_AppendIterator::i___construct, (void*)&c_AppendIterator::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_AppendIterator::ci_current((void*)&c_AppendIterator::i_current, (void*)&c_AppendIterator::ifa_current, 0, 4, 0x0000000000000000LL);
+CallInfo c_AppendIterator::ci___call((void*)&c_AppendIterator::i___call, (void*)&c_AppendIterator::ifa___call, 2, 4, 0x0000000000000000LL);
+CallInfo c_AppendIterator::ci_rewind((void*)&c_AppendIterator::i_rewind, (void*)&c_AppendIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_AppendIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_AppendIterator *self = NULL;
@@ -2832,18 +2832,18 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
 Variant c_RecursiveDirectoryIterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_DirectoryIterator::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_RecursiveDirectoryIterator::ci_next((void*)&c_RecursiveDirectoryIterator::i_next, (void*)&c_RecursiveDirectoryIterator::ifa_next, 0, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveDirectoryIterator::ci_key((void*)&c_RecursiveDirectoryIterator::i_key, (void*)&c_RecursiveDirectoryIterator::ifa_key, 0, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveDirectoryIterator::ci_valid((void*)&c_RecursiveDirectoryIterator::i_valid, (void*)&c_RecursiveDirectoryIterator::ifa_valid, 0, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveDirectoryIterator::ci___tostring((void*)&c_RecursiveDirectoryIterator::i___tostring, (void*)&c_RecursiveDirectoryIterator::ifa___tostring, 0, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveDirectoryIterator::ci_getsubpathname((void*)&c_RecursiveDirectoryIterator::i_getsubpathname, (void*)&c_RecursiveDirectoryIterator::ifa_getsubpathname, 0, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveDirectoryIterator::ci_getsubpath((void*)&c_RecursiveDirectoryIterator::i_getsubpath, (void*)&c_RecursiveDirectoryIterator::ifa_getsubpath, 0, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveDirectoryIterator::ci___construct((void*)&c_RecursiveDirectoryIterator::i___construct, (void*)&c_RecursiveDirectoryIterator::ifa___construct, 2, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveDirectoryIterator::ci_haschildren((void*)&c_RecursiveDirectoryIterator::i_haschildren, (void*)&c_RecursiveDirectoryIterator::ifa_haschildren, 0, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveDirectoryIterator::ci_seek((void*)&c_RecursiveDirectoryIterator::i_seek, (void*)&c_RecursiveDirectoryIterator::ifa_seek, 1, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveDirectoryIterator::ci_getchildren((void*)&c_RecursiveDirectoryIterator::i_getchildren, (void*)&c_RecursiveDirectoryIterator::ifa_getchildren, 0, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveDirectoryIterator::ci_current((void*)&c_RecursiveDirectoryIterator::i_current, (void*)&c_RecursiveDirectoryIterator::ifa_current, 0, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveDirectoryIterator::ci_rewind((void*)&c_RecursiveDirectoryIterator::i_rewind, (void*)&c_RecursiveDirectoryIterator::ifa_rewind, 0, 0, 0x0000000000000000LL);
+CallInfo c_RecursiveDirectoryIterator::ci_next((void*)&c_RecursiveDirectoryIterator::i_next, (void*)&c_RecursiveDirectoryIterator::ifa_next, 0, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveDirectoryIterator::ci_key((void*)&c_RecursiveDirectoryIterator::i_key, (void*)&c_RecursiveDirectoryIterator::ifa_key, 0, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveDirectoryIterator::ci_valid((void*)&c_RecursiveDirectoryIterator::i_valid, (void*)&c_RecursiveDirectoryIterator::ifa_valid, 0, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveDirectoryIterator::ci___tostring((void*)&c_RecursiveDirectoryIterator::i___tostring, (void*)&c_RecursiveDirectoryIterator::ifa___tostring, 0, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveDirectoryIterator::ci_getsubpathname((void*)&c_RecursiveDirectoryIterator::i_getsubpathname, (void*)&c_RecursiveDirectoryIterator::ifa_getsubpathname, 0, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveDirectoryIterator::ci_getsubpath((void*)&c_RecursiveDirectoryIterator::i_getsubpath, (void*)&c_RecursiveDirectoryIterator::ifa_getsubpath, 0, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveDirectoryIterator::ci___construct((void*)&c_RecursiveDirectoryIterator::i___construct, (void*)&c_RecursiveDirectoryIterator::ifa___construct, 2, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveDirectoryIterator::ci_haschildren((void*)&c_RecursiveDirectoryIterator::i_haschildren, (void*)&c_RecursiveDirectoryIterator::ifa_haschildren, 0, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveDirectoryIterator::ci_seek((void*)&c_RecursiveDirectoryIterator::i_seek, (void*)&c_RecursiveDirectoryIterator::ifa_seek, 1, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveDirectoryIterator::ci_getchildren((void*)&c_RecursiveDirectoryIterator::i_getchildren, (void*)&c_RecursiveDirectoryIterator::ifa_getchildren, 0, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveDirectoryIterator::ci_current((void*)&c_RecursiveDirectoryIterator::i_current, (void*)&c_RecursiveDirectoryIterator::ifa_current, 0, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveDirectoryIterator::ci_rewind((void*)&c_RecursiveDirectoryIterator::i_rewind, (void*)&c_RecursiveDirectoryIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_RecursiveDirectoryIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_RecursiveDirectoryIterator *self = NULL;
@@ -3683,15 +3683,15 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
 Variant c_DirectoryIterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_SplFileInfo::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DirectoryIterator::ci_next((void*)&c_DirectoryIterator::i_next, (void*)&c_DirectoryIterator::ifa_next, 0, 0, 0x0000000000000000LL);
-CallInfo c_DirectoryIterator::ci_key((void*)&c_DirectoryIterator::i_key, (void*)&c_DirectoryIterator::ifa_key, 0, 0, 0x0000000000000000LL);
-CallInfo c_DirectoryIterator::ci_valid((void*)&c_DirectoryIterator::i_valid, (void*)&c_DirectoryIterator::ifa_valid, 0, 0, 0x0000000000000000LL);
-CallInfo c_DirectoryIterator::ci___tostring((void*)&c_DirectoryIterator::i___tostring, (void*)&c_DirectoryIterator::ifa___tostring, 0, 0, 0x0000000000000000LL);
-CallInfo c_DirectoryIterator::ci___construct((void*)&c_DirectoryIterator::i___construct, (void*)&c_DirectoryIterator::ifa___construct, 1, 0, 0x0000000000000000LL);
-CallInfo c_DirectoryIterator::ci_seek((void*)&c_DirectoryIterator::i_seek, (void*)&c_DirectoryIterator::ifa_seek, 1, 0, 0x0000000000000000LL);
-CallInfo c_DirectoryIterator::ci_current((void*)&c_DirectoryIterator::i_current, (void*)&c_DirectoryIterator::ifa_current, 0, 0, 0x0000000000000000LL);
-CallInfo c_DirectoryIterator::ci_isdot((void*)&c_DirectoryIterator::i_isdot, (void*)&c_DirectoryIterator::ifa_isdot, 0, 0, 0x0000000000000000LL);
-CallInfo c_DirectoryIterator::ci_rewind((void*)&c_DirectoryIterator::i_rewind, (void*)&c_DirectoryIterator::ifa_rewind, 0, 0, 0x0000000000000000LL);
+CallInfo c_DirectoryIterator::ci_next((void*)&c_DirectoryIterator::i_next, (void*)&c_DirectoryIterator::ifa_next, 0, 4, 0x0000000000000000LL);
+CallInfo c_DirectoryIterator::ci_key((void*)&c_DirectoryIterator::i_key, (void*)&c_DirectoryIterator::ifa_key, 0, 4, 0x0000000000000000LL);
+CallInfo c_DirectoryIterator::ci_valid((void*)&c_DirectoryIterator::i_valid, (void*)&c_DirectoryIterator::ifa_valid, 0, 4, 0x0000000000000000LL);
+CallInfo c_DirectoryIterator::ci___tostring((void*)&c_DirectoryIterator::i___tostring, (void*)&c_DirectoryIterator::ifa___tostring, 0, 4, 0x0000000000000000LL);
+CallInfo c_DirectoryIterator::ci___construct((void*)&c_DirectoryIterator::i___construct, (void*)&c_DirectoryIterator::ifa___construct, 1, 4, 0x0000000000000000LL);
+CallInfo c_DirectoryIterator::ci_seek((void*)&c_DirectoryIterator::i_seek, (void*)&c_DirectoryIterator::ifa_seek, 1, 4, 0x0000000000000000LL);
+CallInfo c_DirectoryIterator::ci_current((void*)&c_DirectoryIterator::i_current, (void*)&c_DirectoryIterator::ifa_current, 0, 4, 0x0000000000000000LL);
+CallInfo c_DirectoryIterator::ci_isdot((void*)&c_DirectoryIterator::i_isdot, (void*)&c_DirectoryIterator::ifa_isdot, 0, 4, 0x0000000000000000LL);
+CallInfo c_DirectoryIterator::ci_rewind((void*)&c_DirectoryIterator::i_rewind, (void*)&c_DirectoryIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_DirectoryIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DirectoryIterator *self = NULL;
@@ -4382,13 +4382,13 @@ Variant c_RecursiveIteratorIterator::o_invoke_from_eval(const char *s, Eval::Var
 Variant c_RecursiveIteratorIterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_RecursiveIteratorIterator::ci_next((void*)&c_RecursiveIteratorIterator::i_next, (void*)&c_RecursiveIteratorIterator::ifa_next, 0, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveIteratorIterator::ci_key((void*)&c_RecursiveIteratorIterator::i_key, (void*)&c_RecursiveIteratorIterator::ifa_key, 0, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveIteratorIterator::ci_valid((void*)&c_RecursiveIteratorIterator::i_valid, (void*)&c_RecursiveIteratorIterator::ifa_valid, 0, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveIteratorIterator::ci_getinneriterator((void*)&c_RecursiveIteratorIterator::i_getinneriterator, (void*)&c_RecursiveIteratorIterator::ifa_getinneriterator, 0, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveIteratorIterator::ci___construct((void*)&c_RecursiveIteratorIterator::i___construct, (void*)&c_RecursiveIteratorIterator::ifa___construct, 3, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveIteratorIterator::ci_current((void*)&c_RecursiveIteratorIterator::i_current, (void*)&c_RecursiveIteratorIterator::ifa_current, 0, 0, 0x0000000000000000LL);
-CallInfo c_RecursiveIteratorIterator::ci_rewind((void*)&c_RecursiveIteratorIterator::i_rewind, (void*)&c_RecursiveIteratorIterator::ifa_rewind, 0, 0, 0x0000000000000000LL);
+CallInfo c_RecursiveIteratorIterator::ci_next((void*)&c_RecursiveIteratorIterator::i_next, (void*)&c_RecursiveIteratorIterator::ifa_next, 0, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveIteratorIterator::ci_key((void*)&c_RecursiveIteratorIterator::i_key, (void*)&c_RecursiveIteratorIterator::ifa_key, 0, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveIteratorIterator::ci_valid((void*)&c_RecursiveIteratorIterator::i_valid, (void*)&c_RecursiveIteratorIterator::ifa_valid, 0, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveIteratorIterator::ci_getinneriterator((void*)&c_RecursiveIteratorIterator::i_getinneriterator, (void*)&c_RecursiveIteratorIterator::ifa_getinneriterator, 0, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveIteratorIterator::ci___construct((void*)&c_RecursiveIteratorIterator::i___construct, (void*)&c_RecursiveIteratorIterator::ifa___construct, 3, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveIteratorIterator::ci_current((void*)&c_RecursiveIteratorIterator::i_current, (void*)&c_RecursiveIteratorIterator::ifa_current, 0, 4, 0x0000000000000000LL);
+CallInfo c_RecursiveIteratorIterator::ci_rewind((void*)&c_RecursiveIteratorIterator::i_rewind, (void*)&c_RecursiveIteratorIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_RecursiveIteratorIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_RecursiveIteratorIterator *self = NULL;

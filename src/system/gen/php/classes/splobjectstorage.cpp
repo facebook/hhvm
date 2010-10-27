@@ -289,15 +289,15 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
 Variant c_SplObjectStorage::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_SplObjectStorage::ci_next((void*)&c_SplObjectStorage::i_next, (void*)&c_SplObjectStorage::ifa_next, 0, 0, 0x0000000000000000LL);
-CallInfo c_SplObjectStorage::ci_detach((void*)&c_SplObjectStorage::i_detach, (void*)&c_SplObjectStorage::ifa_detach, 1, 0, 0x0000000000000000LL);
-CallInfo c_SplObjectStorage::ci_attach((void*)&c_SplObjectStorage::i_attach, (void*)&c_SplObjectStorage::ifa_attach, 1, 0, 0x0000000000000000LL);
-CallInfo c_SplObjectStorage::ci_count((void*)&c_SplObjectStorage::i_count, (void*)&c_SplObjectStorage::ifa_count, 0, 0, 0x0000000000000000LL);
-CallInfo c_SplObjectStorage::ci_key((void*)&c_SplObjectStorage::i_key, (void*)&c_SplObjectStorage::ifa_key, 0, 0, 0x0000000000000000LL);
-CallInfo c_SplObjectStorage::ci_valid((void*)&c_SplObjectStorage::i_valid, (void*)&c_SplObjectStorage::ifa_valid, 0, 0, 0x0000000000000000LL);
-CallInfo c_SplObjectStorage::ci_contains((void*)&c_SplObjectStorage::i_contains, (void*)&c_SplObjectStorage::ifa_contains, 1, 0, 0x0000000000000000LL);
-CallInfo c_SplObjectStorage::ci_current((void*)&c_SplObjectStorage::i_current, (void*)&c_SplObjectStorage::ifa_current, 0, 0, 0x0000000000000000LL);
-CallInfo c_SplObjectStorage::ci_rewind((void*)&c_SplObjectStorage::i_rewind, (void*)&c_SplObjectStorage::ifa_rewind, 0, 0, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_next((void*)&c_SplObjectStorage::i_next, (void*)&c_SplObjectStorage::ifa_next, 0, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_detach((void*)&c_SplObjectStorage::i_detach, (void*)&c_SplObjectStorage::ifa_detach, 1, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_attach((void*)&c_SplObjectStorage::i_attach, (void*)&c_SplObjectStorage::ifa_attach, 1, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_count((void*)&c_SplObjectStorage::i_count, (void*)&c_SplObjectStorage::ifa_count, 0, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_key((void*)&c_SplObjectStorage::i_key, (void*)&c_SplObjectStorage::ifa_key, 0, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_valid((void*)&c_SplObjectStorage::i_valid, (void*)&c_SplObjectStorage::ifa_valid, 0, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_contains((void*)&c_SplObjectStorage::i_contains, (void*)&c_SplObjectStorage::ifa_contains, 1, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_current((void*)&c_SplObjectStorage::i_current, (void*)&c_SplObjectStorage::ifa_current, 0, 4, 0x0000000000000000LL);
+CallInfo c_SplObjectStorage::ci_rewind((void*)&c_SplObjectStorage::i_rewind, (void*)&c_SplObjectStorage::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_SplObjectStorage::i_next(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_SplObjectStorage *self = NULL;

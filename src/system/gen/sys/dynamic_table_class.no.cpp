@@ -588,8 +588,8 @@ Variant c_PDOException::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
 Variant c_PDOException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_PDOException::ci___destruct((void*)&c_PDOException::i___destruct, (void*)&c_PDOException::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOException::ci___construct((void*)&c_PDOException::i___construct, (void*)&c_PDOException::ifa___construct, 0, 0, 0x0000000000000000LL);
+CallInfo c_PDOException::ci___destruct((void*)&c_PDOException::i___destruct, (void*)&c_PDOException::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOException::ci___construct((void*)&c_PDOException::i___construct, (void*)&c_PDOException::ifa___construct, 0, 4, 0x0000000000000000LL);
 Variant c_PDOException::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_PDOException *self = NULL;
@@ -848,9 +848,9 @@ Variant c_DOMDocumentFragment::o_invoke_from_eval(const char *s, Eval::VariableE
 Variant c_DOMDocumentFragment::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_DOMNode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMDocumentFragment::ci___destruct((void*)&c_DOMDocumentFragment::i___destruct, (void*)&c_DOMDocumentFragment::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocumentFragment::ci___construct((void*)&c_DOMDocumentFragment::i___construct, (void*)&c_DOMDocumentFragment::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocumentFragment::ci_appendxml((void*)&c_DOMDocumentFragment::i_appendxml, (void*)&c_DOMDocumentFragment::ifa_appendxml, 1, 0, 0x0000000000000000LL);
+CallInfo c_DOMDocumentFragment::ci___destruct((void*)&c_DOMDocumentFragment::i___destruct, (void*)&c_DOMDocumentFragment::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocumentFragment::ci___construct((void*)&c_DOMDocumentFragment::i___construct, (void*)&c_DOMDocumentFragment::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocumentFragment::ci_appendxml((void*)&c_DOMDocumentFragment::i_appendxml, (void*)&c_DOMDocumentFragment::ifa_appendxml, 1, 4, 0x0000000000000000LL);
 Variant c_DOMDocumentFragment::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMDocumentFragment *self = NULL;
@@ -1211,12 +1211,12 @@ Variant c_DOMText::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
 Variant c_DOMText::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_DOMCharacterData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMText::ci___destruct((void*)&c_DOMText::i___destruct, (void*)&c_DOMText::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMText::ci___set((void*)&c_DOMText::i___set, (void*)&c_DOMText::ifa___set, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMText::ci___construct((void*)&c_DOMText::i___construct, (void*)&c_DOMText::ifa___construct, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMText::ci___get((void*)&c_DOMText::i___get, (void*)&c_DOMText::ifa___get, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMText::ci_iswhitespaceinelementcontent((void*)&c_DOMText::i_iswhitespaceinelementcontent, (void*)&c_DOMText::ifa_iswhitespaceinelementcontent, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMText::ci_splittext((void*)&c_DOMText::i_splittext, (void*)&c_DOMText::ifa_splittext, 1, 0, 0x0000000000000000LL);
+CallInfo c_DOMText::ci___destruct((void*)&c_DOMText::i___destruct, (void*)&c_DOMText::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMText::ci___set((void*)&c_DOMText::i___set, (void*)&c_DOMText::ifa___set, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMText::ci___construct((void*)&c_DOMText::i___construct, (void*)&c_DOMText::ifa___construct, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMText::ci___get((void*)&c_DOMText::i___get, (void*)&c_DOMText::ifa___get, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMText::ci_iswhitespaceinelementcontent((void*)&c_DOMText::i_iswhitespaceinelementcontent, (void*)&c_DOMText::ifa_iswhitespaceinelementcontent, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMText::ci_splittext((void*)&c_DOMText::i_splittext, (void*)&c_DOMText::ifa_splittext, 1, 4, 0x0000000000000000LL);
 Variant c_DOMText::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMText *self = NULL;
@@ -2169,36 +2169,36 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
 Variant c_DebuggerClient::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DebuggerClient::ci_argcount((void*)&c_DebuggerClient::i_argcount, (void*)&c_DebuggerClient::ifa_argcount, 0, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_arg((void*)&c_DebuggerClient::i_arg, (void*)&c_DebuggerClient::ifa_arg, 2, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_helpcmds((void*)&c_DebuggerClient::i_helpcmds, (void*)&c_DebuggerClient::ifa_helpcmds, 2, 1, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_ask((void*)&c_DebuggerClient::i_ask, (void*)&c_DebuggerClient::ifa_ask, 1, 1, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_error((void*)&c_DebuggerClient::i_error, (void*)&c_DebuggerClient::ifa_error, 1, 1, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_xend((void*)&c_DebuggerClient::i_xend, (void*)&c_DebuggerClient::ifa_xend, 1, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci___destruct((void*)&c_DebuggerClient::i___destruct, (void*)&c_DebuggerClient::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_helptitle((void*)&c_DebuggerClient::i_helptitle, (void*)&c_DebuggerClient::ifa_helptitle, 1, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_getcommand((void*)&c_DebuggerClient::i_getcommand, (void*)&c_DebuggerClient::ifa_getcommand, 0, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_tutorial((void*)&c_DebuggerClient::i_tutorial, (void*)&c_DebuggerClient::ifa_tutorial, 1, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci___construct((void*)&c_DebuggerClient::i___construct, (void*)&c_DebuggerClient::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_getcode((void*)&c_DebuggerClient::i_getcode, (void*)&c_DebuggerClient::ifa_getcode, 0, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_argvalue((void*)&c_DebuggerClient::i_argvalue, (void*)&c_DebuggerClient::ifa_argvalue, 1, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_output((void*)&c_DebuggerClient::i_output, (void*)&c_DebuggerClient::ifa_output, 1, 1, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_getstacktrace((void*)&c_DebuggerClient::i_getstacktrace, (void*)&c_DebuggerClient::ifa_getstacktrace, 0, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_info((void*)&c_DebuggerClient::i_info, (void*)&c_DebuggerClient::ifa_info, 1, 1, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_printframe((void*)&c_DebuggerClient::i_printframe, (void*)&c_DebuggerClient::ifa_printframe, 1, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_print((void*)&c_DebuggerClient::i_print, (void*)&c_DebuggerClient::ifa_print, 1, 1, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_code((void*)&c_DebuggerClient::i_code, (void*)&c_DebuggerClient::ifa_code, 4, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_helpsection((void*)&c_DebuggerClient::i_helpsection, (void*)&c_DebuggerClient::ifa_helpsection, 1, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_quit((void*)&c_DebuggerClient::i_quit, (void*)&c_DebuggerClient::ifa_quit, 0, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_helpbody((void*)&c_DebuggerClient::i_helpbody, (void*)&c_DebuggerClient::ifa_helpbody, 1, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_getframe((void*)&c_DebuggerClient::i_getframe, (void*)&c_DebuggerClient::ifa_getframe, 0, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_help((void*)&c_DebuggerClient::i_help, (void*)&c_DebuggerClient::ifa_help, 1, 1, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_args((void*)&c_DebuggerClient::i_args, (void*)&c_DebuggerClient::ifa_args, 0, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_addcompletion((void*)&c_DebuggerClient::i_addcompletion, (void*)&c_DebuggerClient::ifa_addcompletion, 1, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_argrest((void*)&c_DebuggerClient::i_argrest, (void*)&c_DebuggerClient::ifa_argrest, 1, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_getcurrentlocation((void*)&c_DebuggerClient::i_getcurrentlocation, (void*)&c_DebuggerClient::ifa_getcurrentlocation, 0, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_send((void*)&c_DebuggerClient::i_send, (void*)&c_DebuggerClient::ifa_send, 1, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerClient::ci_wrap((void*)&c_DebuggerClient::i_wrap, (void*)&c_DebuggerClient::ifa_wrap, 1, 0, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_argcount((void*)&c_DebuggerClient::i_argcount, (void*)&c_DebuggerClient::ifa_argcount, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_arg((void*)&c_DebuggerClient::i_arg, (void*)&c_DebuggerClient::ifa_arg, 2, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_helpcmds((void*)&c_DebuggerClient::i_helpcmds, (void*)&c_DebuggerClient::ifa_helpcmds, 2, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_ask((void*)&c_DebuggerClient::i_ask, (void*)&c_DebuggerClient::ifa_ask, 1, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_error((void*)&c_DebuggerClient::i_error, (void*)&c_DebuggerClient::ifa_error, 1, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_xend((void*)&c_DebuggerClient::i_xend, (void*)&c_DebuggerClient::ifa_xend, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci___destruct((void*)&c_DebuggerClient::i___destruct, (void*)&c_DebuggerClient::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_helptitle((void*)&c_DebuggerClient::i_helptitle, (void*)&c_DebuggerClient::ifa_helptitle, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_getcommand((void*)&c_DebuggerClient::i_getcommand, (void*)&c_DebuggerClient::ifa_getcommand, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_tutorial((void*)&c_DebuggerClient::i_tutorial, (void*)&c_DebuggerClient::ifa_tutorial, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci___construct((void*)&c_DebuggerClient::i___construct, (void*)&c_DebuggerClient::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_getcode((void*)&c_DebuggerClient::i_getcode, (void*)&c_DebuggerClient::ifa_getcode, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_argvalue((void*)&c_DebuggerClient::i_argvalue, (void*)&c_DebuggerClient::ifa_argvalue, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_output((void*)&c_DebuggerClient::i_output, (void*)&c_DebuggerClient::ifa_output, 1, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_getstacktrace((void*)&c_DebuggerClient::i_getstacktrace, (void*)&c_DebuggerClient::ifa_getstacktrace, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_info((void*)&c_DebuggerClient::i_info, (void*)&c_DebuggerClient::ifa_info, 1, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_printframe((void*)&c_DebuggerClient::i_printframe, (void*)&c_DebuggerClient::ifa_printframe, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_print((void*)&c_DebuggerClient::i_print, (void*)&c_DebuggerClient::ifa_print, 1, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_code((void*)&c_DebuggerClient::i_code, (void*)&c_DebuggerClient::ifa_code, 4, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_helpsection((void*)&c_DebuggerClient::i_helpsection, (void*)&c_DebuggerClient::ifa_helpsection, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_quit((void*)&c_DebuggerClient::i_quit, (void*)&c_DebuggerClient::ifa_quit, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_helpbody((void*)&c_DebuggerClient::i_helpbody, (void*)&c_DebuggerClient::ifa_helpbody, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_getframe((void*)&c_DebuggerClient::i_getframe, (void*)&c_DebuggerClient::ifa_getframe, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_help((void*)&c_DebuggerClient::i_help, (void*)&c_DebuggerClient::ifa_help, 1, 5, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_args((void*)&c_DebuggerClient::i_args, (void*)&c_DebuggerClient::ifa_args, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_addcompletion((void*)&c_DebuggerClient::i_addcompletion, (void*)&c_DebuggerClient::ifa_addcompletion, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_argrest((void*)&c_DebuggerClient::i_argrest, (void*)&c_DebuggerClient::ifa_argrest, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_getcurrentlocation((void*)&c_DebuggerClient::i_getcurrentlocation, (void*)&c_DebuggerClient::ifa_getcurrentlocation, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_send((void*)&c_DebuggerClient::i_send, (void*)&c_DebuggerClient::ifa_send, 1, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerClient::ci_wrap((void*)&c_DebuggerClient::i_wrap, (void*)&c_DebuggerClient::ifa_wrap, 1, 4, 0x0000000000000000LL);
 Variant c_DebuggerClient::i_argcount(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DebuggerClient *self = NULL;
@@ -3587,8 +3587,8 @@ Variant c_DOMCDATASection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
 Variant c_DOMCDATASection::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_DOMText::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMCDATASection::ci___destruct((void*)&c_DOMCDATASection::i___destruct, (void*)&c_DOMCDATASection::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMCDATASection::ci___construct((void*)&c_DOMCDATASection::i___construct, (void*)&c_DOMCDATASection::ifa___construct, 1, 0, 0x0000000000000000LL);
+CallInfo c_DOMCDATASection::ci___destruct((void*)&c_DOMCDATASection::i___destruct, (void*)&c_DOMCDATASection::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMCDATASection::ci___construct((void*)&c_DOMCDATASection::i___construct, (void*)&c_DOMCDATASection::ifa___construct, 1, 4, 0x0000000000000000LL);
 Variant c_DOMCDATASection::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMCDATASection *self = NULL;
@@ -3855,8 +3855,8 @@ Variant c_Locale::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &e
 Variant c_Locale::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_Locale::ci___destruct((void*)&c_Locale::i___destruct, (void*)&c_Locale::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_Locale::ci___construct((void*)&c_Locale::i___construct, (void*)&c_Locale::ifa___construct, 0, 0, 0x0000000000000000LL);
+CallInfo c_Locale::ci___destruct((void*)&c_Locale::i___destruct, (void*)&c_Locale::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_Locale::ci___construct((void*)&c_Locale::i___construct, (void*)&c_Locale::ifa___construct, 0, 4, 0x0000000000000000LL);
 Variant c_Locale::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_Locale *self = NULL;
@@ -4135,10 +4135,10 @@ Variant c_DOMDocumentType::o_invoke_from_eval(const char *s, Eval::VariableEnvir
 Variant c_DOMDocumentType::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_DOMNode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMDocumentType::ci___destruct((void*)&c_DOMDocumentType::i___destruct, (void*)&c_DOMDocumentType::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocumentType::ci___set((void*)&c_DOMDocumentType::i___set, (void*)&c_DOMDocumentType::ifa___set, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocumentType::ci___construct((void*)&c_DOMDocumentType::i___construct, (void*)&c_DOMDocumentType::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocumentType::ci___get((void*)&c_DOMDocumentType::i___get, (void*)&c_DOMDocumentType::ifa___get, 1, 0, 0x0000000000000000LL);
+CallInfo c_DOMDocumentType::ci___destruct((void*)&c_DOMDocumentType::i___destruct, (void*)&c_DOMDocumentType::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocumentType::ci___set((void*)&c_DOMDocumentType::i___set, (void*)&c_DOMDocumentType::ifa___set, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocumentType::ci___construct((void*)&c_DOMDocumentType::i___construct, (void*)&c_DOMDocumentType::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocumentType::ci___get((void*)&c_DOMDocumentType::i___get, (void*)&c_DOMDocumentType::ifa___get, 1, 4, 0x0000000000000000LL);
 Variant c_DOMDocumentType::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMDocumentType *self = NULL;
@@ -4594,15 +4594,15 @@ Variant c_SQLite3Stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
 Variant c_SQLite3Stmt::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_SQLite3Stmt::ci___destruct((void*)&c_SQLite3Stmt::i___destruct, (void*)&c_SQLite3Stmt::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3Stmt::ci___construct((void*)&c_SQLite3Stmt::i___construct, (void*)&c_SQLite3Stmt::ifa___construct, 2, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3Stmt::ci_close((void*)&c_SQLite3Stmt::i_close, (void*)&c_SQLite3Stmt::ifa_close, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3Stmt::ci_paramcount((void*)&c_SQLite3Stmt::i_paramcount, (void*)&c_SQLite3Stmt::ifa_paramcount, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3Stmt::ci_bindparam((void*)&c_SQLite3Stmt::i_bindparam, (void*)&c_SQLite3Stmt::ifa_bindparam, 3, 0, 0x0000000000000002LL);
-CallInfo c_SQLite3Stmt::ci_execute((void*)&c_SQLite3Stmt::i_execute, (void*)&c_SQLite3Stmt::ifa_execute, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3Stmt::ci_reset((void*)&c_SQLite3Stmt::i_reset, (void*)&c_SQLite3Stmt::ifa_reset, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3Stmt::ci_clear((void*)&c_SQLite3Stmt::i_clear, (void*)&c_SQLite3Stmt::ifa_clear, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3Stmt::ci_bindvalue((void*)&c_SQLite3Stmt::i_bindvalue, (void*)&c_SQLite3Stmt::ifa_bindvalue, 3, 0, 0x0000000000000000LL);
+CallInfo c_SQLite3Stmt::ci___destruct((void*)&c_SQLite3Stmt::i___destruct, (void*)&c_SQLite3Stmt::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3Stmt::ci___construct((void*)&c_SQLite3Stmt::i___construct, (void*)&c_SQLite3Stmt::ifa___construct, 2, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3Stmt::ci_close((void*)&c_SQLite3Stmt::i_close, (void*)&c_SQLite3Stmt::ifa_close, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3Stmt::ci_paramcount((void*)&c_SQLite3Stmt::i_paramcount, (void*)&c_SQLite3Stmt::ifa_paramcount, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3Stmt::ci_bindparam((void*)&c_SQLite3Stmt::i_bindparam, (void*)&c_SQLite3Stmt::ifa_bindparam, 3, 4, 0x0000000000000002LL);
+CallInfo c_SQLite3Stmt::ci_execute((void*)&c_SQLite3Stmt::i_execute, (void*)&c_SQLite3Stmt::ifa_execute, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3Stmt::ci_reset((void*)&c_SQLite3Stmt::i_reset, (void*)&c_SQLite3Stmt::ifa_reset, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3Stmt::ci_clear((void*)&c_SQLite3Stmt::i_clear, (void*)&c_SQLite3Stmt::ifa_clear, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3Stmt::ci_bindvalue((void*)&c_SQLite3Stmt::i_bindvalue, (void*)&c_SQLite3Stmt::ifa_bindvalue, 3, 4, 0x0000000000000000LL);
 Variant c_SQLite3Stmt::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_SQLite3Stmt *self = NULL;
@@ -5212,12 +5212,12 @@ Variant c_DOMNodeList::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
 Variant c_DOMNodeList::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMNodeList::ci_item((void*)&c_DOMNodeList::i_item, (void*)&c_DOMNodeList::ifa_item, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMNodeList::ci___destruct((void*)&c_DOMNodeList::i___destruct, (void*)&c_DOMNodeList::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNodeList::ci___set((void*)&c_DOMNodeList::i___set, (void*)&c_DOMNodeList::ifa___set, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMNodeList::ci___construct((void*)&c_DOMNodeList::i___construct, (void*)&c_DOMNodeList::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNodeList::ci_getiterator((void*)&c_DOMNodeList::i_getiterator, (void*)&c_DOMNodeList::ifa_getiterator, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNodeList::ci___get((void*)&c_DOMNodeList::i___get, (void*)&c_DOMNodeList::ifa___get, 1, 0, 0x0000000000000000LL);
+CallInfo c_DOMNodeList::ci_item((void*)&c_DOMNodeList::i_item, (void*)&c_DOMNodeList::ifa_item, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMNodeList::ci___destruct((void*)&c_DOMNodeList::i___destruct, (void*)&c_DOMNodeList::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNodeList::ci___set((void*)&c_DOMNodeList::i___set, (void*)&c_DOMNodeList::ifa___set, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMNodeList::ci___construct((void*)&c_DOMNodeList::i___construct, (void*)&c_DOMNodeList::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNodeList::ci_getiterator((void*)&c_DOMNodeList::i_getiterator, (void*)&c_DOMNodeList::ifa_getiterator, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNodeList::ci___get((void*)&c_DOMNodeList::i___get, (void*)&c_DOMNodeList::ifa___get, 1, 4, 0x0000000000000000LL);
 Variant c_DOMNodeList::i_item(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMNodeList *self = NULL;
@@ -5737,10 +5737,10 @@ Variant c_Normalizer::os_invoke_from_eval(const char *c, const char *s, Eval::Va
   }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_Normalizer::ci___destruct((void*)&c_Normalizer::i___destruct, (void*)&c_Normalizer::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_Normalizer::ci___construct((void*)&c_Normalizer::i___construct, (void*)&c_Normalizer::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_Normalizer::ci_normalize((void*)&c_Normalizer::i_normalize, (void*)&c_Normalizer::ifa_normalize, 2, 0, 0x0000000000000000LL);
-CallInfo c_Normalizer::ci_isnormalized((void*)&c_Normalizer::i_isnormalized, (void*)&c_Normalizer::ifa_isnormalized, 2, 0, 0x0000000000000000LL);
+CallInfo c_Normalizer::ci___destruct((void*)&c_Normalizer::i___destruct, (void*)&c_Normalizer::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_Normalizer::ci___construct((void*)&c_Normalizer::i___construct, (void*)&c_Normalizer::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_Normalizer::ci_normalize((void*)&c_Normalizer::i_normalize, (void*)&c_Normalizer::ifa_normalize, 2, 12, 0x0000000000000000LL);
+CallInfo c_Normalizer::ci_isnormalized((void*)&c_Normalizer::i_isnormalized, (void*)&c_Normalizer::ifa_isnormalized, 2, 12, 0x0000000000000000LL);
 Variant c_Normalizer::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_Normalizer *self = NULL;
@@ -6219,15 +6219,15 @@ Variant c_DOMCharacterData::o_invoke_from_eval(const char *s, Eval::VariableEnvi
 Variant c_DOMCharacterData::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_DOMNode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMCharacterData::ci___destruct((void*)&c_DOMCharacterData::i___destruct, (void*)&c_DOMCharacterData::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMCharacterData::ci_substringdata((void*)&c_DOMCharacterData::i_substringdata, (void*)&c_DOMCharacterData::ifa_substringdata, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMCharacterData::ci___set((void*)&c_DOMCharacterData::i___set, (void*)&c_DOMCharacterData::ifa___set, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMCharacterData::ci_insertdata((void*)&c_DOMCharacterData::i_insertdata, (void*)&c_DOMCharacterData::ifa_insertdata, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMCharacterData::ci___construct((void*)&c_DOMCharacterData::i___construct, (void*)&c_DOMCharacterData::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMCharacterData::ci_appenddata((void*)&c_DOMCharacterData::i_appenddata, (void*)&c_DOMCharacterData::ifa_appenddata, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMCharacterData::ci___get((void*)&c_DOMCharacterData::i___get, (void*)&c_DOMCharacterData::ifa___get, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMCharacterData::ci_replacedata((void*)&c_DOMCharacterData::i_replacedata, (void*)&c_DOMCharacterData::ifa_replacedata, 3, 0, 0x0000000000000000LL);
-CallInfo c_DOMCharacterData::ci_deletedata((void*)&c_DOMCharacterData::i_deletedata, (void*)&c_DOMCharacterData::ifa_deletedata, 2, 0, 0x0000000000000000LL);
+CallInfo c_DOMCharacterData::ci___destruct((void*)&c_DOMCharacterData::i___destruct, (void*)&c_DOMCharacterData::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMCharacterData::ci_substringdata((void*)&c_DOMCharacterData::i_substringdata, (void*)&c_DOMCharacterData::ifa_substringdata, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMCharacterData::ci___set((void*)&c_DOMCharacterData::i___set, (void*)&c_DOMCharacterData::ifa___set, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMCharacterData::ci_insertdata((void*)&c_DOMCharacterData::i_insertdata, (void*)&c_DOMCharacterData::ifa_insertdata, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMCharacterData::ci___construct((void*)&c_DOMCharacterData::i___construct, (void*)&c_DOMCharacterData::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMCharacterData::ci_appenddata((void*)&c_DOMCharacterData::i_appenddata, (void*)&c_DOMCharacterData::ifa_appenddata, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMCharacterData::ci___get((void*)&c_DOMCharacterData::i___get, (void*)&c_DOMCharacterData::ifa___get, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMCharacterData::ci_replacedata((void*)&c_DOMCharacterData::i_replacedata, (void*)&c_DOMCharacterData::ifa_replacedata, 3, 4, 0x0000000000000000LL);
+CallInfo c_DOMCharacterData::ci_deletedata((void*)&c_DOMCharacterData::i_deletedata, (void*)&c_DOMCharacterData::ifa_deletedata, 2, 4, 0x0000000000000000LL);
 Variant c_DOMCharacterData::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMCharacterData *self = NULL;
@@ -6767,8 +6767,8 @@ Variant c_DOMEntityReference::o_invoke_from_eval(const char *s, Eval::VariableEn
 Variant c_DOMEntityReference::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_DOMNode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMEntityReference::ci___destruct((void*)&c_DOMEntityReference::i___destruct, (void*)&c_DOMEntityReference::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMEntityReference::ci___construct((void*)&c_DOMEntityReference::i___construct, (void*)&c_DOMEntityReference::ifa___construct, 1, 0, 0x0000000000000000LL);
+CallInfo c_DOMEntityReference::ci___destruct((void*)&c_DOMEntityReference::i___destruct, (void*)&c_DOMEntityReference::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMEntityReference::ci___construct((void*)&c_DOMEntityReference::i___construct, (void*)&c_DOMEntityReference::ifa___construct, 1, 4, 0x0000000000000000LL);
 Variant c_DOMEntityReference::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMEntityReference *self = NULL;
@@ -7098,13 +7098,13 @@ Variant c_SimpleXMLElementIterator::o_invoke_from_eval(const char *s, Eval::Vari
 Variant c_SimpleXMLElementIterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_SimpleXMLElementIterator::ci_next((void*)&c_SimpleXMLElementIterator::i_next, (void*)&c_SimpleXMLElementIterator::ifa_next, 0, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElementIterator::ci_key((void*)&c_SimpleXMLElementIterator::i_key, (void*)&c_SimpleXMLElementIterator::ifa_key, 0, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElementIterator::ci_valid((void*)&c_SimpleXMLElementIterator::i_valid, (void*)&c_SimpleXMLElementIterator::ifa_valid, 0, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElementIterator::ci___destruct((void*)&c_SimpleXMLElementIterator::i___destruct, (void*)&c_SimpleXMLElementIterator::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElementIterator::ci___construct((void*)&c_SimpleXMLElementIterator::i___construct, (void*)&c_SimpleXMLElementIterator::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElementIterator::ci_current((void*)&c_SimpleXMLElementIterator::i_current, (void*)&c_SimpleXMLElementIterator::ifa_current, 0, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElementIterator::ci_rewind((void*)&c_SimpleXMLElementIterator::i_rewind, (void*)&c_SimpleXMLElementIterator::ifa_rewind, 0, 0, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElementIterator::ci_next((void*)&c_SimpleXMLElementIterator::i_next, (void*)&c_SimpleXMLElementIterator::ifa_next, 0, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElementIterator::ci_key((void*)&c_SimpleXMLElementIterator::i_key, (void*)&c_SimpleXMLElementIterator::ifa_key, 0, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElementIterator::ci_valid((void*)&c_SimpleXMLElementIterator::i_valid, (void*)&c_SimpleXMLElementIterator::ifa_valid, 0, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElementIterator::ci___destruct((void*)&c_SimpleXMLElementIterator::i___destruct, (void*)&c_SimpleXMLElementIterator::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElementIterator::ci___construct((void*)&c_SimpleXMLElementIterator::i___construct, (void*)&c_SimpleXMLElementIterator::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElementIterator::ci_current((void*)&c_SimpleXMLElementIterator::i_current, (void*)&c_SimpleXMLElementIterator::ifa_current, 0, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElementIterator::ci_rewind((void*)&c_SimpleXMLElementIterator::i_rewind, (void*)&c_SimpleXMLElementIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_SimpleXMLElementIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_SimpleXMLElementIterator *self = NULL;
@@ -7681,13 +7681,13 @@ Variant c_DateTimeZone::os_invoke_from_eval(const char *c, const char *s, Eval::
   }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DateTimeZone::ci_gettransitions((void*)&c_DateTimeZone::i_gettransitions, (void*)&c_DateTimeZone::ifa_gettransitions, 0, 0, 0x0000000000000000LL);
-CallInfo c_DateTimeZone::ci_listidentifiers((void*)&c_DateTimeZone::i_listidentifiers, (void*)&c_DateTimeZone::ifa_listidentifiers, 0, 0, 0x0000000000000000LL);
-CallInfo c_DateTimeZone::ci___destruct((void*)&c_DateTimeZone::i___destruct, (void*)&c_DateTimeZone::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DateTimeZone::ci_getoffset((void*)&c_DateTimeZone::i_getoffset, (void*)&c_DateTimeZone::ifa_getoffset, 1, 0, 0x0000000000000000LL);
-CallInfo c_DateTimeZone::ci___construct((void*)&c_DateTimeZone::i___construct, (void*)&c_DateTimeZone::ifa___construct, 1, 0, 0x0000000000000000LL);
-CallInfo c_DateTimeZone::ci_listabbreviations((void*)&c_DateTimeZone::i_listabbreviations, (void*)&c_DateTimeZone::ifa_listabbreviations, 0, 0, 0x0000000000000000LL);
-CallInfo c_DateTimeZone::ci_getname((void*)&c_DateTimeZone::i_getname, (void*)&c_DateTimeZone::ifa_getname, 0, 0, 0x0000000000000000LL);
+CallInfo c_DateTimeZone::ci_gettransitions((void*)&c_DateTimeZone::i_gettransitions, (void*)&c_DateTimeZone::ifa_gettransitions, 0, 4, 0x0000000000000000LL);
+CallInfo c_DateTimeZone::ci_listidentifiers((void*)&c_DateTimeZone::i_listidentifiers, (void*)&c_DateTimeZone::ifa_listidentifiers, 0, 12, 0x0000000000000000LL);
+CallInfo c_DateTimeZone::ci___destruct((void*)&c_DateTimeZone::i___destruct, (void*)&c_DateTimeZone::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DateTimeZone::ci_getoffset((void*)&c_DateTimeZone::i_getoffset, (void*)&c_DateTimeZone::ifa_getoffset, 1, 4, 0x0000000000000000LL);
+CallInfo c_DateTimeZone::ci___construct((void*)&c_DateTimeZone::i___construct, (void*)&c_DateTimeZone::ifa___construct, 1, 4, 0x0000000000000000LL);
+CallInfo c_DateTimeZone::ci_listabbreviations((void*)&c_DateTimeZone::i_listabbreviations, (void*)&c_DateTimeZone::ifa_listabbreviations, 0, 12, 0x0000000000000000LL);
+CallInfo c_DateTimeZone::ci_getname((void*)&c_DateTimeZone::i_getname, (void*)&c_DateTimeZone::ifa_getname, 0, 4, 0x0000000000000000LL);
 Variant c_DateTimeZone::i_gettransitions(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DateTimeZone *self = NULL;
@@ -8198,13 +8198,13 @@ Variant c_DOMNodeIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
 Variant c_DOMNodeIterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMNodeIterator::ci_next((void*)&c_DOMNodeIterator::i_next, (void*)&c_DOMNodeIterator::ifa_next, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNodeIterator::ci_key((void*)&c_DOMNodeIterator::i_key, (void*)&c_DOMNodeIterator::ifa_key, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNodeIterator::ci_valid((void*)&c_DOMNodeIterator::i_valid, (void*)&c_DOMNodeIterator::ifa_valid, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNodeIterator::ci___destruct((void*)&c_DOMNodeIterator::i___destruct, (void*)&c_DOMNodeIterator::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNodeIterator::ci___construct((void*)&c_DOMNodeIterator::i___construct, (void*)&c_DOMNodeIterator::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNodeIterator::ci_current((void*)&c_DOMNodeIterator::i_current, (void*)&c_DOMNodeIterator::ifa_current, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNodeIterator::ci_rewind((void*)&c_DOMNodeIterator::i_rewind, (void*)&c_DOMNodeIterator::ifa_rewind, 0, 0, 0x0000000000000000LL);
+CallInfo c_DOMNodeIterator::ci_next((void*)&c_DOMNodeIterator::i_next, (void*)&c_DOMNodeIterator::ifa_next, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNodeIterator::ci_key((void*)&c_DOMNodeIterator::i_key, (void*)&c_DOMNodeIterator::ifa_key, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNodeIterator::ci_valid((void*)&c_DOMNodeIterator::i_valid, (void*)&c_DOMNodeIterator::ifa_valid, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNodeIterator::ci___destruct((void*)&c_DOMNodeIterator::i___destruct, (void*)&c_DOMNodeIterator::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNodeIterator::ci___construct((void*)&c_DOMNodeIterator::i___construct, (void*)&c_DOMNodeIterator::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNodeIterator::ci_current((void*)&c_DOMNodeIterator::i_current, (void*)&c_DOMNodeIterator::ifa_current, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNodeIterator::ci_rewind((void*)&c_DOMNodeIterator::i_rewind, (void*)&c_DOMNodeIterator::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_DOMNodeIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMNodeIterator *self = NULL;
@@ -8705,11 +8705,11 @@ Variant c_DOMImplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
 Variant c_DOMImplementation::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMImplementation::ci_createdocument((void*)&c_DOMImplementation::i_createdocument, (void*)&c_DOMImplementation::ifa_createdocument, 3, 0, 0x0000000000000000LL);
-CallInfo c_DOMImplementation::ci_createdocumenttype((void*)&c_DOMImplementation::i_createdocumenttype, (void*)&c_DOMImplementation::ifa_createdocumenttype, 3, 0, 0x0000000000000000LL);
-CallInfo c_DOMImplementation::ci___destruct((void*)&c_DOMImplementation::i___destruct, (void*)&c_DOMImplementation::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMImplementation::ci___construct((void*)&c_DOMImplementation::i___construct, (void*)&c_DOMImplementation::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMImplementation::ci_hasfeature((void*)&c_DOMImplementation::i_hasfeature, (void*)&c_DOMImplementation::ifa_hasfeature, 2, 0, 0x0000000000000000LL);
+CallInfo c_DOMImplementation::ci_createdocument((void*)&c_DOMImplementation::i_createdocument, (void*)&c_DOMImplementation::ifa_createdocument, 3, 4, 0x0000000000000000LL);
+CallInfo c_DOMImplementation::ci_createdocumenttype((void*)&c_DOMImplementation::i_createdocumenttype, (void*)&c_DOMImplementation::ifa_createdocumenttype, 3, 4, 0x0000000000000000LL);
+CallInfo c_DOMImplementation::ci___destruct((void*)&c_DOMImplementation::i___destruct, (void*)&c_DOMImplementation::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMImplementation::ci___construct((void*)&c_DOMImplementation::i___construct, (void*)&c_DOMImplementation::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMImplementation::ci_hasfeature((void*)&c_DOMImplementation::i_hasfeature, (void*)&c_DOMImplementation::ifa_hasfeature, 2, 4, 0x0000000000000000LL);
 Variant c_DOMImplementation::i_createdocument(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMImplementation *self = NULL;
@@ -9107,8 +9107,8 @@ Variant c_SoapHeader::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
 Variant c_SoapHeader::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_SoapHeader::ci___destruct((void*)&c_SoapHeader::i___destruct, (void*)&c_SoapHeader::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_SoapHeader::ci___construct((void*)&c_SoapHeader::i___construct, (void*)&c_SoapHeader::ifa___construct, 5, 0, 0x0000000000000000LL);
+CallInfo c_SoapHeader::ci___destruct((void*)&c_SoapHeader::i___destruct, (void*)&c_SoapHeader::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_SoapHeader::ci___construct((void*)&c_SoapHeader::i___construct, (void*)&c_SoapHeader::ifa___construct, 5, 4, 0x0000000000000000LL);
 Variant c_SoapHeader::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_SoapHeader *self = NULL;
@@ -9467,10 +9467,10 @@ Variant c_DOMNotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
 Variant c_DOMNotation::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_DOMNode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMNotation::ci___destruct((void*)&c_DOMNotation::i___destruct, (void*)&c_DOMNotation::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNotation::ci___set((void*)&c_DOMNotation::i___set, (void*)&c_DOMNotation::ifa___set, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMNotation::ci___construct((void*)&c_DOMNotation::i___construct, (void*)&c_DOMNotation::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNotation::ci___get((void*)&c_DOMNotation::i___get, (void*)&c_DOMNotation::ifa___get, 1, 0, 0x0000000000000000LL);
+CallInfo c_DOMNotation::ci___destruct((void*)&c_DOMNotation::i___destruct, (void*)&c_DOMNotation::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNotation::ci___set((void*)&c_DOMNotation::i___set, (void*)&c_DOMNotation::ifa___set, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMNotation::ci___construct((void*)&c_DOMNotation::i___construct, (void*)&c_DOMNotation::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNotation::ci___get((void*)&c_DOMNotation::i___get, (void*)&c_DOMNotation::ifa___get, 1, 4, 0x0000000000000000LL);
 Variant c_DOMNotation::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMNotation *self = NULL;
@@ -9826,10 +9826,10 @@ Variant c_DebuggerProxy::o_invoke_from_eval(const char *s, Eval::VariableEnviron
 Variant c_DebuggerProxy::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DebuggerProxy::ci_islocal((void*)&c_DebuggerProxy::i_islocal, (void*)&c_DebuggerProxy::ifa_islocal, 0, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerProxy::ci___destruct((void*)&c_DebuggerProxy::i___destruct, (void*)&c_DebuggerProxy::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerProxy::ci___construct((void*)&c_DebuggerProxy::i___construct, (void*)&c_DebuggerProxy::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DebuggerProxy::ci_send((void*)&c_DebuggerProxy::i_send, (void*)&c_DebuggerProxy::ifa_send, 1, 0, 0x0000000000000000LL);
+CallInfo c_DebuggerProxy::ci_islocal((void*)&c_DebuggerProxy::i_islocal, (void*)&c_DebuggerProxy::ifa_islocal, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerProxy::ci___destruct((void*)&c_DebuggerProxy::i___destruct, (void*)&c_DebuggerProxy::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerProxy::ci___construct((void*)&c_DebuggerProxy::i___construct, (void*)&c_DebuggerProxy::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DebuggerProxy::ci_send((void*)&c_DebuggerProxy::i_send, (void*)&c_DebuggerProxy::ifa_send, 1, 4, 0x0000000000000000LL);
 Variant c_DebuggerProxy::i_islocal(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DebuggerProxy *self = NULL;
@@ -10154,8 +10154,8 @@ Variant c_DOMComment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
 Variant c_DOMComment::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_DOMCharacterData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMComment::ci___destruct((void*)&c_DOMComment::i___destruct, (void*)&c_DOMComment::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMComment::ci___construct((void*)&c_DOMComment::i___construct, (void*)&c_DOMComment::ifa___construct, 1, 0, 0x0000000000000000LL);
+CallInfo c_DOMComment::ci___destruct((void*)&c_DOMComment::i___destruct, (void*)&c_DOMComment::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMComment::ci___construct((void*)&c_DOMComment::i___construct, (void*)&c_DOMComment::ifa___construct, 1, 4, 0x0000000000000000LL);
 Variant c_DOMComment::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMComment *self = NULL;
@@ -10738,24 +10738,24 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
 Variant c_SQLite3::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_SQLite3::ci_exec((void*)&c_SQLite3::i_exec, (void*)&c_SQLite3::ifa_exec, 1, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_version((void*)&c_SQLite3::i_version, (void*)&c_SQLite3::ifa_version, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_loadextension((void*)&c_SQLite3::i_loadextension, (void*)&c_SQLite3::ifa_loadextension, 1, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci___destruct((void*)&c_SQLite3::i___destruct, (void*)&c_SQLite3::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_createfunction((void*)&c_SQLite3::i_createfunction, (void*)&c_SQLite3::ifa_createfunction, 3, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci___construct((void*)&c_SQLite3::i___construct, (void*)&c_SQLite3::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_lastinsertrowid((void*)&c_SQLite3::i_lastinsertrowid, (void*)&c_SQLite3::ifa_lastinsertrowid, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_query((void*)&c_SQLite3::i_query, (void*)&c_SQLite3::ifa_query, 1, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_close((void*)&c_SQLite3::i_close, (void*)&c_SQLite3::ifa_close, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_escapestring((void*)&c_SQLite3::i_escapestring, (void*)&c_SQLite3::ifa_escapestring, 1, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_lasterrormsg((void*)&c_SQLite3::i_lasterrormsg, (void*)&c_SQLite3::ifa_lasterrormsg, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_createaggregate((void*)&c_SQLite3::i_createaggregate, (void*)&c_SQLite3::ifa_createaggregate, 4, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_open((void*)&c_SQLite3::i_open, (void*)&c_SQLite3::ifa_open, 3, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_changes((void*)&c_SQLite3::i_changes, (void*)&c_SQLite3::ifa_changes, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_openblob((void*)&c_SQLite3::i_openblob, (void*)&c_SQLite3::ifa_openblob, 4, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_lasterrorcode((void*)&c_SQLite3::i_lasterrorcode, (void*)&c_SQLite3::ifa_lasterrorcode, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_prepare((void*)&c_SQLite3::i_prepare, (void*)&c_SQLite3::ifa_prepare, 1, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3::ci_querysingle((void*)&c_SQLite3::i_querysingle, (void*)&c_SQLite3::ifa_querysingle, 2, 0, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_exec((void*)&c_SQLite3::i_exec, (void*)&c_SQLite3::ifa_exec, 1, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_version((void*)&c_SQLite3::i_version, (void*)&c_SQLite3::ifa_version, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_loadextension((void*)&c_SQLite3::i_loadextension, (void*)&c_SQLite3::ifa_loadextension, 1, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci___destruct((void*)&c_SQLite3::i___destruct, (void*)&c_SQLite3::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_createfunction((void*)&c_SQLite3::i_createfunction, (void*)&c_SQLite3::ifa_createfunction, 3, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci___construct((void*)&c_SQLite3::i___construct, (void*)&c_SQLite3::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_lastinsertrowid((void*)&c_SQLite3::i_lastinsertrowid, (void*)&c_SQLite3::ifa_lastinsertrowid, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_query((void*)&c_SQLite3::i_query, (void*)&c_SQLite3::ifa_query, 1, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_close((void*)&c_SQLite3::i_close, (void*)&c_SQLite3::ifa_close, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_escapestring((void*)&c_SQLite3::i_escapestring, (void*)&c_SQLite3::ifa_escapestring, 1, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_lasterrormsg((void*)&c_SQLite3::i_lasterrormsg, (void*)&c_SQLite3::ifa_lasterrormsg, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_createaggregate((void*)&c_SQLite3::i_createaggregate, (void*)&c_SQLite3::ifa_createaggregate, 4, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_open((void*)&c_SQLite3::i_open, (void*)&c_SQLite3::ifa_open, 3, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_changes((void*)&c_SQLite3::i_changes, (void*)&c_SQLite3::ifa_changes, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_openblob((void*)&c_SQLite3::i_openblob, (void*)&c_SQLite3::ifa_openblob, 4, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_lasterrorcode((void*)&c_SQLite3::i_lasterrorcode, (void*)&c_SQLite3::ifa_lasterrorcode, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_prepare((void*)&c_SQLite3::i_prepare, (void*)&c_SQLite3::ifa_prepare, 1, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3::ci_querysingle((void*)&c_SQLite3::i_querysingle, (void*)&c_SQLite3::ifa_querysingle, 2, 4, 0x0000000000000000LL);
 Variant c_SQLite3::i_exec(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_SQLite3 *self = NULL;
@@ -11706,11 +11706,11 @@ Variant c_DOMAttr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
 Variant c_DOMAttr::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_DOMNode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMAttr::ci_isid((void*)&c_DOMAttr::i_isid, (void*)&c_DOMAttr::ifa_isid, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMAttr::ci___destruct((void*)&c_DOMAttr::i___destruct, (void*)&c_DOMAttr::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMAttr::ci___set((void*)&c_DOMAttr::i___set, (void*)&c_DOMAttr::ifa___set, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMAttr::ci___construct((void*)&c_DOMAttr::i___construct, (void*)&c_DOMAttr::ifa___construct, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMAttr::ci___get((void*)&c_DOMAttr::i___get, (void*)&c_DOMAttr::ifa___get, 1, 0, 0x0000000000000000LL);
+CallInfo c_DOMAttr::ci_isid((void*)&c_DOMAttr::i_isid, (void*)&c_DOMAttr::ifa_isid, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMAttr::ci___destruct((void*)&c_DOMAttr::i___destruct, (void*)&c_DOMAttr::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMAttr::ci___set((void*)&c_DOMAttr::i___set, (void*)&c_DOMAttr::ifa___set, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMAttr::ci___construct((void*)&c_DOMAttr::i___construct, (void*)&c_DOMAttr::ifa___construct, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMAttr::ci___get((void*)&c_DOMAttr::i___get, (void*)&c_DOMAttr::ifa___get, 1, 4, 0x0000000000000000LL);
 Variant c_DOMAttr::i_isid(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMAttr *self = NULL;
@@ -12133,8 +12133,8 @@ Variant c_SoapVar::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
 Variant c_SoapVar::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_SoapVar::ci___destruct((void*)&c_SoapVar::i___destruct, (void*)&c_SoapVar::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_SoapVar::ci___construct((void*)&c_SoapVar::i___construct, (void*)&c_SoapVar::ifa___construct, 6, 0, 0x0000000000000000LL);
+CallInfo c_SoapVar::ci___destruct((void*)&c_SoapVar::i___destruct, (void*)&c_SoapVar::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_SoapVar::ci___construct((void*)&c_SoapVar::i___construct, (void*)&c_SoapVar::ifa___construct, 6, 4, 0x0000000000000000LL);
 Variant c_SoapVar::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_SoapVar *self = NULL;
@@ -12581,14 +12581,14 @@ Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
 Variant c_DOMNamedNodeMap::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMNamedNodeMap::ci_item((void*)&c_DOMNamedNodeMap::i_item, (void*)&c_DOMNamedNodeMap::ifa_item, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMNamedNodeMap::ci_getnameditem((void*)&c_DOMNamedNodeMap::i_getnameditem, (void*)&c_DOMNamedNodeMap::ifa_getnameditem, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMNamedNodeMap::ci___destruct((void*)&c_DOMNamedNodeMap::i___destruct, (void*)&c_DOMNamedNodeMap::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNamedNodeMap::ci___set((void*)&c_DOMNamedNodeMap::i___set, (void*)&c_DOMNamedNodeMap::ifa___set, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMNamedNodeMap::ci___construct((void*)&c_DOMNamedNodeMap::i___construct, (void*)&c_DOMNamedNodeMap::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNamedNodeMap::ci_getiterator((void*)&c_DOMNamedNodeMap::i_getiterator, (void*)&c_DOMNamedNodeMap::ifa_getiterator, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNamedNodeMap::ci___get((void*)&c_DOMNamedNodeMap::i___get, (void*)&c_DOMNamedNodeMap::ifa___get, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMNamedNodeMap::ci_getnameditemns((void*)&c_DOMNamedNodeMap::i_getnameditemns, (void*)&c_DOMNamedNodeMap::ifa_getnameditemns, 2, 0, 0x0000000000000000LL);
+CallInfo c_DOMNamedNodeMap::ci_item((void*)&c_DOMNamedNodeMap::i_item, (void*)&c_DOMNamedNodeMap::ifa_item, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMNamedNodeMap::ci_getnameditem((void*)&c_DOMNamedNodeMap::i_getnameditem, (void*)&c_DOMNamedNodeMap::ifa_getnameditem, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMNamedNodeMap::ci___destruct((void*)&c_DOMNamedNodeMap::i___destruct, (void*)&c_DOMNamedNodeMap::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNamedNodeMap::ci___set((void*)&c_DOMNamedNodeMap::i___set, (void*)&c_DOMNamedNodeMap::ifa___set, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMNamedNodeMap::ci___construct((void*)&c_DOMNamedNodeMap::i___construct, (void*)&c_DOMNamedNodeMap::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNamedNodeMap::ci_getiterator((void*)&c_DOMNamedNodeMap::i_getiterator, (void*)&c_DOMNamedNodeMap::ifa_getiterator, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNamedNodeMap::ci___get((void*)&c_DOMNamedNodeMap::i___get, (void*)&c_DOMNamedNodeMap::ifa___get, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMNamedNodeMap::ci_getnameditemns((void*)&c_DOMNamedNodeMap::i_getnameditemns, (void*)&c_DOMNamedNodeMap::ifa_getnameditemns, 2, 4, 0x0000000000000000LL);
 Variant c_DOMNamedNodeMap::i_item(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMNamedNodeMap *self = NULL;
@@ -13165,14 +13165,14 @@ Variant c_SQLite3Result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
 Variant c_SQLite3Result::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_SQLite3Result::ci_columnname((void*)&c_SQLite3Result::i_columnname, (void*)&c_SQLite3Result::ifa_columnname, 1, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3Result::ci_columntype((void*)&c_SQLite3Result::i_columntype, (void*)&c_SQLite3Result::ifa_columntype, 1, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3Result::ci___destruct((void*)&c_SQLite3Result::i___destruct, (void*)&c_SQLite3Result::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3Result::ci___construct((void*)&c_SQLite3Result::i___construct, (void*)&c_SQLite3Result::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3Result::ci_numcolumns((void*)&c_SQLite3Result::i_numcolumns, (void*)&c_SQLite3Result::ifa_numcolumns, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3Result::ci_fetcharray((void*)&c_SQLite3Result::i_fetcharray, (void*)&c_SQLite3Result::ifa_fetcharray, 1, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3Result::ci_reset((void*)&c_SQLite3Result::i_reset, (void*)&c_SQLite3Result::ifa_reset, 0, 0, 0x0000000000000000LL);
-CallInfo c_SQLite3Result::ci_finalize((void*)&c_SQLite3Result::i_finalize, (void*)&c_SQLite3Result::ifa_finalize, 0, 0, 0x0000000000000000LL);
+CallInfo c_SQLite3Result::ci_columnname((void*)&c_SQLite3Result::i_columnname, (void*)&c_SQLite3Result::ifa_columnname, 1, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3Result::ci_columntype((void*)&c_SQLite3Result::i_columntype, (void*)&c_SQLite3Result::ifa_columntype, 1, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3Result::ci___destruct((void*)&c_SQLite3Result::i___destruct, (void*)&c_SQLite3Result::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3Result::ci___construct((void*)&c_SQLite3Result::i___construct, (void*)&c_SQLite3Result::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3Result::ci_numcolumns((void*)&c_SQLite3Result::i_numcolumns, (void*)&c_SQLite3Result::ifa_numcolumns, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3Result::ci_fetcharray((void*)&c_SQLite3Result::i_fetcharray, (void*)&c_SQLite3Result::ifa_fetcharray, 1, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3Result::ci_reset((void*)&c_SQLite3Result::i_reset, (void*)&c_SQLite3Result::ifa_reset, 0, 4, 0x0000000000000000LL);
+CallInfo c_SQLite3Result::ci_finalize((void*)&c_SQLite3Result::i_finalize, (void*)&c_SQLite3Result::ifa_finalize, 0, 4, 0x0000000000000000LL);
 Variant c_SQLite3Result::i_columnname(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_SQLite3Result *self = NULL;
@@ -14079,29 +14079,29 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
 Variant c_SimpleXMLElement::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_SimpleXMLElement::ci_addattribute((void*)&c_SimpleXMLElement::i_addattribute, (void*)&c_SimpleXMLElement::ifa_addattribute, 3, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_count((void*)&c_SimpleXMLElement::i_count, (void*)&c_SimpleXMLElement::ifa_count, 0, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci___tostring((void*)&c_SimpleXMLElement::i___tostring, (void*)&c_SimpleXMLElement::ifa___tostring, 0, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_xpath((void*)&c_SimpleXMLElement::i_xpath, (void*)&c_SimpleXMLElement::ifa_xpath, 1, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci___destruct((void*)&c_SimpleXMLElement::i___destruct, (void*)&c_SimpleXMLElement::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci___set((void*)&c_SimpleXMLElement::i___set, (void*)&c_SimpleXMLElement::ifa___set, 2, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci___construct((void*)&c_SimpleXMLElement::i___construct, (void*)&c_SimpleXMLElement::ifa___construct, 5, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_offsetexists((void*)&c_SimpleXMLElement::i_offsetexists, (void*)&c_SimpleXMLElement::ifa_offsetexists, 1, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_getiterator((void*)&c_SimpleXMLElement::i_getiterator, (void*)&c_SimpleXMLElement::ifa_getiterator, 0, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_registerxpathnamespace((void*)&c_SimpleXMLElement::i_registerxpathnamespace, (void*)&c_SimpleXMLElement::ifa_registerxpathnamespace, 2, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_offsetget((void*)&c_SimpleXMLElement::i_offsetget, (void*)&c_SimpleXMLElement::ifa_offsetget, 1, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_getnamespaces((void*)&c_SimpleXMLElement::i_getnamespaces, (void*)&c_SimpleXMLElement::ifa_getnamespaces, 1, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci___unset((void*)&c_SimpleXMLElement::i___unset, (void*)&c_SimpleXMLElement::ifa___unset, 1, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_asxml((void*)&c_SimpleXMLElement::i_asxml, (void*)&c_SimpleXMLElement::ifa_asxml, 1, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_getdocnamespaces((void*)&c_SimpleXMLElement::i_getdocnamespaces, (void*)&c_SimpleXMLElement::ifa_getdocnamespaces, 1, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_offsetunset((void*)&c_SimpleXMLElement::i_offsetunset, (void*)&c_SimpleXMLElement::ifa_offsetunset, 1, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci___get((void*)&c_SimpleXMLElement::i___get, (void*)&c_SimpleXMLElement::ifa___get, 1, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_children((void*)&c_SimpleXMLElement::i_children, (void*)&c_SimpleXMLElement::ifa_children, 2, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_addchild((void*)&c_SimpleXMLElement::i_addchild, (void*)&c_SimpleXMLElement::ifa_addchild, 3, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci___isset((void*)&c_SimpleXMLElement::i___isset, (void*)&c_SimpleXMLElement::ifa___isset, 1, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_getname((void*)&c_SimpleXMLElement::i_getname, (void*)&c_SimpleXMLElement::ifa_getname, 0, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_attributes((void*)&c_SimpleXMLElement::i_attributes, (void*)&c_SimpleXMLElement::ifa_attributes, 2, 0, 0x0000000000000000LL);
-CallInfo c_SimpleXMLElement::ci_offsetset((void*)&c_SimpleXMLElement::i_offsetset, (void*)&c_SimpleXMLElement::ifa_offsetset, 2, 0, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_addattribute((void*)&c_SimpleXMLElement::i_addattribute, (void*)&c_SimpleXMLElement::ifa_addattribute, 3, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_count((void*)&c_SimpleXMLElement::i_count, (void*)&c_SimpleXMLElement::ifa_count, 0, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci___tostring((void*)&c_SimpleXMLElement::i___tostring, (void*)&c_SimpleXMLElement::ifa___tostring, 0, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_xpath((void*)&c_SimpleXMLElement::i_xpath, (void*)&c_SimpleXMLElement::ifa_xpath, 1, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci___destruct((void*)&c_SimpleXMLElement::i___destruct, (void*)&c_SimpleXMLElement::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci___set((void*)&c_SimpleXMLElement::i___set, (void*)&c_SimpleXMLElement::ifa___set, 2, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci___construct((void*)&c_SimpleXMLElement::i___construct, (void*)&c_SimpleXMLElement::ifa___construct, 5, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_offsetexists((void*)&c_SimpleXMLElement::i_offsetexists, (void*)&c_SimpleXMLElement::ifa_offsetexists, 1, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_getiterator((void*)&c_SimpleXMLElement::i_getiterator, (void*)&c_SimpleXMLElement::ifa_getiterator, 0, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_registerxpathnamespace((void*)&c_SimpleXMLElement::i_registerxpathnamespace, (void*)&c_SimpleXMLElement::ifa_registerxpathnamespace, 2, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_offsetget((void*)&c_SimpleXMLElement::i_offsetget, (void*)&c_SimpleXMLElement::ifa_offsetget, 1, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_getnamespaces((void*)&c_SimpleXMLElement::i_getnamespaces, (void*)&c_SimpleXMLElement::ifa_getnamespaces, 1, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci___unset((void*)&c_SimpleXMLElement::i___unset, (void*)&c_SimpleXMLElement::ifa___unset, 1, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_asxml((void*)&c_SimpleXMLElement::i_asxml, (void*)&c_SimpleXMLElement::ifa_asxml, 1, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_getdocnamespaces((void*)&c_SimpleXMLElement::i_getdocnamespaces, (void*)&c_SimpleXMLElement::ifa_getdocnamespaces, 1, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_offsetunset((void*)&c_SimpleXMLElement::i_offsetunset, (void*)&c_SimpleXMLElement::ifa_offsetunset, 1, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci___get((void*)&c_SimpleXMLElement::i___get, (void*)&c_SimpleXMLElement::ifa___get, 1, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_children((void*)&c_SimpleXMLElement::i_children, (void*)&c_SimpleXMLElement::ifa_children, 2, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_addchild((void*)&c_SimpleXMLElement::i_addchild, (void*)&c_SimpleXMLElement::ifa_addchild, 3, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci___isset((void*)&c_SimpleXMLElement::i___isset, (void*)&c_SimpleXMLElement::ifa___isset, 1, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_getname((void*)&c_SimpleXMLElement::i_getname, (void*)&c_SimpleXMLElement::ifa_getname, 0, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_attributes((void*)&c_SimpleXMLElement::i_attributes, (void*)&c_SimpleXMLElement::ifa_attributes, 2, 4, 0x0000000000000000LL);
+CallInfo c_SimpleXMLElement::ci_offsetset((void*)&c_SimpleXMLElement::i_offsetset, (void*)&c_SimpleXMLElement::ifa_offsetset, 2, 4, 0x0000000000000000LL);
 Variant c_SimpleXMLElement::i_addattribute(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_SimpleXMLElement *self = NULL;
@@ -15823,27 +15823,27 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
 Variant c_Memcache::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_Memcache::ci_addserver((void*)&c_Memcache::i_addserver, (void*)&c_Memcache::ifa_addserver, 9, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_set((void*)&c_Memcache::i_set, (void*)&c_Memcache::ifa_set, 4, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_setserverparams((void*)&c_Memcache::i_setserverparams, (void*)&c_Memcache::ifa_setserverparams, 6, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci___destruct((void*)&c_Memcache::i___destruct, (void*)&c_Memcache::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci___construct((void*)&c_Memcache::i___construct, (void*)&c_Memcache::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_increment((void*)&c_Memcache::i_increment, (void*)&c_Memcache::ifa_increment, 2, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_decrement((void*)&c_Memcache::i_decrement, (void*)&c_Memcache::ifa_decrement, 2, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_getstats((void*)&c_Memcache::i_getstats, (void*)&c_Memcache::ifa_getstats, 3, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_getserverstatus((void*)&c_Memcache::i_getserverstatus, (void*)&c_Memcache::ifa_getserverstatus, 2, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_close((void*)&c_Memcache::i_close, (void*)&c_Memcache::ifa_close, 0, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_setoptimeout((void*)&c_Memcache::i_setoptimeout, (void*)&c_Memcache::ifa_setoptimeout, 1, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_setcompressthreshold((void*)&c_Memcache::i_setcompressthreshold, (void*)&c_Memcache::ifa_setcompressthreshold, 2, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_get((void*)&c_Memcache::i_get, (void*)&c_Memcache::ifa_get, 2, 0, 0x0000000000000002LL);
-CallInfo c_Memcache::ci_add((void*)&c_Memcache::i_add, (void*)&c_Memcache::ifa_add, 4, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_pconnect((void*)&c_Memcache::i_pconnect, (void*)&c_Memcache::ifa_pconnect, 4, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_getversion((void*)&c_Memcache::i_getversion, (void*)&c_Memcache::ifa_getversion, 0, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_delete((void*)&c_Memcache::i_delete, (void*)&c_Memcache::ifa_delete, 2, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_connect((void*)&c_Memcache::i_connect, (void*)&c_Memcache::ifa_connect, 4, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_flush((void*)&c_Memcache::i_flush, (void*)&c_Memcache::ifa_flush, 1, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_replace((void*)&c_Memcache::i_replace, (void*)&c_Memcache::ifa_replace, 4, 0, 0x0000000000000000LL);
-CallInfo c_Memcache::ci_getextendedstats((void*)&c_Memcache::i_getextendedstats, (void*)&c_Memcache::ifa_getextendedstats, 3, 0, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_addserver((void*)&c_Memcache::i_addserver, (void*)&c_Memcache::ifa_addserver, 9, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_set((void*)&c_Memcache::i_set, (void*)&c_Memcache::ifa_set, 4, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_setserverparams((void*)&c_Memcache::i_setserverparams, (void*)&c_Memcache::ifa_setserverparams, 6, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci___destruct((void*)&c_Memcache::i___destruct, (void*)&c_Memcache::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci___construct((void*)&c_Memcache::i___construct, (void*)&c_Memcache::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_increment((void*)&c_Memcache::i_increment, (void*)&c_Memcache::ifa_increment, 2, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_decrement((void*)&c_Memcache::i_decrement, (void*)&c_Memcache::ifa_decrement, 2, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_getstats((void*)&c_Memcache::i_getstats, (void*)&c_Memcache::ifa_getstats, 3, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_getserverstatus((void*)&c_Memcache::i_getserverstatus, (void*)&c_Memcache::ifa_getserverstatus, 2, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_close((void*)&c_Memcache::i_close, (void*)&c_Memcache::ifa_close, 0, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_setoptimeout((void*)&c_Memcache::i_setoptimeout, (void*)&c_Memcache::ifa_setoptimeout, 1, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_setcompressthreshold((void*)&c_Memcache::i_setcompressthreshold, (void*)&c_Memcache::ifa_setcompressthreshold, 2, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_get((void*)&c_Memcache::i_get, (void*)&c_Memcache::ifa_get, 2, 4, 0x0000000000000002LL);
+CallInfo c_Memcache::ci_add((void*)&c_Memcache::i_add, (void*)&c_Memcache::ifa_add, 4, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_pconnect((void*)&c_Memcache::i_pconnect, (void*)&c_Memcache::ifa_pconnect, 4, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_getversion((void*)&c_Memcache::i_getversion, (void*)&c_Memcache::ifa_getversion, 0, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_delete((void*)&c_Memcache::i_delete, (void*)&c_Memcache::ifa_delete, 2, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_connect((void*)&c_Memcache::i_connect, (void*)&c_Memcache::ifa_connect, 4, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_flush((void*)&c_Memcache::i_flush, (void*)&c_Memcache::ifa_flush, 1, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_replace((void*)&c_Memcache::i_replace, (void*)&c_Memcache::ifa_replace, 4, 4, 0x0000000000000000LL);
+CallInfo c_Memcache::ci_getextendedstats((void*)&c_Memcache::i_getextendedstats, (void*)&c_Memcache::ifa_getextendedstats, 3, 4, 0x0000000000000000LL);
 Variant c_Memcache::i_addserver(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_Memcache *self = NULL;
@@ -17012,10 +17012,10 @@ Variant c_DOMProcessingInstruction::o_invoke_from_eval(const char *s, Eval::Vari
 Variant c_DOMProcessingInstruction::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_DOMNode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMProcessingInstruction::ci___destruct((void*)&c_DOMProcessingInstruction::i___destruct, (void*)&c_DOMProcessingInstruction::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMProcessingInstruction::ci___set((void*)&c_DOMProcessingInstruction::i___set, (void*)&c_DOMProcessingInstruction::ifa___set, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMProcessingInstruction::ci___construct((void*)&c_DOMProcessingInstruction::i___construct, (void*)&c_DOMProcessingInstruction::ifa___construct, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMProcessingInstruction::ci___get((void*)&c_DOMProcessingInstruction::i___get, (void*)&c_DOMProcessingInstruction::ifa___get, 1, 0, 0x0000000000000000LL);
+CallInfo c_DOMProcessingInstruction::ci___destruct((void*)&c_DOMProcessingInstruction::i___destruct, (void*)&c_DOMProcessingInstruction::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMProcessingInstruction::ci___set((void*)&c_DOMProcessingInstruction::i___set, (void*)&c_DOMProcessingInstruction::ifa___set, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMProcessingInstruction::ci___construct((void*)&c_DOMProcessingInstruction::i___construct, (void*)&c_DOMProcessingInstruction::ifa___construct, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMProcessingInstruction::ci___get((void*)&c_DOMProcessingInstruction::i___get, (void*)&c_DOMProcessingInstruction::ifa___get, 1, 4, 0x0000000000000000LL);
 Variant c_DOMProcessingInstruction::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMProcessingInstruction *self = NULL;
@@ -17865,34 +17865,34 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
 Variant c_PDOStatement::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_PDOStatement::ci_next((void*)&c_PDOStatement::i_next, (void*)&c_PDOStatement::ifa_next, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_errorcode((void*)&c_PDOStatement::i_errorcode, (void*)&c_PDOStatement::ifa_errorcode, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_getattribute((void*)&c_PDOStatement::i_getattribute, (void*)&c_PDOStatement::ifa_getattribute, 1, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_fetchcolumn((void*)&c_PDOStatement::i_fetchcolumn, (void*)&c_PDOStatement::ifa_fetchcolumn, 1, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_key((void*)&c_PDOStatement::i_key, (void*)&c_PDOStatement::ifa_key, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_getcolumnmeta((void*)&c_PDOStatement::i_getcolumnmeta, (void*)&c_PDOStatement::ifa_getcolumnmeta, 1, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_valid((void*)&c_PDOStatement::i_valid, (void*)&c_PDOStatement::ifa_valid, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_nextrowset((void*)&c_PDOStatement::i_nextrowset, (void*)&c_PDOStatement::ifa_nextrowset, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci___destruct((void*)&c_PDOStatement::i___destruct, (void*)&c_PDOStatement::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci___wakeup((void*)&c_PDOStatement::i___wakeup, (void*)&c_PDOStatement::ifa___wakeup, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci___construct((void*)&c_PDOStatement::i___construct, (void*)&c_PDOStatement::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_bindcolumn((void*)&c_PDOStatement::i_bindcolumn, (void*)&c_PDOStatement::ifa_bindcolumn, 5, 0, 0x0000000000000002LL);
-CallInfo c_PDOStatement::ci_setfetchmode((void*)&c_PDOStatement::i_setfetchmode, (void*)&c_PDOStatement::ifa_setfetchmode, 1, 1, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_columncount((void*)&c_PDOStatement::i_columncount, (void*)&c_PDOStatement::ifa_columncount, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_bindparam((void*)&c_PDOStatement::i_bindparam, (void*)&c_PDOStatement::ifa_bindparam, 5, 0, 0x0000000000000002LL);
-CallInfo c_PDOStatement::ci_closecursor((void*)&c_PDOStatement::i_closecursor, (void*)&c_PDOStatement::ifa_closecursor, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_setattribute((void*)&c_PDOStatement::i_setattribute, (void*)&c_PDOStatement::ifa_setattribute, 2, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_rowcount((void*)&c_PDOStatement::i_rowcount, (void*)&c_PDOStatement::ifa_rowcount, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_execute((void*)&c_PDOStatement::i_execute, (void*)&c_PDOStatement::ifa_execute, 1, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_fetchobject((void*)&c_PDOStatement::i_fetchobject, (void*)&c_PDOStatement::ifa_fetchobject, 2, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_bindvalue((void*)&c_PDOStatement::i_bindvalue, (void*)&c_PDOStatement::ifa_bindvalue, 3, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_fetchall((void*)&c_PDOStatement::i_fetchall, (void*)&c_PDOStatement::ifa_fetchall, 3, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_fetch((void*)&c_PDOStatement::i_fetch, (void*)&c_PDOStatement::ifa_fetch, 3, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_current((void*)&c_PDOStatement::i_current, (void*)&c_PDOStatement::ifa_current, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_errorinfo((void*)&c_PDOStatement::i_errorinfo, (void*)&c_PDOStatement::ifa_errorinfo, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci___sleep((void*)&c_PDOStatement::i___sleep, (void*)&c_PDOStatement::ifa___sleep, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_debugdumpparams((void*)&c_PDOStatement::i_debugdumpparams, (void*)&c_PDOStatement::ifa_debugdumpparams, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDOStatement::ci_rewind((void*)&c_PDOStatement::i_rewind, (void*)&c_PDOStatement::ifa_rewind, 0, 0, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_next((void*)&c_PDOStatement::i_next, (void*)&c_PDOStatement::ifa_next, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_errorcode((void*)&c_PDOStatement::i_errorcode, (void*)&c_PDOStatement::ifa_errorcode, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_getattribute((void*)&c_PDOStatement::i_getattribute, (void*)&c_PDOStatement::ifa_getattribute, 1, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_fetchcolumn((void*)&c_PDOStatement::i_fetchcolumn, (void*)&c_PDOStatement::ifa_fetchcolumn, 1, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_key((void*)&c_PDOStatement::i_key, (void*)&c_PDOStatement::ifa_key, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_getcolumnmeta((void*)&c_PDOStatement::i_getcolumnmeta, (void*)&c_PDOStatement::ifa_getcolumnmeta, 1, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_valid((void*)&c_PDOStatement::i_valid, (void*)&c_PDOStatement::ifa_valid, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_nextrowset((void*)&c_PDOStatement::i_nextrowset, (void*)&c_PDOStatement::ifa_nextrowset, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci___destruct((void*)&c_PDOStatement::i___destruct, (void*)&c_PDOStatement::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci___wakeup((void*)&c_PDOStatement::i___wakeup, (void*)&c_PDOStatement::ifa___wakeup, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci___construct((void*)&c_PDOStatement::i___construct, (void*)&c_PDOStatement::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_bindcolumn((void*)&c_PDOStatement::i_bindcolumn, (void*)&c_PDOStatement::ifa_bindcolumn, 5, 4, 0x0000000000000002LL);
+CallInfo c_PDOStatement::ci_setfetchmode((void*)&c_PDOStatement::i_setfetchmode, (void*)&c_PDOStatement::ifa_setfetchmode, 1, 5, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_columncount((void*)&c_PDOStatement::i_columncount, (void*)&c_PDOStatement::ifa_columncount, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_bindparam((void*)&c_PDOStatement::i_bindparam, (void*)&c_PDOStatement::ifa_bindparam, 5, 4, 0x0000000000000002LL);
+CallInfo c_PDOStatement::ci_closecursor((void*)&c_PDOStatement::i_closecursor, (void*)&c_PDOStatement::ifa_closecursor, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_setattribute((void*)&c_PDOStatement::i_setattribute, (void*)&c_PDOStatement::ifa_setattribute, 2, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_rowcount((void*)&c_PDOStatement::i_rowcount, (void*)&c_PDOStatement::ifa_rowcount, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_execute((void*)&c_PDOStatement::i_execute, (void*)&c_PDOStatement::ifa_execute, 1, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_fetchobject((void*)&c_PDOStatement::i_fetchobject, (void*)&c_PDOStatement::ifa_fetchobject, 2, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_bindvalue((void*)&c_PDOStatement::i_bindvalue, (void*)&c_PDOStatement::ifa_bindvalue, 3, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_fetchall((void*)&c_PDOStatement::i_fetchall, (void*)&c_PDOStatement::ifa_fetchall, 3, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_fetch((void*)&c_PDOStatement::i_fetch, (void*)&c_PDOStatement::ifa_fetch, 3, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_current((void*)&c_PDOStatement::i_current, (void*)&c_PDOStatement::ifa_current, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_errorinfo((void*)&c_PDOStatement::i_errorinfo, (void*)&c_PDOStatement::ifa_errorinfo, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci___sleep((void*)&c_PDOStatement::i___sleep, (void*)&c_PDOStatement::ifa___sleep, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_debugdumpparams((void*)&c_PDOStatement::i_debugdumpparams, (void*)&c_PDOStatement::ifa_debugdumpparams, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDOStatement::ci_rewind((void*)&c_PDOStatement::i_rewind, (void*)&c_PDOStatement::ifa_rewind, 0, 4, 0x0000000000000000LL);
 Variant c_PDOStatement::i_next(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_PDOStatement *self = NULL;
@@ -19424,20 +19424,20 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
 Variant c_SoapClient::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_SoapClient::ci___dorequest((void*)&c_SoapClient::i___dorequest, (void*)&c_SoapClient::ifa___dorequest, 5, 0, 0x0000000000000000LL);
-CallInfo c_SoapClient::ci___getlastrequest((void*)&c_SoapClient::i___getlastrequest, (void*)&c_SoapClient::ifa___getlastrequest, 0, 0, 0x0000000000000000LL);
-CallInfo c_SoapClient::ci___setsoapheaders((void*)&c_SoapClient::i___setsoapheaders, (void*)&c_SoapClient::ifa___setsoapheaders, 1, 0, 0x0000000000000000LL);
-CallInfo c_SoapClient::ci___setcookie((void*)&c_SoapClient::i___setcookie, (void*)&c_SoapClient::ifa___setcookie, 2, 0, 0x0000000000000000LL);
-CallInfo c_SoapClient::ci___soapcall((void*)&c_SoapClient::i___soapcall, (void*)&c_SoapClient::ifa___soapcall, 5, 0, 0x0000000000000010LL);
-CallInfo c_SoapClient::ci___destruct((void*)&c_SoapClient::i___destruct, (void*)&c_SoapClient::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_SoapClient::ci___setlocation((void*)&c_SoapClient::i___setlocation, (void*)&c_SoapClient::ifa___setlocation, 1, 0, 0x0000000000000000LL);
-CallInfo c_SoapClient::ci___getlastrequestheaders((void*)&c_SoapClient::i___getlastrequestheaders, (void*)&c_SoapClient::ifa___getlastrequestheaders, 0, 0, 0x0000000000000000LL);
-CallInfo c_SoapClient::ci___construct((void*)&c_SoapClient::i___construct, (void*)&c_SoapClient::ifa___construct, 2, 0, 0x0000000000000000LL);
-CallInfo c_SoapClient::ci___getfunctions((void*)&c_SoapClient::i___getfunctions, (void*)&c_SoapClient::ifa___getfunctions, 0, 0, 0x0000000000000000LL);
-CallInfo c_SoapClient::ci___getlastresponseheaders((void*)&c_SoapClient::i___getlastresponseheaders, (void*)&c_SoapClient::ifa___getlastresponseheaders, 0, 0, 0x0000000000000000LL);
-CallInfo c_SoapClient::ci___getlastresponse((void*)&c_SoapClient::i___getlastresponse, (void*)&c_SoapClient::ifa___getlastresponse, 0, 0, 0x0000000000000000LL);
-CallInfo c_SoapClient::ci___gettypes((void*)&c_SoapClient::i___gettypes, (void*)&c_SoapClient::ifa___gettypes, 0, 0, 0x0000000000000000LL);
-CallInfo c_SoapClient::ci___call((void*)&c_SoapClient::i___call, (void*)&c_SoapClient::ifa___call, 2, 0, 0x0000000000000000LL);
+CallInfo c_SoapClient::ci___dorequest((void*)&c_SoapClient::i___dorequest, (void*)&c_SoapClient::ifa___dorequest, 5, 4, 0x0000000000000000LL);
+CallInfo c_SoapClient::ci___getlastrequest((void*)&c_SoapClient::i___getlastrequest, (void*)&c_SoapClient::ifa___getlastrequest, 0, 4, 0x0000000000000000LL);
+CallInfo c_SoapClient::ci___setsoapheaders((void*)&c_SoapClient::i___setsoapheaders, (void*)&c_SoapClient::ifa___setsoapheaders, 1, 4, 0x0000000000000000LL);
+CallInfo c_SoapClient::ci___setcookie((void*)&c_SoapClient::i___setcookie, (void*)&c_SoapClient::ifa___setcookie, 2, 4, 0x0000000000000000LL);
+CallInfo c_SoapClient::ci___soapcall((void*)&c_SoapClient::i___soapcall, (void*)&c_SoapClient::ifa___soapcall, 5, 4, 0x0000000000000010LL);
+CallInfo c_SoapClient::ci___destruct((void*)&c_SoapClient::i___destruct, (void*)&c_SoapClient::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_SoapClient::ci___setlocation((void*)&c_SoapClient::i___setlocation, (void*)&c_SoapClient::ifa___setlocation, 1, 4, 0x0000000000000000LL);
+CallInfo c_SoapClient::ci___getlastrequestheaders((void*)&c_SoapClient::i___getlastrequestheaders, (void*)&c_SoapClient::ifa___getlastrequestheaders, 0, 4, 0x0000000000000000LL);
+CallInfo c_SoapClient::ci___construct((void*)&c_SoapClient::i___construct, (void*)&c_SoapClient::ifa___construct, 2, 4, 0x0000000000000000LL);
+CallInfo c_SoapClient::ci___getfunctions((void*)&c_SoapClient::i___getfunctions, (void*)&c_SoapClient::ifa___getfunctions, 0, 4, 0x0000000000000000LL);
+CallInfo c_SoapClient::ci___getlastresponseheaders((void*)&c_SoapClient::i___getlastresponseheaders, (void*)&c_SoapClient::ifa___getlastresponseheaders, 0, 4, 0x0000000000000000LL);
+CallInfo c_SoapClient::ci___getlastresponse((void*)&c_SoapClient::i___getlastresponse, (void*)&c_SoapClient::ifa___getlastresponse, 0, 4, 0x0000000000000000LL);
+CallInfo c_SoapClient::ci___gettypes((void*)&c_SoapClient::i___gettypes, (void*)&c_SoapClient::ifa___gettypes, 0, 4, 0x0000000000000000LL);
+CallInfo c_SoapClient::ci___call((void*)&c_SoapClient::i___call, (void*)&c_SoapClient::ifa___call, 2, 4, 0x0000000000000000LL);
 Variant c_SoapClient::i___dorequest(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_SoapClient *self = NULL;
@@ -20196,8 +20196,8 @@ Variant c_SoapParam::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
 Variant c_SoapParam::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_SoapParam::ci___destruct((void*)&c_SoapParam::i___destruct, (void*)&c_SoapParam::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_SoapParam::ci___construct((void*)&c_SoapParam::i___construct, (void*)&c_SoapParam::ifa___construct, 2, 0, 0x0000000000000000LL);
+CallInfo c_SoapParam::ci___destruct((void*)&c_SoapParam::i___destruct, (void*)&c_SoapParam::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_SoapParam::ci___construct((void*)&c_SoapParam::i___construct, (void*)&c_SoapParam::ifa___construct, 2, 4, 0x0000000000000000LL);
 Variant c_SoapParam::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_SoapParam *self = NULL;
@@ -20664,16 +20664,16 @@ Variant c_DateTime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
 Variant c_DateTime::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DateTime::ci_format((void*)&c_DateTime::i_format, (void*)&c_DateTime::ifa_format, 1, 0, 0x0000000000000000LL);
-CallInfo c_DateTime::ci_setdate((void*)&c_DateTime::i_setdate, (void*)&c_DateTime::ifa_setdate, 3, 0, 0x0000000000000000LL);
-CallInfo c_DateTime::ci___destruct((void*)&c_DateTime::i___destruct, (void*)&c_DateTime::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DateTime::ci_getoffset((void*)&c_DateTime::i_getoffset, (void*)&c_DateTime::ifa_getoffset, 0, 0, 0x0000000000000000LL);
-CallInfo c_DateTime::ci_settime((void*)&c_DateTime::i_settime, (void*)&c_DateTime::ifa_settime, 3, 0, 0x0000000000000000LL);
-CallInfo c_DateTime::ci___construct((void*)&c_DateTime::i___construct, (void*)&c_DateTime::ifa___construct, 2, 0, 0x0000000000000000LL);
-CallInfo c_DateTime::ci_gettimezone((void*)&c_DateTime::i_gettimezone, (void*)&c_DateTime::ifa_gettimezone, 0, 0, 0x0000000000000000LL);
-CallInfo c_DateTime::ci_setisodate((void*)&c_DateTime::i_setisodate, (void*)&c_DateTime::ifa_setisodate, 3, 0, 0x0000000000000000LL);
-CallInfo c_DateTime::ci_settimezone((void*)&c_DateTime::i_settimezone, (void*)&c_DateTime::ifa_settimezone, 1, 0, 0x0000000000000000LL);
-CallInfo c_DateTime::ci_modify((void*)&c_DateTime::i_modify, (void*)&c_DateTime::ifa_modify, 1, 0, 0x0000000000000000LL);
+CallInfo c_DateTime::ci_format((void*)&c_DateTime::i_format, (void*)&c_DateTime::ifa_format, 1, 4, 0x0000000000000000LL);
+CallInfo c_DateTime::ci_setdate((void*)&c_DateTime::i_setdate, (void*)&c_DateTime::ifa_setdate, 3, 4, 0x0000000000000000LL);
+CallInfo c_DateTime::ci___destruct((void*)&c_DateTime::i___destruct, (void*)&c_DateTime::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DateTime::ci_getoffset((void*)&c_DateTime::i_getoffset, (void*)&c_DateTime::ifa_getoffset, 0, 4, 0x0000000000000000LL);
+CallInfo c_DateTime::ci_settime((void*)&c_DateTime::i_settime, (void*)&c_DateTime::ifa_settime, 3, 4, 0x0000000000000000LL);
+CallInfo c_DateTime::ci___construct((void*)&c_DateTime::i___construct, (void*)&c_DateTime::ifa___construct, 2, 4, 0x0000000000000000LL);
+CallInfo c_DateTime::ci_gettimezone((void*)&c_DateTime::i_gettimezone, (void*)&c_DateTime::ifa_gettimezone, 0, 4, 0x0000000000000000LL);
+CallInfo c_DateTime::ci_setisodate((void*)&c_DateTime::i_setisodate, (void*)&c_DateTime::ifa_setisodate, 3, 4, 0x0000000000000000LL);
+CallInfo c_DateTime::ci_settimezone((void*)&c_DateTime::i_settimezone, (void*)&c_DateTime::ifa_settimezone, 1, 4, 0x0000000000000000LL);
+CallInfo c_DateTime::ci_modify((void*)&c_DateTime::i_modify, (void*)&c_DateTime::ifa_modify, 1, 4, 0x0000000000000000LL);
 Variant c_DateTime::i_format(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DateTime *self = NULL;
@@ -21599,20 +21599,20 @@ Variant c_Collator::os_invoke_from_eval(const char *c, const char *s, Eval::Vari
   }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_Collator::ci_getattribute((void*)&c_Collator::i_getattribute, (void*)&c_Collator::ifa_getattribute, 1, 0, 0x0000000000000000LL);
-CallInfo c_Collator::ci_sortwithsortkeys((void*)&c_Collator::i_sortwithsortkeys, (void*)&c_Collator::ifa_sortwithsortkeys, 1, 0, 0x0000000000000001LL);
-CallInfo c_Collator::ci___destruct((void*)&c_Collator::i___destruct, (void*)&c_Collator::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_Collator::ci___construct((void*)&c_Collator::i___construct, (void*)&c_Collator::ifa___construct, 1, 0, 0x0000000000000000LL);
-CallInfo c_Collator::ci_sort((void*)&c_Collator::i_sort, (void*)&c_Collator::ifa_sort, 2, 0, 0x0000000000000001LL);
-CallInfo c_Collator::ci_geterrorcode((void*)&c_Collator::i_geterrorcode, (void*)&c_Collator::ifa_geterrorcode, 0, 0, 0x0000000000000000LL);
-CallInfo c_Collator::ci_getstrength((void*)&c_Collator::i_getstrength, (void*)&c_Collator::ifa_getstrength, 0, 0, 0x0000000000000000LL);
-CallInfo c_Collator::ci_asort((void*)&c_Collator::i_asort, (void*)&c_Collator::ifa_asort, 2, 0, 0x0000000000000001LL);
-CallInfo c_Collator::ci_setstrength((void*)&c_Collator::i_setstrength, (void*)&c_Collator::ifa_setstrength, 1, 0, 0x0000000000000000LL);
-CallInfo c_Collator::ci_create((void*)&c_Collator::i_create, (void*)&c_Collator::ifa_create, 1, 0, 0x0000000000000000LL);
-CallInfo c_Collator::ci_setattribute((void*)&c_Collator::i_setattribute, (void*)&c_Collator::ifa_setattribute, 2, 0, 0x0000000000000000LL);
-CallInfo c_Collator::ci_getlocale((void*)&c_Collator::i_getlocale, (void*)&c_Collator::ifa_getlocale, 1, 0, 0x0000000000000000LL);
-CallInfo c_Collator::ci_geterrormessage((void*)&c_Collator::i_geterrormessage, (void*)&c_Collator::ifa_geterrormessage, 0, 0, 0x0000000000000000LL);
-CallInfo c_Collator::ci_compare((void*)&c_Collator::i_compare, (void*)&c_Collator::ifa_compare, 2, 0, 0x0000000000000000LL);
+CallInfo c_Collator::ci_getattribute((void*)&c_Collator::i_getattribute, (void*)&c_Collator::ifa_getattribute, 1, 4, 0x0000000000000000LL);
+CallInfo c_Collator::ci_sortwithsortkeys((void*)&c_Collator::i_sortwithsortkeys, (void*)&c_Collator::ifa_sortwithsortkeys, 1, 4, 0x0000000000000001LL);
+CallInfo c_Collator::ci___destruct((void*)&c_Collator::i___destruct, (void*)&c_Collator::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_Collator::ci___construct((void*)&c_Collator::i___construct, (void*)&c_Collator::ifa___construct, 1, 4, 0x0000000000000000LL);
+CallInfo c_Collator::ci_sort((void*)&c_Collator::i_sort, (void*)&c_Collator::ifa_sort, 2, 4, 0x0000000000000001LL);
+CallInfo c_Collator::ci_geterrorcode((void*)&c_Collator::i_geterrorcode, (void*)&c_Collator::ifa_geterrorcode, 0, 4, 0x0000000000000000LL);
+CallInfo c_Collator::ci_getstrength((void*)&c_Collator::i_getstrength, (void*)&c_Collator::ifa_getstrength, 0, 4, 0x0000000000000000LL);
+CallInfo c_Collator::ci_asort((void*)&c_Collator::i_asort, (void*)&c_Collator::ifa_asort, 2, 4, 0x0000000000000001LL);
+CallInfo c_Collator::ci_setstrength((void*)&c_Collator::i_setstrength, (void*)&c_Collator::ifa_setstrength, 1, 4, 0x0000000000000000LL);
+CallInfo c_Collator::ci_create((void*)&c_Collator::i_create, (void*)&c_Collator::ifa_create, 1, 12, 0x0000000000000000LL);
+CallInfo c_Collator::ci_setattribute((void*)&c_Collator::i_setattribute, (void*)&c_Collator::ifa_setattribute, 2, 4, 0x0000000000000000LL);
+CallInfo c_Collator::ci_getlocale((void*)&c_Collator::i_getlocale, (void*)&c_Collator::ifa_getlocale, 1, 4, 0x0000000000000000LL);
+CallInfo c_Collator::ci_geterrormessage((void*)&c_Collator::i_geterrormessage, (void*)&c_Collator::ifa_geterrormessage, 0, 4, 0x0000000000000000LL);
+CallInfo c_Collator::ci_compare((void*)&c_Collator::i_compare, (void*)&c_Collator::ifa_compare, 2, 4, 0x0000000000000000LL);
 Variant c_Collator::i_getattribute(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_Collator *self = NULL;
@@ -22883,23 +22883,23 @@ Variant c_PDO::os_invoke_from_eval(const char *c, const char *s, Eval::VariableE
   }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_PDO::ci_errorcode((void*)&c_PDO::i_errorcode, (void*)&c_PDO::ifa_errorcode, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci_getattribute((void*)&c_PDO::i_getattribute, (void*)&c_PDO::ifa_getattribute, 1, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci_exec((void*)&c_PDO::i_exec, (void*)&c_PDO::ifa_exec, 1, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci_lastinsertid((void*)&c_PDO::i_lastinsertid, (void*)&c_PDO::ifa_lastinsertid, 1, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci___destruct((void*)&c_PDO::i___destruct, (void*)&c_PDO::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci___wakeup((void*)&c_PDO::i___wakeup, (void*)&c_PDO::ifa___wakeup, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci___construct((void*)&c_PDO::i___construct, (void*)&c_PDO::ifa___construct, 4, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci_query((void*)&c_PDO::i_query, (void*)&c_PDO::ifa_query, 1, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci_rollback((void*)&c_PDO::i_rollback, (void*)&c_PDO::ifa_rollback, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci_commit((void*)&c_PDO::i_commit, (void*)&c_PDO::ifa_commit, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci_getavailabledrivers((void*)&c_PDO::i_getavailabledrivers, (void*)&c_PDO::ifa_getavailabledrivers, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci_quote((void*)&c_PDO::i_quote, (void*)&c_PDO::ifa_quote, 2, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci_setattribute((void*)&c_PDO::i_setattribute, (void*)&c_PDO::ifa_setattribute, 2, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci_begintransaction((void*)&c_PDO::i_begintransaction, (void*)&c_PDO::ifa_begintransaction, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci_prepare((void*)&c_PDO::i_prepare, (void*)&c_PDO::ifa_prepare, 2, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci_errorinfo((void*)&c_PDO::i_errorinfo, (void*)&c_PDO::ifa_errorinfo, 0, 0, 0x0000000000000000LL);
-CallInfo c_PDO::ci___sleep((void*)&c_PDO::i___sleep, (void*)&c_PDO::ifa___sleep, 0, 0, 0x0000000000000000LL);
+CallInfo c_PDO::ci_errorcode((void*)&c_PDO::i_errorcode, (void*)&c_PDO::ifa_errorcode, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci_getattribute((void*)&c_PDO::i_getattribute, (void*)&c_PDO::ifa_getattribute, 1, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci_exec((void*)&c_PDO::i_exec, (void*)&c_PDO::ifa_exec, 1, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci_lastinsertid((void*)&c_PDO::i_lastinsertid, (void*)&c_PDO::ifa_lastinsertid, 1, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci___destruct((void*)&c_PDO::i___destruct, (void*)&c_PDO::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci___wakeup((void*)&c_PDO::i___wakeup, (void*)&c_PDO::ifa___wakeup, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci___construct((void*)&c_PDO::i___construct, (void*)&c_PDO::ifa___construct, 4, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci_query((void*)&c_PDO::i_query, (void*)&c_PDO::ifa_query, 1, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci_rollback((void*)&c_PDO::i_rollback, (void*)&c_PDO::ifa_rollback, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci_commit((void*)&c_PDO::i_commit, (void*)&c_PDO::ifa_commit, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci_getavailabledrivers((void*)&c_PDO::i_getavailabledrivers, (void*)&c_PDO::ifa_getavailabledrivers, 0, 12, 0x0000000000000000LL);
+CallInfo c_PDO::ci_quote((void*)&c_PDO::i_quote, (void*)&c_PDO::ifa_quote, 2, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci_setattribute((void*)&c_PDO::i_setattribute, (void*)&c_PDO::ifa_setattribute, 2, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci_begintransaction((void*)&c_PDO::i_begintransaction, (void*)&c_PDO::ifa_begintransaction, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci_prepare((void*)&c_PDO::i_prepare, (void*)&c_PDO::ifa_prepare, 2, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci_errorinfo((void*)&c_PDO::i_errorinfo, (void*)&c_PDO::ifa_errorinfo, 0, 4, 0x0000000000000000LL);
+CallInfo c_PDO::ci___sleep((void*)&c_PDO::i___sleep, (void*)&c_PDO::ifa___sleep, 0, 4, 0x0000000000000000LL);
 Variant c_PDO::i_errorcode(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_PDO *self = NULL;
@@ -24022,18 +24022,18 @@ Variant c_ImageSprite::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
 Variant c_ImageSprite::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_ImageSprite::ci_addstring((void*)&c_ImageSprite::i_addstring, (void*)&c_ImageSprite::ifa_addstring, 3, 0, 0x0000000000000000LL);
-CallInfo c_ImageSprite::ci_loaddims((void*)&c_ImageSprite::i_loaddims, (void*)&c_ImageSprite::ifa_loaddims, 1, 0, 0x0000000000000000LL);
-CallInfo c_ImageSprite::ci___destruct((void*)&c_ImageSprite::i___destruct, (void*)&c_ImageSprite::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_ImageSprite::ci_mapping((void*)&c_ImageSprite::i_mapping, (void*)&c_ImageSprite::ifa_mapping, 0, 0, 0x0000000000000000LL);
-CallInfo c_ImageSprite::ci___construct((void*)&c_ImageSprite::i___construct, (void*)&c_ImageSprite::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_ImageSprite::ci_css((void*)&c_ImageSprite::i_css, (void*)&c_ImageSprite::ifa_css, 4, 0, 0x0000000000000000LL);
-CallInfo c_ImageSprite::ci_output((void*)&c_ImageSprite::i_output, (void*)&c_ImageSprite::ifa_output, 3, 0, 0x0000000000000000LL);
-CallInfo c_ImageSprite::ci_loadimages((void*)&c_ImageSprite::i_loadimages, (void*)&c_ImageSprite::ifa_loadimages, 1, 0, 0x0000000000000000LL);
-CallInfo c_ImageSprite::ci_clear((void*)&c_ImageSprite::i_clear, (void*)&c_ImageSprite::ifa_clear, 1, 0, 0x0000000000000000LL);
-CallInfo c_ImageSprite::ci_geterrors((void*)&c_ImageSprite::i_geterrors, (void*)&c_ImageSprite::ifa_geterrors, 0, 0, 0x0000000000000000LL);
-CallInfo c_ImageSprite::ci_addurl((void*)&c_ImageSprite::i_addurl, (void*)&c_ImageSprite::ifa_addurl, 3, 0, 0x0000000000000000LL);
-CallInfo c_ImageSprite::ci_addfile((void*)&c_ImageSprite::i_addfile, (void*)&c_ImageSprite::ifa_addfile, 2, 0, 0x0000000000000000LL);
+CallInfo c_ImageSprite::ci_addstring((void*)&c_ImageSprite::i_addstring, (void*)&c_ImageSprite::ifa_addstring, 3, 4, 0x0000000000000000LL);
+CallInfo c_ImageSprite::ci_loaddims((void*)&c_ImageSprite::i_loaddims, (void*)&c_ImageSprite::ifa_loaddims, 1, 4, 0x0000000000000000LL);
+CallInfo c_ImageSprite::ci___destruct((void*)&c_ImageSprite::i___destruct, (void*)&c_ImageSprite::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_ImageSprite::ci_mapping((void*)&c_ImageSprite::i_mapping, (void*)&c_ImageSprite::ifa_mapping, 0, 4, 0x0000000000000000LL);
+CallInfo c_ImageSprite::ci___construct((void*)&c_ImageSprite::i___construct, (void*)&c_ImageSprite::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_ImageSprite::ci_css((void*)&c_ImageSprite::i_css, (void*)&c_ImageSprite::ifa_css, 4, 4, 0x0000000000000000LL);
+CallInfo c_ImageSprite::ci_output((void*)&c_ImageSprite::i_output, (void*)&c_ImageSprite::ifa_output, 3, 4, 0x0000000000000000LL);
+CallInfo c_ImageSprite::ci_loadimages((void*)&c_ImageSprite::i_loadimages, (void*)&c_ImageSprite::ifa_loadimages, 1, 4, 0x0000000000000000LL);
+CallInfo c_ImageSprite::ci_clear((void*)&c_ImageSprite::i_clear, (void*)&c_ImageSprite::ifa_clear, 1, 4, 0x0000000000000000LL);
+CallInfo c_ImageSprite::ci_geterrors((void*)&c_ImageSprite::i_geterrors, (void*)&c_ImageSprite::ifa_geterrors, 0, 4, 0x0000000000000000LL);
+CallInfo c_ImageSprite::ci_addurl((void*)&c_ImageSprite::i_addurl, (void*)&c_ImageSprite::ifa_addurl, 3, 4, 0x0000000000000000LL);
+CallInfo c_ImageSprite::ci_addfile((void*)&c_ImageSprite::i_addfile, (void*)&c_ImageSprite::ifa_addfile, 2, 4, 0x0000000000000000LL);
 Variant c_ImageSprite::i_addstring(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_ImageSprite *self = NULL;
@@ -24748,10 +24748,10 @@ Variant c_DOMEntity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
 Variant c_DOMEntity::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_DOMNode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMEntity::ci___destruct((void*)&c_DOMEntity::i___destruct, (void*)&c_DOMEntity::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMEntity::ci___set((void*)&c_DOMEntity::i___set, (void*)&c_DOMEntity::ifa___set, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMEntity::ci___construct((void*)&c_DOMEntity::i___construct, (void*)&c_DOMEntity::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMEntity::ci___get((void*)&c_DOMEntity::i___get, (void*)&c_DOMEntity::ifa___get, 1, 0, 0x0000000000000000LL);
+CallInfo c_DOMEntity::ci___destruct((void*)&c_DOMEntity::i___destruct, (void*)&c_DOMEntity::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMEntity::ci___set((void*)&c_DOMEntity::i___set, (void*)&c_DOMEntity::ifa___set, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMEntity::ci___construct((void*)&c_DOMEntity::i___construct, (void*)&c_DOMEntity::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMEntity::ci___get((void*)&c_DOMEntity::i___get, (void*)&c_DOMEntity::ifa___get, 1, 4, 0x0000000000000000LL);
 Variant c_DOMEntity::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMEntity *self = NULL;
@@ -25897,50 +25897,50 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
 Variant c_XMLWriter::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_XMLWriter::ci_writeelementns((void*)&c_XMLWriter::i_writeelementns, (void*)&c_XMLWriter::ifa_writeelementns, 4, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_outputmemory((void*)&c_XMLWriter::i_outputmemory, (void*)&c_XMLWriter::ifa_outputmemory, 1, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_enddtdattlist((void*)&c_XMLWriter::i_enddtdattlist, (void*)&c_XMLWriter::ifa_enddtdattlist, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_fullendelement((void*)&c_XMLWriter::i_fullendelement, (void*)&c_XMLWriter::ifa_fullendelement, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_startdocument((void*)&c_XMLWriter::i_startdocument, (void*)&c_XMLWriter::ifa_startdocument, 3, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_startdtdentity((void*)&c_XMLWriter::i_startdtdentity, (void*)&c_XMLWriter::ifa_startdtdentity, 2, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_endcdata((void*)&c_XMLWriter::i_endcdata, (void*)&c_XMLWriter::ifa_endcdata, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_writecomment((void*)&c_XMLWriter::i_writecomment, (void*)&c_XMLWriter::ifa_writecomment, 1, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_writeattribute((void*)&c_XMLWriter::i_writeattribute, (void*)&c_XMLWriter::ifa_writeattribute, 2, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_endcomment((void*)&c_XMLWriter::i_endcomment, (void*)&c_XMLWriter::ifa_endcomment, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci___destruct((void*)&c_XMLWriter::i___destruct, (void*)&c_XMLWriter::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_writedtd((void*)&c_XMLWriter::i_writedtd, (void*)&c_XMLWriter::ifa_writedtd, 4, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci___construct((void*)&c_XMLWriter::i___construct, (void*)&c_XMLWriter::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_enddtdentity((void*)&c_XMLWriter::i_enddtdentity, (void*)&c_XMLWriter::ifa_enddtdentity, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_startattributens((void*)&c_XMLWriter::i_startattributens, (void*)&c_XMLWriter::ifa_startattributens, 3, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_startelement((void*)&c_XMLWriter::i_startelement, (void*)&c_XMLWriter::ifa_startelement, 1, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_startelementns((void*)&c_XMLWriter::i_startelementns, (void*)&c_XMLWriter::ifa_startelementns, 3, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_startdtdelement((void*)&c_XMLWriter::i_startdtdelement, (void*)&c_XMLWriter::ifa_startdtdelement, 1, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_enddocument((void*)&c_XMLWriter::i_enddocument, (void*)&c_XMLWriter::ifa_enddocument, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_writecdata((void*)&c_XMLWriter::i_writecdata, (void*)&c_XMLWriter::ifa_writecdata, 1, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_writedtdelement((void*)&c_XMLWriter::i_writedtdelement, (void*)&c_XMLWriter::ifa_writedtdelement, 2, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_writeattributens((void*)&c_XMLWriter::i_writeattributens, (void*)&c_XMLWriter::ifa_writeattributens, 4, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_writepi((void*)&c_XMLWriter::i_writepi, (void*)&c_XMLWriter::ifa_writepi, 2, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_setindentstring((void*)&c_XMLWriter::i_setindentstring, (void*)&c_XMLWriter::ifa_setindentstring, 1, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_startattribute((void*)&c_XMLWriter::i_startattribute, (void*)&c_XMLWriter::ifa_startattribute, 1, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_writeelement((void*)&c_XMLWriter::i_writeelement, (void*)&c_XMLWriter::ifa_writeelement, 2, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_endelement((void*)&c_XMLWriter::i_endelement, (void*)&c_XMLWriter::ifa_endelement, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_writeraw((void*)&c_XMLWriter::i_writeraw, (void*)&c_XMLWriter::ifa_writeraw, 1, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_writedtdentity((void*)&c_XMLWriter::i_writedtdentity, (void*)&c_XMLWriter::ifa_writedtdentity, 6, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_endpi((void*)&c_XMLWriter::i_endpi, (void*)&c_XMLWriter::ifa_endpi, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_startdtd((void*)&c_XMLWriter::i_startdtd, (void*)&c_XMLWriter::ifa_startdtd, 3, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_setindent((void*)&c_XMLWriter::i_setindent, (void*)&c_XMLWriter::ifa_setindent, 1, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_enddtdelement((void*)&c_XMLWriter::i_enddtdelement, (void*)&c_XMLWriter::ifa_enddtdelement, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_startdtdattlist((void*)&c_XMLWriter::i_startdtdattlist, (void*)&c_XMLWriter::ifa_startdtdattlist, 1, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_startcdata((void*)&c_XMLWriter::i_startcdata, (void*)&c_XMLWriter::ifa_startcdata, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_writedtdattlist((void*)&c_XMLWriter::i_writedtdattlist, (void*)&c_XMLWriter::ifa_writedtdattlist, 2, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_enddtd((void*)&c_XMLWriter::i_enddtd, (void*)&c_XMLWriter::ifa_enddtd, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_openuri((void*)&c_XMLWriter::i_openuri, (void*)&c_XMLWriter::ifa_openuri, 1, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_openmemory((void*)&c_XMLWriter::i_openmemory, (void*)&c_XMLWriter::ifa_openmemory, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_endattribute((void*)&c_XMLWriter::i_endattribute, (void*)&c_XMLWriter::ifa_endattribute, 0, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_startpi((void*)&c_XMLWriter::i_startpi, (void*)&c_XMLWriter::ifa_startpi, 1, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_text((void*)&c_XMLWriter::i_text, (void*)&c_XMLWriter::ifa_text, 1, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_flush((void*)&c_XMLWriter::i_flush, (void*)&c_XMLWriter::ifa_flush, 1, 0, 0x0000000000000000LL);
-CallInfo c_XMLWriter::ci_startcomment((void*)&c_XMLWriter::i_startcomment, (void*)&c_XMLWriter::ifa_startcomment, 0, 0, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_writeelementns((void*)&c_XMLWriter::i_writeelementns, (void*)&c_XMLWriter::ifa_writeelementns, 4, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_outputmemory((void*)&c_XMLWriter::i_outputmemory, (void*)&c_XMLWriter::ifa_outputmemory, 1, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_enddtdattlist((void*)&c_XMLWriter::i_enddtdattlist, (void*)&c_XMLWriter::ifa_enddtdattlist, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_fullendelement((void*)&c_XMLWriter::i_fullendelement, (void*)&c_XMLWriter::ifa_fullendelement, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_startdocument((void*)&c_XMLWriter::i_startdocument, (void*)&c_XMLWriter::ifa_startdocument, 3, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_startdtdentity((void*)&c_XMLWriter::i_startdtdentity, (void*)&c_XMLWriter::ifa_startdtdentity, 2, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_endcdata((void*)&c_XMLWriter::i_endcdata, (void*)&c_XMLWriter::ifa_endcdata, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_writecomment((void*)&c_XMLWriter::i_writecomment, (void*)&c_XMLWriter::ifa_writecomment, 1, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_writeattribute((void*)&c_XMLWriter::i_writeattribute, (void*)&c_XMLWriter::ifa_writeattribute, 2, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_endcomment((void*)&c_XMLWriter::i_endcomment, (void*)&c_XMLWriter::ifa_endcomment, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci___destruct((void*)&c_XMLWriter::i___destruct, (void*)&c_XMLWriter::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_writedtd((void*)&c_XMLWriter::i_writedtd, (void*)&c_XMLWriter::ifa_writedtd, 4, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci___construct((void*)&c_XMLWriter::i___construct, (void*)&c_XMLWriter::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_enddtdentity((void*)&c_XMLWriter::i_enddtdentity, (void*)&c_XMLWriter::ifa_enddtdentity, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_startattributens((void*)&c_XMLWriter::i_startattributens, (void*)&c_XMLWriter::ifa_startattributens, 3, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_startelement((void*)&c_XMLWriter::i_startelement, (void*)&c_XMLWriter::ifa_startelement, 1, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_startelementns((void*)&c_XMLWriter::i_startelementns, (void*)&c_XMLWriter::ifa_startelementns, 3, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_startdtdelement((void*)&c_XMLWriter::i_startdtdelement, (void*)&c_XMLWriter::ifa_startdtdelement, 1, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_enddocument((void*)&c_XMLWriter::i_enddocument, (void*)&c_XMLWriter::ifa_enddocument, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_writecdata((void*)&c_XMLWriter::i_writecdata, (void*)&c_XMLWriter::ifa_writecdata, 1, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_writedtdelement((void*)&c_XMLWriter::i_writedtdelement, (void*)&c_XMLWriter::ifa_writedtdelement, 2, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_writeattributens((void*)&c_XMLWriter::i_writeattributens, (void*)&c_XMLWriter::ifa_writeattributens, 4, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_writepi((void*)&c_XMLWriter::i_writepi, (void*)&c_XMLWriter::ifa_writepi, 2, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_setindentstring((void*)&c_XMLWriter::i_setindentstring, (void*)&c_XMLWriter::ifa_setindentstring, 1, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_startattribute((void*)&c_XMLWriter::i_startattribute, (void*)&c_XMLWriter::ifa_startattribute, 1, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_writeelement((void*)&c_XMLWriter::i_writeelement, (void*)&c_XMLWriter::ifa_writeelement, 2, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_endelement((void*)&c_XMLWriter::i_endelement, (void*)&c_XMLWriter::ifa_endelement, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_writeraw((void*)&c_XMLWriter::i_writeraw, (void*)&c_XMLWriter::ifa_writeraw, 1, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_writedtdentity((void*)&c_XMLWriter::i_writedtdentity, (void*)&c_XMLWriter::ifa_writedtdentity, 6, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_endpi((void*)&c_XMLWriter::i_endpi, (void*)&c_XMLWriter::ifa_endpi, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_startdtd((void*)&c_XMLWriter::i_startdtd, (void*)&c_XMLWriter::ifa_startdtd, 3, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_setindent((void*)&c_XMLWriter::i_setindent, (void*)&c_XMLWriter::ifa_setindent, 1, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_enddtdelement((void*)&c_XMLWriter::i_enddtdelement, (void*)&c_XMLWriter::ifa_enddtdelement, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_startdtdattlist((void*)&c_XMLWriter::i_startdtdattlist, (void*)&c_XMLWriter::ifa_startdtdattlist, 1, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_startcdata((void*)&c_XMLWriter::i_startcdata, (void*)&c_XMLWriter::ifa_startcdata, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_writedtdattlist((void*)&c_XMLWriter::i_writedtdattlist, (void*)&c_XMLWriter::ifa_writedtdattlist, 2, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_enddtd((void*)&c_XMLWriter::i_enddtd, (void*)&c_XMLWriter::ifa_enddtd, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_openuri((void*)&c_XMLWriter::i_openuri, (void*)&c_XMLWriter::ifa_openuri, 1, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_openmemory((void*)&c_XMLWriter::i_openmemory, (void*)&c_XMLWriter::ifa_openmemory, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_endattribute((void*)&c_XMLWriter::i_endattribute, (void*)&c_XMLWriter::ifa_endattribute, 0, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_startpi((void*)&c_XMLWriter::i_startpi, (void*)&c_XMLWriter::ifa_startpi, 1, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_text((void*)&c_XMLWriter::i_text, (void*)&c_XMLWriter::ifa_text, 1, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_flush((void*)&c_XMLWriter::i_flush, (void*)&c_XMLWriter::ifa_flush, 1, 4, 0x0000000000000000LL);
+CallInfo c_XMLWriter::ci_startcomment((void*)&c_XMLWriter::i_startcomment, (void*)&c_XMLWriter::ifa_startcomment, 0, 4, 0x0000000000000000LL);
 Variant c_XMLWriter::i_writeelementns(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_XMLWriter *self = NULL;
@@ -27893,8 +27893,8 @@ Variant c_DOMException::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
 Variant c_DOMException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMException::ci___destruct((void*)&c_DOMException::i___destruct, (void*)&c_DOMException::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMException::ci___construct((void*)&c_DOMException::i___construct, (void*)&c_DOMException::ifa___construct, 2, 0, 0x0000000000000000LL);
+CallInfo c_DOMException::ci___destruct((void*)&c_DOMException::i___destruct, (void*)&c_DOMException::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMException::ci___construct((void*)&c_DOMException::i___construct, (void*)&c_DOMException::ifa___construct, 2, 4, 0x0000000000000000LL);
 Variant c_DOMException::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMException *self = NULL;
@@ -28310,14 +28310,14 @@ Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
 Variant c_DOMXPath::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMXPath::ci___destruct((void*)&c_DOMXPath::i___destruct, (void*)&c_DOMXPath::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMXPath::ci___set((void*)&c_DOMXPath::i___set, (void*)&c_DOMXPath::ifa___set, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMXPath::ci___construct((void*)&c_DOMXPath::i___construct, (void*)&c_DOMXPath::ifa___construct, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMXPath::ci_query((void*)&c_DOMXPath::i_query, (void*)&c_DOMXPath::ifa_query, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMXPath::ci_evaluate((void*)&c_DOMXPath::i_evaluate, (void*)&c_DOMXPath::ifa_evaluate, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMXPath::ci_registerphpfunctions((void*)&c_DOMXPath::i_registerphpfunctions, (void*)&c_DOMXPath::ifa_registerphpfunctions, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMXPath::ci___get((void*)&c_DOMXPath::i___get, (void*)&c_DOMXPath::ifa___get, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMXPath::ci_registernamespace((void*)&c_DOMXPath::i_registernamespace, (void*)&c_DOMXPath::ifa_registernamespace, 2, 0, 0x0000000000000000LL);
+CallInfo c_DOMXPath::ci___destruct((void*)&c_DOMXPath::i___destruct, (void*)&c_DOMXPath::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMXPath::ci___set((void*)&c_DOMXPath::i___set, (void*)&c_DOMXPath::ifa___set, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMXPath::ci___construct((void*)&c_DOMXPath::i___construct, (void*)&c_DOMXPath::ifa___construct, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMXPath::ci_query((void*)&c_DOMXPath::i_query, (void*)&c_DOMXPath::ifa_query, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMXPath::ci_evaluate((void*)&c_DOMXPath::i_evaluate, (void*)&c_DOMXPath::ifa_evaluate, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMXPath::ci_registerphpfunctions((void*)&c_DOMXPath::i_registerphpfunctions, (void*)&c_DOMXPath::ifa_registerphpfunctions, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMXPath::ci___get((void*)&c_DOMXPath::i___get, (void*)&c_DOMXPath::ifa___get, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMXPath::ci_registernamespace((void*)&c_DOMXPath::i_registernamespace, (void*)&c_DOMXPath::ifa_registernamespace, 2, 4, 0x0000000000000000LL);
 Variant c_DOMXPath::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMXPath *self = NULL;
@@ -28998,16 +28998,16 @@ Variant c_SoapServer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
 Variant c_SoapServer::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_SoapServer::ci_addfunction((void*)&c_SoapServer::i_addfunction, (void*)&c_SoapServer::ifa_addfunction, 1, 0, 0x0000000000000000LL);
-CallInfo c_SoapServer::ci___destruct((void*)&c_SoapServer::i___destruct, (void*)&c_SoapServer::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_SoapServer::ci___construct((void*)&c_SoapServer::i___construct, (void*)&c_SoapServer::ifa___construct, 2, 0, 0x0000000000000000LL);
-CallInfo c_SoapServer::ci_getfunctions((void*)&c_SoapServer::i_getfunctions, (void*)&c_SoapServer::ifa_getfunctions, 0, 0, 0x0000000000000000LL);
-CallInfo c_SoapServer::ci_addsoapheader((void*)&c_SoapServer::i_addsoapheader, (void*)&c_SoapServer::ifa_addsoapheader, 1, 0, 0x0000000000000000LL);
-CallInfo c_SoapServer::ci_setpersistence((void*)&c_SoapServer::i_setpersistence, (void*)&c_SoapServer::ifa_setpersistence, 1, 0, 0x0000000000000000LL);
-CallInfo c_SoapServer::ci_handle((void*)&c_SoapServer::i_handle, (void*)&c_SoapServer::ifa_handle, 1, 0, 0x0000000000000000LL);
-CallInfo c_SoapServer::ci_setobject((void*)&c_SoapServer::i_setobject, (void*)&c_SoapServer::ifa_setobject, 1, 0, 0x0000000000000000LL);
-CallInfo c_SoapServer::ci_fault((void*)&c_SoapServer::i_fault, (void*)&c_SoapServer::ifa_fault, 5, 0, 0x0000000000000000LL);
-CallInfo c_SoapServer::ci_setclass((void*)&c_SoapServer::i_setclass, (void*)&c_SoapServer::ifa_setclass, 1, 1, 0x0000000000000000LL);
+CallInfo c_SoapServer::ci_addfunction((void*)&c_SoapServer::i_addfunction, (void*)&c_SoapServer::ifa_addfunction, 1, 4, 0x0000000000000000LL);
+CallInfo c_SoapServer::ci___destruct((void*)&c_SoapServer::i___destruct, (void*)&c_SoapServer::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_SoapServer::ci___construct((void*)&c_SoapServer::i___construct, (void*)&c_SoapServer::ifa___construct, 2, 4, 0x0000000000000000LL);
+CallInfo c_SoapServer::ci_getfunctions((void*)&c_SoapServer::i_getfunctions, (void*)&c_SoapServer::ifa_getfunctions, 0, 4, 0x0000000000000000LL);
+CallInfo c_SoapServer::ci_addsoapheader((void*)&c_SoapServer::i_addsoapheader, (void*)&c_SoapServer::ifa_addsoapheader, 1, 4, 0x0000000000000000LL);
+CallInfo c_SoapServer::ci_setpersistence((void*)&c_SoapServer::i_setpersistence, (void*)&c_SoapServer::ifa_setpersistence, 1, 4, 0x0000000000000000LL);
+CallInfo c_SoapServer::ci_handle((void*)&c_SoapServer::i_handle, (void*)&c_SoapServer::ifa_handle, 1, 4, 0x0000000000000000LL);
+CallInfo c_SoapServer::ci_setobject((void*)&c_SoapServer::i_setobject, (void*)&c_SoapServer::ifa_setobject, 1, 4, 0x0000000000000000LL);
+CallInfo c_SoapServer::ci_fault((void*)&c_SoapServer::i_fault, (void*)&c_SoapServer::ifa_fault, 5, 4, 0x0000000000000000LL);
+CallInfo c_SoapServer::ci_setclass((void*)&c_SoapServer::i_setclass, (void*)&c_SoapServer::ifa_setclass, 1, 5, 0x0000000000000000LL);
 Variant c_SoapServer::i_addfunction(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_SoapServer *self = NULL;
@@ -29996,27 +29996,27 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
 Variant c_DOMNode::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMNode::ci_getlineno((void*)&c_DOMNode::i_getlineno, (void*)&c_DOMNode::ifa_getlineno, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_insertbefore((void*)&c_DOMNode::i_insertbefore, (void*)&c_DOMNode::ifa_insertbefore, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_isdefaultnamespace((void*)&c_DOMNode::i_isdefaultnamespace, (void*)&c_DOMNode::ifa_isdefaultnamespace, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_lookupnamespaceuri((void*)&c_DOMNode::i_lookupnamespaceuri, (void*)&c_DOMNode::ifa_lookupnamespaceuri, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_appendchild((void*)&c_DOMNode::i_appendchild, (void*)&c_DOMNode::ifa_appendchild, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci___destruct((void*)&c_DOMNode::i___destruct, (void*)&c_DOMNode::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci___set((void*)&c_DOMNode::i___set, (void*)&c_DOMNode::ifa___set, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_clonenode((void*)&c_DOMNode::i_clonenode, (void*)&c_DOMNode::ifa_clonenode, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci___construct((void*)&c_DOMNode::i___construct, (void*)&c_DOMNode::ifa___construct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_replacechild((void*)&c_DOMNode::i_replacechild, (void*)&c_DOMNode::ifa_replacechild, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_c14n((void*)&c_DOMNode::i_c14n, (void*)&c_DOMNode::ifa_c14n, 4, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_hasattributes((void*)&c_DOMNode::i_hasattributes, (void*)&c_DOMNode::ifa_hasattributes, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_lookupprefix((void*)&c_DOMNode::i_lookupprefix, (void*)&c_DOMNode::ifa_lookupprefix, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_normalize((void*)&c_DOMNode::i_normalize, (void*)&c_DOMNode::ifa_normalize, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_getnodepath((void*)&c_DOMNode::i_getnodepath, (void*)&c_DOMNode::ifa_getnodepath, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_c14nfile((void*)&c_DOMNode::i_c14nfile, (void*)&c_DOMNode::ifa_c14nfile, 5, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_issamenode((void*)&c_DOMNode::i_issamenode, (void*)&c_DOMNode::ifa_issamenode, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_removechild((void*)&c_DOMNode::i_removechild, (void*)&c_DOMNode::ifa_removechild, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci___get((void*)&c_DOMNode::i___get, (void*)&c_DOMNode::ifa___get, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_issupported((void*)&c_DOMNode::i_issupported, (void*)&c_DOMNode::ifa_issupported, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMNode::ci_haschildnodes((void*)&c_DOMNode::i_haschildnodes, (void*)&c_DOMNode::ifa_haschildnodes, 0, 0, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_getlineno((void*)&c_DOMNode::i_getlineno, (void*)&c_DOMNode::ifa_getlineno, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_insertbefore((void*)&c_DOMNode::i_insertbefore, (void*)&c_DOMNode::ifa_insertbefore, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_isdefaultnamespace((void*)&c_DOMNode::i_isdefaultnamespace, (void*)&c_DOMNode::ifa_isdefaultnamespace, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_lookupnamespaceuri((void*)&c_DOMNode::i_lookupnamespaceuri, (void*)&c_DOMNode::ifa_lookupnamespaceuri, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_appendchild((void*)&c_DOMNode::i_appendchild, (void*)&c_DOMNode::ifa_appendchild, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci___destruct((void*)&c_DOMNode::i___destruct, (void*)&c_DOMNode::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci___set((void*)&c_DOMNode::i___set, (void*)&c_DOMNode::ifa___set, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_clonenode((void*)&c_DOMNode::i_clonenode, (void*)&c_DOMNode::ifa_clonenode, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci___construct((void*)&c_DOMNode::i___construct, (void*)&c_DOMNode::ifa___construct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_replacechild((void*)&c_DOMNode::i_replacechild, (void*)&c_DOMNode::ifa_replacechild, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_c14n((void*)&c_DOMNode::i_c14n, (void*)&c_DOMNode::ifa_c14n, 4, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_hasattributes((void*)&c_DOMNode::i_hasattributes, (void*)&c_DOMNode::ifa_hasattributes, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_lookupprefix((void*)&c_DOMNode::i_lookupprefix, (void*)&c_DOMNode::ifa_lookupprefix, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_normalize((void*)&c_DOMNode::i_normalize, (void*)&c_DOMNode::ifa_normalize, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_getnodepath((void*)&c_DOMNode::i_getnodepath, (void*)&c_DOMNode::ifa_getnodepath, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_c14nfile((void*)&c_DOMNode::i_c14nfile, (void*)&c_DOMNode::ifa_c14nfile, 5, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_issamenode((void*)&c_DOMNode::i_issamenode, (void*)&c_DOMNode::ifa_issamenode, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_removechild((void*)&c_DOMNode::i_removechild, (void*)&c_DOMNode::ifa_removechild, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci___get((void*)&c_DOMNode::i___get, (void*)&c_DOMNode::ifa___get, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_issupported((void*)&c_DOMNode::i_issupported, (void*)&c_DOMNode::ifa_issupported, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci_haschildnodes((void*)&c_DOMNode::i_haschildnodes, (void*)&c_DOMNode::ifa_haschildnodes, 0, 4, 0x0000000000000000LL);
 Variant c_DOMNode::i_getlineno(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMNode *self = NULL;
@@ -31650,40 +31650,40 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
 Variant c_DOMDocument::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_DOMNode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMDocument::ci_getelementsbytagname((void*)&c_DOMDocument::i_getelementsbytagname, (void*)&c_DOMDocument::ifa_getelementsbytagname, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_createcdatasection((void*)&c_DOMDocument::i_createcdatasection, (void*)&c_DOMDocument::ifa_createcdatasection, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_validate((void*)&c_DOMDocument::i_validate, (void*)&c_DOMDocument::ifa_validate, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_getelementsbytagnamens((void*)&c_DOMDocument::i_getelementsbytagnamens, (void*)&c_DOMDocument::ifa_getelementsbytagnamens, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_schemavalidatesource((void*)&c_DOMDocument::i_schemavalidatesource, (void*)&c_DOMDocument::ifa_schemavalidatesource, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_relaxngvalidate((void*)&c_DOMDocument::i_relaxngvalidate, (void*)&c_DOMDocument::ifa_relaxngvalidate, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_loadhtml((void*)&c_DOMDocument::i_loadhtml, (void*)&c_DOMDocument::ifa_loadhtml, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_createentityreference((void*)&c_DOMDocument::i_createentityreference, (void*)&c_DOMDocument::ifa_createentityreference, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_schemavalidate((void*)&c_DOMDocument::i_schemavalidate, (void*)&c_DOMDocument::ifa_schemavalidate, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci___destruct((void*)&c_DOMDocument::i___destruct, (void*)&c_DOMDocument::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci___set((void*)&c_DOMDocument::i___set, (void*)&c_DOMDocument::ifa___set, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_savexml((void*)&c_DOMDocument::i_savexml, (void*)&c_DOMDocument::ifa_savexml, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_createprocessinginstruction((void*)&c_DOMDocument::i_createprocessinginstruction, (void*)&c_DOMDocument::ifa_createprocessinginstruction, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci___construct((void*)&c_DOMDocument::i___construct, (void*)&c_DOMDocument::ifa___construct, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_registernodeclass((void*)&c_DOMDocument::i_registernodeclass, (void*)&c_DOMDocument::ifa_registernodeclass, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_load((void*)&c_DOMDocument::i_load, (void*)&c_DOMDocument::ifa_load, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_createattributens((void*)&c_DOMDocument::i_createattributens, (void*)&c_DOMDocument::ifa_createattributens, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_createelement((void*)&c_DOMDocument::i_createelement, (void*)&c_DOMDocument::ifa_createelement, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_createelementns((void*)&c_DOMDocument::i_createelementns, (void*)&c_DOMDocument::ifa_createelementns, 3, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_importnode((void*)&c_DOMDocument::i_importnode, (void*)&c_DOMDocument::ifa_importnode, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_relaxngvalidatesource((void*)&c_DOMDocument::i_relaxngvalidatesource, (void*)&c_DOMDocument::ifa_relaxngvalidatesource, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_createtextnode((void*)&c_DOMDocument::i_createtextnode, (void*)&c_DOMDocument::ifa_createtextnode, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_savehtml((void*)&c_DOMDocument::i_savehtml, (void*)&c_DOMDocument::ifa_savehtml, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_loadxml((void*)&c_DOMDocument::i_loadxml, (void*)&c_DOMDocument::ifa_loadxml, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_save((void*)&c_DOMDocument::i_save, (void*)&c_DOMDocument::ifa_save, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_createattribute((void*)&c_DOMDocument::i_createattribute, (void*)&c_DOMDocument::ifa_createattribute, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_xinclude((void*)&c_DOMDocument::i_xinclude, (void*)&c_DOMDocument::ifa_xinclude, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci___get((void*)&c_DOMDocument::i___get, (void*)&c_DOMDocument::ifa___get, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_loadhtmlfile((void*)&c_DOMDocument::i_loadhtmlfile, (void*)&c_DOMDocument::ifa_loadhtmlfile, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_savehtmlfile((void*)&c_DOMDocument::i_savehtmlfile, (void*)&c_DOMDocument::ifa_savehtmlfile, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_getelementbyid((void*)&c_DOMDocument::i_getelementbyid, (void*)&c_DOMDocument::ifa_getelementbyid, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_createcomment((void*)&c_DOMDocument::i_createcomment, (void*)&c_DOMDocument::ifa_createcomment, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_normalizedocument((void*)&c_DOMDocument::i_normalizedocument, (void*)&c_DOMDocument::ifa_normalizedocument, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMDocument::ci_createdocumentfragment((void*)&c_DOMDocument::i_createdocumentfragment, (void*)&c_DOMDocument::ifa_createdocumentfragment, 0, 0, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_getelementsbytagname((void*)&c_DOMDocument::i_getelementsbytagname, (void*)&c_DOMDocument::ifa_getelementsbytagname, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_createcdatasection((void*)&c_DOMDocument::i_createcdatasection, (void*)&c_DOMDocument::ifa_createcdatasection, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_validate((void*)&c_DOMDocument::i_validate, (void*)&c_DOMDocument::ifa_validate, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_getelementsbytagnamens((void*)&c_DOMDocument::i_getelementsbytagnamens, (void*)&c_DOMDocument::ifa_getelementsbytagnamens, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_schemavalidatesource((void*)&c_DOMDocument::i_schemavalidatesource, (void*)&c_DOMDocument::ifa_schemavalidatesource, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_relaxngvalidate((void*)&c_DOMDocument::i_relaxngvalidate, (void*)&c_DOMDocument::ifa_relaxngvalidate, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_loadhtml((void*)&c_DOMDocument::i_loadhtml, (void*)&c_DOMDocument::ifa_loadhtml, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_createentityreference((void*)&c_DOMDocument::i_createentityreference, (void*)&c_DOMDocument::ifa_createentityreference, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_schemavalidate((void*)&c_DOMDocument::i_schemavalidate, (void*)&c_DOMDocument::ifa_schemavalidate, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci___destruct((void*)&c_DOMDocument::i___destruct, (void*)&c_DOMDocument::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci___set((void*)&c_DOMDocument::i___set, (void*)&c_DOMDocument::ifa___set, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_savexml((void*)&c_DOMDocument::i_savexml, (void*)&c_DOMDocument::ifa_savexml, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_createprocessinginstruction((void*)&c_DOMDocument::i_createprocessinginstruction, (void*)&c_DOMDocument::ifa_createprocessinginstruction, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci___construct((void*)&c_DOMDocument::i___construct, (void*)&c_DOMDocument::ifa___construct, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_registernodeclass((void*)&c_DOMDocument::i_registernodeclass, (void*)&c_DOMDocument::ifa_registernodeclass, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_load((void*)&c_DOMDocument::i_load, (void*)&c_DOMDocument::ifa_load, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_createattributens((void*)&c_DOMDocument::i_createattributens, (void*)&c_DOMDocument::ifa_createattributens, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_createelement((void*)&c_DOMDocument::i_createelement, (void*)&c_DOMDocument::ifa_createelement, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_createelementns((void*)&c_DOMDocument::i_createelementns, (void*)&c_DOMDocument::ifa_createelementns, 3, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_importnode((void*)&c_DOMDocument::i_importnode, (void*)&c_DOMDocument::ifa_importnode, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_relaxngvalidatesource((void*)&c_DOMDocument::i_relaxngvalidatesource, (void*)&c_DOMDocument::ifa_relaxngvalidatesource, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_createtextnode((void*)&c_DOMDocument::i_createtextnode, (void*)&c_DOMDocument::ifa_createtextnode, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_savehtml((void*)&c_DOMDocument::i_savehtml, (void*)&c_DOMDocument::ifa_savehtml, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_loadxml((void*)&c_DOMDocument::i_loadxml, (void*)&c_DOMDocument::ifa_loadxml, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_save((void*)&c_DOMDocument::i_save, (void*)&c_DOMDocument::ifa_save, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_createattribute((void*)&c_DOMDocument::i_createattribute, (void*)&c_DOMDocument::ifa_createattribute, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_xinclude((void*)&c_DOMDocument::i_xinclude, (void*)&c_DOMDocument::ifa_xinclude, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci___get((void*)&c_DOMDocument::i___get, (void*)&c_DOMDocument::ifa___get, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_loadhtmlfile((void*)&c_DOMDocument::i_loadhtmlfile, (void*)&c_DOMDocument::ifa_loadhtmlfile, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_savehtmlfile((void*)&c_DOMDocument::i_savehtmlfile, (void*)&c_DOMDocument::ifa_savehtmlfile, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_getelementbyid((void*)&c_DOMDocument::i_getelementbyid, (void*)&c_DOMDocument::ifa_getelementbyid, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_createcomment((void*)&c_DOMDocument::i_createcomment, (void*)&c_DOMDocument::ifa_createcomment, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_normalizedocument((void*)&c_DOMDocument::i_normalizedocument, (void*)&c_DOMDocument::ifa_normalizedocument, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci_createdocumentfragment((void*)&c_DOMDocument::i_createdocumentfragment, (void*)&c_DOMDocument::ifa_createdocumentfragment, 0, 4, 0x0000000000000000LL);
 Variant c_DOMDocument::i_getelementsbytagname(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMDocument *self = NULL;
@@ -33275,8 +33275,8 @@ Variant c_LibXMLError::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
 Variant c_LibXMLError::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_LibXMLError::ci___destruct((void*)&c_LibXMLError::i___destruct, (void*)&c_LibXMLError::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_LibXMLError::ci___construct((void*)&c_LibXMLError::i___construct, (void*)&c_LibXMLError::ifa___construct, 0, 0, 0x0000000000000000LL);
+CallInfo c_LibXMLError::ci___destruct((void*)&c_LibXMLError::i___destruct, (void*)&c_LibXMLError::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_LibXMLError::ci___construct((void*)&c_LibXMLError::i___construct, (void*)&c_LibXMLError::ifa___construct, 0, 4, 0x0000000000000000LL);
 Variant c_LibXMLError::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_LibXMLError *self = NULL;
@@ -33557,9 +33557,9 @@ Variant c_SoapFault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
 Variant c_SoapFault::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_SoapFault::ci___tostring((void*)&c_SoapFault::i___tostring, (void*)&c_SoapFault::ifa___tostring, 0, 0, 0x0000000000000000LL);
-CallInfo c_SoapFault::ci___destruct((void*)&c_SoapFault::i___destruct, (void*)&c_SoapFault::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_SoapFault::ci___construct((void*)&c_SoapFault::i___construct, (void*)&c_SoapFault::ifa___construct, 6, 0, 0x0000000000000000LL);
+CallInfo c_SoapFault::ci___tostring((void*)&c_SoapFault::i___tostring, (void*)&c_SoapFault::ifa___tostring, 0, 4, 0x0000000000000000LL);
+CallInfo c_SoapFault::ci___destruct((void*)&c_SoapFault::i___destruct, (void*)&c_SoapFault::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_SoapFault::ci___construct((void*)&c_SoapFault::i___construct, (void*)&c_SoapFault::ifa___construct, 6, 4, 0x0000000000000000LL);
 Variant c_SoapFault::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_SoapFault *self = NULL;
@@ -34350,28 +34350,28 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
 Variant c_DOMElement::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_DOMNode::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_DOMElement::ci_getelementsbytagname((void*)&c_DOMElement::i_getelementsbytagname, (void*)&c_DOMElement::ifa_getelementsbytagname, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_setidattributens((void*)&c_DOMElement::i_setidattributens, (void*)&c_DOMElement::ifa_setidattributens, 3, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_getattribute((void*)&c_DOMElement::i_getattribute, (void*)&c_DOMElement::ifa_getattribute, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_getelementsbytagnamens((void*)&c_DOMElement::i_getelementsbytagnamens, (void*)&c_DOMElement::ifa_getelementsbytagnamens, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_getattributenodens((void*)&c_DOMElement::i_getattributenodens, (void*)&c_DOMElement::ifa_getattributenodens, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci___destruct((void*)&c_DOMElement::i___destruct, (void*)&c_DOMElement::ifa___destruct, 0, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci___set((void*)&c_DOMElement::i___set, (void*)&c_DOMElement::ifa___set, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci___construct((void*)&c_DOMElement::i___construct, (void*)&c_DOMElement::ifa___construct, 3, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_hasattribute((void*)&c_DOMElement::i_hasattribute, (void*)&c_DOMElement::ifa_hasattribute, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_hasattributens((void*)&c_DOMElement::i_hasattributens, (void*)&c_DOMElement::ifa_hasattributens, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_setattributenodens((void*)&c_DOMElement::i_setattributenodens, (void*)&c_DOMElement::ifa_setattributenodens, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_setattributens((void*)&c_DOMElement::i_setattributens, (void*)&c_DOMElement::ifa_setattributens, 3, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_getattributens((void*)&c_DOMElement::i_getattributens, (void*)&c_DOMElement::ifa_getattributens, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_removeattributens((void*)&c_DOMElement::i_removeattributens, (void*)&c_DOMElement::ifa_removeattributens, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_getattributenode((void*)&c_DOMElement::i_getattributenode, (void*)&c_DOMElement::ifa_getattributenode, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_setidattribute((void*)&c_DOMElement::i_setidattribute, (void*)&c_DOMElement::ifa_setidattribute, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_setidattributenode((void*)&c_DOMElement::i_setidattributenode, (void*)&c_DOMElement::ifa_setidattributenode, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_setattribute((void*)&c_DOMElement::i_setattribute, (void*)&c_DOMElement::ifa_setattribute, 2, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_removeattributenode((void*)&c_DOMElement::i_removeattributenode, (void*)&c_DOMElement::ifa_removeattributenode, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci___get((void*)&c_DOMElement::i___get, (void*)&c_DOMElement::ifa___get, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_removeattribute((void*)&c_DOMElement::i_removeattribute, (void*)&c_DOMElement::ifa_removeattribute, 1, 0, 0x0000000000000000LL);
-CallInfo c_DOMElement::ci_setattributenode((void*)&c_DOMElement::i_setattributenode, (void*)&c_DOMElement::ifa_setattributenode, 1, 0, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_getelementsbytagname((void*)&c_DOMElement::i_getelementsbytagname, (void*)&c_DOMElement::ifa_getelementsbytagname, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_setidattributens((void*)&c_DOMElement::i_setidattributens, (void*)&c_DOMElement::ifa_setidattributens, 3, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_getattribute((void*)&c_DOMElement::i_getattribute, (void*)&c_DOMElement::ifa_getattribute, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_getelementsbytagnamens((void*)&c_DOMElement::i_getelementsbytagnamens, (void*)&c_DOMElement::ifa_getelementsbytagnamens, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_getattributenodens((void*)&c_DOMElement::i_getattributenodens, (void*)&c_DOMElement::ifa_getattributenodens, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci___destruct((void*)&c_DOMElement::i___destruct, (void*)&c_DOMElement::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci___set((void*)&c_DOMElement::i___set, (void*)&c_DOMElement::ifa___set, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci___construct((void*)&c_DOMElement::i___construct, (void*)&c_DOMElement::ifa___construct, 3, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_hasattribute((void*)&c_DOMElement::i_hasattribute, (void*)&c_DOMElement::ifa_hasattribute, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_hasattributens((void*)&c_DOMElement::i_hasattributens, (void*)&c_DOMElement::ifa_hasattributens, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_setattributenodens((void*)&c_DOMElement::i_setattributenodens, (void*)&c_DOMElement::ifa_setattributenodens, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_setattributens((void*)&c_DOMElement::i_setattributens, (void*)&c_DOMElement::ifa_setattributens, 3, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_getattributens((void*)&c_DOMElement::i_getattributens, (void*)&c_DOMElement::ifa_getattributens, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_removeattributens((void*)&c_DOMElement::i_removeattributens, (void*)&c_DOMElement::ifa_removeattributens, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_getattributenode((void*)&c_DOMElement::i_getattributenode, (void*)&c_DOMElement::ifa_getattributenode, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_setidattribute((void*)&c_DOMElement::i_setidattribute, (void*)&c_DOMElement::ifa_setidattribute, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_setidattributenode((void*)&c_DOMElement::i_setidattributenode, (void*)&c_DOMElement::ifa_setidattributenode, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_setattribute((void*)&c_DOMElement::i_setattribute, (void*)&c_DOMElement::ifa_setattribute, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_removeattributenode((void*)&c_DOMElement::i_removeattributenode, (void*)&c_DOMElement::ifa_removeattributenode, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci___get((void*)&c_DOMElement::i___get, (void*)&c_DOMElement::ifa___get, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_removeattribute((void*)&c_DOMElement::i_removeattribute, (void*)&c_DOMElement::ifa_removeattribute, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci_setattributenode((void*)&c_DOMElement::i_setattributenode, (void*)&c_DOMElement::ifa_setattributenode, 1, 4, 0x0000000000000000LL);
 Variant c_DOMElement::i_getelementsbytagname(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMElement *self = NULL;

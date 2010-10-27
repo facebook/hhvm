@@ -14852,6 +14852,23 @@ bool TestCodeRun::TestLateStaticBinding() {
 
         "Y::foo\nX::foo\n");
 
+  MVCRO("<?php\n"
+        "function f() { return true; }\n"
+        "if (f()) {\n"
+        "  class A {\n"
+        "    static $a = 'A';\n"
+        "    static function f() { echo static::$a; }\n"
+        "    function g() { $this->f(); }\n"
+        "  }\n"
+        "} else {\n"
+        "  class A { }\n"
+        "}\n"
+        "class B extends A { static $a = 'B'; }\n"
+        "$b = new B;\n"
+        "$b->g();\n",
+
+        "B");
+
   return true;
 }
 

@@ -1246,15 +1246,15 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
 Variant c_Exception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_Exception::ci_getmessage((void*)&c_Exception::i_getmessage, (void*)&c_Exception::ifa_getmessage, 0, 0, 0x0000000000000000LL);
-CallInfo c_Exception::ci___tostring((void*)&c_Exception::i___tostring, (void*)&c_Exception::ifa___tostring, 0, 0, 0x0000000000000000LL);
-CallInfo c_Exception::ci___construct((void*)&c_Exception::i___construct, (void*)&c_Exception::ifa___construct, 2, 0, 0x0000000000000000LL);
-CallInfo c_Exception::ci_getcode((void*)&c_Exception::i_getcode, (void*)&c_Exception::ifa_getcode, 0, 0, 0x0000000000000000LL);
-CallInfo c_Exception::ci_getline((void*)&c_Exception::i_getline, (void*)&c_Exception::ifa_getline, 0, 0, 0x0000000000000000LL);
-CallInfo c_Exception::ci___init__((void*)&c_Exception::i___init__, (void*)&c_Exception::ifa___init__, 0, 0, 0x0000000000000000LL);
-CallInfo c_Exception::ci_getfile((void*)&c_Exception::i_getfile, (void*)&c_Exception::ifa_getfile, 0, 0, 0x0000000000000000LL);
-CallInfo c_Exception::ci_gettraceasstring((void*)&c_Exception::i_gettraceasstring, (void*)&c_Exception::ifa_gettraceasstring, 0, 0, 0x0000000000000000LL);
-CallInfo c_Exception::ci_gettrace((void*)&c_Exception::i_gettrace, (void*)&c_Exception::ifa_gettrace, 0, 0, 0x0000000000000000LL);
+CallInfo c_Exception::ci_getmessage((void*)&c_Exception::i_getmessage, (void*)&c_Exception::ifa_getmessage, 0, 4, 0x0000000000000000LL);
+CallInfo c_Exception::ci___tostring((void*)&c_Exception::i___tostring, (void*)&c_Exception::ifa___tostring, 0, 4, 0x0000000000000000LL);
+CallInfo c_Exception::ci___construct((void*)&c_Exception::i___construct, (void*)&c_Exception::ifa___construct, 2, 4, 0x0000000000000000LL);
+CallInfo c_Exception::ci_getcode((void*)&c_Exception::i_getcode, (void*)&c_Exception::ifa_getcode, 0, 4, 0x0000000000000000LL);
+CallInfo c_Exception::ci_getline((void*)&c_Exception::i_getline, (void*)&c_Exception::ifa_getline, 0, 4, 0x0000000000000000LL);
+CallInfo c_Exception::ci___init__((void*)&c_Exception::i___init__, (void*)&c_Exception::ifa___init__, 0, 4, 0x0000000000000000LL);
+CallInfo c_Exception::ci_getfile((void*)&c_Exception::i_getfile, (void*)&c_Exception::ifa_getfile, 0, 4, 0x0000000000000000LL);
+CallInfo c_Exception::ci_gettraceasstring((void*)&c_Exception::i_gettraceasstring, (void*)&c_Exception::ifa_gettraceasstring, 0, 4, 0x0000000000000000LL);
+CallInfo c_Exception::ci_gettrace((void*)&c_Exception::i_gettrace, (void*)&c_Exception::ifa_gettrace, 0, 4, 0x0000000000000000LL);
 Variant c_Exception::i_getmessage(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_Exception *self = NULL;
@@ -2027,8 +2027,8 @@ Variant c_ErrorException::o_invoke_from_eval(const char *s, Eval::VariableEnviro
 Variant c_ErrorException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_ErrorException::ci___construct((void*)&c_ErrorException::i___construct, (void*)&c_ErrorException::ifa___construct, 5, 0, 0x0000000000000000LL);
-CallInfo c_ErrorException::ci_getseverity((void*)&c_ErrorException::i_getseverity, (void*)&c_ErrorException::ifa_getseverity, 0, 0, 0x0000000000000000LL);
+CallInfo c_ErrorException::ci___construct((void*)&c_ErrorException::i___construct, (void*)&c_ErrorException::ifa___construct, 5, 4, 0x0000000000000000LL);
+CallInfo c_ErrorException::ci_getseverity((void*)&c_ErrorException::i_getseverity, (void*)&c_ErrorException::ifa_getseverity, 0, 4, 0x0000000000000000LL);
 Variant c_ErrorException::i___construct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_ErrorException *self = NULL;

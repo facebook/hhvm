@@ -43,9 +43,21 @@ public:
 
   // what does "static::" resolve to?
   static CStrRef GetStaticClassName(ThreadInfo *info);
-  static void SetStaticClassName(ThreadInfo *info, CStrRef cls);
-  static void ResetStaticClassName(ThreadInfo *info);
-  static void SetCallingObject(ThreadInfo* info, ObjectData *obj);
+  static void SetStaticClassName(ThreadInfo *info, CStrRef cls) {
+    ASSERT(info);
+    FrameInjection *t = info->m_top;
+    if (t) t->m_staticClass = &cls;
+  }
+  static void ResetStaticClassName(ThreadInfo *info) {
+    ASSERT(info);
+    FrameInjection *t = info->m_top;
+    if (t) t->m_staticClass = NULL;
+  }
+  static void SetCallingObject(ThreadInfo* info, ObjectData *obj) {
+    ASSERT(info);
+    FrameInjection *t = info->m_top;
+    if (t) t->m_callingObject = obj;
+  }
 
   static bool IsGlobalScope();
   static bool IsGlobalScope(FrameInjection *frame);

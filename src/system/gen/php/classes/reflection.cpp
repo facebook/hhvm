@@ -303,19 +303,19 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
 Variant c_ReflectionFunctionAbstract::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_ReflectionFunctionAbstract::ci_getnumberofrequiredparameters((void*)&c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_isuserdefined((void*)&c_ReflectionFunctionAbstract::i_isuserdefined, (void*)&c_ReflectionFunctionAbstract::ifa_isuserdefined, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getnumberofparameters((void*)&c_ReflectionFunctionAbstract::i_getnumberofparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofparameters, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getendline((void*)&c_ReflectionFunctionAbstract::i_getendline, (void*)&c_ReflectionFunctionAbstract::ifa_getendline, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getstaticvariables((void*)&c_ReflectionFunctionAbstract::i_getstaticvariables, (void*)&c_ReflectionFunctionAbstract::ifa_getstaticvariables, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getparameters((void*)&c_ReflectionFunctionAbstract::i_getparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getparameters, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_returnsreference((void*)&c_ReflectionFunctionAbstract::i_returnsreference, (void*)&c_ReflectionFunctionAbstract::ifa_returnsreference, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getfilename((void*)&c_ReflectionFunctionAbstract::i_getfilename, (void*)&c_ReflectionFunctionAbstract::ifa_getfilename, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getstartline((void*)&c_ReflectionFunctionAbstract::i_getstartline, (void*)&c_ReflectionFunctionAbstract::ifa_getstartline, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getdoccomment((void*)&c_ReflectionFunctionAbstract::i_getdoccomment, (void*)&c_ReflectionFunctionAbstract::ifa_getdoccomment, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getclosure((void*)&c_ReflectionFunctionAbstract::i_getclosure, (void*)&c_ReflectionFunctionAbstract::ifa_getclosure, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_getname((void*)&c_ReflectionFunctionAbstract::i_getname, (void*)&c_ReflectionFunctionAbstract::ifa_getname, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunctionAbstract::ci_isinternal((void*)&c_ReflectionFunctionAbstract::i_isinternal, (void*)&c_ReflectionFunctionAbstract::ifa_isinternal, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getnumberofrequiredparameters((void*)&c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_isuserdefined((void*)&c_ReflectionFunctionAbstract::i_isuserdefined, (void*)&c_ReflectionFunctionAbstract::ifa_isuserdefined, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getnumberofparameters((void*)&c_ReflectionFunctionAbstract::i_getnumberofparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofparameters, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getendline((void*)&c_ReflectionFunctionAbstract::i_getendline, (void*)&c_ReflectionFunctionAbstract::ifa_getendline, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getstaticvariables((void*)&c_ReflectionFunctionAbstract::i_getstaticvariables, (void*)&c_ReflectionFunctionAbstract::ifa_getstaticvariables, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getparameters((void*)&c_ReflectionFunctionAbstract::i_getparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getparameters, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_returnsreference((void*)&c_ReflectionFunctionAbstract::i_returnsreference, (void*)&c_ReflectionFunctionAbstract::ifa_returnsreference, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getfilename((void*)&c_ReflectionFunctionAbstract::i_getfilename, (void*)&c_ReflectionFunctionAbstract::ifa_getfilename, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getstartline((void*)&c_ReflectionFunctionAbstract::i_getstartline, (void*)&c_ReflectionFunctionAbstract::ifa_getstartline, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getdoccomment((void*)&c_ReflectionFunctionAbstract::i_getdoccomment, (void*)&c_ReflectionFunctionAbstract::ifa_getdoccomment, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getclosure((void*)&c_ReflectionFunctionAbstract::i_getclosure, (void*)&c_ReflectionFunctionAbstract::ifa_getclosure, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getname((void*)&c_ReflectionFunctionAbstract::i_getname, (void*)&c_ReflectionFunctionAbstract::ifa_getname, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_isinternal((void*)&c_ReflectionFunctionAbstract::i_isinternal, (void*)&c_ReflectionFunctionAbstract::ifa_isinternal, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_ReflectionFunctionAbstract *self = NULL;
@@ -1066,7 +1066,7 @@ Variant c_ReflectionObject::os_invoke_from_eval(const char *c, const char *s, Ev
   }
   return c_ReflectionClass::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_ReflectionObject::ci_export((void*)&c_ReflectionObject::i_export, (void*)&c_ReflectionObject::ifa_export, 2, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionObject::ci_export((void*)&c_ReflectionObject::i_export, (void*)&c_ReflectionObject::ifa_export, 2, 12, 0x0000000000000000LL);
 Variant c_ReflectionObject::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   const char *c;
@@ -2076,48 +2076,48 @@ Variant c_ReflectionClass::os_invoke_from_eval(const char *c, const char *s, Eva
   }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_ReflectionClass::ci_getmethods((void*)&c_ReflectionClass::i_getmethods, (void*)&c_ReflectionClass::ifa_getmethods, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isiterateable((void*)&c_ReflectionClass::i_isiterateable, (void*)&c_ReflectionClass::ifa_isiterateable, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getstaticpropertyvalue((void*)&c_ReflectionClass::i_getstaticpropertyvalue, (void*)&c_ReflectionClass::ifa_getstaticpropertyvalue, 2, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isuserdefined((void*)&c_ReflectionClass::i_isuserdefined, (void*)&c_ReflectionClass::ifa_isuserdefined, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_newinstance((void*)&c_ReflectionClass::i_newinstance, (void*)&c_ReflectionClass::ifa_newinstance, 0, 1, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getextension((void*)&c_ReflectionClass::i_getextension, (void*)&c_ReflectionClass::ifa_getextension, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getconstructor((void*)&c_ReflectionClass::i_getconstructor, (void*)&c_ReflectionClass::ifa_getconstructor, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci___tostring((void*)&c_ReflectionClass::i___tostring, (void*)&c_ReflectionClass::ifa___tostring, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_newinstanceargs((void*)&c_ReflectionClass::i_newinstanceargs, (void*)&c_ReflectionClass::ifa_newinstanceargs, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getendline((void*)&c_ReflectionClass::i_getendline, (void*)&c_ReflectionClass::ifa_getendline, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isinstance((void*)&c_ReflectionClass::i_isinstance, (void*)&c_ReflectionClass::ifa_isinstance, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_hasmethod((void*)&c_ReflectionClass::i_hasmethod, (void*)&c_ReflectionClass::ifa_hasmethod, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci___construct((void*)&c_ReflectionClass::i___construct, (void*)&c_ReflectionClass::ifa___construct, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isfinal((void*)&c_ReflectionClass::i_isfinal, (void*)&c_ReflectionClass::ifa_isfinal, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getmodifiers((void*)&c_ReflectionClass::i_getmodifiers, (void*)&c_ReflectionClass::ifa_getmodifiers, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_export((void*)&c_ReflectionClass::i_export, (void*)&c_ReflectionClass::ifa_export, 2, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getproperties((void*)&c_ReflectionClass::i_getproperties, (void*)&c_ReflectionClass::ifa_getproperties, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_hasconstant((void*)&c_ReflectionClass::i_hasconstant, (void*)&c_ReflectionClass::ifa_hasconstant, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getmethod((void*)&c_ReflectionClass::i_getmethod, (void*)&c_ReflectionClass::ifa_getmethod, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getextensionname((void*)&c_ReflectionClass::i_getextensionname, (void*)&c_ReflectionClass::ifa_getextensionname, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getparentclass((void*)&c_ReflectionClass::i_getparentclass, (void*)&c_ReflectionClass::ifa_getparentclass, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getfilename((void*)&c_ReflectionClass::i_getfilename, (void*)&c_ReflectionClass::ifa_getfilename, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_implementsinterface((void*)&c_ReflectionClass::i_implementsinterface, (void*)&c_ReflectionClass::ifa_implementsinterface, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getinterfacenames((void*)&c_ReflectionClass::i_getinterfacenames, (void*)&c_ReflectionClass::ifa_getinterfacenames, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getconstant((void*)&c_ReflectionClass::i_getconstant, (void*)&c_ReflectionClass::ifa_getconstant, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getstartline((void*)&c_ReflectionClass::i_getstartline, (void*)&c_ReflectionClass::ifa_getstartline, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getconstants((void*)&c_ReflectionClass::i_getconstants, (void*)&c_ReflectionClass::ifa_getconstants, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getdoccomment((void*)&c_ReflectionClass::i_getdoccomment, (void*)&c_ReflectionClass::ifa_getdoccomment, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isinterface((void*)&c_ReflectionClass::i_isinterface, (void*)&c_ReflectionClass::ifa_isinterface, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_issubclassof((void*)&c_ReflectionClass::i_issubclassof, (void*)&c_ReflectionClass::ifa_issubclassof, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_hasproperty((void*)&c_ReflectionClass::i_hasproperty, (void*)&c_ReflectionClass::ifa_hasproperty, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getstaticproperties((void*)&c_ReflectionClass::i_getstaticproperties, (void*)&c_ReflectionClass::ifa_getstaticproperties, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_test((void*)&c_ReflectionClass::i_test, (void*)&c_ReflectionClass::ifa_test, 2, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getdefaultproperties((void*)&c_ReflectionClass::i_getdefaultproperties, (void*)&c_ReflectionClass::ifa_getdefaultproperties, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_setstaticpropertyvalue((void*)&c_ReflectionClass::i_setstaticpropertyvalue, (void*)&c_ReflectionClass::ifa_setstaticpropertyvalue, 2, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isinstantiable((void*)&c_ReflectionClass::i_isinstantiable, (void*)&c_ReflectionClass::ifa_isinstantiable, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getinterfaces((void*)&c_ReflectionClass::i_getinterfaces, (void*)&c_ReflectionClass::ifa_getinterfaces, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_fetch((void*)&c_ReflectionClass::i_fetch, (void*)&c_ReflectionClass::ifa_fetch, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isabstract((void*)&c_ReflectionClass::i_isabstract, (void*)&c_ReflectionClass::ifa_isabstract, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getname((void*)&c_ReflectionClass::i_getname, (void*)&c_ReflectionClass::ifa_getname, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_getproperty((void*)&c_ReflectionClass::i_getproperty, (void*)&c_ReflectionClass::ifa_getproperty, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionClass::ci_isinternal((void*)&c_ReflectionClass::i_isinternal, (void*)&c_ReflectionClass::ifa_isinternal, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getmethods((void*)&c_ReflectionClass::i_getmethods, (void*)&c_ReflectionClass::ifa_getmethods, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isiterateable((void*)&c_ReflectionClass::i_isiterateable, (void*)&c_ReflectionClass::ifa_isiterateable, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getstaticpropertyvalue((void*)&c_ReflectionClass::i_getstaticpropertyvalue, (void*)&c_ReflectionClass::ifa_getstaticpropertyvalue, 2, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isuserdefined((void*)&c_ReflectionClass::i_isuserdefined, (void*)&c_ReflectionClass::ifa_isuserdefined, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_newinstance((void*)&c_ReflectionClass::i_newinstance, (void*)&c_ReflectionClass::ifa_newinstance, 0, 5, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getextension((void*)&c_ReflectionClass::i_getextension, (void*)&c_ReflectionClass::ifa_getextension, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getconstructor((void*)&c_ReflectionClass::i_getconstructor, (void*)&c_ReflectionClass::ifa_getconstructor, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci___tostring((void*)&c_ReflectionClass::i___tostring, (void*)&c_ReflectionClass::ifa___tostring, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_newinstanceargs((void*)&c_ReflectionClass::i_newinstanceargs, (void*)&c_ReflectionClass::ifa_newinstanceargs, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getendline((void*)&c_ReflectionClass::i_getendline, (void*)&c_ReflectionClass::ifa_getendline, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isinstance((void*)&c_ReflectionClass::i_isinstance, (void*)&c_ReflectionClass::ifa_isinstance, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_hasmethod((void*)&c_ReflectionClass::i_hasmethod, (void*)&c_ReflectionClass::ifa_hasmethod, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci___construct((void*)&c_ReflectionClass::i___construct, (void*)&c_ReflectionClass::ifa___construct, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isfinal((void*)&c_ReflectionClass::i_isfinal, (void*)&c_ReflectionClass::ifa_isfinal, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getmodifiers((void*)&c_ReflectionClass::i_getmodifiers, (void*)&c_ReflectionClass::ifa_getmodifiers, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_export((void*)&c_ReflectionClass::i_export, (void*)&c_ReflectionClass::ifa_export, 2, 12, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getproperties((void*)&c_ReflectionClass::i_getproperties, (void*)&c_ReflectionClass::ifa_getproperties, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_hasconstant((void*)&c_ReflectionClass::i_hasconstant, (void*)&c_ReflectionClass::ifa_hasconstant, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getmethod((void*)&c_ReflectionClass::i_getmethod, (void*)&c_ReflectionClass::ifa_getmethod, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getextensionname((void*)&c_ReflectionClass::i_getextensionname, (void*)&c_ReflectionClass::ifa_getextensionname, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getparentclass((void*)&c_ReflectionClass::i_getparentclass, (void*)&c_ReflectionClass::ifa_getparentclass, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getfilename((void*)&c_ReflectionClass::i_getfilename, (void*)&c_ReflectionClass::ifa_getfilename, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_implementsinterface((void*)&c_ReflectionClass::i_implementsinterface, (void*)&c_ReflectionClass::ifa_implementsinterface, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getinterfacenames((void*)&c_ReflectionClass::i_getinterfacenames, (void*)&c_ReflectionClass::ifa_getinterfacenames, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getconstant((void*)&c_ReflectionClass::i_getconstant, (void*)&c_ReflectionClass::ifa_getconstant, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getstartline((void*)&c_ReflectionClass::i_getstartline, (void*)&c_ReflectionClass::ifa_getstartline, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getconstants((void*)&c_ReflectionClass::i_getconstants, (void*)&c_ReflectionClass::ifa_getconstants, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getdoccomment((void*)&c_ReflectionClass::i_getdoccomment, (void*)&c_ReflectionClass::ifa_getdoccomment, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isinterface((void*)&c_ReflectionClass::i_isinterface, (void*)&c_ReflectionClass::ifa_isinterface, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_issubclassof((void*)&c_ReflectionClass::i_issubclassof, (void*)&c_ReflectionClass::ifa_issubclassof, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_hasproperty((void*)&c_ReflectionClass::i_hasproperty, (void*)&c_ReflectionClass::ifa_hasproperty, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getstaticproperties((void*)&c_ReflectionClass::i_getstaticproperties, (void*)&c_ReflectionClass::ifa_getstaticproperties, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_test((void*)&c_ReflectionClass::i_test, (void*)&c_ReflectionClass::ifa_test, 2, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getdefaultproperties((void*)&c_ReflectionClass::i_getdefaultproperties, (void*)&c_ReflectionClass::ifa_getdefaultproperties, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_setstaticpropertyvalue((void*)&c_ReflectionClass::i_setstaticpropertyvalue, (void*)&c_ReflectionClass::ifa_setstaticpropertyvalue, 2, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isinstantiable((void*)&c_ReflectionClass::i_isinstantiable, (void*)&c_ReflectionClass::ifa_isinstantiable, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getinterfaces((void*)&c_ReflectionClass::i_getinterfaces, (void*)&c_ReflectionClass::ifa_getinterfaces, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_fetch((void*)&c_ReflectionClass::i_fetch, (void*)&c_ReflectionClass::ifa_fetch, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isabstract((void*)&c_ReflectionClass::i_isabstract, (void*)&c_ReflectionClass::ifa_isabstract, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getname((void*)&c_ReflectionClass::i_getname, (void*)&c_ReflectionClass::ifa_getname, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getproperty((void*)&c_ReflectionClass::i_getproperty, (void*)&c_ReflectionClass::ifa_getproperty, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isinternal((void*)&c_ReflectionClass::i_isinternal, (void*)&c_ReflectionClass::ifa_isinternal, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionClass::i_getmethods(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_ReflectionClass *self = NULL;
@@ -4939,17 +4939,17 @@ Variant c_ReflectionExtension::os_invoke_from_eval(const char *c, const char *s,
   }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_ReflectionExtension::ci___tostring((void*)&c_ReflectionExtension::i___tostring, (void*)&c_ReflectionExtension::ifa___tostring, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci___construct((void*)&c_ReflectionExtension::i___construct, (void*)&c_ReflectionExtension::ifa___construct, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_getfunctions((void*)&c_ReflectionExtension::i_getfunctions, (void*)&c_ReflectionExtension::ifa_getfunctions, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_export((void*)&c_ReflectionExtension::i_export, (void*)&c_ReflectionExtension::ifa_export, 2, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_info((void*)&c_ReflectionExtension::i_info, (void*)&c_ReflectionExtension::ifa_info, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_getinientries((void*)&c_ReflectionExtension::i_getinientries, (void*)&c_ReflectionExtension::ifa_getinientries, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_getconstants((void*)&c_ReflectionExtension::i_getconstants, (void*)&c_ReflectionExtension::ifa_getconstants, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_getclassnames((void*)&c_ReflectionExtension::i_getclassnames, (void*)&c_ReflectionExtension::ifa_getclassnames, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_getversion((void*)&c_ReflectionExtension::i_getversion, (void*)&c_ReflectionExtension::ifa_getversion, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_getname((void*)&c_ReflectionExtension::i_getname, (void*)&c_ReflectionExtension::ifa_getname, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionExtension::ci_getclasses((void*)&c_ReflectionExtension::i_getclasses, (void*)&c_ReflectionExtension::ifa_getclasses, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci___tostring((void*)&c_ReflectionExtension::i___tostring, (void*)&c_ReflectionExtension::ifa___tostring, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci___construct((void*)&c_ReflectionExtension::i___construct, (void*)&c_ReflectionExtension::ifa___construct, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_getfunctions((void*)&c_ReflectionExtension::i_getfunctions, (void*)&c_ReflectionExtension::ifa_getfunctions, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_export((void*)&c_ReflectionExtension::i_export, (void*)&c_ReflectionExtension::ifa_export, 2, 12, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_info((void*)&c_ReflectionExtension::i_info, (void*)&c_ReflectionExtension::ifa_info, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_getinientries((void*)&c_ReflectionExtension::i_getinientries, (void*)&c_ReflectionExtension::ifa_getinientries, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_getconstants((void*)&c_ReflectionExtension::i_getconstants, (void*)&c_ReflectionExtension::ifa_getconstants, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_getclassnames((void*)&c_ReflectionExtension::i_getclassnames, (void*)&c_ReflectionExtension::ifa_getclassnames, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_getversion((void*)&c_ReflectionExtension::i_getversion, (void*)&c_ReflectionExtension::ifa_getversion, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_getname((void*)&c_ReflectionExtension::i_getname, (void*)&c_ReflectionExtension::ifa_getname, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_getclasses((void*)&c_ReflectionExtension::i_getclasses, (void*)&c_ReflectionExtension::ifa_getclasses, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionExtension::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_ReflectionExtension *self = NULL;
@@ -5951,22 +5951,22 @@ Variant c_ReflectionMethod::os_invoke_from_eval(const char *c, const char *s, Ev
   }
   return c_ReflectionFunctionAbstract::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_ReflectionMethod::ci_isprivate((void*)&c_ReflectionMethod::i_isprivate, (void*)&c_ReflectionMethod::ifa_isprivate, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci___tostring((void*)&c_ReflectionMethod::i___tostring, (void*)&c_ReflectionMethod::ifa___tostring, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_isprotected((void*)&c_ReflectionMethod::i_isprotected, (void*)&c_ReflectionMethod::ifa_isprotected, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_isstatic((void*)&c_ReflectionMethod::i_isstatic, (void*)&c_ReflectionMethod::ifa_isstatic, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_getdeclaringclass((void*)&c_ReflectionMethod::i_getdeclaringclass, (void*)&c_ReflectionMethod::ifa_getdeclaringclass, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_isconstructor((void*)&c_ReflectionMethod::i_isconstructor, (void*)&c_ReflectionMethod::ifa_isconstructor, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci___construct((void*)&c_ReflectionMethod::i___construct, (void*)&c_ReflectionMethod::ifa___construct, 2, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_isfinal((void*)&c_ReflectionMethod::i_isfinal, (void*)&c_ReflectionMethod::ifa_isfinal, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_invokeargs((void*)&c_ReflectionMethod::i_invokeargs, (void*)&c_ReflectionMethod::ifa_invokeargs, 2, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_getmodifiers((void*)&c_ReflectionMethod::i_getmodifiers, (void*)&c_ReflectionMethod::ifa_getmodifiers, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_export((void*)&c_ReflectionMethod::i_export, (void*)&c_ReflectionMethod::ifa_export, 3, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_invoke((void*)&c_ReflectionMethod::i_invoke, (void*)&c_ReflectionMethod::ifa_invoke, 1, 1, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_ispublic((void*)&c_ReflectionMethod::i_ispublic, (void*)&c_ReflectionMethod::ifa_ispublic, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_isdestructor((void*)&c_ReflectionMethod::i_isdestructor, (void*)&c_ReflectionMethod::ifa_isdestructor, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_getclosure((void*)&c_ReflectionMethod::i_getclosure, (void*)&c_ReflectionMethod::ifa_getclosure, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionMethod::ci_isabstract((void*)&c_ReflectionMethod::i_isabstract, (void*)&c_ReflectionMethod::ifa_isabstract, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_isprivate((void*)&c_ReflectionMethod::i_isprivate, (void*)&c_ReflectionMethod::ifa_isprivate, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci___tostring((void*)&c_ReflectionMethod::i___tostring, (void*)&c_ReflectionMethod::ifa___tostring, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_isprotected((void*)&c_ReflectionMethod::i_isprotected, (void*)&c_ReflectionMethod::ifa_isprotected, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_isstatic((void*)&c_ReflectionMethod::i_isstatic, (void*)&c_ReflectionMethod::ifa_isstatic, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_getdeclaringclass((void*)&c_ReflectionMethod::i_getdeclaringclass, (void*)&c_ReflectionMethod::ifa_getdeclaringclass, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_isconstructor((void*)&c_ReflectionMethod::i_isconstructor, (void*)&c_ReflectionMethod::ifa_isconstructor, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci___construct((void*)&c_ReflectionMethod::i___construct, (void*)&c_ReflectionMethod::ifa___construct, 2, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_isfinal((void*)&c_ReflectionMethod::i_isfinal, (void*)&c_ReflectionMethod::ifa_isfinal, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_invokeargs((void*)&c_ReflectionMethod::i_invokeargs, (void*)&c_ReflectionMethod::ifa_invokeargs, 2, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_getmodifiers((void*)&c_ReflectionMethod::i_getmodifiers, (void*)&c_ReflectionMethod::ifa_getmodifiers, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_export((void*)&c_ReflectionMethod::i_export, (void*)&c_ReflectionMethod::ifa_export, 3, 12, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_invoke((void*)&c_ReflectionMethod::i_invoke, (void*)&c_ReflectionMethod::ifa_invoke, 1, 5, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_ispublic((void*)&c_ReflectionMethod::i_ispublic, (void*)&c_ReflectionMethod::ifa_ispublic, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_isdestructor((void*)&c_ReflectionMethod::i_isdestructor, (void*)&c_ReflectionMethod::ifa_isdestructor, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_getclosure((void*)&c_ReflectionMethod::i_getclosure, (void*)&c_ReflectionMethod::ifa_getclosure, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_isabstract((void*)&c_ReflectionMethod::i_isabstract, (void*)&c_ReflectionMethod::ifa_isabstract, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionMethod::i_isprivate(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_ReflectionMethod *self = NULL;
@@ -7236,21 +7236,21 @@ Variant c_ReflectionProperty::os_invoke_from_eval(const char *c, const char *s, 
   }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_ReflectionProperty::ci_isprivate((void*)&c_ReflectionProperty::i_isprivate, (void*)&c_ReflectionProperty::ifa_isprivate, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_getvalue((void*)&c_ReflectionProperty::i_getvalue, (void*)&c_ReflectionProperty::ifa_getvalue, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci___tostring((void*)&c_ReflectionProperty::i___tostring, (void*)&c_ReflectionProperty::ifa___tostring, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_isprotected((void*)&c_ReflectionProperty::i_isprotected, (void*)&c_ReflectionProperty::ifa_isprotected, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_isstatic((void*)&c_ReflectionProperty::i_isstatic, (void*)&c_ReflectionProperty::ifa_isstatic, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_getdeclaringclass((void*)&c_ReflectionProperty::i_getdeclaringclass, (void*)&c_ReflectionProperty::ifa_getdeclaringclass, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_isdefault((void*)&c_ReflectionProperty::i_isdefault, (void*)&c_ReflectionProperty::ifa_isdefault, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci___construct((void*)&c_ReflectionProperty::i___construct, (void*)&c_ReflectionProperty::ifa___construct, 2, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_getmodifiers((void*)&c_ReflectionProperty::i_getmodifiers, (void*)&c_ReflectionProperty::ifa_getmodifiers, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_export((void*)&c_ReflectionProperty::i_export, (void*)&c_ReflectionProperty::ifa_export, 3, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_ispublic((void*)&c_ReflectionProperty::i_ispublic, (void*)&c_ReflectionProperty::ifa_ispublic, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_setaccessible((void*)&c_ReflectionProperty::i_setaccessible, (void*)&c_ReflectionProperty::ifa_setaccessible, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_getdoccomment((void*)&c_ReflectionProperty::i_getdoccomment, (void*)&c_ReflectionProperty::ifa_getdoccomment, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_setvalue((void*)&c_ReflectionProperty::i_setvalue, (void*)&c_ReflectionProperty::ifa_setvalue, 2, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionProperty::ci_getname((void*)&c_ReflectionProperty::i_getname, (void*)&c_ReflectionProperty::ifa_getname, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_isprivate((void*)&c_ReflectionProperty::i_isprivate, (void*)&c_ReflectionProperty::ifa_isprivate, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_getvalue((void*)&c_ReflectionProperty::i_getvalue, (void*)&c_ReflectionProperty::ifa_getvalue, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci___tostring((void*)&c_ReflectionProperty::i___tostring, (void*)&c_ReflectionProperty::ifa___tostring, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_isprotected((void*)&c_ReflectionProperty::i_isprotected, (void*)&c_ReflectionProperty::ifa_isprotected, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_isstatic((void*)&c_ReflectionProperty::i_isstatic, (void*)&c_ReflectionProperty::ifa_isstatic, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_getdeclaringclass((void*)&c_ReflectionProperty::i_getdeclaringclass, (void*)&c_ReflectionProperty::ifa_getdeclaringclass, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_isdefault((void*)&c_ReflectionProperty::i_isdefault, (void*)&c_ReflectionProperty::ifa_isdefault, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci___construct((void*)&c_ReflectionProperty::i___construct, (void*)&c_ReflectionProperty::ifa___construct, 2, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_getmodifiers((void*)&c_ReflectionProperty::i_getmodifiers, (void*)&c_ReflectionProperty::ifa_getmodifiers, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_export((void*)&c_ReflectionProperty::i_export, (void*)&c_ReflectionProperty::ifa_export, 3, 12, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_ispublic((void*)&c_ReflectionProperty::i_ispublic, (void*)&c_ReflectionProperty::ifa_ispublic, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_setaccessible((void*)&c_ReflectionProperty::i_setaccessible, (void*)&c_ReflectionProperty::ifa_setaccessible, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_getdoccomment((void*)&c_ReflectionProperty::i_getdoccomment, (void*)&c_ReflectionProperty::ifa_getdoccomment, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_setvalue((void*)&c_ReflectionProperty::i_setvalue, (void*)&c_ReflectionProperty::ifa_setvalue, 2, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_getname((void*)&c_ReflectionProperty::i_getname, (void*)&c_ReflectionProperty::ifa_getname, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionProperty::i_isprivate(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_ReflectionProperty *self = NULL;
@@ -8281,11 +8281,11 @@ Variant c_ReflectionFunction::os_invoke_from_eval(const char *c, const char *s, 
   }
   return c_ReflectionFunctionAbstract::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_ReflectionFunction::ci___tostring((void*)&c_ReflectionFunction::i___tostring, (void*)&c_ReflectionFunction::ifa___tostring, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunction::ci___construct((void*)&c_ReflectionFunction::i___construct, (void*)&c_ReflectionFunction::ifa___construct, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunction::ci_invokeargs((void*)&c_ReflectionFunction::i_invokeargs, (void*)&c_ReflectionFunction::ifa_invokeargs, 1, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunction::ci_export((void*)&c_ReflectionFunction::i_export, (void*)&c_ReflectionFunction::ifa_export, 2, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionFunction::ci_invoke((void*)&c_ReflectionFunction::i_invoke, (void*)&c_ReflectionFunction::ifa_invoke, 0, 1, 0x0000000000000000LL);
+CallInfo c_ReflectionFunction::ci___tostring((void*)&c_ReflectionFunction::i___tostring, (void*)&c_ReflectionFunction::ifa___tostring, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunction::ci___construct((void*)&c_ReflectionFunction::i___construct, (void*)&c_ReflectionFunction::ifa___construct, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunction::ci_invokeargs((void*)&c_ReflectionFunction::i_invokeargs, (void*)&c_ReflectionFunction::ifa_invokeargs, 1, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionFunction::ci_export((void*)&c_ReflectionFunction::i_export, (void*)&c_ReflectionFunction::ifa_export, 2, 12, 0x0000000000000000LL);
+CallInfo c_ReflectionFunction::ci_invoke((void*)&c_ReflectionFunction::i_invoke, (void*)&c_ReflectionFunction::ifa_invoke, 0, 5, 0x0000000000000000LL);
 Variant c_ReflectionFunction::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_ReflectionFunction *self = NULL;
@@ -8962,19 +8962,19 @@ Variant c_ReflectionParameter::os_invoke_from_eval(const char *c, const char *s,
   }
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_ReflectionParameter::ci___tostring((void*)&c_ReflectionParameter::i___tostring, (void*)&c_ReflectionParameter::ifa___tostring, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_getdeclaringclass((void*)&c_ReflectionParameter::i_getdeclaringclass, (void*)&c_ReflectionParameter::ifa_getdeclaringclass, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_isdefaultvalueavailable((void*)&c_ReflectionParameter::i_isdefaultvalueavailable, (void*)&c_ReflectionParameter::ifa_isdefaultvalueavailable, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci___construct((void*)&c_ReflectionParameter::i___construct, (void*)&c_ReflectionParameter::ifa___construct, 2, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_getclass((void*)&c_ReflectionParameter::i_getclass, (void*)&c_ReflectionParameter::ifa_getclass, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_export((void*)&c_ReflectionParameter::i_export, (void*)&c_ReflectionParameter::ifa_export, 3, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_allowsnull((void*)&c_ReflectionParameter::i_allowsnull, (void*)&c_ReflectionParameter::ifa_allowsnull, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_getposition((void*)&c_ReflectionParameter::i_getposition, (void*)&c_ReflectionParameter::ifa_getposition, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_isarray((void*)&c_ReflectionParameter::i_isarray, (void*)&c_ReflectionParameter::ifa_isarray, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_isoptional((void*)&c_ReflectionParameter::i_isoptional, (void*)&c_ReflectionParameter::ifa_isoptional, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_getdefaultvalue((void*)&c_ReflectionParameter::i_getdefaultvalue, (void*)&c_ReflectionParameter::ifa_getdefaultvalue, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_getname((void*)&c_ReflectionParameter::i_getname, (void*)&c_ReflectionParameter::ifa_getname, 0, 0, 0x0000000000000000LL);
-CallInfo c_ReflectionParameter::ci_ispassedbyreference((void*)&c_ReflectionParameter::i_ispassedbyreference, (void*)&c_ReflectionParameter::ifa_ispassedbyreference, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci___tostring((void*)&c_ReflectionParameter::i___tostring, (void*)&c_ReflectionParameter::ifa___tostring, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_getdeclaringclass((void*)&c_ReflectionParameter::i_getdeclaringclass, (void*)&c_ReflectionParameter::ifa_getdeclaringclass, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_isdefaultvalueavailable((void*)&c_ReflectionParameter::i_isdefaultvalueavailable, (void*)&c_ReflectionParameter::ifa_isdefaultvalueavailable, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci___construct((void*)&c_ReflectionParameter::i___construct, (void*)&c_ReflectionParameter::ifa___construct, 2, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_getclass((void*)&c_ReflectionParameter::i_getclass, (void*)&c_ReflectionParameter::ifa_getclass, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_export((void*)&c_ReflectionParameter::i_export, (void*)&c_ReflectionParameter::ifa_export, 3, 12, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_allowsnull((void*)&c_ReflectionParameter::i_allowsnull, (void*)&c_ReflectionParameter::ifa_allowsnull, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_getposition((void*)&c_ReflectionParameter::i_getposition, (void*)&c_ReflectionParameter::ifa_getposition, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_isarray((void*)&c_ReflectionParameter::i_isarray, (void*)&c_ReflectionParameter::ifa_isarray, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_isoptional((void*)&c_ReflectionParameter::i_isoptional, (void*)&c_ReflectionParameter::ifa_isoptional, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_getdefaultvalue((void*)&c_ReflectionParameter::i_getdefaultvalue, (void*)&c_ReflectionParameter::ifa_getdefaultvalue, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_getname((void*)&c_ReflectionParameter::i_getname, (void*)&c_ReflectionParameter::ifa_getname, 0, 4, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_ispassedbyreference((void*)&c_ReflectionParameter::i_ispassedbyreference, (void*)&c_ReflectionParameter::ifa_ispassedbyreference, 0, 4, 0x0000000000000000LL);
 Variant c_ReflectionParameter::i___tostring(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_ReflectionParameter *self = NULL;

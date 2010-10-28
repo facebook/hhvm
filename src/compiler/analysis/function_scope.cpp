@@ -50,8 +50,7 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
                              FileScopePtr file,
                              bool inPseudoMain /* = false */)
     : BlockScope(name, docComment, stmt, BlockScope::FunctionScope),
-      m_method(method), m_file(file),
-      m_minParam(minParam), m_maxParam(maxParam),
+      m_method(method), m_minParam(minParam), m_maxParam(maxParam),
       m_attribute(attribute), m_refReturn(reference), m_modifiers(modifiers),
       m_virtual(false), m_perfectVirtual(false), m_overriding(false),
       m_redeclaring(-1), m_volatile(false), m_pseudoMain(inPseudoMain),
@@ -283,15 +282,6 @@ bool FunctionScope::isConstructor(ClassScopePtr cls) const {
 
 bool FunctionScope::isMagic() const {
   return m_name.size() >= 2 && m_name[0] == '_' && m_name[1] == '_';
-}
-
-void FunctionScope::setClass(ClassScopePtr cls) {
-  m_class = cls;
-  setOuterScope(cls);
-}
-
-ClassScopePtr FunctionScope::getClass() {
-  return m_class.lock();
 }
 
 static std::string s_empty;
@@ -548,7 +538,7 @@ void FunctionScope::setReturnType(AnalysisResultPtr ar, TypePtr type) {
     }
   }
   if (!type->getName().empty()) {
-    FileScopePtr fs = getFileScope();
+    FileScopePtr fs = getContainingFile();
     if (fs) fs->addClassDependency(ar, type->getName());
   }
   m_returnType = type;

@@ -81,7 +81,7 @@ void ClassStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
   ClassScopePtr classScope(new ClassScope(kindOf, m_originalName, m_parent,
                                           bases, m_docComment,
-                                          stmt, fs));
+                                          stmt));
   m_classScope = classScope;
   if (!fs->addClass(ar, classScope)) {
     m_ignored = true;

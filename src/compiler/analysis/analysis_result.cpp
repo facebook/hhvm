@@ -448,7 +448,7 @@ bool AnalysisResult::addClassDependency(FileScopePtr usingFile,
     m_classDecs.find(className);
   if (iter == m_classDecs.end() || iter->second.size() != 1) return false;
   ClassScopePtr classScope = iter->second[0];
-  FileScopePtr fileScope = classScope->getFileScope();
+  FileScopePtr fileScope = classScope->getContainingFile();
   link(usingFile, fileScope);
   return true;
 }
@@ -462,7 +462,7 @@ bool AnalysisResult::addFunctionDependency(FileScopePtr usingFile,
   if (iter == m_functionDecs.end() ||
       iter->second.size() != 1) return false;
   FunctionScopePtr functionScope = iter->second[0];
-  FileScopePtr fileScope = functionScope->getFileScope();
+  FileScopePtr fileScope = functionScope->getContainingFile();
   link(usingFile, fileScope);
   return true;
 }
@@ -510,13 +510,6 @@ bool AnalysisResult::isConstantRedeclared(const std::string &constName) {
 
 bool AnalysisResult::isSystemConstant(const std::string &constName) {
   return m_constants->isSystem(constName);
-}
-
-void AnalysisResult::addCallee(StatementPtr stmt) {
-  if (m_calleesAdded.find(stmt) == m_calleesAdded.end()) {
-    m_callees.push_back(stmt);
-    m_calleesAdded.insert(stmt);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

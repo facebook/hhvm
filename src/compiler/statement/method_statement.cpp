@@ -219,7 +219,7 @@ void MethodStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
 
   fs->setParamCounts(ar, -1, -1);
   classScope->addFunction(ar, fs);
-  fs->setClass(classScope);
+
   if (m_name == "__construct") {
     classScope->setAttribute(ClassScope::HasConstructor);
   } else if (m_name == "__destruct") {

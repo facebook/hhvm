@@ -413,8 +413,6 @@ private:
   StatementPtrVec m_stmts;
   StatementPtr m_stmt;
 
-  StatementPtrVec m_callees;
-  StatementPtrSet m_calleesAdded;
   std::string m_outputPath;
   int m_optCounter;
 

@@ -343,7 +343,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   BOOST_FOREACH(name, m_usedClasses) {
     cls = ar->findClass(name, AnalysisResult::ClassName);
     if (cls && cls->isUserClass()) {
-      FileScopePtr fs = cls->getFileScope();
+      FileScopePtr fs = cls->getContainingFile();
       if (fs) {
         extraIncs[fs->getName()] = fs;
       }
@@ -428,7 +428,7 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
     BOOST_FOREACH(string name, m_usedClasses) {
       ClassScopePtr cls = ar->findClass(name, AnalysisResult::ClassName);
       if (cls && cls->isUserClass()) {
-        FileScopePtr fs = cls->getFileScope();
+        FileScopePtr fs = cls->getContainingFile();
         if (fs && done.find(fs) == done.end()) {
           done.insert(fs);
           cg_printInclude(fs->outputFilebase());
@@ -439,7 +439,7 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
     BOOST_FOREACH(string name, m_usedFuncsInline) {
       FunctionScopePtr func = ar->findFunction(name);
       if (func) {
-        FileScopePtr fs = func->getFileScope();
+        FileScopePtr fs = func->getContainingFile();
         if (fs && done.find(fs) == done.end()) {
           done.insert(fs);
           cg_printInclude(fs->outputFilebase());

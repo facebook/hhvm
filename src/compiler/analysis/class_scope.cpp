@@ -42,9 +42,8 @@ using namespace boost;
 ClassScope::ClassScope(KindOf kindOf, const std::string &name,
                        const std::string &parent,
                        const vector<string> &bases,
-                       const std::string &docComment, StatementPtr stmt,
-                       FileScopePtr file)
-  : BlockScope(name, docComment, stmt, BlockScope::ClassScope), m_file(file),
+                       const std::string &docComment, StatementPtr stmt)
+  : BlockScope(name, docComment, stmt, BlockScope::ClassScope),
     m_kindOf(kindOf), m_parent(parent), m_bases(bases), m_attribute(0),
     m_redeclaring(-1), m_volatile(false), m_needStaticInitializer(false),
     m_derivesFromRedeclaring(FromNormal), m_derivedByDynamic(false),
@@ -1017,7 +1016,7 @@ void ClassScope::getRootParents(AnalysisResultPtr ar,
 }
 
 string ClassScope::getHeaderFilename(CodeGenerator &cg) {
-  FileScopePtr file = getFileScope();
+  FileScopePtr file = getContainingFile();
   ASSERT(file);
   string fileBase = file->outputFilebase();
   string headerFile = Option::ClassHeaderPrefix;
@@ -1389,7 +1388,7 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
     iterFuncs = funcScopes.find(name);
     ASSERT(iterFuncs != funcScopes.end());
     FunctionScopePtr func = iterFuncs->second[0];
-    string id = func->getClass()->getId(cg);
+    string id = func->getContainingClass()->getId(cg);
     if (fewArgs &&
         func->getMinParamCount() > Option::InvokeFewArgsCount)
       continue;

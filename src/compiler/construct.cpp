@@ -130,9 +130,6 @@ void Construct::addUserFunction(AnalysisResultPtr ar,
                                 bool strong /* = true */) {
   if (!name.empty()) {
     FunctionScopePtr func = ar->findFunction(name);
-    if (func && func->isUserFunction()) {
-      ar->addCallee(func->getStmt());
-    }
     if (strong && ar->getPhase() == AnalysisResult::AnalyzeAll) {
       FunctionScopePtr func = getFunctionScope();
       getFileScope()->addFunctionDependency(ar, name, func &&
@@ -146,9 +143,6 @@ void Construct::addUserClass(AnalysisResultPtr ar,
                              bool strong /* = true */) {
   if (!name.empty()) {
     ClassScopePtr cls = ar->findClass(name);
-    if (cls && cls->isUserClass()) {
-      ar->addCallee(cls->getStmt());
-    }
     if (strong && !ar->isFirstPass()) {
       getFileScope()->addClassDependency(ar, name);
     }

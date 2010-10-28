@@ -137,7 +137,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
   string fname = funcScope->getId(cg).c_str();
   bool pseudoMain = funcScope->inPseudoMain();
   string origFuncName = !pseudoMain ? funcScope->getOriginalName() :
-          ("run_init::" + funcScope->getFileScope()->getName());
+          ("run_init::" + funcScope->getContainingFile()->getName());
   string funcSection;
 
   if (outputFFI(cg, ar)) return;
@@ -209,7 +209,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
 
   if (pseudoMain) {
     cg_printf(" %s%s(", Option::PseudoMainPrefix,
-              funcScope->getFileScope()->pseudoMainName().c_str());
+              funcScope->getContainingFile()->pseudoMainName().c_str());
   } else {
     cg_printf(" %s%s(", Option::FunctionPrefix, fname.c_str());
   }
@@ -234,7 +234,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
       if (pseudoMain) {
         cg_printf("PSEUDOMAIN_INJECTION%s(%s, %s%s);\n",
                   sys, origFuncName.c_str(), Option::PseudoMainPrefix,
-                  funcScope->getFileScope()->pseudoMainName().c_str());
+                  funcScope->getContainingFile()->pseudoMainName().c_str());
       } else {
         if (m_stmt->hasBody()) {
           cg_printf("FUNCTION_INJECTION%s(%s);\n", sys, origFuncName.c_str());

@@ -84,8 +84,7 @@ public:
   ClassScope(KindOf kindOf, const std::string &name,
              const std::string &parent,
              const std::vector<std::string> &bases,
-             const std::string &docComment, StatementPtr stmt,
-             FileScopePtr file);
+             const std::string &docComment, StatementPtr stmt);
 
 
   /**
@@ -254,11 +253,6 @@ public:
 
   std::vector<std::string> &getBases() { return m_bases;}
 
-  FileScopePtr getFileScope() {
-    FileScopePtr fs = m_file.lock();
-    return fs;
-  }
-
   ClassScopePtr getParentScope(AnalysisResultPtr ar);
 
   /**
@@ -386,7 +380,6 @@ private:
   // need to maintain declaration order for ClassInfo map
   FunctionScopePtrVec m_functionsVec;
 
-  FileScopeWeakPtr m_file;
   KindOf m_kindOf;
   std::string m_parent;
   mutable std::vector<std::string> m_bases;

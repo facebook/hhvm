@@ -120,9 +120,6 @@ public:
     m_volatile = false;
   }
 
-  void setClass(ClassScopePtr cls);
-  ClassScopePtr getClass();
-
   /**
    * Get original name of the function, without case being lowered.
    */
@@ -336,20 +333,12 @@ public:
    */
   void outputCPPCallInfo(CodeGenerator &cg, AnalysisResultPtr ar);
 
-  FileScopePtr getFileScope() {
-    FileScopePtr fs = m_file.lock();
-    return fs;
-  }
-
   /**
    * Serialize the iface, not everything.
    */
   void serialize(JSON::OutputStream &out) const;
   bool inPseudoMain() {
     return m_pseudoMain;
-  }
-  void setFileScope(FileScopePtr fs) {
-    m_file = fs;
   }
 
   void setMagicMethod() {
@@ -406,7 +395,6 @@ private:
   static StringToRefParamInfoPtrMap s_refParamInfo;
 
   bool m_method;
-  FileScopeWeakPtr m_file;
   int m_minParam;
   int m_maxParam;
   int m_attribute;
@@ -440,7 +428,6 @@ private:
   int m_inlineIndex;
   bool m_directInvoke;
   FunctionOptPtr m_optFunction;
-  boost::weak_ptr<HPHP::ClassScope> m_class;
   bool outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
       bool ret, bool constructor);
 };

@@ -201,7 +201,7 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
     }
     ClassScopePtr cl(new ClassScope(ar, cname, cparent, ifaces, methods));
     for (uint i = 0; i < methods.size(); ++i) {
-      methods[i]->setClass(cl);
+      methods[i]->setOuterScope(cl);
     }
     p++;
     // Parse properties

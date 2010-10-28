@@ -1080,7 +1080,7 @@ void VariableTable::outputCPPGlobalVariablesDtorIncludes(CodeGenerator &cg,
         ClassScopePtr cls = ar->findClass(varType->getName());
         ASSERT(cls && !cls->isRedeclaring());
         if (cls->isUserClass()) {
-          const string fileBase = cls->getFileScope()->outputFilebase();
+          const string fileBase = cls->getContainingFile()->outputFilebase();
           if (dtorIncludes.find(fileBase) == dtorIncludes.end()) {
             cg_printInclude(fileBase + ".h");
             dtorIncludes.insert(fileBase);

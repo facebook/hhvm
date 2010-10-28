@@ -75,7 +75,7 @@ void InterfaceStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
   ClassScopePtr classScope
     (new ClassScope(ClassScope::KindOfInterface, m_name, "", bases,
-                    m_docComment, stmt, fs));
+                    m_docComment, stmt));
   m_classScope = classScope;
   fs->addClass(ar, classScope);
 

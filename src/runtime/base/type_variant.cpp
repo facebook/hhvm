@@ -1495,7 +1495,7 @@ int64 Variant::toInt64Helper(int base /* = 10 */) const {
   return m_data.num;
 }
 
-double Variant::toDouble() const {
+double Variant::toDoubleHelper() const {
   switch (m_type) {
   case KindOfNull:    return 0.0;
   case KindOfDouble:  return m_data.dbl;
@@ -1527,7 +1527,7 @@ String Variant::toStringHelper() const {
   return m_data.num;
 }
 
-Array Variant::toArray() const {
+Array Variant::toArrayHelper() const {
   switch (m_type) {
   case KindOfNull:    return Array::Create();
   case KindOfInt64:   return Array::Create(m_data.num);
@@ -1542,8 +1542,7 @@ Array Variant::toArray() const {
   return Array::Create(*this);
 }
 
-Object Variant::toObject() const {
-  if (m_type == KindOfObject) return m_data.pobj;
+Object Variant::toObjectHelper() const {
   if (m_type == KindOfVariant) return m_data.pvar->toObject();
 
   switch (m_type) {
@@ -1563,6 +1562,7 @@ Object Variant::toObject() const {
       return obj;
     }
   case KindOfArray:   return m_data.parr->toObject();
+  case KindOfObject:  return m_data.pobj;
   default:
     ASSERT(false);
     break;

@@ -448,15 +448,24 @@ class Variant {
     if (m_type <= KindOfInt64) return m_data.num;
     return toInt64Helper(base);
   }
-  double toDouble () const;
+  double toDouble () const {
+    if (m_type == KindOfDouble) return m_data.dbl;
+    return toDoubleHelper();
+  }
   String toString () const {
     if (m_type == KindOfStaticString || m_type == KindOfString) {
       return m_data.pstr;
     }
     return toStringHelper();
   }
-  Array  toArray  () const;
-  Object toObject () const;
+  Array  toArray  () const {
+    if (m_type == KindOfArray) return m_data.parr;
+    return toArrayHelper();
+  }
+  Object toObject () const {
+    if (m_type == KindOfObject) return m_data.pobj;
+    return toObjectHelper();
+  }
   Variant toKey   () const;
   static int64 ToKey(bool i) { return (int64)i; }
   static int64 ToKey(char i) { return (int64)i; }
@@ -1134,10 +1143,6 @@ class Variant {
     strongBind(v.m_data.pvar);
   }
 
-  bool   toBooleanHelper() const;
-  int64  toInt64Helper(int base = 10) const;
-  String toStringHelper() const;
-
   void split();  // breaking weak binding by making a real copy
 
   template<typename T>
@@ -1197,6 +1202,13 @@ class Variant {
   Variant argvalAtImpl(bool byRef, CStrRef key, bool isString = false);
 
  private:
+  bool   toBooleanHelper() const;
+  int64  toInt64Helper(int base = 10) const;
+  double toDoubleHelper() const;
+  String toStringHelper() const;
+  Array  toArrayHelper() const;
+  Object toObjectHelper() const;
+
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(Variant,m_data) == offsetof(TypedValue,m_data));
     CT_ASSERT(offsetof(Variant,_count) == offsetof(TypedValue,_count));

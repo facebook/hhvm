@@ -45,10 +45,38 @@ PlainFile::~PlainFile() {
 }
 
 bool PlainFile::open(CStrRef filename, CStrRef mode) {
+  int fd;
+  FILE *f;
   ASSERT(m_stream == NULL);
   ASSERT(m_fd == -1);
 
-  FILE *f = fopen(filename.data(), mode.data());
+  // For these definded in php fopen but C stream have different modes
+  switch (mode[0]) {
+    case 'x':
+      if (mode.find('+') == -1) {
+        fd = ::open(filename.data(), O_WRONLY|O_CREAT|O_EXCL, 0666);
+        if (fd < 0) return false;
+        f = fdopen(fd, "w");
+      } else {
+        fd = ::open(filename.data(), O_RDWR|O_CREAT|O_EXCL, 0666);
+        if (fd < 0) return false;
+        f = fdopen(fd, "w+");
+      }
+      break;
+    case 'c':
+      if (mode.find('+') == -1) {
+        fd = ::open(filename.data(), O_WRONLY|O_CREAT, 0666);
+        if (fd < 0) return false;
+        f = fdopen(fd, "w");
+      } else {
+        fd = ::open(filename.data(), O_RDWR|O_CREAT, 0666);
+        if (fd < 0) return false;
+        f = fdopen(fd, "w+");
+      }
+      break;
+    default:
+      f = fopen(filename.data(), mode.data());
+  }
   if (!f) {
     return false;
   }

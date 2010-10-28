@@ -359,8 +359,8 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   }
 
   transport->onSendEnd();
-  ServerStats::LogPage(file, code);
   hphp_context_exit(context, true, true, transport->getUrl());
+  ServerStats::LogPage(file, code);
   return ret;
 }
 

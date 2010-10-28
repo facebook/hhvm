@@ -180,7 +180,7 @@ include_directories(${ONIGURUMA_INCLUDE_DIRS})
 find_package(Ldap REQUIRED)
 include_directories(${LDAP_INCLUDE_DIR})
 
-# ncuses, readline and history
+# ncurses, readline and history
 #set(CURSES_NEED_NCURSES true)
 find_package(Ncurses REQUIRED)
 include_directories(${NCURSES_INCLUDE_PATH})
@@ -188,6 +188,8 @@ include_directories(${NCURSES_INCLUDE_PATH})
 find_package(Readline REQUIRED)
 include_directories(${READLINE_INCLUDE_DIR})
 
+find_package(CClient REQUIRED)
+include_directories(${CCLIENT_INCLUDE_PATH})
 
 if (LINUX OR FREEBSD)
 	FIND_LIBRARY (CRYPT_LIB crypt)
@@ -301,5 +303,5 @@ endif()
 
 	target_link_libraries(${target} ${READLINE_LIBRARY})
 	target_link_libraries(${target} ${NCURSES_LIBRARY})
-
+	target_link_libraries(${target} ${CCLIENT_LIBRARY})
 endmacro()

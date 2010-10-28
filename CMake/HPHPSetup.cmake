@@ -24,9 +24,9 @@ set(FREEBSD FALSE)
 set(LINUX FALSE)
 
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
-	set(FREEBSD TRUE)	
+	set(FREEBSD TRUE)
 endif()
-	
+
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
 	set(LINUX TRUE)
 endif()
@@ -57,7 +57,7 @@ endif()
 add_definitions(-DHPHP_OSS=1)
 
 set(CMAKE_C_FLAGS "-w -fPIC")
-set(CMAKE_CXX_FLAGS "-fPIC -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof")
+set(CMAKE_CXX_FLAGS "-fPIC -fno-omit-frame-pointer -ftemplate-depth-60 -Wall -Woverloaded-virtual -Wno-deprecated -Wno-parentheses -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names")
 
 include_directories(${HPHP_HOME}/src)
 include_directories(${HPHP_HOME}/src/lib/system/gen)

@@ -848,10 +848,10 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
     multipart_event_formdata *data = (multipart_event_formdata *)event_data;
     if (data->name &&
         !strncasecmp(data->name, RuntimeOption::Rfc1867Name.c_str(),
-                     RuntimeOption::Rfc1867Name.size() &&
+                     RuntimeOption::Rfc1867Name.size()) &&
         data->value && data->length &&
         data->length < RFC1867_TRACKING_KEY_MAXLEN -
-                       RuntimeOption::Rfc1867Prefix.size())) {
+                       RuntimeOption::Rfc1867Prefix.size()) {
       int len = RuntimeOption::Rfc1867Prefix.size();
       if (len > RFC1867_TRACKING_KEY_MAXLEN) {
         len = RFC1867_TRACKING_KEY_MAXLEN;

@@ -952,6 +952,9 @@ public:
 
   ~TraceProfiler() {
     if (m_successful) {
+      free(s_trace);
+      s_trace = NULL;
+      s_n_backing = 0;
       pthread_mutex_unlock(&s_in_use);
     }
   }

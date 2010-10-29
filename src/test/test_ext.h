@@ -48,6 +48,7 @@
 #include <test/test_ext_math.h>
 #include <test/test_ext_mb.h>
 #include <test/test_ext_mcrypt.h>
+#include <test/test_ext_memcached.h>
 #include <test/test_ext_memcache.h>
 #include <test/test_ext_misc.h>
 #include <test/test_ext_mysql.h>

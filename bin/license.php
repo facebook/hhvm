@@ -13,6 +13,10 @@ $excluded = array(
   'util/cronoutils.cpp',
   'runtime/ext/quicklz.h',
   'runtime/ext/quicklz.inc',
+  'runtime/ext/ext_memcached.h',
+  'runtime/ext/ext_memcached.cpp',
+  'test/test_ext_memcached.h',
+  'test/test_ext_memcached.cpp',
 
   // non-PHP licenses
   'runtime/base/zend/utf8_decode.c',

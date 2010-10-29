@@ -519,6 +519,10 @@ int64 StringData::getSharedStringHash() const {
   return m_shared->stringHash();
 }
 
+int64 StringData::hashHelper() const {
+  return hash_string(data(), size());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool StringData::calculate(int &totalSize) {

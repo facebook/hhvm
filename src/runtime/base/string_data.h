@@ -167,10 +167,12 @@ class StringData {
   int64 hash() const {
     if (isStatic()) return getPrecomputedHash();
     if (isShared()) return getSharedStringHash();
-    if ((m_hash & 0x7fffffffffffffffull) == 0) {
-      m_hash |= hash_string(data(), size());
+    int64 h = m_hash & 0x7fffffffffffffffull;
+    if (h == 0) {
+      h = hashHelper();
+      m_hash |= h;
     }
-    return m_hash & 0x7fffffffffffffffull;
+    return h;
   }
 
   bool same(const StringData *s) const {
@@ -236,6 +238,7 @@ class StringData {
   void removeChar(int offset);
 
   int64 getSharedStringHash() const;
+  int64 hashHelper() const __attribute__((noinline));
 
 #ifdef FAST_REFCOUNT_FOR_VARIANT
  private:

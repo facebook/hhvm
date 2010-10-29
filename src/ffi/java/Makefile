@@ -25,6 +25,11 @@ JAVA_PATH = /usr/local/jdk-6u7-64
 
 CPPFLAGS += -I $(JAVA_PATH)/include -I $(JAVA_PATH)/include/linux \
 
+$(SHARED_LIB) : setup
+
+setup :
+	$(V)cd $(PROJECT_ROOT)/src && make shared-lib-gd
+
 $(CLS) : $(SRC)
 	$(V)mkdir -p classes
 	$(V)$(JAVA_PATH)/bin/javac -sourcepath . -d classes $^

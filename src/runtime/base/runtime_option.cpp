@@ -912,10 +912,15 @@ void RuntimeOption::Load(Hdf &config) {
     Hdf eval = config["Eval"];
     EnableShortTags= eval["EnableShortTags"].getBool(true);
     if (EnableShortTags) ScannerType |= Scanner::AllowShortTags;
+    else ScannerType &= ~Scanner::AllowShortTags;
+
     EnableAspTags = eval["EnableAspTags"].getBool();
     if (EnableAspTags) ScannerType |= Scanner::AllowAspTags;
+    else ScannerType &= ~Scanner::AllowAspTags;
+
     EnableXHP = eval["EnableXHP"].getBool(true);
     if (EnableXHP) ScannerType |= Scanner::PreprocessXHP;
+    else ScannerType &= ~Scanner::PreprocessXHP;
 
     EnableStrict = eval["EnableStrict"].getBool();
     StrictLevel = eval["StrictLevel"].getInt32(1); // StrictBasic

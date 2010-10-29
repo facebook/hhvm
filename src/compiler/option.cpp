@@ -358,10 +358,15 @@ void Option::Load(Hdf &config) {
 
   EnableShortTags = config["EnableShortTags"].getBool(true);
   if (EnableShortTags) ScannerType |= Scanner::AllowShortTags;
+  else ScannerType &= ~Scanner::AllowShortTags;
+
   EnableAspTags = config["EnableAspTags"].getBool();
   if (EnableAspTags) ScannerType |= Scanner::AllowAspTags;
+  else ScannerType &= ~Scanner::AllowAspTags;
+
   EnableXHP = config["EnableXHP"].getBool();
   if (EnableXHP) ScannerType |= Scanner::PreprocessXHP;
+  else ScannerType &= ~Scanner::PreprocessXHP;
 
   RTTIOutputFile = config["RTTIOutputFile"].getString();
   EnableEval = (EvalLevel)config["EnableEval"].getByte(0);

@@ -38,10 +38,10 @@ public:
     m_file(NULL),
     m_bytesWritten(0),
     m_prevBytesWritten(0) {}
-
   ~Cronolog() {
     if (m_file) fclose(m_file);
   }
+  void setPeriodicity();
   FILE *getOutputFile();
 public:
   PERIODICITY m_periodicity;

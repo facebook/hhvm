@@ -659,6 +659,7 @@ static int execute_program_impl(int argc, char **argv) {
     if (Logger::UseCronolog) {
       if (strchr(RuntimeOption::LogFile.c_str(), '%')) {
         Logger::cronOutput.m_template = RuntimeOption::LogFile;
+        Logger::cronOutput.setPeriodicity();
         Logger::cronOutput.m_linkName = RuntimeOption::LogFileSymLink;
       } else {
         Logger::Output = fopen(RuntimeOption::LogFile.c_str(), "w");

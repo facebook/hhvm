@@ -80,6 +80,12 @@ static FILE *new_log_file(const char *fileTemplate, const char *linkname,
   return fdopen(log_fd, "a");
 }
 
+void Cronolog::setPeriodicity() {
+  if (m_periodicity == UNKNOWN) {
+    m_periodicity = determine_periodicity((char *)m_template.c_str());
+  }
+}
+
 FILE *Cronolog::getOutputFile() {
   if (m_template.empty()) return m_file;
 

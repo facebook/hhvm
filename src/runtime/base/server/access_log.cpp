@@ -76,6 +76,7 @@ void AccessLog::openFiles() {
       Cronolog cl;
       if (strchr(file.c_str(), '%')) {
         cl.m_template = file;
+        cl.setPeriodicity();
         cl.m_linkName = symLink;
       } else {
         cl.m_file = fopen(file.c_str(), "a");

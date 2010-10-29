@@ -69,6 +69,7 @@ bool f_hphp_log(CStrRef filename, CStrRef message) {
         Cronolog cl;
         if (strchr(filename.c_str(), '%')) {
           cl.m_template = filename;
+          cl.setPeriodicity();
         } else {
           cl.m_file = fopen(filename.data(), "a");
         }

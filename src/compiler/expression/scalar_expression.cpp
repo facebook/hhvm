@@ -158,10 +158,6 @@ bool ScalarExpression::canonCompare(ExpressionPtr e) const {
     m_quoted == s->m_quoted;
 }
 
-ExpressionPtr ScalarExpression::preOptimize(AnalysisResultPtr ar) {
-  return ExpressionPtr();
-}
-
 ExpressionPtr ScalarExpression::postOptimize(AnalysisResultPtr ar) {
   switch (m_type) {
   case T_LINE:

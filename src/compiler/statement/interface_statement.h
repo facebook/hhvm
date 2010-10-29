@@ -35,6 +35,7 @@ public:
                      const std::string &docComment, StatementListPtr stmt);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
+  StatementPtr preOptimize(AnalysisResultPtr ar);
   virtual bool hasDecl() const { return true; }
   virtual bool hasImpl() const;
   virtual int getRecursiveCount() const;

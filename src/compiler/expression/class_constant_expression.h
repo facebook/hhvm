@@ -32,6 +32,7 @@ public:
                           const std::string &varName);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  ExpressionPtr preOptimize(AnalysisResultPtr ar);
   virtual int getLocalEffects() const { return NoEffect; }
 
   virtual unsigned getCanonHash() const;

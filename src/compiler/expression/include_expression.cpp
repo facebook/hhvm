@@ -55,7 +55,9 @@ ExpressionPtr IncludeExpression::clone() {
 
 void IncludeExpression::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   // See if we can get a string literal
-  preOptimize(ar);
+  if (ExpressionPtr exp = ar->preOptimizeRecur(m_exp)) {
+    m_exp = exp;
+  }
   m_include = ar->getDependencyGraph()->add
     (DependencyGraph::KindOfPHPInclude, shared_from_this(), m_exp,
      m_documentRoot);
@@ -100,9 +102,6 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr IncludeExpression::preOptimize(AnalysisResultPtr ar) {
-  if (ExpressionPtr rep = UnaryOpExpression::preOptimize(ar)) {
-    return rep;
-  }
   if (ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
     if (m_include.empty()) {
       m_include = ar->getDependencyGraph()->add
@@ -130,7 +129,7 @@ ExpressionPtr IncludeExpression::postOptimize(AnalysisResultPtr ar) {
       if (!Option::KeepStatementsWithNoEffect) {
         if (ExpressionPtr rep = fs->getEffectiveImpl(ar)) {
           recomputeEffects();
-          return rep;
+          return replaceValue(rep->clone());
         }
       }
       m_exp.reset();

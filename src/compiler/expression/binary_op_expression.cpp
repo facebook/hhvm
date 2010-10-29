@@ -266,8 +266,6 @@ bool BinaryOpExpression::canonCompare(ExpressionPtr e) const {
 }
 
 ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_exp1);
-  ar->preOptimize(m_exp2);
   if (!m_exp2->isScalar()) {
     if (!m_exp1->isScalar()) return ExpressionPtr();
   }

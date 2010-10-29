@@ -59,7 +59,7 @@ public:
   Variant &getVariant();
   int64 getHash() const;
 
-  void setComment(const std::string comment) { m_comment = comment;}
+  void setComment(const std::string &comment) { m_comment = comment;}
   const std::string getComment() { return m_comment;}
 
   void outputCPPString(CodeGenerator &cg, AnalysisResultPtr ar);

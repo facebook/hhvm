@@ -349,8 +349,6 @@ void MethodStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 StatementPtr MethodStatement::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_modifiers);
-  ar->preOptimize(m_params);
   FunctionScopePtr funcScope = m_funcScope.lock();
   if (ar->getPhase() != AnalysisResult::AnalyzeInclude &&
       Option::LocalCopyProp) {
@@ -360,12 +358,7 @@ StatementPtr MethodStatement::preOptimize(AnalysisResultPtr ar) {
       MethodStatementPtr self =
         static_pointer_cast<MethodStatement>(shared_from_this());
       flag = am.optimize(ar, self);
-      if (flag >= 0) {
-        ar->preOptimize(m_stmt);
-      }
     } while (flag);
-  } else {
-    ar->preOptimize(m_stmt);
   }
   return StatementPtr();
 }

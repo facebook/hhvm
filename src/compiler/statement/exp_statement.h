@@ -29,6 +29,7 @@ public:
   ExpStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
+  StatementPtr preOptimize(AnalysisResultPtr ar);
   virtual int getLocalEffects() const { return NoEffect;}
 
   ExpressionPtr getExpression() { return m_exp;}

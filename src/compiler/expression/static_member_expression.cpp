@@ -71,6 +71,13 @@ void StaticMemberExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_class) {
     m_class->analyzeProgram(ar);
   } else {
+    if (ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_className)) {
+      if (cls->isRedeclaring()) {
+        m_redeclared = true;
+        cls = ar->findExactClass(shared_from_this(), m_className);
+      }
+      if (cls) cls->addUse(getScope(), BlockScope::UseKindStaticRef);
+    }
     addUserClass(ar, m_className);
   }
   m_exp->analyzeProgram(ar);
@@ -108,11 +115,7 @@ void StaticMemberExpression::setNthKid(int n, ConstructPtr cp) {
 }
 
 ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultPtr ar) {
-  if (m_class) {
-    ar->preOptimize(m_class);
-    updateClassName();
-  }
-  ar->preOptimize(m_exp);
+  if (m_class) updateClassName();
   return ExpressionPtr();
 }
 

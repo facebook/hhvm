@@ -149,9 +149,6 @@ void ClassVariable::setNthKid(int n, ConstructPtr cp) {
 }
 
 StatementPtr ClassVariable::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_modifiers);
-  ar->preOptimize(m_declaration);
-
   ClassScopePtr scope = getClassScope();
   for (int i = 0; i < m_declaration->getCount(); i++) {
     ExpressionPtr exp = (*m_declaration)[i];

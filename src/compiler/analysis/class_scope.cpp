@@ -263,20 +263,22 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
           m_derivesFromRedeclaring = DirectFromRedeclared;
           getVariables()->forceVariants(ar, VariableTable::AnyNonPrivateVars);
           getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
-          setVolatile();
         } else if (isInterface()) {
           m_derivesFromRedeclaring = DirectFromRedeclared;
         }
+        setVolatile();
       } else {
         super->collectMethods(ar, funcs, false, forInvoke);
         if (super->derivesFromRedeclaring()) {
           if (base == m_parent) {
             m_derivesFromRedeclaring = IndirectFromRedeclared;
             getVariables()->forceVariants(ar, VariableTable::AnyNonPrivateVars);
-            setVolatile();
           } else if (isInterface()) {
             m_derivesFromRedeclaring = IndirectFromRedeclared;
           }
+          setVolatile();
+        } else if (super->isVolatile()) {
+          setVolatile();
         }
       }
     } else {
@@ -361,6 +363,21 @@ std::string ClassScope::findCommonParent(AnalysisResultPtr ar,
   }
 
   return "";
+}
+
+void ClassScope::setVolatile() {
+  if (!m_volatile) {
+    m_volatile = true;
+    for (BlockScopeRawPtrFlagsHashMap::iterator it = m_users.begin(),
+           end = m_users.end(); it != end; ++it) {
+      if (it->second & UseKindParentRef) {
+        BlockScopeRawPtr scope = it->first;
+        if (scope->is(BlockScope::ClassScope)) {
+          ((HPHP::ClassScope*)scope.get())->setVolatile();
+        }
+      }
+    }
+  }
 }
 
 FunctionScopePtr ClassScope::findFunction(AnalysisResultPtr ar,

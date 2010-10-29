@@ -109,18 +109,6 @@ void ForStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ForStatement::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_exp1);
-  ar->preOptimize(m_exp2);
-  ar->preOptimize(m_exp3);
-  if (m_stmt) {
-    getScope()->incLoopNestedLevel();
-    ar->preOptimize(m_stmt);
-    getScope()->decLoopNestedLevel();
-  }
-  return StatementPtr();
-}
-
 StatementPtr ForStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_exp1);
   ar->postOptimize(m_exp2);

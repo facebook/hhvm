@@ -101,11 +101,6 @@ void ParameterExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ParameterExpression::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_defaultValue);
-  return ExpressionPtr();
-}
-
 ExpressionPtr ParameterExpression::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_defaultValue);
   return ExpressionPtr();

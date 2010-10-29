@@ -67,6 +67,16 @@ void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_class) {
     m_class->analyzeProgram(ar);
   } else {
+    if (ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_className)) {
+      if (cls->isRedeclaring()) {
+        cls = ar->findExactClass(shared_from_this(), m_className);
+      }
+      if (cls) {
+        ConstructPtr decl = cls->getConstants()->
+          getValueRecur(ar, m_varName, cls);
+        cls->addUse(getScope(), BlockScope::UseKindConstRef);
+      }
+    }
     addUserClass(ar, m_className);
   }
 }
@@ -102,17 +112,16 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
     return ExpressionPtr();
   }
   if (m_class) {
-    ar->preOptimize(m_class);
     updateClassName();
     return ExpressionPtr();
   }
+
   string currentClsName;
   ClassScopePtr currentCls = getClassScope();
   if (currentCls) currentClsName = currentCls->getName();
   bool inCurrentClass = currentClsName == m_className;
   ClassScopePtr cls =
-    inCurrentClass ? currentCls : ar->resolveClass(shared_from_this(),
-                                                   m_className);
+    inCurrentClass ? currentCls : ar->findClass(m_className);
   if (!cls) return ExpressionPtr();
   if (!inCurrentClass) {
     if (m_redeclared) return ExpressionPtr();
@@ -124,34 +133,17 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
   if (decl) {
     cls = defClass;
     ExpressionPtr value = dynamic_pointer_cast<Expression>(decl);
-    if (!m_visited) {
-      m_visited = true;
-      ExpressionPtr optExp = value->preOptimize(ar);
-      m_visited = false;
-      if (optExp) value = optExp;
-    }
     if (value->isScalar()) {
-      // inline the value
-      if (value->is(Expression::KindOfScalarExpression)) {
-        ScalarExpressionPtr exp =
-          dynamic_pointer_cast<ScalarExpression>(Clone(value, getScope()));
-        bool annotate = Option::FlAnnotate;
-        Option::FlAnnotate = false; // avoid nested comments on getText()
-        exp->setComment(getText());
-        Option::FlAnnotate = annotate;
-        exp->setLocation(getLocation());
-        return exp;
-      } else if (value->is(Expression::KindOfConstantExpression)) {
-        // inline the value
-        ConstantExpressionPtr exp =
-          dynamic_pointer_cast<ConstantExpression>(Clone(value, getScope()));
-        bool annotate = Option::FlAnnotate;
-        Option::FlAnnotate = false; // avoid nested comments
-        exp->setComment(getText());
-        Option::FlAnnotate = annotate;
-        exp->setLocation(getLocation());
-        return exp;
+      ExpressionPtr rep = Clone(value, getScope());
+      bool annotate = Option::FlAnnotate;
+      Option::FlAnnotate = false; // avoid nested comments on getText
+      rep->setComment(getText());
+      Option::FlAnnotate = annotate;
+      rep->setLocation(getLocation());
+      if (!value->is(KindOfScalarExpression)) {
+        value->getScope()->addUse(getScope(), BlockScope::UseKindConstRef);
       }
+      return replaceValue(rep);
     }
   }
   return ExpressionPtr();

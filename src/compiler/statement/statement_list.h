@@ -29,6 +29,7 @@ public:
   StatementList(STATEMENT_CONSTRUCTOR_PARAMETERS);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
+  StatementPtr preOptimize(AnalysisResultPtr ar);
   virtual bool hasDecl() const;
   virtual bool hasImpl() const;
   ExpressionPtr getEffectiveImpl(AnalysisResultPtr ar) const;

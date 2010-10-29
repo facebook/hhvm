@@ -136,8 +136,10 @@ public:
   void setStaticDynamic(AnalysisResultPtr ar);
   void setDynamic(AnalysisResultPtr ar, const std::string &name);
 
+  void addReferer(BlockScopePtr ref, int useKinds);
+
   /* For class_exists */
-  void setVolatile() { m_volatile = true;}
+  void setVolatile();
   bool isVolatile() { return m_volatile;}
 
   /* For code generation of os_static_initializer */

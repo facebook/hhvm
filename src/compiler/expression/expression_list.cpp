@@ -343,9 +343,6 @@ void ExpressionList::optimize(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr ExpressionList::preOptimize(AnalysisResultPtr ar) {
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
-    ar->preOptimize(m_exps[i]);
-  }
   optimize(ar);
   return ExpressionPtr();
 }

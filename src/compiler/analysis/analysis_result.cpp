@@ -19,12 +19,15 @@
 #include <boost/format.hpp>
 #include <boost/bind.hpp>
 #include <compiler/analysis/analysis_result.h>
+#include <compiler/analysis/alias_manager.h>
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/statement/statement_list.h>
 #include <compiler/statement/if_branch_statement.h>
+#include <compiler/statement/method_statement.h>
+#include <compiler/statement/loop_statement.h>
 #include <compiler/analysis/symbol_table.h>
 #include <util/logger.h>
 #include <compiler/package.h>
@@ -766,30 +769,162 @@ void AnalysisResult::visitFiles(void (*cb)(AnalysisResultPtr,
   }
 }
 
+void AnalysisResult::getFuncScopesSet(BlockScopeRawPtrQueue &v,
+                                      FunctionContainerPtr fc) {
+  const StringToFunctionScopePtrVecMap &funcMap = fc->getFunctions();
+  for (StringToFunctionScopePtrVecMap::const_iterator
+         iter = funcMap.begin(), end = funcMap.end();
+       iter != end; ++iter) {
+    for (FunctionScopePtrVec::const_iterator it = iter->second.begin(),
+           e = iter->second.end(); it != e; ++it) {
+      FunctionScopePtr f = *it;
+      if (f->isUserFunction()) {
+        v.push_back(f);
+      }
+    }
+  }
+}
+
+void AnalysisResult::getScopesSet(BlockScopeRawPtrQueue &v) {
+  for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
+       iter != m_files.end(); ++iter) {
+    FileScopePtr file = iter->second;
+    getFuncScopesSet(v, file);
+  }
+
+  for (StringToClassScopePtrVecMap::iterator iter = m_classDecs.begin(),
+         end = m_classDecs.end(); iter != end; ++iter) {
+    for (ClassScopePtrVec::iterator it = iter->second.begin(),
+           e = iter->second.end(); it != e; ++it) {
+      ClassScopePtr cls = *it;
+      if (cls->isUserClass()) {
+        v.push_back(cls);
+        getFuncScopesSet(v, cls);
+      }
+    }
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // optimization functions
 
+ExpressionPtr AnalysisResult::preOptimizeRecur(ExpressionPtr e) {
+  for (int i = 0, n = e->getKidCount(); i < n; i++) {
+    if (ExpressionPtr kid = e->getNthExpr(i)) {
+      ExpressionPtr rep = preOptimizeRecur(kid);
+      if (rep) {
+        m_optCounter++;
+        e->setNthKid(i, rep);
+      }
+    }
+  }
+  return e->preOptimize(shared_from_this());
+}
+
+StatementPtr AnalysisResult::preOptimizeRecur(StatementPtr stmt) {
+  BlockScopePtr scope = dynamic_pointer_cast<LoopStatement>(stmt) ?
+    stmt->getScope() : BlockScopePtr();
+
+  for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
+    if (ConstructPtr kid = stmt->getNthKid(i)) {
+      if (StatementPtr s = dynamic_pointer_cast<Statement>(kid)) {
+        switch (s->getKindOf()) {
+          case Statement::KindOfFunctionStatement:
+          case Statement::KindOfMethodStatement:
+          case Statement::KindOfClassStatement:
+          case Statement::KindOfInterfaceStatement:
+            continue;
+          default:
+            break;
+        }
+        if (scope) scope->incLoopNestedLevel();
+        if (StatementPtr rep = preOptimizeRecur(s)) {
+          stmt->setNthKid(i, rep);
+          m_optCounter++;
+        }
+        if (scope) scope->decLoopNestedLevel();
+      } else {
+        ExpressionPtr e = dynamic_pointer_cast<Expression>(kid);
+        if (ExpressionPtr rep = preOptimizeRecur(e)) {
+          stmt->setNthKid(i, rep);
+          m_optCounter++;
+        }
+      }
+    }
+  }
+
+  return stmt->preOptimize(shared_from_this());
+}
+
+int AnalysisResult::preOptimizeTop(StatementPtr stmt) {
+  int loops = 0;
+  int lastOptCounter;
+
+  AnalysisResultPtr ar = shared_from_this();
+  do {
+    lastOptCounter = m_optCounter;
+
+    if (getPhase() != AnalysisResult::AnalyzeInclude &&
+        (Option::LocalCopyProp|
+         Option::EliminateDeadCode)) {
+      if (MethodStatementPtr m = dynamic_pointer_cast<MethodStatement>(stmt)) {
+        int flag;
+        do {
+          AliasManager am;
+          flag = am.optimize(ar, m);
+          loops++;
+        } while (flag);
+      } else {
+        loops++;
+      }
+    } else {
+      loops++;
+    }
+
+    StatementPtr rep = preOptimizeRecur(stmt);
+    assert(!rep);
+  } while (lastOptCounter != m_optCounter);
+
+  return loops > 1 ? UseKindAny : 0;
+}
+
+void AnalysisResult::preOptimizeDeps(BlockScopePtr scope,
+                                     BlockScopeRawPtrQueue &queue) {
+  scope->setMark(1);
+  const BlockScopeRawPtrHashSet &deps = scope->getDeps();
+  for (BlockScopeRawPtrHashSet::const_iterator it = deps.begin(),
+         end = deps.end(); it != end; ++it) {
+    BlockScopeRawPtr dep = *it;
+    if (!dep->getMark()) {
+      preOptimizeDeps(dep, queue);
+    }
+  }
+  if (int useKinds = preOptimizeTop(scope->getStmt())) {
+    scope->changed(queue, useKinds);
+  }
+  scope->setMark(2);
+}
+
 void AnalysisResult::preOptimize(int maxPass /* = 100 */) {
   AnalysisResultPtr ar = shared_from_this();
-  int lastOptCounter;
-  int i;
   setPhase(FirstPreOptimize);
+  BlockScopeRawPtrQueue scopes;
+  getScopesSet(scopes);
+
+  BlockScopeRawPtrQueue::iterator end = scopes.end();
+  for (BlockScopeRawPtrQueue::iterator it = scopes.begin(); it != end; ++it) {
+    (*it)->setMark(0);
+  }
+
   while (true) {
-    for (i = 0; i < maxPass; i++) {
-      lastOptCounter = m_optCounter;
-      for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
-           iter != m_files.end(); ++iter) {
-        FileScopePtr file = iter->second;
-        file->preOptimize(ar);
-      }
-      if (lastOptCounter == m_optCounter) break;
+    BlockScopeRawPtrQueue::iterator it = scopes.begin();
+    if (it == end) break;
+    if (!(*it)->getMark()) {
+      preOptimizeDeps(*it, scopes);
     }
-    ASSERT(i <= 100);
-    if (m_phase == FirstPreOptimize) {
-      setPhase(SecondPreOptimize);
-    } else {
-      break;
-    }
+    assert((*it)->getMark() == 2);
+    (*it)->setMark(3);
+    scopes.erase(it);
   }
 }
 

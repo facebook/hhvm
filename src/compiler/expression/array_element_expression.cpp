@@ -173,12 +173,6 @@ bool ArrayElementExpression::canonCompare(ExpressionPtr e) const {
   return m_offset && Expression::canonCompare(e);
 }
 
-ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_variable);
-  ar->preOptimize(m_offset);
-  return ExpressionPtr();
-}
-
 ExpressionPtr ArrayElementExpression::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_variable);
   ar->postOptimize(m_offset);

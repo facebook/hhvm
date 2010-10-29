@@ -89,11 +89,6 @@ void CatchStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr CatchStatement::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_stmt);
-  return StatementPtr();
-}
-
 StatementPtr CatchStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_stmt);
   return StatementPtr();

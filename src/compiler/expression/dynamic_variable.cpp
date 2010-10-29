@@ -75,11 +75,6 @@ void DynamicVariable::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr DynamicVariable::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_exp);
-  return ExpressionPtr();
-}
-
 ExpressionPtr DynamicVariable::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_exp);
   return ExpressionPtr();

@@ -95,12 +95,6 @@ void TryStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr TryStatement::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_tryStmt);
-  ar->preOptimize(m_catches);
-  return StatementPtr();
-}
-
 StatementPtr TryStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_tryStmt);
   ar->postOptimize(m_catches);

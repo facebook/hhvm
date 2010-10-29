@@ -69,10 +69,6 @@ void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-ExpressionPtr NewObjectExpression::preOptimize(AnalysisResultPtr ar) {
-  return FunctionCall::preOptimize(ar);
-}
-
 ExpressionPtr NewObjectExpression::postOptimize(AnalysisResultPtr ar) {
   return FunctionCall::postOptimize(ar);
 }

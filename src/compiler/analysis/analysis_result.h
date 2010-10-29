@@ -135,22 +135,20 @@ public:
   void dump();
   void visitFiles(void (*cb)(AnalysisResultPtr, StatementPtr, void*),
                   void *data);
+
+  ExpressionPtr preOptimizeRecur(ExpressionPtr stmt);
+  StatementPtr preOptimizeRecur(StatementPtr stmt);
+  int preOptimizeTop(StatementPtr stmt);
+  void preOptimizeDeps(BlockScopePtr scope,
+                       BlockScopeRawPtrQueue &queue);
+
   void preOptimize(int maxPass = 100);
   void postOptimize(int maxPass = 100);
   void incOptCounter() { m_optCounter++; }
-  template<typename T>
-  bool preOptimize(boost::shared_ptr<T> &before) {
-    if (before) {
-      boost::shared_ptr<T> after = boost::dynamic_pointer_cast<T>
-        (before->preOptimize(shared_from_this()));
-      if (after) {
-        before = after;
-        m_optCounter++;
-        return true;
-      }
-    }
-    return false;
-  }
+
+  void getFuncScopesSet(BlockScopeRawPtrQueue &v, FunctionContainerPtr fc);
+  void getScopesSet(BlockScopeRawPtrQueue &v);
+
   template<typename T>
   bool postOptimize(boost::shared_ptr<T> &before) {
     if (before) {
@@ -274,7 +272,6 @@ public:
                             const std::string &includeFilename);
   bool addConstantDependency(FileScopePtr usingFile,
                              const std::string &constantName);
-  void addCallee(StatementPtr stmt);
 
   /**
    * Find class by that name, and update class name if it's "self" or

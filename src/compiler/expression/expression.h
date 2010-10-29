@@ -28,7 +28,6 @@
 #define DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS                       \
   virtual void analyzeProgram(AnalysisResultPtr ar);                    \
   virtual ExpressionPtr clone();                                        \
-  virtual ExpressionPtr preOptimize(AnalysisResultPtr ar);              \
   virtual ExpressionPtr postOptimize(AnalysisResultPtr ar);             \
   virtual TypePtr inferTypes(AnalysisResultPtr ar, TypePtr type,        \
                              bool coerce);                              \
@@ -132,7 +131,7 @@ public:
   int getContext() const { return m_context;}
   bool hasContext(Context context) const { return m_context & context; }
   bool hasSubExpr(ExpressionPtr sub) const;
-
+  virtual void setComment(const std::string &) {}
   /**
    * Set this expression's error flags.
    */
@@ -222,7 +221,9 @@ public:
   /**
    * Called before type inference.
    */
-  virtual ExpressionPtr preOptimize(AnalysisResultPtr ar) = 0;
+  virtual ExpressionPtr preOptimize(AnalysisResultPtr ar) {
+    return ExpressionPtr();
+  }
 
   /**
    * Called after type inference.

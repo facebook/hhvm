@@ -96,10 +96,6 @@ void ModifierExpression::analyzeProgram(AnalysisResultPtr ar) {
   // do nothing
 }
 
-ExpressionPtr ModifierExpression::preOptimize(AnalysisResultPtr ar) {
-  return ExpressionPtr();
-}
-
 ExpressionPtr ModifierExpression::postOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }

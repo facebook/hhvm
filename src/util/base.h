@@ -129,6 +129,13 @@ struct pointer_hash {
   }
 };
 
+template<typename T>
+struct smart_pointer_hash {
+  size_t operator() (const T &p) const {
+    return (size_t)p.get();
+  }
+};
+
 struct int64_hash {
   size_t operator() (const int64 v) const {
     return (size_t)v;
@@ -149,6 +156,17 @@ public:
   template <class S>
   hphp_raw_ptr(const hphp_raw_ptr<S> &p) : ptr(p.get()) {}
 
+  friend bool operator==(const hphp_raw_ptr<T> &p1, const hphp_raw_ptr<T> &p2) {
+    return p1.ptr == p2.ptr;
+  }
+
+  friend bool operator!=(const hphp_raw_ptr<T> &p1, const hphp_raw_ptr<T> &p2) {
+    return p1.ptr != p2.ptr;
+  }
+
+  friend bool operator<(const hphp_raw_ptr<T> &p1, const hphp_raw_ptr<T> &p2) {
+    return (size_t)p1.ptr < (size_t)p2.ptr;
+  }
 
   boost::shared_ptr<T> lock() const {
     return ptr ? boost::static_pointer_cast<T>(ptr->shared_from_this()) :

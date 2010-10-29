@@ -33,7 +33,7 @@ using namespace boost;
 BlockScope::BlockScope(const std::string &name, const std::string &docComment,
                        StatementPtr stmt, KindOf kind)
   : m_attributeClassInfo(0), m_docComment(docComment), m_stmt(stmt),
-    m_kind(kind), m_loopNestedLevel(0), m_incLevel(0) {
+    m_kind(kind), m_loopNestedLevel(0), m_incLevel(0), m_mark(0) {
   m_originalName = name;
   m_name = Util::toLower(name);
   m_variables = VariableTablePtr(new VariableTable(*this));
@@ -85,6 +85,27 @@ ClassScopePtr BlockScope::getContainingClass() {
 
 FunctionScopePtr BlockScope::getContainingFunction() {
   return dynamic_pointer_cast<HPHP::FunctionScope>(shared_from_this());
+}
+
+void BlockScope::addUse(BlockScopePtr user, int useKinds) {
+  if (is(ClassScope) ? static_cast<HPHP::ClassScope*>(this)->isUserClass() :
+      is(FunctionScope) &&
+      static_cast<HPHP::FunctionScope*>(this)->isUserFunction()) {
+    m_users[user] |= useKinds;
+    user->m_deps.insert(BlockScopeRawPtr(this));
+  }
+}
+
+void BlockScope::changed(BlockScopeRawPtrQueue &todo, int useKinds) {
+  for (BlockScopeRawPtrFlagsHashMap::iterator it = m_users.begin(),
+         end = m_users.end(); it != end; ++it) {
+    if (it->second & useKinds && it->first->getMark() >= 2) {
+      if (it->first->getMark() == 3) {
+        todo.push_back(it->first);
+      }
+      it->first->setMark(0);
+    }
+  }
 }
 
 ModifierExpressionPtr

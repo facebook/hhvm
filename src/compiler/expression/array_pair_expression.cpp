@@ -97,12 +97,6 @@ void ArrayPairExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ArrayPairExpression::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_name);
-  ar->preOptimize(m_value);
-  return ExpressionPtr();
-}
-
 ExpressionPtr ArrayPairExpression::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_name);
   ar->postOptimize(m_value);

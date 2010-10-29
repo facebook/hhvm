@@ -176,12 +176,6 @@ void ObjectPropertyExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ObjectPropertyExpression::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_object);
-  ar->preOptimize(m_property);
-  return ExpressionPtr();
-}
-
 ExpressionPtr ObjectPropertyExpression::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_object);
   ar->postOptimize(m_property);

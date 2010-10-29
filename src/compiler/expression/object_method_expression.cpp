@@ -92,6 +92,8 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
         m_funcScope = func = cls->findFunction(ar, m_name, true, true);
         if (!func) {
           cls->addMissingMethod(m_name);
+        } else {
+          func->addCaller(getScope());
         }
       }
     }
@@ -133,11 +135,6 @@ void ObjectMethodExpression::setNthKid(int n, ConstructPtr cp) {
       FunctionCall::setNthKid(n-1, cp);
       break;
   }
-}
-
-ExpressionPtr ObjectMethodExpression::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_object);
-  return FunctionCall::preOptimize(ar);
 }
 
 ExpressionPtr ObjectMethodExpression::postOptimize(AnalysisResultPtr ar) {
@@ -229,6 +226,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
       return checkTypesImpl(ar, type, Type::Variant, coerce);
     }
     m_funcScope = func;
+    func->addCaller(getScope());
   }
 
   bool valid = true;

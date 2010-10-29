@@ -119,14 +119,6 @@ void ForEachStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ForEachStatement::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_array);
-  ar->preOptimize(m_name);
-  ar->preOptimize(m_value);
-  ar->preOptimize(m_stmt);
-  return StatementPtr();
-}
-
 StatementPtr ForEachStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_array);
   ar->postOptimize(m_name);

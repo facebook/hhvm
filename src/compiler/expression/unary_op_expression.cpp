@@ -257,7 +257,6 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
   Variant value;
   Variant result;
 
-  ar->preOptimize(m_exp);
   if (m_exp && ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
     if (m_op == '(') {
       return m_exp;

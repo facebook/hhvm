@@ -95,10 +95,6 @@ void FunctionStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   MethodStatement::analyzeProgramImpl(ar);
 }
 
-StatementPtr FunctionStatement::preOptimize(AnalysisResultPtr ar) {
-  return MethodStatement::preOptimize(ar);
-}
-
 StatementPtr FunctionStatement::postOptimize(AnalysisResultPtr ar) {
   return MethodStatement::postOptimize(ar);
 }

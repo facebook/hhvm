@@ -63,10 +63,6 @@ void DynamicFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-ExpressionPtr DynamicFunctionCall::preOptimize(AnalysisResultPtr ar) {
-  return FunctionCall::preOptimize(ar);
-}
-
 ExpressionPtr DynamicFunctionCall::postOptimize(AnalysisResultPtr ar) {
   return FunctionCall::postOptimize(ar);
 }

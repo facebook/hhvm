@@ -84,20 +84,6 @@ void ReturnStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ReturnStatement::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_exp);
-  /* HACK: Get rid of "(" to make analyzing return expression easier
-     Should really get rid of "(" everywhere */
-  while (m_exp && m_exp->is(Expression::KindOfUnaryOpExpression)) {
-    UnaryOpExpressionPtr op(static_pointer_cast<UnaryOpExpression>(m_exp));
-    if (op->getOp() != '(') break;
-    ar->incOptCounter();
-    m_exp = op->getExpression();
-  }
-
-  return StatementPtr();
-}
-
 StatementPtr ReturnStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_exp);
   return StatementPtr();

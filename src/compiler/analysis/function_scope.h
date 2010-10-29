@@ -352,6 +352,8 @@ public:
     m_stmtCloned = stmt;
   }
 
+  void addCaller(BlockScopePtr caller);
+
   DECLARE_BOOST_TYPES(RefParamInfo);
 
   static void RecordRefParamInfo(std::string fname, FunctionScopePtr func);

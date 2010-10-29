@@ -80,12 +80,6 @@ void IfBranchStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr IfBranchStatement::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_condition);
-  ar->preOptimize(m_stmt);
-  return StatementPtr();
-}
-
 StatementPtr IfBranchStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_condition);
   ar->postOptimize(m_stmt);

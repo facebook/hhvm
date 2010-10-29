@@ -30,6 +30,7 @@ public:
                          ExpressionPtr classExp, ExpressionPtr exp);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  ExpressionPtr preOptimize(AnalysisResultPtr ar);
   virtual int getLocalEffects() const { return NoEffect; }
   virtual bool isRefable(bool checkError = false) const { return true;}
 

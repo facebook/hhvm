@@ -89,9 +89,6 @@ void QOpExpression::setNthKid(int n, ConstructPtr cp) {
 }
 
 ExpressionPtr QOpExpression::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_condition);
-  ar->preOptimize(m_expYes);
-  ar->preOptimize(m_expNo);
   Variant value;
   if (m_condition->getScalarValue(value)) {
     if (value.toBoolean()) return m_expYes; else return m_expNo;

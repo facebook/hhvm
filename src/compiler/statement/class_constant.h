@@ -30,6 +30,7 @@ public:
   ClassConstant(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
+  StatementPtr preOptimize(AnalysisResultPtr ar);
 
   // implementing IParseHandler
   virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);

@@ -129,7 +129,6 @@ void Construct::addUserFunction(AnalysisResultPtr ar,
                                 const std::string &name,
                                 bool strong /* = true */) {
   if (!name.empty()) {
-    FunctionScopePtr func = ar->findFunction(name);
     if (strong && ar->getPhase() == AnalysisResult::AnalyzeAll) {
       FunctionScopePtr func = getFunctionScope();
       getFileScope()->addFunctionDependency(ar, name, func &&
@@ -142,7 +141,6 @@ void Construct::addUserClass(AnalysisResultPtr ar,
                              const std::string &name,
                              bool strong /* = true */) {
   if (!name.empty()) {
-    ClassScopePtr cls = ar->findClass(name);
     if (strong && !ar->isFirstPass()) {
       getFileScope()->addClassDependency(ar, name);
     }

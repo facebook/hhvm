@@ -340,7 +340,6 @@ StatementPtr StatementList::preOptimize(AnalysisResultPtr ar) {
     }
 
     if (s) {
-      ar->preOptimize(s);
       if (ar->getPhase() != AnalysisResult::AnalyzeInclude &&
           Option::EliminateDeadCode) {
         if (s->is(KindOfBreakStatement) ||

@@ -34,6 +34,7 @@ public:
                      ExpressionPtr cls);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  ExpressionPtr preOptimize(AnalysisResultPtr ar);
   bool isDefineWithoutImpl(AnalysisResultPtr ar);
   void setValid() { m_valid = true; }
   void setNoPrefix() { m_noPrefix = true; }
@@ -97,6 +98,7 @@ protected:
   bool m_noPrefix;
 
   void outputCPPParamOrderControlled(CodeGenerator &cg, AnalysisResultPtr ar);
+  void setupScopes(AnalysisResultPtr ar);
 
   // only used for redeclared functions
   bool canInvokeFewArgs();

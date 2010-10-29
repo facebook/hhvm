@@ -110,12 +110,6 @@ void ListAssignment::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ListAssignment::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_variables);
-  ar->preOptimize(m_array);
-  return ExpressionPtr();
-}
-
 ExpressionPtr ListAssignment::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_variables);
   ar->postOptimize(m_array);

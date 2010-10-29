@@ -90,11 +90,6 @@ void BlockStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr BlockStatement::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_stmts);
-  return StatementPtr();
-}
-
 StatementPtr BlockStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_stmts);
   return StatementPtr();

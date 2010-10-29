@@ -156,6 +156,7 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
         m_base = ExpressionListPtr();
         classScope->clearBases();
       } else if (cls->isUserClass()) {
+        cls->addUse(classScope, BlockScope::UseKindParentRef);
         dependencies->add(DependencyGraph::KindOfClassDerivation,
                           ar->getName(),
                           m_originalName, shared_from_this(),
@@ -163,10 +164,6 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
       }
     }
   }
-}
-
-StatementPtr ClassStatement::preOptimize(AnalysisResultPtr ar) {
-  return InterfaceStatement::preOptimize(ar);
 }
 
 StatementPtr ClassStatement::postOptimize(AnalysisResultPtr ar) {

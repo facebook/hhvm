@@ -18,6 +18,8 @@
 #define __BLOCK_SCOPE_H__
 
 #include <compiler/hphp.h>
+#include <tr1/unordered_map>
+#include <tr1/unordered_set>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,6 +37,23 @@ DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FileScope);
 
+template<typename T>
+struct smarter_pointer_hash {
+  size_t operator() (const T &p) const {
+    size_t x = (size_t)p.get();
+    return (x >> 8) | (x << 56);
+  }
+};
+
+typedef std::tr1::unordered_map<BlockScopeRawPtr, int,
+                                smarter_pointer_hash<BlockScopeRawPtr>
+                                > BlockScopeRawPtrFlagsHashMap;
+typedef std::tr1::unordered_set<BlockScopeRawPtr,
+                                smarter_pointer_hash<BlockScopeRawPtr>
+                                > BlockScopeRawPtrHashSet;
+
+typedef std::list<BlockScopeRawPtr> BlockScopeRawPtrQueue;
+
 /**
  * Base class of ClassScope and FunctionScope.
  */
@@ -45,6 +64,15 @@ public:
     FunctionScope,
     FileScope,
     ProgramScope,
+  };
+
+  enum UseKinds {
+    UseKindCaller = 1,
+    UseKindStaticRef = 2,
+    UseKindNonStaticRef = 4,
+    UseKindConstRef = 8,
+    UseKindParentRef = 16,
+    UseKindAny = (unsigned)-1
   };
 
   BlockScope(const std::string &name, const std::string &docComment,
@@ -60,6 +88,10 @@ public:
   ClassScopePtr getContainingClass();
   FunctionScopePtr getContainingFunction();
   FileScopePtr getContainingFile();
+
+  void addUse(BlockScopePtr user, int useFlags);
+  void changed(BlockScopeRawPtrQueue &todo, int useKinds);
+
 
   /**
    * Helpers for keeping track of break/continue nested level.
@@ -108,7 +140,10 @@ public:
   void setOuterScope(BlockScopePtr o) { m_outerScope = o; }
   BlockScopePtr getOuterScope() { return m_outerScope.lock(); }
   bool isOuterScope() { return m_outerScope.expired(); }
+  BlockScopeRawPtrHashSet &getDeps() { return m_deps; }
 
+  void setMark(int m) { m_mark = m; }
+  int getMark() const { return m_mark; }
 protected:
   std::string m_originalName;
   std::string m_name;
@@ -120,10 +155,14 @@ protected:
   ConstantTablePtr m_constants;
   BlockScopeRawPtr m_outerScope;
 
+  BlockScopeRawPtrHashSet m_deps;
+  BlockScopeRawPtrFlagsHashMap m_users;
+
   int m_loopNestedLevel;
   int m_incLevel;
   ModifierExpressionPtr m_modifiers;
   StatementListPtr m_includes;
+  int m_mark;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

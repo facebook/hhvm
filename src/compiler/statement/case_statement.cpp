@@ -103,12 +103,6 @@ void CaseStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr CaseStatement::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_condition);
-  ar->preOptimize(m_stmt);
-  return StatementPtr();
-}
-
 StatementPtr CaseStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_condition);
   ar->postOptimize(m_stmt);

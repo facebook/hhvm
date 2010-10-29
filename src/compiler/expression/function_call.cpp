@@ -149,12 +149,7 @@ void FunctionCall::markRefParams(FunctionScopePtr func,
 }
 
 ExpressionPtr FunctionCall::preOptimize(AnalysisResultPtr ar) {
-  if (m_class) {
-    ar->preOptimize(m_class);
-    updateClassName();
-  }
-  ar->preOptimize(m_nameExp);
-  ar->preOptimize(m_params);
+  if (m_class) updateClassName();
   return ExpressionPtr();
 }
 

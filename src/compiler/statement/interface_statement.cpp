@@ -145,12 +145,12 @@ void InterfaceStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
       if (dependencies->checkCircle(DependencyGraph::KindOfClassDerivation,
                                     m_originalName,
                                     cls->getOriginalName().c_str())) {
-        ClassScopePtr classScope = m_classScope.lock();
         Compiler::Error(Compiler::InvalidDerivation, shared_from_this(),
                         cls->getOriginalName());
         m_base = ExpressionListPtr();
         classScope->clearBases();
       } else if (cls->isUserClass()) {
+        cls->addUse(classScope, BlockScope::UseKindParentRef);
         dependencies->add(DependencyGraph::KindOfClassDerivation,
                           ar->getName(),
                           m_originalName, shared_from_this(),
@@ -192,11 +192,6 @@ void InterfaceStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 StatementPtr InterfaceStatement::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_base);
-  if (m_stmt) {
-    ClassScopePtr classScope = m_classScope.lock();
-    ar->preOptimize(m_stmt);
-  }
   if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
     checkVolatile(ar);
   }

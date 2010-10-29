@@ -85,11 +85,6 @@ void GlobalStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr GlobalStatement::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_exp);
-  return StatementPtr();
-}
-
 StatementPtr GlobalStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_exp);
   return StatementPtr();

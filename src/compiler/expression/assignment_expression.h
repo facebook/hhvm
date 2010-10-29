@@ -31,6 +31,7 @@ public:
                        bool ref);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  ExpressionPtr preOptimize(AnalysisResultPtr ar);
 
   // implementing IParseHandler
   virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);

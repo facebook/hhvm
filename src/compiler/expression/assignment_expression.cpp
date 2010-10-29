@@ -181,8 +181,6 @@ ExpressionPtr AssignmentExpression::optimize(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_variable);
-  ar->preOptimize(m_value);
   if (Option::EliminateDeadCode &&
       ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
     // otherwise used & needed flags may not be up to date yet

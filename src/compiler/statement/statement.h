@@ -26,7 +26,6 @@
 #define DECLARE_BASE_STATEMENT_VIRTUAL_FUNCTIONS                        \
   virtual void analyzeProgramImpl(AnalysisResultPtr ar);                \
   virtual StatementPtr clone();                                         \
-  virtual StatementPtr preOptimize(AnalysisResultPtr ar);               \
   virtual StatementPtr postOptimize(AnalysisResultPtr ar);              \
   virtual void inferTypes(AnalysisResultPtr ar);                        \
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);      \
@@ -111,7 +110,9 @@ public:
  /**
    * Called before type inference.
    */
-  virtual StatementPtr preOptimize(AnalysisResultPtr ar) = 0;
+  virtual StatementPtr preOptimize(AnalysisResultPtr ar) {
+    return StatementPtr();
+  }
 
   /**
    * Called after type inference.

@@ -95,12 +95,6 @@ void SwitchStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr SwitchStatement::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_exp);
-  ar->preOptimize(m_cases);
-  return StatementPtr();
-}
-
 StatementPtr SwitchStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_exp);
   ar->postOptimize(m_cases);

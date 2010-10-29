@@ -134,7 +134,6 @@ StatementPtr ExpStatement::preOptimize(AnalysisResultPtr ar) {
   if (ar->getPhase() != AnalysisResult::AnalyzeInclude) {
     m_exp = m_exp->unneeded(ar);
   }
-  ar->preOptimize(m_exp);
   return StatementPtr();
 }
 

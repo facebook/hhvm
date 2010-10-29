@@ -46,9 +46,21 @@ StatementPtr ClassConstant::clone() {
 // parser functions
 
 void ClassConstant::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
+  ConstantTablePtr constants = scope->getConstants();
+
   for (int i = 0; i < m_exp->getCount(); i++) {
-    IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>((*m_exp)[i]);
-    ph->onParse(ar, scope);
+    AssignmentExpressionPtr assignment =
+      dynamic_pointer_cast<AssignmentExpression>((*m_exp)[i]);
+
+    ExpressionPtr var = assignment->getVariable();
+    const std::string &name =
+      dynamic_pointer_cast<ConstantExpression>(var)->getName();
+    if (constants->isPresent(name)) {
+      Compiler::Error(Compiler::DeclaredVariableTwice, assignment);
+      m_exp->removeElement(i--);
+    } else {
+      assignment->onParse(ar, scope);
+    }
   }
 }
 
@@ -86,7 +98,22 @@ void ClassConstant::setNthKid(int n, ConstructPtr cp) {
 }
 
 StatementPtr ClassConstant::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_exp);
+  for (int i = 0; i < m_exp->getCount(); i++) {
+    AssignmentExpressionPtr assignment =
+      dynamic_pointer_cast<AssignmentExpression>((*m_exp)[i]);
+
+    ExpressionPtr var = assignment->getVariable();
+    ExpressionPtr val = assignment->getValue();
+
+    const std::string &name =
+      dynamic_pointer_cast<ConstantExpression>(var)->getName();
+
+    Symbol *sym = getScope()->getConstants()->getSymbol(name);
+    if (sym->getValue() != val) {
+      ar->incOptCounter();
+      sym->setValue(val);
+    }
+  }
   return StatementPtr();
 }
 

@@ -198,11 +198,44 @@ void SimpleFunctionCall::addDependencies(AnalysisResultPtr ar) {
   }
 }
 
+void SimpleFunctionCall::setupScopes(AnalysisResultPtr ar) {
+  FunctionScopePtr func;
+  ClassScopePtr cls;
+  if (!m_class && m_className.empty()) {
+    if (!m_dynamicInvoke) {
+      func = ar->findFunction(m_name);
+    }
+  } else {
+    cls = ar->resolveClass(shared_from_this(), m_className);
+    if (cls && cls->isRedeclaring()) {
+      cls = ar->findExactClass(shared_from_this(), m_className);
+    }
+    if (cls) {
+      m_classScope = cls;
+      if (m_name == "__construct") {
+        func = cls->findConstructor(ar, true);
+      } else {
+        func = cls->findFunction(ar, m_name, true, true);
+      }
+    }
+  }
+  if (func && !func->isRedeclaring()) {
+    if (m_funcScope != func) {
+      m_funcScope = func;
+      Construct::recomputeEffects();
+      m_funcScope->addCaller(getScope());
+    }
+  }
+}
+
 void SimpleFunctionCall::addLateDependencies(AnalysisResultPtr ar) {
   AnalysisResult::Phase phase = ar->getPhase();
   ar->setPhase(AnalysisResult::AnalyzeAll);
   addDependencies(ar);
   ar->setPhase(phase);
+  m_funcScope.reset();
+  m_classScope.reset();
+  setupScopes(ar);
 }
 
 ConstructPtr SimpleFunctionCall::getNthKid(int n) const {
@@ -276,30 +309,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     // Look up the corresponding FunctionScope and ClassScope
     // for this function call
     {
-      FunctionScopePtr func;
-      ClassScopePtr cls;
-      if (!m_class && m_className.empty()) {
-        func = ar->findFunction(m_name);
-      } else {
-        cls = ar->resolveClass(shared_from_this(), m_className);
-        if (cls && cls->isRedeclaring()) {
-          cls = ar->findExactClass(shared_from_this(), m_className);
-        }
-        if (cls) {
-          m_classScope = cls;
-          if (m_name == "__construct") {
-            func = cls->findConstructor(ar, true);
-          } else {
-            func = cls->findFunction(ar, m_name, true, true);
-          }
-        }
-      }
-      if (func && !func->isRedeclaring()) {
-        if (m_funcScope != func) {
-          m_funcScope = func;
-          Construct::recomputeEffects();
-        }
-      }
+      setupScopes(ar);
     }
     // check for dynamic constant and volatile function/class
     if (!m_class && m_className.empty() &&
@@ -584,42 +594,54 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
-  if (m_class) {
-    ar->preOptimize(m_class);
-    updateClassName();
-  }
-  ar->preOptimize(m_safeDef);
-  ar->preOptimize(m_nameExp);
-  ar->preOptimize(m_params);
+  if (m_class) updateClassName();
 
-  if (ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
-    ExpressionPtr rep = onPreOptimize(ar);
-    if (rep) {
-      ar->preOptimize(rep);
-      return rep;
-    }
-  }
-
-  if (ar->getPhase() != AnalysisResult::SecondPreOptimize) {
+  if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
     return ExpressionPtr();
   }
+
+  if (ExpressionPtr rep = onPreOptimize(ar)) {
+    return rep;
+  }
+
   if (ExpressionPtr rep = optimize(ar)) {
     return rep;
   }
-  // optimize away various "exists" functions, this may trigger
-  // dead code elimination and improve type-inference.
+
   if (!m_class && m_className.empty() &&
-      (m_type == DefinedFunction ||
+      (m_type == DefineFunction ||
+       m_type == DefinedFunction ||
        m_type == FunctionExistsFunction ||
        m_type == ClassExistsFunction ||
        m_type == InterfaceExistsFunction) &&
-      m_params && m_params->getCount() == 1) {
+      m_params &&
+      m_params->getCount() == (m_type == DefineFunction) + 1) {
     ExpressionPtr value = (*m_params)[0];
     if (value->isScalar()) {
       ScalarExpressionPtr name = dynamic_pointer_cast<ScalarExpression>(value);
       if (name && name->isLiteralString()) {
         string symbol = name->getLiteralString();
         switch (m_type) {
+        case DefineFunction: {
+          ConstantTablePtr constants = ar->getConstants();
+          // system constant
+          if (constants->isPresent(symbol)) {
+            break;
+          }
+          // user constant
+          BlockScopePtr block = ar->findConstantDeclarer(symbol);
+          // not found (i.e., undefined)
+          if (!block) break;
+          constants = block->getConstants();
+          // already set to be dynamic
+          Symbol *sym = constants->getSymbol(symbol);
+          assert(sym);
+          if (!sym->isDynamic() && sym->getValue() != (*m_params)[1]) {
+            sym->setValue((*m_params)[1]);
+            ar->incOptCounter();
+          }
+          break;
+        }
         case DefinedFunction: {
           ConstantTablePtr constants = ar->getConstants();
           // system constant
@@ -900,6 +922,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     return checkTypesImpl(ar, type, Type::Variant, coerce);
   } else if (func != m_funcScope) {
     m_funcScope = func;
+    m_funcScope->addCaller(getScope());
     Construct::recomputeEffects();
   }
 

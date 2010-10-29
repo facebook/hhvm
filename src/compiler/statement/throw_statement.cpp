@@ -70,11 +70,6 @@ void ThrowStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ThrowStatement::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_exp);
-  return StatementPtr();
-}
-
 StatementPtr ThrowStatement::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_exp);
   return StatementPtr();

@@ -73,7 +73,6 @@ void BreakStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 StatementPtr BreakStatement::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_exp);
   Variant v;
   // break/continue 1 => break/continue;
   if (m_exp && m_exp->getScalarValue(v) &&

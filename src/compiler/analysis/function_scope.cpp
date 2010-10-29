@@ -312,6 +312,10 @@ string FunctionScope::getOriginalFullName() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void FunctionScope::addCaller(BlockScopePtr caller) {
+  addUse(caller, UseKindCaller);
+}
+
 bool FunctionScope::matchParams(FunctionScopePtr func) {
   // leaving them alone for now
   if (m_overriding || func->m_overriding) return false;
@@ -1270,8 +1274,6 @@ void FunctionScope::serialize(JSON::OutputStream &out) const {
     .add("argIsRef", m_refs)
     .done();
 }
-
-
 
 void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {

@@ -317,7 +317,7 @@ DefineFunction(
       array(
         'name'   => "length",
         'type'   => Int64,
-        'value'  => "1024",
+        'value'  => "0",
         'desc'   => "Reading ends when length - 1 bytes have been read, on a newline (which is included in the return value), or on EOF (whichever comes first). If no length is specified, it will keep reading from the stream until it reaches the end of the line.\n\nUntil PHP 4.3.0, omitting it would assume 1024 as the line length. If the majority of the lines in the file are all larger than 8KB, it is more resource efficient for your script to specify the maximum line length.",
       ),
     ),

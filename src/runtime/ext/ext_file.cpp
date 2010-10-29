@@ -211,7 +211,7 @@ Variant f_fgetc(CObjRef handle) {
   return String::FromChar(result);
 }
 
-Variant f_fgets(CObjRef handle, int64 length /* = 1024 */) {
+Variant f_fgets(CObjRef handle, int64 length /* = 0 */) {
   if (length < 0) {
     throw_invalid_argument("length (negative): %d", length);
     return false;

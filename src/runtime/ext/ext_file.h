@@ -43,7 +43,7 @@ bool f_feof(CObjRef handle);
 Variant f_fstat(CObjRef handle);
 Variant f_fread(CObjRef handle, int64 length);
 Variant f_fgetc(CObjRef handle);
-Variant f_fgets(CObjRef handle, int64 length = 1024);
+Variant f_fgets(CObjRef handle, int64 length = 0);
 Variant f_fgetss(CObjRef handle, int64 length = 0,
                 CStrRef allowable_tags = null_string);
 Variant f_fscanf(int _argc, CObjRef handle, CStrRef format, CArrRef _argv = null_array);

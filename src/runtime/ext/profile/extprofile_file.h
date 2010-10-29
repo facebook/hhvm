@@ -80,7 +80,7 @@ inline Variant x_fgetc(CObjRef handle) {
   return f_fgetc(handle);
 }
 
-inline Variant x_fgets(CObjRef handle, int64 length = 1024) {
+inline Variant x_fgets(CObjRef handle, int64 length = 0) {
   FUNCTION_INJECTION_BUILTIN(fgets);
   return f_fgets(handle, length);
 }

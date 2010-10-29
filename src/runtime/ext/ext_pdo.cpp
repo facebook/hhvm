@@ -2675,7 +2675,7 @@ Variant c_PDOStatement::t_execute(CArrRef params /* = null_array */) {
   return false;
 }
 
-Variant c_PDOStatement::t_fetch(int64 how /* = q_PDO_FETCH_BOTH */,
+Variant c_PDOStatement::t_fetch(int64 how /* = 0 */,
                                 int64 orientation /* = q_PDO_FETCH_ORI_NEXT */,
                                 int64 offset /* = 0 */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::fetch);
@@ -2750,7 +2750,7 @@ Variant c_PDOStatement::t_fetchcolumn(int64 column_numner /* = 0 */) {
   return ret;
 }
 
-Variant c_PDOStatement::t_fetchall(int64 how /* = q_PDO_FETCH_BOTH */,
+Variant c_PDOStatement::t_fetchall(int64 how /* = 0 */,
                                    CVarRef class_name /* = null */,
                                    CVarRef ctor_args /* = null */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::fetchall);
@@ -3121,7 +3121,7 @@ Variant c_PDOStatement::t_key() {
 
 Variant c_PDOStatement::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::next);
-  m_row = t_fetch(PDO_FETCH_BOTH);
+  m_row = t_fetch(PDO_FETCH_USE_DEFAULT);
   if (m_row.same(false)) {
     m_rowIndex = -1;
   } else {

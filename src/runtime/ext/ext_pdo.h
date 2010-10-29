@@ -192,13 +192,13 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t_execute(CArrRef params = null_array);
   DECLARE_METHOD_INVOKE_HELPERS(execute);
-  public: Variant t_fetch(int64 how = q_PDO_FETCH_BOTH, int64 orientation = q_PDO_FETCH_ORI_NEXT, int64 offset = 0);
+  public: Variant t_fetch(int64 how = 0, int64 orientation = q_PDO_FETCH_ORI_NEXT, int64 offset = 0);
   DECLARE_METHOD_INVOKE_HELPERS(fetch);
   public: Variant t_fetchobject(CStrRef class_name = null_string, CVarRef ctor_args = null);
   DECLARE_METHOD_INVOKE_HELPERS(fetchobject);
   public: Variant t_fetchcolumn(int64 column_numner = 0);
   DECLARE_METHOD_INVOKE_HELPERS(fetchcolumn);
-  public: Variant t_fetchall(int64 how = q_PDO_FETCH_BOTH, CVarRef class_name = null, CVarRef ctor_args = null);
+  public: Variant t_fetchall(int64 how = 0, CVarRef class_name = null, CVarRef ctor_args = null);
   DECLARE_METHOD_INVOKE_HELPERS(fetchall);
   public: bool t_bindvalue(CVarRef paramno, CVarRef param, int64 type = q_PDO_PARAM_STR);
   DECLARE_METHOD_INVOKE_HELPERS(bindvalue);

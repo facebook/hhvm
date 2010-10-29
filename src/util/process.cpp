@@ -435,11 +435,23 @@ int Process::GetCPUCount() {
   return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
+#ifndef __LP64__
+/* For PIC code we need to save the %EBX */
+static __inline void do_cpuid(u_int ax, u_int *p) {
+  __asm __volatile("pushl %%ebx\n\t"
+                   "cpuid\n\t"
+                   "movl %%ebx, %%esi\n\t"
+                   "popl %%ebx\n\t"
+                   : "=a" (p[0]), "=r" (p[1]), "=c" (p[2]), "=d" (p[3])
+                   : "a" (ax));
+}
+#else
 static __inline void do_cpuid(u_int ax, u_int *p) {
   __asm __volatile("cpuid"
                    : "=a" (p[0]), "=b" (p[1]), "=c" (p[2]), "=d" (p[3])
                    : "0" (ax));
 }
+#endif
 
 std::string Process::GetCPUModel() {
   uint32_t regs[4];

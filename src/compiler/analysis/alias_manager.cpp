@@ -846,8 +846,12 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
             }
           } else {
             switch (rep->getKindOf()) {
-            case Expression::KindOfAssignmentExpression:
+              case Expression::KindOfAssignmentExpression:
               {
+                /*
+                  Handling unset of an variable which hasnt been
+                  used since it was last assigned
+                */
                 if (!e->is(Expression::KindOfSimpleVariable)) break;
                 const string &name = spc(SimpleVariable, e)->getName();
                 AliasInfo &ai = m_aliasInfo[name];
@@ -868,54 +872,56 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
                   while (last->is(Expression::KindOfAssignmentExpression)) {
                     last = spc(AssignmentExpression, last)->getValue();
                   }
-                  ExpressionPtr cur = value;
-                  while (cur) {
-                    ExpressionPtr rhs = cur;
-                    ExpressionPtr next;
-                    if (cur->is(Expression::KindOfAssignmentExpression)) {
-                      rhs = spc(AssignmentExpression, cur)->getVariable();
-                      next = spc(AssignmentExpression, cur)->getValue();
-                    } else {
-                      next.reset();
-                    }
-                    if (!rhs->hasEffect()) {
-                      m_noAdd = true;
-                      ExpressionPtr v = rhs->clone();
-                      v->clearContext();
-                      v = canonicalizeRecurNonNull(v);
-                      m_noAdd = false;
-                      while (v->getCanonPtr() && v->getCanonPtr() != last) {
-                        v = v->getCanonPtr();
+                  if (!last->isScalar()) {
+                    ExpressionPtr cur = value;
+                    while (cur) {
+                      ExpressionPtr rhs = cur;
+                      ExpressionPtr next;
+                      if (cur->is(Expression::KindOfAssignmentExpression)) {
+                        rhs = spc(AssignmentExpression, cur)->getVariable();
+                        next = spc(AssignmentExpression, cur)->getValue();
+                      } else {
+                        next.reset();
                       }
-                      if (v->getCanonPtr()) {
-                        if (a->isUnused() && rhs == value) {
-                          value = value->replaceValue(
-                            canonicalizeRecurNonNull(
-                              value->makeConstant(m_arp, "null")));
-                          a->setNthKid(1, value);
-                          m_changes++;
-                        } else {
-                          ExpressionListPtr el(
-                            new ExpressionList(
-                              a->getScope(), a->getLocation(),
-                              Expression::KindOfExpressionList,
-                              ExpressionList::ListKindWrapped));
-                          a = spc(AssignmentExpression, a->clone());
-                          el->addElement(a);
-                          el->addElement(a->getValue());
-                          a->setNthKid(1, value->makeConstant(m_arp, "null"));
-                          rep->setReplacement(el);
-                          m_replaced++;
+                      if (!rhs->hasEffect()) {
+                        m_noAdd = true;
+                        ExpressionPtr v = rhs->clone();
+                        v->clearContext();
+                        v = canonicalizeRecurNonNull(v);
+                        m_noAdd = false;
+                        while (v->getCanonPtr() && v->getCanonPtr() != last) {
+                          v = v->getCanonPtr();
                         }
-                        break;
+                        if (v->getCanonPtr()) {
+                          if (a->isUnused() && rhs == value) {
+                            value = value->replaceValue(
+                              canonicalizeRecurNonNull(
+                                value->makeConstant(m_arp, "null")));
+                            a->setNthKid(1, value);
+                            m_changes++;
+                          } else {
+                            ExpressionListPtr el(
+                              new ExpressionList(
+                                a->getScope(), a->getLocation(),
+                                Expression::KindOfExpressionList,
+                                ExpressionList::ListKindWrapped));
+                            a = spc(AssignmentExpression, a->clone());
+                            el->addElement(a);
+                            el->addElement(a->getValue());
+                            a->setNthKid(1, value->makeConstant(m_arp, "null"));
+                            rep->setReplacement(el);
+                            m_replaced++;
+                          }
+                          break;
+                        }
                       }
+                      cur = next;
                     }
-                    cur = next;
                   }
                 }
               }
-            default:
-              break;
+              default:
+                break;
             }
           }
         }

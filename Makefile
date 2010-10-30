@@ -22,15 +22,11 @@ SLOW_TESTS := TestCodeRun TestServer
 
 all: fast_tests
 
-SETUP_TARGETS := all
-
 $(FAST_TESTS) $(SLOW_TESTS): % : setup
 	cd src && $(TEST) $(if $($@),$($@),$@)
 
-$(SLOW_TESTS): SETUP_TARGETS += shared-lib-gd
-
 setup:
-	$(MAKE) -C src $(SETUP_TARGETS) $(COPY)
+	$(MAKE) -C src $(COPY)
 
 fast_tests: $(FAST_TESTS)
 slow_tests: $(SLOW_TESTS)

@@ -45,7 +45,8 @@ hphp-setup: compiler-setup
 hphp: compiler
 hphpi: hphp
 test-setup: compiler-setup
-test: compiler
+test: compiler shared-lib-gd
+
 shared-lib-target: $(if $(TLS_GD),$(SHARED_LIB_GD),$(SHARED_LIB))
 	cp $< $(SHARED_LIB_TARGET)
 

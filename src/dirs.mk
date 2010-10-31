@@ -11,9 +11,6 @@
 # directory, not the one that make was invoked from
 CWD := $(shell readlink -f `pwd`)
 
-# This is to make sure "make" without any target will actually "make all".
-overall: all
-
 # only want to do this once per invocation of make
 # (particularly the build rules)
 # unfortunately, the variables get passed down to
@@ -22,6 +19,14 @@ overall: all
 ifneq ($(CWD),$(DIRS_INCLUDED))
 
 DIRS_INCLUDED := $(CWD)
+
+# This is to make sure "make" without any target will actually "make all".
+overall: all quiet
+
+# Add quiet as a dependent to prevent "nothing to do for... warnings from make"
+.PHONY: quiet
+quiet:
+	@true
 
 ###############################################################################
 # Command line switches. For example, "make RELEASE=1".

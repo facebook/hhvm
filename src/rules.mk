@@ -578,12 +578,7 @@ LIB_PATHS := $(HPHP_LIB) $(HPHP_TEST_LIB_PATH) $(EXT_DIR)/binutils \
 # Dependencies
 
 # This is to make sure "make" without any target will actually "make all".
-overall: all
-
-# Add quiet as a dependent to prevent "nothing to do for... warnings from make"
-.PHONY: quiet
-quiet:
-	@true
+overall: all quiet
 
 # Suppressing no rule errors
 %.d:
@@ -770,7 +765,7 @@ $(addsuffix -obj, $(PROGRAMS) $(LIB_TARGETS)):
 report:
 	@echo "Time    PID  Source File"
 	@echo "---------------------------------------------"
-	$(V)ps wwaxo pid,etime,command k start | grep distcc | grep -v grep | \
+	-$(V)ps -Cdistcc wwho pid,etime,command k start | \
 	sed 's/^\( *[0-9]\+\) \+\([0-9:]\+\) .* \([^ ]\+\)$$/\2 \1  \3/' | \
 	head -`tput lines`
 

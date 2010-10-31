@@ -500,6 +500,14 @@ std::string Process::GetAppName() {
   return progname;
 }
 
+std::string Process::GetAppVersion() {
+#ifdef HPHP_VERSION
+#undefine HPHP_VERSION
+#endif
+#define HPHP_VERSION(v) return #v;
+#include "../version"
+}
+
 std::string Process::GetHostName() {
   char hostbuf[128];
   gethostname(hostbuf, 127);

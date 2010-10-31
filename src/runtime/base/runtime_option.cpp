@@ -306,6 +306,7 @@ bool RuntimeOption::EnableDebuggerServer = false;
 int RuntimeOption::DebuggerServerPort = 8089;
 int RuntimeOption::DebuggerDefaultRpcPort = 8083;
 std::string RuntimeOption::DebuggerDefaultRpcAuth;
+std::string RuntimeOption::DebuggerRpcHostDomain;
 int RuntimeOption::DebuggerDefaultRpcTimeout = 30;
 std::string RuntimeOption::DebuggerStartupDocument;
 std::string RuntimeOption::DebuggerDefaultSandboxPath;
@@ -937,6 +938,7 @@ void RuntimeOption::Load(Hdf &config) {
 
       DebuggerDefaultRpcPort = debugger["RPC.DefaultPort"].getInt16(8083);
       DebuggerDefaultRpcAuth = debugger["RPC.DefaultAuth"].getString();
+      DebuggerRpcHostDomain = debugger["RPC.HostDomain"].getString();
       DebuggerDefaultRpcTimeout = debugger["RPC.DefaultTimeout"].getInt32(30);
     }
   }

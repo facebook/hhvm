@@ -4,7 +4,7 @@
 Server status displays current running status of server process and each worker
 thread. To query status, hit admin port with a URL like this,
 
-  http://[server]:9999/status.[xml|json|html]
+  http://[server]:8088/status.[xml|json|html]
 
 The format is,
 

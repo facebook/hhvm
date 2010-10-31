@@ -559,6 +559,7 @@ static int execute_program_impl(int argc, char **argv) {
   options_description desc(usage.c_str());
   desc.add_options()
     ("help", "display this message")
+    ("version", "display version number")
 #ifdef COMPILER_ID
     ("compiler-id", "display the git hash for the compiler id")
 #endif
@@ -572,7 +573,7 @@ static int execute_program_impl(int argc, char **argv) {
     ("port,p", value<int>(&po.port)->default_value(-1),
      "start an HTTP server at specified port")
     ("admin-port", value<int>(&po.admin_port)->default_value(-1),
-     "start admin listerner at specified port")
+     "start admin listener at specified port")
     ("debug-host,h", value<string>(&po.debugger_options.host),
      "connect to debugger server at specified address")
     ("debug-port", value<int>(&po.debugger_options.port)->default_value(-1),
@@ -610,6 +611,9 @@ static int execute_program_impl(int argc, char **argv) {
     store(command_line_parser(argc, argv).options(desc).positional(p).run(),
           vm);
     notify(vm);
+    if (po.mode == "d") po.mode = "debug";
+    if (po.mode == "s") po.mode = "server";
+    if (po.mode == "t") po.mode = "translate";
   } catch (error &e) {
     cerr << "Error in command line: " << e.what() << "\n\n";
     cout << desc << "\n";
@@ -622,6 +626,20 @@ static int execute_program_impl(int argc, char **argv) {
   if (vm.count("help")) {
     cout << desc << "\n";
     return -1;
+  }
+  if (vm.count("version")) {
+#ifdef HPHP_VERSION
+#undefine HPHP_VERSION
+#endif
+#define HPHP_VERSION(v) const char *version = #v;
+#include "../../version"
+
+    if (po.mode == "debug") {
+      cout << "HipHop Debugger v" << version << "\n";
+    } else {
+      cout << "Compiled by HipHop Compiler v" << version << "\n";
+    }
+    return 1;
   }
 #ifdef COMPILER_ID
   if (vm.count("compiler-id")) {
@@ -672,10 +690,6 @@ static int execute_program_impl(int argc, char **argv) {
       }
     }
   }
-
-  if (po.mode == "d") po.mode = "debug";
-  if (po.mode == "s") po.mode = "server";
-  if (po.mode == "t") po.mode = "translate";
 
   // Defer the initialization of light processes until the log file handle
   // is created, so that light processes can log to the right place.

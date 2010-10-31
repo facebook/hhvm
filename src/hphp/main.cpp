@@ -169,6 +169,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
                            "Options");
   desc.add_options()
     ("help", "display this message")
+    ("version", "display version number")
     ("target,t", value<string>(&po.target)->default_value("run"),
      "lint | "
      "analyze | "
@@ -309,6 +310,14 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
   }
   if (argc <= 1 || vm.count("help")) {
     cout << desc << "\n";
+    return 1;
+  }
+  if (vm.count("version")) {
+#ifdef HPHP_VERSION
+#undefine HPHP_VERSION
+#endif
+#define HPHP_VERSION(v) cout << "HipHop Compiler v" #v << "\n";
+#include "../version"
     return 1;
   }
 

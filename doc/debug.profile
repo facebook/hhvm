@@ -13,10 +13,12 @@ command line and server.
 
 <h3>Profiling from the command line</h3>
 
-For building stand alone programs you need to link with libprofiler and libunwind: 
+For building stand alone programs you need to link with libprofiler and
+libunwind:
 
- export LIBRARY_PATH=[path]/hphp/external/google-perftools/lib:[path]/hphp/external/libunwind/lib
- g++ <my program>.cpp -lprofiler 
+ export LIBRARY_PATH=[path]/hphp/external/google-perftools/lib:\
+   [path]/hphp/external/libunwind/lib
+ g++ <my program>.cpp -lprofiler
 
 With a compiled program, p, execute:
 
@@ -31,14 +33,15 @@ run to collect a significant number of samples.
 
 Run
 
-  GET http://[server]:9999/prof-cpu-on
+  GET http://[server]:8088/prof-cpu-on
 
 Then hit the server some number of times. When satisfied,
 
-  GET http://[server]:9999/prof-cpu-off
+  GET http://[server]:8088/prof-cpu-off
 
 A file /hphp/pprof/[host]/hphp.prof should be created. The exact path is
-configurable with the runtime option Debug.ProfilerOutputDir (defaults to /tmp on production).
+configurable with the runtime option Debug.ProfilerOutputDir
+(defaults to /tmp on production).
 
 <h3>Processing the profile</h3>
 

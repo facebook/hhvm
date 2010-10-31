@@ -450,6 +450,7 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
     switchMachine(machine);
     return true;
   }
+  error("Unable to connect to %s:%d.", host.c_str(), port);
   return false;
 }
 
@@ -661,6 +662,7 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
             addCompletion("<?php");
             break;
           }
+        case '@':
         case '=':
         case '$': {
           addCompletion(AutoCompleteCode);
@@ -669,6 +671,7 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
         default: {
           if (m_command.empty()) {
             addCompletion(GetCommands());
+            addCompletion("@");
             addCompletion("=");
             addCompletion("<?php");
             addCompletion("?>");
@@ -1191,6 +1194,7 @@ DebuggerCommand *DebuggerClient::createCommand() {
 
 bool DebuggerClient::process() {
   switch (tolower(m_command[0])) {
+    case '@':
     case '=':
     case '$': return processTakeCode();
     case '<': return match("<?php") && processTakeCode();
@@ -1393,6 +1397,10 @@ bool DebuggerClient::processTakeCode() {
   ASSERT(m_inputState == TakingCommand);
 
   char first = m_line[0];
+  if (first == '@') {
+    m_code = string("<?php ") + (m_line.c_str() + 1) + ";";
+    return processEval();
+  }
   if (first == '=') {
     m_code = string("<?php $_") + m_line + "; var_dump($_);";
     return processEval();

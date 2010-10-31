@@ -19,5 +19,6 @@ debugger:
 	@../src/hphpi/hphpi -m debug \
 	$(patsubst %, --debug-cmd "'h %'", $(DEBUGGER_CMDS)) > debugger.refs
 
+clean: clobber
 clobber:
 	@rm -f *~

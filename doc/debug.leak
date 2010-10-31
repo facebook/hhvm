@@ -41,7 +41,7 @@ APC objects may be reported as leaked items.
 
 Hit the server to turn on leak detection:
 
-  GET http://[server]:9999/leak-on?sampling=500
+  GET http://[server]:8088/leak-on?sampling=500
 
 The higher the sampling rate, the least impact leak detection has on server
 running, but it will take longer to collect leaked items. 500 is a good rate
@@ -52,7 +52,7 @@ in our debugging process.
 Wait for minutes long, or even hours long, depending on how rare the leak
 happens. Then hit the server to turn off leak detection and to report leaks:
 
-  GET http://[server]:9999/leak-off > leak_report
+  GET http://[server]:8088/leak-off > leak_report
 
 6. Examine output
 

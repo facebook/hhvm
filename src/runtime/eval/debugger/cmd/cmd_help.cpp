@@ -50,7 +50,8 @@ void CmdHelp::HelpAll(DebuggerClient *client) {
     "[k]onstant",   "lists all constants",
 
     "Evaluation Commands", "",
-    "=",            "prints right-hand-side's value",
+    "@",            "evaluates one line of PHP code",
+    "=",            "prints right-hand-side's value, assigns to $_",
     "${name}=",     "assigns a value to left-hand-side",
     "[<?]php",      "starts input of a block of PHP code",
     "?>",           "ends and evaluates a block a PHP code",

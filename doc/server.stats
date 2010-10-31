@@ -25,7 +25,7 @@ defined by different parts of the system.
 
 To query stats, hit admin port with a URL like this,
 
-  http://[server]:9999/stats.[fmt]?from=[t1]&to=[t2]...
+  http://[server]:8088/stats.[fmt]?from=[t1]&to=[t2]...
 
 from: (optional) starting time's timestamp (e.g. 1251927393),
         - use -n for n seconds ago
@@ -175,7 +175,7 @@ idle:  number of idle worker threads
 
 <h2>Example URL</h2>
 
-  GET "http://localhost:9999/stats.kvp?prefix=hphp&agg=*" \
+  GET "http://localhost:8088/stats.kvp?prefix=hphp&agg=*" \
     "&keys=apc.hit/sec,hit,load,:sql.query..*.select:," \
     "network.compressed/hit,hit/sec"
 

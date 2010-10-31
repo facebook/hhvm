@@ -153,8 +153,17 @@ Variant f_call_user_func_array_rpc(CStrRef host, int port, CStrRef auth,
 Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
                              int timeout, CVarRef function,
                              CArrRef _argv /* = null_array */) {
+  string shost = host.data();
+  if (!RuntimeOption::DebuggerRpcHostDomain.empty()) {
+    unsigned int pos = shost.find(RuntimeOption::DebuggerRpcHostDomain);
+    if (pos == string::npos ||
+        pos != shost.length() - RuntimeOption::DebuggerRpcHostDomain.size()) {
+      shost += RuntimeOption::DebuggerRpcHostDomain;
+    }
+  }
+
   string url = "http://";
-  url += host.data();
+  url += shost;
   url += ":";
   url += lexical_cast<string>(port);
   url += "/call_user_func_serialized?auth=";
@@ -163,19 +172,18 @@ Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
   Array blob = CREATE_MAP2("func", function, "args", _argv);
   String message = f_serialize(blob);
 
-  string hostStr(host.data());
   vector<string> headers;
-  LibEventHttpClientPtr http = LibEventHttpClient::Get(hostStr, port);
+  LibEventHttpClientPtr http = LibEventHttpClient::Get(shost, port);
   if (!http->send(url, headers, timeout < 0 ? 0 : timeout, false,
                   message.data(), message.size())) {
-    raise_warning("Unable to send RPC request");
+    raise_error("Unable to send RPC request");
     return false;
   }
 
   int code = http->getCode();
   if (code <= 0) {
-    raise_warning("Server timed out or unable to find specified URL: %s",
-                  url.c_str());
+    raise_error("Server timed out or unable to find specified URL: %s",
+                url.c_str());
     return false;
   }
 
@@ -183,8 +191,8 @@ Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
   char *response = http->recv(len);
   String sresponse(response, len, AttachString);
   if (code != 200) {
-    raise_warning("Internal server error: %d %s", code,
-                  HttpProtocol::GetReasonString(code));
+    raise_error("Internal server error: %d %s", code,
+                HttpProtocol::GetReasonString(code));
     return false;
   }
 
@@ -192,7 +200,7 @@ Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
   // take PHP serialization format.
   Variant res = f_unserialize(f_json_decode(sresponse));
   if (!res.isArray()) {
-    raise_warning("Internal protocol error");
+    raise_error("Internal protocol error");
     return false;
   }
 

@@ -317,6 +317,7 @@ public:
   static int DebuggerServerPort;
   static int DebuggerDefaultRpcPort;
   static std::string DebuggerDefaultRpcAuth;
+  static std::string DebuggerRpcHostDomain;
   static int DebuggerDefaultRpcTimeout;
   static std::string DebuggerDefaultSandboxPath;
   static std::string DebuggerStartupDocument;

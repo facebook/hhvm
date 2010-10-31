@@ -717,6 +717,13 @@ users can use the same machine serving their own source files.
       Port = 8089
       StartupDocument =
       DefaultSandboxPath =
+
+      RPC {
+        DefaultPort = 8083
+        DefaultAuth =
+        HostDomain =
+        DefaultTimeout = 30
+      }
     }
 
     # experimental, please ignore

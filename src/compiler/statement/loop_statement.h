@@ -36,7 +36,7 @@ class LoopStatement : public Statement {
   bool checkStringBuf(const std::string &name);
  private:
   std::set<std::string>  m_string_bufs;
-  LoopStatementWeakPtr m_outer;
+  boost::weak_ptr<LoopStatement> m_outer;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

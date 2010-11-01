@@ -20,7 +20,6 @@
 #include <util/json.h>
 #include <compiler/code_generator.h>
 #include <compiler/analysis/code_error.h>
-#include <compiler/analysis/block_scope.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -166,7 +165,7 @@ public:
                                      const Variant &value) const;
 private:
   std::string m_text;
-  BlockScopeRawPtr m_blockScope;
+  BlockScopeWeakPtr m_blockScope;
 
 protected:
   LocationPtr m_loc;

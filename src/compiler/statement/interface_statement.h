@@ -54,7 +54,7 @@ protected:
   ExpressionListPtr m_base;
   std::string m_docComment;
   StatementListPtr m_stmt;
-  ClassScopeRawPtr m_classScope;
+  boost::weak_ptr<ClassScope> m_classScope;
   void checkVolatile(AnalysisResultPtr ar);
 private:
   bool checkVolatileBases(AnalysisResultPtr ar);

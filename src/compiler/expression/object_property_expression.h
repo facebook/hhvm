@@ -67,7 +67,7 @@ private:
   std::string m_lvalTmp;
 
   Symbol *m_propSym;
-  ClassScopeRawPtr m_objectClass;
+  boost::weak_ptr<HPHP::ClassScope> m_objectClass;
 
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);

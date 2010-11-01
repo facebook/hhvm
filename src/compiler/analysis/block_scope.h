@@ -118,7 +118,7 @@ protected:
   KindOf m_kind;
   VariableTablePtr m_variables;
   ConstantTablePtr m_constants;
-  BlockScopeRawPtr m_outerScope;
+  BlockScopeWeakPtr m_outerScope;
 
   int m_loopNestedLevel;
   int m_incLevel;

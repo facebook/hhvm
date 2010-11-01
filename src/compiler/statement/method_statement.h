@@ -82,7 +82,7 @@ protected:
   std::string m_originalClassName;
   ExpressionListPtr m_params;
   StatementListPtr m_stmt;
-  FunctionScopeRawPtr m_funcScope;
+  boost::weak_ptr<FunctionScope> m_funcScope;
   int m_attribute;
   std::string m_docComment;
 

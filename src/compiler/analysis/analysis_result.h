@@ -245,6 +245,19 @@ public:
   }
 
   void addFileScope(FileScopePtr fileScope);
+#if 0
+  FileScopePtr getFileScope() { return m_file;}
+  /**
+   * When inferring types, it's important to push/pop correct a BlockScope
+   * that has the right variable and constant symbol tables to look up and
+   * check their types.
+   */
+  void pushScope(BlockScopePtr scope);
+  void popScope();
+  BlockScopePtr getScope() const { return m_scope;}
+  ClassScopePtr getClassScope() const;
+  FunctionScopePtr getFunctionScope() const;
+#endif
 
   /**
    * To implement the silence operator correctly, we need to keep trace
@@ -377,6 +390,7 @@ private:
   DependencyGraphPtr m_dependencyGraph;
   StringToFileScopePtrMap m_files;
   FileScopePtrVec m_fileScopes;
+//  FileScopePtr m_file;
   std::string m_extraCodeFileName;
   std::string m_extraCode;
 
@@ -392,6 +406,9 @@ private:
   bool m_dynamicClass;
   bool m_dynamicFunction;
   bool m_classForcedVariants[2];
+
+//  BlockScopePtrVec m_scopes;
+//  BlockScopePtr m_scope;
 
   StatementPtrVec m_stmts;
   StatementPtr m_stmt;

@@ -697,6 +697,7 @@ static int execute_program_impl(int argc, char **argv) {
                            RuntimeOption::LightProcessCount);
 
   MethodIndexHMap::initialize(false);
+  ShmCounters::initialize(true, Logger::Error);
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {
     RuntimeOption::ExecutionMode = "cli";
 

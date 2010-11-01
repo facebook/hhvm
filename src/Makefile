@@ -10,7 +10,7 @@ REC_SOURCES := $(filter-out $(EXCLUDED_CXX_SOURCES), \
 	$(shell find $(RECURSIVE_SOURCE_SUBDIRS) -name "*.cpp" -o -name "*.c"))
 CXX_NOOPT_SOURCES := $(filter %.no.cpp, $(REC_SOURCES))
 
-PROGRAMS = test hphp hphpi compiler
+PROGRAMS = test hphp hphpi compiler tools
 SUB_CLEAN_DIRS = idl hphp runtime ../facebook/extensions
 
 C_SOURCES := $(filter-out $(GENERATED_CPP_SOURCES) $(GENERATED_C_SOURCES),\

@@ -14920,6 +14920,75 @@ bool TestCodeRun::TestLateStaticBinding() {
 
 bool TestCodeRun::TestCallStatic() {
   MVCRO("<?php\n"
+        "class c2 {\n"
+        "  public static function __callStatic($func, $args) {\n"
+        "    echo \"c2::__callStatic\n\";\n"
+        "  }\n"
+        "}\n"
+        "class d2 extends c2 {\n"
+        "  public function __call($func, $args) {\n"
+        "    echo \"d2::__call\n\";\n"
+        "  }\n"
+        "  public function test1a() {\n"
+        "    c2::foo();\n"
+        "  }\n"
+        "}\n"
+        "$obj = new d2;\n"
+        "$obj->test1a();\n",
+
+        "d2::__call\n"
+        // "c2::__callStatic\n"  <--- PHP 5.3 returns this
+       );
+
+  MVCRO("<?php\n"
+        "class b2 { }\n"
+        "class c2 extends b2 {\n"
+        "  public static function __callStatic($func, $args) {\n"
+        "    echo \"c2::__callStatic\n\"; }\n"
+        "}\n"
+        "class d2 extends c2 {\n"
+        "  public function __call($func, $args) {\n"
+        "    echo \"d2::__call\n\";\n"
+        "  }\n"
+        "  public function test1a() {\n"
+        "    b2::foo();\n"
+        "  }\n"
+        "}\n"
+        "set_error_handler('h');\n"
+        "function h() { var_dump('errored');}"
+        "$obj = new d2;\n"
+        "$obj->test1a();\n"
+        "var_dump('end');\n",
+
+        "d2::__call\n"
+        "string(3) \"end\"\n"
+
+        // "string(7) \"errored\"\n"  <--- PHP 5.3 returns this
+       );
+
+  MVCRO("<?php\n"
+        "class b2 {}\n"
+        "class c2 extends b2 {\n"
+        "  public function __call($func, $args) {\n"
+        "    echo \"c2::__call\n\";\n"
+        "  }\n"
+        "  public function test1a() {\n"
+        "    b2::foo();\n"
+        "  }\n"
+        "}\n"
+        "set_error_handler('h');\n"
+        "function h() { var_dump('errored');}"
+        "$obj = new c2;\n"
+        "$obj->test1a();\n"
+        "var_dump('end');\n",
+
+        "c2::__call\n"
+        "string(3) \"end\"\n"
+
+        // "string(7) \"errored\"\n"  <--- PHP 5.3 returns this
+       );
+
+  MVCRO("<?php\n"
         "class c3 {\n"
         "  public function __call($func, $args) {\n"
         "    echo \"c3::__call\n\";\n"

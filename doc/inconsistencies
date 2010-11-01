@@ -111,6 +111,39 @@ example,
 
 In HipHop, $this will be NULL when doing this.
 
+(6) __call/__callStatic() handling
+
+These 2 examples give inconsistent results in PHP 5.3:
+
+  <?php
+  class B {
+  }
+  class G extends B {
+    function __call($name, $arguments) { var_dump('G');}
+    function f4missing($a) {
+      B::f4missing(5); // __call checking happened at B
+    }
+  }
+  $g = new G();
+  $g->f4missing(3);
+
+
+  <?php
+  class B {
+    function __call($name, $arguments) { var_dump('B');}
+  }
+  class G extends B {
+    function __call($name, $arguments) { var_dump('G');}
+    function f4missing($a) {
+      B::f4missing(5); // G::__call() was called actually!
+    }
+  }
+  $g = new G();
+  $g->f4missing(3);
+
+In HipHop, both checking and invocation of __call() happen on class G.
+
+
 3. Eval Issues
 
 (1) eval

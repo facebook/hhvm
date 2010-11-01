@@ -897,7 +897,8 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
   }
 }
 
-void FunctionScope::outputCPPArguments(ExpressionListPtr params,
+void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
+                                       FunctionScopePtr func,
                                        CodeGenerator &cg,
                                        AnalysisResultPtr ar, int extraArg,
                                        bool variableArgument,
@@ -955,7 +956,32 @@ void FunctionScope::outputCPPArguments(ExpressionListPtr params,
       param->outputCPP(cg, ar);
       cg_printf(")");
     } else {
+      // If the implemented type is ref-counted and expected type is variant,
+      // use VarNR to avoid unnecessary ref-counting because we know
+      // the actual argument will always has a ref in the callee.
+      bool wrap = false;
+      if (!param->isScalar() && !param->hasContext(Expression::RefValue) &&
+          param->getExpectedType() &&
+          param->getExpectedType()->is(Type::KindOfVariant) &&
+          (param->getCPPType()->is(Type::KindOfArray) ||
+           param->getCPPType()->is(Type::KindOfString) ||
+           param->getCPPType()->is(Type::KindOfObject))) {
+        wrap = true;
+        if (func && i < func->getMaxParamCount()) {
+          VariableTablePtr variables = func->getVariables();
+          if (variables->isLvalParam(func->getParamName(i))) {
+            // Callee expects a Variant instead of CVarRef
+            wrap = false;
+          }
+        }
+      }
+      if (wrap) {
+        cg_printf("VarNR(");
+      }
       param->outputCPP(cg, ar);
+      if (wrap) {
+        cg_printf(")");
+      }
     }
   }
   if (extra) {
@@ -963,7 +989,7 @@ void FunctionScope::outputCPPArguments(ExpressionListPtr params,
   }
 }
 
-void FunctionScope::outputCPPEffectiveArguments(ExpressionListPtr params,
+void FunctionScope::OutputCPPEffectiveArguments(ExpressionListPtr params,
                                                 CodeGenerator &cg,
                                                 AnalysisResultPtr ar) {
   int paramCount = params ? params->getCount() : 0;

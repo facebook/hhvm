@@ -235,7 +235,8 @@ void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
       cg.printf("(cit%d->getMeth())(mcp%d, ", m_ciTemp, m_ciTemp);
       if (m_params && m_params->getCount() > 0) {
         ar->pushCallInfo(m_ciTemp);
-        FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
+        FunctionScopePtr dummy;
+        FunctionScope::OutputCPPArguments(m_params, dummy, cg, ar, -1, false);
         ar->popCallInfo();
       } else {
         cg_printf("Array()");
@@ -252,7 +253,8 @@ void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
     cg_printf("(cit%d->getFunc())(vt%d, ", m_ciTemp, m_ciTemp);
     if (m_params && m_params->getCount() > 0) {
       ar->pushCallInfo(m_ciTemp);
-      FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
+      FunctionScopePtr dummy;
+      FunctionScope::OutputCPPArguments(m_params, dummy, cg, ar, -1, false);
       ar->popCallInfo();
     } else {
       cg_printf("Array()");
@@ -269,7 +271,8 @@ void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
   }
   cg_printf(", ");
   if (m_params && m_params->getCount() > 0) {
-    FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
+    FunctionScopePtr dummy;
+    FunctionScope::OutputCPPArguments(m_params, dummy, cg, ar, -1, false);
   } else {
     cg_printf("Array()");
   }

@@ -179,7 +179,8 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
       cg_printf("(%s->create(", m_receiverTemp.c_str());
     }
 
-    FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
+    FunctionScopePtr dummy;
+    FunctionScope::OutputCPPArguments(m_params, dummy, cg, ar, m_extraArg,
                                       m_variableArgument, m_argArrayId,
                                       m_argArrayHash, m_argArrayIndex);
     if (m_receiverTemp.empty()) {
@@ -261,7 +262,8 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf("(cit%d->getMeth())(mcp%d, ", m_ciTemp, m_ciTemp);
     if (m_params && m_params->getOutputCount()) {
       ar->pushCallInfo(m_ciTemp);
-      FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
+      FunctionScopePtr dummy;
+      FunctionScope::OutputCPPArguments(m_params, dummy, cg, ar, -1, false);
       ar->popCallInfo();
     } else {
       cg_printf("Array()");

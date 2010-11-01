@@ -423,7 +423,7 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
 }
 
 void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
-    AnalysisResultPtr ar) {
+                                           AnalysisResultPtr ar) {
 
   bool fewParams = canInvokeFewArgs();
   if (!m_name.empty() && m_valid && m_object->getType()->isSpecificObject()) {
@@ -433,8 +433,10 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
               m_funcScope->getPrefix(m_params) : Option::MethodPrefix,
               m_name.c_str());
 
-    FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
-        m_variableArgument, m_argArrayId, m_argArrayHash, m_argArrayIndex);
+    FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar,
+                                      m_extraArg, m_variableArgument,
+                                      m_argArrayId, m_argArrayHash,
+                                      m_argArrayIndex);
     cg_printf(")");
   } else {
     cg_printf("(mcp%d.bindClass(info)->", m_ciTemp);
@@ -444,7 +446,8 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       if (pcount) {
         cg_printf("%d, ", pcount);
         ar->pushCallInfo(m_ciTemp);
-        FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
+        FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, 0,
+                                          false);
         ar->popCallInfo();
       } else {
         cg_printf("0");
@@ -467,7 +470,8 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       cg_printf("getMeth())(mcp%d, ", m_ciTemp);
       if (m_params && m_params->getCount()) {
         ar->pushCallInfo(m_ciTemp);
-        FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
+        FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, -1,
+                                          false);
         ar->popCallInfo();
       } else {
         cg_printf("Array()");

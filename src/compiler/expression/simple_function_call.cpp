@@ -1218,12 +1218,14 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
     switch (m_type) {
     case ExtractFunction:
       cg_printf("extract(variables, ");
-      FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
+      FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, 0,
+                                        false);
       cg_printf(")");
       return;
     case CompactFunction:
       cg_printf("compact(variables, ");
-      FunctionScope::outputCPPArguments(m_params, cg, ar, -1, true);
+      FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, -1,
+                                        true);
       cg_printf(")");
       return;
     default:
@@ -1326,8 +1328,9 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         }
       }
     }
-    FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
-                                      m_variableArgument, m_argArrayId,
+    FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar,
+                                      m_extraArg, m_variableArgument,
+                                      m_argArrayId,
                                       m_argArrayHash, m_argArrayIndex);
   } else {
     if (!m_class && m_className.empty()) {
@@ -1351,7 +1354,8 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       if (m_params && m_params->getCount()) {
         cg_printf("%d, ", m_params->getCount());
         ar->pushCallInfo(m_ciTemp);
-        FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
+        FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, 0,
+                                          false);
         ar->popCallInfo();
       } else {
         cg_printf("0");
@@ -1364,7 +1368,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         cg_printf("Array()");
       } else {
         ar->pushCallInfo(m_ciTemp);
-        FunctionScope::outputCPPArguments(m_params, cg, ar,
+        FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar,
                                           m_arrayParams ? 0 : -1, false);
         ar->popCallInfo();
       }

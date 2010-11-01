@@ -276,7 +276,8 @@ public:
   /**
    * How does a caller prepare parameters.
    */
-  static void outputCPPArguments(ExpressionListPtr params,
+  static void OutputCPPArguments(ExpressionListPtr params,
+                                 FunctionScopePtr func,
                                  CodeGenerator &cg, AnalysisResultPtr ar,
                                  int extraArg, bool variableArgument,
                                  int extraArgArrayId = -1,
@@ -288,7 +289,7 @@ public:
    * parameters around when generating a error-raising function call, so to
    * avoid "unused" variable compiler warnings.
    */
-  static void outputCPPEffectiveArguments(ExpressionListPtr params,
+  static void OutputCPPEffectiveArguments(ExpressionListPtr params,
                                           CodeGenerator &cg,
                                           AnalysisResultPtr ar);
 

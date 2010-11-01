@@ -212,6 +212,12 @@ TypePtr Expression::getType() {
   return Type::Any;
 }
 
+TypePtr Expression::getCPPType() {
+  if (m_implementedType) return m_implementedType;
+  if (m_actualType) return m_actualType;
+  return Type::Variant;
+}
+
 TypePtr Expression::propagateTypes(AnalysisResultPtr ar, TypePtr inType) {
   ExpressionPtr e = this->m_canonPtr;
   TypePtr ret = inType;

@@ -292,6 +292,7 @@ public:
     m_implementedType = implementedType;
   }
   TypePtr getType();
+  TypePtr getCPPType();
 
   static ExpressionPtr MakeConstant(AnalysisResultPtr ar,
                                     BlockScopePtr scope,

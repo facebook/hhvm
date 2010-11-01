@@ -350,6 +350,10 @@ bool Package::parseImpl(const char *fileName) {
     Logger::Error("Unable to stat file %s", fullPath.c_str());
     return false;
   }
+  if ((sb.st_mode & S_IFMT) == S_IFDIR) {
+    Logger::Error("Unable to parse directory: %s", fullPath.c_str());
+    return false;
+  }
 
   try {
     Logger::Verbose("parsing %s ...", fullPath.c_str());

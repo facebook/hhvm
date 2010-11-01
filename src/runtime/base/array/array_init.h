@@ -109,7 +109,7 @@ public:
     if (keyConverted) {
       m_data->set(name, v, false);
     } else {
-      Variant k(name.toKey());
+      VarNR k(name.toKey());
       if (!k.isNull()) {
         m_data->set(k, v, false);
       }
@@ -122,7 +122,7 @@ public:
     if (keyConverted) {
       m_data->set(name, v, false);
     } else {
-      Variant k(Variant(name).toKey());
+      VarNR k(Variant(name).toKey());
       if (!k.isNull()) {
         m_data->set(k, v, false);
       }
@@ -152,7 +152,7 @@ public:
     if (keyConverted) {
       m_data->add(name, v, false);
     } else {
-      Variant k(name.toKey());
+      VarNR k(name.toKey());
       if (!k.isNull()) {
         m_data->add(k, v, false);
       }
@@ -165,7 +165,7 @@ public:
     if (keyConverted) {
       m_data->add(name, v, false);
     } else {
-      Variant k(Variant(name).toKey());
+      VarNR k(Variant(name).toKey());
       if (!k.isNull()) {
         m_data->add(k, v, false);
       }
@@ -221,7 +221,7 @@ public:
       v.setContagious();
       m_data->set(name, v, false);
     } else {
-      Variant key(Variant(name).toKey());
+      VarNR key(Variant(name).toKey());
       if (!key.isNull()) {
         v.setContagious();
         m_data->set(key, v, false);

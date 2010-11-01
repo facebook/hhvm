@@ -320,8 +320,18 @@ Variant &unsetLval(Array &v, const T &key) {
  *
  *   a = ref(b); // strong binding: now both a and b point to the same data
  *   a = b;      // weak binding: a will copy or copy-on-write
+ *
+ * The case of VarNR is only supposed to show up in ifa_ calls where it
+ * it should be made no effect.
  */
-inline CVarRef ref(CVarRef v) { v.setContagious(); return v;}
+inline CVarRef ref(CVarRef v) {
+  if (!v.isVarNR()) {
+    v.setContagious();
+  } else {
+    ASSERT(false);
+  }
+  return v;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // misc functions

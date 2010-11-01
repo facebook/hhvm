@@ -159,6 +159,14 @@ class Variant {
     set(v);
   }
 
+ protected:
+  // This constructor is only used to construct VarNR
+  static const int NR_FLAG = 1 << 29;
+  Variant(DataType dt) : _count(NR_FLAG), m_type(dt) { }
+
+ public:
+  bool isVarNR() const { return _count == NR_FLAG; }
+
   /**
    * Break bindings and set to null.
    */
@@ -270,8 +278,12 @@ class Variant {
    * Borrowing Countable::_count for contagious bit, and this is okay, since
    * outer Variant never uses reference counting.
    */
-  void setContagious() const { ASSERT(this != &null_variant); _count = -1;}
-  void clearContagious() const { _count = 0;}
+  void setContagious() const {
+    ASSERT(this != &null_variant);
+    ASSERT(!isVarNR());
+    _count = -1;
+  }
+  void clearContagious() const { ASSERT(!isVarNR()); _count = 0;}
   bool isContagious() const { return _count == -1;}
 
   /**
@@ -478,17 +490,7 @@ class Variant {
     if (m_type == KindOfObject) return m_data.pobj;
     return toObjectHelper();
   }
-  Variant toKey   () const;
-  static int64 ToKey(bool i) { return (int64)i; }
-  static int64 ToKey(char i) { return (int64)i; }
-  static int64 ToKey(short i) { return (int64)i; }
-  static int64 ToKey(int i) { return (int64)i; }
-  static int64 ToKey(int64 i) { return i; }
-  static int64 ToKey(double d) { return (int64)d; }
-  static Variant ToKey(litstr s) { return String(s).toKey(); }
-  static Variant ToKey(CStrRef s) { return s.toKey(); }
-  static Variant ToKey(CVarRef v) { return v.toKey(); }
-
+  VarNR toKey   () const;
 
   /**
    * Comparisons
@@ -781,43 +783,14 @@ class Variant {
   template<typename T, int op>
   T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
 
-  template<typename T>
-  void removeImpl(const T &key, bool isString = false) {
-    switch (getType()) {
-    case KindOfNull:
-      break;
-    case KindOfArray:
-      {
-        ArrayData *arr = getArrayData();
-        if (arr) {
-          ArrayData *escalated;
-          if (isString) {
-            escalated = arr->remove(key, (arr->getCount() > 1));
-          } else {
-            escalated = arr->remove(ToKey(key), (arr->getCount() > 1));
-          }
-          if (escalated) {
-            set(escalated);
-          }
-        }
-      }
-      break;
-    case KindOfObject:
-      callOffsetUnset(key);
-      break;
-    default:
-      lvalInvalid();
-      break;
-    }
-  }
   void remove(bool    key) { removeImpl(key);}
-  void remove(char    key) { remove((int64)key);}
-  void remove(short   key) { remove((int64)key);}
-  void remove(int     key) { remove((int64)key);}
+  void remove(char    key) { removeImpl((int64)key);}
+  void remove(short   key) { removeImpl((int64)key);}
+  void remove(int     key) { removeImpl((int64)key);}
   void remove(int64   key) { removeImpl(key);}
   void remove(double  key) { removeImpl(key);}
   void remove(litstr  key, bool isString = false) {
-    removeImpl(key, isString);
+    remove(String(key), isString);
   }
   void remove(CStrRef key, bool isString = false) {
     removeImpl(key, isString);
@@ -996,7 +969,7 @@ class Variant {
    * The order of the data members is significant. The _count field must
    * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.
    */
- private:
+ protected:
   mutable union {
     int64        num;
     double       dbl;
@@ -1024,6 +997,12 @@ class Variant {
            (is(KindOfString) && getStringData()->empty()) ||
            (is(KindOfStaticString) && getStringData()->empty());
   }
+
+  void removeImpl(double key);
+  void removeImpl(int64 key);
+  void removeImpl(bool key);
+  void removeImpl(CVarRef key, bool isString = false);
+  void removeImpl(CStrRef key, bool isString = false);
 
   CVarRef set(bool    v);
   CVarRef set(char    v);
@@ -1157,30 +1136,7 @@ class Variant {
   void split();  // breaking weak binding by making a real copy
 
   template<typename T>
-  Variant &lvalAtImpl(const T &key, bool checkExist = false) {
-    if (m_type == KindOfVariant) {
-      return m_data.pvar->lvalAtImpl(key);
-    }
-    if (isObjectConvertable()) {
-      unset();
-      set(toArray());
-    }
-    if (m_type == KindOfArray) {
-      Variant *ret = NULL;
-      ArrayData *arr = m_data.parr;
-      ArrayData *escalated =
-        arr->lval(ToKey(key), ret, arr->getCount() > 1, checkExist);
-      if (escalated) {
-        set(escalated);
-      }
-      ASSERT(ret);
-      return *ret;
-    }
-    if (m_type == KindOfObject) {
-      return getArrayAccess()->___offsetget_lval(key);
-    }
-    return lvalInvalid();
-  }
+  Variant &lvalAtImpl(const T &key, bool checkExist = false);
 
   template<typename T>
   Variant refvalAtImpl(const T &key) {
@@ -1234,6 +1190,67 @@ class Variant {
 template<int op> class AssignOp {
 public:
   static Variant assign(Variant &var, CVarRef val);
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// VarNR
+
+class VarNR : public Variant {
+public:
+  // Use to hold variant that do not need ref-counting
+  VarNR(bool    v) : Variant(v) {}
+  VarNR(char    v) : Variant(v) {}
+  VarNR(short   v) : Variant(v) {}
+  VarNR(int     v) : Variant(v) {}
+  VarNR(int64   v) : Variant(v) {}
+  VarNR(uint64  v) : Variant(v) {}
+  VarNR(long    v) : Variant(v) {}
+  VarNR(double  v) : Variant(v) {}
+
+  VarNR(litstr  v) : Variant(v) {}
+  VarNR(const std::string & v) : Variant(v) {}
+  VarNR(const StaticString &v) : Variant(v) {}
+
+  VarNR(CStrRef v);
+  VarNR(CArrRef v);
+  VarNR(CObjRef v);
+  VarNR(StringData *v);
+  VarNR(ArrayData *v);
+  VarNR(ObjectData *v);
+
+  VarNR(const VarNR &v) : Variant(v.m_type) {
+    m_data = v.m_data;
+  }
+
+  // Only used to wrap around null_variant
+  VarNR(CVarRef v) : Variant(KindOfNull) {
+    ASSERT(v.is(KindOfNull));
+    m_data.num = 0;
+  }
+
+  ~VarNR() {
+    ASSERT(checkRefCount());
+    // Need to fool the parent destructor that it is a simple type
+    m_type = KindOfNull;
+  }
+
+private:
+  bool checkRefCount() {
+    if (m_type == KindOfVariant) return false;
+    if (!IS_REFCOUNTED_TYPE(m_type)) return true;
+    if (!isVarNR()) return false;
+    switch (m_type) {
+    case KindOfArray:
+      return m_data.parr->getCount() > 0;
+    case KindOfString:
+      return m_data.pstr->getCount() > 0;
+    case KindOfObject:
+      return m_data.pobj->getCount() > 0;
+    default:
+      break;
+    }
+    return false;
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -516,7 +516,7 @@ Variant &Array::lvalAt(CStrRef key, bool checkExist /* = false */,
   return lvalAtImpl(key.toKey(), checkExist);
 }
 Variant &Array::lvalAt(CVarRef key, bool checkExist /* = false */) {
-  Variant k(key.toKey());
+  VarNR k(key.toKey());
   if (!k.isNull()) {
     return lvalAtImpl(k, checkExist);
   }
@@ -535,7 +535,7 @@ CVarRef Array::set(CStrRef key, CVarRef v, bool isString /* = false */) {
 CVarRef Array::set(CVarRef key, CVarRef v) {
   if (key.getRawType() == KindOfInt64)
     return setImpl(key.getNumData(), v);
-  Variant k(key.toKey());
+  VarNR k(key.toKey());
   if (!k.isNull()) {
     return setImpl(k, v);
   }
@@ -556,7 +556,7 @@ CVarRef Array::add(CVarRef key, CVarRef v) {
   if (key.getRawType() == KindOfInt64) {
     return addImpl(key.getNumData(), v);
   }
-  Variant k(key.toKey());
+  VarNR k(key.toKey());
   if (!k.isNull()) {
     return addImpl(k, v);
   }
@@ -577,7 +577,7 @@ Variant &Array::addLval(CVarRef key) {
   if (key.getRawType() == KindOfInt64) {
     return addLvalImpl(key.getNumData());
   }
-  Variant k(key.toKey());
+  VarNR k(key.toKey());
   if (!k.isNull()) {
     return addLvalImpl(k);
   }
@@ -667,7 +667,7 @@ bool Array::exists(CVarRef key) const {
   default:
     break;
   }
-  Variant k(key.toKey());
+  VarNR k(key.toKey());
   if (!k.isNull()) {
     return existsImpl(k);
   }
@@ -701,7 +701,7 @@ void Array::remove(CVarRef key) {
   default:
     break;
   }
-  Variant k(key.toKey());
+  VarNR k(key.toKey());
   if (!k.isNull()) {
     removeImpl(k);
   }

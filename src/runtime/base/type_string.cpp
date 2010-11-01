@@ -388,13 +388,13 @@ String &String::operator^=(CStrRef v) {
 ///////////////////////////////////////////////////////////////////////////////
 // conversions
 
-Variant String::toKey() const {
+VarNR String::toKey() const {
   if (!m_px) return empty_string;
   int64 n = 0;
   if (m_px->isStrictlyInteger(n)) {
     return n;
   } else {
-    return *this;
+    return m_px;
   }
 }
 

@@ -47,6 +47,18 @@ static StaticString s_array("Array");
 static StaticString s_1("1");
 
 ///////////////////////////////////////////////////////////////////////////////
+// local helpers
+
+static int64 ToKey(bool i) { return (int64)i; }
+static int64 ToKey(char i) { return (int64)i; }
+static int64 ToKey(short i) { return (int64)i; }
+static int64 ToKey(int i) { return (int64)i; }
+static int64 ToKey(int64 i) { return i; }
+static int64 ToKey(double d) { return (int64)d; }
+static VarNR ToKey(CStrRef s) { return s.toKey(); }
+static VarNR ToKey(CVarRef v) { return v.toKey(); }
+
+///////////////////////////////////////////////////////////////////////////////
 // private implementations
 
 Variant::Variant(litstr  v) : _count(0), m_type(KindOfString) {
@@ -1587,13 +1599,13 @@ Object Variant::toObjectHelper() const {
   return Object(NEW(c_stdClass)());
 }
 
-Variant Variant::toKey() const {
+VarNR Variant::toKey() const {
   if (m_type == KindOfString || m_type == KindOfStaticString) {
     int64 n;
     if (m_data.pstr->isStrictlyInteger(n)) {
       return n;
     } else {
-      return *this;
+      return m_data.pstr;
     }
   }
   switch (m_type) {
@@ -2142,6 +2154,32 @@ Variant Variant::rvalAt(CVarRef offset, bool error /* = false */) const {
   return null_variant;
 }
 
+template<typename T>
+Variant& Variant::lvalAtImpl(const T &key, bool checkExist /* false */)  {
+  if (m_type == KindOfVariant) {
+    return m_data.pvar->lvalAtImpl(key);
+  }
+  if (isObjectConvertable()) {
+    unset();
+    set(toArray());
+  }
+  if (m_type == KindOfArray) {
+    Variant *ret = NULL;
+    ArrayData *arr = m_data.parr;
+    ArrayData *escalated =
+      arr->lval(ToKey(key), ret, arr->getCount() > 1, checkExist);
+    if (escalated) {
+      set(escalated);
+    }
+    ASSERT(ret);
+    return *ret;
+  }
+  if (m_type == KindOfObject) {
+    return getArrayAccess()->___offsetget_lval(key);
+  }
+  return lvalInvalid();
+}
+
 Variant &Variant::lvalAt(bool    key, bool    checkExist /* = false */) {
   return lvalAtImpl(key, checkExist);
 }
@@ -2171,25 +2209,10 @@ Variant &Variant::lvalAt(int64   key, bool    checkExist /* = false */) {
 Variant &Variant::lvalAt(double  key, bool    checkExist /* = false */) {
   return lvalAtImpl((int64)key, checkExist);
 }
-Variant &Variant::lvalAt(litstr  key, bool    checkExist /* = false */,
+Variant &Variant::lvalAt(litstr  ckey, bool    checkExist /* = false */,
                          bool    isString /* = false */) {
-  if (m_type == KindOfArray) {
-    Variant *ret = NULL;
-    ArrayData *arr = m_data.parr;
-    ArrayData *escalated;
-    if (isString) {
-      escalated = arr->lval(key, ret, arr->getCount() > 1, checkExist);
-    } else {
-      escalated = arr->lval(String(key).toKey(), ret, arr->getCount() > 1,
-                            checkExist);
-    }
-    if (escalated) {
-      set(escalated);
-    }
-    ASSERT(ret);
-    return *ret;
-  }
-  return lvalAtImpl(key, checkExist);
+  String key(ckey);
+  return lvalAt(key, checkExist, isString);
 }
 Variant &Variant::lvalAt(CStrRef key, bool    checkExist /* = false */,
                          bool    isString /* = false */) {
@@ -3118,6 +3141,136 @@ check_array:
   return v;
 }
 
+void Variant::removeImpl(double key) {
+  switch (getType()) {
+  case KindOfNull:
+    break;
+  case KindOfArray:
+    {
+      ArrayData *arr = getArrayData();
+      if (arr) {
+        ArrayData *escalated = arr->remove(ToKey(key), (arr->getCount() > 1));
+        if (escalated) {
+          set(escalated);
+        }
+      }
+    }
+    break;
+  case KindOfObject:
+    callOffsetUnset(key);
+    break;
+  default:
+    lvalInvalid();
+    break;
+  }
+}
+
+void Variant::removeImpl(int64 key) {
+  switch (getType()) {
+  case KindOfNull:
+    break;
+  case KindOfArray:
+    {
+      ArrayData *arr = getArrayData();
+      if (arr) {
+        ArrayData *escalated = arr->remove(key, (arr->getCount() > 1));
+        if (escalated) {
+          set(escalated);
+        }
+      }
+    }
+    break;
+  case KindOfObject:
+    callOffsetUnset(key);
+    break;
+  default:
+    lvalInvalid();
+    break;
+  }
+}
+
+void Variant::removeImpl(bool key) {
+  switch (getType()) {
+  case KindOfNull:
+    break;
+  case KindOfArray:
+    {
+      ArrayData *arr = getArrayData();
+      if (arr) {
+        ArrayData *escalated = arr->remove(ToKey(key), (arr->getCount() > 1));
+        if (escalated) {
+          set(escalated);
+        }
+      }
+    }
+    break;
+  case KindOfObject:
+    callOffsetUnset(key);
+    break;
+  default:
+    lvalInvalid();
+    break;
+  }
+}
+
+void Variant::removeImpl(CVarRef key, bool isString /* false */) {
+  switch (getType()) {
+  case KindOfNull:
+    break;
+  case KindOfArray:
+    {
+      ArrayData *arr = getArrayData();
+      if (arr) {
+        ArrayData *escalated;
+        if (isString) {
+          escalated = arr->remove(key, (arr->getCount() > 1));
+        } else {
+          escalated = arr->remove(key.toKey(), (arr->getCount() > 1));
+        }
+        if (escalated) {
+          set(escalated);
+        }
+      }
+    }
+    break;
+  case KindOfObject:
+    callOffsetUnset(key);
+    break;
+  default:
+    lvalInvalid();
+    break;
+  }
+}
+
+void Variant::removeImpl(CStrRef key, bool isString /* false */) {
+  switch (getType()) {
+  case KindOfNull:
+    break;
+  case KindOfArray:
+    {
+      ArrayData *arr = getArrayData();
+      if (arr) {
+        ArrayData *escalated;
+        if (isString) {
+          escalated = arr->remove(key, (arr->getCount() > 1));
+        } else {
+          escalated = arr->remove(key.toKey(), (arr->getCount() > 1));
+        }
+        if (escalated) {
+          set(escalated);
+        }
+      }
+    }
+    break;
+  case KindOfObject:
+    callOffsetUnset(key);
+    break;
+  default:
+    lvalInvalid();
+    break;
+  }
+}
+
 void Variant::remove(CVarRef key) {
   switch(key.getType()) {
   case KindOfByte:
@@ -3125,6 +3278,10 @@ void Variant::remove(CVarRef key) {
   case KindOfInt32:
   case KindOfInt64:
     removeImpl(key.toInt64());
+    return;
+  case KindOfString:
+  case KindOfStaticString:
+    removeImpl(key.toString());
     return;
   default:
     break;
@@ -3623,6 +3780,63 @@ void Variant::dump() const {
   VariableSerializer vs(VariableSerializer::VarDump);
   Variant ret(vs.serialize(*this, true));
   printf("Variant: %s", ret.toString().data());
+}
+
+VarNR::VarNR(CStrRef v) : Variant(KindOfString) {
+  StringData *s = v.get();
+  if (s) {
+    m_data.pstr = s;
+  } else {
+    m_data.num = 0;
+    m_type = KindOfNull;
+  }
+}
+
+VarNR::VarNR(CArrRef v) : Variant(KindOfArray) {
+  ArrayData *a = v.get();
+  if (a) {
+    m_data.parr = a;
+  } else {
+    m_data.num = 0;
+    m_type = KindOfNull;
+  }
+}
+
+VarNR::VarNR(CObjRef v) : Variant(KindOfObject) {
+  ObjectData *o = v.get();
+  if (o) {
+    m_data.pobj = o;
+  } else {
+    m_data.num = 0;
+    m_type = KindOfNull;
+  }
+}
+
+VarNR::VarNR(StringData *v) : Variant(KindOfString) {
+  if (v) {
+    m_data.pstr = v;
+  } else {
+    m_data.num = 0;
+    m_type = KindOfNull;
+  }
+}
+
+VarNR::VarNR(ArrayData *v) : Variant(KindOfArray) {
+  if (v) {
+    m_data.parr = v;
+  } else {
+    m_data.num = 0;
+    m_type = KindOfNull;
+  }
+}
+
+VarNR::VarNR(ObjectData *v) : Variant(KindOfObject) {
+  if (v) {
+    m_data.pobj = v;
+  } else {
+    m_data.num = 0;
+    m_type = KindOfNull;
+  }
 }
 
 template<>

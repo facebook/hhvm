@@ -33,6 +33,7 @@ namespace HPHP {
 class Array;
 class String;
 class TaintedMetadata;
+class VarNR;
 
 /**
  * String type wrapping around StringData to implement copy-on-write and
@@ -198,7 +199,7 @@ public:
   int    toInt32  () const { return m_px ? m_px->toInt32  () : 0;}
   int64  toInt64  () const { return m_px ? m_px->toInt64  () : 0;}
   double toDouble () const { return m_px ? m_px->toDouble () : 0;}
-  Variant toKey   () const;
+  VarNR  toKey   () const;
 
   /**
    * Comparisons

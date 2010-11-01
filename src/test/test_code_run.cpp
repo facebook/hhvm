@@ -12897,7 +12897,9 @@ bool TestCodeRun::TestFile() {
       "var_dump(is_link('test/test_ext_file2.tmp'));"
       "$a = lstat('test/test_ext_file2.tmp');"
       "var_dump($a['mtime']);");
-
+  MVCR("<?php "
+      "$f = fopen('php://stdout', 'w');"
+      "fprintf($f, 'stdout');");
   return true;
 }
 

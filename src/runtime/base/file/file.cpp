@@ -124,6 +124,12 @@ Variant File::Open(CStrRef filename, CStrRef mode,
     if (!strcasecmp(filename.c_str(), "php://stdin")) {
       return Object(NEW(PlainFile)(dup(STDIN_FILENO)));
     }
+    if (!strcasecmp(filename.c_str(), "php://stdout")) {
+      return Object(NEW(PlainFile)(dup(STDOUT_FILENO)));
+    }
+    if (!strcasecmp(filename.c_str(), "php://stderr")) {
+      return Object(NEW(PlainFile)(dup(STDERR_FILENO)));
+    }
 
     if (!strncasecmp(filename.c_str(), "php://temp", 10) ||
         !strcasecmp(filename.c_str(), "php://memory")) {

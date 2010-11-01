@@ -332,7 +332,7 @@ protected:
  private:
   void outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar);
 
-  boost::weak_ptr<ClassScope> m_originalScope;
+  ClassScopeRawPtr m_originalScope;
   bool m_originalScopeSet;
   unsigned m_canon_id;
   ExpressionPtr m_canonPtr;

@@ -135,6 +135,41 @@ struct int64_hash {
   }
 };
 
+template <class T> class hphp_raw_ptr {
+public:
+  hphp_raw_ptr() : ptr(0) {}
+  explicit hphp_raw_ptr(T *p) : ptr(p) {}
+
+  hphp_raw_ptr(const boost::weak_ptr<T> &p) : ptr(p.lock().get()) {}
+
+  template <class S>
+  hphp_raw_ptr(const boost::shared_ptr<S> &p) : ptr(p.get()) {}
+  template <class S>
+  hphp_raw_ptr(const boost::weak_ptr<S> &p) : ptr(p.lock().get()) {}
+  template <class S>
+  hphp_raw_ptr(const hphp_raw_ptr<S> &p) : ptr(p.get()) {}
+
+
+  boost::shared_ptr<T> lock() const {
+    return ptr ? boost::static_pointer_cast<T>(ptr->shared_from_this()) :
+      boost::shared_ptr<T>();
+  }
+  bool expired() const {
+    return !ptr;
+  }
+
+  operator boost::shared_ptr<T>() const {
+    return lock();
+  }
+
+  T *operator->() const { return ptr; }
+  T *get() const { return ptr; }
+  operator bool() const { return !expired(); }
+  void reset() { ptr = 0; }
+private:
+  T     *ptr;
+};
+
 template<typename T>
 class hphp_const_char_map :
     public hphp_hash_map<const char *, T, hphp_hash<const char *>, eqstr> {
@@ -170,6 +205,7 @@ typedef std::vector<StringPairVec> StringPairVecVec;
 #define DECLARE_BOOST_TYPES(classname)                                  \
   class classname;                                                      \
   typedef boost::shared_ptr<classname> classname ## Ptr;                \
+  typedef hphp_raw_ptr<classname> classname ## RawPtr;                  \
   typedef boost::weak_ptr<classname> classname ## WeakPtr;              \
   typedef boost::shared_ptr<const classname> classname ## ConstPtr;     \
   typedef std::vector<classname ## Ptr> classname ## PtrVec;            \

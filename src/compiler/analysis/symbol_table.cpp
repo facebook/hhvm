@@ -92,10 +92,14 @@ void SymbolTable::import(SymbolTablePtr src) {
     dst_sym.setName(src_sym.getName());
     dst_sym.setSystem();
     if (src_sym.declarationSet()) {
-      dst_sym.setDeclaration(src_sym.getDeclaration());
+      ConstructPtr sc = src_sym.getDeclaration();
+      if (sc) sc->resetScope(getBlockScope());
+      dst_sym.setDeclaration(sc);
     }
     if (src_sym.valueSet()) {
-      dst_sym.setValue(src_sym.getValue());
+      ConstructPtr sc = src_sym.getValue();
+      if (sc) sc->resetScope(getBlockScope());
+      dst_sym.setValue(sc);
     }
     if (src_sym.isDynamic()) {
       dst_sym.setDynamic();

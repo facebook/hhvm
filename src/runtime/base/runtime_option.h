@@ -310,6 +310,9 @@ public:
   static std::string SandboxFallback;
   static std::string SandboxConfFile;
   static std::map<std::string, std::string> SandboxServerVariables;
+  static bool SandboxFromCommonRoot;
+  static std::string SandboxDirectoriesRoot;
+  static std::string SandboxLogsRoot;
 
   // Debugger options
   static bool EnableDebugger;

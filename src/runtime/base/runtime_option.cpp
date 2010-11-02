@@ -300,6 +300,9 @@ std::string RuntimeOption::SandboxHome;
 std::string RuntimeOption::SandboxFallback;
 std::string RuntimeOption::SandboxConfFile;
 std::map<std::string, std::string> RuntimeOption::SandboxServerVariables;
+bool RuntimeOption::SandboxFromCommonRoot;
+std::string RuntimeOption::SandboxDirectoriesRoot;
+std::string RuntimeOption::SandboxLogsRoot;
 
 bool RuntimeOption::EnableDebugger = false;
 bool RuntimeOption::EnableDebuggerServer = false;
@@ -944,6 +947,9 @@ void RuntimeOption::Load(Hdf &config) {
     SandboxHome = sandbox["Home"].getString();
     SandboxFallback = sandbox["Fallback"].getString();
     SandboxConfFile = sandbox["ConfFile"].getString();
+    SandboxFromCommonRoot = sandbox["FromCommonRoot"].getBool();
+    SandboxDirectoriesRoot = sandbox["DirectoriesRoot"].getString();
+    SandboxLogsRoot = sandbox["LogsRoot"].getString();
     sandbox["ServerVariables"].get(SandboxServerVariables);
   }
   {

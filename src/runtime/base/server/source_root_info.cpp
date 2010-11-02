@@ -36,16 +36,21 @@ SourceRootInfo::SourceRootInfo(const char *host)
     m_sandboxCond = SandboxOff;
     return;
   }
-  Array pair = StringUtil::Explode(matches.rvalAt(1), "-", 2);
-  m_user = pair.rvalAt(0).toString();
-  bool defaultSb = pair.size() == 1;
-  if (defaultSb) {
-    m_sandbox = "default";
+  if (RuntimeOption::SandboxFromCommonRoot) {
+    String sandboxName = matches.rvalAt(1).toString();
+    createFromCommonRoot(sandboxName);
   } else {
-    m_sandbox = pair.rvalAt(1).toString();
-  }
+    Array pair = StringUtil::Explode(matches.rvalAt(1), "-", 2);
+    m_user = pair.rvalAt(0).toString();
+    bool defaultSb = pair.size() == 1;
+    if (defaultSb) {
+      m_sandbox = "default";
+    } else {
+      m_sandbox = pair.rvalAt(1).toString();
+    }
 
-  create();
+    createFromUserConfig();
+  }
 }
 
 SourceRootInfo::SourceRootInfo(const std::string &user,
@@ -54,10 +59,33 @@ SourceRootInfo::SourceRootInfo(const std::string &user,
   if (!sandboxOn()) return;
   m_user = user;
   m_sandbox = sandbox;
-  create();
+  createFromUserConfig();
 }
 
-void SourceRootInfo::create() {
+void SourceRootInfo::createFromCommonRoot(const String &sandboxName) {
+  m_user = "";
+  m_sandbox = string(sandboxName);
+  String sandboxesRoot = String(RuntimeOption::SandboxDirectoriesRoot);
+  String logsRoot = String(RuntimeOption::SandboxLogsRoot);
+  m_path = sandboxesRoot + "/" + sandboxName;
+  if (m_path.charAt(m_path.size() - 1) != '/') {
+    m_path += "/";
+  }
+  String logPath = logsRoot + "/" + sandboxName + "_error.log";
+  String accessLogPath = logsRoot + "/" + sandboxName + "_access.log";
+  if (!Logger::SetThreadLog(logPath.c_str())) {
+    Logger::Warning("Sandbox error log %s could not be opened",
+                    logPath.c_str());
+  }
+  if (!HttpRequestHandler::GetAccessLog().setThreadLog(accessLogPath.c_str())) {
+    Logger::Warning("Sandbox access log %s could not be opened",
+                    accessLogPath.c_str());
+  }
+}
+
+
+
+void SourceRootInfo::createFromUserConfig() {
   String homePath = String(RuntimeOption::SandboxHome) + "/" + m_user + "/";
   {
     struct stat hstat;

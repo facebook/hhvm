@@ -28,7 +28,8 @@ class SourceRootInfo {
 public:
   SourceRootInfo(const char *host);
   SourceRootInfo(const std::string &user, const std::string &sandbox);
-  void create();
+  void createFromUserConfig();
+  void createFromCommonRoot(const String &sandboxName);
 
   ~SourceRootInfo();
 

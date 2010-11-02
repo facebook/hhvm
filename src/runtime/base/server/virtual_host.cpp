@@ -157,6 +157,7 @@ void VirtualHost::init(Hdf vh) {
     QueryStringFilter filter;
     filter.urlPattern = format_pattern(hdf["url"].getString(""), true);
     filter.replaceWith = hdf["value"].getString("");
+    filter.replaceWith = "\\1=" + filter.replaceWith;
 
     string pattern = hdf["pattern"].getString("");
     vector<string> names;
@@ -165,14 +166,14 @@ void VirtualHost::init(Hdf vh) {
     if (pattern.empty()) {
       for (unsigned int i = 0; i < names.size(); i++) {
         if (pattern.empty()) {
-          pattern = "(?<=[&\?](";
+          pattern = "(?<=[&\?])(";
         } else {
           pattern += "|";
         }
         pattern += names[i];
       }
       if (!pattern.empty()) {
-        pattern += ")=).*?(?=(&|$))";
+        pattern += ")=.*?(?=(&|$))";
         pattern = format_pattern(pattern, false);
       }
     } else if (!names.empty()) {

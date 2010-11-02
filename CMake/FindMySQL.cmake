@@ -36,6 +36,7 @@ FIND_PATH(MYSQL_INCLUDE_DIR mysql/mysql.h
 		/usr/local/include/mysql
 		/opt/mysql/mysql/include
 		/opt/mysql/mysql/include/mysql
+		/opt/mysql/include
 		/opt/local/include/mysql5
 		/usr/local/mysql/include
 		/usr/local/mysql/include/mysql
@@ -77,7 +78,8 @@ ELSE (WIN32)
 				 /usr/local/mysql/lib/mysql
 				 /opt/local/mysql5/lib
 				 /opt/local/lib/mysql5/mysql
-				 /opt/mysql/mysql/lib/mysql)
+				 /opt/mysql/mysql/lib/mysql
+				 /opt/mysql/lib/mysql)
 ENDIF (WIN32)
 
 IF(MYSQL_LIB)

@@ -4,7 +4,7 @@ ENDIF(CCLIENT_FOUND)
 
 FIND_PATH(CCLIENT_INCLUDE_PATH
   NAMES c-client.h
-  PATH_SUFFIXES c-client
+  PATH_SUFFIXES c-client imap
   PATHS /usr/include /usr/local/include /usr/pkg/include
 )
 

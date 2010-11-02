@@ -14,5 +14,13 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+require_once('setup.inc');
 
-define('TAINT_HTML_MASK', 0x1);
+$a = "good\n";
+
+print_r($a);
+
+$b = array($a);
+
+print_r($b);
+

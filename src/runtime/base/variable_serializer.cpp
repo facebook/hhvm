@@ -24,6 +24,7 @@
 #include <runtime/base/class_info.h>
 #include <math.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/taint.h>
 
 using namespace std;
 
@@ -318,6 +319,12 @@ void VariableSerializer::write(CObjRef v) {
 }
 
 void VariableSerializer::write(CVarRef v, bool isArrayKey /* = false */) {
+#ifdef TAINTED
+  if (v.isString()) {
+    Taint(*m_buf) << *v.getStringData();
+}
+#endif
+
   if (!isArrayKey && v.isObject()) {
     write(v.toObject());
     return;

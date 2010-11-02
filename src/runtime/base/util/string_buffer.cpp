@@ -328,6 +328,17 @@ void StringBuffer::unsetTaint(bitstring b){
 TaintedMetadata* StringBuffer::getTaintedMetadata() const {
   return m_tainted_metadata;
 }
+
+
+bitstring* StringBuffer::getTaintBitString() {
+  return &m_tainting;
+}
+
+TaintedMetadata** StringBuffer::getTaintMetaData() {
+  return &m_tainted_metadata;
+}
+
+
 #endif
 
 void StringBuffer::grow(int minSize) {

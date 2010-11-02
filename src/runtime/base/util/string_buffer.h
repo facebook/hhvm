@@ -121,6 +121,9 @@ public:
   void setTaint(bitstring b);
   void unsetTaint(bitstring b);
   TaintedMetadata* getTaintedMetadata() const;
+
+  bitstring* getTaintBitString();
+  TaintedMetadata** getTaintMetaData();
   #endif
 
 private:

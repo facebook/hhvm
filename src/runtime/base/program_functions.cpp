@@ -77,6 +77,7 @@ struct ProgramOptions {
   int        admin_port;
   string     user;
   string     file;
+  bool       isTempFile;
   int        count;
   bool       noSafeAccessCheck;
   StringVec  args;
@@ -589,6 +590,8 @@ static int execute_program_impl(int argc, char **argv) {
      "run server under this user account")
     ("file,f", value<string>(&po.file),
      "executing specified file")
+    ("temp-file",
+     "file specified is temporary and removed after execution")
     ("count", value<int>(&po.count)->default_value(1),
      "how many times to repeat execution")
     ("no-safe-access-check",
@@ -648,6 +651,8 @@ static int execute_program_impl(int argc, char **argv) {
   }
 #endif
 
+  po.isTempFile = vm.count("temp-file");
+
   Hdf config;
   if (!po.config.empty()) {
     config.open(po.config);
@@ -695,6 +700,10 @@ static int execute_program_impl(int argc, char **argv) {
   // is created, so that light processes can log to the right place.
   LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
                            RuntimeOption::LightProcessCount);
+
+  if (po.mode == "d") po.mode = "debug";
+  if (po.mode == "s") po.mode = "server";
+  if (po.mode == "t") po.mode = "translate";
 
   MethodIndexHMap::initialize(false);
   ShmCounters::initialize(true, Logger::Error);
@@ -765,6 +774,11 @@ static int execute_program_impl(int argc, char **argv) {
 
     free(new_argv);
     hphp_process_exit();
+
+    if (po.isTempFile && boost::filesystem::exists(po.file)) {
+      boost::filesystem::remove(po.file);
+    }
+
     return ret;
   }
 

@@ -29,6 +29,10 @@ using namespace std;
 #define PHP_EXPUNGE 32768
 #define PHP_IMAP_ADDRESS_SIZE_BUF 10
 
+#ifndef SENDBUFLEN
+#define SENDBUFLEN 16385
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

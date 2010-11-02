@@ -380,10 +380,13 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultPtr ar) {
 static ExpressionPtr cloneForInlineRecur(ExpressionPtr exp,
                                          const std::string &prefix,
                                          StringToExpressionPtrMap &sepm,
-                                         AnalysisResultPtr ar) {
+                                         AnalysisResultPtr ar,
+                                         FunctionScopePtr scope) {
+  exp->getOriginalScope(); // make sure to cache the original scope
+  exp->setBlockScope(scope);
   for (int i = 0, n = exp->getKidCount(); i < n; i++) {
     if (ExpressionPtr k = exp->getNthExpr(i)) {
-      exp->setNthKid(i, cloneForInlineRecur(k, prefix, sepm, ar));
+      exp->setNthKid(i, cloneForInlineRecur(k, prefix, sepm, ar, scope));
     }
   }
   switch (exp->getKindOf()) {
@@ -414,20 +417,22 @@ static ExpressionPtr cloneForInlineRecur(ExpressionPtr exp,
 static ExpressionPtr cloneForInline(ExpressionPtr exp,
                                     const std::string &prefix,
                                     StringToExpressionPtrMap &sepm,
-                                    AnalysisResultPtr ar) {
-  return cloneForInlineRecur(exp->clone(), prefix, sepm, ar);
+                                    AnalysisResultPtr ar,
+                                    FunctionScopePtr scope) {
+  return cloneForInlineRecur(exp->clone(), prefix, sepm, ar, scope);
 }
 
 static int cloneStmtsForInline(ExpressionListPtr elist, StatementPtr s,
                                const std::string &prefix,
                                StringToExpressionPtrMap &sepm,
-                               AnalysisResultPtr ar) {
+                               AnalysisResultPtr ar,
+                               FunctionScopePtr scope) {
   switch (s->getKindOf()) {
   case Statement::KindOfStatementList:
     {
       for (int i = 0, n = s->getKidCount(); i < n; ++i) {
         if (int ret = cloneStmtsForInline(elist, s->getNthStmt(i),
-                                          prefix, sepm, ar)) {
+                                          prefix, sepm, ar, scope)) {
           return ret;
         }
       }
@@ -435,7 +440,7 @@ static int cloneStmtsForInline(ExpressionListPtr elist, StatementPtr s,
     }
   case Statement::KindOfExpStatement:
     elist->addElement(cloneForInline(dynamic_pointer_cast<ExpStatement>(s)->
-                                     getExpression(), prefix, sepm, ar));
+                                     getExpression(), prefix, sepm, ar, scope));
     return 0;
   case Statement::KindOfReturnStatement:
     {
@@ -443,7 +448,7 @@ static int cloneStmtsForInline(ExpressionListPtr elist, StatementPtr s,
         dynamic_pointer_cast<ReturnStatement>(s)->getRetExp();
 
       if (exp) {
-        elist->addElement(cloneForInline(exp, prefix, sepm, ar));
+        elist->addElement(cloneForInline(exp, prefix, sepm, ar, scope));
         return 1;
       }
       return -1;
@@ -542,7 +547,8 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
     }
   }
 
-  if (cloneStmtsForInline(elist, m->getStmts(), prefix, sepm, ar) <= 0) {
+  if (cloneStmtsForInline(elist, m->getStmts(), prefix, sepm, ar,
+                          getFunctionScope()) <= 0) {
     elist->addElement(CONSTANT("null"));
   }
 
@@ -574,8 +580,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
     }
   }
 
-  elist->copyContext(static_pointer_cast<Expression>(shared_from_this()));
-  return elist;
+  return replaceValue(elist);
 }
 
 ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {

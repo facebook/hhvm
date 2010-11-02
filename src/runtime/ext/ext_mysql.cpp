@@ -762,7 +762,10 @@ static bool php_mysql_read_rows(MYSQL *mysql, CVarRef result) {
 }
 
 static Variant php_mysql_localize_result(MYSQL *mysql) {
+#if MYSQL_VERSION_ID < 50500
   mysql = mysql->last_used_con;
+#endif
+
   if (!mysql->fields) return true;
   if (mysql->status != MYSQL_STATUS_GET_RESULT) {
     // consistent with php_mysql_do_query_general

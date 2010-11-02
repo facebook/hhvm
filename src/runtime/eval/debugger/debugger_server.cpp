@@ -97,17 +97,28 @@ void DebuggerServer::accept() {
     struct pollfd fds[1];
     fds[0].fd = sock->fd();
     fds[0].events = POLLIN|POLLERR|POLLHUP;
-    if (poll(fds, 1, POLLING_SECONDS * 1000) > 0 &&
-        (fds[0].revents & POLLIN)) {
-      struct sockaddr sa;
-      socklen_t salen = sizeof(sa);
-      Socket *new_sock = new Socket(::accept(sock->fd(), &sa, &salen),
-                                    sock->getType());
-      SmartPtr<Socket> ret(new_sock);
-      if (new_sock->valid()) {
-        Debugger::RegisterProxy(ret, false);
-      } else {
-        Logger::Error("unable to accept incoming debugger request");
+    int ret = poll(fds, 1, POLLING_SECONDS * 1000);
+    if (ret > 0) {
+      bool in = (fds[0].revents & POLLIN);
+      if (in) {
+        struct sockaddr sa;
+        socklen_t salen = sizeof(sa);
+        try {
+          Socket *new_sock = new Socket(::accept(sock->fd(), &sa, &salen),
+                                        sock->getType());
+          SmartPtr<Socket> ret(new_sock);
+          if (new_sock->valid()) {
+            Debugger::RegisterProxy(ret, false);
+          } else {
+            Logger::Error("unable to accept incoming debugger request");
+          }
+        } catch (Exception &e) {
+          Logger::Error("%s", e.getMessage().c_str());
+        } catch (std::exception &e) {
+          Logger::Error("%s", e.what());
+        } catch (...) {
+          Logger::Error("(unknown exception was thrown)");
+        }
       }
     } // else timed out, then we have a chance to check m_stopped bit
   }

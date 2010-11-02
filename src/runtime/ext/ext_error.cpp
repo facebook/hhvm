@@ -103,7 +103,8 @@ bool f_error_log(CStrRef message, int message_type /* = 0 */,
   std::string line(message.data(),
                    // Truncate to 512k
                    message.size() > (1<<19) ? (1<<19) : message.size());
-  if (strcmp(RuntimeOption::ExecutionMode, "srv") == 0) {
+  if (strcmp(RuntimeOption::ExecutionMode, "srv") == 0 &&
+      !ThreadInfo::s_threadInfo->m_reqInjectionData.debugger) {
     Logger::Error(line);
   } else {
     Logger::RawError(line);

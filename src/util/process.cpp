@@ -440,7 +440,7 @@ int Process::GetCPUCount() {
 static __inline void do_cpuid(u_int ax, u_int *p) {
   __asm __volatile("pushl %%ebx\n\t"
                    "cpuid\n\t"
-                   "movl %%ebx, %%esi\n\t"
+                   "movl %%ebx, %1\n\t" // %1 is the register assigned to p[1]
                    "popl %%ebx\n\t"
                    : "=a" (p[0]), "=r" (p[1]), "=c" (p[2]), "=d" (p[3])
                    : "a" (ax));

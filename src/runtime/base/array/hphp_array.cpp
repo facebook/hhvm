@@ -89,14 +89,6 @@ static inline HphpArray::ElmInd* elms2Hash(HphpArray::Elm* elms,
   return hash;
 }
 
-static inline HphpArray::Elm* hash2Elms(HphpArray::ElmInd* hash,
-                                        size_t maxElms) {
-  HphpArray::Elm* elms = (HphpArray::Elm*)(uintptr_t(hash)
-                         - (maxElms * sizeof(HphpArray::Elm)));
-  ASSERT((uintptr_t(elms) & HphpArray::ElmAlignmentMask) == 0);
-  return elms;
-}
-
 static inline bool validElmInd(ssize_t /*HphpArray::ElmInd*/ ei) {
   return (ei > ssize_t(HphpArray::ElmIndEmpty));
 }
@@ -119,9 +111,9 @@ static inline bool isIntegerKey(CVarRef v) {
 
 HphpArray::HphpArray(uint nSize /* = 0 */)
   : m_data(NULL), m_nextKI(0), m_nElms(0), m_hLoad(0), m_lastE(ElmIndEmpty),
-    m_linear(false), m_siPastEnd(false), m_dataPad(0) {
+    m_linear(false), m_siPastEnd(false), m_dataPad(0), m_nIndirectElms(0) {
 #ifdef PEDANTIC
-  if (m_nElms > 0x7fffffffU) {
+  if (nSize > 0x7fffffffU) {
     raise_error("Cannot create an array with more than 2^31 - 1 elements");
   }
 #endif
@@ -144,14 +136,16 @@ HphpArray::~HphpArray() {
   ssize_t lastE = (ssize_t)m_lastE;
   for (ssize_t /*ElmInd*/ pos = 0; pos <= lastE; ++pos) {
     Elm* e = &elms[pos];
+    ASSERT(e->data.m_type != KindOfIndirect);
     if (e->data.m_type != KindOfTombstone) {
       if (e->key != NULL) {
         if (e->key->decRefCount() == 0) {
           e->key->release();
         }
       }
-      if (IS_REFCOUNTED_TYPE(e->data.m_type)) {
-        tvDecRef(&e->data);
+      TypedValue* tv = &e->data;
+      if (IS_REFCOUNTED_TYPE(tv->m_type)) {
+        tvDecRef(tv);
       }
     }
   }
@@ -160,6 +154,30 @@ HphpArray::~HphpArray() {
       free(getBlock());
     }
   }
+}
+
+ssize_t HphpArray::size() const {
+  if (LIKELY(m_nIndirectElms == 0)) {
+    return m_nElms;
+  }
+  // TODO: If we had a way to just iterate over the indirect
+  // elements, we could compute this much faster
+  ssize_t sz = 0;
+  Elm* elms = data2Elms(m_data);
+  ssize_t lastE = (ssize_t)m_lastE;
+  for (ssize_t /*ElmInd*/ pos = 0; pos <= lastE; ++pos) {
+    Elm* e = &elms[pos];
+    if (e->data.m_type < KindOfTombstone) {
+      ++sz;
+    } else if (e->data.m_type == KindOfIndirect) {
+      TypedValue* tv = e->data.m_data.ptv;
+      // Check for uninit null
+      if (tv->m_type != KindOfNull || tv->m_data.num != 1LL) {
+        ++sz;
+      }
+    }
+  }
+  return sz;
 }
 
 void HphpArray::dumpDebugInfo() const {
@@ -180,7 +198,7 @@ void HphpArray::dumpDebugInfo() const {
   fprintf(stderr, "Elements:\n");
   ssize_t lastE = m_lastE;
   for (ssize_t /*ElmInd*/ i = 0; i <= lastE; ++i) {
-    if (elms[i].data.m_type != KindOfTombstone) {
+    if (elms[i].data.m_type < KindOfTombstone) {
       Variant v = tvAsVariant(&elms[i].data);
       VariableSerializer vs(VariableSerializer::DebugDump);
       Variant v2(vs.serialize(v, true));
@@ -193,6 +211,18 @@ void HphpArray::dumpDebugInfo() const {
         fprintf(stderr, "  [%3d] ind=%lld data.m_type=(%.*s)\n", int(i),
                elms[i].h, s.size()-1, s.data());
       }
+    } else if (elms[i].data.m_type == KindOfIndirect) {
+      // Integer keys do not support KindOfIndirect
+      ASSERT(elms[i].key != NULL);
+      TypedValue* fixedLocation = elms[i].data.m_data.ptv;
+      Variant v = tvAsVariant(fixedLocation);
+      VariableSerializer vs(VariableSerializer::DebugDump);
+      Variant v2(vs.serialize(v, true));
+      String s = v2.toString().data();
+      String k = Util::escapeStringForCPP(elms[i].key->data());
+      fprintf(stderr, "  [%3d] hash=0x%016llx key=\"%s\" "
+              "fixed location=%p data=(%.*s)\n", int(i), elms[i].h,
+              k.data(), fixedLocation, s.size()-1, s.data());
     } else {
       fprintf(stderr, "  [%3d] <tombstone>\n", int(i));
     }
@@ -221,11 +251,36 @@ void HphpArray::dumpDebugInfo() const {
 
 inline /*ElmInd*/ ssize_t HphpArray::nextElm(Elm* elms,
                                              /*ElmInd*/ ssize_t ei) const {
+  ASSERT(ei >= -1);
   ssize_t lastE = m_lastE;
   while (ei < lastE) {
     ++ei;
-    if (elms[ei].data.m_type != KindOfTombstone) {
+    if (elms[ei].data.m_type < KindOfTombstone) {
       return ei;
+    } else if (elms[ei].data.m_type == KindOfIndirect) {
+      TypedValue* tv = elms[ei].data.m_data.ptv;
+      // Check for uninit null
+      if (tv->m_type != KindOfNull || tv->m_data.num != 1LL) {
+        return ei;
+      }
+    }
+  }
+  return (ssize_t)ElmIndEmpty;
+}
+
+inline /*ElmInd*/ ssize_t HphpArray::prevElm(Elm* elms,
+                                             /*ElmInd*/ ssize_t ei) const {
+  ASSERT(ei <= (ssize_t)(m_lastE+1));
+  while (ei > 0) {
+    --ei;
+    if (elms[ei].data.m_type < KindOfTombstone) {
+      return ei;
+    } else if (elms[ei].data.m_type == KindOfIndirect) {
+      TypedValue* tv = elms[ei].data.m_data.ptv;
+      // Check for uninit null
+      if (tv->m_type != KindOfNull || tv->m_data.num != 1LL) {
+        return ei;
+      }
     }
   }
   return (ssize_t)ElmIndEmpty;
@@ -233,17 +288,12 @@ inline /*ElmInd*/ ssize_t HphpArray::nextElm(Elm* elms,
 
 ssize_t HphpArray::iter_begin() const {
   Elm* elms = data2Elms(m_data);
-  return ssize_t(nextElm(elms, ElmIndEmpty));
+  return nextElm(elms, ElmIndEmpty);
 }
 
 ssize_t HphpArray::iter_end() const {
   Elm* elms = data2Elms(m_data);
-  for (ElmInd pos = m_lastE; pos >= 0; --pos) {
-    if (elms[pos].data.m_type != KindOfTombstone) {
-      return ssize_t(pos);
-    }
-  }
-  return ArrayData::invalid_index;
+  return prevElm(elms, (ssize_t)(m_lastE+1));
 }
 
 ssize_t HphpArray::iter_advance(ssize_t pos) const {
@@ -254,7 +304,7 @@ ssize_t HphpArray::iter_advance(ssize_t pos) const {
   // we can save a check by doing an unsigned comparison instead
   // of a signed comparison.
   if (size_t(pos) < size_t(lastE) &&
-      elms[pos+1].data.m_type != KindOfTombstone) {
+      elms[pos+1].data.m_type < KindOfTombstone) {
     return pos+1;
   }
   return iter_advance_helper(pos);
@@ -268,8 +318,14 @@ ssize_t HphpArray::iter_advance_helper(ssize_t pos) const {
   // a signed comparison.
   while (size_t(pos) < size_t(lastE)) {
     ++pos;
-    if (elms[pos].data.m_type != KindOfTombstone) {
+    if (elms[pos].data.m_type < KindOfTombstone) {
       return pos;
+    } else if (elms[pos].data.m_type == KindOfIndirect) {
+      TypedValue* tv = elms[pos].data.m_data.ptv;
+      // Check for uninit null
+      if (tv->m_type != KindOfNull || tv->m_data.num != 1LL) {
+        return pos;
+      }
     }
   }
   return ArrayData::invalid_index;
@@ -279,15 +335,8 @@ ssize_t HphpArray::iter_rewind(ssize_t pos) const {
   if (pos == ArrayData::invalid_index) {
     return ArrayData::invalid_index;
   }
-  ElmInd ipos = pos;
-  ASSERT(ssize_t(ipos) == pos);
   Elm* elms = data2Elms(m_data);
-  for (--ipos; ipos >= 0; --ipos) {
-    if (elms[ipos].data.m_type != KindOfTombstone) {
-      return ssize_t(ipos);
-    }
-  }
-  return ArrayData::invalid_index;
+  return prevElm(elms, (ssize_t)(m_lastE+1));
 }
 
 Variant HphpArray::getKey(ssize_t pos) const {
@@ -305,28 +354,48 @@ Variant HphpArray::getValue(ssize_t pos) const {
   ASSERT(pos != ArrayData::invalid_index);
   Elm* elms = data2Elms(m_data);
   Elm* e = &elms[/*(ElmInd)*/pos];
-  return *(const Variant*)&(e->data);
+  ASSERT(e->data.m_type != KindOfTombstone);
+  if (LIKELY(e->data.m_type != KindOfIndirect)) {
+    return tvAsCVarRef(&e->data);
+  } else {
+    return tvAsCVarRef(e->data.m_data.ptv);
+  }
 }
 
 void HphpArray::fetchValue(ssize_t pos, Variant& v) const {
   ASSERT(pos != ArrayData::invalid_index);
   Elm* elms = data2Elms(m_data);
   Elm* e = &elms[/*(ElmInd)*/pos];
-  v = tvAsCVarRef(&e->data);
+  ASSERT(e->data.m_type != KindOfTombstone);
+  if (LIKELY(e->data.m_type != KindOfIndirect)) {
+    v = tvAsCVarRef(&e->data);
+  } else {
+    v = tvAsCVarRef(e->data.m_data.ptv);
+  }
 }
 
 CVarRef HphpArray::getValueRef(ssize_t pos) const {
   ASSERT(pos != ArrayData::invalid_index);
   Elm* elms = data2Elms(m_data);
   Elm* e = &elms[/*(ElmInd)*/pos];
-  return tvAsCVarRef(&e->data);
+  ASSERT(e->data.m_type != KindOfTombstone);
+  if (LIKELY(e->data.m_type != KindOfIndirect)) {
+    return tvAsCVarRef(&e->data);
+  } else {
+    return tvAsCVarRef(e->data.m_data.ptv);
+  }
 }
 
 CVarRef HphpArray::getValueRef(ssize_t pos, Variant &holder) const {
   ASSERT(pos != ArrayData::invalid_index);
   Elm* elms = data2Elms(m_data);
   Elm* e = &elms[/*(ElmInd)*/pos];
-  return tvAsCVarRef(&e->data);
+  ASSERT(e->data.m_type != KindOfTombstone);
+  if (LIKELY(e->data.m_type != KindOfIndirect)) {
+    return tvAsCVarRef(&e->data);
+  } else {
+    return tvAsCVarRef(e->data.m_data.ptv);
+  }
 }
 
 bool HphpArray::isVectorData() const {
@@ -340,6 +409,12 @@ bool HphpArray::isVectorData() const {
     if (e->data.m_type == KindOfTombstone) {
       continue;
     }
+    if (UNLIKELY(e->data.m_type == KindOfIndirect)) {
+      TypedValue* tv = e->data.m_data.ptv;
+      if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
+        continue;
+      }
+    }
     if (e->key != NULL || e->h != i) {
       return false;
     }
@@ -349,12 +424,15 @@ bool HphpArray::isVectorData() const {
 }
 
 Variant HphpArray::reset() {
-  if (m_nElms > 0) {
-    Elm* elms = data2Elms(m_data);
-    m_pos = ssize_t(nextElm(elms, ElmIndEmpty));
-    ASSERT(m_pos != ArrayData::invalid_index);
+  Elm* elms = data2Elms(m_data);
+  m_pos = ssize_t(nextElm(elms, ElmIndEmpty));
+  if (m_pos != ArrayData::invalid_index) {
     Elm* e = &elms[(ElmInd)m_pos];
-    return tvAsCVarRef(&e->data);
+    if (LIKELY(e->data.m_type != KindOfIndirect)) {
+      return tvAsCVarRef(&e->data);
+    } else {
+      return tvAsCVarRef(e->data.m_data.ptv);
+    }
   }
   m_pos = ArrayData::invalid_index;
   return false;
@@ -362,48 +440,55 @@ Variant HphpArray::reset() {
 
 Variant HphpArray::prev() {
   if (m_pos != ArrayData::invalid_index) {
-    ASSERT(m_nElms > 0);
     Elm* elms = data2Elms(m_data);
-    --m_pos;
-    while (m_pos >= 0) {
-      Elm* e = &elms[(ElmInd)m_pos];
-      if (e->data.m_type != KindOfTombstone) {
+    m_pos = prevElm(elms, m_pos);
+    if (m_pos != ArrayData::invalid_index) {
+      Elm* e = &elms[m_pos];
+      if (LIKELY(e->data.m_type != KindOfIndirect)) {
         return tvAsCVarRef(&e->data);
+      } else {
+        return tvAsCVarRef(e->data.m_data.ptv);
       }
-      --m_pos;
     }
-    m_pos = ArrayData::invalid_index;
   }
   return false;
 }
 
 Variant HphpArray::next() {
   if (m_pos != ArrayData::invalid_index) {
-    ASSERT(m_nElms > 0);
     Elm* elms = data2Elms(m_data);
-    m_pos = ssize_t(nextElm(elms, (ElmInd)m_pos));
+    m_pos = nextElm(elms, m_pos);
     if (m_pos != ArrayData::invalid_index) {
-      Elm* e = &elms[(ElmInd)m_pos];
-      return tvAsCVarRef(&e->data);
+      Elm* e = &elms[m_pos];
+      ASSERT(e->data.m_type != KindOfTombstone);
+      if (LIKELY(e->data.m_type != KindOfIndirect)) {
+        return tvAsCVarRef(&e->data);
+      } else {
+        return tvAsCVarRef(e->data.m_data.ptv);
+      }
     }
   }
   return false;
 }
 
 Variant HphpArray::end() {
-  if (m_lastE != ElmIndEmpty) {
-    Elm* elms = data2Elms(m_data);
-    ASSERT(elms[m_lastE].data.m_type != KindOfTombstone);
-    m_pos = ssize_t(m_lastE);
-    return tvAsCVarRef(&elms[(ElmInd)m_pos].data);
+  Elm* elms = data2Elms(m_data);
+  m_pos = prevElm(elms, (ssize_t)(m_lastE+1));
+  if (m_pos != ArrayData::invalid_index) {
+    Elm* e = &elms[m_pos];
+    ASSERT(e->data.m_type != KindOfTombstone);
+    if (LIKELY(e->data.m_type != KindOfIndirect)) {
+      return tvAsCVarRef(&e->data);
+    } else {
+      return tvAsCVarRef(e->data.m_data.ptv);
+    }
   }
-  m_pos = ArrayData::invalid_index;
   return false;
 }
 
 Variant HphpArray::key() const {
   if (m_pos != ArrayData::invalid_index) {
-    ASSERT((ElmInd)m_pos <= m_lastE);
+    ASSERT(m_pos <= (ssize_t)m_lastE);
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[(ElmInd)m_pos];
     ASSERT(e->data.m_type != KindOfTombstone);
@@ -418,9 +503,13 @@ Variant HphpArray::key() const {
 Variant HphpArray::value(ssize_t& pos) const {
   if (pos != ArrayData::invalid_index) {
     Elm* elms = data2Elms(m_data);
-    Elm* e = &elms[(ElmInd)pos];
+    Elm* e = &elms[pos];
     ASSERT(e->data.m_type != KindOfTombstone);
-    return tvAsCVarRef(&e->data);
+    if (LIKELY(e->data.m_type != KindOfIndirect)) {
+      return tvAsCVarRef(&e->data);
+    } else {
+      return tvAsCVarRef(e->data.m_data.ptv);
+    }
   }
   return false;
 }
@@ -428,9 +517,13 @@ Variant HphpArray::value(ssize_t& pos) const {
 Variant HphpArray::current() const {
   if (m_pos != ArrayData::invalid_index) {
     Elm* elms = data2Elms(m_data);
-    Elm* e = &elms[(ElmInd)m_pos];
+    Elm* e = &elms[m_pos];
     ASSERT(e->data.m_type != KindOfTombstone);
-    return tvAsCVarRef(&e->data);
+    if (LIKELY(e->data.m_type != KindOfIndirect)) {
+      return tvAsCVarRef(&e->data);
+    } else {
+      return tvAsCVarRef(e->data.m_data.ptv);
+    }
   }
   return false;
 }
@@ -441,14 +534,14 @@ static StaticString s_key("key");
 Variant HphpArray::each() {
   if (m_pos != ArrayData::invalid_index) {
     ArrayInit init(4, false);
-    Variant key = getKey((ElmInd)m_pos);
-    Variant value = getValue((ElmInd)m_pos);
+    Variant key = getKey(m_pos);
+    Variant value = getValue(m_pos);
     init.set(int64(1), value);
     init.set(s_value, value, true);
     init.set(int64(0), key);
     init.set(s_key, key, true);
     Elm* elms = data2Elms(m_data);
-    m_pos = ssize_t(nextElm(elms, (ElmInd)m_pos));
+    m_pos = nextElm(elms, m_pos);
     return Array(init.create());
   }
   return false;
@@ -617,6 +710,8 @@ Variant HphpArray::get(int64 k, bool error /* = false */) const {
   if (pos != ElmIndEmpty) {
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
+    // Integer keys do not support KindOfIndirect
+    ASSERT(e->data.m_type != KindOfIndirect);
     return tvAsCVarRef(&e->data);
   }
   if (error) {
@@ -631,8 +726,18 @@ Variant HphpArray::get(litstr k, bool error /* = false */) const {
   if (pos != ElmIndEmpty) {
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
-    return tvAsCVarRef(&e->data);
+    if (LIKELY(e->data.m_type != KindOfIndirect)) {
+      return tvAsCVarRef(&e->data);
+    } else {
+      TypedValue* tv = e->data.m_data.ptv;
+      // Check for uninit null
+      if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
+        goto undefined_index;
+      }
+      return tvAsCVarRef(tv);
+    }
   }
+undefined_index:
   if (error) {
     raise_notice("Undefined index: %s", k);
   }
@@ -646,8 +751,18 @@ Variant HphpArray::get(CStrRef k, bool error /* = false */) const {
   if (pos != ElmIndEmpty) {
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
-    return tvAsCVarRef(&e->data);
+    if (LIKELY(e->data.m_type != KindOfIndirect)) {
+      return tvAsCVarRef(&e->data);
+    } else {
+      TypedValue* tv = e->data.m_data.ptv;
+      // Check for uninit null
+      if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
+        goto undefined_index;
+      }
+      return tvAsCVarRef(tv);
+    }
   }
+undefined_index:
   if (error) {
     raise_notice("Undefined index: %s", k.data());
   }
@@ -658,16 +773,33 @@ Variant HphpArray::get(CVarRef k, bool error /* = false */) const {
   ElmInd pos;
   if (isIntegerKey(k)) {
     pos = find(k.toInt64());
+    if (pos != ElmIndEmpty) {
+      Elm* elms = data2Elms(m_data);
+      Elm* e = &elms[pos];
+      // Integer keys do not support KindOfIndirect
+      ASSERT(e->data.m_type != KindOfIndirect);
+      return tvAsCVarRef(&e->data);
+    }
   } else {
     StringData* strkey = k.getStringData();
     int64 prehash = strkey->hash();
     pos = find(strkey->data(), strkey->size(), prehash);
+    if (pos != ElmIndEmpty) {
+      Elm* elms = data2Elms(m_data);
+      Elm* e = &elms[pos];
+      if (LIKELY(e->data.m_type != KindOfIndirect)) {
+        return tvAsCVarRef(&e->data);
+      } else {
+        TypedValue* tv = e->data.m_data.ptv;
+        // Check for uninit null
+        if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
+          goto undefined_index;
+        }
+        return tvAsCVarRef(tv);
+      }
+    }
   }
-  if (pos != ElmIndEmpty) {
-    Elm* elms = data2Elms(m_data);
-    Elm* e = &elms[pos];
-    return tvAsCVarRef(&e->data);
-  }
+undefined_index:
   if (error) {
     raise_notice("Undefined index: %s", k.toString().data());
   }
@@ -681,7 +813,16 @@ Variant HphpArray::fetch(CStrRef k) const {
   if (pos != (ssize_t)ElmIndEmpty) {
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
-    return tvAsCVarRef(&e->data);
+    if (e->data.m_type != KindOfIndirect) {
+      return tvAsCVarRef(&e->data);
+    } else {
+      TypedValue* tv = e->data.m_data.ptv;
+      // Check for uninit null
+      if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
+        return false;
+      }
+      return tvAsCVarRef(tv);
+    }
   }
   return false;
 }
@@ -698,9 +839,22 @@ void HphpArray::load(CVarRef k, Variant& v) const {
   if (pos != (ssize_t)ElmIndEmpty) {
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
-    v.setWithRef(tvAsCVarRef(&e->data));
+    TypedValue* tv;
+    if (e->data.m_type != KindOfIndirect) {
+      tv = &e->data;
+    } else {
+      tv = e->data.m_data.ptv;
+      // Check for uninit null
+      if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
+        return;
+      }
+    }
+    v.setWithRef(tvAsCVarRef(tv));
   }
 }
+
+// NOTE: getIndex() will return a valid position even if the value
+// is KindOfIndirect and it is uninit null
 
 ssize_t HphpArray::getIndex(int64 k) const {
   return ssize_t(find(k));
@@ -1107,7 +1261,10 @@ bool HphpArray::addLvalImpl(int64 ki, Variant** pDest,
   if (validElmInd(*ei)) {
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[*ei];
-    *pDest = (Variant*)&(e->data);
+    // Integer keys do not support KindOfIndirect
+    ASSERT(e->data.m_type != KindOfIndirect);
+    TypedValue* tv = &e->data;
+    *pDest = (Variant*)tv;
     return false;
   }
 
@@ -1143,7 +1300,13 @@ bool HphpArray::addLvalImpl(StringData* key, int64 h, Variant** pDest,
   if (validElmInd(*ei)) {
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[*ei];
-    *pDest = &(tvAsVariant(&e->data));
+    TypedValue* tv;
+    if (e->data.m_type != KindOfIndirect) {
+      tv = &e->data;
+    } else {
+      tv = e->data.m_data.ptv;
+    }
+    *pDest = &(tvAsVariant(tv));
     return false;
   }
 
@@ -1206,24 +1369,40 @@ inline bool HphpArray::addVal(StringData* key, CVarRef data,
   }
   int64 h = key->hash();
   ElmInd* ei = findForInsert(key->data(), key->size(), h);
+  Elm* elms = data2Elms(m_data);
   if (checkExists && validElmInd(*ei)) {
-    return false;
+    if (LIKELY(elms[*ei].data.m_type != KindOfIndirect)) {
+      return false;
+    } else {
+      TypedValue* tv = elms[*ei].data.m_data.ptv;
+      // Check for uninit null
+      if (tv->m_type != KindOfNull || tv->m_data.num != 1LL) {
+        return false;
+      }
+    }
+  }
+  TypedValue* to;
+  if (LIKELY(!validElmInd(*ei))) {
+    Elm* e = allocElm(ei);
+    if (UNLIKELY(e == NULL)) {
+      resize();
+      ei = findForNewInsert(h);
+      e = allocElm(ei);
+      ASSERT(e != NULL);
+    }
+    to = (TypedValue*)(&e->data);
+    // Set the key
+    e->h = h;
+    e->key = key;
+    e->key->incRefCount();
   } else {
-    ASSERT(!validElmInd(*ei));
+    Elm* e = &elms[*ei];
+    ASSERT(e->data.m_type == KindOfIndirect);
+    to = (TypedValue*)(e->data.m_data.ptv);
+    ASSERT(to->m_type == KindOfNull && to->m_data.num == 1);
   }
-
-  Elm* e = allocElm(ei);
-  if (UNLIKELY(e == NULL)) {
-    resize();
-    ei = findForNewInsert(h);
-    e = allocElm(ei);
-    ASSERT(e != NULL);
-  }
+  // Set the element
   TypedValue* fr = (TypedValue*)(&data);
-  TypedValue* to = (TypedValue*)(&e->data);
-  e->h = h;
-  e->key = key;
-  e->key->incRefCount();
   ELEMENT_CONSTRUCT(fr, to);
 
   return true;
@@ -1296,6 +1475,8 @@ bool HphpArray::update(int64 ki, CVarRef data) {
   if (validElmInd(*ei)) {
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[*ei];
+    // Integer keys do not support KindOfIndirect
+    ASSERT(e->data.m_type != KindOfIndirect);
     TypedValue* to = (TypedValue*)(&e->data);
     ELEMENT_ASSIGN(fr, to);
     return true;
@@ -1330,7 +1511,12 @@ bool HphpArray::update(litstr key, CVarRef data) {
   if (validElmInd(*ei)) {
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[*ei];
-    TypedValue* to = (TypedValue*)(&e->data);
+    TypedValue* to;
+    if (LIKELY(e->data.m_type != KindOfIndirect)) {
+      to = (TypedValue*)(&e->data);
+    } else {
+      to = (TypedValue*)(e->data.m_data.ptv);
+    }
     ELEMENT_ASSIGN(fr, to);
     return true;
   }
@@ -1352,6 +1538,131 @@ bool HphpArray::update(litstr key, CVarRef data) {
   return true;
 }
 
+// NOTE: The migrate() and migrateAndSet() methods do not trigger
+// copy-on-write. It is the caller's responsibility to account
+// for this.
+
+TypedValue* HphpArray::migrate(StringData* k, TypedValue* tv) {
+  int64 h = k->hash();
+  ElmInd* ei = findForInsert(k->data(), k->size(), h);
+  if (validElmInd(*ei)) {
+    Elm* elms = data2Elms(m_data);
+    Elm* e = &elms[*ei];
+    TypedValue* slot = (TypedValue*)(&e->data);
+    if (slot->m_type != KindOfIndirect) {
+      if (tv == NULL) {
+        // If the caller wants to unpin a key in the array that is not
+        // pinned, do nothing and return NULL
+        return NULL;
+      }
+      // Migrate the existing direct element to tv
+      memcpy(tv, slot, sizeof(TypedValue));
+      // Set the element to a KindOfIndirect that points to tv
+      slot->m_data.ptv = tv;
+      slot->m_type = KindOfIndirect;
+      ++m_nIndirectElms;
+      return NULL;
+    } else {
+      TypedValue* cur = slot->m_data.ptv;
+      if (tv == NULL) {
+        // Migrate the existing indirect element back to the array
+        memcpy(slot, cur, sizeof(TypedValue));
+        // Check for uninit null
+        if (cur->m_type == KindOfNull && cur->m_data.num == 1LL) {
+          // Erase the element
+          erase(ei);
+        }
+        --m_nIndirectElms;
+        return cur;
+      }
+      // Migrate the existing indirect element to tv
+      memcpy(tv, cur, sizeof(TypedValue));
+      // Set the element to point to tv
+      slot->m_data.ptv = tv;
+      return cur;
+    }
+  } else {
+    if (tv == NULL) {
+      // If the caller wants to unpin a key that is not present in the
+      // array, do nothing and return NULL
+      return NULL;
+    }
+    // Allocate a new element
+    Elm* e = allocElm(ei);
+    if (UNLIKELY(e == NULL)) {
+      resize();
+      ei = findForNewInsert(h);
+      e = allocElm(ei);
+      ASSERT(e != NULL);
+    }
+    TypedValue* slot = (TypedValue*)(&e->data);
+    // Set the key
+    e->h = h;
+    e->key = k;
+    e->key->incRefCount();
+    // Set the element to a KindOfIndirect that points to tv
+    slot->m_data.ptv = tv;
+    slot->_count = 0;
+    slot->m_type = KindOfIndirect;
+    // Set tv to uninit null
+    TV_WRITE_UNINIT(tv);
+    ++m_nIndirectElms;
+    return NULL;
+  }
+}
+
+TypedValue* HphpArray::migrateAndSet(StringData* k, TypedValue* tv) {
+  ASSERT(tv != NULL);
+  int64 h = k->hash();
+  ElmInd* ei = findForInsert(k->data(), k->size(), h);
+  if (validElmInd(*ei)) {
+    Elm* elms = data2Elms(m_data);
+    Elm* e = &elms[*ei];
+    TypedValue* slot = (TypedValue*)(&e->data);
+    if (slot->m_type != KindOfIndirect) {
+      // Destroy the old element
+      if (IS_REFCOUNTED_TYPE(slot->m_type)) {
+        tvDecRef(slot);
+      }
+      // Set the element to a KindOfIndirect that points to tv
+      slot->m_data.ptv = tv;
+      slot->m_type = KindOfIndirect;
+      ++m_nIndirectElms;
+      return NULL;
+    } else {
+      TypedValue* cur = slot->m_data.ptv;
+      // Destroy the old element
+      if (IS_REFCOUNTED_TYPE(cur->m_type)) {
+        tvDecRef(cur);
+        TV_WRITE_UNINIT(cur);
+      }
+      // Set the element to point to tv
+      slot->m_data.ptv = tv;
+      return cur;
+    }
+  } else {
+    // Allocate a new element
+    Elm* e = allocElm(ei);
+    if (UNLIKELY(e == NULL)) {
+      resize();
+      ei = findForNewInsert(h);
+      e = allocElm(ei);
+      ASSERT(e != NULL);
+    }
+    TypedValue* slot = (TypedValue*)(&e->data);
+    // Set the key
+    e->h = h;
+    e->key = k;
+    e->key->incRefCount();
+    // Set the element to a KindOfIndirect that points to tv
+    slot->m_data.ptv = tv;
+    slot->_count = 0;
+    slot->m_type = KindOfIndirect;
+    ++m_nIndirectElms;
+    return NULL;
+  }
+}
+
 bool HphpArray::update(StringData* key, CVarRef data) {
   if (m_linear) {
     delinearize();
@@ -1362,7 +1673,12 @@ bool HphpArray::update(StringData* key, CVarRef data) {
   if (validElmInd(*ei)) {
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[*ei];
-    TypedValue* to = (TypedValue*)(&e->data);
+    TypedValue* to;
+    if (LIKELY(e->data.m_type != KindOfIndirect)) {
+      to = (TypedValue*)(&e->data);
+    } else {
+      to = (TypedValue*)(e->data.m_data.ptv);
+    }
     ELEMENT_ASSIGN(fr, to);
     return true;
   }
@@ -1390,13 +1706,21 @@ ArrayData* HphpArray::lval(Variant*& ret, bool copy) {
     ASSERT(a->m_lastE != ElmIndEmpty);
     ssize_t lastE = (ssize_t)a->m_lastE;
     Elm* aElms = data2Elms(a->m_data);
-    ret = &tvAsVariant(&aElms[lastE].data);
+    if (LIKELY(aElms[lastE].data.m_type != KindOfIndirect)) {
+      ret = &tvAsVariant(&aElms[lastE].data);
+    } else {
+      ret = &tvAsVariant(aElms[lastE].data.m_data.ptv);
+    }
     return a;
   }
   ASSERT(m_lastE != ElmIndEmpty);
   ssize_t lastE = (ssize_t)m_lastE;
   Elm* elms = data2Elms(m_data);
-  ret = &(tvAsVariant(&elms[lastE].data));
+  if (LIKELY(elms[lastE].data.m_type != KindOfIndirect)) {
+    ret = &(tvAsVariant(&elms[lastE].data));
+  } else {
+    ret = &(tvAsVariant(elms[lastE].data.m_data.ptv));
+  }
   return NULL;
 }
 
@@ -1415,6 +1739,8 @@ ArrayData* HphpArray::lval(int64 k, Variant*& ret, bool copy,
   if (pos != (ssize_t)ElmIndEmpty) {
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
+    // Integer keys do not support KindOfIndirect
+    ASSERT(e->data.m_type != KindOfIndirect);
     ret = &(tvAsVariant(&e->data));
     return NULL;
   }
@@ -1446,9 +1772,18 @@ ArrayData* HphpArray::lval(CStrRef k, Variant*& ret, bool copy,
   if (pos != (ssize_t)ElmIndEmpty) {
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
-    ret = &(tvAsVariant(&e->data));
+    if (e->data.m_type != KindOfIndirect) {
+      ret = &(tvAsVariant(&e->data));
+    } else {
+      TypedValue* tv = e->data.m_data.ptv;
+      if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
+        goto miss;
+      }
+      ret = &(tvAsVariant(tv));
+    }
     return NULL;
   }
+miss:
   HphpArray* a = copyImpl();
   a->addLvalImpl(key, prehash, &ret, false);
   return a;
@@ -1471,7 +1806,6 @@ ArrayData *HphpArray::lvalPtr(CStrRef k, Variant*& ret, bool copy,
   if (copy) {
     a = t = copyImpl();
   }
-
   if (create) {
     t->addLvalImpl(key, prehash, &ret);
   } else {
@@ -1479,7 +1813,17 @@ ArrayData *HphpArray::lvalPtr(CStrRef k, Variant*& ret, bool copy,
     if (pos != (ssize_t)ElmIndEmpty) {
       Elm* elms = data2Elms(m_data);
       Elm* e = &elms[pos];
-      ret = &(tvAsVariant(&e->data));
+      if (LIKELY(e->data.m_type != KindOfIndirect)) {
+        ret = &(tvAsVariant(&e->data));
+      } else {
+        TypedValue* tv = e->data.m_data.ptv;
+        // Check for uninit null
+        if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
+          ret = NULL;
+        } else {
+          ret = &(tvAsVariant(e->data.m_data.ptv));
+        }
+      }
     } else {
       ret = NULL;
     }
@@ -1697,48 +2041,62 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
     m_pos = ssize_t(eINext);
   }
 
-  // Free the value if necessary and mark it as a tombstone.
   Elm* e = &elms[pos];
-  if (IS_REFCOUNTED_TYPE(e->data.m_type)) {
-    tvDecRef(&e->data);
-  }
-  e->data.m_type = KindOfTombstone;
-
-  // Free the key if necessary, and clear the h and key fields in order to
-  // increase the chances that subsequent searches will quickly/safely fail
-  // when encountering tombstones, even though checking for KindOfTombstone is
-  // the last validation step during search.
-  if (e->key != NULL) {
-    if (e->key->decRefCount() == 0) {
-      e->key->release();
+  if (e->data.m_type != KindOfIndirect) {
+    // Free the value if necessary and mark it as a tombstone.
+    TypedValue* tv = &e->data;
+    if (IS_REFCOUNTED_TYPE(tv->m_type)) {
+      tvDecRef(tv);
     }
-    e->key = NULL;
+    tv->m_type = KindOfTombstone;
+    // Free the key if necessary, and clear the h and key fields in order to
+    // increase the chances that subsequent searches will quickly/safely fail
+    // when encountering tombstones, even though checking for KindOfTombstone is
+    // the last validation step during search.
+    if (e->key != NULL) {
+      if (e->key->decRefCount() == 0) {
+        e->key->release();
+      }
+      e->key = NULL;
+    } else {
+      // Match PHP 5.3.1 semantics
+      if (e->h == m_nextKI-1 && (e->h == 0x7fffffffffffffffLL || updateNext)) {
+        --m_nextKI;
+      }
+    }
+    e->h = 0;
+    --m_nElms;
+    // If this element was last, adjust m_lastE.
+    if (pos == m_lastE) {
+      do {
+        --m_lastE;
+      } while (m_lastE >= 0 && elms[m_lastE].data.m_type == KindOfTombstone);
+    }
+    // Mark the hash entry as "deleted".
+    *ei = ElmIndTombstone;
+    ASSERT(m_lastE == ElmIndEmpty ||
+           uint32(m_lastE)+1 <= computeMaxElms(m_tableMask));
+    ASSERT(m_hLoad <= computeMaxElms(m_tableMask));
+    if (m_nElms < ((m_lastE+1) >> 1)) {
+      // Compact in order to keep elms from being overly sparse.
+      compact();
+    }
   } else {
-    // Match PHP 5.3.1 semantics
-    if (e->h == m_nextKI-1 && (e->h == 0x7fffffffffffffffLL || updateNext)) {
-      --m_nextKI;
+    // For KindOfIndirect, we do not free the key or remove the hash entry.
+    // Instead, we decref the value that the KindOfIndirect points to and
+    // set it to uninit null. m_nElms does not get updated either. It is the
+    // responsibility of the size() function to account for this.
+    //
+    // The main takeaway here is that we leave the hash entry, the key, and
+    // the KindOfIndirect pointer intact. That way, if the element is set
+    // later, we are able to preserve the relationship between the key and
+    // the indirect memory location.
+    TypedValue* tv = e->data.m_data.ptv;
+    if (IS_REFCOUNTED_TYPE(tv->m_type)) {
+      tvDecRef(tv);
     }
-  }
-  e->h = 0;
-
-  --m_nElms;
-
-  // If this element was last, adjust m_lastE.
-  if (pos == m_lastE) {
-    do {
-      --m_lastE;
-    } while (m_lastE >= 0 && elms[m_lastE].data.m_type == KindOfTombstone);
-  }
-
-  // Mark the hash entry as "deleted".
-  *ei = ElmIndTombstone;
-
-  ASSERT(m_lastE == ElmIndEmpty ||
-         uint32(m_lastE)+1 <= computeMaxElms(m_tableMask));
-  ASSERT(m_hLoad <= computeMaxElms(m_tableMask));
-  if (m_nElms < ((m_lastE+1) >> 1)) {
-    // Compact in order to keep elms from being overly sparse.
-    compact();
+    tv->m_type = KindOfNull;
+    tv->m_data.num = 1;
   }
 
   if (nextElementUnsetInsideForeachByReference) {
@@ -1835,6 +2193,7 @@ HphpArray* HphpArray::copyImpl() const {
   target->m_linear = false;
   target->m_siPastEnd = false;
   target->m_dataPad = 0;
+  target->m_nIndirectElms = 0;
   size_t tableSize = computeTableSize(m_tableMask);
   size_t maxElms = computeMaxElms(m_tableMask);
   target->reallocData(maxElms, tableSize);
@@ -1852,10 +2211,33 @@ HphpArray* HphpArray::copyImpl() const {
       if (e->data.m_type != KindOfTombstone) {
         te->h = e->h;
         te->key = e->key;
+        TypedValue* fr;
         if (te->key != NULL) {
+          if (LIKELY(e->data.m_type != KindOfIndirect)) {
+            fr = &e->data;
+          } else {
+            fr = e->data.m_data.ptv;
+            // Check for uninit null
+            if (fr->m_type == KindOfNull && fr->m_data.num == 1LL) {
+              // If the indirect memory location is set to uninit
+              // null, we treat it as a tombstone.
+              te->h = 0;
+              te->key = NULL;
+              te->data.m_type = KindOfTombstone;
+              // Because we are converting an indirect element into
+              // a tombstone, we need to decrement m_nElms to stay
+              // consistent. This is because m_nElms always "counts"
+              // an indirect element even if it is uninit null.
+              --(target->m_nElms);
+              continue;
+            }
+          }
           te->key->incRefCount();
+        } else {
+          // Integer keys do not support KindOfIndirect
+          ASSERT(e->data.m_type != KindOfIndirect);
+          fr = &e->data;
         }
-        TypedValue* fr = &e->data;
         TypedValue* to = &te->data;
         ELEMENT_CLONE(fr, to);
       } else {
@@ -1864,6 +2246,20 @@ HphpArray* HphpArray::copyImpl() const {
         te->key = NULL;
         te->data.m_type = KindOfTombstone;
       }
+    }
+    // It's possible that there were indirect elements at the end that were
+    // converted to tombstones, so check if we should adjust target->m_lastE
+    while (target->m_lastE >= 0) {
+      Elm* te = &targetElms[target->m_lastE];
+      if (te->data.m_type != KindOfTombstone) {
+        break;
+      }
+      --(target->m_lastE);
+    }
+    // If the element density dropped below 50% due to indirect elements
+    // being converted into tombstones, we should do a compaction
+    if (target->m_nElms < ((target->m_lastE+1) >> 1)) {
+      target->compact();
     }
   }
   return target;
@@ -1931,14 +2327,22 @@ ArrayData* HphpArray::pop(Variant& value) {
     return a;
   }
   Elm* elms = data2Elms(m_data);
-  if (m_nElms > 0) {
-    if (m_linear) {
-      delinearize();
-    }
-    ElmInd pos = m_lastE;
+  if (m_linear) {
+    delinearize();
+  }
+  ElmInd pos = iter_end();
+  if (validElmInd(pos)) {
     Elm* e = &elms[pos];
     ASSERT(e->data.m_type != KindOfTombstone);
-    value = tvAsCVarRef(&e->data);
+    if (LIKELY(e->data.m_type != KindOfIndirect)) {
+      value = tvAsCVarRef(&e->data);
+    } else {
+      TypedValue* tv = e->data.m_data.ptv;
+      // iter_end() must guarantee that it will not return an element
+      // which is KindOfIndirect and points to an uninit null value
+      ASSERT(tv->m_type != KindOfNull || tv->m_data.num != 1LL);
+      value = tvAsCVarRef(tv);
+    }
     ElmInd* ei = (e->key != NULL)
         ? findForInsert(e->key->data(), e->key->size(), e->h)
         : findForInsert(e->h);
@@ -1964,13 +2368,21 @@ ArrayData* HphpArray::dequeue(Variant& value) {
     freeStrongIterators();
   }
   Elm* elms = data2Elms(m_data);
-  if (m_nElms > 0) {
-    if (m_linear) {
-      delinearize();
-    }
-    ElmInd pos = nextElm(elms, ElmIndEmpty);
+  if (m_linear) {
+    delinearize();
+  }
+  ElmInd pos = nextElm(elms, ElmIndEmpty);
+  if (validElmInd(pos)) {
     Elm* e = &elms[pos];
-    value = tvAsCVarRef(&e->data);
+    if (LIKELY(e->data.m_type != KindOfIndirect)) {
+      value = tvAsCVarRef(&e->data);
+    } else {
+      TypedValue* tv = e->data.m_data.ptv;
+      // nextElm() must guarantee that it will not return an element
+      // which is KindOfIndirect and points to an uninit null value
+      ASSERT(tv->m_type != KindOfNull || tv->m_data.num != 1LL);
+      value = tvAsCVarRef(tv);
+    }
     erase((e->key != NULL)
           ? findForInsert(e->key->data(), e->key->size(), e->h)
           : findForInsert(e->h)
@@ -2040,7 +2452,15 @@ void HphpArray::onSetStatic() {
       if (e->key) {
         e->key->setStatic();
       }
-      tvAsVariant(&e->data).setStatic();
+      if (LIKELY(e->data.m_type != KindOfIndirect)) {
+        tvAsVariant(&e->data).setStatic();
+      } else {
+        TypedValue* tv = e->data.m_data.ptv;
+        // Check for uninit null
+        if (tv->m_type != KindOfNull || tv->m_data.num != 1LL) {
+          tvAsVariant(tv).setStatic();
+        }
+      }
     }
   }
 }
@@ -2068,7 +2488,11 @@ CVarRef HphpArray::currentRef() {
   Elm* elms = data2Elms(m_data);
   Elm* e = &elms[(ElmInd)m_pos];
   ASSERT(e->data.m_type != KindOfTombstone);
-  return tvAsCVarRef(&e->data);
+  if (LIKELY(e->data.m_type != KindOfIndirect)) {
+    return tvAsCVarRef(&e->data);
+  } else {
+    return tvAsCVarRef(e->data.m_data.ptv);
+  }
 }
 
 CVarRef HphpArray::endRef() {
@@ -2076,7 +2500,11 @@ CVarRef HphpArray::endRef() {
   Elm* elms = data2Elms(m_data);
   ElmInd pos = m_lastE;
   Elm* e = &elms[pos];
-  return tvAsCVarRef(&e->data);
+  if (LIKELY(e->data.m_type != KindOfIndirect)) {
+    return tvAsCVarRef(&e->data);
+  } else {
+    return tvAsCVarRef(e->data.m_data.ptv);
+  }
 }
 
 //=============================================================================
@@ -2094,8 +2522,44 @@ void HphpArray::backup(LinearAllocator& allocator) {
   Elm* elms = data2Elms(m_data);
   void* alignedData = NULL;
   allocator.backup((const char*)&alignedData, sizeof(void*));
-  allocator.backup((const char*)elms,
-                   computeMaxElms(m_tableMask) * sizeof(Elm));
+  if (m_nIndirectElms == 0) {
+    allocator.backup((const char*)elms,
+                     computeMaxElms(m_tableMask) * sizeof(Elm));
+  } else {
+    // If this array contains indirect elements, we have to backup
+    // the elements one at a time
+    Elm ts;
+    ts.h = 0LL;
+    ts.key = NULL;
+    ts.data.m_data.num = 0LL;
+    ts.data._count = 0;
+    ts.data.m_type = KindOfTombstone;
+
+    for (ElmInd i = 0; i <= m_lastE; ++i) {
+      Elm* e = &elms[i];
+      if (e->data.m_type != KindOfIndirect) {
+        allocator.backup((const char*)e, sizeof(Elm));
+      } else {
+        TypedValue* tv = e->data.m_data.ptv;
+        // Check for uninit null
+        if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
+          // Tombstone
+          allocator.backup((const char*)(&ts), sizeof(Elm));
+        } else {
+          Elm indElm;
+          indElm.h = e->h;
+          indElm.key = e->key;
+          indElm.data.m_data.num = tv->m_data.num;
+          indElm.data._count = tv->_count;
+          indElm.data.m_type = tv->m_type;
+          allocator.backup((const char*)(&indElm), sizeof(Elm));
+        }
+      }
+    }
+    // Back up the rest of the element slots after m_lastE
+    allocator.backup((const char*)elms + ((m_lastE+1) * sizeof(Elm)),
+                  (computeMaxElms(m_tableMask) - (m_lastE+1)) * sizeof(Elm));
+  }
   allocator.backup((const char*)m_hash,
                    computeTableSize(m_tableMask) * sizeof(ElmInd));
   Elm pad;

@@ -38,7 +38,7 @@ private:
 public:
   virtual ~HphpArray();
 
-  virtual ssize_t size() const { return (ssize_t)m_nElms;}
+  virtual ssize_t size() const;
 
   virtual Variant getKey(ssize_t pos) const;
   virtual Variant getValue(ssize_t pos) const;
@@ -132,8 +132,29 @@ public:
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
 
+  /**
+   * Assumes 'tv' is dead and preserves the element's original value
+   * if the key is already present in the array. If 'tv' is NULL, this
+   * method will migrate the element back to the array.
+   *
+   * Returns the previous fixed memory location that the element lived at,
+   * or NULL if the element used to live in the array.
+   */
+  TypedValue* migrate(StringData* k, TypedValue* tv);
+
+  /**
+   * Assumes 'tv' is live, overwrites the element's value if the key
+   * is already present in the array. 'tv' must not be NULL.
+   *
+   * Returns the previous fixed memory location that the element lived at,
+   * or NULL if the element used to live in the array.
+   */
+  TypedValue* migrateAndSet(StringData* k, TypedValue* tv);
+
   // Used in Elm's data.m_type field to denote an invalid Elm.
   static const HPHP::DataType KindOfTombstone = MaxNumDataTypes;
+  static const HPHP::DataType KindOfIndirect =
+      (HPHP::DataType)(MaxNumDataTypes + 1);
 
   // Array element.
   struct Elm {
@@ -189,6 +210,8 @@ private:
   char    m_siPastEnd;   // (true) ? strong iterators possibly past end.
   uchar   m_dataPad;     // Number of bytes that m_data was advanced to
                          //   achieve the required alignment
+  ElmInd  m_nIndirectElms; // Total number of elements in the array with
+                           //   m_type == KindOfIndirect
 
   inline void* getBlock() {
     return ((void*)(uintptr_t(m_data) - uintptr_t(m_dataPad)));
@@ -197,6 +220,7 @@ private:
   void dumpDebugInfo() const;
 
   ssize_t /*ElmInd*/ nextElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
+  ssize_t /*ElmInd*/ prevElm(Elm* elms, ssize_t /*ElmInd*/ ei) const;
 
   inline ssize_t /*ElmInd*/ find(int64 ki) const;
   inline ssize_t /*ElmInd*/ find(const char* k, int len, int64 prehash) const;
@@ -281,4 +305,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __HPHP_ZEND_ARRAY_H__
+#endif // __HPHP_HPHP_ARRAY_H__

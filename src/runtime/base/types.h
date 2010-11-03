@@ -123,6 +123,8 @@ enum DataType {
   KindOfVariant = 11,
 
   MaxNumDataTypes = 12, // marker, not a valid type
+
+  MaxDataType   = 0x7fffffff // Allow KindOf* > 12 in HphpArray.
 };
 
 inline int getDataTypeIndex(DataType t) {

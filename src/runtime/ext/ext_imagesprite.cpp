@@ -383,19 +383,11 @@ void ImageFromHTTP::loadImage(bool block /* = false */) {
     m_ev_group->add(m_conn);
     m_request = evhttp_request_new(ev_req_complete, this);
 
-    std::string url;
-    if (m_url.find("http://") != 0) {
-      url += "http://";
-      url += m_host.c_str();
-    }
-    url += m_url.c_str();
-    url += m_query.c_str();
-
     int ret = evhttp_make_request(
       m_conn,
       m_request,
       EVHTTP_REQ_GET,
-      url.c_str());
+      (m_url + m_query).c_str());
 
     if (ret) {
       setError("http request failed");

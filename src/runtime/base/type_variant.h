@@ -317,6 +317,14 @@ class Variant {
   Variant &operator=(CVarRef v) {
     return assign(v);
   }
+  Variant &operator=(const StaticString & v) {
+    if (m_type != KindOfVariant) {
+      set(v);
+    } else {
+      m_data.pvar->set(v);
+    }
+    return *this;
+  }
   template<typename T> Variant &operator=(const T &v) {
     if (m_type != KindOfVariant) {
       set(v);
@@ -1025,11 +1033,15 @@ class Variant {
   CVarRef set(int64   v);
   CVarRef set(double  v);
   CVarRef set(litstr  v);
+  CVarRef set(const std::string & v) {
+    return set(String(v));
+  }
   CVarRef set(StringData  *v);
   CVarRef set(ArrayData   *v);
   CVarRef set(ObjectData  *v);
 
   CVarRef set(CStrRef v) { return set(v.get()); }
+  CVarRef set(const StaticString & v);
   CVarRef set(CArrRef v) { return set(v.get()); }
   CVarRef set(CObjRef v) { return set(v.get()); }
 

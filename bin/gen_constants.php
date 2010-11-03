@@ -46,3 +46,7 @@ print "define('GLOBAL_STATE_SKIP', 2);\n";
 print "define('GLOBAL_SYMBOL_GLOBAL_VARIABLE',     0);\n";
 print "define('GLOBAL_SYMBOL_STATIC_VARIABLE',     1);\n";
 print "define('GLOBAL_SYMBOL_CLASS_STATIC',        2);\n";
+print "define('GLOBAL_SYMBOL_DYNAMIC_CONSTANT',    3);\n";
+print "define('GLOBAL_SYMBOL_FILE_INCLUDE',        4);\n";
+print "define('GLOBAL_SYMBOL_REDECLARED_FUNCTION', 5);\n";
+print "define('GLOBAL_SYMBOL_REDECLARED_CLASS',    6);\n";

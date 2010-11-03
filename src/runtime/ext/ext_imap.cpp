@@ -108,7 +108,7 @@ public:
     if (m_errorstack != NIL) {
       /* output any remaining errors at their original error level */
       for (ERRORLIST *ecur = m_errorstack; ecur != NIL; ecur = ecur->next) {
-        Logger::Verbose("%s (errflg=%ld)", ecur->text.data, ecur->errflg);
+        Logger::Warning("%s (errflg=%ld)", ecur->text.data, ecur->errflg);
       }
       mail_free_errorlist(&m_errorstack);
       m_errorstack = NIL;
@@ -117,7 +117,7 @@ public:
     if (m_alertstack != NIL) {
       /* output any remaining alerts at E_NOTICE level */
       for (STRINGLIST *acur = m_alertstack; acur != NIL; acur = acur->next) {
-        Logger::Verbose("%s", acur->text.data);
+        Logger::Warning("%s", acur->text.data);
       }
       mail_free_stringlist(&m_alertstack);
       m_alertstack = NIL;
@@ -157,6 +157,49 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(ImapRequestData, s_imap_data);
 static class imapExtension : public Extension {
 public:
   imapExtension() : Extension("imap") {}
+
+  virtual void moduleInit() {
+    mail_link(&unixdriver);   /* link in the unix driver */
+    mail_link(&mhdriver);     /* link in the mh driver */
+    /* According to c-client docs (internal.txt) this shouldn't be used. */
+    /* mail_link(&mxdriver); */
+    mail_link(&mmdfdriver);   /* link in the mmdf driver */
+    mail_link(&newsdriver);   /* link in the news driver */
+    mail_link(&philedriver);  /* link in the phile driver */
+
+    mail_link(&imapdriver);   /* link in the imap driver */
+    mail_link(&nntpdriver);   /* link in the nntp driver */
+    mail_link(&pop3driver);   /* link in the pop3 driver */
+    mail_link(&mbxdriver);    /* link in the mbx driver */
+    mail_link(&tenexdriver);  /* link in the tenex driver */
+    mail_link(&mtxdriver);    /* link in the mtx driver */
+    mail_link(&dummydriver);  /* link in the dummy driver */
+
+    auth_link(&auth_log);     /* link in the log authenticator */
+    auth_link(&auth_md5);     /* link in the cram-md5 authenticator */
+
+#ifndef SKIP_IMAP_GSS
+    auth_link(&auth_gss);     /* link in the gss authenticator */
+#endif
+
+    auth_link(&auth_pla);     /* link in the plain authenticator */
+
+#ifndef SKIP_IMAP_SSL
+    ssl_onceonlyinit();
+#endif
+
+    /* plug in our gets */
+    mail_parameters(NIL, SET_GETS, (void *) NIL);
+
+    /* set default timeout values */
+    void *timeout = (void *)RuntimeOption::SocketDefaultTimeout;
+
+    mail_parameters(NIL, SET_OPENTIMEOUT,  timeout);
+    mail_parameters(NIL, SET_READTIMEOUT,  timeout);
+    mail_parameters(NIL, SET_WRITETIMEOUT, timeout);
+    mail_parameters(NIL, SET_CLOSETIMEOUT, timeout);
+  }
+
 } s_imap_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -575,9 +618,9 @@ void mm_login(NETMBX *mb, char *user, char *pwd, long trial) {
   if (*mb->user) {
     string_copy(user, mb->user, MAILTMPLEN);
   } else {
-    IMAPG(user) = user;
+    string_copy(user, IMAPG(user).c_str(), MAILTMPLEN);
   }
-  IMAPG(password) = pwd;
+  string_copy(pwd, IMAPG(password).c_str(), MAILTMPLEN);
 }
 
 void mm_dlog(char *str) {}

@@ -483,7 +483,7 @@ LIBMEMCACHED_LIBS = $(EXT_DIR)/libmemcached/lib/libmemcached.a
 
 LIBCAP_LIBS = $(EXT_DIR)/libcap/lib64/libcap.a
 
-IMAP_LIBS = $(EXT_DIR)/imap/lib/c-client.a -lpam
+IMAP_LIBS = $(EXT_DIR)/imap/lib/c-client.a -lpam -lkrb5
 
 GD_LIBS = $(EXT_DIR)/gd/lib/libgd.a $(EXT_DIR)/libpng/lib/libpng.a \
 	-ljpeg -lfreetype -lfontconfig

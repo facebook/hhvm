@@ -1409,7 +1409,10 @@ Variant c_PDO::t_query(CStrRef sql) {
     stmt->lazy_object_ref = null;
 
     strcpy(stmt->error_code, PDO_ERR_NONE);
-    if (pdo_stmt_set_fetch_mode(stmt, 0, 1, Array())) {
+
+    // when we add support for varargs here, we only need to set the stmt if
+    // the argument count is > 1
+    if (true || pdo_stmt_set_fetch_mode(stmt, 0, PDO_FETCH_BOTH, Array())) {
       /* now execute the statement */
       strcpy(stmt->error_code, PDO_ERR_NONE);
       if (stmt->executer()) {

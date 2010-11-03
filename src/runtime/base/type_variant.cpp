@@ -51,14 +51,18 @@ static StaticString s_1("1");
 
 Variant::Variant(litstr  v) : _count(0), m_type(KindOfString) {
   m_data.pstr = NEW(StringData)(v);
-  m_data.pstr->incRefCount();
+  m_data.pstr->incRefCountNoCheck();
 }
 
 Variant::Variant(CStrRef v) : _count(0), m_type(KindOfString) {
   StringData *s = v.get();
   if (s) {
     m_data.pstr = s;
-    s->incRefCount();
+    if (s->isStatic()) {
+      m_type = KindOfStaticString;
+    } else {
+      s->incRefCountNoCheck();
+    }
   } else {
     m_data.num = 0;
     m_type = KindOfNull;
@@ -69,7 +73,7 @@ Variant::Variant(const std::string & v) : _count(0), m_type(KindOfString) {
   StringData *s = NEW(StringData)(v.c_str(), v.size(), CopyString);
   ASSERT(s);
   m_data.pstr = s;
-  s->incRefCount();
+  s->incRefCountNoCheck();
 }
 
 Variant::Variant(const StaticString & v) :
@@ -108,7 +112,11 @@ Variant::Variant(CObjRef v) : _count(0), m_type(KindOfObject) {
 Variant::Variant(StringData *v) : _count(0), m_type(KindOfString) {
   if (v) {
     m_data.pstr = v;
-    v->incRefCount();
+    if (v->isStatic()) {
+      m_type = KindOfStaticString;
+    } else {
+      v->incRefCountNoCheck();
+    }
   } else {
     m_data.num = 0;
     m_type = KindOfNull;
@@ -262,7 +270,7 @@ CVarRef Variant::set(bool v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
+    destruct();
   }
   m_type = KindOfBoolean;
   m_data.num = (v ? 1 : 0);
@@ -276,7 +284,7 @@ CVarRef Variant::set(char v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
+    destruct();
   }
   m_type = KindOfByte;
   m_data.num = v;
@@ -290,7 +298,7 @@ CVarRef Variant::set(short v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
+    destruct();
   }
   m_type = KindOfInt16;
   m_data.num = v;
@@ -304,7 +312,7 @@ CVarRef Variant::set(int v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
+    destruct();
   }
   m_type = KindOfInt32;
   m_data.num = v;
@@ -318,7 +326,7 @@ CVarRef Variant::set(int64 v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
+    destruct();
   }
   m_type = KindOfInt64;
   m_data.num = v;
@@ -332,7 +340,7 @@ CVarRef Variant::set(double v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
+    destruct();
   }
   m_type = KindOfDouble;
   m_data.dbl = v;
@@ -346,11 +354,11 @@ CVarRef Variant::set(litstr v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
+    destruct();
   }
   m_type = KindOfString;
   m_data.pstr = NEW(StringData)(v);
-  m_data.pstr->incRefCount();
+  m_data.pstr->incRefCountNoCheck();
   return *this;
 }
 
@@ -361,12 +369,35 @@ CVarRef Variant::set(StringData *v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
+    destruct();
   }
   if (v) {
-    m_type = KindOfString;
     m_data.pstr = v;
-    v->incRefCount();
+    if (v->isStatic()) {
+      m_type = KindOfStaticString;
+    } else {
+      m_type = KindOfString;
+      v->incRefCountNoCheck();
+    }
+  } else {
+    m_data.num = 0;
+    m_type = KindOfNull;
+  }
+  return *this;
+}
+
+CVarRef Variant::set(const StaticString & v) {
+  if (isPrimitive()) {
+    // do nothing
+  } else if (m_type == KindOfVariant) {
+    m_data.pvar->set(v);
+    return *this;
+  } else {
+    destruct();
+  }
+  if (!v.isNull()) {
+    m_type = KindOfStaticString;
+    m_data.pstr = v.get();
   } else {
     m_data.num = 0;
     m_type = KindOfNull;
@@ -417,7 +448,7 @@ CVarRef Variant::set(ObjectData *v) {
     m_data.pvar->set(v);
     return *this;
   } else {
-    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
+    destruct();
   }
   if (v) {
     m_type = KindOfObject;

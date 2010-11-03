@@ -934,7 +934,7 @@ class Variant {
   }
 
   const char *getCStr() const {
-    if (getType() == KindOfString) {
+    if (isString()) {
       return m_type == KindOfVariant ? m_data.pvar->m_data.pstr->data() :
         m_data.pstr->data();
     } else {

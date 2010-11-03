@@ -330,6 +330,9 @@ public:
   void setTaint(bitstring b, CStrRef msg) const;
   void unsetTaint(bitstring b) const;
   TaintedMetadata* getTaintedMetadata() const;
+  // For String, getTaintBitString() and getTaintMetaData() can return NULL,
+  bitstring* getTaintBitString();
+  TaintedMetadata** getTaintMetaData();
   #endif
 };
 

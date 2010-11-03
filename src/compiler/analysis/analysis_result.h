@@ -520,9 +520,6 @@ private:
   void outputCPPEvalHook(CodeGenerator &cg);
   void outputCPPDefaultInvokeFile(CodeGenerator &cg, const char *file);
 
-  void outputTaintNumDecl(CodeGenerator &cg, int num);
-  void outputTaintDecl(CodeGenerator &cg);
-  void outputTaintImpl(CodeGenerator &cg);
   void outputConcatNumDecl(CodeGenerator &cg, int num);
   void outputConcatDecl(CodeGenerator &cg);
   void outputConcatImpl(CodeGenerator &cg);

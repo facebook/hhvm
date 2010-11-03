@@ -19,9 +19,10 @@
 
 #ifdef TAINTED
 
-#include <runtime/base/util/string_buffer.h>
 #include <runtime/base/tainting.h>
 #include <runtime/base/tainted_metadata.h>
+#include <runtime/base/complex_types.h>
+#include <runtime/base/util/string_buffer.h>
 
 /**
  * This class handles the tainting of strings.
@@ -37,6 +38,7 @@ namespace HPHP {
 class Taint {
 public:
   Taint(StringBuffer &str);
+  Taint(String &str);
   Taint& operator<<(const String& src);
   Taint& operator<<(const StringData& src);
 

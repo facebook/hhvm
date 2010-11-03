@@ -44,12 +44,21 @@ Taint::Taint(StringBuffer &str) {
   m_metadata = str.getTaintMetaData();
 }
 
+Taint::Taint(String &str) {
+  m_bits = str.getTaintBitString();
+  m_metadata = str.getTaintMetaData();
+}
+
 Taint& Taint::operator <<(const String &src) {
   bitstring src_bits = src.getTaint();
 
+  if (!m_bits) {
+    return *this;
+  }
+
   *m_bits = *m_bits | src_bits;
 
-  if (is_tainting_metadata(src_bits)) {
+  if (m_metadata && is_tainting_metadata(src_bits)) {
     propagateMetaData(src.getTaintedMetadata());
   }
 
@@ -59,9 +68,13 @@ Taint& Taint::operator <<(const String &src) {
 Taint& Taint::operator <<(const StringData &src) {
   bitstring src_bits = src.getTaint();
 
+  if (!m_bits) {
+    return *this;
+  }
+
   *m_bits = *m_bits | src_bits;
 
-  if (is_tainting_metadata(src_bits)) {
+  if (m_metadata && is_tainting_metadata(src_bits)) {
     propagateMetaData(src.getTaintedMetadata());
   }
 

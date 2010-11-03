@@ -1760,7 +1760,6 @@ void AnalysisResult::outputCPPUtilDecl(CodeGenerator::Output output) {
   cg_printf("\n");
   cg.namespaceBegin();
   if (Option::GenConcat) {
-    outputTaintDecl(cg);
     outputConcatDecl(cg);
   }
   if (Option::GenArrayCreate) {
@@ -1782,57 +1781,15 @@ void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
   cg_printInclude("\"cpputil.h\"");
   cg_printInclude("<runtime/base/array/zend_array.h>");
   cg_printInclude("<runtime/base/array/small_array.h>");
+  cg_printInclude("<runtime/base/taint.h>");
   cg.namespaceBegin();
   if (Option::GenConcat) {
-    outputTaintImpl(cg);
     outputConcatImpl(cg);
   }
   if (Option::GenArrayCreate) {
     outputArrayCreateImpl(cg);
   }
   cg.namespaceEnd();
-}
-
-void AnalysisResult::outputTaintNumDecl(CodeGenerator &cg, int num) {
-  cg_printf("void propagate_tainting%d(", num);
-  for (int i = 1; i <= num; i++) {
-    cg_printf("CStrRef orig%d", i);
-    if (i < num) {
-      cg_printf(", ");
-    } else {
-      cg_printf(", String& dest)");
-    }
-  }
-}
-
-void AnalysisResult::outputTaintDecl(CodeGenerator &cg) {
-  cg_printf("#ifdef TAINTED\n");
-  for (set<int>::const_iterator iter = m_concatLengths.begin();
-       iter != m_concatLengths.end(); ++iter) {
-    int num = *iter;
-    ASSERT(num > MAX_CONCAT_ARGS);
-    outputTaintNumDecl(cg, num);
-    cg_printf(";\n");
-  }
-  cg_printf("#endif // TAINTED\n\n");
-}
-
-void AnalysisResult::outputTaintImpl(CodeGenerator &cg) {
-  cg_printf("#ifdef TAINTED\n");
-  for (set<int>::const_iterator iter = m_concatLengths.begin();
-       iter != m_concatLengths.end(); ++iter) {
-    int num = *iter;
-    ASSERT(num > MAX_CONCAT_ARGS);
-    outputTaintNumDecl(cg, num);
-    cg_indentBegin(" {\n");
-    for (int i = 1; i <= num; i++) {
-      cg_printf("%sif( propagate_tainting_aux(orig%d, dest) ) { }\n",
-                i == 1 ? "" : "else ", i);
-    }
-    cg_printf("else { dest.untaint(); }\n");
-    cg_indentEnd("}\n");
-  }
-  cg_printf("#endif // TAINTED\n\n");
 }
 
 void AnalysisResult::outputConcatNumDecl(CodeGenerator &cg, int num) {
@@ -1888,22 +1845,15 @@ void AnalysisResult::outputConcatImpl(CodeGenerator &cg) {
       cg_printf(", s%d.data(), len%d);\n", i, i);
     }
     cg_printf("buf[len] = 0;\n");
-    cg_printf("#ifndef TAINTED\n");
-    cg_printf("return String(buf, len, AttachString);\n");
-    cg_printf("#else\n");
-    cg_printf("String res = String(buf, len, AttachString);\n");
-    cg_printf("propagate_tainting%d(", num);
+    cg_printf("String r = String(buf, len, AttachString);\n");
+    cg_printf("#ifdef TAINTED\n");
+    cg_printf("Taint(r) ");
     for (int i = 1; i <= num; i++) {
-      cg_printf("s%d", i);
-      if (i < num) {
-        cg_printf(", ");
-      } else {
-        cg_printf(", res)");
-      }
+      cg_printf("<< s%d", i);
     }
     cg_printf(";\n");
-    cg_printf("return res;\n");
     cg_printf("#endif\n");
+    cg_printf("return r;\n");
     cg_indentEnd("}\n");
   }
 }

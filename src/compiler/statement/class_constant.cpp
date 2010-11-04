@@ -56,7 +56,7 @@ void ClassConstant::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
     const std::string &name =
       dynamic_pointer_cast<ConstantExpression>(var)->getName();
     if (constants->isPresent(name)) {
-      Compiler::Error(Compiler::DeclaredVariableTwice, assignment);
+      Compiler::Error(Compiler::DeclaredConstantTwice, assignment);
       m_exp->removeElement(i--);
     } else {
       assignment->onParse(ar, scope);

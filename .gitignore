@@ -20,6 +20,7 @@
 
 /src/hphpi/gen
 /src/hphpi/hphpi
+/src/tools/shmw/shmw
 
 /facebook/output_*
 /facebook/push/install
@@ -32,3 +33,5 @@
 CMakeFiles
 CMakeCache.txt
 cmake_install.cmake
+
+/output_gd/

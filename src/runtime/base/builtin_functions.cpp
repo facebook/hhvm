@@ -378,7 +378,7 @@ void throw_invalid_argument(const char *fmt, ...) {
 
 void throw_infinite_loop_exception() {
   if (!RuntimeOption::NoInfiniteLoopDetection) {
-    throw FatalErrorException("infinite loop detected");
+    throw FatalErrorException(0, "loop iterated over %d times", MAX_LOOP_COUNT);
   }
 }
 void throw_infinite_recursion_exception() {

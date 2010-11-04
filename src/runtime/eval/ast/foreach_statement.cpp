@@ -31,6 +31,8 @@ ForEachStatement::ForEachStatement(STATEMENT_ARGS, ExpressionPtr source,
 
 void ForEachStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
+  DECLARE_THREAD_INFO;
+  LOOP_COUNTER(1);
   Variant map(m_source->eval(env));
   if (m_key) {
     TempExpressionList *texp = m_key->cast<TempExpressionList>();
@@ -38,6 +40,7 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
       for (ArrayIterPtr iter = map.begin(env.currentContext(), true);
            !iter->end(); iter->next()) {
         {
+          LOOP_COUNTER_CHECK(1);
           const Variant &value = iter->second();
           const Variant &key = iter->first();
           TempExpressionHelper helper(texp, env);
@@ -50,6 +53,7 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
     } else {
       for (ArrayIterPtr iter = map.begin(env.currentContext(), true);
            !iter->end(); iter->next()) {
+        LOOP_COUNTER_CHECK(1);
         const Variant &value = iter->second();
         const Variant &key = iter->first();
         m_value->set(env, value);
@@ -61,6 +65,7 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
   } else {
     for (ArrayIterPtr iter = map.begin(env.currentContext(), true);
          !iter->end(); iter->next()) {
+      LOOP_COUNTER_CHECK(1);
       m_value->set(env, iter->second());
       if (!m_body) continue;
       EVAL_STMT_HANDLE_BREAK(m_body, env);

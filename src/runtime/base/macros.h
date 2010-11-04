@@ -394,12 +394,14 @@ do { \
   ThreadInfo *info __attribute__((__unused__)) = \
     ThreadInfo::s_threadInfo.get();
 
+#define MAX_LOOP_COUNT 1000000
+
 #ifdef INFINITE_LOOP_DETECTION
 #define LOOP_COUNTER(n) int lc##n = 0;
-#define LOOP_COUNTER_CHECK(n)                                   \
-  if ((++lc##n & 1023) == 0) {                                  \
-    check_request_timeout(info);                                \
-    if (lc##n > 1000000) throw_infinite_loop_exception();       \
+#define LOOP_COUNTER_CHECK(n)                                           \
+  if ((++lc##n & 1023) == 0) {                                          \
+    check_request_timeout(info);                                        \
+    if (lc##n > MAX_LOOP_COUNT) throw_infinite_loop_exception();        \
   }
 
 #else

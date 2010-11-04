@@ -28,7 +28,10 @@ DoWhileStatement::DoWhileStatement(STATEMENT_ARGS, StatementPtr body,
 
 void DoWhileStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
+  DECLARE_THREAD_INFO;
+  LOOP_COUNTER(1);
   do {
+    LOOP_COUNTER_CHECK(1);
     if (!m_body) continue;
     EVAL_STMT_HANDLE_BREAK(m_body, env);
  } while (m_cond->eval(env));

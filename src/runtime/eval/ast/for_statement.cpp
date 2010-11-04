@@ -32,9 +32,12 @@ ForStatement::ForStatement(STATEMENT_ARGS,
 
 void ForStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
+  DECLARE_THREAD_INFO;
+  LOOP_COUNTER(1);
   for (Expression::evalVector(m_init, env);
        m_cond.empty() ? true : (bool)Expression::evalVector(m_cond, env);
        Expression::evalVector(m_next, env)) {
+    LOOP_COUNTER_CHECK(1);
     if (m_body) {
       EVAL_STMT_HANDLE_BREAK(m_body, env);
     }

@@ -28,7 +28,10 @@ WhileStatement::WhileStatement(STATEMENT_ARGS, ExpressionPtr cond,
 
 void WhileStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
+  DECLARE_THREAD_INFO;
+  LOOP_COUNTER(1);
   while (m_cond->eval(env)) {
+    LOOP_COUNTER_CHECK(1);
     if (!m_body) continue;
     EVAL_STMT_HANDLE_BREAK(m_body, env);
   }

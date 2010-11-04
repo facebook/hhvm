@@ -15,6 +15,8 @@
 #   +----------------------------------------------------------------------+
 #
 
+include(CheckFunctionExists)
+
 # boost checks
 
 find_package(Boost 1.37.0 COMPONENTS system;program_options;filesystem REQUIRED)
@@ -191,6 +193,21 @@ include_directories(${READLINE_INCLUDE_DIR})
 find_package(CClient REQUIRED)
 include_directories(${CCLIENT_INCLUDE_PATH})
 
+CHECK_LIBRARY_EXISTS(${CCLIENT_LIBRARY} auth_gss "" CCLIENT_NEEDS_PAM)
+
+CHECK_LIBRARY_EXISTS(${CCLIENT_LIBRARY} ssl_onceonlyinit "" CCLIENT_HAS_SSL)
+
+if (CCLIENT_NEEDS_PAM)
+	find_package(Libpam REQUIRED)
+	include_directories(${PAM_INCLUDE_PATH})
+else()
+	add_definitions(-DSKIP_IMAP_GSS=1)
+endif()
+
+if (NOT CCLIENT_HAS_SSL)
+	add_definitions(-DSKIP_IMAP_SSL=1)
+endif()
+
 if (LINUX OR FREEBSD)
 	FIND_LIBRARY (CRYPT_LIB crypt)
 	FIND_LIBRARY (RT_LIB rt)
@@ -304,4 +321,9 @@ endif()
 	target_link_libraries(${target} ${READLINE_LIBRARY})
 	target_link_libraries(${target} ${NCURSES_LIBRARY})
 	target_link_libraries(${target} ${CCLIENT_LIBRARY})
+
+	if (CCLIENT_NEEDS_PAM)
+		target_link_libraries(${target} ${PAM_LIBRARY})
+	endif()
+
 endmacro()

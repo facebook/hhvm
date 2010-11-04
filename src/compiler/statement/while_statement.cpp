@@ -81,16 +81,6 @@ void WhileStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr WhileStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_condition);
-  if (m_stmt) {
-    getScope()->incLoopNestedLevel();
-    ar->postOptimize(m_stmt);
-    getScope()->decLoopNestedLevel();
-  }
-  return StatementPtr();
-}
-
 void WhileStatement::inferTypes(AnalysisResultPtr ar) {
   m_condition->inferAndCheck(ar, Type::Boolean, false);
   if (m_stmt) {

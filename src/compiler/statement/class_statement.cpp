@@ -166,10 +166,6 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   }
 }
 
-StatementPtr ClassStatement::postOptimize(AnalysisResultPtr ar) {
-  return InterfaceStatement::postOptimize(ar);
-}
-
 void ClassStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_stmt) {
     ClassScopePtr classScope = m_classScope.lock();

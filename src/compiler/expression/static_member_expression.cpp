@@ -121,10 +121,9 @@ ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultPtr ar) {
 
 ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultPtr ar) {
   Symbol *sym = NULL;
-  if (m_class) {
-    ar->postOptimize(m_class);
-  } else if (!m_redeclared && m_valid &&
-             m_exp->is(Expression::KindOfScalarExpression)) {
+  if (m_class) updateClassName();
+  if (!m_class && !m_redeclared && m_valid &&
+      m_exp->is(Expression::KindOfScalarExpression)) {
     ClassScopePtr cls = ar->findExactClass(shared_from_this(), m_className);
     if (cls && (!cls->isVolatile() ||
                 ar->checkClassPresent(shared_from_this(), m_className))) {
@@ -143,7 +142,6 @@ ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultPtr ar) {
       }
     }
   }
-  ar->postOptimize(m_exp);
   return ExpressionPtr();
 }
 

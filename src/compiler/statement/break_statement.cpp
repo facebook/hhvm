@@ -82,11 +82,6 @@ StatementPtr BreakStatement::preOptimize(AnalysisResultPtr ar) {
   return StatementPtr();
 }
 
-StatementPtr BreakStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_exp);
-  return StatementPtr();
-}
-
 void BreakStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_exp) m_exp->inferAndCheck(ar, Type::Int64, false);
 }

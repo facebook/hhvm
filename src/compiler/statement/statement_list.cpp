@@ -365,21 +365,18 @@ StatementPtr StatementList::preOptimize(AnalysisResultPtr ar) {
 }
 
 StatementPtr StatementList::postOptimize(AnalysisResultPtr ar) {
-  bool changed = false;
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     StatementPtr &s = m_stmts[i];
-    ar->postOptimize(s);
     if (s->is(KindOfExpStatement) && !s->hasEffect()) {
       if (Option::EliminateDeadCode ||
           static_pointer_cast<ExpStatement>(s)->getExpression()->isScalar()) {
         removeElement(i--);
-        changed = true;
+        ar->incOptCounter();
         continue;
       }
     }
   }
-  return changed ? static_pointer_cast<Statement>(shared_from_this())
-                 : StatementPtr();
+  return StatementPtr();
 }
 
 void StatementList::inferTypes(AnalysisResultPtr ar) {

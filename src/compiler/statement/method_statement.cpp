@@ -363,27 +363,6 @@ StatementPtr MethodStatement::preOptimize(AnalysisResultPtr ar) {
   return StatementPtr();
 }
 
-StatementPtr MethodStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_modifiers);
-  ar->postOptimize(m_params);
-  FunctionScopePtr funcScope = m_funcScope.lock();
-  if (ar->getPhase() != AnalysisResult::AnalyzeInclude &&
-      (Option::LocalCopyProp || Option::StringLoopOpts)) {
-    int flag;
-    do {
-      AliasManager am;
-      MethodStatementPtr self =
-        static_pointer_cast<MethodStatement>(shared_from_this());
-      flag = am.optimize(ar, self);
-      if (flag >= 0) {
-        ar->postOptimize(m_stmt);
-      }
-    } while (flag);
-  } else {
-    ar->postOptimize(m_stmt);
-  }
-  return StatementPtr();
-}
 void MethodStatement::inferTypes(AnalysisResultPtr ar) {
   FunctionScopePtr funcScope = m_funcScope.lock();
   if (ar->getPhase() == AnalysisResult::FirstInference && m_stmt) {

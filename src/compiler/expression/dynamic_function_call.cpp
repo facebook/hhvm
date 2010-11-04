@@ -63,10 +63,6 @@ void DynamicFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-ExpressionPtr DynamicFunctionCall::postOptimize(AnalysisResultPtr ar) {
-  return FunctionCall::postOptimize(ar);
-}
-
 TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                         bool coerce) {
   reset();

@@ -28,7 +28,6 @@
 #define DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS                       \
   virtual void analyzeProgram(AnalysisResultPtr ar);                    \
   virtual ExpressionPtr clone();                                        \
-  virtual ExpressionPtr postOptimize(AnalysisResultPtr ar);             \
   virtual TypePtr inferTypes(AnalysisResultPtr ar, TypePtr type,        \
                              bool coerce);                              \
   virtual void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);      \
@@ -228,7 +227,9 @@ public:
   /**
    * Called after type inference.
    */
-  virtual ExpressionPtr postOptimize(AnalysisResultPtr ar) = 0;
+  virtual ExpressionPtr postOptimize(AnalysisResultPtr ar) {
+    return ExpressionPtr();
+  }
 
   /**
    * Find other types that have been inferred for this expression,

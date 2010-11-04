@@ -90,11 +90,6 @@ void BlockStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr BlockStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_stmts);
-  return StatementPtr();
-}
-
 void BlockStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_stmts) m_stmts->inferTypes(ar);
 }

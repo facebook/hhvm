@@ -80,12 +80,6 @@ void IfBranchStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr IfBranchStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_condition);
-  ar->postOptimize(m_stmt);
-  return StatementPtr();
-}
-
 void IfBranchStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_condition) m_condition->inferAndCheck(ar, Type::Boolean, false);
   if (m_stmt) m_stmt->inferTypes(ar);

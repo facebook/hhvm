@@ -98,9 +98,6 @@ ExpressionPtr QOpExpression::preOptimize(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr QOpExpression::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_condition);
-  ar->postOptimize(m_expYes);
-  ar->postOptimize(m_expNo);
   if (getActualType() && getActualType()->is(Type::KindOfString) &&
       m_expYes->isLiteralString() != m_expNo->isLiteralString()) {
     setActualType(Type::Variant);

@@ -75,11 +75,6 @@ void DynamicVariable::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr DynamicVariable::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_exp);
-  return ExpressionPtr();
-}
-
 TypePtr DynamicVariable::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                     bool coerce) {
   ConstructPtr self = shared_from_this();

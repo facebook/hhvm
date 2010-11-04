@@ -30,6 +30,7 @@ public:
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   StatementPtr preOptimize(AnalysisResultPtr ar);
+  StatementPtr postOptimize(AnalysisResultPtr ar);
   virtual bool hasDecl() const;
   virtual bool hasImpl() const;
   ExpressionPtr getEffectiveImpl(AnalysisResultPtr ar) const;

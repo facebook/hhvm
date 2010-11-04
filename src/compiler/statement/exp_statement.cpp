@@ -139,7 +139,6 @@ StatementPtr ExpStatement::preOptimize(AnalysisResultPtr ar) {
 
 StatementPtr ExpStatement::postOptimize(AnalysisResultPtr ar) {
   m_exp = m_exp->unneeded(ar);
-  ar->postOptimize(m_exp);
   return StatementPtr();
 }
 

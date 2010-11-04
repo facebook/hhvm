@@ -95,12 +95,6 @@ void TryStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr TryStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_tryStmt);
-  ar->postOptimize(m_catches);
-  return StatementPtr();
-}
-
 void TryStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_tryStmt) m_tryStmt->inferTypes(ar);
   m_catches->inferTypes(ar);

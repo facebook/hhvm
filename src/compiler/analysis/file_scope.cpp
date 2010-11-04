@@ -174,12 +174,8 @@ void FileScope::addConstantDependency(AnalysisResultPtr ar,
 }
 
 void FileScope::analyzeProgram(AnalysisResultPtr ar) {
-  for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
-       it != m_functions.end(); ++it) {
-    if (it->second[0]->inPseudoMain()) {
-      it->second[0]->getStmt()->analyzeProgram(ar);
-      break;
-    }
+  if (m_pseudoMain) {
+    m_pseudoMain->getStmt()->analyzeProgram(ar);
   }
 }
 
@@ -187,42 +183,14 @@ void FileScope::visit(AnalysisResultPtr ar,
                       void (*cb)(AnalysisResultPtr, StatementPtr, void*),
                       void *data)
 {
-  for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
-       it != m_functions.end(); ++it) {
-    if (it->second[0]->inPseudoMain()) {
-      cb(ar, it->second[0]->getStmt(), data);
-      break;
-    }
-  }
-}
-
-void FileScope::preOptimize(AnalysisResultPtr ar) {
-  for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
-       it != m_functions.end(); ++it) {
-    if (it->second[0]->inPseudoMain()) {
-      it->second[0]->getStmt()->preOptimize(ar);
-      break;
-    }
-  }
-}
-
-void FileScope::postOptimize(AnalysisResultPtr ar) {
-  for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
-       it != m_functions.end(); ++it) {
-    if (it->second[0]->inPseudoMain()) {
-      it->second[0]->getStmt()->postOptimize(ar);
-      break;
-    }
+  if (m_pseudoMain) {
+    cb(ar, m_pseudoMain->getStmt(), data);
   }
 }
 
 void FileScope::inferTypes(AnalysisResultPtr ar) {
-  for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
-       it != m_functions.end(); ++it) {
-    if (it->second[0]->inPseudoMain()) {
-      it->second[0]->getStmt()->inferTypes(ar);
-      break;
-    }
+  if (m_pseudoMain) {
+    m_pseudoMain->getStmt()->inferTypes(ar);
   }
 }
 
@@ -241,16 +209,17 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultPtr ar) {
                            false, pseudoMainName(),
                            ExpressionListPtr(), st, 0, ""));
   f->setFileLevel();
-  FunctionScopePtr pseudoMain
-    (new HPHP::FunctionScope(ar, true,
-                             pseudoMainName().c_str(),
-                             f, false, 0, 0,
-                             ModifierExpressionPtr(),
-                             m_attributes[0], "",
-                             shared_from_this(),
-                             true));
+  FunctionScopePtr pseudoMain(
+    new HPHP::FunctionScope(ar, true,
+                            pseudoMainName().c_str(),
+                            f, false, 0, 0,
+                            ModifierExpressionPtr(),
+                            m_attributes[0], "",
+                            shared_from_this(),
+                            true));
   f->setFunctionScope(pseudoMain);
   m_functions[pseudoMainName()].push_back(pseudoMain);
+  m_pseudoMain = pseudoMain;
   return pseudoMain;
 }
 

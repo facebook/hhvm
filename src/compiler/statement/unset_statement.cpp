@@ -87,7 +87,6 @@ StatementPtr UnsetStatement::preOptimize(AnalysisResultPtr ar) {
 }
 
 StatementPtr UnsetStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_exp);
   if (m_exp->getCount() == 0) return NULL_STATEMENT();
   return StatementPtr();
 }

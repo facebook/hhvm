@@ -190,8 +190,6 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr AssignmentExpression::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_variable);
-  ar->postOptimize(m_value);
   return optimize(ar);
 }
 

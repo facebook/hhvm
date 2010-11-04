@@ -32,6 +32,7 @@ public:
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultPtr ar);
+  ExpressionPtr postOptimize(AnalysisResultPtr ar);
   virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
   virtual int getLocalEffects() const;
   virtual bool isTemporary() const;

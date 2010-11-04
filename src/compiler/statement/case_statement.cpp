@@ -103,12 +103,6 @@ void CaseStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr CaseStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_condition);
-  ar->postOptimize(m_stmt);
-  return StatementPtr();
-}
-
 void CaseStatement::inferTypes(AnalysisResultPtr ar) {
   ASSERT(false);
 }

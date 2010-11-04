@@ -150,8 +150,6 @@ public:
   void visit(AnalysisResultPtr ar,
              void (*cb)(AnalysisResultPtr, StatementPtr, void*),
              void *data);
-  void preOptimize(AnalysisResultPtr ar);
-  void postOptimize(AnalysisResultPtr ar);
   const std::string &pseudoMainName();
   void outputFileCPP(AnalysisResultPtr ar, CodeGenerator &cg);
   bool load();
@@ -163,6 +161,10 @@ public:
   }
   std::set<std::string> &getPseudoMainVariables() {
     return m_pseudoMainVariables;
+  }
+
+  FunctionScopeRawPtr getPseudoMain() const {
+    return m_pseudoMain;
   }
 
   void outputCPPForwardStaticDecl(CodeGenerator &cg, AnalysisResultPtr ar);
@@ -201,6 +203,7 @@ private:
   StatementListPtr m_tree;
   StringToClassScopePtrVecMap m_classes;      // name => class
   ClassScopePtrVec m_ignoredClasses;
+  FunctionScopeRawPtr m_pseudoMain;
 
   std::vector<std::string> m_declares;
 

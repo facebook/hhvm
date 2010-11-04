@@ -282,7 +282,6 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_exp);
   if (m_op == T_PRINT && m_exp->is(KindOfEncapsListExpression) &&
       !m_exp->hasEffect()) {
     EncapsListExpressionPtr e = static_pointer_cast<EncapsListExpression>

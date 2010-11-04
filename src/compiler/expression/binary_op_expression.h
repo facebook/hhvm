@@ -31,6 +31,7 @@ public:
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultPtr ar);
+  ExpressionPtr postOptimize(AnalysisResultPtr ar);
   virtual bool isTemporary() const;
   virtual int getLocalEffects() const;
   virtual bool isLiteralString() const;

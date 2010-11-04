@@ -106,11 +106,6 @@ ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr EncapsListExpression::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_exps);
-  return ExpressionPtr();
-}
-
 TypePtr EncapsListExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                          bool coerce) {
   if (m_exps) {

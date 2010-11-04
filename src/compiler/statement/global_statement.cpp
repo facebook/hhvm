@@ -85,11 +85,6 @@ void GlobalStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr GlobalStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_exp);
-  return StatementPtr();
-}
-
 void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
   BlockScopePtr scope = getScope();
   for (int i = 0; i < m_exp->getCount(); i++) {

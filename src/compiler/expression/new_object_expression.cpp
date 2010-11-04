@@ -69,10 +69,6 @@ void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-ExpressionPtr NewObjectExpression::postOptimize(AnalysisResultPtr ar) {
-  return FunctionCall::postOptimize(ar);
-}
-
 TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                         bool coerce) {
   reset();

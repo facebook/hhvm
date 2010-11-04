@@ -30,6 +30,7 @@ public:
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   StatementPtr preOptimize(AnalysisResultPtr ar);
+  StatementPtr postOptimize(AnalysisResultPtr ar);
   virtual int getLocalEffects() const { return NoEffect;}
 
   ExpressionPtr getExpression() { return m_exp;}

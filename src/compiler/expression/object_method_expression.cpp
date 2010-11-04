@@ -137,11 +137,6 @@ void ObjectMethodExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ObjectMethodExpression::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_object);
-  return FunctionCall::postOptimize(ar);
-}
-
 TypePtr ObjectMethodExpression::inferTypes(AnalysisResultPtr ar,
                                            TypePtr type, bool coerce) {
   ASSERT(false);

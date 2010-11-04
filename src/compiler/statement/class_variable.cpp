@@ -164,12 +164,6 @@ StatementPtr ClassVariable::preOptimize(AnalysisResultPtr ar) {
   return StatementPtr();
 }
 
-StatementPtr ClassVariable::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_modifiers);
-  ar->postOptimize(m_declaration);
-  return StatementPtr();
-}
-
 void ClassVariable::inferTypes(AnalysisResultPtr ar) {
   m_declaration->inferAndCheck(ar, Type::Variant, false);
 

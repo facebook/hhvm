@@ -96,10 +96,6 @@ void ModifierExpression::analyzeProgram(AnalysisResultPtr ar) {
   // do nothing
 }
 
-ExpressionPtr ModifierExpression::postOptimize(AnalysisResultPtr ar) {
-  return ExpressionPtr();
-}
-
 TypePtr ModifierExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                        bool coerce) {
   ASSERT(false);

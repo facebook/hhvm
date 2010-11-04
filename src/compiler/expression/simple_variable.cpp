@@ -88,10 +88,6 @@ bool SimpleVariable::canonCompare(ExpressionPtr e) const {
     getName() == static_cast<SimpleVariable*>(e.get())->getName();
 }
 
-ExpressionPtr SimpleVariable::postOptimize(AnalysisResultPtr ar) {
-  return ExpressionPtr();
-}
-
 TypePtr SimpleVariable::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                    bool coerce) {
   ASSERT(false);

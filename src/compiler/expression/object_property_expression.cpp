@@ -176,12 +176,6 @@ void ObjectPropertyExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ObjectPropertyExpression::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_object);
-  ar->postOptimize(m_property);
-  return ExpressionPtr();
-}
-
 void ObjectPropertyExpression::setEffect(Effect effect) {
   if ((m_localEffects & effect) != effect) {
     recomputeEffects();

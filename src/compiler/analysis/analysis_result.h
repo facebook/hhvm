@@ -136,32 +136,15 @@ public:
   void visitFiles(void (*cb)(AnalysisResultPtr, StatementPtr, void*),
                   void *data);
 
-  ExpressionPtr preOptimizeRecur(ExpressionPtr stmt);
-  StatementPtr preOptimizeRecur(StatementPtr stmt);
-  int preOptimizeTop(StatementPtr stmt);
-  void preOptimizeDeps(BlockScopePtr scope,
-                       BlockScopeRawPtrQueue &queue);
-
-  void preOptimize(int maxPass = 100);
-  void postOptimize(int maxPass = 100);
-  void incOptCounter() { m_optCounter++; }
-
   void getFuncScopesSet(BlockScopeRawPtrQueue &v, FunctionContainerPtr fc);
   void getScopesSet(BlockScopeRawPtrQueue &v);
 
-  template<typename T>
-  bool postOptimize(boost::shared_ptr<T> &before) {
-    if (before) {
-      boost::shared_ptr<T> after = boost::dynamic_pointer_cast<T>
-        (before->postOptimize(shared_from_this()));
-      if (after) {
-        before = after;
-        m_optCounter++;
-        return true;
-      }
-    }
-    return false;
-  }
+  ExpressionPtr preOptimize(ExpressionPtr e);
+  void preOptimize();
+  void postOptimize();
+
+  void incOptCounter() { m_optCounter++; }
+  int getOptCounter() const { return m_optCounter; }
 
   /**
    * When types are newly inferred, we need more passes, until no new types

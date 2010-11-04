@@ -70,11 +70,6 @@ void ThrowStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ThrowStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_exp);
-  return StatementPtr();
-}
-
 void ThrowStatement::inferTypes(AnalysisResultPtr ar) {
   m_exp->inferAndCheck(ar, Type::Object, false);
 }

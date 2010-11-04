@@ -95,12 +95,6 @@ void SwitchStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr SwitchStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_exp);
-  ar->postOptimize(m_cases);
-  return StatementPtr();
-}
-
 void SwitchStatement::inferTypes(AnalysisResultPtr ar) {
   // we optimize the most two common cases of switch statements
   bool allInteger = true;

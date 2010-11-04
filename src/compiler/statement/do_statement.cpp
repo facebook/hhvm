@@ -81,12 +81,6 @@ void DoStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr DoStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_stmt);
-  ar->postOptimize(m_condition);
-  return StatementPtr();
-}
-
 void DoStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_stmt) {
     getScope()->incLoopNestedLevel();

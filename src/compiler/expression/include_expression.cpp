@@ -55,7 +55,7 @@ ExpressionPtr IncludeExpression::clone() {
 
 void IncludeExpression::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   // See if we can get a string literal
-  if (ExpressionPtr exp = ar->preOptimizeRecur(m_exp)) {
+  if (ExpressionPtr exp = ar->preOptimize(m_exp)) {
     m_exp = exp;
   }
   m_include = ar->getDependencyGraph()->add
@@ -82,6 +82,9 @@ void IncludeExpression::analyzeInclude(AnalysisResultPtr ar,
   FunctionScopePtr func = getFunctionScope();
   getFileScope()->addIncludeDependency(ar, m_include,
                                        func && func->isInlined());
+  if (func && file->getPseudoMain()) {
+    file->getPseudoMain()->addUse(func, BlockScope::UseKindInclude);
+  }
 }
 
 void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
@@ -118,7 +121,6 @@ ExpressionPtr IncludeExpression::preOptimize(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr IncludeExpression::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_exp);
   if (!m_include.empty()) {
     if (!m_depsSet) {
       analyzeInclude(ar, m_include);

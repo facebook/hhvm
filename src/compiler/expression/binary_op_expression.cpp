@@ -345,8 +345,6 @@ ExpressionPtr BinaryOpExpression::simplifyArithmetic(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr BinaryOpExpression::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_exp1);
-  ar->postOptimize(m_exp2);
   ExpressionPtr optExp = simplifyArithmetic(ar);
   if (!optExp) {
     if (isShortCircuitOperator()) optExp = simplifyLogical(ar);

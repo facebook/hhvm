@@ -110,12 +110,6 @@ void ListAssignment::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ListAssignment::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_variables);
-  ar->postOptimize(m_array);
-  return ExpressionPtr();
-}
-
 TypePtr ListAssignment::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                    bool coerce) {
   if (m_variables) {

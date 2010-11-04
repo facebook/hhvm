@@ -84,11 +84,6 @@ void ReturnStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ReturnStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_exp);
-  return StatementPtr();
-}
-
 void ReturnStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_exp) {
     FunctionScopePtr funcScope = getFunctionScope();

@@ -149,11 +149,6 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr ClassConstantExpression::postOptimize(AnalysisResultPtr ar) {
-  if (m_class) ar->postOptimize(m_class);
-  return ExpressionPtr();
-}
-
 TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
                                             TypePtr type, bool coerce) {
   m_valid = false;

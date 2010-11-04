@@ -744,7 +744,6 @@ ExpressionPtr SimpleFunctionCall::postOptimize(AnalysisResultPtr ar) {
       return rep;
     }
   */
-  ar->postOptimize(m_safeDef);
   return FunctionCall::postOptimize(ar);
 }
 

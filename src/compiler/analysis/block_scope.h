@@ -72,6 +72,7 @@ public:
     UseKindNonStaticRef = 4,
     UseKindConstRef = 8,
     UseKindParentRef = 16,
+    UseKindInclude = 32,
     UseKindAny = (unsigned)-1
   };
 

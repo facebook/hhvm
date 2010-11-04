@@ -109,18 +109,6 @@ void ForStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ForStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_exp1);
-  ar->postOptimize(m_exp2);
-  ar->postOptimize(m_exp3);
-  if (m_stmt) {
-    getScope()->incLoopNestedLevel();
-    ar->postOptimize(m_stmt);
-    getScope()->decLoopNestedLevel();
-  }
-  return StatementPtr();
-}
-
 void ForStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_exp1) m_exp1->inferAndCheck(ar, Type::Any, false);
   if (m_exp2) m_exp2->inferAndCheck(ar, Type::Boolean, false);

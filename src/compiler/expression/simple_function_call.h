@@ -35,6 +35,7 @@ public:
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultPtr ar);
+  ExpressionPtr postOptimize(AnalysisResultPtr ar);
   bool isDefineWithoutImpl(AnalysisResultPtr ar);
   void setValid() { m_valid = true; }
   void setNoPrefix() { m_noPrefix = true; }

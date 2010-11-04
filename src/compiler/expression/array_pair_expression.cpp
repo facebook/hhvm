@@ -97,12 +97,6 @@ void ArrayPairExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ArrayPairExpression::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_name);
-  ar->postOptimize(m_value);
-  return ExpressionPtr();
-}
-
 TypePtr ArrayPairExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                         bool coerce) {
   if (m_name) {

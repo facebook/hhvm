@@ -119,14 +119,6 @@ void ForEachStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ForEachStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_array);
-  ar->postOptimize(m_name);
-  ar->postOptimize(m_value);
-  ar->postOptimize(m_stmt);
-  return StatementPtr();
-}
-
 void ForEachStatement::inferTypes(AnalysisResultPtr ar) {
   m_array->inferAndCheck(ar, m_ref ? Type::Variant : Type::Array, m_ref);
   if (m_name) {

@@ -101,11 +101,6 @@ void ParameterExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr ParameterExpression::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_defaultValue);
-  return ExpressionPtr();
-}
-
 TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar, bool error) {
   TypePtr ret;
   if (m_type.empty() || m_defaultValue) {

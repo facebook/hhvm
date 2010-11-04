@@ -32,6 +32,7 @@ public:
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultPtr ar);
+  ExpressionPtr postOptimize(AnalysisResultPtr ar);
   virtual int getLocalEffects() const { return NoEffect; }
 
   virtual ExpressionPtr unneededHelper(AnalysisResultPtr ar);

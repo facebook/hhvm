@@ -135,11 +135,6 @@ StatementPtr StaticStatement::preOptimize(AnalysisResultPtr ar) {
   return StatementPtr();
 }
 
-StatementPtr StaticStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_exp);
-  return StatementPtr();
-}
-
 void StaticStatement::inferTypes(AnalysisResultPtr ar) {
   BlockScopePtr scope = getScope();
   if (scope->inPseudoMain()) { // static just means to unset at global level

@@ -156,7 +156,6 @@ StatementPtr IfStatement::preOptimize(AnalysisResultPtr ar) {
 
 StatementPtr IfStatement::postOptimize(AnalysisResultPtr ar) {
   bool changed = false;
-  ar->postOptimize(m_stmts);
   for (int i = 0; i < m_stmts->getCount(); i++) {
     IfBranchStatementPtr branch =
       dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[i]);

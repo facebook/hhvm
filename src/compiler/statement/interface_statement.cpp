@@ -198,15 +198,6 @@ StatementPtr InterfaceStatement::preOptimize(AnalysisResultPtr ar) {
   return StatementPtr();
 }
 
-StatementPtr InterfaceStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_base);
-  if (m_stmt) {
-    ClassScopePtr classScope = m_classScope.lock();
-    ar->postOptimize(m_stmt);
-  }
-  return StatementPtr();
-}
-
 void InterfaceStatement::inferTypes(AnalysisResultPtr ar) {
   vector<string> bases;
   if (m_base) m_base->getStrings(bases);

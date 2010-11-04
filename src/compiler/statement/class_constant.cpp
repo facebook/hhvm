@@ -117,11 +117,6 @@ StatementPtr ClassConstant::preOptimize(AnalysisResultPtr ar) {
   return StatementPtr();
 }
 
-StatementPtr ClassConstant::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_exp);
-  return StatementPtr();
-}
-
 void ClassConstant::inferTypes(AnalysisResultPtr ar) {
   m_exp->inferAndCheck(ar, Type::Some, false);
 }

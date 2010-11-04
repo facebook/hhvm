@@ -31,6 +31,7 @@ public:
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   StatementPtr preOptimize(AnalysisResultPtr ar);
+  StatementPtr postOptimize(AnalysisResultPtr ar);
 
 private:
   ExpressionListPtr m_exp;

@@ -154,9 +154,7 @@ ExpressionPtr FunctionCall::preOptimize(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr FunctionCall::postOptimize(AnalysisResultPtr ar) {
-  if (m_class) ar->postOptimize(m_class);
-  ar->postOptimize(m_nameExp);
-  ar->postOptimize(m_params);
+  if (m_class) updateClassName();
   optimizeArgArray(ar);
   return ExpressionPtr();
 }

@@ -24,6 +24,7 @@
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/code_error.h>
+#include <compiler/analysis/depth_first_visitor.h>
 #include <compiler/statement/statement_list.h>
 #include <compiler/statement/if_branch_statement.h>
 #include <compiler/statement/method_statement.h>
@@ -808,141 +809,117 @@ void AnalysisResult::getScopesSet(BlockScopeRawPtrQueue &v) {
 ///////////////////////////////////////////////////////////////////////////////
 // optimization functions
 
-ExpressionPtr AnalysisResult::preOptimizeRecur(ExpressionPtr e) {
-  for (int i = 0, n = e->getKidCount(); i < n; i++) {
-    if (ExpressionPtr kid = e->getNthExpr(i)) {
-      ExpressionPtr rep = preOptimizeRecur(kid);
-      if (rep) {
-        m_optCounter++;
-        e->setNthKid(i, rep);
-      }
-    }
-  }
-  return e->preOptimize(shared_from_this());
-}
+namespace HPHP {
 
-StatementPtr AnalysisResult::preOptimizeRecur(StatementPtr stmt) {
-  BlockScopePtr scope = dynamic_pointer_cast<LoopStatement>(stmt) ?
-    stmt->getScope() : BlockScopePtr();
+struct PreOptVisitor {
+  PreOptVisitor(AnalysisResultPtr ar) : m_ar(ar) {}
 
-  for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
-    if (ConstructPtr kid = stmt->getNthKid(i)) {
-      if (StatementPtr s = dynamic_pointer_cast<Statement>(kid)) {
-        switch (s->getKindOf()) {
-          case Statement::KindOfFunctionStatement:
-          case Statement::KindOfMethodStatement:
-          case Statement::KindOfClassStatement:
-          case Statement::KindOfInterfaceStatement:
-            continue;
-          default:
-            break;
-        }
-        if (scope) scope->incLoopNestedLevel();
-        if (StatementPtr rep = preOptimizeRecur(s)) {
-          stmt->setNthKid(i, rep);
-          m_optCounter++;
-        }
-        if (scope) scope->decLoopNestedLevel();
-      } else {
-        ExpressionPtr e = dynamic_pointer_cast<Expression>(kid);
-        if (ExpressionPtr rep = preOptimizeRecur(e)) {
-          stmt->setNthKid(i, rep);
-          m_optCounter++;
-        }
+  AnalysisResultPtr m_ar;
+};
+
+template<>
+int DepthFirstVisitor<PreOptVisitor>::visit(BlockScopeRawPtr scope) {
+  int optCount = m_optCounter + this->m_data.m_ar->getOptCounter();
+  StatementPtr stmt = scope->getStmt();
+  int flags = 0;
+  if (Option::LocalCopyProp | Option::EliminateDeadCode) {
+    if (MethodStatementPtr m =
+        dynamic_pointer_cast<MethodStatement>(stmt)) {
+      int flag;
+      while (true) {
+        AliasManager am;
+        flag = am.optimize(this->m_data.m_ar, m);
+        if (!flag) break;
+        flags |= BlockScope::UseKindAny;
       }
     }
   }
 
-  return stmt->preOptimize(shared_from_this());
-}
-
-int AnalysisResult::preOptimizeTop(StatementPtr stmt) {
-  int loops = 0;
-  int lastOptCounter;
-
-  AnalysisResultPtr ar = shared_from_this();
-  do {
-    lastOptCounter = m_optCounter;
-
-    if (getPhase() != AnalysisResult::AnalyzeInclude &&
-        (Option::LocalCopyProp|
-         Option::EliminateDeadCode)) {
-      if (MethodStatementPtr m = dynamic_pointer_cast<MethodStatement>(stmt)) {
-        int flag;
-        do {
-          AliasManager am;
-          flag = am.optimize(ar, m);
-          loops++;
-        } while (flag);
-      } else {
-        loops++;
-      }
-    } else {
-      loops++;
-    }
-
-    StatementPtr rep = preOptimizeRecur(stmt);
-    assert(!rep);
-  } while (lastOptCounter != m_optCounter);
-
-  return loops > 1 ? UseKindAny : 0;
-}
-
-void AnalysisResult::preOptimizeDeps(BlockScopePtr scope,
-                                     BlockScopeRawPtrQueue &queue) {
-  scope->setMark(1);
-  const BlockScopeRawPtrHashSet &deps = scope->getDeps();
-  for (BlockScopeRawPtrHashSet::const_iterator it = deps.begin(),
-         end = deps.end(); it != end; ++it) {
-    BlockScopeRawPtr dep = *it;
-    if (!dep->getMark()) {
-      preOptimizeDeps(dep, queue);
-    }
+  StatementPtr rep = this->visitStmtRecur(stmt);
+  assert(!rep);
+  if (optCount != m_optCounter + this->m_data.m_ar->getOptCounter()) {
+    flags |= BlockScope::UseKindAny;
   }
-  if (int useKinds = preOptimizeTop(scope->getStmt())) {
-    scope->changed(queue, useKinds);
-  }
-  scope->setMark(2);
+
+  return flags;
 }
 
-void AnalysisResult::preOptimize(int maxPass /* = 100 */) {
-  AnalysisResultPtr ar = shared_from_this();
+template<>
+ExpressionPtr DepthFirstVisitor<PreOptVisitor>::visit(ExpressionPtr e) {
+  return e->preOptimize(this->m_data.m_ar);
+}
+
+template<>
+StatementPtr DepthFirstVisitor<PreOptVisitor>::visit(StatementPtr stmt) {
+  return stmt->preOptimize(this->m_data.m_ar);
+}
+
+ExpressionPtr AnalysisResult::preOptimize(ExpressionPtr e) {
+  DepthFirstVisitor<PreOptVisitor> dfv(shared_from_this());
+  return dfv.visitExprRecur(e);
+}
+
+void AnalysisResult::preOptimize() {
   setPhase(FirstPreOptimize);
+  DepthFirstVisitor<PreOptVisitor> dfv(shared_from_this());
   BlockScopeRawPtrQueue scopes;
   getScopesSet(scopes);
-
-  BlockScopeRawPtrQueue::iterator end = scopes.end();
-  for (BlockScopeRawPtrQueue::iterator it = scopes.begin(); it != end; ++it) {
-    (*it)->setMark(0);
-  }
-
-  while (true) {
-    BlockScopeRawPtrQueue::iterator it = scopes.begin();
-    if (it == end) break;
-    if (!(*it)->getMark()) {
-      preOptimizeDeps(*it, scopes);
-    }
-    assert((*it)->getMark() == 2);
-    (*it)->setMark(3);
-    scopes.erase(it);
-  }
+  dfv.visitDepthFirst(scopes);
 }
 
-void AnalysisResult::postOptimize(int maxPass /* = 100 */) {
-  AnalysisResultPtr ar = shared_from_this();
-  setPhase(AnalysisResult::PostOptimize);
-  int lastOptCounter;
-  int i;
-  for (i = 0; i < maxPass; i++) {
-    lastOptCounter = m_optCounter;
-    for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
-         iter != m_files.end(); ++iter) {
-      FileScopePtr file = iter->second;
-      file->postOptimize(ar);
+struct PostOptVisitor {
+  PostOptVisitor(AnalysisResultPtr ar) : m_ar(ar) {}
+
+  AnalysisResultPtr m_ar;
+};
+
+template<>
+int DepthFirstVisitor<PostOptVisitor>::visit(BlockScopeRawPtr scope) {
+  int optCount = m_optCounter + this->m_data.m_ar->getOptCounter();
+  StatementPtr stmt = scope->getStmt();
+  int flags = 0;
+  if (Option::LocalCopyProp |
+      Option::EliminateDeadCode |
+      Option::StringLoopOpts) {
+    if (MethodStatementPtr m =
+        dynamic_pointer_cast<MethodStatement>(stmt)) {
+      int flag;
+      while (true) {
+        AliasManager am;
+        flag = am.optimize(this->m_data.m_ar, m);
+        if (!flag) break;
+        flags |= BlockScope::UseKindAny;
+      }
     }
-    if (lastOptCounter == m_optCounter) break;
   }
-  ASSERT(i <= 100);
+
+  StatementPtr rep = this->visitStmtRecur(stmt);
+  assert(!rep);
+  if (optCount != m_optCounter + this->m_data.m_ar->getOptCounter()) {
+    flags |= BlockScope::UseKindAny;
+  }
+
+  return flags;
+}
+
+template<>
+ExpressionPtr DepthFirstVisitor<PostOptVisitor>::visit(ExpressionPtr e) {
+  return e->postOptimize(this->m_data.m_ar);
+}
+
+template<>
+StatementPtr DepthFirstVisitor<PostOptVisitor>::visit(StatementPtr stmt) {
+  return stmt->postOptimize(this->m_data.m_ar);
+}
+
+void AnalysisResult::postOptimize() {
+  setPhase(AnalysisResult::PostOptimize);
+  DepthFirstVisitor<PostOptVisitor> dfv(shared_from_this());
+  BlockScopeRawPtrQueue scopes;
+  getScopesSet(scopes);
+  dfv.visitDepthFirst(scopes);
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////

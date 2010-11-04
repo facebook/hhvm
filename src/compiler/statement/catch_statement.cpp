@@ -89,11 +89,6 @@ void CatchStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr CatchStatement::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_stmt);
-  return StatementPtr();
-}
-
 void CatchStatement::inferTypes(AnalysisResultPtr ar) {
   ClassScopePtr cls = ar->findClass(m_className);
   TypePtr type;

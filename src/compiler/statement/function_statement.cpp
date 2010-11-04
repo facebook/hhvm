@@ -95,10 +95,6 @@ void FunctionStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   MethodStatement::analyzeProgramImpl(ar);
 }
 
-StatementPtr FunctionStatement::postOptimize(AnalysisResultPtr ar) {
-  return MethodStatement::postOptimize(ar);
-}
-
 void FunctionStatement::inferTypes(AnalysisResultPtr ar) {
   MethodStatement::inferTypes(ar);
 }

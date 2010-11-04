@@ -126,11 +126,11 @@ void DynamicObjectData::o_setArray(CArrRef props) {
   }
 }
 
-Array DynamicObjectData::o_toArray() const {
+Array DynamicObjectData::o_toArray(bool warn /* = false */) const {
   if (!parent.isNull()) {
-    return parent->o_toArray();
+    return parent->o_toArray(warn);
   } else {
-    return ObjectData::o_toArray();
+    return ObjectData::o_toArray(warn);
   }
 }
 

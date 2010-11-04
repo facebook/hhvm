@@ -839,7 +839,7 @@ double c_SimpleXMLElement::o_toDouble() const {
   return prop.toString().toDouble();
 }
 
-Array c_SimpleXMLElement::o_toArray() const {
+Array c_SimpleXMLElement::o_toArray(bool warn /* = false */) const {
   if (m_attributes.toArray().empty()) {
     return m_children;
   }

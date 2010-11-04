@@ -432,7 +432,10 @@ Variant *ObjectData::o_weakLval(CStrRef propName,
   return NULL;
 }
 
-Array ObjectData::o_toArray() const {
+Array ObjectData::o_toArray(bool warn /* = false */) const {
+  if (warn && RuntimeOption::EnableHipHopErrors) {
+    raise_warning("casting object to array");
+  }
   Array ret(ArrayData::Create());
   const_cast<ObjectData*>(this)->getRoot()->o_getArray(ret);
   return ret;

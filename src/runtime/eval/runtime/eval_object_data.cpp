@@ -105,8 +105,8 @@ void EvalObjectData::destruct() {
   }
 }
 
-Array EvalObjectData::o_toArray() const {
-  Array values(DynamicObjectData::o_toArray());
+Array EvalObjectData::o_toArray(bool warn /* = false */) const {
+  Array values(DynamicObjectData::o_toArray(warn));
   Array props(Array::Create());
   m_cls.getClass()->toArray(props, values);
   if (!values.empty()) {

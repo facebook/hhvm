@@ -1544,15 +1544,15 @@ String Variant::toStringHelper() const {
   return m_data.num;
 }
 
-Array Variant::toArrayHelper() const {
+Array Variant::toArrayHelper(bool warn) const {
   switch (m_type) {
   case KindOfNull:    return Array::Create();
   case KindOfInt64:   return Array::Create(m_data.num);
   case KindOfStaticString:
   case KindOfString:  return Array::Create(m_data.pstr);
   case KindOfArray:   return m_data.parr;
-  case KindOfObject:  return m_data.pobj->o_toArray();
-  case KindOfVariant: return m_data.pvar->toArray();
+  case KindOfObject:  return m_data.pobj->o_toArray(warn);
+  case KindOfVariant: return m_data.pvar->toArray(warn);
   default:
     break;
   }

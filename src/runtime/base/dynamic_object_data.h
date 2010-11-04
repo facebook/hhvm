@@ -41,7 +41,7 @@ class DynamicObjectData : public ObjectData {
   virtual ObjectData* clone();
 
   // properties
-  virtual Array o_toArray() const;
+  virtual Array o_toArray(bool warn = false) const;
   virtual Array o_getDynamicProperties() const;
   virtual Variant *o_realProp(CStrRef prop, int flags,
                               CStrRef context = null_string) const;

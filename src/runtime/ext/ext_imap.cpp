@@ -326,6 +326,112 @@ static Object _php_make_header_object(ENVELOPE *en) {
   return ret;
 }
 
+static void _php_imap_add_body(Object &ret, BODY *body) {
+
+  if (body->type <= TYPEMAX) {
+   ret.o_set("type", body->type);
+  }
+
+  if (body->encoding <= ENCMAX) {
+    ret.o_set("encoding", body->encoding);
+  }
+
+  if (body->subtype) {
+    ret.o_set("ifsubtype", 1);
+    ret.o_set("subtype", String((const char*)body->subtype, CopyString));
+  } else {
+    ret.o_set("ifsubtype", 0);
+  }
+
+  if (body->description) {
+    ret.o_set("ifdescription", 1);
+    ret.o_set("description",
+      String((const char*)body->description, CopyString));
+  } else {
+    ret.o_set("ifdescription", 0);
+  }
+
+  if (body->id) {
+    ret.o_set("ifid", 1);
+    ret.o_set("id", String((const char*)body->id, CopyString));
+  } else {
+    ret.o_set("ifid", 0);
+  }
+
+
+  if (body->size.lines) {
+    ret.o_set("lines", (int64)body->size.lines);
+  }
+
+  if (body->size.bytes) {
+    ret.o_set("bytes", (int64)body->size.bytes);
+  }
+
+  if (body->disposition.type) {
+    ret.o_set("ifdisposition", 1);
+    ret.o_set("disposition",
+      String((const char*)body->disposition.type, CopyString));
+  } else {
+    ret.o_set("ifdisposition", 0);
+  }
+
+  if (body->disposition.parameter) {
+    PARAMETER *dpar;
+    dpar = body->disposition.parameter;
+    ret.o_set("ifdparameters", 1);
+
+    Array dparametres(Array::Create());
+    do {
+      Object dparam(NEW(c_stdClass)());
+      dparam.o_set("attribute",
+        String((const char*)dpar->attribute, CopyString));
+      dparam.o_set("value", String((const char*)dpar->value, CopyString));
+      dparametres.append(dparam);
+    } while ((dpar = dpar->next));
+    ret.o_set("ifdisposition", dparametres);
+  } else {
+    ret.o_set("ifdparameters", 0);
+  }
+
+  PARAMETER *par;
+  Array parametres(Array::Create());
+
+  if ((par = body->parameter)) {
+    ret.o_set("ifparameters", 1);
+    do {
+      Object param(NEW(c_stdClass)());
+      OBJ_SET_ENTRY(param, par, "attribute", attribute);
+      OBJ_SET_ENTRY(param, par, "value", value);
+      parametres.append(param);
+    } while ((par = par->next));
+  } else {
+    ret.o_set("ifparameters", 0);
+  }
+  ret.o_set("parameters", parametres);
+
+  /* multipart message ? */
+  if (body->type == TYPEMULTIPART) {
+    parametres.clear();
+    PART *part;
+    for (part = body->nested.part; part; part = part->next) {
+      Object param(NEW(c_stdClass)());
+      _php_imap_add_body(param, &part->body);
+      parametres.append(param);
+    }
+    ret.o_set("parts", parametres);
+  }
+
+  /* encapsulated message ? */
+  if ((body->type == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
+    body = body->nested.msg->body;
+    parametres.clear();
+    Object param(NEW(c_stdClass)());
+    _php_imap_add_body(param, body);
+    parametres.append(param);
+    ret.o_set("parts", parametres);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // interfaces to C-client
 
@@ -804,7 +910,39 @@ Variant f_imap_fetchheader(CObjRef imap_stream, int64 msg_number,
 
 Variant f_imap_fetchstructure(CObjRef imap_stream, int64 msg_number,
                               int64 options /* = 0 */) {
-  throw NotImplementedException(__func__);
+  if (options && ((options & ~FT_UID) != 0)) {
+    raise_warning("invalid value for the options parameter");
+    return false;
+  }
+
+  if (msg_number < 1) {
+    return false;
+  }
+
+  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  int msgindex;
+  if (options & FT_UID) {
+    /* This should be cached; if it causes an extra RTT to the
+       IMAP server, then that's the price we pay for making sure
+       we don't crash. */
+    msgindex = mail_msgno(obj->m_stream, msg_number);
+  } else {
+    msgindex = msg_number;
+  }
+
+  if (!obj->checkMsgNumber(msgindex)) {
+    return false;
+  }
+
+  BODY *body;
+
+  mail_fetchstructure_full(obj->m_stream, msg_number, &body,
+                           (options ? options : NIL));
+
+  Object ret(NEW(c_stdClass)());
+  _php_imap_add_body(ret, body);
+
+  return ret;
 }
 
 bool f_imap_gc(CObjRef imap_stream, int64 caches) {
@@ -1073,7 +1211,35 @@ Variant f_imap_scanmailbox(CObjRef imap_stream, CStrRef ref, CStrRef pattern,
 
 Variant f_imap_search(CObjRef imap_stream, CStrRef criteria,
                       int64 options /* = 0 */, CStrRef charset /* = "" */) {
-  throw NotImplementedException(__func__);
+  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+
+  char *search_criteria = (char*)criteria.data();
+  IMAPG(messages) = IMAPG(messages_tail) = NIL;
+
+  SEARCHPGM *pgm = mail_criteria(search_criteria);
+
+  mail_search_full(obj->m_stream,
+                   (charset.empty() ? NIL : (char*)charset.data()),
+                   pgm,
+                   options);
+
+  if (pgm && !(options & SE_FREE)) {
+    mail_free_searchpgm(&pgm);
+  }
+
+  if (IMAPG(messages) == NIL) {
+    return false;
+  }
+
+  Array ret(Array::Create());
+
+  MESSAGELIST *cur = IMAPG(messages);
+  while (cur != NIL) {
+    ret.append((int64)cur->msgid);
+    cur = cur->next;
+  }
+  mail_free_messagelist(&IMAPG(messages), &IMAPG(messages_tail));
+  return ret;
 }
 
 bool f_imap_set_quota(CObjRef imap_stream, CStrRef quota_root,

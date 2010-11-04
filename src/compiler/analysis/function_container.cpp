@@ -368,8 +368,8 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
       if (func->isRedeclaring()) {
         assert(!system);
         string lname(cg.formatLabel(name));
-        cg_printf("(const char *)((char *)&gv.%s%s - (char *)&gv),\n",
-                  Option::CallInfoPrefix, lname.c_str());
+        cg_printf("(const char *)((char *)&gv.GCI(%s) - (char *)&gv),\n",
+                  lname.c_str());
       } else {
         cg_printf("(const char *)&%s%s,\n",
                   Option::CallInfoPrefix, func->getId(cg).c_str());
@@ -426,10 +426,10 @@ void FunctionContainer::outputCPPCodeInfoTable(CodeGenerator &cg,
                 hash_string_i(name), name);
     if (iterFuncs->second[0]->isRedeclaring()) {
       string lname(cg.formatLabel(name));
-      cg_printf("ci = g->%s%s;\n", Option::CallInfoPrefix, lname.c_str());
+      cg_printf("ci = g->GCI(%s);\n", lname.c_str());
     } else {
       cg_printf("ci = &%s%s;\n", Option::CallInfoPrefix,
-          iterFuncs->second[0]->getId(cg).c_str());
+                iterFuncs->second[0]->getId(cg).c_str());
     }
     cg_printf("return true;\n");
     cg_indentEnd("}\n");

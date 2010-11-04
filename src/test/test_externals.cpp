@@ -325,11 +325,11 @@ Variant invoke_file(CStrRef path, bool once /* = false */,
     SystemGlobals *g = (SystemGlobals*)get_global_variables();
 
     echo("pagelet postparam: ");
-    echo(g->gv_HTTP_RAW_POST_DATA);
+    echo(g->GV(HTTP_RAW_POST_DATA));
     echo("pagelet getparam: ");
-    echo(g->gv__GET["getparam"]);
+    echo(g->GV(_GET)["getparam"]);
     echo("pagelet header: ");
-    echo(g->gv__SERVER["HTTP_MYHEADER"]);
+    echo(g->GV(_SERVER)["HTTP_MYHEADER"]);
     f_header("ResponseHeader: okay");
 
     sleep(1); // give status check time to happen

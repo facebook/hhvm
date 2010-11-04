@@ -361,32 +361,13 @@ do { \
 ///////////////////////////////////////////////////////////////////////////////
 // global variable macros
 
-#ifdef DIRECT_GLOBAL_VARIABLES
-
-#define BEGIN_GVS()
-#define GVS(s) gv_##s;
-#define END_GVS(c)
-#define GV(s) s
-
-#else
-
-#define BEGIN_GVS() enum _gv_enums_ {
-#define GVS(s) gv_##s,
-#define END_GVS(c) }; Variant gv[c];
-#define GV(s) gv[GlobalVariables::gv_##s]
-
-#endif
-
-// Class declared flags
-
-#define BEGIN_CDECS() enum _cdec_enums_ {
-#define DEF_CDEC(s) cdec_##s,
-#define END_CDECS(c) }; bool cdec[c];
-#define CDEC(s) cdec[GlobalVariables::cdec_##s]
-
-// Function declared flags
 #define FVF_PREFIX "fvf_"
-#define FVF(s) fvf_##s
+
+#define GV(s)   gvm_  ## s
+#define GCI(s)  cim_  ## s
+#define CDEC(s) cdec_ ## s
+#define FVF(s)  fvf_  ## s
+
 ///////////////////////////////////////////////////////////////////////////////
 // code instrumentation or injections
 

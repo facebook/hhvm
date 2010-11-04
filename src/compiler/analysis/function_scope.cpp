@@ -1339,9 +1339,9 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
                            true, false, false, NULL, true);
     cg_indentEnd("}\n");
     cg_indentBegin("void %s%s::getConstructor(MethodCallPackage &mcp) {\n",
-        Option::ClassPrefix, clsName);
+                   Option::ClassPrefix, clsName);
     cg_printf("mcp.ci = &%s%s::%s%s;\n", Option::ClassPrefix, clsName,
-        Option::CallInfoPrefix, cg.formatLabel(consName).c_str());
+              Option::CallInfoPrefix, cg.formatLabel(consName).c_str());
     cg_printf("mcp.obj = this;\n");
     cg_indentEnd("}\n");
     if (cg.getOutput() == CodeGenerator::SystemCPP ||
@@ -1494,14 +1494,14 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
     ClassScopePtr scope = getContainingClass();
     string clsName = scope->getId(cg);
     cg.printf("CallInfo %s%s::%s%s((void*)&%s%s::%s%s, ", Option::ClassPrefix,
-        clsName.c_str(), Option::CallInfoPrefix, id.c_str(),
-        Option::ClassPrefix, clsName.c_str(), Option::InvokePrefix,
-        id.c_str());
+              clsName.c_str(), Option::CallInfoPrefix, id.c_str(),
+              Option::ClassPrefix, clsName.c_str(), Option::InvokePrefix,
+              id.c_str());
     cg.printf("(void*)&%s%s::%s%s", Option::ClassPrefix, clsName.c_str(),
-        Option::InvokeFewArgsPrefix, id.c_str());
+              Option::InvokeFewArgsPrefix, id.c_str());
   } else {
     cg.printf("CallInfo %s%s((void*)&%s%s, ", Option::CallInfoPrefix,
-        id.c_str(), Option::InvokePrefix, id.c_str());
+              id.c_str(), Option::InvokePrefix, id.c_str());
     cg.printf("(void*)&%s%s", Option::InvokeFewArgsPrefix, id.c_str());
   }
   cg.printf(", %d, %d, 0x%.16lXLL);\n", m_maxParam, flags, refflags);

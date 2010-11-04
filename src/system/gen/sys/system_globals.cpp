@@ -20,24 +20,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-SystemGlobals::SystemGlobals() : dummy(false),
-  run_pm_php$classes$arrayaccess_php(false),
-  run_pm_php$classes$debugger_php(false),
-  run_pm_php$classes$directory_php(false),
-  run_pm_php$classes$exception_php(false),
-  run_pm_php$classes$iterator_php(false),
-  run_pm_php$classes$reflection_php(false),
-  run_pm_php$classes$splfile_php(false),
-  run_pm_php$classes$splobjectstorage_php(false),
-  run_pm_php$classes$stdclass_php(false),
-  run_pm_php$globals$constants_php(false),
-  run_pm_php$globals$symbols_php(false) {
+SystemGlobals::SystemGlobals() {
+  memset(&stgv_bool, 0, sizeof(stgv_bool));
+  memset(&stgv_CallInfoPtr, 0, sizeof(stgv_CallInfoPtr));
+  memset(&stgv_ObjectStaticCallbacksPtr, 0, sizeof(stgv_ObjectStaticCallbacksPtr));
 
   // Primitive Function/Method Static Variables
 
   // Primitive Class Static Variables
-
-  // Redeclared Functions
 
   // Redeclared Classes
 }

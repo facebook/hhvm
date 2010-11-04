@@ -100,9 +100,9 @@ time_t start_time() {
 
 static void process_cmd_arguments(int argc, char **argv) {
   SystemGlobals *g = (SystemGlobals *)get_global_variables();
-  g->gv_argc = argc;
+  g->GV(argc) = argc;
   for (int i = 0; i < argc; i++) {
-    g->gv_argv.lvalAt() = argv[i];
+    g->GV(argv).lvalAt() = argv[i];
   }
 }
 
@@ -368,19 +368,19 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   // reset global symbols to nulls or empty arrays
   pm_php$globals$symbols_php();
 
-  process_env_variables(g->gv__ENV);
-  g->gv__ENV.set("HPHP", 1);
+  process_env_variables(g->GV(_ENV));
+  g->GV(_ENV).set("HPHP", 1);
 
   process_cmd_arguments(argc, argv);
 
-  Variant &server = g->gv__SERVER;
+  Variant &server = g->GV(_SERVER);
   process_env_variables(server);
   server.set("DOCUMENT_ROOT", "");
   server.set("SCRIPT_FILENAME", argv[0]);
   server.set("SCRIPT_NAME", argv[0]);
   server.set("PHP_SELF", argv[0]);
-  server.set("argv", g->gv_argv);
-  server.set("argc", g->gv_argc);
+  server.set("argv", g->GV(argv));
+  server.set("argc", g->GV(argc));
   server.set("PWD", g_context->getCwd());
   char hostname[1024];
   if (!gethostname(hostname, 1024)) {

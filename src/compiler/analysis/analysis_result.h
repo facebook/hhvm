@@ -21,6 +21,7 @@
 #include <compiler/analysis/code_error.h>
 #include <compiler/option.h>
 #include <compiler/analysis/block_scope.h>
+#include <compiler/analysis/symbol_table.h>
 #include <compiler/analysis/function_container.h>
 #include <compiler/package.h>
 #include <compiler/analysis/method_slot.h>
@@ -192,21 +193,24 @@ public:
   void outputAllCPP(CodeGenerator &cg); // mainly for unit test
 
   void outputCPPSystemImplementations(CodeGenerator &cg);
-  void outputCPPFileRunDecls(CodeGenerator &cg);
-  void outputCPPFileRunImpls(CodeGenerator &cg);
-  void outputCPPRedeclaredFunctionDecl(CodeGenerator &cg, bool constructor);
-  void outputCPPRedeclaredFunctionImpl(CodeGenerator &cg);
-  void outputCPPRedeclaredClassDecl(CodeGenerator &cg);
+  void outputCPPFileRunDecls(CodeGenerator &cg,
+                             Type2SymbolListMap &type2names);
+  void outputCPPRedeclaredFunctionDecl(CodeGenerator &cg,
+                                       Type2SymbolListMap &type2names);
+  void outputCPPRedeclaredClassDecl(CodeGenerator &cg,
+                                    Type2SymbolListMap &type2names);
   void outputCPPRedeclaredClassImpl(CodeGenerator &cg);
-  void outputCPPDynamicConstantDecl(CodeGenerator &cg);
+  void outputCPPDynamicConstantDecl(CodeGenerator &cg,
+                                    Type2SymbolListMap &type2names);
   void outputCPPDynamicConstantImpl(CodeGenerator &cg);
   void outputCPPScalarArrayDecl(CodeGenerator &cg);
   void outputCPPScalarArrayImpl(CodeGenerator &cg);
   void outputCPPScalarArrayInit(CodeGenerator &cg, int fileCount, int part);
   void outputCPPScalarArrayId(CodeGenerator &cg, int id, int hash, int index);
   void outputCPPClassStaticInitializerFlags(CodeGenerator &cg,
-                                            bool constructor);
-  void outputCPPClassDeclaredFlags(CodeGenerator &cg);
+                                            Type2SymbolListMap &type2names);
+  void outputCPPClassDeclaredFlags(CodeGenerator &cg,
+                                   Type2SymbolListMap &type2names);
   bool inExpression() { return m_inExpression; }
   void setInExpression(bool in) { m_inExpression = in; }
   bool wrapExpressionBegin(CodeGenerator &);

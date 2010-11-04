@@ -79,7 +79,8 @@ public:
    */
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPDynamicDecl(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputCPPDynamicDecl(CodeGenerator &cg, AnalysisResultPtr ar,
+                            Type2SymbolListMap &type2names);
   void outputCPPDynamicImpl(CodeGenerator &cg, AnalysisResultPtr ar);
 
   void collectCPPGlobalSymbols(StringPairVec &symbols, CodeGenerator &cg,

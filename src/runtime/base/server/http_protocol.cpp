@@ -88,20 +88,20 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   pm_php$globals$symbols_php();
 
   // $_ENV
-  process_env_variables(g->gv__ENV);
-  g->gv__ENV.set("HPHP", 1);
-  g->gv__ENV.set("HPHP_SERVER", 1);
+  process_env_variables(g->GV(_ENV));
+  g->GV(_ENV).set("HPHP", 1);
+  g->GV(_ENV).set("HPHP_SERVER", 1);
 #ifdef HOTPROFILER
-  g->gv__ENV.set("HPHP_HOTPROFILER", 1);
+  g->GV(_ENV).set("HPHP_HOTPROFILER", 1);
 #endif
 
-  Variant &request = g->gv__REQUEST;
+  Variant &request = g->GV(_REQUEST);
 
   // $_GET and $_REQUEST
   if (!r.queryString().empty()) {
-    DecodeParameters(g->gv__GET, r.queryString().data(),
+    DecodeParameters(g->GV(_GET), r.queryString().data(),
                      r.queryString().size());
-    CopyParams(request, g->gv__GET);
+    CopyParams(request, g->GV(_GET));
   }
 
   string contentType = transport->getHeader("Content-Type");
@@ -128,7 +128,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
             needDelete = true;
             data = Util::buffer_duplicate(data, size);
           }
-          DecodeRfc1867(transport, g->gv__POST, g->gv__FILES,
+          DecodeRfc1867(transport, g->GV(_POST), g->GV(_FILES),
                         content_length, data, size, boundary);
         }
       } else {
@@ -141,20 +141,20 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
         decodeData = true;
 
         if (decodeData) {
-          DecodeParameters(g->gv__POST, (const char*)data, size, true);
+          DecodeParameters(g->GV(_POST), (const char*)data, size, true);
         }
 
       }
-      CopyParams(request, g->gv__POST);
+      CopyParams(request, g->GV(_POST));
       if (needDelete) {
         if (RuntimeOption::AlwaysPopulateRawPostData) {
-          g->gv_HTTP_RAW_POST_DATA = String((char*)data, size, AttachString);
+          g->GV(HTTP_RAW_POST_DATA) = String((char*)data, size, AttachString);
         } else {
           free((void *)data);
         }
       } else {
         // For literal we disregard RuntimeOption::AlwaysPopulateRawPostData
-        g->gv_HTTP_RAW_POST_DATA = String((char*)data, size, AttachLiteral);
+        g->GV(HTTP_RAW_POST_DATA) = String((char*)data, size, AttachLiteral);
       }
     }
   }
@@ -164,12 +164,12 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   if (!cookie_data.empty()) {
     StringBuffer sb;
     sb.append(cookie_data);
-    DecodeCookies(g->gv__COOKIE, (char*)sb.data());
-    CopyParams(request, g->gv__COOKIE);
+    DecodeCookies(g->GV(_COOKIE), (char*)sb.data());
+    CopyParams(request, g->GV(_COOKIE));
   }
 
   // $_SERVER
-  Variant &server = g->gv__SERVER;
+  Variant &server = g->GV(_SERVER);
 
   // HTTP_ headers -- we don't exclude headers we handle elsewhere (e.g.,
   // Content-Type, Authorization), since the CGI "spec" merely says the server

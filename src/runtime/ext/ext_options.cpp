@@ -463,7 +463,7 @@ Array f_getopt(CStrRef options, CVarRef longopts /* = null_variant */) {
   opts->opt_name   = NULL;
 
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  Array vargv = g->gv_argv.toArray();
+  Array vargv = g->GV(argv).toArray();
   int argc = vargv.size();
   char **argv = (char **)malloc((argc+1) * sizeof(char*));
   vector<String> holders;

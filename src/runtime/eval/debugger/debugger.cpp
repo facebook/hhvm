@@ -81,7 +81,7 @@ void Debugger::SwitchSandbox(DebuggerProxyPtr proxy,
 
 DebuggerProxyPtr Debugger::GetProxy() {
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  String id = g->gv__SERVER["HPHP_SANDBOX_ID"];
+  String id = g->GV(_SERVER)["HPHP_SANDBOX_ID"];
   return s_debugger.findProxy(id.data());
 }
 

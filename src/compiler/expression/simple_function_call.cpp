@@ -1087,8 +1087,8 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   if (!m_class && m_className.empty()) {
     if (m_redeclared && !m_dynamicInvoke) {
       needHash = false;
-      cg_printf("cit%d = %s->%s%s;\n", m_ciTemp, cg.getGlobals(ar),
-          Option::CallInfoPrefix, cg.formatLabel(m_name).c_str());
+      cg_printf("cit%d = %s->GCI(%s);\n", m_ciTemp, cg.getGlobals(ar),
+                cg.formatLabel(m_name).c_str());
       if (!safeCheck) {
         // If m_safe, check cit later, if null then yield null or safeDef
         cg_printf("if (!cit%d) invoke_failed(\"%s\", null_array, -1);\n",

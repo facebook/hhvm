@@ -1749,7 +1749,7 @@ static void send_soap_server_fault(sdlFunctionPtr function, Variant fault,
   USE_SOAP_GLOBAL;
   bool use_http_error_status = true;
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  if (g->gv__SERVER["HTTP_USER_AGENT"].toString() == "Shockwave Flash") {
+  if (g->GV(_SERVER)["HTTP_USER_AGENT"].toString() == "Shockwave Flash") {
     use_http_error_status = false;
   }
   if (use_http_error_status) {
@@ -2061,8 +2061,8 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
     req = String(data, size, AttachLiteral);
 
     SystemGlobals *g = (SystemGlobals*)get_global_variables();
-    if (g->gv__SERVER.toArray().exists("HTTP_CONTENT_ENCODING")) {
-      String encoding = g->gv__SERVER["HTTP_CONTENT_ENCODING"];
+    if (g->GV(_SERVER).toArray().exists("HTTP_CONTENT_ENCODING")) {
+      String encoding = g->GV(_SERVER)["HTTP_CONTENT_ENCODING"];
       Variant ret;
       if (encoding == "gzip" || encoding == "x-gzip") {
         ret = f_gzinflate(String(data, size, AttachLiteral));

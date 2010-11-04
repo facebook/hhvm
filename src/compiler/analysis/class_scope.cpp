@@ -1467,7 +1467,7 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
         break;
       case CallInfo:
         cg_printf("mcp.ci = &%s%s::%s%s;\n", Option::ClassPrefix,
-            id.c_str(), Option::CallInfoPrefix, lname.c_str());
+                  id.c_str(), Option::CallInfoPrefix, lname.c_str());
         if (!staticOnly) {
           cg_printf("mcp.obj = this;\n");
         }

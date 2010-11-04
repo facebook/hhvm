@@ -73,7 +73,7 @@ bool UrlFile::open(CStrRef url, CStrRef mode) {
   }
 
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  Variant &r = g->gv_http_response_header;
+  Variant &r = g->GV(http_response_header);
   r = Array::Create();
   for (unsigned int i = 0; i < responseHeaders.size(); i++) {
     r.append(responseHeaders[i]);

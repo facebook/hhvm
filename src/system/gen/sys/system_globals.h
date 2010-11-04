@@ -41,49 +41,35 @@ public:
   SystemGlobals();
   static void initialize();
 
-  bool dummy; // for easier constructor initializer output
-
-  // Global Variables
-  Variant gv_argc;
-  Variant gv_argv;
-  Variant gv__SERVER;
-  Variant gv__GET;
-  Variant gv__POST;
-  Variant gv__COOKIE;
-  Variant gv__FILES;
-  Variant gv__ENV;
-  Variant gv__REQUEST;
-  Variant gv__SESSION;
-  Variant gv_HTTP_RAW_POST_DATA;
-  Variant gv_http_response_header;
-
-  // Dynamic Constants
-  Variant k_SID;
-
-  // Function/Method Static Variables
-
-  // Function/Method Static Variable Initialization Booleans
-
-  // Class Static Variables
-
-  // Class Static Initializer Flags
-
-  // PseudoMain Variables
-  bool run_pm_php$classes$arrayaccess_php;
-  bool run_pm_php$classes$debugger_php;
-  bool run_pm_php$classes$directory_php;
-  bool run_pm_php$classes$exception_php;
-  bool run_pm_php$classes$iterator_php;
-  bool run_pm_php$classes$reflection_php;
-  bool run_pm_php$classes$splfile_php;
-  bool run_pm_php$classes$splobjectstorage_php;
-  bool run_pm_php$classes$stdclass_php;
-  bool run_pm_php$globals$constants_php;
-  bool run_pm_php$globals$symbols_php;
-
-  // Redeclared Functions
-
-  // Redeclared Classes
+  CallInfo* stgv_CallInfoPtr[1];
+  ClassStaticsPtr stgv_ClassStaticsPtr[1];
+  ObjectStaticCallbacks* stgv_ObjectStaticCallbacksPtr[1];
+  Variant stgv_Variant[13];
+  #define gvm_argc stgv_Variant[0]
+  #define gvm_argv stgv_Variant[1]
+  #define gvm__SERVER stgv_Variant[2]
+  #define gvm__GET stgv_Variant[3]
+  #define gvm__POST stgv_Variant[4]
+  #define gvm__COOKIE stgv_Variant[5]
+  #define gvm__FILES stgv_Variant[6]
+  #define gvm__ENV stgv_Variant[7]
+  #define gvm__REQUEST stgv_Variant[8]
+  #define gvm__SESSION stgv_Variant[9]
+  #define gvm_HTTP_RAW_POST_DATA stgv_Variant[10]
+  #define gvm_http_response_header stgv_Variant[11]
+  #define k_SID stgv_Variant[12]
+  bool stgv_bool[11];
+  #define run_pm_php$classes$arrayaccess_php stgv_bool[0]
+  #define run_pm_php$classes$debugger_php stgv_bool[1]
+  #define run_pm_php$classes$directory_php stgv_bool[2]
+  #define run_pm_php$classes$exception_php stgv_bool[3]
+  #define run_pm_php$classes$iterator_php stgv_bool[4]
+  #define run_pm_php$classes$reflection_php stgv_bool[5]
+  #define run_pm_php$classes$splfile_php stgv_bool[6]
+  #define run_pm_php$classes$splobjectstorage_php stgv_bool[7]
+  #define run_pm_php$classes$stdclass_php stgv_bool[8]
+  #define run_pm_php$globals$constants_php stgv_bool[9]
+  #define run_pm_php$globals$symbols_php stgv_bool[10]
 };
 
 // Scalar Arrays

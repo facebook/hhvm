@@ -137,8 +137,8 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
   if (context == CodeGenerator::NoContext) {
     string rname = cg.formatLabel(m_name);
     if (funcScope->isRedeclaring()) {
-      cg.printf("g->%s%s = &%s%s;\n", Option::CallInfoPrefix, m_name.c_str(),
-          Option::CallInfoPrefix, fname.c_str());
+      cg.printf("g->GCI(%s) = &%s%s;\n", m_name.c_str(),
+                Option::CallInfoPrefix, fname.c_str());
     }
     if (funcScope->isVolatile()) {
       cg_printf("g->declareFunctionLit(");

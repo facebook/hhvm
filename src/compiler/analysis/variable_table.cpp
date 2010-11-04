@@ -270,9 +270,6 @@ string VariableTable::getVariableName(CodeGenerator &cg, AnalysisResultPtr ar,
 string
 VariableTable::getGlobalVariableName(CodeGenerator &cg, AnalysisResultPtr ar,
                                      const string &name) const {
-  if (ar->getVariables()->isSystem(name)) {
-    return string(Option::GlobalVariablePrefix) + cg.formatLabel(name);
-  }
   return string("GV(") + cg.formatLabel(name) + ")";
 }
 
@@ -757,63 +754,61 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   cg_printf("static void initialize();\n");
 
   cg_printf("\n");
-  cg_printf("bool dummy; // for easier constructor initializer output\n");
 
-  cg.printSection("Global Variables");
+  // We will create one variable[] per type.
+  Type2SymbolListMap type2names;
+  SymbolList &variants = type2names["Variant"];
+  SymbolList &bools = type2names["bool"];
+
+  // Global Variables
   if (cg.getOutput() != CodeGenerator::SystemCPP) {
-    cg_printf("BEGIN_GVS()\n");
-    int count = 0;
     for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
       const Symbol *sym = m_symbolVec[i];
       if (!sym->isSystem()) {
-        count++;
-        cg_printf("  GVS(%s)\n", cg.formatLabel(sym->getName()).c_str());
+        variants.push_back(string("gvm_") + cg.formatLabel(sym->getName()));
       }
     }
-    cg_printf("END_GVS(%d)\n", count);
   } else {
     for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
       const Symbol *sym = m_symbolVec[i];
       TypePtr type = sym->getFinalType();
-      type->outputCPPDecl(cg, ar);
-      cg_printf(" %s%s;\n", Option::GlobalVariablePrefix,
-                cg.formatLabel(sym->getName()).c_str());
+      type2names[type->getCPPDecl(cg, ar)].push_back
+        (string("gvm_") + cg.formatLabel(sym->getName()));
     }
   }
 
-  cg.printSection("Dynamic Constants");
-  ar->outputCPPDynamicConstantDecl(cg);
+  // Dynamic Constants
+  ar->outputCPPDynamicConstantDecl(cg, type2names);
 
-  cg.printSection("Function/Method Static Variables");
+  // Function/Method Static Variables
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     const string &id = iter->first;
     StaticGlobalInfoPtr sgi = iter->second;
     if (sgi->func) {
       TypePtr varType = sgi->variables->getFinalType(sgi->name);
-      varType->outputCPPDecl(cg, ar);
-      cg_printf(" %s%s;\n", Option::StaticVariablePrefix, id.c_str());
+      type2names[varType->getCPPDecl(cg, ar)].push_back
+        (string(Option::StaticVariablePrefix) + id);
     }
   }
 
-  cg.printSection("Function/Method Static Variable Initialization Booleans");
+  // Function/Method Static Variable Initialization Booleans
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     const string &id = iter->first;
     StaticGlobalInfoPtr sgi = iter->second;
     if (sgi->func) {
+      string name = string(Option::InitPrefix) +
+        Option::StaticVariablePrefix + id;
       if (ar->needStaticArray(sgi->cls, sgi->func)) {
-        cg_printf("Variant %s%s%s;\n", Option::InitPrefix,
-                  Option::StaticVariablePrefix, id.c_str());
+        variants.push_back(name);
       } else {
-        cg_printf("bool %s%s%s;\n", Option::InitPrefix,
-                  Option::StaticVariablePrefix, id.c_str());
+        bools.push_back(name);
       }
     }
   }
 
-  cg.printSection("Class Static Variables");
-  int count = 0;
+  // Class Static Variables
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
@@ -822,37 +817,57 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
                                                sgi->name);
     if (!sgi->func) {
       TypePtr varType = sgi->variables->getFinalType(sgi->name);
-      if (varType->is(Type::KindOfVariant)) {
-        cg_printf("#define %s%s csp[%d]\n",
-                  Option::StaticPropertyPrefix, id.c_str(), count);
-        count++;
-      } else {
-        varType->outputCPPDecl(cg, ar);
-        cg_printf(" %s%s;\n", Option::StaticPropertyPrefix, id.c_str());
-      }
+      type2names[varType->getCPPDecl(cg, ar)].push_back
+        (string(Option::StaticPropertyPrefix) + id);
     }
   }
-  if (count) {
-    cg_printf("Variant csp[%d];\n", count);
-  }
 
-  cg.printSection("Class Static Initializer Flags");
-  ar->outputCPPClassStaticInitializerFlags(cg, false);
+  // Class Static Initializer Flags
+  ar->outputCPPClassStaticInitializerFlags(cg, type2names);
 
-  cg.printSection("PseudoMain Variables");
-  ar->outputCPPFileRunDecls(cg);
+  // PseudoMain Variables
+  ar->outputCPPFileRunDecls(cg, type2names);
 
   if (cg.getOutput() != CodeGenerator::SystemCPP) {
-    cg.printSection("Volatile class declared flags");
-    ar->outputCPPClassDeclaredFlags(cg);
+    // Volatile class declared flags
+    ar->outputCPPClassDeclaredFlags(cg, type2names);
     cg_printf("virtual bool class_exists(const char *name);\n");
   }
 
-  cg.printSection("Redeclared Functions");
-  ar->outputCPPRedeclaredFunctionDecl(cg, false);
+  // Redeclared Functions
+  ar->outputCPPRedeclaredFunctionDecl(cg, type2names);
 
-  cg.printSection("Redeclared Classes");
-  ar->outputCPPRedeclaredClassDecl(cg);
+  // Redeclared Classes
+  ar->outputCPPRedeclaredClassDecl(cg, type2names);
+
+  // generating arr[1] even if it's empty just to make
+  // outputCPPGlobalVariablesImpl()'s memset easier to generate
+  type2names.operator[]("bool");
+  type2names.operator[]("CallInfo*");
+  type2names.operator[]("ObjectStaticCallbacks*");
+
+  const char *prefix = (cg.getOutput() == CodeGenerator::SystemCPP) ?
+    "stgv_" : "tgv_"; // (system) typed global variables
+  for (Type2SymbolListMap::const_iterator iter = type2names.begin();
+       iter != type2names.end(); ++iter) {
+    const string &type = iter->first;
+    string typeName = type;
+    Util::replaceAll(typeName, "*", "Ptr");
+    const SymbolList &names = iter->second;
+
+    // generating arr[1] even if it's empty just to make
+    // outputCPPGlobalVariablesImpl()'s memset easier to generate
+    cg_printf("%s %s%s[%d];\n", type.c_str(), prefix, typeName.c_str(),
+              (names.empty() ? 1 : (int)names.size()));
+
+    int i = 0;
+    for (SymbolList::const_iterator iterName = names.begin();
+         iterName != names.end(); ++iterName) {
+      cg_printf("#define %s %s%s[%d]\n", iterName->c_str(), prefix,
+                typeName.c_str(), i);
+      i++;
+    }
+  }
 
   if (cg.getOutput() != CodeGenerator::SystemCPP) {
     cg.printSection("Global Array Wrapper Methods");
@@ -947,30 +962,14 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
   }
 
   const char *clsname = system ? "SystemGlobals" : "GlobalVariables";
-  cg_printf("%s::%s() : dummy(false)", clsname, clsname);
+  cg_indentBegin("%s::%s() {\n", clsname, clsname);
 
-  set<string> classes;
-  for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
-         m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
-    const string &id = iter->first;
-    StaticGlobalInfoPtr sgi = iter->second;
-    if (sgi->func) {
-      if (ar->needStaticArray(sgi->cls, sgi->func)) {
-        cg_printf(",\n  %s%s%s()", Option::InitPrefix,
-                  Option::StaticVariablePrefix, id.c_str());
-      } else {
-        cg_printf(",\n  %s%s%s(false)", Option::InitPrefix,
-                  Option::StaticVariablePrefix, id.c_str());
-      }
-    } else if (sgi->cls->needStaticInitializer()) {
-      classes.insert(sgi->cls->getId(cg));
-    }
-  }
-  ar->outputCPPClassStaticInitializerFlags(cg, true);
-  ar->outputCPPFileRunImpls(cg);
-  ar->outputCPPRedeclaredFunctionDecl(cg, true);
-
-  cg_indentBegin(" {\n");
+  const char *prefix = system ? "stgv_" : "tgv_";
+  cg_printf("memset(&%sbool, 0, sizeof(%sbool));\n", prefix, prefix);
+  cg_printf("memset(&%sCallInfoPtr, 0, sizeof(%sCallInfoPtr));\n",
+            prefix, prefix);
+  cg_printf("memset(&%sObjectStaticCallbacksPtr, 0, "
+            "sizeof(%sObjectStaticCallbacksPtr));\n", prefix, prefix);
 
   cg.printSection("Primitive Function/Method Static Variables");
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
@@ -1006,16 +1005,8 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
     }
   }
 
-  cg.printSection("Redeclared Functions");
-  ar->outputCPPRedeclaredFunctionImpl(cg);
-
   cg.printSection("Redeclared Classes");
   ar->outputCPPRedeclaredClassImpl(cg);
-
-  if (!system) {
-    cg.printSection("Volatile class declaration flags");
-    cg_printf("memset(cdec, 0, sizeof(cdec));\n");
-  }
 
   cg_indentEnd("}\n");
 
@@ -1028,10 +1019,14 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
     cg_indentBegin("void GlobalVariables::initialize() {\n");
     cg_printf("SystemGlobals::initialize();\n");
   }
-  for (set<string>::const_iterator iter = classes.begin();
-       iter != classes.end(); ++iter) {
-    cg_printf("%s%s();\n", Option::ClassStaticInitializerPrefix,
-              iter->c_str());
+
+  for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
+         m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
+    StaticGlobalInfoPtr sgi = iter->second;
+    if (!sgi->func && sgi->cls->needStaticInitializer()) {
+      cg_printf("%s%s();\n", Option::ClassStaticInitializerPrefix,
+                sgi->cls->getId(cg).c_str());
+    }
   }
   cg_indentEnd("}\n");
 
@@ -1182,7 +1177,7 @@ void VariableTable::outputCPPVariableInit(CodeGenerator &cg,
     if (cg.getOutput() != CodeGenerator::SystemCPP) {
       cg_printf(getGlobalVariableName(cg, ar, name).c_str());
     } else {
-      cg_printf("%s%s", Option::GlobalVariablePrefix, name.c_str());
+      cg_printf("GV(%s)", name.c_str());
     }
   }
 }

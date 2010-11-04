@@ -272,7 +272,7 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
        it != m_functions.end(); ++it) {
     BOOST_FOREACH(FunctionScopePtr func, it->second) {
       cg_printf("extern CallInfo %s%s;\n", Option::CallInfoPrefix,
-          func->getId(cg).c_str());
+                func->getId(cg).c_str());
     }
   }
 

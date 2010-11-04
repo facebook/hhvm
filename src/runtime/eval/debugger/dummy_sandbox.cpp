@@ -70,9 +70,9 @@ void DummySandbox::run() {
           msg = "Invalid sandbox was specified. "
             "PHP files may not be loaded properly.\n";
           // force HPHP_SANDBOX_ID to be set, so we can still talk to client
-          g->gv__SERVER.set("HPHP_SANDBOX_ID", sandbox.id());
+          g->GV(_SERVER).set("HPHP_SANDBOX_ID", sandbox.id());
         } else {
-          sri.setServerVariables(g->gv__SERVER);
+          sri.setServerVariables(g->GV(_SERVER));
         }
 
         std::string doc = getStartupDoc(sandbox);

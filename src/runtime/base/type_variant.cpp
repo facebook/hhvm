@@ -405,25 +405,6 @@ CVarRef Variant::set(const StaticString & v) {
   return *this;
 }
 
-CVarRef Variant::set(const StaticString & v) {
-  if (isPrimitive()) {
-    // do nothing
-  } else if (m_type == KindOfVariant) {
-    m_data.pvar->set(v);
-    return *this;
-  } else {
-    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
-  }
-  if (!v.isNull()) {
-    m_type = KindOfStaticString;
-    m_data.pstr = v.get();
-  } else {
-    m_data.num = 0;
-    m_type = KindOfNull;
-  }
-  return *this;
-}
-
 CVarRef Variant::set(ArrayData *v) {
   if (m_type == KindOfVariant) {
     m_data.pvar->set(v);

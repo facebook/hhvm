@@ -185,7 +185,7 @@ CPPFLAGS += -MMD -fPIC
 CXXFLAGS += -fno-operator-names
 
 # Include frame pointers to make it easier to generate callgraphs in oprofile
-CPPFLAGS += -fno-omit-frame-pointer
+CPPFLAGS += -fno-omit-frame-pointer -momit-leaf-frame-pointer
 
 ifdef MAC_OS_X
 

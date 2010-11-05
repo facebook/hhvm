@@ -115,9 +115,13 @@ SimpleFunctionCall::SimpleFunctionCall
 
 ExpressionPtr SimpleFunctionCall::clone() {
   SimpleFunctionCallPtr exp(new SimpleFunctionCall(*this));
+  deepCopy(exp);
+  return exp;
+}
+
+void SimpleFunctionCall::deepCopy(SimpleFunctionCallPtr exp) {
   FunctionCall::deepCopy(exp);
   exp->m_safeDef = Clone(m_safeDef);
-  return exp;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -502,7 +506,8 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
     }
   }
 
-  if (!m_funcScope->getInlineAsExpr() ||
+  if (m_type != UnknownType || m_safe ||
+      !m_funcScope->getInlineAsExpr() ||
       !m_funcScope->getStmt() ||
       m_funcScope->getStmt()->getRecursiveCount() > 10) {
     return ExpressionPtr();
@@ -1650,9 +1655,9 @@ SimpleFunctionCallPtr SimpleFunctionCall::getFunctionCallForCallUserFunc(
             }
           }
           SimpleFunctionCallPtr rep(
-            new SimpleFunctionCall(call->getScope(), call->getLocation(),
-                                   Expression::KindOfSimpleFunctionCall,
-                                   name, p2, ExpressionPtr()));
+            NewSimpleFunctionCall(call->getScope(), call->getLocation(),
+                                  Expression::KindOfSimpleFunctionCall,
+                                  name, p2, ExpressionPtr()));
           return rep;
         }
         v = t;
@@ -1733,9 +1738,9 @@ SimpleFunctionCallPtr SimpleFunctionCall::getFunctionCallForCallUserFunc(
           }
         }
         SimpleFunctionCallPtr rep(
-          new SimpleFunctionCall(call->getScope(), call->getLocation(),
-                                 Expression::KindOfSimpleFunctionCall,
-                                 smethod, p2, cl));
+          NewSimpleFunctionCall(call->getScope(), call->getLocation(),
+                                Expression::KindOfSimpleFunctionCall,
+                                smethod, p2, cl));
         return rep;
       }
     }

@@ -36,6 +36,8 @@ public:
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   ExpressionPtr preOptimize(AnalysisResultPtr ar);
   ExpressionPtr postOptimize(AnalysisResultPtr ar);
+  void deepCopy(SimpleFunctionCallPtr exp);
+
   bool isDefineWithoutImpl(AnalysisResultPtr ar);
   void setValid() { m_valid = true; }
   void setNoPrefix() { m_noPrefix = true; }
@@ -111,6 +113,11 @@ protected:
 
   ExpressionPtr optimize(AnalysisResultPtr ar);
 };
+
+SimpleFunctionCallPtr NewSimpleFunctionCall(
+  EXPRESSION_CONSTRUCTOR_PARAMETERS,
+  const std::string &name, ExpressionListPtr params,
+  ExpressionPtr cls);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

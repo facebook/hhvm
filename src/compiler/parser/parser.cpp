@@ -97,7 +97,18 @@ using namespace boost;
 #define NEW_STMT(cls, e...)                                     \
   cls##Ptr(new cls(BlockScopePtr(), getLocation(), Statement::KindOf##cls, ##e))
 
-namespace HPHP { namespace Compiler {
+namespace HPHP {
+
+SimpleFunctionCallPtr NewSimpleFunctionCall(
+  EXPRESSION_CONSTRUCTOR_PARAMETERS,
+  const std::string &name, ExpressionListPtr params,
+  ExpressionPtr cls) {
+  return SimpleFunctionCallPtr(
+    new RealSimpleFunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES,
+                               name, params, cls));
+}
+
+namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 

@@ -43,6 +43,8 @@ enum {
   PHP_PCRE_BAD_UTF8_OFFSET_ERROR
 };
 
+using namespace std;
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // regex cache and helpers
@@ -67,54 +69,64 @@ public:
 #endif
   int compile_options;
 };
-typedef std::map<std::string, pcre_cache_entry*> PCRECache;
 
-class PCREData : public RequestEventHandler {
+typedef hphp_hash_map<StringData *, pcre_cache_entry*,
+                      string_data_hash, string_data_same> PCREStringMap;
+
+// TODO LRU cache
+class PCRECache {
 public:
-  ~PCREData() {
+  ~PCRECache() {
     cleanup();
   }
 
   void cleanup() {
-    for (PCRECache::iterator iter = cache.begin(); iter != cache.end();
-         ++iter) {
-      delete iter->second;
+    for (PCREStringMap::iterator it = m_cache.begin(); it != m_cache.end();
+         ++it) {
+      delete it->second;
+      if (!it->first->isStatic()) {
+        delete it->first;
+      }
     }
-    cache.clear();
   }
 
-  virtual void requestInit() {
-    cleanup();
+  pcre_cache_entry *find(CStrRef regex) {
+    PCREStringMap::const_iterator it = m_cache.find(regex.get());
+    if (it != m_cache.end()) return it->second;
+    return NULL;
   }
 
-  virtual void requestShutdown() {
-    cleanup();
+  void set(CStrRef regex, pcre_cache_entry *pce) {
+    PCREStringMap::iterator it = m_cache.find(regex.get());
+    if (it != m_cache.end()) {
+      delete it->second;
+      it->second = pce;
+    } else {
+      m_cache[regex->copy(true)] = pce;
+    }
   }
 
-  PCRECache cache;
   int error_code;
   pcre_extra extra_data;
+
+private:
+  PCREStringMap m_cache;
 };
-IMPLEMENT_STATIC_REQUEST_LOCAL(PCREData, s_pcre_data);
+IMPLEMENT_THREAD_LOCAL(PCRECache, s_pcre_cache);
 
 static pcre_cache_entry *pcre_get_compiled_regex_cache(CStrRef regex) {
-  PCRECache &pcre_cache = s_pcre_data->cache;
+  PCRECache &pcre_cache = *s_pcre_cache;
 
   /* Try to lookup the cached regex entry, and if successful, just pass
      back the compiled pattern, otherwise go on and compile it. */
-  std::string sregex(regex.data(), regex.size());
-  PCRECache::const_iterator iter = pcre_cache.find(sregex);
-  if (iter != pcre_cache.end()) {
-    pcre_cache_entry *pce = iter->second;
+  pcre_cache_entry *pce = pcre_cache.find(regex);
+  if (pce) {
     /**
      * We use a quick pcre_info() check to see whether cache is corrupted,
      * and if it is, we flush it and compile the pattern from scratch.
      */
     if (pcre_info(pce->re, NULL, NULL) == PCRE_ERROR_BADMAGIC) {
-      for (iter = pcre_cache.begin(); iter != pcre_cache.end(); ++iter) {
-        delete iter->second;
-      }
-      pcre_cache.clear();
+      pcre_cache.cleanup();
     } else {
 #if HAVE_SETLOCALE
       if (!strcmp(pce->locale, locale)) {
@@ -275,16 +287,13 @@ static pcre_cache_entry *pcre_get_compiled_regex_cache(CStrRef regex) {
   new_entry->locale = strdup(locale);
   new_entry->tables = tables;
 #endif
-  if (iter != pcre_cache.end()) {
-    delete iter->second;
-  }
-  pcre_cache[sregex] = new_entry;
+  pcre_cache.set(regex, new_entry);
   return new_entry;
 }
 
 static void set_extra_limits(pcre_extra *&extra) {
   if (extra == NULL) {
-    pcre_extra &extra_data = s_pcre_data->extra_data;
+    pcre_extra &extra_data = s_pcre_cache->extra_data;
     extra_data.flags = PCRE_EXTRA_MATCH_LIMIT |
       PCRE_EXTRA_MATCH_LIMIT_RECURSION;
     extra = &extra_data;
@@ -352,7 +361,7 @@ static void pcre_handle_exec_error(int pcre_code) {
     preg_code = PHP_PCRE_INTERNAL_ERROR;
     break;
   }
-  s_pcre_data->error_code = preg_code;
+  s_pcre_cache->error_code = preg_code;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -371,7 +380,7 @@ Variant preg_grep(CStrRef pattern, CArrRef input, int flags /* = 0 */) {
 
   /* Initialize return array */
   Array ret = Array::Create();
-  s_pcre_data->error_code = PHP_PCRE_NO_ERROR;
+  s_pcre_cache->error_code = PHP_PCRE_NO_ERROR;
 
   /* Go through the input array */
   bool invert = (flags & PREG_GREP_INVERT);
@@ -410,8 +419,8 @@ Variant preg_grep(CStrRef pattern, CArrRef input, int flags /* = 0 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant preg_match_impl(CStrRef pattern, CStrRef subject,
-                               Variant &subpats, int flags, int start_offset,
+static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
+                               Variant *subpats, int flags, int start_offset,
                                bool global) {
   pcre_cache_entry *pce = pcre_get_compiled_regex_cache(pattern);
   if (pce == NULL) {
@@ -420,7 +429,9 @@ Variant preg_match_impl(CStrRef pattern, CStrRef subject,
 
   pcre_extra *extra = pce->extra;
   set_extra_limits(extra);
-  subpats = Array::Create();
+  if (subpats) {
+    *subpats = Array::Create();
+  }
 
   int subpats_order = global ? PREG_PATTERN_ORDER : 0;
   bool offset_capture = false;
@@ -489,7 +500,8 @@ Variant preg_match_impl(CStrRef pattern, CStrRef subject,
       }
 
       while (ni++ < name_cnt) {
-        name_idx = 0xff * (unsigned char)name_table[0] + (unsigned char)name_table[1];
+        name_idx = 0xff * (unsigned char)name_table[0] +
+                   (unsigned char)name_table[1];
         subpat_names[name_idx] = name_table + 2;
         if (is_numeric_string(subpat_names[name_idx],
                               strlen(subpat_names[name_idx]),
@@ -515,7 +527,7 @@ Variant preg_match_impl(CStrRef pattern, CStrRef subject,
 
   const char *match = NULL;
   int matched = 0;
-  s_pcre_data->error_code = PHP_PCRE_NO_ERROR;
+  s_pcre_cache->error_code = PHP_PCRE_NO_ERROR;
 
   Variant result_set; // Holds a set of subpatterns after a global match
   int g_notempty = 0; // If the match should not be empty
@@ -536,6 +548,8 @@ Variant preg_match_impl(CStrRef pattern, CStrRef subject,
     if (count > 0) {
       matched++;
       match = subject.data() + offsets[0];
+
+      if (!subpats) continue;
 
       // Try to get the list of substrings and display a warning if failed.
       if (pcre_get_substring_list(subject.data(), offsets, count,
@@ -593,13 +607,13 @@ Variant preg_match_impl(CStrRef pattern, CStrRef subject,
             }
           }
           /* And add it to the output array */
-          subpats.append(result_set);
+          subpats->append(result_set);
         }
       } else {      /* single pattern matching */
         /* For each subpattern, insert it into the subpatterns array. */
         for (i = 0; i < count; i++) {
           if (offset_capture) {
-            add_offset_pair(subpats,
+            add_offset_pair(*subpats,
                             String(stringlist[i],
                                    offsets[(i<<1)+1] - offsets[i<<1],
                                    CopyString),
@@ -608,9 +622,9 @@ Variant preg_match_impl(CStrRef pattern, CStrRef subject,
             String value(stringlist[i], offsets[(i<<1)+1] - offsets[i<<1],
                          CopyString);
             if (subpat_names[i]) {
-              subpats.set(subpat_names[i], value);
+              subpats->set(subpat_names[i], value);
             }
-            subpats.append(value);
+            subpats->append(value);
           }
         }
       }
@@ -642,12 +656,12 @@ Variant preg_match_impl(CStrRef pattern, CStrRef subject,
   } while (global);
 
   /* Add the match sets to the output array and clean up */
-  if (global && subpats_order == PREG_PATTERN_ORDER) {
+  if (subpats && global && subpats_order == PREG_PATTERN_ORDER) {
     for (i = 0; i < num_subpats; i++) {
       if (subpat_names[i]) {
-        subpats.set(subpat_names[i], match_sets[i]);
+        subpats->set(subpat_names[i], match_sets[i]);
       }
-      subpats.append(match_sets[i]);
+      subpats->append(match_sets[i]);
     }
   }
 
@@ -659,22 +673,20 @@ Variant preg_match_impl(CStrRef pattern, CStrRef subject,
 Variant preg_match(CStrRef pattern, CStrRef subject,
                    Variant &matches, int flags /* = 0 */,
                    int offset /* = 0 */) {
-  return preg_match_impl(pattern, subject, matches, flags, offset, false);
+  return preg_match_impl(pattern, subject, &matches, flags, offset, false);
 }
 Variant preg_match(CStrRef pattern, CStrRef subject, int flags /* = 0 */,
                    int offset /* = 0 */) {
-  Variant matches;
-  return preg_match_impl(pattern, subject, matches, flags, offset, false);
+  return preg_match_impl(pattern, subject, NULL, flags, offset, false);
 }
 
 Variant preg_match_all(CStrRef pattern, CStrRef subject, Variant &matches,
                        int flags /* = 0 */, int offset /* = 0 */) {
-  return preg_match_impl(pattern, subject, matches, flags, offset, true);
+  return preg_match_impl(pattern, subject, &matches, flags, offset, true);
 }
 Variant preg_match_all(CStrRef pattern, CStrRef subject,
                        int flags /* = 0 */, int offset /* = 0 */) {
-  Variant matches;
-  return preg_match_impl(pattern, subject, matches, flags, offset, true);
+  return preg_match_impl(pattern, subject, NULL, flags, offset, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -785,7 +797,7 @@ static String php_pcre_replace(CStrRef pattern, CStrRef subject,
   /* Initialize */
   const char *match = NULL;
   int start_offset = 0;
-  s_pcre_data->error_code = PHP_PCRE_NO_ERROR;
+  s_pcre_cache->error_code = PHP_PCRE_NO_ERROR;
   pcre_extra *extra = pce->extra;
   set_extra_limits(extra);
 
@@ -1090,7 +1102,7 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
   int next_offset = 0;
   const char *last_match = ssubject.data();
   const char *match = NULL;
-  s_pcre_data->error_code = PHP_PCRE_NO_ERROR;
+  s_pcre_cache->error_code = PHP_PCRE_NO_ERROR;
   pcre_extra *extra = pce->extra;
 
   // Get next piece if no limit or limit not yet reached and something matched
@@ -1271,7 +1283,7 @@ String preg_quote(CStrRef str, CStrRef delimiter /* = null_string */) {
 }
 
 int preg_last_error() {
-  return s_pcre_data->error_code;
+  return s_pcre_cache->error_code;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

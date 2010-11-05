@@ -25,16 +25,15 @@ namespace HPHP {
 
 Variant preg_grep(CStrRef pattern, CArrRef input, int flags = 0);
 
-Variant preg_match_impl(CStrRef pattern, CStrRef subject,
-                        Variant &subpats, int flags, int start_offset,
-                        bool global);
-Variant preg_match(CStrRef pattern, CStrRef subject,
-                   Variant &matches, int flags = 0,
-                   int offset = 0);
+Variant preg_match(CStrRef pattern, CStrRef subject, Variant &matches,
+                   int flags = 0, int offset = 0);
+
 Variant preg_match(CStrRef pattern, CStrRef subject, int flags = 0,
                    int offset = 0);
+
 Variant preg_match_all(CStrRef pattern, CStrRef subject, Variant &matches,
                        int flags = 0, int offset = 0);
+
 Variant preg_match_all(CStrRef pattern, CStrRef subject,
                        int flags = 0, int offset = 0);
 

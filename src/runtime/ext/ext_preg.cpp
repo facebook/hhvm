@@ -33,12 +33,20 @@ Variant f_preg_grep(CStrRef pattern, CArrRef input, int flags /* = 0 */) {
 Variant f_preg_match(CStrRef pattern, CStrRef subject,
                      Variant matches /* = null */, int flags /* = 0 */,
                      int offset /* = 0 */) {
-  return preg_match_impl(pattern, subject, matches, flags, offset, false);
+  if (matches.isReferenced()) {
+    return preg_match(pattern, subject, matches, flags, offset);
+  } else {
+    return preg_match(pattern, subject, flags, offset);
+  }
 }
 
 Variant f_preg_match_all(CStrRef pattern, CStrRef subject, Variant matches,
                          int flags /* = 0 */, int offset /* = 0 */) {
-  return preg_match_impl(pattern, subject, matches, flags, offset, true);
+  if (matches.isReferenced()) {
+    return preg_match_all(pattern, subject, matches, flags, offset);
+  } else {
+    return preg_match_all(pattern, subject, flags, offset);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

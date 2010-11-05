@@ -30,6 +30,7 @@ STATIC_LIBS := $(subst libsicu,libicu,$(filter-out $(EXCEPTIONS), $(ALL_LIBS)))
 
 SHARED_LIBS = $(EXT_DIR)/icu/lib/libicuuc.so \
               $(EXT_DIR)/binutils/libbinutils.so \
+              $(EXT_DIR)/imap/lib/libc-client.so.2007 \
               $(shell find $(EXT_DIR)/mozilla -name "*.so") \
               $(patsubst %.a, %.so, $(STATIC_LIBS)) \
               $(LINK_LIBS) \

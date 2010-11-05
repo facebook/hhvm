@@ -211,7 +211,7 @@ bool FunctionScope::isFinal() const {
 }
 
 bool FunctionScope::isVariableArgument() const {
-  return m_attribute & FileScope::VariableArgument;
+  return m_attribute & FileScope::VariableArgument && !m_overriding;
 }
 
 bool FunctionScope::isReferenceVariableArgument() const {
@@ -701,7 +701,7 @@ bool FunctionScope::outputCPPArrayCreate(CodeGenerator &cg,
                                          AnalysisResultPtr ar,
                                          int m_maxParam) {
   ASSERT(m_maxParam >= 0);
-  ASSERT(isVariableArgument());
+  ASSERT(m_attribute & FileScope::VariableArgument);
   if (!Option::GenArrayCreate ||
       cg.getOutput() == CodeGenerator::SystemCPP ||
       m_maxParam == 0) {
@@ -729,7 +729,7 @@ bool FunctionScope::outputCPPArrayCreate(CodeGenerator &cg,
     }
   }
   cg_printf(")");
-  if (isVariableArgument()) cg_printf(",args");
+  cg_printf(isVariableArgument() ? ",args" : ",Array()");
   return true;
 }
 
@@ -738,6 +738,8 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
                                         bool aggregateParams) {
   if (isVariableArgument()) {
     cg_printf("num_args, ");
+  } else if (aggregateParams) {
+    cg_printf("%d, ", m_maxParam);
   }
   if (aggregateParams && outputCPPArrayCreate(cg, ar, m_maxParam)) {
     return;
@@ -790,6 +792,8 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
   if (isVariableArgument()) {
     if (aggregateParams || m_maxParam > 0) cg_printf(",");
     cg_printf("args");
+  } else if (aggregateParams) {
+    cg_printf(", Array()");
   }
 }
 

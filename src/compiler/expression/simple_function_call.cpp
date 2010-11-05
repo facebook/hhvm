@@ -1484,7 +1484,12 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
       return;
     }
     if (m_name == "func_num_args") {
-      cg_printf("num_args");
+      FunctionScopePtr func = getFunctionScope();
+      if (!func || func->isVariableArgument()) {
+        cg_printf("num_args");
+      } else {
+        cg_printf("%d", func->getMaxParamCount());
+      }
       return;
     }
 

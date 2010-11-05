@@ -255,13 +255,13 @@ Variant func_get_arg(int num_args, CArrRef params, CArrRef args, int pos) {
       }
     }
   }
-  return null;
+  return false;
 }
 
 Array f_func_get_args() {
   throw FatalErrorException("bad HPHP code generation");
 }
-Array func_get_args(int num_args, CArrRef params, Array &args) {
+Array func_get_args(int num_args, CArrRef params, CArrRef args) {
   FUNCTION_INJECTION_BUILTIN(func_get_args);
   if (params.empty() && args.empty()) return Array::Create();
   if (args.empty()) {

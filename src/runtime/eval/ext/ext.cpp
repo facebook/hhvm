@@ -202,7 +202,13 @@ Variant EvalFuncGetArg::InvokeImpl(VariableEnvironment &env,
                                    CArrRef params) {
   int size = params.size();
   switch (size) {
-  case 1: return env.getParams().rvalAt(params.rvalAt(0));
+  case 1: {
+    int n = params.rvalAt(0);
+    if (n >= 0 && n < env.getParams().size()) {
+      return env.getParams().rvalAt(n);
+    }
+    return false;
+  }
   default: throw InvalidFunctionCallException("func_get_arg");
   }
 }

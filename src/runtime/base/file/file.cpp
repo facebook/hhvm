@@ -37,6 +37,7 @@
 #include <runtime/base/util/exceptions.h>
 #include <sys/file.h>
 #include <runtime/base/string_util.h>
+#include <runtime/base/array/array_iterator.h>
 
 using namespace std;
 

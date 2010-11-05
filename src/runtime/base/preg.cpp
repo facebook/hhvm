@@ -19,6 +19,9 @@
 #include <pcre.h>
 #include <regex.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/builtin_functions.h>
+#include <runtime/base/zend/zend_functions.h>
+#include <runtime/base/array/array_iterator.h>
 
 #define PREG_PATTERN_ORDER          1
 #define PREG_SET_ORDER              2

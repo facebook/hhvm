@@ -20,6 +20,7 @@
 #include <runtime/base/zend/zend_url.h>
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/array/array_iterator.h>
+#include <runtime/base/builtin_functions.h>
 
 using namespace std;
 

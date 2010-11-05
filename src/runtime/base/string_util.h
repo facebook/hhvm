@@ -18,10 +18,11 @@
 #define __HPHP_STRING_UTIL_H__
 
 #include <runtime/base/complex_types.h>
-#include <system/gen/php/globals/constants.fw.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+extern const StaticString k_HPHP_TRIM_CHARLIST;
 
 /**
  * Utility string functions. These are mostly wrappers around zend/ string

@@ -76,17 +76,6 @@ Variant::Variant(const std::string & v) : _count(0), m_type(KindOfString) {
   s->incRefCountNoCheck();
 }
 
-Variant::Variant(const StaticString & v) :
-  _count(0), m_type(KindOfStaticString) {
-  StringData *s = v.get();
-  if (s) {
-    m_data.pstr = s;
-  } else {
-    m_data.num = 0;
-    m_type = KindOfNull;
-  }
-}
-
 Variant::Variant(CArrRef v) : _count(0), m_type(KindOfArray) {
   ArrayData *a = v.get();
   if (a) {
@@ -395,13 +384,10 @@ CVarRef Variant::set(const StaticString & v) {
   } else {
     destruct();
   }
-  if (!v.isNull()) {
-    m_type = KindOfStaticString;
-    m_data.pstr = v.get();
-  } else {
-    m_data.num = 0;
-    m_type = KindOfNull;
-  }
+  StringData *s = v.get();
+  ASSERT(s);
+  m_type = KindOfStaticString;
+  m_data.pstr = s;
   return *this;
 }
 

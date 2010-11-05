@@ -400,7 +400,6 @@ public:
   friend class StringUtil;
   friend class LiteralStringInitializer;
 
-  StaticString() { }
   StaticString(litstr s);
   StaticString(litstr s, int length); // binary string
   StaticString(std::string s);

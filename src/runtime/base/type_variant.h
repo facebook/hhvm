@@ -140,7 +140,11 @@ class Variant {
 
   Variant(litstr  v);
   Variant(const std::string & v);
-  Variant(const StaticString & v);
+  Variant(const StaticString & v) : _count(0), m_type(KindOfStaticString) {
+    StringData *s = v.get();
+    ASSERT(s);
+    m_data.pstr = s;
+  }
 
   Variant(CStrRef v);
   Variant(CArrRef v);

@@ -298,7 +298,6 @@ void FileScope::outputCPPPseudoMain(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
                                              AnalysisResultPtr ar) {
-  cg.printSection("Forward Declarations");
   cg.setContext(CodeGenerator::CppForwardDeclaration);
 
   BOOST_FOREACH(const string &dep, m_usedClassesFullHeader) {
@@ -308,49 +307,58 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
     }
   }
 
-  cg.namespaceBegin();
-  cg.printSection("1. Static Strings", false);
-  string str;
-  BOOST_FOREACH(str, m_usedLiteralStringsHeader) {
+  bool first = true;
+  BOOST_FOREACH(const string &str, m_usedLiteralStringsHeader) {
     int index = -1;
     int stringId = cg.checkLiteralString(str, index, ar, BlockScopePtr());
     assert(index != -1);
     string lisnam = ar->getLiteralStringName(stringId, index);
+    if (!cg.ensureInNamespace() && first) cg_printf("\n");
+    first = false;
     cg_printf("extern StaticString %s;\n", lisnam.c_str());
   }
-  cg_printf("\n");
-  cg.printSection("2. Static Arrays", false);
-  BOOST_FOREACH(str, m_usedDefaultValueScalarArrays) {
+
+  first = true;
+  BOOST_FOREACH(const string &str, m_usedDefaultValueScalarArrays) {
     int index = -1;
     int hash = ar->checkScalarArray(str, index);
     assert(hash != -1 && index != -1);
     string name = ar->getScalarArrayName(hash, index);
+    if (!cg.ensureInNamespace() && first) cg_printf("\n");
+    first = false;
     cg_printf("extern StaticArray %s;\n", name.c_str());
   }
-  cg_printf("\n");
 
-  cg.printSection("5. Used constants");
-  BOOST_FOREACH(str, m_usedConstsHeader) {
+  first = true;
+  BOOST_FOREACH(const string &str, m_usedConstsHeader) {
     BlockScopeConstPtr block = ar->findConstantDeclarer(str);
     assert(block);
     ConstantTablePtr constants = block->getConstants();
+    if (!cg.ensureInNamespace() && first) cg_printf("\n");
+    first = false;
     constants->outputSingleConstant(cg, ar, str);
   }
 
+
+  first = true;
   BOOST_FOREACH(const UsedClassConst& item, m_usedClassConstsHeader) {
     ClassScopePtr cls = ar->findClass(item.first);
     assert(cls);
+    if (!cg.ensureInNamespace() && first) cg_printf("\n");
+    first = false;
     cls->getConstants()->outputSingleConstant(cg, ar, item.second);
   }
 
-  cg.printSection("6. Used Classes");
-  BOOST_FOREACH(str, m_usedClassesHeader) {
+  BOOST_FOREACH(const string &str, m_usedClassesHeader) {
     ClassScopePtr usedClass = ar->findClass(str);
+    assert(usedClass);
     string usedClassName = usedClass->getId(cg);
+    if (!cg.ensureInNamespace() && first) cg_printf("\n");
+    first = false;
     cg_printf("FORWARD_DECLARE_CLASS(%s);\n", usedClassName.c_str());
   }
 
-  cg.namespaceEnd();
+  cg.ensureOutOfNamespace();
 }
 
 void FileScope::outputCPPDeclarations(CodeGenerator &cg,

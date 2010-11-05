@@ -21,8 +21,8 @@
 #include <runtime/base/zend/zend_collator.h>
 
 #define SORT_REGULAR            0
-#define SORT_STRING             1
-#define SORT_NUMERIC            2
+#define SORT_NUMERIC            1
+#define SORT_STRING             2
 #define SORT_LOCALE_STRING      5
 
 #define SORT_DESC               3

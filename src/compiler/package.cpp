@@ -347,7 +347,9 @@ bool Package::parseImpl(const char *fileName) {
 
   struct stat sb;
   if (stat(fullPath.c_str(), &sb)) {
-    Logger::Error("Unable to stat file %s", fullPath.c_str());
+    if (fullPath.find(' ') == string::npos) {
+      Logger::Error("Unable to stat file %s", fullPath.c_str());
+    }
     return false;
   }
   if ((sb.st_mode & S_IFMT) == S_IFDIR) {

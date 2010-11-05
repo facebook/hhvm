@@ -275,7 +275,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
     m_offset->inferAndCheck(ar, Type::Some, false);
   } else {
     if (hasContext(ExistContext) || hasContext(UnsetContext)) {
-      if (ar->isFirstPass()) {
+      if (getScope()->isFirstPass()) {
         Compiler::Error(Compiler::InvalidArrayElement, self);
       }
     }

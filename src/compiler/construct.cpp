@@ -141,7 +141,7 @@ void Construct::addUserClass(AnalysisResultPtr ar,
                              const std::string &name,
                              bool strong /* = true */) {
   if (!name.empty()) {
-    if (strong && !ar->isFirstPass()) {
+    if (strong && ar->getPhase() == AnalysisResult::AnalyzeAll) {
       getFileScope()->addClassDependency(ar, name);
     }
   }

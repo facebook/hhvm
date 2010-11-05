@@ -363,7 +363,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
                                    ExpressionListPtr params, bool &valid) {
   if (!params) {
     if (m_minParam > 0) {
-      if (ar->isFirstPass()) {
+      if (exp->getScope()->isFirstPass()) {
         Compiler::Error(Compiler::TooFewArgument, exp, m_stmt);
       }
       valid = false;
@@ -374,7 +374,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
 
   int ret = 0;
   if (params->getCount() < m_minParam) {
-    if (ar->isFirstPass()) {
+    if (exp->getScope()->isFirstPass()) {
       Compiler::Error(Compiler::TooFewArgument, exp, m_stmt);
     }
     valid = false;
@@ -384,7 +384,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
     if (isVariableArgument()) {
       ret = params->getCount() - m_maxParam;
     } else {
-      if (ar->isFirstPass()) {
+      if (exp->getScope()->isFirstPass()) {
         Compiler::Error(Compiler::TooManyArgument, exp, m_stmt);
       }
       valid = false;
@@ -460,8 +460,8 @@ TypePtr FunctionScope::setParamType(AnalysisResultPtr ar, int index,
   if (!paramType) paramType = Type::Some;
   type = Type::Coerce(ar, paramType, type);
   if (type && !Type::SameType(paramType, type)) {
-    ar->incNewlyInferred();
-    if (!ar->isFirstPass()) {
+    addUpdates(UseKindNonStaticRef);
+    if (!isFirstPass()) {
       Logger::Verbose("Corrected type of parameter %d of %s: %s -> %s",
                       index, m_name.c_str(),
                       paramType->toString().c_str(), type->toString().c_str());
@@ -532,20 +532,42 @@ void FunctionScope::setReturnType(AnalysisResultPtr ar, TypePtr type) {
 
   if (m_returnType) {
     type = Type::Coerce(ar, m_returnType, type);
-    if (type && !Type::SameType(m_returnType, type)) {
-      ar->incNewlyInferred();
-      if (!ar->isFirstPass()) {
-        Logger::Verbose("Corrected function return type %s -> %s",
-                        m_returnType->toString().c_str(),
-                        type->toString().c_str());
-      }
-    }
   }
-  if (!type->getName().empty()) {
+  if (!type->getName().empty() && !Type::SameType(type, m_returnType)) {
     FileScopePtr fs = getContainingFile();
     if (fs) fs->addClassDependency(ar, type->getName());
   }
   m_returnType = type;
+}
+
+void FunctionScope::pushReturnType() {
+  if (m_overriding || m_perfectVirtual || m_pseudoMain) return;
+
+  m_prevReturn = m_returnType;
+  m_returnType.reset();
+}
+
+void FunctionScope::popReturnType(AnalysisResultPtr ar) {
+  if (m_overriding || m_perfectVirtual || m_pseudoMain) return;
+
+  if (m_returnType) {
+    if (m_prevReturn) {
+      if (Type::SameType(m_returnType, m_prevReturn)) {
+        m_prevReturn.reset();
+        return;
+      }
+      if (!isFirstPass()) {
+        Logger::Verbose("Corrected function return type %s -> %s",
+                        m_prevReturn->toString().c_str(),
+                        m_returnType->toString().c_str());
+      }
+    }
+  } else if (!m_prevReturn) {
+    return;
+  }
+
+  m_prevReturn.reset();
+  addUpdates(UseKindCaller);
 }
 
 void FunctionScope::setOverriding(TypePtr returnType,

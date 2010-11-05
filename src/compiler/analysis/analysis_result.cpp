@@ -59,7 +59,7 @@ using namespace boost;
 AnalysisResult::AnalysisResult()
   : BlockScope("Root", "", StatementPtr(), BlockScope::ProgramScope),
     m_package(NULL), m_parseOnDemand(false), m_phase(AnalyzeInclude),
-    m_newlyInferred(0), m_dynamicClass(false), m_dynamicFunction(false),
+    m_dynamicClass(false), m_dynamicFunction(false),
     m_optCounter(0),
     m_scalarArraysCounter(0), m_paramRTTICounter(0),
     m_insideScalarArray(false), m_inExpression(false),
@@ -721,35 +721,6 @@ void AnalysisResult::analyzeProgramFinal() {
   setPhase(AnalysisResult::CodeGen);
 }
 
-void AnalysisResult::inferTypes(int maxPass /* = 100 */) {
-  AnalysisResultPtr ar = shared_from_this();
-  setPhase(FirstInference);
-  int lastInferred = 0;
-  bool lastInference = false;
-  for (int i = 0; i < maxPass; i++) {
-    m_newlyInferred = 0;
-    for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
-         iter != m_files.end(); ++iter) {
-      FileScopePtr file = iter->second;
-      file->inferTypes(ar);
-    }
-    if (lastInference) {
-      return;
-    }
-    if (i > 1 && m_newlyInferred == 0 /* lastInferred */) {
-      lastInference = true;
-    }
-    lastInferred = m_newlyInferred;
-    Logger::Verbose("newly inferred types: %d", m_newlyInferred);
-    if (lastInference) {
-      setPhase(LastInference);
-    } else {
-      setPhase(i == 0 ? SecondInference : MoreInference);
-    }
-  }
-  ASSERT(false);
-}
-
 static void dumpVisitor(AnalysisResultPtr ar, StatementPtr s, void *data) {
   s->dump(0, ar);
 }
@@ -865,6 +836,58 @@ void AnalysisResult::preOptimize() {
   BlockScopeRawPtrQueue scopes;
   getScopesSet(scopes);
   dfv.visitDepthFirst(scopes);
+}
+
+struct InferTypesVisitor {
+  InferTypesVisitor(AnalysisResultPtr ar) : m_ar(ar) {}
+
+  AnalysisResultPtr m_ar;
+};
+
+template<>
+int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
+  do {
+    scope->clearUpdated();
+    StatementPtr stmt = scope->getStmt();
+    if (MethodStatementPtr m =
+        dynamic_pointer_cast<MethodStatement>(stmt)) {
+      m->inferFunctionTypes(this->m_data.m_ar);
+    } else {
+      for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
+        StatementPtr kid(
+          dynamic_pointer_cast<Statement>(stmt->getNthKid(i)));
+        if (kid) {
+          kid->inferTypes(this->m_data.m_ar);
+        }
+      }
+    }
+
+    scope->incPass();
+  } while (scope->getUpdated());
+
+  return 0;
+}
+
+void AnalysisResult::inferTypes() {
+  setPhase(FirstInference);
+  DepthFirstVisitor<InferTypesVisitor> dfv(shared_from_this());
+  BlockScopeRawPtrHashSet changed;
+
+  BlockScopeRawPtrQueue scopes;
+  getScopesSet(scopes);
+  for (BlockScopeRawPtrQueue::iterator it = scopes.begin(), end = scopes.end();
+       it != end; ++it) {
+    (*it)->setChangedScopes(&changed);
+  }
+  dfv.visitDepthFirst(scopes);
+
+  setPhase(LastInference);
+  getScopesSet(scopes);
+  for (BlockScopeRawPtrQueue::iterator it = scopes.begin(), end = scopes.end();
+       it != end; ++it) {
+    dfv.visitScope(*it);
+    (*it)->setChangedScopes(0);
+  }
 }
 
 struct PostOptVisitor {

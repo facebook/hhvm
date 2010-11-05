@@ -136,6 +136,7 @@ void InterfaceStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   if (m_base) m_base->getStrings(bases);
   DependencyGraphPtr dependencies = ar->getDependencyGraph();
   for (unsigned int i = 0; i < bases.size(); i++) {
+    addUserClass(ar, bases[i]);
     ClassScopePtr cls = ar->findClass(bases[i]);
     if (cls) {
       if (!cls->isInterface()) {
@@ -199,16 +200,6 @@ StatementPtr InterfaceStatement::preOptimize(AnalysisResultPtr ar) {
 }
 
 void InterfaceStatement::inferTypes(AnalysisResultPtr ar) {
-  vector<string> bases;
-  if (m_base) m_base->getStrings(bases);
-  for (unsigned int i = 0; i < bases.size(); i++) {
-    addUserClass(ar, bases[i]);
-  }
-
-  if (m_stmt) {
-    ClassScopePtr classScope = m_classScope.lock();
-    m_stmt->inferTypes(ar);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

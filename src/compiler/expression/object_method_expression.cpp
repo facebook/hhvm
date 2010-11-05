@@ -177,13 +177,18 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
     return checkTypesImpl(ar, type, Type::Variant, coerce);
   }
 
-  ClassScopePtr cls = m_classScope;
+  ClassScopePtr cls;
   if (objectType && !objectType->getName().empty()) {
-    cls = ar->findExactClass(shared_from_this(), objectType->getName());
+    if (m_classScope && !strcasecmp(objectType->getName().c_str(),
+                                    m_classScope->getName().c_str())) {
+      cls = m_classScope;
+    } else {
+      cls = ar->findExactClass(shared_from_this(), objectType->getName());
+    }
   }
 
   if (!cls) {
-    if (ar->isFirstPass()) {
+    if (getScope()->isFirstPass()) {
       // call resolveClass to mark functions as dynamic
       // but we cant do anything else with the result.
       resolveClass(ar, m_name);
@@ -231,7 +236,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
   if (m_object->isThis()) {
     FunctionScopePtr localfunc = getFunctionScope();
     if (localfunc->isStatic()) {
-      if (ar->isFirstPass()) {
+      if (getScope()->isFirstPass()) {
         Compiler::Error(Compiler::MissingObjectContext, self);
       }
       valid = false;

@@ -137,7 +137,7 @@ void StatementList::analyzeProgramImpl(AnalysisResultPtr ar) {
     StatementPtr stmt = m_stmts[i];
 
     // effect testing
-    if (ar->isFirstPass() && !stmt->hasEffect() &&
+    if (ar->isAnalyzeInclude() && !stmt->hasEffect() &&
         !stmt->is(Statement::KindOfStatementList)) {
       Compiler::Error(Compiler::StatementHasNoEffect, stmt);
     }

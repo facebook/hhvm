@@ -33,7 +33,8 @@ using namespace boost;
 BlockScope::BlockScope(const std::string &name, const std::string &docComment,
                        StatementPtr stmt, KindOf kind)
   : m_attributeClassInfo(0), m_docComment(docComment), m_stmt(stmt),
-    m_kind(kind), m_loopNestedLevel(0), m_incLevel(0), m_mark(0) {
+    m_kind(kind), m_changedScopes(0), m_loopNestedLevel(0), m_incLevel(0),
+    m_mark(0), m_pass(0), m_updated(0) {
   m_originalName = name;
   m_name = Util::toLower(name);
   m_variables = VariableTablePtr(new VariableTable(*this));
@@ -94,6 +95,13 @@ void BlockScope::addUse(BlockScopePtr user, int useKinds) {
     m_users[user] |= useKinds;
     user->m_deps.insert(BlockScopeRawPtr(this));
   }
+}
+
+void BlockScope::addUpdates(int f) {
+  if (!m_updated && m_changedScopes) {
+    m_changedScopes->insert(BlockScopeRawPtr(this));
+  }
+  m_updated |= f;
 }
 
 void BlockScope::changed(BlockScopeRawPtrQueue &todo, int useKinds) {

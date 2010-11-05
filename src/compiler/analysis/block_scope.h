@@ -135,6 +135,19 @@ public:
 
   void setMark(int m) { m_mark = m; }
   int getMark() const { return m_mark; }
+
+  void setPass(int p) { m_pass = p; }
+  void incPass() { m_pass++; }
+  int getPass() const { return m_pass; }
+  bool isFirstPass() const { return !m_pass; }
+  void clearUpdated() { m_updated = 0; }
+  void addUpdates(int f);
+  int getUpdated() const { return m_updated; }
+
+  BlockScopeRawPtrHashSet *getChangedScopes() const { return m_changedScopes; }
+  void setChangedScopes(BlockScopeRawPtrHashSet *scopes) {
+    m_changedScopes = scopes;
+  }
 protected:
   std::string m_originalName;
   std::string m_name;
@@ -148,12 +161,15 @@ protected:
 
   BlockScopeRawPtrHashSet m_deps;
   BlockScopeRawPtrFlagsHashMap m_users;
+  BlockScopeRawPtrHashSet *m_changedScopes;
 
   int m_loopNestedLevel;
   int m_incLevel;
   ModifierExpressionPtr m_modifiers;
   StatementListPtr m_includes;
   int m_mark;
+  int m_pass;
+  int m_updated;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

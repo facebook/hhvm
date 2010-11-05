@@ -54,7 +54,8 @@ public:
 
   TypePtr getType(bool coerced) const { return coerced ? m_coerced : m_rtype; }
   TypePtr getFinalType() const;
-  TypePtr setType(AnalysisResultPtr ar, TypePtr type, bool coerced);
+  TypePtr setType(AnalysisResultPtr ar, BlockScopeRawPtr scope,
+                  TypePtr type, bool coerced);
 
   bool isPresent() const { return m_flags.m_declaration_set; }
   bool declarationSet() const { return m_flags.m_declaration_set; }

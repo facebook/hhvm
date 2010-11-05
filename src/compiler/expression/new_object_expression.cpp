@@ -84,7 +84,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
         getScope()->getVariables()->
           setAttribute(VariableTable::NeedGlobalPointer);
       }
-      if (!cls && ar->isFirstPass()) {
+      if (!cls && getScope()->isFirstPass()) {
         Compiler::Error(Compiler::UnknownClass, self);
       }
       if (m_params) m_params->inferAndCheck(ar, Type::Any, false);
@@ -100,7 +100,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     if (!func) {
       if (m_params) {
         if (!m_dynamic && m_params->getCount()) {
-          if (ar->isFirstPass()) {
+          if (getScope()->isFirstPass()) {
             Compiler::Error(Compiler::BadConstructorCall, self);
           }
           m_params->setOutputCount(0);

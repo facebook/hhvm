@@ -75,7 +75,7 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
         getScope()->getVariables()->
           setAttribute(VariableTable::NeedGlobalPointer);
       }
-      if (!cls && ar->isFirstPass()) {
+      if (!cls && getScope()->isFirstPass()) {
         Compiler::Error(Compiler::UnknownClass, self);
       }
     } else {

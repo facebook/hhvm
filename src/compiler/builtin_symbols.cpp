@@ -391,6 +391,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
 
   // load extension functions first, so system/classes may call them
   ParseExtFunctions(ar, ExtensionFunctions, false);
+  AnalysisResultPtr ar2;
 
   // parse all PHP files under system/classes
   if (!extOnly) {
@@ -434,19 +435,19 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
     // parse globals/variables.php and globals/constants.php
     NoSuperGlobals = true;
     s_variables = LoadGlobalSymbols("symbols.php")->getVariables();
-    const FileScopePtrVec fileScopes =
-      LoadGlobalSymbols("constants.php")->getAllFilesVector();
+    ar2 = LoadGlobalSymbols("constants.php");
+    const FileScopePtrVec &fileScopes = ar2->getAllFilesVector();
     if (!fileScopes.empty()) {
       s_constants = fileScopes[0]->getConstants();
     } else {
-      AnalysisResult ar2;
-      s_constants = ConstantTablePtr(new ConstantTable(ar2));
+      ar2 = AnalysisResultPtr(new AnalysisResult());
+      s_constants = ConstantTablePtr(new ConstantTable(*ar2.get()));
     }
     NoSuperGlobals = false;
   } else {
-    AnalysisResult ar2;
-    s_variables = VariableTablePtr(new VariableTable(ar2));
-    s_constants = ConstantTablePtr(new ConstantTable(ar2));
+    ar2 = AnalysisResultPtr(new AnalysisResult());
+    s_variables = VariableTablePtr(new VariableTable(*ar2.get()));
+    s_constants = ConstantTablePtr(new ConstantTable(*ar2.get()));
     NoSuperGlobals = true;
   }
   s_constants->setDynamic(ar, "SID");

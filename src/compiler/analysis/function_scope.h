@@ -177,8 +177,12 @@ public:
   /**
    * What is the inferred type of this function's return.
    */
+  void pushReturnType();
   void setReturnType(AnalysisResultPtr ar, TypePtr type);
-  TypePtr getReturnType() const { return m_returnType;}
+  TypePtr getReturnType() const {
+    return m_prevReturn ? m_prevReturn : m_returnType;
+  }
+  void popReturnType(AnalysisResultPtr ar);
 
   void setOptFunction(FunctionOptPtr fn) { m_optFunction = fn; }
   FunctionOptPtr getOptFunction() const { return m_optFunction; }
@@ -408,6 +412,7 @@ private:
   bool m_refReturn; // whether it's "function &get_reference()"
   std::vector<bool> m_refs;
   TypePtr m_returnType;
+  TypePtr m_prevReturn;
   ModifierExpressionPtr m_modifiers;
   bool m_virtual;
   bool m_perfectVirtual;

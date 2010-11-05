@@ -826,7 +826,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
           return checkTypesImpl(ar, type, Type::Boolean, coerce);
         }
       }
-      if (varName.empty() && ar->isFirstPass()) {
+      if (varName.empty() && getScope()->isFirstPass()) {
         Compiler::Error(Compiler::BadDefine, self);
       }
     } else if (m_type == ExtractFunction) {
@@ -857,7 +857,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       }
     }
     if (!cls) {
-      if (ar->isFirstPass()) {
+      if (getScope()->isFirstPass()) {
         Compiler::Error(Compiler::UnknownClass, self);
       }
       if (m_params) {
@@ -885,7 +885,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
            !clsThis->derivesFrom(ar, m_className, true, false)) ||
           funcThis->isStatic()) {
         func->setDynamic();
-        if (ar->isFirstPass()) {
+        if (getScope()->isFirstPass()) {
           Compiler::Error(Compiler::MissingObjectContext, self);
           errorFlagged = true;
         }
@@ -903,7 +903,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
     }
-    if (!func && !errorFlagged && ar->isFirstPass()) {
+    if (!func && !errorFlagged && getScope()->isFirstPass()) {
       Compiler::Error(Compiler::UnknownFunction, self);
     }
     if (m_params) {

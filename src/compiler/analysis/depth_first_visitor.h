@@ -99,6 +99,14 @@ public:
     }
     if (int useKinds = this->visitScope(scope)) {
       scope->changed(queue, useKinds);
+    } else if (BlockScopeRawPtrHashSet *changed = scope->getChangedScopes()) {
+      for (BlockScopeRawPtrHashSet::iterator it = changed->begin(),
+             end = changed->end(); it != end; ) {
+        BlockScopeRawPtr bs = *it;
+        changed->erase(it++);
+        bs->changed(queue, bs->getUpdated() | BlockScope::UseKindAny);
+        bs->clearUpdated();
+      }
     }
     scope->setMark(2);
   }

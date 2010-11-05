@@ -79,7 +79,7 @@ void FunctionStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   // registering myself as a parent in dependency graph, so that
   // (1) we can tell orphaned parents
   // (2) overwrite non-master copy of function declarations
-  if (ar->isFirstPass()) {
+  if (ar->isAnalyzeInclude()) {
     if (m_loc) {
       ar->getDependencyGraph()->addParent(DependencyGraph::KindOfFunctionCall,
                                           "", m_name, shared_from_this());
@@ -96,7 +96,6 @@ void FunctionStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
 }
 
 void FunctionStatement::inferTypes(AnalysisResultPtr ar) {
-  MethodStatement::inferTypes(ar);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

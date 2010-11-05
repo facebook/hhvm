@@ -98,7 +98,7 @@ void ScalarExpression::toLower(bool funcCall /* = false */) {
 // static analysis functions
 
 void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (ar->isFirstPass()) {
+  if (ar->isAnalyzeInclude()) {
     string id = Util::toLower(getIdentifier());
     addUserFunction(ar, id, false);
     addUserClass(ar, id, false);

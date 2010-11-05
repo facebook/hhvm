@@ -117,7 +117,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultPtr ar,
       }
     }
 
-    if (ar->isFirstPass()) {
+    if (ar->isAnalyzeInclude()) {
       for (i = 0; i < maxParam; i++) {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
@@ -277,7 +277,7 @@ void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   // registering myself as a parent in dependency graph, so that
   // (1) we can tell orphaned parents
   // (2) overwrite non-master copy of function declarations
-  if (ar->isFirstPass()) {
+  if (ar->isAnalyzeInclude()) {
     ar->getDependencyGraph()->addParent(DependencyGraph::KindOfFunctionCall,
                                         "", getFullName(), shared_from_this());
     if (funcScope->isSepExtension() ||
@@ -297,7 +297,7 @@ void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   }
   if (m_stmt) m_stmt->analyzeProgram(ar);
 
-  if (ar->isFirstPass()) {
+  if (ar->isAnalyzeInclude()) {
     if (!funcScope->isStatic() && getClassScope() &&
         funcScope->getVariables()->
         getAttribute(VariableTable::ContainsDynamicVariable)) {
@@ -349,7 +349,6 @@ void MethodStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 StatementPtr MethodStatement::preOptimize(AnalysisResultPtr ar) {
-  FunctionScopePtr funcScope = m_funcScope.lock();
   if (ar->getPhase() != AnalysisResult::AnalyzeInclude &&
       Option::LocalCopyProp) {
     int flag;
@@ -364,7 +363,12 @@ StatementPtr MethodStatement::preOptimize(AnalysisResultPtr ar) {
 }
 
 void MethodStatement::inferTypes(AnalysisResultPtr ar) {
+}
+
+void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
   FunctionScopePtr funcScope = m_funcScope.lock();
+  funcScope->pushReturnType();
+
   if (ar->getPhase() == AnalysisResult::FirstInference && m_stmt) {
     if (m_stmt->hasRetExp() ||
         funcScope->inPseudoMain() ||
@@ -394,6 +398,7 @@ void MethodStatement::inferTypes(AnalysisResultPtr ar) {
   if (m_stmt) {
     m_stmt->inferTypes(ar);
   }
+  funcScope->popReturnType(ar);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

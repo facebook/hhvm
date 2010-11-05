@@ -166,7 +166,7 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
       getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
     }
-    if (!cls && ar->isFirstPass()) {
+    if (!cls && getScope()->isFirstPass()) {
       Compiler::Error(Compiler::UnknownClass, self);
     }
     return Type::Variant;

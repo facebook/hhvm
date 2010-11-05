@@ -57,7 +57,7 @@ StatementPtr CatchStatement::clone() {
 
 void CatchStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   addUserClass(ar, m_className);
-  if (ar->isFirstPass()) {
+  if (ar->isAnalyzeInclude()) {
     getScope()->getVariables()->addUsed(m_variable);
   }
   if (m_stmt) m_stmt->analyzeProgram(ar);
@@ -93,7 +93,7 @@ void CatchStatement::inferTypes(AnalysisResultPtr ar) {
   ClassScopePtr cls = ar->findClass(m_className);
   TypePtr type;
   m_valid = cls;
-  if (!m_valid && ar->isFirstPass()) {
+  if (!m_valid && getScope()->isFirstPass()) {
     ConstructPtr self = shared_from_this();
     Compiler::Error(Compiler::UnknownClass, self);
   }
@@ -107,7 +107,7 @@ void CatchStatement::inferTypes(AnalysisResultPtr ar) {
   VariableTablePtr variables = scope->getVariables();
   variables->add(m_variable, type, false, ar, shared_from_this(),
                  ModifierExpressionPtr(), false);
-  if (ar->isFirstPass()) {
+  if (getScope()->isFirstPass()) {
     FunctionScopePtr func = dynamic_pointer_cast<FunctionScope>(scope);
     if (func && variables->isParameter(m_variable)) {
       variables->addLvalParam(m_variable);

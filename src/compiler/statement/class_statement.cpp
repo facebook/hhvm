@@ -167,10 +167,6 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
 }
 
 void ClassStatement::inferTypes(AnalysisResultPtr ar) {
-  if (m_stmt) {
-    ClassScopePtr classScope = m_classScope.lock();
-    m_stmt->inferTypes(ar);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

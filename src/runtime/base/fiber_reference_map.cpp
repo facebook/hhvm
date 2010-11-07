@@ -151,10 +151,10 @@ void FiberReferenceMap::unmarshalDynamicGlobals
 
     FiberAsyncFunc::Strategy strategy =
       (FiberAsyncFunc::Strategy)default_strategy;
-    hphp_string_map<char>::const_iterator iter =
+    hphp_string_map<char>::const_iterator it =
       additional_strategies.find(fullKey.data());
-    if (iter != additional_strategies.end()) {
-      strategy = (FiberAsyncFunc::Strategy)iter->second;
+    if (it != additional_strategies.end()) {
+      strategy = (FiberAsyncFunc::Strategy)it->second;
     }
 
     Variant &dval = dest.lvalAt(key.fiberCopy());

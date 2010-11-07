@@ -943,6 +943,8 @@ BeginClass(
 
  private:
   SmartObject<DateTime> m_dt;
+ public:
+  virtual ObjectData *clone();
 EOT
 ,
   ));
@@ -1219,6 +1221,8 @@ BeginClass(
 
  private:
   SmartObject<TimeZone> m_tz;
+ public:
+  virtual ObjectData *clone();
 EOT
 ,
   ));

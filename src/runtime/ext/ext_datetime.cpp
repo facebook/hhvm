@@ -121,6 +121,13 @@ Variant c_DateTime::t___destruct() {
   return null;
 }
 
+ObjectData *c_DateTime::clone() {
+  ObjectData *obj = cloneImpl();
+  c_DateTime *dt = static_cast<c_DateTime*>(obj);
+  dt->m_dt = m_dt;
+  return obj;
+}
+
 c_DateTimeZone::c_DateTimeZone() {
 }
 
@@ -166,6 +173,13 @@ Array c_DateTimeZone::ti_listidentifiers(const char* cls) {
 Variant c_DateTimeZone::t___destruct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DateTimeZone, DateTimeZone::__destruct);
   return null;
+}
+
+ObjectData *c_DateTimeZone::clone() {
+  ObjectData *obj = cloneImpl();
+  c_DateTimeZone *dtz = static_cast<c_DateTimeZone*>(obj);
+  dtz->m_tz = m_tz;
+  return obj;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

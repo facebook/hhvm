@@ -100,6 +100,8 @@ class c_DateTime : public ExtObjectData {
 
  private:
   SmartObject<DateTime> m_dt;
+ public:
+  virtual ObjectData *clone();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -179,6 +181,8 @@ class c_DateTimeZone : public ExtObjectData {
 
  private:
   SmartObject<TimeZone> m_tz;
+ public:
+  virtual ObjectData *clone();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

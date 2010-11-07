@@ -168,10 +168,10 @@ endif
 endif
 
 PREFIX := $(TIMECMD)$(if $(USE_CCACHE), ccache,$(if $(NO_DISTCC),, distcc))
-ICC_ARGS := -no-ipo -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593
+ICC_ARGS := -no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593
 
-CXX := $(if $(USE_ICC),$(ICC)/bin/intel64/icpc $(ICC_ARGS),g++)
-CC = $(if $(USE_ICC),$(ICC)/bin/intel64/icc $(ICC_ARGS),gcc)
+CXX := $(if $(USE_ICC),$(ICC)/bin/icpc $(ICC_ARGS),g++)
+CC = $(if $(USE_ICC),$(ICC)/bin/icc $(ICC_ARGS),gcc)
 
 P_CXX = $(PREFIX) $(CXX)
 P_CC = $(PREFIX) $(CC)

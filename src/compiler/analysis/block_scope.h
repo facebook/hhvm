@@ -18,8 +18,6 @@
 #define __BLOCK_SCOPE_H__
 
 #include <compiler/hphp.h>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,20 +35,12 @@ DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FileScope);
 
-template<typename T>
-struct smarter_pointer_hash {
-  size_t operator() (const T &p) const {
-    size_t x = (size_t)p.get();
-    return (x >> 8) | (x << 56);
-  }
-};
-
-typedef std::tr1::unordered_map<BlockScopeRawPtr, int,
-                                smarter_pointer_hash<BlockScopeRawPtr>
-                                > BlockScopeRawPtrFlagsHashMap;
-typedef std::tr1::unordered_set<BlockScopeRawPtr,
-                                smarter_pointer_hash<BlockScopeRawPtr>
-                                > BlockScopeRawPtrHashSet;
+typedef hphp_hash_map<BlockScopeRawPtr, int,
+                      smart_pointer_hash<BlockScopeRawPtr>
+                      > BlockScopeRawPtrFlagsHashMap;
+typedef hphp_hash_set<BlockScopeRawPtr,
+                      smart_pointer_hash<BlockScopeRawPtr>
+                      > BlockScopeRawPtrHashSet;
 
 typedef std::list<BlockScopeRawPtr> BlockScopeRawPtrQueue;
 

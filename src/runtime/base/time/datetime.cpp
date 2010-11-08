@@ -714,6 +714,13 @@ bool DateTime::fromString(CStrRef input, SmartObject<TimeZone> tz) {
   return true;
 }
 
+SmartObject<DateTime> DateTime::cloneDateTime() const {
+  bool err;
+  SmartObject<DateTime> ret(NEW(DateTime)(toTimeStamp(err), true));
+  ret->setTimezone(m_tz);
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // sun
 

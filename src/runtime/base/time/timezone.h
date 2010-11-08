@@ -93,15 +93,14 @@ public:
    */
   Array transitions() const;
 
+  /**
+   * Make a copy of this timezone object, so it can be changed independently.
+   */
+  SmartObject<TimeZone> cloneTimeZone() const;
+
 protected:
   friend class DateTime;
   friend class TimeStamp;
-
-  /**
-   * Make a copy of this timezone object, so it can be changed independently.
-   * This is for internal use.
-   */
-  SmartObject<TimeZone> cloneTimeZone() const;
 
   /**
    * Returns raw pointer. For internal use only.

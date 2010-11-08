@@ -270,6 +270,9 @@ public:
   void fromTimeStamp(int64 timestamp, bool utc = false);
   bool fromString(CStrRef input, SmartObject<TimeZone> tz);
 
+  // cloning
+  SmartObject<DateTime> cloneDateTime() const;
+
   // sun info
   Array getSunInfo(double latitude, double longitude) const;
   Variant getSunInfo(SunInfoFormat retformat,

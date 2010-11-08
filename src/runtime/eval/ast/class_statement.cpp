@@ -900,10 +900,15 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
     }
     cls = this;
   }
-  if (cls->getModifiers() & (Interface|Abstract)) return;
 
   if (parent) {
-    parent->semanticCheck(cls);
+    if (parent->getModifiers() & Interface) {
+      raise_error("%s cannot extend %s - it is an interface",
+                  name().c_str(), parent->name().c_str());
+    }
+    if ((cls->getModifiers() & (Interface|Abstract)) == 0) {
+      parent->semanticCheck(cls);
+    }
   } else if (!m_parent.empty() && !f_class_exists(m_parent.c_str(), false)) {
     raise_error("Class '%s' does not exist.", m_parent.c_str());
   }
@@ -915,7 +920,9 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
         raise_error("%s cannot implement %s - it is not an interface",
                     name().c_str(), iface->name().c_str());
       }
-      iface->semanticCheck(cls);
+      if ((cls->getModifiers() & (Interface|Abstract)) == 0) {
+        iface->semanticCheck(cls);
+      }
     } else if (!f_interface_exists(it->c_str(), false)) {
       raise_error("Interface '%s' does not exist.", it->c_str());
     }

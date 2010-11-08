@@ -8862,6 +8862,24 @@ Variant ifa_fmod(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("fmod", count, 2, 2, 1);
   return (f_fmod(a0, a1));
 }
+Variant i_qlzcompress(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(qlzcompress);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("qlzcompress", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_qlzcompress(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_qlzcompress(arg0, arg1));
+  }
+}
+Variant ifa_qlzcompress(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 1 || count > 2) return throw_wrong_arguments("qlzcompress", count, 1, 2, 1);
+  if (count <= 1) return (f_qlzcompress(a0));
+  return (f_qlzcompress(a0, a1));
+}
 Variant i_curl_errno(void *extra, CArrRef params) {
   FUNCTION_INJECTION(curl_errno);
   int count __attribute__((__unused__)) = params.size();
@@ -21362,6 +21380,21 @@ Variant ifa_hphp_splfileobject_fscanf(void *extra, int count, INVOKE_FEW_ARGS_IM
   if (count != 4) return throw_wrong_arguments("hphp_splfileobject_fscanf", count, 4, 4, 1);
   return (f_hphp_splfileobject_fscanf(a0, a1, a2, a3));
 }
+Variant i_qlzuncompress(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(qlzuncompress);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("qlzuncompress", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_qlzuncompress(arg0));
+  }
+}
+Variant ifa_qlzuncompress(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("qlzuncompress", count, 1, 1, 1);
+  return (f_qlzuncompress(a0));
+}
 Variant i_mb_ereg_search_getregs(void *extra, CArrRef params) {
   FUNCTION_INJECTION(mb_ereg_search_getregs);
   int count __attribute__((__unused__)) = params.size();
@@ -25203,16 +25236,6 @@ Variant ifa_apc_bin_loadfile(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
   if (count == 3) return (f_apc_bin_loadfile(a0, a1, a2));
   return (f_apc_bin_loadfile(a0, a1, a2, a3));
 }
-Variant i_posix_getcwd(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(posix_getcwd);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_getcwd", 0, 1);
-  return (f_posix_getcwd());
-}
-Variant ifa_posix_getcwd(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 0) return throw_toomany_arguments("posix_getcwd", 0, 1);
-  return (f_posix_getcwd());
-}
 Variant i_drawpathcurvetoabsolute(void *extra, CArrRef params) {
   FUNCTION_INJECTION(drawpathcurvetoabsolute);
   int count __attribute__((__unused__)) = params.size();
@@ -25233,6 +25256,16 @@ Variant i_drawpathcurvetoabsolute(void *extra, CArrRef params) {
 Variant ifa_drawpathcurvetoabsolute(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 7) return throw_wrong_arguments("drawpathcurvetoabsolute", count, 7, 7, 1);
   return (f_drawpathcurvetoabsolute(a0, a1, a2, a3, a4, a5, null), null);
+}
+Variant i_posix_getcwd(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(posix_getcwd);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_getcwd", 0, 1);
+  return (f_posix_getcwd());
+}
+Variant ifa_posix_getcwd(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("posix_getcwd", 0, 1);
+  return (f_posix_getcwd());
 }
 Variant i_hphp_set_error_page(void *extra, CArrRef params) {
   FUNCTION_INJECTION(hphp_set_error_page);
@@ -45893,6 +45926,27 @@ Variant ei_fmod(Eval::VariableEnvironment &env, const Eval::FunctionCallExpressi
   }
   return (x_fmod(a0, a1));
 }
+Variant ei_qlzcompress(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("qlzcompress", count, 1, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_qlzcompress(a0));
+  else return (x_qlzcompress(a0, a1));
+}
 Variant ei_curl_errno(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -61294,6 +61348,22 @@ Variant ei_hphp_splfileobject_fscanf(Eval::VariableEnvironment &env, const Eval:
   }
   return (x_hphp_splfileobject_fscanf(a0, a1, a2, a3));
 }
+Variant ei_qlzuncompress(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("qlzuncompress", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_qlzuncompress(a0));
+}
 Variant ei_mb_ereg_search_getregs(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
@@ -66047,18 +66117,6 @@ Variant ei_apc_bin_loadfile(Eval::VariableEnvironment &env, const Eval::Function
   else if (count == 3) return (x_apc_bin_loadfile(a0, a1, a2));
   else return (x_apc_bin_loadfile(a0, a1, a2, a3));
 }
-Variant ei_posix_getcwd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_getcwd", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_posix_getcwd());
-}
 Variant ei_drawpathcurvetoabsolute(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -66098,6 +66156,18 @@ Variant ei_drawpathcurvetoabsolute(Eval::VariableEnvironment &env, const Eval::F
     (*it)->eval(env);
   }
   return (x_drawpathcurvetoabsolute(a0, a1, a2, a3, a4, a5, a6), null);
+}
+Variant ei_posix_getcwd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_getcwd", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_posix_getcwd());
 }
 Variant ei_hphp_set_error_page(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -80224,6 +80294,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2681:
       HASH_INVOKE_FROM_EVAL(0x28AC28C54C4E6A79LL, openssl_error_string);
+      HASH_INVOKE_FROM_EVAL(0x2ACAD5A7A8C78A79LL, qlzuncompress);
       break;
     case 2689:
       HASH_INVOKE_FROM_EVAL(0x09367774F803EA81LL, hphp_recursiveiteratoriterator_valid);
@@ -81618,6 +81689,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 4558:
       HASH_INVOKE_FROM_EVAL(0x2E7741B5440FB1CELL, magicksetlastiterator);
+      break;
+    case 4559:
+      HASH_INVOKE_FROM_EVAL(0x595E413CAA7E11CFLL, qlzcompress);
       break;
     case 4560:
       HASH_INVOKE_FROM_EVAL(0x03012F3DDD7AB1D0LL, getservbyport);
@@ -84676,6 +84750,7 @@ CallInfo ci_json_decode((void*)&i_json_decode, (void*)&ifa_json_decode, 3, 0, 0x
 CallInfo ci_preg_replace((void*)&i_preg_replace, (void*)&ifa_preg_replace, 5, 0, 0x0000000000000010LL);
 CallInfo ci_hphp_splfileinfo_getmtime((void*)&i_hphp_splfileinfo_getmtime, (void*)&ifa_hphp_splfileinfo_getmtime, 1, 0, 0x0000000000000000LL);
 CallInfo ci_fmod((void*)&i_fmod, (void*)&ifa_fmod, 2, 0, 0x0000000000000000LL);
+CallInfo ci_qlzcompress((void*)&i_qlzcompress, (void*)&ifa_qlzcompress, 2, 0, 0x0000000000000000LL);
 CallInfo ci_curl_errno((void*)&i_curl_errno, (void*)&ifa_curl_errno, 1, 0, 0x0000000000000000LL);
 CallInfo ci_pagelet_server_task_start((void*)&i_pagelet_server_task_start, (void*)&ifa_pagelet_server_task_start, 3, 0, 0x0000000000000000LL);
 CallInfo ci_hash_init((void*)&i_hash_init, (void*)&ifa_hash_init, 3, 0, 0x0000000000000000LL);
@@ -85414,6 +85489,7 @@ CallInfo ci_write_hdf_file((void*)&i_write_hdf_file, (void*)&ifa_write_hdf_file,
 CallInfo ci_socket_send((void*)&i_socket_send, (void*)&ifa_socket_send, 4, 0, 0x0000000000000000LL);
 CallInfo ci_zlib_get_coding_type((void*)&i_zlib_get_coding_type, (void*)&ifa_zlib_get_coding_type, 0, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileobject_fscanf((void*)&i_hphp_splfileobject_fscanf, (void*)&ifa_hphp_splfileobject_fscanf, 4, 0, 0x0000000000000000LL);
+CallInfo ci_qlzuncompress((void*)&i_qlzuncompress, (void*)&ifa_qlzuncompress, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mb_ereg_search_getregs((void*)&i_mb_ereg_search_getregs, (void*)&ifa_mb_ereg_search_getregs, 0, 0, 0x0000000000000000LL);
 CallInfo ci_mb_eregi((void*)&i_mb_eregi, (void*)&ifa_mb_eregi, 3, 0, 0x0000000000000004LL);
 CallInfo ci_pixelgetgreen((void*)&i_pixelgetgreen, (void*)&ifa_pixelgetgreen, 1, 0, 0x0000000000000000LL);
@@ -85638,8 +85714,8 @@ CallInfo ci_preg_match_all((void*)&i_preg_match_all, (void*)&ifa_preg_match_all,
 CallInfo ci_imap_scanmailbox((void*)&i_imap_scanmailbox, (void*)&ifa_imap_scanmailbox, 4, 0, 0x0000000000000000LL);
 CallInfo ci_proc_terminate((void*)&i_proc_terminate, (void*)&ifa_proc_terminate, 2, 0, 0x0000000000000000LL);
 CallInfo ci_apc_bin_loadfile((void*)&i_apc_bin_loadfile, (void*)&ifa_apc_bin_loadfile, 4, 0, 0x0000000000000000LL);
-CallInfo ci_posix_getcwd((void*)&i_posix_getcwd, (void*)&ifa_posix_getcwd, 0, 0, 0x0000000000000000LL);
 CallInfo ci_drawpathcurvetoabsolute((void*)&i_drawpathcurvetoabsolute, (void*)&ifa_drawpathcurvetoabsolute, 7, 0, 0x0000000000000000LL);
+CallInfo ci_posix_getcwd((void*)&i_posix_getcwd, (void*)&ifa_posix_getcwd, 0, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_set_error_page((void*)&i_hphp_set_error_page, (void*)&ifa_hphp_set_error_page, 1, 0, 0x0000000000000000LL);
 CallInfo ci_preg_match((void*)&i_preg_match, (void*)&ifa_preg_match, 5, 0, 0x0000000000000004LL);
 CallInfo ci_timezone_abbreviations_list((void*)&i_timezone_abbreviations_list, (void*)&ifa_timezone_abbreviations_list, 0, 0, 0x0000000000000000LL);
@@ -90098,6 +90174,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_openssl_error_string;
         return true;
       }
+      HASH_GUARD(0x2ACAD5A7A8C78A79LL, qlzuncompress) {
+        ci = &ci_qlzuncompress;
+        return true;
+      }
       break;
     case 2689:
       HASH_GUARD(0x09367774F803EA81LL, hphp_recursiveiteratoriterator_valid) {
@@ -93008,6 +93088,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 4558:
       HASH_GUARD(0x2E7741B5440FB1CELL, magicksetlastiterator) {
         ci = &ci_magicksetlastiterator;
+        return true;
+      }
+      break;
+    case 4559:
+      HASH_GUARD(0x595E413CAA7E11CFLL, qlzcompress) {
+        ci = &ci_qlzcompress;
         return true;
       }
       break;

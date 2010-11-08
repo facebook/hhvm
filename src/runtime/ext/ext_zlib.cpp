@@ -127,4 +127,143 @@ Object f_gzopen(CStrRef filename, CStrRef mode,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// QuickLZ functions
+
+#ifdef HAVE_QUICKLZ
+
+namespace QuickLZ1 {
+#ifdef QLZ_COMPRESSION_LEVEL
+#undef QLZ_COMPRESSION_LEVEL
+#endif
+#ifdef QLZ_STREAMING_BUFFER
+#undef QLZ_STREAMING_BUFFER
+#endif
+#define QLZ_COMPRESSION_LEVEL 1
+#define QLZ_STREAMING_BUFFER 0
+#include "quicklz.inc"
+}
+
+namespace QuickLZ2 {
+#ifdef QLZ_COMPRESSION_LEVEL
+#undef QLZ_COMPRESSION_LEVEL
+#endif
+#ifdef QLZ_STREAMING_BUFFER
+#undef QLZ_STREAMING_BUFFER
+#endif
+#define QLZ_COMPRESSION_LEVEL 2
+#define QLZ_STREAMING_BUFFER 100000
+#include "quicklz.inc"
+}
+
+namespace QuickLZ3 {
+#ifdef QLZ_COMPRESSION_LEVEL
+#undef QLZ_COMPRESSION_LEVEL
+#endif
+#ifdef QLZ_STREAMING_BUFFER
+#undef QLZ_STREAMING_BUFFER
+#endif
+#define QLZ_COMPRESSION_LEVEL 3
+#define QLZ_STREAMING_BUFFER 1000000
+#include "quicklz.inc"
+}
+
+#endif // HAVE_QUICKLZ
+
+Variant f_qlzcompress(CStrRef data, int level /* = 1 */) {
+#ifndef HAVE_QUICKLZ
+  throw NotSupportedException(__func__, "QuickLZ library cannot be found");
+#else
+  if (level < 1 || level > 3) {
+    throw_invalid_argument("level: %d", level);
+    return false;
+  }
+
+  char *compressed = (char*)malloc(data.size() + 401);
+  size_t size;
+
+  switch (level) {
+    case 1: {
+      QuickLZ1::qlz_state_compress state;
+      memset(&state, 0, sizeof(state));
+      size = QuickLZ1::qlz_compress(data.data(), compressed, data.size(),
+                                    &state);
+      break;
+    }
+    case 2: {
+      QuickLZ2::qlz_state_compress state;
+      memset(&state, 0, sizeof(state));
+      size = QuickLZ2::qlz_compress(data.data(), compressed, data.size(),
+                                    &state);
+      break;
+    }
+    case 3:
+      QuickLZ3::qlz_state_compress *state = new QuickLZ3::qlz_state_compress();
+      memset(state, 0, sizeof(*state));
+      size = QuickLZ3::qlz_compress(data.data(), compressed, data.size(),
+                                    state);
+      delete state;
+      break;
+  }
+
+  ASSERT(size >= 0 && (int64)size < data.size() + 401);
+  compressed[size] = '\0';
+  return String(compressed, size, AttachString);
+#endif
+}
+
+Variant f_qlzuncompress(CStrRef data, int level /* = 1 */) {
+#ifndef HAVE_QUICKLZ
+  throw NotSupportedException(__func__, "QuickLZ library cannot be found");
+#else
+  if (level < 1 || level > 3) {
+    throw_invalid_argument("level: %d", level);
+    return false;
+  }
+
+  if (data.size() < 9) {
+    raise_notice("passing invalid data to qlzuncompress()");
+    return false;
+  }
+
+  size_t size = QuickLZ1::qlz_size_decompressed(data.data());
+  if (size < 0 ||
+      (RuntimeOption::SerializationSizeLimit > 0 &&
+       (int64)size > RuntimeOption::SerializationSizeLimit)) {
+    raise_notice("invalid size in compressed header: %lld", (int64)size);
+    return false;
+  }
+
+  char *decompressed = (char*)malloc(size + 1);
+  size_t dsize;
+
+  switch (level) {
+    case 1: {
+      QuickLZ1::qlz_state_decompress state;
+      memset(&state, 0, sizeof(state));
+      dsize = QuickLZ1::qlz_decompress(data.data(), decompressed, &state);
+      break;
+    }
+    case 2: {
+      QuickLZ2::qlz_state_decompress state;
+      memset(&state, 0, sizeof(state));
+      dsize = QuickLZ2::qlz_decompress(data.data(), decompressed, &state);
+      break;
+    }
+    case 3: {
+      QuickLZ3::qlz_state_decompress *state =
+        new QuickLZ3::qlz_state_decompress();
+      memset(state, 0, sizeof(*state));
+      dsize = QuickLZ3::qlz_decompress(data.data(), decompressed, state);
+      delete state;
+      break;
+    }
+  }
+
+  ASSERT(dsize == size);
+  decompressed[dsize] = '\0';
+  return String(decompressed, dsize, AttachString);
+#endif
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

@@ -37,6 +37,8 @@ Variant f_gzdecode(CStrRef data);
 inline String f_zlib_get_coding_type() {
   throw NotSupportedException(__func__, "no use");
 }
+Variant f_qlzcompress(CStrRef data, int level = 1);
+Variant f_qlzuncompress(CStrRef data, int level = 1);
 
 ///////////////////////////////////////////////////////////////////////////////
 // stream functions
@@ -49,7 +51,7 @@ inline bool f_gzclose(CObjRef zp) {
 inline Variant f_gzread(CObjRef zp, int64 length = 0) {
   return f_fread(zp, length);
 }
-inline Variant f_gzseek(CObjRef zp, int64 offset, int64 whence = SEEK_SET) {
+inline Variant f_gzseek(CObjRef zp, int64 offset, int64 whence = k_SEEK_SET) {
   return f_fseek(zp, offset, whence);
 }
 inline Variant f_gztell(CObjRef zp) {

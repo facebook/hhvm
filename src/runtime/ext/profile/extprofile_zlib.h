@@ -135,6 +135,16 @@ inline Variant x_gzputs(CObjRef zp, CStrRef str, int64 length = 0) {
   return f_gzputs(zp, str, length);
 }
 
+inline Variant x_qlzcompress(CStrRef data, int level = 1) {
+  FUNCTION_INJECTION_BUILTIN(qlzcompress);
+  return f_qlzcompress(data, level);
+}
+
+inline Variant x_qlzuncompress(CStrRef data, int level = 1) {
+  FUNCTION_INJECTION_BUILTIN(qlzuncompress);
+  return f_qlzuncompress(data, level);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

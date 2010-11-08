@@ -46,6 +46,8 @@ bool TestExtZlib::RunTests(const std::string &which) {
   RUN_TEST(test_gztell);
   RUN_TEST(test_gzwrite);
   RUN_TEST(test_gzputs);
+  RUN_TEST(test_qlzcompress);
+  RUN_TEST(test_qlzuncompress);
 
   return ret;
 }
@@ -198,5 +200,20 @@ bool TestExtZlib::test_gzwrite() {
 
 bool TestExtZlib::test_gzputs() {
   // tested in gzopen
+  return Count(true);
+}
+
+bool TestExtZlib::test_qlzcompress() {
+  // tested in test_qlzuncompress();
+  return Count(true);
+}
+
+bool TestExtZlib::test_qlzuncompress() {
+  VS(f_qlzuncompress(f_qlzcompress("testing gzcompress", 1), 1),
+     "testing gzcompress");
+  VS(f_qlzuncompress(f_qlzcompress("testing gzcompress", 2), 2),
+     "testing gzcompress");
+  VS(f_qlzuncompress(f_qlzcompress("testing gzcompress", 3), 3),
+     "testing gzcompress");
   return Count(true);
 }

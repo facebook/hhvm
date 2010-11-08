@@ -49,6 +49,8 @@ class TestExtZlib : public TestCppExt {
   bool test_gztell();
   bool test_gzwrite();
   bool test_gzputs();
+  bool test_qlzcompress();
+  bool test_qlzuncompress();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

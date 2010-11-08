@@ -11,6 +11,8 @@ $excluded = array(
   'util/neo/',
   'util/cronoutils.h',
   'util/cronoutils.cpp',
+  'runtime/ext/quicklz.h',
+  'runtime/ext/quicklz.inc',
 
   // non-PHP licenses
   'runtime/base/zend/utf8_decode.c',

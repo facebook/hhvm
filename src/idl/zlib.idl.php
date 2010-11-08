@@ -549,6 +549,53 @@ DefineFunction(
     ),
   ));
 
+DefineFunction(
+  array(
+    'name'   => "qlzcompress",
+    'desc'   => "This function compress the given string using the QuickLZ data format.\n\nFor details on the QuickLZ compression algorithm go to http://www.quicklz.com/(RFC 1950).",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "The compressed string or FALSE if an error occurred.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "data",
+        'type'   => String,
+        'desc'   => "The data to compress.",
+      ),
+      array(
+        'name'   => "level",
+        'type'   => Int32,
+        'value'  => "1",
+        'desc'   => "The level of compression. Can be given as 1, 2 or 3.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "qlzuncompress",
+    'desc'   => "This function uncompress a compressed string.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "The original uncompressed data or FALSE on error.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "data",
+        'type'   => String,
+        'desc'   => "The data compressed by qlzcompress().",
+      ),
+      array(
+        'name'   => "level",
+        'type'   => Int32,
+        'value'  => "1",
+        'desc'   => "The level of compression. Can be given as 1, 2 or 3.",
+      ),
+    ),
+  ));
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

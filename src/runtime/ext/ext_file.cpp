@@ -133,10 +133,11 @@ static Array stat_impl(struct stat *stat_sb) {
 
 Variant f_fopen(CStrRef filename, CStrRef mode,
                 bool use_include_path /* = false */,
-                CObjRef context /* = null_object */) {
+                CVarRef context /* = null */) {
   Array options;
   if (!context.isNull()) {
-    StreamContext *streamContext = context.getTyped<StreamContext>();
+    StreamContext *streamContext =
+      context.toObject().getTyped<StreamContext>();
     options = streamContext->m_options;
   }
   return File::Open(filename, mode, options);
@@ -162,7 +163,8 @@ Variant f_pclose(CObjRef handle) {
   return CHECK_ERROR(f->close());
 }
 
-Variant f_fseek(CObjRef handle, int64 offset, int64 whence /* = SEEK_SET */) {
+Variant f_fseek(CObjRef handle, int64 offset,
+                int64 whence /* = k_SEEK_SET */) {
   CHECK_HANDLE(handle, f);
   return CHECK_ERROR(f->seek(offset, whence)) ? 0 : -1;
 }
@@ -320,7 +322,7 @@ Variant f_fgetcsv(CObjRef handle, int64 length /* = 0 */,
 
 Variant f_file_get_contents(CStrRef filename,
                             bool use_include_path /* = false */,
-                            CObjRef context /* = null_object */,
+                            CVarRef context /* = null */,
                             int64 offset /* = 0 */,
                             int64 maxlen /* = 0 */) {
   Variant stream = f_fopen(filename, "rb", use_include_path, context);
@@ -330,7 +332,7 @@ Variant f_file_get_contents(CStrRef filename,
 
 Variant f_file_put_contents(CStrRef filename, CVarRef data,
                             int flags /* = 0 */,
-                            CObjRef context /* = null_object */) {
+                            CVarRef context /* = null */) {
   FILE *f = fopen(File::TranslatePath(filename).data(),
                   (flags & PHP_FILE_APPEND) ? "ab" : "wb");
   Object closer(NEW(PlainFile)(f));
@@ -401,7 +403,7 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
 }
 
 Variant f_file(CStrRef filename, int flags /* = 0 */,
-               CObjRef context /* = null_object */) {
+               CVarRef context /* = null */) {
   Variant contents = f_file_get_contents(filename,
                                          flags & PHP_FILE_USE_INCLUDE_PATH,
                                          context);
@@ -459,7 +461,7 @@ Variant f_file(CStrRef filename, int flags /* = 0 */,
 }
 
 Variant f_readfile(CStrRef filename, bool use_include_path /* = false */,
-                   CObjRef context /* = null_object */) {
+                   CVarRef context /* = null */) {
   Variant f = f_fopen(filename, "rb", use_include_path, context);
   if (same(f, false)) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
@@ -970,7 +972,7 @@ bool f_touch(CStrRef filename, int64 mtime /* = 0 */, int64 atime /* = 0 */) {
 }
 
 bool f_copy(CStrRef source, CStrRef dest,
-            CObjRef context /* = null_object */) {
+            CVarRef context /* = null */) {
   if (!context.isNull() || !File::IsPlainFilePath(source) ||
       !File::IsPlainFilePath(dest)) {
     Variant sfile = f_fopen(source, "r", false, context);
@@ -989,7 +991,7 @@ bool f_copy(CStrRef source, CStrRef dest,
 }
 
 bool f_rename(CStrRef oldname, CStrRef newname,
-              CObjRef context /* = null_object */) {
+              CVarRef context /* = null */) {
   int ret =
     RuntimeOption::UseDirectCopy ?
       Util::directRename(File::TranslatePath(oldname).data(),
@@ -1010,7 +1012,7 @@ int f_umask(CVarRef mask /* = null_variant */) {
   return oldumask;
 }
 
-bool f_unlink(CStrRef filename, CObjRef context /* = null_object */) {
+bool f_unlink(CStrRef filename, CVarRef context /* = null */) {
   CHECK_SYSTEM(unlink(File::TranslatePath(filename).data()));
   return true;
 }
@@ -1168,7 +1170,7 @@ Variant f_tmpfile() {
 // directory functions
 
 bool f_mkdir(CStrRef pathname, int64 mode /* = 0777 */,
-             bool recursive /* = false */, CObjRef context /* = null_object */) {
+             bool recursive /* = false */, CVarRef context /* = null */) {
   if (recursive) {
     String path = File::TranslatePath(pathname);
     if (path.empty()) return false;
@@ -1181,7 +1183,7 @@ bool f_mkdir(CStrRef pathname, int64 mode /* = 0777 */,
   return true;
 }
 
-bool f_rmdir(CStrRef dirname, CObjRef context /* = null_object */) {
+bool f_rmdir(CStrRef dirname, CVarRef context /* = null */) {
   CHECK_SYSTEM(rmdir(File::TranslatePath(dirname).data()));
   return true;
 }
@@ -1329,7 +1331,7 @@ Variant f_dir(CStrRef directory) {
   return c_d;
 }
 
-Variant f_opendir(CStrRef path, CObjRef context /* = null */) {
+Variant f_opendir(CStrRef path, CVarRef context /* = null */) {
   DIR *dir = opendir(File::TranslatePath(path).data());
   if (dir == NULL) {
     return false;
@@ -1369,7 +1371,7 @@ static bool StringAscending(CStrRef s1, CStrRef s2) {
 }
 
 Variant f_scandir(CStrRef directory, bool descending /* = false */,
-                  CObjRef context /* = null */) {
+                  CVarRef context /* = null */) {
   DIR *dir = opendir(File::TranslatePath(directory).data());
   if (dir == NULL) {
     return false;

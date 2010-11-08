@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline Variant x_fopen(CStrRef filename, CStrRef mode, bool use_include_path = false, CObjRef context = null_object) {
+inline Variant x_fopen(CStrRef filename, CStrRef mode, bool use_include_path = false, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(fopen);
   return f_fopen(filename, mode, use_include_path, context);
 }
@@ -145,22 +145,22 @@ inline Variant x_fgetcsv(CObjRef handle, int64 length = 0, CStrRef delimiter = "
   return f_fgetcsv(handle, length, delimiter, enclosure);
 }
 
-inline Variant x_file_get_contents(CStrRef filename, bool use_include_path = false, CObjRef context = null_object, int64 offset = 0, int64 maxlen = 0) {
+inline Variant x_file_get_contents(CStrRef filename, bool use_include_path = false, CVarRef context = null, int64 offset = 0, int64 maxlen = 0) {
   FUNCTION_INJECTION_BUILTIN(file_get_contents);
   return f_file_get_contents(filename, use_include_path, context, offset, maxlen);
 }
 
-inline Variant x_file_put_contents(CStrRef filename, CVarRef data, int flags = 0, CObjRef context = null_object) {
+inline Variant x_file_put_contents(CStrRef filename, CVarRef data, int flags = 0, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(file_put_contents);
   return f_file_put_contents(filename, data, flags, context);
 }
 
-inline Variant x_file(CStrRef filename, int flags = 0, CObjRef context = null_object) {
+inline Variant x_file(CStrRef filename, int flags = 0, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(file);
   return f_file(filename, flags, context);
 }
 
-inline Variant x_readfile(CStrRef filename, bool use_include_path = false, CObjRef context = null_object) {
+inline Variant x_readfile(CStrRef filename, bool use_include_path = false, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(readfile);
   return f_readfile(filename, use_include_path, context);
 }
@@ -240,12 +240,12 @@ inline bool x_touch(CStrRef filename, int64 mtime = 0, int64 atime = 0) {
   return f_touch(filename, mtime, atime);
 }
 
-inline bool x_copy(CStrRef source, CStrRef dest, CObjRef context = null_object) {
+inline bool x_copy(CStrRef source, CStrRef dest, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(copy);
   return f_copy(source, dest, context);
 }
 
-inline bool x_rename(CStrRef oldname, CStrRef newname, CObjRef context = null_object) {
+inline bool x_rename(CStrRef oldname, CStrRef newname, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(rename);
   return f_rename(oldname, newname, context);
 }
@@ -255,7 +255,7 @@ inline int x_umask(CVarRef mask = null_variant) {
   return f_umask(mask);
 }
 
-inline bool x_unlink(CStrRef filename, CObjRef context = null_object) {
+inline bool x_unlink(CStrRef filename, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(unlink);
   return f_unlink(filename, context);
 }
@@ -435,12 +435,12 @@ inline Variant x_disk_total_space(CStrRef directory) {
   return f_disk_total_space(directory);
 }
 
-inline bool x_mkdir(CStrRef pathname, int64 mode = 0777, bool recursive = false, CObjRef context = null_object) {
+inline bool x_mkdir(CStrRef pathname, int64 mode = 0777, bool recursive = false, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(mkdir);
   return f_mkdir(pathname, mode, recursive, context);
 }
 
-inline bool x_rmdir(CStrRef dirname, CObjRef context = null_object) {
+inline bool x_rmdir(CStrRef dirname, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(rmdir);
   return f_rmdir(dirname, context);
 }
@@ -470,7 +470,7 @@ inline Variant x_dir(CStrRef directory) {
   return f_dir(directory);
 }
 
-inline Variant x_opendir(CStrRef path, CObjRef context = null) {
+inline Variant x_opendir(CStrRef path, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(opendir);
   return f_opendir(path, context);
 }
@@ -485,7 +485,7 @@ inline void x_rewinddir(CObjRef dir_handle) {
   f_rewinddir(dir_handle);
 }
 
-inline Variant x_scandir(CStrRef directory, bool descending = false, CObjRef context = null) {
+inline Variant x_scandir(CStrRef directory, bool descending = false, CVarRef context = null) {
   FUNCTION_INJECTION_BUILTIN(scandir);
   return f_scandir(directory, descending, context);
 }

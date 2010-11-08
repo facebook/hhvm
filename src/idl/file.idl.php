@@ -92,8 +92,8 @@ DefineFunction(
       ),
       array(
         'name'   => "context",
-        'type'   => Resource,
-        'value'  => "null_object",
+        'type'   => Variant,
+        'value'  => "null",
       ),
     ),
   ));
@@ -659,8 +659,8 @@ DefineFunction(
       ),
       array(
         'name'   => "context",
-        'type'   => Resource,
-        'value'  => "null_object",
+        'type'   => Variant,
+        'value'  => "null",
         'desc'   => "A valid context resource created with stream_context_create(). If you don't need to use a custom context, you can skip this parameter by NULL.",
       ),
       array(
@@ -706,8 +706,8 @@ DefineFunction(
       ),
       array(
         'name'   => "context",
-        'type'   => Resource,
-        'value'  => "null_object",
+        'type'   => Variant,
+        'value'  => "null",
         'desc'   => "A valid context resource created with stream_context_create().",
       ),
     ),
@@ -736,8 +736,8 @@ DefineFunction(
       ),
       array(
         'name'   => "context",
-        'type'   => Resource,
-        'value'  => "null_object",
+        'type'   => Variant,
+        'value'  => "null",
         'desc'   => "Do not add newline at the end of each array element",
       ),
     ),
@@ -766,8 +766,8 @@ DefineFunction(
       ),
       array(
         'name'   => "context",
-        'type'   => Resource,
-        'value'  => "null_object",
+        'type'   => Variant,
+        'value'  => "null",
         'desc'   => "A context stream resource.",
       ),
     ),
@@ -1134,8 +1134,8 @@ DefineFunction(
       ),
       array(
         'name'   => "context",
-        'type'   => Resource,
-        'value'  => "null_object",
+        'type'   => Variant,
+        'value'  => "null",
         'desc'   => "A valid context resource created with stream_context_create().",
       ),
     ),
@@ -1163,8 +1163,8 @@ DefineFunction(
       ),
       array(
         'name'   => "context",
-        'type'   => Resource,
-        'value'  => "null_object",
+        'type'   => Variant,
+        'value'  => "null",
         'desc'   => "Context support was added with PHP 5.0.0. For a description of contexts, refer to Stream Functions.",
       ),
     ),
@@ -1206,8 +1206,8 @@ DefineFunction(
       ),
       array(
         'name'   => "context",
-        'type'   => Resource,
-        'value'  => "null_object",
+        'type'   => Variant,
+        'value'  => "null",
         'desc'   => "Context support was added with PHP 5.0.0. For a description of contexts, refer to Stream Functions.",
       ),
     ),
@@ -1895,8 +1895,8 @@ DefineFunction(
       ),
       array(
         'name'   => "context",
-        'type'   => Resource,
-        'value'  => "null_object",
+        'type'   => Variant,
+        'value'  => "null",
         'desc'   => "Context support was added with PHP 5.0.0. For a description of contexts, refer to Stream Functions.",
       ),
     ),
@@ -1919,8 +1919,8 @@ DefineFunction(
       ),
       array(
         'name'   => "context",
-        'type'   => Resource,
-        'value'  => "null_object",
+        'type'   => Variant,
+        'value'  => "null",
         'desc'   => "Context support was added with PHP 5.0.0. For a description of contexts, refer to Stream Functions.",
       ),
     ),
@@ -2023,7 +2023,7 @@ DefineFunction(
       ),
       array(
         'name'   => "context",
-        'type'   => Resource,
+        'type'   => Variant,
         'value'  => "null",
         'desc'   => "For a description of the context parameter, refer to the streams section of the manual.",
       ),
@@ -2087,7 +2087,7 @@ DefineFunction(
       ),
       array(
         'name'   => "context",
-        'type'   => Resource,
+        'type'   => Variant,
         'value'  => "null",
         'desc'   => "For a description of the context parameter, refer to the streams section of the manual.",
       ),

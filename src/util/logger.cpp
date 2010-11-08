@@ -27,28 +27,28 @@
 
 using namespace std;
 
-#define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                   \
-  void Logger::LOGLEVEL(const char *fmt, ...) {                        \
-    if (LogLevel < Log ## LOGLEVEL) return;                            \
-    va_list ap; va_start(ap, fmt); Log(fmt, ap); va_end(ap);           \
-  }                                                                    \
-  void Logger::LOGLEVEL(const std::string &msg) {                      \
-    if (LogLevel < Log ## LOGLEVEL) return;                            \
-    Log(msg, NULL);                                                    \
-  }                                                                    \
-  void Logger::Raw ## LOGLEVEL(const std::string &msg) {               \
-    if (LogLevel < Log ## LOGLEVEL) return;                            \
-    Log(msg, NULL, false);                                             \
-  }                                                                    \
+#define IMPLEMENT_LOGLEVEL(LOGLEVEL, err)                               \
+  void Logger::LOGLEVEL(const char *fmt, ...) {                         \
+    if (LogLevel < Log ## LOGLEVEL) return;                             \
+    va_list ap; va_start(ap, fmt); Log(err, fmt, ap); va_end(ap);       \
+  }                                                                     \
+  void Logger::LOGLEVEL(const std::string &msg) {                       \
+    if (LogLevel < Log ## LOGLEVEL) return;                             \
+    Log(err, msg, NULL);                                                \
+  }                                                                     \
+  void Logger::Raw ## LOGLEVEL(const std::string &msg) {                \
+    if (LogLevel < Log ## LOGLEVEL) return;                             \
+    Log(err, msg, NULL, false);                                         \
+  }                                                                     \
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_LOGLEVEL(Error);
-IMPLEMENT_LOGLEVEL(Warning);
-IMPLEMENT_LOGLEVEL(Info);
-IMPLEMENT_LOGLEVEL(Verbose);
+IMPLEMENT_LOGLEVEL(Error,   true);
+IMPLEMENT_LOGLEVEL(Warning, true);
+IMPLEMENT_LOGLEVEL(Info,    false);
+IMPLEMENT_LOGLEVEL(Verbose, false);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -69,28 +69,28 @@ IMPLEMENT_THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
 
 Logger *Logger::s_logger = new Logger();
 
-void Logger::Log(const char *fmt, va_list ap) {
+void Logger::Log(bool err, const char *fmt, va_list ap) {
   if (!UseLogAggregator && !UseLogFile) return;
 
   string msg;
   Util::string_vsnprintf(msg, fmt, ap);
-  Log(msg, NULL);
+  Log(err, msg, NULL);
 }
 
-void Logger::LogEscapeMore(const char *fmt, va_list ap) {
+void Logger::LogEscapeMore(bool err, const char *fmt, va_list ap) {
   if (!UseLogAggregator && !UseLogFile) return;
 
   string msg;
   Util::string_vsnprintf(msg, fmt, ap);
-  Log(msg, NULL, true, true);
+  Log(err, msg, NULL, true, true);
 }
 
-void Logger::Log(const char *type, const Exception &e,
+void Logger::Log(bool err, const char *type, const Exception &e,
                  const char *file /* = NULL */, int line /* = 0 */) {
-  s_logger->log(type, e, file, line);
+  s_logger->log(err, type, e, file, line);
 }
 
-void Logger::log(const char *type, const Exception &e,
+void Logger::log(bool err, const char *type, const Exception &e,
                  const char *file /* = NULL */, int line /* = 0 */) {
   if (!UseLogAggregator && !UseLogFile) return;
 
@@ -101,7 +101,7 @@ void Logger::log(const char *type, const Exception &e,
     os << " in " << file << " on line " << line;
     msg += os.str();
   }
-  Log(msg, &e.getStackTrace());
+  Log(err, msg, &e.getStackTrace());
 }
 
 void Logger::OnNewRequest() {
@@ -116,12 +116,14 @@ void Logger::ResetRequestCount() {
   threadData->message = 0;
 }
 
-void Logger::Log(const std::string &msg, const StackTrace *stackTrace,
+void Logger::Log(bool err, const std::string &msg,
+                 const StackTrace *stackTrace,
                  bool escape /* = true */, bool escapeMore /* = false */) {
-  s_logger->log(msg, stackTrace, escape, escapeMore);
+  s_logger->log(err, msg, stackTrace, escape, escapeMore);
 }
 
-void Logger::log(const std::string &msg, const StackTrace *stackTrace,
+void Logger::log(bool err, const std::string &msg,
+                 const StackTrace *stackTrace,
                  bool escape /* = true */, bool escapeMore /* = false */) {
   ASSERT(!escapeMore || escape);
   ThreadData *threadData = s_threadData.get();
@@ -139,13 +141,14 @@ void Logger::log(const std::string &msg, const StackTrace *stackTrace,
   if (UseLogAggregator) {
     LogAggregator::TheLogAggregator.log(*stackTrace, msg);
   }
+  FILE *stdf = err ? stderr : stdout;
   if (UseLogFile) {
     FILE *f;
     if (UseCronolog) {
       f = cronOutput.getOutputFile();
-      if (!f) f = stdout;
+      if (!f) f = stdf;
     } else {
-      f = Output ? Output : stdout;
+      f = Output ? Output : stdf;
     }
     string header, sheader;
     if (LogHeader) {
@@ -159,7 +162,7 @@ void Logger::log(const std::string &msg, const StackTrace *stackTrace,
     const char *escaped = escape ? EscapeString(msg) : msg.c_str();
     const char *ending = escapeMore ? "\\n" : "\n";
     int bytes;
-    if (f == stdout && Util::s_stderr_color) {
+    if (f == stdf && Util::s_stderr_color) {
       bytes =
         fprintf(f, "%s%s%s%s%s",
                 Util::s_stderr_color, sheader.c_str(), msg.c_str(), ending,

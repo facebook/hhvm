@@ -77,7 +77,7 @@ public:
   static void RawInfo(const std::string &msg);
   static void RawVerbose(const std::string &msg);
 
-  static void Log(const char *type, const Exception &e,
+  static void Log(bool err, const char *type, const Exception &e,
                   const char *file = NULL, int line = 0);
 
   static void OnNewRequest();
@@ -117,17 +117,19 @@ protected:
   };
   static DECLARE_THREAD_LOCAL(ThreadData, s_threadData);
 
-  static void Log(const char *fmt, va_list ap);
-  static void LogEscapeMore(const char *fmt, va_list ap);
-  static void Log(const std::string &msg, const StackTrace *stackTrace,
+  static void Log(bool err, const char *fmt, va_list ap);
+  static void LogEscapeMore(bool err, const char *fmt, va_list ap);
+  static void Log(bool err, const std::string &msg,
+                  const StackTrace *stackTrace,
                   bool escape = true, bool escapeMore = false);
 
   /**
    * For subclasses to override, e.g., to support injected stack trace.
    */
-  virtual void log(const char *type, const Exception &e,
+  virtual void log(bool err, const char *type, const Exception &e,
                    const char *file = NULL, int line = 0);
-  virtual void log(const std::string &msg, const StackTrace *stackTrace,
+  virtual void log(bool err, const std::string &msg,
+                   const StackTrace *stackTrace,
                    bool escape = true, bool escapeMore = false);
 
   /**

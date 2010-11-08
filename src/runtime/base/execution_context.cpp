@@ -594,7 +594,7 @@ void ExecutionContext::handleError(const std::string &msg,
     try {
       if (!Eval::Debugger::InterruptException(String(msg))) return;
     } catch (const Eval::DebuggerClientExitException &e) {}
-    Logger::Log(prefix.c_str(), ee);
+    Logger::Log(true, prefix.c_str(), ee);
   }
 }
 
@@ -652,7 +652,7 @@ void ExecutionContext::recordLastError(const Exception &e,
 bool ExecutionContext::onFatalError(const Exception &e) {
   recordLastError(e);
   if (RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log("HipHop Fatal error: ", e);
+    Logger::Log(true, "HipHop Fatal error: ", e);
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
@@ -660,7 +660,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log("HipHop Fatal error: ", e);
+    Logger::Log(true, "HipHop Fatal error: ", e);
   }
   return handled;
 }

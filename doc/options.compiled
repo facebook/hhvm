@@ -604,11 +604,11 @@ next requests.
     MaxSlot = 72        # 10 minutes x 72 = 12 hours
 
     APCSize {
-      Enable = false;
-      CountPrime = false;
-      Group = false;
-      Individual = false;
-      FetchStats = false;
+      Enable = false
+      CountPrime = false
+      Group = false
+      Individual = false
+      FetchStats = false
       SpecialPrefix {
         * = sv:/
       }

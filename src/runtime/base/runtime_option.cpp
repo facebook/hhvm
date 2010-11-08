@@ -897,11 +897,6 @@ void RuntimeOption::Load(Hdf &config) {
       EnableAPCFetchStats = apcSize["FetchStats"].getBool();
       APCSizeCountPrime = apcSize["CountPrime"].getBool();
     }
-    // Following two lines are added for compatibility, will be removed
-    // when new config format is pushed.
-    EnableAPCSizeStats =
-      stats["EnableAPCSizeStats"].getBool(EnableAPCSizeStats);
-    APCSizeCountPrime = stats["APCSizeCountPrime"].getBool(APCSizeCountPrime);
 
     ProfilerTraceBuffer = stats["ProfilerTraceBuffer"].getInt32(2000000);
   }

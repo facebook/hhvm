@@ -86,8 +86,8 @@ public:
   static int PageletServerThreadCount;
   static int FiberCount;
   static int RequestTimeoutSeconds;
-  static int RequestMemoryMaxBytes;
-  static int ImageMemoryMaxBytes;
+  static int64 RequestMemoryMaxBytes;
+  static int64 ImageMemoryMaxBytes;
   static int ResponseQueueCount;
   static int ServerGracefulShutdownWait;
   static int ServerDanglingWait;
@@ -107,7 +107,7 @@ public:
   static bool ForceChunkedEncoding;
   static int MaxPostSize;
   static bool AlwaysPopulateRawPostData;
-  static int UploadMaxFileSize;
+  static int64 UploadMaxFileSize;
   static std::string UploadTmpDir;
   static bool EnableFileUploads;
   static bool EnableUploadProgress;

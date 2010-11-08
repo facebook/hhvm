@@ -235,6 +235,14 @@ bool IniSetting::Get(CStrRef name, String &value) {
     value = g_context->getErrorLog();
     return true;
   }
+  if (name == "notice_frequency") {
+    value = String((int64)RuntimeOption::NoticeFrequency);
+    return true;
+  }
+  if (name == "warning_frequency") {
+    value = String((int64)RuntimeOption::WarningFrequency);
+    return true;
+  }
 
   DefaultMap::iterator iter = s_global_ini.find(name.data());
   if (iter != s_global_ini.end()) {
@@ -280,6 +288,12 @@ bool IniSetting::Set(CStrRef name, CStrRef value) {
     return true;
   } else if (name == "error_log") {
     g_context->setErrorLog(value);
+    return true;
+  } else if (name == "notice_frequency") {
+    RuntimeOption::NoticeFrequency = value.toInt64();
+    return true;
+  } else if (name == "warning_frequency") {
+    RuntimeOption::WarningFrequency = value.toInt64();
     return true;
   }
 

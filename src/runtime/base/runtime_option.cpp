@@ -91,8 +91,8 @@ bool RuntimeOption::ServerThreadJobLIFO = false;
 int RuntimeOption::PageletServerThreadCount = 0;
 int RuntimeOption::FiberCount = 0;
 int RuntimeOption::RequestTimeoutSeconds = 0;
-int RuntimeOption::RequestMemoryMaxBytes = -1;
-int RuntimeOption::ImageMemoryMaxBytes = 0;
+int64 RuntimeOption::RequestMemoryMaxBytes = -1;
+int64 RuntimeOption::ImageMemoryMaxBytes = 0;
 int RuntimeOption::ResponseQueueCount;
 int RuntimeOption::ServerGracefulShutdownWait;
 bool RuntimeOption::ServerHarshShutdown = true;
@@ -112,7 +112,7 @@ bool RuntimeOption::EnableEarlyFlush = true;
 bool RuntimeOption::ForceChunkedEncoding = false;
 int RuntimeOption::MaxPostSize;
 bool RuntimeOption::AlwaysPopulateRawPostData = true;
-int RuntimeOption::UploadMaxFileSize;
+int64 RuntimeOption::UploadMaxFileSize;
 std::string RuntimeOption::UploadTmpDir;
 bool RuntimeOption::EnableFileUploads;
 bool RuntimeOption::EnableUploadProgress;
@@ -530,7 +530,7 @@ void RuntimeOption::Load(Hdf &config) {
       server["ThreadDropCacheTimeoutSeconds"].getInt32(0);
     ServerThreadJobLIFO = server["ThreadJobLIFO"].getBool();
     RequestTimeoutSeconds = server["RequestTimeoutSeconds"].getInt32(0);
-    RequestMemoryMaxBytes = server["RequestMemoryMaxBytes"].getInt32(-1);
+    RequestMemoryMaxBytes = server["RequestMemoryMaxBytes"].getInt64(-1);
     ResponseQueueCount = server["ResponseQueueCount"].getInt32(0);
     if (ResponseQueueCount <= 0) {
       ResponseQueueCount = ServerThreadCount / 10;
@@ -709,7 +709,7 @@ void RuntimeOption::Load(Hdf &config) {
     Rfc1867Prefix = upload["Rfc1867Prefix"].getString("vupload_");
     Rfc1867Name = upload["Rfc1867Name"].getString("video_ptoken");
 
-    ImageMemoryMaxBytes = server["ImageMemoryMaxBytes"].getInt32(0);
+    ImageMemoryMaxBytes = server["ImageMemoryMaxBytes"].getInt64(0);
     if (ImageMemoryMaxBytes == 0) {
       ImageMemoryMaxBytes = UploadMaxFileSize * 2;
     }

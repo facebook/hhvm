@@ -871,7 +871,7 @@ int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
 void AnalysisResult::inferTypes() {
   setPhase(FirstInference);
   DepthFirstVisitor<InferTypesVisitor> dfv(shared_from_this());
-  BlockScopeRawPtrHashSet changed;
+  BlockScopeRawPtrQueue changed;
 
   BlockScopeRawPtrQueue scopes;
   getScopesSet(scopes);

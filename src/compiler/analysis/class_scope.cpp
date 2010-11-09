@@ -368,10 +368,12 @@ std::string ClassScope::findCommonParent(AnalysisResultPtr ar,
 void ClassScope::setVolatile() {
   if (!m_volatile) {
     m_volatile = true;
-    for (BlockScopeRawPtrFlagsHashMap::iterator it = m_users.begin(),
-           end = m_users.end(); it != end; ++it) {
-      if (it->second & UseKindParentRef) {
-        BlockScopeRawPtr scope = it->first;
+    const BlockScopeRawPtrFlagsVec &orderedUsers = getOrderedUsers();
+    for (BlockScopeRawPtrFlagsVec::const_iterator it = orderedUsers.begin(),
+           end = orderedUsers.end(); it != end; ++it) {
+      BlockScopeRawPtrFlagsVec::value_type pf = *it;
+      if (pf->second & UseKindParentRef) {
+        BlockScopeRawPtr scope = pf->first;
         if (scope->is(BlockScope::ClassScope)) {
           ((HPHP::ClassScope*)scope.get())->setVolatile();
         }

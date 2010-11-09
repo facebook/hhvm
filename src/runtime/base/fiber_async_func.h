@@ -54,10 +54,11 @@ public:
   static Object Start(CVarRef function, CArrRef params);
 
   /**
-   * Query if an async call is finished. This is non-blocking and can be
-   * called as many times as desired.
+   * Query if some async calls are finished. If msTimeout is -1, non-blocking,
+   * 0, wait forever, positive number, wait for at most that many milli-
+   * seconds.
    */
-  static bool Status(CObjRef func);
+  static Array Status(CArrRef funcs, int msTimeout);
 
   /**
    * Get results of an async call. This is blocking until task is finished.

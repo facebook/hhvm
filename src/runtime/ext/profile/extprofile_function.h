@@ -60,9 +60,9 @@ inline Object x_call_user_func_async(int _argc, CVarRef function, CArrRef _argv 
   return f_call_user_func_async(_argc, function, _argv);
 }
 
-inline bool x_check_user_func_async(CObjRef handle) {
+inline Variant x_check_user_func_async(CVarRef handles, int timeout = -1) {
   FUNCTION_INJECTION_BUILTIN(check_user_func_async);
-  return f_check_user_func_async(handle);
+  return f_check_user_func_async(handles, timeout);
 }
 
 inline Variant x_end_user_func_async(CObjRef handle, int default_strategy = k_GLOBAL_STATE_IGNORE, CVarRef additional_strategies = null) {

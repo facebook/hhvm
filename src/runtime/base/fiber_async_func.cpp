@@ -37,16 +37,16 @@ namespace HPHP {
  * means end_user_func_async() is forgotten, fiber job will not touch request
  * thread's data. There is no need to restore any states in this case.
  */
-class FiberAsyncFuncData {
+class FiberAsyncFuncData : public Synchronizable {
 public:
   FiberAsyncFuncData() : m_reqId(0) {}
-  Mutex m_mutex;
+  Mutex m_mutexReqId;
   int64 m_reqId;
 };
 static IMPLEMENT_THREAD_LOCAL(FiberAsyncFuncData, s_fiber_data);
 
 void FiberAsyncFunc::OnRequestExit() {
-  Lock lock(s_fiber_data->m_mutex);
+  Lock lock(s_fiber_data->m_mutexReqId);
   ++s_fiber_data->m_reqId;
 };
 
@@ -88,7 +88,7 @@ public:
 
   void cleanup() {
     if (m_unmarshaled_function) {
-      Lock lock(m_thread->m_mutex);
+      Lock lock(m_thread->m_mutexReqId);
       if (m_thread->m_reqId == m_reqId) {
         DELETE(Variant)(m_unmarshaled_function);
         DELETE(Variant)(m_unmarshaled_params);
@@ -147,9 +147,15 @@ public:
       m_fatal = String("unknown exception was thrown");
     }
 
-    Lock lock(this);
-    m_done = true;
-    notify();
+    {
+      Lock lock(this);
+      m_done = true;
+      notify();
+    }
+    {
+      Lock lock(m_thread);
+      m_thread->notify();
+    }
   }
 
   Variant syncGetResults() {
@@ -369,9 +375,33 @@ Object FiberAsyncFunc::Start(CVarRef function, CArrRef params) {
   return ret;
 }
 
-bool FiberAsyncFunc::Status(CObjRef func) {
-  FiberAsyncFuncHandle *handle = func.getTyped<FiberAsyncFuncHandle>();
-  return handle->getJob()->isDone();
+Array FiberAsyncFunc::Status(CArrRef funcs, int msTimeout) {
+  if (funcs.empty()) {
+    return funcs;
+  }
+  if (msTimeout < 0) {
+    Array ret(Array::Create());
+    for (ArrayIter iter(funcs); iter; ++iter) {
+      Variant job = iter.second();
+      FiberAsyncFuncHandle *handle =
+        job.toObject().getTyped<FiberAsyncFuncHandle>();
+      if (handle->getJob()->isDone()) {
+        ret.append(job);
+      }
+    }
+    return ret;
+  }
+  {
+    Lock lock(s_fiber_data.get());
+    Array ret = Status(funcs, -1);
+    if (!ret.empty()) {
+      return ret;
+    }
+    s_fiber_data->wait(msTimeout / 1000,
+                       ((int64)msTimeout - 1000 * (int)(msTimeout/1000)) *
+                       1000000);
+  }
+  return Status(funcs, -1);
 }
 
 Variant FiberAsyncFunc::Result(CObjRef func, Strategy default_strategy,

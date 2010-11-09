@@ -2899,17 +2899,20 @@ Variant ifa_dom_document_xinclude(void *extra, int count, INVOKE_FEW_ARGS_IMPL_A
 Variant i_check_user_func_async(void *extra, CArrRef params) {
   FUNCTION_INJECTION(check_user_func_async);
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("check_user_func_async", count, 1, 1, 1);
+  if (count < 1 || count > 2) return throw_wrong_arguments("check_user_func_async", count, 1, 2, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    return (f_check_user_func_async(arg0));
+    if (count <= 1) return (f_check_user_func_async(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_check_user_func_async(arg0, arg1));
   }
 }
 Variant ifa_check_user_func_async(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 1) return throw_wrong_arguments("check_user_func_async", count, 1, 1, 1);
-  return (f_check_user_func_async(a0));
+  if (count < 1 || count > 2) return throw_wrong_arguments("check_user_func_async", count, 1, 2, 1);
+  if (count <= 1) return (f_check_user_func_async(a0));
+  return (f_check_user_func_async(a0, a1));
 }
 Variant i_drawgetfontweight(void *extra, CArrRef params) {
   FUNCTION_INJECTION(drawgetfontweight);
@@ -38707,19 +38710,24 @@ Variant ei_dom_document_xinclude(Eval::VariableEnvironment &env, const Eval::Fun
 }
 Variant ei_check_user_func_async(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
+  Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("check_user_func_async", count, 1, 1, 1);
+  if (count < 1 || count > 2) return throw_wrong_arguments("check_user_func_async", count, 1, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
     a0 = (*it)->eval(env);
     it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  return (x_check_user_func_async(a0));
+  if (count <= 1) return (x_check_user_func_async(a0));
+  else return (x_check_user_func_async(a0, a1));
 }
 Variant ei_drawgetfontweight(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -84398,7 +84406,7 @@ CallInfo ci_magickmodulateimage((void*)&i_magickmodulateimage, (void*)&ifa_magic
 CallInfo ci_mysql_set_charset((void*)&i_mysql_set_charset, (void*)&ifa_mysql_set_charset, 2, 0, 0x0000000000000000LL);
 CallInfo ci_fb_unset_taint((void*)&i_fb_unset_taint, (void*)&ifa_fb_unset_taint, 2, 0, 0x0000000000000001LL);
 CallInfo ci_dom_document_xinclude((void*)&i_dom_document_xinclude, (void*)&ifa_dom_document_xinclude, 2, 0, 0x0000000000000000LL);
-CallInfo ci_check_user_func_async((void*)&i_check_user_func_async, (void*)&ifa_check_user_func_async, 1, 0, 0x0000000000000000LL);
+CallInfo ci_check_user_func_async((void*)&i_check_user_func_async, (void*)&ifa_check_user_func_async, 2, 0, 0x0000000000000000LL);
 CallInfo ci_drawgetfontweight((void*)&i_drawgetfontweight, (void*)&ifa_drawgetfontweight, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimageheight((void*)&i_magickgetimageheight, (void*)&ifa_magickgetimageheight, 1, 0, 0x0000000000000000LL);
 CallInfo ci_posix_getpgrp((void*)&i_posix_getpgrp, (void*)&ifa_posix_getpgrp, 0, 0, 0x0000000000000000LL);

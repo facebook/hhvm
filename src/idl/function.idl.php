@@ -196,17 +196,23 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "check_user_func_async",
-    'desc'   => "Check to see if an async call is done or not.",
+    'desc'   => "Check to see if any specified jobs are done or not.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
-      'type'   => Boolean,
-      'desc'   => "TRUE if done; FALSE otherwise.",
+      'type'   => Variant,
+      'desc'   => "An array of finished jobs if an array of jobs was specified, otherwise TRUE for finished and FALSE for not finished.",
     ),
     'args'   => array(
       array(
-        'name'   => "handle",
-        'type'   => Object,
-        'desc'   => "The object returned from call_user_func_async() or call_user_func_array_async().",
+        'name'   => "handles",
+        'type'   => Variant,
+        'desc'   => "An array of objects returned from call_user_func_async() or call_user_func_array_async(), or a single object for a simple TRUE/FALSE return.",
+      ),
+      array(
+        'name'   => "timeout",
+        'type'   => Int32,
+        'value'  => "-1",
+        'desc'   => "In milli-seconds. -1 to return job status immediately without blocking; positive numbers for blocking until some of the specified jobs are done; 0 for infinite waiting until some of the specified jobs are done.",
       ),
     ),
   ));

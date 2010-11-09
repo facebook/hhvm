@@ -121,8 +121,12 @@ Object f_call_user_func_async(int _argc, CVarRef function,
   return FiberAsyncFunc::Start(function, _argv);
 }
 
-bool f_check_user_func_async(CObjRef handle) {
-  return FiberAsyncFunc::Status(handle);
+Variant f_check_user_func_async(CVarRef handles, int timeout /* = -1 */) {
+  if (handles.isArray()) {
+    return FiberAsyncFunc::Status(handles, timeout);
+  }
+  Array ret = FiberAsyncFunc::Status(CREATE_VECTOR1(handles), timeout);
+  return !ret.empty();
 }
 
 Variant f_end_user_func_async(CObjRef handle,

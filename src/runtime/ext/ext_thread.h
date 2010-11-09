@@ -26,6 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 void f_hphp_service_thread_started();
+bool f_hphp_service_thread_stopped(int timeout);
 bool f_hphp_thread_is_warmup_enabled();
 void f_hphp_thread_set_warmup_enabled();
 int64 f_hphp_get_thread_id();

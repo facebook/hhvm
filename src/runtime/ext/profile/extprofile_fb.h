@@ -105,6 +105,24 @@ inline Variant x_xhprof_disable() {
   return f_xhprof_disable();
 }
 
+inline void x_xhprof_network_enable() {
+  FUNCTION_INJECTION_BUILTIN(xhprof_network_enable);
+  f_xhprof_network_enable();
+}
+
+inline Variant x_xhprof_network_disable() {
+  FUNCTION_INJECTION_BUILTIN(xhprof_network_disable);
+  return f_xhprof_network_disable();
+}
+
+inline void x_xhprof_frame_begin(CStrRef name) {
+  f_xhprof_frame_begin(name);
+}
+
+inline void x_xhprof_frame_end() {
+  f_xhprof_frame_end();
+}
+
 inline Variant x_xhprof_run_trace(CStrRef packedTrace, int flags) {
   FUNCTION_INJECTION_BUILTIN(xhprof_run_trace);
   return f_xhprof_run_trace(packedTrace, flags);

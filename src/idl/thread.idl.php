@@ -61,6 +61,24 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "hphp_service_thread_stopped",
+    'desc'   => "A function to call to ask system whether a service thread should stop.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "TRUE if HTTP server is stopping and service thread should stop, FALSE otherwise.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "timeout",
+        'type'   => Int32,
+        'desc'   => "How many seconds to wait for system to tell us.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "hphp_thread_is_warmup_enabled",
     'desc'   => "Whether current thread is warmed up with some PHP document.",
     'flags'  =>  HasDocComment | HipHopSpecific,

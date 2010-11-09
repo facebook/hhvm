@@ -21,6 +21,7 @@
 #include <runtime/base/preg.h>
 #include <runtime/base/comparisons.h>
 #include <runtime/base/time/datetime.h>
+#include <runtime/base/array/array_init.h>
 #include <util/json.h>
 #include <util/compatibility.h>
 
@@ -591,6 +592,7 @@ private:
 
 Mutex ServerStats::s_lock;
 vector<ServerStats*> ServerStats::s_loggers;
+bool ServerStats::s_profile_network = false;
 IMPLEMENT_THREAD_LOCAL(ServerStats, ServerStats::s_logger);
 
 void ServerStats::LogPage(const string &url, int code) {
@@ -622,8 +624,8 @@ void ServerStats::SetThreadMode(ThreadMode mode) {
   ServerStats::s_logger->setThreadMode(mode);
 }
 
-void ServerStats::SetThreadIOStatus(const char *status) {
-  ServerStats::s_logger->setThreadIOStatus(status);
+void ServerStats::SetThreadIOStatus(const char *name, const char *addr) {
+  ServerStats::s_logger->setThreadIOStatus(name, addr);
 }
 
 int64 ServerStats::Get(const string &name) {
@@ -802,21 +804,6 @@ static std::string format_duration(int64 duration) {
   return ret;
 }
 
-/**
- * Computes and returns a time difference in microseconds, or zero if the end
- * time occurs before the start time.
- *
- * @return difference in time range, in millis
- */
-static int compute_io_duration_micros(const timeval &timevalStart,
-        const timeval &timevalEnd) {
-    int64 ioDurationMicros = 0;
-    int64 sofarseconds = timevalEnd.tv_sec - timevalStart.tv_sec;
-    int64 sofarmicros = timevalEnd.tv_usec - timevalStart.tv_usec;
-    ioDurationMicros = sofarmicros + sofarseconds*1000*1000;
-    return ioDurationMicros > 0 ? ioDurationMicros : 0;
-}
-
 void ServerStats::ReportStatus(std::string &output, Format format) {
   ostringstream out;
   Writer *w;
@@ -891,11 +878,11 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
     // Only in the event that we are currently in the process of an io, will
     // we output the iostatus, and ioInProcessDuationMicros
     if (ts.m_ioInProcess) {
-      timeval now;
-      gettimeofday(&now, NULL);
-      w->writeEntry("iostatus", ts.m_iostatus);
+      timespec now;
+      gettime(CLOCK_MONOTONIC, &now);
+      w->writeEntry("iostatus", string(ts.m_ioName) + " " + ts.m_ioAddr);
       w->writeEntry("ioInProcessDurationMicros",
-          compute_io_duration_micros(ts.m_ioStartTimeval, now));
+                    gettime_diff_us(ts.m_ioStart, now));
     }
     w->writeEntry("mode", mode);
     w->writeEntry("url", ts.m_url);
@@ -911,13 +898,48 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
   output = out.str();
 }
 
+void ServerStats::StartNetworkProfile() {
+  s_profile_network = true;
+
+  // It is necessary to clear leftovers, as EndNetworkProfile() can race with
+  // threads writing their status.
+  Lock lock(s_lock, false);
+  for (unsigned int i = 0; i < s_loggers.size(); i++) {
+    ServerStats *ss = s_loggers[i];
+    Lock lock(ss->m_lock, false);
+    ss->m_ioStatuses.clear();
+  }
+}
+
+Array ServerStats::EndNetworkProfile() {
+  s_profile_network = false;
+  Lock lock(s_lock, false);
+
+  Array ret;
+  for (unsigned int i = 0; i < s_loggers.size(); i++) {
+    ServerStats *ss = s_loggers[i];
+    Lock lock(ss->m_lock, false);
+
+    IOStatusMap &status = ss->m_ioStatuses;
+    for (IOStatusMap::const_iterator iter = status.begin();
+         iter != status.end(); ++iter) {
+      ret.set(String(iter->first),
+              CREATE_MAP2("ct", iter->second.count,
+                          "wt", iter->second.wall_time));
+    }
+    status.clear();
+  }
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 ServerStats::ThreadStatus::ThreadStatus()
     : m_requestCount(0), m_writeBytes(0), m_start(0), m_done(0),
       m_mode(Idling), m_ioInProcess(false) {
   m_threadId = Process::GetThreadId();
-  memset(m_iostatus, 0, sizeof(m_iostatus));
+  memset(m_ioName, 0, sizeof(m_ioName));
+  memset(m_ioAddr, 0, sizeof(m_ioAddr));
   memset(m_url, 0, sizeof(m_url));
   memset(m_clientIP, 0, sizeof(m_clientIP));
   memset(m_vhost, 0, sizeof(m_vhost));
@@ -1042,19 +1064,45 @@ void ServerStats::setThreadMode(ThreadMode mode) {
   m_threadStatus.m_mode = mode;
 }
 
-void ServerStats::setThreadIOStatus(const char *status) {
-  if (status && *status) {
-    safe_copy(m_threadStatus.m_iostatus, status,
-              sizeof(m_threadStatus.m_iostatus));
+void ServerStats::setThreadIOStatus(const char *name, const char *addr) {
+  if ((name && *name) || (addr && *addr)) {
+    if (name) {
+      safe_copy(m_threadStatus.m_ioName, name,
+                sizeof(m_threadStatus.m_ioName));
+    }
+    if (addr) {
+      safe_copy(m_threadStatus.m_ioAddr, addr,
+                sizeof(m_threadStatus.m_ioAddr));
+    }
 
     // Mark the current thread as being in the process of completing
     // an io, and record the time that the io started.
     m_threadStatus.m_ioInProcess = true;
-    gettimeofday(&(m_threadStatus.m_ioStartTimeval), NULL);
+    gettime(CLOCK_MONOTONIC, &m_threadStatus.m_ioStart);
 
   } else {
     m_threadStatus.m_ioInProcess = false;
-    // At this point, the ThreadStatus's m_ioStartTimeval is junk.
+    if (s_profile_network) {
+      timespec now;
+      gettime(CLOCK_MONOTONIC, &now);
+      int64 wt = gettime_diff_us(m_threadStatus.m_ioStart, now);
+
+      const char *key0 = "main()";
+      string key1 = m_threadStatus.m_url;
+      key1 += "==>";
+      key1 += m_threadStatus.m_ioName;
+
+      string key2 = m_threadStatus.m_ioName;
+      if (*m_threadStatus.m_ioAddr) {
+        key2 += "==>";
+        key2 += m_threadStatus.m_ioAddr;
+      }
+
+      Lock lock(m_lock, false);
+      { IOStatus &io = m_ioStatuses[key0]; ++io.count; io.wall_time += wt;}
+      { IOStatus &io = m_ioStatuses[key1]; ++io.count; io.wall_time += wt;}
+      { IOStatus &io = m_ioStatuses[key2]; ++io.count; io.wall_time += wt;}
+    }
   }
 }
 
@@ -1088,10 +1136,7 @@ ServerStatsHelper::~ServerStatsHelper() {
 
 void ServerStatsHelper::logTime(const std::string &prefix,
                                 const timespec &start, const timespec &end) {
-  time_t dsec = end.tv_sec - start.tv_sec;
-  long dnsec = end.tv_nsec - start.tv_nsec;
-  int64 dusec = dsec * 1000000 + dnsec / 1000;
-  ServerStats::Log(prefix + m_section, dusec);
+  ServerStats::Log(prefix + m_section, gettime_diff_us(start, end));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1100,23 +1145,24 @@ IOStatusHelper::IOStatusHelper(const char *name, const char *address,
                                int port /* = 0 */) {
   ASSERT(name && *name);
 
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
-    std::string msg = name;
+  if (ServerStats::s_profile_network ||
+      (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats)) {
+    std::string msg;
     if (address) {
-      msg += " ";
-      msg += address;
+      msg = address;
     }
     if (port) {
       msg += ":";
       msg += boost::lexical_cast<std::string>(port);
     }
-    ServerStats::SetThreadIOStatus(msg.c_str());
+    ServerStats::SetThreadIOStatus(name, msg.c_str());
   }
 }
 
 IOStatusHelper::~IOStatusHelper() {
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
-    ServerStats::SetThreadIOStatus(NULL);
+  if (ServerStats::s_profile_network ||
+      (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats)) {
+    ServerStats::SetThreadIOStatus(NULL, NULL);
   }
 }
 

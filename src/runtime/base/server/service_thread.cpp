@@ -35,7 +35,7 @@ ServiceThread *ServiceThread::GetThisThread() {
 
 ServiceThread::ServiceThread(const std::string &url) :
   AsyncFunc<ServiceThread>(this, &ServiceThread::threadRun),
-  m_started(false), m_url(url) {
+  m_started(false), m_stopped(false), m_url(url) {
 }
 
 void ServiceThread::threadRun() {
@@ -66,6 +66,20 @@ void ServiceThread::waitForStarted() {
 void ServiceThread::notifyStarted() {
   Lock lock(this);
   m_started = true;
+  notify();
+}
+
+bool ServiceThread::waitForStopped(int seconds) {
+  Lock lock(this);
+  if (!m_stopped) {
+    wait(seconds);
+  }
+  return m_stopped;
+}
+
+void ServiceThread::notifyStopped() {
+  Lock lock(this);
+  m_stopped = true;
   notify();
 }
 

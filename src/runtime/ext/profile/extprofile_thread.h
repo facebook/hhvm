@@ -30,6 +30,11 @@ inline void x_hphp_service_thread_started() {
   f_hphp_service_thread_started();
 }
 
+inline bool x_hphp_service_thread_stopped(int timeout) {
+  FUNCTION_INJECTION_BUILTIN(hphp_service_thread_stopped);
+  return f_hphp_service_thread_stopped(timeout);
+}
+
 inline bool x_hphp_thread_is_warmup_enabled() {
   FUNCTION_INJECTION_BUILTIN(hphp_thread_is_warmup_enabled);
   return f_hphp_thread_is_warmup_enabled();

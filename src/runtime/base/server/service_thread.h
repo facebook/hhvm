@@ -33,9 +33,12 @@ public:
   void threadRun();
   void waitForStarted();
   void notifyStarted();
+  bool waitForStopped(int seconds);
+  void notifyStopped();
 
 private:
   bool m_started;
+  bool m_stopped;
   std::string m_url;
 };
 

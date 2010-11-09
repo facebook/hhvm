@@ -240,6 +240,7 @@ extern StaticString s_sys_ss32a12503;
 extern StaticString s_sys_ss32c2a32d;
 extern StaticString s_sys_ss3327229d;
 extern StaticString s_sys_ss33e6769b;
+extern StaticString s_sys_ss33ed12fd;
 extern StaticString s_sys_ss3402f38b;
 extern StaticString s_sys_ss34bc6371;
 extern StaticString s_sys_ss34f4c258;

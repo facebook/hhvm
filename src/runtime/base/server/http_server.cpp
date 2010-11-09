@@ -272,6 +272,10 @@ void HttpServer::run() {
                  m_danglings[i]->getName().c_str());
   }
 
+  for (unsigned int i = 0; i < m_serviceThreads.size(); i++) {
+    m_serviceThreads[i]->notifyStopped();
+  }
+
   hphp_process_exit();
   m_watchDog.waitForEnd();
   m_loggerThread.waitForEnd();

@@ -19,6 +19,7 @@
 #include <runtime/base/memory/memory_manager.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/zend/zend_math.h>
+#include <runtime/base/server/server_stats.h>
 #include <util/alloc.h>
 
 #ifdef __FreeBSD__
@@ -489,14 +490,14 @@ public:
 };
 
 enum Flag {
-  TrackBuiltins = 0x1,
-  TrackCPU      = 0x2,
-  TrackMemory   = 0x4,
-  TrackVtsc     = 0x8,
-  Trace         = 0x10,
-  MeasureXhprofDisable = 0x20,
-  GetTrace = 0x40,
-  TrackMalloc = 0x80,
+  TrackBuiltins         = 0x1,
+  TrackCPU              = 0x2,
+  TrackMemory           = 0x4,
+  TrackVtsc             = 0x8,
+  Trace                 = 0x10,
+  MeasureXhprofDisable  = 0x20,
+  GetTrace              = 0x40,
+  TrackMalloc           = 0x80,
 };
 
 /**
@@ -1403,6 +1404,8 @@ public:
     Sample       = 620002, // Rockfort's zip code
   };
 
+  static bool EnableNetworkProfiler;
+
 public:
   ProfilerFactory() : m_profiler(NULL) {
   }
@@ -1420,6 +1423,7 @@ public:
 
   virtual void requestShutdown() {
     stop();
+    m_artificialFrameNames.reset();
   }
 
   void start(Level level, long flags) {
@@ -1466,9 +1470,20 @@ public:
     return null;
   }
 
+  /**
+   * The whole purpose to make sure "const char *" is safe to take on these
+   * strings.
+   */
+  void cacheString(CStrRef name) {
+    m_artificialFrameNames.append(name);
+  }
+
 private:
   Profiler *m_profiler;
+  Array m_artificialFrameNames;
 };
+
+bool ProfilerFactory::EnableNetworkProfiler = false;
 
 #ifdef HOTPROFILER
 IMPLEMENT_STATIC_REQUEST_LOCAL(ProfilerFactory, s_factory);
@@ -1512,6 +1527,25 @@ Variant f_phprof_disable() {
 #endif
 }
 
+void f_xhprof_frame_begin(CStrRef name) {
+#ifdef HOTPROFILER
+  Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
+  if (prof) {
+    s_factory->cacheString(name);
+    prof->beginFrame(name.data());
+  }
+#endif
+}
+
+void f_xhprof_frame_end() {
+#ifdef HOTPROFILER
+  Profiler *prof = ThreadInfo::s_threadInfo->m_profiler;
+  if (prof) {
+    prof->endFrame();
+  }
+#endif
+}
+
 void f_xhprof_enable(int flags/* = 0 */,
                      CArrRef args /* = null_array */) {
 #ifdef HOTPROFILER
@@ -1534,6 +1568,14 @@ Variant f_xhprof_disable() {
 #else
   return null;
 #endif
+}
+
+void f_xhprof_network_enable() {
+  ServerStats::StartNetworkProfile();
+}
+
+Variant f_xhprof_network_disable() {
+  return ServerStats::EndNetworkProfile();
 }
 
 void f_xhprof_sample_enable() {

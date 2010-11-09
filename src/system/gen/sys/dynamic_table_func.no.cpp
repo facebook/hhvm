@@ -1856,6 +1856,16 @@ Variant ifa_openssl_x509_export_to_file(void *extra, int count, INVOKE_FEW_ARGS_
   if (count <= 2) return (f_openssl_x509_export_to_file(a0, a1));
   return (f_openssl_x509_export_to_file(a0, a1, a2));
 }
+Variant i_xhprof_network_disable(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(xhprof_network_disable);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("xhprof_network_disable", 0, 1);
+  return (f_xhprof_network_disable());
+}
+Variant ifa_xhprof_network_disable(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("xhprof_network_disable", 0, 1);
+  return (f_xhprof_network_disable());
+}
 Variant i_imagesetstyle(void *extra, CArrRef params) {
   FUNCTION_INJECTION(imagesetstyle);
   int count __attribute__((__unused__)) = params.size();
@@ -2514,6 +2524,21 @@ Variant i_stream_filter_register(void *extra, CArrRef params) {
 Variant ifa_stream_filter_register(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("stream_filter_register", count, 2, 2, 1);
   return (f_stream_filter_register(a0, a1));
+}
+Variant i_hphp_service_thread_stopped(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(hphp_service_thread_stopped);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("hphp_service_thread_stopped", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_hphp_service_thread_stopped(arg0));
+  }
+}
+Variant ifa_hphp_service_thread_stopped(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("hphp_service_thread_stopped", count, 1, 1, 1);
+  return (f_hphp_service_thread_stopped(a0));
 }
 Variant i_apache_response_headers(void *extra, CArrRef params) {
   FUNCTION_INJECTION(apache_response_headers);
@@ -7483,6 +7508,21 @@ Variant ifa_magickspliceimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS)
   if (count != 5) return throw_wrong_arguments("magickspliceimage", count, 5, 5, 1);
   return (f_magickspliceimage(a0, a1, a2, a3, a4));
 }
+Variant i_xhprof_frame_begin(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(xhprof_frame_begin);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("xhprof_frame_begin", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_xhprof_frame_begin(arg0), null);
+  }
+}
+Variant ifa_xhprof_frame_begin(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("xhprof_frame_begin", count, 1, 1, 1);
+  return (f_xhprof_frame_begin(a0), null);
+}
 Variant i_define(void *extra, CArrRef params) {
   FUNCTION_INJECTION(define);
   int count __attribute__((__unused__)) = params.size();
@@ -11574,6 +11614,16 @@ Variant i_pixelsetindex(void *extra, CArrRef params) {
 Variant ifa_pixelsetindex(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("pixelsetindex", count, 2, 2, 1);
   return (f_pixelsetindex(a0, a1), null);
+}
+Variant i_xhprof_network_enable(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(xhprof_network_enable);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("xhprof_network_enable", 0, 1);
+  return (f_xhprof_network_enable(), null);
+}
+Variant ifa_xhprof_network_enable(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("xhprof_network_enable", 0, 1);
+  return (f_xhprof_network_enable(), null);
 }
 Variant i_php_sapi_name(void *extra, CArrRef params) {
   FUNCTION_INJECTION(php_sapi_name);
@@ -25048,6 +25098,16 @@ Variant ifa_imagefilltoborder(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS)
   if (count != 5) return throw_wrong_arguments("imagefilltoborder", count, 5, 5, 1);
   return (f_imagefilltoborder(a0, a1, a2, a3, a4));
 }
+Variant i_xhprof_frame_end(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(xhprof_frame_end);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("xhprof_frame_end", 0, 1);
+  return (f_xhprof_frame_end(), null);
+}
+Variant ifa_xhprof_frame_end(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("xhprof_frame_end", 0, 1);
+  return (f_xhprof_frame_end(), null);
+}
 Variant i_xml_set_notation_decl_handler(void *extra, CArrRef params) {
   FUNCTION_INJECTION(xml_set_notation_decl_handler);
   int count __attribute__((__unused__)) = params.size();
@@ -25145,22 +25205,6 @@ Variant ifa_memcache_add_server(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARG
   if (count == 5) return (f_memcache_add_server(a0, a1, a2, a3, a4));
   return (f_memcache_add_server(a0, a1, a2, a3, a4, a5));
 }
-Variant i_dom_node_remove_child(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(dom_node_remove_child);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("dom_node_remove_child", count, 2, 2, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (f_dom_node_remove_child(arg0, arg1));
-  }
-}
-Variant ifa_dom_node_remove_child(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 2) return throw_wrong_arguments("dom_node_remove_child", count, 2, 2, 1);
-  return (f_dom_node_remove_child(a0, a1));
-}
 Variant i_imageinterlace(void *extra, CArrRef params) {
   FUNCTION_INJECTION(imageinterlace);
   int count __attribute__((__unused__)) = params.size();
@@ -25178,6 +25222,22 @@ Variant ifa_imageinterlace(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count < 1 || count > 2) return throw_wrong_arguments("imageinterlace", count, 1, 2, 1);
   if (count <= 1) return (f_imageinterlace(a0));
   return (f_imageinterlace(a0, a1));
+}
+Variant i_dom_node_remove_child(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(dom_node_remove_child);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("dom_node_remove_child", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_dom_node_remove_child(arg0, arg1));
+  }
+}
+Variant ifa_dom_node_remove_child(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("dom_node_remove_child", count, 2, 2, 1);
+  return (f_dom_node_remove_child(a0, a1));
 }
 Variant i_preg_match_all(void *extra, CArrRef params) {
   FUNCTION_INJECTION(preg_match_all);
@@ -37447,6 +37507,18 @@ Variant ei_openssl_x509_export_to_file(Eval::VariableEnvironment &env, const Eva
   if (count <= 2) return (x_openssl_x509_export_to_file(a0, a1));
   else return (x_openssl_x509_export_to_file(a0, a1, a2));
 }
+Variant ei_xhprof_network_disable(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("xhprof_network_disable", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_xhprof_network_disable());
+}
 Variant ei_imagesetstyle(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -38299,6 +38371,22 @@ Variant ei_stream_filter_register(Eval::VariableEnvironment &env, const Eval::Fu
     (*it)->eval(env);
   }
   return (x_stream_filter_register(a0, a1));
+}
+Variant ei_hphp_service_thread_stopped(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("hphp_service_thread_stopped", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_hphp_service_thread_stopped(a0));
 }
 Variant ei_apache_response_headers(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -44282,6 +44370,22 @@ Variant ei_magickspliceimage(Eval::VariableEnvironment &env, const Eval::Functio
   }
   return (x_magickspliceimage(a0, a1, a2, a3, a4));
 }
+Variant ei_xhprof_frame_begin(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("xhprof_frame_begin", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_xhprof_frame_begin(a0), null);
+}
 Variant ei_define(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -49284,6 +49388,18 @@ Variant ei_pixelsetindex(Eval::VariableEnvironment &env, const Eval::FunctionCal
     (*it)->eval(env);
   }
   return (x_pixelsetindex(a0, a1), null);
+}
+Variant ei_xhprof_network_enable(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("xhprof_network_enable", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_xhprof_network_enable(), null);
 }
 Variant ei_php_sapi_name(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -65915,6 +66031,18 @@ Variant ei_imagefilltoborder(Eval::VariableEnvironment &env, const Eval::Functio
   }
   return (x_imagefilltoborder(a0, a1, a2, a3, a4));
 }
+Variant ei_xhprof_frame_end(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("xhprof_frame_end", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_xhprof_frame_end(), null);
+}
 Variant ei_xml_set_notation_decl_handler(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -66043,26 +66171,6 @@ Variant ei_memcache_add_server(Eval::VariableEnvironment &env, const Eval::Funct
   else if (count == 9) return (x_memcache_add_server(a0, a1, a2, a3, a4, a5, a6, a7, a8));
   else return (x_memcache_add_server(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9));
 }
-Variant ei_dom_node_remove_child(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("dom_node_remove_child", count, 2, 2, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_dom_node_remove_child(a0, a1));
-}
 Variant ei_imageinterlace(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -66083,6 +66191,26 @@ Variant ei_imageinterlace(Eval::VariableEnvironment &env, const Eval::FunctionCa
   }
   if (count <= 1) return (x_imageinterlace(a0));
   else return (x_imageinterlace(a0, a1));
+}
+Variant ei_dom_node_remove_child(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("dom_node_remove_child", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_dom_node_remove_child(a0, a1));
 }
 Variant ei_preg_match_all(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -79481,6 +79609,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1406:
       HASH_INVOKE_FROM_EVAL(0x132776D93181E57ELL, ldap_set_option);
       break;
+    case 1408:
+      HASH_INVOKE_FROM_EVAL(0x709140577B2C6580LL, xhprof_network_enable);
+      break;
     case 1410:
       HASH_INVOKE_FROM_EVAL(0x02688986D5D76582LL, magickspreadimage);
       break;
@@ -80258,6 +80389,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2492:
       HASH_INVOKE_FROM_EVAL(0x7E7BF1BDA6DB49BCLL, hphp_splfileinfo_getgroup);
+      HASH_INVOKE_FROM_EVAL(0x672DA903B52249BCLL, xhprof_frame_begin);
       break;
     case 2494:
       HASH_INVOKE_FROM_EVAL(0x458B5ABEDAC1C9BELL, disk_free_space);
@@ -82349,6 +82481,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 5261:
       HASH_INVOKE_FROM_EVAL(0x23511F83C2BC548DLL, header);
+      HASH_INVOKE_FROM_EVAL(0x4162939E6335F48DLL, xhprof_network_disable);
       break;
     case 5267:
       HASH_INVOKE_FROM_EVAL(0x56377FCC2447D493LL, magicksetimagepixels);
@@ -83080,6 +83213,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 6396:
       HASH_INVOKE_FROM_EVAL(0x4C2AFB2EFDB1B8FCLL, stripslashes);
+      break;
+    case 6402:
+      HASH_INVOKE_FROM_EVAL(0x454DAD4DE5C29902LL, xhprof_frame_end);
       break;
     case 6411:
       HASH_INVOKE_FROM_EVAL(0x67B879A1120C190BLL, headers_sent);
@@ -84158,6 +84294,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 7920:
       HASH_INVOKE_FROM_EVAL(0x7DFF9707F1CD9EF0LL, dangling_server_proxy_old_request);
       break;
+    case 7922:
+      HASH_INVOKE_FROM_EVAL(0x7601F38FDB3DDEF2LL, hphp_service_thread_stopped);
+      break;
     case 7929:
       HASH_INVOKE_FROM_EVAL(0x200FC256EB093EF9LL, gettimeofday);
       break;
@@ -84447,6 +84586,7 @@ CallInfo ci_mcrypt_generic((void*)&i_mcrypt_generic, (void*)&ifa_mcrypt_generic,
 CallInfo ci_is_file((void*)&i_is_file, (void*)&ifa_is_file, 1, 0, 0x0000000000000000LL);
 CallInfo ci_xml_set_end_namespace_decl_handler((void*)&i_xml_set_end_namespace_decl_handler, (void*)&ifa_xml_set_end_namespace_decl_handler, 2, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_x509_export_to_file((void*)&i_openssl_x509_export_to_file, (void*)&ifa_openssl_x509_export_to_file, 3, 0, 0x0000000000000000LL);
+CallInfo ci_xhprof_network_disable((void*)&i_xhprof_network_disable, (void*)&ifa_xhprof_network_disable, 0, 0, 0x0000000000000000LL);
 CallInfo ci_imagesetstyle((void*)&i_imagesetstyle, (void*)&ifa_imagesetstyle, 2, 0, 0x0000000000000000LL);
 CallInfo ci_drawcolor((void*)&i_drawcolor, (void*)&ifa_drawcolor, 4, 0, 0x0000000000000000LL);
 CallInfo ci_get_headers((void*)&i_get_headers, (void*)&ifa_get_headers, 2, 0, 0x0000000000000000LL);
@@ -84486,6 +84626,7 @@ CallInfo ci_dechex((void*)&i_dechex, (void*)&ifa_dechex, 1, 0, 0x000000000000000
 CallInfo ci_imagecolortransparent((void*)&i_imagecolortransparent, (void*)&ifa_imagecolortransparent, 2, 0, 0x0000000000000000LL);
 CallInfo ci_socket_get_option((void*)&i_socket_get_option, (void*)&ifa_socket_get_option, 3, 0, 0x0000000000000000LL);
 CallInfo ci_stream_filter_register((void*)&i_stream_filter_register, (void*)&ifa_stream_filter_register, 2, 0, 0x0000000000000000LL);
+CallInfo ci_hphp_service_thread_stopped((void*)&i_hphp_service_thread_stopped, (void*)&ifa_hphp_service_thread_stopped, 1, 0, 0x0000000000000000LL);
 CallInfo ci_apache_response_headers((void*)&i_apache_response_headers, (void*)&ifa_apache_response_headers, 0, 0, 0x0000000000000000LL);
 CallInfo ci_array_merge((void*)&i_array_merge, (void*)&ifa_array_merge, 1, 1, 0x0000000000000000LL);
 CallInfo ci_md5((void*)&i_md5, (void*)&ifa_md5, 2, 0, 0x0000000000000000LL);
@@ -84779,6 +84920,7 @@ CallInfo ci_hphp_recursivedirectoryiterator___tostring((void*)&i_hphp_recursived
 CallInfo ci_magicksetimagebordercolor((void*)&i_magicksetimagebordercolor, (void*)&ifa_magicksetimagebordercolor, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_directoryiterator_rewind((void*)&i_hphp_directoryiterator_rewind, (void*)&ifa_hphp_directoryiterator_rewind, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickspliceimage((void*)&i_magickspliceimage, (void*)&ifa_magickspliceimage, 5, 0, 0x0000000000000000LL);
+CallInfo ci_xhprof_frame_begin((void*)&i_xhprof_frame_begin, (void*)&ifa_xhprof_frame_begin, 1, 0, 0x0000000000000000LL);
 CallInfo ci_define((void*)&i_define, (void*)&ifa_define, 3, 0, 0x0000000000000000LL);
 CallInfo ci_headers_sent((void*)&i_headers_sent, (void*)&ifa_headers_sent, 2, 0, 0x0000000000000003LL);
 CallInfo ci_stream_context_get_options((void*)&i_stream_context_get_options, (void*)&ifa_stream_context_get_options, 1, 0, 0x0000000000000000LL);
@@ -85020,6 +85162,7 @@ CallInfo ci_magickechoimagesblob((void*)&i_magickechoimagesblob, (void*)&ifa_mag
 CallInfo ci_mailparse_msg_parse((void*)&i_mailparse_msg_parse, (void*)&ifa_mailparse_msg_parse, 2, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_text((void*)&i_xmlwriter_text, (void*)&ifa_xmlwriter_text, 2, 0, 0x0000000000000000LL);
 CallInfo ci_pixelsetindex((void*)&i_pixelsetindex, (void*)&ifa_pixelsetindex, 2, 0, 0x0000000000000000LL);
+CallInfo ci_xhprof_network_enable((void*)&i_xhprof_network_enable, (void*)&ifa_xhprof_network_enable, 0, 0, 0x0000000000000000LL);
 CallInfo ci_php_sapi_name((void*)&i_php_sapi_name, (void*)&ifa_php_sapi_name, 0, 0, 0x0000000000000000LL);
 CallInfo ci_mcrypt_enc_get_key_size((void*)&i_mcrypt_enc_get_key_size, (void*)&ifa_mcrypt_enc_get_key_size, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imap_get_quotaroot((void*)&i_imap_get_quotaroot, (void*)&ifa_imap_get_quotaroot, 2, 0, 0x0000000000000000LL);
@@ -85815,13 +85958,14 @@ CallInfo ci_drawpathmovetoabsolute((void*)&i_drawpathmovetoabsolute, (void*)&ifa
 CallInfo ci_quotemeta((void*)&i_quotemeta, (void*)&ifa_quotemeta, 1, 0, 0x0000000000000000LL);
 CallInfo ci_parse_ini_string((void*)&i_parse_ini_string, (void*)&ifa_parse_ini_string, 3, 0, 0x0000000000000000LL);
 CallInfo ci_imagefilltoborder((void*)&i_imagefilltoborder, (void*)&ifa_imagefilltoborder, 5, 0, 0x0000000000000000LL);
+CallInfo ci_xhprof_frame_end((void*)&i_xhprof_frame_end, (void*)&ifa_xhprof_frame_end, 0, 0, 0x0000000000000000LL);
 CallInfo ci_xml_set_notation_decl_handler((void*)&i_xml_set_notation_decl_handler, (void*)&ifa_xml_set_notation_decl_handler, 2, 0, 0x0000000000000000LL);
 CallInfo ci_is_writeable((void*)&i_is_writeable, (void*)&ifa_is_writeable, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetwandsize((void*)&i_magickgetwandsize, (void*)&ifa_magickgetwandsize, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_directoryiterator___tostring((void*)&i_hphp_directoryiterator___tostring, (void*)&ifa_hphp_directoryiterator___tostring, 1, 0, 0x0000000000000000LL);
 CallInfo ci_memcache_add_server((void*)&i_memcache_add_server, (void*)&ifa_memcache_add_server, 10, 0, 0x0000000000000000LL);
-CallInfo ci_dom_node_remove_child((void*)&i_dom_node_remove_child, (void*)&ifa_dom_node_remove_child, 2, 0, 0x0000000000000000LL);
 CallInfo ci_imageinterlace((void*)&i_imageinterlace, (void*)&ifa_imageinterlace, 2, 0, 0x0000000000000000LL);
+CallInfo ci_dom_node_remove_child((void*)&i_dom_node_remove_child, (void*)&ifa_dom_node_remove_child, 2, 0, 0x0000000000000000LL);
 CallInfo ci_preg_match_all((void*)&i_preg_match_all, (void*)&ifa_preg_match_all, 5, 0, 0x0000000000000004LL);
 CallInfo ci_imap_scanmailbox((void*)&i_imap_scanmailbox, (void*)&ifa_imap_scanmailbox, 4, 0, 0x0000000000000000LL);
 CallInfo ci_proc_terminate((void*)&i_proc_terminate, (void*)&ifa_proc_terminate, 2, 0, 0x0000000000000000LL);
@@ -88380,6 +88524,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 1408:
+      HASH_GUARD(0x709140577B2C6580LL, xhprof_network_enable) {
+        ci = &ci_xhprof_network_enable;
+        return true;
+      }
+      break;
     case 1410:
       HASH_GUARD(0x02688986D5D76582LL, magickspreadimage) {
         ci = &ci_magickspreadimage;
@@ -89995,6 +90145,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2492:
       HASH_GUARD(0x7E7BF1BDA6DB49BCLL, hphp_splfileinfo_getgroup) {
         ci = &ci_hphp_splfileinfo_getgroup;
+        return true;
+      }
+      HASH_GUARD(0x672DA903B52249BCLL, xhprof_frame_begin) {
+        ci = &ci_xhprof_frame_begin;
         return true;
       }
       break;
@@ -94371,6 +94525,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_header;
         return true;
       }
+      HASH_GUARD(0x4162939E6335F48DLL, xhprof_network_disable) {
+        ci = &ci_xhprof_network_disable;
+        return true;
+      }
       break;
     case 5267:
       HASH_GUARD(0x56377FCC2447D493LL, magicksetimagepixels) {
@@ -95883,6 +96041,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 6396:
       HASH_GUARD(0x4C2AFB2EFDB1B8FCLL, stripslashes) {
         ci = &ci_stripslashes;
+        return true;
+      }
+      break;
+    case 6402:
+      HASH_GUARD(0x454DAD4DE5C29902LL, xhprof_frame_end) {
+        ci = &ci_xhprof_frame_end;
         return true;
       }
       break;
@@ -98109,6 +98273,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 7920:
       HASH_GUARD(0x7DFF9707F1CD9EF0LL, dangling_server_proxy_old_request) {
         ci = &ci_dangling_server_proxy_old_request;
+        return true;
+      }
+      break;
+    case 7922:
+      HASH_GUARD(0x7601F38FDB3DDEF2LL, hphp_service_thread_stopped) {
+        ci = &ci_hphp_service_thread_stopped;
         return true;
       }
       break;

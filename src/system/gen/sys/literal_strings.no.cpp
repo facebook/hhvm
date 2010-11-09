@@ -237,6 +237,7 @@ StaticString s_sys_ss32a12503("getIterator");
 StaticString s_sys_ss32c2a32d("getParameters");
 StaticString s_sys_ss3327229d("fetchobject");
 StaticString s_sys_ss33e6769b("getName");
+StaticString s_sys_ss33ed12fd("xhprofframe");
 StaticString s_sys_ss3402f38b("__setcookie");
 StaticString s_sys_ss34bc6371("hasProperty");
 StaticString s_sys_ss34f4c258("setTime");

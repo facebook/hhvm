@@ -27,6 +27,7 @@
 #include <php/classes/splfile.h>
 #include <php/classes/splobjectstorage.h>
 #include <php/classes/stdclass.h>
+#include <php/classes/xhprof.h>
 #include <php/globals/constants.h>
 #include <php/globals/symbols.h>
 namespace hphp_impl_starter {}
@@ -59,7 +60,7 @@ public:
   #define gvm_HTTP_RAW_POST_DATA stgv_Variant[10]
   #define gvm_http_response_header stgv_Variant[11]
   #define k_SID stgv_Variant[12]
-  bool stgv_bool[11];
+  bool stgv_bool[12];
   #define run_pm_php$classes$arrayaccess_php stgv_bool[0]
   #define run_pm_php$classes$debugger_php stgv_bool[1]
   #define run_pm_php$classes$directory_php stgv_bool[2]
@@ -69,8 +70,9 @@ public:
   #define run_pm_php$classes$splfile_php stgv_bool[6]
   #define run_pm_php$classes$splobjectstorage_php stgv_bool[7]
   #define run_pm_php$classes$stdclass_php stgv_bool[8]
-  #define run_pm_php$globals$constants_php stgv_bool[9]
-  #define run_pm_php$globals$symbols_php stgv_bool[10]
+  #define run_pm_php$classes$xhprof_php stgv_bool[9]
+  #define run_pm_php$globals$constants_php stgv_bool[10]
+  #define run_pm_php$globals$symbols_php stgv_bool[11]
 };
 
 // Scalar Arrays

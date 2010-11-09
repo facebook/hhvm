@@ -17,6 +17,7 @@
 
 #include <runtime/ext/ext_thread.h>
 #include <runtime/base/server/service_thread.h>
+#include <runtime/base/server/http_server.h>
 #include <runtime/base/program_functions.h>
 #include <util/process.h>
 
@@ -26,6 +27,10 @@ IMPLEMENT_DEFAULT_EXTENSION(thread);
 
 void f_hphp_service_thread_started() {
   ServiceThread::GetThisThread()->notifyStarted();
+}
+
+bool f_hphp_service_thread_stopped(int timeout) {
+  return ServiceThread::GetThisThread()->waitForStopped(timeout);
 }
 
 bool f_hphp_thread_is_warmup_enabled() {

@@ -472,6 +472,7 @@ extern struct ObjectStaticCallbacks cw___PHP_Incomplete_Class;
 extern struct ObjectStaticCallbacks cw_RuntimeException;
 extern struct ObjectStaticCallbacks cw_Exception;
 extern struct ObjectStaticCallbacks cw_ReflectionFunction;
+extern struct ObjectStaticCallbacks cw_XhprofFrame;
 extern struct ObjectStaticCallbacks cw_ErrorException;
 extern struct ObjectStaticCallbacks cw_RecursiveDirectoryIterator;
 extern struct ObjectStaticCallbacks cw_DirectoryIterator;
@@ -35601,6 +35602,7 @@ Variant get_builtin_class_var_init(const char *s, const char *var) {
       break;
     case 253:
       HASH_GET_CLASS_VAR_INIT(0x74419B70A46387FDLL, DOMImplementation);
+      HASH_GET_CLASS_VAR_INIT(0x3D290BF933ED12FDLL, XhprofFrame);
       break;
     case 255:
       HASH_GET_CLASS_VAR_INIT(0x624835B2D74B86FFLL, DOMEntity);
@@ -35835,6 +35837,7 @@ Object create_builtin_object_only(const char *s, ObjectData* root /* = NULL*/) {
       break;
     case 253:
       HASH_CREATE_OBJECT_ONLY(0x74419B70A46387FDLL, DOMImplementation);
+      HASH_CREATE_OBJECT_ONLY(0x3D290BF933ED12FDLL, XhprofFrame);
       break;
     case 255:
       HASH_CREATE_OBJECT_ONLY(0x624835B2D74B86FFLL, DOMEntity);
@@ -36070,6 +36073,7 @@ bool get_call_info_static_method_builtin(MethodCallPackage &mcp) {
       break;
     case 253:
       HASH_CALL_INFO_STATIC_METHOD(0x74419B70A46387FDLL, DOMImplementation);
+      HASH_CALL_INFO_STATIC_METHOD(0x3D290BF933ED12FDLL, XhprofFrame);
       break;
     case 255:
       HASH_CALL_INFO_STATIC_METHOD(0x624835B2D74B86FFLL, DOMEntity);
@@ -36307,6 +36311,7 @@ const ObjectStaticCallbacks * get_builtin_object_static_callbacks(const char *s)
       break;
     case 253:
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x74419B70A46387FDLL, DOMImplementation);
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x3D290BF933ED12FDLL, XhprofFrame);
       break;
     case 255:
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x624835B2D74B86FFLL, DOMEntity);

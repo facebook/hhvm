@@ -103,6 +103,7 @@ const char *BuiltinSymbols::SystemClasses[] = {
   "directory",
   "splfile",
   "debugger",
+  "xhprof",
   NULL
 };
 

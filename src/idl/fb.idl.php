@@ -492,6 +492,54 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "xhprof_network_enable",
+    'desc'   => "Starts xhprof network I/O profiling.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "xhprof_network_disable",
+    'desc'   => "Ends and reports xhprof network I/O profiling result.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Profile result.",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "xhprof_frame_begin",
+    'desc'   => "Starts an artificial frame. Together with xhprof_frame_end(), this times one block of code execution as if it were a function call, allowing people to define arbitrary function boundaries. Prefer to use XhprofFrame classobjects instead of calling this function directly.",
+    'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,
+    'return' => array(
+      'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => String,
+        'desc'   => "The \"virtual\" function's name.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "xhprof_frame_end",
+    'desc'   => "Ends an artificial frame that xhprof_frame_begin() started. One has to make sure there are no exceptions in between these two calls, as otherwise, it may report incorrect timings. Also, xhprof_frame_begin() and xhprof_frame_end() have to be paired up really well, so not to interfere with regular function's profiling, unless that's the intention. Prefer to use XhprofFrame classobjects instead of calling this function directly.",
+    'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,
+    'return' => array(
+      'type'   => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "xhprof_run_trace",
     'desc'   => "Re-runs a prior trace and generates xhprof output.",
     'flags'  =>  HasDocComment | HipHopSpecific,

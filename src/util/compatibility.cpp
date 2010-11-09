@@ -72,5 +72,11 @@ void gettime(clockid_t which_clock, struct timespec *tp) {
 #endif
 }
 
+int64 gettime_diff_us(const timespec &start, const timespec &end) {
+  int64 dsec = end.tv_sec - start.tv_sec;
+  int64 dnsec = end.tv_nsec - start.tv_nsec;
+  return dsec * 1000000 + dnsec / 1000;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

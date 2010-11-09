@@ -40,6 +40,8 @@ public:
   void run();
   void stop();
 
+  bool isStopped() const { return m_stopped;}
+
   void flushLog();
   void watchDog();
 

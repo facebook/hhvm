@@ -2,6 +2,7 @@
 
 #if EXT_TYPE == 0
 "hphp_service_thread_started", T(Void), S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * A function to call to tell system a service thread has completed its\n * startup.\n *\n */", 
+"hphp_service_thread_stopped", T(Boolean), S(0), "timeout", T(Int32), NULL, NULL, S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * A function to call to ask system whether a service thread should stop.\n *\n * @timeout    int     How many seconds to wait for system to tell us.\n *\n * @return     bool    TRUE if HTTP server is stopping and service thread\n *                     should stop, FALSE otherwise.\n */", 
 "hphp_thread_is_warmup_enabled", T(Boolean), S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Whether current thread is warmed up with some PHP document.\n *\n * @return     bool    TRUE if warmed up already, FALSE otherwise.\n */", 
 "hphp_thread_set_warmup_enabled", T(Void), S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Enables warmup document.\n *\n */", 
 "hphp_get_thread_id", T(Int64), S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Gets current thread's ID.\n *\n * @return     int     The pthread_self() return.\n */", 

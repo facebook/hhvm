@@ -19,6 +19,7 @@
 #define __GENERATED_gen_sys_literal_strings_h__
 #include <runtime/base/hphp.h>
 
+namespace hphp_impl_starter {}
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

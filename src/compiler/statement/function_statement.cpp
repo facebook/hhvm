@@ -256,7 +256,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
         funcScope->outputCPP(cg, ar);
         cg.setContext(CodeGenerator::NoContext); // no inner functions/classes
         outputCPPStmt(cg, ar);
-        cg_indentEnd("} /* function */\n");
+        cg_indentEnd("}\n");
         if (needsWrapper) {
           cg.setContext(CodeGenerator::CppTypedParamsWrapperImpl);
           outputCPPImpl(cg, ar);
@@ -264,8 +264,9 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
         cg.setContext(context);
       } else {
         outputCPPTypeCheckWrapper(cg, ar);
-        cg_indentEnd("} /* function */\n");
+        cg_indentEnd("}\n");
       }
+      cg.printImplSplitter();
     }
     break;
     default:

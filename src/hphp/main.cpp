@@ -93,6 +93,7 @@ struct ProgramOptions {
   bool nofork;
   bool fl_annotate;
   string optimizations;
+  string ppp;
 };
 
 int prepareOptions(ProgramOptions &po, int argc, char **argv);
@@ -298,6 +299,13 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     ("opts",
      value<string>(&po.optimizations)->default_value("none"),
      "Set optimizations to enable/disable")
+    ("ppp",
+     value<string>(&po.ppp)->default_value(""),
+     "Preprocessed partition configuration. To speed up distcc compilation, "
+     "bin/ppp.php can pre-compute better partition between different .cpp "
+     "files according to preprocessed file sizes, instead of original file "
+     "sizes (default). Run bin/ppp.php to generate an HDF configuration file "
+     "to specify here.")
     ;
 
   positional_options_description p;
@@ -461,6 +469,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
   Option::SystemGen = (po.target == "cpp" && po.format == "sys") ;
 
   Option::ProgramName = po.program;
+  Option::PreprocessedPartitionConfig = po.ppp;
 
   if (po.target == "cpp") {
     if (po.format.empty()) po.format = "cluster";

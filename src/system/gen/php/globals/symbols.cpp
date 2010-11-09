@@ -19,6 +19,7 @@
 #include <php/globals/symbols.fws.h>
 #include <runtime/ext/ext.h>
 #include <runtime/eval/eval.h>
+namespace hphp_impl_starter {}
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,7 +64,8 @@ Variant pm_php$globals$symbols_php(bool incOnce /* = false */, LVariableTable* v
   setNull(v_HTTP_RAW_POST_DATA);
   setNull(v_http_response_header);
   return true;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

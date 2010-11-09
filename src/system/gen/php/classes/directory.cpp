@@ -19,6 +19,7 @@
 #include <php/classes/directory.fws.h>
 #include <runtime/ext/ext.h>
 #include <runtime/eval/eval.h>
+namespace hphp_impl_starter {}
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -430,22 +431,26 @@ void c_Directory::t___construct(Variant v_path) {
     m_handle = tmp1;
   }
   gasInCtor(oldInCtor);
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/directory.php line 12 */
 Variant c_Directory::t_read() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::read);
   return x_readdir(toObject(m_handle));
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/directory.php line 16 */
 void c_Directory::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::rewind);
   x_rewinddir(toObject(m_handle));
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/directory.php line 20 */
 void c_Directory::t_close() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::close);
   x_closedir(toObject(m_handle));
-} /* function */
+}
+namespace hphp_impl_splitter {}
 Object co_Directory(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_Directory)())->dynCreate(params, init));
 }
@@ -458,7 +463,8 @@ Variant pm_php$classes$directory_php(bool incOnce /* = false */, LVariableTable*
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/directory.php, pm_php$classes$directory_php);
   LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
   return true;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

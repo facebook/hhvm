@@ -20,6 +20,7 @@
 #include <runtime/eval/eval.h>
 #include <sys/literal_strings.h>
 
+namespace hphp_impl_starter {}
 
 using namespace std;
 

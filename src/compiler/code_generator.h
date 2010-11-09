@@ -98,6 +98,9 @@ public:
                              MapIntToStringVec &out, int tableSize,
                              bool caseInsensitive);
 
+  static const char *STARTER_MARKER;
+  static const char *SPLITTER_MARKER;
+
 public:
   CodeGenerator() {} // only for creating a dummy code generator
   CodeGenerator(std::ostream *primary, Output output = PickledPHP,
@@ -146,6 +149,8 @@ public:
   void printDeclareGlobals();
   void printStartOfJumpTable(int tableSize);
   void printDocComment(const std::string comment);
+  void printImplStarter(); // end of includes
+  void printImplSplitter(); // marker to split .cpp into smaller files
   const char *getGlobals(AnalysisResultPtr ar);
   std::string formatLabel(const std::string &name);
   std::string escapeLabel(const std::string &name, bool *binary = NULL);

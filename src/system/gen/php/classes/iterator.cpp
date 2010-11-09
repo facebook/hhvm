@@ -27,6 +27,7 @@
 #include <php/globals/constants.fws.h>
 #include <runtime/ext/ext.h>
 #include <runtime/eval/eval.h>
+namespace hphp_impl_starter {}
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -1468,7 +1469,8 @@ void c_ArrayIterator::t___construct(Variant v_array, Variant v_flags //  = 0LL
   m_arr = v_array;
   m_flags = v_flags;
   gasInCtor(oldInCtor);
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 346 */
 void c_ArrayIterator::t_append(CVarRef v_value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::append);
@@ -1476,7 +1478,8 @@ void c_ArrayIterator::t_append(CVarRef v_value) {
     Variant tmp1((v_value));
     m_arr.append((tmp1));
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 359 */
 bool c_ArrayIterator::t_asort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::asort);
@@ -1485,32 +1488,38 @@ bool c_ArrayIterator::t_asort() {
     Variant &tmp1_lv = const_cast<Variant&>(tmp1);
     return x_asort(ref(tmp1_lv), toInt32(m_flags));
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 373 */
 int c_ArrayIterator::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::count);
   return x_count(m_arr);
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 385 */
 Variant c_ArrayIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::current);
   return x_current(ref(m_arr));
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 399 */
 Variant c_ArrayIterator::t_getarraycopy() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::getArrayCopy);
   return m_arr;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 412 */
 Variant c_ArrayIterator::t_getflags() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::getFlags);
   return m_flags;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 424 */
 Variant c_ArrayIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::key);
   return x_key(ref(m_arr));
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 437 */
 bool c_ArrayIterator::t_ksort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::ksort);
@@ -1519,39 +1528,46 @@ bool c_ArrayIterator::t_ksort() {
     Variant &tmp1_lv = const_cast<Variant&>(tmp1);
     return x_ksort(ref(tmp1_lv), toInt32(m_flags));
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 451 */
 Variant c_ArrayIterator::t_natcasesort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::natcasesort);
   return x_natcasesort(ref(m_arr));
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 465 */
 Variant c_ArrayIterator::t_natsort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::natsort);
   return x_natsort(ref(m_arr));
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 477 */
 Variant c_ArrayIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::next);
   return x_next(ref(m_arr));
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 492 */
 bool c_ArrayIterator::t_offsetexists(CVarRef v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetExists);
   return isset(m_arr, v_index);
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 507 */
 Variant c_ArrayIterator::t_offsetget(Variant v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetGet);
   return m_arr.rvalAt(v_index, true);
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 507 */
 Variant &c_ArrayIterator::___offsetget_lval(Variant v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetGet);
   Variant &v = get_system_globals()->__lvalProxy;
   v = t_offsetget(v_index);
   return v;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 523 */
 Variant c_ArrayIterator::t_offsetset(CVarRef v_index, CVarRef v_newval) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetSet);
@@ -1560,18 +1576,21 @@ Variant c_ArrayIterator::t_offsetset(CVarRef v_index, CVarRef v_newval) {
     m_arr.set(v_index, (tmp1));
   }
   return null;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 538 */
 Variant c_ArrayIterator::t_offsetunset(CVarRef v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetUnset);
   m_arr.weakRemove(v_index);
   return null;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 550 */
 Variant c_ArrayIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::rewind);
   return x_reset(ref(m_arr));
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 563 */
 void c_ArrayIterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::seek);
@@ -1598,12 +1617,14 @@ void c_ArrayIterator::t_seek(CVarRef v_position) {
       }
     }
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 586 */
 void c_ArrayIterator::t_setflags(CVarRef v_flags) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::setFlags);
   m_flags = v_flags;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 603 */
 bool c_ArrayIterator::t_uasort(CVarRef v_cmp_function) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::uasort);
@@ -1612,7 +1633,8 @@ bool c_ArrayIterator::t_uasort(CVarRef v_cmp_function) {
     Variant &tmp1_lv = const_cast<Variant&>(tmp1);
     return x_uasort(ref(tmp1_lv), v_cmp_function);
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 620 */
 bool c_ArrayIterator::t_uksort(CVarRef v_cmp_function) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::uksort);
@@ -1621,7 +1643,8 @@ bool c_ArrayIterator::t_uksort(CVarRef v_cmp_function) {
     Variant &tmp1_lv = const_cast<Variant&>(tmp1);
     return x_uksort(ref(tmp1_lv), v_cmp_function);
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 632 */
 bool c_ArrayIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::valid);
@@ -1630,7 +1653,8 @@ bool c_ArrayIterator::t_valid() {
     bool tmp2((x_is_null(tmp1)));
     return !(tmp2);
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 923 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_AppendIterator
 Variant c_AppendIterator::os_getInit(CStrRef s) {
@@ -2304,7 +2328,8 @@ void c_AppendIterator::t___construct() {
     m_iterators = tmp1;
   }
   gasInCtor(oldInCtor);
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 941 */
 void c_AppendIterator::t_append(CVarRef v_it) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::append);
@@ -2318,7 +2343,8 @@ void c_AppendIterator::t_append(CVarRef v_it) {
     const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
     (mcp1.bindClass(info)->getMethFewArgs())(mcp1, 1, v_it, null_variant, null_variant, null_variant, null_variant, null_variant);
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 955 */
 Variant c_AppendIterator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::getInnerIterator);
@@ -2328,7 +2354,8 @@ Variant c_AppendIterator::t_getinneriterator() {
     const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
     return wrap_variant((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant));
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 969 */
 void c_AppendIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::rewind);
@@ -2360,7 +2387,8 @@ void c_AppendIterator::t_rewind() {
       }
     }
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 985 */
 bool c_AppendIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::valid);
@@ -2380,7 +2408,8 @@ bool c_AppendIterator::t_valid() {
     }
     return tmp1;
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 998 */
 Variant c_AppendIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::current);
@@ -2402,7 +2431,8 @@ Variant c_AppendIterator::t_current() {
     }
     return tmp1;
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 1016 */
 Variant c_AppendIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::key);
@@ -2424,7 +2454,8 @@ Variant c_AppendIterator::t_key() {
     }
     return tmp1;
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 1030 */
 void c_AppendIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::next);
@@ -2520,7 +2551,8 @@ void c_AppendIterator::t_next() {
       }
     }
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 1048 */
 Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__call);
@@ -2535,7 +2567,8 @@ Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
     const Array &tmp3((Array(tmp1)));
     return x_call_user_func_array(tmp3, toArray(v_params));
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 755 */
 const int64 q_RecursiveDirectoryIterator_CURRENT_AS_SELF = 0LL;
 const int64 q_RecursiveDirectoryIterator_CURRENT_AS_FILEINFO = 16LL;
@@ -3411,62 +3444,74 @@ void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags
     }
   }
   gasInCtor(oldInCtor);
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 772 */
 Variant c_RecursiveDirectoryIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::current);
   return x_hphp_recursivedirectoryiterator_current(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 784 */
 Variant c_RecursiveDirectoryIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::key);
   return x_hphp_recursivedirectoryiterator_key(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 796 */
 void c_RecursiveDirectoryIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::next);
   x_hphp_recursivedirectoryiterator_next(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 808 */
 void c_RecursiveDirectoryIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::rewind);
   x_hphp_recursivedirectoryiterator_rewind(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 812 */
 void c_RecursiveDirectoryIterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::seek);
   x_hphp_recursivedirectoryiterator_seek(GET_THIS(), toInt64(v_position));
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 816 */
 String c_RecursiveDirectoryIterator::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::__toString);
   return x_hphp_recursivedirectoryiterator___tostring(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 820 */
 bool c_RecursiveDirectoryIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::valid);
   return x_hphp_recursivedirectoryiterator_valid(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 833 */
 bool c_RecursiveDirectoryIterator::t_haschildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::hasChildren);
   return x_hphp_recursivedirectoryiterator_haschildren(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 846 */
 Object c_RecursiveDirectoryIterator::t_getchildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getChildren);
   return x_hphp_recursivedirectoryiterator_getchildren(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 860 */
 String c_RecursiveDirectoryIterator::t_getsubpath() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getSubPath);
   return x_hphp_recursivedirectoryiterator_getsubpath(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 874 */
 String c_RecursiveDirectoryIterator::t_getsubpathname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getSubPathname);
   return x_hphp_recursivedirectoryiterator_getsubpathname(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 645 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DirectoryIterator
 Variant c_DirectoryIterator::os_getInit(CStrRef s) {
@@ -4131,47 +4176,56 @@ void c_DirectoryIterator::t___construct(Variant v_path) {
     }
   }
   gasInCtor(oldInCtor);
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 662 */
 Variant c_DirectoryIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::current);
   return x_hphp_directoryiterator_current(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 674 */
 Variant c_DirectoryIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::key);
   return x_hphp_directoryiterator_key(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 686 */
 void c_DirectoryIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::next);
   x_hphp_directoryiterator_next(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 698 */
 void c_DirectoryIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::rewind);
   x_hphp_directoryiterator_rewind(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 712 */
 void c_DirectoryIterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::seek);
   x_hphp_directoryiterator_seek(GET_THIS(), toInt64(v_position));
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 716 */
 String c_DirectoryIterator::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::__toString);
   return x_hphp_directoryiterator___tostring(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 729 */
 bool c_DirectoryIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::valid);
   return x_hphp_directoryiterator_valid(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 742 */
 bool c_DirectoryIterator::t_isdot() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::isDot);
   return x_hphp_directoryiterator_isdot(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 164 */
 const int64 q_RecursiveIteratorIterator_LEAVES_ONLY = 0LL;
 const int64 q_RecursiveIteratorIterator_SELF_FIRST = 1LL;
@@ -4772,37 +4826,44 @@ void c_RecursiveIteratorIterator::t___construct(Variant v_iterator, Variant v_mo
   bool oldInCtor = gasInCtor(true);
   x_hphp_recursiveiteratoriterator___construct(GET_THIS(), toObject(v_iterator), toInt64(v_mode), toInt64(v_flags));
   gasInCtor(oldInCtor);
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 186 */
 Object c_RecursiveIteratorIterator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::getInnerIterator);
   return x_hphp_recursiveiteratoriterator_getinneriterator(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 197 */
 Variant c_RecursiveIteratorIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::current);
   return x_hphp_recursiveiteratoriterator_current(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 208 */
 Variant c_RecursiveIteratorIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::key);
   return x_hphp_recursiveiteratoriterator_key(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 219 */
 void c_RecursiveIteratorIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::next);
   x_hphp_recursiveiteratoriterator_next(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 230 */
 void c_RecursiveIteratorIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::rewind);
   x_hphp_recursiveiteratoriterator_rewind(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 242 */
 bool c_RecursiveIteratorIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::valid);
   return x_hphp_recursiveiteratoriterator_valid(GET_THIS());
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 888 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_FilterIterator
 Variant c_FilterIterator::os_getInit(CStrRef s) {
@@ -4952,7 +5013,8 @@ Variant pm_php$classes$iterator_php(bool incOnce /* = false */, LVariableTable* 
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/iterator.php, pm_php$classes$iterator_php);
   LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
   return true;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

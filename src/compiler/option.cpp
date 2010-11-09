@@ -181,6 +181,7 @@ Option::EvalLevel Option::EnableEval = NoEval;
 std::string Option::JavaFFIRootPackage;
 
 std::string Option::ProgramName;
+std::string Option::PreprocessedPartitionConfig;
 
 bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;

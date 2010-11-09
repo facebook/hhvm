@@ -481,7 +481,7 @@ private:
   void outputCPPUtilImpl(CodeGenerator::Output output);
 
   void repartitionCPP(const std::string &filename, int64 targetSize,
-                      bool insideHPHP);
+                      bool insideHPHP, bool force);
   void repartitionLargeCPP(const std::vector<std::string> &filenames,
                            const std::vector<std::string> &additionals);
 

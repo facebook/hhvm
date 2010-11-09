@@ -18,6 +18,7 @@
 #include <runtime/base/hphp.h>
 #include <sys/system_globals.h>
 
+namespace hphp_impl_starter {}
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

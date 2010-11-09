@@ -19,6 +19,7 @@
 #include <php/globals/constants.fws.h>
 #include <runtime/ext/ext.h>
 #include <runtime/eval/eval.h>
+namespace hphp_impl_starter {}
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -669,7 +670,7 @@ const StaticString k_MCC_ARG_TCP_INACTIVITY_TIME(LITSTR_INIT("tcp_inactivity_tim
 const StaticString k_MCC_ARG_TMO(LITSTR_INIT("tmo"));
 const StaticString k_MCC_ARG_UDP_REPLY_PORTS(LITSTR_INIT("udp_reply_ports"));
 const StaticString k_MCC_ARG_WINDOW_MAX(LITSTR_INIT("window_max"));
-const int64 k_MCC_COMPRESSION_THRESHHOLD = 102400LL;
+const int64 k_MCC_COMPRESSION_THRESHOLD = 102400LL;
 const int64 k_MCC_CONN_NTRIES = 5LL;
 const int64 k_MCC_CONN_TMO_MS = 250LL;
 const int64 k_MCC_CONSISTENCY_IGNORE = 0LL;
@@ -2060,7 +2061,8 @@ Variant pm_php$globals$constants_php(bool incOnce /* = false */, LVariableTable*
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::globals/constants.php, pm_php$globals$constants_php);
   LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
   return true;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

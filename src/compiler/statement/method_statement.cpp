@@ -576,16 +576,17 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
             }
             outputCPPStmt(cg, ar);
           }
-          cg_indentEnd("} /* function */\n");
+          cg_indentEnd("}\n");
           if (Option::HardTypeHints && funcScope->needsTypeCheckWrapper()) {
             cg.setContext(CodeGenerator::CppTypedParamsWrapperImpl);
             outputCPPImpl(cg, ar);
           }
         } else {
           outputCPPTypeCheckWrapper(cg, ar);
-          cg_indentEnd("} /* function */\n");
+          cg_indentEnd("}\n");
         }
         cg.setContext(context);
+        cg.printImplSplitter();
       }
       break;
     default:
@@ -934,7 +935,8 @@ void MethodStatement::outputCPPFFIStub(CodeGenerator &cg,
       cg_printf("), res");
     }
     cg_printf(");\n");
-    cg_indentEnd("} /* function */\n");
+    cg_indentEnd("}\n");
+    cg.printImplSplitter();
   }
   return;
 }
@@ -1260,7 +1262,8 @@ void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
     cg_printf("return exportVariantToJava(env, hphp, result, kind);\n");
   }
 
-  cg_indentEnd("} /* function */\n\n");
+  cg_indentEnd("}\n");
+  cg.printImplSplitter();
 }
 
 void MethodStatement::outputSwigFFIStub(CodeGenerator &cg,

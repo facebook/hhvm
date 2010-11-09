@@ -453,8 +453,12 @@ int PDOMySqlConnection::handleError(const char *file, int line,
     strcpy(*pdo_err, mysql_sqlstate(m_server));
   }
 
-  pdo_raise_impl_error(stmt->dbh, NULL, pdo_err[0], einfo->errmsg);
-
+  if (stmt && stmt->stmt()) {
+    pdo_raise_impl_error(stmt->dbh, NULL, pdo_err[0], einfo->errmsg);
+  } else {
+    throw_pdo_exception(null, null, "SQLSTATE[%s] [%d] %s",
+                        pdo_err[0], einfo->errcode, einfo->errmsg);
+  }
   return einfo->errcode;
 }
 

@@ -390,6 +390,11 @@ ifdef TLS_GD
 CPPFLAGS += -DTLS_GLOBAL_DYNAMIC
 endif
 
+MYSQL_UNIX_SOCK_ADDR := $(shell mysql_config --socket)
+ifneq ($(MYSQL_UNIX_SOCK_ADDR), "")
+CPPFLAGS += -DPHP_MYSQL_UNIX_SOCK_ADDR=\"$(MYSQL_UNIX_SOCK_ADDR)\"
+endif
+
 ###############################################################################
 # Linking
 

@@ -49,6 +49,6 @@ macro(MYSQL_SOCKET_SEARCH)
 	endforeach()
 
 	if (MYSQL_SOCK)
-		set(MYSQL_UNIX_SOCK_ADDR ${MYSQL_SOCK} CACHE STRING "Path to MySQL Socket")	
+		set(MYSQL_UNIX_SOCK_ADDR ${MYSQL_SOCK} CACHE STRING "Path to MySQL Socket")
 	endif()
 endmacro()

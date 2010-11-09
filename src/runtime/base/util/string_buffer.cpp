@@ -349,7 +349,7 @@ void StringBuffer::grow(int minSize) {
   }
 
   if (m_maxBytes > 0 && new_size > m_maxBytes) {
-    throw StringBufferLimitException(m_maxBytes);
+    throw StringBufferLimitException(m_maxBytes, detach());
   }
 
   char *new_buffer;

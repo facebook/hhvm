@@ -78,6 +78,7 @@ Variant f_print_r(CVarRef expression, bool ret /* = false */) {
     res = vs.serialize(expression, ret);
   } catch (StringBufferLimitException &e) {
     Logger::Error("print_r() exceeded max bytes limit");
+    res = e.m_result;
   }
   return res;
 }

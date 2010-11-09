@@ -28,9 +28,12 @@ class TaintedMetadata;
 
 class StringBufferLimitException : public Exception {
 public:
-  StringBufferLimitException(int size)
-      : Exception("StringBuffer exceeded %d bytes of memory", size) {}
+  StringBufferLimitException(int size, CStrRef partialResult)
+      : Exception("StringBuffer exceeded %d bytes of memory", size),
+        m_result(partialResult) {}
   virtual ~StringBufferLimitException() throw() {}
+
+  String m_result;
 };
 
 /**

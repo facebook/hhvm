@@ -270,7 +270,7 @@ class Variant {
    * Borrowing Countable::_count for contagious bit, and this is okay, since
    * outer Variant never uses reference counting.
    */
-  void setContagious() const { _count = -1;}
+  void setContagious() const { ASSERT(this != &null_variant); _count = -1;}
   void clearContagious() const { _count = 0;}
   bool isContagious() const { return _count == -1;}
 

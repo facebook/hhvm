@@ -346,6 +346,7 @@ Variant o_invoke_failed(const char *cls, const char *meth,
                         bool fatal = true);
 
 Array collect_few_args(int count, INVOKE_FEW_ARGS_IMPL_ARGS);
+Array collect_few_args_ref(int count, INVOKE_FEW_ARGS_IMPL_ARGS);
 
 void get_call_info_or_fail(const CallInfo *&ci, void *&extra, CStrRef name);
 

@@ -320,7 +320,8 @@ std::string RuntimeOption::MailForceExtraParameters;
 int RuntimeOption::PregBacktraceLimit = 100000;
 int RuntimeOption::PregRecursionLimit = 100000;
 
-int RuntimeOption::ProfilerTraceBuffer;
+int RuntimeOption::ProfilerTraceBuffer = 2000000;
+double RuntimeOption::ProfilerTraceExpansion = 1.2;
 
 ///////////////////////////////////////////////////////////////////////////////
 // keep this block after all the above static variables, or we will have
@@ -902,6 +903,7 @@ void RuntimeOption::Load(Hdf &config) {
     }
 
     ProfilerTraceBuffer = stats["ProfilerTraceBuffer"].getInt32(2000000);
+    ProfilerTraceExpansion = stats["ProfilerTraceExpansion"].getDouble(1.2);
   }
   {
     config["ServerVariables"].get(ServerVariables);

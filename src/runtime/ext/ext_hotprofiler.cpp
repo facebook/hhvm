@@ -1014,7 +1014,7 @@ public:
     } else {
       // we always have at least one free slot
       collectStats("(trace buffer realloc)", s_trace[nTrace++]);
-      s_n_backing *= 2;
+      s_n_backing *= 1.2;
       track_realloc = TRUE;
     }
     s_trace = (TraceEntry*)realloc((void *)s_trace,

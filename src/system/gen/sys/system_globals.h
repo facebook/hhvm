@@ -123,6 +123,7 @@ extern const int64 k_UCOL_STRENGTH;
 extern const int64 k_UCOL_TERTIARY;
 extern const int64 k_UCOL_UPPER_FIRST;
 extern const int64 k_XHPROF_FLAGS_CPU;
+extern const int64 k_XHPROF_FLAGS_MALLOC;
 extern const int64 k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE;
 extern const int64 k_XHPROF_FLAGS_MEMORY;
 extern const int64 k_XHPROF_FLAGS_NO_BUILTINS;

@@ -19,6 +19,7 @@
 #include <runtime/base/memory/memory_manager.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/zend/zend_math.h>
+#include <util/alloc.h>
 
 #ifdef __FreeBSD__
 # include <sys/resource.h>
@@ -316,6 +317,97 @@ static inline uint64 vtsc(int64 MHz) {
     tv_to_cycles(usage.ru_utime, MHz) + tv_to_cycles(usage.ru_stime, MHz);
 }
 
+#ifndef NO_JEMALLOC
+
+#define JEMALLOC_STAT_MIB_LEN 2
+size_t mallctl_mib_len = JEMALLOC_STAT_MIB_LEN;
+size_t *mallctl_alloc_mib;
+size_t *mallctl_free_mib;
+bool mallctl_init = false;
+
+bool
+mallctl_mib_init()
+{
+  if (mallctl_init) {
+    return false;
+  }
+  mallctl_init = true;
+  mallctl_alloc_mib = new size_t[mallctl_mib_len];
+  if (mallctlnametomib("thread.allocated",
+                       mallctl_alloc_mib, &mallctl_mib_len))
+  {
+    return false;
+  }
+  mallctl_free_mib = new size_t[mallctl_mib_len];
+  if (mallctlnametomib("thread.deallocated",
+                       mallctl_free_mib, &mallctl_mib_len))
+  {
+    return false;
+  }
+  return true;
+}
+#endif
+
+uint64
+get_allocs()
+{
+#ifndef NO_JEMALLOC
+  if (mallctl) {
+    if (!mallctl_alloc_mib) {
+      if (!mallctl_mib_init()) {
+        return 0;
+      }
+    }
+    uint64 stat;
+    size_t size = sizeof(stat);
+    if (mallctlbymib(mallctl_alloc_mib, mallctl_mib_len, &stat, &size, NULL, 0))
+    {
+      return 0;
+    }
+    return stat;
+  }
+#endif
+#ifndef NO_TCMALLOC
+  if (MallocExtensionInstance) {
+    size_t stat;
+    MallocExtensionInstance()->GetNumericProperty(
+           "generic.thread_bytes_allocated", &stat);
+    return stat;
+  }
+#endif
+  return 0;
+}
+
+uint64
+get_frees()
+{
+#ifndef NO_JEMALLOC
+  if (mallctl) {
+    if (!mallctl_free_mib) {
+      if (!mallctl_mib_init()) {
+        return 0;
+      }
+    }
+    uint64 stat;
+    size_t size = sizeof(stat);
+    if (mallctlbymib(mallctl_free_mib, mallctl_mib_len, &stat, &size, NULL, 0))
+    {
+      return 0;
+    }
+    return stat;
+  }
+#endif
+#ifndef NO_TCMALLOC
+  if (MallocExtensionInstance) {
+    size_t stat;
+    MallocExtensionInstance()->GetNumericProperty(
+           "generic.thread_bytes_freed", &stat);
+    return stat;
+  }
+#endif
+  return 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // classes
 
@@ -396,6 +488,17 @@ public:
   }
 };
 
+enum Flag {
+  TrackBuiltins = 0x1,
+  TrackCPU      = 0x2,
+  TrackMemory   = 0x4,
+  TrackVtsc     = 0x8,
+  Trace         = 0x10,
+  MeasureXhprofDisable = 0x20,
+  GetTrace = 0x40,
+  TrackMalloc = 0x80,
+};
+
 /**
  * Maintain profiles of a running stack.
  */
@@ -456,28 +559,30 @@ public:
 
   template<class phpret, class Name, class Counts>
   static void returnVals(phpret& ret, const Name& name, const Counts& counts,
-                  bool cpu, bool memory, int64 MHz)
+                  int flags, int64 MHz)
   {
     Array arr;
     arr.set("ct",  counts.count);
     arr.set("wt",  to_usec(counts.wall_time, MHz));
-    if (cpu) {
+    if (flags & TrackCPU) {
       arr.set("cpu", to_usec(counts.cpu, MHz));
     }
-    if (memory) {
+    if (flags & TrackMemory) {
       arr.set("mu",  counts.memory);
       arr.set("pmu", counts.peak_memory);
+    } else if (flags & TrackMalloc) {
+      arr.set("alloc", counts.memory);
+      arr.set("free", counts.peak_memory);
     }
     ret.set(String(name), arr);
   }
 
   template<class phpret, class StatsMap>
-  static bool extractStats(phpret& ret, StatsMap& stats,
-                           bool cpu, bool memory, int64 MHz)
+  static bool extractStats(phpret& ret, StatsMap& stats, int flags, int64 MHz)
   {
     for (typename StatsMap::const_iterator iter = stats.begin();
          iter != stats.end(); ++iter) {
-      returnVals(ret, iter->first, iter->second, cpu, memory, MHz);
+      returnVals(ret, iter->first, iter->second, flags, MHz);
     }
     return true;
   }
@@ -670,15 +775,6 @@ private:
   StatsMap m_stats; // outcome
 
 public:
-  enum Flag {
-    TrackBuiltins = 0x1,
-    TrackCPU      = 0x2,
-    TrackMemory   = 0x4,
-    TrackVtsc     = 0x8,
-    Trace         = 0x10,
-    MeasureXhprofDisable = 0x20,
-    GetTrace = 0x40,
-  };
 
 public:
   HierarchicalProfiler(int flags) : m_flags(flags) {
@@ -696,6 +792,9 @@ public:
       const MemoryUsageStats &stats = mm->getStats();
       m_stack->m_mu_start  = stats.usage;
       m_stack->m_pmu_start = stats.peakUsage;
+    } else if (m_flags & TrackMalloc) {
+      m_stack->m_mu_start = get_allocs();
+      m_stack->m_pmu_start = get_frees();
     }
   }
 
@@ -717,12 +816,14 @@ public:
       int64 pmu_end = stats.peakUsage;
       counts.memory += mu_end - m_stack->m_mu_start;
       counts.peak_memory += pmu_end - m_stack->m_pmu_start;
+    } else if (m_flags & TrackMalloc) {
+      counts.memory += get_allocs() - m_stack->m_mu_start;
+      counts.peak_memory += get_frees() - m_stack->m_pmu_start;
     }
   }
 
   virtual void writeStats(Array &ret) {
-    extractStats(ret, m_stats,
-                 m_flags & TrackCPU, m_flags & TrackMemory, m_MHz);
+    extractStats(ret, m_stats, m_flags, m_MHz);
   }
 
 private:
@@ -925,16 +1026,6 @@ public:
 
   static pthread_mutex_t s_in_use;
 
-  enum Flag {
-    TrackBuiltins = 0x1,
-    TrackCPU      = 0x2,
-    TrackMemory   = 0x4,
-    TrackVtsc     = 0x8,
-    // Trace         = 0x10,    // don't need this one.  it's always on
-    MeasureXhprofDisable = 0x20,
-    GetTrace = 0x40,
-  };
-
   class CountMap : public TraceData {
   public:
     int64 count;
@@ -983,6 +1074,9 @@ public:
       const MemoryUsageStats &stats = mm->getStats();
       te.memory = stats.usage;
       te.peak_memory = stats.peakUsage;
+    } else if (m_flags & TrackMalloc) {
+      te.memory = get_allocs();
+      te.peak_memory = get_frees();
     } else {
       te.memory = 0;
       te.peak_memory = 0;
@@ -1002,13 +1096,11 @@ public:
   }
 
   virtual void writeStats(Array &ret) {
-    bool cpu = m_flags & TrackCPU;
-    bool memory =  m_flags & TrackMemory;
     map<const char *, unsigned>fmap;
     TraceData my_begin;
     collectStats(my_begin);
     walkTrace(s_trace, s_trace + nTrace, m_stats, fmap);
-    extractStats(ret, m_stats, cpu, memory, m_MHz);
+    extractStats(ret, m_stats, m_flags, m_MHz);
     if (m_flags & GetTrace) {
       String traceData;
       packTraceData(fmap, traceData, m_MHz);
@@ -1024,7 +1116,7 @@ public:
       my_end.wall_time -= my_begin.wall_time;
       my_end.memory -= my_begin.memory;
       my_end.peak_memory -= my_begin.peak_memory;
-      returnVals(ret, "xhprof_post_processing()", my_end, cpu, memory, m_MHz);
+      returnVals(ret, "xhprof_post_processing()", my_end, m_flags, m_MHz);
     }
   }
 
@@ -1389,11 +1481,10 @@ void f_hotprofiler_enable(int level) {
 #ifdef HOTPROFILER
   long flags = 0;
   if (level == ProfilerFactory::Hierarchical) {
-    flags = HierarchicalProfiler::TrackBuiltins;
+    flags = TrackBuiltins;
   } else if (level == ProfilerFactory::Memory) {
     level = ProfilerFactory::Hierarchical;
-    flags = HierarchicalProfiler::TrackBuiltins |
-      HierarchicalProfiler::TrackMemory;
+    flags = TrackBuiltins | TrackMemory;
   }
   s_factory->start((ProfilerFactory::Level)level, flags);
 #endif
@@ -1425,12 +1516,11 @@ void f_xhprof_enable(int flags/* = 0 */,
                      CArrRef args /* = null_array */) {
 #ifdef HOTPROFILER
   if (vtsc_syscall.num <= 0) {
-    flags &= ~HierarchicalProfiler::TrackVtsc;
+    flags &= ~TrackVtsc; }
+  if (flags & TrackVtsc) {
+    flags |= TrackCPU;
   }
-  if (flags & HierarchicalProfiler::TrackVtsc) {
-    flags |= HierarchicalProfiler::TrackCPU;
-  }
-  if (flags & HierarchicalProfiler::Trace) {
+  if (flags & Trace) {
     s_factory->start(ProfilerFactory::Trace, flags);
   } else {
     s_factory->start(ProfilerFactory::Hierarchical, flags);
@@ -1501,9 +1591,7 @@ Variant f_xhprof_run_trace(CStrRef packedTrace, int flags) {
   Array result;
   TraceProfiler::StatsMap stats;
   walkTrace(&*begin, &*end, stats, fmap);
-  Profiler::extractStats(result, stats,
-                         flags & HierarchicalProfiler::TrackCPU,
-                         flags & HierarchicalProfiler::TrackMemory, MHz);
+  Profiler::extractStats(result, stats, flags, MHz);
   return result;
 #else
   return null;
@@ -1512,14 +1600,14 @@ Variant f_xhprof_run_trace(CStrRef packedTrace, int flags) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // constants
-const int64 k_XHPROF_FLAGS_NO_BUILTINS = HierarchicalProfiler::TrackBuiltins;
-const int64 k_XHPROF_FLAGS_CPU = HierarchicalProfiler::TrackCPU;
-const int64 k_XHPROF_FLAGS_MEMORY = HierarchicalProfiler::TrackMemory;
-const int64 k_XHPROF_FLAGS_VTSC = HierarchicalProfiler::TrackVtsc;
-const int64 k_XHPROF_FLAGS_TRACE = HierarchicalProfiler::Trace;
-const int64 k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE
-                                  = HierarchicalProfiler::MeasureXhprofDisable;
-const int64 k_XHPROF_FLAGS_GET_TRACE = HierarchicalProfiler::GetTrace;
+const int64 k_XHPROF_FLAGS_NO_BUILTINS = TrackBuiltins;
+const int64 k_XHPROF_FLAGS_CPU = TrackCPU;
+const int64 k_XHPROF_FLAGS_MEMORY = TrackMemory;
+const int64 k_XHPROF_FLAGS_VTSC = TrackVtsc;
+const int64 k_XHPROF_FLAGS_TRACE = Trace;
+const int64 k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE = MeasureXhprofDisable;
+const int64 k_XHPROF_FLAGS_GET_TRACE = GetTrace;
+const int64 k_XHPROF_FLAGS_MALLOC = TrackMalloc;
 
 ///////////////////////////////////////////////////////////////////////////////
 // injected code

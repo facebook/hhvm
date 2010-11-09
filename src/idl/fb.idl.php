@@ -85,6 +85,12 @@ DefineConstant(
     'type'   => Int64,
   ));
 
+DefineConstant(
+  array(
+    'name'   => "XHPROF_FLAGS_MALLOC",
+    'type'   => Int64,
+  ));
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Functions
@@ -206,7 +212,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_intercept",
-    'desc'   => "Invokes a user handler upon calling a function or a class method. If this handler returns FALSE, code will continue with original function. Otherwise, it will return what handler tells. The handler function looks like \"intercept_handler(\$name, \$obj, \$params, \$data, &\$done)\", where \$name is orginal function's name, \$obj is \$	his for an instance method call or null for static method call or function calls, and \$params are original call's parameters. \$data is what's passed to fb_intercept() and set \$done to false to indicate function should continue its execution with old function as if interception did not happen. By default \$done is true so it will return handler's return immediately without executing old function's code. Note that built-in functions are not interceptable.",
+    'desc'   => "Invokes a user handler upon calling a function or a class method. If this handler returns FALSE, code will continue with original function. Otherwise, it will return what handler tells. The handler function looks like \"intercept_handler(\$name, \$obj, \$params, \$data, &\$done)\", where \$name is orginal function's name, \$obj is \$this for an instance method call or null for static method call or function calls, and \$params are original call's parameters. \$data is what's passed to fb_intercept() and set \$done to false to indicate function should continue its execution with old function as if interception did not happen. By default \$done is true so it will return handler's return immediately without executing old function's code. Note that built-in functions are not interceptable.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,

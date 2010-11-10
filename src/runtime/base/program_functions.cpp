@@ -856,7 +856,6 @@ void hphp_process_init() {
   Extension::InitModules();
   apc_load(RuntimeOption::ApcLoadThread);
   StaticString::FinishInit();
-  Eval::Debugger::StartServer();
 }
 
 void hphp_session_init() {

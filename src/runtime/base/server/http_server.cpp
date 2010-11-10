@@ -235,6 +235,12 @@ void HttpServer::run() {
     }
   }
 
+  if (!Eval::Debugger::StartServer()) {
+    Logger::Error("Unable to start debugger server");
+    abortServers();
+    return;
+  }
+
   {
     Logger::Info("all servers started");
     createPid();

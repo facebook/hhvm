@@ -18,6 +18,7 @@
 #define __HPHP_EVAL_DEBUGGER_SERVER_H__
 
 #include <util/async_func.h>
+#include <runtime/base/file/socket.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,13 +31,13 @@ public:
   /**
    * Start/stop for remote debugging.
    */
-  static void Start();
+  static bool Start();
   static void Stop();
 
 public:
   DebuggerServer();
 
-  void start();
+  bool start();
   void stop();
 
   // server thread
@@ -47,6 +48,7 @@ private:
 
   AsyncFunc<DebuggerServer> m_serverThread;
   bool m_stopped;
+  SmartPtr<Socket> m_sock;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

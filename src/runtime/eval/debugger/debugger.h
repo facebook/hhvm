@@ -29,7 +29,7 @@ public:
   /**
    * Start/stop Debugger for remote debugging.
    */
-  static void StartServer();
+  static bool StartServer();
   static void StartClient(const DebuggerClientOptions &options);
   static void OnServerShutdown();
   static void Stop();

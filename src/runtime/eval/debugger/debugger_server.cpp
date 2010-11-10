@@ -28,7 +28,7 @@ namespace HPHP { namespace Eval {
 
 DebuggerServer DebuggerServer::s_debugger_server;
 
-void DebuggerServer::Start() {
+bool DebuggerServer::Start() {
   if (RuntimeOption::EnableDebuggerServer) {
     Debugger::SetTextColors();
 
@@ -37,8 +37,9 @@ void DebuggerServer::Start() {
     Hdf hdf;
     DebuggerClient::LoadColors(hdf);
 
-    s_debugger_server.start();
+    return s_debugger_server.start();
   }
+  return true;
 }
 
 void DebuggerServer::Stop() {
@@ -53,8 +54,37 @@ DebuggerServer::DebuggerServer()
     : m_serverThread(this, &DebuggerServer::accept), m_stopped(false) {
 }
 
-void DebuggerServer::start() {
+bool DebuggerServer::start() {
+  int port = RuntimeOption::DebuggerServerPort;
+  int backlog = 128;
+
+  Util::HostEnt result;
+  if (!Util::safe_gethostbyname("0.0.0.0", result)) {
+    return false;
+  }
+  struct sockaddr_in la;
+  memcpy((char*)&la.sin_addr, result.hostbuf.h_addr,
+         result.hostbuf.h_length);
+  la.sin_family = result.hostbuf.h_addrtype;
+  la.sin_port = htons((unsigned short)port);
+
+  m_sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET, "0.0.0.0",
+                      port);
+  if (!m_sock->valid()) {
+    Logger::Error("unable to create debugger server socket");
+    return false;
+  }
+  if (bind(m_sock->fd(), (struct sockaddr *)&la, sizeof(la)) < 0) {
+    Logger::Error("unable to bind to port %d for debugger server", port);
+    return false;
+  }
+  if (listen(m_sock->fd(), backlog) < 0) {
+    Logger::Error("unable to listen on port %d for debugger server", port);
+    return false;
+  }
+
   m_serverThread.start();
+  return true;
 }
 
 void DebuggerServer::stop() {
@@ -63,39 +93,10 @@ void DebuggerServer::stop() {
 }
 
 void DebuggerServer::accept() {
-  int port = RuntimeOption::DebuggerServerPort;
-  int backlog = 128;
-
-  Util::HostEnt result;
-  if (!Util::safe_gethostbyname("0.0.0.0", result)) {
-    return;
-  }
-  struct sockaddr_in la;
-  memcpy((char*)&la.sin_addr, result.hostbuf.h_addr,
-         result.hostbuf.h_length);
-  la.sin_family = result.hostbuf.h_addrtype;
-  la.sin_port = htons((unsigned short)port);
-
-  Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
-                            "0.0.0.0", port);
-  Object deleter(sock);
-  if (!sock->valid()) {
-    Logger::Error("unable to create debugger server socket");
-    return;
-  }
-  if (bind(sock->fd(), (struct sockaddr *)&la, sizeof(la)) < 0) {
-    Logger::Error("unable to bind to port %d for debugger server", port);
-    return;
-  }
-  if (listen(sock->fd(), backlog) < 0) {
-    Logger::Error("unable to listen on port %d for debugger server", port);
-    return;
-  }
-
   // server loop
   while (!m_stopped) {
     struct pollfd fds[1];
-    fds[0].fd = sock->fd();
+    fds[0].fd = m_sock->fd();
     fds[0].events = POLLIN|POLLERR|POLLHUP;
     int ret = poll(fds, 1, POLLING_SECONDS * 1000);
     if (ret > 0) {
@@ -104,8 +105,8 @@ void DebuggerServer::accept() {
         struct sockaddr sa;
         socklen_t salen = sizeof(sa);
         try {
-          Socket *new_sock = new Socket(::accept(sock->fd(), &sa, &salen),
-                                        sock->getType());
+          Socket *new_sock = new Socket(::accept(m_sock->fd(), &sa, &salen),
+                                        m_sock->getType());
           SmartPtr<Socket> ret(new_sock);
           if (new_sock->valid()) {
             Debugger::RegisterProxy(ret, false);

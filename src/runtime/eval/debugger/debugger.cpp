@@ -29,8 +29,8 @@ namespace HPHP { namespace Eval {
 
 Debugger Debugger::s_debugger;
 
-void Debugger::StartServer() {
-  DebuggerServer::Start();
+bool Debugger::StartServer() {
+  return DebuggerServer::Start();
 }
 
 void Debugger::StartClient(const DebuggerClientOptions &options) {

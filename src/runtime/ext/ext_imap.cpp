@@ -939,6 +939,11 @@ Variant f_imap_fetchstructure(CObjRef imap_stream, int64 msg_number,
   mail_fetchstructure_full(obj->m_stream, msg_number, &body,
                            (options ? options : NIL));
 
+  if (!body) {
+    raise_warning("No body information available");
+    return false;
+  }
+
   Object ret(NEW(c_stdClass)());
   _php_imap_add_body(ret, body);
 

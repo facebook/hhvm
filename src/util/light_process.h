@@ -56,8 +56,10 @@ public:
   /**
    * The main process is not the (direct) parent of the worker process,
    * and therefore it has to delegate to the shadow process to do waitpid.
+   * There can be a timeout (in seconds), after which SIGKILL is sent to
+   * the child process.
    */
-  static pid_t waitpid(pid_t pid, int *stat_loc, int options);
+  static pid_t waitpid(pid_t pid, int *stat_loc, int options, int timeout = 0);
 
   static pid_t pcntl_waitpid(pid_t pid, int *stat_loc, int options);
 

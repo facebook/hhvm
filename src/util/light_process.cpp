@@ -26,6 +26,7 @@
 #include <sys/wait.h>
 #include <poll.h>
 #include <pwd.h>
+#include <signal.h>
 
 using namespace std;
 
@@ -220,15 +221,30 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
   close_fds(pkeys);
 }
 
+static pid_t waited = 0;
+
+static void kill_handler(int sig) {
+  if (sig == SIGALRM && waited) {
+    kill(waited, SIGKILL);
+  }
+}
+
 static void do_waitpid(FILE *fin, FILE *fout) {
   char buf[BUFFER_SIZE];
   read_buf(fin, buf);
   int64 p = -1;
   int options = 0;
-  sscanf(buf, "%lld %d", &p, &options);
+  int timeout = 0;
+  sscanf(buf, "%lld %d %d", &p, &options, &timeout);
   pid_t pid = (pid_t)p;
   int stat;
+  if (timeout > 0) {
+    waited = pid;
+    signal(SIGALRM, kill_handler);
+    alarm(timeout);
+  }
   pid_t ret = ::waitpid(pid, &stat, options);
+  waited = 0;
   fprintf(fout, "%lld %d\n", (int64)ret, stat);
   if (ret < 0) {
     fprintf(fout, "%d\n", errno);
@@ -557,7 +573,8 @@ pid_t LightProcess::proc_open(const char *cmd, const vector<int> &created,
   return (pid_t)pid;
 }
 
-pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options) {
+pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
+                            int timeout) {
   if (!Available()) {
     // light process is not really there
     return ::waitpid(pid, stat_loc, options);
@@ -566,7 +583,8 @@ pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options) {
   int id = GetId();
   Lock lock(g_procs[id].m_procMutex);
 
-  fprintf(g_procs[id].m_fout, "waitpid\n%lld %d\n", (int64)pid, options);
+  fprintf(g_procs[id].m_fout, "waitpid\n%lld %d %d\n", (int64)pid, options,
+          timeout);
   fflush(g_procs[id].m_fout);
 
   char buf[BUFFER_SIZE];

@@ -430,7 +430,8 @@ public:
     pid_t wait_pid;
     int wstatus;
     do {
-      wait_pid = LightProcess::waitpid(child, &wstatus, 0);
+      wait_pid = LightProcess::waitpid(child, &wstatus, 0,
+                                       RuntimeOption::RequestTimeoutSeconds);
     } while (wait_pid == -1 && errno == EINTR);
 
     if (wait_pid == -1) {

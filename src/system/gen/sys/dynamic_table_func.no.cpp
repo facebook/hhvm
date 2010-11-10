@@ -1193,6 +1193,16 @@ Variant ifa_magickgetimagehistogram(void *extra, int count, INVOKE_FEW_ARGS_IMPL
   if (count != 1) return throw_wrong_arguments("magickgetimagehistogram", count, 1, 1, 1);
   return (f_magickgetimagehistogram(a0));
 }
+Variant i_cpu_get_model(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(cpu_get_model);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("cpu_get_model", 0, 1);
+  return (f_cpu_get_model());
+}
+Variant ifa_cpu_get_model(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("cpu_get_model", 0, 1);
+  return (f_cpu_get_model());
+}
 Variant i_preg_last_error(void *extra, CArrRef params) {
   FUNCTION_INJECTION(preg_last_error);
   int count __attribute__((__unused__)) = params.size();
@@ -5807,6 +5817,16 @@ Variant i_bzerrstr(void *extra, CArrRef params) {
 Variant ifa_bzerrstr(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("bzerrstr", count, 1, 1, 1);
   return (f_bzerrstr(a0));
+}
+Variant i_cpu_get_count(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(cpu_get_count);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("cpu_get_count", 0, 1);
+  return (f_cpu_get_count());
+}
+Variant ifa_cpu_get_count(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("cpu_get_count", 0, 1);
+  return (f_cpu_get_count());
 }
 Variant i_fileinode(void *extra, CArrRef params) {
   FUNCTION_INJECTION(fileinode);
@@ -36609,6 +36629,18 @@ Variant ei_magickgetimagehistogram(Eval::VariableEnvironment &env, const Eval::F
   }
   return (x_magickgetimagehistogram(a0));
 }
+Variant ei_cpu_get_model(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("cpu_get_model", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_cpu_get_model());
+}
 Variant ei_preg_last_error(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
@@ -42252,6 +42284,18 @@ Variant ei_bzerrstr(Eval::VariableEnvironment &env, const Eval::FunctionCallExpr
     (*it)->eval(env);
   }
   return (x_bzerrstr(a0));
+}
+Variant ei_cpu_get_count(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("cpu_get_count", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_cpu_get_count());
 }
 Variant ei_fileinode(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -82742,6 +82786,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 5998:
       HASH_INVOKE_FROM_EVAL(0x6DB71D850799D76ELL, hphp_splfileobject_fscanf);
       break;
+    case 6000:
+      HASH_INVOKE_FROM_EVAL(0x5DD71E685F179770LL, cpu_get_model);
+      break;
     case 6005:
       HASH_INVOKE_FROM_EVAL(0x04D9076808F79775LL, getenv);
       break;
@@ -83819,6 +83866,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 7592:
       HASH_INVOKE_FROM_EVAL(0x572AE270D9E4FDA8LL, socket_set_option);
       break;
+    case 7593:
+      HASH_INVOKE_FROM_EVAL(0x35828C81A86A9DA9LL, cpu_get_count);
+      break;
     case 7594:
       HASH_INVOKE_FROM_EVAL(0x6326C14D0FFA7DAALL, fb_thrift_serialize);
       break;
@@ -84305,6 +84355,7 @@ CallInfo ci_convert_uudecode((void*)&i_convert_uudecode, (void*)&ifa_convert_uud
 CallInfo ci_htmlspecialchars_decode((void*)&i_htmlspecialchars_decode, (void*)&ifa_htmlspecialchars_decode, 2, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_end_document((void*)&i_xmlwriter_end_document, (void*)&ifa_xmlwriter_end_document, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimagehistogram((void*)&i_magickgetimagehistogram, (void*)&ifa_magickgetimagehistogram, 1, 0, 0x0000000000000000LL);
+CallInfo ci_cpu_get_model((void*)&i_cpu_get_model, (void*)&ifa_cpu_get_model, 0, 0, 0x0000000000000000LL);
 CallInfo ci_preg_last_error((void*)&i_preg_last_error, (void*)&ifa_preg_last_error, 0, 0, 0x0000000000000000LL);
 CallInfo ci_end((void*)&i_end, (void*)&ifa_end, 1, 0, 0x0000000000000001LL);
 CallInfo ci_stream_get_line((void*)&i_stream_get_line, (void*)&ifa_stream_get_line, 3, 0, 0x0000000000000000LL);
@@ -84578,6 +84629,7 @@ CallInfo ci_pixelsetcolorcount((void*)&i_pixelsetcolorcount, (void*)&ifa_pixelse
 CallInfo ci_drawpathcurvetoquadraticbezierrelative((void*)&i_drawpathcurvetoquadraticbezierrelative, (void*)&ifa_drawpathcurvetoquadraticbezierrelative, 5, 0, 0x0000000000000000LL);
 CallInfo ci_posix_getgroups((void*)&i_posix_getgroups, (void*)&ifa_posix_getgroups, 0, 0, 0x0000000000000000LL);
 CallInfo ci_bzerrstr((void*)&i_bzerrstr, (void*)&ifa_bzerrstr, 1, 0, 0x0000000000000000LL);
+CallInfo ci_cpu_get_count((void*)&i_cpu_get_count, (void*)&ifa_cpu_get_count, 0, 0, 0x0000000000000000LL);
 CallInfo ci_fileinode((void*)&i_fileinode, (void*)&ifa_fileinode, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetnumberimages((void*)&i_magickgetnumberimages, (void*)&ifa_magickgetnumberimages, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimagesblob((void*)&i_magickgetimagesblob, (void*)&ifa_magickgetimagesblob, 1, 0, 0x0000000000000000LL);
@@ -95277,6 +95329,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 6000:
+      HASH_GUARD(0x5DD71E685F179770LL, cpu_get_model) {
+        ci = &ci_cpu_get_model;
+        return true;
+      }
+      break;
     case 6005:
       HASH_GUARD(0x04D9076808F79775LL, getenv) {
         ci = &ci_getenv;
@@ -97500,6 +97558,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 7592:
       HASH_GUARD(0x572AE270D9E4FDA8LL, socket_set_option) {
         ci = &ci_socket_set_option;
+        return true;
+      }
+      break;
+    case 7593:
+      HASH_GUARD(0x35828C81A86A9DA9LL, cpu_get_count) {
+        ci = &ci_cpu_get_count;
         return true;
       }
       break;

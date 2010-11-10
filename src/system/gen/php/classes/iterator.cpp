@@ -1747,7 +1747,8 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("AppendIterator::append", count, 1, 1, 1);
+        if (count < 1) return throw_missing_typed_argument("AppendIterator::append", "iterator", 1);
+        if (count > 1) return throw_toomany_arguments("AppendIterator::append", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1952,7 +1953,8 @@ Variant c_AppendIterator::i_append(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("AppendIterator::append", count, 1, 1, 1);
+  if (count < 1) return throw_missing_typed_argument("AppendIterator::append", "iterator", 1);
+  if (count > 1) return throw_toomany_arguments("AppendIterator::append", 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2066,7 +2068,8 @@ Variant c_AppendIterator::ifa_append(MethodCallPackage &mcp, int count, INVOKE_F
   } else {
     self = createDummy(pobj);
   }
-  if (count != 1) return throw_wrong_arguments("AppendIterator::append", count, 1, 1, 1);
+  if (count < 1) return throw_missing_typed_argument("AppendIterator::append", "iterator", 1);
+  if (count > 1) return throw_toomany_arguments("AppendIterator::append", 1, 1);
   return (self->t_append(a0), null);
 }
 Variant c_AppendIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -2305,8 +2308,10 @@ void c_AppendIterator::t___construct() {
 /* SRC: classes/iterator.php line 941 */
 void c_AppendIterator::t_append(CVarRef v_it) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::append);
-  if(!v_it.instanceof(NAMSTR(s_sys_ss4af9d29e, "iterator")))
+  if(!v_it.instanceof(NAMSTR(s_sys_ss4af9d29e, "iterator"))) {
     throw_unexpected_argument_type(0,"append","iterator",v_it);
+    return;
+  }
   {
     MethodCallPackage mcp1;
     mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss2dc69ec2, "append"), 0x4DEE4A472DC69EC2LL);

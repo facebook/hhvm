@@ -43,7 +43,7 @@ public:
   int getLocalEffects() const { return NoEffect; }
   void rename(const std::string &name) { m_name = name;}
   ExpressionPtr defaultValue() { return m_defaultValue; }
-  TypePtr getTypeSpec(AnalysisResultPtr ar, bool error);
+  TypePtr getTypeSpec(AnalysisResultPtr ar, bool forInference);
 private:
   std::string m_type;
   std::string m_originalType;

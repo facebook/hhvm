@@ -125,7 +125,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
   CodeGenerator::Context context = cg.getContext();
 
   FunctionScopePtr funcScope = m_funcScope.lock();
-  string fname = funcScope->getId(cg).c_str();
+  string fname = funcScope->getId(cg);
   bool pseudoMain = funcScope->inPseudoMain();
   string origFuncName = !pseudoMain ? funcScope->getOriginalName() :
           ("run_init::" + funcScope->getContainingFile()->getName());
@@ -183,6 +183,12 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
     cg.printDocComment(funcScope->getDocComment());
   }
 
+  bool isWrapper = context == CodeGenerator::CppTypedParamsWrapperDecl ||
+    context == CodeGenerator::CppTypedParamsWrapperImpl;
+
+  bool needsWrapper = isWrapper ||
+    (Option::HardTypeHints && funcScope->needsTypeCheckWrapper());
+
   if (funcScope->isInlined()) cg_printf("inline ");
 
   TypePtr type = funcScope->getReturnType();
@@ -202,45 +208,68 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
     cg_printf(" %s%s(", Option::PseudoMainPrefix,
               funcScope->getContainingFile()->pseudoMainName().c_str());
   } else {
-    cg_printf(" %s%s(", Option::FunctionPrefix, fname.c_str());
+    cg_printf(" %s%s(",
+              needsWrapper && !isWrapper ?
+              Option::TypedFunctionPrefix : Option::FunctionPrefix,
+              fname.c_str());
   }
 
   switch (context) {
-  case CodeGenerator::CppForwardDeclaration:
-    funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
-    cg_printf(");\n");
-    if (funcScope->hasDirectInvoke()) {
-      cg_printf("Variant %s%s(void *extra, CArrRef params);\n",
-                Option::InvokePrefix, fname.c_str());
-    }
-    break;
-  case CodeGenerator::CppDeclaration:
-  case CodeGenerator::CppImplementation:
-  case CodeGenerator::CppPseudoMain:
+    case CodeGenerator::CppForwardDeclaration:
+    case CodeGenerator::CppTypedParamsWrapperDecl:
+      funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
+      cg_printf(");\n");
+      if (!isWrapper) {
+        if (funcScope->hasDirectInvoke()) {
+          cg_printf("Variant %s%s(void *extra, CArrRef params);\n",
+                    Option::InvokePrefix, fname.c_str());
+        }
+        if (needsWrapper) {
+          cg.setContext(CodeGenerator::CppTypedParamsWrapperDecl);
+          outputCPPImpl(cg, ar);
+          cg.setContext(context);
+        }
+      }
+      break;
+    case CodeGenerator::CppDeclaration:
+    case CodeGenerator::CppImplementation:
+    case CodeGenerator::CppPseudoMain:
+    case CodeGenerator::CppTypedParamsWrapperImpl:
     {
       funcScope->outputCPPParamsDecl(cg, ar, m_params, false);
       cg_indentBegin(") {\n");
-      const char *sys =
-        (cg.getOutput() == CodeGenerator::SystemCPP ? "_BUILTIN" : "");
-      if (pseudoMain) {
-        cg_printf("PSEUDOMAIN_INJECTION%s(%s, %s%s);\n",
-                  sys, origFuncName.c_str(), Option::PseudoMainPrefix,
-                  funcScope->getContainingFile()->pseudoMainName().c_str());
-      } else {
-        if (m_stmt->hasBody()) {
-          cg_printf("FUNCTION_INJECTION%s(%s);\n", sys, origFuncName.c_str());
+      if (!isWrapper) {
+        const char *sys =
+          (cg.getOutput() == CodeGenerator::SystemCPP ? "_BUILTIN" : "");
+        if (pseudoMain) {
+          cg_printf("PSEUDOMAIN_INJECTION%s(%s, %s%s);\n",
+                    sys, origFuncName.c_str(), Option::PseudoMainPrefix,
+                    funcScope->getContainingFile()->pseudoMainName().c_str());
+        } else {
+          if (m_stmt->hasBody()) {
+            cg_printf("FUNCTION_INJECTION%s(%s);\n", sys,
+                      origFuncName.c_str());
+          }
+          outputCPPArgInjections(cg, ar, origFuncName.c_str(),
+                                 ClassScopePtr(), funcScope);
         }
-        outputCPPArgInjections(cg, ar, origFuncName.c_str(), ClassScopePtr(),
-                               funcScope);
+        funcScope->outputCPP(cg, ar);
+        cg.setContext(CodeGenerator::NoContext); // no inner functions/classes
+        outputCPPStmt(cg, ar);
+        cg_indentEnd("} /* function */\n");
+        if (needsWrapper) {
+          cg.setContext(CodeGenerator::CppTypedParamsWrapperImpl);
+          outputCPPImpl(cg, ar);
+        }
+        cg.setContext(context);
+      } else {
+        outputCPPTypeCheckWrapper(cg, ar);
+        cg_indentEnd("} /* function */\n");
       }
-      funcScope->outputCPP(cg, ar);
-      cg.setContext(CodeGenerator::NoContext); // no inner functions/classes
-      outputCPPStmt(cg, ar);
-      cg.setContext(context);
-      cg_indentEnd("} /* function */\n");
     }
     break;
-  default:
-    ASSERT(false);
+    default:
+      ASSERT(false);
   }
 }
+

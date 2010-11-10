@@ -69,6 +69,8 @@ public:
   void outputCPPStaticMethodWrapper(CodeGenerator &cg,
                                     AnalysisResultPtr ar,
                                     const char *cls);
+  void outputCPPTypeCheckWrapper(CodeGenerator &cg,
+                                 AnalysisResultPtr ar);
   bool hasRefParam();
   void outputParamArrayCreate(CodeGenerator &cg, bool checkRef);
   FunctionScopePtr onInitialParse(AnalysisResultPtr ar, FileScopePtr fs,

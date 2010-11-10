@@ -114,6 +114,7 @@ public:
   static int LiteralStringFileCount;
   static bool LiteralStringCompression;
   static bool AnalyzePerfectVirtuals;
+  static bool HardTypeHints;
 
   /**
    * RTTI profiling metadata output file
@@ -193,6 +194,7 @@ public:
    * Name resolution helpers.
    */
   static const char *FunctionPrefix;
+  static const char *TypedFunctionPrefix;
   static const char *BuiltinFunctionPrefix;
   static const char *InvokePrefix;
   static const char *InvokeFewArgsPrefix;
@@ -217,8 +219,10 @@ public:
   static const char *ObjectStaticPrefix;
   static const char *SmartPtrPrefix;
   static const char *MethodPrefix;
+  static const char *TypedMethodPrefix;
   static const char *MethodWrapperPrefix;
   static const char *MethodImplPrefix;
+  static const char *TypedMethodImplPrefix;
   static const char *PropertyPrefix;
   static const char *StaticPropertyPrefix;
   static const char *ConstantPrefix;

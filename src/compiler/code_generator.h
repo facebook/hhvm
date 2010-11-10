@@ -67,6 +67,8 @@ public:
     CppStaticMethodWrapper,     // Only used to force parameters to use C*Ref
     CppParameterDefaultValueDecl,
     CppParameterDefaultValueImpl,
+    CppTypedParamsWrapperImpl,
+    CppTypedParamsWrapperDecl,
     CppFFIDecl,
     CppFFIImpl,
     HsFFI,
@@ -181,12 +183,6 @@ public:
   const std::vector<int> &getBreakScopes() const { return m_breakScopes;}
   void addLabelId(const char *name, int labelId);
   bool findLabelId(const char *name, int labelId);
-
-  /**
-   * Helpers for keeping track of index in an ExpressionList.
-   */
-  void setItemIndex(int index) { m_itemIndex = index;}
-  int getItemIndex() { return m_itemIndex;}
 
   /**
    * Get current line number of primary stream.

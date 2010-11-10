@@ -405,6 +405,18 @@ Variant throw_wrong_arguments(const char *fn, int count, int cmin, int cmax,
   return null;
 }
 
+Variant throw_missing_typed_argument(const char *fn,
+                                     const char *type, int arg) {
+  if (!type) {
+    raise_error("Argument %d passed to %s() must be an array, none given",
+                arg, fn);
+  } else {
+    raise_error("Argument %d passed to %s() must be "
+                "an instance of %s, none given", arg, fn, type);
+  }
+  return null;
+}
+
 void throw_bad_type_exception(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);

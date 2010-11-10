@@ -183,6 +183,8 @@ public:
     return m_prevReturn ? m_prevReturn : m_returnType;
   }
   void popReturnType(AnalysisResultPtr ar);
+  bool needsTypeCheckWrapper() const;
+  const char *getPrefix(ExpressionListPtr params);
 
   void setOptFunction(FunctionOptPtr fn) { m_optFunction = fn; }
   FunctionOptPtr getOptFunction() const { return m_optFunction; }
@@ -241,18 +243,7 @@ public:
                       ExpressionListPtr params, bool &valid);
   TypePtr setParamType(AnalysisResultPtr ar, int index, TypePtr type);
   TypePtr getParamType(int index);
-
-  int requireCallTemps(int count) {
-    int ret = m_callTempCountCurrent;
-    m_callTempCountCurrent += count;
-    if (m_callTempCountMax < m_callTempCountCurrent) {
-      m_callTempCountMax = m_callTempCountCurrent;
-    }
-    return ret;
-  }
-  void endRequireCallTemps(int old) {
-    m_callTempCountCurrent = old;
-  }
+  TypePtr getParamTypeSpec(int index) { return m_paramTypeSpecs[index]; }
 
   /**
    * Override BlockScope::outputPHP() to generate return type.
@@ -421,8 +412,6 @@ private:
   bool m_inlineable;
   bool m_sep;
   bool m_containsThis; // contains a usage of $this?
-  int m_callTempCountMax;
-  int m_callTempCountCurrent;
   StatementPtr m_stmtCloned; // cloned method body stmt
   bool m_nrvoFix;
   bool m_inlineAsExpr;

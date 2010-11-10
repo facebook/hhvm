@@ -1309,7 +1309,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         cls->findConstructor(ar, true)->getName() :
         cg.formatLabel(m_name);
 
-      cg_printf("%s%s(", Option::MethodPrefix, name.c_str());
+      cg_printf("%s%s(", m_funcScope->getPrefix(m_params), name.c_str());
     } else {
       int paramCount = m_params ? m_params->getCount() : 0;
       if (m_name == "get_class" && getClassScope() && paramCount == 0) {
@@ -1331,7 +1331,8 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         } else {
           cg_printf("%s%s(",
                     m_builtinFunction ? Option::BuiltinFunctionPrefix :
-                    Option::FunctionPrefix, m_funcScope->getId(cg).c_str());
+                    m_funcScope->getPrefix(m_params),
+                    m_funcScope->getId(cg).c_str());
         }
       }
     }

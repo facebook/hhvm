@@ -102,26 +102,31 @@ void ParameterExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar, bool error) {
+TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar,
+                                         bool forInference) {
   TypePtr ret;
-  if (m_type.empty() || m_defaultValue) {
+  if (m_type.empty() || (forInference && m_defaultValue)) {
     ret = Type::Some;
   } else if (m_type == "array") {
     ret = Type::Array;
   } else {
-    ClassScopePtr cls = ar->findClass(m_type);
-    if (!cls || cls->isRedeclaring()) {
-      if (error && !cls && getScope()->isFirstPass()) {
-        ConstructPtr self = shared_from_this();
-        Compiler::Error(Compiler::UnknownClass, self);
+    if (forInference) {
+      ClassScopePtr cls = ar->findClass(m_type);
+      if (Option::SystemGen ||
+          !cls || cls->isRedeclaring() || cls->derivedByDynamic()) {
+        if (!cls && getScope()->isFirstPass()) {
+          ConstructPtr self = shared_from_this();
+          Compiler::Error(Compiler::UnknownClass, self);
+        }
+        ret = Type::Variant;
       }
-      ret = Type::Some;
-    } else {
+    }
+    if (!ret) {
       ret = Type::CreateObjectType(m_type);
     }
   }
   // we still want the above to run, so to record errors and infer defaults
-  if (m_ref) {
+  if (m_ref && forInference) {
     ret = Type::Variant;
   }
 
@@ -133,18 +138,22 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   ASSERT(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
   TypePtr ret = getTypeSpec(ar, true);
 
-  if (m_defaultValue && !m_ref) {
-    ret = m_defaultValue->inferAndCheck(ar, ret, false);
-  }
-
   VariableTablePtr variables = getScope()->getVariables();
   // Functions that can be called dynamically have to have
   // variant parameters, even if they have a type hint
   if (getFunctionScope()->isDynamic() ||
       getFunctionScope()->isRedeclaring() ||
       getFunctionScope()->isVirtual()) {
-    variables->forceVariant(ar, m_name, VariableTable::AnyVars);
-    ret = Type::Variant;
+    if (Option::HardTypeHints &&
+        (ret->is(Type::KindOfArray) || ret->is(Type::KindOfObject))) {
+    } else {
+      variables->forceVariant(ar, m_name, VariableTable::AnyVars);
+      ret = Type::Variant;
+    }
+  }
+
+  if (m_defaultValue && !m_ref) {
+    ret = m_defaultValue->inferAndCheck(ar, ret, false);
   }
 
   // parameters are like variables, but we need to remember these are
@@ -189,9 +198,20 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   FunctionScopePtr func = getFunctionScope();
   VariableTablePtr variables = func->getVariables();
-  TypePtr paramType = func->getParamType(cg.getItemIndex());
+  Symbol *sym = variables->getSymbol(m_name);
+  assert(sym && sym->isParameter());
+
+  CodeGenerator::Context context = cg.getContext();
+  bool typedWrapper = (context == CodeGenerator::CppTypedParamsWrapperImpl ||
+                       context == CodeGenerator::CppTypedParamsWrapperDecl);
+
+  TypePtr paramType =
+    typedWrapper && func->getParamTypeSpec(sym->getParameterIndex()) ?
+    Type::Variant : func->getParamType(sym->getParameterIndex());
+
   bool isCVarRef = false;
   if (cg.getContext() == CodeGenerator::CppStaticMethodWrapper ||
+      typedWrapper ||
       (!variables->isLvalParam(m_name) &&
        !variables->getAttribute(VariableTable::ContainsDynamicVariable) &&
        !variables->getAttribute(VariableTable::ContainsExtract) &&
@@ -210,8 +230,8 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
 
   cg_printf(" %s%s", Option::VariablePrefix, m_name.c_str());
   if (m_defaultValue) {
-    CodeGenerator::Context context = cg.getContext();
-    bool comment =  context == CodeGenerator::CppImplementation ||
+    bool comment = context == CodeGenerator::CppTypedParamsWrapperImpl ||
+      context == CodeGenerator::CppImplementation ||
       (context == CodeGenerator::CppDeclaration && func->isInlined());
     if (comment) {
       cg_printf(" // ");

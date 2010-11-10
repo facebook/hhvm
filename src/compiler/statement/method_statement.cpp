@@ -430,12 +430,24 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   cg.setPHPLineNo(-1);
 
-  if (cg.getContext() == CodeGenerator::CppImplementation) {
+  CodeGenerator::Context context = cg.getContext();
+
+  if (context == CodeGenerator::CppImplementation) {
     printSource(cg);
   }
 
-  switch (cg.getContext()) {
-  case CodeGenerator::CppDeclaration:
+  bool isWrapper = context == CodeGenerator::CppTypedParamsWrapperDecl ||
+    context == CodeGenerator::CppTypedParamsWrapperImpl;
+
+  bool needsWrapper = isWrapper ||
+    (Option::HardTypeHints && funcScope->needsTypeCheckWrapper());
+
+  const char *prefix = needsWrapper && !isWrapper ?
+    Option::TypedMethodPrefix : Option::MethodPrefix;
+
+  switch (context) {
+    case CodeGenerator::CppDeclaration:
+    case CodeGenerator::CppTypedParamsWrapperDecl:
     {
       if (!m_stmt && !funcScope->isPerfectVirtual()) {
         cg_printf("// ");
@@ -457,13 +469,14 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf(" &___offsetget_lval(");
       } else if (m_modifiers->isStatic() && m_stmt) {
         // Static method wrappers get generated as support methods
-        cg_printf(" %s%s(CStrRef cls%s", Option::MethodImplPrefix,
+        cg_printf(" %s%s(CStrRef cls%s",
+                  needsWrapper && !isWrapper ?
+                  Option::TypedMethodImplPrefix : Option::MethodImplPrefix,
                   cg.formatLabel(m_name).c_str(),
                   funcScope->isVariableArgument() ||
                   (m_params && m_params->getCount()) ? ", " : "");
       } else {
-        cg_printf(" %s%s(", Option::MethodPrefix,
-                  cg.formatLabel(m_name).c_str());
+        cg_printf(" %s%s(", prefix, cg.formatLabel(m_name).c_str());
       }
       funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
       if (m_stmt) {
@@ -474,88 +487,109 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf(") = 0;\n");
       }
 
-      if (funcScope->isConstructor(scope)
-       && !funcScope->isAbstract() && !scope->isInterface()) {
-        funcScope->outputCPPCreateDecl(cg, ar);
+      if (context != CodeGenerator::CppTypedParamsWrapperDecl) {
+        if (funcScope->isConstructor(scope)
+            && !funcScope->isAbstract() && !scope->isInterface()) {
+          funcScope->outputCPPCreateDecl(cg, ar);
+        }
+        if (Option::HardTypeHints && funcScope->needsTypeCheckWrapper()) {
+          cg.setContext(CodeGenerator::CppTypedParamsWrapperDecl);
+          outputCPPImpl(cg, ar);
+          cg.setContext(context);
+        }
       }
     }
     break;
-  case CodeGenerator::CppImplementation:
-    if (m_stmt) {
-      TypePtr type = funcScope->getReturnType();
-      if (type) {
-        type->outputCPPDecl(cg, ar);
-      } else {
-        cg_printf("void");
-      }
-      string origFuncName = getOriginalFullName();
-      string funcSection = Option::FunctionSections[origFuncName];
-      if (!funcSection.empty()) {
-        cg_printf(" __attribute__ ((section (\".text.%s\")))",
-                  funcSection.c_str());
-      }
-
-      if (m_name == "__offsetget_lval") {
-        cg_printf(" &%s%s::___offsetget_lval(",
-                  Option::ClassPrefix, scope->getId(cg).c_str());
-      } else if (m_modifiers->isStatic()) {
-        cg_printf(" %s%s::%s%s(CStrRef cls%s", Option::ClassPrefix,
-                  scope->getId(cg).c_str(),
-                  Option::MethodImplPrefix, cg.formatLabel(m_name).c_str(),
-                  funcScope->isVariableArgument() ||
-                  (m_params && m_params->getCount()) ? ", " : "");
-      } else {
-        cg_printf(" %s%s::%s%s(", Option::ClassPrefix,
-                  scope->getId(cg).c_str(),
-                  Option::MethodPrefix, cg.formatLabel(m_name).c_str());
-      }
-      funcScope->outputCPPParamsDecl(cg, ar, m_params, false);
-      cg_indentBegin(") {\n");
-      if (m_stmt->hasBody()) {
-        const char *sys =
-          (cg.getOutput() == CodeGenerator::SystemCPP ? "_BUILTIN" : "");
-        if (m_modifiers->isStatic()) {
-          cg_printf("STATIC_METHOD_INJECTION%s(%s, %s);\n", sys,
-                    scope->getOriginalName().c_str(), origFuncName.c_str());
-        } else if (cg.getOutput() != CodeGenerator::SystemCPP &&
-                   !scope->isRedeclaring() && !scope->derivedByDynamic()) {
-          cg_printf("INSTANCE_METHOD_INJECTION_ROOTLESS(%s, %s);\n",
-                    scope->getOriginalName().c_str(), origFuncName.c_str());
+    case CodeGenerator::CppImplementation:
+    case CodeGenerator::CppTypedParamsWrapperImpl:
+      if (m_stmt) {
+        TypePtr type = funcScope->getReturnType();
+        if (type) {
+          type->outputCPPDecl(cg, ar);
         } else {
-          cg_printf("INSTANCE_METHOD_INJECTION%s(%s, %s);\n", sys,
-                    scope->getOriginalName().c_str(), origFuncName.c_str());
+          cg_printf("void");
         }
+        string origFuncName = getOriginalFullName();
+        string funcSection = Option::FunctionSections[origFuncName];
+        if (!funcSection.empty()) {
+          cg_printf(" __attribute__ ((section (\".text.%s\")))",
+                    funcSection.c_str());
+        }
+
+        if (m_name == "__offsetget_lval") {
+          cg_printf(" &%s%s::___offsetget_lval(",
+                    Option::ClassPrefix, scope->getId(cg).c_str());
+        } else if (m_modifiers->isStatic()) {
+          cg_printf(" %s%s::%s%s(CStrRef cls%s", Option::ClassPrefix,
+                    scope->getId(cg).c_str(),
+                    needsWrapper && !isWrapper ?
+                    Option::TypedMethodImplPrefix : Option::MethodImplPrefix,
+                    cg.formatLabel(m_name).c_str(),
+                    funcScope->isVariableArgument() ||
+                    (m_params && m_params->getCount()) ? ", " : "");
+        } else {
+          cg_printf(" %s%s::%s%s(", Option::ClassPrefix,
+                    scope->getId(cg).c_str(),
+                    prefix, cg.formatLabel(m_name).c_str());
+        }
+        funcScope->outputCPPParamsDecl(cg, ar, m_params, false);
+        cg_indentBegin(") {\n");
+        if (context != CodeGenerator::CppTypedParamsWrapperImpl) {
+          if (m_stmt->hasBody()) {
+            const char *sys =
+              (cg.getOutput() == CodeGenerator::SystemCPP ? "_BUILTIN" : "");
+            if (m_modifiers->isStatic()) {
+              cg_printf("STATIC_METHOD_INJECTION%s(%s, %s);\n", sys,
+                        scope->getOriginalName().c_str(), origFuncName.c_str());
+            } else if (cg.getOutput() != CodeGenerator::SystemCPP &&
+                       !scope->isRedeclaring() && !scope->derivedByDynamic()) {
+              cg_printf("INSTANCE_METHOD_INJECTION_ROOTLESS(%s, %s);\n",
+                        scope->getOriginalName().c_str(), origFuncName.c_str());
+            } else {
+              cg_printf("INSTANCE_METHOD_INJECTION%s(%s, %s);\n", sys,
+                        scope->getOriginalName().c_str(), origFuncName.c_str());
+            }
+          }
+          outputCPPArgInjections(cg, ar, origFuncName.c_str(),
+                                 scope, funcScope);
+          if (m_name == "__offsetget_lval") {
+            ParameterExpressionPtr param =
+              dynamic_pointer_cast<ParameterExpression>((*m_params)[0]);
+            cg_printf("Variant &v = %s->__lvalProxy;\n", cg.getGlobals(ar));
+            string lowered = Util::toLower(m_originalName);
+            cg_printf("v = %s%s(%s%s);\n",
+                      prefix, lowered.c_str(),
+                      Option::VariablePrefix, param->getName().c_str());
+            cg_printf("return v;\n");
+          } else {
+            if (funcScope->isConstructor(scope)) {
+              cg_printf("bool oldInCtor = gasInCtor(true);\n");
+            } else if (m_name == "__destruct") {
+              cg_printf("setInDtor();\n");
+            }
+            funcScope->outputCPP(cg, ar);
+            cg.setContext(
+              CodeGenerator::NoContext); // no inner functions/classes
+            if (!funcScope->isStatic() && funcScope->getVariables()->
+                getAttribute(VariableTable::ContainsDynamicVariable)) {
+              cg_printf("%sthis = this;\n", Option::VariablePrefix);
+            }
+            outputCPPStmt(cg, ar);
+          }
+          cg_indentEnd("} /* function */\n");
+          if (Option::HardTypeHints && funcScope->needsTypeCheckWrapper()) {
+            cg.setContext(CodeGenerator::CppTypedParamsWrapperImpl);
+            outputCPPImpl(cg, ar);
+          }
+        } else {
+          outputCPPTypeCheckWrapper(cg, ar);
+          cg_indentEnd("} /* function */\n");
+        }
+        cg.setContext(context);
       }
-      outputCPPArgInjections(cg, ar, origFuncName.c_str(), scope, funcScope);
-      if (m_name == "__offsetget_lval") {
-        ParameterExpressionPtr param =
-          dynamic_pointer_cast<ParameterExpression>((*m_params)[0]);
-        cg_printf("Variant &v = %s->__lvalProxy;\n", cg.getGlobals(ar));
-        string lowered = Util::toLower(m_originalName);
-        cg_printf("v = %s%s(%s%s);\n",
-                  Option::MethodPrefix, lowered.c_str(),
-                  Option::VariablePrefix, param->getName().c_str());
-        cg_printf("return v;\n");
-      } else {
-        if (funcScope->isConstructor(scope)) {
-          cg_printf("bool oldInCtor = gasInCtor(true);\n");
-        } else if (m_name == "__destruct") {
-          cg_printf("setInDtor();\n");
-        }
-        funcScope->outputCPP(cg, ar);
-        cg.setContext(CodeGenerator::NoContext); // no inner functions/classes
-        if (!funcScope->isStatic() && funcScope->getVariables()->
-            getAttribute(VariableTable::ContainsDynamicVariable)) {
-          cg_printf("%sthis = this;\n", Option::VariablePrefix);
-        }
-        outputCPPStmt(cg, ar);
-        cg.setContext(CodeGenerator::CppImplementation);
-      }
-      cg_indentEnd("} /* function */\n");
-    }
-    break;
-  default:
-    break;
+      break;
+    default:
+      break;
   }
 }
 
@@ -655,7 +689,16 @@ void MethodStatement::outputCPPStaticMethodWrapper(CodeGenerator &cg,
                                                    AnalysisResultPtr ar,
                                                    const char *cls) {
   if (!m_modifiers->isStatic() || !m_stmt) return;
+
+  CodeGenerator::Context context = cg.getContext();
   FunctionScopePtr funcScope = m_funcScope.lock();
+
+  bool isWrapper = context == CodeGenerator::CppTypedParamsWrapperDecl ||
+    context == CodeGenerator::CppTypedParamsWrapperImpl;
+
+  bool needsWrapper = isWrapper ||
+    (Option::HardTypeHints && funcScope->needsTypeCheckWrapper());
+
   m_modifiers->outputCPP(cg, ar);
   TypePtr type = funcScope->getReturnType();
   if (type) {
@@ -663,14 +706,17 @@ void MethodStatement::outputCPPStaticMethodWrapper(CodeGenerator &cg,
   } else {
     cg_printf("void");
   }
-  cg_printf(" %s%s(", Option::MethodPrefix, cg.formatLabel(m_name).c_str());
-  CodeGenerator::Context old = cg.getContext();
-  cg.setContext(CodeGenerator::CppStaticMethodWrapper);
+  cg_printf(" %s%s(", needsWrapper && !isWrapper ?
+            Option::TypedMethodPrefix : Option::MethodPrefix,
+            cg.formatLabel(m_name).c_str());
+  if (!isWrapper) cg.setContext(CodeGenerator::CppStaticMethodWrapper);
   funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
-  cg_printf(") { %s%s%s(", type ? "return " : "", Option::MethodImplPrefix,
+  cg_printf(") { %s%s%s(", type ? "return " : "",
+            needsWrapper && !isWrapper ?
+            Option::TypedMethodImplPrefix : Option::MethodImplPrefix,
             cg.formatLabel(m_name).c_str());
   cg_printf("%s%s::s_class_name", Option::ClassPrefix, cls);
-  cg.setContext(old);
+  cg.setContext(context);
   if (funcScope->isVariableArgument()) {
     cg_printf(", num_args");
   }
@@ -686,8 +732,61 @@ void MethodStatement::outputCPPStaticMethodWrapper(CodeGenerator &cg,
     cg_printf(", args");
   }
   cg_printf("); }\n");
+  if (!isWrapper && needsWrapper) {
+    cg.setContext(CodeGenerator::CppTypedParamsWrapperDecl);
+    outputCPPStaticMethodWrapper(cg, ar, cls);
+    cg.setContext(context);
+  }
 }
 
+void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
+                                                AnalysisResultPtr ar) {
+  FunctionScopePtr funcScope = getFunctionScope();
+  TypePtr type = funcScope->getReturnType();
+  bool isMethod = getClassScope();
+  string fname = isMethod ? funcScope->getName() : funcScope->getId(cg);
+
+  funcScope->outputCPP(cg, ar);
+  cg_printf("%s%s%s(", type ? "return " : "",
+            (isMethod ? (m_modifiers->isStatic() ?
+                         Option::TypedMethodImplPrefix :
+                         Option::TypedMethodPrefix) :
+             Option::TypedFunctionPrefix),
+            fname.c_str());
+  if (getClassScope() && m_modifiers->isStatic()) {
+    cg_printf("cls, ");
+  }
+  if (funcScope->isVariableArgument()) {
+    cg_printf("num_args, ");
+  }
+
+  assert(m_params);
+
+  for (int i = 0; i < m_params->getCount(); i++) {
+    ParameterExpressionPtr param =
+      dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+    ASSERT(param);
+    if (i) cg_printf(", ");
+    cg_printf("%s%s", Option::VariablePrefix,
+              param->getName().c_str());
+    if (TypePtr spec = funcScope->getParamTypeSpec(i)) {
+      if (Type::SameType(spec, funcScope->getParamType(i))) {
+        if (spec->is(Type::KindOfArray)) {
+          cg_printf(".getArrayData()");
+        } else {
+          ClassScopePtr cls = ar->findClass(spec->getName());
+          assert(cls && !cls->isRedeclaring());
+          cg_printf(".getObjectData()");
+        }
+      }
+    }
+  }
+
+  if (funcScope->isVariableArgument()) {
+    cg_printf(", args");
+  }
+  cg_printf(");\n");
+}
 
 bool MethodStatement::outputFFI(CodeGenerator &cg, AnalysisResultPtr ar) {
   FunctionScopePtr funcScope = m_funcScope.lock();

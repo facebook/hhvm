@@ -779,7 +779,6 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         if (i == n - 1 && skipLast) s = 0;
         bool noEffect = false;
         if (m_kindOf == KindOfExpressionList) {
-          cg.setItemIndex(i);
           ExpressionList *el = static_cast<ExpressionList*>(this);
           if (i >= el->getOutputCount()) {
             s = lastState = 0;

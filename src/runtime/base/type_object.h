@@ -184,6 +184,22 @@ class Object : public SmartPtr<ObjectData> {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// ObjNR
+
+class ObjNR : public Object {
+public:
+  ObjNR(ObjectData *data) {
+    m_px = data;
+  }
+  ObjNR(const ObjNR &o) {
+    m_px = o.m_px;
+  }
+  ~ObjNR() {
+    m_px = NULL;
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
 }
 
 #endif // __HPHP_OBJECT_H__

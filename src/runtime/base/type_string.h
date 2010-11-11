@@ -388,6 +388,8 @@ template<typename T>
 class StringIMap :
   public hphp_hash_map<String, T, hphp_string_hash, hphp_string_isame> { };
 
+///////////////////////////////////////////////////////////////////////////////
+
 /**
  * A StaticString can be co-accessed by multiple threads, therefore they are
  * not thread local, and they have to be allocated BEFORE any thread starts,
@@ -423,6 +425,22 @@ private:
 };
 
 extern const StaticString empty_string;
+
+///////////////////////////////////////////////////////////////////////////////
+// StrNR
+
+class StrNR : public String {
+public:
+  StrNR(StringData *data) {
+    m_px = data;
+  }
+  StrNR(const StrNR &s) {
+    m_px = s.m_px;
+  }
+  ~StrNR() {
+    m_px = NULL;
+  }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

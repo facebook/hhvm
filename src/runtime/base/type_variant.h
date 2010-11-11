@@ -501,6 +501,23 @@ class Variant {
     return toObjectHelper();
   }
   VarNR toKey   () const;
+  /* Creating a temporary Array, String, or Object with no ref-counting and
+   * no type checking, use it only when we have checked the variant type and
+   * we are sure the internal data will have a reference until the temporary
+   * one gets out-of-scope.
+   */
+  StrNR toStrNR () const {
+    ASSERT(m_type == KindOfString);
+    return m_data.pstr;
+  }
+  ArrNR toArrNR () const {
+    ASSERT(m_type == KindOfArray);
+    return m_data.parr;
+  }
+  ObjNR toObjNR() const {
+    ASSERT(m_type == KindOfObject);
+    return m_data.pobj;
+  }
 
   /**
    * Comparisons

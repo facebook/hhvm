@@ -724,7 +724,8 @@ function generateMethodCPPHeader($method, $class, $f) {
                         $method['name'] != "__construct" &&
                         strpos($method['name'], "__") === 0,
                         $method['flags'] & IsStatic, $class);
-  fprintf($f, "  DECLARE_METHOD_INVOKE_HELPERS(%s);\n", $method['name']);
+  fprintf($f, "  DECLARE_METHOD_INVOKE_HELPERS(%s);\n",
+          strtolower($method['name']));
   if ($method['name'] == "__call") {
     fprintf($f, "  public: Variant doCall(Variant v_name, ");
     fprintf($f, "Variant v_arguments, bool fatal);\n");

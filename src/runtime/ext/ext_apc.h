@@ -121,6 +121,7 @@ String apc_reserialize(CStrRef str);
 // debugging support
 
 bool apc_dump(const char *filename);
+size_t get_const_map_size();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

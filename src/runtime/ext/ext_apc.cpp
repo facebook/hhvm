@@ -25,6 +25,7 @@
 #include <runtime/base/program_functions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/variable_serializer.h>
+#include <util/alloc.h>
 
 using namespace std;
 
@@ -240,6 +241,8 @@ public:
   void onThreadExit() {}
 };
 
+static size_t s_const_map_size = 0;
+
 void apc_load(int thread) {
   static void *handle = NULL;
   if (handle ||
@@ -275,11 +278,39 @@ void apc_load(int thread) {
   }
 
   if (RuntimeOption::EnableConstLoad) {
+#ifndef NO_JEMALLOC
+    size_t allocated_before = 0;
+    size_t allocated_after = 0;
+    size_t sz = sizeof(size_t);
+    if (mallctl) {
+      uint64_t epoch = 1;
+      mallctl("epoch", NULL, NULL, &epoch, sizeof(epoch));
+      mallctl("stats.allocated", &allocated_before, &sz, NULL, 0);
+      // Ignore the first result because it may be inaccurate due to internal
+      // allocation.
+      epoch = 1;
+      mallctl("epoch", NULL, NULL, &epoch, sizeof(epoch));
+      mallctl("stats.allocated", &allocated_before, &sz, NULL, 0);
+    }
+#endif
     apc_load_func(handle, "_hphp_const_load_all")();
+#ifndef NO_JEMALLOC
+    if (mallctl) {
+      uint64_t epoch = 1;
+      mallctl("epoch", NULL, NULL, &epoch, sizeof(epoch));
+      sz = sizeof(size_t);
+      mallctl("stats.allocated", &allocated_after, &sz, NULL, 0);
+      s_const_map_size = allocated_after - allocated_before;
+    }
+#endif
   }
 
   // We've copied all the data out, so close it out.
   dlclose(handle);
+}
+
+size_t get_const_map_size() {
+  return s_const_map_size;
 }
 
 //define in ext_fb.cpp

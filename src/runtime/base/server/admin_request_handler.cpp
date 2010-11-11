@@ -168,6 +168,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "                  only valid when EnableAPCSizeDetail is true\n"
         "    keysample     optional, only dump keys that belongs to the same\n"
         "                  group as <keysample>\n"
+        "/const-ss:        get const_map_size\n"
         "/dump-apc:        dump all current value in APC to /tmp/apc_dump\n"
         "/dump-const:      dump all constant value in constant map to\n"
         "                  /tmp/const_map_dump\n"
@@ -277,6 +278,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "dump", 4) == 0 &&
         handleDumpCacheRequest(cmd, transport)) {
+      break;
+    }
+    if (strncmp(cmd.c_str(), "const-ss", 8) == 0 &&
+        handleConstSizeRequest(cmd, transport)) {
       break;
     }
 
@@ -806,6 +811,22 @@ bool AdminRequestHandler::handleAPCSizeRequest (const std::string &cmd,
     } else {
       transport->sendString("Failed\n");
     }
+    return true;
+  }
+  return false;
+}
+
+bool AdminRequestHandler::handleConstSizeRequest (const std::string &cmd,
+                                                  Transport *transport) {
+  if (!RuntimeOption::EnableConstLoad && cmd == "const-ss") {
+    transport->sendString("Not Enabled\n");
+    return true;
+  }
+  if (cmd == "const-ss") {
+    ostringstream result;
+    size_t size = get_const_map_size();
+    result << "{ \"hphp.const_map.size\":" << size << "}\n";
+    transport->sendString(result.str());
     return true;
   }
   return false;

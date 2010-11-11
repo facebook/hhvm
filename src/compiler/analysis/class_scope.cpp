@@ -403,7 +403,7 @@ FunctionScopePtr ClassScope::findFunction(AnalysisResultPtr ar,
       if (!super) continue;
       if (exclIntfBase && super->isInterface()) break;
       if (super->isRedeclaring()) {
-        if (!super->isInterface()) {
+        if (base == m_parent) {
           m_derivesFromRedeclaring = DirectFromRedeclared;
           break;
         }

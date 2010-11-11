@@ -749,18 +749,14 @@ class Variant {
    * this function.
    */
   CVarRef set(bool    key, CVarRef v);
-  CVarRef set(char    key, CVarRef v) {
-    return set((int64)key, v);
-  }
-  CVarRef set(short   key, CVarRef v) {
-    return set((int64)key, v);
-  }
-  CVarRef set(int     key, CVarRef v) {
-    return set((int64)key, v);
-  }
-  CVarRef set(int64 key, CVarRef v);
+  CVarRef set(char    key, CVarRef v) { return set((int64)key, v); }
+  CVarRef set(short   key, CVarRef v) { return set((int64)key, v); }
+  CVarRef set(int     key, CVarRef v) { return set((int64)key, v); }
+  CVarRef set(int64   key, CVarRef v);
   CVarRef set(double  key, CVarRef v);
-  CVarRef set(litstr  key, CVarRef v, bool isString = false);
+  CVarRef set(litstr  key, CVarRef v, bool isString = false) {
+    return set(String(key), v, isString);
+  }
   CVarRef set(CStrRef key, CVarRef v, bool isString = false);
   CVarRef set(CVarRef key, CVarRef v);
 
@@ -777,8 +773,10 @@ class Variant {
     return setOpEqual(op, (int64)key, v);
   }
   CVarRef setOpEqual(int op, int64 key, CVarRef v);
-  CVarRef setOpEqual(int op, double  key, CVarRef v);
-  CVarRef setOpEqual(int op, litstr  key, CVarRef v, bool isString = false);
+  CVarRef setOpEqual(int op, double key, CVarRef v);
+  CVarRef setOpEqual(int op, litstr  key, CVarRef v, bool isString = false) {
+    return setOpEqual(op, String(key), v, isString);
+  }
   CVarRef setOpEqual(int op, CStrRef key, CVarRef v, bool isString = false);
   CVarRef setOpEqual(int op, CVarRef key, CVarRef v);
   CVarRef appendOpEqual(int op, CVarRef v);

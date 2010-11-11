@@ -525,7 +525,7 @@ CVarRef Array::set(CVarRef key, CVarRef v) {
   if (!k.isNull()) {
     return setImpl(k, v);
   }
-  return null_variant;
+  return Variant::lvalBlackHole();
 }
 
 CVarRef Array::add(litstr  key, CVarRef v, bool isString /* = false */) {
@@ -546,7 +546,7 @@ CVarRef Array::add(CVarRef key, CVarRef v) {
   if (!k.isNull()) {
     return addImpl(k, v);
   }
-  return null_variant;
+  return Variant::lvalBlackHole();
 }
 
 Variant &Array::addLval(litstr  key, bool isString /* = false */) {

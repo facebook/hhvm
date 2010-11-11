@@ -910,7 +910,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       if (func) {
         FunctionScope::RefParamInfoPtr info =
           FunctionScope::GetRefParamInfo(m_name);
-        ASSERT(info);
+        assert(info);
         for (int i = m_params->getCount(); i--; ) {
           if (info->isRefParam(i)) {
             m_params->markParam(i, canInvokeFewArgs());
@@ -1356,9 +1356,8 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       }
     }
     if (canInvokeFewArgs() && !m_arrayParams) {
-      int left = Option::InvokeFewArgsCount;
+      int pcount = m_params ? m_params->getCount() : 0;
       if (m_params && m_params->getCount()) {
-        left -= m_params->getCount();
         cg_printf("%d, ", m_params->getCount());
         ar->pushCallInfo(m_ciTemp);
         FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
@@ -1366,7 +1365,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       } else {
         cg_printf("0");
       }
-      for (int i = 0; i < left; i++) {
+      for (int i = pcount; i < Option::InvokeFewArgsCount; i++) {
         cg_printf(", null");
       }
     } else {

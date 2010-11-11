@@ -362,13 +362,7 @@ public:
 
   static void RecordRefParamInfo(std::string fname, FunctionScopePtr func);
 
-  static RefParamInfoPtr GetRefParamInfo(std::string fname) {
-    StringToRefParamInfoPtrMap::iterator it = s_refParamInfo.find(fname);
-    if (it == s_refParamInfo.end()) {
-      return RefParamInfoPtr();
-    }
-    return it->second;
-  }
+  static RefParamInfoPtr GetRefParamInfo(std::string fname);
 
   class RefParamInfo {
   public:

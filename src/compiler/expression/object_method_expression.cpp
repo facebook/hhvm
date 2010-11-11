@@ -447,8 +447,18 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       } else {
         cg_printf("0");
       }
+      FunctionScope::RefParamInfoPtr info;
+      if (!m_name.empty()) {
+        info = FunctionScope::GetRefParamInfo(m_name);
+      }
       for (int i = pcount; i < Option::InvokeFewArgsCount; ++i) {
-        cg.printf(", null_variant");
+        if (info && !info->isRefParam(i)) {
+          cg_printf(", null_variant");
+        } else {
+          // It is not safe to use null_variant here, because
+          // throw_missing_arguments() might not throw at all.
+          cg_printf(", null");
+        }
       }
       cg_printf(")");
     } else {

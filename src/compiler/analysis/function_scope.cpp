@@ -1552,6 +1552,14 @@ void FunctionScope::RecordRefParamInfo(string fname, FunctionScopePtr func) {
   }
 }
 
+FunctionScope::RefParamInfoPtr FunctionScope::GetRefParamInfo(string fname) {
+  StringToRefParamInfoPtrMap::iterator it = s_refParamInfo.find(fname);
+  if (it == s_refParamInfo.end()) {
+    return RefParamInfoPtr();
+  }
+  return it->second;
+}
+
 void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
                                         AnalysisResultPtr ar,
                                         const char *clsToConstruct) {

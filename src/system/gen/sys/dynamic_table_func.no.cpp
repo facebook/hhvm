@@ -21406,17 +21406,20 @@ Variant ifa_hphp_splfileobject_fscanf(void *extra, int count, INVOKE_FEW_ARGS_IM
 Variant i_qlzuncompress(void *extra, CArrRef params) {
   FUNCTION_INJECTION(qlzuncompress);
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("qlzuncompress", count, 1, 1, 1);
+  if (count < 1 || count > 2) return throw_wrong_arguments("qlzuncompress", count, 1, 2, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    return (f_qlzuncompress(arg0));
+    if (count <= 1) return (f_qlzuncompress(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_qlzuncompress(arg0, arg1));
   }
 }
 Variant ifa_qlzuncompress(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 1) return throw_wrong_arguments("qlzuncompress", count, 1, 1, 1);
-  return (f_qlzuncompress(a0));
+  if (count < 1 || count > 2) return throw_wrong_arguments("qlzuncompress", count, 1, 2, 1);
+  if (count <= 1) return (f_qlzuncompress(a0));
+  return (f_qlzuncompress(a0, a1));
 }
 Variant i_mb_ereg_search_getregs(void *extra, CArrRef params) {
   FUNCTION_INJECTION(mb_ereg_search_getregs);
@@ -61402,19 +61405,24 @@ Variant ei_hphp_splfileobject_fscanf(Eval::VariableEnvironment &env, const Eval:
 }
 Variant ei_qlzuncompress(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
+  Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("qlzuncompress", count, 1, 1, 1);
+  if (count < 1 || count > 2) return throw_wrong_arguments("qlzuncompress", count, 1, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
     a0 = (*it)->eval(env);
     it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  return (x_qlzuncompress(a0));
+  if (count <= 1) return (x_qlzuncompress(a0));
+  else return (x_qlzuncompress(a0, a1));
 }
 Variant ei_mb_ereg_search_getregs(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -85549,7 +85557,7 @@ CallInfo ci_write_hdf_file((void*)&i_write_hdf_file, (void*)&ifa_write_hdf_file,
 CallInfo ci_socket_send((void*)&i_socket_send, (void*)&ifa_socket_send, 4, 0, 0x0000000000000000LL);
 CallInfo ci_zlib_get_coding_type((void*)&i_zlib_get_coding_type, (void*)&ifa_zlib_get_coding_type, 0, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileobject_fscanf((void*)&i_hphp_splfileobject_fscanf, (void*)&ifa_hphp_splfileobject_fscanf, 4, 0, 0x0000000000000000LL);
-CallInfo ci_qlzuncompress((void*)&i_qlzuncompress, (void*)&ifa_qlzuncompress, 1, 0, 0x0000000000000000LL);
+CallInfo ci_qlzuncompress((void*)&i_qlzuncompress, (void*)&ifa_qlzuncompress, 2, 0, 0x0000000000000000LL);
 CallInfo ci_mb_ereg_search_getregs((void*)&i_mb_ereg_search_getregs, (void*)&ifa_mb_ereg_search_getregs, 0, 0, 0x0000000000000000LL);
 CallInfo ci_mb_eregi((void*)&i_mb_eregi, (void*)&ifa_mb_eregi, 3, 0, 0x0000000000000004LL);
 CallInfo ci_pixelgetgreen((void*)&i_pixelgetgreen, (void*)&ifa_pixelgetgreen, 1, 0, 0x0000000000000000LL);

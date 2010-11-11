@@ -6721,7 +6721,7 @@ Variant c_ReflectionMethod::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name
     MethodCallPackage mcp10;
     mcp10.methodCall((v_cls), NAMSTR(s_sys_ss53a3b5b6, "getMethod"), 0x0D81ECE253A3B5B6LL);
     const CallInfo *cit10  __attribute__((__unused__)) = mcp10.ci;
-    const Variant &tmp2(((mcp10.bindClass(info)->getMethFewArgs())(mcp10, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
+    Variant tmp2(((mcp10.bindClass(info)->getMethFewArgs())(mcp10, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
     v_obj = tmp2;
   }
   v_str = (toString(v_obj));
@@ -7959,7 +7959,7 @@ Variant c_ReflectionProperty::ti_export(CStrRef cls, Variant v_cls, CVarRef v_na
     MethodCallPackage mcp12;
     mcp12.methodCall((v_cls), NAMSTR(s_sys_ss04fdcfb9, "getProperty"), 0x0FD73627FB023047LL);
     const CallInfo *cit12  __attribute__((__unused__)) = mcp12.ci;
-    const Variant &tmp2(((mcp12.bindClass(info)->getMethFewArgs())(mcp12, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
+    Variant tmp2(((mcp12.bindClass(info)->getMethFewArgs())(mcp12, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
     v_obj = tmp2;
   }
   v_str = (toString(v_obj));

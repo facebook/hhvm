@@ -129,6 +129,7 @@ define('NoEffect',                       1 << 21);
 define('NoInjection',                    1 << 22);
 define('HasOptFunction',                 1 << 23);
 define('AllowIntercept',                 1 << 24);
+define('NoProfile',                      1 << 25);
 
 // Mask for checking the flags related to variable arguments
 define('VarArgsMask', (VariableArguments | RefVariableArguments |
@@ -158,6 +159,7 @@ function get_flag_names($arr, $name) {
   if ($flag & NoInjection           ) $ret .= ' | NoInjection'           ;
   if ($flag & HasOptFunction        ) $ret .= ' | HasOptFunction'        ;
   if ($flag & AllowIntercept        ) $ret .= ' | AllowIntercept'        ;
+  if ($flag & NoProfile             ) $ret .= ' | NoProfile'             ;
 
   if ($ret == '') {
     throw new Exception("invalid flag $flag");
@@ -568,7 +570,9 @@ function generateFuncProfileHeader($func, $f) {
   generateFuncArgsCPPHeader($func, $f, null);
   fprintf($f, " {\n");
 
-  if (!($func['flags'] & NoInjection)) {
+  if (($func['flags'] & NoProfile)) {
+    fprintf($f, "  FUNCTION_NOPROFILE_BUILTIN(%s);\n", $func['name']);
+  } else if (!($func['flags'] & NoInjection)) {
     fprintf($f, "  FUNCTION_INJECTION_BUILTIN(%s);\n", $func['name']);
   }
   fprintf($f, "  ");

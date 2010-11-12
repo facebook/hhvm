@@ -173,6 +173,16 @@ void Package::findNonPHPFiles(vector<string> &out, const char *path,
   if (!path) path = "";
   if (*path == '/') path++;
 
+  string spath = path;
+  if (spath.length() && spath[spath.length() - 1] != '/') {
+    spath += '/';
+  }
+  if (exclude &&
+      Option::PackageExcludeStaticDirs.find(spath) !=
+      Option::PackageExcludeStaticDirs.end()) {
+    return;
+  }
+
   string fullPath = m_root + path;
   DIR *dir = opendir(fullPath.c_str());
   if (dir == NULL) {

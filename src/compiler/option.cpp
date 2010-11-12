@@ -38,6 +38,7 @@ set<string> Option::PackageFiles;
 set<string> Option::PackageExcludeDirs;
 set<string> Option::PackageExcludeFiles;
 set<string> Option::PackageExcludeStaticFiles;
+set<string> Option::PackageExcludeStaticDirs;
 set<string> Option::PackageExcludePatterns;
 bool Option::CachePHPFile = false;
 

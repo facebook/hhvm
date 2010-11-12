@@ -64,6 +64,7 @@ struct ProgramOptions {
   vector<string> excludeFiles;
   vector<string> excludePatterns;
   vector<string> excludeStaticPatterns;
+  vector<string> excludeStaticDirs;
   vector<string> cfiles;
   vector<string> cmodules;
   bool parseOnDemand;
@@ -212,13 +213,16 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      "files to exclude from the input, even if parse-on-demand finds it")
     ("exclude-pattern",
      value<vector<string> >(&po.excludePatterns)->composing(),
-     "regex (in 'find' command's regex command line option format)  of files "
+     "regex (in 'find' command's regex command line option format) of files "
      "or directories to exclude from the input, even if parse-on-demand finds "
      "it")
     ("exclude-static-pattern",
      value<vector<string> >(&po.excludeStaticPatterns)->composing(),
-     "regex (in 'find' command's regex command line option format)  of files "
-     "or directories to exclude from static content cache it")
+     "regex (in 'find' command's regex command line option format) of files "
+     "or directories to exclude from static content cache")
+    ("exclude-static-dir",
+     value<vector<string> >(&po.excludeStaticDirs)->composing(),
+     "directories to exclude from static content cache")
     ("cfile", value<vector<string> >(&po.cfiles)->composing(),
      "extra static files forced to include without exclusion checking")
     ("cmodule", value<vector<string> >(&po.cmodules)->composing(),
@@ -441,6 +445,13 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
       }
       break;
     }
+  }
+  for (unsigned int i = 0; i < po.excludeStaticDirs.size(); i++) {
+    string dirname = Util::canonicalize(po.excludeStaticDirs[i]);
+    if (dirname.length() && dirname[dirname.length() - 1] != '/') {
+      dirname += '/';
+    }
+    Option::PackageExcludeStaticDirs.insert(dirname);
   }
 
   if (po.target == "cpp" && po.format == "sys") {

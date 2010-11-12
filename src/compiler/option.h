@@ -53,6 +53,7 @@ public:
   static std::set<std::string> PackageExcludeDirs;
   static std::set<std::string> PackageExcludeFiles;
   static std::set<std::string> PackageExcludeStaticFiles;
+  static std::set<std::string> PackageExcludeStaticDirs;
   static std::set<std::string> PackageExcludePatterns;
 
   /**

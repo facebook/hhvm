@@ -736,9 +736,26 @@ DefineFunction(
     ),
     'args'   => array(
       array(
-	'name'   => "new_value",
+        'name'   => "new_value",
         'type'   => Boolean,
         'desc'   => "The new value for the compression state.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "fb_set_exit_callback",
+    'desc'   => "Set a callback function that is called when php tries to exit.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "function",
+        'type'   => Variant,
+        'desc'   => "The callback to invoke. An exception object will be passed to the function",
       ),
     ),
   ));

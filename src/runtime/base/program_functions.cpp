@@ -237,6 +237,8 @@ enum ContextOfException {
   HandlerException,
 };
 
+extern void invoke_exit_callback(const ExitException &e);
+
 static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
                              ContextOfException where, bool &error) {
   bool ret = false;
@@ -247,6 +249,7 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
   } catch (const ExitException &e) {
     ret = true;
     // ExitException is fine
+    invoke_exit_callback(e);
   } catch (const PhpFileDoesNotExistException &e) {
     if (where == WarmupDocException) {
       Logger::Error("warmup error: %s", e.getMessage().c_str());
@@ -948,6 +951,9 @@ static void handle_invoke_exception(bool &ret, ExecutionContext *context,
     if (!handle_exception(context, errorMsg, InvokeException, error)) {
       ret = false;
     }
+  } catch (const ExitException &e) {
+    // Got an ExitException during exception handling, handle similarly to
+    // handle_exception, except not calling the callback
   } catch (...) {
     if (!handle_exception(context, errorMsg, HandlerException, error)) {
       ret = false;

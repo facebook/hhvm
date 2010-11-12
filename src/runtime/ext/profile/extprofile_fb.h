@@ -160,6 +160,11 @@ inline bool x_fb_output_compression(bool new_value) {
   return f_fb_output_compression(new_value);
 }
 
+inline void x_fb_set_exit_callback(CVarRef function) {
+  FUNCTION_INJECTION_BUILTIN(fb_set_exit_callback);
+  f_fb_set_exit_callback(function);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

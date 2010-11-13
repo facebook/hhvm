@@ -567,10 +567,12 @@ bool TestServer::TestRPCServer() {
          8083);
 
   // invoking a file, with NO json encoding
+  // "int(100)" is printed twice, one from warmup, and the other from include
   VSGETP("<?php\n"
          "var_dump(100);\n",
+         "int(100)\n"
          "int(100)\n",
-         "?file=string&output=1&auth=test",
+         "?include=string&output=1&auth=test",
          8083);
 
   return true;

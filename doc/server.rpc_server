@@ -71,18 +71,23 @@ There are two cases. First, the purpose of the RPC call is still to invoke a
 function, but the definition of the function is in a file that is not in the
 normal initialization path, defined by the WarmupDocument or the
 RequestInitDocument. In order to invoke the function reliably, you can add
-"file=..." to the request:
+"include=..." or "include_once=..." to the request:
 
-  http://[server]:[port]/function_name?file=file_name.php&...
+  http://[server]:[port]/function_name?include_once=file_name.php&...
+
+The difference between include and include_once here is just like that in
+normal PHP scripts. A file that is included once on an RPC request will only
+execute once for the entire life time of an RPC request handler.
 
 The second case is that you can directly invoke a file, without calling a
 function:
 
-  http://[server]:[port]/?file=file_name.php&...
+  http://[server]:[port]/?include=file_name.php&...
 
 or just
 
   http://[server]:[port]/file_name.php?...
 
 In this case, you would probably want to use "output=1" for the file
-invocation, as a file does not return a value.
+invocation, as a file does not return a value. You would also want to
+use "include=...", rather than "include_once=...".

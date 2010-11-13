@@ -76,9 +76,7 @@ typedef hphp_hash_map<StringData *, pcre_cache_entry*,
 // TODO LRU cache
 class PCRECache {
 public:
-  ~PCRECache() {
-    cleanup();
-  }
+  ~PCRECache() { }
 
   void cleanup() {
     for (PCREStringMap::iterator it = m_cache.begin(); it != m_cache.end();

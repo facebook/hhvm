@@ -1434,7 +1434,7 @@ define('MCC_HAVE_DEBUG_LOG', 0);
 define('MCC_ARG_DEBUG', 'debug');
 define('MCC_ARG_DEBUG_LOGFILE', 'debug_logfile');
 define('MCC_HAVE_ZLIB_COMPRESSION', 1);
-define('MCC_COMPRESSION_THRESHHOLD', 102400);
+define('MCC_COMPRESSION_THRESHOLD', 102400);
 define('MCC_ARG_SERVERS', 'servers');
 define('MCC_ARG_MIRROR_CFG', 'mirror_cfg');
 define('MCC_ARG_MIRROR_CFG_NAME', 'name');

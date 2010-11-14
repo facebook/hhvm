@@ -1,6 +1,6 @@
 *.[oad]
-/bin-g
-/bin-O
+/bin*-g
+/bin*-O
 /bin/*.so
 
 /src/compiler/analysis/code_error.inc
@@ -27,6 +27,10 @@
 /facebook/autoload_files
 /facebook/volatile.hdf
 /facebook/hotcold.hdf
+/facebook/push/output_www
+/facebook/push/autoload_files
+/facebook/push/volatile.hdf
+/facebook/push/hotcold.hdf
 
 /local/*.mk
 

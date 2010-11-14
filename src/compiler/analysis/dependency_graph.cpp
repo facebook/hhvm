@@ -17,6 +17,8 @@
 #include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/expression/scalar_expression.h>
+#include <compiler/expression/unary_op_expression.h>
+#include <compiler/expression/binary_op_expression.h>
 #include <compiler/parser/parser.h>
 #include <util/util.h>
 #include <compiler/statement/statement.h>
@@ -139,11 +141,49 @@ string DependencyGraph::GetIncludeFilePath(const string &source,
   return "";
 }
 
+static void parseStringArg(ExpressionPtr exp, string &var, string &lit) {
+  if (exp->is(Expression::KindOfUnaryOpExpression)) {
+    UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(exp));
+    if (u->getOp() == '(') {
+      parseStringArg(u->getExpression(), var, lit);
+      return;
+    }
+  } else if (exp->is(Expression::KindOfBinaryOpExpression)) {
+    BinaryOpExpressionPtr b(static_pointer_cast<BinaryOpExpression>(exp));
+    if (b->getOp() == '.') {
+      string v, l;
+      parseStringArg(b->getExp2(), v, l);
+      if (v.empty()) {
+        parseStringArg(b->getExp1(), var, lit);
+        lit += l;
+        return;
+      }
+    }
+  }
+  if (exp->isLiteralString()) {
+    var = "";
+    lit = exp->getLiteralString();
+    return;
+  }
+  var = exp->getText();
+  lit = "";
+  return;
+}
+
 bool DependencyGraph::CheckInclude(std::string &included,
                                    ConstructPtr includeExp,
                                    ExpressionPtr fileExp, bool documentRoot) {
   string container = includeExp->getLocation()->file;
-  included = GetIncludeFilePath(container, fileExp->getText(), documentRoot);
+  string var, lit;
+  parseStringArg(fileExp, var, lit);
+  if (!lit.empty()) {
+    if (!var.empty()) {
+      var += " . ";
+    }
+    var += "'" + lit + "'";
+  }
+
+  included = GetIncludeFilePath(container, var, documentRoot);
   included = Util::canonicalize(included);
   if (included.empty() || container == included) {
     if (!included.empty()) {

@@ -223,9 +223,11 @@ bool VariableTable::definedByParent(AnalysisResultPtr ar,
   }
 }
 
-const char *VariableTable::getVariablePrefix(AnalysisResultPtr ar,
-                                             const string &name) const {
-  Symbol *sym = getSymbol(name);
+const char *VariableTable::getVariablePrefix(const string &name) const {
+  return getVariablePrefix(getSymbol(name));
+}
+
+const char *VariableTable::getVariablePrefix(const Symbol *sym) const {
   if (sym && sym->isStatic()) {
     if (!needLocalCopy(sym)) {
       return Option::StaticVariablePrefix;
@@ -311,7 +313,7 @@ TypePtr VariableTable::addParam(const string &name, TypePtr type,
     sym->setParameterIndex(m_nextParam++);
   }
   return type ?
-    add(name, type, false, ar, construct, ModifierExpressionPtr()) : type;
+    add(sym, type, false, ar, construct, ModifierExpressionPtr()) : type;
 }
 
 void VariableTable::addStaticVariable(Symbol *sym,
@@ -327,7 +329,7 @@ void VariableTable::addStaticVariable(Symbol *sym,
 
   VariableTablePtr globalVariables = ar->getVariables();
   StaticGlobalInfoPtr sgi(new StaticGlobalInfo());
-  sgi->name = sym->getName();
+  sgi->sym = sym;
   sgi->variables = this;
   sgi->cls = getClassScope();
   sgi->func = member ? FunctionScopePtr() : getFunctionScope();
@@ -361,30 +363,38 @@ TypePtr VariableTable::add(const string &name, TypePtr type,
                            ConstructPtr construct,
                            ModifierExpressionPtr modifiers,
                            bool checkError /* = true */) {
-  Symbol *sym = getSymbol(name, true);
+  return add(getSymbol(name, true), type, implicit, ar,
+             construct, modifiers, checkError);
+}
+
+TypePtr VariableTable::add(Symbol *sym, TypePtr type,
+                           bool implicit, AnalysisResultPtr ar,
+                           ConstructPtr construct,
+                           ModifierExpressionPtr modifiers,
+                           bool checkError /* = true */) {
   if (getAttribute(InsideStaticStatement)) {
     addStaticVariable(sym, ar);
     if (ar->needStaticArray(getClassScope(), getFunctionScope())) {
-      forceVariant(ar, name, AnyVars);
+      forceVariant(ar, sym->getName(), AnyVars);
     }
   } else if (getAttribute(InsideGlobalStatement)) {
     sym->setGlobal();
     m_hasGlobal = true;
     if (!isGlobalTable(ar)) {
-      ar->getVariables()->add(name, type, implicit, ar, construct, modifiers,
-                              false);
+      ar->getVariables()->add(sym->getName(), type, implicit,
+                              ar, construct, modifiers, false);
     }
     ASSERT(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
-    TypePtr varType = ar->getVariables()->getFinalType(name);
+    TypePtr varType = ar->getVariables()->getFinalType(sym->getName());
     if (varType) {
       type = varType;
     } else {
-      ar->getVariables()->setType(ar, name, type, true);
+      ar->getVariables()->setType(ar, sym->getName(), type, true);
     }
   } else if (ar->getPhase() == AnalysisResult::FirstInference &&
              isPseudoMainTable()) {
     // A variable used in a pseudomain
-    ar->getVariables()->add(name, type, implicit, ar,
+    ar->getVariables()->add(sym->getName(), type, implicit, ar,
                             construct, modifiers,
                             checkError);
   }
@@ -418,28 +428,31 @@ TypePtr VariableTable::add(const string &name, TypePtr type,
 TypePtr VariableTable::checkVariable(const string &name, TypePtr type,
                                      bool coerce, AnalysisResultPtr ar,
                                      ConstructPtr construct, int &properties) {
+  return checkVariable(getSymbol(name, true), type,
+                       coerce, ar, construct, properties);
+}
+
+TypePtr VariableTable::checkVariable(Symbol *sym, TypePtr type,
+                                     bool coerce, AnalysisResultPtr ar,
+                                     ConstructPtr construct, int &properties) {
   properties = 0;
 
   // Variable used in pseudomain
-  if (ar->getPhase() == AnalysisResult::FirstInference &&
-      isPseudoMainTable()) {
-    ar->getVariables()->checkVariable(name, type,
-                                      coerce, ar, construct, properties);
+  if (ar->getPhase() == AnalysisResult::FirstInference) {
+    if (isPseudoMainTable()) {
+      ar->getVariables()->checkVariable(sym->getName(), type,
+                                        coerce, ar, construct, properties);
+    }
+  } else if (!coerce && ar->getPhase() == AnalysisResult::LastInference &&
+             !sym->isSystem() &&
+             sym->getDeclaration() == construct) {
+    Compiler::Error(Compiler::UseUndeclaredVariable, construct);
   }
 
-  ClassScopePtr cur(dynamic_pointer_cast<ClassScope>(
-                      m_blockScope.shared_from_this()));
-  Symbol *sym = findProperty(cur, name, ar, construct);
-
-  if (!sym) return Type::Variant;
-
-  if (!cur && !sym->declarationSet()) {
+  if (!sym->declarationSet()) {
     bool isLocal = !sym->isGlobal() && !sym->isSystem();
     if (isLocal && !getAttribute(ContainsLDynamicVariable) &&
         m_blockScope.isFirstPass()) {
-      if (construct->getScope()->getLoopNestedLevel() == 0) {
-        Compiler::Error(Compiler::UseUndeclaredVariable, construct);
-      }
       type = Type::Variant;
       coerce = true;
     }
@@ -453,6 +466,7 @@ TypePtr VariableTable::checkVariable(const string &name, TypePtr type,
   if (sym->isStatic()) {
     properties |= VariableStatic;
   }
+
   return setType(ar, sym, type, coerce);
 }
 
@@ -478,7 +492,9 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
 
     if (!cls) {
       sym = getSymbol(name, true);
-      Compiler::Error(Compiler::UseUndeclaredVariable, construct);
+      if (m_blockScope.is(BlockScope::ClassScope)) {
+        Compiler::Error(Compiler::UseUndeclaredVariable, construct);
+      }
     }
   }
 
@@ -490,9 +506,10 @@ TypePtr VariableTable::checkProperty(Symbol *sym, TypePtr type,
   if (sym->isOverride()) {
     ClassScopePtr parent = findParent(ar, sym->getName());
     assert(parent);
-    sym = parent->getVariables()->getSymbol(sym->getName());
-    assert(sym && !sym->isPrivate());
-    type = parent->getVariables()->setType(ar, sym, type, coerce);
+    VariableTablePtr variables = parent->getVariables();
+    Symbol *base = variables->getSymbol(sym->getName());
+    assert(base && !base->isPrivate());
+    type = variables->setType(ar, base, type, coerce);
   }
 
   return setType(ar, sym, type, coerce);
@@ -543,12 +560,12 @@ void VariableTable::addNeeded(const string &name)
   getSymbol(name, true)->setNeeded();
 }
 
-bool VariableTable::checkUnused(const string &name) {
+bool VariableTable::checkUnused(Symbol *sym) {
   if (isPseudoMainTable() ||
       getAttribute(VariableTable::ContainsDynamicVariable)) {
     return false;
   }
-  if (Symbol *sym = getSymbol(name)) {
+  if (sym) {
     return !sym->isUsed() && isLocal(sym);
   }
   return false;
@@ -727,8 +744,8 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
-    if (!sgi->func) {
-      TypePtr varType = sgi->variables->getFinalType(sgi->name);
+    if (!sgi->func && !sgi->sym->isOverride()) {
+      TypePtr varType = sgi->sym->getFinalType();
       if (varType->isSpecificObject()) {
         cg_printf("FORWARD_DECLARE_CLASS(%s);\n", varType->getName().c_str());
       }
@@ -786,7 +803,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     const string &id = iter->first;
     StaticGlobalInfoPtr sgi = iter->second;
     if (sgi->func) {
-      TypePtr varType = sgi->variables->getFinalType(sgi->name);
+      TypePtr varType = sgi->sym->getFinalType();
       type2names[varType->getCPPDecl(cg, ar)].push_back
         (string(Option::StaticVariablePrefix) + id);
     }
@@ -814,9 +831,9 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     StaticGlobalInfoPtr sgi = iter->second;
     // id can change if we discover it is redeclared
     const string &id = StaticGlobalInfo::getId(cg, sgi->cls, sgi->func,
-                                               sgi->name);
-    if (!sgi->func) {
-      TypePtr varType = sgi->variables->getFinalType(sgi->name);
+                                               sgi->sym->getName());
+    if (!sgi->func && !sgi->sym->isOverride()) {
+      TypePtr varType = sgi->sym->getFinalType();
       type2names[varType->getCPPDecl(cg, ar)].push_back
         (string(Option::StaticPropertyPrefix) + id);
     }
@@ -943,8 +960,8 @@ void VariableTable::collectCPPGlobalSymbols(StringPairVecVec &symbols,
     StaticGlobalInfoPtr sgi = iter->second;
     // id can change if we discover it is redeclared
     const string &id = StaticGlobalInfo::getId(cg, sgi->cls, sgi->func,
-                                               sgi->name);
-    if (!sgi->func) {
+                                               sgi->sym->getName());
+    if (!sgi->func && !sgi->sym->isOverride()) {
       string name = Option::StaticPropertyPrefix + id;
       names->push_back(pair<string, string>(name, name));
     }
@@ -976,7 +993,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
        m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
     if (sgi->func) {
-      TypePtr varType = sgi->variables->getFinalType(sgi->name);
+      TypePtr varType = sgi->sym->getFinalType();
       if (varType->isPrimitive()) {
         const string &id = iter->first;
         const char *initializer = varType->getCPPInitializer();
@@ -992,11 +1009,11 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
        m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
     // id can change if we discover it is redeclared
-    if (!sgi->func) {
-      TypePtr varType = sgi->variables->getFinalType(sgi->name);
+    if (!sgi->func && !sgi->sym->isOverride()) {
+      TypePtr varType = sgi->sym->getFinalType();
       if (varType->isPrimitive()) {
         const string &id = StaticGlobalInfo::getId(cg, sgi->cls, sgi->func,
-                                                   sgi->name);
+                                                   sgi->sym->getName());
         const char *initializer = varType->getCPPInitializer();
         ASSERT(initializer);
         cg_printf("%s%s = %s;\n",
@@ -1023,7 +1040,8 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
-    if (!sgi->func && sgi->cls->needStaticInitializer()) {
+    if (!sgi->func && !sgi->sym->isOverride() &&
+        sgi->cls->needStaticInitializer()) {
       cg_printf("%s%s();\n", Option::ClassStaticInitializerPrefix,
                 sgi->cls->getId(cg).c_str());
     }
@@ -1069,8 +1087,8 @@ void VariableTable::outputCPPGlobalVariablesDtorIncludes(CodeGenerator &cg,
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
     StaticGlobalInfoPtr sgi = iter->second;
-    if (!sgi->func) {
-      TypePtr varType = sgi->variables->getFinalType(sgi->name);
+    if (!sgi->func && !sgi->sym->isOverride()) {
+      TypePtr varType = sgi->sym->getFinalType();
       if (varType->isSpecificObject()) {
         ClassScopePtr cls = ar->findClass(varType->getName());
         ASSERT(cls && !cls->isRedeclaring());
@@ -1272,7 +1290,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         inPseudoMain || sym->isUsed() || sym->isNeeded()) {
       TypePtr type = sym->getFinalType();
       type->outputCPPDecl(cg, ar);
-      cg_printf(" %s%s%s", prefix, getVariablePrefix(ar, name),
+      cg_printf(" %s%s%s", prefix, getVariablePrefix(sym),
                 fname.c_str());
       if (inPseudoMain) {
         outputCPPVariableInit(cg, ar, inPseudoMain, name);
@@ -1306,7 +1324,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const Symbol *sym = m_symbolVec[i];
     const string &name = sym->getName();
-    string varName = string(getVariablePrefix(ar, name)) +
+    string varName = string(getVariablePrefix(sym)) +
       cg.formatLabel(name);
     TypePtr type = sym->getFinalType();
     if (!inGlobalScope) {
@@ -1390,8 +1408,9 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
     cg_printf("Array ret = %sVariableTable::getDefinedVars();\n",
               m_forcedVariants ? "L" : "R");
     for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
-      const string &name = m_symbolVec[i]->getName();
-      const char *prefix = getVariablePrefix(ar, name);
+      Symbol *sym = m_symbolVec[i];
+      const string &name = sym->getName();
+      const char *prefix = getVariablePrefix(sym);
       string varName;
       if (prefix == Option::GlobalVariablePrefix) {
         varName = string("g->") + getGlobalVariableName(cg, ar, name);
@@ -1778,7 +1797,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
        jt.next()) {
     const char *name = jt.key();
     const char *symbol_prefix =
-      prefix ? prefix : getVariablePrefix(ar, name);
+      prefix ? prefix : getVariablePrefix(name);
     string varName;
     if (prefix == Option::StaticPropertyPrefix) {
       varName = string(prefix) + getClassScope()->getId(cg) +

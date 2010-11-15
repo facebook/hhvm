@@ -40,6 +40,10 @@ public:
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                       int state);
 private:
+  bool findMember(AnalysisResultPtr ar,
+                  ClassScopePtr &cls, std::string &name,
+                  Symbol *&sym);
+
   ExpressionPtr m_exp;
 
   bool m_valid;

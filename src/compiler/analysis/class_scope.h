@@ -231,9 +231,6 @@ public:
                        AnalysisResultPtr ar, ConstructPtr construct);
   TypePtr checkProperty(Symbol *sym, TypePtr type,
                         bool coerce, AnalysisResultPtr ar);
-  TypePtr checkStatic(const std::string &name, TypePtr type,
-                      bool coerce, AnalysisResultPtr ar,
-                      ConstructPtr construct, int &properties);
   TypePtr checkConst(const std::string &name, TypePtr type,
                      bool coerce, AnalysisResultPtr ar,
                      ConstructPtr construct,

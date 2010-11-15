@@ -217,7 +217,6 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
         setAttribute(VariableTable::NeedGlobalPointer);
       VariableTablePtr vars = ar->getVariables();
 
-
       if (m_offset && m_offset->is(Expression::KindOfScalarExpression)) {
         ScalarExpressionPtr offset =
           dynamic_pointer_cast<ScalarExpression>(m_offset);

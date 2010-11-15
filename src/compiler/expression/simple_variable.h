@@ -22,6 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+class Symbol;
 DECLARE_BOOST_TYPES(SimpleVariable);
 
 class SimpleVariable : public Expression {
@@ -48,11 +49,12 @@ private:
   std::string m_text;
 
   TypePtr m_superGlobalType;
+  Symbol *m_sym;
 
-  bool m_this; // whether this is a legitimate $this
-  bool m_globals; // whether is is $GLOBAL
-  bool m_superGlobal;
-  bool m_alwaysStash;
+  unsigned m_this : 1; // whether this is a legitimate $this
+  unsigned m_globals : 1; // whether is is $GLOBAL
+  unsigned m_superGlobal : 1;
+  unsigned m_alwaysStash : 1;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

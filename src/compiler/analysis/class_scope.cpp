@@ -602,14 +602,6 @@ TypePtr ClassScope::checkProperty(Symbol *sym, TypePtr type,
   return getVariables()->checkProperty(sym, type, coerce, ar);
 }
 
-TypePtr ClassScope::checkStatic(const std::string &name, TypePtr type,
-                                bool coerce, AnalysisResultPtr ar,
-                                ConstructPtr construct, int &properties) {
-  TypePtr ret = getVariables()->checkVariable(name, type, coerce,
-                                              ar, construct, properties);
-  return ret;
-}
-
 TypePtr ClassScope::checkConst(const std::string &name, TypePtr type,
                                bool coerce, AnalysisResultPtr ar,
                                ConstructPtr construct,

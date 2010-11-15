@@ -589,7 +589,7 @@ overall: all quiet
 %.d:
 	@
 
-%.h %.hpp %.hh:
+%.h %.hpp %.hh %.inc:
 	@
 
 DEPEND_FILES := $(OBJECTS:.o=.d)

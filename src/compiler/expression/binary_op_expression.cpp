@@ -759,7 +759,7 @@ static const char *stringBufferPrefix(AnalysisResultPtr ar, ExpressionPtr var) {
       SimpleVariablePtr sv = static_pointer_cast<SimpleVariable>(var);
       if (loop->checkStringBuf(sv->getName())) {
         return loop->getScope()->getVariables()->
-          getVariablePrefix(ar, sv->getName());
+          getVariablePrefix(sv->getName());
       }
     }
   }

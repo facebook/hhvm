@@ -150,8 +150,8 @@ public:
 
   virtual bool isInherited(const std::string &name) const;
 
-  const char *getVariablePrefix(AnalysisResultPtr ar,
-                                const std::string &name) const;
+  const char *getVariablePrefix(const std::string &name) const;
+  const char *getVariablePrefix(const Symbol *sym) const;
   std::string getVariableName(CodeGenerator &cg, AnalysisResultPtr ar,
                               const std::string &name) const;
   std::string getGlobalVariableName(CodeGenerator &cg, AnalysisResultPtr ar,
@@ -175,6 +175,9 @@ public:
   TypePtr add(const std::string &name, TypePtr type, bool implicit,
               AnalysisResultPtr ar, ConstructPtr construct,
               ModifierExpressionPtr modifiers, bool checkError = true);
+  TypePtr add(Symbol *sym, TypePtr type, bool implicit,
+              AnalysisResultPtr ar, ConstructPtr construct,
+              ModifierExpressionPtr modifiers, bool checkError = true);
 
   /**
    * Called to note whether a class variable overrides
@@ -186,6 +189,9 @@ public:
    * Called when a variable is used or being evaluated (r-value).
    */
   TypePtr checkVariable(const std::string &name, TypePtr type, bool coerce,
+                        AnalysisResultPtr ar, ConstructPtr construct,
+                        int &properties);
+  TypePtr checkVariable(Symbol *sym, TypePtr type, bool coerce,
                         AnalysisResultPtr ar, ConstructPtr construct,
                         int &properties);
   /**
@@ -225,7 +231,7 @@ public:
    */
   void addLvalParam(const std::string &name);
   void addUsed(const std::string &name);
-  bool checkUnused(const std::string &name);
+  bool checkUnused(Symbol *sym);
   void addNeeded(const std::string &name);
   void clearUsed();
   void addStaticVariable(Symbol *sym, AnalysisResultPtr ar,
@@ -320,7 +326,7 @@ private:
    */
   DECLARE_BOOST_TYPES(StaticGlobalInfo);
   struct StaticGlobalInfo {
-    std::string name;
+    Symbol *sym;
     VariableTable *variables; // where this variable was from
     ClassScopePtr cls;
     FunctionScopePtr func;

@@ -563,9 +563,6 @@ void BuiltinSymbols::LoadBaseSysRsrcClasses(AnalysisResultPtr ar,
 
 void BuiltinSymbols::LoadSuperGlobals() {
   if (s_superGlobals.empty()) {
-    s_superGlobals["argc"] = Type::Variant;
-    s_superGlobals["argv"] = Type::Variant;
-
     s_superGlobals["_SERVER"] = Type::Variant;
     s_superGlobals["_GET"] = Type::Variant;
     s_superGlobals["_POST"] = Type::Variant;

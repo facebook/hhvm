@@ -33,8 +33,9 @@ using namespace boost;
 SimpleVariable::SimpleVariable
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, const std::string &name)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_name(name), m_this(false), m_globals(false), m_superGlobal(false),
-    m_alwaysStash(false) {
+    m_name(name), m_sym(NULL),
+    m_this(false), m_globals(false),
+    m_superGlobal(false), m_alwaysStash(false) {
   setContext(Expression::NoLValueWrapper);
 }
 
@@ -52,33 +53,25 @@ ExpressionPtr SimpleVariable::clone() {
 
 void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
   Expression::analyzeProgram(ar);
-  if (m_name == "argc" || m_name == "argv") {
-    // special case: they are NOT superglobals when not in global scope
-    if (getScope() == ar) {
-      m_superGlobal = BuiltinSymbols::IsSuperGlobal(m_name);
-      m_superGlobalType = BuiltinSymbols::GetSuperGlobalType(m_name);
-    }
-  } else {
-    m_superGlobal = BuiltinSymbols::IsSuperGlobal(m_name);
-    m_superGlobalType = BuiltinSymbols::GetSuperGlobalType(m_name);
-  }
+  m_superGlobal = BuiltinSymbols::IsSuperGlobal(m_name);
+  m_superGlobalType = BuiltinSymbols::GetSuperGlobalType(m_name);
 
+  VariableTablePtr variables = getScope()->getVariables();
   if (m_superGlobal) {
-    getScope()->getVariables()->
-      setAttribute(VariableTable::NeedGlobalPointer);
-  }
-
-  if (m_name == "this" && getClassScope()) {
-    FunctionScopePtr func = getFunctionScope();
-    func->setContainsThis();
-    m_this = true;
+    variables->setAttribute(VariableTable::NeedGlobalPointer);
   } else if (m_name == "GLOBALS") {
     m_globals = true;
+  } else {
+    m_sym = variables->getSymbol(m_name, true);
   }
-  if (!(m_context & AssignmentLHS)) {
-    FunctionScopePtr func = getFunctionScope();
-    if (func) {
-      func->getVariables()->addUsed(m_name);
+
+  if (FunctionScopePtr func = getFunctionScope()) {
+    if (m_name == "this" && getClassScope()) {
+      func->setContainsThis();
+      m_this = true;
+    }
+    if (m_sym && !(m_context & AssignmentLHS)) {
+      m_sym->setUsed();
     }
   }
 }
@@ -95,8 +88,8 @@ TypePtr SimpleVariable::inferTypes(AnalysisResultPtr ar, TypePtr type,
 }
 
 bool SimpleVariable::checkUnused(AnalysisResultPtr ar) const {
-  VariableTablePtr variables = getScope()->getVariables();
-  return !m_superGlobal && variables->checkUnused(m_name);
+  return !m_superGlobal && !m_globals &&
+    getScope()->getVariables()->checkUnused(m_sym);
 }
 
 TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
@@ -107,70 +100,50 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
   VariableTablePtr variables = scope->getVariables();
 
   // check function parameter that can occur in lval context
-  if (m_context & (LValue | RefValue | DeepReference |
+  if (m_sym && m_sym->isParameter() &&
+      m_context & (LValue | RefValue | DeepReference |
                    UnsetContext | InvokeArgument | OprLValue | DeepOprLValue)) {
-    FunctionScopePtr func = dynamic_pointer_cast<FunctionScope>(scope);
-    if (func) {
-      if (variables->isParameter(m_name)) {
-        variables->addLvalParam(m_name);
-      }
-    }
+    m_sym->setLvalParam();
   }
-  if (m_name == "this") {
+  if (m_this) {
     ClassScopePtr cls = getOriginalScope();
-    if (cls) {
-      bool isStaticFunc = false;
-      FunctionScopePtr func = dynamic_pointer_cast<FunctionScope>(scope);
-      if (func->isStatic()) isStaticFunc = true;
-      if (cls->isRedeclaring()) {
-        ret = Type::Variant;
-      } else {
-        ret = Type::CreateObjectType(cls->getName());
-      }
-      if (!isStaticFunc || (m_context & ObjectContext)) m_this = true;
+    if (cls->isRedeclaring()) {
+      ret = Type::Variant;
+    } else {
+      ret = Type::CreateObjectType(cls->getName());
     }
-  }
-  if ((m_context & (LValue|Declaration)) && !(m_context & ObjectContext)) {
-    if (m_superGlobal) {
+  } else if ((m_context & (LValue|Declaration)) &&
+             !(m_context & ObjectContext)) {
+    if (m_globals) {
+      ret = Type::Variant;
+    } else if (m_superGlobal) {
       ret = m_superGlobalType;
     } else if (m_superGlobalType) { // For system
-      if (!m_this) {
-        ret = variables->add(m_name, m_superGlobalType,
-                             ((m_context & Declaration) != Declaration), ar,
-                             construct, scope->getModifiers());
-      }
+      ret = variables->add(m_sym, m_superGlobalType,
+                           ((m_context & Declaration) != Declaration), ar,
+                           construct, scope->getModifiers());
     } else {
-      if (m_globals) {
-        ret = Type::Variant; // this can happen with "unset($GLOBALS)"
-      } else if (!m_this) {
-        ret = variables->add(m_name, type,
-                             ((m_context & Declaration) != Declaration), ar,
-                             construct, scope->getModifiers());
-      }
+      ret = variables->add(m_sym, type,
+                           ((m_context & Declaration) != Declaration), ar,
+                           construct, scope->getModifiers());
     }
   } else {
-    if (!m_this) {
-      if (m_superGlobalType) {
-        ret = m_superGlobalType;
-      } else if (m_globals) {
-        ret = Type::Array;
-      } else if (scope->is(BlockScope::ClassScope)) {
-        // ClassVariable expression will come to this block of code
-        ClassScopePtr cls;
-        if (Symbol *sym = variables->findProperty(cls, m_name, ar, construct)) {
-          if (!cls) cls = getClassScope();
-          ret = cls->checkProperty(sym, type, true, ar);
-        }
-      } else {
-        TypePtr tmpType = type;
-        if (m_context & RefValue) {
-          tmpType = Type::Variant;
-          coerce = true;
-        }
-        int p;
-        ret = variables->checkVariable(m_name, tmpType, coerce, ar, construct,
-                                       p);
+    if (m_superGlobalType) {
+      ret = m_superGlobalType;
+    } else if (m_globals) {
+      ret = Type::Array;
+    } else if (scope->is(BlockScope::ClassScope)) {
+      // ClassVariable expression will come to this block of code
+      ret = getClassScope()->checkProperty(m_sym, type, true, ar);
+    } else {
+      TypePtr tmpType = type;
+      if (m_context & RefValue) {
+        tmpType = Type::Variant;
+        coerce = true;
       }
+      int p;
+      ret = variables->checkVariable(m_sym, tmpType, coerce,
+                                     ar, construct, p);
     }
   }
 
@@ -217,7 +190,7 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("get_global_array_wrapper()");
   } else {
     const char *prefix =
-      getScope()->getVariables()->getVariablePrefix(ar, m_name);
+      getScope()->getVariables()->getVariablePrefix(m_sym);
     cg_printf("%s%s", prefix, cg.formatLabel(m_name).c_str());
   }
 }

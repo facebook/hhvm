@@ -26,7 +26,6 @@
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/analysis/constant_table.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <util/parser/hphp.tab.hpp>
 #include <runtime/base/class_info.h>
 #include <util/logger.h>
@@ -504,8 +503,6 @@ void BuiltinSymbols::LoadFunctions(AnalysisResultPtr ar,
        it != s_functions.end(); ++it) {
     if (functions.find(it->first) == functions.end()) {
       functions[it->first].push_back(it->second);
-      ar->getDependencyGraph()->addParent(DependencyGraph::KindOfFunctionCall,
-                                          "", it->first, StatementPtr());
       FunctionScope::RecordRefParamInfo(it->first, it->second);
     }
   }
@@ -532,8 +529,6 @@ void BuiltinSymbols::LoadClasses(AnalysisResultPtr ar,
   // will not overwrite them with their own file and line number information
   for (StringToClassScopePtrMap::const_iterator iter =
          s_classes.begin(); iter != s_classes.end(); ++iter) {
-    ar->getDependencyGraph()->addParent(DependencyGraph::KindOfClassDerivation,
-                                        "", iter->first, StatementPtr());
     const StringToFunctionScopePtrVecMap &funcs = iter->second->getFunctions();
     for (StringToFunctionScopePtrVecMap::const_iterator iter =
            funcs.begin(); iter != funcs.end(); ++iter) {

@@ -21,7 +21,6 @@
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/option.h>
 #include <compiler/expression/simple_variable.h>
 #include <util/hash.h>

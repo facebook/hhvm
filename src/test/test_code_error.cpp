@@ -19,7 +19,6 @@
 #include <compiler/builtin_symbols.h>
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/code_generator.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/option.h>
 
 using namespace std;
@@ -67,11 +66,6 @@ bool TestCodeError::Verify(Compiler::ErrorType type, const char *src,
 
 bool TestCodeError::TestBadPHPIncludeFile() {
   VE(BadPHPIncludeFile, "<?php include 'f1';");
-  return true;
-}
-
-bool TestCodeError::TestRedundantInclude() {
-  VE(RedundantInclude, "<?php require('a'); require('a');");
   return true;
 }
 

@@ -1,6 +1,5 @@
 
 CODE_ERROR_ENTRY(BadPHPIncludeFile)
-CODE_ERROR_ENTRY(RedundantInclude)
 CODE_ERROR_ENTRY(PHPIncludeFileNotFound)
 CODE_ERROR_ENTRY(UseEvaluation)
 CODE_ERROR_ENTRY(UseUndeclaredVariable)

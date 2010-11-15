@@ -34,7 +34,6 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(FunctionScope);
-DECLARE_BOOST_TYPES(DependencyGraph);
 DECLARE_BOOST_TYPES(Location);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(ScalarExpression);
@@ -114,9 +113,6 @@ public:
     return m_phase == AnalyzeInclude;// || m_phase == FirstInference;
   }
 
-  DependencyGraphPtr getDependencyGraph() {
-    return m_dependencyGraph;
-  }
   int getFunctionCount() const;
   int getClassCount() const;
   void countReturnTypes(std::map<std::string, int> &counts);
@@ -346,7 +342,6 @@ private:
   bool m_parseOnDemand;
   std::vector<std::string> m_parseOnDemandDirs;
   Phase m_phase;
-  DependencyGraphPtr m_dependencyGraph;
   StringToFileScopePtrMap m_files;
   FileScopePtrVec m_fileScopes;
   std::string m_extraCodeFileName;

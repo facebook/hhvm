@@ -18,7 +18,6 @@
 #include <compiler/expression/simple_variable.h>
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/option.h>
 #include <compiler/expression/static_member_expression.h>
@@ -230,12 +229,6 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
             getScope()->getVariables()->
               setAttribute(VariableTable::NeedGlobalPointer);
             TypePtr ret;
-            ConstructPtr decl = vars->getDeclaration(m_globalName);
-            if (decl) {
-              ar->getDependencyGraph()->
-                add(DependencyGraph::KindOfGlobalVariable,
-                    ar->getName(), m_globalName, self, m_globalName, decl);
-            }
             if (coerce) {
               ret = vars->add(m_globalName, type, true, ar, self,
                               ModifierExpressionPtr());

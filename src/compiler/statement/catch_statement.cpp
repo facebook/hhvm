@@ -23,7 +23,6 @@
 #include <compiler/analysis/code_error.h>
 #include <util/util.h>
 #include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/option.h>
 
 using namespace HPHP;

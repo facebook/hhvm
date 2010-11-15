@@ -18,7 +18,6 @@
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/constant_table.h>
 #include <compiler/analysis/code_error.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <util/hash.h>
 #include <util/util.h>
 #include <compiler/option.h>
@@ -180,10 +179,6 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
     cls->getConstants()->getDeclarationRecur(ar, m_varName, defClass);
   if (decl) { // No decl means an extension class.
     cls = defClass;
-    string name = m_className + "::" + m_varName;
-    ar->getDependencyGraph()->add(DependencyGraph::KindOfConstant,
-                                  ar->getName(),
-                                  name, shared_from_this(), name, decl);
     m_valid = true;
   }
   BlockScope *defScope;

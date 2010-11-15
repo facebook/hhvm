@@ -29,7 +29,6 @@
 #include <compiler/statement/statement_list.h>
 #include <util/util.h>
 #include <compiler/option.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/builtin_symbols.h>
 #include <compiler/analysis/alias_manager.h>
 
@@ -274,12 +273,7 @@ void MethodStatement::addParamRTTI(AnalysisResultPtr ar) {
 void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   FunctionScopePtr funcScope = m_funcScope.lock();
 
-  // registering myself as a parent in dependency graph, so that
-  // (1) we can tell orphaned parents
-  // (2) overwrite non-master copy of function declarations
   if (ar->isAnalyzeInclude()) {
-    ar->getDependencyGraph()->addParent(DependencyGraph::KindOfFunctionCall,
-                                        "", getFullName(), shared_from_this());
     if (funcScope->isSepExtension() ||
         BuiltinSymbols::IsDeclaredDynamic(m_name) ||
         Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {

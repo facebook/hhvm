@@ -21,7 +21,6 @@
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/dependency_graph.h>
 
 #include <compiler/expression/simple_function_call.h>
 #include <compiler/expression/simple_variable.h>

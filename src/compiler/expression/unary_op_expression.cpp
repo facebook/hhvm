@@ -17,7 +17,6 @@
 #include <compiler/expression/unary_op_expression.h>
 #include <compiler/expression/object_property_expression.h>
 #include <util/parser/hphp.tab.hpp>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/file_scope.h>
 #include <compiler/statement/statement_list.h>

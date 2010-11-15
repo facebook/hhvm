@@ -22,7 +22,6 @@
 #include <compiler/analysis/alias_manager.h>
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/class_scope.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/depth_first_visitor.h>
 #include <compiler/statement/statement_list.h>
@@ -67,7 +66,6 @@ AnalysisResult::AnalysisResult()
     m_scalarArraySortedAvgLen(0), m_scalarArraySortedIndex(0),
     m_scalarArraySortedSumLen(0), m_scalarArrayCompressedTextSize(0),
     m_system(false) {
-  m_dependencyGraph = DependencyGraphPtr(new DependencyGraph());
   m_classForcedVariants[0] = m_classForcedVariants[1] = false;
 }
 

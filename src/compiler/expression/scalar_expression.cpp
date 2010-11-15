@@ -19,7 +19,6 @@
 #include <compiler/expression/scalar_expression.h>
 #include <util/parser/hphp.tab.hpp>
 #include <util/util.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/block_scope.h>
 #include <compiler/analysis/variable_table.h>

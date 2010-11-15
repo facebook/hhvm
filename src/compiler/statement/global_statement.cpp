@@ -23,7 +23,6 @@
 #include <compiler/expression/simple_variable.h>
 #include <compiler/expression/dynamic_variable.h>
 #include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/dependency_graph.h>
 
 using namespace HPHP;
 using namespace std;
@@ -104,15 +103,6 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
       var->setContext(Expression::Declaration);
       var->inferAndCheck(ar, Type::Any, true);
       variables->forceVariant(ar, name, VariableTable::AnyVars);
-
-      ConstructPtr decl =
-        ar->getVariables()->getDeclaration(var->getName());
-      if (decl) {
-        ar->getDependencyGraph()->add(DependencyGraph::KindOfGlobalVariable,
-                                      ar->getName(),
-                                      var->getName(), var,
-                                      var->getName(), decl);
-      }
       variables->clearAttribute(VariableTable::InsideGlobalStatement);
     } else {
       variables->forceVariants(ar, VariableTable::AnyVars);

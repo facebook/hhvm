@@ -23,7 +23,6 @@
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/analysis_result.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/statement/method_statement.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/analysis/constant_table.h>
@@ -138,7 +137,6 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
     m_stmt->analyzeProgram(ar);
   }
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
-  DependencyGraphPtr dependencies = ar->getDependencyGraph();
   for (unsigned int i = 0; i < bases.size(); i++) {
     ClassScopePtr cls = ar->findClass(bases[i]);
     if (cls) {
@@ -147,20 +145,8 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
         Compiler::Error(Compiler::InvalidDerivation, shared_from_this(),
                         cls->getOriginalName());
       }
-      if (dependencies->checkCircle(DependencyGraph::KindOfClassDerivation,
-                                    m_originalName,
-                                    cls->getOriginalName())) {
-        Compiler::Error(Compiler::InvalidDerivation, shared_from_this(),
-                        cls->getOriginalName());
-        m_parent = "";
-        m_base = ExpressionListPtr();
-        classScope->clearBases();
-      } else if (cls->isUserClass()) {
+      if (cls->isUserClass()) {
         cls->addUse(classScope, BlockScope::UseKindParentRef);
-        dependencies->add(DependencyGraph::KindOfClassDerivation,
-                          ar->getName(),
-                          m_originalName, shared_from_this(),
-                          cls->getOriginalName(), cls->getStmt());
       }
     }
   }

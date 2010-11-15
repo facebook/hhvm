@@ -20,7 +20,6 @@
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/constant_table.h>
 #include <compiler/analysis/variable_table.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/code_error.h>
 #include <util/hash.h>
 #include <util/util.h>
@@ -199,11 +198,6 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       getFileScope()->declareConstant(ar, m_name);
     }
     ConstantTablePtr constants = scope->getConstants();
-    ConstructPtr decl = constants->getDeclaration(m_name);
-    if (decl) {
-      ar->getDependencyGraph()->add(DependencyGraph::KindOfConstant, "",
-                                    m_name, self, m_name, decl);
-    }
     if (!m_valid) {
       if (ar->isSystemConstant(m_name) || constants->getValue(m_name)) {
         m_valid = true;

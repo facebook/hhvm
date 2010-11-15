@@ -19,7 +19,6 @@
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/statement/statement.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/expression/expression_list.h>
@@ -166,9 +165,6 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
                                            FunctionScopePtr func,
                                            bool arrayParams) {
   ConstructPtr self = shared_from_this();
-  ar->getDependencyGraph()->add(DependencyGraph::KindOfFunctionCall,
-                                ar->getName(), getText(),
-                                self, func->getFullName(), func->getStmt());
   TypePtr frt = func->getReturnType();
   if (!frt) {
     m_voidReturn = true;

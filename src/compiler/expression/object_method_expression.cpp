@@ -20,7 +20,6 @@
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/statement/statement.h>
 #include <util/util.h>
 #include <util/hash.h>

@@ -20,7 +20,6 @@
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/option.h>
 #include <compiler/analysis/variable_table.h>
 

@@ -24,7 +24,6 @@
 #include <util/util.h>
 #include <util/hash.h>
 #include <util/parser/hphp.tab.hpp>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/option.h>
 
 using namespace HPHP;

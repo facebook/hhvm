@@ -22,7 +22,6 @@
 #include <compiler/package.h>
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/alias_manager.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/code_error.h>
 #include <util/json.h>
 #include <util/logger.h>
@@ -241,11 +240,11 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     ("optimize-level", value<int>(&po.optimizeLevel)->default_value(1),
      "optimization level")
     ("gen-stats", value<bool>(&po.genStats)->default_value(false),
-     "whether to generate dependency graphs and code errors")
+     "whether to generate code errors")
     ("keep-tempdir,k", value<bool>(&po.keepTempDir)->default_value(false),
      "whether to keep the temporary directory")
     ("db-stats", value<string>(&po.dbStats),
-     "database connection string to save dependency graphs and code errors: "
+     "database connection string to save code errors: "
      "<username>:<password>@<host>:<port>/<db>")
     ("no-type-inference",
      value<bool>(&po.noTypeInference)->default_value(false),
@@ -634,7 +633,7 @@ int process(const ProgramOptions &po) {
   if (po.target == "analyze" || po.genStats || !po.dbStats.empty()) {
     int seconds = timer.getMicroSeconds() / 1000000;
 
-    Logger::Info("saving code errors, dependency graph and stats...");
+    Logger::Info("saving code errors and stats...");
     Timer timer(Timer::WallTime, "saving stats");
 
     if (!po.dbStats.empty()) {
@@ -642,9 +641,6 @@ int process(const ProgramOptions &po) {
         ServerDataPtr server = ServerData::Create(po.dbStats);
         int runId = package.saveStatsToDB(server, seconds, po.branch,
                                           po.revision);
-        if (runId) {
-          ar->getDependencyGraph()->saveToDB(server, runId);
-        }
         package.commitStats(server, runId);
       } catch (DatabaseException e) {
         Logger::Error("%s", e.what());
@@ -652,8 +648,6 @@ int process(const ProgramOptions &po) {
     } else {
       Compiler::SaveErrors((po.outputDir + "/CodeError.js").c_str());
       package.saveStatsToFile((po.outputDir + "/Stats.js").c_str(), seconds);
-      mkdir((po.outputDir + "/dep").c_str(), 0777);
-      ar->getDependencyGraph()->saveToFiles((po.outputDir + "/dep").c_str());
     }
   } else if (Compiler::HasError()) {
     Logger::Info("saving code errors...");

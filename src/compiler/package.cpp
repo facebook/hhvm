@@ -114,19 +114,6 @@ void Package::addDirectory(const char *path, bool force) {
   addDirectory(path, "", force); // look for PHP files without postfix
 }
 
-void Package::addDependencyParents(const char *path, const char *postfix,
-                                   DependencyGraph::KindOf kindOf) {
-  vector<string> files;
-  findFiles(files, path, postfix);
-  DependencyGraphPtr dep = m_ar->getDependencyGraph();
-  int rootSize = m_root.size();
-  for (unsigned int i = 0; i < files.size(); i++) {
-    const string &file = files[i];
-    ASSERT(file.substr(0, rootSize) == m_root);
-    dep->addParent(kindOf, "", file.substr(rootSize), ConstructPtr());
-  }
-}
-
 void Package::findFiles(std::vector<std::string> &out, const char *path,
                         const char *postfix) {
   ASSERT(postfix && *postfix);

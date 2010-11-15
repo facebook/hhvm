@@ -29,7 +29,6 @@
 #include <compiler/option.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/function_scope.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/simple_function_call.h>
@@ -92,10 +91,6 @@ void AssignmentExpression::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
     ConstantExpressionPtr exp =
       dynamic_pointer_cast<ConstantExpression>(m_variable);
     scope->getConstants()->add(exp->getName(), type, m_value, ar, m_variable);
-
-    string name = scope->getName() + "::" + exp->getName();
-    ar->getDependencyGraph()->
-      addParent(DependencyGraph::KindOfConstant, "", name, exp);
   } else if (m_variable->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(m_variable);
     scope->getVariables()->add(var->getName(), type, true, ar,

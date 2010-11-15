@@ -15,7 +15,6 @@
 */
 
 #include <compiler/expression/simple_function_call.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/class_scope.h>
@@ -177,14 +176,6 @@ void SimpleFunctionCall::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
       break;
     }
   }
-
-  string call = getText();
-  string name = m_name;
-  if (!m_className.empty()) {
-    name = m_className + "::" + name;
-  }
-  ar->getDependencyGraph()->add(DependencyGraph::KindOfFunctionCall, call,
-                                shared_from_this(), name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -798,9 +789,6 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         if (!varName.empty()) {
           ExpressionPtr value = (*m_params)[1];
           TypePtr varType = value->inferAndCheck(ar, Type::Some, false);
-          ar->getDependencyGraph()->
-            addParent(DependencyGraph::KindOfConstant,
-                      ar->getName(), varName, self);
           BlockScopePtr block = ar->findConstantDeclarer(varName);
           if (!block) {
             getFileScope()->declareConstant(ar, varName);

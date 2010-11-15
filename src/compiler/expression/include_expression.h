@@ -27,6 +27,10 @@ DECLARE_BOOST_TYPES(IncludeExpression);
 class IncludeExpression : public UnaryOpExpression,
                           public IParseHandler {
 public:
+  static std::string CheckInclude(ConstructPtr includeExp,
+                                  ExpressionPtr fileExp, bool documentRoot);
+
+public:
   IncludeExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                     ExpressionPtr exp, int op);
 

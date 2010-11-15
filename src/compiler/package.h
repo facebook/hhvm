@@ -19,7 +19,6 @@
 
 #include <compiler/hphp.h>
 #include <util/string_bag.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <util/file_cache.h>
 
 namespace HPHP {
@@ -85,8 +84,6 @@ private:
   void findPHPFiles(std::vector<std::string> &out, const char *path);
   void findNonPHPFiles(std::vector<std::string> &out, const char *path,
                        bool exclude);
-  void addDependencyParents(const char *path, const char *postfix,
-                            DependencyGraph::KindOf kindOf);
 
   bool parseImpl(const char *fileName);
 };

@@ -24,7 +24,6 @@
 #include <compiler/expression/parameter_expression.h>
 #include <compiler/expression/modifier_expression.h>
 #include <compiler/option.h>
-#include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/analysis/class_scope.h>
 #include <sstream>
@@ -76,15 +75,6 @@ std::string FunctionStatement::getName() const {
 }
 
 void FunctionStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
-  // registering myself as a parent in dependency graph, so that
-  // (1) we can tell orphaned parents
-  // (2) overwrite non-master copy of function declarations
-  if (ar->isAnalyzeInclude()) {
-    if (m_loc) {
-      ar->getDependencyGraph()->addParent(DependencyGraph::KindOfFunctionCall,
-                                          "", m_name, shared_from_this());
-    } // else it's pseudoMain or artificial functions we added
-  }
   FunctionScopePtr func =
     Construct::getFunctionScope(); // containing function scope
   FunctionScopePtr fs = getFunctionScope();

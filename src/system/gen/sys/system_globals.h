@@ -29,6 +29,7 @@
 #include <php/classes/stdclass.h>
 #include <php/globals/constants.h>
 #include <php/globals/symbols.h>
+namespace hphp_impl_starter {}
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

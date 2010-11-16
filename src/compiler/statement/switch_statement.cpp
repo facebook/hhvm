@@ -143,12 +143,12 @@ void SwitchStatement::inferTypes(AnalysisResultPtr ar) {
       if (!cond) {
         checking = true;
         defaultCount++;
-      } else if (checking && cond && ar->isFirstPass()) {
+      } else if (checking && cond && getScope()->isFirstPass()) {
         defaults.push_back(i);
         Compiler::Error(Compiler::CaseAfterDefault, stmt);
       }
     }
-    if (defaultCount > 1 && ar->isFirstPass()) {
+    if (defaultCount > 1 && getScope()->isFirstPass()) {
       Compiler::Error(Compiler::MoreThanOneDefault, m_cases);
     }
   }

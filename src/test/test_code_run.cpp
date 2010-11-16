@@ -2976,6 +2976,28 @@ bool TestCodeRun::TestArrayAssignment() {
   MVCR("<?php $a = false; $a['a'] = 10;");
   MVCR("<?php $a = false; $a['a']['b'] = 10;");
 
+  // invalid offset type
+  MVCR("<?php\n"
+       "class c { function f(&$a, $b) { $a = $b; } }\n"
+       "function setNullVariantHelper($f, $value) {\n"
+       "  $a = array();\n"
+       "  $obj = new c;\n"
+       "  $obj->$f($a[$obj] = 1, $value);\n"
+       "  var_dump($a[$obj] = 1);\n"
+       "}\n"
+       "function setNullVariant($value) {\n"
+       "  setNullVariantHelper('f', $value);\n"
+       "}\n"
+       "setNullVariant('Surprise!');\n"
+       "$b = null;\n"
+       "var_dump($b[1]);\n");
+
+  // empty string to array conversion
+  MVCR("<?php\n"
+       "$s = '';\n"
+       "$s[0] += 10;\n"
+       "var_dump($s);\n");
+
   return true;
 }
 

@@ -29,6 +29,7 @@
 #include <runtime/base/server/upload.h>
 #include <runtime/base/server/replay_transport.h>
 #include <runtime/base/util/http_client.h>
+#include <runtime/base/taint/taint_array.h>
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 
@@ -312,6 +313,13 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   const char *threadType = transport->getThreadTypeName();
   server.set("THREAD_TYPE", threadType);
   StackTraceNoHeap::AddExtraLogging("ThreadType", threadType);
+
+#ifdef TAINTED
+  taint_array_variant(g->GV(_GET));
+  taint_array_variant(g->GV(_POST));
+  taint_array_variant(g->GV(_SERVER));
+  taint_array_variant(g->GV(_COOKIE));
+#endif
 }
 
 std::string HttpProtocol::RecordRequest(Transport *transport) {

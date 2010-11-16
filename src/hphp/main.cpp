@@ -64,6 +64,7 @@ struct ProgramOptions {
   vector<string> excludeFiles;
   vector<string> excludePatterns;
   vector<string> excludeStaticPatterns;
+  vector<string> excludeStaticDirs;
   vector<string> cfiles;
   vector<string> cmodules;
   bool parseOnDemand;
@@ -92,6 +93,7 @@ struct ProgramOptions {
   bool nofork;
   bool fl_annotate;
   string optimizations;
+  string ppp;
 };
 
 int prepareOptions(ProgramOptions &po, int argc, char **argv);
@@ -212,13 +214,16 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      "files to exclude from the input, even if parse-on-demand finds it")
     ("exclude-pattern",
      value<vector<string> >(&po.excludePatterns)->composing(),
-     "regex (in 'find' command's regex command line option format)  of files "
+     "regex (in 'find' command's regex command line option format) of files "
      "or directories to exclude from the input, even if parse-on-demand finds "
      "it")
     ("exclude-static-pattern",
      value<vector<string> >(&po.excludeStaticPatterns)->composing(),
-     "regex (in 'find' command's regex command line option format)  of files "
-     "or directories to exclude from static content cache it")
+     "regex (in 'find' command's regex command line option format) of files "
+     "or directories to exclude from static content cache")
+    ("exclude-static-dir",
+     value<vector<string> >(&po.excludeStaticDirs)->composing(),
+     "directories to exclude from static content cache")
     ("cfile", value<vector<string> >(&po.cfiles)->composing(),
      "extra static files forced to include without exclusion checking")
     ("cmodule", value<vector<string> >(&po.cmodules)->composing(),
@@ -294,6 +299,13 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     ("opts",
      value<string>(&po.optimizations)->default_value("none"),
      "Set optimizations to enable/disable")
+    ("ppp",
+     value<string>(&po.ppp)->default_value(""),
+     "Preprocessed partition configuration. To speed up distcc compilation, "
+     "bin/ppp.php can pre-compute better partition between different .cpp "
+     "files according to preprocessed file sizes, instead of original file "
+     "sizes (default). Run bin/ppp.php to generate an HDF configuration file "
+     "to specify here.")
     ;
 
   positional_options_description p;
@@ -442,6 +454,13 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
       break;
     }
   }
+  for (unsigned int i = 0; i < po.excludeStaticDirs.size(); i++) {
+    string dirname = Util::canonicalize(po.excludeStaticDirs[i]);
+    if (dirname.length() && dirname[dirname.length() - 1] != '/') {
+      dirname += '/';
+    }
+    Option::PackageExcludeStaticDirs.insert(dirname);
+  }
 
   if (po.target == "cpp" && po.format == "sys") {
     BuiltinSymbols::NoSuperGlobals = true; // so to generate super globals
@@ -450,6 +469,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
   Option::SystemGen = (po.target == "cpp" && po.format == "sys") ;
 
   Option::ProgramName = po.program;
+  Option::PreprocessedPartitionConfig = po.ppp;
 
   if (po.target == "cpp") {
     if (po.format.empty()) po.format = "cluster";

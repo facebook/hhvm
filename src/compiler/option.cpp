@@ -38,6 +38,7 @@ set<string> Option::PackageFiles;
 set<string> Option::PackageExcludeDirs;
 set<string> Option::PackageExcludeFiles;
 set<string> Option::PackageExcludeStaticFiles;
+set<string> Option::PackageExcludeStaticDirs;
 set<string> Option::PackageExcludePatterns;
 bool Option::CachePHPFile = false;
 
@@ -86,6 +87,7 @@ string Option::Tab = "  ";
  * of name collision or incorrect code transformation.
  */
 const char *Option::FunctionPrefix = "f_";
+const char *Option::TypedFunctionPrefix = "ft_";
 const char *Option::BuiltinFunctionPrefix = "x_";
 const char *Option::InvokePrefix = "i_";
 const char *Option::InvokeFewArgsPrefix = "ifa_";
@@ -110,8 +112,10 @@ const char *Option::ObjectPrefix = "o_";
 const char *Option::ObjectStaticPrefix = "os_";
 const char *Option::SmartPtrPrefix = "p_";
 const char *Option::MethodPrefix = "t_";
+const char *Option::TypedMethodPrefix = "tt_";
 const char *Option::MethodWrapperPrefix = "mf_";
 const char *Option::MethodImplPrefix = "ti_";
+const char *Option::TypedMethodImplPrefix = "tti_";
 const char *Option::PropertyPrefix = "m_";
 const char *Option::StaticPropertyPrefix = "s_";
 const char *Option::ConstantPrefix = "k_";
@@ -148,6 +152,7 @@ bool Option::SeparateCompLib = false;
 bool Option::UseNamedScalarArray = true;
 int Option::LiteralStringFileCount = 50;
 bool Option::AnalyzePerfectVirtuals = true;
+bool Option::HardTypeHints = true;
 
 std::string Option::RTTIOutputFile;
 std::string Option::RTTIDirectory;
@@ -176,6 +181,7 @@ Option::EvalLevel Option::EnableEval = NoEval;
 std::string Option::JavaFFIRootPackage;
 
 std::string Option::ProgramName;
+std::string Option::PreprocessedPartitionConfig;
 
 bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
@@ -349,6 +355,7 @@ void Option::Load(Hdf &config) {
   if (ScalarArrayFileCount <= 0) ScalarArrayFileCount = 1;
   LiteralStringFileCount = config["LiteralStringFileCount"].getInt32(1);
   if (LiteralStringFileCount <= 0) LiteralStringFileCount = 1;
+  HardTypeHints = config["HardTypeHints"].getBool(true);
   ScalarArrayOverflowLimit = config["ScalarArrayOverflowLimit"].getInt32(2000);
   if (ScalarArrayOverflowLimit <= 0) ScalarArrayOverflowLimit = 2000;
   if (UseNamedScalarArray) {

@@ -49,6 +49,8 @@ bool TestExtOptions::RunTests(const std::string &which) {
   RUN_TEST(test_clock_getres);
   RUN_TEST(test_clock_gettime);
   RUN_TEST(test_clock_settime);
+  RUN_TEST(test_cpu_get_count);
+  RUN_TEST(test_cpu_get_model);
   RUN_TEST(test_ini_alter);
   RUN_TEST(test_ini_get_all);
   RUN_TEST(test_ini_get);
@@ -253,6 +255,16 @@ bool TestExtOptions::test_clock_gettime() {
 
 bool TestExtOptions::test_clock_settime() {
   f_clock_settime(k_CLOCK_THREAD_CPUTIME_ID, 100, 100);
+  return Count(true);
+}
+
+bool TestExtOptions::test_cpu_get_count() {
+  VERIFY(f_cpu_get_count() > 0);
+  return Count(true);
+}
+
+bool TestExtOptions::test_cpu_get_model() {
+  VERIFY(!f_cpu_get_model().empty());
   return Count(true);
 }
 

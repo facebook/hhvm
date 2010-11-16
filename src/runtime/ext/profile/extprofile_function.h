@@ -41,12 +41,12 @@ inline bool x_is_callable(CVarRef v, bool syntax = false, CVarRef name = null) {
 }
 
 inline Variant x_call_user_func_array(CVarRef function, CArrRef params) {
-  FUNCTION_INJECTION_BUILTIN(call_user_func_array);
+  FUNCTION_NOPROFILE_BUILTIN(call_user_func_array);
   return f_call_user_func_array(function, params);
 }
 
 inline Variant x_call_user_func(int _argc, CVarRef function, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION_BUILTIN(call_user_func);
+  FUNCTION_NOPROFILE_BUILTIN(call_user_func);
   return f_call_user_func(_argc, function, _argv);
 }
 

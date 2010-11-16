@@ -177,7 +177,7 @@ void StaticStatement::inferTypes(AnalysisResultPtr ar) {
            it is not a static variable, record this variable as "redeclared"
            to force Variant type.
          */
-        if (ar->isFirstPass()) {
+        if (getScope()->isFirstPass()) {
           variables->checkRedeclared(name, KindOfStaticStatement);
         }
         /* If this is not a top-level static statement, the variable also

@@ -59,7 +59,7 @@ using namespace boost;
 AnalysisResult::AnalysisResult()
   : BlockScope("Root", "", StatementPtr(), BlockScope::ProgramScope),
     m_package(NULL), m_parseOnDemand(false), m_phase(AnalyzeInclude),
-    m_newlyInferred(0), m_dynamicClass(false), m_dynamicFunction(false),
+    m_dynamicClass(false), m_dynamicFunction(false),
     m_optCounter(0),
     m_scalarArraysCounter(0), m_paramRTTICounter(0),
     m_insideScalarArray(false), m_inExpression(false),
@@ -721,35 +721,6 @@ void AnalysisResult::analyzeProgramFinal() {
   setPhase(AnalysisResult::CodeGen);
 }
 
-void AnalysisResult::inferTypes(int maxPass /* = 100 */) {
-  AnalysisResultPtr ar = shared_from_this();
-  setPhase(FirstInference);
-  int lastInferred = 0;
-  bool lastInference = false;
-  for (int i = 0; i < maxPass; i++) {
-    m_newlyInferred = 0;
-    for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
-         iter != m_files.end(); ++iter) {
-      FileScopePtr file = iter->second;
-      file->inferTypes(ar);
-    }
-    if (lastInference) {
-      return;
-    }
-    if (i > 1 && m_newlyInferred == 0 /* lastInferred */) {
-      lastInference = true;
-    }
-    lastInferred = m_newlyInferred;
-    Logger::Verbose("newly inferred types: %d", m_newlyInferred);
-    if (lastInference) {
-      setPhase(LastInference);
-    } else {
-      setPhase(i == 0 ? SecondInference : MoreInference);
-    }
-  }
-  ASSERT(false);
-}
-
 static void dumpVisitor(AnalysisResultPtr ar, StatementPtr s, void *data) {
   s->dump(0, ar);
 }
@@ -865,6 +836,58 @@ void AnalysisResult::preOptimize() {
   BlockScopeRawPtrQueue scopes;
   getScopesSet(scopes);
   dfv.visitDepthFirst(scopes);
+}
+
+struct InferTypesVisitor {
+  InferTypesVisitor(AnalysisResultPtr ar) : m_ar(ar) {}
+
+  AnalysisResultPtr m_ar;
+};
+
+template<>
+int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
+  do {
+    scope->clearUpdated();
+    StatementPtr stmt = scope->getStmt();
+    if (MethodStatementPtr m =
+        dynamic_pointer_cast<MethodStatement>(stmt)) {
+      m->inferFunctionTypes(this->m_data.m_ar);
+    } else {
+      for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
+        StatementPtr kid(
+          dynamic_pointer_cast<Statement>(stmt->getNthKid(i)));
+        if (kid) {
+          kid->inferTypes(this->m_data.m_ar);
+        }
+      }
+    }
+
+    scope->incPass();
+  } while (scope->getUpdated());
+
+  return 0;
+}
+
+void AnalysisResult::inferTypes() {
+  setPhase(FirstInference);
+  DepthFirstVisitor<InferTypesVisitor> dfv(shared_from_this());
+  BlockScopeRawPtrQueue changed;
+
+  BlockScopeRawPtrQueue scopes;
+  getScopesSet(scopes);
+  for (BlockScopeRawPtrQueue::iterator it = scopes.begin(), end = scopes.end();
+       it != end; ++it) {
+    (*it)->setChangedScopes(&changed);
+  }
+  dfv.visitDepthFirst(scopes);
+
+  setPhase(LastInference);
+  getScopesSet(scopes);
+  for (BlockScopeRawPtrQueue::iterator it = scopes.begin(), end = scopes.end();
+       it != end; ++it) {
+    dfv.visitScope(*it);
+    (*it)->setChangedScopes(0);
+  }
 }
 
 struct PostOptVisitor {
@@ -1007,6 +1030,7 @@ void AnalysisResult::outputCPPNamedScalarArrays(const std::string &file) {
     cg_printInclude("<sys/global_variables.h>");
   }
   cg_printf("\n");
+  cg.printImplStarter();
   cg.namespaceBegin();
   for (map<int, vector<string> >::const_iterator it =
        m_namedScalarArrays.begin(); it != m_namedScalarArrays.end();
@@ -1029,7 +1053,7 @@ void AnalysisResult::outputCPPNamedScalarArrays(const std::string &file) {
   filename = file + ".no.cpp";
   f.open(filename.c_str());
   cg_printf("\n");
-  cg_printInclude("\"scalar_arrays.h\"");
+  cg_printInclude(string(Option::SystemFilePrefix) + "scalar_arrays.h");
   cg_printf("\n");
   cg.namespaceBegin();
   for (map<int, vector<string> >::const_iterator it =
@@ -1213,16 +1237,18 @@ void AnalysisResult::clusterByFileSizes(StringToFileScopePtrVecMap &clusters,
 }
 
 void AnalysisResult::repartitionCPP(const string &filename, int64 targetSize,
-                                    bool insideHPHP) {
-  struct stat results;
-  if (stat(filename.c_str(), &results)) {
-    // error, shouldn't happen
-    return;
-  }
-  int64 size = (int64)results.st_size;
-  if (size <= targetSize * 2) {
-    // tolerable size
-    return;
+                                    bool insideHPHP, bool force) {
+  if (!force) {
+    struct stat results;
+    if (stat(filename.c_str(), &results)) {
+      // error, shouldn't happen
+      return;
+    }
+    int64 size = (int64)results.st_size;
+    if (size <= targetSize * 2) {
+      // tolerable size
+      return;
+    }
   }
 
   // for updating source info
@@ -1270,7 +1296,7 @@ void AnalysisResult::repartitionCPP(const string &filename, int64 targetSize,
       preface.push_back(line);
     } else if (line == "/* preface finishes */") {
       inPreface = false;
-    } else if (line == "} /* function */") {
+    } else if (line == CodeGenerator::SPLITTER_MARKER) {
       // a possible cut point
       if (current > targetSize) {
         if (insideHPHP) {
@@ -1307,6 +1333,16 @@ void AnalysisResult::repartitionCPP(const string &filename, int64 targetSize,
 
 void AnalysisResult::repartitionLargeCPP(const vector<string> &filenames,
                                          const vector<string> &additionals) {
+  std::map<std::string, int> ppp;
+  if (!Option::PreprocessedPartitionConfig.empty()) {
+    Hdf pppc(Option::PreprocessedPartitionConfig);
+    for (Hdf node = pppc["splits"].firstChild(); node.exists();
+         node = node.next()) {
+      ppp[getOutputPath() + "/" + node["name"].getString()] =
+        node["count"].getInt32();
+    }
+  }
+
   int64 totalSize = 0;
   int count = 0;
   for (unsigned int i = 0; i < filenames.size(); i++) {
@@ -1318,10 +1354,22 @@ void AnalysisResult::repartitionLargeCPP(const vector<string> &filenames,
   }
   int64 averageSize = totalSize / count;
   for (unsigned int i = 0; i < filenames.size(); i++) {
-    repartitionCPP(filenames[i], averageSize, true);
+    const string &filename = filenames[i];
+
+    if (Option::PreprocessedPartitionConfig.empty()) {
+      repartitionCPP(filename, averageSize, true, false);
+    } else {
+      int count = ppp[filename];
+      if (count > 1) {
+        struct stat results;
+        if (stat(filename.c_str(), &results) == 0) {
+          repartitionCPP(filename, results.st_size / count, true, true);
+        }
+      }
+    }
   }
   for (unsigned int i = 0; i < additionals.size(); i++) {
-    repartitionCPP(additionals[i], averageSize, false);
+    repartitionCPP(additionals[i], averageSize, false, false);
   }
 }
 
@@ -1567,8 +1615,9 @@ void AnalysisResult::outputCPPClassMapFile() {
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   cg_printf("\n");
-  cg_printf("using namespace std;\n");
 
+  cg.printImplStarter();
+  cg_printf("using namespace std;\n");
   cg.namespaceBegin();
   outputCPPClassMap(cg);
   cg.namespaceEnd();
@@ -1623,6 +1672,7 @@ void AnalysisResult::outputCPPSourceInfos() {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
 
+  cg.printImplStarter();
   cg.namespaceBegin();
   cg_printf("const char *g_source_root = \"%s\";\n",
             (Process::GetCurrentDirectory() + '/').c_str());
@@ -1654,6 +1704,7 @@ void AnalysisResult::outputCPPNameMaps() {
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
 
+  cg.printImplStarter();
   cg.namespaceBegin();
 
   cg.printSection("Class -> File Line");
@@ -1735,9 +1786,9 @@ void AnalysisResult::outputCPPUtilDecl(CodeGenerator::Output output) {
   cg_printf("#define __GENERATED_cpputil_h__\n");
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printf("\n");
+  cg.printImplStarter();
   cg.namespaceBegin();
   if (Option::GenConcat) {
-    outputTaintDecl(cg);
     outputConcatDecl(cg);
   }
   if (Option::GenArrayCreate) {
@@ -1756,60 +1807,19 @@ void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
   ofstream f(headerPath.c_str());
   CodeGenerator cg(&f, output);
   cg_printf("\n");
-  cg_printInclude("\"cpputil.h\"");
+  cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   cg_printInclude("<runtime/base/array/zend_array.h>");
   cg_printInclude("<runtime/base/array/small_array.h>");
+  cg_printInclude("<runtime/base/taint.h>");
+  cg.printImplStarter();
   cg.namespaceBegin();
   if (Option::GenConcat) {
-    outputTaintImpl(cg);
     outputConcatImpl(cg);
   }
   if (Option::GenArrayCreate) {
     outputArrayCreateImpl(cg);
   }
   cg.namespaceEnd();
-}
-
-void AnalysisResult::outputTaintNumDecl(CodeGenerator &cg, int num) {
-  cg_printf("void propagate_tainting%d(", num);
-  for (int i = 1; i <= num; i++) {
-    cg_printf("CStrRef orig%d", i);
-    if (i < num) {
-      cg_printf(", ");
-    } else {
-      cg_printf(", String& dest)");
-    }
-  }
-}
-
-void AnalysisResult::outputTaintDecl(CodeGenerator &cg) {
-  cg_printf("#ifdef TAINTED\n");
-  for (set<int>::const_iterator iter = m_concatLengths.begin();
-       iter != m_concatLengths.end(); ++iter) {
-    int num = *iter;
-    ASSERT(num > MAX_CONCAT_ARGS);
-    outputTaintNumDecl(cg, num);
-    cg_printf(";\n");
-  }
-  cg_printf("#endif // TAINTED\n\n");
-}
-
-void AnalysisResult::outputTaintImpl(CodeGenerator &cg) {
-  cg_printf("#ifdef TAINTED\n");
-  for (set<int>::const_iterator iter = m_concatLengths.begin();
-       iter != m_concatLengths.end(); ++iter) {
-    int num = *iter;
-    ASSERT(num > MAX_CONCAT_ARGS);
-    outputTaintNumDecl(cg, num);
-    cg_indentBegin(" {\n");
-    for (int i = 1; i <= num; i++) {
-      cg_printf("%sif( propagate_tainting_aux(orig%d, dest) ) { }\n",
-                i == 1 ? "" : "else ", i);
-    }
-    cg_printf("else { dest.untaint(); }\n");
-    cg_indentEnd("}\n");
-  }
-  cg_printf("#endif // TAINTED\n\n");
 }
 
 void AnalysisResult::outputConcatNumDecl(CodeGenerator &cg, int num) {
@@ -1865,22 +1875,15 @@ void AnalysisResult::outputConcatImpl(CodeGenerator &cg) {
       cg_printf(", s%d.data(), len%d);\n", i, i);
     }
     cg_printf("buf[len] = 0;\n");
-    cg_printf("#ifndef TAINTED\n");
-    cg_printf("return String(buf, len, AttachString);\n");
-    cg_printf("#else\n");
-    cg_printf("String res = String(buf, len, AttachString);\n");
-    cg_printf("propagate_tainting%d(", num);
+    cg_printf("String r = String(buf, len, AttachString);\n");
+    cg_printf("#ifdef TAINTED\n");
+    cg_printf("Taint(r) ");
     for (int i = 1; i <= num; i++) {
-      cg_printf("s%d", i);
-      if (i < num) {
-        cg_printf(", ");
-      } else {
-        cg_printf(", res)");
-      }
+      cg_printf("<< s%d", i);
     }
     cg_printf(";\n");
-    cg_printf("return res;\n");
     cg_printf("#endif\n");
+    cg_printf("return r;\n");
     cg_indentEnd("}\n");
   }
 }
@@ -2014,6 +2017,7 @@ void AnalysisResult::outputCPPDynamicTablesHeader
     }
   }
 
+  cg.printImplStarter();
   if (!noNamespace) {
     cg_printf("\n");
     cg_printf("using namespace std;\n");
@@ -2419,6 +2423,7 @@ void AnalysisResult::outputCPPSystem() {
     cg_printInclude(fs->outputFilebase());
   }
 
+  cg.printImplStarter();
   cg.namespaceBegin();
   AnalysisResultPtr ar = shared_from_this();
   getVariables()->setAttribute(VariableTable::ForceGlobal);
@@ -2745,6 +2750,7 @@ void AnalysisResult::outputCPPGlobalDeclarations() {
   // includes, but more of a "convenient" place.
   outputCPPSepExtensionIncludes(cg);
 
+  cg.printImplStarter();
   cg.namespaceBegin();
 
   AnalysisResultPtr ar = shared_from_this();
@@ -2861,6 +2867,7 @@ void AnalysisResult::outputCPPScalarArrays(bool system) {
                     (system ? "system_globals.h" : "global_variables.h"));
 
     cg_printf("\n");
+    cg.printImplStarter();
     cg.namespaceBegin();
 
     AnalysisResultPtr ar = shared_from_this();
@@ -2947,6 +2954,7 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
     getVariables()->outputCPPGlobalVariablesDtorIncludes(cg, ar);
   }
   cg_printf("\n");
+  cg.printImplStarter();
   cg_printf("using namespace std;\n");
   cg.namespaceBegin();
 
@@ -3019,6 +3027,7 @@ void AnalysisResult::outputCPPGlobalState() {
     cg_printInclude("<runtime/eval/eval.h>");
   }
   cg_printf("\n");
+  cg.printImplStarter();
   cg_printf("using namespace std;\n");
   cg.namespaceBegin();
 
@@ -3167,6 +3176,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
   cg_printf("\n");
+  cg.printImplStarter();
   cg_printf("using namespace std;\n");
   cg.namespaceBegin();
 
@@ -3301,6 +3311,7 @@ void AnalysisResult::outputCPPMain() {
   cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
 
   cg_printf("\n");
+  cg.printImplStarter();
   cg_printf("using namespace std;\n");
   cg.namespaceBegin();
   outputCPPClassStaticInitializerDecls(cg);
@@ -3425,6 +3436,7 @@ void AnalysisResult::outputCPPClusterImpl(CodeGenerator &cg,
   }
 
   // implementations
+  cg.printImplStarter();
   cg.namespaceBegin();
   BOOST_FOREACH(FileScopePtr fs, files) {
     cg.setContext(CodeGenerator::CppImplementation);
@@ -3447,6 +3459,7 @@ void AnalysisResult::outputCPPFFIStubs() {
   ofstream fh(hPath.c_str());
   CodeGenerator cg(&fh, CodeGenerator::ClusterCPP);
   cg_printInclude("<runtime/base/hphp_ffi.h>");
+  cg.printImplStarter();
   cg_printf("using namespace HPHP;\n");
   cg_printf("extern \"C\" {\n");
 
@@ -3590,6 +3603,7 @@ void AnalysisResult::outputJavaFFICppImpl() {
   cg_printInclude("\"stubs.h\"");
   cg_printInclude("\"java_stubs.h\"");
 
+  cg.printImplStarter();
   cg_printf("/* preface starts */\n");
 
   cg_printf("\nusing namespace HPHP;\n\n");
@@ -3788,6 +3802,7 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
     cg_printInclude("<runtime/base/hphp.h>");
     cg_printf("\n");
   }
+  cg.printImplStarter();
   cg.namespaceBegin();
   for (map<int, vector<string> >::const_iterator it =
        m_namedStringLiterals.begin(); it != m_namedStringLiterals.end();
@@ -3908,6 +3923,7 @@ void AnalysisResult::outputCPPSepExtensionImpl(const std::string &filename) {
   cg_printf("#include \"%s\"\n", litstrFile.c_str());
 
   cg_printf("\n");
+  cg.printImplStarter();
   cg_printf("using namespace std;\n");
   cg.namespaceBegin();
 

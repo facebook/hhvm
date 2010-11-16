@@ -113,7 +113,7 @@ DefineFunction(
   array(
     'name'   => "call_user_func_array",
     'desc'   => "Call a user defined function with the parameters in param_arr.",
-    'flags'  =>  HasDocComment | HasOptFunction,
+    'flags'  =>  HasDocComment | HasOptFunction | NoProfile,
     'opt'    => "hphp_opt_call_user_func",
     'return' => array(
       'type'   => Variant,
@@ -137,7 +137,7 @@ DefineFunction(
   array(
     'name'   => "call_user_func",
     'desc'   => "Call a user defined function given by the function parameter.",
-    'flags'  =>  HasDocComment | MixedVariableArguments | HasOptFunction,
+    'flags'  =>  HasDocComment | MixedVariableArguments | HasOptFunction | NoProfile,
     'opt'    => "hphp_opt_call_user_func",
     'return' => array(
       'type'   => Variant,

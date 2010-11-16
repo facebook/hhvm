@@ -62,3 +62,6 @@ TARGETS = $(APP_TARGET)
 endif
 
 all: $(TARGETS)
+
+%.pp: %
+	$(CXX) -E $(if $(OUT_TOP),-I$(OUT_TOP)src) $(CPPFLAGS) $(OPT) $(CXXFLAGS) $<

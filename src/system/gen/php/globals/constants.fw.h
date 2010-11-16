@@ -676,7 +676,7 @@ extern const StaticString k_MCC_ARG_TCP_INACTIVITY_TIME;
 extern const StaticString k_MCC_ARG_TMO;
 extern const StaticString k_MCC_ARG_UDP_REPLY_PORTS;
 extern const StaticString k_MCC_ARG_WINDOW_MAX;
-extern const int64 k_MCC_COMPRESSION_THRESHHOLD;
+extern const int64 k_MCC_COMPRESSION_THRESHOLD;
 extern const int64 k_MCC_CONN_NTRIES;
 extern const int64 k_MCC_CONN_TMO_MS;
 extern const int64 k_MCC_CONSISTENCY_IGNORE;

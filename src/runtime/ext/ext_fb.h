@@ -52,6 +52,7 @@ void f_fb_unset_taint(Variant str, int taint);
 int f_fb_get_taint(CStrRef str);
 Variant f_fb_const_fetch(CVarRef key);
 bool f_fb_output_compression(bool new_value);
+void f_fb_set_exit_callback(CVarRef function);
 extern const int64 k_FB_UNSERIALIZE_NONSTRING_VALUE;
 extern const int64 k_FB_UNSERIALIZE_UNEXPECTED_END;
 extern const int64 k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;
@@ -60,6 +61,9 @@ extern const int64 k_XHPROF_FLAGS_NO_BUILTINS;
 extern const int64 k_XHPROF_FLAGS_CPU;
 extern const int64 k_XHPROF_FLAGS_MEMORY;
 extern const int64 k_XHPROF_FLAGS_VTSC;
+extern const int64 k_XHPROF_FLAGS_TRACE;
+extern const int64 k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE;
+extern const int64 k_XHPROF_FLAGS_MALLOC;
 
 ///////////////////////////////////////////////////////////////////////////////
 

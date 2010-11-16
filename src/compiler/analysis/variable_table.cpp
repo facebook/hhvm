@@ -407,7 +407,7 @@ TypePtr VariableTable::add(const string &name, TypePtr type,
   type = setType(ar, sym, type, true);
   sym->setDeclaration(construct);
 
-  if (!implicit && ar->isFirstPass()) {
+  if (!implicit && m_blockScope.isFirstPass()) {
     if (!sym->getValue()) {
       sym->setValue(construct);
     }
@@ -436,7 +436,7 @@ TypePtr VariableTable::checkVariable(const string &name, TypePtr type,
   if (!cur && !sym->declarationSet()) {
     bool isLocal = !sym->isGlobal() && !sym->isSystem();
     if (isLocal && !getAttribute(ContainsLDynamicVariable) &&
-        ar->isFirstPass()) {
+        m_blockScope.isFirstPass()) {
       if (construct->getScope()->getLoopNestedLevel() == 0) {
         Compiler::Error(Compiler::UseUndeclaredVariable, construct);
       }

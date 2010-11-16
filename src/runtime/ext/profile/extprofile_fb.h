@@ -76,17 +76,17 @@ inline bool x_fb_utf8ize(CVarRef input) {
 }
 
 inline Array x_fb_call_user_func_safe(int _argc, CVarRef function, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION_BUILTIN(fb_call_user_func_safe);
+  FUNCTION_NOPROFILE_BUILTIN(fb_call_user_func_safe);
   return f_fb_call_user_func_safe(_argc, function, _argv);
 }
 
 inline Variant x_fb_call_user_func_safe_return(int _argc, CVarRef function, CVarRef def, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION_BUILTIN(fb_call_user_func_safe_return);
+  FUNCTION_NOPROFILE_BUILTIN(fb_call_user_func_safe_return);
   return f_fb_call_user_func_safe_return(_argc, function, def, _argv);
 }
 
 inline Array x_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
-  FUNCTION_INJECTION_BUILTIN(fb_call_user_func_array_safe);
+  FUNCTION_NOPROFILE_BUILTIN(fb_call_user_func_array_safe);
   return f_fb_call_user_func_array_safe(function, params);
 }
 
@@ -158,6 +158,11 @@ inline Variant x_fb_const_fetch(CVarRef key) {
 inline bool x_fb_output_compression(bool new_value) {
   FUNCTION_INJECTION_BUILTIN(fb_output_compression);
   return f_fb_output_compression(new_value);
+}
+
+inline void x_fb_set_exit_callback(CVarRef function) {
+  FUNCTION_INJECTION_BUILTIN(fb_set_exit_callback);
+  f_fb_set_exit_callback(function);
 }
 
 

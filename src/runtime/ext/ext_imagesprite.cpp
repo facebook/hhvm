@@ -383,6 +383,15 @@ void ImageFromHTTP::loadImage(bool block /* = false */) {
     m_ev_group->add(m_conn);
     m_request = evhttp_request_new(ev_req_complete, this);
 
+    if (m_port == 80) {
+      evhttp_add_header(m_request->output_headers, "Host", m_host.c_str());
+    } else {
+      std::string ss = m_host.data();
+      ss += ":";
+      ss += boost::lexical_cast<std::string>(m_port);
+      evhttp_add_header(m_request->output_headers, "Host", ss.c_str());
+    }
+
     int ret = evhttp_make_request(
       m_conn,
       m_request,
@@ -422,7 +431,7 @@ void ImageFromHTTP::completed() {
       EVBUFFER_LENGTH(m_request->input_buffer),
       EVBUFFER_DATA(m_request->input_buffer));
   } else {
-    setError("Invalid Response code: " + code);
+    setError(String("Invalid Response code: ") + String((int64)code));
   }
   m_ev_group->complete(m_conn);
   evhttp_connection_free(m_conn);

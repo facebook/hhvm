@@ -246,7 +246,8 @@ Variant MethodStatement::MethInvoker(MethodCallPackage &mcp, CArrRef params) {
 
 Variant MethodStatement::MethInvokerFewArgs(MethodCallPackage &mcp,
     int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  return MethInvoker(mcp, collect_few_args(count, INVOKE_FEW_ARGS_PASS_ARGS));
+  return MethInvoker(mcp,
+                     collect_few_args_ref(count, INVOKE_FEW_ARGS_PASS_ARGS));
 }
 
 void MethodStatement::dump(std::ostream &out) const {

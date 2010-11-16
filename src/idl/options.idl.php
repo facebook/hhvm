@@ -489,6 +489,28 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "cpu_get_count",
+    'desc'   => "Gets number of processors.",
+    'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,
+    'return' => array(
+      'type'   => Int32,
+      'desc'   => "Number of CPUs.",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "cpu_get_model",
+    'desc'   => "Gets processor model.",
+    'flags'  =>  HasDocComment | HipHopSpecific | NoInjection,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "Model name of CPU.",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "ini_alter",
     'flags'  =>  HasDocComment,
     'return' => array(

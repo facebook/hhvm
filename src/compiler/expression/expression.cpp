@@ -386,7 +386,7 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
   } else if (variable->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
     if (var->getName() == "this" && getClassScope()) {
-      if (ar->isFirstPass()) {
+      if (getScope()->isFirstPass()) {
         Compiler::Error(Compiler::ReassignThis, variable);
       }
     }
@@ -779,7 +779,6 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         if (i == n - 1 && skipLast) s = 0;
         bool noEffect = false;
         if (m_kindOf == KindOfExpressionList) {
-          cg.setItemIndex(i);
           ExpressionList *el = static_cast<ExpressionList*>(this);
           if (i >= el->getOutputCount()) {
             s = lastState = 0;

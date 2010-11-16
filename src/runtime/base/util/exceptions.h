@@ -237,11 +237,12 @@ public:
   virtual ~NotSupportedException() throw() {}
 };
 
-class ExitException : public Exception {
+class ExitException : public ExtendedException {
 public:
   static int ExitCode;
 
-  ExitException(int exitCode) : Exception(false) {
+  ExitException(int exitCode) {
+    m_handled = false;
     ExitCode = exitCode;
   }
   virtual ~ExitException() throw() {}

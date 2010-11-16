@@ -54,6 +54,8 @@ class TestExtOptions : public TestCppExt {
   bool test_clock_getres();
   bool test_clock_gettime();
   bool test_clock_settime();
+  bool test_cpu_get_count();
+  bool test_cpu_get_model();
   bool test_ini_alter();
   bool test_ini_get_all();
   bool test_ini_get();

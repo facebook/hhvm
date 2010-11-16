@@ -33,7 +33,8 @@ using namespace boost;
 BlockScope::BlockScope(const std::string &name, const std::string &docComment,
                        StatementPtr stmt, KindOf kind)
   : m_attributeClassInfo(0), m_docComment(docComment), m_stmt(stmt),
-    m_kind(kind), m_loopNestedLevel(0), m_incLevel(0), m_mark(0) {
+    m_kind(kind), m_loopNestedLevel(0), m_incLevel(0),
+    m_mark(0), m_pass(0), m_updated(0), m_changedScopes(0) {
   m_originalName = name;
   m_name = Util::toLower(name);
   m_variables = VariableTablePtr(new VariableTable(*this));
@@ -87,23 +88,39 @@ FunctionScopePtr BlockScope::getContainingFunction() {
   return dynamic_pointer_cast<HPHP::FunctionScope>(shared_from_this());
 }
 
-void BlockScope::addUse(BlockScopePtr user, int useKinds) {
+void BlockScope::addUse(BlockScopeRawPtr user, int useKinds) {
   if (is(ClassScope) ? static_cast<HPHP::ClassScope*>(this)->isUserClass() :
       is(FunctionScope) &&
       static_cast<HPHP::FunctionScope*>(this)->isUserFunction()) {
-    m_users[user] |= useKinds;
-    user->m_deps.insert(BlockScopeRawPtr(this));
+
+    std::pair<BlockScopeRawPtrFlagsHashMap::iterator,bool> val =
+      m_userMap.insert(BlockScopeRawPtrFlagsHashMap::value_type(user,
+                                                                useKinds));
+    if (val.second) {
+      m_orderedUsers.push_back(&*val.first);
+      user->m_orderedDeps.push_back(BlockScopeRawPtr(this));
+    } else {
+      val.first->second |= useKinds;
+    }
   }
 }
 
+void BlockScope::addUpdates(int f) {
+  if (!m_updated && m_changedScopes) {
+    m_changedScopes->push_back(BlockScopeRawPtr(this));
+  }
+  m_updated |= f;
+}
+
 void BlockScope::changed(BlockScopeRawPtrQueue &todo, int useKinds) {
-  for (BlockScopeRawPtrFlagsHashMap::iterator it = m_users.begin(),
-         end = m_users.end(); it != end; ++it) {
-    if (it->second & useKinds && it->first->getMark() >= 2) {
-      if (it->first->getMark() == 3) {
-        todo.push_back(it->first);
+  for (BlockScopeRawPtrFlagsVec::iterator it = m_orderedUsers.begin(),
+         end = m_orderedUsers.end(); it != end; ++it) {
+    BlockScopeRawPtrFlagsVec::value_type pf = *it;
+    if (pf->second & useKinds && pf->first->getMark() >= 2) {
+      if (pf->first->getMark() == 3) {
+        todo.push_back(pf->first);
       }
-      it->first->setMark(0);
+      pf->first->setMark(0);
     }
   }
 }

@@ -180,7 +180,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
   m_valid = true;
 
   if (!cls) {
-    if (ar->isFirstPass()) {
+    if (getScope()->isFirstPass()) {
       Compiler::Error(Compiler::UnknownClass, self);
     }
     m_valid = false;
@@ -218,7 +218,8 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
     } else {
       tp = cls->checkStatic(name, type, coerce, ar, self, p);
     }
-    if (ar->isFirstPass() && p && !(p & VariableTable::VariableStatic)) {
+    if (getScope()->isFirstPass() && p &&
+        !(p & VariableTable::VariableStatic)) {
       Compiler::Error(Compiler::MissingObjectContext, self);
     }
 

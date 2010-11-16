@@ -67,6 +67,8 @@ public:
     CppStaticMethodWrapper,     // Only used to force parameters to use C*Ref
     CppParameterDefaultValueDecl,
     CppParameterDefaultValueImpl,
+    CppTypedParamsWrapperImpl,
+    CppTypedParamsWrapperDecl,
     CppFFIDecl,
     CppFFIImpl,
     HsFFI,
@@ -95,6 +97,9 @@ public:
   static void BuildJumpTable(const std::vector<const char *> &strings,
                              MapIntToStringVec &out, int tableSize,
                              bool caseInsensitive);
+
+  static const char *STARTER_MARKER;
+  static const char *SPLITTER_MARKER;
 
 public:
   CodeGenerator() {} // only for creating a dummy code generator
@@ -144,6 +149,8 @@ public:
   void printDeclareGlobals();
   void printStartOfJumpTable(int tableSize);
   void printDocComment(const std::string comment);
+  void printImplStarter(); // end of includes
+  void printImplSplitter(); // marker to split .cpp into smaller files
   const char *getGlobals(AnalysisResultPtr ar);
   std::string formatLabel(const std::string &name);
   std::string escapeLabel(const std::string &name, bool *binary = NULL);
@@ -181,12 +188,6 @@ public:
   const std::vector<int> &getBreakScopes() const { return m_breakScopes;}
   void addLabelId(const char *name, int labelId);
   bool findLabelId(const char *name, int labelId);
-
-  /**
-   * Helpers for keeping track of index in an ExpressionList.
-   */
-  void setItemIndex(int index) { m_itemIndex = index;}
-  int getItemIndex() { return m_itemIndex;}
 
   /**
    * Get current line number of primary stream.

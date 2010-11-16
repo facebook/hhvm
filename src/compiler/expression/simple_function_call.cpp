@@ -826,7 +826,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
           return checkTypesImpl(ar, type, Type::Boolean, coerce);
         }
       }
-      if (varName.empty() && ar->isFirstPass()) {
+      if (varName.empty() && getScope()->isFirstPass()) {
         Compiler::Error(Compiler::BadDefine, self);
       }
     } else if (m_type == ExtractFunction) {
@@ -857,7 +857,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       }
     }
     if (!cls) {
-      if (ar->isFirstPass()) {
+      if (getScope()->isFirstPass()) {
         Compiler::Error(Compiler::UnknownClass, self);
       }
       if (m_params) {
@@ -885,7 +885,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
            !clsThis->derivesFrom(ar, m_className, true, false)) ||
           funcThis->isStatic()) {
         func->setDynamic();
-        if (ar->isFirstPass()) {
+        if (getScope()->isFirstPass()) {
           Compiler::Error(Compiler::MissingObjectContext, self);
           errorFlagged = true;
         }
@@ -903,14 +903,14 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
     }
-    if (!func && !errorFlagged && ar->isFirstPass()) {
+    if (!func && !errorFlagged && getScope()->isFirstPass()) {
       Compiler::Error(Compiler::UnknownFunction, self);
     }
     if (m_params) {
       if (func) {
         FunctionScope::RefParamInfoPtr info =
           FunctionScope::GetRefParamInfo(m_name);
-        ASSERT(info);
+        assert(info);
         for (int i = m_params->getCount(); i--; ) {
           if (info->isRefParam(i)) {
             m_params->markParam(i, canInvokeFewArgs());
@@ -1309,7 +1309,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         cls->findConstructor(ar, true)->getName() :
         cg.formatLabel(m_name);
 
-      cg_printf("%s%s(", Option::MethodPrefix, name.c_str());
+      cg_printf("%s%s(", m_funcScope->getPrefix(m_params), name.c_str());
     } else {
       int paramCount = m_params ? m_params->getCount() : 0;
       if (m_name == "get_class" && getClassScope() && paramCount == 0) {
@@ -1331,7 +1331,8 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         } else {
           cg_printf("%s%s(",
                     m_builtinFunction ? Option::BuiltinFunctionPrefix :
-                    Option::FunctionPrefix, m_funcScope->getId(cg).c_str());
+                    m_funcScope->getPrefix(m_params),
+                    m_funcScope->getId(cg).c_str());
         }
       }
     }
@@ -1356,9 +1357,8 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       }
     }
     if (canInvokeFewArgs() && !m_arrayParams) {
-      int left = Option::InvokeFewArgsCount;
+      int pcount = m_params ? m_params->getCount() : 0;
       if (m_params && m_params->getCount()) {
-        left -= m_params->getCount();
         cg_printf("%d, ", m_params->getCount());
         ar->pushCallInfo(m_ciTemp);
         FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
@@ -1366,7 +1366,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       } else {
         cg_printf("0");
       }
-      for (int i = 0; i < left; i++) {
+      for (int i = pcount; i < Option::InvokeFewArgsCount; i++) {
         cg_printf(", null");
       }
     } else {

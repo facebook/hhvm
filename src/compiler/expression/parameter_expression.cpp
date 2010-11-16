@@ -67,9 +67,10 @@ void ParameterExpression::analyzeProgram(AnalysisResultPtr ar) {
 
   if (m_defaultValue) m_defaultValue->analyzeProgram(ar);
 
-  if (ar->isFirstPass()) {
+  if (ar->isAnalyzeInclude()) {
     // Have to use non const ref params for magic methods
     FunctionScopePtr fs = getFunctionScope();
+    fs->getVariables()->addParam(m_name, TypePtr(), ar, ExpressionPtr());
     if (fs->isMagicMethod() || fs->getName() == "offsetget") {
       fs->getVariables()->addLvalParam(m_name);
     }
@@ -101,26 +102,31 @@ void ParameterExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar, bool error) {
+TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar,
+                                         bool forInference) {
   TypePtr ret;
-  if (m_type.empty() || m_defaultValue) {
+  if (m_type.empty() || (forInference && m_defaultValue)) {
     ret = Type::Some;
   } else if (m_type == "array") {
     ret = Type::Array;
   } else {
-    ClassScopePtr cls = ar->findClass(m_type);
-    if (!cls || cls->isRedeclaring()) {
-      if (error && !cls && ar->isFirstPass()) {
-        ConstructPtr self = shared_from_this();
-        Compiler::Error(Compiler::UnknownClass, self);
+    if (forInference) {
+      ClassScopePtr cls = ar->findClass(m_type);
+      if (Option::SystemGen ||
+          !cls || cls->isRedeclaring() || cls->derivedByDynamic()) {
+        if (!cls && getScope()->isFirstPass()) {
+          ConstructPtr self = shared_from_this();
+          Compiler::Error(Compiler::UnknownClass, self);
+        }
+        ret = Type::Variant;
       }
-      ret = Type::Some;
-    } else {
+    }
+    if (!ret) {
       ret = Type::CreateObjectType(m_type);
     }
   }
   // we still want the above to run, so to record errors and infer defaults
-  if (m_ref) {
+  if (m_ref && forInference) {
     ret = Type::Variant;
   }
 
@@ -132,6 +138,20 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   ASSERT(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
   TypePtr ret = getTypeSpec(ar, true);
 
+  VariableTablePtr variables = getScope()->getVariables();
+  // Functions that can be called dynamically have to have
+  // variant parameters, even if they have a type hint
+  if (getFunctionScope()->isDynamic() ||
+      getFunctionScope()->isRedeclaring() ||
+      getFunctionScope()->isVirtual()) {
+    if (Option::HardTypeHints &&
+        (ret->is(Type::KindOfArray) || ret->is(Type::KindOfObject))) {
+    } else {
+      variables->forceVariant(ar, m_name, VariableTable::AnyVars);
+      ret = Type::Variant;
+    }
+  }
+
   if (m_defaultValue && !m_ref) {
     ret = m_defaultValue->inferAndCheck(ar, ret, false);
   }
@@ -139,21 +159,14 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   // parameters are like variables, but we need to remember these are
   // parameters so when variable table is generated, they are not generated
   // as declared variables.
-  VariableTablePtr variables = getScope()->getVariables();
-  if (ar->isFirstPass()) {
-    ret = variables->addParam(m_name, ret, ar, shared_from_this());
+  if (getScope()->isFirstPass()) {
+    ret = variables->add(m_name, ret, false, ar,
+                         shared_from_this(), ModifierExpressionPtr());
   } else {
-    // Functions that can be called dynamically have to have
-    // variant parameters, even if they have a type hint
-    if (getFunctionScope()->isDynamic() ||
-        getFunctionScope()->isRedeclaring() ||
-        getFunctionScope()->isVirtual()) {
-      variables->forceVariant(ar, m_name, VariableTable::AnyVars);
-    }
     int p;
-    ret = variables->checkVariable(m_name, ret, true, ar, shared_from_this(),
-                                   p);
-    if (ar->isSecondPass() && ret->is(Type::KindOfSome)) {
+    ret = variables->checkVariable(m_name, ret, true, ar,
+                                   shared_from_this(), p);
+    if (ret->is(Type::KindOfSome)) {
       // This is probably too conservative. The problem is that
       // a function never called will have parameter types of Any.
       // Functions that it calls won't be able to accept variant unless
@@ -185,9 +198,20 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   FunctionScopePtr func = getFunctionScope();
   VariableTablePtr variables = func->getVariables();
-  TypePtr paramType = func->getParamType(cg.getItemIndex());
+  Symbol *sym = variables->getSymbol(m_name);
+  assert(sym && sym->isParameter());
+
+  CodeGenerator::Context context = cg.getContext();
+  bool typedWrapper = (context == CodeGenerator::CppTypedParamsWrapperImpl ||
+                       context == CodeGenerator::CppTypedParamsWrapperDecl);
+
+  TypePtr paramType =
+    typedWrapper && func->getParamTypeSpec(sym->getParameterIndex()) ?
+    Type::Variant : func->getParamType(sym->getParameterIndex());
+
   bool isCVarRef = false;
   if (cg.getContext() == CodeGenerator::CppStaticMethodWrapper ||
+      typedWrapper ||
       (!variables->isLvalParam(m_name) &&
        !variables->getAttribute(VariableTable::ContainsDynamicVariable) &&
        !variables->getAttribute(VariableTable::ContainsExtract) &&
@@ -206,8 +230,8 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
 
   cg_printf(" %s%s", Option::VariablePrefix, m_name.c_str());
   if (m_defaultValue) {
-    CodeGenerator::Context context = cg.getContext();
-    bool comment =  context == CodeGenerator::CppImplementation ||
+    bool comment = context == CodeGenerator::CppTypedParamsWrapperImpl ||
+      context == CodeGenerator::CppImplementation ||
       (context == CodeGenerator::CppDeclaration && func->isInlined());
     if (comment) {
       cg_printf(" // ");

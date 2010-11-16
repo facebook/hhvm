@@ -606,7 +606,6 @@ bool ExpressionList::outputCPPArrayCreate(CodeGenerator &cg,
 
   if (pre) {
     for (unsigned i = 0; i < m_exps.size(); i++) {
-      cg.setItemIndex(i);
       if (ExpressionPtr exp = m_exps[i]) {
         exp->preOutputCPP(cg, ar, 0);
       }
@@ -649,7 +648,6 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
   unsigned i = 0, s = m_exps.size();
   unsigned ix = m_kind == ListKindLeft ? 0 : s - 1;
   for ( ; i < s; i++) {
-    cg.setItemIndex(i);
     if (ExpressionPtr exp = m_exps[i]) {
       if (pre) {
         exp->preOutputCPP(cg, ar, 0);

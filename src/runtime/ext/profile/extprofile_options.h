@@ -160,6 +160,14 @@ inline bool x_clock_settime(int clk_id, int64 sec, int64 nsec) {
   return f_clock_settime(clk_id, sec, nsec);
 }
 
+inline int x_cpu_get_count() {
+  return f_cpu_get_count();
+}
+
+inline String x_cpu_get_model() {
+  return f_cpu_get_model();
+}
+
 inline String x_ini_alter(CStrRef varname, CStrRef newvalue) {
   FUNCTION_INJECTION_BUILTIN(ini_alter);
   return f_ini_alter(varname, newvalue);

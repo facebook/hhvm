@@ -19,6 +19,7 @@
 #include <php/classes/exception.fws.h>
 #include <runtime/ext/ext.h>
 #include <runtime/eval/eval.h>
+namespace hphp_impl_starter {}
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -1768,7 +1769,8 @@ void c_Exception::t___init__() {
       m_line = tmp14;
     }
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 44 */
 void c_Exception::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
@@ -1778,32 +1780,38 @@ void c_Exception::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000,
   m_message = v_message;
   m_code = v_code;
   gasInCtor(oldInCtor);
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 58 */
 Variant c_Exception::t_getmessage() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getMessage);
   return m_message;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 71 */
 Variant c_Exception::t_getcode() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getCode);
   return m_code;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 85 */
 Variant c_Exception::t_getfile() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getFile);
   return m_file;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 99 */
 Variant c_Exception::t_getline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getLine);
   return m_line;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 112 */
 Variant c_Exception::t_gettrace() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getTrace);
   return m_trace;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 125 */
 String c_Exception::t_gettraceasstring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getTraceAsString);
@@ -1856,7 +1864,8 @@ String c_Exception::t_gettraceasstring() {
   }
   concat_assign(v_s, concat3(NAMSTR(s_sys_ss2e45e4ea, "#"), toString(v_i), NAMSTR(s_sys_ss10600e60, " {main}")));
   return v_s;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 144 */
 String c_Exception::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__toString);
@@ -1875,7 +1884,8 @@ String c_Exception::t___tostring() {
     CStrRef tmp1(tmp1_buf.detach());
     return tmp1;
   }
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 271 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ErrorException
 Variant c_ErrorException::os_getInit(CStrRef s) {
@@ -2293,12 +2303,14 @@ void c_ErrorException::t___construct(Variant v_message //  = NAMSTR(s_sys_ss0000
     }
   }
   gasInCtor(oldInCtor);
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 293 */
 Variant c_ErrorException::t_getseverity() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ErrorException, ErrorException::getSeverity);
   return m_severity;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 /* SRC: classes/exception.php line 168 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadFunctionCallException
 Variant c_BadFunctionCallException::os_getInit(CStrRef s) {
@@ -2710,7 +2722,8 @@ Variant pm_php$classes$exception_php(bool incOnce /* = false */, LVariableTable*
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/exception.php, pm_php$classes$exception_php);
   LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
   return true;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

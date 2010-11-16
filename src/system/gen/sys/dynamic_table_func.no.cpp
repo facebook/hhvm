@@ -20,6 +20,7 @@
 #include <runtime/eval/eval.h>
 #include <sys/literal_strings.h>
 
+namespace hphp_impl_starter {}
 
 using namespace std;
 
@@ -1192,6 +1193,16 @@ Variant i_magickgetimagehistogram(void *extra, CArrRef params) {
 Variant ifa_magickgetimagehistogram(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("magickgetimagehistogram", count, 1, 1, 1);
   return (f_magickgetimagehistogram(a0));
+}
+Variant i_cpu_get_model(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(cpu_get_model);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("cpu_get_model", 0, 1);
+  return (f_cpu_get_model());
+}
+Variant ifa_cpu_get_model(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("cpu_get_model", 0, 1);
+  return (f_cpu_get_model());
 }
 Variant i_preg_last_error(void *extra, CArrRef params) {
   FUNCTION_INJECTION(preg_last_error);
@@ -5807,6 +5818,16 @@ Variant i_bzerrstr(void *extra, CArrRef params) {
 Variant ifa_bzerrstr(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("bzerrstr", count, 1, 1, 1);
   return (f_bzerrstr(a0));
+}
+Variant i_cpu_get_count(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(cpu_get_count);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("cpu_get_count", 0, 1);
+  return (f_cpu_get_count());
+}
+Variant ifa_cpu_get_count(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("cpu_get_count", 0, 1);
+  return (f_cpu_get_count());
 }
 Variant i_fileinode(void *extra, CArrRef params) {
   FUNCTION_INJECTION(fileinode);
@@ -21386,17 +21407,20 @@ Variant ifa_hphp_splfileobject_fscanf(void *extra, int count, INVOKE_FEW_ARGS_IM
 Variant i_qlzuncompress(void *extra, CArrRef params) {
   FUNCTION_INJECTION(qlzuncompress);
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("qlzuncompress", count, 1, 1, 1);
+  if (count < 1 || count > 2) return throw_wrong_arguments("qlzuncompress", count, 1, 2, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    return (f_qlzuncompress(arg0));
+    if (count <= 1) return (f_qlzuncompress(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_qlzuncompress(arg0, arg1));
   }
 }
 Variant ifa_qlzuncompress(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 1) return throw_wrong_arguments("qlzuncompress", count, 1, 1, 1);
-  return (f_qlzuncompress(a0));
+  if (count < 1 || count > 2) return throw_wrong_arguments("qlzuncompress", count, 1, 2, 1);
+  if (count <= 1) return (f_qlzuncompress(a0));
+  return (f_qlzuncompress(a0, a1));
 }
 Variant i_mb_ereg_search_getregs(void *extra, CArrRef params) {
   FUNCTION_INJECTION(mb_ereg_search_getregs);
@@ -25239,6 +25263,16 @@ Variant ifa_apc_bin_loadfile(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
   if (count == 3) return (f_apc_bin_loadfile(a0, a1, a2));
   return (f_apc_bin_loadfile(a0, a1, a2, a3));
 }
+Variant i_posix_getcwd(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(posix_getcwd);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_getcwd", 0, 1);
+  return (f_posix_getcwd());
+}
+Variant ifa_posix_getcwd(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("posix_getcwd", 0, 1);
+  return (f_posix_getcwd());
+}
 Variant i_drawpathcurvetoabsolute(void *extra, CArrRef params) {
   FUNCTION_INJECTION(drawpathcurvetoabsolute);
   int count __attribute__((__unused__)) = params.size();
@@ -25259,16 +25293,6 @@ Variant i_drawpathcurvetoabsolute(void *extra, CArrRef params) {
 Variant ifa_drawpathcurvetoabsolute(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 7) return throw_wrong_arguments("drawpathcurvetoabsolute", count, 7, 7, 1);
   return (f_drawpathcurvetoabsolute(a0, a1, a2, a3, a4, a5, null), null);
-}
-Variant i_posix_getcwd(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(posix_getcwd);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_getcwd", 0, 1);
-  return (f_posix_getcwd());
-}
-Variant ifa_posix_getcwd(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 0) return throw_toomany_arguments("posix_getcwd", 0, 1);
-  return (f_posix_getcwd());
 }
 Variant i_hphp_set_error_page(void *extra, CArrRef params) {
   FUNCTION_INJECTION(hphp_set_error_page);
@@ -26112,22 +26136,6 @@ Variant ifa_magickgetimageblueprimary(void *extra, int count, INVOKE_FEW_ARGS_IM
   if (count != 1) return throw_wrong_arguments("magickgetimageblueprimary", count, 1, 1, 1);
   return (f_magickgetimageblueprimary(a0));
 }
-Variant i_magickspreadimage(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(magickspreadimage);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("magickspreadimage", count, 2, 2, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (f_magickspreadimage(arg0, arg1));
-  }
-}
-Variant ifa_magickspreadimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 2) return throw_wrong_arguments("magickspreadimage", count, 2, 2, 1);
-  return (f_magickspreadimage(a0, a1));
-}
 Variant i_array_fill(void *extra, CArrRef params) {
   FUNCTION_INJECTION(array_fill);
   int count __attribute__((__unused__)) = params.size();
@@ -26144,6 +26152,22 @@ Variant i_array_fill(void *extra, CArrRef params) {
 Variant ifa_array_fill(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 3) return throw_wrong_arguments("array_fill", count, 3, 3, 1);
   return (f_array_fill(a0, a1, a2));
+}
+Variant i_magickspreadimage(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(magickspreadimage);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("magickspreadimage", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_magickspreadimage(arg0, arg1));
+  }
+}
+Variant ifa_magickspreadimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("magickspreadimage", count, 2, 2, 1);
+  return (f_magickspreadimage(a0, a1));
 }
 Variant i_dom_element_set_attribute_node(void *extra, CArrRef params) {
   FUNCTION_INJECTION(dom_element_set_attribute_node);
@@ -31623,6 +31647,21 @@ Variant ifa_bcadd(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 2) return (f_bcadd(a0, a1));
   return (f_bcadd(a0, a1, a2));
 }
+Variant i_fb_set_exit_callback(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(fb_set_exit_callback);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("fb_set_exit_callback", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_fb_set_exit_callback(arg0), null);
+  }
+}
+Variant ifa_fb_set_exit_callback(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("fb_set_exit_callback", count, 1, 1, 1);
+  return (f_fb_set_exit_callback(a0), null);
+}
 Variant i_curl_setopt(void *extra, CArrRef params) {
   FUNCTION_INJECTION(curl_setopt);
   int count __attribute__((__unused__)) = params.size();
@@ -36608,6 +36647,18 @@ Variant ei_magickgetimagehistogram(Eval::VariableEnvironment &env, const Eval::F
     (*it)->eval(env);
   }
   return (x_magickgetimagehistogram(a0));
+}
+Variant ei_cpu_get_model(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("cpu_get_model", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_cpu_get_model());
 }
 Variant ei_preg_last_error(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -42252,6 +42303,18 @@ Variant ei_bzerrstr(Eval::VariableEnvironment &env, const Eval::FunctionCallExpr
     (*it)->eval(env);
   }
   return (x_bzerrstr(a0));
+}
+Variant ei_cpu_get_count(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("cpu_get_count", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_cpu_get_count());
 }
 Variant ei_fileinode(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -61358,19 +61421,24 @@ Variant ei_hphp_splfileobject_fscanf(Eval::VariableEnvironment &env, const Eval:
 }
 Variant ei_qlzuncompress(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
+  Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("qlzuncompress", count, 1, 1, 1);
+  if (count < 1 || count > 2) return throw_wrong_arguments("qlzuncompress", count, 1, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
     a0 = (*it)->eval(env);
     it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  return (x_qlzuncompress(a0));
+  if (count <= 1) return (x_qlzuncompress(a0));
+  else return (x_qlzuncompress(a0, a1));
 }
 Variant ei_mb_ereg_search_getregs(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -66125,6 +66193,18 @@ Variant ei_apc_bin_loadfile(Eval::VariableEnvironment &env, const Eval::Function
   else if (count == 3) return (x_apc_bin_loadfile(a0, a1, a2));
   else return (x_apc_bin_loadfile(a0, a1, a2, a3));
 }
+Variant ei_posix_getcwd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_getcwd", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_posix_getcwd());
+}
 Variant ei_drawpathcurvetoabsolute(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -66164,18 +66244,6 @@ Variant ei_drawpathcurvetoabsolute(Eval::VariableEnvironment &env, const Eval::F
     (*it)->eval(env);
   }
   return (x_drawpathcurvetoabsolute(a0, a1, a2, a3, a4, a5, a6), null);
-}
-Variant ei_posix_getcwd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_getcwd", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_posix_getcwd());
 }
 Variant ei_hphp_set_error_page(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -67228,26 +67296,6 @@ Variant ei_magickgetimageblueprimary(Eval::VariableEnvironment &env, const Eval:
   }
   return (x_magickgetimageblueprimary(a0));
 }
-Variant ei_magickspreadimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("magickspreadimage", count, 2, 2, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_magickspreadimage(a0, a1));
-}
 Variant ei_array_fill(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -67271,6 +67319,26 @@ Variant ei_array_fill(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
     (*it)->eval(env);
   }
   return (x_array_fill(a0, a1, a2));
+}
+Variant ei_magickspreadimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("magickspreadimage", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_magickspreadimage(a0, a1));
 }
 Variant ei_dom_element_set_attribute_node(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -74029,6 +74097,22 @@ Variant ei_bcadd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpress
   if (count <= 2) return (x_bcadd(a0, a1));
   else return (x_bcadd(a0, a1, a2));
 }
+Variant ei_fb_set_exit_callback(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("fb_set_exit_callback", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_fb_set_exit_callback(a0), null);
+}
 Variant ei_curl_setopt(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -79093,6 +79177,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 947:
       HASH_INVOKE_FROM_EVAL(0x61720D771D1A23B3LL, posix_getpwnam);
       break;
+    case 949:
+      HASH_INVOKE_FROM_EVAL(0x03BE37E94875C3B5LL, fb_set_exit_callback);
+      break;
     case 955:
       HASH_INVOKE_FROM_EVAL(0x5A3F5AAD1B13A3BBLL, is_executable);
       break;
@@ -82742,6 +82829,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 5998:
       HASH_INVOKE_FROM_EVAL(0x6DB71D850799D76ELL, hphp_splfileobject_fscanf);
       break;
+    case 6000:
+      HASH_INVOKE_FROM_EVAL(0x5DD71E685F179770LL, cpu_get_model);
+      break;
     case 6005:
       HASH_INVOKE_FROM_EVAL(0x04D9076808F79775LL, getenv);
       break;
@@ -83819,6 +83909,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 7592:
       HASH_INVOKE_FROM_EVAL(0x572AE270D9E4FDA8LL, socket_set_option);
       break;
+    case 7593:
+      HASH_INVOKE_FROM_EVAL(0x35828C81A86A9DA9LL, cpu_get_count);
+      break;
     case 7594:
       HASH_INVOKE_FROM_EVAL(0x6326C14D0FFA7DAALL, fb_thrift_serialize);
       break;
@@ -84305,6 +84398,7 @@ CallInfo ci_convert_uudecode((void*)&i_convert_uudecode, (void*)&ifa_convert_uud
 CallInfo ci_htmlspecialchars_decode((void*)&i_htmlspecialchars_decode, (void*)&ifa_htmlspecialchars_decode, 2, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_end_document((void*)&i_xmlwriter_end_document, (void*)&ifa_xmlwriter_end_document, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimagehistogram((void*)&i_magickgetimagehistogram, (void*)&ifa_magickgetimagehistogram, 1, 0, 0x0000000000000000LL);
+CallInfo ci_cpu_get_model((void*)&i_cpu_get_model, (void*)&ifa_cpu_get_model, 0, 0, 0x0000000000000000LL);
 CallInfo ci_preg_last_error((void*)&i_preg_last_error, (void*)&ifa_preg_last_error, 0, 0, 0x0000000000000000LL);
 CallInfo ci_end((void*)&i_end, (void*)&ifa_end, 1, 0, 0x0000000000000001LL);
 CallInfo ci_stream_get_line((void*)&i_stream_get_line, (void*)&ifa_stream_get_line, 3, 0, 0x0000000000000000LL);
@@ -84578,6 +84672,7 @@ CallInfo ci_pixelsetcolorcount((void*)&i_pixelsetcolorcount, (void*)&ifa_pixelse
 CallInfo ci_drawpathcurvetoquadraticbezierrelative((void*)&i_drawpathcurvetoquadraticbezierrelative, (void*)&ifa_drawpathcurvetoquadraticbezierrelative, 5, 0, 0x0000000000000000LL);
 CallInfo ci_posix_getgroups((void*)&i_posix_getgroups, (void*)&ifa_posix_getgroups, 0, 0, 0x0000000000000000LL);
 CallInfo ci_bzerrstr((void*)&i_bzerrstr, (void*)&ifa_bzerrstr, 1, 0, 0x0000000000000000LL);
+CallInfo ci_cpu_get_count((void*)&i_cpu_get_count, (void*)&ifa_cpu_get_count, 0, 0, 0x0000000000000000LL);
 CallInfo ci_fileinode((void*)&i_fileinode, (void*)&ifa_fileinode, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetnumberimages((void*)&i_magickgetnumberimages, (void*)&ifa_magickgetnumberimages, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimagesblob((void*)&i_magickgetimagesblob, (void*)&ifa_magickgetimagesblob, 1, 0, 0x0000000000000000LL);
@@ -85497,7 +85592,7 @@ CallInfo ci_write_hdf_file((void*)&i_write_hdf_file, (void*)&ifa_write_hdf_file,
 CallInfo ci_socket_send((void*)&i_socket_send, (void*)&ifa_socket_send, 4, 0, 0x0000000000000000LL);
 CallInfo ci_zlib_get_coding_type((void*)&i_zlib_get_coding_type, (void*)&ifa_zlib_get_coding_type, 0, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileobject_fscanf((void*)&i_hphp_splfileobject_fscanf, (void*)&ifa_hphp_splfileobject_fscanf, 4, 0, 0x0000000000000000LL);
-CallInfo ci_qlzuncompress((void*)&i_qlzuncompress, (void*)&ifa_qlzuncompress, 1, 0, 0x0000000000000000LL);
+CallInfo ci_qlzuncompress((void*)&i_qlzuncompress, (void*)&ifa_qlzuncompress, 2, 0, 0x0000000000000000LL);
 CallInfo ci_mb_ereg_search_getregs((void*)&i_mb_ereg_search_getregs, (void*)&ifa_mb_ereg_search_getregs, 0, 0, 0x0000000000000000LL);
 CallInfo ci_mb_eregi((void*)&i_mb_eregi, (void*)&ifa_mb_eregi, 3, 0, 0x0000000000000004LL);
 CallInfo ci_pixelgetgreen((void*)&i_pixelgetgreen, (void*)&ifa_pixelgetgreen, 1, 0, 0x0000000000000000LL);
@@ -85722,8 +85817,8 @@ CallInfo ci_preg_match_all((void*)&i_preg_match_all, (void*)&ifa_preg_match_all,
 CallInfo ci_imap_scanmailbox((void*)&i_imap_scanmailbox, (void*)&ifa_imap_scanmailbox, 4, 0, 0x0000000000000000LL);
 CallInfo ci_proc_terminate((void*)&i_proc_terminate, (void*)&ifa_proc_terminate, 2, 0, 0x0000000000000000LL);
 CallInfo ci_apc_bin_loadfile((void*)&i_apc_bin_loadfile, (void*)&ifa_apc_bin_loadfile, 4, 0, 0x0000000000000000LL);
-CallInfo ci_drawpathcurvetoabsolute((void*)&i_drawpathcurvetoabsolute, (void*)&ifa_drawpathcurvetoabsolute, 7, 0, 0x0000000000000000LL);
 CallInfo ci_posix_getcwd((void*)&i_posix_getcwd, (void*)&ifa_posix_getcwd, 0, 0, 0x0000000000000000LL);
+CallInfo ci_drawpathcurvetoabsolute((void*)&i_drawpathcurvetoabsolute, (void*)&ifa_drawpathcurvetoabsolute, 7, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_set_error_page((void*)&i_hphp_set_error_page, (void*)&ifa_hphp_set_error_page, 1, 0, 0x0000000000000000LL);
 CallInfo ci_preg_match((void*)&i_preg_match, (void*)&ifa_preg_match, 5, 0, 0x0000000000000004LL);
 CallInfo ci_timezone_abbreviations_list((void*)&i_timezone_abbreviations_list, (void*)&ifa_timezone_abbreviations_list, 0, 0, 0x0000000000000000LL);
@@ -85775,8 +85870,8 @@ CallInfo ci_xml_set_processing_instruction_handler((void*)&i_xml_set_processing_
 CallInfo ci_apd_breakpoint((void*)&i_apd_breakpoint, (void*)&ifa_apd_breakpoint, 0, 0, 0x0000000000000000LL);
 CallInfo ci_memcache_delete((void*)&i_memcache_delete, (void*)&ifa_memcache_delete, 3, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimageblueprimary((void*)&i_magickgetimageblueprimary, (void*)&ifa_magickgetimageblueprimary, 1, 0, 0x0000000000000000LL);
-CallInfo ci_magickspreadimage((void*)&i_magickspreadimage, (void*)&ifa_magickspreadimage, 2, 0, 0x0000000000000000LL);
 CallInfo ci_array_fill((void*)&i_array_fill, (void*)&ifa_array_fill, 3, 0, 0x0000000000000000LL);
+CallInfo ci_magickspreadimage((void*)&i_magickspreadimage, (void*)&ifa_magickspreadimage, 2, 0, 0x0000000000000000LL);
 CallInfo ci_dom_element_set_attribute_node((void*)&i_dom_element_set_attribute_node, (void*)&ifa_dom_element_set_attribute_node, 2, 0, 0x0000000000000000LL);
 CallInfo ci_memcache_replace((void*)&i_memcache_replace, (void*)&ifa_memcache_replace, 5, 0, 0x0000000000000000LL);
 CallInfo ci_stream_set_write_buffer((void*)&i_stream_set_write_buffer, (void*)&ifa_stream_set_write_buffer, 2, 0, 0x0000000000000000LL);
@@ -86101,6 +86196,7 @@ CallInfo ci_rename_function((void*)&i_rename_function, (void*)&ifa_rename_functi
 CallInfo ci_gzcompress((void*)&i_gzcompress, (void*)&ifa_gzcompress, 2, 0, 0x0000000000000000LL);
 CallInfo ci_gzeof((void*)&i_gzeof, (void*)&ifa_gzeof, 1, 0, 0x0000000000000000LL);
 CallInfo ci_bcadd((void*)&i_bcadd, (void*)&ifa_bcadd, 3, 0, 0x0000000000000000LL);
+CallInfo ci_fb_set_exit_callback((void*)&i_fb_set_exit_callback, (void*)&ifa_fb_set_exit_callback, 1, 0, 0x0000000000000000LL);
 CallInfo ci_curl_setopt((void*)&i_curl_setopt, (void*)&ifa_curl_setopt, 3, 0, 0x0000000000000000LL);
 CallInfo ci_imagealphablending((void*)&i_imagealphablending, (void*)&ifa_imagealphablending, 2, 0, 0x0000000000000000LL);
 CallInfo ci_pixelgetmagenta((void*)&i_pixelgetmagenta, (void*)&ifa_pixelgetmagenta, 1, 0, 0x0000000000000000LL);
@@ -87662,6 +87758,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 947:
       HASH_GUARD(0x61720D771D1A23B3LL, posix_getpwnam) {
         ci = &ci_posix_getpwnam;
+        return true;
+      }
+      break;
+    case 949:
+      HASH_GUARD(0x03BE37E94875C3B5LL, fb_set_exit_callback) {
+        ci = &ci_fb_set_exit_callback;
         return true;
       }
       break;
@@ -95277,6 +95379,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 6000:
+      HASH_GUARD(0x5DD71E685F179770LL, cpu_get_model) {
+        ci = &ci_cpu_get_model;
+        return true;
+      }
+      break;
     case 6005:
       HASH_GUARD(0x04D9076808F79775LL, getenv) {
         ci = &ci_getenv;
@@ -97500,6 +97608,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 7592:
       HASH_GUARD(0x572AE270D9E4FDA8LL, socket_set_option) {
         ci = &ci_socket_set_option;
+        return true;
+      }
+      break;
+    case 7593:
+      HASH_GUARD(0x35828C81A86A9DA9LL, cpu_get_count) {
+        ci = &ci_cpu_get_count;
         return true;
       }
       break;

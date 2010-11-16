@@ -390,6 +390,11 @@ ifdef TLS_GD
 CPPFLAGS += -DTLS_GLOBAL_DYNAMIC
 endif
 
+MYSQL_UNIX_SOCK_ADDR := $(shell mysql_config --socket)
+ifneq ($(MYSQL_UNIX_SOCK_ADDR), "")
+CPPFLAGS += -DPHP_MYSQL_UNIX_SOCK_ADDR=\"$(MYSQL_UNIX_SOCK_ADDR)\"
+endif
+
 ###############################################################################
 # Linking
 
@@ -568,8 +573,8 @@ ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
 	$(GD_LIBS) $(LIBXML_LIBS) $(FBML_LIBS) $(MBFL_LIBS) \
 	$(MCRYPT_LIBS) $(JEMALLOC_LIBS) $(GOOGLE_LIBS) $(ICU_LIBS) \
 	$(HTTP_LIBS) $(XHP_LIBS) $(TIME_LIBS) $(TBB_LIBS) $(FBI_LIBS) \
-	$(LDAP_LIBS) $(READLINE_LIBS) $(LIBMEMCACHED_LIBS) $(ORACLE_LIBS) \
-	$(LIBCAP_LIBS) $(IMAP_LIBS) \
+	$(LDAP_LIBS) $(READLINE_LIBS) $(LIBMEMCACHED_LIBS) \
+	$(LIBCAP_LIBS) $(IMAP_LIBS) $(ORACLE_LIBS) \
 
 LIB_PATHS := $(HPHP_LIB) $(HPHP_TEST_LIB_PATH) $(EXT_DIR)/binutils \
              $(sort $(foreach L,$(filter-out -%, $(ALL_LIBS)), $(dir $(L))))

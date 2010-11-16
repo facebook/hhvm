@@ -140,7 +140,11 @@ class Variant {
 
   Variant(litstr  v);
   Variant(const std::string & v);
-  Variant(const StaticString & v);
+  Variant(const StaticString & v) : _count(0), m_type(KindOfStaticString) {
+    StringData *s = v.get();
+    ASSERT(s);
+    m_data.pstr = s;
+  }
 
   Variant(CStrRef v);
   Variant(CArrRef v);
@@ -266,7 +270,7 @@ class Variant {
    * Borrowing Countable::_count for contagious bit, and this is okay, since
    * outer Variant never uses reference counting.
    */
-  void setContagious() const { _count = -1;}
+  void setContagious() const { ASSERT(this != &null_variant); _count = -1;}
   void clearContagious() const { _count = 0;}
   bool isContagious() const { return _count == -1;}
 
@@ -745,18 +749,14 @@ class Variant {
    * this function.
    */
   CVarRef set(bool    key, CVarRef v);
-  CVarRef set(char    key, CVarRef v) {
-    return set((int64)key, v);
-  }
-  CVarRef set(short   key, CVarRef v) {
-    return set((int64)key, v);
-  }
-  CVarRef set(int     key, CVarRef v) {
-    return set((int64)key, v);
-  }
-  CVarRef set(int64 key, CVarRef v);
+  CVarRef set(char    key, CVarRef v) { return set((int64)key, v); }
+  CVarRef set(short   key, CVarRef v) { return set((int64)key, v); }
+  CVarRef set(int     key, CVarRef v) { return set((int64)key, v); }
+  CVarRef set(int64   key, CVarRef v);
   CVarRef set(double  key, CVarRef v);
-  CVarRef set(litstr  key, CVarRef v, bool isString = false);
+  CVarRef set(litstr  key, CVarRef v, bool isString = false) {
+    return set(String(key), v, isString);
+  }
   CVarRef set(CStrRef key, CVarRef v, bool isString = false);
   CVarRef set(CVarRef key, CVarRef v);
 
@@ -773,8 +773,10 @@ class Variant {
     return setOpEqual(op, (int64)key, v);
   }
   CVarRef setOpEqual(int op, int64 key, CVarRef v);
-  CVarRef setOpEqual(int op, double  key, CVarRef v);
-  CVarRef setOpEqual(int op, litstr  key, CVarRef v, bool isString = false);
+  CVarRef setOpEqual(int op, double key, CVarRef v);
+  CVarRef setOpEqual(int op, litstr  key, CVarRef v, bool isString = false) {
+    return setOpEqual(op, String(key), v, isString);
+  }
   CVarRef setOpEqual(int op, CStrRef key, CVarRef v, bool isString = false);
   CVarRef setOpEqual(int op, CVarRef key, CVarRef v);
   CVarRef appendOpEqual(int op, CVarRef v);

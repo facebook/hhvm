@@ -54,13 +54,9 @@ ExpressionPtr IncludeExpression::clone() {
 // parser functions
 
 void IncludeExpression::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
-  // See if we can get a string literal
-  if (ExpressionPtr exp = ar->preOptimize(m_exp)) {
-    m_exp = exp;
-  }
-  m_include = ar->getDependencyGraph()->add
-    (DependencyGraph::KindOfPHPInclude, shared_from_this(), m_exp,
-     m_documentRoot);
+  m_include = ar->getDependencyGraph()->add(
+    DependencyGraph::KindOfPHPInclude, shared_from_this(),
+    m_exp, m_documentRoot);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

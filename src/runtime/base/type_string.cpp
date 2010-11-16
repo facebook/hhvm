@@ -665,6 +665,14 @@ void String::dump() const {
       return NULL;
     }
   }
+
+  bitstring* String::getTaintBitString() {
+    return m_px ? m_px->getTaintBitString() : NULL;
+  }
+
+  TaintedMetadata** String::getTaintMetaData() {
+    return m_px ? m_px->getTaintMetaData() : NULL;
+  }
   #endif
 
 

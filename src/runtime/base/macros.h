@@ -488,12 +488,20 @@ do { \
   HOTPROFILER_INJECTION(n)                         \
   FRAME_INJECTION_FLAGS(empty_string, n, FrameInjection::PseudoMain) \
 
-// code injected into every builtin function/method
+// code injected into every profiled builtin function/method
 #define FUNCTION_INJECTION_BUILTIN(n)           \
   DECLARE_THREAD_INFO                           \
   RECURSION_INJECTION                           \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION_BUILTIN(n)              \
+  FRAME_INJECTION_FLAGS(empty_string, n, FrameInjection::BuiltinFunction) \
+  DECLARE_SYSTEM_GLOBALS_INJECTION(g)           \
+
+// code injected into every unprofiled builtin function/method
+#define FUNCTION_NOPROFILE_BUILTIN(n)           \
+  DECLARE_THREAD_INFO                           \
+  RECURSION_INJECTION                           \
+  REQUEST_TIMEOUT_INJECTION                     \
   FRAME_INJECTION_FLAGS(empty_string, n, FrameInjection::BuiltinFunction) \
   DECLARE_SYSTEM_GLOBALS_INJECTION(g)           \
 

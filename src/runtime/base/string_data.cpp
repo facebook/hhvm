@@ -434,6 +434,14 @@ void StringData::unsetTaint(bitstring b){
 TaintedMetadata* StringData::getTaintedMetadata() const {
   return m_tainted_metadata;
 }
+
+bitstring* StringData::getTaintBitString() {
+  return &m_tainting;
+}
+
+TaintedMetadata** StringData::getTaintMetaData() {
+ return &m_tainted_metadata;
+}
 #endif
 
 bool StringData::toBoolean() const {

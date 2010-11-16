@@ -48,7 +48,8 @@ TypePtr Symbol::coerceTo(AnalysisResultPtr ar,
   return curType;
 }
 
-TypePtr Symbol::setType(AnalysisResultPtr ar, TypePtr type, bool coerced) {
+TypePtr Symbol::setType(AnalysisResultPtr ar, BlockScopeRawPtr scope,
+                        TypePtr type, bool coerced) {
   TypePtr oldType = getType(true);
   if (!oldType) oldType = Type::Some;
   if (type) {
@@ -56,7 +57,9 @@ TypePtr Symbol::setType(AnalysisResultPtr ar, TypePtr type, bool coerced) {
     TypePtr newType = getType(true);
     if (!newType) newType = Type::Some;
     if (!Type::SameType(oldType, newType)) {
-      ar->incNewlyInferred();
+      scope->addUpdates(isStatic() ?
+                        BlockScope::UseKindStaticRef :
+                        BlockScope::UseKindNonStaticRef);
     }
     return newType;
   }
@@ -219,7 +222,7 @@ TypePtr SymbolTable::setType(AnalysisResultPtr ar, Symbol *sym,
     m_symbolVec.push_back(sym);
     sym->setDeclaration(ConstructPtr());
   }
-  return sym->setType(ar, type, coerced);
+  return sym->setType(ar, BlockScopeRawPtr(&m_blockScope), type, coerced);
 }
 
 void SymbolTable::getSymbols(vector<string> &syms) const {

@@ -40,6 +40,7 @@ public:
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   StatementPtr preOptimize(AnalysisResultPtr ar);
+  void inferFunctionTypes(AnalysisResultPtr ar);
   virtual bool hasDecl() const { return true; }
   virtual bool hasImpl() const { return false; }
   virtual int getRecursiveCount() const;
@@ -68,6 +69,8 @@ public:
   void outputCPPStaticMethodWrapper(CodeGenerator &cg,
                                     AnalysisResultPtr ar,
                                     const char *cls);
+  void outputCPPTypeCheckWrapper(CodeGenerator &cg,
+                                 AnalysisResultPtr ar);
   bool hasRefParam();
   void outputParamArrayCreate(CodeGenerator &cg, bool checkRef);
   FunctionScopePtr onInitialParse(AnalysisResultPtr ar, FileScopePtr fs,

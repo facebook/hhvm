@@ -177,13 +177,18 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
     return checkTypesImpl(ar, type, Type::Variant, coerce);
   }
 
-  ClassScopePtr cls = m_classScope;
+  ClassScopePtr cls;
   if (objectType && !objectType->getName().empty()) {
-    cls = ar->findExactClass(shared_from_this(), objectType->getName());
+    if (m_classScope && !strcasecmp(objectType->getName().c_str(),
+                                    m_classScope->getName().c_str())) {
+      cls = m_classScope;
+    } else {
+      cls = ar->findExactClass(shared_from_this(), objectType->getName());
+    }
   }
 
   if (!cls) {
-    if (ar->isFirstPass()) {
+    if (getScope()->isFirstPass()) {
       // call resolveClass to mark functions as dynamic
       // but we cant do anything else with the result.
       resolveClass(ar, m_name);
@@ -231,7 +236,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
   if (m_object->isThis()) {
     FunctionScopePtr localfunc = getFunctionScope();
     if (localfunc->isStatic()) {
-      if (ar->isFirstPass()) {
+      if (getScope()->isFirstPass()) {
         Compiler::Error(Compiler::MissingObjectContext, self);
       }
       valid = false;
@@ -425,7 +430,10 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
   if (!m_name.empty() && m_valid && m_object->getType()->isSpecificObject()) {
     // Static method call
     outputCPPObjectCall(cg, ar);
-    cg_printf("%s%s(", Option::MethodPrefix, m_name.c_str());
+    cg_printf("%s%s(", m_funcScope ?
+              m_funcScope->getPrefix(m_params) : Option::MethodPrefix,
+              m_name.c_str());
+
     FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
         m_variableArgument, m_argArrayId, m_argArrayHash, m_argArrayIndex);
     cg_printf(")");
@@ -442,8 +450,18 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       } else {
         cg_printf("0");
       }
+      FunctionScope::RefParamInfoPtr info;
+      if (!m_name.empty()) {
+        info = FunctionScope::GetRefParamInfo(m_name);
+      }
       for (int i = pcount; i < Option::InvokeFewArgsCount; ++i) {
-        cg.printf(", null_variant");
+        if (info && !info->isRefParam(i)) {
+          cg_printf(", null_variant");
+        } else {
+          // It is not safe to use null_variant here, because
+          // throw_missing_arguments() might not throw at all.
+          cg_printf(", null");
+        }
       }
       cg_printf(")");
     } else {

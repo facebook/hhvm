@@ -19,6 +19,7 @@
 #include <php/classes/arrayaccess.fws.h>
 #include <runtime/ext/ext.h>
 #include <runtime/eval/eval.h>
+namespace hphp_impl_starter {}
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,7 +31,8 @@ Variant pm_php$classes$arrayaccess_php(bool incOnce /* = false */, LVariableTabl
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/arrayaccess.php, pm_php$classes$arrayaccess_php);
   LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
   return true;
-} /* function */
+}
+namespace hphp_impl_splitter {}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

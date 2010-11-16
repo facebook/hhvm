@@ -237,6 +237,8 @@ enum ContextOfException {
   HandlerException,
 };
 
+extern void invoke_exit_callback(const ExitException &e);
+
 static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
                              ContextOfException where, bool &error) {
   bool ret = false;
@@ -247,6 +249,7 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
   } catch (const ExitException &e) {
     ret = true;
     // ExitException is fine
+    invoke_exit_callback(e);
   } catch (const PhpFileDoesNotExistException &e) {
     if (where == WarmupDocException) {
       Logger::Error("warmup error: %s", e.getMessage().c_str());
@@ -856,7 +859,6 @@ void hphp_process_init() {
   Extension::InitModules();
   apc_load(RuntimeOption::ApcLoadThread);
   StaticString::FinishInit();
-  Eval::Debugger::StartServer();
 }
 
 void hphp_session_init() {
@@ -949,6 +951,9 @@ static void handle_invoke_exception(bool &ret, ExecutionContext *context,
     if (!handle_exception(context, errorMsg, InvokeException, error)) {
       ret = false;
     }
+  } catch (const ExitException &e) {
+    // Got an ExitException during exception handling, handle similarly to
+    // handle_exception, except not calling the callback
   } catch (...) {
     if (!handle_exception(context, errorMsg, HandlerException, error)) {
       ret = false;
@@ -967,7 +972,8 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool func, CArrRef funcParams, Variant funcRet,
                  const string &warmupDoc, const string &reqInitFunc,
                  const string &reqInitDoc,
-                 bool &error, string &errorMsg) {
+                 bool &error, string &errorMsg,
+                 bool once /* = true */) {
   bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
   error = false;
 
@@ -1001,7 +1007,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
       funcRet = invoke(cmd.c_str(), funcParams);
     } else {
       if (isServer) hphp_chdir_file(cmd);
-      include_impl_invoke(cmd.c_str(), true, get_variable_table());
+      include_impl_invoke(cmd.c_str(), once, get_variable_table());
     }
   } catch (...) {
     handle_invoke_exception(ret, context, errorMsg, error);

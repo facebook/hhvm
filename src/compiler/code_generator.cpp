@@ -48,6 +48,11 @@ void CodeGenerator::BuildJumpTable(const std::vector<const char *> &strings,
   }
 }
 
+const char *CodeGenerator::STARTER_MARKER =
+  "namespace hphp_impl_starter {}";
+const char *CodeGenerator::SPLITTER_MARKER =
+  "namespace hphp_impl_splitter {}";
+
 ///////////////////////////////////////////////////////////////////////////////
 
 CodeGenerator::CodeGenerator(std::ostream *primary,
@@ -235,6 +240,14 @@ void CodeGenerator::printDocComment(const std::string comment) {
   }
   print(escaped, false);
   printf("\n");
+}
+
+void CodeGenerator::printImplStarter() {
+  printf("%s\n", STARTER_MARKER);
+}
+
+void CodeGenerator::printImplSplitter() {
+  printf("%s\n", SPLITTER_MARKER);
 }
 
 const char *CodeGenerator::getGlobals(AnalysisResultPtr ar) {

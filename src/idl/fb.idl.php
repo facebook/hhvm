@@ -376,7 +376,7 @@ DefineFunction(
   array(
     'name'   => "fb_call_user_func_safe",
     'desc'   => "This function invokes \$function with the arguments specified in its parameter list. It returns an array of two elements, the first being a boolean specifying whether or not the function was invoked, the latter being the return value, or null if it was not invoked. The function may be any PHP callable, either a string function name, an array of object instance and method, or array of classname and static class method.",
-    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments | HasOptFunction,
+    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments | HasOptFunction | NoProfile,
     'opt'    => "hphp_opt_fb_call_user_func",
     'return' => array(
       'type'   => VariantVec,
@@ -395,7 +395,7 @@ DefineFunction(
   array(
     'name'   => "fb_call_user_func_safe_return",
     'desc'   => "This function invokes \$function with the arguments specified in its parameter\nlist. If the function is not defined, \$default_rval is returned. Note that\nthe default return value comes BEFORE the arguments to the function.",
-    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments | HasOptFunction,
+    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments | HasOptFunction | NoProfile,
     'opt'    => "hphp_opt_fb_call_user_func",
     'return' => array(
       'type'   => Variant,
@@ -419,7 +419,7 @@ DefineFunction(
   array(
     'name'   => "fb_call_user_func_array_safe",
     'desc'   => "This function invokes \$function with the arguments specified in its parameter list. It returns an array of two elements, the first being a boolean specifying whether or not the function was invoked, the latter being the return value, or null if it was not invoked. The function may be any PHP callable, either a string function name, an array of object instance and method, or array of classname and static class method.",
-    'flags'  =>  HasDocComment | HipHopSpecific | HasOptFunction,
+    'flags'  =>  HasDocComment | HipHopSpecific | HasOptFunction | NoProfile,
     'opt'    => "hphp_opt_fb_call_user_func",
     'return' => array(
       'type'   => VariantVec,
@@ -736,9 +736,26 @@ DefineFunction(
     ),
     'args'   => array(
       array(
-	'name'   => "new_value",
+        'name'   => "new_value",
         'type'   => Boolean,
         'desc'   => "The new value for the compression state.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "fb_set_exit_callback",
+    'desc'   => "Set a callback function that is called when php tries to exit.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "function",
+        'type'   => Variant,
+        'desc'   => "The callback to invoke. An exception object will be passed to the function",
       ),
     ),
   ));

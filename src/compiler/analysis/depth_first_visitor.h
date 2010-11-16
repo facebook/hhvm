@@ -86,11 +86,11 @@ public:
     return flags;
   }
 
-  void visitDependencies(BlockScopePtr scope,
+  void visitDependencies(BlockScopeRawPtr scope,
                          BlockScopeRawPtrQueue &queue) {
     scope->setMark(1);
-    const BlockScopeRawPtrHashSet &deps = scope->getDeps();
-    for (BlockScopeRawPtrHashSet::const_iterator it = deps.begin(),
+    const BlockScopeRawPtrVec &deps = scope->getDeps();
+    for (BlockScopeRawPtrVec::const_iterator it = deps.begin(),
            end = deps.end(); it != end; ++it) {
       BlockScopeRawPtr dep = *it;
       if (!dep->getMark()) {
@@ -99,6 +99,14 @@ public:
     }
     if (int useKinds = this->visitScope(scope)) {
       scope->changed(queue, useKinds);
+    } else if (BlockScopeRawPtrQueue *changed = scope->getChangedScopes()) {
+      for (BlockScopeRawPtrQueue::iterator it = changed->begin(),
+             end = changed->end(); it != end; ) {
+        BlockScopeRawPtr bs = *it;
+        changed->erase(it++);
+        bs->changed(queue, bs->getUpdated() | BlockScope::UseKindAny);
+        bs->clearUpdated();
+      }
     }
     scope->setMark(2);
   }

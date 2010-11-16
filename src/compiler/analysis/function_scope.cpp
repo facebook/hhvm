@@ -55,9 +55,9 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
       m_virtual(false), m_perfectVirtual(false), m_overriding(false),
       m_redeclaring(-1), m_volatile(false), m_pseudoMain(inPseudoMain),
       m_magicMethod(false), m_system(false), m_inlineable(false), m_sep(false),
-      m_containsThis(false), m_callTempCountMax(0), m_callTempCountCurrent(0),
-      m_nrvoFix(true), m_inlineAsExpr(false), m_inlineIndex(0),
-      m_directInvoke(false), m_optFunction(0) {
+      m_containsThis(false), m_nrvoFix(true), m_inlineAsExpr(false),
+      m_inlineIndex(0), m_directInvoke(false),
+      m_optFunction(0) {
   bool canInline = true;
   if (inPseudoMain) {
     canInline = false;
@@ -141,9 +141,8 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_virtual(false), m_perfectVirtual(false), m_overriding(false),
       m_redeclaring(-1), m_volatile(false), m_pseudoMain(false),
       m_magicMethod(false), m_system(true), m_inlineable(false), m_sep(false),
-      m_containsThis(false), m_callTempCountMax(0), m_callTempCountCurrent(0),
-      m_nrvoFix(true), m_inlineAsExpr(false), m_inlineIndex(0),
-      m_directInvoke(false), m_optFunction(0) {
+      m_containsThis(false), m_nrvoFix(true), m_inlineAsExpr(false),
+      m_inlineIndex(0), m_directInvoke(false), m_optFunction(0) {
   m_dynamic = Option::IsDynamicFunction(method, m_name);
   m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
     Option::DynamicInvokeFunctions.end();
@@ -176,7 +175,12 @@ void FunctionScope::setParamCounts(AnalysisResultPtr ar, int minParam,
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*params)[i]);
         m_paramNames[i] = param->getName();
-        m_paramTypeSpecs[i] = param->getTypeSpec(ar, false);
+        TypePtr specType = param->getTypeSpec(ar, false);
+        if (specType &&
+            !specType->is(Type::KindOfSome) &&
+            !specType->is(Type::KindOfVariant)) {
+          m_paramTypeSpecs[i] = specType;
+        }
         ExpressionPtr exp = param->defaultValue();
         if (exp) {
           m_paramDefaults[i] = exp->getText(false, false, ar);
@@ -359,11 +363,54 @@ void FunctionScope::setPerfectVirtual() {
   }
 }
 
+bool FunctionScope::needsTypeCheckWrapper() const {
+  for (int i = 0; i < m_maxParam; i++) {
+    if (isRefParam(i) || !m_paramDefaults[i].empty()) continue;
+    if (TypePtr spec = m_paramTypeSpecs[i]) {
+      if (Type::SameType(spec, m_paramTypes[i])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+const char *FunctionScope::getPrefix(ExpressionListPtr params) {
+  bool isMethod = getContainingClass();
+  bool callInner = false;
+  if (Option::HardTypeHints && !Option::SystemGen &&
+      !m_system && !m_sep && params) {
+    int count = params->getCount();
+    if (count >= m_minParam) {
+      for (int i = 0; i < count; i++) {
+        if (i == m_maxParam) break;
+        if (isRefParam(i) || !m_paramDefaults[i].empty()) continue;
+        if (TypePtr spec = m_paramTypeSpecs[i]) {
+          if (Type::SameType(spec, m_paramTypes[i])) {
+            ExpressionPtr p = (*params)[i];
+            TypePtr at = p->getActualType();
+            if (!Type::SameType(spec, at)) {
+              callInner = false;
+              break;
+            }
+            callInner = true;
+          }
+        }
+      }
+    }
+  }
+  if (callInner) {
+    return isMethod ? Option::TypedMethodPrefix : Option::TypedFunctionPrefix;
+  }
+
+  return isMethod ? Option::MethodPrefix : Option::FunctionPrefix;
+}
+
 int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
                                    ExpressionListPtr params, bool &valid) {
   if (!params) {
     if (m_minParam > 0) {
-      if (ar->isFirstPass()) {
+      if (exp->getScope()->isFirstPass()) {
         Compiler::Error(Compiler::TooFewArgument, exp, m_stmt);
       }
       valid = false;
@@ -374,7 +421,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
 
   int ret = 0;
   if (params->getCount() < m_minParam) {
-    if (ar->isFirstPass()) {
+    if (exp->getScope()->isFirstPass()) {
       Compiler::Error(Compiler::TooFewArgument, exp, m_stmt);
     }
     valid = false;
@@ -384,7 +431,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
     if (isVariableArgument()) {
       ret = params->getCount() - m_maxParam;
     } else {
-      if (ar->isFirstPass()) {
+      if (exp->getScope()->isFirstPass()) {
         Compiler::Error(Compiler::TooManyArgument, exp, m_stmt);
       }
       valid = false;
@@ -392,7 +439,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
     }
   }
 
-  bool canSetParamType = isUserFunction() && !m_overriding;
+  bool canSetParamType = isUserFunction() && !m_overriding && !m_perfectVirtual;
   for (int i = 0; i < params->getCount(); i++) {
     ExpressionPtr param = (*params)[i];
     if (valid && param->hasContext(Expression::InvokeArgument)) {
@@ -401,7 +448,8 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
       param->clearContext(Expression::NoRefWrapper);
     }
     TypePtr expType;
-    if (valid && !canSetParamType && i < m_maxParam) {
+    if (valid && !canSetParamType && i < m_maxParam &&
+        (!Option::HardTypeHints || !m_paramTypeSpecs[i])) {
       expType = param->inferAndCheck(ar, getParamType(i), false);
     } else {
       expType = param->inferAndCheck(ar, Type::Some, false);
@@ -425,21 +473,23 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
           const char *file = m_stmt->getLocation()->file;
           Util::string_printf
             (msg, "%s: parameter %d of %s requires %s, called with %s",
-             file, i, m_name.c_str(), m_paramTypeSpecs[i]->toString().c_str(),
+             file, i+1, m_name.c_str(), m_paramTypeSpecs[i]->toString().c_str(),
              expType->toString().c_str());
           Compiler::Error(Compiler::BadArgumentType, m_stmt, msg);
         }
       }
-      TypePtr paramType = getParamType(i);
-      if (canSetParamType) {
-        paramType = setParamType(ar, i, expType);
-      }
-      if (valid) {
-        if (!Type::IsLegalCast(ar, expType, paramType) &&
-            paramType->isNonConvertibleType()) {
-          param->inferAndCheck(ar, paramType, true);
+      if (!Option::HardTypeHints || !m_paramTypeSpecs[i]) {
+        TypePtr paramType = getParamType(i);
+        if (canSetParamType) {
+          paramType = setParamType(ar, i, expType);
         }
-        param->setExpectedType(paramType);
+        if (valid) {
+          if (!Type::IsLegalCast(ar, expType, paramType) &&
+              paramType->isNonConvertibleType()) {
+            param->inferAndCheck(ar, paramType, true);
+          }
+          param->setExpectedType(paramType);
+        }
       }
     }
     // we do a best-effort check for bad pass-by-reference and do not report
@@ -460,8 +510,8 @@ TypePtr FunctionScope::setParamType(AnalysisResultPtr ar, int index,
   if (!paramType) paramType = Type::Some;
   type = Type::Coerce(ar, paramType, type);
   if (type && !Type::SameType(paramType, type)) {
-    ar->incNewlyInferred();
-    if (!ar->isFirstPass()) {
+    addUpdates(UseKindNonStaticRef);
+    if (!isFirstPass()) {
       Logger::Verbose("Corrected type of parameter %d of %s: %s -> %s",
                       index, m_name.c_str(),
                       paramType->toString().c_str(), type->toString().c_str());
@@ -532,20 +582,42 @@ void FunctionScope::setReturnType(AnalysisResultPtr ar, TypePtr type) {
 
   if (m_returnType) {
     type = Type::Coerce(ar, m_returnType, type);
-    if (type && !Type::SameType(m_returnType, type)) {
-      ar->incNewlyInferred();
-      if (!ar->isFirstPass()) {
-        Logger::Verbose("Corrected function return type %s -> %s",
-                        m_returnType->toString().c_str(),
-                        type->toString().c_str());
-      }
-    }
   }
-  if (!type->getName().empty()) {
+  if (!type->getName().empty() && !Type::SameType(type, m_returnType)) {
     FileScopePtr fs = getContainingFile();
     if (fs) fs->addClassDependency(ar, type->getName());
   }
   m_returnType = type;
+}
+
+void FunctionScope::pushReturnType() {
+  if (m_overriding || m_perfectVirtual || m_pseudoMain) return;
+
+  m_prevReturn = m_returnType;
+  m_returnType.reset();
+}
+
+void FunctionScope::popReturnType(AnalysisResultPtr ar) {
+  if (m_overriding || m_perfectVirtual || m_pseudoMain) return;
+
+  if (m_returnType) {
+    if (m_prevReturn) {
+      if (Type::SameType(m_returnType, m_prevReturn)) {
+        m_prevReturn.reset();
+        return;
+      }
+      if (!isFirstPass()) {
+        Logger::Verbose("Corrected function return type %s -> %s",
+                        m_prevReturn->toString().c_str(),
+                        m_returnType->toString().c_str());
+      }
+    }
+  } else if (!m_prevReturn) {
+    return;
+  }
+
+  m_prevReturn.reset();
+  addUpdates(UseKindCaller);
 }
 
 void FunctionScope::setOverriding(TypePtr returnType,
@@ -585,52 +657,69 @@ void FunctionScope::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  for (int i = 0; i < m_callTempCountMax; i++) {
-    cg_printf("Variant %s%d;\n", Option::EvalOrderTempPrefix, i);
-  }
-
   ExpressionListPtr params =
     dynamic_pointer_cast<MethodStatement>(getStmt())->getParams();
+
+  int inTypedWrapper = Option::HardTypeHints ?
+    cg.getContext() == CodeGenerator::CppTypedParamsWrapperImpl : -1;
 
   /* Typecheck parameters */
   for (size_t i = 0; i < m_paramTypes.size(); i++) {
     TypePtr specType = m_paramTypeSpecs[i];
-    if (!specType)
-      continue;
-    if (specType->is(Type::KindOfSome) || specType->is(Type::KindOfAny)
-      || specType->is(Type::KindOfVariant))
-      continue;
-
-    /* If there's any possible runtime conflict, this will be turned into
-     * a Variant; if it hasn't been, then we don't need to worry */
-    if (!getParamType(i)->is(Type::KindOfVariant))
-      continue;
+    if (!specType) continue;
+    if (inTypedWrapper >= 0) {
+      TypePtr infType = m_paramTypes[i];
+      bool typed = !isRefParam(i) &&
+        m_paramDefaults[i].empty() &&
+        Type::SameType(specType, infType);
+      if (!typed == inTypedWrapper) continue;
+    }
 
     ParameterExpressionPtr param =
       dynamic_pointer_cast<ParameterExpression>((*params)[i]);
 
     /* Insert runtime checks. */
     if (specType->is(Type::KindOfArray)) {
-      cg_printf("if(!%s%s.isArray())\n",
-                Option::VariablePrefix, param->getName().c_str());
-      cg_printf("  throw_unexpected_argument_type"
+      cg_printf("if(");
+      if (!m_paramDefaults[i].empty()) {
+        cg_printf("!f_is_null(%s%s) && ",
+                   Option::VariablePrefix, param->getName().c_str());
+      }
+      cg_indentBegin("!%s%s.isArray()) {\n",
+                     Option::VariablePrefix, param->getName().c_str());
+      cg_printf("throw_unexpected_argument_type"
                 "(%d,\"%s\",\"array\",%s%s);\n",
                 i, m_name.c_str(),
                 Option::VariablePrefix, param->getName().c_str());
+      if (Option::HardTypeHints) {
+        cg_printf("return%s;\n", getReturnType() ? " null" : "");
+      }
+      cg_indentEnd("}\n");
     } else if (specType->is(Type::KindOfObject)) {
-      cg_printf("if(!%s%s.instanceof(", Option::VariablePrefix,
+      cg_printf("if(");
+      if (!m_paramDefaults[i].empty()) {
+        cg_printf("!f_is_null(%s%s) && ",
+                   Option::VariablePrefix, param->getName().c_str());
+      }
+      cg_printf("!%s%s.instanceof(", Option::VariablePrefix,
                 param->getName().c_str());
       cg_printString(specType->getName(), ar, shared_from_this());
-      cg_printf("))\n");
-      cg_printf("  throw_unexpected_argument_type(%d,\"%s\",\"%s\",%s%s);\n",
+      cg_indentBegin(")) {\n");
+      cg_printf("throw_unexpected_argument_type(%d,\"%s\",\"%s\",%s%s);\n",
                 i, m_name.c_str(), specType->getName().c_str(),
                 Option::VariablePrefix, param->getName().c_str());
+      if (Option::HardTypeHints) {
+        cg_printf("return%s;\n", getReturnType() ? " null" : "");
+      }
+      cg_indentEnd("}\n");
     } else {
       ASSERT(false);
     }
   }
 
-  BlockScope::outputCPP(cg, ar);
+  if (inTypedWrapper <= 0) {
+    BlockScope::outputCPP(cg, ar);
+  }
 }
 
 void FunctionScope::outputCPPParamsDecl(CodeGenerator &cg,
@@ -819,7 +908,6 @@ void FunctionScope::outputCPPArguments(ExpressionListPtr params,
   int firstExtra = 0;
   for (int i = 0; i < paramCount; i++) {
     ExpressionPtr param = (*params)[i];
-    cg.setItemIndex(i);
     if (i > 0) cg_printf(extra ? "." : ", ");
     if (!extra && (i == iMax || extraArg < 0)) {
       if (extraArgArrayId != -1) {
@@ -900,6 +988,24 @@ bool FunctionScope::outputCPPInvokeArgCountCheck(CodeGenerator &cg,
   const char *level = (system ? (constructor ? ", 2" : ", 1") : "");
   bool guarded = system && (ret || constructor);
   string fullname = getOriginalFullName();
+  if (checkMissing) {
+    bool fullGuard = ret && (system || Option::HardTypeHints);
+    for (int i = 0; i < m_minParam; i++) {
+      if (TypePtr t = m_paramTypeSpecs[i]) {
+        cg_printf("if (count < %d) "
+                  "%sthrow_missing_typed_argument(\"%s\", ",
+                  i + 1, fullGuard ? "return " : "", fullname.c_str());
+        cg_printf(t->is(Type::KindOfArray) ?
+                  "0" : "\"%s\"", cg.escapeLabel(t->getName()).c_str());
+        cg_printf(", %d);\n", i + 1);
+        if (fullGuard && i + 1 == m_minParam) {
+          guarded = true;
+          checkMissing = false;
+        }
+      }
+    }
+  }
+
   if (checkMissing && checkTooMany) {
     if (!variable && m_minParam == m_maxParam) {
       cg_printf("if (count != %d)"
@@ -1528,6 +1634,14 @@ void FunctionScope::RecordRefParamInfo(string fname, FunctionScopePtr func) {
     variables->addParam(func->getParamName(i),
                         TypePtr(), AnalysisResultPtr(), ConstructPtr());
   }
+}
+
+FunctionScope::RefParamInfoPtr FunctionScope::GetRefParamInfo(string fname) {
+  StringToRefParamInfoPtrMap::iterator it = s_refParamInfo.find(fname);
+  if (it == s_refParamInfo.end()) {
+    return RefParamInfoPtr();
+  }
+  return it->second;
 }
 
 void FunctionScope::outputMethodWrapper(CodeGenerator &cg,

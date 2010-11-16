@@ -811,7 +811,9 @@ Variant f_imap_errors() {
 }
 
 bool f_imap_expunge(CObjRef imap_stream) {
-  throw NotImplementedException(__func__);
+  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  mail_expunge(obj->m_stream);
+  return true;
 }
 
 Variant f_imap_fetch_overview(CObjRef imap_stream, CStrRef sequence,
@@ -879,7 +881,30 @@ Variant f_imap_fetch_overview(CObjRef imap_stream, CStrRef sequence,
 
 Variant f_imap_fetchbody(CObjRef imap_stream, int64 msg_number,
                          CStrRef section, int64 options /* = 0 */) {
-  throw NotImplementedException(__func__);
+  if (options && ((options & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
+    raise_warning("invalid value for the options parameter");
+    return false;
+  }
+
+  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+
+  if (!options || !(options & FT_UID)) {
+    if (!obj->checkMsgNumber(msg_number)) {
+      return false;
+    }
+  }
+
+  unsigned long len;
+  char *body = mail_fetchbody_full(obj->m_stream, msg_number,
+                                   (char*)section.data(),
+                                   &len, (options ? options : NIL));
+
+  if (!body) {
+    raise_warning("No body information available");
+    return false;
+  }
+
+  return String(body, len, CopyString);
 }
 
 Variant f_imap_fetchheader(CObjRef imap_stream, int64 msg_number,
@@ -938,6 +963,11 @@ Variant f_imap_fetchstructure(CObjRef imap_stream, int64 msg_number,
 
   mail_fetchstructure_full(obj->m_stream, msg_number, &body,
                            (options ? options : NIL));
+
+  if (!body) {
+    raise_warning("No body information available");
+    return false;
+  }
 
   Object ret(NEW(c_stdClass)());
   _php_imap_add_body(ret, body);
@@ -1168,7 +1198,8 @@ Variant f_imap_open(CStrRef mailbox, CStrRef username, CStrRef password,
 }
 
 bool f_imap_ping(CObjRef imap_stream) {
-  throw NotImplementedException(__func__);
+  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  return mail_ping(obj->m_stream);
 }
 
 Variant f_imap_qprint(CStrRef str) {
@@ -1254,7 +1285,10 @@ bool f_imap_setacl(CObjRef imap_stream, CStrRef mailbox, CStrRef id,
 
 bool f_imap_setflag_full(CObjRef imap_stream, CStrRef sequence, CStrRef flag,
                          int64 options /* = 0 */) {
-  throw NotImplementedException(__func__);
+  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  mail_setflag_full(obj->m_stream, (char*)sequence.data(), (char*)flag.data(),
+                    (options ? options : NIL));
+  return true;
 }
 
 Variant f_imap_sort(CObjRef imap_stream, int64 criteria, int64 reverse,

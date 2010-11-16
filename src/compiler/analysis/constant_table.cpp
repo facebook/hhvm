@@ -55,13 +55,17 @@ TypePtr ConstantTable::add(const std::string &name, TypePtr type,
     return type;
   }
 
-  if (ar->isFirstPass()) {
-    if (exp != sym->getValue()) {
-      Compiler::Error(Compiler::DeclaredConstantTwice, construct,
-                      sym->getDeclaration());
-      sym->setDynamic();
-      m_hasDynamic = true;
-      type = Type::Variant;
+  if (m_blockScope.isFirstPass()) {
+    if (construct) {
+      if (exp != sym->getValue()) {
+        Compiler::Error(Compiler::DeclaredConstantTwice, construct,
+                        sym->getDeclaration());
+        sym->setDynamic();
+        m_hasDynamic = true;
+        type = Type::Variant;
+      }
+    } else if (exp) {
+      sym->setValue(exp);
     }
     setType(ar, sym, type, true);
   }

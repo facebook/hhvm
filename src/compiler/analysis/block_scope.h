@@ -42,7 +42,10 @@ typedef hphp_hash_set<BlockScopeRawPtr,
                       smart_pointer_hash<BlockScopeRawPtr>
                       > BlockScopeRawPtrHashSet;
 
+typedef std::vector<BlockScopeRawPtr> BlockScopeRawPtrVec;
 typedef std::list<BlockScopeRawPtr> BlockScopeRawPtrQueue;
+typedef std::vector<BlockScopeRawPtrFlagsHashMap::
+                    value_type*> BlockScopeRawPtrFlagsVec;
 
 /**
  * Base class of ClassScope and FunctionScope.
@@ -80,7 +83,7 @@ public:
   FunctionScopePtr getContainingFunction();
   FileScopePtr getContainingFile();
 
-  void addUse(BlockScopePtr user, int useFlags);
+  void addUse(BlockScopeRawPtr user, int useFlags);
   void changed(BlockScopeRawPtrQueue &todo, int useKinds);
 
 
@@ -131,10 +134,26 @@ public:
   void setOuterScope(BlockScopePtr o) { m_outerScope = o; }
   BlockScopePtr getOuterScope() { return m_outerScope.lock(); }
   bool isOuterScope() { return m_outerScope.expired(); }
-  BlockScopeRawPtrHashSet &getDeps() { return m_deps; }
+  const BlockScopeRawPtrVec &getDeps() const { return m_orderedDeps; }
+  const BlockScopeRawPtrFlagsVec &getOrderedUsers() const {
+    return m_orderedUsers;
+  }
 
   void setMark(int m) { m_mark = m; }
   int getMark() const { return m_mark; }
+
+  void setPass(int p) { m_pass = p; }
+  void incPass() { m_pass++; }
+  int getPass() const { return m_pass; }
+  bool isFirstPass() const { return !m_pass; }
+  void clearUpdated() { m_updated = 0; }
+  void addUpdates(int f);
+  int getUpdated() const { return m_updated; }
+
+  BlockScopeRawPtrQueue *getChangedScopes() const { return m_changedScopes; }
+  void setChangedScopes(BlockScopeRawPtrQueue *scopes) {
+    m_changedScopes = scopes;
+  }
 protected:
   std::string m_originalName;
   std::string m_name;
@@ -146,14 +165,18 @@ protected:
   ConstantTablePtr m_constants;
   BlockScopeRawPtr m_outerScope;
 
-  BlockScopeRawPtrHashSet m_deps;
-  BlockScopeRawPtrFlagsHashMap m_users;
-
   int m_loopNestedLevel;
   int m_incLevel;
   ModifierExpressionPtr m_modifiers;
   StatementListPtr m_includes;
   int m_mark;
+  int m_pass;
+  int m_updated;
+private:
+  BlockScopeRawPtrVec m_orderedDeps;
+  BlockScopeRawPtrFlagsVec m_orderedUsers;
+  BlockScopeRawPtrFlagsHashMap m_userMap;
+  BlockScopeRawPtrQueue *m_changedScopes;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

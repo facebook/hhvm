@@ -172,12 +172,17 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
         reqInitDoc = getSourceFilename(reqInitDoc, sourceRootInfo);
     }
 
+    bool runOnce = false;
     bool ret = true;
     if (isFile) {
       rpcFile = rpcFunc;
       rpcFunc.clear();
     } else {
-      rpcFile = transport->getParam("file");
+      rpcFile = transport->getParam("include");
+      if (rpcFile.empty()) {
+        rpcFile = transport->getParam("include_once");
+        runOnce = true;
+      }
     }
     if (!rpcFile.empty()) {
       // invoking a file through rpc
@@ -194,7 +199,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
         rpcFile = getSourceFilename(rpcFile, sourceRootInfo);
         ret = hphp_invoke(m_context, rpcFile, false, Array(), null,
                           warmupDoc, reqInitFunc, reqInitDoc,
-                          error, errorMsg);
+                          error, errorMsg, runOnce);
       }
       // no need to do the initialization for a second time
       warmupDoc.clear();

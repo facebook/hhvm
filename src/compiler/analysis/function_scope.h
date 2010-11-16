@@ -177,8 +177,14 @@ public:
   /**
    * What is the inferred type of this function's return.
    */
+  void pushReturnType();
   void setReturnType(AnalysisResultPtr ar, TypePtr type);
-  TypePtr getReturnType() const { return m_returnType;}
+  TypePtr getReturnType() const {
+    return m_prevReturn ? m_prevReturn : m_returnType;
+  }
+  void popReturnType(AnalysisResultPtr ar);
+  bool needsTypeCheckWrapper() const;
+  const char *getPrefix(ExpressionListPtr params);
 
   void setOptFunction(FunctionOptPtr fn) { m_optFunction = fn; }
   FunctionOptPtr getOptFunction() const { return m_optFunction; }
@@ -237,18 +243,7 @@ public:
                       ExpressionListPtr params, bool &valid);
   TypePtr setParamType(AnalysisResultPtr ar, int index, TypePtr type);
   TypePtr getParamType(int index);
-
-  int requireCallTemps(int count) {
-    int ret = m_callTempCountCurrent;
-    m_callTempCountCurrent += count;
-    if (m_callTempCountMax < m_callTempCountCurrent) {
-      m_callTempCountMax = m_callTempCountCurrent;
-    }
-    return ret;
-  }
-  void endRequireCallTemps(int old) {
-    m_callTempCountCurrent = old;
-  }
+  TypePtr getParamTypeSpec(int index) { return m_paramTypeSpecs[index]; }
 
   /**
    * Override BlockScope::outputPHP() to generate return type.
@@ -358,13 +353,7 @@ public:
 
   static void RecordRefParamInfo(std::string fname, FunctionScopePtr func);
 
-  static RefParamInfoPtr GetRefParamInfo(std::string fname) {
-    StringToRefParamInfoPtrMap::iterator it = s_refParamInfo.find(fname);
-    if (it == s_refParamInfo.end()) {
-      return RefParamInfoPtr();
-    }
-    return it->second;
-  }
+  static RefParamInfoPtr GetRefParamInfo(std::string fname);
 
   class RefParamInfo {
   public:
@@ -408,6 +397,7 @@ private:
   bool m_refReturn; // whether it's "function &get_reference()"
   std::vector<bool> m_refs;
   TypePtr m_returnType;
+  TypePtr m_prevReturn;
   ModifierExpressionPtr m_modifiers;
   bool m_virtual;
   bool m_perfectVirtual;
@@ -422,8 +412,6 @@ private:
   bool m_inlineable;
   bool m_sep;
   bool m_containsThis; // contains a usage of $this?
-  int m_callTempCountMax;
-  int m_callTempCountCurrent;
   StatementPtr m_stmtCloned; // cloned method body stmt
   bool m_nrvoFix;
   bool m_inlineAsExpr;

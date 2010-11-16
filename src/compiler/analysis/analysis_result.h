@@ -110,11 +110,8 @@ public:
 
   Phase getPhase() const { return m_phase;}
   void setPhase(Phase phase) { m_phase = phase;}
-  bool isFirstPass() const {
-    return m_phase == AnalyzeInclude || m_phase == FirstInference;
-  }
-  bool isSecondPass() const {
-    return m_phase == SecondInference;
+  bool isAnalyzeInclude() const {
+    return m_phase == AnalyzeInclude;// || m_phase == FirstInference;
   }
 
   DependencyGraphPtr getDependencyGraph() {
@@ -132,7 +129,6 @@ public:
   void analyzeProgram(bool system = false);
   void analyzeProgramFinal();
   void analyzePerfectVirtuals();
-  void inferTypes(int maxPass = 100);
   void dump();
   void visitFiles(void (*cb)(AnalysisResultPtr, StatementPtr, void*),
                   void *data);
@@ -142,18 +138,11 @@ public:
 
   ExpressionPtr preOptimize(ExpressionPtr e);
   void preOptimize();
+  void inferTypes();
   void postOptimize();
 
   void incOptCounter() { m_optCounter++; }
   int getOptCounter() const { return m_optCounter; }
-
-  /**
-   * When types are newly inferred, we need more passes, until no new types
-   * are inferred.
-   */
-  void incNewlyInferred() {
-    m_newlyInferred++;
-  }
 
   void containsDynamicFunctionCall() { m_dynamicFunction = true;}
   void containsDynamicClass() { m_dynamicClass = true;}
@@ -357,7 +346,6 @@ private:
   bool m_parseOnDemand;
   std::vector<std::string> m_parseOnDemandDirs;
   Phase m_phase;
-  int m_newlyInferred;
   DependencyGraphPtr m_dependencyGraph;
   StringToFileScopePtrMap m_files;
   FileScopePtrVec m_fileScopes;
@@ -493,7 +481,7 @@ private:
   void outputCPPUtilImpl(CodeGenerator::Output output);
 
   void repartitionCPP(const std::string &filename, int64 targetSize,
-                      bool insideHPHP);
+                      bool insideHPHP, bool force);
   void repartitionLargeCPP(const std::vector<std::string> &filenames,
                            const std::vector<std::string> &additionals);
 
@@ -532,9 +520,6 @@ private:
   void outputCPPEvalHook(CodeGenerator &cg);
   void outputCPPDefaultInvokeFile(CodeGenerator &cg, const char *file);
 
-  void outputTaintNumDecl(CodeGenerator &cg, int num);
-  void outputTaintDecl(CodeGenerator &cg);
-  void outputTaintImpl(CodeGenerator &cg);
   void outputConcatNumDecl(CodeGenerator &cg, int num);
   void outputConcatDecl(CodeGenerator &cg);
   void outputConcatImpl(CodeGenerator &cg);

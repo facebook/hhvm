@@ -259,7 +259,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   if (m_object->isThis()) {
     FunctionScopePtr func = getFunctionScope();
     if (!func || func->isStatic()) {
-      if (ar->isFirstPass()) {
+      if (getScope()->isFirstPass()) {
         Compiler::Error(Compiler::MissingObjectContext, self);
       }
       m_actualType = Type::Variant;
@@ -280,7 +280,9 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
        getOriginalScope() == parent) &&
       !m_propSym->isStatic();
 
-    m_objectClass = cls;
+    if (m_propSymValid) {
+      parent->addUse(getScope(), BlockScope::UseKindNonStaticRef);
+    }
   }
 
   TypePtr ret;

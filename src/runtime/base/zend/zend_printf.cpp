@@ -21,6 +21,7 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
+#include <runtime/base/array/array_iterator.h>
 #include <math.h>
 
 #if defined(__APPLE__)

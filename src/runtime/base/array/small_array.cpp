@@ -17,6 +17,7 @@
 #include <runtime/base/array/small_array.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/array/zend_array.h>
+#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/runtime_option.h>
 #include <util/hash.h>
 
@@ -111,6 +112,11 @@ void SmallArray::fetchValue(ssize_t pos, Variant &v) const {
 }
 
 CVarRef SmallArray::getValueRef(ssize_t pos) const {
+  ASSERT(pos >= 0 && pos < SARR_TABLE_SIZE && m_arBuckets[pos].kind != Empty);
+  return m_arBuckets[pos].data;
+}
+
+CVarRef SmallArray::getValueRef(ssize_t pos, Variant &holder) const {
   ASSERT(pos >= 0 && pos < SARR_TABLE_SIZE && m_arBuckets[pos].kind != Empty);
   return m_arBuckets[pos].data;
 }
@@ -432,7 +438,7 @@ void SmallArray::load(CVarRef k, Variant &v) const {
   }
   const Bucket &b = m_arBuckets[p];
   if (b.kind != Empty) {
-    if (b.data.isReferenced()) v = ref(b.data); else v = b.data;
+    v.setWithRef(b.data);
   }
 }
 
@@ -716,6 +722,40 @@ ArrayData *SmallArray::lvalPtr(CStrRef k, Variant *&ret, bool copy,
   return result;
 }
 
+ArrayData *SmallArray::lvalPtr(int64 k, Variant *&ret, bool copy,
+                               bool create) {
+  int p = find(k);
+  Bucket *pb = m_arBuckets + p;
+
+  SmallArray *result = NULL;
+  if (pb->kind == Empty) {
+    if (create && m_nNumOfElements >= SARR_SIZE) {
+      ArrayData *a = escalateToZendArray();
+      a->lvalPtr(k, ret, false, create);
+      return a;
+    }
+    ret = NULL;
+    if (copy) {
+      result = copyImpl();
+      if (create) {
+        pb = result->addKey(p, k);
+        ret = &pb->data;
+      }
+    } else if (create) {
+      addKey(p, k);
+      ret = &pb->data;
+    }
+    return result;
+  }
+
+  if (copy) {
+    result = copyImpl();
+    pb = result->m_arBuckets + p;
+  }
+  ret = &pb->data;
+  return result;
+}
+
 ArrayData *SmallArray::lval(CVarRef k, Variant *&ret, bool copy,
                             bool checkExist /* = false */) {
   if (k.isNumeric()) {
@@ -933,6 +973,14 @@ bool SmallArray::nextInsert(CVarRef v) {
   return true;
 }
 
+void SmallArray::nextInsertWithRef(CVarRef v) {
+  int64 h = m_nNextFreeElement;
+  int p = find(h);
+  Bucket *pb = addKey(p, h);
+  pb->data.setWithRef(v);
+  m_nNextFreeElement = h + 1;
+}
+
 ArrayData *SmallArray::append(CVarRef v, bool copy) {
   if (m_nNumOfElements >= SARR_SIZE) {
     ArrayData *a = escalateToZendArray();
@@ -948,21 +996,36 @@ ArrayData *SmallArray::append(CVarRef v, bool copy) {
   return NULL;
 }
 
-bool SmallArray::addVal(int64 h, CVarRef data) {
+ArrayData *SmallArray::appendWithRef(CVarRef v, bool copy) {
+  if (m_nNumOfElements >= SARR_SIZE) {
+    ArrayData *a = escalateToZendArray();
+    a->appendWithRef(v, false);
+    return a;
+  }
+  if (copy) {
+    SmallArray *a = copyImpl();
+    a->nextInsertWithRef(v);
+    return a;
+  }
+  nextInsertWithRef(v);
+  return NULL;
+}
+
+bool SmallArray::addValWithRef(int64 h, CVarRef data) {
   int p = find(h);
   Bucket &b = m_arBuckets[p];
   if (b.kind != Empty) return false;
   addKey(p, h);
-  b.data = data;
+  b.data.setWithRef(data);
   return true;
 }
 
-bool SmallArray::addVal(StringData *key, CVarRef data) {
+bool SmallArray::addValWithRef(StringData *key, CVarRef data) {
   int p = find(key->data(), key->size(), key->hash());
   Bucket &b = m_arBuckets[p];
   if (b.kind != Empty) return false;
   addKey(p, key);
-  b.data = data;
+  b.data.setWithRef(data);
   return true;
 }
 
@@ -980,54 +1043,28 @@ ArrayData *SmallArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
     return a;
   }
 
-  if (elems->supportValueRef()) {
-    if (op == Plus) {
-      for (ArrayIter it(elems); !it.end(); it.next()) {
-        Variant key = it.first();
-        CVarRef value = it.secondRef();
-        if (value.isReferenced()) value.setContagious();
-        if (key.isNumeric()) {
-          addVal(key.toInt64(), value);
-        } else {
-          String strkey = key.toString();
-          addVal(strkey.get(), value);
-        }
-      }
-    } else {
-      ASSERT(op == Merge);
-      for (ArrayIter it(elems); !it.end(); it.next()) {
-        Variant key = it.first();
-        CVarRef value = it.secondRef();
-        if (value.isReferenced()) value.setContagious();
-        if (key.isNumeric()) {
-          nextInsert(value);
-        } else {
-          String strkey = key.toString();
-          set(strkey, value, false);
-        }
+  if (op == Plus) {
+    for (ArrayIter it(elems); !it.end(); it.next()) {
+      Variant key = it.first();
+      CVarRef value = it.secondRef();
+      if (key.isNumeric()) {
+        addValWithRef(key.toInt64(), value);
+      } else {
+        addValWithRef(key.getStringData(), value);
       }
     }
   } else {
-    if (op == Plus) {
-      for (ArrayIter it(elems); !it.end(); it.next()) {
-        Variant key = it.first();
-        if (key.isNumeric()) {
-          addVal(key.toInt64(), it.second());
-        } else {
-          String strkey = key.toString();
-          addVal(strkey.get(), it.second());
-        }
-      }
-    } else {
-      ASSERT(op == Merge);
-      for (ArrayIter it(elems); !it.end(); it.next()) {
-        Variant key = it.first();
-        if (key.isNumeric()) {
-          nextInsert(it.second());
-        } else {
-          String strkey = key.toString();
-          set(strkey, it.second(), false);
-        }
+    ASSERT(op == Merge);
+    for (ArrayIter it(elems); !it.end(); it.next()) {
+      Variant key = it.first();
+      CVarRef value = it.secondRef();
+      if (key.isNumeric()) {
+        nextInsertWithRef(value);
+      } else {
+        Variant *p;
+        String strkey = key.toString();
+        lval(strkey, p, false, false);
+        p->setWithRef(value);
       }
     }
   }

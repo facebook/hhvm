@@ -814,6 +814,8 @@ bool AdminRequestHandler::handleAPCSizeRequest (const std::string &cmd,
 ///////////////////////////////////////////////////////////////////////////////
 // Dump cache content
 
+extern bool const_dump(const char *filename);
+
 bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
                                                  Transport *transport) {
   if (cmd == "dump-const") {

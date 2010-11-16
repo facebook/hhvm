@@ -24,6 +24,7 @@
 #include <runtime/base/class_info.h>
 #include <math.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/taint.h>
 
 using namespace std;

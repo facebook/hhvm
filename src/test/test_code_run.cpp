@@ -3101,6 +3101,30 @@ bool TestCodeRun::TestArrayFunctions() {
       "$input = array(4, \"4\", \"3\", 4, 3, \"3\");"
       "$result = array_unique($input);"
       "var_dump($result);");
+
+  // Preservation of keys and references in original arrays.
+  MVCR("<?php\n"
+       "class A { }\n"
+       "$o = new A;\n"
+       "$f = '10';\n"
+       "$o->$f = 100;\n"
+       "$a = (array)$o;\n"
+       "$v = 1;\n"
+       "$a[10] = &$v;\n"
+       "$a[11] = array(&$v);\n"
+       "var_dump($a);\n"
+       // array_diff
+       "$b = array(10 => 10);\n"
+       "var_dump(array_diff_key($a, $b));\n"
+       // array_merge and array_merge_recursive
+       "var_dump(array_merge($a, $b));\n"
+       "var_dump(array_merge_recursive($a, $b));\n"
+       // array_reverse
+       "var_dump(array_reverse($a));\n"
+       // array_chunk
+       "var_dump(array_chunk($a, 2));\n"
+       );
+
   return true;
 }
 

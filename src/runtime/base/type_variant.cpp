@@ -25,6 +25,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/fiber_reference_map.h>
 #include <runtime/base/zend/zend_string.h>
+#include <runtime/base/array/array_iterator.h>
 #include <util/parser/hphp.tab.hpp>
 
 using namespace std;
@@ -250,6 +251,51 @@ Variant& Variant::assign(CVarRef v) {
   }
   if (IS_REFCOUNTED_TYPE(m_type)) destruct();
   bind(v);
+  return *this;
+}
+
+Variant &Variant::setWithRef(CVarRef v) {
+  ASSERT(!isContagious() && this != &v && !v.isContagious());
+
+  CVarRef rhs = v.m_type == KindOfVariant && v.m_data.pvar->getCount() <= 1 ?
+                *v.m_data.pvar : v;
+  if (IS_REFCOUNTED_TYPE(rhs.m_type)) {
+#ifdef FAST_REFCOUNT_FOR_VARIANT
+    Variant *var = rhs.m_data.pvar;
+    ASSERT(var);
+    var->incRefCount();
+#else
+    switch (rhs.m_type) {
+    case KindOfString: {
+      StringData *str = rhs.m_data.pstr;
+      str->incRefCount();
+      break;
+    }
+    case KindOfArray: {
+      ArrayData *arr = rhs.m_data.parr;
+      arr->incRefCount();
+      break;
+    }
+    case KindOfObject: {
+      ObjectData *obj = rhs.m_data.pobj;
+      obj->incRefCount();
+      break;
+    }
+    case KindOfVariant: {
+      Variant *var = rhs.m_data.pvar;
+      var->incRefCount();
+      break;
+    }
+    default:
+      ASSERT(false);
+    }
+#endif
+  }
+
+  if (IS_REFCOUNTED_TYPE(m_type)) destruct();
+  m_type = rhs.m_type;
+  // drop uninitialized flag
+  m_data.num = m_type == KindOfNull ? 0 : rhs.m_data.num;
   return *this;
 }
 
@@ -2635,9 +2681,6 @@ Variant &Variant::o_unsetLval(CStrRef propName, CVarRef tmpForGet,
 
 #define IMPLEMENT_SETAT                                                 \
   if (m_type == KindOfArray) {                                          \
-    if (v.isContagious()) {                                             \
-      escalate();                                                       \
-    }                                                                   \
     ArrayData *escalated =                                              \
       m_data.parr->set(ToKey(key), v, (m_data.parr->getCount() > 1));   \
     if (escalated) {                                                    \
@@ -2760,9 +2803,6 @@ CVarRef Variant::set(double key, CVarRef v) {
 
 CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
   if (m_type == KindOfArray) {
-    if (v.isContagious()) {
-      escalate();
-    }
     ArrayData *escalated;
     if (isString) {
       escalated = m_data.parr->set(key, v, (m_data.parr->getCount() > 1));
@@ -2819,9 +2859,6 @@ CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
 
 CVarRef Variant::set(CVarRef key, CVarRef v) {
   if (m_type == KindOfArray) {
-    if (v.isContagious()) {
-      escalate();
-    }
     Variant k(ToKey(key));
     if (k.isNull()) return lvalBlackHole();
     ArrayData *escalated =
@@ -3020,7 +3057,6 @@ CVarRef Variant::append(CVarRef v) {
     {
       bool contagious = false;
       if (v.isContagious()) {
-        escalate();
         contagious = true;
       }
       ArrayData *escalated =
@@ -3063,7 +3099,6 @@ check_array:
   if (m_type == KindOfArray) {
     bool contagious = false;
     if (v.isContagious()) {
-      escalate();
       contagious = true;
     }
     ArrayData *escalated =

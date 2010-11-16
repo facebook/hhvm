@@ -16,6 +16,7 @@
 
 #include <runtime/base/fiber_reference_map.h>
 #include <runtime/base/fiber_async_func.h>
+#include <runtime/base/array/array_iterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

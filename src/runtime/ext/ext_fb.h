@@ -75,14 +75,6 @@ extern const int64 k_XHPROF_FLAGS_MALLOC;
 int fb_unserialize_from_buffer(Variant &res, const char *buff, int buff_len,
                                int *pos);
 
-
-///////////////////////////////////////////////////////////////////////////////
-// const index interface and load function
-Variant f_fb_const_fetch(CVarRef key);
-void const_load();
-void const_load_set(Variant key, Variant value);
-bool const_dump(const char *filename);
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

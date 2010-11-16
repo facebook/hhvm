@@ -16,6 +16,7 @@
 
 #include <runtime/base/array/hphp_array.h>
 #include <runtime/base/array/array_init.h>
+#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/runtime_error.h>
@@ -315,6 +316,13 @@ void HphpArray::fetchValue(ssize_t pos, Variant& v) const {
 }
 
 CVarRef HphpArray::getValueRef(ssize_t pos) const {
+  ASSERT(pos != ArrayData::invalid_index);
+  Elm* elms = data2Elms(m_data);
+  Elm* e = &elms[/*(ElmInd)*/pos];
+  return tvAsCVarRef(&e->data);
+}
+
+CVarRef HphpArray::getValueRef(ssize_t pos, Variant &holder) const {
   ASSERT(pos != ArrayData::invalid_index);
   Elm* elms = data2Elms(m_data);
   Elm* e = &elms[/*(ElmInd)*/pos];
@@ -690,11 +698,7 @@ void HphpArray::load(CVarRef k, Variant& v) const {
   if (pos != (ssize_t)ElmIndEmpty) {
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
-    if (tvAsCVarRef(&e->data).isReferenced()) {
-      v = ref(tvAsCVarRef(&e->data));
-    } else {
-      v = tvAsCVarRef(&e->data);
-    }
+    v.setWithRef(tvAsCVarRef(&e->data));
   }
 }
 
@@ -1070,6 +1074,29 @@ bool HphpArray::nextInsert(CVarRef data) {
   return true;
 }
 
+bool HphpArray::nextInsertWithRef(CVarRef data) {
+  if (m_linear) {
+    delinearize();
+  }
+  resize();
+  int64 ki = m_nextKI;
+  ElmInd* ei = findForInsert(ki);
+  ASSERT(!validElmInd(*ei));
+
+  // Allocate a new element.
+  Elm* e = allocElm(ei);
+  // Set key.
+  e->h = ki;
+  e->key = NULL;
+  e->data.m_data.num = 0;
+  e->data._count = 0;
+  e->data.m_type = KindOfNull;
+  tvAsVariant(&e->data).setWithRef(data);
+  // Update next free element.
+  ++m_nextKI;
+  return true;
+}
+
 bool HphpArray::addLvalImpl(int64 ki, Variant** pDest,
                             bool doFind /* = true */) {
   ASSERT(pDest != NULL);
@@ -1198,6 +1225,64 @@ inline bool HphpArray::addVal(StringData* key, CVarRef data,
   e->key = key;
   e->key->incRefCount();
   ELEMENT_CONSTRUCT(fr, to);
+
+  return true;
+}
+
+inline bool HphpArray::addValWithRef(int64 ki, CVarRef data,
+                                     bool checkExists /* = true */) {
+  if (m_linear) {
+    delinearize();
+  }
+  resize();
+  ElmInd* ei = findForInsert(ki);
+  if (checkExists && validElmInd(*ei)) {
+    return false;
+  } else {
+    ASSERT(!validElmInd(*ei));
+  }
+
+  Elm* e = allocElm(ei);
+
+  e->data.m_data.num = 0;
+  e->data._count = 0;
+  e->data.m_type = KindOfNull;
+
+  e->h = ki;
+  e->key = NULL;
+
+  tvAsVariant(&e->data).setWithRef(data);
+
+  if (ki >= m_nextKI) {
+    m_nextKI = ki + 1;
+  }
+  return true;
+}
+
+inline bool HphpArray::addValWithRef(StringData* key, CVarRef data,
+                                     bool checkExists /* = true */) {
+  if (m_linear) {
+    delinearize();
+  }
+  resize();
+  int64 h = key->hash();
+  ElmInd* ei = findForInsert(key->data(), key->size(), h);
+  if (checkExists && validElmInd(*ei)) {
+    return false;
+  } else {
+    ASSERT(!validElmInd(*ei));
+  }
+
+  Elm* e = allocElm(ei);
+
+  e->h = h;
+  e->key = key;
+  e->key->incRefCount();
+
+  e->data.m_data.num = 0;
+  e->data._count = 0;
+  e->data.m_type = KindOfNull;
+  tvAsVariant(&e->data).setWithRef(data);
 
   return true;
 }
@@ -1392,6 +1477,29 @@ ArrayData *HphpArray::lvalPtr(CStrRef k, Variant*& ret, bool copy,
   } else {
     ssize_t /*ElmInd*/ pos = t->find(key->data(), key->size(), prehash);
     if (pos != (ssize_t)ElmIndEmpty) {
+      Elm* elms = data2Elms(m_data);
+      Elm* e = &elms[pos];
+      ret = &(tvAsVariant(&e->data));
+    } else {
+      ret = NULL;
+    }
+  }
+  return a;
+}
+
+ArrayData *HphpArray::lvalPtr(int64 k, Variant*& ret, bool copy,
+                              bool create) {
+  HphpArray* a = 0;
+  HphpArray* t = this;
+  if (copy) {
+    a = t = copyImpl();
+  }
+
+  if (create) {
+    t->addLvalImpl(k, &ret);
+  } else {
+    ElmInd pos = t->find(k);
+    if (pos != ElmIndEmpty) {
       Elm* elms = data2Elms(m_data);
       Elm* e = &elms[pos];
       ret = &(tvAsVariant(&e->data));
@@ -1771,6 +1879,16 @@ ArrayData* HphpArray::append(CVarRef v, bool copy) {
   return NULL;
 }
 
+ArrayData *HphpArray::appendWithRef(CVarRef v, bool copy) {
+  if (copy) {
+    HphpArray *a = copyImpl();
+    a->nextInsertWithRef(v);
+    return a;
+  }
+  nextInsertWithRef(v);
+  return NULL;
+}
+
 ArrayData* HphpArray::append(const ArrayData* elems, ArrayOp op, bool copy) {
   if (copy) {
     HphpArray* a = copyImpl();
@@ -1778,58 +1896,28 @@ ArrayData* HphpArray::append(const ArrayData* elems, ArrayOp op, bool copy) {
     return a;
   }
 
-  if (elems->supportValueRef()) {
-    if (op == Plus) {
-      for (ArrayIter it(elems); !it.end(); it.next()) {
-        Variant key = it.first();
-        CVarRef value = it.secondRef();
-        if (value.isReferenced()) {
-          value.setContagious();
-        }
-        if (isIntegerKey(key)) {
-          addVal(key.toInt64(), value);
-        } else {
-          StringData* skey = key.getStringData();
-          addVal(skey, value);
-        }
-      }
-    } else {
-      ASSERT(op == Merge);
-      for (ArrayIter it(elems); !it.end(); it.next()) {
-        Variant key = it.first();
-        CVarRef value = it.secondRef();
-        if (value.isReferenced()) {
-          value.setContagious();
-        }
-        if (isIntegerKey(key)) {
-          nextInsert(value);
-        } else {
-          StringData* skey = key.getStringData();
-          update(skey, value);
-        }
+  if (op == Plus) {
+    for (ArrayIter it(elems); !it.end(); it.next()) {
+      Variant key = it.first();
+      CVarRef value = it.secondRef();
+      if (key.isNumeric()) {
+        addValWithRef(key.toInt64(), value);
+      } else {
+        addValWithRef(key.getStringData(), value);
       }
     }
   } else {
-    if (op == Plus) {
-      for (ArrayIter it(elems); !it.end(); it.next()) {
-        Variant key = it.first();
-        if (isIntegerKey(key)) {
-          addVal(key.toInt64(), it.second());
-        } else {
-          StringData* skey = key.getStringData();
-          addVal(skey, it.second());
-        }
-      }
-    } else {
-      ASSERT(op == Merge);
-      for (ArrayIter it(elems); !it.end(); it.next()) {
-        Variant key = it.first();
-        if (isIntegerKey(key)) {
-          nextInsert(it.second());
-        } else {
-          StringData* skey = key.getStringData();
-          update(skey, it.second());
-        }
+    ASSERT(op == Merge);
+    for (ArrayIter it(elems); !it.end(); it.next()) {
+      Variant key = it.first();
+      CVarRef value = it.secondRef();
+      if (key.isNumeric()) {
+        nextInsertWithRef(value);
+      } else {
+        Variant *p;
+        StringData *sd = key.getStringData();
+        addLvalImpl(sd, sd->hash(), &p);
+        p->setWithRef(value);
       }
     }
   }

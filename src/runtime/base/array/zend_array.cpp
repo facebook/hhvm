@@ -17,6 +17,7 @@
 
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/array/array_init.h>
+#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/runtime_error.h>
@@ -222,6 +223,12 @@ void ZendArray::fetchValue(ssize_t pos, Variant & v) const {
 }
 
 CVarRef ZendArray::getValueRef(ssize_t pos) const {
+  ASSERT(pos && pos != ArrayData::invalid_index);
+  Bucket *p = reinterpret_cast<Bucket *>(pos);
+  return p->data;
+}
+
+CVarRef ZendArray::getValueRef(ssize_t pos, Variant &holder) const {
   ASSERT(pos && pos != ArrayData::invalid_index);
   Bucket *p = reinterpret_cast<Bucket *>(pos);
   return p->data;
@@ -465,16 +472,6 @@ Variant ZendArray::get(CVarRef k, bool error /* = false */) const {
   return null;
 }
 
-Variant ZendArray::fetch(CStrRef k) const {
-  StringData *key = k.get();
-  int64 prehash = key->hash();
-  Bucket *p = find(key->data(), key->size(), prehash);
-  if (p) {
-    return p->data;
-  }
-  return false;
-}
-
 void ZendArray::load(CVarRef k, Variant &v) const {
   Bucket *p;
   if (k.isNumeric()) {
@@ -486,8 +483,7 @@ void ZendArray::load(CVarRef k, Variant &v) const {
     p = find(strkey->data(), strkey->size(), prehash);
   }
   if (p) {
-    if (p->data.isReferenced()) v = ref(p->data);
-    else v = p->data;
+    v.setWithRef(p->data);
   }
 }
 
@@ -574,6 +570,22 @@ bool ZendArray::nextInsert(CVarRef data) {
   return true;
 }
 
+bool ZendArray::nextInsertWithRef(CVarRef data) {
+  int64 h = m_nNextFreeElement;
+  Bucket * p = NEW(Bucket)();
+  p->data.setWithRef(data);
+  p->h = h;
+  uint nIndex = (h & m_nTableMask);
+  CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
+  SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
+  CONNECT_TO_GLOBAL_DLLIST(p);
+  m_nNextFreeElement = h + 1;
+  if (++m_nNumOfElements > m_nTableSize) {
+    resize();
+  }
+  return true;
+}
+
 bool ZendArray::addLvalImpl(int64 h, Variant **pDest,
                             bool doFind /* = true */) {
   ASSERT(pDest != NULL);
@@ -629,12 +641,13 @@ bool ZendArray::addLvalImpl(StringData *key, int64 h, Variant **pDest,
   return true;
 }
 
-bool ZendArray::addVal(int64 h, CVarRef data) {
+bool ZendArray::addValWithRef(int64 h, CVarRef data) {
   Bucket *p = find(h);
   if (p) {
     return false;
   }
-  p = NEW(Bucket)(data);
+  p = NEW(Bucket)();
+  p->data.setWithRef(data);
   p->h = h;
   uint nIndex = (h & m_nTableMask);
   CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
@@ -649,13 +662,14 @@ bool ZendArray::addVal(int64 h, CVarRef data) {
   return true;
 }
 
-bool ZendArray::addVal(StringData *key, CVarRef data) {
+bool ZendArray::addValWithRef(StringData *key, CVarRef data) {
   int64 h = key->hash();
   Bucket *p = find(key->data(), key->size(), h);
   if (p) {
     return false;
   }
-  p = NEW(Bucket)(data);
+  p = NEW(Bucket)();
+  p->data.setWithRef(data);
   p->key = key;
   p->key->incRefCount();
   p->h = h;
@@ -811,6 +825,26 @@ ArrayData *ZendArray::lvalPtr(CStrRef k, Variant *&ret, bool copy,
     t->addLvalImpl(key, prehash, &ret);
   } else {
     Bucket *p = t->find(key->data(), key->size(), prehash);
+    if (p) {
+      ret = &p->data;
+    } else {
+      ret = NULL;
+    }
+  }
+  return a;
+}
+
+ArrayData *ZendArray::lvalPtr(int64 k, Variant *&ret, bool copy,
+                              bool create) {
+  ZendArray *a = 0, *t = this;
+  if (copy) {
+    a = t = copyImpl();
+  }
+
+  if (create) {
+    t->addLvalImpl(k, &ret);
+  } else {
+    Bucket *p = t->find(k);
     if (p) {
       ret = &p->data;
     } else {
@@ -1122,10 +1156,8 @@ ZendArray *ZendArray::copyImpl() const {
   ZendArray *target = NEW(ZendArray)(m_nNumOfElements);
   Bucket *last = NULL;
   for (Bucket *p = m_pListHead; p; p = p->pListNext) {
-    if (p->data.isReferenced()) {
-      p->data.setContagious();
-    }
-    Bucket *np = NEW(Bucket)(p->data);
+    Bucket *np = NEW(Bucket)();
+    np->data.setWithRef(p->data);
     np->h = p->h;
     if (p->key) {
       np->key = p->key;
@@ -1178,6 +1210,16 @@ ArrayData *ZendArray::append(CVarRef v, bool copy) {
   return NULL;
 }
 
+ArrayData *ZendArray::appendWithRef(CVarRef v, bool copy) {
+  if (copy) {
+    ZendArray *a = copyImpl();
+    a->nextInsertWithRef(v);
+    return a;
+  }
+  nextInsertWithRef(v);
+  return NULL;
+}
+
 ArrayData *ZendArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
   if (copy) {
     ZendArray *a = copyImpl();
@@ -1185,54 +1227,28 @@ ArrayData *ZendArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
     return a;
   }
 
-  if (elems->supportValueRef()) {
-    if (op == Plus) {
-      for (ArrayIter it(elems); !it.end(); it.next()) {
-        Variant key = it.first();
-        CVarRef value = it.secondRef();
-        if (value.isReferenced()) value.setContagious();
-        if (key.isNumeric()) {
-          addVal(key.toInt64(), value);
-        } else {
-          String skey = key.toString();
-          addVal(skey.get(), value);
-        }
-      }
-    } else {
-      ASSERT(op == Merge);
-      for (ArrayIter it(elems); !it.end(); it.next()) {
-        Variant key = it.first();
-        CVarRef value = it.secondRef();
-        if (value.isReferenced()) value.setContagious();
-        if (key.isNumeric()) {
-          nextInsert(value);
-        } else {
-          String skey = key.toString();
-          update(skey.get(), value);
-        }
+  if (op == Plus) {
+    for (ArrayIter it(elems); !it.end(); it.next()) {
+      Variant key = it.first();
+      CVarRef value = it.secondRef();
+      if (key.isNumeric()) {
+        addValWithRef(key.toInt64(), value);
+      } else {
+        addValWithRef(key.getStringData(), value);
       }
     }
   } else {
-    if (op == Plus) {
-      for (ArrayIter it(elems); !it.end(); it.next()) {
-        Variant key = it.first();
-        if (key.isNumeric()) {
-          addVal(key.toInt64(), it.second());
-        } else {
-          String skey = key.toString();
-          addVal(skey.get(), it.second());
-        }
-      }
-    } else {
-      ASSERT(op == Merge);
-      for (ArrayIter it(elems); !it.end(); it.next()) {
-        Variant key = it.first();
-        if (key.isNumeric()) {
-          nextInsert(it.second());
-        } else {
-          String skey = key.toString();
-          update(skey.get(), it.second());
-        }
+    ASSERT(op == Merge);
+    for (ArrayIter it(elems); !it.end(); it.next()) {
+      Variant key = it.first();
+      CVarRef value = it.secondRef();
+      if (key.isNumeric()) {
+        nextInsertWithRef(value);
+      } else {
+        Variant *p;
+        StringData *sd = key.getStringData();
+        addLvalImpl(sd, sd->hash(), &p, true);
+        p->setWithRef(value);
       }
     }
   }

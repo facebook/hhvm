@@ -36,10 +36,10 @@ public:
 
   virtual Variant getKey(ssize_t pos) const;
   virtual Variant getValue(ssize_t pos) const;
-  virtual void fetchValue(ssize_t pos, Variant & v) const;
+  virtual void fetchValue(ssize_t pos, Variant &v) const;
   virtual CVarRef getValueRef(ssize_t pos) const;
+  virtual CVarRef getValueRef(ssize_t pos, Variant &holder) const;
   virtual bool isVectorData() const;
-  virtual bool supportValueRef() const { return true; }
 
   virtual ssize_t iter_begin() const { return m_nListHead; }
   virtual ssize_t iter_end() const { return m_nListTail; }
@@ -85,6 +85,8 @@ public:
                           bool checkExist = false);
   virtual ArrayData *lvalPtr(CStrRef k, Variant *&ret, bool copy,
                              bool create);
+  virtual ArrayData *lvalPtr(int64   k, Variant *&ret, bool copy,
+                             bool create);
 
   virtual ArrayData *lvalNew(Variant *&ret, bool copy);
 
@@ -107,6 +109,7 @@ public:
 
   virtual ArrayData *copy() const;
   virtual ArrayData *append(CVarRef v, bool copy);
+  virtual ArrayData *appendWithRef(CVarRef v, bool copy);
   virtual ArrayData *append(const ArrayData *elems, ArrayOp op, bool copy);
   virtual ArrayData *pop(Variant &value);
   virtual ArrayData *dequeue(Variant &value);
@@ -143,8 +146,7 @@ public:
       if (kind != Empty) {
         prev = other.prev; next = other.next;
         h = other.h;
-        if (other.data.isReferenced()) other.data.setContagious();
-        data = other.data;
+        data.setWithRef(other.data);
         if (key) key->incRefCount();
       }
     }
@@ -200,11 +202,12 @@ private:
   inline Bucket *addKey(int p, StringData *key);
 
   // no-op if the key already exists
-  inline bool addVal(int64 h, CVarRef data);
-  inline bool addVal(StringData *key, CVarRef data);
+  inline bool addValWithRef(int64 h, CVarRef data);
+  inline bool addValWithRef(StringData *key, CVarRef data);
 
   inline void erase(Bucket *pb, bool updateNext = false);
   inline bool nextInsert(CVarRef v);
+  inline void nextInsertWithRef(CVarRef v);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

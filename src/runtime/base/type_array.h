@@ -25,7 +25,6 @@
 #include <runtime/base/util/smart_ptr.h>
 #include <runtime/base/types.h>
 #include <runtime/base/array/array_data.h>
-#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/type_string.h>
 #include <runtime/base/hphp_value.h>
 
@@ -34,6 +33,7 @@ namespace HPHP {
 
 // forward declaration
 CVarRef ref(CVarRef v);
+class ArrayIter;
 
 /**
  * Array type wrapping around 2 types of ArrayData to implement reference
@@ -136,10 +136,7 @@ class Array : public SmartPtr<ArrayData> {
    * Iterator functions. See array_iterator.h for end() and next().
    */
   ArrayIter begin(CStrRef context = null_string,
-                  bool setIterDirty = false) const {
-    if (setIterDirty && m_px) m_px->iter_dirty_set();
-    return m_px;
-  }
+                  bool setIterDirty = false) const;
 
   void escalate(bool mutableIteration = false);
 
@@ -221,15 +218,15 @@ class Array : public SmartPtr<ArrayData> {
   /**
    * Offset
    */
-  Variant rvalAt(bool key, bool error = false) const;
-  Variant rvalAt(char key, bool error = false) const;
-  Variant rvalAt(short key, bool error = false) const;
-  Variant rvalAt(int key, bool error = false) const;
-  Variant rvalAt(int64 key, bool error = false) const;
-  Variant rvalAt(double key, bool error = false) const;
-  Variant rvalAt(litstr key, bool error = false, bool isString = false) const;
-  Variant rvalAt(CStrRef key, bool error = false, bool isString = false) const;
-  Variant rvalAt(CVarRef key, bool error = false) const;
+  Variant rvalAt(bool    key, bool error = false) const;
+  Variant rvalAt(char    key, bool error = false) const;
+  Variant rvalAt(short   key, bool error = false) const;
+  Variant rvalAt(int     key, bool error = false) const;
+  Variant rvalAt(int64   key, bool error = false) const;
+  Variant rvalAt(double  key, bool error = false) const;
+  Variant rvalAt(litstr  key, bool error = false, bool isKey = false) const;
+  Variant rvalAt(CStrRef key, bool error = false, bool isKey = false) const;
+  Variant rvalAt(CVarRef key, bool error = false, bool isKey = false) const;
 
   const Variant operator[](bool    key) const;
   const Variant operator[](char    key) const;
@@ -276,6 +273,7 @@ class Array : public SmartPtr<ArrayData> {
   }
 
   Variant *lvalPtr(CStrRef key, bool forWrite, bool create);
+  Variant *lvalPtr(int64   key, bool forWrite, bool create);
 
   Variant &lvalAt();
 
@@ -297,9 +295,9 @@ class Array : public SmartPtr<ArrayData> {
   Variant &lvalAt(double  key, bool checkExist = false) {
     return lvalAtImpl((int64)key, checkExist);
   }
-  Variant &lvalAt(litstr  key, bool checkExist = false, bool isString = false);
-  Variant &lvalAt(CStrRef key, bool checkExist = false, bool isString = false);
-  Variant &lvalAt(CVarRef key, bool checkExist = false);
+  Variant &lvalAt(litstr  key, bool checkExist = false, bool isKey = false);
+  Variant &lvalAt(CStrRef key, bool checkExist = false, bool isKey = false);
+  Variant &lvalAt(CVarRef key, bool checkExist = false, bool isKey = false);
 
   // defined in type_variant.h
   template<typename T>
@@ -324,10 +322,9 @@ class Array : public SmartPtr<ArrayData> {
     return setImpl((int64)key, v);
   }
 
-  CVarRef set(litstr  key, CVarRef v, bool isString = false);
-  CVarRef set(CStrRef key, CVarRef v, bool isString = false);
-
-  CVarRef set(CVarRef key, CVarRef v);
+  CVarRef set(litstr  key, CVarRef v, bool isKey = false);
+  CVarRef set(CStrRef key, CVarRef v, bool isKey = false);
+  CVarRef set(CVarRef key, CVarRef v, bool isKey = false);
 
   // defined in type_variant.h
   template<typename T>
@@ -352,10 +349,9 @@ class Array : public SmartPtr<ArrayData> {
     return addImpl((int64)key, v);
   }
 
-  CVarRef add(litstr  key, CVarRef v, bool isString = false);
-  CVarRef add(CStrRef key, CVarRef v, bool isString = false);
-
-  CVarRef add(CVarRef key, CVarRef v);
+  CVarRef add(litstr  key, CVarRef v, bool isKey = false);
+  CVarRef add(CStrRef key, CVarRef v, bool isKey = false);
+  CVarRef add(CVarRef key, CVarRef v, bool isKey = false);
 
   // defined in type_variant.h
   template<typename T>
@@ -391,10 +387,9 @@ class Array : public SmartPtr<ArrayData> {
     return addLvalImpl((int64)key);
   }
 
-  Variant &addLval(litstr  key, bool isString = false);
-  Variant &addLval(CStrRef key, bool isString = false);
-
-  Variant &addLval(CVarRef key);
+  Variant &addLval(litstr  key, bool isKey = false);
+  Variant &addLval(CStrRef key, bool isKey = false);
+  Variant &addLval(CVarRef key, bool isKey = false);
 
   // defined in type_variant.h
   template<typename T>
@@ -433,9 +428,9 @@ class Array : public SmartPtr<ArrayData> {
   bool exists(double  key) const {
     return existsImpl((int64)key);
   }
-  bool exists(litstr  key, bool isString = false) const;
-  bool exists(CStrRef key, bool isString = false) const;
-  bool exists(CVarRef key) const;
+  bool exists(litstr  key, bool isKey = false) const;
+  bool exists(CStrRef key, bool isKey = false) const;
+  bool exists(CVarRef key, bool isKey = false) const;
 
   template<typename T>
   void removeImpl(const T &key) {
@@ -485,6 +480,7 @@ class Array : public SmartPtr<ArrayData> {
   void clear() { removeAll();}
 
   Variant append(CVarRef v);
+  Variant appendWithRef(CVarRef v);
   Variant appendOpEqual(int op, CVarRef v);
   Variant pop();
   Variant dequeue();

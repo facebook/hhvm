@@ -349,32 +349,25 @@ Variant ObjectData::o_setPublic(CStrRef propName, CVarRef v,
 }
 
 void ObjectData::o_setArray(CArrRef properties) {
-  bool valueRef = properties->supportValueRef();
   CStrRef context = o_getClassName();
   for (ArrayIter iter(properties); iter; ++iter) {
     String key = iter.first().toString();
     if (key.empty() || key.charAt(0) != '\0') {
       // non-private property
-      if (valueRef) {
-        CVarRef secondRef = iter.secondRef();
-        o_set(key, secondRef.isReferenced() ? ref(secondRef) : secondRef,
-              false, context);
-        continue;
-      }
-      o_set(key, iter.second(), false, context);
+      CVarRef secondRef = iter.secondRef();
+      o_set(key, secondRef.isReferenced() ? ref(secondRef) : secondRef,
+            false, context);
+      continue;
     }
   }
 }
 
 void ObjectData::o_getArray(Array &props) const {
   if (o_properties && !o_properties->empty()) {
-    ASSERT((*o_properties)->supportValueRef());
     for (ArrayIter it(*o_properties); !it.end(); it.next()) {
       Variant key = it.first();
       CVarRef value = it.secondRef();
-      if (value.isReferenced()) value.setContagious();
-      if (key.isNumeric()) props.add(key.toInt64(), value);
-      else props.add(key.toString(), value, true);
+      props.addLval(key, true).setWithRef(value);
     }
   }
 }

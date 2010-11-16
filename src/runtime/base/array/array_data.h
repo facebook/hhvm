@@ -86,16 +86,22 @@ class ArrayData : public Countable {
   virtual ssize_t size() const = 0;
 
   /**
-   * For ArrayIter to work. Get key or value at position "pos". getValueRef()
-   * gets a reference to value at position "pos".
+   * For ArrayIter to work. Get key or value at position "pos".
    */
   virtual Variant getKey(ssize_t pos) const = 0;
   virtual Variant getValue(ssize_t pos) const = 0;
-  virtual void fetchValue(ssize_t pos, Variant & v) const;
-  virtual CVarRef getValueRef(ssize_t pos) const;
+  virtual void fetchValue(ssize_t pos, Variant &v) const;
+  /**
+   * getValueRef() gets a reference to value at position "pos".
+   * We might use the holder if the array is a SharedMap and the value is not
+   * cached.
+   */
+  virtual CVarRef getValueRef(ssize_t pos) const = 0;
+  virtual CVarRef getValueRef(ssize_t pos, Variant &holder) const = 0;
+
   virtual bool isVectorData() const;
-  virtual bool supportValueRef() const { return false;}
   virtual bool isGlobalArrayWrapper() const;
+  virtual bool isSharedMap() const { return false; }
 
   virtual SharedVariant *getSharedVariant() const { return NULL; }
 
@@ -174,10 +180,13 @@ class ArrayData : public Countable {
   virtual ArrayData *lvalNew(Variant *&ret, bool copy) = 0;
 
   /**
-   * Helper function used for getting a reference to elements of
-   * the o_properties array
+   * Helper functions used for getting a reference to elements of
+   * the dynamic property array in ObjectData or the local cache array
+   * in ShardMap.
    */
   virtual ArrayData *lvalPtr(CStrRef k, Variant *&ret, bool copy,
+                             bool create);
+  virtual ArrayData *lvalPtr(int64   k, Variant *&ret, bool copy,
                              bool create);
 
   /**
@@ -240,6 +249,11 @@ class ArrayData : public Countable {
    * escalated array data.
    */
   virtual ArrayData *append(CVarRef v, bool copy) = 0;
+
+  /**
+   * Similar to append(v, copy), with reference in v preserved.
+   */
+  virtual ArrayData *appendWithRef(CVarRef v, bool copy) = 0;
 
   /**
    * Implementing array appending and merging. If "copy" is true, make a copy

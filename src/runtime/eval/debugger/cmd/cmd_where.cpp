@@ -15,6 +15,7 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_where.h>
+#include <runtime/base/array/array_iterator.h>
 
 using namespace std;
 

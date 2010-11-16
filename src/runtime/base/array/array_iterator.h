@@ -19,6 +19,7 @@
 
 #include <runtime/base/types.h>
 #include <runtime/base/util/smart_ptr.h>
+#include <runtime/base/complex_types.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -74,6 +75,7 @@ public:
 private:
   const ArrayData *m_data;
   ssize_t m_pos;
+  Variant m_holder;
 
   void create();
 };

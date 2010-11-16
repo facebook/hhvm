@@ -139,17 +139,20 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
 
   for (ArrayIter iter(arr2); iter; ++iter) {
     Variant key(iter.first());
-    Variant value(iter.second());
+    CVarRef value(iter.secondRef());
     if (key.isNumeric()) {
-      arr1.append(value);
-    } else if (arr1.exists(key)) {
-      Variant &v = arr1.lvalAt(key);
+      arr1.appendWithRef(value);
+    } else if (arr1.exists(key, true)) {
+      // There is no need to do toKey() conversion, for a key that is already
+      // in the array.
+      Variant &v = arr1.lvalAt(key, false, true);
       Array subarr1(v.toArray()->copy());
       php_array_merge_recursive(seen, v.isReferenced(), subarr1,
                                 value.toArray());
+      v.unset(); // avoid contamination of the value that was strongly bound
       v = subarr1;
     } else {
-      arr1.set(key, value);
+      arr1.addLval(key, true).setWithRef(value);
     }
   }
 
@@ -198,19 +201,10 @@ Variant f_array_merge_recursive(int _argc, CVarRef arr1, CArrRef args) {
 }
 
 static void php_array_replace(Array &arr1, CArrRef arr2) {
-  if (arr2->supportValueRef()) {
-    for (ArrayIter iter(arr2); iter; ++iter) {
-      Variant key = iter.first();
-      CVarRef value = iter.secondRef();
-      if (value.isReferenced()) value.setContagious();
-      arr1.set(key, value);
-    }
-  } else {
-    for (ArrayIter iter(arr2); iter; ++iter) {
-      Variant key = iter.first();
-      Variant value = iter.second();
-      arr1.set(key, value);
-    }
+  for (ArrayIter iter(arr2); iter; ++iter) {
+    Variant key = iter.first();
+    CVarRef value = iter.secondRef();
+    arr1.lvalAt(key, false, true).setWithRef(value);
   }
 }
 
@@ -224,42 +218,21 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
     seen.insert((void*)arr1.get());
   }
 
-  if (arr2->supportValueRef()) {
-    for (ArrayIter iter(arr2); iter; ++iter) {
-      Variant key = iter.first();
-      CVarRef value = iter.secondRef();
-      if (arr1.exists(key) && value.isArray()) {
-        Variant &v = arr1.lvalAt(key);
-        if (v.isArray()) {
-          Array subarr1 = v.toArray();
-          php_array_replace_recursive(seen, v.isReferenced(), subarr1,
-                                      value.toArray());
-          v = subarr1;
-        } else {
-          arr1.set(key, value);
-        }
+  for (ArrayIter iter(arr2); iter; ++iter) {
+    Variant key = iter.first();
+    CVarRef value = iter.secondRef();
+    if (arr1.exists(key, true) && value.isArray()) {
+      Variant &v = arr1.lvalAt(key, false, true);
+      if (v.isArray()) {
+        Array subarr1 = v.toArray();
+        php_array_replace_recursive(seen, v.isReferenced(), subarr1,
+                                    value.toArray());
+        v = subarr1;
       } else {
-        if (value.isReferenced()) value.setContagious();
-        arr1.set(key, value);
+        arr1.set(key, value, true);
       }
-    }
-  } else {
-    for (ArrayIter iter(arr2); iter; ++iter) {
-      Variant key = iter.first();
-      Variant value = iter.second();
-      if (arr1.exists(key) && value.isArray()) {
-        Variant &v = arr1.lvalAt(key);
-        if (v.isArray()) {
-          Array subarr1 = v.toArray();
-          php_array_replace_recursive(seen, v.isReferenced(), subarr1,
-                                      value.toArray());
-          v = subarr1;
-        } else {
-          arr1.set(key, value);
-        }
-      } else {
-        arr1.set(key, value);
-      }
+    } else {
+      arr1.lvalAt(key, false, true).setWithRef(value);
     }
   }
 
@@ -277,7 +250,7 @@ Variant f_array_replace(int _argc, CVarRef array1,
   Array ret = Array::Create();
   php_array_replace(ret, array1);
   for (ArrayIter iter(_argv); iter; ++iter) {
-    Variant v = iter.second();
+    CVarRef v = iter.secondRef();
     if (!v.isArray()) {
       throw_bad_array_exception("f_array_replace");
       return null;
@@ -298,7 +271,7 @@ Variant f_array_replace_recursive(int _argc, CVarRef array1,
   php_array_replace_recursive(seen, false, ret, array1);
   ASSERT(seen.empty());
   for (ArrayIter iter(_argv); iter; ++iter) {
-    Variant v = iter.second();
+    CVarRef v = iter.secondRef();
     if (!v.isArray()) {
       throw_bad_array_exception("f_array_replace_recursive");
       return null;
@@ -344,22 +317,23 @@ int f_array_unshift(int _argc, Variant array, CVarRef var, CArrRef _argv /* = nu
     }
     array.prepend(var);
   } else {
-    // XXX This is incorrect, because it does not preserve elements which are
-    // references
     {
       Array newArray;
       newArray.append(var);
       if (!_argv.empty()) {
-        for (ssize_t pos = _argv->iter_begin(); pos != ArrayData::invalid_index;
+        for (ssize_t pos = _argv->iter_begin();
+             pos != ArrayData::invalid_index;
              pos = _argv->iter_advance(pos)) {
           newArray.append(_argv->getValue(pos));
         }
       }
       for (ArrayIter iter(array); iter; ++iter) {
-        if (iter.first().isInteger()) {
-          newArray.append(iter.second());
+        Variant key(iter.first());
+        CVarRef value(iter.secondRef());
+        if (key.isInteger()) {
+          newArray.appendWithRef(value);
         } else {
-          newArray.set(iter.first(), iter.second());
+          newArray.lvalAt(key, false, true).setWithRef(value);
         }
       }
       array = newArray;

@@ -15,6 +15,7 @@
 */
 
 #include <runtime/base/array/array_util.h>
+#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/string_util.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/runtime_error.h>
@@ -61,16 +62,8 @@ Variant ArrayUtil::Combine(CArrRef keys, CArrRef values) {
 
   Array ret = Array::Create();
   for (ArrayIter iter1(keys), iter2(values); iter1; ++iter1, ++iter2) {
-    if (values->supportValueRef()) {
-      CVarRef v(iter2.secondRef());
-      if (v.isReferenced()) {
-        ret.set(iter1.second(), ref(v));
-      } else {
-        ret.set(iter1.second(), v);
-      }
-    } else {
-      ret.set(iter1.second(), iter2.second());
-    }
+    CVarRef v(iter2.secondRef());
+    ret.lvalAt(iter1.second()).setWithRef(v);
   }
   return ret;
 }
@@ -87,9 +80,9 @@ Variant ArrayUtil::Chunk(CArrRef input, int size,
   int current = 0;
   for (ArrayIter iter(input); iter; ++iter) {
     if (preserve_keys) {
-      chunk.set(iter.first(), iter.second());
+      chunk.addLval(iter.first(), true).setWithRef(iter.secondRef());
     } else {
-      chunk.append(iter.second());
+      chunk.appendWithRef(iter.secondRef());
     }
     if ((++current % size) == 0) {
       ret.append(chunk);
@@ -121,24 +114,15 @@ Variant ArrayUtil::Slice(CArrRef input, int offset, int length,
   Array out_hash = Array::Create();
   int pos = 0;
   ArrayIter iter(input);
-  bool supportRef = input->supportValueRef();
   for (; pos < offset && iter; ++pos, ++iter) {}
   for (; pos < offset + length && iter; ++pos, ++iter) {
-    bool doAppend = !preserve_keys && iter.first().isNumeric();
-    if (supportRef) {
-      CVarRef v = iter.secondRef();
-      if (v.isReferenced()) v.setContagious();
-      if (doAppend) {
-        out_hash.append(v);
-      } else {
-        out_hash.set(iter.first(), v);
-      }
+    Variant key(iter.first());
+    bool doAppend = !preserve_keys && key.isNumeric();
+    CVarRef v = iter.secondRef();
+    if (doAppend) {
+      out_hash.appendWithRef(v);
     } else {
-      if (doAppend) {
-        out_hash.append(iter.second());
-      } else {
-        out_hash.set(iter.first(), iter.second());
-      }
+      out_hash.addLval(key, true).setWithRef(v);
     }
   }
   return out_hash;
@@ -163,41 +147,24 @@ Variant ArrayUtil::Splice(CArrRef input, int offset, int length /* = 0 */,
   Array out_hash = Array::Create();
   int pos = 0;
   ArrayIter iter(input);
-  bool supportRef = input->supportValueRef();
   for (; pos < offset && iter; ++pos, ++iter) {
-    if (supportRef) {
-      CVarRef v = iter.secondRef();
-      if (v.isReferenced()) v.setContagious();
-      if (iter.first().isNumeric()) {
-        out_hash.append(v);
-      } else {
-        out_hash.set(iter.first(), v);
-      }
+    Variant key(iter.first());
+    CVarRef v = iter.secondRef();
+    if (key.isNumeric()) {
+      out_hash.appendWithRef(v);
     } else {
-      if (iter.first().isNumeric()) {
-        out_hash.append(iter.second());
-      } else {
-        out_hash.set(iter.first(), iter.second());
-      }
+      out_hash.addLval(key, true).setWithRef(v);
     }
   }
 
   for (; pos < offset + length && iter; ++pos, ++iter) {
     if (removed) {
-      if (supportRef) {
-        CVarRef v = iter.secondRef();
-        if (v.isReferenced()) v.setContagious();
-        if (iter.first().isNumeric()) {
-          removed->append(v);
-        } else {
-          removed->set(iter.first(), v);
-        }
+      Variant key(iter.first());
+      CVarRef v = iter.secondRef();
+      if (key.isNumeric()) {
+        removed->appendWithRef(v);
       } else {
-        if (iter.first().isNumeric()) {
-          removed->append(iter.second());
-        } else {
-          removed->set(iter.first(), iter.second());
-        }
+        removed->lvalAt(key, true).setWithRef(v);
       }
     }
   }
@@ -205,31 +172,18 @@ Variant ArrayUtil::Splice(CArrRef input, int offset, int length /* = 0 */,
   Array arr = replacement.toArray();
   if (!arr.empty()) {
     for (ArrayIter iter(arr); iter; ++iter) {
-      if (supportRef) {
-        CVarRef v = iter.secondRef();
-        if (v.isReferenced()) v.setContagious();
-        out_hash.append(v);
-      } else {
-        out_hash.append(iter.second());
-      }
+      CVarRef v = iter.secondRef();
+      out_hash.appendWithRef(v);
     }
   }
 
   for (; iter; ++iter) {
-    if (supportRef) {
-      CVarRef v = iter.secondRef();
-      if (v.isReferenced()) v.setContagious();
-      if (iter.first().isNumeric()) {
-        out_hash.append(v);
-      } else {
-        out_hash.set(iter.first(), v);
-      }
+    Variant key(iter.first());
+    CVarRef v = iter.secondRef();
+    if (key.isNumeric()) {
+      out_hash.appendWithRef(v);
     } else {
-      if (iter.first().isNumeric()) {
-        out_hash.append(iter.second());
-      } else {
-        out_hash.set(iter.first(), iter.second());
-      }
+      out_hash.lvalAt(key, true).setWithRef(v);
     }
   }
 
@@ -254,10 +208,11 @@ Variant ArrayUtil::Pad(CArrRef input, CVarRef pad_value, int pad_size,
       ret.append(pad_value);
     }
     for (ArrayIter iter(input); iter; ++iter) {
-      if (iter.first().isNumeric()) {
-        ret.append(iter.second());
+      Variant key(iter.first());
+      if (key.isNumeric()) {
+        ret.appendWithRef(iter.secondRef());
       } else {
-        ret.set(iter.first(), iter.second());
+        ret.addLval(key, true).setWithRef(iter.secondRef());
       }
     }
   }
@@ -435,7 +390,7 @@ DataType ArrayUtil::Sum(CArrRef input, int64 *isum, double *dsum) {
 DOUBLE:
   double d = i;
   for (; iter; ++iter) {
-    Variant entry(iter.second());
+    CVarRef entry(iter.secondRef());
     if (!entry.is(KindOfArray) && !entry.is(KindOfObject)) {
       d += entry.toDouble();
     }
@@ -481,7 +436,7 @@ DataType ArrayUtil::Product(CArrRef input, int64 *iprod, double *dprod) {
 DOUBLE:
   double d = i;
   for (; iter; ++iter) {
-    Variant entry(iter.second());
+    CVarRef entry(iter.secondRef());
     if (!entry.is(KindOfArray) && !entry.is(KindOfObject)) {
       d *= entry.toDouble();
     }
@@ -493,7 +448,7 @@ DOUBLE:
 Variant ArrayUtil::CountValues(CArrRef input) {
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    Variant entry(iter.second());
+    CVarRef entry(iter.secondRef());
     if (entry.isInteger() || entry.isString()) {
       if (!ret.exists(entry)) {
         ret.set(entry, 1);
@@ -530,7 +485,7 @@ Variant ArrayUtil::ChangeKeyCase(CArrRef input, bool lower) {
 Variant ArrayUtil::Flip(CArrRef input) {
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    Variant value(iter.second());
+    CVarRef value(iter.secondRef());
     if (value.isString() || value.isInteger()) {
       ret.set(value, iter.first());
     } else {
@@ -545,14 +500,15 @@ Variant ArrayUtil::Reverse(CArrRef input, bool preserve_keys /* = false */) {
     return input;
   }
 
+  Variant tmp;
   Array ret = Array::Create();
   for (ssize_t pos = input->iter_end(); pos != ArrayData::invalid_index;
        pos = input->iter_rewind(pos)) {
     Variant key(input->getKey(pos));
     if (preserve_keys || key.isString()) {
-      ret.set(key, input->getValue(pos));
+      ret.addLval(key, true).setWithRef(input->getValueRef(pos, tmp));
     } else {
-      ret.append(input->getValue(pos));
+      ret.appendWithRef(input->getValueRef(pos, tmp));
     }
   }
   return ret;
@@ -587,10 +543,11 @@ Variant ArrayUtil::Shuffle(CArrRef input) {
   }
   php_array_data_shuffle(indices);
 
+  Variant tmp;
   Array ret = Array::Create();
   for (int i = 0; i < count; i++) {
     ssize_t pos = indices[i];
-    ret.append(input->getValue(pos));
+    ret.appendWithRef(input->getValueRef(pos, tmp));
   }
   return ret;
 }
@@ -655,7 +612,7 @@ Variant ArrayUtil::Filter(CArrRef input, PFUNC_FILTER filter /* = NULL */,
   for (ArrayIter iter(input); iter; ++iter) {
     Variant value(iter.second());
     if ((filter && filter(value, data)) || (!filter && value.toBoolean())) {
-      ret.set(iter.first(), iter.second());
+      ret.addLval(iter.first(), true).setWithRef(iter.secondRef());
     }
   }
   return ret;
@@ -724,7 +681,7 @@ Variant ArrayUtil::Map(CArrRef inputs, PFUNC_MAP map_function,
         } else {
           result = params;
         }
-        ret.set(arr->getKey(k), result);
+        ret.add(arr->getKey(k), result, true);
       }
     }
   } else {

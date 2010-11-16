@@ -25,11 +25,12 @@
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/comparisons.h>
 #include <runtime/base/zend/zend_string.h>
+#include <runtime/base/zend/zend_qsort.h>
+#include <runtime/base/zend/zend_printf.h>
 #include <runtime/base/array/array_util.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/ext/ext_iconv.h>
 #include <unicode/coll.h> // icu
-#include <runtime/base/zend/zend_qsort.h>
 #include <util/parser/hphp.tab.hpp>
 
 using namespace std;
@@ -137,17 +138,18 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
     // Fast case
     for (ArrayIter iter(*this); iter; ++iter) {
       Variant key(iter.first());
+      CVarRef value(iter.secondRef());
       bool found = false;
-      if (array.exists(key)) {
+      if (array->exists(key)) {
         if (by_value) {
-          found = value_cmp_function(iter.second(),
-                                     array.rvalAt(key), value_data) == 0;
+          found = value_cmp_function(value, array.rvalAt(key, false, true),
+                                     value_data) == 0;
         } else {
           found = true;
         }
       }
       if (found == match) {
-        ret.set(key, iter.second());
+        ret.addLval(key, true).setWithRef(value);
       }
     }
     return ret;
@@ -187,7 +189,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
       mid = (max + min) / 2;
       ssize_t pos = opaque1.positions[perm1[mid]];
       int cmp_res =  cmp(target,
-                         by_key ? array->getKey(pos) : array->getValue(pos),
+                         by_key ? array->getKey(pos) : array->getValueRef(pos),
                          cmp_data);
       if (cmp_res > 0) { // outer is bigger
         min = mid + 1;
@@ -201,14 +203,15 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
     if (min < max) { // found
       // if checking both, check value
       if (by_key && by_value) {
-        Variant val(iter.second());
+        CVarRef val(iter.secondRef());
         // Have to look up and down for matches
         for (int i = mid; i < max; i++) {
           ssize_t pos = opaque1.positions[perm1[i]];
           if (key_cmp_function(target, array->getKey(pos), key_data) != 0) {
             break;
           }
-          if (value_cmp_function(val, array->getValue(pos), value_data) == 0) {
+          if (value_cmp_function(val, array->getValueRef(pos),
+                                 value_data) == 0) {
             found = true;
             break;
           }
@@ -219,7 +222,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
             if (key_cmp_function(target, array->getKey(pos), key_data) != 0) {
               break;
             }
-            if (value_cmp_function(val, array->getValue(pos),
+            if (value_cmp_function(val, array->getValueRef(pos),
                                    value_data) == 0) {
               found = true;
               break;
@@ -233,7 +236,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
     }
 
     if (found == match) {
-      ret.set(iter.first(), iter.second());
+      ret.addLval(iter.first(), true).setWithRef(iter.secondRef());
     }
   }
   return ret;
@@ -363,6 +366,12 @@ bool Array::more(CVarRef v2) const {
 ///////////////////////////////////////////////////////////////////////////////
 // iterator
 
+ArrayIter Array::begin(CStrRef context /* = null_string */,
+                       bool setIterDirty /* = false */) const {
+  if (setIterDirty && m_px) m_px->iter_dirty_set();
+  return m_px;
+}
+
 void Array::escalate(bool mutableIteration /* = false */) {
   if (m_px) {
     SmartPtr<ArrayData>::operator=(m_px->escalate(mutableIteration));
@@ -403,9 +412,9 @@ Variant Array::rvalAt(double key, bool error /* = false */) const {
 }
 
 Variant Array::rvalAt(litstr key, bool error /* = false */,
-                      bool isString /* = false */) const {
+                      bool isKey /* = false */) const {
   if (m_px) {
-    if (isString) return m_px->get(key, error);
+    if (isKey) return m_px->get(key, error);
     int64 n;
     int len = strlen(key);
     if (!is_strictly_integer(key, len, n)) {
@@ -418,9 +427,9 @@ Variant Array::rvalAt(litstr key, bool error /* = false */,
 }
 
 Variant Array::rvalAt(CStrRef key, bool error /* = false */,
-                      bool isString /* = false */) const {
+                      bool isKey /* = false */) const {
   if (m_px) {
-    if (isString) return m_px->get(key, error);
+    if (isKey) return m_px->get(key, error);
     if (key.isNull()) return m_px->get(empty_string, error);
     int64 n;
     if (!key->isStrictlyInteger(n)) {
@@ -432,7 +441,8 @@ Variant Array::rvalAt(CStrRef key, bool error /* = false */,
   return null_variant;
 }
 
-Variant Array::rvalAt(CVarRef key, bool error /* = false*/) const {
+Variant Array::rvalAt(CVarRef key, bool error /* = false */,
+                      bool isKey /* = false */) const {
   if (!m_px) return null_variant;
   switch (key.m_type) {
   case KindOfNull:
@@ -448,7 +458,7 @@ Variant Array::rvalAt(CVarRef key, bool error /* = false*/) const {
   case KindOfStaticString:
   case KindOfString: {
     int64 n;
-    if (key.m_data.pstr->isStrictlyInteger(n)) {
+    if (!isKey && key.m_data.pstr->isStrictlyInteger(n)) {
       return m_px->get(n, error);
     } else {
       return m_px->get(key.asCStrRef(), error);
@@ -464,7 +474,7 @@ Variant Array::rvalAt(CVarRef key, bool error /* = false*/) const {
     throw_bad_type_exception("Invalid type used as key");
     break;
   case KindOfVariant:
-    return rvalAt(*(key.m_data.pvar), error);
+    return rvalAt(*(key.m_data.pvar), error, isKey);
   default:
     ASSERT(false);
     break;
@@ -478,6 +488,25 @@ Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
       SmartPtr<ArrayData>::operator=(ArrayData::Create());
     }
     return &lvalAt(key, false, true);
+  }
+  Variant *ret = NULL;
+  if (m_px) {
+    ArrayData *escalated = m_px->lvalPtr(key, ret,
+                                         forWrite && m_px->getCount() > 1,
+                                         false);
+    if (escalated) {
+      SmartPtr<ArrayData>::operator=(escalated);
+    }
+  }
+  return ret;
+}
+
+Variant *Array::lvalPtr(int64 key, bool forWrite, bool create) {
+  if (create) {
+    if (!m_px) {
+      SmartPtr<ArrayData>::operator=(ArrayData::Create());
+    }
+    return &lvalAt(key, false);
   }
   Variant *ret = NULL;
   if (m_px) {
@@ -506,16 +535,19 @@ Variant &Array::lvalAt() {
 }
 
 Variant &Array::lvalAt(litstr  key, bool checkExist /* = false */,
-                       bool isString /* = false */) {
-  if (isString) return lvalAtImpl(String(key), checkExist);
+                       bool isKey /* = false */) {
+  if (isKey) return lvalAtImpl(String(key), checkExist);
   return lvalAtImpl(String(key).toKey(), checkExist);
 }
+
 Variant &Array::lvalAt(CStrRef key, bool checkExist /* = false */,
-                       bool isString /* = false */) {
-  if (isString) return lvalAtImpl(key, checkExist);
+                       bool isKey /* = false */) {
+  if (isKey) return lvalAtImpl(key, checkExist);
   return lvalAtImpl(key.toKey(), checkExist);
 }
-Variant &Array::lvalAt(CVarRef key, bool checkExist /* = false */) {
+Variant &Array::lvalAt(CVarRef key, bool checkExist /* = false */,
+                       bool isKey /* = false */) {
+  if (isKey) return lvalAtImpl(key, checkExist);
   VarNR k(key.toKey());
   if (!k.isNull()) {
     return lvalAtImpl(k, checkExist);
@@ -523,18 +555,20 @@ Variant &Array::lvalAt(CVarRef key, bool checkExist /* = false */) {
   return Variant::lvalBlackHole();
 }
 
-CVarRef Array::set(litstr  key, CVarRef v, bool isString /* = false */) {
-  if (isString) return setImpl(String(key), v);
+CVarRef Array::set(litstr  key, CVarRef v, bool isKey /* = false */) {
+  if (isKey) return setImpl(String(key), v);
   return setImpl(String(key).toKey(), v);
 }
-CVarRef Array::set(CStrRef key, CVarRef v, bool isString /* = false */) {
-  if (isString) return setImpl(key, v);
+CVarRef Array::set(CStrRef key, CVarRef v, bool isKey /* = false */) {
+  if (isKey) return setImpl(key, v);
   return setImpl(key.toKey(), v);
 }
 
-CVarRef Array::set(CVarRef key, CVarRef v) {
-  if (key.getRawType() == KindOfInt64)
+CVarRef Array::set(CVarRef key, CVarRef v, bool isKey /* = false */) {
+  if (key.getRawType() == KindOfInt64) {
     return setImpl(key.getNumData(), v);
+  }
+  if (isKey) return setImpl(key, v);
   VarNR k(key.toKey());
   if (!k.isNull()) {
     return setImpl(k, v);
@@ -542,20 +576,21 @@ CVarRef Array::set(CVarRef key, CVarRef v) {
   return Variant::lvalBlackHole();
 }
 
-CVarRef Array::add(litstr  key, CVarRef v, bool isString /* = false */) {
-  if (isString) return addImpl(String(key), v);
+CVarRef Array::add(litstr  key, CVarRef v, bool isKey /* = false */) {
+  if (isKey) return addImpl(String(key), v);
   return addImpl(String(key).toKey(), v);
 }
 
-CVarRef Array::add(CStrRef key, CVarRef v, bool isString /* = false */) {
-  if (isString) return addImpl(key, v);
+CVarRef Array::add(CStrRef key, CVarRef v, bool isKey /* = false */) {
+  if (isKey) return addImpl(key, v);
   return addImpl(key.toKey(), v);
 }
 
-CVarRef Array::add(CVarRef key, CVarRef v) {
+CVarRef Array::add(CVarRef key, CVarRef v, bool isKey /* = false */) {
   if (key.getRawType() == KindOfInt64) {
     return addImpl(key.getNumData(), v);
   }
+  if (isKey) return addImpl(key, v);
   VarNR k(key.toKey());
   if (!k.isNull()) {
     return addImpl(k, v);
@@ -563,20 +598,21 @@ CVarRef Array::add(CVarRef key, CVarRef v) {
   return Variant::lvalBlackHole();
 }
 
-Variant &Array::addLval(litstr  key, bool isString /* = false */) {
-  if (isString) return addLvalImpl(String(key));
+Variant &Array::addLval(litstr  key, bool isKey /* = false */) {
+  if (isKey) return addLvalImpl(String(key));
   return addLvalImpl(String(key).toKey());
 }
 
-Variant &Array::addLval(CStrRef key, bool isString /* = false */) {
-  if (isString) return addLvalImpl(key);
+Variant &Array::addLval(CStrRef key, bool isKey /* = false */) {
+  if (isKey) return addLvalImpl(key);
   return addLvalImpl(key.toKey());
 }
 
-Variant &Array::addLval(CVarRef key) {
+Variant &Array::addLval(CVarRef key, bool isKey /* = false */) {
   if (key.getRawType() == KindOfInt64) {
     return addLvalImpl(key.getNumData());
   }
+  if (isKey) return addLvalImpl(key);
   VarNR k(key.toKey());
   if (!k.isNull()) {
     return addLvalImpl(k);
@@ -602,8 +638,8 @@ Variant Array::argvalAt(bool byRef, CStrRef key, bool isString /* = false */) {
 bool Array::valueExists(CVarRef search_value,
                         bool strict /* = false */) const {
   for (ArrayIter iter(*this); iter; ++iter) {
-    if ((strict && iter.second().same(search_value)) ||
-        (!strict && iter.second().equal(search_value))) {
+    if ((strict && iter.secondRef().same(search_value)) ||
+        (!strict && iter.secondRef().equal(search_value))) {
       return true;
     }
   }
@@ -612,8 +648,8 @@ bool Array::valueExists(CVarRef search_value,
 
 Variant Array::key(CVarRef search_value, bool strict /* = false */) const {
   for (ArrayIter iter(*this); iter; ++iter) {
-    if ((strict && iter.second().same(search_value)) ||
-        (!strict && iter.second().equal(search_value))) {
+    if ((strict && iter.secondRef().same(search_value)) ||
+        (!strict && iter.secondRef().equal(search_value))) {
       return iter.first();
     }
   }
@@ -629,8 +665,8 @@ Array Array::keys(CVarRef search_value /* = null_variant */,
     }
   } else {
     for (ArrayIter iter(*this); iter; ++iter) {
-      if ((strict && iter.second().same(search_value)) ||
-          (!strict && iter.second().equal(search_value))) {
+      if ((strict && iter.secondRef().same(search_value)) ||
+          (!strict && iter.secondRef().equal(search_value))) {
         ret.append(iter.first());
       }
     }
@@ -641,22 +677,22 @@ Array Array::keys(CVarRef search_value /* = null_variant */,
 Array Array::values() const {
   Array ret = Array::Create();
   for (ArrayIter iter(*this); iter; ++iter) {
-    ret.append(iter.second());
+    ret.append(iter.secondRef());
   }
   return ret;
 }
 
-bool Array::exists(litstr key, bool isString /* = false */) const {
-  if (isString) return existsImpl(key);
+bool Array::exists(litstr key, bool isKey /* = false */) const {
+  if (isKey) return existsImpl(key);
   return existsImpl(String(key).toKey());
 }
 
-bool Array::exists(CStrRef key, bool isString /* = false */) const {
-  if (isString) return existsImpl(key);
+bool Array::exists(CStrRef key, bool isKey /* = false */) const {
+  if (isKey) return existsImpl(key);
   return existsImpl(key.toKey());
 }
 
-bool Array::exists(CVarRef key) const {
+bool Array::exists(CVarRef key, bool isKey /* = false */) const {
   switch(key.getType()) {
   case KindOfBoolean:
   case KindOfByte:
@@ -667,6 +703,7 @@ bool Array::exists(CVarRef key) const {
   default:
     break;
   }
+  if (isKey) return existsImpl(key);
   VarNR k(key.toKey());
   if (!k.isNull()) {
     return existsImpl(k);
@@ -715,9 +752,6 @@ Variant Array::append(CVarRef v) {
   if (!m_px) {
     SmartPtr<ArrayData>::operator=(ArrayData::Create(v));
   } else {
-    if (v.isContagious()) {
-      escalate();
-    }
     ArrayData *escalated = m_px->append(v, (m_px->getCount() > 1));
     if (escalated) {
       SmartPtr<ArrayData>::operator=(escalated);
@@ -726,12 +760,20 @@ Variant Array::append(CVarRef v) {
   return v;
 }
 
-Variant Array::appendOpEqual(int op, CVarRef v) {
+Variant Array::appendWithRef(CVarRef v) {
   if (!m_px) {
     SmartPtr<ArrayData>::operator=(ArrayData::Create());
   }
-  if (v.isContagious()) {
-    escalate();
+  ArrayData *escalated = m_px->appendWithRef(v, (m_px->getCount() > 1));
+  if (escalated) {
+    SmartPtr<ArrayData>::operator=(escalated);
+  }
+  return v;
+}
+
+Variant Array::appendOpEqual(int op, CVarRef v) {
+  if (!m_px) {
+    SmartPtr<ArrayData>::operator=(ArrayData::Create());
   }
   ArrayData *escalated =
     m_px->append(null_variant, (m_px->getCount() > 1));
@@ -822,11 +864,10 @@ void Array::unserialize(VariableUnserializer *uns) {
     // Pre-allocate an ArrayData of the given size, to avoid escalation in
     // the middle, which breaks references.
     operator=(ArrayInit(size).create());
+    bool isAPC = (uns->getType() == VariableUnserializer::APCSerialize);
     for (int64 i = 0; i < size; i++) {
       Variant key(uns->unserializeKey());
-      Variant &value =
-        key.isString() ? addLval(key.toString(), true)
-                       : addLval(key);
+      Variant &value = isAPC ? addLval(key, true) : lvalAt(key, false, true);
       value.unserialize(uns);
     }
   }
@@ -842,15 +883,10 @@ Array Array::fiberMarshal(FiberReferenceMap &refMap) const {
     Array ret = Array::Create();
     if (m_px->isGlobalArrayWrapper()) {
       ret = get_global_array_wrapper();
-    } else if (m_px->supportValueRef()) {
-      for (ArrayIter iter(*this); iter; ++iter) {
-        ret.set(iter.first().fiberMarshal(refMap),
-                ref(iter.secondRef().fiberMarshal(refMap)));
-      }
     } else {
       for (ArrayIter iter(*this); iter; ++iter) {
         ret.set(iter.first().fiberMarshal(refMap),
-                iter.second().fiberMarshal(refMap));
+                ref(iter.secondRef().fiberMarshal(refMap)));
       }
     }
     return ret;
@@ -863,15 +899,10 @@ Array Array::fiberUnmarshal(FiberReferenceMap &refMap) const {
     Array ret = Array::Create();
     if (m_px->isGlobalArrayWrapper()) {
       ret = get_global_array_wrapper();
-    } else if (m_px->supportValueRef()) {
-      for (ArrayIter iter(*this); iter; ++iter) {
-        ret.set(iter.first().fiberUnmarshal(refMap),
-                ref(iter.secondRef().fiberUnmarshal(refMap)));
-      }
     } else {
       for (ArrayIter iter(*this); iter; ++iter) {
         ret.set(iter.first().fiberUnmarshal(refMap),
-                iter.second().fiberUnmarshal(refMap));
+                ref(iter.secondRef().fiberUnmarshal(refMap)));
       }
     }
     return ret;

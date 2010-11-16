@@ -26,6 +26,18 @@ const Object Object::s_nullObject = Object();
 
 ///////////////////////////////////////////////////////////////////////////////
 
+ArrayIterPtr Object::begin(CStrRef context /* = null_string */,
+                           bool setIterDirty /* = false */) const {
+  if (!m_px) throw NullPointerException();
+  return m_px->begin(context);
+}
+
+MutableArrayIterPtr Object::begin(Variant *key, Variant &val,
+                                  bool setIterDirty /* = false */) const {
+  if (!m_px) throw NullPointerException();
+  return m_px->begin(key, val);
+}
+
 Array Object::toArray() const {
   return HPHP::toArray(m_px);
 }

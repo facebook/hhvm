@@ -42,6 +42,7 @@
 #include <runtime/base/class_statics.h>
 #include <runtime/base/dynamic_object_data.h>
 #include <runtime/base/array/array_init.h>
+#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/util/simple_counter.h>
 #include <util/shm_counter.h>

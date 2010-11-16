@@ -29,11 +29,15 @@
 #include <runtime/base/type_array.h>
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/array/array_data.h>
-#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/macros.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+class IArrayIterator;
+typedef SmartPtr<IArrayIterator> ArrayIterPtr;
+class MutableArrayIter;
+typedef SmartPtr<MutableArrayIter> MutableArrayIterPtr;
 
 /**
  * Perhaps the most important class in the entire runtime. When type inference
@@ -180,6 +184,12 @@ class Variant {
    * set to null without breaking bindings (if any), faster than v_a = null;
    */
   void setNull();
+
+  /**
+   * Clear the original data, and set it to be the same as in v, and if
+   * v is referenced, keep the reference.
+   */
+  Variant &setWithRef(CVarRef v);
 
   /**
    * Fast accessors that can be used by generated code when type inference can

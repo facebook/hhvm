@@ -32,6 +32,11 @@ namespace HPHP {
 
 #define null_object Object::s_nullObject
 
+class IArrayIterator;
+typedef SmartPtr<IArrayIterator> ArrayIterPtr;
+class MutableArrayIter;
+typedef SmartPtr<MutableArrayIter> MutableArrayIterPtr;
+
 /**
  * Object type wrapping around ObjectData to implement reference count.
  */
@@ -71,16 +76,10 @@ class Object : public SmartPtr<ObjectData> {
   }
 
   ArrayIterPtr begin(CStrRef context = null_string,
-                     bool setIterDirty = false) const {
-    if (!m_px) throw NullPointerException();
-    return m_px->begin(context);
-  }
+                     bool setIterDirty = false) const;
 
   MutableArrayIterPtr begin(Variant *key, Variant &val,
-                            bool setIterDirty = false) const {
-    if (!m_px) throw NullPointerException();
-    return m_px->begin(key, val);
-  }
+                            bool setIterDirty = false) const;
 
   /**
    * getTyped() and is() are intended for use with classes only. Using

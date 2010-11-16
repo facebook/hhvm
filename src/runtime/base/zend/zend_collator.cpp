@@ -22,6 +22,7 @@
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/runtime_error.h>
+#include <runtime/base/array/array_iterator.h>
 
 namespace HPHP {
 
@@ -356,62 +357,32 @@ static Variant collator_convert_object_to_string(CVarRef obj) {
 
 static void collator_convert_array_from_utf16_to_utf8(Array &array,
                                                       UErrorCode * status) {
-  if (array->supportValueRef()) {
-    for (ArrayIter iter(array); iter; ++iter) {
-      CVarRef value = iter.secondRef();
-      /* Process string values only. */
-      if (!value.isString()) continue;
-      String str = intl_convert_str_utf16_to_utf8(value, status);
-      if (U_FAILURE(*status)) {
-        return;
-      }
-      /* Update current value with the converted value. */
-      const_cast<Variant&>(value) = str;
+  for (ArrayIter iter(array); iter; ++iter) {
+    CVarRef value = iter.secondRef();
+    /* Process string values only. */
+    if (!value.isString()) continue;
+    String str = intl_convert_str_utf16_to_utf8(value, status);
+    if (U_FAILURE(*status)) {
+      return;
     }
-  } else {
-    for (ArrayIter iter(array); iter; ++iter) {
-      CVarRef value = iter.second();
-      /* Process string values only. */
-      if (!value.isString()) continue;
-      String str = intl_convert_str_utf16_to_utf8(value, status);
-      if (U_FAILURE(*status)) {
-        return;
-      }
-      /* Update current value with the converted value. */
-      Variant key = iter.first();
-      array.set(key, str);
-    }
+    /* Update current value with the converted value. */
+    const_cast<Variant&>(value) = str;
   }
 }
 
 static void collator_convert_array_from_utf8_to_utf16(Array &array,
                                                       UErrorCode * status) {
-  if (array->supportValueRef()) {
-    for (ArrayIter iter(array); iter; ++iter) {
-      CVarRef value = iter.secondRef();
-      /* Process string values only. */
-      if (!value.isString()) continue;
-      String str = intl_convert_str_utf8_to_utf16(value, status);
-      if (U_FAILURE(*status)) {
-        return;
-      }
-      /* Update current value with the converted value. */
-      Variant key = iter.first();
-      array.set(key, str);
+  for (ArrayIter iter(array); iter; ++iter) {
+    CVarRef value = iter.secondRef();
+    /* Process string values only. */
+    if (!value.isString()) continue;
+    String str = intl_convert_str_utf8_to_utf16(value, status);
+    if (U_FAILURE(*status)) {
+      return;
     }
-  } else {
-    for (ArrayIter iter(array); iter; ++iter) {
-      CVarRef value = iter.second();
-      /* Process string values only. */
-      if (!value.isString()) continue;
-      String str = intl_convert_str_utf8_to_utf16(value, status);
-      if (U_FAILURE(*status)) {
-        return;
-      }
-      /* Update current value with the converted value. */
-      Variant key = iter.first();
-      array.set(key, str);
-    }
+    /* Update current value with the converted value. */
+    Variant key = iter.first();
+    array.set(key, str);
   }
 }
 

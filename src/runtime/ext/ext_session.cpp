@@ -26,6 +26,7 @@
 #include <runtime/base/ini_setting.h>
 #include <runtime/base/time/datetime.h>
 #include <runtime/base/variable_unserializer.h>
+#include <runtime/base/array/array_iterator.h>
 #include <util/lock.h>
 #include <util/compatibility.h>
 #include <sys/types.h>

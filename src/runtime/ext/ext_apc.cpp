@@ -283,7 +283,7 @@ void apc_load(int thread) {
 }
 
 //define in ext_fb.cpp
-extern void const_load_set(Variant key, Variant value);
+extern void const_load_set(CStrRef key, CVarRef value);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constant and APC priming with uncompressed data

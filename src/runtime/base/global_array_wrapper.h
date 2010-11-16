@@ -34,7 +34,7 @@ public:
   virtual Variant getKey(ssize_t pos) const;
   virtual Variant getValue(ssize_t pos) const;
   virtual CVarRef getValueRef(ssize_t pos) const;
-  virtual bool supportValueRef() const;
+  virtual CVarRef getValueRef(ssize_t pos, Variant &holder) const;
   virtual bool isGlobalArrayWrapper() const;
 
   virtual bool exists(int64   k) const;
@@ -78,6 +78,7 @@ public:
   virtual ArrayData *copy() const;
 
   virtual ArrayData *append(CVarRef v, bool copy);
+  virtual ArrayData *appendWithRef(CVarRef v, bool copy);
 
   virtual ArrayData *append(const ArrayData *elems, ArrayOp op, bool copy);
 

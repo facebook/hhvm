@@ -16,6 +16,7 @@
 #include <runtime/base/intercept.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/array/array_init.h>
+#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <util/lock.h>

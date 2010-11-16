@@ -916,22 +916,23 @@ Array f_fb_get_flush_stat() {
 ///////////////////////////////////////////////////////////////////////////////
 // const index functions
 
-static ZendArray const_data;
+static Array const_data;
 
 Variant f_fb_const_fetch(CVarRef key) {
   String k = key.toString();
-  return const_data.fetch(k);
+  Variant *ret = const_data.lvalPtr(k, false, false);
+  if (ret) return *ret;
+  return false;
 }
 
-void const_load_set(Variant key, Variant value) {
-  const_data.set(key, value, false);
+void const_load_set(CStrRef key, CVarRef value) {
+  const_data.set(key, value, true);
 }
 
 void const_load() {
   // after all loading
   const_load_set("zend_array_size", const_data.size());
   const_data.setStatic();
-  const_data.onSetStatic();
 }
 
 bool const_dump(const char *filename) {
@@ -939,7 +940,7 @@ bool const_dump(const char *filename) {
   if (out.fail()) {
     return false;
   }
-  const_data.dump(out);
+  const_data->dump(out);
   out.close();
   return true;
 }

@@ -16,7 +16,7 @@
 
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/shared/shared_map.h>
-#include <runtime/base/array/zend_array.h>
+#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/runtime_error.h>
 
@@ -25,9 +25,35 @@ namespace HPHP {
 IMPLEMENT_SMART_ALLOCATION(SharedMap, SmartAllocatorImpl::NeedRestore);
 ///////////////////////////////////////////////////////////////////////////////
 
-SharedMap::SharedMap(SharedVariant* source)
-  : m_arr(source) {
+SharedMap::SharedMap(SharedVariant* source) : m_arr(source) {
   source->incRef();
+}
+
+Variant SharedMap::getValue(ssize_t pos) const {
+  SharedVariant *sv = m_arr->getValue(pos);
+  if (!sv->shouldCache()) return sv->toLocal();
+  Variant *pv = m_localCache.lvalPtr(pos, false, false);
+  if (pv) return *pv;
+  Variant v = sv->toLocal();
+  m_localCache.add((int64)pos, v);
+  return v;
+}
+
+CVarRef SharedMap::getValueRef(ssize_t pos) const {
+  throw FatalErrorException("taking reference from an r-value");
+}
+
+CVarRef SharedMap::getValueRef(ssize_t pos, Variant &holder) const {
+  SharedVariant *sv = m_arr->getValue(pos);
+  if (!sv->shouldCache()) {
+    holder = sv->toLocal();
+    return holder;
+  }
+  Variant *pv = m_localCache.lvalPtr(pos, false, false);
+  if (pv) return *pv;
+  Variant &r = m_localCache.addLval((int64)pos);
+  r = sv->toLocal();
+  return r;
 }
 
 bool SharedMap::exists(CVarRef k) const {
@@ -64,9 +90,7 @@ Variant SharedMap::get(CVarRef k, bool error /* = false */) const {
     }
     return null;
   }
-  SharedVariant *sv = m_arr->getValue(index);
-  ASSERT(sv);
-  return getLocal(sv);
+  return getValue(index);
 }
 
 Variant SharedMap::get(CStrRef k, bool error /* = false */) const {
@@ -77,9 +101,7 @@ Variant SharedMap::get(CStrRef k, bool error /* = false */) const {
     }
     return null;
   }
-  SharedVariant *sv = m_arr->getValue(index);
-  ASSERT(sv);
-  return getLocal(sv);
+  return getValue(index);
 }
 
 Variant SharedMap::get(litstr k, bool error /* = false */) const {
@@ -90,9 +112,7 @@ Variant SharedMap::get(litstr k, bool error /* = false */) const {
     }
     return null;
   }
-  SharedVariant *sv = m_arr->getValue(index);
-  ASSERT(sv);
-  return getLocal(sv);
+  return getValue(index);
 }
 
 Variant SharedMap::get(int64 k, bool error /* = false */) const {
@@ -103,9 +123,7 @@ Variant SharedMap::get(int64 k, bool error /* = false */) const {
     }
     return null;
   }
-  SharedVariant *sv = m_arr->getValue(index);
-  ASSERT(sv);
-  return getLocal(sv);
+  return getValue(index);
 }
 
 ArrayData *SharedMap::lval(Variant *&ret, bool copy) {
@@ -248,6 +266,16 @@ ArrayData *SharedMap::copy() const {
 ArrayData *SharedMap::append(CVarRef v, bool copy) {
   ArrayData *escalated = escalate();
   ArrayData *ee = escalated->append(v, false);
+  if (ee) {
+    escalated->release();
+    return ee;
+  }
+  return escalated;
+}
+
+ArrayData *SharedMap::appendWithRef(CVarRef v, bool copy) {
+  ArrayData *escalated = escalate();
+  ArrayData *ee = escalated->appendWithRef(v, false);
   if (ee) {
     escalated->release();
     return ee;

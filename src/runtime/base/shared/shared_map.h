@@ -37,6 +37,8 @@ public:
     m_arr->decRef();
   }
 
+  virtual bool isSharedMap() const { return true; }
+
   virtual SharedVariant *getSharedVariant() const {
     if (m_arr->shouldCache()) return NULL;
     return m_arr;
@@ -50,10 +52,9 @@ public:
     return m_arr->getKey(pos);
   }
 
-  Variant getValue(ssize_t pos) const {
-    SharedVariant* v = m_arr->getValue(pos);
-    return v ? getLocal(v) : null;
-  }
+  Variant getValue(ssize_t pos) const;
+  CVarRef getValueRef(ssize_t pos) const;
+  CVarRef getValueRef(ssize_t pos, Variant &holder) const;
 
   bool exists(int64 k) const;
   bool exists(litstr k) const;
@@ -98,6 +99,7 @@ public:
   ArrayData *copy() const;
 
   ArrayData *append(CVarRef v, bool copy);
+  ArrayData *appendWithRef(CVarRef v, bool copy);
   ArrayData *append(const ArrayData *elems, ArrayOp op, bool copy);
 
   ArrayData *prepend(CVarRef v, bool copy);
@@ -118,19 +120,6 @@ public:
 private:
   SharedVariant *m_arr;
   mutable Array m_localCache;
-
-  Variant getLocal(SharedVariant *sv) const {
-    ASSERT(sv);
-    if (!sv->shouldCache()) return sv->toLocal();
-    int64 key = (int64)sv;
-    key = ((key & 0xfll) << 60) | (key >> 4);
-    Variant v = m_localCache.rvalAt(key);
-    if (v.isNull()) {
-      v = sv->toLocal();
-      if (!v.isNull()) m_localCache.set(key, v);
-    }
-    return v;
-  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -33,6 +33,7 @@
 #include <compiler/expression/function_call.h>
 #include <compiler/analysis/file_scope.h>
 #include <util/hash.h>
+#include <runtime/base/array/array_iterator.h>
 
 using namespace HPHP;
 using namespace std;

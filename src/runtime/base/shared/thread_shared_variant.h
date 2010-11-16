@@ -83,6 +83,7 @@ public:
     }
     return m_data.map->getKeyIndex(pos)->toLocal();
   }
+
   virtual SharedVariant* getValue(ssize_t pos) const {
     ASSERT(is(KindOfArray));
     if (getIsVector()) {

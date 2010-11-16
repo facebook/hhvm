@@ -38,10 +38,10 @@ public:
 
   virtual Variant getKey(ssize_t pos) const;
   virtual Variant getValue(ssize_t pos) const;
-  virtual void fetchValue(ssize_t pos, Variant & v) const;
+  virtual void fetchValue(ssize_t pos, Variant &v) const;
   virtual CVarRef getValueRef(ssize_t pos) const;
+  virtual CVarRef getValueRef(ssize_t pos, Variant &holder) const;
   virtual bool isVectorData() const;
-  virtual bool supportValueRef() const { return true; }
 
   virtual ssize_t iter_begin() const;
   virtual ssize_t iter_end() const;
@@ -75,8 +75,6 @@ public:
 
   virtual void load(CVarRef k, Variant &v) const;
 
-  Variant fetch(CStrRef k) const;
-
   virtual ssize_t getIndex(int64 k) const;
   virtual ssize_t getIndex(litstr k) const;
   virtual ssize_t getIndex(CStrRef k) const;
@@ -92,6 +90,8 @@ public:
   virtual ArrayData *lval(CVarRef k, Variant *&ret, bool copy,
                           bool checkExist = false);
   virtual ArrayData *lvalPtr(CStrRef k, Variant *&ret, bool copy,
+                             bool create);
+  virtual ArrayData *lvalPtr(int64   k, Variant *&ret, bool copy,
                              bool create);
 
   virtual ArrayData *lvalNew(Variant *&ret, bool copy);
@@ -115,6 +115,7 @@ public:
 
   virtual ArrayData *copy() const;
   virtual ArrayData *append(CVarRef v, bool copy);
+  virtual ArrayData *appendWithRef(CVarRef v, bool copy);
   virtual ArrayData *append(const ArrayData *elems, ArrayOp op, bool copy);
   virtual ArrayData *pop(Variant &value);
   virtual ArrayData *dequeue(Variant &value);
@@ -186,11 +187,12 @@ private:
   Bucket ** findForErase(Bucket * bucketPtr) const;
 
   bool nextInsert(CVarRef data);
+  bool nextInsertWithRef(CVarRef data);
   bool addLvalImpl(int64 h, Variant **pDest, bool doFind = true);
   bool addLvalImpl(StringData *key, int64 h, Variant **pDest,
                    bool doFind = true);
-  bool addVal(int64 h, CVarRef data);
-  bool addVal(StringData *key, CVarRef data);
+  bool addValWithRef(int64 h, CVarRef data);
+  bool addValWithRef(StringData *key, CVarRef data);
 
   bool update(int64 h, CVarRef data);
   bool update(litstr key, CVarRef data);

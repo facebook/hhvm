@@ -67,10 +67,6 @@ Object ArrayData::toObject() const {
   return ObjectData::FromArray(const_cast<ArrayData *>(this));
 }
 
-CVarRef ArrayData::getValueRef(ssize_t pos) const {
-  throw FatalErrorException("taking reference from an r-value");
-}
-
 bool ArrayData::isVectorData() const {
   for (ssize_t i = 0; i < size(); i++) {
     if (getIndex(i) != i) {
@@ -149,6 +145,11 @@ void ArrayData::load(CVarRef k, Variant &v) const {
 }
 
 ArrayData *ArrayData::lvalPtr(CStrRef k, Variant *&ret, bool copy,
+                              bool create) {
+  throw FatalErrorException("Unimplemented ArrayData::lvalPtr");
+}
+
+ArrayData *ArrayData::lvalPtr(int64 k, Variant *&ret, bool copy,
                               bool create) {
   throw FatalErrorException("Unimplemented ArrayData::lvalPtr");
 }
@@ -361,7 +362,6 @@ void ArrayData::serialize(VariableSerializer *serializer) const {
     serializer->writeOverflow((void*)this);
   } else {
     serializer->writeArrayHeader(this, size());
-    bool refValue = supportValueRef();
     for (ArrayIter iter(this); iter; ++iter) {
       Variant key(iter.first());
       if (key.isInteger()) {
@@ -369,11 +369,7 @@ void ArrayData::serialize(VariableSerializer *serializer) const {
       } else {
         serializer->writeArrayKey(this, key.toString());
       }
-      if (refValue) {
-        serializer->writeArrayValue(this, iter.secondRef());
-      } else {
-        serializer->writeArrayValue(this, iter.second());
-      }
+      serializer->writeArrayValue(this, iter.secondRef());
     }
     serializer->writeArrayFooter(this);
   }
@@ -381,30 +377,29 @@ void ArrayData::serialize(VariableSerializer *serializer) const {
 }
 
 bool ArrayData::hasInternalReference(PointerSet &vars) const {
-  if (supportValueRef()) {
-    for (ArrayIter iter(this); iter; ++iter) {
-      CVarRef var = iter.secondRef();
-      if (var.isReferenced()) {
-        Variant *pvar = var.getVariantData();
-        if (vars.find(pvar) != vars.end()) {
-          return true;
-        }
-        vars.insert(pvar);
-      }
-      if (var.isObject()) {
-        ObjectData *pobj = var.getObjectData();
-        if (vars.find(pobj) != vars.end()) {
-          return true;
-        }
-        vars.insert(pobj);
-
-        if (pobj->o_toArray().get()->hasInternalReference(vars)) {
-          return true;
-        }
-      } else if (var.isArray() &&
-                 var.getArrayData()->hasInternalReference(vars)) {
+  if (isSharedMap()) return false;
+  for (ArrayIter iter(this); iter; ++iter) {
+    CVarRef var = iter.secondRef();
+    if (var.isReferenced()) {
+      Variant *pvar = var.getVariantData();
+      if (vars.find(pvar) != vars.end()) {
         return true;
       }
+      vars.insert(pvar);
+    }
+    if (var.isObject()) {
+      ObjectData *pobj = var.getObjectData();
+      if (vars.find(pobj) != vars.end()) {
+        return true;
+      }
+      vars.insert(pobj);
+
+      if (pobj->o_toArray().get()->hasInternalReference(vars)) {
+        return true;
+      }
+    } else if (var.isArray() &&
+               var.getArrayData()->hasInternalReference(vars)) {
+      return true;
     }
   }
   return false;

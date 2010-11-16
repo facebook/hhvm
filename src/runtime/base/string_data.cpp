@@ -82,6 +82,7 @@ void StringData::releaseData() {
       m_shared->decRef();
     } else if (m_data) {
       free((void*)m_data);
+      m_data = NULL;
     }
   }
   m_hash = 0;

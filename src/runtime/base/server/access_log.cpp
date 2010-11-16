@@ -29,6 +29,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 AccessLog::~AccessLog() {
+  signal(SIGCHLD, SIG_DFL);
   for (uint i = 0; i < m_output.size(); ++i) {
     if (m_output[i].log) {
       if (m_files[i].file[0] == '|') {

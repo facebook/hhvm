@@ -42,10 +42,10 @@ Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
                      ExpressionPtr defVal, int argNum)
   : Construct(CONSTRUCT_PASS), m_type(type),
     m_name(Name::fromString(CONSTRUCT_PASS, name)), m_defVal(defVal),
-    m_fnName(NULL), m_idx(idx), m_kind(KindOfNull), m_argNum(argNum),
+    m_idx(idx), m_kind(KindOfNull), m_argNum(argNum),
     m_ref(ref), m_nullDefault(false) {
   if (!type.empty()) {
-    m_fnName = parser->peekFunc()->name().c_str();
+    m_fnName = parser->peekFunc()->fullName() + "()";
     if (strcasecmp(type.c_str(), "array") == 0) {
       m_kind = KindOfArray;
     } else {
@@ -86,7 +86,8 @@ void Parameter::bind(VariableEnvironment &env, CVarRef val,
           (m_kind != KindOfObject ||
            m_kind == KindOfObject &&
            val.toObject().instanceof(m_type.c_str())))) {
-      throw_unexpected_argument_type(m_argNum, m_fnName, m_type.c_str(), val);
+      throw_unexpected_argument_type(m_argNum, m_fnName.c_str(),
+                                     m_type.c_str(), val);
     }
   }
   if (ref) val.setContagious();

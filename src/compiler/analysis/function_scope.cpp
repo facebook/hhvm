@@ -663,6 +663,12 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   int inTypedWrapper = Option::HardTypeHints ?
     cg.getContext() == CodeGenerator::CppTypedParamsWrapperImpl : -1;
 
+  string funcName = cg.escapeLabel(getOriginalName());
+  if (ClassScopePtr cls = getContainingClass()) {
+    funcName = cg.escapeLabel(cls->getOriginalName()) + "::" + funcName;
+  }
+  funcName += "()";
+
   /* Typecheck parameters */
   for (size_t i = 0; i < m_paramTypes.size(); i++) {
     TypePtr specType = m_paramTypeSpecs[i];
@@ -689,7 +695,7 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
                      Option::VariablePrefix, param->getName().c_str());
       cg_printf("throw_unexpected_argument_type"
                 "(%d,\"%s\",\"array\",%s%s);\n",
-                i, m_name.c_str(),
+                i + 1, funcName.c_str(),
                 Option::VariablePrefix, param->getName().c_str());
       if (Option::HardTypeHints) {
         cg_printf("return%s;\n", getReturnType() ? " null" : "");
@@ -706,7 +712,7 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printString(specType->getName(), ar, shared_from_this());
       cg_indentBegin(")) {\n");
       cg_printf("throw_unexpected_argument_type(%d,\"%s\",\"%s\",%s%s);\n",
-                i, m_name.c_str(), specType->getName().c_str(),
+                i + 1, funcName.c_str(), specType->getName().c_str(),
                 Option::VariablePrefix, param->getName().c_str());
       if (Option::HardTypeHints) {
         cg_printf("return%s;\n", getReturnType() ? " null" : "");
@@ -1388,12 +1394,16 @@ void FunctionScope::serialize(JSON::OutputStream &out) const {
 void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   ClassScopePtr scope = getContainingClass();
+  CodeGenerator::Context context = cg.getContext();
+  bool setWrapper = Option::HardTypeHints && needsTypeCheckWrapper();
 
   cg_printf("public: %s%s *create(",
             Option::ClassPrefix, scope->getId(cg).c_str());
+  if (setWrapper) cg.setContext(CodeGenerator::CppTypedParamsWrapperDecl);
   outputCPPParamsDecl(cg, ar,
                       dynamic_pointer_cast<MethodStatement>(getStmt())
                       ->getParams(), true);
+  cg.setContext(context);
   cg_printf(");\n");
   cg_printf("public: ObjectData *dynCreate(CArrRef params, bool init = true);"
             "\n");
@@ -1413,12 +1423,17 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
   ClassScopePtr scope = getContainingClass();
   string clsNameStr = scope->getId(cg);
   const char *clsName = clsNameStr.c_str();
-  const char *consName = scope->classNameCtor() ? scope->getName().c_str()
-                                                : "__construct";
+  const string &funcNameStr = this->getName();
+  const char *consName = funcNameStr.c_str();
+  CodeGenerator::Context context = cg.getContext();
+  bool setWrapper = Option::HardTypeHints && needsTypeCheckWrapper();
 
   cg_printf("%s%s *%s%s::create(",
             Option::ClassPrefix, clsName, Option::ClassPrefix, clsName);
+  if (setWrapper) cg.setContext(CodeGenerator::CppTypedParamsWrapperImpl);
+
   outputCPPParamsImpl(cg, ar);
+  cg.setContext(context);
   cg_indentBegin(") {\n");
   cg_printf("CountableHelper h(this);\n");
   cg_printf("init();\n");

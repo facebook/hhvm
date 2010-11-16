@@ -54,7 +54,7 @@ private:
   std::string m_type;
   NamePtr m_name;
   ExpressionPtr m_defVal;
-  const char *m_fnName;
+  std::string m_fnName;
   int m_idx;
   DataType m_kind;
   int m_argNum;
@@ -86,6 +86,7 @@ public:
   const std::vector<ParameterPtr>& getParams() const { return m_params; }
   bool hasBody() const { return m_body;}
   virtual const CallInfo *getCallInfo() const;
+  virtual const std::string &fullName() const;
 
 protected:
   bool m_ref;
@@ -99,7 +100,6 @@ protected:
 
   std::string m_docComment;
 
-  virtual const std::string &fullName() const;
   void directBind(VariableEnvironment &env,
                   const FunctionCallExpression *caller,
                   FuncScopeVariableEnvironment &fenv) const;

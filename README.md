@@ -11,7 +11,7 @@ HipHop is a source code transformer which transforms PHP source code into highly
 The latest information is available on the [wiki](http://wiki.github.com/facebook/hiphop-php/building-and-installing)
 
 * cmake *2.6 is the minimum version*
-* g++/gcc *4.1 is the minimum version*
+* g++/gcc *4.3 is the minimum version*
 * Boost *1.37 is the minimum version*
 * flex
 * bison

@@ -825,9 +825,13 @@ Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant f_fb_get_code_coverage() {
+Variant f_fb_get_code_coverage(bool flush) {
   if (RuntimeOption::RecordCodeCoverage) {
-    return Eval::CodeCoverage::Report();
+    Array ret = Eval::CodeCoverage::Report();
+    if (flush) {
+      Eval::CodeCoverage::Reset();
+    }
+    return ret;
   }
   return false;
 }

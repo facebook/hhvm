@@ -90,9 +90,9 @@ inline Array x_fb_call_user_func_array_safe(CVarRef function, CArrRef params) {
   return f_fb_call_user_func_array_safe(function, params);
 }
 
-inline Variant x_fb_get_code_coverage() {
+inline Variant x_fb_get_code_coverage(bool flush) {
   FUNCTION_INJECTION_BUILTIN(fb_get_code_coverage);
-  return f_fb_get_code_coverage();
+  return f_fb_get_code_coverage(flush);
 }
 
 inline void x_xhprof_enable(int flags, CArrRef args = null_array) {

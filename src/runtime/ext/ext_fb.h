@@ -38,7 +38,7 @@ bool f_fb_utf8ize(Variant input);
 Array f_fb_call_user_func_safe(int _argc, CVarRef function, CArrRef _argv = null_array);
 Variant f_fb_call_user_func_safe_return(int _argc, CVarRef function, CVarRef def, CArrRef _argv = null_array);
 Array f_fb_call_user_func_array_safe(CVarRef function, CArrRef params);
-Variant f_fb_get_code_coverage();
+Variant f_fb_get_code_coverage(bool flush);
 void f_xhprof_enable(int flags, CArrRef args = null_array);
 Variant f_xhprof_disable();
 void f_xhprof_sample_enable();

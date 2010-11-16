@@ -442,9 +442,17 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_get_code_coverage",
+    'desc'   => "Returns code coverage data collected so far. Turn on code coverage by Eval.RecordCodeCoverage and call this function periodically to get results. Eval.CodeCoverageOutputFile allows you to specify an output file to store results at end of a script run from command line. Use this function in server mode to collect results instead.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "flush",
+        'type'   => Boolean,
+        'desc'   => "Whether to clear data after this function call.",
+      ),
     ),
   ));
 

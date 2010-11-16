@@ -43,6 +43,11 @@ public:
    */
   static void Report(const std::string &filename);
 
+  /**
+   * Clear all coverage data.
+   */
+  static void Reset();
+
 private:
   typedef hphp_const_char_map<std::vector<int> > CodeCoverageMap;
 

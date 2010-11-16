@@ -102,6 +102,11 @@ void CodeCoverage::Report(const std::string &filename) {
   f.close();
 }
 
+void CodeCoverage::Reset() {
+  Lock lock(s_mutex);
+  s_hits.clear();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

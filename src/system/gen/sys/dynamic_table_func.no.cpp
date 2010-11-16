@@ -26804,12 +26804,17 @@ Variant ifa_mcrypt_enc_get_modes_name(void *extra, int count, INVOKE_FEW_ARGS_IM
 Variant i_fb_get_code_coverage(void *extra, CArrRef params) {
   FUNCTION_INJECTION(fb_get_code_coverage);
   int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("fb_get_code_coverage", 0, 1);
-  return (f_fb_get_code_coverage());
+  if (count != 1) return throw_wrong_arguments("fb_get_code_coverage", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_fb_get_code_coverage(arg0));
+  }
 }
 Variant ifa_fb_get_code_coverage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 0) return throw_toomany_arguments("fb_get_code_coverage", 0, 1);
-  return (f_fb_get_code_coverage());
+  if (count != 1) return throw_wrong_arguments("fb_get_code_coverage", count, 1, 1, 1);
+  return (f_fb_get_code_coverage(a0));
 }
 Variant i_array_flip(void *extra, CArrRef params) {
   FUNCTION_INJECTION(array_flip);
@@ -68132,16 +68137,20 @@ Variant ei_mcrypt_enc_get_modes_name(Eval::VariableEnvironment &env, const Eval:
   return (x_mcrypt_enc_get_modes_name(a0));
 }
 Variant ei_fb_get_code_coverage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("fb_get_code_coverage", 0, 1);
+  if (count != 1) return throw_wrong_arguments("fb_get_code_coverage", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  return (x_fb_get_code_coverage());
+  return (x_fb_get_code_coverage(a0));
 }
 Variant ei_array_flip(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -85909,7 +85918,7 @@ CallInfo ci_imagecolorallocate((void*)&i_imagecolorallocate, (void*)&ifa_imageco
 CallInfo ci_mt_srand((void*)&i_mt_srand, (void*)&ifa_mt_srand, 1, 0, 0x0000000000000000LL);
 CallInfo ci_define_syslog_variables((void*)&i_define_syslog_variables, (void*)&ifa_define_syslog_variables, 0, 0, 0x0000000000000000LL);
 CallInfo ci_mcrypt_enc_get_modes_name((void*)&i_mcrypt_enc_get_modes_name, (void*)&ifa_mcrypt_enc_get_modes_name, 1, 0, 0x0000000000000000LL);
-CallInfo ci_fb_get_code_coverage((void*)&i_fb_get_code_coverage, (void*)&ifa_fb_get_code_coverage, 0, 0, 0x0000000000000000LL);
+CallInfo ci_fb_get_code_coverage((void*)&i_fb_get_code_coverage, (void*)&ifa_fb_get_code_coverage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_array_flip((void*)&i_array_flip, (void*)&ifa_array_flip, 1, 0, 0x0000000000000000LL);
 CallInfo ci_count((void*)&i_count, (void*)&ifa_count, 2, 0, 0x0000000000000000LL);
 CallInfo ci_lcg_value((void*)&i_lcg_value, (void*)&ifa_lcg_value, 0, 0, 0x0000000000000000LL);

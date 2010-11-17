@@ -18,27 +18,18 @@ list(APPEND C_SOURCES ${files})
 
 
 set(ERROR_INC "analysis/core_code_error.inc")
-set(DEPENDENCY_INC "analysis/core_dependency.inc")
 
 set(ERROR_INC_FILE "${CMAKE_CURRENT_SOURCE_DIR}/analysis/code_error.inc")
-set(DEPENDENCY_INC_FILE "${CMAKE_CURRENT_SOURCE_DIR}/analysis/dependency.inc")
 
 file(REMOVE "${ERROR_INC_FILE}")
-file(REMOVE "${DEPENDENCY_INC_FILE}")
 
 file(WRITE "${ERROR_INC_FILE}" "/* This file is auto generated */")
-file(WRITE "${DEPENDENCY_INC_FILE}" "/* This file is auto generated */")
 
 foreach (error_file ${ERROR_INC})
 	file(READ ${error_file} file_contents)
 
 	file(APPEND "${ERROR_INC_FILE}" "${file_contents}")
 endforeach (error_file ${ERROR_INC})
-
-foreach	(dependency_file ${DEPENDENCY_INC})
-        file(READ ${dependency_file} file_contents)
-        file(APPEND "${DEPENDENCY_INC_FILE}" "${file_contents}")
-endforeach (dependency_file ${DEPENDENCY_INC})
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../")
 

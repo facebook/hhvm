@@ -181,10 +181,8 @@ protected:
    * Called by analyzeProgram() to add a reference to a user class or
    * function.
    */
-  void addUserFunction(AnalysisResultPtr ar, const std::string &name,
-                       bool strong = true);
-  void addUserClass(AnalysisResultPtr ar, const std::string &name,
-                    bool strong = true);
+  void addUserFunction(AnalysisResultPtr ar, const std::string &name);
+  void addUserClass(AnalysisResultPtr ar, const std::string &name);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

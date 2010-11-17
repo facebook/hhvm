@@ -125,10 +125,10 @@ void Construct::serialize(JSON::OutputStream &out) const {
 }
 
 void Construct::addUserFunction(AnalysisResultPtr ar,
-                                const std::string &name,
-                                bool strong /* = true */) {
+                                const std::string &name) {
   if (!name.empty()) {
-    if (strong && ar->getPhase() == AnalysisResult::AnalyzeAll) {
+    if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
+        ar->getPhase() == AnalysisResult::AnalyzeFinal) {
       FunctionScopePtr func = getFunctionScope();
       getFileScope()->addFunctionDependency(ar, name, func &&
                                             func->isInlined());
@@ -137,10 +137,10 @@ void Construct::addUserFunction(AnalysisResultPtr ar,
 }
 
 void Construct::addUserClass(AnalysisResultPtr ar,
-                             const std::string &name,
-                             bool strong /* = true */) {
+                             const std::string &name) {
   if (!name.empty()) {
-    if (strong && ar->getPhase() == AnalysisResult::AnalyzeAll) {
+    if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
+        ar->getPhase() == AnalysisResult::AnalyzeFinal) {
       getFileScope()->addClassDependency(ar, name);
     }
   }

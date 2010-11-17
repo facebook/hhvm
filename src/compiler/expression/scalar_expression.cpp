@@ -99,8 +99,6 @@ void ScalarExpression::toLower(bool funcCall /* = false */) {
 void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (ar->isAnalyzeInclude()) {
     string id = Util::toLower(getIdentifier());
-    addUserFunction(ar, id, false);
-    addUserClass(ar, id, false);
 
     switch (m_type) {
     case T_LINE:

@@ -173,9 +173,6 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       // it is forced here.
       variables->forceVariant(ar, m_name, VariableTable::AnyVars);
       ret = Type::Variant;
-    } else if (ar->getPhase() == AnalysisResult::LastInference &&
-               !ret->getName().empty()) {
-      addUserClass(ar, ret->getName(), true);
     }
   }
   return ret;

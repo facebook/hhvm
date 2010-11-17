@@ -18,6 +18,7 @@
 #include <runtime/base/server/files_match.h>
 #include <runtime/base/server/virtual_host.h>
 #include <runtime/base/preg.h>
+#include <util/util.h>
 
 using namespace std;
 
@@ -25,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 FilesMatch::FilesMatch(Hdf vh) {
-  m_pattern = format_pattern(vh["pattern"].get(""), true);
+  m_pattern = Util::format_pattern(vh["pattern"].get(""), true);
   vh["headers"].get(m_headers);
 }
 

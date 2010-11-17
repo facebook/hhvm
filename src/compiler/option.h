@@ -52,9 +52,15 @@ public:
    */
   static std::set<std::string> PackageExcludeDirs;
   static std::set<std::string> PackageExcludeFiles;
+  static std::set<std::string> PackageExcludePatterns;
   static std::set<std::string> PackageExcludeStaticFiles;
   static std::set<std::string> PackageExcludeStaticDirs;
-  static std::set<std::string> PackageExcludePatterns;
+  static std::set<std::string> PackageExcludeStaticPatterns;
+
+  static bool IsFileExcluded(const std::string &file,
+                             const std::set<std::string> &patterns);
+  static void FilterFiles(std::vector<std::string> &files,
+                          const std::set<std::string> &patterns);
 
   /**
    * Directories in which files are parsed on-demand, when parse-on-demand
@@ -317,6 +323,7 @@ public:
   static bool EnableAspTags;
   static bool EnableXHP;
   static int ScannerType;
+  static int ParserThreadCount;
 
   /**
    * "Dynamic" means a function or a method can be invoked dynamically.

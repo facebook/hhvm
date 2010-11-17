@@ -23,7 +23,9 @@
 #include <util/logger.h>
 #include <util/db_query.h>
 #include <util/util.h>
+#include <util/process.h>
 #include <boost/algorithm/string/trim.hpp>
+#include <runtime/base/preg.h>
 
 using namespace HPHP;
 using namespace std;
@@ -37,9 +39,10 @@ set<string> Option::PackageDirectories;
 set<string> Option::PackageFiles;
 set<string> Option::PackageExcludeDirs;
 set<string> Option::PackageExcludeFiles;
-set<string> Option::PackageExcludeStaticFiles;
-set<string> Option::PackageExcludeStaticDirs;
 set<string> Option::PackageExcludePatterns;
+set<string> Option::PackageExcludeStaticDirs;
+set<string> Option::PackageExcludeStaticFiles;
+set<string> Option::PackageExcludeStaticPatterns;
 bool Option::CachePHPFile = false;
 
 vector<string> Option::ParseOnDemandDirs;
@@ -186,6 +189,7 @@ bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
 bool Option::EnableXHP = false;
 int Option::ScannerType = Scanner::AllowShortTags;
+int Option::ParserThreadCount = 0;
 
 int Option::InvokeFewArgsCount = 6;
 bool Option::FlattenInvoke = true;
@@ -254,8 +258,10 @@ void Option::Load(Hdf &config) {
   config["PackageDirectories"].get(PackageDirectories);
   config["PackageExcludeDirs"].get(PackageExcludeDirs);
   config["PackageExcludeFiles"].get(PackageExcludeFiles);
-  config["PackageExcludeStaticFiles"].get(PackageExcludeStaticFiles);
   config["PackageExcludePatterns"].get(PackageExcludePatterns);
+  config["PackageExcludeStaticDirs"].get(PackageExcludeStaticDirs);
+  config["PackageExcludeStaticFiles"].get(PackageExcludeStaticFiles);
+  config["PackageExcludeStaticPatterns"].get(PackageExcludeStaticPatterns);
   CachePHPFile = config["CachePHPFile"].getBool();
 
   config["ParseOnDemandDirs"].get(ParseOnDemandDirs);
@@ -374,6 +380,11 @@ void Option::Load(Hdf &config) {
   if (EnableXHP) ScannerType |= Scanner::PreprocessXHP;
   else ScannerType &= ~Scanner::PreprocessXHP;
 
+  ParserThreadCount = config["ParserThreadCount"].getInt32(0);
+  if (ParserThreadCount <= 0) {
+    ParserThreadCount = Process::GetCPUCount() * 2;
+  }
+
   RTTIOutputFile = config["RTTIOutputFile"].getString();
   EnableEval = (EvalLevel)config["EnableEval"].getByte(0);
   AllDynamic = config["AllDynamic"].getBool(true);
@@ -465,3 +476,29 @@ std::string Option::FormatClusterFile(int index) {
   snprintf(buf, sizeof(buf), "%s%03d", ClusterPrefix, index);
   return buf;
 }
+
+bool Option::IsFileExcluded(const std::string &file,
+                            const std::set<std::string> &patterns) {
+  String sfile(file.c_str(), file.size(), AttachLiteral);
+  for (set<string>::const_iterator iter = patterns.begin();
+       iter != patterns.end(); ++iter) {
+    const std::string &pattern = *iter;
+    Variant matches;
+    Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
+                                    AttachLiteral), sfile, matches);
+    if (ret.toInt64() > 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void Option::FilterFiles(std::vector<std::string> &files,
+                         const std::set<std::string> &patterns) {
+  for (int i = files.size() - 1; i >= 0; i--) {
+    if (IsFileExcluded(files[i], patterns)) {
+      files.erase(files.begin() + i);
+    }
+  }
+}
+

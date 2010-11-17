@@ -574,10 +574,7 @@ void RuntimeOption::Load(Hdf &config) {
     SSLCertificateFile = server["SSLCertificateFile"].getString();
     SSLCertificateKeyFile = server["SSLCertificateKeyFile"].getString();
 
-    SourceRoot = server["SourceRoot"].getString();
-    if (!SourceRoot.empty() && SourceRoot[SourceRoot.length() - 1] != '/') {
-      SourceRoot += '/';
-    }
+    SourceRoot = Util::normalizeDir(server["SourceRoot"].getString());
     if (!SourceRoot.empty()) {
       // Guaranteed empty on empty load so avoid setting FileCache::SourceRoot
       // since it may not be initialized
@@ -585,10 +582,7 @@ void RuntimeOption::Load(Hdf &config) {
     }
     server["IncludeSearchPaths"].get(IncludeSearchPaths);
     for (unsigned int i = 0; i < IncludeSearchPaths.size(); i++) {
-      string &path = IncludeSearchPaths[i];
-      if (!path.empty() && path[path.length() - 1] != '/') {
-        path += '/';
-      }
+      IncludeSearchPaths[i] = Util::normalizeDir(IncludeSearchPaths[i]);
     }
     IncludeSearchPaths.insert(IncludeSearchPaths.begin(), "./");
 
@@ -599,10 +593,7 @@ void RuntimeOption::Load(Hdf &config) {
     ErrorDocument500 = server["ErrorDocument500"].getString();
     normalizePath(ErrorDocument500);
     FatalErrorMessage = server["FatalErrorMessage"].getString();
-    FontPath = server["FontPath"].getString();
-    if (!FontPath.empty() && FontPath[FontPath.length() - 1] != '/') {
-      FontPath += "/";
-    }
+    FontPath = Util::normalizeDir(server["FontPath"].getString());
     EnableStaticContentCache =
       server["EnableStaticContentCache"].getBool(true);
     EnableStaticContentFromDisk =
@@ -614,11 +605,8 @@ void RuntimeOption::Load(Hdf &config) {
     if (EnableStaticContentMMap) {
       EnableOnDemandUncompress = true;
     }
-    RTTIDirectory = server["RTTIDirectory"].getString("/tmp/");
-    if (!RTTIDirectory.empty() &&
-        RTTIDirectory[RTTIDirectory.length() - 1] != '/') {
-      RTTIDirectory += "/";
-    }
+    RTTIDirectory =
+      Util::normalizeDir(server["RTTIDirectory"].getString("/tmp/"));
     EnableCliRTTI = server["EnableCliRTTI"].getBool();
 
     StartupDocument = server["StartupDocument"].getString();
@@ -942,7 +930,8 @@ void RuntimeOption::Load(Hdf &config) {
   {
     Hdf sandbox = config["Sandbox"];
     SandboxMode = sandbox["SandboxMode"].getBool();
-    SandboxPattern = format_pattern(sandbox["Pattern"].getString(), true);
+    SandboxPattern = Util::format_pattern
+      (sandbox["Pattern"].getString(), true);
     SandboxHome = sandbox["Home"].getString();
     SandboxFallback = sandbox["Fallback"].getString();
     SandboxConfFile = sandbox["ConfFile"].getString();

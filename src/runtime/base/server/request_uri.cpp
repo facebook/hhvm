@@ -68,8 +68,7 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
   // Fast path for files that exist
   String canon = Util::canonicalize(string(m_originalURL.c_str(),
                                            m_originalURL.size()));
-  String relUrl(canon.charAt(0) == '/' ? canon.substr(1) :
-                canon);
+  String relUrl(canon.charAt(0) == '/' ? canon.substr(1) : canon);
   if (virtualFileExists(vhost, sourceRoot, pathTranslation, relUrl)) {
     m_rewrittenURL = relUrl;
     m_resolvedURL = relUrl;

@@ -170,6 +170,10 @@ Default is false. Is &lt;% %&gt; allowed with PHP code?
 Whether to enable XHP extension. XHP adds some syntax sugar to allow better and
 safer HTML templating. For more information, search XHP.
 
+= ParserThreadCount
+
+How many threads to use when parsing PHP files. By default, it's 2x CPU count.
+
 = FlibDirectory
 
 Facebook specific. Ignore.

@@ -577,6 +577,14 @@ const char *Util::canonicalize(const char *addpath, size_t addlen) {
   return path;
 }
 
+std::string Util::normalizeDir(const std::string &dirname) {
+  string ret = Util::canonicalize(dirname);
+  if (!ret.empty() && ret[ret.length() - 1] != '/') {
+    ret += '/';
+  }
+  return ret;
+}
+
 std::string Util::escapeStringForCPP(const char *input, int len,
                                      bool* binary /* = NULL */) {
   if (binary) *binary = false;
@@ -673,6 +681,109 @@ void Util::string_vsnprintf(std::string &msg, const char *fmt, va_list ap) {
     va_end(v);
     if (++i > 10) break;
   }
+}
+
+void Util::find(std::vector<std::string> &out,
+                const std::string &root, const char *path, bool php,
+                const std::set<std::string> *excludeDirs /* = NULL */,
+                const std::set<std::string> *excludeFiles /* = NULL */) {
+  if (!path) path = "";
+  if (*path == '/') path++;
+
+  string spath = path;
+  if (spath.length() && spath[spath.length() - 1] != '/') {
+    spath += '/';
+  }
+  if (excludeDirs && excludeDirs->find(spath) != excludeDirs->end()) {
+    return;
+  }
+
+  string fullPath = root + path;
+  DIR *dir = opendir(fullPath.c_str());
+  if (dir == NULL) {
+    Logger::Error("Util::find(): unable to open directory %s",
+                  fullPath.c_str());
+    return;
+  }
+  if (fullPath[fullPath.length() - 1] != '/') {
+    fullPath += '/';
+  }
+
+  dirent *e;
+  while (e = readdir(dir)) {
+    char *ename = e->d_name;
+
+    // skipping .  .. hidden files and "tags"
+    if (ename[0] == '.' || strcmp(ename, "tags") == 0) {
+      continue;
+    }
+    string fe = fullPath + ename;
+
+    struct stat se;
+    if (stat(fe.c_str(), &se)) {
+      Logger::Error("Util::find(): unable to stat %s", fe.c_str());
+      continue;
+    }
+
+    if ((se.st_mode & S_IFMT) == S_IFDIR) {
+      string subdir = spath + ename;
+      find(out, root, subdir.c_str(), php, excludeDirs, excludeFiles);
+      continue;
+    }
+
+    bool isPHP = false;
+    const char *p = strrchr(ename, '.');
+    if (p) {
+      isPHP = (strncmp(p + 1, "php", 3) == 0);
+    } else {
+      try {
+        string line; ifstream fin(fe.c_str());
+        if (getline(fin, line)) {
+          if (line[0] == '#' && line[1] == '!' &&
+              line.find("php") != string::npos) {
+            isPHP = true;
+          }
+        }
+      } catch (...) {
+        Logger::Error("Util::find(): unable to read %s", fe.c_str());
+      }
+    }
+
+    if (isPHP == php &&
+        (!excludeFiles ||
+         excludeFiles->find(spath + ename) == excludeFiles->end())) {
+      out.push_back(fe);
+    }
+  }
+
+  closedir(dir);
+}
+
+std::string Util::format_pattern(const std::string &pattern,
+                                 bool prefixSlash) {
+  if (pattern.empty()) return pattern;
+
+  std::string ret = "#";
+  for (unsigned int i = 0; i < pattern.size(); i++) {
+    char ch = pattern[i];
+
+    // apache rewrite rules don't require initial slash
+    if (prefixSlash && i == 0 && ch == '^') {
+      char ch1 = pattern[1];
+      if (ch1 != '/' && ch1 != '(') {
+        ret += "^/";
+        continue;
+      }
+    }
+
+    if (ch == '#') {
+      ret += "\\#";
+    } else {
+      ret += ch;
+    }
+  }
+  ret += '#';
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

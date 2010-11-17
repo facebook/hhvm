@@ -19,19 +19,20 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
-#include <util/process.h>
-#include <util/util.h>
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/parser/parser.h>
-#include <util/logger.h>
-#include <util/json.h>
 #include <compiler/analysis/symbol_table.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/option.h>
+#include <util/process.h>
+#include <util/util.h>
+#include <util/logger.h>
+#include <util/json.h>
 #include <util/db_conn.h>
 #include <util/db_query.h>
 #include <util/exception.h>
 #include <util/preprocess.h>
+#include <util/job_queue.h>
 
 using namespace HPHP;
 using namespace std;
@@ -64,8 +65,9 @@ void Package::addAllFiles(bool force) {
 }
 
 void Package::addSourceFile(const char *fileName) {
-  ASSERT(fileName && *fileName);
-  m_files.add(Util::canonicalize(fileName).c_str());
+  if (fileName && *fileName) {
+    m_filesToParse.insert(Util::canonicalize(fileName));
+  }
 }
 
 void Package::addInputList(const char *listFileName) {
@@ -106,166 +108,29 @@ void Package::addDirectory(const std::string &path, bool force) {
 
 void Package::addDirectory(const char *path, bool force) {
   m_directories.insert(path);
-
-  addDirectory(path, "*.php", force);
-#ifdef HAVE_PHPT
-  addDirectory(path, "*.phpt", force);
-#endif
-  addDirectory(path, "", force); // look for PHP files without postfix
+  addPHPDirectory(path, force);
 }
 
-void Package::findFiles(std::vector<std::string> &out, const char *path,
-                        const char *postfix) {
-  ASSERT(postfix && *postfix);
-  if (!path) path = "";
-  if (*path == '/') path++;
-
-  string fullPath = m_root + path;
-  const char *argv[] = {"", "-L", (char*)fullPath.c_str(),
-                        "-name", (char*)postfix, NULL};
-  string files;
-  Process::Exec("find", argv, NULL, files);
-  Util::split('\n', files.c_str(), out, true);
-}
-
-void Package::findPHPFiles(std::vector<std::string> &out, const char *path) {
-  if (!path) path = "";
-  if (*path == '/') path++;
-
-  string fullPath = m_root + path;
-  const char *argv[] = {"", "-L", (char*)fullPath.c_str(),
-                        "-type", "f",
-                        "-regex", ".*/[A-Za-z0-9_\\-]+",
-                        "-not", "-regex", ".*/\\.svn/.*",
-                        "-not", "-regex", ".*/\\.git/.*",
-                        /* Do not use [A-Z] below. That seems to be
-                           broken outside of the C locale, and we dont
-                           know what locale find will run in */
-                        "-not", "-regex", ".*/[ABCDEFGHIJKLMNOPQRSTUVWXYZ]+",
-                        "-not", "-regex", ".*/tags",
-
-                        "-exec", "perl", "-n", "-e",
-                        "/php\\s*$/ && print $ARGV.\"\\n\"; exit",
-                        "{}", ";",
-
-                        NULL};
-
-  string files;
-  Process::Exec("find", argv, NULL, files);
-  Util::split('\n', files.c_str(), out, true);
-}
-
-void Package::findNonPHPFiles(vector<string> &out, const char *path,
-                              bool exclude) {
-  if (!path) path = "";
-  if (*path == '/') path++;
-
-  string spath = path;
-  if (spath.length() && spath[spath.length() - 1] != '/') {
-    spath += '/';
-  }
-  if (exclude &&
-      Option::PackageExcludeStaticDirs.find(spath) !=
-      Option::PackageExcludeStaticDirs.end()) {
-    return;
-  }
-
-  string fullPath = m_root + path;
-  DIR *dir = opendir(fullPath.c_str());
-  if (dir == NULL) {
-    Logger::Error("findNonPHPFiles: unable to open directory %s",
-                  fullPath.c_str());
-    return;
-  }
-
-  dirent *e;
-  while (e = readdir(dir)) {
-    char *ename = e->d_name;
-    if (strcmp(ename, ".") == 0 || strcmp(ename, "..") == 0) {
-      continue;
-    }
-
-    string fe = fullPath +
-      (fullPath[fullPath.length() - 1] != '/' ? "/" : "") + ename;
-    struct stat se;
-    if (stat(fe.c_str(), &se) != 0) {
-      // unable to stat, maybe a broken symbolic link
-      // do not include it
-      continue;
-    }
-    if ((se.st_mode & S_IFMT) == S_IFDIR) {
-      if (strcmp(ename, ".svn") && strcmp(ename, ".git")) {
-        string subdir = path;
-        if (subdir[subdir.length() - 1] != '/') subdir += '/';
-        subdir += ename;
-        findNonPHPFiles(out, subdir.c_str(), exclude);
-      }
-      continue;
-    }
-
-    if (strcmp(ename, "tags") == 0) {
-      continue;
-    }
-    size_t len = strlen(ename);
-    if (len >= 4 && ename[len - 4] == '.' && ename[len - 3] == 'p' &&
-        ename[len - 2] == 'h' && ename[len - 1] == 'p') {
-      // ending with .php
-      continue;
-    }
-#ifdef HAVE_PHPT
-    if (len >= 5 && ename[len - 5] == '.' && ename[len - 4] == 'p' &&
-        ename[len - 3] == 'h' && ename[len - 2] == 'p' &&
-        ename[len - 1] == 't') {
-      // ending with .phpt
-      continue;
-    }
-#endif
-    string fullname = string(path) + "/" + ename;
-    if (!exclude ||
-        Option::PackageExcludeStaticFiles.find(fullname) ==
-        Option::PackageExcludeStaticFiles.end()) {
-      out.push_back(fe);
-    }
-  }
-
-  closedir(dir);
-}
-
-void Package::addDirectory(const char *path, const char *postfix, bool force) {
-  ASSERT(path && *path);
-  if (*path == '/') path++;
-
+void Package::addPHPDirectory(const char *path, bool force) {
   vector<string> files;
-  if (postfix && *postfix) {
-    findFiles(files, path, postfix);
+  if (force) {
+    Util::find(files, m_root, path, true);
   } else {
-    findPHPFiles(files, path);
+    Util::find(files, m_root, path, true,
+               &Option::PackageExcludeDirs, &Option::PackageExcludeFiles);
+    Option::FilterFiles(files, Option::PackageExcludePatterns);
   }
+  int rootSize = m_root.size();
   for (unsigned int i = 0; i < files.size(); i++) {
     const string &file = files[i];
-    bool excluded = false;
-    if (!force) {
-      for (set<string>::const_iterator iter =
-             Option::PackageExcludeDirs.begin();
-           iter != Option::PackageExcludeDirs.end(); ++iter) {
-        if (file.find(*iter) == Option::RootDirectory.size()) {
-          excluded = true;
-          break;
-        }
-      }
-    }
-    if (!excluded) {
-      ASSERT(file.substr(0, m_root.size()) == m_root);
-      string name = file.substr(m_root.size());
-      if (Option::PackageExcludeFiles.find(name) ==
-          Option::PackageExcludeFiles.end()) {
-        m_files.add(name.c_str());
-      }
-    }
+    ASSERT(file.substr(0, rootSize) == m_root);
+    m_filesToParse.insert(file.substr(rootSize));
   }
 }
 
 void Package::getFiles(std::vector<std::string> &files) const {
+  ASSERT(m_filesToParse.empty());
+
   files.clear();
   files.reserve(m_files.size());
   for (unsigned int i = 0; i < m_files.size(); i++) {
@@ -278,7 +143,10 @@ FileCachePtr Package::getFileCache() {
   for (set<string>::const_iterator iter = m_directories.begin();
        iter != m_directories.end(); ++iter) {
     vector<string> files;
-    findNonPHPFiles(files, iter->c_str(), true);
+    Util::find(files, m_root, iter->c_str(), false,
+               &Option::PackageExcludeStaticDirs,
+               &Option::PackageExcludeStaticFiles);
+    Option::FilterFiles(files, Option::PackageExcludeStaticPatterns);
     for (unsigned int i = 0; i < files.size(); i++) {
       string &file = files[i];
       string rpath = file.substr(m_root.size());
@@ -291,7 +159,7 @@ FileCachePtr Package::getFileCache() {
   for (set<string>::const_iterator iter = m_staticDirectories.begin();
        iter != m_staticDirectories.end(); ++iter) {
     vector<string> files;
-    findNonPHPFiles(files, iter->c_str(), false);
+    Util::find(files, m_root, iter->c_str(), false);
     for (unsigned int i = 0; i < files.size(); i++) {
       string &file = files[i];
       string rpath = file.substr(m_root.size());
@@ -315,15 +183,43 @@ FileCachePtr Package::getFileCache() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool Package::parse() {
-  hphp_const_char_set files;
-  for (unsigned int i = 0; i < m_files.size(); i++) {
-    const char *fileName = m_files.at(i);
-    if (files.find(fileName) == files.end()) {
-      files.insert(fileName);
-      if (!parseImpl(fileName)) return false;
-    }
+class ParserWorker : public JobQueueWorker<const char *> {
+public:
+  bool m_ret;
+  ParserWorker() : m_ret(true) {}
+
+  virtual void doJob(const char *filename) {
+    Package *package = (Package*)m_opaque;
+    m_ret = package->parseImpl(filename);
   }
+};
+
+bool Package::parse() {
+  if (m_filesToParse.empty()) {
+    return true;
+  }
+
+  unsigned int threadCount = Option::ParserThreadCount;
+  if (threadCount > m_filesToParse.size()) {
+    threadCount = m_filesToParse.size();
+  }
+
+  JobQueueDispatcher<const char *, ParserWorker>
+    dispatcher(threadCount, true, 0, this);
+  dispatcher.start();
+  for (set<string>::const_iterator iter = m_filesToParse.begin();
+       iter != m_filesToParse.end(); ++iter) {
+    dispatcher.enqueue(m_files.add(iter->c_str()));
+  }
+  dispatcher.stop();
+  m_filesToParse.clear();
+
+  std::vector<ParserWorker> &workers = dispatcher.getWorkers();
+  for (unsigned int i = 0; i < workers.size(); i++) {
+    ParserWorker &worker = workers[i];
+    if (!worker.m_ret) return false;
+  }
+
   return true;
 }
 
@@ -354,6 +250,7 @@ bool Package::parseImpl(const char *fileName) {
     return false;
   }
 
+  int lines = 0;
   try {
     Logger::Verbose("parsing %s ...", fullPath.c_str());
     Scanner scanner(fullPath.c_str(), Option::ScannerType);
@@ -363,15 +260,17 @@ bool Package::parseImpl(const char *fileName) {
                       parser.getMessage().c_str());
     }
 
-    m_lineCount += parser.line1();
-    struct stat fst;
-    stat(fullPath.c_str(), &fst);
-    m_charCount += fst.st_size;
-
+    lines = parser.line1();
   } catch (FileOpenException &e) {
     Logger::Error("%s", e.getMessage().c_str());
     return false;
   }
+
+  Lock lock(m_mutex);
+  m_lineCount += lines;
+  struct stat fst;
+  stat(fullPath.c_str(), &fst);
+  m_charCount += fst.st_size;
 
   if (!m_fileCache->fileExists(fileName) &&
       m_extraStaticFiles.find(fileName) == m_extraStaticFiles.end()) {

@@ -116,20 +116,18 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultPtr ar,
       }
     }
 
-    if (ar->isAnalyzeInclude()) {
-      for (i = 0; i < maxParam; i++) {
-        ParameterExpressionPtr param =
-          dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
-        if (names.find(param->getName()) == names.end()) {
-          names.insert(param->getName());
-        } else {
-          Compiler::Error(Compiler::RedundantParameter, param);
-          for (int j = 0; j < 1000; j++) {
-            string name = param->getName() + lexical_cast<string>(j);
-            if (names.find(name) == names.end()) {
-              param->rename(name);
-              break;
-            }
+    for (i = 0; i < maxParam; i++) {
+      ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+      if (names.find(param->getName()) == names.end()) {
+        names.insert(param->getName());
+      } else {
+        Compiler::Error(Compiler::RedundantParameter, param);
+        for (int j = 0; j < 1000; j++) {
+          string name = param->getName() + lexical_cast<string>(j);
+          if (names.find(name) == names.end()) {
+            param->rename(name);
+            break;
           }
         }
       }

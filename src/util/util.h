@@ -20,6 +20,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <set>
 #include <stdlib.h>
 #include <stdarg.h>
 
@@ -113,6 +114,12 @@ std::string relativePath(const std::string fromDir, const std::string toFile);
  */
 std::string canonicalize(const std::string &path);
 const char *canonicalize(const char *path, size_t len);
+
+/**
+ * Makes sure there is ending slash by changing "path/name" to "path/name/".
+ */
+std::string normalizeDir(const std::string &dirname);
+
 /**
  * Thread-safe strerror().
  */
@@ -158,6 +165,19 @@ std::string escapeStringForPHP(const char *input, int len);
 inline std::string escapeStringForPHP(const std::string &input) {
   return escapeStringForPHP(input.data(), input.length());
 }
+
+/**
+ * Search for PHP or non-PHP files under a directory.
+ */
+void find(std::vector<std::string> &out,
+          const std::string &root, const char *path, bool php,
+          const std::set<std::string> *excludeDirs = NULL,
+          const std::set<std::string> *excludeFiles = NULL);
+
+/**
+ * Format a regex pattern by surrounding with slashes and escaping pattern.
+ */
+std::string format_pattern(const std::string &pattern, bool prefixSlash);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

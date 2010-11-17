@@ -332,11 +332,10 @@ private:
     FunctionScopePtr func;
 
     // get unique identifier for this variable
-    static std::string getName(ClassScopePtr cls,
-                               FunctionScopePtr func, const std::string &name);
     static std::string getId(CodeGenerator &cg, ClassScopePtr cls,
                              FunctionScopePtr func, const std::string &name);
   };
+  StaticGlobalInfoPtrVec m_staticGlobalsVec;
   StringToStaticGlobalInfoPtrMap m_staticGlobals;
 
   bool isGlobalTable(AnalysisResultPtr ar) const;
@@ -348,6 +347,8 @@ private:
   virtual void dumpStats(std::map<std::string, int> &typeCounts);
 
   bool definedByParent(AnalysisResultPtr ar, const std::string &name);
+
+  void prepareStaticGlobals(CodeGenerator &cg);
 
   void outputCPPGlobalVariablesHeader(CodeGenerator &cg,
                                       AnalysisResultPtr ar);

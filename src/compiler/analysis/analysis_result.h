@@ -26,6 +26,7 @@
 #include <compiler/package.h>
 #include <compiler/analysis/method_slot.h>
 #include <boost/graph/adjacency_list.hpp>
+#include <util/string_bag.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,6 +46,9 @@ public:
    * There are multiple passes over our syntax trees. This lists all of them.
    */
   enum Phase {
+    // parse
+    ParseAllFiles,
+
     // analyzeProgram
     AnalyzeInclude,
     AnalyzeTopLevel,
@@ -91,6 +95,7 @@ public:
 
 public:
   AnalysisResult();
+  Mutex &getMutex() { return m_mutex;}
 
   void setPackage(Package *package) { m_package = package;}
   void setParseOnDemand(bool v) { m_parseOnDemand = v;}
@@ -105,7 +110,7 @@ public:
    * Stores the code in a temporary string, so we can parse this as an
    * extra file appended to parsed code.
    */
-  void appendExtraCode(const std::string &code);
+  void appendExtraCode(const std::string &key, const std::string &code);
 
   Phase getPhase() const { return m_phase;}
   void setPhase(Phase phase) { m_phase = phase;}
@@ -208,7 +213,8 @@ public:
   /**
    * Parser creates a FileScope upon parsing a new file.
    */
-  FileScopePtr findFileScope(const std::string &name, bool parseOnDemand);
+  void parseOnDemand(const std::string &name);
+  FileScopePtr findFileScope(const std::string &name);
   const StringToFileScopePtrMap &getAllFiles() { return m_files;}
   const std::vector<FileScopePtr> &getAllFilesVector() {
     return m_fileScopes;
@@ -336,15 +342,18 @@ public:
 
   void setSystem() { m_system = true; }
   bool isSystem() const { return m_system; }
+
 private:
+  Mutex m_mutex;
   Package *m_package;
   bool m_parseOnDemand;
   std::vector<std::string> m_parseOnDemandDirs;
   Phase m_phase;
   StringToFileScopePtrMap m_files;
   FileScopePtrVec m_fileScopes;
-  std::string m_extraCodeFileName;
-  std::string m_extraCode;
+
+  StringBag m_extraCodeFileNames;
+  std::map<std::string, std::string> m_extraCodes;
 
   StringToClassScopePtrMap m_systemClasses;
   StringToFunctionScopePtrVecMap m_functionDecs;
@@ -420,6 +429,14 @@ private:
    * Checks whether the file is in one of the on-demand parsing directories.
    */
   bool inParseOnDemandDirs(const std::string &filename);
+
+  void collectFunctionsAndClasses(FileScopePtr fs);
+
+  /**
+   * Making sure symbol orders are not different even with multithreading, so
+   * to make sure generated code are consistent every time.
+   */
+  void canonicalizeSymbolOrder();
 
   /**
    * Checks circular class derivations that can cause stack overflows for

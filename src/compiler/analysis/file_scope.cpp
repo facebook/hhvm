@@ -416,7 +416,7 @@ void FileScope::outputCPPDeclarations(CodeGenerator &cg,
       }
     }
     BOOST_FOREACH(string name, m_usedIncludesInline) {
-      FileScopePtr fs = ar->findFileScope(name, false);
+      FileScopePtr fs = ar->findFileScope(name);
       if (fs && done.find(fs) == done.end()) {
         done.insert(fs);
         cg_printInclude(fs->outputFilebase());

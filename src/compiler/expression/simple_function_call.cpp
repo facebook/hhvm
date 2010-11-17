@@ -144,7 +144,7 @@ void SimpleFunctionCall::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
         m_lambda = CodeGenerator::GetNewLambda();
         string code = "function " + m_lambda + "(" + params + ") "
           "{" + body + "}";
-        ar->appendExtraCode(code);
+        ar->appendExtraCode(fs->getName(), code);
       }
       break;
     case VariableArgumentFunction:

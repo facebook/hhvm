@@ -100,8 +100,6 @@ private:
   std::vector<QueryStringFilter> m_queryStringFilters;
 };
 
-std::string format_pattern(const std::string &pattern, bool prefixSlash);
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -21,6 +21,7 @@
 #include <runtime/base/server/virtual_host.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/preg.h>
+#include <util/util.h>
 
 using namespace std;
 
@@ -50,7 +51,7 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
     vector<string> urls;
     hdf["URLs"].get(urls);
     for (unsigned int i = 0; i < urls.size(); i++) {
-      m_urls.insert(format_pattern(urls[i], true));
+      m_urls.insert(Util::format_pattern(urls[i], true));
     }
     if (hdf["BlockMainServer"].getBool(true)) {
       InternalURLs.insert(m_urls.begin(), m_urls.end());

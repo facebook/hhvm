@@ -19,6 +19,7 @@
 #include <runtime/base/preg.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/comparisons.h>
+#include <util/util.h>
 
 using namespace std;
 
@@ -44,32 +45,6 @@ const VirtualHost *VirtualHost::GetCurrent() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string format_pattern(const std::string &pattern, bool prefixSlash) {
-  if (pattern.empty()) return pattern;
-
-  std::string ret = "#";
-  for (unsigned int i = 0; i < pattern.size(); i++) {
-    char ch = pattern[i];
-
-    // apache rewrite rules don't require initial slash
-    if (prefixSlash && i == 0 && ch == '^') {
-      char ch1 = pattern[1];
-      if (ch1 != '/' && ch1 != '(') {
-        ret += "^/";
-        continue;
-      }
-    }
-
-    if (ch == '#') {
-      ret += "\\#";
-    } else {
-      ret += ch;
-    }
-  }
-  ret += '#';
-  return ret;
-}
-
 VirtualHost::VirtualHost() : m_disabled(false) {
 }
 
@@ -86,7 +61,7 @@ void VirtualHost::init(Hdf vh) {
 
   if (prefix) m_prefix = prefix;
   if (pattern) {
-    m_pattern = format_pattern(pattern, true);
+    m_pattern = Util::format_pattern(pattern, true);
     if (!m_pattern.empty()) {
       m_pattern += "i"; // case-insensitive
     }
@@ -111,7 +86,7 @@ void VirtualHost::init(Hdf vh) {
     RewriteRule dummy;
     m_rewriteRules.push_back(dummy);
     RewriteRule &rule = m_rewriteRules.back();
-    rule.pattern = format_pattern(hdf["pattern"].getString(""), true);
+    rule.pattern = Util::format_pattern(hdf["pattern"].getString(""), true);
     rule.to = hdf["to"].getString("");
     rule.qsa = hdf["qsa"].getBool(false);
     rule.redirect = hdf["redirect"].getInt16(0);
@@ -125,7 +100,7 @@ void VirtualHost::init(Hdf vh) {
       RewriteCond dummy;
       rule.rewriteConds.push_back(dummy);
       RewriteCond &cond = rule.rewriteConds.back();
-      cond.pattern = format_pattern(chdf["pattern"].getString(""), true);
+      cond.pattern = Util::format_pattern(chdf["pattern"].getString(""), true);
       if (cond.pattern.empty()) {
         throw InvalidArgumentException("rewrite rule", "(empty cond pattern)");
       }
@@ -155,7 +130,7 @@ void VirtualHost::init(Hdf vh) {
   Hdf logFilters = vh["LogFilters"];
   for (Hdf hdf = logFilters.firstChild(); hdf.exists(); hdf = hdf.next()) {
     QueryStringFilter filter;
-    filter.urlPattern = format_pattern(hdf["url"].getString(""), true);
+    filter.urlPattern = Util::format_pattern(hdf["url"].getString(""), true);
     filter.replaceWith = hdf["value"].getString("");
     filter.replaceWith = "\\1=" + filter.replaceWith;
 
@@ -174,7 +149,7 @@ void VirtualHost::init(Hdf vh) {
       }
       if (!pattern.empty()) {
         pattern += ")=.*?(?=(&|$))";
-        pattern = format_pattern(pattern, false);
+        pattern = Util::format_pattern(pattern, false);
       }
     } else if (!names.empty()) {
       throw InvalidArgumentException

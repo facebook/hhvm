@@ -50,7 +50,7 @@ namespace HPHP {
  *
  * Now, use JobQueueDispatcher to start the whole thing,
  *
- *   JobQueueDispatcher<MyJob*, MyWorker> dispatcher(40); // 40 threads
+ *   JobQueueDispatcher<MyJob*, MyWorker> dispatcher(40, NULL); // 40 threads
  *   dispatcher.start();
  *   ...
  *   dispatcher.enqueue(new MyJob(...));

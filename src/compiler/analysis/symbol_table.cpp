@@ -69,6 +69,7 @@ TypePtr Symbol::setType(AnalysisResultPtr ar, BlockScopeRawPtr scope,
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
+Mutex SymbolTable::AllSymbolTablesMutex;
 SymbolTablePtrVec SymbolTable::AllSymbolTables;
 
 void SymbolTable::CountTypes(std::map<std::string, int> &counts) {
@@ -223,6 +224,14 @@ TypePtr SymbolTable::setType(AnalysisResultPtr ar, Symbol *sym,
     sym->setDeclaration(ConstructPtr());
   }
   return sym->setType(ar, BlockScopeRawPtr(&m_blockScope), type, coerced);
+}
+
+static bool by_name(const Symbol *s1, const Symbol *s2) {
+  return s1->getName() < s2->getName();
+}
+
+void SymbolTable::canonicalizeSymbolOrder() {
+  sort(m_symbolVec.begin(), m_symbolVec.end(), by_name);
 }
 
 void SymbolTable::getSymbols(vector<string> &syms) const {

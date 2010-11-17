@@ -57,7 +57,7 @@ using namespace boost;
 
 AnalysisResult::AnalysisResult()
   : BlockScope("Root", "", StatementPtr(), BlockScope::ProgramScope),
-    m_package(NULL), m_parseOnDemand(false), m_phase(AnalyzeInclude),
+    m_package(NULL), m_parseOnDemand(false), m_phase(ParseAllFiles),
     m_dynamicClass(false), m_dynamicFunction(false),
     m_optCounter(0),
     m_scalarArraysCounter(0), m_paramRTTICounter(0),
@@ -69,11 +69,13 @@ AnalysisResult::AnalysisResult()
   m_classForcedVariants[0] = m_classForcedVariants[1] = false;
 }
 
-void AnalysisResult::appendExtraCode(const std::string &code) {
-  if (m_extraCode.empty()) {
-    m_extraCode = "<?php\n";
+void AnalysisResult::appendExtraCode(const std::string &key,
+                                     const std::string &code) {
+  string &extraCode = m_extraCodes[key];
+  if (extraCode.empty()) {
+    extraCode = "<?php\n";
   }
-  m_extraCode += code + "\n";
+  extraCode += code + "\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,21 +101,20 @@ bool AnalysisResult::inParseOnDemandDirs(const string &filename) {
   return false;
 }
 
-FileScopePtr AnalysisResult::findFileScope(const std::string &name,
-                                           bool parseOnDemand) {
-  StringToFileScopePtrMap::const_iterator iter = m_files.find(name);
-  if (iter != m_files.end()) return iter->second;
-
-  if (!parseOnDemand ||
-      Option::PackageExcludeFiles.find(name) !=
-      Option::PackageExcludeFiles.end()) {
-    return FileScopePtr();
+void AnalysisResult::parseOnDemand(const std::string &name) {
+  if (m_package &&
+      m_files.find(name) == m_files.end() &&
+      (m_parseOnDemand || inParseOnDemandDirs(name)) &&
+      Option::PackageExcludeFiles.find(name) ==
+      Option::PackageExcludeFiles.end() &&
+      !Option::IsFileExcluded(name, Option::PackageExcludePatterns)) {
+    m_package->addSourceFile(name.c_str());
   }
+}
 
-  if (parseOnDemand && (m_parseOnDemand || inParseOnDemandDirs(name)) &&
-      m_package && m_package->parse(name.c_str())) {
-    iter = m_files.find(name);
-    ASSERT(iter != m_files.end());
+FileScopePtr AnalysisResult::findFileScope(const std::string &name) {
+  StringToFileScopePtrMap::const_iterator iter = m_files.find(name);
+  if (iter != m_files.end()) {
     return iter->second;
   }
   return FileScopePtr();
@@ -370,40 +371,27 @@ bool AnalysisResult::needStaticArray(ClassScopePtr cls, FunctionScopePtr func) {
 // static analysis functions
 
 bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) {
+  ASSERT(m_phase <= AnalyzeInclude);
+
   string fname = funcScope->getName();
   // System functions override
   if (m_functions.find(fname) != m_functions.end()) {
     return false;
   }
 
-  FunctionScopePtrVec &funcs = m_functionDecs[fname];
-  if (funcs.size() == 1) {
-    funcs[0]->setRedeclaring(0);
-  }
-  if (funcs.size() > 0 ||
-      Option::DynamicInvokeFunctions.find(fname) !=
-      Option::DynamicInvokeFunctions.end()) {
-    funcScope->setRedeclaring(funcs.size());
-  }
-  funcs.push_back(funcScope);
   return true;
 }
 
 bool AnalysisResult::declareClass(ClassScopePtr classScope) {
+  ASSERT(m_phase <= AnalyzeInclude);
+
   string cname = classScope->getName();
   // System classes override
   if (m_systemClasses.find(cname) != m_systemClasses.end()) {
     return false;
   }
-  AnalysisResultPtr ar = shared_from_this();
-  ClassScopePtrVec &classes = m_classDecs[cname];
-  if (classes.size() == 1) {
-    classes[0]->setRedeclaring(ar, 0);
-  }
-  if (classes.size() > 0) {
-    classScope->setRedeclaring(ar, classes.size());
-  }
 
+  AnalysisResultPtr ar = shared_from_this();
   int mask =
     (m_classForcedVariants[0] ? VariableTable::NonPrivateNonStaticVars : 0) |
     (m_classForcedVariants[1] ? VariableTable::NonPrivateStaticVars : 0);
@@ -411,7 +399,6 @@ bool AnalysisResult::declareClass(ClassScopePtr classScope) {
   if (mask) {
     classScope->getVariables()->forceVariants(ar, mask);
   }
-  classes.push_back(classScope);
   return true;
 }
 
@@ -428,6 +415,48 @@ bool AnalysisResult::declareConst(FileScopePtr fs, const string &name) {
   } else {
     m_constDecs[name] = fs;
     return true;
+  }
+}
+
+static bool by_source(const BlockScopePtr &b1, const BlockScopePtr &b2) {
+  return b1->getStmt()->getLocation()->
+    compare(b2->getStmt()->getLocation().get()) == -1;
+}
+
+void AnalysisResult::canonicalizeSymbolOrder() {
+  getConstants()->canonicalizeSymbolOrder();
+  getVariables()->canonicalizeSymbolOrder();
+
+  for (StringToFunctionScopePtrVecMap::iterator iter = m_functions.begin();
+       iter != m_functions.end(); ++iter) {
+    FunctionScopePtrVec &funcs = iter->second;
+    if (funcs.size() > 1) {
+      sort(funcs.begin(), funcs.end(), by_source);
+    }
+  }
+
+  for (StringToFunctionScopePtrVecMap::iterator iter = m_functionDecs.begin();
+       iter != m_functionDecs.end(); ++iter) {
+    const string &fname = iter->first;
+    FunctionScopePtrVec &funcs = iter->second;
+    if (funcs.size() > 1 ||
+        Option::DynamicInvokeFunctions.find(fname) !=
+        Option::DynamicInvokeFunctions.end()) {
+      for (unsigned int i = 0; i < funcs.size(); i++) {
+        funcs[i]->setRedeclaring(i);
+      }
+    }
+  }
+
+  AnalysisResultPtr ar = shared_from_this();
+  for (StringToClassScopePtrVecMap::iterator iter = m_classDecs.begin();
+       iter != m_classDecs.end(); ++iter) {
+    ClassScopePtrVec &classes = iter->second;
+    if (classes.size() > 1) {
+      for (unsigned int i = 0; i < classes.size(); i++) {
+        classes[i]->setRedeclaring(ar, i);
+      }
+    }
   }
 }
 
@@ -454,6 +483,7 @@ bool AnalysisResult::addClassDependency(FileScopePtr usingFile,
   link(usingFile, fileScope);
   return true;
 }
+
 bool AnalysisResult::addFunctionDependency(FileScopePtr usingFile,
                                            const std::string &functionName) {
   if (BuiltinSymbols::s_functions.find(functionName) !=
@@ -471,7 +501,7 @@ bool AnalysisResult::addFunctionDependency(FileScopePtr usingFile,
 bool AnalysisResult::addIncludeDependency(FileScopePtr usingFile,
                                           const std::string &includeFilename) {
   ASSERT(!includeFilename.empty());
-  FileScopePtr fileScope = findFileScope(includeFilename, true);
+  FileScopePtr fileScope = findFileScope(includeFilename);
   if (fileScope) {
     link(usingFile, fileScope);
     return true;
@@ -479,12 +509,14 @@ bool AnalysisResult::addIncludeDependency(FileScopePtr usingFile,
     return false;
   }
 }
+
 bool AnalysisResult::addConstantDependency(FileScopePtr usingFile,
                                            const std::string &constantName) {
   if (m_constants->isPresent(constantName))
     return true;
 
-  StringToFileScopePtrMap::const_iterator iter = m_constDecs.find(constantName);
+  StringToFileScopePtrMap::const_iterator iter =
+    m_constDecs.find(constantName);
   if (iter == m_constDecs.end()) return false;
   FileScopePtr fileScope = iter->second;
   link(usingFile, fileScope);
@@ -545,6 +577,31 @@ void AnalysisResult::checkClassDerivations() {
   }
 }
 
+void AnalysisResult::collectFunctionsAndClasses(FileScopePtr fs) {
+  const StringToFunctionScopePtrVecMap &funcs = fs->getFunctions();
+  for (StringToFunctionScopePtrVecMap::const_iterator iter = funcs.begin();
+       iter != funcs.end(); ++iter) {
+    for (unsigned int i = 0; i < iter->second.size(); i++) {
+      FunctionScopePtr func = iter->second[i];
+      if (!func->inPseudoMain()) {
+        FunctionScopePtrVec &funcVec = m_functionDecs[iter->first];
+        funcVec.push_back(func);
+      }
+    }
+  }
+
+  const StringToClassScopePtrVecMap &classes = fs->getClasses();
+  for (StringToClassScopePtrVecMap::const_iterator iter = classes.begin();
+       iter != classes.end(); ++iter) {
+    ClassScopePtrVec &clsVec = m_classDecs[iter->first];
+    clsVec.insert(clsVec.end(), iter->second.begin(), iter->second.end());
+  }
+}
+
+static bool by_filename(const FileScopePtr &f1, const FileScopePtr &f2) {
+  return f1->getName() < f2->getName();
+}
+
 void AnalysisResult::analyzeProgram(bool system /* = false */) {
   AnalysisResultPtr ar = shared_from_this();
 
@@ -553,24 +610,39 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   getVariables()->setAttribute(VariableTable::ContainsLDynamicVariable);
   getVariables()->setAttribute(VariableTable::ContainsExtract);
 
-  checkClassDerivations();
-
   // Analyze Includes
   Logger::Verbose("Analyzing Includes");
   setPhase(AnalysisResult::AnalyzeInclude);
-  unsigned int i;
-  for (i = 0; i < m_fileScopes.size(); i++) {
-    m_fileScopes[i]->analyzeProgram(ar);
-  }
-  if (!m_extraCode.empty()) {
-    m_extraCodeFileName = Option::LambdaPrefix + "lambda";
-    Compiler::Parser::ParseString(m_extraCode.c_str(), ar,
-                                  m_extraCodeFileName.c_str());
-  }
-  for (; i < m_fileScopes.size(); i++) {
-    m_fileScopes[i]->analyzeProgram(ar);
+  sort(m_fileScopes.begin(), m_fileScopes.end(), by_filename); // fixed order
+  unsigned int i = 0; int round = 0;
+  while (i < m_fileScopes.size() || !m_extraCodes.empty()) {
+    for (; i < m_fileScopes.size(); i++) {
+      collectFunctionsAndClasses(m_fileScopes[i]);
+      m_fileScopes[i]->analyzeProgram(ar);
+    }
+    for (; !m_extraCodes.empty(); round++) {
+      map<string, string> codes = m_extraCodes;
+      m_extraCodes.clear();
+      for (map<string, string>::const_iterator iter = codes.begin();
+           iter != codes.end(); ++iter) {
+        string sfilename = iter->first + Option::LambdaPrefix + "lambda" +
+          lexical_cast<string>(round);
+        const char *filename = m_extraCodeFileNames.add(sfilename.c_str());
+        Compiler::Parser::ParseString(iter->second.c_str(), ar, filename);
+      }
+    }
+    if (m_package) {
+      m_package->parse();
+      if (i < m_fileScopes.size()) {
+        sort(m_fileScopes.begin() + i, m_fileScopes.end(), by_filename);
+      }
+    }
   }
 
+  // Keep generated code identical without randomness
+  canonicalizeSymbolOrder();
+
+  // Analyze some special cases
   for (set<string>::const_iterator it = Option::VolatileClasses.begin();
        it != Option::VolatileClasses.end(); ++it) {
     ClassScopePtr cls = findClass(Util::toLower(*it));

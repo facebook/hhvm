@@ -37,27 +37,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // StaticGlobalInfo
 
-CodeGenerator s_dummy_code_generator;
-
-string VariableTable::StaticGlobalInfo::getName
-(ClassScopePtr cls, FunctionScopePtr func, const string &name) {
-  ASSERT(cls || func);
-
-  // format: <class>$$<func>$$name
-  string id;
-  if (cls) {
-    id += cls->getId(s_dummy_code_generator);
-    id += Option::IdPrefix;
-  }
-  if (func) {
-    id += func->getId(s_dummy_code_generator);
-    id += Option::IdPrefix;
-  }
-  id += name;
-
-  return id;
-}
-
 string VariableTable::StaticGlobalInfo::getId
 (CodeGenerator &cg, ClassScopePtr cls, FunctionScopePtr func,
  const string &name) {
@@ -334,10 +313,7 @@ void VariableTable::addStaticVariable(Symbol *sym,
   sgi->cls = getClassScope();
   sgi->func = member ? FunctionScopePtr() : getFunctionScope();
 
-  string id = StaticGlobalInfo::getName(sgi->cls, sgi->func, sym->getName());
-  ASSERT(globalVariables->m_staticGlobals.find(id) ==
-         globalVariables->m_staticGlobals.end());
-  globalVariables->m_staticGlobals[id] = sgi;
+  globalVariables->m_staticGlobalsVec.push_back(sgi);
 }
 
 void VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
@@ -742,8 +718,22 @@ void VariableTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
+void VariableTable::prepareStaticGlobals(CodeGenerator &cg) {
+  ASSERT(m_staticGlobals.empty());
+
+  for (unsigned int i = 0; i < m_staticGlobalsVec.size(); i++) {
+    StaticGlobalInfoPtr &sgi = m_staticGlobalsVec[i];
+    string id = StaticGlobalInfo::getId(cg, sgi->cls, sgi->func,
+                                        sgi->sym->getName());
+    ASSERT(m_staticGlobals.find(id) == m_staticGlobals.end());
+    m_staticGlobals[id] = sgi;
+  }
+}
+
 void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
                                                    AnalysisResultPtr ar) {
+  if (m_staticGlobals.empty()) prepareStaticGlobals(cg);
+
   cg.printSection("Class Forward Declarations\n");
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {
@@ -935,6 +925,7 @@ void VariableTable::collectCPPGlobalSymbols(StringPairVecVec &symbols,
                                             CodeGenerator &cg,
                                             AnalysisResultPtr ar) {
   ASSERT(symbols.size() == AnalysisResult::GlobalSymbolTypeCount);
+  if (m_staticGlobals.empty()) prepareStaticGlobals(cg);
 
   // static global variables
   StringPairVec *names = &symbols[AnalysisResult::KindOfStaticGlobalVariable];
@@ -977,6 +968,7 @@ void VariableTable::collectCPPGlobalSymbols(StringPairVecVec &symbols,
 void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
                                                  AnalysisResultPtr ar) {
   bool system = (cg.getOutput() == CodeGenerator::SystemCPP);
+  if (m_staticGlobals.empty()) prepareStaticGlobals(cg);
 
   if (!system) {
     cg_printf("IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(GlobalVariables)\n");
@@ -1087,6 +1079,8 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
 
 void VariableTable::outputCPPGlobalVariablesDtorIncludes(CodeGenerator &cg,
                                                          AnalysisResultPtr ar) {
+  if (m_staticGlobals.empty()) prepareStaticGlobals(cg);
+
   std::set<string> dtorIncludes;
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
          m_staticGlobals.begin(); iter != m_staticGlobals.end(); ++iter) {

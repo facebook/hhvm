@@ -76,7 +76,7 @@ public:
   const std::string &getName() const { return m_name;}
   void setName(const std::string name) { m_name = name;}
   virtual std::string getId(CodeGenerator &cg) const;
-  StatementPtr getStmt() { return m_stmt;}
+  StatementPtr getStmt() const { return m_stmt;}
   VariableTablePtr getVariables() { return m_variables;}
   ConstantTablePtr getConstants() { return m_constants;}
   ClassScopePtr getContainingClass();

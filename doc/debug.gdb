@@ -3,8 +3,8 @@
 
   info threads
   thread apply [threadno] [all] args
-  set follow-fork-mode child
-  set detach-on-fork off
+  set follow-fork-mode parent
+  set detach-on-fork on
   set print pretty
   handle SIGPIPE nostop noprint pass
   dump binary memory [filename] [start_addr] [end_addr]

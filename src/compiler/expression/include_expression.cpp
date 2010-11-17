@@ -206,8 +206,7 @@ std::string IncludeExpression::getCurrentInclude(AnalysisResultPtr ar) {
 void IncludeExpression::analyzeInclude(AnalysisResultPtr ar,
                                        const std::string &include) {
   ConstructPtr self = shared_from_this();
-  FileScopePtr file = ar->findFileScope(include, ar->getPhase() <=
-                                        AnalysisResult::AnalyzeInclude);
+  FileScopePtr file = ar->findFileScope(include);
   if (!file && !include.empty()) {
     Compiler::Error(Compiler::PHPIncludeFileNotFound, self);
     return;
@@ -224,6 +223,8 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
   string include = getCurrentInclude(ar);
   if (!include.empty()) {
     if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
+      ar->parseOnDemand(include);
+    } else if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
       analyzeInclude(ar, include);
     }
   }
@@ -257,7 +258,7 @@ ExpressionPtr IncludeExpression::postOptimize(AnalysisResultPtr ar) {
       analyzeInclude(ar, m_include);
       m_depsSet = true;
     }
-    FileScopePtr fs = ar->findFileScope(m_include, false);
+    FileScopePtr fs = ar->findFileScope(m_include);
     if (fs) {
       if (!Option::KeepStatementsWithNoEffect) {
         if (ExpressionPtr rep = fs->getEffectiveImpl(ar)) {
@@ -296,7 +297,7 @@ void IncludeExpression::outputCPPImpl(CodeGenerator &cg,
   bool require = (m_op == T_REQUIRE || m_op == T_REQUIRE_ONCE);
   bool once = (m_op == T_INCLUDE_ONCE || m_op == T_REQUIRE_ONCE);
   if (!getCurrentInclude(ar).empty()) {
-    FileScopePtr fs = ar->findFileScope(getCurrentInclude(ar), false);
+    FileScopePtr fs = ar->findFileScope(getCurrentInclude(ar));
     if (fs) {
       cg_printf("%s%s(%s, %s, %s)", Option::PseudoMainPrefix,
                 fs->pseudoMainName().c_str(),

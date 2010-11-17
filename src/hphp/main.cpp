@@ -58,12 +58,13 @@ struct ProgramOptions {
   string inputList;
   vector<string> modules;
   vector<string> excludeDirs;
-  vector<string> fmodules;
-  vector<string> ffiles;
   vector<string> excludeFiles;
   vector<string> excludePatterns;
-  vector<string> excludeStaticPatterns;
   vector<string> excludeStaticDirs;
+  vector<string> excludeStaticFiles;
+  vector<string> excludeStaticPatterns;
+  vector<string> fmodules;
+  vector<string> ffiles;
   vector<string> cfiles;
   vector<string> cmodules;
   bool parseOnDemand;
@@ -223,6 +224,9 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     ("exclude-static-dir",
      value<vector<string> >(&po.excludeStaticDirs)->composing(),
      "directories to exclude from static content cache")
+    ("exclude-static-file",
+     value<vector<string> >(&po.excludeStaticFiles)->composing(),
+     "files to exclude from static content cache")
     ("cfile", value<vector<string> >(&po.cfiles)->composing(),
      "extra static files forced to include without exclusion checking")
     ("cmodule", value<vector<string> >(&po.cmodules)->composing(),
@@ -367,98 +371,34 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
   if (po.inputDir.empty()) {
     po.inputDir = '.';
   }
-  if (po.inputDir[po.inputDir.size() - 1] != '/') {
-    po.inputDir += '/';
-  }
+  po.inputDir = Util::normalizeDir(po.inputDir);
   if (po.configDir.empty()) {
     po.configDir = po.inputDir;
   }
-  if (!po.configDir.empty() && po.configDir[po.configDir.size() - 1] != '/') {
-    po.configDir += '/';
-  }
+  po.configDir = Util::normalizeDir(po.configDir);
   Option::RootDirectory = po.configDir;
 
   for (unsigned int i = 0; i < po.excludeDirs.size(); i++) {
-    Option::PackageExcludeDirs.insert(po.excludeDirs[i]);
+    Option::PackageExcludeDirs.insert
+      (Util::normalizeDir(po.excludeDirs[i]));
   }
   for (unsigned int i = 0; i < po.excludeFiles.size(); i++) {
     Option::PackageExcludeFiles.insert(po.excludeFiles[i]);
   }
   for (unsigned int i = 0; i < po.excludePatterns.size(); i++) {
-    Option::PackageExcludePatterns.insert(po.excludePatterns[i]);
-  }
-  size_t rootSize = po.inputDir.size();
-  for (set<string>::const_iterator it = Option::PackageExcludePatterns.begin();
-       it != Option::PackageExcludePatterns.end(); ++it) {
-    string pattern = po.inputDir + *it;
-    const char *argv[] = {"", "-L", (char*)po.inputDir.c_str(),
-                          "-type", "f", "-regex", pattern.c_str(),
-                          NULL};
-    int numErrors = 0;
-    for (;;) {
-      string files;
-      vector<string> out;
-      Process::Exec("find", argv, NULL, files);
-      Util::split('\n', files.c_str(), out, true);
-      bool errorOccurred = false;
-      for (unsigned int j = 0; j < out.size(); j++) {
-        if (rootSize > out[j].size()) {
-          Logger::Error("File name: '%s'", out[j].c_str());
-          ++numErrors;
-          if (numErrors > 1000) {
-            throw Exception("find command returned bad results");
-          }
-          errorOccurred = true;
-          break;
-        }
-      }
-      // If an error occurred, retry
-      if (errorOccurred) continue;
-      for (unsigned int j = 0; j < out.size(); j++) {
-        string file = out[j].substr(rootSize);
-        Option::PackageExcludeFiles.insert(file);
-      }
-      break;
-    }
-  }
-  for (unsigned int i = 0; i < po.excludeStaticPatterns.size(); i++) {
-    string pattern = po.inputDir + po.excludeStaticPatterns[i];
-    const char *argv[] = {"", "-L", (char*)po.inputDir.c_str(),
-                          "-type", "f", "-regex", pattern.c_str(),
-                          NULL};
-    int numErrors = 0;
-    for (;;) {
-      string files;
-      vector<string> out;
-      Process::Exec("find", argv, NULL, files);
-      Util::split('\n', files.c_str(), out, true);
-      bool errorOccurred = false;
-      for (unsigned int j = 0; j < out.size(); j++) {
-        if (rootSize > out[j].size()) {
-          Logger::Error("File name: '%s'", out[j].c_str());
-          ++numErrors;
-          if (numErrors > 1000) {
-            throw Exception("find command returned bad results");
-          }
-          errorOccurred = true;
-          break;
-        }
-      }
-      // If an error occurred, retry
-      if (errorOccurred) continue;
-      for (unsigned int j = 0; j < out.size(); j++) {
-        string file = out[j].substr(rootSize);
-        Option::PackageExcludeStaticFiles.insert(file);
-      }
-      break;
-    }
+    Option::PackageExcludePatterns.insert
+      (Util::format_pattern(po.excludePatterns[i], true));
   }
   for (unsigned int i = 0; i < po.excludeStaticDirs.size(); i++) {
-    string dirname = Util::canonicalize(po.excludeStaticDirs[i]);
-    if (dirname.length() && dirname[dirname.length() - 1] != '/') {
-      dirname += '/';
-    }
-    Option::PackageExcludeStaticDirs.insert(dirname);
+    Option::PackageExcludeStaticDirs.insert
+      (Util::normalizeDir(po.excludeStaticDirs[i]));
+  }
+  for (unsigned int i = 0; i < po.excludeStaticFiles.size(); i++) {
+    Option::PackageExcludeStaticFiles.insert(po.excludeStaticFiles[i]);
+  }
+  for (unsigned int i = 0; i < po.excludeStaticPatterns.size(); i++) {
+    Option::PackageExcludeStaticPatterns.insert
+      (Util::format_pattern(po.excludeStaticPatterns[i], true));
   }
 
   if (po.target == "cpp" && po.format == "sys") {

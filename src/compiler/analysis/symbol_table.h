@@ -20,6 +20,7 @@
 #include <compiler/hphp.h>
 #include <util/json.h>
 #include <util/util.h>
+#include <util/lock.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -195,6 +196,7 @@ private:
 class SymbolTable : public boost::enable_shared_from_this<SymbolTable>,
                     public JSON::ISerializable {
 public:
+  static Mutex AllSymbolTablesMutex;
   static SymbolTablePtrVec AllSymbolTables; // for stats purpose
   static void CountTypes(std::map<std::string, int> &counts);
   BlockScope *getScopePtr() const { return &m_blockScope; }
@@ -256,6 +258,7 @@ public:
     return Util::roundUpToPowerOfTwo(m_symbolVec.size() * 2);
   }
 
+  void canonicalizeSymbolOrder();
   void getSymbols(std::vector<std::string> &syms) const;
   void getCoerced(StringToTypePtrMap &coerced) const;
   void getRTypes(StringToTypePtrMap &rtypes) const;

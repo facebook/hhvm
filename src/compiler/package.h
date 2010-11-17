@@ -20,6 +20,7 @@
 #include <compiler/hphp.h>
 #include <util/string_bag.h>
 #include <util/file_cache.h>
+#include <util/mutex.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,10 +47,11 @@ public:
   void addDirectory(const std::string &path, bool force);
   void addDirectory(const char *path, bool force);
   void addStaticDirectory(const std::string path);
-  void addDirectory(const char *path, const char *postfix, bool force);
+  void addPHPDirectory(const char *path, bool force);
 
   bool parse();
   bool parse(const char *fileName);
+  bool parseImpl(const char *fileName);
 
   AnalysisResultPtr getAnalysisResult() { return m_ar;}
   int getFileCount() const { return m_files.size();}
@@ -69,7 +71,10 @@ private:
   std::string m_root;
   bool m_bShortTags;
   bool m_bAspTags;
+  std::set<std::string> m_filesToParse;
   StringBag m_files;
+
+  Mutex m_mutex;
   AnalysisResultPtr m_ar;
   int m_lineCount;
   int m_charCount;
@@ -78,14 +83,6 @@ private:
   std::set<std::string> m_directories;
   std::set<std::string> m_staticDirectories;
   std::set<std::string> m_extraStaticFiles;
-
-  void findFiles(std::vector<std::string> &out, const char *path,
-                 const char *postfix);
-  void findPHPFiles(std::vector<std::string> &out, const char *path);
-  void findNonPHPFiles(std::vector<std::string> &out, const char *path,
-                       bool exclude);
-
-  bool parseImpl(const char *fileName);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

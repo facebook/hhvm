@@ -45,6 +45,19 @@ public:
   void last(Location &loc) {
     line1 = loc.line1; char1 = loc.char1;
   }
+
+  /**
+   * This only guarantees consistent result between two locations, whether or
+   * not it makes sense, because we're comparing those integers first for
+   * quicker sorting.
+   */
+  int compare(Location *loc) {
+    if (line0 < loc->line0) return -1; if (line0 > loc->line0) return 1;
+    if (char0 < loc->char0) return -1; if (char0 > loc->char0) return 1;
+    if (line1 < loc->line1) return -1; if (line1 > loc->line1) return 1;
+    if (char1 < loc->char1) return -1; if (char1 > loc->char1) return 1;
+    return strcmp(file, loc->file);
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

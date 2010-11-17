@@ -376,7 +376,8 @@ void ArrayData::serialize(VariableSerializer *serializer) const {
   serializer->decNestedLevel((void*)this);
 }
 
-bool ArrayData::hasInternalReference(PointerSet &vars) const {
+bool ArrayData::hasInternalReference(PointerSet &vars,
+                                     bool ds /* = false */) const {
   if (isSharedMap()) return false;
   for (ArrayIter iter(this); iter; ++iter) {
     CVarRef var = iter.secondRef();
@@ -393,12 +394,20 @@ bool ArrayData::hasInternalReference(PointerSet &vars) const {
         return true;
       }
       vars.insert(pobj);
-
-      if (pobj->o_toArray().get()->hasInternalReference(vars)) {
+      if (pobj->o_instanceof("Serializable")) {
+        if (ds) {
+          // We want to detect Serializable object as well
+          return true;
+        } else {
+          // Serializable object does not have internal reference issue
+          return false;
+        }
+      }
+      if (pobj->o_toArray().get()->hasInternalReference(vars, ds)) {
         return true;
       }
     } else if (var.isArray() &&
-               var.getArrayData()->hasInternalReference(vars)) {
+               var.getArrayData()->hasInternalReference(vars, ds)) {
       return true;
     }
   }

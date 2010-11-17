@@ -84,6 +84,9 @@ public:
   // or an array with circular reference
   bool shouldCache() { return getShouldCache(); }
 
+  virtual SharedVariant *convertObj(CVarRef var) { return NULL; }
+  virtual bool isUnserializedObj() { return false; }
+
  protected:
   const static uint16 SerializedArray = (1<<15);
   const static uint16 ShouldCache = (1<<14);

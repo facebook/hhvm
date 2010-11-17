@@ -108,8 +108,10 @@ class ArrayData : public Countable {
   /**
    * Whether or not this array has a referenced Variant or Object appearing
    * twice. This is mainly for APC to decide whether to serialize an array.
+   * Also used for detecting whether there is serializable object in the tree.
    */
-  bool hasInternalReference(PointerSet &seen) const;
+  bool hasInternalReference(PointerSet &seen,
+                            bool detectSerializable = false) const;
 
   /**
    * Position-based iterations.

@@ -34,20 +34,8 @@ class ThreadSharedVariant;
  */
 class ImmutableMap {
 public:
-  ImmutableMap(int num) : m_curPos(0) {
-    if (num <= 0) {
-      num = 1;
-    }
-    int pow_2 = 1;
-    while (num >>= 1) pow_2++;
-    int capacity = 1 << pow_2;
-    m_capacity_mask = capacity - 1;
-    m_hash = (int*)malloc(sizeof(int) * capacity);
-    for (int i = 0; i < capacity; i++) m_hash[i] = -1;
-    m_buckets = (Bucket*)malloc(sizeof(Bucket) * capacity);
-  }
-
-  virtual ~ImmutableMap();
+  ImmutableMap(int num);
+  ~ImmutableMap();
 
   void add(ThreadSharedVariant *key, ThreadSharedVariant *val);
 

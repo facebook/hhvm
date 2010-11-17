@@ -277,6 +277,7 @@ public:
   static int ApcKeyFrequencyUpdatePeriod;
   static bool ApcExpireOnSets;
   static int ApcPurgeFrequency;
+  static bool ApcAllowObj;
 
   static bool EnableDnsCache;
   static int DnsCacheTTL;

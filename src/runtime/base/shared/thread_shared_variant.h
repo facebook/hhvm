@@ -24,6 +24,7 @@
 #include <runtime/base/shared/shared_variant.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/shared/immutable_map.h>
+#include <runtime/base/shared/immutable_obj.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,7 +39,8 @@ typedef hphp_hash_map<StringData *, int, string_data_hash, string_data_same>
 
 class ThreadSharedVariant : public SharedVariant {
 public:
-  ThreadSharedVariant(CVarRef source, bool serialized, bool inner = false);
+  ThreadSharedVariant(CVarRef source, bool serialized, bool inner = false,
+                      bool unserializeObj = false);
   virtual ~ThreadSharedVariant();
 
   virtual void incRef() {
@@ -103,9 +105,13 @@ public:
     return m_data.str;
   }
 
+  virtual SharedVariant *convertObj(CVarRef var);
+  virtual bool isUnserializedObj() { return getIsObj(); }
+
 protected:
   virtual ThreadSharedVariant *createAnother(CVarRef source, bool serialized,
-                                             bool inner = false);
+                                             bool inner = false,
+                                             bool unserializeObj = false);
 
   virtual SharedVariant* getKeySV(ssize_t pos) const {
     ASSERT(is(KindOfArray));
@@ -116,6 +122,8 @@ protected:
 private:
   const static uint16 IsVector = (1<<13);
   const static uint16 Owner = (1<<12);
+  const static uint16 IsObj = (1<<11);
+  const static uint16 ObjAttempted = (1<<10);
 
   class VectorData {
   public:
@@ -177,6 +185,7 @@ private:
     ImmutableMap* map;
     VectorData* vec;
     MapData *gnuMap;
+    ImmutableObj* obj;
   } m_data;
 
   bool getIsVector() const { return (bool)(m_flags & IsVector);}
@@ -186,6 +195,14 @@ private:
   bool getOwner() const { return (bool)(m_flags & Owner);}
   void setOwner() { m_flags |= Owner;}
   void clearOwner() { m_flags &= ~Owner;}
+
+  bool getIsObj() const { return (bool)(m_flags & IsObj);}
+  void setIsObj() { m_flags |= IsObj;}
+  void clearIsObj() { m_flags &= ~IsObj;}
+
+  bool getObjAttempted() const { return (bool)(m_flags & ObjAttempted);}
+  void setObjAttempted() { m_flags |= ObjAttempted;}
+  void clearObjAttempted() { m_flags &= ~ObjAttempted;}
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -826,42 +826,75 @@ bool LockedSharedStore::get(CStrRef key, Variant &value) {
 
 
 bool ConcurrentTableSharedStore::get(CStrRef key, Variant &value) {
- bool stats = RuntimeOption::EnableStats && RuntimeOption::EnableAPCStats;
- const StoreValue *val;
- ReadLock l(m_lock);
- bool expired = false;
- {
-   Map::const_accessor acc;
-   if (!m_vars.find(acc, key.data())) {
-     if (stats) ServerStats::Log("apc.miss", 1);
-     return false;
-   } else {
-     val = &acc->second;
-     if (val->expired()) {
-       // Because it only has a read lock on the data, deletion from
-       // expiration has to happen after the lock is released
-       expired = true;
-     } else {
-       value = val->var->toLocal();
-       if (RuntimeOption::EnableAPCSizeStats &&
-           RuntimeOption::EnableAPCSizeDetail &&
-           RuntimeOption::EnableAPCFetchStats) {
-         SharedStoreStats::onGet(key.get(), val->var);
-       }
-     }
-   }
- }
- if (expired) {
-   if (stats) {
-     ServerStats::Log("apc.miss", 1);
-   }
-   eraseImpl(key, true);
-   return false;
- }
- if (stats) {
-   ServerStats::Log("apc.hit", 1);
- }
- return true;
+  bool stats = RuntimeOption::EnableStats && RuntimeOption::EnableAPCStats;
+  const StoreValue *val;
+  SharedVariant *svar = NULL;
+  ReadLock l(m_lock);
+  bool expired = false;
+  {
+    Map::const_accessor acc;
+    if (!m_vars.find(acc, key.data())) {
+      if (stats) ServerStats::Log("apc.miss", 1);
+      return false;
+    } else {
+      val = &acc->second;
+      if (val->expired()) {
+        // Because it only has a read lock on the data, deletion from
+        // expiration has to happen after the lock is released
+        expired = true;
+      } else {
+        svar = val->var;
+        if (RuntimeOption::ApcAllowObj) {
+          // Hold ref here
+          svar->incRef();
+        }
+        value = svar->toLocal();
+        if (RuntimeOption::EnableAPCSizeStats &&
+            RuntimeOption::EnableAPCSizeDetail &&
+            RuntimeOption::EnableAPCFetchStats) {
+          SharedStoreStats::onGet(key.get(), svar);
+        }
+      }
+    }
+  }
+  if (expired) {
+    if (stats) {
+      ServerStats::Log("apc.miss", 1);
+    }
+    eraseImpl(key, true);
+    return false;
+  }
+  if (stats) {
+    ServerStats::Log("apc.hit", 1);
+  }
+
+  if (RuntimeOption::ApcAllowObj)  {
+    SharedVariant *converted = svar->convertObj(value);
+    if (converted) {
+      Map::accessor acc;
+      m_vars.find(acc, key.data()); // start a write lock
+      StoreValue *sval = &acc->second;
+      SharedVariant *sv = sval->var;
+      // sv may not be same as svar here because some other thread may have
+      // updated it already, check before updating
+      if (!sv->isUnserializedObj()) {
+        if (RuntimeOption::EnableAPCSizeStats) {
+          SharedStoreStats::onDelete(key.get(), sv, true);
+        }
+        sval->var = converted;
+        sv->decRef();
+        if (RuntimeOption::EnableAPCSizeStats) {
+          int64 ttl = sval->expiry ? sval->expiry - time(NULL) : 0;
+          SharedStoreStats::onStore(key.get(), converted, ttl, false);
+        }
+      } else {
+        converted->decRef();
+      }
+    }
+    // release the extra ref
+    svar->decRef();
+  }
+  return true;
 }
 
 bool ConcurrentTableSharedStore::exists(CStrRef key) {

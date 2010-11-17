@@ -26,7 +26,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
-                                         bool inner /* = false */) {
+                                         bool inner /* = false */,
+                                         bool unserializeObj /* = false */) {
   ASSERT(!serialized || source.isString());
 
   setOwner();
@@ -91,7 +92,8 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
         m_data.vec = new VectorData(size);
         uint i = 0;
         for (ArrayIter it(arr); !it.end(); it.next(), i++) {
-          ThreadSharedVariant* val = createAnother(it.second(), false, true);
+          ThreadSharedVariant* val = createAnother(it.second(), false, true,
+                                                   unserializeObj);
           if (val->shouldCache()) setShouldCache();
           m_data.vec->vals[i] = val;
         }
@@ -100,16 +102,20 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
         m_data.gnuMap = new MapData(size);
         uint i = 0;
         for (ArrayIter it(arr); !it.end(); it.next(), i++) {
-          ThreadSharedVariant* key = createAnother(it.first(), false);
-          ThreadSharedVariant* val = createAnother(it.second(), false, true);
+          ThreadSharedVariant* key = createAnother(it.first(), false, true,
+                                                   unserializeObj);
+          ThreadSharedVariant* val = createAnother(it.second(), false, true,
+                                                   unserializeObj);
           if (val->shouldCache()) setShouldCache();
           m_data.gnuMap->set(i, key, val);
         }
       } else {
         m_data.map = new ImmutableMap(size);
         for (ArrayIter it(arr); !it.end(); it.next()) {
-          ThreadSharedVariant* key = createAnother(it.first(), false);
-          ThreadSharedVariant* val = createAnother(it.second(), false, true);
+          ThreadSharedVariant* key = createAnother(it.first(), false, true,
+                                                   unserializeObj);
+          ThreadSharedVariant* val = createAnother(it.second(), false, true,
+                                                   unserializeObj);
           if (val->shouldCache()) setShouldCache();
           m_data.map->add(key, val);
         }
@@ -118,10 +124,18 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
     }
   default:
     {
+      ASSERT(source.isObject());
       m_type = KindOfObject;
       setShouldCache();
-      String s = apc_serialize(source);
-      m_data.str = new StringData(s.data(), s.size(), CopyString);
+      if (unserializeObj) {
+        // This assumes hasInternalReference(seen, true) is false
+        ImmutableObj* obj = new ImmutableObj(source.getObjectData());
+        m_data.obj = obj;
+        setIsObj();
+      } else {
+        String s = apc_serialize(source);
+        m_data.str = new StringData(s.data(), s.size(), CopyString);
+      }
       break;
     }
   }
@@ -158,6 +172,9 @@ Variant ThreadSharedVariant::toLocal() {
   default:
     {
       ASSERT(m_type == KindOfObject);
+      if (getIsObj()) {
+        return m_data.obj->getObject();
+      }
       return apc_unserialize(String(m_data.str->data(), m_data.str->size(),
                                     AttachLiteral));
     }
@@ -205,9 +222,14 @@ void ThreadSharedVariant::dump(std::string &out) {
 
 ThreadSharedVariant::~ThreadSharedVariant() {
   switch (m_type) {
-  case KindOfString:
   case KindOfObject:
-    if (getOwner()) {
+    if (getIsObj()) {
+      delete m_data.obj;
+      break;
+    }
+    // otherwise fall through
+  case KindOfString:
+   if (getOwner()) {
       m_data.str->destruct();
     }
     break;
@@ -352,14 +374,31 @@ void ThreadSharedVariant::loadElems(ArrayData *&elems,
 }
 
 ThreadSharedVariant *ThreadSharedVariant::createAnother
-(CVarRef source, bool serialized, bool inner /* = false */) {
+(CVarRef source, bool serialized, bool inner /* = false */,
+ bool unserializeObj /* = false*/) {
   SharedVariant *wrapped = source.getSharedVariant();
-  if (wrapped) {
+  if (wrapped && !unserializeObj) {
     wrapped->incRef();
     // static cast should be enough
     return (ThreadSharedVariant *)wrapped;
   }
-  return new ThreadSharedVariant(source, serialized, inner);
+  return new ThreadSharedVariant(source, serialized, inner, unserializeObj);
+}
+
+SharedVariant* ThreadSharedVariant::convertObj(CVarRef var) {
+  if (!var.is(KindOfObject) || getObjAttempted()) {
+    return NULL;
+  }
+  setObjAttempted();
+  PointerSet seen;
+  ObjectData *obj = var.getObjectData();
+  CArrRef arr = obj->o_toArray();
+  if (arr->hasInternalReference(seen, true)) {
+    return NULL;
+  }
+  ThreadSharedVariant *tmp = new ThreadSharedVariant(var, false, true, true);
+  tmp->setObjAttempted();
+  return tmp;
 }
 
 void ThreadSharedVariant::getStats(SharedVariantStats *stats) {
@@ -375,9 +414,16 @@ void ThreadSharedVariant::getStats(SharedVariantStats *stats) {
     stats->dataSize = sizeof(m_data.dbl);
     stats->dataTotalSize = sizeof(ThreadSharedVariant);
     break;
-  case KindOfString:
   case KindOfObject:
-    if (m_data.str->isStatic()) {
+    if (getIsObj()) {
+      SharedVariantStats childStats;
+      m_data.obj->getSizeStats(&childStats);
+      stats->addChildStats(&childStats);
+      break;
+    }
+    // fall through
+  case KindOfString:
+   if (m_data.str->isStatic()) {
       stats->dataSize = 0;
       stats->dataTotalSize = sizeof(ThreadSharedVariant);
       break;

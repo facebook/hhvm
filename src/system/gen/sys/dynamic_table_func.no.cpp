@@ -26990,6 +26990,16 @@ Variant ifa_openssl_private_encrypt(void *extra, int count, INVOKE_FEW_ARGS_IMPL
   if (count <= 3) return (f_openssl_private_encrypt(a0, ref(a1), a2));
   return (f_openssl_private_encrypt(a0, ref(a1), a2, a3));
 }
+Variant i_hphp_get_status(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(hphp_get_status);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("hphp_get_status", 0, 1);
+  return (f_hphp_get_status());
+}
+Variant ifa_hphp_get_status(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("hphp_get_status", 0, 1);
+  return (f_hphp_get_status());
+}
 Variant i_xhprof_enable(void *extra, CArrRef params) {
   FUNCTION_INJECTION(xhprof_enable);
   int count __attribute__((__unused__)) = params.size();
@@ -68414,6 +68424,18 @@ Variant ei_openssl_private_encrypt(Eval::VariableEnvironment &env, const Eval::F
   if (count <= 3) return (x_openssl_private_encrypt(a0, ref(a1), a2));
   else return (x_openssl_private_encrypt(a0, ref(a1), a2, a3));
 }
+Variant ei_hphp_get_status(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("hphp_get_status", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_hphp_get_status());
+}
 Variant ei_xhprof_enable(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -79471,6 +79493,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1213:
       HASH_INVOKE_FROM_EVAL(0x35BE8F6E7726C4BDLL, dechex);
+      HASH_INVOKE_FROM_EVAL(0x1F4D41588D2EA4BDLL, hphp_get_status);
       break;
     case 1214:
       HASH_INVOKE_FROM_EVAL(0x57278846B8B0E4BELL, ldap_count_entries);
@@ -86071,6 +86094,7 @@ CallInfo ci_time((void*)&i_time, (void*)&ifa_time, 0, 0, 0x0000000000000000LL);
 CallInfo ci_magickcoalesceimages((void*)&i_magickcoalesceimages, (void*)&ifa_magickcoalesceimages, 1, 0, 0x0000000000000000LL);
 CallInfo ci_pixelgetquantumcolor((void*)&i_pixelgetquantumcolor, (void*)&ifa_pixelgetquantumcolor, 1, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_private_encrypt((void*)&i_openssl_private_encrypt, (void*)&ifa_openssl_private_encrypt, 4, 0, 0x0000000000000002LL);
+CallInfo ci_hphp_get_status((void*)&i_hphp_get_status, (void*)&ifa_hphp_get_status, 0, 0, 0x0000000000000000LL);
 CallInfo ci_xhprof_enable((void*)&i_xhprof_enable, (void*)&ifa_xhprof_enable, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileinfo_gettype((void*)&i_hphp_splfileinfo_gettype, (void*)&ifa_hphp_splfileinfo_gettype, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imap_rfc822_parse_adrlist((void*)&i_imap_rfc822_parse_adrlist, (void*)&ifa_imap_rfc822_parse_adrlist, 2, 0, 0x0000000000000000LL);
@@ -88237,6 +88261,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1213:
       HASH_GUARD(0x35BE8F6E7726C4BDLL, dechex) {
         ci = &ci_dechex;
+        return true;
+      }
+      HASH_GUARD(0x1F4D41588D2EA4BDLL, hphp_get_status) {
+        ci = &ci_hphp_get_status;
         return true;
       }
       break;

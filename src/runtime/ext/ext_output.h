@@ -70,6 +70,7 @@ inline int f_ob_get_level() {
 inline Array f_ob_get_status(bool full_status = false) {
   return g_context->obGetStatus(full_status);
 }
+Array f_hphp_get_status();
 inline String f_ob_gzhandler(CStrRef buffer, int mode) {
   throw NotSupportedException(__func__, "something that's in transport layer");
 }

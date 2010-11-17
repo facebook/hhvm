@@ -130,6 +130,11 @@ inline int64 x_hphp_get_stats(CStrRef name) {
   return f_hphp_get_stats(name);
 }
 
+inline Array x_hphp_get_status() {
+  FUNCTION_INJECTION_BUILTIN(hphp_get_status);
+  return f_hphp_get_status();
+}
+
 inline Variant x_hphp_get_timers(bool get_as_float = true) {
   FUNCTION_INJECTION_BUILTIN(hphp_get_timers);
   return f_hphp_get_timers(get_as_float);

@@ -379,6 +379,17 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "hphp_get_status",
+    'desc'   => "Returns status of different server threads.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => VariantMap,
+      'desc'   => "Array of thread statuses.",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "hphp_get_timers",
     'desc'   => "Returns timestamps of different request events.",
     'flags'  =>  HasDocComment | HipHopSpecific,

@@ -16,6 +16,7 @@
 */
 
 #include <runtime/ext/ext_output.h>
+#include <runtime/ext/ext_json.h>
 #include <runtime/base/runtime_option.h>
 #include <util/lock.h>
 #include <util/logger.h>
@@ -121,6 +122,12 @@ bool f_hphp_log(CStrRef filename, CStrRef message) {
 
 void f_hphp_crash_log(CStrRef name, CStrRef value) {
   StackTraceNoHeap::AddExtraLogging(name.data(), value.data());
+}
+
+Array f_hphp_get_status() {
+  std::string out;
+  ServerStats::ReportStatus(out, ServerStats::JSON);
+  return f_json_decode(String(out));
 }
 
 static double ts_float(const timespec &ts) {

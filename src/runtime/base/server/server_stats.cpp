@@ -873,7 +873,7 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
     w->writeEntry("start", DateTime(ts.m_start).
                   toString(DateTime::DateFormatCookie).data());
     w->writeEntry("duration", format_duration(duration));
-    w->writeEntry("ioInProcess", ts.m_ioInProcess);
+    w->writeEntry("io", ts.m_ioInProcess);
 
     // Only in the event that we are currently in the process of an io, will
     // we output the iostatus, and ioInProcessDuationMicros
@@ -881,8 +881,7 @@ void ServerStats::ReportStatus(std::string &output, Format format) {
       timespec now;
       gettime(CLOCK_MONOTONIC, &now);
       w->writeEntry("iostatus", string(ts.m_ioName) + " " + ts.m_ioAddr);
-      w->writeEntry("ioInProcessDurationMicros",
-                    gettime_diff_us(ts.m_ioStart, now));
+      w->writeEntry("ioduration", gettime_diff_us(ts.m_ioStart, now));
     }
     w->writeEntry("mode", mode);
     w->writeEntry("url", ts.m_url);

@@ -1145,6 +1145,26 @@ bool f_array_multisort(int _argc, Variant ar1,
   return Array::MultiSort(data, true);
 }
 
+Variant f_array_unique(CVarRef array, int sort_flags /* = 2 */) {
+  // NOTE, PHP array_unique accepts ArrayAccess objects as well,
+  // which is not supported here.
+  if (!array.isArray()) {
+    throw_bad_array_exception(__func__);
+    return false;
+  }
+  Array input = toArray(array);
+  switch (sort_flags) {
+  case SORT_STRING:
+  case SORT_LOCALE_STRING:
+    return ArrayUtil::StringUnique(input);
+  case SORT_NUMERIC:
+    return ArrayUtil::NumericUnique(input);
+  case SORT_REGULAR:
+  default:
+    return ArrayUtil::RegularSortUnique(input);
+  }
+}
+
 String f_i18n_loc_get_default() {
   return s_collator->getLocale();
 }

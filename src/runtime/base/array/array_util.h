@@ -147,9 +147,20 @@ public:
                         const void *data = NULL);
 
   /**
-   * Removes duplicate values from array.
+   * Removes values whose string conversion is duplicate from array.
    */
-  static Variant Unique(CArrRef input);
+  static Variant StringUnique(CArrRef input);
+
+  /**
+   * Removes values whose numeric conversion is duplicate from array.
+   */
+  static Variant NumericUnique(CArrRef input);
+
+  /**
+   * Removes values that compare as equal and that end up in contiguous
+   * positions if the input array is sorted.
+   */
+  static Variant RegularSortUnique(CArrRef input);
 
   /////////////////////////////////////////////////////////////////////////////
   // Iterations.

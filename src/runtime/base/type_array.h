@@ -192,6 +192,11 @@ class Array : public SmartPtr<ArrayData> {
   };
   static bool MultiSort(std::vector<SortData> &data, bool renumber);
 
+  static void SortImpl(std::vector<int> &indices, CArrRef source,
+                       Array::SortData &opaque,
+                       Array::PFUNC_CMP cmp_func,
+                       bool by_key, const void *data = NULL);
+
   /**
    * Type conversions
    */

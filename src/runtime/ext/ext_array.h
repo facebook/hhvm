@@ -226,15 +226,7 @@ inline Variant f_array_sum(CVarRef array) {
     return d;
   }
 }
-inline Variant f_array_unique(CVarRef array) {
-  // NOTE, PHP array_unique accepts ArrayAccess objects as well,
-  // which is not supported here.
-  if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
-    return false;
-  }
-  return ArrayUtil::Unique(toArray(array));
-}
+Variant f_array_unique(CVarRef array, int sort_flags = 2);
 
 int f_array_unshift(int _argc, Variant array, CVarRef var, CArrRef _argv = null_array);
 

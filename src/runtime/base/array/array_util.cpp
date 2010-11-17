@@ -661,7 +661,7 @@ Variant ArrayUtil::Filter(CArrRef input, PFUNC_FILTER filter /* = NULL */,
   return ret;
 }
 
-Variant ArrayUtil::Unique(CArrRef input) {
+Variant ArrayUtil::StringUnique(CArrRef input) {
   Array seenValues;
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
@@ -671,6 +671,59 @@ Variant ArrayUtil::Unique(CArrRef input) {
       seenValues.set(str, 1);
       ret.set(iter.first(), entry);
     }
+  }
+  return ret;
+}
+
+Variant ArrayUtil::NumericUnique(CArrRef input) {
+  set<double> seenValues;
+  Array ret = Array::Create();
+  for (ArrayIter iter(input); iter; ++iter) {
+    Variant entry(iter.second());
+    double value = entry.toDouble();
+    pair<set<double>::iterator, bool> res = seenValues.insert(value);
+    if (res.second) { // it was inserted
+      ret.set(iter.first(), entry);
+    }
+  }
+  return ret;
+}
+
+Variant ArrayUtil::RegularSortUnique(CArrRef input) {
+  /* The output of this function in PHP strictly depends on the implementation
+   * of the sort function and on whether values that compare as equal end
+   * up in contiguous positions in the sorted array (which is not really
+   * well-defined in case of mixed strings/numbers). To get the same result
+   * as in PHP we thus need to replicate the PHP algorithm more closely than
+   * in the other versions of array_unique.
+   */
+  if (input.size() <= 1) return input;
+
+  Array::SortData opaque;
+  vector<int> indices;
+  Array::SortImpl(indices, input, opaque, Array::SortRegularAscending, false);
+
+  vector<bool> duplicates(indices.size(), false);
+  int lastIdx = indices[0];
+  Variant last = input->getValue(opaque.positions[lastIdx]);
+  for (unsigned int i = 1; i < indices.size(); ++i) {
+    int currentIdx = indices[i];
+    Variant current = input->getValue(opaque.positions[currentIdx]);
+    if (current.equal(last)) {
+      if (currentIdx > lastIdx) {
+        duplicates[currentIdx] = true;
+        continue;
+      }
+      duplicates[lastIdx] = true;
+    }
+    lastIdx = currentIdx;
+    last = current;
+  }
+
+  Array ret = Array::Create();
+  int i = 0;
+  for (ArrayIter iter(input); iter; ++iter, ++i) {
+    if (!duplicates[i]) ret.set(iter.first(), iter.second());
   }
   return ret;
 }

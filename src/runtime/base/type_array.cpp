@@ -115,10 +115,6 @@ Array Array::intersect(CArrRef array, bool by_key, bool by_value,
 }
 
 
-static void _sort(vector<int> &indices, CArrRef source, Array::SortData &opaque,
-                  Array::PFUNC_CMP cmp_func,
-                  bool by_key, const void *data /* = NULL */);
-
 Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
                       PFUNC_CMP key_cmp_function,
                       const void *key_data,
@@ -170,7 +166,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
     cmp = value_cmp_function;
     cmp_data = value_data;
   }
-  _sort(perm1, array, opaque1, cmp, by_key, cmp_data);
+  SortImpl(perm1, array, opaque1, cmp, by_key, cmp_data);
 
   for (ArrayIter iter(*this); iter; ++iter) {
     Variant target;
@@ -916,9 +912,9 @@ static int multi_compare_func(const void *n1, const void *n2, const void *op) {
   return 0;
 }
 
-static void _sort(vector<int> &indices, CArrRef source, Array::SortData &opaque,
-                  Array::PFUNC_CMP cmp_func, bool by_key,
-                  const void *data /* = NULL */) {
+void Array::SortImpl(vector<int> &indices, CArrRef source,
+                     Array::SortData &opaque, Array::PFUNC_CMP cmp_func,
+                     bool by_key, const void *data /* = NULL */) {
   ASSERT(cmp_func);
 
   int count = source.size();
@@ -947,7 +943,7 @@ void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
   Array sorted = Array::Create();
   SortData opaque;
   vector<int> indices;
-  _sort(indices, *this, opaque, cmp_func, by_key, data);
+  SortImpl(indices, *this, opaque, cmp_func, by_key, data);
   int count = size();
   for (int i = 0; i < count; i++) {
     ssize_t pos = opaque.positions[indices[i]];

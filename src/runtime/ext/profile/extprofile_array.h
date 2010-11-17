@@ -170,9 +170,9 @@ inline Variant x_array_sum(CVarRef array) {
   return f_array_sum(array);
 }
 
-inline Variant x_array_unique(CVarRef array) {
+inline Variant x_array_unique(CVarRef array, int sort_flags = 2) {
   FUNCTION_INJECTION_BUILTIN(array_unique);
-  return f_array_unique(array);
+  return f_array_unique(array, sort_flags);
 }
 
 inline int x_array_unshift(int _argc, CVarRef array, CVarRef var, CArrRef _argv = null_array) {

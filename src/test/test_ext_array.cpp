@@ -989,6 +989,43 @@ bool TestExtArray::test_array_unique() {
        "    [2] => 3\n"
        ")\n");
   }
+  {
+    Array input(CREATE_MAP6("a", "A", "b", "C", 0, "1",
+                            2 ,"01", 1, 1, "c", "C"));
+    VS(f_print_r(f_array_unique(input, k_SORT_STRING), true),
+       "Array\n"
+       "(\n"
+       "    [a] => A\n"
+       "    [b] => C\n"
+       "    [0] => 1\n"
+       "    [2] => 01\n"
+       ")\n");
+    VS(f_print_r(f_array_unique(input, k_SORT_NUMERIC), true),
+       "Array\n"
+       "(\n"
+       "    [a] => A\n"
+       "    [0] => 1\n"
+       ")\n");
+    VS(f_print_r(f_array_unique(input, k_SORT_REGULAR), true),
+       "Array\n"
+       "(\n"
+       "    [a] => A\n"
+       "    [b] => C\n"
+       "    [0] => 1\n"
+       ")\n");
+  }
+  {
+    Array input(CREATE_MAP6(1, 1, "a", "A", "b", "C",
+                            0, "1", 2 ,"01", "c", "C"));
+    VS(f_print_r(f_array_unique(input, k_SORT_REGULAR), true),
+       "Array\n"
+       "(\n"
+       "    [1] => 1\n"
+       "    [a] => A\n"
+       "    [b] => C\n"
+       "    [0] => 1\n"
+       ")\n");
+  }
   return Count(true);
 }
 

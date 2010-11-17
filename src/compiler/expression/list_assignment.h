@@ -18,6 +18,8 @@
 #define __LIST_ASSIGNMENT_H__
 
 #include <compiler/expression/expression.h>
+#include <compiler/expression/simple_variable.h>
+#include <compiler/analysis/variable_table.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

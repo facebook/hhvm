@@ -247,7 +247,20 @@ bool ListAssignment::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     tmp = "null";
   } else {
     tmp = genCPPTemp(cg, ar);
-    cg_printf("Variant %s((ref(%s)));\n", tmp.c_str(), m_cppTemp.c_str());
+    bool need_ref = true;
+    if (m_array->is(Expression::KindOfSimpleVariable)) {
+      std::string name =
+        static_pointer_cast<SimpleVariable>(m_array)->getName();
+      VariableTablePtr variables = getScope()->getVariables();
+      if (variables->isParameter(name) && !variables->isLvalParam(name)) {
+        need_ref = false;
+      }
+    }
+    cg_printf("Variant %s((", tmp.c_str());
+    if (need_ref) cg_printf("ref(");
+    cg_printf("%s",m_cppTemp.c_str());
+    if (need_ref) cg_printf(")");
+    cg_printf("));\n");
     if (!isArray) {
       cg_printf("if (!f_is_array(%s)) %s.unset();\n",tmp.c_str(),
                 tmp.c_str());

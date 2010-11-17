@@ -13038,6 +13038,43 @@ bool TestCodeRun::TestBadFunctionCalls() {
       "}"
       "z();");
 
+  // Ensure all arguments are evaluated
+  MVCR("<?php\n"
+      "function f() {\n"
+      "  $a = array();\n"
+      "  array_push($a[] = 1);\n"
+      "  var_dump($a);\n"
+      "}\n"
+      "f();\n");
+  MVCR("<?php\n"
+      "function f() {\n"
+      "  $a = 0;\n"
+      "  array_chunk($a = 1);\n"
+      "  var_dump($a);\n"
+      "}\n"
+      "f();\n");
+  MVCR("<?php\n"
+      "function f() {\n"
+      "  $a = 0;\n"
+      "  $b = 0;\n"
+      "  $c = 0;\n"
+      "  $d = 0;\n"
+      "  array_chunk($a = 1, $b = 2, $c = 3, $d = 4);\n"
+      "  var_dump($a, $b, $c, $d);\n"
+      "}\n"
+      "f();\n");
+  MVCR("<?php\n"
+      "function f() {\n"
+      "  $arr = array();\n"
+      "  sort($arr[0]);\n"
+      "  var_dump($arr);\n"
+      "  unset($arr);\n"
+      "  $arr = array();\n"
+      "  sort($arr[0],0,0,0,0,0,0,0,0);\n"
+      "  var_dump($arr);\n"
+      "}\n"
+      "f();\n");
+
   return true;
 }
 

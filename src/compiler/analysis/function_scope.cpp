@@ -1270,8 +1270,6 @@ void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
   }
   cg_printf("const std::vector<Eval::ExpressionPtr> &params = "
             "caller->params();\n");
-  FunctionScope::OutputCPPDynamicInvokeCount(cg);
-  outputCPPInvokeArgCountCheck(cg, ar, ret, constructor);
   cg_printf("std::vector<Eval::ExpressionPtr>::const_iterator it = "
             "params.begin();\n");
   cg_indentBegin("do {\n");
@@ -1304,6 +1302,9 @@ void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
   if (variable) cg_printf(")");
   cg_printf(";\n");
   cg_indentEnd("}\n");
+
+  FunctionScope::OutputCPPDynamicInvokeCount(cg);
+  outputCPPInvokeArgCountCheck(cg, ar, ret, constructor);
 
   if (m_attributeClassInfo & ClassInfo::AllowIntercept) {
     ClassScopePtr cls = getContainingClass();

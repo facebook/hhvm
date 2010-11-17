@@ -149,28 +149,28 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 4:
       HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplObjectStorage::valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 10:
       HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplObjectStorage::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
@@ -178,8 +178,6 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD_LITSTR(0x62DD82BFEB88A4ACLL, NAMSTR(s_sys_ss14775b54, "attach")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -189,27 +187,27 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
         return (t_attach(a0), null);
       }
       break;
     case 16:
       HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss65104d10, "count")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplObjectStorage::count", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::count", 0, 1);
         return (t_count());
       }
       HASH_GUARD_LITSTR(0x61B94551FA22D290LL, NAMSTR(s_sys_ss05dd2d70, "contains")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -219,20 +217,22 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
         return (t_contains(a0));
       }
       break;
     case 17:
       HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplObjectStorage::key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::key", 0, 1);
         return (t_key());
       }
       break;
@@ -240,8 +240,6 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD_LITSTR(0x3C7D0AC0EBA9A695LL, NAMSTR(s_sys_ss1456596b, "detach")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -251,34 +249,36 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
         return (t_detach(a0), null);
       }
       break;
     case 24:
       HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplObjectStorage::next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 28:
       HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplObjectStorage::current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplObjectStorage::current", 0, 1);
         return (t_current());
       }
       break;

@@ -159,8 +159,6 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD_LITSTR(0x3E6BCFB9742FC700LL, NAMSTR(s_sys_ss742fc700, "offsetExists")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetExists", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -170,6 +168,8 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetExists", count, 1, 1, 1);
         return (t_offsetexists(a0));
       }
       break;
@@ -177,8 +177,6 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss2dc69ec2, "append")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ArrayIterator::append", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -188,27 +186,27 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::append", count, 1, 1, 1);
         return (t_append(a0), null);
       }
       break;
     case 4:
       HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ArrayIterator::valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::valid", 0, 1);
         return (t_valid());
       }
       HASH_GUARD_LITSTR(0x4842AF70A71BE6C4LL, NAMSTR(s_sys_ss58e4193c, "uksort")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ArrayIterator::uksort", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -218,20 +216,22 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::uksort", count, 1, 1, 1);
         return (t_uksort(a0));
       }
       break;
     case 6:
       HASH_GUARD_LITSTR(0x234F6A0A486E8646LL, NAMSTR(s_sys_ss486e8646, "natcasesort")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ArrayIterator::natcasesort", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::natcasesort", 0, 1);
         return (t_natcasesort());
       }
       break;
@@ -239,8 +239,6 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD_LITSTR(0x2FC3A6941D522E0ALL, NAMSTR(s_sys_ss1d522e0a, "setFlags")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ArrayIterator::setFlags", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -250,34 +248,36 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::setFlags", count, 1, 1, 1);
         return (t_setflags(a0), null);
       }
       break;
     case 16:
       HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss65104d10, "count")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ArrayIterator::count", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::count", 0, 1);
         return (t_count());
       }
       break;
     case 17:
       HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ArrayIterator::key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::key", 0, 1);
         return (t_key());
       }
       break;
@@ -285,8 +285,6 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD_LITSTR(0x61D11ECEF4404498LL, NAMSTR(s_sys_ss0bbfbb68, "offsetGet")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetGet", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -296,32 +294,34 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetGet", count, 1, 1, 1);
         return (t_offsetget(a0));
       }
       HASH_GUARD_LITSTR(0x70448A629A74FB18LL, NAMSTR(s_sys_ss658b04e8, "ksort")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ArrayIterator::ksort", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::ksort", 0, 1);
         return (t_ksort());
       }
       break;
     case 28:
       HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ArrayIterator::current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::current", 0, 1);
         return (t_current());
       }
       break;
@@ -330,8 +330,6 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 2) return throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -344,6 +342,8 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 2);
         if (count <= 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
@@ -352,8 +352,6 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD_LITSTR(0x6FACBD7F02B6FD60LL, NAMSTR(s_sys_ss02b6fd60, "uasort")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ArrayIterator::uasort", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -363,32 +361,34 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::uasort", count, 1, 1, 1);
         return (t_uasort(a0));
       }
       break;
     case 33:
       HASH_GUARD_LITSTR(0x0E210679B2DFD461LL, NAMSTR(s_sys_ss4d202b9f, "getArrayCopy")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ArrayIterator::getArrayCopy", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::getArrayCopy", 0, 1);
         return (t_getarraycopy());
       }
       HASH_GUARD_LITSTR(0x27E7DBA875AD17E1LL, NAMSTR(s_sys_ss75ad17e1, "getFlags")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ArrayIterator::getFlags", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::getFlags", 0, 1);
         return (t_getflags());
       }
       break;
@@ -396,8 +396,6 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ArrayIterator::seek", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -407,70 +405,70 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::seek", count, 1, 1, 1);
         return (t_seek(a0), null);
       }
       break;
     case 42:
       HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ArrayIterator::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 46:
       HASH_GUARD_LITSTR(0x790B7C44A3442BEELL, NAMSTR(s_sys_ss5cbbd412, "asort")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ArrayIterator::asort", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::asort", 0, 1);
         return (t_asort());
       }
       break;
     case 51:
       HASH_GUARD_LITSTR(0x7DB9D839ACE0DEB3LL, NAMSTR(s_sys_ss531f214d, "natsort")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ArrayIterator::natsort", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::natsort", 0, 1);
         return (t_natsort());
       }
       break;
     case 56:
       HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ArrayIterator::next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ArrayIterator::next", 0, 1);
         return (t_next());
       }
       HASH_GUARD_LITSTR(0x0957F693A48AF738LL, NAMSTR(s_sys_ss5b7508c8, "offsetSet")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ArrayIterator::offsetSet", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -483,6 +481,8 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("ArrayIterator::offsetSet", count, 2, 2, 1);
         return (t_offsetset(a0, a1));
       }
       break;
@@ -490,8 +490,6 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD_LITSTR(0x08329980E6369ABALL, NAMSTR(s_sys_ss19c96546, "offsetUnset")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetUnset", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -501,6 +499,8 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetUnset", count, 1, 1, 1);
         return (t_offsetunset(a0));
       }
       break;
@@ -1432,8 +1432,6 @@ void c_ArrayIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 2) throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -1446,6 +1444,8 @@ void c_ArrayIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 1);
   if (count <= 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
 }
@@ -1770,9 +1770,6 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss2dc69ec2, "append")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count < 1) return throw_missing_typed_argument("AppendIterator::append", "iterator", 1);
-        if (count > 1) return throw_toomany_arguments("AppendIterator::append", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1782,46 +1779,49 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_typed_argument("AppendIterator::append", "iterator", 1);
+        if (count > 1) return throw_toomany_arguments("AppendIterator::append", 1, 1);
         return (t_append(a0), null);
       }
       break;
     case 4:
       HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("AppendIterator::valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("AppendIterator::valid", 0, 1);
         return (t_valid());
       }
       HASH_GUARD_LITSTR(0x3106F858B09C7424LL, NAMSTR(s_sys_ss4f638bdc, "getInnerIterator")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("AppendIterator::getInnerIterator", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("AppendIterator::getInnerIterator", 0, 1);
         return (t_getinneriterator());
       }
       break;
     case 10:
       HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("AppendIterator::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("AppendIterator::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
@@ -1830,8 +1830,6 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("AppendIterator::__call", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -1844,62 +1842,64 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("AppendIterator::__call", count, 2, 2, 1);
         return (t___call(a0, a1));
       }
       break;
     case 17:
       HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("AppendIterator::key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("AppendIterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 24:
       HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("AppendIterator::next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("AppendIterator::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 28:
       HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("AppendIterator::current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("AppendIterator::current", 0, 1);
         return (t_current());
       }
       break;
     case 31:
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("AppendIterator::__construct", 0, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("AppendIterator::__construct", 0, 2);
         return (t___construct(), null);
       }
       break;
@@ -2298,14 +2298,14 @@ void c_AppendIterator::getConstructor(MethodCallPackage &mcp) {
 }
 void c_AppendIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) throw_toomany_arguments("AppendIterator::__construct", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) throw_toomany_arguments("AppendIterator::__construct", 0, 1);
   (t___construct(), null);
 }
 struct ObjectStaticCallbacks cw_AppendIterator = {
@@ -2684,14 +2684,14 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
     case 4:
       HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::valid", 0, 1);
         return (t_valid());
       }
       break;
@@ -2699,8 +2699,6 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
       HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("RecursiveDirectoryIterator::seek", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2710,132 +2708,134 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("RecursiveDirectoryIterator::seek", count, 1, 1, 1);
         return (t_seek(a0), null);
       }
       break;
     case 9:
       HASH_GUARD_LITSTR(0x430BA7B88ED3A809LL, NAMSTR(s_sys_ss712c57f7, "getSubPathname")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPathname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPathname", 0, 1);
         return (t_getsubpathname());
       }
       break;
     case 10:
       HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
     case 15:
       HASH_GUARD_LITSTR(0x732EC1BDA8EC520FLL, NAMSTR(s_sys_ss5713adf1, "getChildren")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getChildren", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getChildren", 0, 1);
         return (t_getchildren());
       }
       break;
     case 17:
       HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 19:
       HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 21:
       HASH_GUARD_LITSTR(0x40044334DA397C15LL, NAMSTR(s_sys_ss25c683eb, "hasChildren")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::hasChildren", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::hasChildren", 0, 1);
         return (t_haschildren());
       }
       break;
     case 24:
       HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 27:
       HASH_GUARD_LITSTR(0x7CF26A0E76B5E27BLL, NAMSTR(s_sys_ss76b5e27b, "getSubPath")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPath", 0, 1);
         return (t_getsubpath());
       }
       break;
     case 28:
       HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::current", 0, 1);
         return (t_current());
       }
       break;
@@ -2844,8 +2844,6 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 2) return throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2858,6 +2856,8 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 2);
         if (count <= 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
@@ -3395,8 +3395,6 @@ void c_RecursiveDirectoryIterator::dynConstructFromEval(Eval::VariableEnvironmen
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 2) throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -3409,6 +3407,8 @@ void c_RecursiveDirectoryIterator::dynConstructFromEval(Eval::VariableEnvironmen
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 1);
   if (count <= 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
 }
@@ -3594,14 +3594,14 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
     case 4:
       HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("DirectoryIterator::valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::valid", 0, 1);
         return (t_valid());
       }
       break;
@@ -3609,8 +3609,6 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("DirectoryIterator::seek", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3620,90 +3618,92 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("DirectoryIterator::seek", count, 1, 1, 1);
         return (t_seek(a0), null);
       }
       break;
     case 10:
       HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("DirectoryIterator::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
     case 17:
       HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("DirectoryIterator::key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 19:
       HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("DirectoryIterator::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 20:
       HASH_GUARD_LITSTR(0x08D1EA51B78DA5F4LL, NAMSTR(s_sys_ss48725a0c, "isDot")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::isDot", 0, 1);
         return (t_isdot());
       }
       break;
     case 24:
       HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("DirectoryIterator::next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 28:
       HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("DirectoryIterator::current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("DirectoryIterator::current", 0, 1);
         return (t_current());
       }
       break;
@@ -3711,8 +3711,6 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -3722,6 +3720,8 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       break;
@@ -4132,8 +4132,6 @@ void c_DirectoryIterator::getConstructor(MethodCallPackage &mcp) {
 void c_DirectoryIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -4143,6 +4141,8 @@ void c_DirectoryIterator::dynConstructFromEval(Eval::VariableEnvironment &env, c
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 1);
   (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_DirectoryIterator = {
@@ -4326,82 +4326,82 @@ Variant c_RecursiveIteratorIterator::o_invoke_from_eval(const char *s, Eval::Var
     case 1:
       HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::key", 0, 1);
         return (t_key());
       }
       break;
     case 4:
       HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::valid", 0, 1);
         return (t_valid());
       }
       HASH_GUARD_LITSTR(0x3106F858B09C7424LL, NAMSTR(s_sys_ss4f638bdc, "getInnerIterator")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::getInnerIterator", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::getInnerIterator", 0, 1);
         return (t_getinneriterator());
       }
       break;
     case 8:
       HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 10:
       HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
     case 12:
       HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::current", 0, 1);
         return (t_current());
       }
       break;
@@ -4411,8 +4411,6 @@ Variant c_RecursiveIteratorIterator::o_invoke_from_eval(const char *s, Eval::Var
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 3) return throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -4428,6 +4426,8 @@ Variant c_RecursiveIteratorIterator::o_invoke_from_eval(const char *s, Eval::Var
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 3) return throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 2);
         if (count <= 1) return (t___construct(a0), null);
         else if (count == 2) return (t___construct(a0, a1), null);
         else return (t___construct(a0, a1, a2), null);
@@ -4787,8 +4787,6 @@ void c_RecursiveIteratorIterator::dynConstructFromEval(Eval::VariableEnvironment
   Variant a1;
   Variant a2;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 3) throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -4804,6 +4802,8 @@ void c_RecursiveIteratorIterator::dynConstructFromEval(Eval::VariableEnvironment
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 3) throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 1);
   if (count <= 1) (t___construct(a0), null);
   else if (count == 2) (t___construct(a0, a1), null);
   else (t___construct(a0, a1, a2), null);

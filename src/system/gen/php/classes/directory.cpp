@@ -128,40 +128,40 @@ Variant c_Directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 1:
       HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
         return (t_close(), null);
       }
       HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_ss1b610cff, "read")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
         return (t_read());
       }
       break;
     case 2:
       HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
@@ -169,8 +169,6 @@ Variant c_Directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -180,6 +178,8 @@ Variant c_Directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       break;
@@ -396,8 +396,6 @@ void c_Directory::getConstructor(MethodCallPackage &mcp) {
 void c_Directory::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("Directory::__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -407,6 +405,8 @@ void c_Directory::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("Directory::__construct", count, 1, 1, 1);
   (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_Directory = {

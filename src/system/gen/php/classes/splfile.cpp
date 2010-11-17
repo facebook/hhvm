@@ -135,14 +135,14 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
     case 0:
       HASH_GUARD_LITSTR(0x09637D7CA2E33F00LL, NAMSTR(s_sys_ss5d1cc100, "fgetc")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
         return (t_fgetc());
       }
       break;
@@ -150,8 +150,6 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD_LITSTR(0x5ACCF9166CD9D043LL, NAMSTR(s_sys_ss6cd9d043, "ftruncate")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -161,32 +159,34 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
         return (t_ftruncate(a0));
       }
       HASH_GUARD_LITSTR(0x794FAFD4412AEFC3LL, NAMSTR(s_sys_ss412aefc3, "eof")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
         return (t_eof());
       }
       break;
     case 4:
       HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
         return (t_valid());
       }
       break;
@@ -195,8 +195,6 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -209,6 +207,8 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
         return (t_flock(a0, ref(a1)));
       }
       break;
@@ -217,8 +217,6 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -231,6 +229,8 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
         return (t_fseek(a0, a1));
       }
       break;
@@ -238,8 +238,6 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD_LITSTR(0x2FC3A6941D522E0ALL, NAMSTR(s_sys_ss1d522e0a, "setFlags")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("SplFileObject::setFlags", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -249,6 +247,8 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("SplFileObject::setFlags", count, 1, 1, 1);
         return (t_setflags(a0), null);
       }
       break;
@@ -258,8 +258,6 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 3) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -275,6 +273,8 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 3) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
         if (count <= 0) return (t_fgetcsv());
         else if (count == 1) return (t_fgetcsv(a0));
         else if (count == 2) return (t_fgetcsv(a0, a1));
@@ -284,14 +284,14 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
     case 15:
       HASH_GUARD_LITSTR(0x732EC1BDA8EC520FLL, NAMSTR(s_sys_ss5713adf1, "getChildren")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
         return (t_getchildren());
       }
       break;
@@ -301,8 +301,6 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 3) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -318,6 +316,8 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 3) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
         if (count <= 0) return (t_setcsvcontrol(), null);
         else if (count == 1) return (t_setcsvcontrol(a0), null);
         else if (count == 2) return (t_setcsvcontrol(a0, a1), null);
@@ -327,82 +327,82 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
     case 17:
       HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::key", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::key", 0, 1);
         return (t_key());
       }
       break;
     case 21:
       HASH_GUARD_LITSTR(0x40044334DA397C15LL, NAMSTR(s_sys_ss25c683eb, "hasChildren")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
         return (t_haschildren());
       }
       break;
     case 26:
       HASH_GUARD_LITSTR(0x25F68E7910FE9CDALL, NAMSTR(s_sys_ss10fe9cda, "getMaxLineLen")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
         return (t_getmaxlinelen());
       }
       HASH_GUARD_LITSTR(0x2B7CAC006AF27F9ALL, NAMSTR(s_sys_ss6af27f9a, "fflush")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
         return (t_fflush());
       }
       break;
     case 27:
       HASH_GUARD_LITSTR(0x5B33B55D4B7E339BLL, NAMSTR(s_sys_ss4b7e339b, "fpassthru")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
         return (t_fpassthru());
       }
       break;
     case 28:
       HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::current", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::current", 0, 1);
         return (t_current());
       }
       break;
@@ -410,8 +410,6 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD_LITSTR(0x3E4E7C561D3A541ELL, NAMSTR(s_sys_ss1d3a541e, "fgetss")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -421,6 +419,8 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
         return (t_fgetss(a0));
       }
       break;
@@ -431,8 +431,6 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a2;
         Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 4) return throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -451,6 +449,8 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 4) return throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
         if (count <= 1) return (t___construct(a0), null);
         else if (count == 2) return (t___construct(a0, a1), null);
         else if (count == 3) return (t___construct(a0, a1, a2), null);
@@ -460,28 +460,28 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
     case 33:
       HASH_GUARD_LITSTR(0x27E7DBA875AD17E1LL, NAMSTR(s_sys_ss75ad17e1, "getFlags")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
         return (t_getflags());
       }
       break;
     case 34:
       HASH_GUARD_LITSTR(0x6FE9F691E4A6D962LL, NAMSTR(s_sys_ss1b59269e, "getCsvControl")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
         return (t_getcsvcontrol());
       }
       break;
@@ -489,8 +489,6 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD_LITSTR(0x044B276686B77923LL, NAMSTR(s_sys_ss794886dd, "fscanf")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count < 1) return throw_missing_arguments("SplFileObject::fscanf", count+1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -501,6 +499,8 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           vargs.append((*it)->eval(env));
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_arguments("SplFileObject::fscanf", count+1, 1);
         if (count <= 1) return (t_fscanf(count, a0));
         return (t_fscanf(count, a0,vargs));
       }
@@ -510,8 +510,6 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -524,6 +522,8 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
         return (t_fwrite(a0, a1));
       }
       break;
@@ -531,8 +531,6 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("SplFileObject::seek", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -542,48 +540,50 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("SplFileObject::seek", count, 1, 1, 1);
         return (t_seek(a0), null);
       }
       break;
     case 42:
       HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
         return (t_rewind(), null);
       }
       break;
     case 45:
       HASH_GUARD_LITSTR(0x1C1216F2B7C16CADLL, NAMSTR(s_sys_ss483e9353, "ftell")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
         return (t_ftell());
       }
       break;
     case 51:
       HASH_GUARD_LITSTR(0x7AE1BE187F18FDF3LL, NAMSTR(s_sys_ss7f18fdf3, "fgets")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
         return (t_fgets());
       }
       break;
@@ -591,8 +591,6 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       HASH_GUARD_LITSTR(0x4CEC6AA30E43D437LL, NAMSTR(s_sys_ss0e43d437, "setMaxLineLen")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -602,32 +600,34 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
         return (t_setmaxlinelen(a0), null);
       }
       break;
     case 56:
       HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
         return (t_next(), null);
       }
       HASH_GUARD_LITSTR(0x0890F9052322E838LL, NAMSTR(s_sys_ss2322e838, "fstat")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
         return (t_fstat());
       }
       break;
@@ -1889,8 +1889,6 @@ void c_SplFileObject::dynConstructFromEval(Eval::VariableEnvironment &env, const
   Variant a2;
   Variant a3;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 4) throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -1909,6 +1907,8 @@ void c_SplFileObject::dynConstructFromEval(Eval::VariableEnvironment &env, const
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 4) throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 1);
   if (count <= 1) (t___construct(a0), null);
   else if (count == 2) (t___construct(a0, a1), null);
   else if (count == 3) (t___construct(a0, a1, a2), null);
@@ -2194,8 +2194,6 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD_LITSTR(0x5676046725D241C5LL, NAMSTR(s_sys_ss25d241c5, "setInfoClass")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2205,6 +2203,8 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         if (count <= 0) return (t_setinfoclass(), null);
         else return (t_setinfoclass(a0), null);
       }
@@ -2212,124 +2212,124 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 6:
       HASH_GUARD_LITSTR(0x6B2EAD4A44934786LL, NAMSTR(s_sys_ss44934786, "getRealPath")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       HASH_GUARD_LITSTR(0x1D3B08AA0AF50F06LL, NAMSTR(s_sys_ss0af50f06, "getType")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
       HASH_GUARD_LITSTR(0x1ADA46FCC8EFEC08LL, NAMSTR(s_sys_ss371013f8, "isDir")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 10:
       HASH_GUARD_LITSTR(0x01A800A73CD2604ALL, NAMSTR(s_sys_ss3cd2604a, "getInode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 13:
       HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d, "getFilename")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 14:
       HASH_GUARD_LITSTR(0x32ABF385AD4BE48ELL, NAMSTR(s_sys_ss52b41b72, "getOwner")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
       HASH_GUARD_LITSTR(0x569FC7D8E9401C4FLL, NAMSTR(s_sys_ss16bfe3b1, "isReadable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 19:
       HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 24:
       HASH_GUARD_LITSTR(0x1D5801BB72C51C58LL, NAMSTR(s_sys_ss72c51c58, "isLink")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
@@ -2337,8 +2337,6 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD_LITSTR(0x572E108C6731E29CLL, NAMSTR(s_sys_ss6731e29c, "getBasename")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2348,6 +2346,8 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         else return (t_getbasename(a0));
       }
@@ -2355,14 +2355,14 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 29:
       HASH_GUARD_LITSTR(0x4C43532D60465F1DLL, NAMSTR(s_sys_ss60465f1d, "isFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
@@ -2370,8 +2370,6 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2381,32 +2379,34 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       HASH_GUARD_LITSTR(0x4BC19906B553C59FLL, NAMSTR(s_sys_ss4aac3a61, "getATime")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 35:
       HASH_GUARD_LITSTR(0x638F2A56B8463A63LL, NAMSTR(s_sys_ss47b9c59d, "isWritable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
@@ -2414,8 +2414,6 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD_LITSTR(0x5948407CA9CC4DA5LL, NAMSTR(s_sys_ss5633b25b, "setFileClass")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2425,6 +2423,8 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         if (count <= 0) return (t_setfileclass(), null);
         else return (t_setfileclass(a0), null);
       }
@@ -2433,8 +2433,6 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD_LITSTR(0x00DCC39EDB16AFE7LL, NAMSTR(s_sys_ss24e95019, "getPathInfo")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2444,6 +2442,8 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         else return (t_getpathinfo(a0));
       }
@@ -2451,68 +2451,68 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 42:
       HASH_GUARD_LITSTR(0x0F9EDEC32565D86ALL, NAMSTR(s_sys_ss2565d86a, "getGroup")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
       HASH_GUARD_LITSTR(0x6615B5496D03A6EALL, NAMSTR(s_sys_ss6d03a6ea, "getSize")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
     case 43:
       HASH_GUARD_LITSTR(0x0D6276BAB75513ABLL, NAMSTR(s_sys_ss48aaec55, "getLinkTarget")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 47:
       HASH_GUARD_LITSTR(0x5640A4755D0078AFLL, NAMSTR(s_sys_ss5d0078af, "getCTime")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 52:
       HASH_GUARD_LITSTR(0x265BDC54C992EE74LL, NAMSTR(s_sys_ss366d118c, "getMTime")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
@@ -2522,8 +2522,6 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2539,6 +2537,8 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         if (count <= 0) return (t_openfile());
         else if (count == 1) return (t_openfile(a0));
         else if (count == 2) return (t_openfile(a0, a1));
@@ -2548,63 +2548,61 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 56:
       HASH_GUARD_LITSTR(0x25070641C3D924F8LL, NAMSTR(s_sys_ss3c26db08, "getPathname")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 58:
       HASH_GUARD_LITSTR(0x3786834B2A0CCB7ALL, NAMSTR(s_sys_ss2a0ccb7a, "isExecutable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 61:
       HASH_GUARD_LITSTR(0x4351578037A06E7DLL, NAMSTR(s_sys_ss37a06e7d, "getPerms")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
     case 63:
       HASH_GUARD_LITSTR(0x04C642C6C162243FLL, NAMSTR(s_sys_ss3e9ddbc1, "getPath")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       HASH_GUARD_LITSTR(0x7D50FA42F9D4923FLL, NAMSTR(s_sys_ss062b6dc1, "getFileInfo")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -2614,6 +2612,8 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
         else return (t_getfileinfo(a0));
       }
@@ -3755,8 +3755,6 @@ void c_SplFileInfo::getConstructor(MethodCallPackage &mcp) {
 void c_SplFileInfo::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
@@ -3766,6 +3764,8 @@ void c_SplFileInfo::dynConstructFromEval(Eval::VariableEnvironment &env, const E
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 1);
   (t___construct(a0), null);
 }
 struct ObjectStaticCallbacks cw_SplFileInfo = {

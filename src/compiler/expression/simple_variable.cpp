@@ -58,6 +58,24 @@ void SimpleVariable::updateSymbol(SimpleVariablePtr src) {
   }
 }
 
+bool SimpleVariable::couldBeAliased() const {
+  if (m_globals || m_superGlobal) return true;
+  assert(m_sym);
+  return m_sym->isReferenced() || m_sym->isGlobal() || m_sym->isStatic();
+}
+
+/*
+  This simple variable is about to go out of scope.
+  Is it ok to kill the last assignment?
+  What if its a reference assignment (or an unset)?
+*/
+bool SimpleVariable::canKill(bool isref) const {
+  if (m_globals || m_superGlobal) return false;
+  assert(m_sym);
+  return !m_sym->isGlobal() && !m_sym->isStatic() &&
+    (isref || !m_sym->isReferenced());
+}
+
 void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
   Expression::analyzeProgram(ar);
   m_superGlobal = BuiltinSymbols::IsSuperGlobal(m_name);

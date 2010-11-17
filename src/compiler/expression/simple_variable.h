@@ -39,6 +39,11 @@ public:
 
   virtual bool canonCompare(ExpressionPtr e) const;
   const std::string &getName() const { return m_name;}
+  Symbol *getSymbol() const { return m_sym; }
+
+  bool couldBeAliased() const;
+  bool canKill(bool unset) const;
+
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                       int state);
   bool checkUnused(AnalysisResultPtr) const;

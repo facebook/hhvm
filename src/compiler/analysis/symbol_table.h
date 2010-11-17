@@ -98,6 +98,7 @@ public:
   bool isSuperGlobal() const { return m_flags.m_superGlobal; }
   bool isOverride() const { return m_flags.m_override; }
   bool isIndirectAltered() const { return m_flags.m_indirectAltered; }
+  bool isReferenced() const { return m_flags.m_referenced; }
 
   void setParameterIndex(int ix) { m_parameter = ix; }
   void setProtected() { m_flags.m_protected = true; }
@@ -114,9 +115,11 @@ public:
   void setSuperGlobal() { m_flags.m_superGlobal = true; }
   void setOverride() { m_flags.m_override = true; }
   void setIndirectAltered() { m_flags.m_indirectAltered = true; }
+  void setReferenced() { m_flags.m_referenced = true; }
 
   void clearUsed() { m_flags.m_used = false; }
   void clearNeeded() { m_flags.m_needed = false; }
+  void clearReferenced() { m_flags.m_referenced = false; }
 
   void update(Symbol *src) {
     m_flags_val = src->m_flags_val;
@@ -171,6 +174,7 @@ private:
       unsigned m_superGlobal : 1;
       unsigned m_override : 1;
       unsigned m_indirectAltered : 1;
+      unsigned m_referenced : 1;
     } m_flags;
   };
   ConstructPtr        m_declaration;

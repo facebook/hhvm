@@ -64,32 +64,6 @@ class BucketMapEntry {
   size_t                m_num;
 };
 
-class AliasInfo {
- public:
-  AliasInfo() : m_refLevels(0), m_isRefTo(false),
-    m_isParam(false), m_isGlobal(false) {}
- public:
-  void setRefLevels(unsigned rl) { m_refLevels = rl; }
-  void clearRefLevel(int l) { m_refLevels &= ~(1u << l); }
-  void addRefLevel(int l) { m_refLevels |= 1u << l; }
-  unsigned getRefLevels() { return m_refLevels; }
-  bool checkRefLevel(int l) { return (m_refLevels & (1u << l)) != 0; }
-
-  bool getIsRefTo() const { return m_isRefTo; }
-  void setIsRefTo(bool ref = true) { m_isRefTo = ref; }
-
-  bool getIsParam() const { return m_isParam; }
-  void setIsParam(bool p = true) { m_isParam = p; }
-
-  bool getIsGlobal() const { return m_isGlobal; }
-  void setIsGlobal(bool g = true) { m_isGlobal = g; }
- private:
-  unsigned m_refLevels;
-  bool m_isRefTo;
-  bool m_isParam;
-  bool m_isGlobal;
-};
-
 class AliasManager {
  public:
   AliasManager();
@@ -129,7 +103,6 @@ class AliasManager {
   };
 
   typedef std::map<unsigned, BucketMapEntry> BucketMap;
-  typedef std::map<std::string, AliasInfo> AliasInfoMap;
   typedef std::vector<CondStackElem> CondStack;
   typedef std::vector<LoopInfo> LoopInfoVec;
 
@@ -175,7 +148,6 @@ class AliasManager {
   int                   m_changes;
   int                   m_replaced;
   bool                  m_wildRefs;
-  AliasInfoMap          m_aliasInfo;
 
   AnalysisResultPtr     m_arp;
   VariableTablePtr      m_variables;

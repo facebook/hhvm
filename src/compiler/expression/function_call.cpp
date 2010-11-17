@@ -19,6 +19,7 @@
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/function_scope.h>
+#include <compiler/analysis/variable_table.h>
 #include <compiler/statement/statement.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/expression/expression_list.h>
@@ -125,6 +126,11 @@ void FunctionCall::markRefParams(FunctionScopePtr func,
       if (i < mpc ? func->isRefParam(i) :
           func->isReferenceVariableArgument()) {
         p->setContext(Expression::RefValue);
+      } else if (i < mpc && p->hasContext(RefParameter)) {
+        Symbol *sym = func->getVariables()->getSymbol(
+          func->getParamName(i), true);
+        sym->setLvalParam();
+        sym->setCallTimeRef();
       }
     }
   } else if (!m_name.empty()) {

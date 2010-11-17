@@ -555,8 +555,7 @@ void VariableTable::addUsed(const string &name) {
   getSymbol(name, true)->setUsed();
 }
 
-void VariableTable::addNeeded(const string &name)
-{
+void VariableTable::addNeeded(const string &name) {
   getSymbol(name, true)->setNeeded();
 }
 
@@ -571,12 +570,17 @@ bool VariableTable::checkUnused(Symbol *sym) {
   return false;
 }
 
-void VariableTable::clearUsed()
-{
+void VariableTable::clearUsed() {
   typedef std::pair<const string,Symbol> symPair;
+  bool ps = isPseudoMainTable();
   BOOST_FOREACH(symPair &sym, m_symbolMap) {
-    sym.second.clearUsed();
-    sym.second.clearNeeded();
+    if (!ps) {
+      sym.second.clearUsed();
+      sym.second.clearNeeded();
+      sym.second.clearReferenced();
+    } else {
+      sym.second.setReferenced();
+    }
   }
 }
 

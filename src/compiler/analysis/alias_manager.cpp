@@ -332,7 +332,6 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
           return DisjointAccess;
         }
         SimpleVariablePtr sv1 = spc(SimpleVariable, e1);
-        AliasInfo &ai1 = m_aliasInfo[sv1->getName()];
         switch (k2) {
         case Expression::KindOfSimpleVariable:
           {
@@ -340,16 +339,10 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
             if (sv1->getName() == sv2->getName()) {
               return SameAccess;
             }
-            AliasInfo &ai2 = m_aliasInfo[sv2->getName()];
 
-            if (ai1.getIsRefTo() || ai1.getIsGlobal()) {
-              return m_wildRefs || ai2.getIsGlobal() || ai2.checkRefLevel(0) ?
-                InterfAccess : DisjointAccess;
-            }
-
-            if (ai2.getIsRefTo() || ai2.getIsGlobal()) {
-              return m_wildRefs || ai1.getIsGlobal() || ai1.checkRefLevel(0) ?
-                InterfAccess : DisjointAccess;
+            if (m_wildRefs ||
+                (sv1->couldBeAliased() && sv2->couldBeAliased())) {
+              return InterfAccess;
             }
           }
           return DisjointAccess;
@@ -358,8 +351,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
           return InterfAccess;
 
         case Expression::KindOfArrayElementExpression:
-          if (ai1.getIsRefTo() || ai1.getIsGlobal() ||
-              m_wildRefs || ai1.checkRefLevel(0)) {
+          if (m_wildRefs || sv1->couldBeAliased()) {
             return InterfAccess;
           } else {
             // $a = "foo"; $a[0] = "x";
@@ -373,7 +365,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
         case Expression::KindOfStaticMemberExpression:
         case Expression::KindOfObjectPropertyExpression:
         default:
-          if (ai1.getIsRefTo() || ai1.getIsGlobal() || m_wildRefs) {
+          if (m_wildRefs || sv1->couldBeAliased()) {
             return InterfAccess;
           }
           return DisjointAccess;
@@ -449,12 +441,7 @@ void AliasManager::cleanInterf(ExpressionPtr load,
 
 bool AliasManager::okToKill(ExpressionPtr ep, bool killRef) {
   if (ep && ep->is(Expression::KindOfSimpleVariable)) {
-    SimpleVariablePtr sv = spc(SimpleVariable, ep);
-    AliasInfo &ai = m_aliasInfo[sv->getName()];
-    if (!ai.getIsGlobal() && !ai.getIsParam() &&
-        (killRef || (!ai.checkRefLevel(0) && !ai.getIsRefTo()))) {
-      return true;
-    }
+    return spc(SimpleVariable, ep)->canKill(killRef);
   }
   return false;
 }
@@ -849,15 +836,14 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
               case Expression::KindOfAssignmentExpression:
               {
                 /*
-                  Handling unset of an variable which hasnt been
+                  Handling unset of a variable which hasnt been
                   used since it was last assigned
                 */
-                if (!e->is(Expression::KindOfSimpleVariable)) break;
-                const string &name = spc(SimpleVariable, e)->getName();
-                AliasInfo &ai = m_aliasInfo[name];
-                if (ai.getIsRefTo() || ai.getRefLevels()) {
+                if (!e->is(Expression::KindOfSimpleVariable) ||
+                    spc(SimpleVariable, e)->couldBeAliased()) {
                   break;
                 }
+
                 AssignmentExpressionPtr a = spc(AssignmentExpression, rep);
                 ExpressionPtr value = a->getValue();
                 if (value->getContext() & Expression::RefValue) {
@@ -1154,7 +1140,7 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
           the first $a is evaluated after the assignment. But in:
           ($a + 1) + ($a = 5)
           the first $a is evaluated before the assignment.
-          To deal with this, if we're not dealing with an parameter list, and
+          To deal with this, if we're not dealing with a parameter list, and
           there's more than one child node, we do two passes, and process the
           simple variables on the second pass.
         */
@@ -1356,11 +1342,11 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         ExpressionPtr var = ae->getVariable();
         ExpressionPtr val = ae->getValue();
         if (var->is(Expression::KindOfSimpleVariable)) {
-          const std::string &name = spc(SimpleVariable, var)->getName();
-          AliasInfo &ai = m_aliasInfo[name];
           if (val->getContext() & Expression::RefValue) {
-            ai.setIsRefTo();
-            m_variables->addUsed(name);
+            if (Symbol *sym = spc(SimpleVariable, var)->getSymbol()) {
+              sym->setReferenced();
+              sym->setUsed();
+            }
           } else {
             Expression::CheckNeeded(m_arp, var, val);
           }
@@ -1375,24 +1361,23 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
           ExpressionPtr v = (*vars)[i];
           if (v && v->is(Expression::KindOfSimpleVariable)) {
             SimpleVariablePtr sv = spc(SimpleVariable, v);
-            m_variables->addNeeded(sv->getName());
+            if (Symbol *sym = spc(SimpleVariable, v)->getSymbol()) {
+              sym->setNeeded();
+            }
           }
         }
       }
       break;
     case Expression::KindOfSimpleVariable:
       {
-        const std::string &name = spc(SimpleVariable, e)->getName();
-        AliasInfo &ai = m_aliasInfo[name];
-        if (spc(SimpleVariable, e)->isSuperGlobal()) {
-          ai.setIsGlobal();
-        }
-        if (context & Expression::RefValue) {
-          ai.addRefLevel(0);
-        }
-        if (!(context & (Expression::AssignmentLHS |
-                         Expression::UnsetContext))) {
-          m_variables->addUsed(name);
+        if (Symbol *sym = spc(SimpleVariable, e)->getSymbol()) {
+          if (context & Expression::RefValue) {
+            sym->setReferenced();
+          }
+          if (!(context & (Expression::AssignmentLHS |
+                           Expression::UnsetContext))) {
+            sym->setUsed();
+          }
         }
       }
       break;
@@ -1409,12 +1394,12 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
           e = spc(ArrayElementExpression, e)->getVariable();
         }
         if (e->is(Expression::KindOfSimpleVariable)) {
-          const std::string &name = spc(SimpleVariable, e)->getName();
-          if (context & Expression::RefValue) {
-            AliasInfo &ai = m_aliasInfo[name];
-            ai.addRefLevel(n);
+          if (Symbol *sym = spc(SimpleVariable, e)->getSymbol()) {
+            if (context & Expression::RefValue) {
+              sym->setReferenced();
+            }
+            sym->setUsed(); // need this for UnsetContext
           }
-          m_variables->addUsed(name); // need this for UnsetContext
         }
       }
       break;
@@ -1422,12 +1407,12 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       {
         e = spc(ObjectPropertyExpression, e)->getObject();
         if (e->is(Expression::KindOfSimpleVariable)) {
-          const std::string &name = spc(SimpleVariable, e)->getName();
-          if (context & Expression::RefValue) {
-            AliasInfo &ai = m_aliasInfo[name];
-            ai.addRefLevel(1);
+          if (Symbol *sym = spc(SimpleVariable, e)->getSymbol()) {
+            if (context & Expression::RefValue) {
+              sym->setReferenced();
+            }
+            sym->setUsed(); // need this for UnsetContext
           }
-          m_variables->addUsed(name); // need this for UnsetContext
         }
       }
       break;
@@ -1437,7 +1422,8 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
   } else {
     StatementPtr s = spc(Statement, cs);
     bool inlineOk = false;
-    switch (s->getKindOf()) {
+    Statement::KindOf skind = s->getKindOf();
+    switch (skind) {
     case Statement::KindOfGlobalStatement:
     case Statement::KindOfStaticStatement:
       {
@@ -1448,11 +1434,13 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
             e = ae->getVariable();
           }
           if (SimpleVariablePtr sv = dpc(SimpleVariable, e)) {
-            m_aliasInfo[sv->getName()].setIsGlobal();
-            if (s->is(Statement::KindOfStaticStatement) &&
-                !m_variables->isPseudoMainTable()) {
-              m_variables->addStaticVariable(
-                m_variables->getSymbol(sv->getName(), true), m_arp);
+            if (Symbol *sym = sv->getSymbol()) {
+              sym->setReferenced();
+              if (skind == Statement::KindOfGlobalStatement) {
+                sym->setGlobal();
+              } else if (!m_variables->isPseudoMainTable()) {
+                m_variables->addStaticVariable(sym, m_arp);
+              }
             }
           }
         }
@@ -1499,18 +1487,16 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
 
   FunctionScopePtr func = m->getFunctionScope();
   m_variables = func->getVariables();
-  if (!m_variables->isPseudoMainTable()) {
-    m_variables->clearUsed();
-  }
+  m_variables->clearUsed();
 
   if (ExpressionListPtr pPtr = m->getParams()) {
     ExpressionList &params = *pPtr;
     for (int i = params.getCount(); i--; ) {
       ParameterExpressionPtr p = spc(ParameterExpression, params[i]);
-      AliasInfo &ai = m_aliasInfo[p->getName()];
-      ai.setIsParam(true);
-      if (p->isRef()) {
-        ai.setIsRefTo();
+      if (Symbol *sym = m_variables->getSymbol(p->getName())) {
+        if (sym->isCallTimeRef() || p->isRef()) {
+          sym->setReferenced();
+        }
       }
     }
   }
@@ -1530,15 +1516,6 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
     func->setInlineAsExpr(m_inlineAsExpr);
   }
 
-  for (AliasInfoMap::iterator it = m_aliasInfo.begin(),
-         end = m_aliasInfo.end(); it != end; ++it) {
-    if (m_variables->isPseudoMainTable() ||
-        m_variables->isGlobal(it->first) ||
-        m_variables->isStatic(it->first)) {
-      it->second.setIsGlobal();
-    }
-  }
-
   if (Option::LocalCopyProp || Option::EliminateDeadCode) {
     canonicalizeRecur(m->getStmts());
     killLocals();
@@ -1550,10 +1527,11 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
       if (func->isRefReturn()) {
         m_nrvoFix = -1;
       } else if (m_nrvoFix > 0) {
-        AliasInfo &ai = m_aliasInfo[m_returnVar];
-        if (!ai.getIsParam() &&
-            (m_wildRefs || ai.getRefLevels() ||
-             (ai.getIsGlobal() && m_variables->needLocalCopy(m_returnVar)))) {
+        Symbol *sym = m_variables->getSymbol(m_returnVar);
+        if (sym && !sym->isParameter() &&
+            (m_wildRefs || sym->isReferenced() ||
+             ((sym->isGlobal() || sym->isStatic()) &&
+              m_variables->needLocalCopy(sym)))) {
           // do nothing
         } else {
           m_nrvoFix = -1;
@@ -1646,11 +1624,7 @@ void AliasManager::stringOptsRecur(ExpressionPtr e, bool ok) {
         ExpressionPtr var = b->getExp1();
         if (var->is(Expression::KindOfSimpleVariable)) {
           SimpleVariablePtr s(spc(SimpleVariable,var));
-          AliasInfo &ai = m_aliasInfo[s->getName()];
-          if (!ai.getIsGlobal() &&
-              !ai.getIsParam() &&
-              !ai.getRefLevels() &&
-              !ai.getIsRefTo()) {
+          if (!s->couldBeAliased()) {
             LoopInfo &li = m_loopInfo.back();
             if (li.m_excluded.find(s->getName()) ==
                 li.m_excluded.end()) {

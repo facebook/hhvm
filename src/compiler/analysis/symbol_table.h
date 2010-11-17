@@ -116,6 +116,10 @@ public:
   void clearUsed() { m_flags.m_used = false; }
   void clearNeeded() { m_flags.m_needed = false; }
 
+  void update(Symbol *src) {
+    m_flags_val = src->m_flags_val;
+  }
+
   ConstructPtr getStaticInitVal() const {
     return m_flags.m_hasStaticInit ? m_initVal : ConstructPtr();
   }
@@ -151,7 +155,6 @@ private:
       unsigned m_dynamic : 1;
 
       /* VariableTable */
-      unsigned m_parameter : 1;
       unsigned m_protected : 1;
       unsigned m_private : 1;
       unsigned m_static : 1;

@@ -400,10 +400,11 @@ static ExpressionPtr cloneForInlineRecur(ExpressionPtr exp,
       SimpleVariablePtr sv(dynamic_pointer_cast<SimpleVariable>(exp));
       if (!sv->isThis() && !sv->isSuperGlobal()) {
         string name = prefix + sv->getName();
-        ExpressionPtr rep(new SimpleVariable(
-                            exp->getScope(), exp->getLocation(),
-                            exp->getKindOf(), name));
-        rep->copyContext(exp);
+        SimpleVariablePtr rep(new SimpleVariable(
+                                exp->getScope(), exp->getLocation(),
+                                exp->getKindOf(), name));
+        rep->copyContext(sv);
+        rep->updateSymbol(SimpleVariablePtr());
         sepm[name] = rep;
         exp = rep;
       }
@@ -542,6 +543,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
                           (i < nAct ? arg.get() : this)->getLocation(),
                           KindOfSimpleVariable,
                           prefix + param->getName()));
+    var->updateSymbol(SimpleVariablePtr());
     bool ref = m_funcScope->isRefParam(i);
     AssignmentExpressionPtr ae
       (new AssignmentExpression(getScope(),

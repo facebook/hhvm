@@ -44,6 +44,7 @@ public:
   bool checkUnused(AnalysisResultPtr) const;
   bool getAlwaysStash() const { return m_alwaysStash; }
   void setAlwaysStash() { m_alwaysStash = true; }
+  void updateSymbol(SimpleVariablePtr src);
 private:
   std::string m_name;
   std::string m_text;

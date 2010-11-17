@@ -51,6 +51,13 @@ ExpressionPtr SimpleVariable::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
+void SimpleVariable::updateSymbol(SimpleVariablePtr src) {
+  m_sym = getScope()->getVariables()->getSymbol(m_name, true);
+  if (src && src->m_sym) {
+    m_sym->update(src->m_sym);
+  }
+}
+
 void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
   Expression::analyzeProgram(ar);
   m_superGlobal = BuiltinSymbols::IsSuperGlobal(m_name);

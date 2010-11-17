@@ -337,6 +337,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
           String content = context->obDetachContents();
           transport->sendRaw((void*)content.data(), content.size());
         } else {
+          Logger::Error("Unable to invoke error page %s", errorPage.c_str());
           errorPage.clear(); // so we fall back to 500 return
         }
       }

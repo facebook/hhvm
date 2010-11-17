@@ -2334,7 +2334,7 @@ namespace hphp_impl_splitter {}
 void c_AppendIterator::t_append(CVarRef v_it) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::append);
   if(!v_it.instanceof(NAMSTR(s_sys_ss4af9d29e, "iterator"))) {
-    throw_unexpected_argument_type(0,"append","iterator",v_it);
+    throw_unexpected_argument_type(1,"AppendIterator::append()","iterator",v_it);
     return;
   }
   {

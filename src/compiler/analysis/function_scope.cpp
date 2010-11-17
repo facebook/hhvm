@@ -442,6 +442,11 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
   bool canSetParamType = isUserFunction() && !m_overriding && !m_perfectVirtual;
   for (int i = 0; i < params->getCount(); i++) {
     ExpressionPtr param = (*params)[i];
+    if (param->hasContext(Expression::RefParameter)) {
+      Symbol *sym = getVariables()->getSymbol(m_paramNames[i], true);
+      sym->setLvalParam();
+      sym->setCallTimeRef();
+    }
     if (valid && param->hasContext(Expression::InvokeArgument)) {
       param->clearContext(Expression::InvokeArgument);
       param->clearContext(Expression::RefValue);

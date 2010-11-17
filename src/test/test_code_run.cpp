@@ -763,6 +763,13 @@ bool TestCodeRun::TestArgumentHandling() {
        "var_dump(strlen('test', 123));\n"
        "var_dump(test('test', 123));\n"
       );
+
+  MVCR("<?php "
+       "function f($x) { $b = $x; $b++; }"
+       "$a = 1;"
+       "f(&$a);"
+       "var_dump($a);");
+
   return true;
 }
 

@@ -92,6 +92,7 @@ public:
   bool isLocalGlobal() const { return m_flags.m_localGlobal; }
   bool isNestedStatic() const { return m_flags.m_nestedStatic; }
   bool isLvalParam() const { return m_flags.m_lvalParam; }
+  bool isCallTimeRef() const { return m_flags.m_callTimeRef; }
   bool isUsed() const { return m_flags.m_used; }
   bool isNeeded() const { return m_flags.m_needed; }
   bool isSuperGlobal() const { return m_flags.m_superGlobal; }
@@ -107,6 +108,7 @@ public:
   void setLocalGlobal() { m_flags.m_localGlobal = true; }
   void setNestedStatic() { m_flags.m_nestedStatic = true; }
   void setLvalParam() { m_flags.m_lvalParam = true; }
+  void setCallTimeRef() { m_flags.m_callTimeRef = true; }
   void setUsed() { m_flags.m_used = true; }
   void setNeeded() { m_flags.m_needed = true; }
   void setSuperGlobal() { m_flags.m_superGlobal = true; }
@@ -163,6 +165,7 @@ private:
       unsigned m_localGlobal : 1;
       unsigned m_nestedStatic : 1;
       unsigned m_lvalParam : 1;
+      unsigned m_callTimeRef : 1;
       unsigned m_used : 1;
       unsigned m_needed : 1;
       unsigned m_superGlobal : 1;

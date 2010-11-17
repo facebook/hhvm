@@ -1011,47 +1011,16 @@ int AnalysisResult::getScalarArrayId(const string &text) {
 
 void AnalysisResult::outputCPPNamedScalarArrays(const std::string &file) {
   AnalysisResultPtr ar = shared_from_this();
-  string filename = file + ".h";
+
+  string filename = file + ".no.cpp";
   ofstream f(filename.c_str());
   CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
 
   cg_printf("\n");
-  if (Option::SystemGen) {
-    cg_printf("#ifndef __GENERATED_gen_sys_scalar_arrays_h__\n");
-    cg_printf("#define __GENERATED_gen_sys_scalar_arrays_h__\n");
-  } else {
-    cg_printf("#ifndef __GENERATED_sys_scalar_arrays_h__\n");
-    cg_printf("#define __GENERATED_sys_scalar_arrays_h__\n");
-  }
   cg_printInclude("<runtime/base/hphp.h>");
   if (!Option::SystemGen) {
     cg_printInclude("<sys/global_variables.h>");
   }
-  cg_printf("\n");
-  cg.printImplStarter();
-  cg.namespaceBegin();
-  for (map<int, vector<string> >::const_iterator it =
-       m_namedScalarArrays.begin(); it != m_namedScalarArrays.end();
-       it++) {
-    int hash = it->first;
-    vector<string> &strings = m_namedScalarArrays[hash];
-    for (unsigned int i = 0; i < strings.size(); i++) {
-      string name = getScalarArrayName(hash, i);
-      cg_printf("extern StaticArray %s;\n", name.c_str());
-    }
-  }
-  cg.namespaceEnd();
-  if (Option::SystemGen) {
-    cg_printf("#endif // __GENERATED_gen_sys_scalar_arrays_h__\n");
-  } else {
-    cg_printf("#endif // __GENERATED_sys_scalar_arrays_h__\n");
-  }
-  f.close();
-
-  filename = file + ".no.cpp";
-  f.open(filename.c_str());
-  cg_printf("\n");
-  cg_printInclude(string(Option::SystemFilePrefix) + "scalar_arrays.h");
   cg_printf("\n");
   cg.namespaceBegin();
   for (map<int, vector<string> >::const_iterator it =

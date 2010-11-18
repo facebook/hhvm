@@ -81,10 +81,7 @@ public:
   void setModifiers(int m) { m_modifiers = m; }
   int getModifiers() const { return m_modifiers; }
   void addBases(const std::vector<String> &bases);
-  void addVariable(ClassVariablePtr v) {
-    m_variables[v->name().c_str()] = v;
-    m_variablesVec.push_back(v);
-  }
+  void addVariable(ClassVariablePtr v);
   void addMethod(MethodStatementPtr m);
   void addConstant(const std::string &name, ExpressionPtr v);
 

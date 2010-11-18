@@ -342,6 +342,17 @@ void ClassStatement::addBases(const std::vector<String> &bases) {
   }
 }
 
+void ClassStatement::addVariable(ClassVariablePtr v) {
+  if (getModifiers() & Interface) {
+    throw FatalErrorException(0, "Interface %s may not include member "
+                              "variable %s", name().c_str(),
+                              v->name().c_str());
+  }
+
+  m_variables[v->name().c_str()] = v;
+  m_variablesVec.push_back(v);
+}
+
 void ClassStatement::addMethod(MethodStatementPtr m) {
   if (m_methods.find(m->lname().c_str()) != m_methods.end()) {
     raise_error("Cannot redeclare %s::%s() in %s on line %d",
@@ -766,6 +777,7 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
         }
       }
     }
+
     // Property check
     for (vector<ClassVariablePtr>::const_iterator it = m_variablesVec.begin();
         it != m_variablesVec.end(); ++it) {
@@ -885,8 +897,8 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
         if (!p2) p2 = Public;
         if (p1 > p2) {
           const char *pn;
-          if (p1 == Private) pn = "private";
-          else if (p1 == Protected) pn = "protected";
+          if (p2 == Private) pn = "private";
+          else if (p2 == Protected) pn = "protected";
           else pn = "public";
           // Illegal strengthening of privacy
           raise_error("Access level to %s::%s() must be %s (as in class %s) "

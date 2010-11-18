@@ -144,13 +144,12 @@ bool Option::PreOptimization = false;
 bool Option::PostOptimization = false;
 bool Option::ScalarArrayOptimization = true;
 bool Option::ScalarArrayCompression = true;
-bool Option::LiteralStringCompression = true;
 int Option::ScalarArrayFileCount = 1;
 int Option::ScalarArrayOverflowLimit = 2000;
 bool Option::SeparateCompilation = false;
 bool Option::SeparateCompLib = false;
 bool Option::UseNamedScalarArray = true;
-int Option::LiteralStringFileCount = 50;
+int Option::LiteralStringFileCount = 10;
 bool Option::AnalyzePerfectVirtuals = true;
 bool Option::HardTypeHints = true;
 
@@ -353,8 +352,8 @@ void Option::Load(Hdf &config) {
 
   ScalarArrayFileCount = config["ScalarArrayFileCount"].getByte(1);
   if (ScalarArrayFileCount <= 0) ScalarArrayFileCount = 1;
-  LiteralStringFileCount = config["LiteralStringFileCount"].getInt32(1);
-  if (LiteralStringFileCount <= 0) LiteralStringFileCount = 1;
+  LiteralStringFileCount = config["LiteralStringFileCount"].getInt32(10);
+  if (LiteralStringFileCount <= 0) LiteralStringFileCount = 10;
   HardTypeHints = config["HardTypeHints"].getBool(true);
   ScalarArrayOverflowLimit = config["ScalarArrayOverflowLimit"].getInt32(2000);
   if (ScalarArrayOverflowLimit <= 0) ScalarArrayOverflowLimit = 2000;

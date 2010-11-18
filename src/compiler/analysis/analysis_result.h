@@ -302,7 +302,6 @@ public:
    */
   std::string getLiteralStringName(int hash, int index);
   int getLiteralStringId(const std::string &s, int &index);
-  void getLiteralStringCompressed(std::string &zsdata, std::string &zldata);
 
   /**
    * Profiling runtime parameter type

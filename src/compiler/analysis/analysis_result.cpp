@@ -1749,8 +1749,7 @@ void AnalysisResult::outputCPPUtilDecl(CodeGenerator::Output output) {
   ofstream f(headerPath.c_str());
   CodeGenerator cg(&f, output);
   cg_printf("\n");
-  cg_printf("#ifndef __GENERATED_cpputil_h__\n");
-  cg_printf("#define __GENERATED_cpputil_h__\n");
+  cg.headerBegin(filename);
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printf("\n");
   cg.printImplStarter();
@@ -1762,7 +1761,7 @@ void AnalysisResult::outputCPPUtilDecl(CodeGenerator::Output output) {
     outputArrayCreateDecl(cg);
   }
   cg.namespaceEnd();
-  cg_printf("#endif // __GENERATED_cpputil_h__\n");
+  cg.headerEnd(filename);
 }
 
 void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
@@ -2385,7 +2384,7 @@ void AnalysisResult::outputCPPSystem() {
   ofstream fSystemImpl(implPath.c_str());
   cg.setStream(CodeGenerator::ImplFile, &fSystemImpl);
 
-  cg.headerBegin(filename.c_str());
+  cg.headerBegin(filename);
   BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
     cg_printInclude(fs->outputFilebase());
   }
@@ -2399,7 +2398,7 @@ void AnalysisResult::outputCPPSystem() {
   getConstants()->outputCPP(cg, ar);
   cg.namespaceEnd();
 
-  cg.headerEnd(filename.c_str());
+  cg.headerEnd(filename);
 
   cg.setContext(CodeGenerator::CppImplementation);
   cg.useStream(CodeGenerator::ImplFile);
@@ -2545,36 +2544,6 @@ string AnalysisResult::getScalarArrayCompressedText() {
   return string(zd, len);
 }
 
-void AnalysisResult::getLiteralStringCompressed(std::string &zsdata,
-                                                std::string &zldata) {
-  int nstrings = m_stringLiterals.size();
-  ASSERT(nstrings > 0);
-  string *sortedById = new string[nstrings];
-  for (map<string, int>::const_iterator it = m_stringLiterals.begin();
-       it != m_stringLiterals.end(); ++it) {
-    int index = it->second;
-    ASSERT(0 <= index && index < nstrings);
-    sortedById[index] = it->first;
-  }
-  string sdata;
-  string ldata;
-  for (int i = 0; i < nstrings; i++) {
-    sdata += sortedById[i];
-    sdata += string("\0", 1);
-
-    int size = sortedById[i].size();
-    char buf[sizeof(size)];
-    memcpy(buf, &size, sizeof(size));
-    ldata += string(buf, sizeof(size));
-  }
-  int sdlen = sdata.size();
-  char *zsd = gzencode(sdata.data(), sdlen, 9, CODING_GZIP);
-  int ldlen = ldata.size();
-  char *zld = gzencode(ldata.data(), ldlen, 9, CODING_GZIP);
-  zsdata = string(zsd, sdlen);
-  zldata = string(zld, ldlen);
-}
-
 void AnalysisResult::outputCPPScalarArrayImpl(CodeGenerator &cg) {
   if (m_scalarArrayIds.size() == 0) return;
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
@@ -2710,7 +2679,7 @@ void AnalysisResult::outputCPPGlobalDeclarations() {
   ofstream f(headerPath.c_str());
   CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
 
-  cg.headerBegin(filename.c_str());
+  cg.headerBegin(filename);
   cg_printInclude("<runtime/base/hphp.h>");
 
   // This isn't necessarily the right place for separable extension's
@@ -2741,7 +2710,7 @@ void AnalysisResult::outputCPPGlobalDeclarations() {
     }
   }
   cg.namespaceEnd();
-  cg.headerEnd(filename.c_str());
+  cg.headerEnd(filename);
   f.close();
 }
 
@@ -3758,17 +3727,12 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
   CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
 
   cg_printf("\n");
-  if (Option::SystemGen) {
-    cg_printf("#ifndef __GENERATED_gen_sys_literal_strings_h__\n");
-    cg_printf("#define __GENERATED_gen_sys_literal_strings_h__\n");
-  } else {
-    cg_printf("#ifndef __GENERATED_sys_literal_strings_h__\n");
-    cg_printf("#define __GENERATED_sys_literal_strings_h__\n");
-  }
+  cg.headerBegin(filename);
   if (!genStatic) {
     cg_printInclude("<runtime/base/hphp.h>");
     cg_printf("\n");
   }
+  int nstrings = 0;
   cg.printImplStarter();
   cg.namespaceBegin();
   for (map<int, vector<string> >::const_iterator it =
@@ -3786,23 +3750,21 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
         cg_printf("extern StaticString %s;\n", name.c_str());
       }
     }
+    nstrings += strings.size();
   }
   cg.namespaceEnd();
-  if (Option::SystemGen) {
-    cg_printf("#endif // __GENERATED_gen_sys_literal_strings_h__\n");
-  } else {
-    cg_printf("#endif // __GENERATED_sys_literal_strings_h__\n");
-  }
+  cg.headerEnd(filename);
   f.close();
 
-  if (genStatic) return;
+  if (genStatic || nstrings == 0) return;
 
-  filename = file + ".no.cpp";
-  f.open(filename.c_str());
-  cg_printf("\n");
-  cg_printInclude("\"literal_strings.h\"");
-  cg_printf("\n");
-  cg.namespaceBegin();
+  int chunkSize = (nstrings + Option::LiteralStringFileCount) /
+                  Option::LiteralStringFileCount;
+  if (chunkSize < Option::LiteralStringFileCount) {
+    chunkSize = Option::LiteralStringFileCount;
+  }
+  int count = 0;
+
   for (map<int, vector<string> >::const_iterator it =
        m_namedStringLiterals.begin(); it != m_namedStringLiterals.end();
        it++) {
@@ -3810,12 +3772,27 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
     vector<string> &strings = m_namedStringLiterals[hash];
     for (unsigned int i = 0; i < strings.size(); i++) {
       string name = getLiteralStringName(hash, i);
+      if (count % chunkSize == 0) {
+        if (count != 0) {
+          cg.namespaceEnd();
+          f.close();
+        }
+        int index = count / chunkSize;
+        filename = file + "_" + lexical_cast<string>(index) + ".no.cpp";
+        f.open(filename.c_str());
+        cg_printf("\n");
+        cg_printInclude("<runtime/base/complex_types.h>");
+        cg_printf("\n");
+        cg.namespaceBegin();
+      }
+      count++;
       cg_printf("StaticString %s(", name.c_str());
       cg_printString(strings[i], ar, BlockScopePtr(), false);
       cg_printf(");\n");
     }
   }
   cg.namespaceEnd();
+  f.close();
 }
 
 void AnalysisResult::outputCPPSepExtensionMake() {

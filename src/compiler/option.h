@@ -113,7 +113,6 @@ public:
   static int ScalarArrayFileCount;
   static int ScalarArrayOverflowLimit;
   static int LiteralStringFileCount;
-  static bool LiteralStringCompression;
   static bool AnalyzePerfectVirtuals;
   static bool HardTypeHints;
 

@@ -152,7 +152,10 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
 }
 
 void HttpServer::onServerShutdown() {
-  Eval::Debugger::OnServerShutdown();
+  Eval::Debugger::Stop();
+  if (RuntimeOption::EnableDebuggerServer) {
+    Logger::Info("debugger server stopped");
+  }
 
   // When a new instance of HPHP has taken over our page server socket,
   // stop our admin server and satellites so it can acquire those ports.
@@ -239,6 +242,8 @@ void HttpServer::run() {
     Logger::Error("Unable to start debugger server");
     abortServers();
     return;
+  } else if (RuntimeOption::EnableDebuggerServer) {
+    Logger::Info("debugger server started");
   }
 
   {

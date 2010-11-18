@@ -40,10 +40,6 @@ void Debugger::StartClient(const DebuggerClientOptions &options) {
   }
 }
 
-void Debugger::OnServerShutdown() {
-  s_debugger.clearThreadInfos();
-}
-
 void Debugger::Stop() {
   DebuggerServer::Stop();
   DebuggerClient::Stop();
@@ -182,11 +178,6 @@ String Debugger::ColorStderr(CStrRef s) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void Debugger::clearThreadInfos() {
-  WriteLock lock(m_mutex);
-  m_sandboxThreads.clear();
-}
 
 void Debugger::stop() {
   WriteLock lock(m_mutex);

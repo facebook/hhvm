@@ -31,7 +31,6 @@ public:
    */
   static bool StartServer();
   static void StartClient(const DebuggerClientOptions &options);
-  static void OnServerShutdown();
   static void Stop();
 
   /**
@@ -98,7 +97,6 @@ private:
   ThreadInfoMap m_threadInfos;
   StringToThreadInfoSet m_sandboxThreads;
 
-  void clearThreadInfos();
   void flagDebugger(const std::string &id);
   bool isThreadDebugging(int64 id);
 

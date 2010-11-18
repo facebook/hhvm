@@ -70,6 +70,10 @@ bool DebuggerServer::start() {
 
   m_sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET, "0.0.0.0",
                       port);
+
+  int yes = 1;
+  setsockopt(m_sock->fd(), SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+
   if (!m_sock->valid()) {
     Logger::Error("unable to create debugger server socket");
     return false;
@@ -123,6 +127,8 @@ void DebuggerServer::accept() {
       }
     } // else timed out, then we have a chance to check m_stopped bit
   }
+
+  m_sock.reset();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

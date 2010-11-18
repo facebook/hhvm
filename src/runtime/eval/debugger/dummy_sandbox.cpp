@@ -103,8 +103,6 @@ void DummySandbox::run() {
     } catch (const DebuggerException &e) {}
     execute_command_line_end(0, false, NULL);
   }
-
-  Debugger::OnServerShutdown();
 }
 
 void DummySandbox::notifySignal(int signum) {

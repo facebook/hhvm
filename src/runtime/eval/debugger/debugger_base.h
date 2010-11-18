@@ -41,6 +41,7 @@ struct DebuggerClientOptions {
 class DebuggerClientException      : public Exception {};
 class DebuggerConsoleExitException : public DebuggerClientException {};
 class DebuggerProtocolException    : public DebuggerClientException {};
+class DebuggerServerLostException  : public DebuggerClientException {};
 
 // both client and server side exception
 class DebuggerException            : public Exception {};
@@ -97,10 +98,11 @@ DECLARE_BOOST_TYPES(DMachineInfo);
 class DMachineInfo {
 public:
   DMachineInfo()
-      : m_interrupting(false), m_sandboxAttached(false), m_initialized(false),
-        m_rpcPort(0) {}
+      : m_port(0), m_interrupting(false), m_sandboxAttached(false),
+        m_initialized(false), m_rpcPort(0) {}
 
   std::string m_name;
+  int m_port;
   DebuggerThriftBuffer m_thrift;
 
   bool m_interrupting;

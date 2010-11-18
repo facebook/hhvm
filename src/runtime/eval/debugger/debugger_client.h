@@ -187,6 +187,7 @@ public:
    */
   bool connect(const std::string &host, int port);
   bool connectRPC(const std::string &host, int port);
+  bool reconnect();
   bool disconnect();
   bool initializeMachine();
   bool isLocal();

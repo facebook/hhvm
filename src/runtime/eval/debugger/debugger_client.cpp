@@ -445,12 +445,41 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
   if (f_socket_connect(sock, String(host), port)) {
     DMachineInfoPtr machine(new DMachineInfo());
     machine->m_name = host;
+    machine->m_port = port;
     machine->m_thrift.create(SmartPtr<Socket>(sock));
     m_machines.push_back(machine);
     switchMachine(machine);
     return true;
   }
   error("Unable to connect to %s:%d.", host.c_str(), port);
+  return false;
+}
+
+bool DebuggerClient::reconnect() {
+  ASSERT(m_machine);
+  string &host = m_machine->m_name;
+  int port = m_machine->m_port;
+  if (port) {
+    info("Re-connecting to %s:%d...", host.c_str(), port);
+    Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
+                              String(host), port);
+    Object obj(sock);
+    if (f_socket_connect(sock, String(host), port)) {
+      for (unsigned int i = 0; i < m_machines.size(); i++) {
+        if (m_machines[i] == m_machine) {
+          m_machines.erase(m_machines.begin() + i);
+          break;
+        }
+      }
+      DMachineInfoPtr machine(new DMachineInfo());
+      machine->m_name = host;
+      machine->m_port = port;
+      machine->m_thrift.create(SmartPtr<Socket>(sock));
+      switchMachine(machine);
+      return true;
+    }
+    error("Still unable to connect to %s:%d.", host.c_str(), port);
+  }
   return false;
 }
 
@@ -513,10 +542,17 @@ void DebuggerClient::run() {
   hphp_session_init();
   ExecutionContext *context = hphp_context_init();
   hphp_invoke_simple(m_options.extension);
-  try {
-    runImpl();
-  } catch (...) {
-    Logger::Error("Unhandled exception from DebuggerClient::runImpl().");
+  while (true) {
+    try {
+      runImpl();
+    } catch (DebuggerServerLostException &e) {
+      if (reconnect()) {
+        continue;
+      }
+    } catch (...) {
+      Logger::Error("Unhandled exception from DebuggerClient::runImpl().");
+    }
+    break;
   }
   reset();
   hphp_context_exit(context, false);
@@ -770,7 +806,7 @@ void DebuggerClient::runImpl() {
       if (DebuggerCommand::Receive(m_machine->m_thrift, cmd, func)) {
         if (!cmd) {
           Logger::Error("Unable to communicate with server. Server's down?");
-          return;
+          throw DebuggerServerLostException();
         }
         if (cmd->is(DebuggerCommand::KindOfSignal)) {
           if (!cmd->onClient(this)) {
@@ -1366,7 +1402,7 @@ DebuggerCommandPtr DebuggerClient::send(DebuggerCommand *cmd, int expected) {
         throw DebuggerProtocolException();
       } else {
         Logger::Error("Unable to communicate with server. Server's down?");
-        throw DebuggerClientExitException();
+        throw DebuggerServerLostException();
       }
     } else {
       return res;

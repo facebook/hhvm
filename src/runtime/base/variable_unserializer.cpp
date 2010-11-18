@@ -55,10 +55,15 @@ double VariableUnserializer::readDouble() {
 
 void VariableUnserializer::read(char *buf, uint n) {
   check();
-  uint i = 0;
-  for (; i < n && m_buf != m_end; ++i) {
-    buf[i] = *(m_buf++);
-  }
+
+  /* compute copy boundaries in a more efficient manner,
+     by using min(...) operation rather than complex conditional
+     in a loop guard */
+  const size_t BUFFER_SIZE = m_end - m_buf;
+  const size_t BUFFER_LIMIT = min(BUFFER_SIZE, size_t(n));
+
+  memcpy(buf, m_buf, BUFFER_LIMIT);
+  m_buf += BUFFER_LIMIT;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -262,7 +262,7 @@ bool RuntimeOption::ApcUseGnuMap = false;
 std::string RuntimeOption::ApcPrimeLibrary;
 int RuntimeOption::ApcLoadThread = 1;
 std::set<std::string> RuntimeOption::ApcCompletionKeys;
-RuntimeOption::ApcTableTypes RuntimeOption::ApcTableType = ApcHashTable;
+RuntimeOption::ApcTableTypes RuntimeOption::ApcTableType = ApcConcurrentTable;
 RuntimeOption::ApcTableLockTypes RuntimeOption::ApcTableLockType =
   ApcReadWriteLock;
 time_t RuntimeOption::ApcKeyMaturityThreshold = 20;
@@ -650,7 +650,7 @@ void RuntimeOption::Load(Hdf &config) {
     ApcLoadThread = apc["LoadThread"].getInt16(2);
     apc["CompletionKeys"].get(ApcCompletionKeys);
 
-    string apcTableType = apc["TableType"].getString("hash");
+    string apcTableType = apc["TableType"].getString("concurrent");
     if (strcasecmp(apcTableType.c_str(), "hash") == 0) {
       ApcTableType = ApcHashTable;
     } else if (strcasecmp(apcTableType.c_str(), "concurrent") == 0) {

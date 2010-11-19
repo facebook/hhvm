@@ -17,7 +17,7 @@
 #ifndef __METHOD_STATEMENT_H__
 #define __METHOD_STATEMENT_H__
 
-#include <compiler/statement/scope_statement.h>
+#include <compiler/statement/statement.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,8 +28,7 @@ DECLARE_BOOST_TYPES(StatementList);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(MethodStatement);
 
-class MethodStatement : public Statement, public IParseHandler,
-                        public IScopeStatement {
+class MethodStatement : public Statement, public IParseHandler {
 public:
   MethodStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                   ModifierExpressionPtr modifiers, bool ref,
@@ -52,15 +51,9 @@ public:
   void setName(const std::string name) { m_name = name; }
   std::string getFullName() const;
   std::string getOriginalFullName() const;
-  virtual BlockScopePtr getScope();
-  FunctionScopePtr getFunctionScope() { return m_funcScope.lock();}
   ExpressionListPtr getParams() { return m_params;}
   StatementListPtr getStmts() { return m_stmt;}
   bool isRef(int index = -1) const;
-
-  void setFunctionScope(FunctionScopePtr f) {
-    m_funcScope = f;
-  }
 
   ModifierExpressionPtr getModifiers() {
     return m_modifiers;
@@ -76,6 +69,12 @@ public:
   FunctionScopePtr onInitialParse(AnalysisResultPtr ar, FileScopePtr fs,
                                   bool method);
 
+  FunctionScopeRawPtr getFunctionScope() const {
+    BlockScopeRawPtr b = getScope();
+    ASSERT(b->is(BlockScope::FunctionScope));
+    return FunctionScopeRawPtr((FunctionScope*)b.get());
+  }
+
 protected:
   bool m_method;
   ModifierExpressionPtr m_modifiers;
@@ -86,7 +85,6 @@ protected:
   std::string m_originalClassName;
   ExpressionListPtr m_params;
   StatementListPtr m_stmt;
-  FunctionScopeRawPtr m_funcScope;
   int m_attribute;
   std::string m_docComment;
 

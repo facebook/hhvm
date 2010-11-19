@@ -19,7 +19,6 @@
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/class_scope.h>
-#include <compiler/statement/scope_statement.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/statement/exp_statement.h>
 #include <compiler/statement/method_statement.h>

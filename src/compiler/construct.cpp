@@ -39,18 +39,6 @@ Construct::Construct(BlockScopePtr scope, LocationPtr loc)
       m_containedEffects(0), m_effectsTag(0) {
 }
 
-FileScopePtr Construct::getFileScope() const {
-  return getScope()->getContainingFile();
-}
-
-FunctionScopePtr Construct::getFunctionScope() const {
-  return boost::dynamic_pointer_cast<FunctionScope>(getScope());
-}
-
-ClassScopePtr Construct::getClassScope() const {
-  return getScope()->getContainingClass();
-}
-
 void Construct::resetScope(BlockScopePtr scope) {
   setBlockScope(scope);
   for (int i = 0, n = getKidCount(); i < n; i++) {

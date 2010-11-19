@@ -43,8 +43,8 @@ public:
   }
 
   StatementPtr visitStmtRecur(StatementPtr stmt) {
-    BlockScopePtr scope = boost::dynamic_pointer_cast<LoopStatement>(stmt) ?
-      stmt->getScope() : BlockScopePtr();
+    BlockScopeRawPtr scope = boost::dynamic_pointer_cast<LoopStatement>(stmt) ?
+      stmt->getScope() : BlockScopeRawPtr();
 
     for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
       if (ConstructPtr kid = stmt->getNthKid(i)) {

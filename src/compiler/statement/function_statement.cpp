@@ -71,13 +71,12 @@ void FunctionStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
 // static analysis functions
 
 std::string FunctionStatement::getName() const {
-  return string("Function ") + m_funcScope.lock()->getName();
+  return string("Function ") + getScope()->getName();
 }
 
 void FunctionStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
-  FunctionScopePtr func =
-    Construct::getFunctionScope(); // containing function scope
-  FunctionScopePtr fs = getFunctionScope();
+  FunctionScopePtr func = getScope()->getOuterScope()->getContainingFunction();
+  FunctionScopeRawPtr fs = getFunctionScope();
   // redeclared functions are automatically volatile
   if (func && fs->isVolatile()) {
     func->getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
@@ -92,7 +91,7 @@ void FunctionStatement::inferTypes(AnalysisResultPtr ar) {
 // code generation functions
 
 void FunctionStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  FunctionScopePtr funcScope = m_funcScope.lock();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
   if (!funcScope->isUserFunction()) return;
 
   cg_printf("function ");
@@ -101,20 +100,20 @@ void FunctionStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_params) m_params->outputPHP(cg, ar);
   cg_indentBegin(") {\n");
 
-  m_funcScope.lock()->outputPHP(cg, ar);
+  funcScope->outputPHP(cg, ar);
   if (m_stmt) m_stmt->outputPHP(cg, ar);
   cg_indentEnd("}\n");
 }
 
 bool FunctionStatement::hasImpl() const {
-  return m_funcScope.lock()->isVolatile();
+  return getFunctionScope()->isVolatile();
 }
 
 void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
                                       AnalysisResultPtr ar) {
   CodeGenerator::Context context = cg.getContext();
 
-  FunctionScopePtr funcScope = m_funcScope.lock();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
   string fname = funcScope->getId(cg);
   bool pseudoMain = funcScope->inPseudoMain();
   string origFuncName = !pseudoMain ? funcScope->getOriginalName() :

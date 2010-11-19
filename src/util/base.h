@@ -176,8 +176,11 @@ public:
     return !ptr;
   }
 
-  operator boost::shared_ptr<T>() const {
-    return lock();
+  template <class S>
+  operator boost::shared_ptr<S>() const {
+    S *s = ptr;
+    return s ? boost::static_pointer_cast<S>(s->shared_from_this()) :
+      boost::shared_ptr<S>();
   }
 
   T *operator->() const { return ptr; }

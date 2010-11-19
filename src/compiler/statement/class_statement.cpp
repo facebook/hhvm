@@ -81,7 +81,7 @@ void ClassStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   ClassScopePtr classScope(new ClassScope(kindOf, m_originalName, m_parent,
                                           bases, m_docComment,
                                           stmt));
-  m_classScope = classScope;
+  setBlockScope(classScope);
   if (!fs->addClass(ar, classScope)) {
     m_ignored = true;
     return;
@@ -118,7 +118,7 @@ void ClassStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
 // static analysis functions
 
 string ClassStatement::getName() const {
-  return string("Class ") + m_classScope.lock()->getName();
+  return string("Class ") + getScope()->getName();
 }
 
 void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
@@ -130,7 +130,6 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
     addUserClass(ar, bases[i]);
   }
 
-  ClassScopePtr classScope = m_classScope.lock();
   checkVolatile(ar);
 
   if (m_stmt) {
@@ -146,7 +145,7 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
                         cls->getOriginalName());
       }
       if (cls->isUserClass()) {
-        cls->addUse(classScope, BlockScope::UseKindParentRef);
+        cls->addUse(getScope(), BlockScope::UseKindParentRef);
       }
     }
   }
@@ -186,7 +185,7 @@ void ClassStatement::getAllParents(AnalysisResultPtr ar,
 }
 
 void ClassStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  ClassScopePtr classScope = m_classScope.lock();
+  ClassScopeRawPtr classScope = getClassScope();
   if (!classScope->isUserClass()) return;
 
   switch (m_type) {
@@ -208,13 +207,13 @@ void ClassStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   cg_indentBegin(" {\n");
-  m_classScope.lock()->outputPHP(cg, ar);
+  classScope->outputPHP(cg, ar);
   if (m_stmt) m_stmt->outputPHP(cg, ar);
   cg_indentEnd("}\n");
 }
 
 bool ClassStatement::hasImpl() const {
-  ClassScopePtr cls = m_classScope.lock();
+  ClassScopeRawPtr cls = getClassScope();
   return cls->isVolatile() ||
     cls->getVariables()->getAttribute(VariableTable::ContainsDynamicStatic);
 }
@@ -224,7 +223,7 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
                                         const char *clsName,
                                         const char *originalName,
                                         const char *parent) {
-  ClassScopePtr classScope = m_classScope.lock();
+  ClassScopeRawPtr classScope = getClassScope();
   VariableTablePtr variables = classScope->getVariables();
   ConstantTablePtr constants = classScope->getConstants();
   if (variables->hasAllJumpTables() && constants->hasJumpTable() &&
@@ -324,7 +323,7 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
 }
 
 void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  ClassScopePtr classScope = m_classScope.lock();
+  ClassScopeRawPtr classScope = getClassScope();
   if (cg.getContext() == CodeGenerator::NoContext) {
     if (classScope->isRedeclaring()) {
       cg_printf("g->%s%s = ClassStaticsPtr(NEW(%s%s)());\n",
@@ -848,7 +847,7 @@ void ClassStatement::outputJavaFFIConstructor(CodeGenerator &cg,
 void ClassStatement::outputJavaFFICPPCreator(CodeGenerator &cg,
                                              AnalysisResultPtr ar,
                                              FunctionScopePtr cons) {
-  ClassScopePtr cls = m_classScope.lock();
+  ClassScopeRawPtr cls = getClassScope();
   string packageName = Option::JavaFFIRootPackage;
   int ac = cons ? cons->getMaxParamCount() : 0;
   bool varArgs = cons && cons->isVariableArgument();

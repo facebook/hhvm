@@ -84,11 +84,17 @@ public:
   void setTopLevel() { m_topLevel = true;}
   bool isFileLevel() const { return m_fileLevel;}
   bool isTopLevel() const { return m_topLevel;}
-  BlockScopePtr getScope() const { return m_blockScope.lock(); }
-  void setBlockScope(BlockScopePtr scope) { m_blockScope = scope; }
-  FileScopePtr getFileScope() const;
-  FunctionScopePtr getFunctionScope() const;
-  ClassScopePtr getClassScope() const;
+  BlockScopeRawPtr getScope() const { return m_blockScope; }
+  void setBlockScope(BlockScopeRawPtr scope) { m_blockScope = scope; }
+  FileScopePtr getFileScope() const {
+    return m_blockScope->getContainingFile();
+  }
+  FunctionScopePtr getFunctionScope() const {
+    return m_blockScope->getContainingFunction();
+  }
+  ClassScopePtr getClassScope() const {
+    return m_blockScope->getContainingClass();
+  }
   void resetScope(BlockScopePtr scope);
 
   virtual int getLocalEffects() const { return UnknownEffect;}

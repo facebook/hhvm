@@ -288,7 +288,7 @@ ClassScopePtr AnalysisResult::findExactClass(ConstructPtr cs,
     for (int i = stmts.getCount(); i--; ) {
       StatementPtr s = stmts[i];
       if (s && s->is(Statement::KindOfClassStatement)) {
-        ClassScopePtr scope =
+        ClassScopeRawPtr scope =
           static_pointer_cast<ClassStatement>(s)->getClassScope();
         if (lowerName == scope->getName()) {
           return scope;

@@ -123,6 +123,7 @@ OUT_EXTS := \
 	$(if $(USE_JEMALLOC),-je) \
 	$(if $(NO_TCMALLOC),,-tc) \
 	$(if $(TLS_GD),-gd) \
+	$(if $(PROFILE),-pg) \
 	$(if $(DEBUG),-g,-O)
 
 EMPTY:=
@@ -170,7 +171,7 @@ EXT_DIR = $(PROJECT_ROOT)/external-$(OS)
 	$(V)touch $@
 
 dirinfo:
-	@echo $(ABS_PROJECT_ROOT) $(OUT_TOP) $(if $(DEBUG),D,R)$(if $(USE_ICC),-I)
+	@echo $(ABS_PROJECT_ROOT) $(OUT_TOP) $(if $(PROFILE),P)$(if $(DEBUG),D,R)$(if $(USE_ICC),-I)
 
 endif
 

@@ -53,13 +53,10 @@ StatementPtr InterfaceStatement::clone() {
 }
 
 bool InterfaceStatement::hasImpl() const {
-  ClassScopePtr cls = m_classScope.lock();
+  ClassScopeRawPtr cls = getClassScope();
   return cls->isVolatile();
 }
 
-BlockScopePtr InterfaceStatement::getScope() {
-  return m_classScope.lock();
-}
 int InterfaceStatement::getRecursiveCount() const {
   return m_stmt ? m_stmt->getRecursiveCount() : 0;
 }
@@ -75,7 +72,7 @@ void InterfaceStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   ClassScopePtr classScope
     (new ClassScope(ClassScope::KindOfInterface, m_name, "", bases,
                     m_docComment, stmt));
-  m_classScope = classScope;
+  setBlockScope(classScope);
   fs->addClass(ar, classScope);
 
   if (m_stmt) {
@@ -90,11 +87,11 @@ void InterfaceStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
 // static analysis functions
 
 std::string InterfaceStatement::getName() const {
-  return string("Interface ") + m_classScope.lock()->getName();
+  return string("Interface ") + getScope()->getName();
 }
 
 bool InterfaceStatement::checkVolatileBases(AnalysisResultPtr ar) {
-  ClassScopePtr classScope = m_classScope.lock();
+  ClassScopeRawPtr classScope = getClassScope();
   ASSERT(!classScope->isVolatile());
   const vector<string> &bases = classScope->getBases();
   for (vector<string>::const_iterator it = bases.begin();
@@ -106,7 +103,7 @@ bool InterfaceStatement::checkVolatileBases(AnalysisResultPtr ar) {
 }
 
 void InterfaceStatement::checkVolatile(AnalysisResultPtr ar) {
-  ClassScopePtr classScope = m_classScope.lock();
+  ClassScopeRawPtr classScope = getClassScope();
   // redeclared classes/interfaces are automatically volatile
   if (!classScope->isVolatile()) {
      if (checkVolatileBases(ar)) {
@@ -121,7 +118,7 @@ void InterfaceStatement::checkVolatile(AnalysisResultPtr ar) {
 }
 
 void InterfaceStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
-  ClassScopePtr classScope = m_classScope.lock();
+  ClassScopeRawPtr classScope = getClassScope();
   if (m_stmt) {
     classScope->setIncludeLevel(ar->getIncludeLevel());
     m_stmt->analyzeProgram(ar);
@@ -210,7 +207,7 @@ void InterfaceStatement::getAllParents(AnalysisResultPtr ar,
 }
 
 void InterfaceStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  ClassScopePtr classScope = m_classScope.lock();
+  ClassScopeRawPtr classScope = getClassScope();
 
   if (cg.getOutput() == CodeGenerator::InlinedPHP ||
       cg.getOutput() == CodeGenerator::TrimmedPHP) {
@@ -225,13 +222,13 @@ void InterfaceStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     m_base->outputPHP(cg, ar);
   }
   cg_indentBegin(" {\n");
-  m_classScope.lock()->outputPHP(cg, ar);
+  classScope->outputPHP(cg, ar);
   if (m_stmt) m_stmt->outputPHP(cg, ar);
   cg_indentEnd("}\n");
 }
 
 void InterfaceStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  ClassScopePtr classScope = m_classScope.lock();
+  ClassScopeRawPtr classScope = getClassScope();
   if (cg.getContext() == CodeGenerator::NoContext) {
     if (classScope->isVolatile()) {
       cg_printf("g->CDEC(%s) = true;\n", cg.formatLabel(m_name).c_str());

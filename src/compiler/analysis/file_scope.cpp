@@ -217,7 +217,7 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultPtr ar) {
                             m_attributes[0], "",
                             shared_from_this(),
                             true));
-  f->setFunctionScope(pseudoMain);
+  f->setBlockScope(pseudoMain);
   m_functions[pseudoMainName()].push_back(pseudoMain);
   m_pseudoMain = pseudoMain;
   return pseudoMain;

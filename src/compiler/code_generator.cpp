@@ -422,7 +422,7 @@ int CodeGenerator::checkLiteralString(const std::string &str, int &index,
         fs->addUsedLiteralString(str);
         if (m_context == CppParameterDefaultValueDecl ||
             m_context == CppStaticMethodWrapper) {
-          bs->getContainingFile()->addUsedLiteralStringHeader(str);
+          fs->addUsedLiteralStringHeader(str);
         }
       }
     }
@@ -462,5 +462,5 @@ void CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
 void CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
                                 ConstructPtr cs,
                                 bool stringWrapper /* = true */) {
-  printString(str, ar, cs->getScope(), stringWrapper);
+  printString(str, ar, (BlockScopePtr)cs->getScope(), stringWrapper);
 }

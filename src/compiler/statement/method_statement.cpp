@@ -59,10 +59,6 @@ StatementPtr MethodStatement::clone() {
   return stmt;
 }
 
-BlockScopePtr MethodStatement::getScope() {
-  return m_funcScope.lock();
-}
-
 string MethodStatement::getFullName() const {
   if (m_className.empty()) return m_name;
   return m_className + "::" + m_name;
@@ -145,7 +141,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultPtr ar,
   if (!m_stmt) {
     funcScope->setVirtual();
   }
-  m_funcScope = funcScope;
+  setBlockScope(funcScope);
 
   // TODO: this may have to expand to a concept of "virtual" functions...
   if (method) {
@@ -212,7 +208,7 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultPtr ar,
 
 void MethodStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   ClassScopePtr classScope = dynamic_pointer_cast<ClassScope>(scope);
-  FunctionScopePtr fs = getFunctionScope();
+  FunctionScopeRawPtr fs = getFunctionScope();
 
   fs->setParamCounts(ar, -1, -1);
   classScope->addFunction(ar, fs);
@@ -243,7 +239,7 @@ void MethodStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
 // static analysis functions
 
 void MethodStatement::addParamRTTI(AnalysisResultPtr ar) {
-  FunctionScopePtr func = getFunctionScope();
+  FunctionScopeRawPtr func = getFunctionScope();
 
   VariableTablePtr variables = func->getVariables();
   if (variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
@@ -269,7 +265,7 @@ void MethodStatement::addParamRTTI(AnalysisResultPtr ar) {
 }
 
 void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
-  FunctionScopePtr funcScope = m_funcScope.lock();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
 
   if (ar->isAnalyzeInclude()) {
     if (funcScope->isSepExtension() ||
@@ -358,7 +354,7 @@ void MethodStatement::inferTypes(AnalysisResultPtr ar) {
 }
 
 void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
-  FunctionScopePtr funcScope = m_funcScope.lock();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
   funcScope->pushReturnType();
 
   if (ar->getPhase() == AnalysisResult::FirstInference && m_stmt) {
@@ -397,7 +393,7 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
 // code generation functions
 
 void MethodStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  FunctionScopePtr funcScope = m_funcScope.lock();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
 
   m_modifiers->outputPHP(cg, ar);
   cg_printf(" function ");
@@ -415,7 +411,7 @@ void MethodStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  FunctionScopePtr funcScope = m_funcScope.lock();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
   ClassScopePtr scope = getClassScope();
 
   if (outputFFI(cg, ar)) return;
@@ -672,7 +668,7 @@ void MethodStatement::outputCPPStmt(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_stmt) {
     m_stmt->outputCPP(cg, ar);
     if (!m_stmt->hasRetExp()) {
-      FunctionScopePtr funcScope = m_funcScope.lock();
+      FunctionScopeRawPtr funcScope = getFunctionScope();
       ClassScopePtr cls = getClassScope();
       if (funcScope->isConstructor(cls)) {
         cg_printf("gasInCtor(oldInCtor);\n");
@@ -687,7 +683,7 @@ void MethodStatement::outputCPPStaticMethodWrapper(CodeGenerator &cg,
   if (!m_modifiers->isStatic() || !m_stmt) return;
 
   CodeGenerator::Context context = cg.getContext();
-  FunctionScopePtr funcScope = m_funcScope.lock();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
 
   bool isWrapper = context == CodeGenerator::CppTypedParamsWrapperDecl ||
     context == CodeGenerator::CppTypedParamsWrapperImpl;
@@ -737,7 +733,7 @@ void MethodStatement::outputCPPStaticMethodWrapper(CodeGenerator &cg,
 
 void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
                                                 AnalysisResultPtr ar) {
-  FunctionScopePtr funcScope = getFunctionScope();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
   TypePtr type = funcScope->getReturnType();
   bool isMethod = getClassScope();
   string fname = isMethod ? funcScope->getName() : funcScope->getId(cg);
@@ -785,7 +781,7 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
 }
 
 bool MethodStatement::outputFFI(CodeGenerator &cg, AnalysisResultPtr ar) {
-  FunctionScopePtr funcScope = m_funcScope.lock();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
   ClassScopePtr clsScope = getClassScope();
   bool pseudoMain = funcScope->inPseudoMain();
   bool inClass = !m_className.empty();
@@ -830,7 +826,7 @@ bool MethodStatement::outputFFI(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void MethodStatement::outputCPPFFIStub(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
-  FunctionScopePtr funcScope = m_funcScope.lock();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
   ClassScopePtr clsScope = getClassScope();
   bool varArgs = funcScope->isVariableArgument();
   bool ret = funcScope->getReturnType();
@@ -942,7 +938,7 @@ void MethodStatement::outputHSFFIStub(CodeGenerator &cg, AnalysisResultPtr ar) {
     return;
   }
 
-  FunctionScopePtr funcScope = m_funcScope.lock();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
   bool varArgs = funcScope->isVariableArgument();
   bool ret = funcScope->getReturnType();
   string fname = funcScope->getId(cg).c_str();
@@ -1048,7 +1044,7 @@ void MethodStatement::outputHSFFIStub(CodeGenerator &cg, AnalysisResultPtr ar) {
  */
 void MethodStatement::outputJavaFFIStub(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
-  FunctionScopePtr funcScope = m_funcScope.lock();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
   bool varArgs = funcScope->isVariableArgument();
   bool ret = funcScope->getReturnType();
   bool inClass = !m_className.empty();
@@ -1168,7 +1164,7 @@ void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
   // TODO translate PHP namespace once that is supported
   string packageName = Option::JavaFFIRootPackage;
 
-  FunctionScopePtr funcScope = m_funcScope.lock();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
   bool varArgs = funcScope->isVariableArgument();
   bool ret = funcScope->getReturnType();
   bool inClass = !m_className.empty();
@@ -1263,7 +1259,7 @@ void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
 
 void MethodStatement::outputSwigFFIStub(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
-  FunctionScopePtr funcScope = m_funcScope.lock();
+  FunctionScopeRawPtr funcScope = getFunctionScope();
   bool varArgs = funcScope->isVariableArgument();
   bool ret = funcScope->getReturnType();
   string fname = funcScope->getId(cg);

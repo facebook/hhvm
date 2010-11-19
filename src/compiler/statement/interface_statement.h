@@ -17,7 +17,7 @@
 #ifndef __INTERFACE_STATEMENT_H__
 #define __INTERFACE_STATEMENT_H__
 
-#include <compiler/statement/scope_statement.h>
+#include <compiler/statement/statement.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,8 +27,7 @@ DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(InterfaceStatement);
 
-class InterfaceStatement : public Statement, public IParseHandler,
-                           public IScopeStatement {
+class InterfaceStatement : public Statement, public IParseHandler {
 public:
   InterfaceStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
                      const std::string &name, ExpressionListPtr base,
@@ -42,20 +41,21 @@ public:
   // implementing IParseHandler
   virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
 
-  virtual BlockScopePtr getScope();
-  ClassScopePtr getClassScope() { return m_classScope.lock();}
   virtual std::string getName() const;
   const std::string &getOriginalName() const { return m_originalName;}
   virtual void getAllParents(AnalysisResultPtr ar,
                              std::vector<std::string> &names);
-
+  ClassScopeRawPtr getClassScope() const {
+    BlockScopeRawPtr b = getScope();
+    ASSERT(b->is(BlockScope::ClassScope));
+    return ClassScopeRawPtr((ClassScope*)b.get());
+  }
 protected:
   std::string m_originalName;
   std::string m_name;
   ExpressionListPtr m_base;
   std::string m_docComment;
   StatementListPtr m_stmt;
-  ClassScopeRawPtr m_classScope;
   void checkVolatile(AnalysisResultPtr ar);
 private:
   bool checkVolatileBases(AnalysisResultPtr ar);

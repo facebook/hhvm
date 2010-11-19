@@ -193,7 +193,8 @@ Variant File::Open(CStrRef filename, CStrRef mode,
     Object obj(file);
     bool ret = file->open(filename, mode);
     if (!ret) {
-      raise_warning("%s", file->getLastError().c_str());
+      raise_warning("Failed to open %s (%s)", filename.data(),
+                    file->getLastError().c_str());
       return false;
     }
     return obj;

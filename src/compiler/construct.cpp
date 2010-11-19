@@ -64,7 +64,7 @@ int Construct::getChildrenEffects() const {
   for (int i = getKidCount(); i--; ) {
     ConstructPtr child = getNthKid(i);
     if (child) {
-      if (StatementPtr s = dynamic_pointer_cast<Statement>(child)) {
+      if (StatementPtr s = boost::dynamic_pointer_cast<Statement>(child)) {
         switch (s->getKindOf()) {
           case Statement::KindOfMethodStatement:
           case Statement::KindOfFunctionStatement:

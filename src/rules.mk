@@ -168,7 +168,7 @@ endif
 endif
 
 PREFIX := $(TIMECMD)$(if $(USE_CCACHE), ccache,$(if $(NO_DISTCC),, distcc))
-ICC_ARGS := -no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593
+ICC_ARGS := -no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -wd68
 
 CXX := $(if $(USE_ICC),$(ICC)/bin/icpc $(ICC_ARGS),g++)
 CC = $(if $(USE_ICC),$(ICC)/bin/icc $(ICC_ARGS),gcc)
@@ -185,7 +185,7 @@ CPPFLAGS += -MMD -fPIC
 CXXFLAGS += -fno-operator-names
 
 # Include frame pointers to make it easier to generate callgraphs in oprofile
-CPPFLAGS += -fno-omit-frame-pointer -momit-leaf-frame-pointer
+CPPFLAGS += -fno-omit-frame-pointer $(if $(USE_ICC),,-momit-leaf-frame-pointer)
 
 ifdef MAC_OS_X
 
@@ -297,9 +297,11 @@ OPT = -Os
 else
 OPT = -O3
 
+ifndef USE_ICC
 # Disable global common subexpression elimination, which made binary code
 # larger, but not faster.
 OPT += -fno-gcse
+endif
 
 endif
 endif

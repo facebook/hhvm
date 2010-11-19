@@ -206,11 +206,6 @@ private:
   T     *ptr;
 };
 
-template <typename T, typename U>
-hphp_raw_ptr<T> dynamic_pointer_cast(hphp_raw_ptr<U> p) {
-  return hphp_raw_ptr<T>(dynamic_cast<T*>(p.get()));
-}
-
 template<typename T>
 class hphp_const_char_map :
     public hphp_hash_map<const char *, T, hphp_hash<const char *>, eqstr> {
@@ -282,6 +277,15 @@ struct file_closer {
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
+}
+
+namespace boost {
+
+template <typename T, typename U>
+HPHP::hphp_raw_ptr<T> dynamic_pointer_cast(HPHP::hphp_raw_ptr<U> p) {
+  return HPHP::hphp_raw_ptr<T>(dynamic_cast<T*>(p.get()));
+}
+
 }
 
 #endif // __BASE_H__

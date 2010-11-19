@@ -205,7 +205,7 @@ Variant f_qlzcompress(CStrRef data, int level /* = 1 */) {
       break;
   }
 
-  ASSERT(size >= 0 && (int64)size < data.size() + 401);
+  ASSERT(size < (size_t)data.size() + 401);
   compressed[size] = '\0';
   return String(compressed, size, AttachString);
 #endif
@@ -226,7 +226,7 @@ Variant f_qlzuncompress(CStrRef data, int level /* = 1 */) {
   }
 
   size_t size = QuickLZ1::qlz_size_decompressed(data.data());
-  if (size < 0 ||
+  if ((int64)size < 0 ||
       (RuntimeOption::SerializationSizeLimit > 0 &&
        (int64)size > RuntimeOption::SerializationSizeLimit)) {
     raise_notice("invalid size in compressed header: %lld", (int64)size);

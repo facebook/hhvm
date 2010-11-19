@@ -89,7 +89,7 @@ bool RuntimeOption::ServerThreadRoundRobin = false;
 int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
 bool RuntimeOption::ServerThreadJobLIFO = false;
 int RuntimeOption::PageletServerThreadCount = 0;
-int RuntimeOption::FiberCount = 0;
+int RuntimeOption::FiberCount = 1;
 int RuntimeOption::RequestTimeoutSeconds = 0;
 int64 RuntimeOption::RequestMemoryMaxBytes = -1;
 int64 RuntimeOption::ImageMemoryMaxBytes = 0;
@@ -777,10 +777,7 @@ void RuntimeOption::Load(Hdf &config) {
   }
   {
     PageletServerThreadCount = config["PageletServer.ThreadCount"].getInt32(0);
-    FiberCount = config["Fiber.ThreadCount"].getInt32(0);
-    if (FiberCount > 0) {
-      FiberAsyncFunc::Restart();
-    }
+    FiberCount = config["Fiber.ThreadCount"].getInt32(Process::GetCPUCount());
   }
   {
     Hdf content = config["StaticFile"];

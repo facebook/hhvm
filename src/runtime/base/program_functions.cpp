@@ -856,6 +856,7 @@ void hphp_process_init() {
   Process::InitProcessStatics();
   PageletServer::Restart();
   XboxServer::Restart();
+  FiberAsyncFunc::Restart();
   Extension::InitModules();
   apc_load(RuntimeOption::ApcLoadThread);
   StaticString::FinishInit();

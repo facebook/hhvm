@@ -35,6 +35,7 @@
 #include <util/util.h>
 #include <util/timer.h>
 #include <util/hdf.h>
+#include <util/async_func.h>
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -433,6 +434,29 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class AsyncFileCacheSaver : public AsyncFunc<AsyncFileCacheSaver> {
+public:
+  AsyncFileCacheSaver(Package *package, const char *name)
+      : AsyncFunc<AsyncFileCacheSaver>(this, &AsyncFileCacheSaver::saveCache),
+        m_package(package), m_name(name) {
+  }
+
+  void saveCache() {
+    Timer timer(Timer::WallTime, "saving file cache...");
+    m_package->getFileCache()->save(m_name);
+
+    struct stat sb;
+    stat(m_name, &sb);
+    Logger::Info("%dMB %s saved", (int64)sb.st_size/(1024*1024), m_name);
+  }
+
+private:
+  Package *m_package;
+  const char *m_name;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 int process(const ProgramOptions &po) {
   if (po.coredump) {
 #if defined(__APPLE__)
@@ -530,14 +554,9 @@ int process(const ProgramOptions &po) {
   }
 
   // saving file cache
+  AsyncFileCacheSaver fileCacheThread(&package, po.filecache.c_str());
   if (!po.filecache.empty()) {
-    Logger::Info("saving file cache...");
-    package.getFileCache()->save(po.filecache.c_str());
-
-    struct stat sb;
-    stat(po.filecache.c_str(), &sb);
-    Logger::Info("%dMB %s saved", (int64)sb.st_size/(1024*1024),
-                 po.filecache.c_str());
+    fileCacheThread.start();
   }
 
   if (po.dump) {
@@ -594,6 +613,9 @@ int process(const ProgramOptions &po) {
     Compiler::SaveErrors((po.outputDir + "/CodeError.js").c_str());
   }
 
+  if (!po.filecache.empty()) {
+    fileCacheThread.waitForEnd();
+  }
   return ret;
 }
 

@@ -133,7 +133,6 @@ void SwitchStatement::inferTypes(AnalysisResultPtr ar) {
   ConstructPtr self = shared_from_this();
   if (m_cases && m_cases->getCount()) {
     bool checking = false;
-    vector<int> defaults;
     int defaultCount = 0;
     for (int i = 0; i < m_cases->getCount(); i++) {
       CaseStatementPtr stmt =
@@ -143,9 +142,6 @@ void SwitchStatement::inferTypes(AnalysisResultPtr ar) {
       if (!cond) {
         checking = true;
         defaultCount++;
-      } else if (checking && cond && getScope()->isFirstPass()) {
-        defaults.push_back(i);
-        Compiler::Error(Compiler::CaseAfterDefault, stmt);
       }
     }
     if (defaultCount > 1 && getScope()->isFirstPass()) {

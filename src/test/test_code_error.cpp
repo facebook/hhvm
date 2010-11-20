@@ -245,11 +245,6 @@ bool TestCodeError::TestMissingObjectContext() {
   return true;
 }
 
-bool TestCodeError::TestCaseAfterDefault() {
-  VE(CaseAfterDefault, "<?php switch ($a) { default: case 1: }");
-  return true;
-}
-
 bool TestCodeError::TestMoreThanOneDefault() {
   VE(MoreThanOneDefault, "<?php switch ($a) { default: default: }");
   return true;

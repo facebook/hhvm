@@ -1029,7 +1029,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   // Short circuit out if inExpression() returns false
-  if (!ar->inExpression()) return true;
+  if (!cg.inExpression()) return true;
   m_ciTemp = cg.createNewId(shared_from_this());
   bool needHash = true;
   string escapedName(cg.escapeLabel(m_origName));
@@ -1046,7 +1046,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     }
     escapedClass = cg.escapeLabel(m_className);
   }
-  ar->wrapExpressionBegin(cg);
+  cg.wrapExpressionBegin();
   cg_printf("const CallInfo *cit%d = NULL;\n", m_ciTemp);
   if (!m_class && m_className.empty()) {
     cg_printf("void *vt%d = NULL;\n", m_ciTemp);
@@ -1203,9 +1203,9 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   if (m_safeDef) m_safeDef->preOutputCPP(cg, ar, state);
 
   if (m_params && m_params->getCount() > 0) {
-    ar->pushCallInfo(m_ciTemp);
+    cg.pushCallInfo(m_ciTemp);
     m_params->preOutputCPP(cg, ar, state);
-    ar->popCallInfo();
+    cg.popCallInfo();
   }
   return true;
 }
@@ -1351,10 +1351,10 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       int pcount = m_params ? m_params->getCount() : 0;
       if (m_params && m_params->getCount()) {
         cg_printf("%d, ", m_params->getCount());
-        ar->pushCallInfo(m_ciTemp);
+        cg.pushCallInfo(m_ciTemp);
         FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, 0,
                                           false);
-        ar->popCallInfo();
+        cg.popCallInfo();
       } else {
         cg_printf("0");
       }
@@ -1365,10 +1365,10 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       if ((!m_params) || (m_params->getCount() == 0)) {
         cg_printf("Array()");
       } else {
-        ar->pushCallInfo(m_ciTemp);
+        cg.pushCallInfo(m_ciTemp);
         FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar,
                                           m_arrayParams ? 0 : -1, false);
-        ar->popCallInfo();
+        cg.popCallInfo();
       }
     }
   }

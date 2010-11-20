@@ -349,9 +349,8 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
       bool rvalAt = false;
       if (hasContext(UnsetContext)) {
         // do nothing
-      } else if (hasContext(InvokeArgument) && ar->callInfoTop() != -1) {
-        cg_printf(".argvalAt(cit%d->isRef(%d), ", ar->callInfoTop(),
-            m_argNum);
+      } else if (hasContext(InvokeArgument) && cg.callInfoTop() != -1) {
+        cg_printf(".argvalAt(cit%d->isRef(%d), ", cg.callInfoTop(), m_argNum);
       } else if (m_context & (LValue|RefValue)) {
         cg_printf(".lvalAt(");
         lvalAt = true;

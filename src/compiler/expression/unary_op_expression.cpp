@@ -511,8 +511,8 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     int count = exps->getCount();
     if (count > 1) {
       bool fix_e1 = (*exps)[0]->preOutputCPP(cg, ar, 0);
-      bool inExpression = ar->inExpression();
-      ar->setInExpression(false);
+      bool inExpression = cg.inExpression();
+      cg.setInExpression(false);
       bool fix_en = false;
       for (int i = 1; i < count; i++) {
         if ((*exps)[i]->preOutputCPP(cg, ar, 0)) {
@@ -520,9 +520,9 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           break;
         }
       }
-      ar->setInExpression(inExpression);
+      cg.setInExpression(inExpression);
       if (inExpression && fix_en) {
-        ar->wrapExpressionBegin(cg);
+        cg.wrapExpressionBegin();
         std::string tmp = genCPPTemp(cg, ar);
         cg_printf("bool %s = (", tmp.c_str());
         (*exps)[0]->outputCPPExistTest(cg, ar, m_op);
@@ -549,14 +549,14 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
   if (m_op == '@') {
     if (isUnused()) m_exp->setUnused(true);
-    bool inExpression = ar->inExpression();
+    bool inExpression = cg.inExpression();
     bool doit = state & FixOrder;
     if (!doit) {
-      ar->setInExpression(false);
+      cg.setInExpression(false);
       if (m_exp->preOutputCPP(cg, ar, state)) {
         doit = true;
       }
-      ar->setInExpression(inExpression);
+      cg.setInExpression(inExpression);
     }
     if (doit && inExpression) {
       cg_printf("%s%d.enable();\n", Option::SilencerPrefix, m_silencer);
@@ -574,8 +574,8 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     if (BinaryOpExpression::getConcatList(ev, m_exp, hasVoid) > 1 ||
         hasVoid ) {
 
-      if (!ar->inExpression()) return true;
-      ar->wrapExpressionBegin(cg);
+      if (!cg.inExpression()) return true;
+      cg.wrapExpressionBegin();
       for (int i = 0, s = ev.size(); i < s; i++) {
         ExpressionPtr e = ev[i];
         e->preOutputCPP(cg, ar, 0);
@@ -616,7 +616,7 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   }
   if (m_op == T_ARRAY &&
       (getContext() & (RefValue|LValue)) == 0 &&
-      !ar->getInsideScalarArray()) {
+      !cg.getInsideScalarArray()) {
     int id = -1;
     int hash = -1;
     int index = -1;
@@ -625,11 +625,12 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       ExpressionListPtr pairs = dynamic_pointer_cast<ExpressionList>(m_exp);
       Variant v;
       if (pairs && pairs->isScalarArrayPairs() && pairs->getScalarValue(v)) {
-        id = ar->registerScalarArray(getFileScope(), m_exp, hash, index, text);
+        id = ar->registerScalarArray(cg.getInsideScalarArray(), getFileScope(),
+                                     m_exp, hash, index, text);
       }
     } else {
-      id = ar->registerScalarArray(getFileScope(), m_exp,
-                                   hash, index, text); // empty array
+      id = ar->registerScalarArray(cg.getInsideScalarArray(), getFileScope(),
+                                   m_exp, hash, index, text); // empty array
     }
     if (id != -1) {
       if (Option::UseNamedScalarArray &&

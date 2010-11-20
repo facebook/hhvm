@@ -343,10 +343,10 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
     return FunctionCall::preOutputCPP(cg, ar, state);
   }
   // Short circuit out if inExpression() returns false
-  if (!ar->inExpression()) return true;
+  if (!cg.inExpression()) return true;
   m_ciTemp = cg.createNewId(shared_from_this());
 
-  ar->wrapExpressionBegin(cg);
+  cg.wrapExpressionBegin();
   bool isThis = m_object->isThis();
   if (!isThis) {
     m_object->preOutputCPP(cg, ar, state);
@@ -386,15 +386,15 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
       " mcp%d.ci;\n", m_ciTemp, m_ciTemp);
 
   if (m_params && m_params->getCount() > 0) {
-    ar->pushCallInfo(m_ciTemp);
+    cg.pushCallInfo(m_ciTemp);
     m_params->preOutputCPP(cg, ar, state);
-    ar->popCallInfo();
+    cg.popCallInfo();
   }
 
   if (state & FixOrder) {
-    ar->pushCallInfo(m_ciTemp);
+    cg.pushCallInfo(m_ciTemp);
     preOutputStash(cg, ar, state);
-    ar->popCallInfo();
+    cg.popCallInfo();
   }
   if (hasCPPTemp() && !(state & FixOrder)) {
     cg_printf("id(%s);\n", cppTemp().c_str());
@@ -425,10 +425,10 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       int pcount = m_params ? m_params->getCount() : 0;
       if (pcount) {
         cg_printf("%d, ", pcount);
-        ar->pushCallInfo(m_ciTemp);
+        cg.pushCallInfo(m_ciTemp);
         FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, 0,
                                           false);
-        ar->popCallInfo();
+        cg.popCallInfo();
       } else {
         cg_printf("0");
       }
@@ -449,10 +449,10 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
     } else {
       cg_printf("getMeth())(mcp%d, ", m_ciTemp);
       if (m_params && m_params->getCount()) {
-        ar->pushCallInfo(m_ciTemp);
+        cg.pushCallInfo(m_ciTemp);
         FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, -1,
                                           false);
-        ar->popCallInfo();
+        cg.popCallInfo();
       } else {
         cg_printf("Array()");
       }

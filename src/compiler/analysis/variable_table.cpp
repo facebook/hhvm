@@ -728,7 +728,7 @@ static bool by_location(const VariableTable::StaticGlobalInfoPtr &p1,
   return d1->getLocation()->compare(d2->getLocation().get()) < 0;
 }
 
-void VariableTable::prepareStaticGlobals(CodeGenerator &cg) {
+void VariableTable::canonicalizeStaticGlobals(CodeGenerator &cg) {
   ASSERT(m_staticGlobals.empty());
 
   sort(m_staticGlobalsVec.begin(), m_staticGlobalsVec.end(), by_location);
@@ -745,7 +745,7 @@ void VariableTable::prepareStaticGlobals(CodeGenerator &cg) {
 
 void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
                                                    AnalysisResultPtr ar) {
-  if (m_staticGlobals.empty()) prepareStaticGlobals(cg);
+  ASSERT(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
 
   cg.printSection("Class Forward Declarations\n");
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =
@@ -938,7 +938,7 @@ void VariableTable::collectCPPGlobalSymbols(StringPairVecVec &symbols,
                                             CodeGenerator &cg,
                                             AnalysisResultPtr ar) {
   ASSERT(symbols.size() == AnalysisResult::GlobalSymbolTypeCount);
-  if (m_staticGlobals.empty()) prepareStaticGlobals(cg);
+  ASSERT(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
 
   // static global variables
   StringPairVec *names = &symbols[AnalysisResult::KindOfStaticGlobalVariable];
@@ -981,7 +981,7 @@ void VariableTable::collectCPPGlobalSymbols(StringPairVecVec &symbols,
 void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
                                                  AnalysisResultPtr ar) {
   bool system = (cg.getOutput() == CodeGenerator::SystemCPP);
-  if (m_staticGlobals.empty()) prepareStaticGlobals(cg);
+  ASSERT(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
 
   if (!system) {
     cg_printf("IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(GlobalVariables)\n");
@@ -1092,7 +1092,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
 
 void VariableTable::outputCPPGlobalVariablesDtorIncludes(CodeGenerator &cg,
                                                          AnalysisResultPtr ar) {
-  if (m_staticGlobals.empty()) prepareStaticGlobals(cg);
+  ASSERT(!m_staticGlobals.empty() || m_staticGlobalsVec.empty());
 
   std::set<string> dtorIncludes;
   for (StringToStaticGlobalInfoPtrMap::const_iterator iter =

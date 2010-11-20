@@ -208,11 +208,11 @@ bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     return Expression::preOutputCPP(cg, ar, state);
   }
 
-  if (!ar->inExpression()) {
+  if (!cg.inExpression()) {
     return true;
   }
   Expression::preOutputCPP(cg, ar, state & ~FixOrder);
-  ar->wrapExpressionBegin(cg);
+  cg.wrapExpressionBegin();
   if (m_classScope) {
     string className = m_classScope->getId(cg);
     cg_printf("FrameInjection::SetStaticClassName(info, "
@@ -307,7 +307,7 @@ void FunctionCall::optimizeArgArray(AnalysisResultPtr ar) {
     }
     string text;
     m_argArrayId =
-      ar->registerScalarArray(getFileScope(), argArrayPairs,
+      ar->registerScalarArray(false, getFileScope(), argArrayPairs,
                               m_argArrayHash, m_argArrayIndex, text);
   }
 }

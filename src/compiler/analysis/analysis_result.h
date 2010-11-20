@@ -38,7 +38,6 @@ DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(Location);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(ScalarExpression);
-DECLARE_BOOST_TYPES(LoopStatement);
 
 class AnalysisResult : public BlockScope, public FunctionContainer {
 public:
@@ -151,14 +150,13 @@ public:
   /**
    * Scalar array handling.
    */
-  int registerScalarArray(FileScopePtr scope, ExpressionPtr pairs,
-                          int &hash, int &index, std::string &text);
+  int registerScalarArray(bool insideScalarArray, FileScopePtr scope,
+                          ExpressionPtr pairs, int &hash, int &index,
+                          std::string &text);
   int checkScalarArray(const std::string &text, int &index);
   int getScalarArrayId(const std::string &text);
   void outputCPPNamedScalarArrays(const std::string &file);
 
-  void setInsideScalarArray(bool flag);
-  bool getInsideScalarArray();
   std::string getScalarArrayCompressedText();
   std::string getScalarArrayName(int hash, int index);
 
@@ -180,7 +178,6 @@ public:
   bool outputAllPHP(CodeGenerator::Output output);
   void outputAllCPP(CodeGenerator::Output output, int clusterCount,
                     const std::string *compileDir);
-  void outputAllCPP(CodeGenerator &cg); // mainly for unit test
 
   void outputCPPSystemImplementations(CodeGenerator &cg);
   void outputCPPFileRunDecls(CodeGenerator &cg,
@@ -201,14 +198,6 @@ public:
                                             Type2SymbolListMap &type2names);
   void outputCPPClassDeclaredFlags(CodeGenerator &cg,
                                    Type2SymbolListMap &type2names);
-  bool inExpression() { return m_inExpression; }
-  void setInExpression(bool in) { m_inExpression = in; }
-  bool wrapExpressionBegin(CodeGenerator &);
-  bool wrapExpressionEnd(CodeGenerator &);
-  LoopStatementPtr getLoopStatement() const { return m_loopStatement; }
-  void setLoopStatement(LoopStatementPtr loop) {
-    m_loopStatement = loop;
-  }
 
   /**
    * Parser creates a FileScope upon parsing a new file.
@@ -327,13 +316,12 @@ public:
    */
   void outputCPPSepExtensionImpl(const std::string &filename);
 
+  void outputCPPClusterImpl(CodeGenerator &cg, const FileScopePtrVec &files);
+
   std::set<std::string> m_variableTableFunctions;
   std::set<int> m_concatLengths;
   std::set<int> m_arrayLitstrKeySizes;
   std::set<int> m_arrayIntegerKeySizes;
-  void pushCallInfo(int cit);
-  void popCallInfo();
-  int callInfoTop();
 
   void setSystem() { m_system = true; }
   bool isSystem() const { return m_system; }
@@ -370,6 +358,7 @@ private:
   int m_optCounter;
 
   std::map<std::string, int> m_scalarArrays;
+  Mutex m_namedScalarArraysMutex;
   std::map<int, std::vector<std::string> > m_namedScalarArrays;
   int m_scalarArraysCounter;
   std::vector<ExpressionPtr> m_scalarArrayIds;
@@ -377,17 +366,36 @@ private:
   std::set<std::string> m_rttiFuncs;
   int m_paramRTTICounter;
 
-  bool m_insideScalarArray;
-  bool m_inExpression;
-  bool m_wrappedExpression;
-
-  LoopStatementPtr m_loopStatement;
 public:
   struct ScalarArrayExp {
     int id;
     int len;
     ExpressionPtr exp;
   };
+
+  void genMethodSlots();
+
+  void outputCPPDynamicTables(CodeGenerator::Output output);
+  void outputCPPClassMapFile();
+  void outputCPPSourceInfos();
+  void outputCPPNameMaps();
+  void outputRTTIMetaData(const char *filename);
+  void outputCPPClassMap(CodeGenerator &cg);
+  void outputCPPSystem();
+  void outputCPPSepExtensionMake();
+  void outputFFI(std::vector<std::string> &additionalCPPs);
+  void repartitionLargeCPP(const std::vector<std::string> &filenames,
+                           const std::vector<std::string> &additionals);
+
+  void outputCPPUtilDecl(CodeGenerator::Output output);
+  void outputCPPUtilImpl(CodeGenerator::Output output);
+  void outputCPPGlobalDeclarations();
+  void outputCPPMain();
+  void outputCPPScalarArrays(bool system);
+  void outputCPPGlobalVariablesMethods(int part);
+  void outputCPPGlobalState();
+  void outputCPPFiberGlobalState();
+
 private:
   int m_scalarArraySortedAvgLen;
   int m_scalarArraySortedIndex;
@@ -411,14 +419,12 @@ private:
   std::map<std::string, std::set<std::pair<std::string, int> > > m_clsNameMap;
   std::map<std::string, std::set<std::pair<std::string, int> > > m_funcNameMap;
 
-  std::map<std::string, int> m_stringLiterals;
+  Mutex m_namedStringLiteralsMutex;
   std::map<int, std::vector<std::string> > m_namedStringLiterals;
 
   int m_funcTableSize;
   CodeGenerator::MapIntToStringVec m_funcTable;
   bool m_system;
-
-  std::deque<int> m_callInfos;
 
   /**
    * Checks whether the file is in one of the on-demand parsing directories.
@@ -445,15 +451,10 @@ private:
    */
   void createGlobalFuncTable();
 
-  void outputCPPGlobalDeclarations();
-  void outputCPPMain();
-  void outputCPPScalarArrays(bool system);
   void outputCPPScalarArrays(CodeGenerator &cg, int fileCount, int part);
-  void outputCPPGlobalVariablesMethods(int part);
 
   void collectCPPGlobalSymbols(StringPairVecVec &symbols,
                                CodeGenerator &cg);
-  void outputCPPGlobalState();
   void outputCPPGlobalStateBegin(CodeGenerator &cg, const char *section);
   void outputCPPGlobalStateEnd(CodeGenerator &cg, const char *section);
   void outputCPPGlobalStateSection(CodeGenerator &cg,
@@ -462,34 +463,19 @@ private:
                                    const char *prefix = "g->",
                                    const char *name_prefix = "");
 
-  void outputCPPFiberGlobalState();
-
   void outputCPPClassStaticInitializerDecls(CodeGenerator &cg);
   void outputCPPClassIncludes(CodeGenerator &cg);
   void outputCPPExtClassImpl(CodeGenerator &cg);
-  void outputCPPDynamicTables(CodeGenerator::Output output);
   void outputCPPDynamicTablesHeader(CodeGenerator &cg,
                                     bool includeGlobalVars = true,
                                     bool includes = true,
                                     bool noNamespace = false);
-  void outputCPPClassMapFile();
-  void outputCPPSourceInfos();
-  void outputCPPNameMaps();
-  void outputRTTIMetaData(const char *filename);
-  void outputCPPClassMap(CodeGenerator &cg);
-  void outputCPPSystem();
   void outputCPPGlobalImplementations(CodeGenerator &cg);
-  void outputCPPClusterImpl(CodeGenerator &cg, const FileScopePtrVec &files);
 
   void outputCPPClassDeclaredFlagsLookup(CodeGenerator &cg);
 
-  void outputCPPUtilDecl(CodeGenerator::Output output);
-  void outputCPPUtilImpl(CodeGenerator::Output output);
-
   void repartitionCPP(const std::string &filename, int64 targetSize,
                       bool insideHPHP, bool force);
-  void repartitionLargeCPP(const std::vector<std::string> &filenames,
-                           const std::vector<std::string> &additionals);
 
   void outputCPPFFIStubs();
   void outputHSFFIStubs();
@@ -519,7 +505,6 @@ private:
   void outputHexBuffer(CodeGenerator &cg, const char *name,
                        const char *buf, int len);
   void outputCPPNamedLiteralStrings(bool genStatic, const std::string &file);
-  void outputCPPSepExtensionMake();
   void outputCPPSepExtensionIncludes(CodeGenerator &cg);
 
   void outputCPPInvokeFileHeader(CodeGenerator &cg);

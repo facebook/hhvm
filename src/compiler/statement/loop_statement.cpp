@@ -45,15 +45,15 @@ void LoopStatement::cppDeclareBufs(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("StringBuffer %s_sbuf_%s%s(512);\n",
                 Option::TempPrefix, prefix, it->c_str());
     }
-    m_outer = ar->getLoopStatement();
-    ar->setLoopStatement(boost::static_pointer_cast<LoopStatement>
-                         (shared_from_this()));
+    m_outer = cg.getLoopStatement();
+    cg.setLoopStatement(boost::static_pointer_cast<LoopStatement>
+                        (shared_from_this()));
   }
 }
 
 void LoopStatement::cppEndBufs(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (numStringBufs()) {
-    ar->setLoopStatement(m_outer.lock());
+    cg.setLoopStatement(m_outer.lock());
     m_outer.reset();
     for (std::set<std::string>::iterator it = m_string_bufs.begin(),
            end = m_string_bufs.end(); it != end; ++it) {

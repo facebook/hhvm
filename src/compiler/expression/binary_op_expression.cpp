@@ -802,9 +802,10 @@ void BinaryOpExpression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 }
 
-static const char *stringBufferPrefix(AnalysisResultPtr ar, ExpressionPtr var) {
+static const char *stringBufferPrefix(CodeGenerator &cg, AnalysisResultPtr ar,
+                                      ExpressionPtr var) {
   if (var->is(Expression::KindOfSimpleVariable)) {
-    if (LoopStatementPtr loop = ar->getLoopStatement()) {
+    if (LoopStatementPtr loop = cg.getLoopStatement()) {
       SimpleVariablePtr sv = static_pointer_cast<SimpleVariable>(var);
       if (loop->checkStringBuf(sv->getName())) {
         return loop->getScope()->getVariables()->
@@ -908,7 +909,7 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
             (!Option::GenConcat ||
              cg.getOutput() == CodeGenerator::SystemCPP));
     } else if (effect2 && m_op == T_CONCAT_EQUAL) {
-      prefix = stringBufferPrefix(ar, m_exp1);
+      prefix = stringBufferPrefix(cg, ar, m_exp1);
       ok = prefix;
       if (!ok) {
         if (m_exp1->is(KindOfSimpleVariable)) {
@@ -920,9 +921,9 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       numConcat += getConcatList(ev, m_exp2, hasVoid);
     }
     if (ok) {
-      if (!ar->inExpression()) return true;
+      if (!cg.inExpression()) return true;
 
-      ar->wrapExpressionBegin(cg);
+      cg.wrapExpressionBegin();
       std::string buf;
       if (prefix) {
         SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(m_exp1));
@@ -972,16 +973,16 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   bool fix_e1 = m_exp1->preOutputCPP(cg, ar, 0);
-  if (!ar->inExpression()) {
+  if (!cg.inExpression()) {
     return fix_e1 || m_exp2->preOutputCPP(cg, ar, 0);
   }
 
-  ar->setInExpression(false);
+  cg.setInExpression(false);
   bool fix_e2 = m_exp2->preOutputCPP(cg, ar, 0);
-  ar->setInExpression(true);
+  cg.setInExpression(true);
 
   if (fix_e2) {
-    ar->wrapExpressionBegin(cg);
+    cg.wrapExpressionBegin();
     std::string tmp = genCPPTemp(cg, ar);
     cg_printf("bool %s = (", tmp.c_str());
     m_exp1->outputCPP(cg, ar);
@@ -1088,7 +1089,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   bool wrapped = true;
   switch (m_op) {
   case T_CONCAT_EQUAL:
-    if (const char *prefix = stringBufferPrefix(ar, m_exp1)) {
+    if (const char *prefix = stringBufferPrefix(cg, ar, m_exp1)) {
       SimpleVariablePtr sv = static_pointer_cast<SimpleVariable>(m_exp1);
       ExpressionPtrVec ev;
       bool hasVoid = false;

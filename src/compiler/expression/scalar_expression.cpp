@@ -33,6 +33,7 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/zend/zend_printf.h>
 #include <runtime/base/zend/zend_printf.h>
+#include <runtime/ext/ext_variable.h>
 
 using namespace HPHP;
 using namespace std;
@@ -52,7 +53,14 @@ ScalarExpression::ScalarExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  CVarRef value, bool quoted /* = true */)
     : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-      m_quoted(quoted), m_variant(value) {
+      m_quoted(quoted) {
+  if (!value.isNull()) {
+    String serialized = f_serialize(value);
+    m_serializedValue = string(serialized.data(), serialized.size());
+    if (value.isDouble()) {
+      m_dval = value.toDouble();
+    }
+  }
   switch (value.getType()) {
   case KindOfStaticString:
   case KindOfString:
@@ -160,7 +168,7 @@ ExpressionPtr ScalarExpression::postOptimize(AnalysisResultPtr ar) {
   case T_LINE:
   case T_LNUMBER:
     if (m_expectedType && m_expectedType->is(Type::KindOfString)) {
-      Variant &value = getVariant();
+      Variant value = getVariant();
       string svalue(value.toString()->data(), value.toString()->size());
       ScalarExpressionPtr sc
         (new ScalarExpression(getScope(), getLocation(),
@@ -422,7 +430,7 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     break;
   }
   case T_LNUMBER: {
-    Variant &v = getVariant();
+    Variant v = getVariant();
     ASSERT(v.isInteger());
     if (v.toInt64() == LONG_MIN) {
       cg_printf("(int64)0x%llxLL", LONG_MIN);
@@ -474,31 +482,34 @@ int64 ScalarExpression::getHash() const {
   return hash;
 }
 
-Variant &ScalarExpression::getVariant() {
-  if (!m_variant.isNull()) return m_variant;
-  switch (m_type) {
-  case T_ENCAPSED_AND_WHITESPACE:
-  case T_CONSTANT_ENCAPSED_STRING:
-  case T_STRING:
-  case T_NUM_STRING:
-    m_variant = String(m_value);
-    break;
-  case T_LNUMBER:
-    m_variant = strtoll(m_value.c_str(), NULL, 0);
-    break;
-  case T_LINE:
-    m_variant = String(m_translated).toInt64();
-    break;
-  case T_CLASS_C:
-  case T_METHOD_C:
-  case T_FUNC_C:
-    m_variant = String(m_translated);
-    break;
-  case T_DNUMBER:
-    m_variant = String(m_value).toDouble();
-    break;
-  default:
-    ASSERT(false);
+Variant ScalarExpression::getVariant() {
+  if (!m_serializedValue.empty()) {
+    Variant ret = f_unserialize
+      (String(m_serializedValue.data(),
+              m_serializedValue.size(), AttachLiteral));
+    if (ret.isDouble()) {
+      return m_dval;
+    }
+    return ret;
   }
-  return m_variant;
+  switch (m_type) {
+    case T_ENCAPSED_AND_WHITESPACE:
+    case T_CONSTANT_ENCAPSED_STRING:
+    case T_STRING:
+    case T_NUM_STRING:
+      return String(m_value);
+    case T_LNUMBER:
+      return strtoll(m_value.c_str(), NULL, 0);
+    case T_LINE:
+      return String(m_translated).toInt64();
+    case T_CLASS_C:
+    case T_METHOD_C:
+    case T_FUNC_C:
+      return String(m_translated);
+    case T_DNUMBER:
+      return String(m_value).toDouble();
+    default:
+      ASSERT(false);
+  }
+  return null;
 }

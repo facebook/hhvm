@@ -385,7 +385,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       error = ", false";
     }
     if (m_context & InvokeArgument) {
-      ASSERT(ar->callInfoTop() != -1);
+      ASSERT(cg.callInfoTop() != -1);
       func += "argval";
     } else if (m_context & (LValue | RefValue | UnsetContext)) {
       if (m_context & UnsetContext) {
@@ -416,7 +416,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
   } else {
     cg_printf("%s(", func.c_str());
     if (hasContext(InvokeArgument)) {
-      cg_printf("cit%d->isRef(%d), ", ar->callInfoTop(), m_argNum);
+      cg_printf("cit%d->isRef(%d), ", cg.callInfoTop(), m_argNum);
     }
     outputCPPProperty(cg, ar);
     cg_printf("%s%s)", error, context.c_str());

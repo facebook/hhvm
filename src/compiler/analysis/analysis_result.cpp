@@ -29,11 +29,8 @@
 #include <compiler/statement/method_statement.h>
 #include <compiler/statement/loop_statement.h>
 #include <compiler/analysis/symbol_table.h>
-#include <util/logger.h>
 #include <compiler/package.h>
 #include <compiler/parser/parser.h>
-#include <util/util.h>
-#include <util/hash.h>
 #include <compiler/option.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/builtin_symbols.h>
@@ -43,10 +40,15 @@
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/array_pair_expression.h>
-#include <util/process.h>
 #include <runtime/base/rtti_info.h>
 #include <runtime/base/array/small_array.h>
 #include <runtime/ext/ext_json.h>
+#include <util/logger.h>
+#include <util/util.h>
+#include <util/hash.h>
+#include <util/process.h>
+#include <util/job_queue.h>
+#include <util/timer.h>
 
 using namespace HPHP;
 using namespace std;
@@ -61,8 +63,6 @@ AnalysisResult::AnalysisResult()
     m_dynamicClass(false), m_dynamicFunction(false),
     m_optCounter(0),
     m_scalarArraysCounter(0), m_paramRTTICounter(0),
-    m_insideScalarArray(false), m_inExpression(false),
-    m_wrappedExpression(false),
     m_scalarArraySortedAvgLen(0), m_scalarArraySortedIndex(0),
     m_scalarArraySortedSumLen(0), m_scalarArrayCompressedTextSize(0),
     m_system(false) {
@@ -403,7 +403,7 @@ bool AnalysisResult::declareConst(FileScopePtr fs, const string &name) {
 
 static bool by_source(const BlockScopePtr &b1, const BlockScopePtr &b2) {
   return b1->getStmt()->getLocation()->
-    compare(b2->getStmt()->getLocation().get()) == -1;
+    compare(b2->getStmt()->getLocation().get()) < 0;
 }
 
 void AnalysisResult::canonicalizeSymbolOrder() {
@@ -592,6 +592,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   getVariables()->forceVariants(ar, VariableTable::AnyVars);
   getVariables()->setAttribute(VariableTable::ContainsLDynamicVariable);
   getVariables()->setAttribute(VariableTable::ContainsExtract);
+  getVariables()->setAttribute(VariableTable::ForceGlobal);
 
   // Analyze Includes
   Logger::Verbose("Analyzing Includes");
@@ -932,7 +933,15 @@ int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
   return ret;
 }
 
+void AnalysisResult::genMethodSlots() {
+  MethodSlot::genMethodSlot(shared_from_this());
+}
+
 void AnalysisResult::inferTypes() {
+  AsyncFunc<AnalysisResult>
+    methodSlotThread(this, &AnalysisResult::genMethodSlots);
+  methodSlotThread.start();
+
   setPhase(FirstInference);
   DepthFirstVisitor<InferTypesVisitor> dfv(shared_from_this());
   BlockScopeRawPtrQueue changed;
@@ -952,6 +961,8 @@ void AnalysisResult::inferTypes() {
     dfv.visitScope(*it);
     (*it)->setChangedScopes(0);
   }
+
+  methodSlotThread.waitForEnd();
 }
 
 struct PostOptVisitor {
@@ -1014,19 +1025,22 @@ void AnalysisResult::postOptimize() {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-int AnalysisResult::registerScalarArray(FileScopePtr scope,
+int AnalysisResult::registerScalarArray(bool insideScalarArray,
+                                        FileScopePtr scope,
                                         ExpressionPtr pairs, int &hash,
                                         int &index, string &text) {
+  Lock lock(m_namedScalarArraysMutex);
+
   int id = -1;
   hash = -1;
   index = -1;
   bool found = false;
-  if (!Option::ScalarArrayOptimization || m_insideScalarArray) {
+  if (!Option::ScalarArrayOptimization || insideScalarArray) {
     return -1;
   }
 
   if (pairs) {
-    // Normal picked PHP wouldn't work here, because predefined constants,
+    // Normal pickled PHP wouldn't work here, because predefined constants,
     // e.g., __CLASS__, need to be translated.
     text = pairs->getText(false, true);
   }
@@ -1058,6 +1072,8 @@ int AnalysisResult::registerScalarArray(FileScopePtr scope,
 }
 
 int AnalysisResult::checkScalarArray(const string &text, int &index) {
+  Lock lock(m_namedScalarArraysMutex);
+
   assert(Option::ScalarArrayOptimization && Option::UseNamedScalarArray);
   int hash = hash_string(text.data(), text.size());
   if (hash < 0) hash = -hash;
@@ -1072,6 +1088,8 @@ int AnalysisResult::checkScalarArray(const string &text, int &index) {
 }
 
 int AnalysisResult::getScalarArrayId(const string &text) {
+  Lock lock(m_namedScalarArraysMutex);
+
   std::map<std::string, int>::const_iterator iter = m_scalarArrays.find(text);
   assert(iter != m_scalarArrays.end());
   return iter->second;
@@ -1120,14 +1138,6 @@ void AnalysisResult::outputCPPNamedScalarArrays(const std::string &file) {
   }
   cg_indentEnd("}\n");
   cg.namespaceEnd();
-}
-
-bool AnalysisResult::getInsideScalarArray() {
-  return m_insideScalarArray;
-}
-
-void AnalysisResult::setInsideScalarArray(bool flag) {
-  m_insideScalarArray = flag;
 }
 
 string AnalysisResult::prepareFile(const char *root, const string &fileName,
@@ -1385,9 +1395,11 @@ void AnalysisResult::repartitionLargeCPP(const vector<string> &filenames,
     if (stat(filenames[i].c_str(), &results) == 0) {
       totalSize += results.st_size;
       count++;
+    } else {
+      Logger::Error("unable to stat %s", filenames[i].c_str());
     }
   }
-  int64 averageSize = totalSize / count;
+  int64 averageSize = count > 1 ? (totalSize / count) : totalSize;
   for (unsigned int i = 0; i < filenames.size(); i++) {
     const string &filename = filenames[i];
 
@@ -1408,11 +1420,171 @@ void AnalysisResult::repartitionLargeCPP(const vector<string> &filenames,
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+class OutputJob {
+public:
+  OutputJob(AnalysisResultPtr ar)
+      : m_ar(ar) {
+  }
+  OutputJob(AnalysisResultPtr ar, CodeGenerator::Output output)
+      : m_ar(ar), m_output(output) {
+  }
+  OutputJob(AnalysisResultPtr ar, const std::string &root,
+            CodeGenerator::Output output, const std::string *compileDir)
+      : m_ar(ar), m_root(root), m_output(output), m_compileDir(compileDir) {
+  }
+
+  void output() {
+    outputImpl();
+  }
+
+  virtual void outputImpl() = 0;
+
+  std::string m_filename;
+
+protected:
+  AnalysisResultPtr m_ar;
+  std::string m_root;
+  CodeGenerator::Output m_output;
+  const std::string *m_compileDir;
+};
+
+class OutputClusterJob : public OutputJob {
+public:
+  OutputClusterJob(AnalysisResultPtr ar, const std::string &root,
+                   CodeGenerator::Output output, const std::string *compileDir,
+                   const std::string &name, const FileScopePtrVec &files)
+      : OutputJob(ar, root, output, compileDir),
+        m_name(name), m_files(files) {
+    Util::mkdir(m_root + m_name);
+    BOOST_FOREACH(FileScopePtr fs, m_files) {
+      string fileBase = fs->outputFilebase();
+      Util::mkdir(m_root + fileBase);
+    }
+  }
+
+  virtual void outputImpl() {
+    // for each cluster, generate one implementation file
+    string filename = m_root + m_name + ".cpp";
+    m_filename = filename;
+    ofstream f(filename.c_str());
+    if (m_compileDir) {
+      // this is the file that will be compiled, so we need to use this
+      // for source info:
+      filename = *m_compileDir + "/" + m_name + ".cpp";
+    }
+    CodeGenerator cg(&f, m_output, &filename);
+    m_ar->outputCPPClusterImpl(cg, m_files);
+
+    // for each file, generate one header and a list of class headers
+    BOOST_FOREACH(FileScopePtr fs, m_files) {
+      string fileBase = fs->outputFilebase();
+      string header = fileBase + ".h";
+      string fwheader = fileBase + ".fw.h";
+      string fwsheader = fileBase + ".fws.h";
+      string fileHeader = m_root + header;
+      string fwFileHeader = m_root + fwheader;
+      string fwsFileHeader = m_root + fwsheader;
+      {
+        ofstream f(fileHeader.c_str());
+        CodeGenerator cg(&f, m_output);
+        fs->outputCPPDeclHeader(cg, m_ar);
+        f.close();
+      }
+      fs->outputCPPClassHeaders(cg, m_ar, m_output);
+      {
+        ofstream f(fwFileHeader.c_str());
+        CodeGenerator cg(&f, m_output);
+        fs->outputCPPForwardDeclHeader(cg, m_ar);
+        f.close();
+      }
+      {
+        ofstream f(fwsFileHeader.c_str());
+        CodeGenerator cg(&f, m_output);
+        fs->outputCPPForwardStaticDecl(cg, m_ar);
+        f.close();
+      }
+    }
+  }
+
+protected:
+  const std::string &m_name;
+  const FileScopePtrVec &m_files;
+};
+
+#define DECLARE_JOB(name, body)                                     \
+class name ## Job : public OutputJob {                              \
+public:                                                             \
+  name ## Job(AnalysisResultPtr ar, CodeGenerator::Output output)   \
+    : OutputJob(ar, output) {                                       \
+  }                                                                 \
+  virtual void outputImpl() {                                       \
+    m_ar->body;                                                     \
+  }                                                                 \
+};                                                                  \
+
+#define SCHEDULE_JOB(name)                                          \
+  {                                                                 \
+    OutputJob *job = new name ## Job(ar, output);                   \
+    jobs.push_back(job);                                            \
+    dispatcher.enqueue(job);                                        \
+  }                                                                 \
+
+DECLARE_JOB(DynamicTable, outputCPPDynamicTables(m_output));
+DECLARE_JOB(System,       outputCPPSystem());
+DECLARE_JOB(SepExtMake,   outputCPPSepExtensionMake());
+DECLARE_JOB(ClassMap,     outputCPPClassMapFile());
+DECLARE_JOB(NameMaps,     outputCPPNameMaps());
+DECLARE_JOB(SourceInfos,  outputCPPSourceInfos());
+DECLARE_JOB(RTTIMeta,     outputRTTIMetaData(Option::RTTIOutputFile.c_str()));
+DECLARE_JOB(UtilDecl,     outputCPPUtilDecl(m_output));
+DECLARE_JOB(UtilImpl,     outputCPPUtilImpl(m_output));
+DECLARE_JOB(GlobalDecl,   outputCPPGlobalDeclarations());
+DECLARE_JOB(Main,         outputCPPMain());
+DECLARE_JOB(ScalarArrays, outputCPPScalarArrays(false));
+DECLARE_JOB(Global1,      outputCPPGlobalVariablesMethods(1));
+DECLARE_JOB(Global2,      outputCPPGlobalVariablesMethods(2));
+DECLARE_JOB(Global3,      outputCPPGlobalVariablesMethods(3));
+DECLARE_JOB(Global4,      outputCPPGlobalVariablesMethods(4));
+DECLARE_JOB(GlobalState,  outputCPPGlobalState());
+DECLARE_JOB(FiberGlobal,  outputCPPFiberGlobalState());
+
+class RepartitionJob : public OutputJob {
+public:
+  RepartitionJob(AnalysisResultPtr ar, const vector<string> &filenames,
+                 const vector<string> &additionalCPPs)
+      : OutputJob(ar), m_filenames(filenames),
+        m_additionalCPPs(additionalCPPs) {
+  }
+
+  virtual void outputImpl() {
+    m_ar->repartitionLargeCPP(m_filenames, m_additionalCPPs);
+  }
+
+private:
+  const vector<string> &m_filenames;
+  const vector<string> &m_additionalCPPs;
+};
+
+class OutputWorker : public JobQueueWorker<OutputJob*> {
+public:
+  virtual void doJob(OutputJob *job) { job->output();}
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
                                   int clusterCount,
                                   const std::string *compileDir) {
+  AnalysisResultPtr ar = shared_from_this();
+
   if (output == CodeGenerator::SystemCPP) {
     Option::GenerateCPPMain = false;
+  }
+  if (Option::GenerateCPPMacros && output != CodeGenerator::SystemCPP) {
+    // system functions are currently unchanged
+    createGlobalFuncTable();
   }
 
   FileScopePtrVec trueDeps;
@@ -1424,174 +1596,112 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
       clusters[f->outputFilebase()].push_back(f);
     }
   }
-
-  if (Option::GenerateCPPMacros && output != CodeGenerator::SystemCPP) {
-    // system functions are currently unchanged
-    createGlobalFuncTable();
+  unsigned int threadCount = Option::ParserThreadCount * 2;
+  if (threadCount > clusters.size()) {
+    threadCount = clusters.size();
   }
+  if (threadCount <= 0) threadCount = 1;
 
-  vector <string> filenames;
+  threadCount = 1; // hzhao: wait for Minghui's change to StaticString/Array
 
-  AnalysisResultPtr ar = shared_from_this();
-  MethodSlot::genMethodSlot(ar);
-  string root = getOutputPath() + "/";
-  for (StringToFileScopePtrVecMap::const_iterator iter = clusters.begin();
-       iter != clusters.end(); ++iter) {
-    // for each cluster, generate one implementation file
-    Util::mkdir(root + iter->first);
-    string filename = root + iter->first + ".cpp";
-    filenames.push_back(filename);
-    ofstream f(filename.c_str());
-    if (compileDir) {
-      // this is the file that will be compiled, so we need to use this
-      // for source info:
-      filename = *compileDir + "/" + iter->first + ".cpp";
-    }
-    CodeGenerator cg(&f, output, &filename);
-    outputCPPClusterImpl(cg, iter->second);
-
-    // for each file, generate one header and a list of class headers
-    BOOST_FOREACH(FileScopePtr fs, iter->second) {
-      string fileBase = fs->outputFilebase();
-      Util::mkdir(root + fileBase);
-      string header = fileBase + ".h";
-      string fwheader = fileBase + ".fw.h";
-      string fwsheader = fileBase + ".fws.h";
-      string fileHeader = root + header;
-      string fwFileHeader = root + fwheader;
-      string fwsFileHeader = root + fwsheader;
-      {
-        ofstream f(fileHeader.c_str());
-        CodeGenerator cg(&f, output);
-        fs->outputCPPDeclHeader(cg, ar);
-        f.close();
-      }
-      fs->outputCPPClassHeaders(cg, ar, output);
-      {
-        ofstream f(fwFileHeader.c_str());
-        CodeGenerator cg(&f, output);
-        fs->outputCPPForwardDeclHeader(cg, ar);
-        f.close();
-      }
-      {
-        ofstream f(fwsFileHeader.c_str());
-        CodeGenerator cg(&f, output);
-        fs->outputCPPForwardStaticDecl(cg, ar);
-        f.close();
-      }
-    }
-  }
-
-  if (Option::GenerateCPPMacros) {
-    outputCPPDynamicTables(output);
-  }
-  if (output == CodeGenerator::SystemCPP) {
-    // this calls outputCPPScalarArrays, so must happen
-    // after function bodies have been output
-    outputCPPSystem();
-    string file = m_outputPath + "/" + Option::SystemFilePrefix +
-      "literal_strings";
-    outputCPPNamedLiteralStrings(false, file);
-    if (Option::UseNamedScalarArray) {
-      string file = m_outputPath + "/" + Option::SystemFilePrefix +
-        "scalar_arrays";
-      outputCPPNamedScalarArrays(file);
-    }
-  } else if (Option::GenerateCPPMain) {
-    outputCPPGlobalDeclarations();
-    outputCPPMain();
-    outputCPPScalarArrays(false);
-    outputCPPGlobalVariablesMethods(1);
-    outputCPPGlobalVariablesMethods(2);
-    outputCPPGlobalVariablesMethods(3);
-    outputCPPGlobalVariablesMethods(4);
-    string file = m_outputPath + "/" + Option::SystemFilePrefix +
-      "literal_strings";
-    outputCPPNamedLiteralStrings(false, file);
-    if (Option::UseNamedScalarArray) {
-      string file = m_outputPath + "/" + Option::SystemFilePrefix +
-        "scalar_arrays";
-      outputCPPNamedScalarArrays(file);
-    }
-    outputCPPGlobalState();
-    outputCPPFiberGlobalState();
-    outputCPPSepExtensionMake();
-  }
-  if (!Option::SystemGen) outputCPPUtilDecl(output);
-  if (Option::GenerateCPPMacros && output != CodeGenerator::SystemCPP) {
-    outputCPPClassMapFile();
-    outputCPPNameMaps();
-  }
-
+  // 1st round doing cpp/*.cpp
+  vector<string> filenames;
   vector<string> additionalCPPs;
-  if (Option::GenerateFFI) {
-    outputCPPFFIStubs();
-    additionalCPPs.push_back(m_outputPath + "/" + Option::FFIFilePrefix +
-                             "stubs.cpp");
-    outputHSFFIStubs();
-    outputJavaFFIStubs();
-    outputJavaFFICppImpl();
-    additionalCPPs.push_back(m_outputPath + "/" + Option::FFIFilePrefix +
-                             "java_stubs.cpp");
-    outputJavaFFICppDecl();
-    outputSwigFFIStubs();
+  {
+    vector<OutputJob*> jobs;
+    JobQueueDispatcher<OutputJob*, OutputWorker>
+      dispatcher(threadCount, true, 0, NULL);
+
+    string root = getOutputPath() + "/";
+    for (StringToFileScopePtrVecMap::const_iterator iter = clusters.begin();
+         iter != clusters.end(); ++iter) {
+      OutputClusterJob *job =
+        new OutputClusterJob(ar, root, output, compileDir,
+                             iter->first, iter->second);
+      jobs.push_back(job);
+      dispatcher.enqueue(job);
+    }
+    dispatcher.start();
+
+    // main thread
+    if (Option::GenerateFFI) {
+      outputFFI(additionalCPPs);
+    }
+
+    dispatcher.stop();
+
+    for (unsigned int i = 0; i < jobs.size(); i++) {
+      if (!jobs[i]->m_filename.empty()) {
+        filenames.push_back(jobs[i]->m_filename);
+      }
+      delete jobs[i];
+    }
+    jobs.clear();
   }
 
-  if (clusterCount > 0) repartitionLargeCPP(filenames, additionalCPPs);
+  // 2nd round code generation
+  {
+    vector<OutputJob*> jobs;
+    JobQueueDispatcher<OutputJob*, OutputWorker>
+      dispatcher(threadCount, true, 0, NULL);
 
-  if (Option::GenerateCPPMacros && output != CodeGenerator::SystemCPP) {
-    outputCPPSourceInfos();
+    if (clusterCount > 0) {
+      OutputJob *job = new RepartitionJob(ar, filenames, additionalCPPs);
+      jobs.push_back(job);
+      dispatcher.enqueue(job);
+    }
+
+    if (Option::GenerateCPPMacros) {
+      SCHEDULE_JOB(DynamicTable);
+    }
+    if (output == CodeGenerator::SystemCPP) {
+      SCHEDULE_JOB(System);
+    } else if (Option::GenerateCPPMain) {
+      SCHEDULE_JOB(SepExtMake);
+    }
+    if (Option::GenerateCPPMacros && output != CodeGenerator::SystemCPP) {
+      SCHEDULE_JOB(ClassMap);
+      SCHEDULE_JOB(NameMaps);
+      SCHEDULE_JOB(SourceInfos);
+    }
+    if (Option::GenRTTIProfileData) {
+      SCHEDULE_JOB(RTTIMeta);
+    }
+
+    if (!Option::SystemGen) {
+      SCHEDULE_JOB(UtilDecl);
+      SCHEDULE_JOB(UtilImpl);
+    }
+    if (output != CodeGenerator::SystemCPP && Option::GenerateCPPMain) {
+      outputCPPGlobalVariablesMethods(0); // canonicalizing static globals
+
+      SCHEDULE_JOB(GlobalDecl);
+      SCHEDULE_JOB(Main);
+      SCHEDULE_JOB(ScalarArrays);
+      SCHEDULE_JOB(Global1);
+      SCHEDULE_JOB(Global2);
+      SCHEDULE_JOB(Global3);
+      SCHEDULE_JOB(Global4);
+      SCHEDULE_JOB(GlobalState);
+      SCHEDULE_JOB(FiberGlobal);
+    }
+    dispatcher.run();
+
+    for (unsigned int i = 0; i < jobs.size(); i++) {
+      delete jobs[i];
+    }
   }
 
-  if (Option::GenRTTIProfileData) {
-    outputRTTIMetaData(Option::RTTIOutputFile.c_str());
-  }
-
-  if (!Option::SystemGen) outputCPPUtilImpl(output);
-}
-
-void AnalysisResult::outputAllCPP(CodeGenerator &cg) {
-  AnalysisResultPtr ar = shared_from_this();
-  cg.setOutput(CodeGenerator::MonoCPP);
-  cg.setContext(CodeGenerator::CppImplementation);
-
-  if (Option::GenerateCPPMain) {
-    cg_printf("\n");
-    cg_printInclude("<runtime/base/hphp.h>");
-    cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
-    cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-    cg_printf("\n");
-  }
-
-  cg.namespaceBegin();
-  getVariables()->setAttribute(VariableTable::ForceGlobal);
-  getVariables()->outputCPP(cg, ar);
-  getVariables()->clearAttribute(VariableTable::ForceGlobal);
-
-  cg.setContext(CodeGenerator::CppImplementation);
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputCPPImpl(cg, ar);
-  }
-  cg.setContext(CodeGenerator::CppPseudoMain);
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputCPPPseudoMain(cg, ar);
-  }
-  cg.setContext(CodeGenerator::CppForwardDeclaration);
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputCPPForwardDeclarations(cg, ar);
-  }
-  cg.setContext(CodeGenerator::CppDeclaration);
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputCPPDeclarations(cg, ar);
-  }
-  cg.namespaceEnd();
-
-  if (Option::GenerateCPPMain) {
-    cg_printf("#ifndef HPHP_BUILD_LIBRARY\n");
-    cg_indentBegin("int main(int argc, char** argv) {\n");
-    cg_printf("return HPHP::execute_program(argc, argv);\n");
-    cg_indentEnd("}\n");
-    cg_printf("#endif\n");
+  // 3rd round code generation
+  {
+    string file = m_outputPath + "/" + Option::SystemFilePrefix +
+      "literal_strings";
+    outputCPPNamedLiteralStrings(false, file);
+    if (Option::UseNamedScalarArray) {
+      string file = m_outputPath + "/" + Option::SystemFilePrefix +
+        "scalar_arrays";
+      outputCPPNamedScalarArrays(file);
+    }
   }
 }
 
@@ -2382,31 +2492,31 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       outputCPPHashTableInvokeFile(cg, entries, needEvalHook);
       cg.namespaceEnd();
       fTable.close();
-      return;
+    } else {
+      outputCPPInvokeFileHeader(cg);
+      // See if there's an eval'd version
+      if (needEvalHook) outputCPPEvalHook(cg);
+
+      string root;
+
+      for (JumpTable jt(cg, entries, false, false, true); jt.ready();
+           jt.next()) {
+        const char *file = jt.key();
+        cg_printf("HASH_INCLUDE(0x%016llXLL, \"%s\", %s);\n",
+                  hash_string(file), file,
+                  Option::MangleFilename(file, true).c_str());
+      }
+
+
+      // when we only have one file, we default to running the file
+      if (entries.size() == 1) outputCPPDefaultInvokeFile(cg, entries[0]);
+
+      cg_printf("return throw_missing_file(s.data());\n");
+      cg_indentEnd("}\n");
+
+      cg.namespaceEnd();
+      fTable.close();
     }
-    outputCPPInvokeFileHeader(cg);
-    // See if there's an eval'd version
-    if (needEvalHook) outputCPPEvalHook(cg);
-
-    string root;
-
-    for (JumpTable jt(cg, entries, false, false, true); jt.ready();
-         jt.next()) {
-      const char *file = jt.key();
-      cg_printf("HASH_INCLUDE(0x%016llXLL, \"%s\", %s);\n",
-                hash_string(file), file,
-                Option::MangleFilename(file, true).c_str());
-    }
-
-
-    // when we only have one file, we default to running the file
-    if (entries.size() == 1) outputCPPDefaultInvokeFile(cg, entries[0]);
-
-    cg_printf("return throw_missing_file(s.data());\n");
-    cg_indentEnd("}\n");
-
-    cg.namespaceEnd();
-    fTable.close();
   }
 }
 
@@ -2460,9 +2570,7 @@ void AnalysisResult::outputCPPSystem() {
   cg.printImplStarter();
   cg.namespaceBegin();
   AnalysisResultPtr ar = shared_from_this();
-  getVariables()->setAttribute(VariableTable::ForceGlobal);
   getVariables()->outputCPP(cg, ar);
-  getVariables()->clearAttribute(VariableTable::ForceGlobal);
   getConstants()->outputCPP(cg, ar);
   cg.namespaceEnd();
 
@@ -2560,24 +2668,6 @@ void AnalysisResult::outputCPPScalarArrayDecl(CodeGenerator &cg) {
   if (m_scalarArrayIds.size() > 0) {
     cg_printf("static StaticArray %s[%d];\n", prefix, m_scalarArrayIds.size());
   }
-}
-
-bool AnalysisResult::wrapExpressionBegin(CodeGenerator &cg) {
-  if (!m_wrappedExpression) {
-    m_wrappedExpression = true;
-    cg_indentBegin("{\n");
-    return true;
-  }
-  return false;
-}
-
-bool AnalysisResult::wrapExpressionEnd(CodeGenerator &cg) {
-  if (m_wrappedExpression) {
-    m_wrappedExpression = false;
-    cg_indentEnd("}\n");
-    return true;
-  }
-  return false;
 }
 
 void AnalysisResult::outputHexBuffer(CodeGenerator &cg, const char *name,
@@ -2686,9 +2776,9 @@ void AnalysisResult::outputCPPScalarArrayInit(CodeGenerator &cg, int fileCount,
         for (int i = Option::ScalarArrayOverflowLimit; i < numElems; i++) {
           subExpList->removeElement(Option::ScalarArrayOverflowLimit);
         }
-        ar->setInsideScalarArray(true);
+        cg.setInsideScalarArray(true);
         subExpList->outputCPP(cg, ar);
-        ar->setInsideScalarArray(false);
+        cg.setInsideScalarArray(false);
         cg_printf(", NULL);\n");
         for (int i = Option::ScalarArrayOverflowLimit; i < numElems; i++) {
           ExpressionPtr elemExp = (*expList)[i];
@@ -2758,9 +2848,7 @@ void AnalysisResult::outputCPPGlobalDeclarations() {
   cg.namespaceBegin();
 
   AnalysisResultPtr ar = shared_from_this();
-  getVariables()->setAttribute(VariableTable::ForceGlobal);
   getVariables()->outputCPP(cg, ar);
-  getVariables()->clearAttribute(VariableTable::ForceGlobal);
 
   cg_printf("\n");
   if (getVariables()->getAttribute(VariableTable::ContainsLDynamicVariable)) {
@@ -2786,9 +2874,7 @@ void AnalysisResult::outputCPPGlobalImplementations(CodeGenerator &cg) {
   AnalysisResultPtr ar = shared_from_this();
   CodeGenerator::Context con = cg.getContext();
   cg.setContext(CodeGenerator::CppImplementation);
-  getVariables()->setAttribute(VariableTable::ForceGlobal);
   getVariables()->outputCPP(cg, ar);
-  getVariables()->clearAttribute(VariableTable::ForceGlobal);
 
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
@@ -2846,8 +2932,6 @@ void AnalysisResult::outputCPPClassStaticInitializerFlags
 }
 
 void AnalysisResult::outputCPPScalarArrays(bool system) {
-  setInsideScalarArray(true);
-
   int fileCount = system ? 1 : Option::ScalarArrayFileCount;
   if (system) {
     fileCount = 1;
@@ -2865,6 +2949,7 @@ void AnalysisResult::outputCPPScalarArrays(bool system) {
     CodeGenerator cg(&f, system ? CodeGenerator::SystemCPP :
                      CodeGenerator::ClusterCPP);
 
+    cg.setInsideScalarArray(true);
     cg_printf("\n");
     cg_printInclude("<runtime/base/hphp.h>");
     cg_printInclude(string(Option::SystemFilePrefix) +
@@ -2877,16 +2962,12 @@ void AnalysisResult::outputCPPScalarArrays(bool system) {
     AnalysisResultPtr ar = shared_from_this();
     CodeGenerator::Context con = cg.getContext();
     cg.setContext(CodeGenerator::CppImplementation);
-    getVariables()->setAttribute(VariableTable::ForceGlobal);
     outputCPPScalarArrays(cg, fileCount, i);
-    getVariables()->clearAttribute(VariableTable::ForceGlobal);
     cg.setContext(con);
 
     cg.namespaceEnd();
     f.close();
   }
-
-  setInsideScalarArray(false);
 }
 
 void AnalysisResult::outputCPPScalarArrays(CodeGenerator &cg, int fileCount,
@@ -2941,11 +3022,16 @@ void AnalysisResult::outputCPPScalarArrays(CodeGenerator &cg, int fileCount,
 
 void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   string filename = m_outputPath + "/" + Option::SystemFilePrefix +
-    "global_variables_" + lexical_cast<string>(part) + ".no.cpp";
+    "global_variables_" + lexical_cast<string>(part ? part : 1) + ".no.cpp";
   Util::mkdir(filename);
   ofstream f(filename.c_str());
   CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
   AnalysisResultPtr ar = shared_from_this();
+
+  if (part == 0) {
+    getVariables()->canonicalizeStaticGlobals(cg);
+    return;
+  }
 
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
@@ -2964,7 +3050,6 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
 
   CodeGenerator::Context con = cg.getContext();
   cg.setContext(CodeGenerator::CppImplementation);
-  getVariables()->setAttribute(VariableTable::ForceGlobal);
   switch (part) {
   case 1:
     getVariables()->outputCPPGlobalVariablesDtor(cg);
@@ -2976,7 +3061,6 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   case 4: getVariables()->outputCPPGlobalVariablesMethods (cg, ar); break;
   default: ASSERT(false);
   }
-  getVariables()->clearAttribute(VariableTable::ForceGlobal);
   cg.setContext(con);
 
   cg.namespaceEnd();
@@ -3451,6 +3535,18 @@ void AnalysisResult::outputCPPClusterImpl(CodeGenerator &cg,
   cg.namespaceEnd();
 }
 
+void AnalysisResult::outputFFI(vector<string> &additionalCPPs) {
+  outputCPPFFIStubs();
+  additionalCPPs.push_back(m_outputPath + "/" + Option::FFIFilePrefix +
+                           "stubs.cpp");
+  outputHSFFIStubs();
+  outputJavaFFIStubs();
+  outputJavaFFICppImpl();
+  additionalCPPs.push_back(m_outputPath + "/" + Option::FFIFilePrefix +
+                           "java_stubs.cpp");
+  outputJavaFFICppDecl();
+  outputSwigFFIStubs();
+}
 
 void AnalysisResult::outputCPPFFIStubs() {
   AnalysisResultPtr ar = shared_from_this();
@@ -3692,6 +3788,8 @@ string AnalysisResult::getLiteralStringName(int hash, int index) {
 }
 
 int AnalysisResult::getLiteralStringId(const std::string &s, int &index) {
+  Lock lock(m_namedStringLiteralsMutex);
+
   int hash = hash_string(s.data(), s.size());
   if (hash < 0) hash = -hash;
   vector<string> &strings = m_namedStringLiterals[hash];
@@ -3775,17 +3873,6 @@ void AnalysisResult::cloneRTTIFuncs(const char *RTTIDirectory) {
   }
 }
 
-
-void AnalysisResult::pushCallInfo(int cit) {
-  m_callInfos.push_back(cit);
-}
-void AnalysisResult::popCallInfo() {
-  m_callInfos.pop_back();
-}
-int AnalysisResult::callInfoTop() {
-  if (m_callInfos.empty()) return -1;
-  return m_callInfos.back();
-}
 
 void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
                                                   const string &file) {

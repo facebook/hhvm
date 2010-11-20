@@ -658,7 +658,7 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
      (isTemp && !dstType->isPrimitive()) || eltOrPropArg ||
      (isLvalue && dynamic_cast<FunctionCall*>(this)));
 
-  ar->wrapExpressionBegin(cg);
+  cg.wrapExpressionBegin();
   // make LINE macro separate to not interfere with persistance of expression.
   // and because nested LINE macros dont work
   if (outputLineMap(cg, ar)) cg_printf("0);\n");
@@ -776,7 +776,7 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     }
   }
 
-  if (!ret || ar->inExpression()) {
+  if (!ret || cg.inExpression()) {
     bool skipLast = !stashAll;
     int lastState = kidState | StashByRef;
     if (stashAll) lastState |= StashVars;
@@ -798,7 +798,7 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         }
         if (k->preOutputCPP(cg, ar, i == lastEffect ? lastState : s)) {
           ret = true;
-          if (!ar->inExpression()) break;
+          if (!cg.inExpression()) break;
         }
         if (noEffect) {
           k->outputCPPUnneeded(cg, ar);
@@ -810,7 +810,7 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   if (state & FixOrder) {
-    if (ar->inExpression()) {
+    if (cg.inExpression()) {
       preOutputStash(cg, ar, state);
     }
   }
@@ -847,7 +847,7 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
     }
   }
   if (!ret) return Expression::preOutputCPP(cg, ar, state);
-  if (!ar->inExpression()) return ret;
+  if (!cg.inExpression()) return ret;
 
   state |= FixOrder;
 
@@ -870,13 +870,13 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
 }
 
 bool Expression::outputCPPBegin(CodeGenerator &cg, AnalysisResultPtr ar) {
-  ar->setInExpression(true);
+  cg.setInExpression(true);
   return preOutputCPP(cg, ar, 0);
 }
 
 bool Expression::outputCPPEnd(CodeGenerator &cg, AnalysisResultPtr ar) {
-  bool ret = ar->wrapExpressionEnd(cg);
-  ar->setInExpression(false);
+  bool ret = cg.wrapExpressionEnd();
+  cg.setInExpression(false);
   return ret;
 }
 
@@ -959,7 +959,7 @@ bool Expression::outputCPPUnneeded(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  bool inExpression = ar->inExpression();
+  bool inExpression = cg.inExpression();
   bool wrapped = false;
   TypePtr et = m_expectedType;
   TypePtr at = m_actualType;
@@ -975,7 +975,7 @@ void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   if (!inExpression) {
-    ar->setInExpression(true);
+    cg.setInExpression(true);
     wrapped = preOutputCPP(cg, ar, 0);
   }
 
@@ -998,8 +998,8 @@ void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (!inExpression) {
     if (wrapped) cg_printf(";");
-    ar->wrapExpressionEnd(cg);
-    ar->setInExpression(inExpression);
+    cg.wrapExpressionEnd();
+    cg.setInExpression(inExpression);
   }
 }
 

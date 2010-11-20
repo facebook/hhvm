@@ -50,8 +50,7 @@ bool TestCodeError::Verify(Compiler::ErrorType type, const char *src,
   ar->inferTypes();
   if (Compiler::HasError(type) != exists) {
     ostringstream code;
-    CodeGenerator cg(&code);
-    ar->outputAllCPP(cg);
+    ar->outputAllCPP(CodeGenerator::ClusterCPP, 0, NULL);
     ostringstream error;
     JSON::OutputStream out(error);
     Compiler::SaveErrors(out);

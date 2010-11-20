@@ -320,6 +320,11 @@ public:
     }
   }
 
+  void run() {
+    start();
+    stop();
+  }
+
 private:
   bool m_stopped;
   JobQueue<TJob> m_queue;

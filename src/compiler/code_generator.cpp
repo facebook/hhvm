@@ -58,13 +58,16 @@ const char *CodeGenerator::SPLITTER_MARKER =
 CodeGenerator::CodeGenerator(std::ostream *primary,
                              Output output /* = PickledPHP */,
                              std::string *filename /* = NULL */)
-  : m_out(NULL), m_output(output), m_context(NoContext), m_itemIndex(-1) {
+    : m_out(NULL), m_output(output), m_context(NoContext),
+      m_insideScalarArray(false), m_itemIndex(-1) {
   for (int i = 0; i < StreamCount; i++) {
     m_streams[i] = NULL;
     m_indentation[i] = 0;
     m_indentPending[i] = false;
     m_lineNo[i] = 1;
     m_inComments[i] = 0;
+    m_wrappedExpression[i] = false;
+    m_inExpression[i] = false;
   }
   setStream(PrimaryStream, primary);
   useStream(PrimaryStream);
@@ -119,6 +122,24 @@ void CodeGenerator::indentEnd(const char *fmt, ...) {
   ASSERT(m_indentation[m_curStream]);
   m_indentation[m_curStream]--;
   va_list ap; va_start(ap, fmt); print(fmt, ap); va_end(ap);
+}
+
+bool CodeGenerator::wrapExpressionBegin() {
+  if (!m_wrappedExpression[m_curStream]) {
+    m_wrappedExpression[m_curStream] = true;
+    indentBegin("{\n");
+    return true;
+  }
+  return false;
+}
+
+bool CodeGenerator::wrapExpressionEnd() {
+  if (m_wrappedExpression[m_curStream]) {
+    m_wrappedExpression[m_curStream] = false;
+    indentEnd("}\n");
+    return true;
+  }
+  return false;
 }
 
 bool CodeGenerator::inComments() const {
@@ -388,6 +409,25 @@ void CodeGenerator::popBreakScope() {
     m_breakLabelIds.clear();
     m_contLabelIds.clear();
   }
+}
+
+void CodeGenerator::pushCallInfo(int cit) {
+  m_callInfos.push_back(cit);
+}
+void CodeGenerator::popCallInfo() {
+  m_callInfos.pop_back();
+}
+int CodeGenerator::callInfoTop() {
+  if (m_callInfos.empty()) return -1;
+  return m_callInfos.back();
+}
+
+bool CodeGenerator::getInsideScalarArray() {
+  return m_insideScalarArray;
+}
+
+void CodeGenerator::setInsideScalarArray(bool flag) {
+  m_insideScalarArray = flag;
 }
 
 void CodeGenerator::addLabelId(const char *name, int labelId) {

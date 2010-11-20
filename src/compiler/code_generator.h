@@ -26,6 +26,7 @@ DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(Construct);
 DECLARE_BOOST_TYPES(BlockScope);
+DECLARE_BOOST_TYPES(LoopStatement);
 
 class CodeGenerator {
 public:
@@ -133,6 +134,8 @@ public:
   void indentBegin(const char *fmt, ...);
   void indentEnd(const char *fmt, ...);
   void printRaw(const std::string &msg) { print(msg, false);}
+  bool wrapExpressionBegin();
+  bool wrapExpressionEnd();
 
   /**
    * Pre-formatted outputs.
@@ -207,6 +210,22 @@ public:
   void printString(const std::string &str, AnalysisResultPtr ar,
                    ConstructPtr check, bool stringWrapper = true);
   int getCurrentIndentation() const { return m_indentation[m_curStream];}
+
+  bool inExpression() { return m_inExpression[m_curStream]; }
+  void setInExpression(bool in) { m_inExpression[m_curStream] = in; }
+
+  void pushCallInfo(int cit);
+  void popCallInfo();
+  int callInfoTop();
+
+  LoopStatementPtr getLoopStatement() const { return m_loopStatement; }
+  void setLoopStatement(LoopStatementPtr loop) {
+    m_loopStatement = loop;
+  }
+
+  void setInsideScalarArray(bool flag);
+  bool getInsideScalarArray();
+
 private:
   std::string m_filename;
   Stream m_curStream;
@@ -219,6 +238,8 @@ private:
   bool m_indentPending[StreamCount];
   int m_lineNo[StreamCount];
   int m_inComments[StreamCount];
+  bool m_wrappedExpression[StreamCount];
+  bool m_inExpression[StreamCount];
 
   static int s_idLambda;
   std::map<std::string, int> m_idCounters;
@@ -226,6 +247,10 @@ private:
   std::vector<int> m_breakScopes;
   std::set<int> m_breakLabelIds; // break labels referenced
   std::set<int> m_contLabelIds;  // continue labels referenced
+  std::deque<int> m_callInfos;
+  LoopStatementPtr m_loopStatement;
+  bool m_insideScalarArray;
+
   int m_itemIndex;
 
   int m_phpLineNo;

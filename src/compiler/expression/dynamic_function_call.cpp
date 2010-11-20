@@ -129,7 +129,7 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   if (!nonStatic && !m_class && !m_classScope && !isRedeclared())
     return FunctionCall::preOutputCPP(cg, ar, state);
   // Short circuit out if inExpression() returns false
-  if (!ar->inExpression()) return true;
+  if (!cg.inExpression()) return true;
 
   if (m_class) {
     m_class->preOutputCPP(cg, ar, state);
@@ -137,7 +137,7 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
   m_nameExp->preOutputCPP(cg, ar, state);
 
-  ar->wrapExpressionBegin(cg);
+  cg.wrapExpressionBegin();
   m_ciTemp = cg.createNewId(shared_from_this());
   bool lsb = false;
 
@@ -204,14 +204,14 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf(");\n");
   }
   if (m_params && m_params->getCount() > 0) {
-    ar->pushCallInfo(m_ciTemp);
+    cg.pushCallInfo(m_ciTemp);
     m_params->preOutputCPP(cg, ar, state);
-    ar->popCallInfo();
+    cg.popCallInfo();
   }
 
-  ar->pushCallInfo(m_ciTemp);
+  cg.pushCallInfo(m_ciTemp);
   preOutputStash(cg, ar, state);
-  ar->popCallInfo();
+  cg.popCallInfo();
   if (!(state & FixOrder)) {
     cg_printf("id(%s);\n", cppTemp().c_str());
   }
@@ -224,10 +224,10 @@ void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
     if (m_class || m_classScope || isRedeclared()) {
       cg.printf("(cit%d->getMeth())(mcp%d, ", m_ciTemp, m_ciTemp);
       if (m_params && m_params->getCount() > 0) {
-        ar->pushCallInfo(m_ciTemp);
+        cg.pushCallInfo(m_ciTemp);
         FunctionScopePtr dummy;
         FunctionScope::OutputCPPArguments(m_params, dummy, cg, ar, -1, false);
-        ar->popCallInfo();
+        cg.popCallInfo();
       } else {
         cg_printf("Array()");
       }
@@ -242,10 +242,10 @@ void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
     //cg.printf("invoke(");
     cg_printf("(cit%d->getFunc())(vt%d, ", m_ciTemp, m_ciTemp);
     if (m_params && m_params->getCount() > 0) {
-      ar->pushCallInfo(m_ciTemp);
+      cg.pushCallInfo(m_ciTemp);
       FunctionScopePtr dummy;
       FunctionScope::OutputCPPArguments(m_params, dummy, cg, ar, -1, false);
-      ar->popCallInfo();
+      cg.popCallInfo();
     } else {
       cg_printf("Array()");
     }

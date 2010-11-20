@@ -158,19 +158,19 @@ bool QOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   bool fix_condition = m_condition->preOutputCPP(cg, ar, 0);
-  if (!ar->inExpression()) {
+  if (!cg.inExpression()) {
     return fix_condition ||
       m_expYes->preOutputCPP(cg, ar, 0) ||
       m_expNo->preOutputCPP(cg, ar, 0);
   }
 
-  ar->setInExpression(false);
+  cg.setInExpression(false);
   bool fix_yes = m_expYes->preOutputCPP(cg, ar, 0);
   bool fix_no = m_expNo->preOutputCPP(cg, ar, 0);
-  ar->setInExpression(true);
+  cg.setInExpression(true);
 
   if (fix_yes || fix_no) {
-    ar->wrapExpressionBegin(cg);
+    cg.wrapExpressionBegin();
     std::string tmp = genCPPTemp(cg, ar);
 
     TypePtr typeYes = m_expYes->getActualType();

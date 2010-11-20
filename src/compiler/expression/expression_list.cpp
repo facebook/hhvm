@@ -415,12 +415,12 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   unsigned n = m_exps.size();
-  bool inExpression = ar->inExpression();
+  bool inExpression = cg.inExpression();
   if (!inExpression && (state & FixOrder)) {
     return true;
   }
 
-  ar->setInExpression(false);
+  cg.setInExpression(false);
   bool ret = false;
   if (m_arrayElements) {
     /*
@@ -442,7 +442,7 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
   if (!inExpression) return ret;
 
-  ar->setInExpression(true);
+  cg.setInExpression(true);
   if (!ret) {
     if (state & FixOrder) {
       preOutputStash(cg, ar, state);
@@ -451,7 +451,7 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     return false;
   }
 
-  ar->wrapExpressionBegin(cg);
+  cg.wrapExpressionBegin();
   if (m_arrayElements) {
     setCPPTemp(genCPPTemp(cg, ar));
     outputCPPInternal(cg, ar, true, true);
@@ -696,10 +696,10 @@ void ExpressionList::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 bool ExpressionList::outputCPPUnneeded(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
-  bool inExpression = ar->inExpression();
+  bool inExpression = cg.inExpression();
   bool wrapped = false;
   if (!inExpression) {
-    ar->setInExpression(true);
+    cg.setInExpression(true);
     wrapped = preOutputCPP(cg, ar, 0);
   }
 
@@ -707,8 +707,8 @@ bool ExpressionList::outputCPPUnneeded(CodeGenerator &cg,
 
   if (!inExpression) {
     if (wrapped) cg_printf(";\n");
-    ar->wrapExpressionEnd(cg);
-    ar->setInExpression(inExpression);
+    cg.wrapExpressionEnd();
+    cg.setInExpression(inExpression);
   }
   return true;
 }

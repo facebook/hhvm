@@ -740,9 +740,9 @@ void FunctionScope::outputCPPParamsDecl(CodeGenerator &cg,
   if (isVariableArgument()) {
     cg_printf("int num_args, ");
     if (params) {
-      ar->setInExpression(true);
+      cg.setInExpression(true);
       params->outputCPP(cg, ar);
-      ar->setInExpression(false);
+      cg.setInExpression(false);
       cg_printf(", ");
     }
     if (showDefault) {
@@ -760,9 +760,9 @@ void FunctionScope::outputCPPParamsDecl(CodeGenerator &cg,
                 "Globals *globals /* = get_globals() */");
     }
   } else if (params) {
-    ar->setInExpression(true);
+    cg.setInExpression(true);
     params->outputCPP(cg, ar);
-    ar->setInExpression(false);
+    cg.setInExpression(false);
   }
 }
 

@@ -256,6 +256,11 @@ public:
   bool isConvertibleSuperGlobal(const std::string &name) const;
 
   /**
+   * Canonicalize symbol order of static globals.
+   */
+  void canonicalizeStaticGlobals(CodeGenerator &cg);
+
+  /**
    * Generate all variable declarations for this symbol table.
    */
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
@@ -348,8 +353,6 @@ private:
   virtual void dumpStats(std::map<std::string, int> &typeCounts);
 
   bool definedByParent(AnalysisResultPtr ar, const std::string &name);
-
-  void prepareStaticGlobals(CodeGenerator &cg);
 
   void outputCPPGlobalVariablesHeader(CodeGenerator &cg,
                                       AnalysisResultPtr ar);

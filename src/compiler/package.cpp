@@ -208,6 +208,7 @@ bool Package::parse() {
   if (threadCount > m_filesToParse.size()) {
     threadCount = m_filesToParse.size();
   }
+  if (threadCount <= 0) threadCount = 1;
 
   JobQueueDispatcher<const char *, ParserWorker>
     dispatcher(threadCount, true, 0, this);

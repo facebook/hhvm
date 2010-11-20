@@ -39,6 +39,7 @@ TestCodeRun::TestCodeRun() : m_perfMode(false) {
   Option::GenerateCPPComments = true;
   Option::GenerateCPPNameSpace = true;
   Option::KeepStatementsWithNoEffect = false;
+  Option::ParserThreadCount = 4;
 }
 
 bool TestCodeRun::preTest() {

@@ -336,7 +336,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool wrap = false;
   if (m_name) {
     if (orderName || m_value->hasEffect()) {
-      ar->setInExpression(true);
+      cg.setInExpression(true);
       m_name->preOutputCPP(cg, ar,
                            m_value->hasEffect() ? Expression::FixOrder: 0);
       wrap = true;
@@ -368,8 +368,8 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf(";\n");
   }
   if (wrap) {
-    ar->wrapExpressionEnd(cg);
-    ar->setInExpression(false);
+    cg.wrapExpressionEnd();
+    cg.setInExpression(false);
   }
 
   if (m_stmt) {

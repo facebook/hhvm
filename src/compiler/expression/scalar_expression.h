@@ -57,7 +57,7 @@ public:
 
   int64 getLiteralInteger() const;
   std::string getIdentifier() const;
-  Variant &getVariant();
+  Variant getVariant();
   int64 getHash() const;
 
   void setComment(const std::string &comment) { m_comment = comment;}
@@ -69,11 +69,12 @@ public:
 
 private:
   int m_type;
+  std::string m_serializedValue;
+  double m_dval;
   std::string m_value;
   std::string m_originalValue;
   std::string m_translated;
   bool m_quoted;
-  Variant m_variant; // value created for compile time optimization
   std::string m_comment; // for inlined constant name
 };
 

@@ -699,6 +699,9 @@ void Util::find(std::vector<std::string> &out,
   }
 
   string fullPath = root + path;
+  if (fullPath.empty()) {
+    return;
+  }
   DIR *dir = opendir(fullPath.c_str());
   if (dir == NULL) {
     Logger::Error("Util::find(): unable to open directory %s",
@@ -714,8 +717,12 @@ void Util::find(std::vector<std::string> &out,
     char *ename = e->d_name;
 
     // skipping .  .. hidden files and "tags"
-    if (ename[0] == '.' || strcmp(ename, "tags") == 0) {
+    if (ename[0] == '.' || strcmp(ename, "tags") == 0 || !*ename) {
       continue;
+    }
+    char last = ename[strlen(ename) - 1];
+    if (last == '~' || last == '#') {
+      continue; // emacs leftover
     }
     string fe = fullPath + ename;
 

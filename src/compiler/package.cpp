@@ -189,8 +189,13 @@ public:
   ParserWorker() : m_ret(true) {}
 
   virtual void doJob(const char *filename) {
-    Package *package = (Package*)m_opaque;
-    m_ret = package->parseImpl(filename);
+    try {
+      Package *package = (Package*)m_opaque;
+      m_ret = package->parseImpl(filename);
+    } catch (Exception &e) {
+      Logger::Error("%s", e.getMessage().c_str());
+      m_ret = false;
+    }
   }
 };
 

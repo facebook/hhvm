@@ -333,16 +333,28 @@ void LibEventServer::onRequest(struct evhttp_request *request) {
 }
 
 void LibEventServer::onResponse(int worker, evhttp_request *request,
-                                int code) {
+                                int code, LibEventTransport *transport) {
   int nwritten = 0;
   bool skip_sync = false;
 #ifdef _EVENT_USE_OPENSSL
   skip_sync = evhttp_is_connection_ssl(request->evcon);
 #endif
 
+  int totalSize = 0;
+
   if (RuntimeOption::LibEventSyncSend && !skip_sync) {
     const char *reason = HttpProtocol::GetReasonString(code);
+    timespec begin, end;
+    gettime(CLOCK_MONOTONIC, &begin);
+#ifdef EVHTTP_SYNC_SEND_REPORT_TOTAL_LEN
+    nwritten = evhttp_send_reply_sync(request, code, reason, NULL, &totalSize);
+#else
     nwritten = evhttp_send_reply_sync_begin(request, code, reason, NULL);
+#endif
+    gettime(CLOCK_MONOTONIC, &end);
+    int64 delay = gettime_diff_us(begin, end);
+    transport->onFlushBegin(totalSize);
+    transport->onFlushProgress(nwritten, delay);
   }
   m_responseQueue.enqueue(worker, request, code, nwritten);
 }

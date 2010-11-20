@@ -816,6 +816,20 @@ DefineFunction(
     ),
   ));
 
+DefineFunction(
+  array(
+    'name'   => "fb_get_flush_stat",
+    'desc'   => "Get stats on flushing the data from server.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => VariantMap,
+      'desc'   => "Query result in a format of array('total' => {number of total bytes to flush}, 'sent' => {number of bytes sent out}, 'time' => {time for flushing in us}).",
+    ),
+    'args'   => array(
+    ),
+  ));
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

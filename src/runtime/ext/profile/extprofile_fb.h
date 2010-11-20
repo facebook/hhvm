@@ -183,6 +183,11 @@ inline void x_fb_set_exit_callback(CVarRef function) {
   f_fb_set_exit_callback(function);
 }
 
+inline Array x_fb_get_flush_stat() {
+  FUNCTION_INJECTION_BUILTIN(fb_get_flush_stat);
+  return f_fb_get_flush_stat();
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

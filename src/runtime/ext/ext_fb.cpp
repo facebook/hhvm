@@ -902,6 +902,17 @@ void invoke_exit_callback(const ExitException &e) {
   f_call_user_func_array(s_exit_callback, argv);
 }
 
+Array f_fb_get_flush_stat() {
+  Transport *transport = g_context->getTransport();
+  if (transport) {
+    int total = transport->getResponseTotalSize();
+    int sent = transport->getResponseSentSize();
+    int64 time = transport->getFlushTime();
+    return CREATE_MAP3("total", total, "sent", sent, "time", time);
+  }
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // const index functions
 

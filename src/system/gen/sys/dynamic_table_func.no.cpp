@@ -22291,6 +22291,16 @@ Variant ifa_magickstripimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
   if (count != 1) return throw_wrong_arguments("magickstripimage", count, 1, 1, 1);
   return (f_magickstripimage(a0));
 }
+Variant i_fb_get_flush_stat(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(fb_get_flush_stat);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("fb_get_flush_stat", 0, 1);
+  return (f_fb_get_flush_stat());
+}
+Variant ifa_fb_get_flush_stat(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("fb_get_flush_stat", 0, 1);
+  return (f_fb_get_flush_stat());
+}
 Variant i_base64_decode(void *extra, CArrRef params) {
   FUNCTION_INJECTION(base64_decode);
   int count __attribute__((__unused__)) = params.size();
@@ -25139,21 +25149,6 @@ Variant ifa_is_writeable(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("is_writeable", count, 1, 1, 1);
   return (f_is_writeable(a0));
 }
-Variant i_magickgetwandsize(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(magickgetwandsize);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("magickgetwandsize", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_magickgetwandsize(arg0));
-  }
-}
-Variant ifa_magickgetwandsize(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 1) return throw_wrong_arguments("magickgetwandsize", count, 1, 1, 1);
-  return (f_magickgetwandsize(a0));
-}
 Variant i_hphp_directoryiterator___tostring(void *extra, CArrRef params) {
   FUNCTION_INJECTION(hphp_directoryiterator___tostring);
   int count __attribute__((__unused__)) = params.size();
@@ -25168,6 +25163,21 @@ Variant i_hphp_directoryiterator___tostring(void *extra, CArrRef params) {
 Variant ifa_hphp_directoryiterator___tostring(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("hphp_directoryiterator___tostring", count, 1, 1, 1);
   return (f_hphp_directoryiterator___tostring(a0));
+}
+Variant i_magickgetwandsize(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(magickgetwandsize);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("magickgetwandsize", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_magickgetwandsize(arg0));
+  }
+}
+Variant ifa_magickgetwandsize(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("magickgetwandsize", count, 1, 1, 1);
+  return (f_magickgetwandsize(a0));
 }
 Variant i_memcache_add_server(void *extra, CArrRef params) {
   FUNCTION_INJECTION(memcache_add_server);
@@ -33237,24 +33247,6 @@ Variant ifa_dns_get_record(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count == 3) return (f_dns_get_record(a0, a1, ref(a2)));
   return (f_dns_get_record(a0, a1, ref(a2), ref(a3)));
 }
-Variant i_openssl_get_privatekey(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(openssl_get_privatekey);
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 2) return throw_wrong_arguments("openssl_get_privatekey", count, 1, 2, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) return (f_openssl_get_privatekey(arg0));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (f_openssl_get_privatekey(arg0, arg1));
-  }
-}
-Variant ifa_openssl_get_privatekey(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count < 1 || count > 2) return throw_wrong_arguments("openssl_get_privatekey", count, 1, 2, 1);
-  if (count <= 1) return (f_openssl_get_privatekey(a0));
-  return (f_openssl_get_privatekey(a0, a1));
-}
 Variant i_imagepng(void *extra, CArrRef params) {
   FUNCTION_INJECTION(imagepng);
   int count __attribute__((__unused__)) = params.size();
@@ -33278,6 +33270,24 @@ Variant ifa_imagepng(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count == 2) return (f_imagepng(a0, a1));
   if (count == 3) return (f_imagepng(a0, a1, a2));
   return (f_imagepng(a0, a1, a2, a3));
+}
+Variant i_openssl_get_privatekey(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(openssl_get_privatekey);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("openssl_get_privatekey", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_openssl_get_privatekey(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_get_privatekey(arg0, arg1));
+  }
+}
+Variant ifa_openssl_get_privatekey(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 1 || count > 2) return throw_wrong_arguments("openssl_get_privatekey", count, 1, 2, 1);
+  if (count <= 1) return (f_openssl_get_privatekey(a0));
+  return (f_openssl_get_privatekey(a0, a1));
 }
 Variant i_socket_bind(void *extra, CArrRef params) {
   FUNCTION_INJECTION(socket_bind);
@@ -62603,6 +62613,18 @@ Variant ei_magickstripimage(Eval::VariableEnvironment &env, const Eval::Function
   if (count != 1) return throw_wrong_arguments("magickstripimage", count, 1, 1, 1);
   return (x_magickstripimage(a0));
 }
+Variant ei_fb_get_flush_stat(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("fb_get_flush_stat", 0, 1);
+  return (x_fb_get_flush_stat());
+}
 Variant ei_base64_decode(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -66114,22 +66136,6 @@ Variant ei_is_writeable(Eval::VariableEnvironment &env, const Eval::FunctionCall
   if (count != 1) return throw_wrong_arguments("is_writeable", count, 1, 1, 1);
   return (x_is_writeable(a0));
 }
-Variant ei_magickgetwandsize(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("magickgetwandsize", count, 1, 1, 1);
-  return (x_magickgetwandsize(a0));
-}
 Variant ei_hphp_directoryiterator___tostring(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -66145,6 +66151,22 @@ Variant ei_hphp_directoryiterator___tostring(Eval::VariableEnvironment &env, con
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) return throw_wrong_arguments("hphp_directoryiterator___tostring", count, 1, 1, 1);
   return (x_hphp_directoryiterator___tostring(a0));
+}
+Variant ei_magickgetwandsize(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("magickgetwandsize", count, 1, 1, 1);
+  return (x_magickgetwandsize(a0));
 }
 Variant ei_memcache_add_server(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -76138,27 +76160,6 @@ Variant ei_dns_get_record(Eval::VariableEnvironment &env, const Eval::FunctionCa
   else if (count == 3) return (x_dns_get_record(a0, a1, ref(a2)));
   else return (x_dns_get_record(a0, a1, ref(a2), ref(a3)));
 }
-Variant ei_openssl_get_privatekey(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 2) return throw_wrong_arguments("openssl_get_privatekey", count, 1, 2, 1);
-  if (count <= 1) return (x_openssl_get_privatekey(a0));
-  else return (x_openssl_get_privatekey(a0, a1));
-}
 Variant ei_imagepng(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -76189,6 +76190,27 @@ Variant ei_imagepng(Eval::VariableEnvironment &env, const Eval::FunctionCallExpr
   else if (count == 2) return (x_imagepng(a0, a1));
   else if (count == 3) return (x_imagepng(a0, a1, a2));
   else return (x_imagepng(a0, a1, a2, a3));
+}
+Variant ei_openssl_get_privatekey(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("openssl_get_privatekey", count, 1, 2, 1);
+  if (count <= 1) return (x_openssl_get_privatekey(a0));
+  else return (x_openssl_get_privatekey(a0, a1));
 }
 Variant ei_socket_bind(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -80511,6 +80533,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2537:
       HASH_INVOKE_FROM_EVAL(0x6A45EB471332A9E9LL, imagecolorexactalpha);
       HASH_INVOKE_FROM_EVAL(0x330EE2729DB7C9E9LL, drawgetfontstretch);
+      break;
+    case 2546:
+      HASH_INVOKE_FROM_EVAL(0x6C1415DAD1E7C9F2LL, fb_get_flush_stat);
       break;
     case 2547:
       HASH_INVOKE_FROM_EVAL(0x6535B60A4BC449F3LL, dns_get_record);
@@ -85877,6 +85902,7 @@ CallInfo ci_call_user_func_array_rpc((void*)&i_call_user_func_array_rpc, (void*)
 CallInfo ci_fb_serialize((void*)&i_fb_serialize, (void*)&ifa_fb_serialize, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetcopyright((void*)&i_magickgetcopyright, (void*)&ifa_magickgetcopyright, 0, 0, 0x0000000000000000LL);
 CallInfo ci_magickstripimage((void*)&i_magickstripimage, (void*)&ifa_magickstripimage, 1, 0, 0x0000000000000000LL);
+CallInfo ci_fb_get_flush_stat((void*)&i_fb_get_flush_stat, (void*)&ifa_fb_get_flush_stat, 0, 0, 0x0000000000000000LL);
 CallInfo ci_base64_decode((void*)&i_base64_decode, (void*)&ifa_base64_decode, 2, 0, 0x0000000000000000LL);
 CallInfo ci_rand((void*)&i_rand, (void*)&ifa_rand, 2, 0, 0x0000000000000000LL);
 CallInfo ci_crc32((void*)&i_crc32, (void*)&ifa_crc32, 1, 0, 0x0000000000000000LL);
@@ -86043,8 +86069,8 @@ CallInfo ci_imagefilltoborder((void*)&i_imagefilltoborder, (void*)&ifa_imagefill
 CallInfo ci_xhprof_frame_end((void*)&i_xhprof_frame_end, (void*)&ifa_xhprof_frame_end, 0, 0, 0x0000000000000000LL);
 CallInfo ci_xml_set_notation_decl_handler((void*)&i_xml_set_notation_decl_handler, (void*)&ifa_xml_set_notation_decl_handler, 2, 0, 0x0000000000000000LL);
 CallInfo ci_is_writeable((void*)&i_is_writeable, (void*)&ifa_is_writeable, 1, 0, 0x0000000000000000LL);
-CallInfo ci_magickgetwandsize((void*)&i_magickgetwandsize, (void*)&ifa_magickgetwandsize, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_directoryiterator___tostring((void*)&i_hphp_directoryiterator___tostring, (void*)&ifa_hphp_directoryiterator___tostring, 1, 0, 0x0000000000000000LL);
+CallInfo ci_magickgetwandsize((void*)&i_magickgetwandsize, (void*)&ifa_magickgetwandsize, 1, 0, 0x0000000000000000LL);
 CallInfo ci_memcache_add_server((void*)&i_memcache_add_server, (void*)&ifa_memcache_add_server, 10, 0, 0x0000000000000000LL);
 CallInfo ci_dom_node_remove_child((void*)&i_dom_node_remove_child, (void*)&ifa_dom_node_remove_child, 2, 0, 0x0000000000000000LL);
 CallInfo ci_imageinterlace((void*)&i_imageinterlace, (void*)&ifa_imageinterlace, 2, 0, 0x0000000000000000LL);
@@ -86525,8 +86551,8 @@ CallInfo ci_imagefttext((void*)&i_imagefttext, (void*)&ifa_imagefttext, 9, 0, 0x
 CallInfo ci_xhprof_sample_disable((void*)&i_xhprof_sample_disable, (void*)&ifa_xhprof_sample_disable, 0, 0, 0x0000000000000000LL);
 CallInfo ci_ldap_compare((void*)&i_ldap_compare, (void*)&ifa_ldap_compare, 4, 0, 0x0000000000000000LL);
 CallInfo ci_dns_get_record((void*)&i_dns_get_record, (void*)&ifa_dns_get_record, 4, 0, 0x000000000000000CLL);
-CallInfo ci_openssl_get_privatekey((void*)&i_openssl_get_privatekey, (void*)&ifa_openssl_get_privatekey, 2, 0, 0x0000000000000000LL);
 CallInfo ci_imagepng((void*)&i_imagepng, (void*)&ifa_imagepng, 4, 0, 0x0000000000000000LL);
+CallInfo ci_openssl_get_privatekey((void*)&i_openssl_get_privatekey, (void*)&ifa_openssl_get_privatekey, 2, 0, 0x0000000000000000LL);
 CallInfo ci_socket_bind((void*)&i_socket_bind, (void*)&ifa_socket_bind, 3, 0, 0x0000000000000000LL);
 CallInfo ci_getmyuid((void*)&i_getmyuid, (void*)&ifa_getmyuid, 0, 0, 0x0000000000000000LL);
 CallInfo ci_pixelgetopacity((void*)&i_pixelgetopacity, (void*)&ifa_pixelgetopacity, 1, 0, 0x0000000000000000LL);
@@ -90334,6 +90360,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x330EE2729DB7C9E9LL, drawgetfontstretch) {
         ci = &ci_drawgetfontstretch;
+        return true;
+      }
+      break;
+    case 2546:
+      HASH_GUARD(0x6C1415DAD1E7C9F2LL, fb_get_flush_stat) {
+        ci = &ci_fb_get_flush_stat;
         return true;
       }
       break;

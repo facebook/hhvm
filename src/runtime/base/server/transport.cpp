@@ -38,7 +38,8 @@ Transport::Transport()
   : m_url(NULL), m_postData(NULL), m_postDataParsed(false),
     m_chunkedEncoding(false), m_headerSent(false),
     m_responseCode(-1), m_firstHeaderSet(false), m_firstHeaderLine(0),
-    m_responseSize(0), m_sendContentType(true),
+    m_responseSize(0), m_responseTotalSize(0), m_responseSentSize(0),
+    m_flushTimeUs(0), m_sendContentType(true),
     m_compression(true), m_compressor(NULL), m_isSSL(false),
     m_compressionDecision(NotDecidedYet), m_threadType(RequestThread) {
   memset(&m_queueTime, 0, sizeof(m_queueTime));
@@ -721,6 +722,11 @@ void Transport::redirect(const char *location, int code /* = 302 */,
   addHeaderImpl("Location", location);
   setResponse(code, info);
   sendString(location, code);
+}
+
+void Transport::onFlushProgress(int writtenSize, int64 delayUs) {
+  m_responseSentSize += writtenSize;
+  m_flushTimeUs += delayUs;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

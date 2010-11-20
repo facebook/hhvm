@@ -303,6 +303,12 @@ public:
   int getResponseSize() const { return m_responseSize; }
   int getResponseCode() const { return m_responseCode; }
 
+  int getResponseTotalSize() const { return m_responseTotalSize; }
+  int getResponseSentSize() const { return m_responseSentSize; }
+  int64 getFlushTime() const { return m_flushTimeUs; }
+  void onFlushBegin(int totalSize) { m_responseTotalSize = totalSize; }
+  void onFlushProgress(int writtenSize, int64 delayUs);
+
   void setThreadType(ThreadType type) { m_threadType = type;}
   ThreadType getThreadType() const { return m_threadType;}
   const char *getThreadTypeName() const;
@@ -347,6 +353,9 @@ protected:
   int m_firstHeaderLine;
   CookieMap m_responseCookies;
   int m_responseSize;
+  int m_responseTotalSize; // including added headers
+  int m_responseSentSize;
+  int64 m_flushTimeUs;
 
   std::string m_mimeType;
   bool m_sendContentType;

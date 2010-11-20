@@ -256,7 +256,7 @@ void LibEventTransport::sendImpl(const void *data, int size, int code,
       snprintf(buf, sizeof(buf), "%d", size);
       addHeaderImpl("Content-Length", buf);
     }
-    m_server->onResponse(m_workerId, m_request, code);
+    m_server->onResponse(m_workerId, m_request, code, this);
     m_sendEnded = true;
   }
   m_sendStarted = true;

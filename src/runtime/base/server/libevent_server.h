@@ -151,7 +151,8 @@ public:
   /**
    * Called by LibEventTransport when a response is fully prepared.
    */
-  void onResponse(int worker, evhttp_request *request, int code);
+  void onResponse(int worker, evhttp_request *request, int code,
+                  LibEventTransport* transport);
   void onChunkedResponse(int worker, evhttp_request *request, int code,
                          evbuffer *chunk, bool firstChunk);
   void onChunkedResponseEnd(int worker, evhttp_request *request);

@@ -294,10 +294,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         }
       }
     }
-
-    if (m_type == UnserializeFunction) {
-      ar->forceClassVariants(getOriginalScope(), false);
-    }
   }
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
@@ -353,6 +349,10 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
           }
         }
       }
+    }
+
+    if (m_type == UnserializeFunction) {
+      ar->forceClassVariants(getOriginalScope(), false);
     }
   }
 

@@ -698,98 +698,8 @@ bool c_ReflectionFunctionAbstract::os_get_call_info(MethodCallPackage &mcp, int6
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_ReflectionFunctionAbstract::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss365fcaa0, "getNumberOfParameters")) {
-        mcp.ci = &c_ReflectionFunctionAbstract::ci_getnumberofparameters;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 1:
-      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss24059ddf, "getNumberOfRequiredParameters")) {
-        mcp.ci = &c_ReflectionFunctionAbstract::ci_getnumberofrequiredparameters;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 2:
-      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
-        mcp.ci = &c_ReflectionFunctionAbstract::ci_getclosure;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        mcp.ci = &c_ReflectionFunctionAbstract::ci_isuserdefined;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        mcp.ci = &c_ReflectionFunctionAbstract::ci_getstartline;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        mcp.ci = &c_ReflectionFunctionAbstract::ci_getname;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss4a3329a8, "getStaticVariables")) {
-        mcp.ci = &c_ReflectionFunctionAbstract::ci_getstaticvariables;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss276d2668, "returnsReference")) {
-        mcp.ci = &c_ReflectionFunctionAbstract::ci_returnsreference;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 13:
-      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss32c2a32d, "getParameters")) {
-        mcp.ci = &c_ReflectionFunctionAbstract::ci_getparameters;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        mcp.ci = &c_ReflectionFunctionAbstract::ci_getfilename;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        mcp.ci = &c_ReflectionFunctionAbstract::ci_isinternal;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 16:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        mcp.ci = &c_ReflectionFunctionAbstract::ci_getendline;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        mcp.ci = &c_ReflectionFunctionAbstract::ci_getdoccomment;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
   c_ReflectionFunctionAbstract::os_getInit,
@@ -1124,20 +1034,8 @@ bool c_ReflectionObject::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ReflectionClass::os_get_call_info(mcp, hash);
 }
 bool c_ReflectionObject::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        mcp.ci = &c_ReflectionObject::ci_export;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ReflectionClass::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_ReflectionObject = {
   c_ReflectionObject::os_getInit,
@@ -1248,8 +1146,8 @@ bool c_ReflectionException::os_get_call_info(MethodCallPackage &mcp, int64 hash)
   return c_Exception::os_get_call_info(mcp, hash);
 }
 bool c_ReflectionException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_Exception::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_ReflectionException = {
   c_ReflectionException::os_getInit,
@@ -3449,297 +3347,8 @@ bool c_ReflectionClass::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_ReflectionClass::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 127) {
-    case 4:
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        mcp.ci = &c_ReflectionClass::ci_getstartline;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ss34bc6371, "hasProperty")) {
-        mcp.ci = &c_ReflectionClass::ci_hasproperty;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        mcp.ci = &c_ReflectionClass::ci___tostring;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        mcp.ci = &c_ReflectionClass::ci_getmodifiers;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_ss5b8cc668, "hasMethod")) {
-        mcp.ci = &c_ReflectionClass::ci_hasmethod;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 27:
-      HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ss13b3dd65, "getDefaultProperties")) {
-        mcp.ci = &c_ReflectionClass::ci_getdefaultproperties;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss7676509e, "isInterface")) {
-        mcp.ci = &c_ReflectionClass::ci_isinterface;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss05797b22, "getStaticProperties")) {
-        mcp.ci = &c_ReflectionClass::ci_getstaticproperties;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 41:
-      HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss142f8c29, "isInstance")) {
-        mcp.ci = &c_ReflectionClass::ci_isinstance;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss58b49929, "getExtensionName")) {
-        mcp.ci = &c_ReflectionClass::ci_getextensionname;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss6488aaaa, "getMethods")) {
-        mcp.ci = &c_ReflectionClass::ci_getmethods;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss3132c356, "getConstructor")) {
-        mcp.ci = &c_ReflectionClass::ci_getconstructor;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss2de08356, "getInterfaceNames")) {
-        mcp.ci = &c_ReflectionClass::ci_getinterfacenames;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 46:
-      HASH_GUARD_LITSTR(0x3C882D4A895F612ELL, NAMSTR(s_sys_ss76a09ed2, "getStaticPropertyValue")) {
-        mcp.ci = &c_ReflectionClass::ci_getstaticpropertyvalue;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
-        mcp.ci = &c_ReflectionClass::ci_isfinal;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 48:
-      HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss01fe7030, "newInstance")) {
-        mcp.ci = &c_ReflectionClass::ci_newinstance;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 52:
-      HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss42c3f8cc, "getConstant")) {
-        mcp.ci = &c_ReflectionClass::ci_getconstant;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 54:
-      HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_ss53a3b5b6, "getMethod")) {
-        mcp.ci = &c_ReflectionClass::ci_getmethod;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
-        mcp.ci = &c_ReflectionClass::ci_isabstract;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 59:
-      HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_ss6ea191c5, "getExtension")) {
-        mcp.ci = &c_ReflectionClass::ci_getextension;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 60:
-      HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss5d4432c4, "isInstantiable")) {
-        mcp.ci = &c_ReflectionClass::ci_isinstantiable;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 63:
-      HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss3b59d4c1, "hasConstant")) {
-        mcp.ci = &c_ReflectionClass::ci_hasconstant;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 67:
-      HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ss673ff4bd, "getInterfaces")) {
-        mcp.ci = &c_ReflectionClass::ci_getinterfaces;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 68:
-      HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss602f4b44, "getProperties")) {
-        mcp.ci = &c_ReflectionClass::ci_getproperties;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 71:
-      HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ss04fdcfb9, "getProperty")) {
-        mcp.ci = &c_ReflectionClass::ci_getproperty;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 77:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        mcp.ci = &c_ReflectionClass::ci_getfilename;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 78:
-      HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss370b68ce, "isIterateable")) {
-        mcp.ci = &c_ReflectionClass::ci_isiterateable;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 79:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        mcp.ci = &c_ReflectionClass::ci_isinternal;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 85:
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
-        mcp.ci = &c_ReflectionClass::ci_getconstants;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_ReflectionClass::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 100:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        mcp.ci = &c_ReflectionClass::ci_isuserdefined;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 101:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        mcp.ci = &c_ReflectionClass::ci_getname;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 102:
-      HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ss54ee5c66, "newInstanceArgs")) {
-        mcp.ci = &c_ReflectionClass::ci_newinstanceargs;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 103:
-      HASH_GUARD_LITSTR(0x37349B25A0ED29E7LL, NAMSTR(s_sys_ss5f12d619, "test")) {
-        mcp.ci = &c_ReflectionClass::ci_test;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 104:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        mcp.ci = &c_ReflectionClass::ci_export;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 112:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        mcp.ci = &c_ReflectionClass::ci_getendline;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 113:
-      HASH_GUARD_LITSTR(0x07ECA928E37717F1LL, NAMSTR(s_sys_ss1c88e80f, "setStaticPropertyValue")) {
-        mcp.ci = &c_ReflectionClass::ci_setstaticpropertyvalue;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 114:
-      HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss16957472, "getParentClass")) {
-        mcp.ci = &c_ReflectionClass::ci_getparentclass;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 120:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        mcp.ci = &c_ReflectionClass::ci_getdoccomment;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 123:
-      HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ss15c7d6fb, "implementsInterface")) {
-        mcp.ci = &c_ReflectionClass::ci_implementsinterface;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
-        mcp.ci = &c_ReflectionClass::ci_fetch;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 126:
-      HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ss1926c97e, "isSubclassOf")) {
-        mcp.ci = &c_ReflectionClass::ci_issubclassof;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_ReflectionClass *c_ReflectionClass::create(Variant v_name) {
   CountableHelper h(this);
@@ -3833,7 +3442,7 @@ void c_ReflectionClass::t___construct(Variant v_name) {
           {
             {
               p_ReflectionException tmp6 = NEWOBJ(c_ReflectionException)();
-              throw_exception((tmp6->create(concat3(NAMSTR(s_sys_ss1f74c210_1, "Class "), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist"))), tmp6));
+              throw_exception((tmp6->create(VarNR(concat3(NAMSTR(s_sys_ss1f74c210_1, "Class "), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist")))), tmp6));
             }
           }
         }
@@ -3864,7 +3473,7 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
         {
           {
             p_ReflectionException tmp2 = NEWOBJ(c_ReflectionException)();
-            throw_exception((tmp2->create(concat3(NAMSTR(s_sys_ss1f74c210_1, "Class "), toString(m_name), NAMSTR(s_sys_ss20448282, " does not exist"))), tmp2));
+            throw_exception((tmp2->create(VarNR(concat3(NAMSTR(s_sys_ss1f74c210_1, "Class "), toString(m_name), NAMSTR(s_sys_ss20448282, " does not exist")))), tmp2));
           }
         }
       }
@@ -4014,7 +3623,7 @@ bool c_ReflectionClass::t_hasmethod(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::hasMethod);
   {
     const String &tmp1((x_strtolower(toString(v_name))));
-    return t_test(NAMSTR(s_sys_ss68683632, "methods"), tmp1);
+    return t_test(NAMSTR(s_sys_ss68683632, "methods"), VarNR(tmp1));
   }
 }
 namespace hphp_impl_splitter {}
@@ -4097,7 +3706,7 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
       }
       {
         p_ReflectionException tmp4 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp4->create(concat5(NAMSTR(s_sys_ss76d82ece, "Method "), toString(v_class), NAMSTR(s_sys_ss1cfa5b62, "::"), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist"))), tmp4));
+        throw_exception((tmp4->create(VarNR(concat5(NAMSTR(s_sys_ss76d82ece, "Method "), toString(v_class), NAMSTR(s_sys_ss1cfa5b62, "::"), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist")))), tmp4));
       }
     }
   }
@@ -4197,7 +3806,7 @@ p_ReflectionProperty c_ReflectionClass::t_getproperty(CVarRef v_name) {
       }
       {
         p_ReflectionException tmp3 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp3->create(concat5(NAMSTR(s_sys_ss3512adea, "Property "), toString(v_class), NAMSTR(s_sys_ss1cfa5b62, "::"), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist"))), tmp3));
+        throw_exception((tmp3->create(VarNR(concat5(NAMSTR(s_sys_ss3512adea, "Property "), toString(v_class), NAMSTR(s_sys_ss1cfa5b62, "::"), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist")))), tmp3));
       }
     }
   }
@@ -4267,7 +3876,7 @@ Variant c_ReflectionClass::t_getconstant(CVarRef v_name) {
       }
       {
         p_ReflectionException tmp3 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp3->create(concat5(NAMSTR(s_sys_ss644993a4, "Class constant "), toString(v_class), NAMSTR(s_sys_ss1cfa5b62, "::"), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist"))), tmp3));
+        throw_exception((tmp3->create(VarNR(concat5(NAMSTR(s_sys_ss644993a4, "Class constant "), toString(v_class), NAMSTR(s_sys_ss1cfa5b62, "::"), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist")))), tmp3));
       }
     }
   }
@@ -4639,7 +4248,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
       {
         {
           p_ReflectionException tmp5 = NEWOBJ(c_ReflectionException)();
-          throw_exception((tmp5->create(concat3(NAMSTR(s_sys_ss1558c380_1, "Interface "), toString(v_cls), NAMSTR(s_sys_ss5615a9b2, " is a Class"))), tmp5));
+          throw_exception((tmp5->create(VarNR(concat3(NAMSTR(s_sys_ss1558c380_1, "Interface "), toString(v_cls), NAMSTR(s_sys_ss5615a9b2, " is a Class")))), tmp5));
         }
       }
     }
@@ -5341,86 +4950,8 @@ bool c_ReflectionExtension::os_get_call_info(MethodCallPackage &mcp, int64 hash)
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_ReflectionExtension::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 2:
-      HASH_GUARD_LITSTR(0x0113D73FC859EDC2LL, NAMSTR(s_sys_ss37a6123e, "getClasses")) {
-        mcp.ci = &c_ReflectionExtension::ci_getclasses;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        mcp.ci = &c_ReflectionExtension::ci_getname;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        mcp.ci = &c_ReflectionExtension::ci_export;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1dd0e851, "getFunctions")) {
-        mcp.ci = &c_ReflectionExtension::ci_getfunctions;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        mcp.ci = &c_ReflectionExtension::ci___tostring;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x5CE2786E11341594LL, NAMSTR(s_sys_ss11341594, "getClassNames")) {
-        mcp.ci = &c_ReflectionExtension::ci_getclassnames;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x306B5F4D1D03D335LL, NAMSTR(s_sys_ss1d03d335, "getINIEntries")) {
-        mcp.ci = &c_ReflectionExtension::ci_getinientries;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
-        mcp.ci = &c_ReflectionExtension::ci_getconstants;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 22:
-      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316, "getVersion")) {
-        mcp.ci = &c_ReflectionExtension::ci_getversion;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_ReflectionExtension::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info")) {
-        mcp.ci = &c_ReflectionExtension::ci_info;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_ReflectionExtension *c_ReflectionExtension::create(Variant v_name) {
   CountableHelper h(this);
@@ -6537,123 +6068,8 @@ bool c_ReflectionMethod::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ReflectionFunctionAbstract::os_get_call_info(mcp, hash);
 }
 bool c_ReflectionMethod::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 2:
-      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
-        mcp.ci = &c_ReflectionMethod::ci_invoke;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
-        mcp.ci = &c_ReflectionMethod::ci_getclosure;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
-        mcp.ci = &c_ReflectionMethod::ci_getdeclaringclass;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
-        mcp.ci = &c_ReflectionMethod::ci_invokeargs;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x51A20EA0E327F607LL, NAMSTR(s_sys_ss1cd809f9, "isDestructor")) {
-        mcp.ci = &c_ReflectionMethod::ci_isdestructor;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        mcp.ci = &c_ReflectionMethod::ci_export;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
-        mcp.ci = &c_ReflectionMethod::ci_isprotected;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 14:
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
-        mcp.ci = &c_ReflectionMethod::ci_isfinal;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
-        mcp.ci = &c_ReflectionMethod::ci_isprivate;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        mcp.ci = &c_ReflectionMethod::ci___tostring;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        mcp.ci = &c_ReflectionMethod::ci_getmodifiers;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 23:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
-        mcp.ci = &c_ReflectionMethod::ci_isabstract;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 25:
-      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
-        mcp.ci = &c_ReflectionMethod::ci_isstatic;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x654B5F965C5CAC7ALL, NAMSTR(s_sys_ss5c5cac7a, "isConstructor")) {
-        mcp.ci = &c_ReflectionMethod::ci_isconstructor;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
-        mcp.ci = &c_ReflectionMethod::ci_ispublic;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_ReflectionMethod::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ReflectionFunctionAbstract::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_ReflectionMethod *c_ReflectionMethod::create(Variant v_cls, Variant v_name) {
   CountableHelper h(this);
@@ -7800,114 +7216,8 @@ bool c_ReflectionProperty::os_get_call_info(MethodCallPackage &mcp, int64 hash) 
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_ReflectionProperty::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 2:
-      HASH_GUARD_LITSTR(0x791E9751F5B8C5A2LL, NAMSTR(s_sys_ss0a473a5e, "setAccessible")) {
-        mcp.ci = &c_ReflectionProperty::ci_setaccessible;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x56879BCEB40997E3LL, NAMSTR(s_sys_ss4bf6681d, "getValue")) {
-        mcp.ci = &c_ReflectionProperty::ci_getvalue;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
-        mcp.ci = &c_ReflectionProperty::ci_getdeclaringclass;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        mcp.ci = &c_ReflectionProperty::ci_getname;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        mcp.ci = &c_ReflectionProperty::ci_export;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
-        mcp.ci = &c_ReflectionProperty::ci_isprotected;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
-        mcp.ci = &c_ReflectionProperty::ci_isprivate;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        mcp.ci = &c_ReflectionProperty::ci___tostring;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        mcp.ci = &c_ReflectionProperty::ci_getmodifiers;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x384A52597AB11F15LL, NAMSTR(s_sys_ss7ab11f15, "isDefault")) {
-        mcp.ci = &c_ReflectionProperty::ci_isdefault;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x36FBED35008C8DB5LL, NAMSTR(s_sys_ss008c8db5, "setValue")) {
-        mcp.ci = &c_ReflectionProperty::ci_setvalue;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        mcp.ci = &c_ReflectionProperty::ci_getdoccomment;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 25:
-      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
-        mcp.ci = &c_ReflectionProperty::ci_isstatic;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
-        mcp.ci = &c_ReflectionProperty::ci_ispublic;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_ReflectionProperty::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_ReflectionProperty *c_ReflectionProperty::create(Variant v_cls, Variant v_name) {
   CountableHelper h(this);
@@ -8561,48 +7871,8 @@ bool c_ReflectionFunction::os_get_call_info(MethodCallPackage &mcp, int64 hash) 
   return c_ReflectionFunctionAbstract::os_get_call_info(mcp, hash);
 }
 bool c_ReflectionFunction::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
-        mcp.ci = &c_ReflectionFunction::ci_invoke;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        mcp.ci = &c_ReflectionFunction::ci___tostring;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
-        mcp.ci = &c_ReflectionFunction::ci_invokeargs;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        mcp.ci = &c_ReflectionFunction::ci_export;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_ReflectionFunction::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ReflectionFunctionAbstract::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_ReflectionFunction *c_ReflectionFunction::create(Variant v_name) {
   CountableHelper h(this);
@@ -8678,7 +7948,7 @@ void c_ReflectionFunction::t___construct(Variant v_name) {
     {
       {
         p_ReflectionException tmp2 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp2->create(concat3(NAMSTR(s_sys_ss38ae19c4, "Function "), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist"))), tmp2));
+        throw_exception((tmp2->create(VarNR(concat3(NAMSTR(s_sys_ss38ae19c4, "Function "), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist")))), tmp2));
       }
     }
   }
@@ -9473,100 +8743,8 @@ bool c_ReflectionParameter::os_get_call_info(MethodCallPackage &mcp, int64 hash)
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_ReflectionParameter::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 3:
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
-        mcp.ci = &c_ReflectionParameter::ci_getdeclaringclass;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        mcp.ci = &c_ReflectionParameter::ci_getname;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        mcp.ci = &c_ReflectionParameter::ci_export;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x4044F1EEBF3BB8C8LL, NAMSTR(s_sys_ss40c44738, "getPosition")) {
-        mcp.ci = &c_ReflectionParameter::ci_getposition;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 9:
-      HASH_GUARD_LITSTR(0x4F51DA0B633E9909LL, NAMSTR(s_sys_ss633e9909, "getClass")) {
-        mcp.ci = &c_ReflectionParameter::ci_getclass;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x24ED05F4504C4C09LL, NAMSTR(s_sys_ss504c4c09, "allowsNull")) {
-        mcp.ci = &c_ReflectionParameter::ci_allowsnull;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x27C482A6C7951E0CLL, NAMSTR(s_sys_ss386ae1f4, "getDefaultValue")) {
-        mcp.ci = &c_ReflectionParameter::ci_getdefaultvalue;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x13E3F304BDD89FB1LL, NAMSTR(s_sys_ss4227604f, "isPassedByReference")) {
-        mcp.ci = &c_ReflectionParameter::ci_ispassedbyreference;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x6E34805C91257C92LL, NAMSTR(s_sys_ss6eda836e, "isDefaultValueAvailable")) {
-        mcp.ci = &c_ReflectionParameter::ci_isdefaultvalueavailable;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        mcp.ci = &c_ReflectionParameter::ci___tostring;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x2D6EF48BBAB22735LL, NAMSTR(s_sys_ss454dd8cb, "isOptional")) {
-        mcp.ci = &c_ReflectionParameter::ci_isoptional;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 29:
-      HASH_GUARD_LITSTR(0x5A9CE40C0F25871DLL, NAMSTR(s_sys_ss0f25871d, "isArray")) {
-        mcp.ci = &c_ReflectionParameter::ci_isarray;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_ReflectionParameter::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_ReflectionParameter *c_ReflectionParameter::create(Variant v_func, Variant v_param) {
   CountableHelper h(this);

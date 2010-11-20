@@ -145,6 +145,12 @@ ObjectData::os_invoke_from_eval(const char *c, const char *s,
 
 bool ObjectData::os_get_call_info(MethodCallPackage &info,
                                   int64 hash /* = -1 */) {
+  if (info.obj) {
+    // For classes that do not inherit from redeclared classes,
+    // o_get_call_info() delegates to os_get_call_info() with info.obj set
+    // beforehand.
+    return info.obj->ObjectData::o_get_call_info(info, hash);
+  }
   Object obj = FrameInjection::GetThis();
   String cls = info.rootObj.toString();
   if (obj.isNull() || !obj->o_instanceof(cls)) {
@@ -650,12 +656,12 @@ bool ObjectData::o_get_call_info(MethodCallPackage &mcp,
   // If UseMethodIndex is on, classes will define o_get_call_info_with_index
   // and this will be a virtual call to the class' version.
   // If it's off, this will go to ObjectData's version.
-  return o_get_call_info_with_index
-    (mcp, methodIndexExists(mcp.name.c_str()), hash);
+  return o_get_call_info_with_index(mcp, methodIndexExists(mcp.name), hash);
 }
 
 bool ObjectData::o_get_call_info_ex(const char *clsname,
                                     MethodCallPackage &mcp, int64 hash) {
+  mcp.obj = this;
   return ObjectData::o_get_call_info(mcp, hash);
 }
 
@@ -663,7 +669,6 @@ bool ObjectData::o_get_call_info_with_index(MethodCallPackage &mcp,
                                             MethodIndex mi,
                                             int64 hash /* = -1 */) {
   mcp.ci = &s_ObjectData_call_handler;
-  mcp.obj = this;
   if (!hasCall() && !hasCallStatic()) {
     mcp.fail();
     return false;
@@ -675,6 +680,7 @@ bool ObjectData::o_get_call_info_with_index_ex(const char *clsname,
                                                MethodCallPackage &mcp,
                                                MethodIndex mi,
                                                int64 hash /* = -1 */) {
+  mcp.obj = this;
   return ObjectData::o_get_call_info_with_index(mcp, mi, hash);
 }
 

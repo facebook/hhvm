@@ -469,8 +469,8 @@ extern struct ObjectStaticCallbacks cw_ReflectionMethod;
 extern struct ObjectStaticCallbacks cw_BadMethodCallException;
 extern struct ObjectStaticCallbacks cw_ReflectionProperty;
 extern struct ObjectStaticCallbacks cw___PHP_Incomplete_Class;
-extern struct ObjectStaticCallbacks cw_RuntimeException;
 extern struct ObjectStaticCallbacks cw_Exception;
+extern struct ObjectStaticCallbacks cw_RuntimeException;
 extern struct ObjectStaticCallbacks cw_ReflectionFunction;
 extern struct ObjectStaticCallbacks cw_XhprofFrame;
 extern struct ObjectStaticCallbacks cw_ErrorException;
@@ -658,25 +658,8 @@ bool c_PDOException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_Exception::os_get_call_info(mcp, hash);
 }
 bool c_PDOException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_PDOException::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_PDOException::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_Exception::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_PDOException *c_PDOException::create() {
   CountableHelper h(this);
@@ -955,34 +938,8 @@ bool c_DOMDocumentFragment::os_get_call_info(MethodCallPackage &mcp, int64 hash)
   return c_DOMNode::os_get_call_info(mcp, hash);
 }
 bool c_DOMDocumentFragment::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
-    case 1:
-      HASH_GUARD_LITSTR(0x1E44C8E8C1920931LL, NAMSTR(s_sys_ss3e6df6cf, "appendXML")) {
-        mcp.ci = &c_DOMDocumentFragment::ci_appendxml;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMDocumentFragment::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMDocumentFragment::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DOMNode::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMDocumentFragment *c_DOMDocumentFragment::create() {
   CountableHelper h(this);
@@ -1424,53 +1381,8 @@ bool c_DOMText::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_DOMCharacterData::os_get_call_info(mcp, hash);
 }
 bool c_DOMText::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMText::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
-        mcp.ci = &c_DOMText::ci___set;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x714D38308D8212B7LL, NAMSTR(s_sys_ss727ded49, "splitText")) {
-        mcp.ci = &c_DOMText::ci_splittext;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 13:
-      HASH_GUARD_LITSTR(0x28FBAB4F0F6C02DDLL, NAMSTR(s_sys_ss0f6c02dd, "isWhitespaceInElementContent")) {
-        mcp.ci = &c_DOMText::ci_iswhitespaceinelementcontent;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMText::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
-        mcp.ci = &c_DOMText::ci___get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DOMCharacterData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMText *c_DOMText::create(String a0) {
   CountableHelper h(this);
@@ -3231,207 +3143,8 @@ bool c_DebuggerClient::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_DebuggerClient::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 63) {
-    case 0:
-      HASH_GUARD_LITSTR(0x07768FF90B181780LL, NAMSTR(s_sys_ss0b181780, "addCompletion")) {
-        mcp.ci = &c_DebuggerClient::ci_addcompletion;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 2:
-      HASH_GUARD_LITSTR(0x20F2EA2BBFF5AA42LL, NAMSTR(s_sys_ss400a55be, "ask")) {
-        mcp.ci = &c_DebuggerClient::ci_ask;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x0E836DA3377C4984LL, NAMSTR(s_sys_ss377c4984, "getFrame")) {
-        mcp.ci = &c_DebuggerClient::ci_getframe;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x1D033DFD1DCAEA85LL, NAMSTR(s_sys_ss1dcaea85, "printFrame")) {
-        mcp.ci = &c_DebuggerClient::ci_printframe;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x3E0170A7802E3888LL, NAMSTR(s_sys_ss7fd1c778, "send")) {
-        mcp.ci = &c_DebuggerClient::ci_send;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 14:
-      HASH_GUARD_LITSTR(0x7A24AFD8ADE43B8ELL, NAMSTR(s_sys_ss521bc472, "args")) {
-        mcp.ci = &c_DebuggerClient::ci_args;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        mcp.ci = &c_DebuggerClient::ci_getcode;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x6B3BF595A55159CFLL, NAMSTR(s_sys_ss5aaea631, "helpBody")) {
-        mcp.ci = &c_DebuggerClient::ci_helpbody;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x687DF38195F5B951LL, NAMSTR(s_sys_ss6a0a46af, "helpCmds")) {
-        mcp.ci = &c_DebuggerClient::ci_helpcmds;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x1015EB3F52B098D1LL, NAMSTR(s_sys_ss52b098d1, "print")) {
-        mcp.ci = &c_DebuggerClient::ci_print;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 23:
-      HASH_GUARD_LITSTR(0x182AC39D2C493A97LL, NAMSTR(s_sys_ss2c493a97, "getCommand")) {
-        mcp.ci = &c_DebuggerClient::ci_getcommand;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x67A7ABCB74D168D7LL, NAMSTR(s_sys_ss74d168d7, "argRest")) {
-        mcp.ci = &c_DebuggerClient::ci_argrest;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x016509DCA13DB6DFLL, NAMSTR(s_sys_ss5ec24921, "error")) {
-        mcp.ci = &c_DebuggerClient::ci_error;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DebuggerClient::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info")) {
-        mcp.ci = &c_DebuggerClient::ci_info;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 35:
-      HASH_GUARD_LITSTR(0x5F8B4ACA3731C423LL, NAMSTR(s_sys_ss3731c423, "helpTitle")) {
-        mcp.ci = &c_DebuggerClient::ci_helptitle;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 38:
-      HASH_GUARD_LITSTR(0x2191643700554726LL, NAMSTR(s_sys_ss00554726, "getCurrentLocation")) {
-        mcp.ci = &c_DebuggerClient::ci_getcurrentlocation;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 40:
-      HASH_GUARD_LITSTR(0x620C55BAC770E928LL, NAMSTR(s_sys_ss388f16d8, "argValue")) {
-        mcp.ci = &c_DebuggerClient::ci_argvalue;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 44:
-      HASH_GUARD_LITSTR(0x6CB0A07E0516B6ACLL, NAMSTR(s_sys_ss0516b6ac, "tutorial")) {
-        mcp.ci = &c_DebuggerClient::ci_tutorial;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 47:
-      HASH_GUARD_LITSTR(0x5412C8462A696DEFLL, NAMSTR(s_sys_ss2a696def, "argCount")) {
-        mcp.ci = &c_DebuggerClient::ci_argcount;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x5CE665973E2B4C6FLL, NAMSTR(s_sys_ss3e2b4c6f, "helpSection")) {
-        mcp.ci = &c_DebuggerClient::ci_helpsection;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DebuggerClient::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 52:
-      HASH_GUARD_LITSTR(0x64C0B4BCDA99F6F4LL, NAMSTR(s_sys_ss2566090c, "arg")) {
-        mcp.ci = &c_DebuggerClient::ci_arg;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x665AFB5CDFD23534LL, NAMSTR(s_sys_ss202dcacc, "help")) {
-        mcp.ci = &c_DebuggerClient::ci_help;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 54:
-      HASH_GUARD_LITSTR(0x04A108469024B7B6LL, NAMSTR(s_sys_ss6fdb484a, "xend")) {
-        mcp.ci = &c_DebuggerClient::ci_xend;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x7C41EEC813FC6FB7LL, NAMSTR(s_sys_ss13fc6fb7, "getStackTrace")) {
-        mcp.ci = &c_DebuggerClient::ci_getstacktrace;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x6C5E35754AA2B277LL, NAMSTR(s_sys_ss4aa2b277, "wrap")) {
-        mcp.ci = &c_DebuggerClient::ci_wrap;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 57:
-      HASH_GUARD_LITSTR(0x58C72230857ACDB9LL, NAMSTR(s_sys_ss7a853247, "code")) {
-        mcp.ci = &c_DebuggerClient::ci_code;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 58:
-      HASH_GUARD_LITSTR(0x0732FA520631017ALL, NAMSTR(s_sys_ss0631017a, "quit")) {
-        mcp.ci = &c_DebuggerClient::ci_quit;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 63:
-      HASH_GUARD_LITSTR(0x07B89E83B77C677FLL, NAMSTR(s_sys_ss48839881, "output")) {
-        mcp.ci = &c_DebuggerClient::ci_output;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DebuggerClient *c_DebuggerClient::create() {
   CountableHelper h(this);
@@ -3662,25 +3375,8 @@ bool c_DOMCDATASection::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_DOMText::os_get_call_info(mcp, hash);
 }
 bool c_DOMCDATASection::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMCDATASection::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMCDATASection::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DOMText::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMCDATASection *c_DOMCDATASection::create(String a0) {
   CountableHelper h(this);
@@ -3925,25 +3621,8 @@ bool c_Locale::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_Locale::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_Locale::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_Locale::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_Locale *c_Locale::create() {
   CountableHelper h(this);
@@ -4276,39 +3955,8 @@ bool c_DOMDocumentType::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_DOMNode::os_get_call_info(mcp, hash);
 }
 bool c_DOMDocumentType::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMDocumentType::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
-        mcp.ci = &c_DOMDocumentType::ci___set;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMDocumentType::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
-        mcp.ci = &c_DOMDocumentType::ci___get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DOMNode::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMDocumentType *c_DOMDocumentType::create() {
   CountableHelper h(this);
@@ -4901,76 +4549,8 @@ bool c_SQLite3Stmt::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_SQLite3Stmt::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x340A51AE22A924E0LL, NAMSTR(s_sys_ss22a924e0, "reset")) {
-        mcp.ci = &c_SQLite3Stmt::ci_reset;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
-        mcp.ci = &c_SQLite3Stmt::ci_close;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x436E6AFC3628E403LL, NAMSTR(s_sys_ss3628e403, "bindvalue")) {
-        mcp.ci = &c_SQLite3Stmt::ci_bindvalue;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x31DA235C5A226667LL, NAMSTR(s_sys_ss5a226667, "clear")) {
-        mcp.ci = &c_SQLite3Stmt::ci_clear;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 14:
-      HASH_GUARD_LITSTR(0x187C7F43EB57714ELL, NAMSTR(s_sys_ss14a88eb2, "execute")) {
-        mcp.ci = &c_SQLite3Stmt::ci_execute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_SQLite3Stmt::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 22:
-      HASH_GUARD_LITSTR(0x77B13FCF1BA41696LL, NAMSTR(s_sys_ss1ba41696, "bindparam")) {
-        mcp.ci = &c_SQLite3Stmt::ci_bindparam;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 23:
-      HASH_GUARD_LITSTR(0x72FA987001E93357LL, NAMSTR(s_sys_ss01e93357, "paramcount")) {
-        mcp.ci = &c_SQLite3Stmt::ci_paramcount;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_SQLite3Stmt::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_SQLite3Stmt *c_SQLite3Stmt::create(Object a0, String a1) {
   CountableHelper h(this);
@@ -5416,51 +4996,8 @@ bool c_DOMNodeList::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_DOMNodeList::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMNodeList::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss32a12503, "getIterator")) {
-        mcp.ci = &c_DOMNodeList::ci_getiterator;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
-        mcp.ci = &c_DOMNodeList::ci___set;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 6:
-      HASH_GUARD_LITSTR(0x0A41DBE0830902C6LL, NAMSTR(s_sys_ss7cf6fd3a, "item")) {
-        mcp.ci = &c_DOMNodeList::ci_item;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMNodeList::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
-        mcp.ci = &c_DOMNodeList::ci___get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMNodeList *c_DOMNodeList::create() {
   CountableHelper h(this);
@@ -5881,41 +5418,8 @@ bool c_Normalizer::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_Normalizer::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
-    case 2:
-      HASH_GUARD_LITSTR(0x11A2D4B742CB6C5ALL, NAMSTR(s_sys_ss42cb6c5a, "normalize")) {
-        mcp.ci = &c_Normalizer::ci_normalize;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_Normalizer::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x58CF37E15F66ED1DLL, NAMSTR(s_sys_ss5f66ed1d, "isnormalized")) {
-        mcp.ci = &c_Normalizer::ci_isnormalized;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_Normalizer::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_Normalizer *c_Normalizer::create() {
   CountableHelper h(this);
@@ -6542,76 +6046,8 @@ bool c_DOMCharacterData::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_DOMNode::os_get_call_info(mcp, hash);
 }
 bool c_DOMCharacterData::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 13:
-      HASH_GUARD_LITSTR(0x3DAC04A51FD2D92DLL, NAMSTR(s_sys_ss1fd2d92d, "appendData")) {
-        mcp.ci = &c_DOMCharacterData::ci_appenddata;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
-        mcp.ci = &c_DOMCharacterData::ci___get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x2D8D2253C2149972LL, NAMSTR(s_sys_ss3deb668e, "substringData")) {
-        mcp.ci = &c_DOMCharacterData::ci_substringdata;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMCharacterData::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x470F2F0EA1F3D4B4LL, NAMSTR(s_sys_ss5e0c2b4c, "replaceData")) {
-        mcp.ci = &c_DOMCharacterData::ci_replacedata;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
-        mcp.ci = &c_DOMCharacterData::ci___set;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x7543EC746714D118LL, NAMSTR(s_sys_ss6714d118, "deleteData")) {
-        mcp.ci = &c_DOMCharacterData::ci_deletedata;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 29:
-      HASH_GUARD_LITSTR(0x0E19CE7886BCEF3DLL, NAMSTR(s_sys_ss794310c3, "insertData")) {
-        mcp.ci = &c_DOMCharacterData::ci_insertdata;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMCharacterData::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DOMNode::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMCharacterData *c_DOMCharacterData::create() {
   CountableHelper h(this);
@@ -6842,25 +6278,8 @@ bool c_DOMEntityReference::os_get_call_info(MethodCallPackage &mcp, int64 hash) 
   return c_DOMNode::os_get_call_info(mcp, hash);
 }
 bool c_DOMEntityReference::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMEntityReference::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMEntityReference::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DOMNode::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMEntityReference *c_DOMEntityReference::create(String a0) {
   CountableHelper h(this);
@@ -7320,62 +6739,8 @@ bool c_SimpleXMLElementIterator::os_get_call_info(MethodCallPackage &mcp, int64 
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_SimpleXMLElementIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 1:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
-        mcp.ci = &c_SimpleXMLElementIterator::ci_key;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_SimpleXMLElementIterator::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
-        mcp.ci = &c_SimpleXMLElementIterator::ci_valid;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
-        mcp.ci = &c_SimpleXMLElementIterator::ci_next;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
-        mcp.ci = &c_SimpleXMLElementIterator::ci_rewind;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
-        mcp.ci = &c_SimpleXMLElementIterator::ci_current;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_SimpleXMLElementIterator::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_SimpleXMLElementIterator *c_SimpleXMLElementIterator::create() {
   CountableHelper h(this);
@@ -7907,60 +7272,8 @@ bool c_DateTimeZone::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_DateTimeZone::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 3:
-      HASH_GUARD_LITSTR(0x6D7CD16BBA93D063LL, NAMSTR(s_sys_ss456c2f9d, "listIdentifiers")) {
-        mcp.ci = &c_DateTimeZone::ci_listidentifiers;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DateTimeZone::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x63D3CF3884CE93F4LL, NAMSTR(s_sys_ss7b316c0c, "getTransitions")) {
-        mcp.ci = &c_DateTimeZone::ci_gettransitions;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        mcp.ci = &c_DateTimeZone::ci_getname;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x2D0CCAB16C3ED068LL, NAMSTR(s_sys_ss6c3ed068, "listAbbreviations")) {
-        mcp.ci = &c_DateTimeZone::ci_listabbreviations;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 11:
-      HASH_GUARD_LITSTR(0x68DB66F60B55BD0BLL, NAMSTR(s_sys_ss0b55bd0b, "getOffset")) {
-        mcp.ci = &c_DateTimeZone::ci_getoffset;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DateTimeZone::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DateTimeZone *c_DateTimeZone::create(String a0) {
   CountableHelper h(this);
@@ -8420,62 +7733,8 @@ bool c_DOMNodeIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_DOMNodeIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 1:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
-        mcp.ci = &c_DOMNodeIterator::ci_key;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMNodeIterator::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
-        mcp.ci = &c_DOMNodeIterator::ci_valid;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
-        mcp.ci = &c_DOMNodeIterator::ci_next;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
-        mcp.ci = &c_DOMNodeIterator::ci_rewind;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
-        mcp.ci = &c_DOMNodeIterator::ci_current;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMNodeIterator::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMNodeIterator *c_DOMNodeIterator::create() {
   CountableHelper h(this);
@@ -8895,44 +8154,8 @@ bool c_DOMImplementation::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_DOMImplementation::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 3:
-      HASH_GUARD_LITSTR(0x3CB56A796F3DBAC3LL, NAMSTR(s_sys_ss6f3dbac3, "createDocumentType")) {
-        mcp.ci = &c_DOMImplementation::ci_createdocumenttype;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMImplementation::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x280878EAC306A6A3LL, NAMSTR(s_sys_ss3cf9595d, "hasFeature")) {
-        mcp.ci = &c_DOMImplementation::ci_hasfeature;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 14:
-      HASH_GUARD_LITSTR(0x30855E95B37D1B4ELL, NAMSTR(s_sys_ss4c82e4b2, "createDocument")) {
-        mcp.ci = &c_DOMImplementation::ci_createdocument;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMImplementation::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMImplementation *c_DOMImplementation::create() {
   CountableHelper h(this);
@@ -9192,25 +8415,8 @@ bool c_SoapHeader::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_SoapHeader::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_SoapHeader::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_SoapHeader::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_SoapHeader *c_SoapHeader::create(String a0, String a1, Variant a2, bool a3, Variant a4) {
   CountableHelper h(this);
@@ -9608,39 +8814,8 @@ bool c_DOMNotation::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_DOMNode::os_get_call_info(mcp, hash);
 }
 bool c_DOMNotation::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMNotation::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
-        mcp.ci = &c_DOMNotation::ci___set;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMNotation::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
-        mcp.ci = &c_DOMNotation::ci___get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DOMNode::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMNotation *c_DOMNotation::create() {
   CountableHelper h(this);
@@ -9963,41 +9138,8 @@ bool c_DebuggerProxy::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_DebuggerProxy::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
-    case 0:
-      HASH_GUARD_LITSTR(0x3E0170A7802E3888LL, NAMSTR(s_sys_ss7fd1c778, "send")) {
-        mcp.ci = &c_DebuggerProxy::ci_send;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DebuggerProxy::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x7B58587A529D270CLL, NAMSTR(s_sys_ss529d270c, "isLocal")) {
-        mcp.ci = &c_DebuggerProxy::ci_islocal;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DebuggerProxy::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DebuggerProxy *c_DebuggerProxy::create() {
   CountableHelper h(this);
@@ -10231,25 +9373,8 @@ bool c_DOMComment::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_DOMCharacterData::os_get_call_info(mcp, hash);
 }
 bool c_DOMComment::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMComment::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMComment::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DOMCharacterData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMComment *c_DOMComment::create(String a0) {
   CountableHelper h(this);
@@ -11361,137 +10486,8 @@ bool c_SQLite3::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_SQLite3::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 63) {
-    case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
-        mcp.ci = &c_SQLite3::ci_close;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 2:
-      HASH_GUARD_LITSTR(0x6081F282094466C2LL, NAMSTR(s_sys_ss094466c2, "lasterrormsg")) {
-        mcp.ci = &c_SQLite3::ci_lasterrormsg;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x65BD6700742BF3C2LL, NAMSTR(s_sys_ss742bf3c2, "openblob")) {
-        mcp.ci = &c_SQLite3::ci_openblob;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x3AA4CCEC6BD68143LL, NAMSTR(s_sys_ss6bd68143, "createaggregate")) {
-        mcp.ci = &c_SQLite3::ci_createaggregate;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x21F68C010C124BC4LL, NAMSTR(s_sys_ss0c124bc4, "open")) {
-        mcp.ci = &c_SQLite3::ci_open;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x632B468FC2FCAB0ALL, NAMSTR(s_sys_ss3d0354f6, "lasterrorcode")) {
-        mcp.ci = &c_SQLite3::ci_lasterrorcode;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x4F1D1ED7B087208CLL, NAMSTR(s_sys_ss4f78df74, "exec")) {
-        mcp.ci = &c_SQLite3::ci_exec;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 13:
-      HASH_GUARD_LITSTR(0x7CECF508291057CDLL, NAMSTR(s_sys_ss291057cd, "createfunction")) {
-        mcp.ci = &c_SQLite3::ci_createfunction;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 25:
-      HASH_GUARD_LITSTR(0x64D2BDB189B02819LL, NAMSTR(s_sys_ss764fd7e7, "changes")) {
-        mcp.ci = &c_SQLite3::ci_changes;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_SQLite3::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 36:
-      HASH_GUARD_LITSTR(0x1B3CDE890A487664LL, NAMSTR(s_sys_ss0a487664, "loadextension")) {
-        mcp.ci = &c_SQLite3::ci_loadextension;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 38:
-      HASH_GUARD_LITSTR(0x5024F08DB0FDCBE6LL, NAMSTR(s_sys_ss4f02341a, "lastinsertrowid")) {
-        mcp.ci = &c_SQLite3::ci_lastinsertrowid;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x5AE41239FF63D86ALL, NAMSTR(s_sys_ss009c2796, "version")) {
-        mcp.ci = &c_SQLite3::ci_version;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 46:
-      HASH_GUARD_LITSTR(0x156B1FAE4132ABEELL, NAMSTR(s_sys_ss4132abee, "querysingle")) {
-        mcp.ci = &c_SQLite3::ci_querysingle;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 47:
-      HASH_GUARD_LITSTR(0x540020AE4BA591AFLL, NAMSTR(s_sys_ss4ba591af, "prepare")) {
-        mcp.ci = &c_SQLite3::ci_prepare;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_SQLite3::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 53:
-      HASH_GUARD_LITSTR(0x607C4C73BB251635LL, NAMSTR(s_sys_ss44dae9cb, "escapestring")) {
-        mcp.ci = &c_SQLite3::ci_escapestring;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss414da377, "query")) {
-        mcp.ci = &c_SQLite3::ci_query;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_SQLite3 *c_SQLite3::create() {
   CountableHelper h(this);
@@ -11885,46 +10881,8 @@ bool c_DOMAttr::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_DOMNode::os_get_call_info(mcp, hash);
 }
 bool c_DOMAttr::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMAttr::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x30A9329415D17F24LL, NAMSTR(s_sys_ss15d17f24, "isId")) {
-        mcp.ci = &c_DOMAttr::ci_isid;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
-        mcp.ci = &c_DOMAttr::ci___set;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMAttr::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
-        mcp.ci = &c_DOMAttr::ci___get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DOMNode::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMAttr *c_DOMAttr::create(String a0, String a1) {
   CountableHelper h(this);
@@ -12221,25 +11179,8 @@ bool c_SoapVar::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_SoapVar::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_SoapVar::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_SoapVar::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_SoapVar *c_SoapVar::create(Variant a0, Variant a1, String a2, String a3, String a4, String a5) {
   CountableHelper h(this);
@@ -12856,65 +11797,8 @@ bool c_DOMNamedNodeMap::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_DOMNamedNodeMap::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMNamedNodeMap::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss32a12503, "getIterator")) {
-        mcp.ci = &c_DOMNamedNodeMap::ci_getiterator;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
-        mcp.ci = &c_DOMNamedNodeMap::ci___set;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 6:
-      HASH_GUARD_LITSTR(0x0A41DBE0830902C6LL, NAMSTR(s_sys_ss7cf6fd3a, "item")) {
-        mcp.ci = &c_DOMNamedNodeMap::ci_item;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x5D3CEC627F9ADC3ALL, NAMSTR(s_sys_ss7f9adc3a, "getNamedItem")) {
-        mcp.ci = &c_DOMNamedNodeMap::ci_getnameditem;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 11:
-      HASH_GUARD_LITSTR(0x53B4D840FF4F0F1BLL, NAMSTR(s_sys_ss00b0f0e5, "getNamedItemNS")) {
-        mcp.ci = &c_DOMNamedNodeMap::ci_getnameditemns;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMNamedNodeMap::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
-        mcp.ci = &c_DOMNamedNodeMap::ci___get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMNamedNodeMap *c_DOMNamedNodeMap::create() {
   CountableHelper h(this);
@@ -13434,69 +12318,8 @@ bool c_SQLite3Result::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_SQLite3Result::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 0:
-      HASH_GUARD_LITSTR(0x340A51AE22A924E0LL, NAMSTR(s_sys_ss22a924e0, "reset")) {
-        mcp.ci = &c_SQLite3Result::ci_reset;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_SQLite3Result::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 6:
-      HASH_GUARD_LITSTR(0x4C7702FC22784996LL, NAMSTR(s_sys_ss22784996, "numcolumns")) {
-        mcp.ci = &c_SQLite3Result::ci_numcolumns;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x696EFC04EE7E47F8LL, NAMSTR(s_sys_ss1181b808, "columnname")) {
-        mcp.ci = &c_SQLite3Result::ci_columnname;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 11:
-      HASH_GUARD_LITSTR(0x59F73C4DEF1C3A6BLL, NAMSTR(s_sys_ss10e3c595, "fetcharray")) {
-        mcp.ci = &c_SQLite3Result::ci_fetcharray;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x32A58B0CE493957CLL, NAMSTR(s_sys_ss1b6c6a84, "finalize")) {
-        mcp.ci = &c_SQLite3Result::ci_finalize;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 13:
-      HASH_GUARD_LITSTR(0x42EDB5CA009D8C6DLL, NAMSTR(s_sys_ss009d8c6d, "columntype")) {
-        mcp.ci = &c_SQLite3Result::ci_columntype;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_SQLite3Result::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_SQLite3Result *c_SQLite3Result::create() {
   CountableHelper h(this);
@@ -14910,170 +13733,8 @@ bool c_SimpleXMLElement::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_SimpleXMLElement::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 63) {
-    case 0:
-      HASH_GUARD_LITSTR(0x3E6BCFB9742FC700LL, NAMSTR(s_sys_ss742fc700, "offsetExists")) {
-        mcp.ci = &c_SimpleXMLElement::ci_offsetexists;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss32a12503, "getIterator")) {
-        mcp.ci = &c_SimpleXMLElement::ci_getiterator;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
-        mcp.ci = &c_SimpleXMLElement::ci___get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 16:
-      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss65104d10, "count")) {
-        mcp.ci = &c_SimpleXMLElement::ci_count;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        mcp.ci = &c_SimpleXMLElement::ci___tostring;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x2DDE12A9866FC794LL, NAMSTR(s_sys_ss7990386c, "addChild")) {
-        mcp.ci = &c_SimpleXMLElement::ci_addchild;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
-        mcp.ci = &c_SimpleXMLElement::ci___set;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 22:
-      HASH_GUARD_LITSTR(0x52F7AA6C19BEEAD6LL, NAMSTR(s_sys_ss19beead6, "addAttribute")) {
-        mcp.ci = &c_SimpleXMLElement::ci_addattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x61D11ECEF4404498LL, NAMSTR(s_sys_ss0bbfbb68, "offsetGet")) {
-        mcp.ci = &c_SimpleXMLElement::ci_offsetget;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 27:
-      HASH_GUARD_LITSTR(0x0817454F196A9A1BLL, NAMSTR(s_sys_ss196a9a1b, "xpath")) {
-        mcp.ci = &c_SimpleXMLElement::ci_xpath;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x04FB7028C9A2079BLL, NAMSTR(s_sys_ss365df865, "__unset")) {
-        mcp.ci = &c_SimpleXMLElement::ci___unset;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 29:
-      HASH_GUARD_LITSTR(0x4B65E1A09A33F21DLL, NAMSTR(s_sys_ss65cc0de3, "attributes")) {
-        mcp.ci = &c_SimpleXMLElement::ci_attributes;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_SimpleXMLElement::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 37:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        mcp.ci = &c_SimpleXMLElement::ci_getname;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 38:
-      HASH_GUARD_LITSTR(0x6D9D75B7E3B40FA6LL, NAMSTR(s_sys_ss1c4bf05a, "getNamespaces")) {
-        mcp.ci = &c_SimpleXMLElement::ci_getnamespaces;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x5C09D9345FD864A6LL, NAMSTR(s_sys_ss5fd864a6, "asXML")) {
-        mcp.ci = &c_SimpleXMLElement::ci_asxml;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 45:
-      HASH_GUARD_LITSTR(0x2B299E949E2E82ADLL, NAMSTR(s_sys_ss61d17d53, "children")) {
-        mcp.ci = &c_SimpleXMLElement::ci_children;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 46:
-      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ss51de8712, "__isset")) {
-        mcp.ci = &c_SimpleXMLElement::ci___isset;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 49:
-      HASH_GUARD_LITSTR(0x0D08AA5F0B2F34F1LL, NAMSTR(s_sys_ss0b2f34f1, "getDocNamespaces")) {
-        mcp.ci = &c_SimpleXMLElement::ci_getdocnamespaces;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_SimpleXMLElement::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 56:
-      HASH_GUARD_LITSTR(0x0957F693A48AF738LL, NAMSTR(s_sys_ss5b7508c8, "offsetSet")) {
-        mcp.ci = &c_SimpleXMLElement::ci_offsetset;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 58:
-      HASH_GUARD_LITSTR(0x08329980E6369ABALL, NAMSTR(s_sys_ss19c96546, "offsetUnset")) {
-        mcp.ci = &c_SimpleXMLElement::ci_offsetunset;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 61:
-      HASH_GUARD_LITSTR(0x3FE8F6937854F83DLL, NAMSTR(s_sys_ss7854f83d, "registerXPathNamespace")) {
-        mcp.ci = &c_SimpleXMLElement::ci_registerxpathnamespace;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_SimpleXMLElement *c_SimpleXMLElement::create(String a0, int64 a1, bool a2, String a3, bool a4) {
   CountableHelper h(this);
@@ -16660,158 +15321,8 @@ bool c_Memcache::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_Memcache::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 63) {
-    case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
-        mcp.ci = &c_Memcache::ci_close;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 6:
-      HASH_GUARD_LITSTR(0x42FAC655280A6146LL, NAMSTR(s_sys_ss280a6146, "replace")) {
-        mcp.ci = &c_Memcache::ci_replace;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x39099707DF7945C7LL, NAMSTR(s_sys_ss2086ba39, "increment")) {
-        mcp.ci = &c_Memcache::ci_increment;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 11:
-      HASH_GUARD_LITSTR(0x3BF3710A1661DE0BLL, NAMSTR(s_sys_ss1661de0b, "setoptimeout")) {
-        mcp.ci = &c_Memcache::ci_setoptimeout;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x15D34462FC79458BLL, NAMSTR(s_sys_ss0386ba75, "add")) {
-        mcp.ci = &c_Memcache::ci_add;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x710DE893BB376C4FLL, NAMSTR(s_sys_ss44c893b1, "getserverstatus")) {
-        mcp.ci = &c_Memcache::ci_getserverstatus;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x030429D528A8EA92LL, NAMSTR(s_sys_ss28a8ea92, "setcompressthreshold")) {
-        mcp.ci = &c_Memcache::ci_setcompressthreshold;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x1C660E5BFA6F55D3LL, NAMSTR(s_sys_ss0590aa2d, "delete")) {
-        mcp.ci = &c_Memcache::ci_delete;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 22:
-      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316_1, "getversion")) {
-        mcp.ci = &c_Memcache::ci_getversion;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 25:
-      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss7ce59bd9, "getstats")) {
-        mcp.ci = &c_Memcache::ci_getstats;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x2A733FC12BA4C1DALL, NAMSTR(s_sys_ss2ba4c1da, "decrement")) {
-        mcp.ci = &c_Memcache::ci_decrement;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_Memcache::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 33:
-      HASH_GUARD_LITSTR(0x399A6427C2185621LL, NAMSTR(s_sys_ss3de7a9df, "set")) {
-        mcp.ci = &c_Memcache::ci_set;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 37:
-      HASH_GUARD_LITSTR(0x4770E54B86BF7765LL, NAMSTR(s_sys_ss7940889b, "getextendedstats")) {
-        mcp.ci = &c_Memcache::ci_getextendedstats;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 38:
-      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss6237aae6, "addserver")) {
-        mcp.ci = &c_Memcache::ci_addserver;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 40:
-      HASH_GUARD_LITSTR(0x25DCCC35D69AD828LL, NAMSTR(s_sys_ss296527d8, "get")) {
-        mcp.ci = &c_Memcache::ci_get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_Memcache::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 57:
-      HASH_GUARD_LITSTR(0x742B441E13CD7279LL, NAMSTR(s_sys_ss13cd7279, "pconnect")) {
-        mcp.ci = &c_Memcache::ci_pconnect;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 58:
-      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss24ffa186, "flush")) {
-        mcp.ci = &c_Memcache::ci_flush;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 61:
-      HASH_GUARD_LITSTR(0x1780351E8EFF92BDLL, NAMSTR(s_sys_ss71006d43, "setserverparams")) {
-        mcp.ci = &c_Memcache::ci_setserverparams;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 62:
-      HASH_GUARD_LITSTR(0x7032C660AD16D7FELL, NAMSTR(s_sys_ss52e92802, "connect")) {
-        mcp.ci = &c_Memcache::ci_connect;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_Memcache *c_Memcache::create() {
   CountableHelper h(this);
@@ -17161,39 +15672,8 @@ bool c_DOMProcessingInstruction::os_get_call_info(MethodCallPackage &mcp, int64 
   return c_DOMNode::os_get_call_info(mcp, hash);
 }
 bool c_DOMProcessingInstruction::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMProcessingInstruction::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
-        mcp.ci = &c_DOMProcessingInstruction::ci___set;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMProcessingInstruction::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
-        mcp.ci = &c_DOMProcessingInstruction::ci___get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DOMNode::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMProcessingInstruction *c_DOMProcessingInstruction::create(String a0, String a1) {
   CountableHelper h(this);
@@ -18831,203 +17311,8 @@ bool c_PDOStatement::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_PDOStatement::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 63) {
-    case 1:
-      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss65eb8e41, "fetchall")) {
-        mcp.ci = &c_PDOStatement::ci_fetchall;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x436E6AFC3628E403LL, NAMSTR(s_sys_ss3628e403, "bindvalue")) {
-        mcp.ci = &c_PDOStatement::ci_bindvalue;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
-        mcp.ci = &c_PDOStatement::ci_valid;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x75A2E23098C65C05LL, NAMSTR(s_sys_ss6739a3fb, "closecursor")) {
-        mcp.ci = &c_PDOStatement::ci_closecursor;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x6D0664CC2372F2C7LL, NAMSTR(s_sys_ss2372f2c7, "errorcode")) {
-        mcp.ci = &c_PDOStatement::ci_errorcode;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss44f4ab8a, "setattribute")) {
-        mcp.ci = &c_PDOStatement::ci_setattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 14:
-      HASH_GUARD_LITSTR(0x187C7F43EB57714ELL, NAMSTR(s_sys_ss14a88eb2, "execute")) {
-        mcp.ci = &c_PDOStatement::ci_execute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x32A381ECDC91918FLL, NAMSTR(s_sys_ss236e6e71, "columncount")) {
-        mcp.ci = &c_PDOStatement::ci_columncount;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
-        mcp.ci = &c_PDOStatement::ci_key;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x31A8917EC4F2A252LL, NAMSTR(s_sys_ss3b0d5dae, "nextrowset")) {
-        mcp.ci = &c_PDOStatement::ci_nextrowset;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 22:
-      HASH_GUARD_LITSTR(0x77B13FCF1BA41696LL, NAMSTR(s_sys_ss1ba41696, "bindparam")) {
-        mcp.ci = &c_PDOStatement::ci_bindparam;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 25:
-      HASH_GUARD_LITSTR(0x5C38814410C5FFD9LL, NAMSTR(s_sys_ss10c5ffd9, "fetchcolumn")) {
-        mcp.ci = &c_PDOStatement::ci_fetchcolumn;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x0D43A7148903299ALL, NAMSTR(s_sys_ss76fcd666, "rowcount")) {
-        mcp.ci = &c_PDOStatement::ci_rowcount;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x4389F50CAA085CDCLL, NAMSTR(s_sys_ss55f7a324, "__wakeup")) {
-        mcp.ci = &c_PDOStatement::ci___wakeup;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
-        mcp.ci = &c_PDOStatement::ci_current;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 29:
-      HASH_GUARD_LITSTR(0x1C87AD14A095219DLL, NAMSTR(s_sys_ss5f6ade63, "bindcolumn")) {
-        mcp.ci = &c_PDOStatement::ci_bindcolumn;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0E1814AA3327229DLL, NAMSTR(s_sys_ss3327229d, "fetchobject")) {
-        mcp.ci = &c_PDOStatement::ci_fetchobject;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x1DDD412E7F04605ELL, NAMSTR(s_sys_ss7f04605e, "errorinfo")) {
-        mcp.ci = &c_PDOStatement::ci_errorinfo;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_PDOStatement::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 33:
-      HASH_GUARD_LITSTR(0x78C9BF8620136861LL, NAMSTR(s_sys_ss20136861, "setfetchmode")) {
-        mcp.ci = &c_PDOStatement::ci_setfetchmode;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x699F5A1E3BD7B2A2LL, NAMSTR(s_sys_ss3bd7b2a2, "debugdumpparams")) {
-        mcp.ci = &c_PDOStatement::ci_debugdumpparams;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 40:
-      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss6612fc28, "getattribute")) {
-        mcp.ci = &c_PDOStatement::ci_getattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
-        mcp.ci = &c_PDOStatement::ci_rewind;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 45:
-      HASH_GUARD_LITSTR(0x61D1244DDADBC02DLL, NAMSTR(s_sys_ss25243fd3, "__sleep")) {
-        mcp.ci = &c_PDOStatement::ci___sleep;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_PDOStatement::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 56:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
-        mcp.ci = &c_PDOStatement::ci_next;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 59:
-      HASH_GUARD_LITSTR(0x5B6B980006E717FBLL, NAMSTR(s_sys_ss06e717fb, "getcolumnmeta")) {
-        mcp.ci = &c_PDOStatement::ci_getcolumnmeta;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
-        mcp.ci = &c_PDOStatement::ci_fetch;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_PDOStatement *c_PDOStatement::create() {
   CountableHelper h(this);
@@ -19911,103 +18196,8 @@ bool c_SoapClient::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_SoapClient::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 4:
-      HASH_GUARD_LITSTR(0x5C5C1E24A140F6E4LL, NAMSTR(s_sys_ss5ebf091c, "__getlastrequest")) {
-        mcp.ci = &c_SoapClient::ci___getlastrequest;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x3648EE7D3B37DE8CLL, NAMSTR(s_sys_ss3b37de8c, "__getlastrequestheaders")) {
-        mcp.ci = &c_SoapClient::ci___getlastrequestheaders;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x5D73364F53CEEB6CLL, NAMSTR(s_sys_ss53ceeb6c, "__call")) {
-        mcp.ci = &c_SoapClient::ci___call;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x1365B3105FC59871LL, NAMSTR(s_sys_ss5fc59871, "__getfunctions")) {
-        mcp.ci = &c_SoapClient::ci___getfunctions;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_SoapClient::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x3CA9145031035A54LL, NAMSTR(s_sys_ss31035a54, "__getlastresponse")) {
-        mcp.ci = &c_SoapClient::ci___getlastresponse;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x19A26CEC7E8AAEF5LL, NAMSTR(s_sys_ss7e8aaef5, "__dorequest")) {
-        mcp.ci = &c_SoapClient::ci___dorequest;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x52C6ABACCBFD0C75LL, NAMSTR(s_sys_ss3402f38b, "__setcookie")) {
-        mcp.ci = &c_SoapClient::ci___setcookie;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x628D398E7604B9D5LL, NAMSTR(s_sys_ss7604b9d5, "__gettypes")) {
-        mcp.ci = &c_SoapClient::ci___gettypes;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 25:
-      HASH_GUARD_LITSTR(0x4A2F89F662050D99LL, NAMSTR(s_sys_ss62050d99, "__soapcall")) {
-        mcp.ci = &c_SoapClient::ci___soapcall;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x0C94657A58A82CFALL, NAMSTR(s_sys_ss58a82cfa, "__getlastresponseheaders")) {
-        mcp.ci = &c_SoapClient::ci___getlastresponseheaders;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 27:
-      HASH_GUARD_LITSTR(0x14842228D5E335BBLL, NAMSTR(s_sys_ss2a1cca45, "__setsoapheaders")) {
-        mcp.ci = &c_SoapClient::ci___setsoapheaders;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x232D13904DBC36FFLL, NAMSTR(s_sys_ss4dbc36ff, "__setlocation")) {
-        mcp.ci = &c_SoapClient::ci___setlocation;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_SoapClient::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_SoapClient *c_SoapClient::create(Variant a0, Array a1) {
   CountableHelper h(this);
@@ -20272,25 +18462,8 @@ bool c_SoapParam::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_SoapParam::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_SoapParam::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_SoapParam::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_SoapParam *c_SoapParam::create(Variant a0, String a1) {
   CountableHelper h(this);
@@ -21022,79 +19195,8 @@ bool c_DateTime::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_DateTime::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 7:
-      HASH_GUARD_LITSTR(0x65A9B2950F080587LL, NAMSTR(s_sys_ss0f080587, "modify")) {
-        mcp.ci = &c_DateTime::ci_modify;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 11:
-      HASH_GUARD_LITSTR(0x67314943DC9D120BLL, NAMSTR(s_sys_ss2362edf5, "setDate")) {
-        mcp.ci = &c_DateTime::ci_setdate;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x68DB66F60B55BD0BLL, NAMSTR(s_sys_ss0b55bd0b, "getOffset")) {
-        mcp.ci = &c_DateTime::ci_getoffset;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x688601F33BE7716CLL, NAMSTR(s_sys_ss3be7716c, "getTimezone")) {
-        mcp.ci = &c_DateTime::ci_gettimezone;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DateTime::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x16D6DBFD6EE55A74LL, NAMSTR(s_sys_ss6ee55a74, "setISODate")) {
-        mcp.ci = &c_DateTime::ci_setisodate;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x07CB96AB34F4C258LL, NAMSTR(s_sys_ss34f4c258, "setTime")) {
-        mcp.ci = &c_DateTime::ci_settime;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x3B576E558B957CB8LL, NAMSTR(s_sys_ss746a8348, "setTimezone")) {
-        mcp.ci = &c_DateTime::ci_settimezone;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 27:
-      HASH_GUARD_LITSTR(0x1B6DDAF6AAF8CA9BLL, NAMSTR(s_sys_ss55073565, "format")) {
-        mcp.ci = &c_DateTime::ci_format;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DateTime::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DateTime *c_DateTime::create(String a0, Object a1) {
   CountableHelper h(this);
@@ -22090,109 +20192,8 @@ bool c_Collator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_Collator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x43E057044D6296E0LL, NAMSTR(s_sys_ss4d6296e0, "geterrorcode")) {
-        mcp.ci = &c_Collator::ci_geterrorcode;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 2:
-      HASH_GUARD_LITSTR(0x2C7E06EB2965CE02LL, NAMSTR(s_sys_ss2965ce02, "getlocale")) {
-        mcp.ci = &c_Collator::ci_getlocale;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss6612fc28, "getattribute")) {
-        mcp.ci = &c_Collator::ci_getattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x1F4984938E1DBB2ALL, NAMSTR(s_sys_ss71e244d6, "sort")) {
-        mcp.ci = &c_Collator::ci_sort;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss44f4ab8a, "setattribute")) {
-        mcp.ci = &c_Collator::ci_setattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 11:
-      HASH_GUARD_LITSTR(0x365C573D887803EBLL, NAMSTR(s_sys_ss7787fc15, "sortwithsortkeys")) {
-        mcp.ci = &c_Collator::ci_sortwithsortkeys;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 14:
-      HASH_GUARD_LITSTR(0x790B7C44A3442BEELL, NAMSTR(s_sys_ss5cbbd412, "asort")) {
-        mcp.ci = &c_Collator::ci_asort;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x3B4D97DC8C437CD1LL, NAMSTR(s_sys_ss73bc832f, "geterrormessage")) {
-        mcp.ci = &c_Collator::ci_geterrormessage;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x1BF74792BDECF352LL, NAMSTR(s_sys_ss42130cae, "compare")) {
-        mcp.ci = &c_Collator::ci_compare;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_Collator::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 22:
-      HASH_GUARD_LITSTR(0x3A0A2C5D90518456LL, NAMSTR(s_sys_ss6fae7baa, "create")) {
-        mcp.ci = &c_Collator::ci_create;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 23:
-      HASH_GUARD_LITSTR(0x0B7AA0ED4CBF9ED7LL, NAMSTR(s_sys_ss4cbf9ed7, "setstrength")) {
-        mcp.ci = &c_Collator::ci_setstrength;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x1C15B5A1A05B4C5ELL, NAMSTR(s_sys_ss5fa4b3a2, "getstrength")) {
-        mcp.ci = &c_Collator::ci_getstrength;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_Collator::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_Collator *c_Collator::create(String a0) {
   CountableHelper h(this);
@@ -23461,132 +21462,8 @@ bool c_PDO::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_PDO::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 63) {
-    case 7:
-      HASH_GUARD_LITSTR(0x6D0664CC2372F2C7LL, NAMSTR(s_sys_ss2372f2c7, "errorcode")) {
-        mcp.ci = &c_PDO::ci_errorcode;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss44f4ab8a, "setattribute")) {
-        mcp.ci = &c_PDO::ci_setattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x4F1D1ED7B087208CLL, NAMSTR(s_sys_ss4f78df74, "exec")) {
-        mcp.ci = &c_PDO::ci_exec;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 14:
-      HASH_GUARD_LITSTR(0x7FF4D594AC38340ELL, NAMSTR(s_sys_ss53c7cbf2, "getavailabledrivers")) {
-        mcp.ci = &c_PDO::ci_getavailabledrivers;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x25466EABBA2D7C12LL, NAMSTR(s_sys_ss45d283ee, "lastinsertid")) {
-        mcp.ci = &c_PDO::ci_lastinsertid;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x4389F50CAA085CDCLL, NAMSTR(s_sys_ss55f7a324, "__wakeup")) {
-        mcp.ci = &c_PDO::ci___wakeup;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x1DDD412E7F04605ELL, NAMSTR(s_sys_ss7f04605e, "errorinfo")) {
-        mcp.ci = &c_PDO::ci_errorinfo;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_PDO::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 36:
-      HASH_GUARD_LITSTR(0x24D23BE465E3F324LL, NAMSTR(s_sys_ss65e3f324, "commit")) {
-        mcp.ci = &c_PDO::ci_commit;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 40:
-      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss6612fc28, "getattribute")) {
-        mcp.ci = &c_PDO::ci_getattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 45:
-      HASH_GUARD_LITSTR(0x61D1244DDADBC02DLL, NAMSTR(s_sys_ss25243fd3, "__sleep")) {
-        mcp.ci = &c_PDO::ci___sleep;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 46:
-      HASH_GUARD_LITSTR(0x1740B14E849464EELL, NAMSTR(s_sys_ss7b6b9b12, "quote")) {
-        mcp.ci = &c_PDO::ci_quote;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 47:
-      HASH_GUARD_LITSTR(0x540020AE4BA591AFLL, NAMSTR(s_sys_ss4ba591af, "prepare")) {
-        mcp.ci = &c_PDO::ci_prepare;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_PDO::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 54:
-      HASH_GUARD_LITSTR(0x374B46BC6D79EC36LL, NAMSTR(s_sys_ss6d79ec36, "rollback")) {
-        mcp.ci = &c_PDO::ci_rollback;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss414da377, "query")) {
-        mcp.ci = &c_PDO::ci_query;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 59:
-      HASH_GUARD_LITSTR(0x0DE392135C33E23BLL, NAMSTR(s_sys_ss5c33e23b, "begintransaction")) {
-        mcp.ci = &c_PDO::ci_begintransaction;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_PDO *c_PDO::create(String a0, String a1, String a2, Array a3) {
   CountableHelper h(this);
@@ -24468,95 +22345,8 @@ bool c_ImageSprite::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_ImageSprite::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x05D2634BA4310200LL, NAMSTR(s_sys_ss5bcefe00, "getErrors")) {
-        mcp.ci = &c_ImageSprite::ci_geterrors;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 2:
-      HASH_GUARD_LITSTR(0x6A37A496C57D57A2LL, NAMSTR(s_sys_ss3a82a85e, "loadDims")) {
-        mcp.ci = &c_ImageSprite::ci_loaddims;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x31DA235C5A226667LL, NAMSTR(s_sys_ss5a226667, "clear")) {
-        mcp.ci = &c_ImageSprite::ci_clear;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x13A96E5A21D1906FLL, NAMSTR(s_sys_ss21d1906f, "addFile")) {
-        mcp.ci = &c_ImageSprite::ci_addfile;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_ImageSprite::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x305D94BB2EC0B554LL, NAMSTR(s_sys_ss2ec0b554, "loadImages")) {
-        mcp.ci = &c_ImageSprite::ci_loadimages;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 23:
-      HASH_GUARD_LITSTR(0x4D8226FDFA2CA297LL, NAMSTR(s_sys_ss05d35d69, "mapping")) {
-        mcp.ci = &c_ImageSprite::ci_mapping;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x386BF72B932D233ALL, NAMSTR(s_sys_ss6cd2dcc6, "addString")) {
-        mcp.ci = &c_ImageSprite::ci_addstring;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x63388F643871547CLL, NAMSTR(s_sys_ss3871547c, "css")) {
-        mcp.ci = &c_ImageSprite::ci_css;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 29:
-      HASH_GUARD_LITSTR(0x79CFC8610DC84A7DLL, NAMSTR(s_sys_ss0dc84a7d, "addUrl")) {
-        mcp.ci = &c_ImageSprite::ci_addurl;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_ImageSprite::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x07B89E83B77C677FLL, NAMSTR(s_sys_ss48839881, "output")) {
-        mcp.ci = &c_ImageSprite::ci_output;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_ImageSprite *c_ImageSprite::create() {
   CountableHelper h(this);
@@ -24889,39 +22679,8 @@ bool c_DOMEntity::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_DOMNode::os_get_call_info(mcp, hash);
 }
 bool c_DOMEntity::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMEntity::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
-        mcp.ci = &c_DOMEntity::ci___set;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMEntity::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
-        mcp.ci = &c_DOMEntity::ci___get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DOMNode::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMEntity *c_DOMEntity::create() {
   CountableHelper h(this);
@@ -27423,315 +25182,8 @@ bool c_XMLWriter::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_XMLWriter::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 127) {
-    case 2:
-      HASH_GUARD_LITSTR(0x1EBCBEA66B6B0982LL, NAMSTR(s_sys_ss6b6b0982, "writeCData")) {
-        mcp.ci = &c_XMLWriter::ci_writecdata;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x55E29E84E96ACF83LL, NAMSTR(s_sys_ss1695307d, "startDTD")) {
-        mcp.ci = &c_XMLWriter::ci_startdtd;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x7C1FF8A79BAB3608LL, NAMSTR(s_sys_ss6454c9f8, "writeDTD")) {
-        mcp.ci = &c_XMLWriter::ci_writedtd;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 14:
-      HASH_GUARD_LITSTR(0x119CC9E7C3E7EF0ELL, NAMSTR(s_sys_ss3c1810f2, "openMemory")) {
-        mcp.ci = &c_XMLWriter::ci_openmemory;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 16:
-      HASH_GUARD_LITSTR(0x0A7FE14C41766610LL, NAMSTR(s_sys_ss41766610, "endCData")) {
-        mcp.ci = &c_XMLWriter::ci_endcdata;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x75F8C992981A4093LL, NAMSTR(s_sys_ss67e5bf6d, "writeComment")) {
-        mcp.ci = &c_XMLWriter::ci_writecomment;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x5A7AE5A26994FF13LL, NAMSTR(s_sys_ss6994ff13, "startAttribute")) {
-        mcp.ci = &c_XMLWriter::ci_startattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x337EFFF3783B919CLL, NAMSTR(s_sys_ss783b919c, "writeElement")) {
-        mcp.ci = &c_XMLWriter::ci_writeelement;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 29:
-      HASH_GUARD_LITSTR(0x4D26D167066BB11DLL, NAMSTR(s_sys_ss066bb11d, "text")) {
-        mcp.ci = &c_XMLWriter::ci_text;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 32:
-      HASH_GUARD_LITSTR(0x7DF0368A44C01B20LL, NAMSTR(s_sys_ss44c01b20, "startCData")) {
-        mcp.ci = &c_XMLWriter::ci_startcdata;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 33:
-      HASH_GUARD_LITSTR(0x5D49A460168D5C21LL, NAMSTR(s_sys_ss168d5c21, "endPI")) {
-        mcp.ci = &c_XMLWriter::ci_endpi;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 41:
-      HASH_GUARD_LITSTR(0x1D81ABDC9890C5A9LL, NAMSTR(s_sys_ss676f3a57, "writeDTDAttlist")) {
-        mcp.ci = &c_XMLWriter::ci_writedtdattlist;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 43:
-      HASH_GUARD_LITSTR(0x0DEAF425F1AD73ABLL, NAMSTR(s_sys_ss0e528c55, "setIndentString")) {
-        mcp.ci = &c_XMLWriter::ci_setindentstring;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 47:
-      HASH_GUARD_LITSTR(0x78A7A5D96EF2F4AFLL, NAMSTR(s_sys_ss6ef2f4af, "endElement")) {
-        mcp.ci = &c_XMLWriter::ci_endelement;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 53:
-      HASH_GUARD_LITSTR(0x75B357D89DDE6EB5LL, NAMSTR(s_sys_ss6221914b, "endComment")) {
-        mcp.ci = &c_XMLWriter::ci_endcomment;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x4B0F1F6361A59C37LL, NAMSTR(s_sys_ss61a59c37, "writeRaw")) {
-        mcp.ci = &c_XMLWriter::ci_writeraw;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 56:
-      HASH_GUARD_LITSTR(0x7FC89CF1AFFB1E38LL, NAMSTR(s_sys_ss5004e1c8, "startDocument")) {
-        mcp.ci = &c_XMLWriter::ci_startdocument;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 58:
-      HASH_GUARD_LITSTR(0x0D155D1E5C6641BALL, NAMSTR(s_sys_ss5c6641ba, "outputMemory")) {
-        mcp.ci = &c_XMLWriter::ci_outputmemory;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 62:
-      HASH_GUARD_LITSTR(0x1FBE635680ADB7BELL, NAMSTR(s_sys_ss7f524842, "openURI")) {
-        mcp.ci = &c_XMLWriter::ci_openuri;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 68:
-      HASH_GUARD_LITSTR(0x275896BFD7A77144LL, NAMSTR(s_sys_ss28588ebc, "endDTD")) {
-        mcp.ci = &c_XMLWriter::ci_enddtd;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 70:
-      HASH_GUARD_LITSTR(0x5D4650E5C0DAEE46LL, NAMSTR(s_sys_ss3f2511ba, "writeDTDEntity")) {
-        mcp.ci = &c_XMLWriter::ci_writedtdentity;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 71:
-      HASH_GUARD_LITSTR(0x017687FD7029CCC7LL, NAMSTR(s_sys_ss7029ccc7, "endDTDElement")) {
-        mcp.ci = &c_XMLWriter::ci_enddtdelement;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 75:
-      HASH_GUARD_LITSTR(0x3954A2C0306CCCCBLL, NAMSTR(s_sys_ss306ccccb, "writeAttribute")) {
-        mcp.ci = &c_XMLWriter::ci_writeattribute;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x7C43ECE80FF886CBLL, NAMSTR(s_sys_ss0ff886cb, "endAttribute")) {
-        mcp.ci = &c_XMLWriter::ci_endattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 77:
-      HASH_GUARD_LITSTR(0x4F1D890D5B36D24DLL, NAMSTR(s_sys_ss5b36d24d, "startAttributens")) {
-        mcp.ci = &c_XMLWriter::ci_startattributens;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 82:
-      HASH_GUARD_LITSTR(0x1357CA1E92397452LL, NAMSTR(s_sys_ss6dc68bae, "writeDTDElement")) {
-        mcp.ci = &c_XMLWriter::ci_writedtdelement;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 84:
-      HASH_GUARD_LITSTR(0x154AE94AEFAC7C54LL, NAMSTR(s_sys_ss105383ac, "writeAttributeNS")) {
-        mcp.ci = &c_XMLWriter::ci_writeattributens;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 86:
-      HASH_GUARD_LITSTR(0x4520735705A382D6LL, NAMSTR(s_sys_ss05a382d6, "endDTDEntity")) {
-        mcp.ci = &c_XMLWriter::ci_enddtdentity;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x37D51A94C6EE8F56LL, NAMSTR(s_sys_ss391170aa, "writePI")) {
-        mcp.ci = &c_XMLWriter::ci_writepi;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 88:
-      HASH_GUARD_LITSTR(0x24A376E9310BF058LL, NAMSTR(s_sys_ss310bf058, "writeElementNS")) {
-        mcp.ci = &c_XMLWriter::ci_writeelementns;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 89:
-      HASH_GUARD_LITSTR(0x390B6C01AE7C4159LL, NAMSTR(s_sys_ss5183bea7, "startPI")) {
-        mcp.ci = &c_XMLWriter::ci_startpi;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 92:
-      HASH_GUARD_LITSTR(0x0DC5AC1E0A2F63DCLL, NAMSTR(s_sys_ss0a2f63dc, "endDocument")) {
-        mcp.ci = &c_XMLWriter::ci_enddocument;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 93:
-      HASH_GUARD_LITSTR(0x75A033B824EA1ADDLL, NAMSTR(s_sys_ss24ea1add, "startDTDEntity")) {
-        mcp.ci = &c_XMLWriter::ci_startdtdentity;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_XMLWriter::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 98:
-      HASH_GUARD_LITSTR(0x55BFFBE5717EFD62LL, NAMSTR(s_sys_ss717efd62, "startElement")) {
-        mcp.ci = &c_XMLWriter::ci_startelement;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 101:
-      HASH_GUARD_LITSTR(0x349B7446B5EE65E5LL, NAMSTR(s_sys_ss4a119a1b, "setIndent")) {
-        mcp.ci = &c_XMLWriter::ci_setindent;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 105:
-      HASH_GUARD_LITSTR(0x608A2D39DE12E169LL, NAMSTR(s_sys_ss21ed1e97, "startElementNS")) {
-        mcp.ci = &c_XMLWriter::ci_startelementns;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 112:
-      HASH_GUARD_LITSTR(0x0CBB10FA542B7D70LL, NAMSTR(s_sys_ss542b7d70, "startDTDAttlist")) {
-        mcp.ci = &c_XMLWriter::ci_startdtdattlist;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 113:
-      HASH_GUARD_LITSTR(0x496175DBD52E1771LL, NAMSTR(s_sys_ss2ad1e88f, "endDTDAttlist")) {
-        mcp.ci = &c_XMLWriter::ci_enddtdattlist;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 115:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_XMLWriter::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 120:
-      HASH_GUARD_LITSTR(0x451436438EBA2AF8LL, NAMSTR(s_sys_ss7145d508, "startDTDElement")) {
-        mcp.ci = &c_XMLWriter::ci_startdtdelement;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 122:
-      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss24ffa186, "flush")) {
-        mcp.ci = &c_XMLWriter::ci_flush;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 126:
-      HASH_GUARD_LITSTR(0x3174CCE00BFB9FFELL, NAMSTR(s_sys_ss0bfb9ffe, "fullEndElement")) {
-        mcp.ci = &c_XMLWriter::ci_fullendelement;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 127:
-      HASH_GUARD_LITSTR(0x6A8CC27A7F0466FFLL, NAMSTR(s_sys_ss7f0466ff, "startComment")) {
-        mcp.ci = &c_XMLWriter::ci_startcomment;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_XMLWriter *c_XMLWriter::create() {
   CountableHelper h(this);
@@ -27973,25 +25425,8 @@ bool c_DOMException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_Exception::os_get_call_info(mcp, hash);
 }
 bool c_DOMException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMException::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMException::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_Exception::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMException *c_DOMException::create(String a0, int64 a1) {
   CountableHelper h(this);
@@ -28603,65 +26038,8 @@ bool c_DOMXPath::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_DOMXPath::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 2:
-      HASH_GUARD_LITSTR(0x144FADF6B374AB82LL, NAMSTR(s_sys_ss4c8b547e, "registerPHPFunctions")) {
-        mcp.ci = &c_DOMXPath::ci_registerphpfunctions;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMXPath::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
-        mcp.ci = &c_DOMXPath::ci___set;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss414da377, "query")) {
-        mcp.ci = &c_DOMXPath::ci_query;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x47ACFB6D8681B0E8LL, NAMSTR(s_sys_ss797e4f18, "registerNamespace")) {
-        mcp.ci = &c_DOMXPath::ci_registernamespace;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMXPath::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x2443593B6F3C912FLL, NAMSTR(s_sys_ss6f3c912f, "evaluate")) {
-        mcp.ci = &c_DOMXPath::ci_evaluate;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
-        mcp.ci = &c_DOMXPath::ci___get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMXPath *c_DOMXPath::create(Variant a0) {
   CountableHelper h(this);
@@ -29371,81 +26749,8 @@ bool c_SoapServer::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_SoapServer::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 3:
-      HASH_GUARD_LITSTR(0x758A4E04590FE203LL, NAMSTR(s_sys_ss590fe203, "fault")) {
-        mcp.ci = &c_SoapServer::ci_fault;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x5E77DD94E0A69328LL, NAMSTR(s_sys_ss1f596cd8, "setpersistence")) {
-        mcp.ci = &c_SoapServer::ci_setpersistence;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1dd0e851_1, "getfunctions")) {
-        mcp.ci = &c_SoapServer::ci_getfunctions;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x5C4CA333F4541532LL, NAMSTR(s_sys_ss0babeace, "handle")) {
-        mcp.ci = &c_SoapServer::ci_handle;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_SoapServer::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x597B151CC4F70834LL, NAMSTR(s_sys_ss3b08f7cc, "setclass")) {
-        mcp.ci = &c_SoapServer::ci_setclass;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 25:
-      HASH_GUARD_LITSTR(0x559622F84FE626B9LL, NAMSTR(s_sys_ss4fe626b9, "setobject")) {
-        mcp.ci = &c_SoapServer::ci_setobject;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x278B0E6CCA74963ELL, NAMSTR(s_sys_ss358b69c2, "addsoapheader")) {
-        mcp.ci = &c_SoapServer::ci_addsoapheader;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x48B5852A397D2D9FLL, NAMSTR(s_sys_ss397d2d9f, "addfunction")) {
-        mcp.ci = &c_SoapServer::ci_addfunction;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_SoapServer::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_SoapServer *c_SoapServer::create(Variant a0, Array a1) {
   CountableHelper h(this);
@@ -30731,152 +28036,8 @@ bool c_DOMNode::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_DOMNode::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 63) {
-    case 3:
-      HASH_GUARD_LITSTR(0x69797649716AE343LL, NAMSTR(s_sys_ss716ae343, "getNodePath")) {
-        mcp.ci = &c_DOMNode::ci_getnodepath;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x77570221C582ED8ALL, NAMSTR(s_sys_ss3a7d1276, "c14n")) {
-        mcp.ci = &c_DOMNode::ci_c14n;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 14:
-      HASH_GUARD_LITSTR(0x1C51CE3C2356D08ELL, NAMSTR(s_sys_ss2356d08e, "replaceChild")) {
-        mcp.ci = &c_DOMNode::ci_replacechild;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0B44A59A023E75CFLL, NAMSTR(s_sys_ss023e75cf, "appendChild")) {
-        mcp.ci = &c_DOMNode::ci_appendchild;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
-        mcp.ci = &c_DOMNode::ci___get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x4F615934A04E3092LL, NAMSTR(s_sys_ss5fb1cf6e, "cloneNode")) {
-        mcp.ci = &c_DOMNode::ci_clonenode;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
-        mcp.ci = &c_DOMNode::ci___set;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x58F8D846AF9E5D18LL, NAMSTR(s_sys_ss5061a2e8, "getLineNo")) {
-        mcp.ci = &c_DOMNode::ci_getlineno;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x11A2D4B742CB6C5ALL, NAMSTR(s_sys_ss42cb6c5a, "normalize")) {
-        mcp.ci = &c_DOMNode::ci_normalize;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 29:
-      HASH_GUARD_LITSTR(0x28D1E151A83B8F5DLL, NAMSTR(s_sys_ss57c470a3, "lookupNamespaceUri")) {
-        mcp.ci = &c_DOMNode::ci_lookupnamespaceuri;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x72044C28B65364DDLL, NAMSTR(s_sys_ss49ac9b23, "removeChild")) {
-        mcp.ci = &c_DOMNode::ci_removechild;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMNode::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 33:
-      HASH_GUARD_LITSTR(0x599DE23996CB7D61LL, NAMSTR(s_sys_ss6934829f, "lookupPrefix")) {
-        mcp.ci = &c_DOMNode::ci_lookupprefix;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 36:
-      HASH_GUARD_LITSTR(0x643EFC8E9378F664LL, NAMSTR(s_sys_ss6c87099c, "isDefaultNamespace")) {
-        mcp.ci = &c_DOMNode::ci_isdefaultnamespace;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 47:
-      HASH_GUARD_LITSTR(0x102549E9CA2EC6EFLL, NAMSTR(s_sys_ss35d13911, "isSameNode")) {
-        mcp.ci = &c_DOMNode::ci_issamenode;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 49:
-      HASH_GUARD_LITSTR(0x3CFA6EECF6F5AEB1LL, NAMSTR(s_sys_ss090a514f, "hasAttributes")) {
-        mcp.ci = &c_DOMNode::ci_hasattributes;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 51:
-      HASH_GUARD_LITSTR(0x076FF0CF9185C433LL, NAMSTR(s_sys_ss6e7a3bcd, "insertBefore")) {
-        mcp.ci = &c_DOMNode::ci_insertbefore;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMNode::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 53:
-      HASH_GUARD_LITSTR(0x1D1768A6CF365A75LL, NAMSTR(s_sys_ss30c9a58b, "c14nfile")) {
-        mcp.ci = &c_DOMNode::ci_c14nfile;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 58:
-      HASH_GUARD_LITSTR(0x279AA1B214B7677ALL, NAMSTR(s_sys_ss14b7677a, "isSupported")) {
-        mcp.ci = &c_DOMNode::ci_issupported;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x5F63574EA50595FALL, NAMSTR(s_sys_ss5afa6a06, "hasChildNodes")) {
-        mcp.ci = &c_DOMNode::ci_haschildnodes;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMNode *c_DOMNode::create() {
   CountableHelper h(this);
@@ -32853,239 +30014,8 @@ bool c_DOMDocument::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_DOMNode::os_get_call_info(mcp, hash);
 }
 bool c_DOMDocument::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 127) {
-    case 5:
-      HASH_GUARD_LITSTR(0x515FE7746601E385LL, NAMSTR(s_sys_ss6601e385, "getElementById")) {
-        mcp.ci = &c_DOMDocument::ci_getelementbyid;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x142A28F8CE4A4E8ALL, NAMSTR(s_sys_ss31b5b176, "xinclude")) {
-        mcp.ci = &c_DOMDocument::ci_xinclude;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 13:
-      HASH_GUARD_LITSTR(0x0D128C363EBF7F0DLL, NAMSTR(s_sys_ss3ebf7f0d, "createCDATASection")) {
-        mcp.ci = &c_DOMDocument::ci_createcdatasection;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
-        mcp.ci = &c_DOMDocument::ci___get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x69C6F7D584EC5011LL, NAMSTR(s_sys_ss7b13afef, "schemaValidateSource")) {
-        mcp.ci = &c_DOMDocument::ci_schemavalidatesource;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x04F8F7CEA46D0514LL, NAMSTR(s_sys_ss5b92faec, "save")) {
-        mcp.ci = &c_DOMDocument::ci_save;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
-        mcp.ci = &c_DOMDocument::ci___set;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x2FC58024A75AEB15LL, NAMSTR(s_sys_ss58a514eb, "createAttributens")) {
-        mcp.ci = &c_DOMDocument::ci_createattributens;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x1A78385D7CD10A1CLL, NAMSTR(s_sys_ss7cd10a1c, "relaxNGValidate")) {
-        mcp.ci = &c_DOMDocument::ci_relaxngvalidate;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x1B0F4D437C8404A2LL, NAMSTR(s_sys_ss7c8404a2, "loadHTML")) {
-        mcp.ci = &c_DOMDocument::ci_loadhtml;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x4C40B0F935B39FA2LL, NAMSTR(s_sys_ss35b39fa2, "createElement")) {
-        mcp.ci = &c_DOMDocument::ci_createelement;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 44:
-      HASH_GUARD_LITSTR(0x1304C35F6E006FACLL, NAMSTR(s_sys_ss6e006fac, "relaxNGValidateSource")) {
-        mcp.ci = &c_DOMDocument::ci_relaxngvalidatesource;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x2BFDE9CF0FE9A82CLL, NAMSTR(s_sys_ss0fe9a82c, "createAttribute")) {
-        mcp.ci = &c_DOMDocument::ci_createattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 47:
-      HASH_GUARD_LITSTR(0x4A6C6D9AB88CD42FLL, NAMSTR(s_sys_ss47732bd1, "importNode")) {
-        mcp.ci = &c_DOMDocument::ci_importnode;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x5FE94CA513F14AAFLL, NAMSTR(s_sys_ss13f14aaf, "loadHTMLFile")) {
-        mcp.ci = &c_DOMDocument::ci_loadhtmlfile;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 49:
-      HASH_GUARD_LITSTR(0x20E2B2FD2B7AE431LL, NAMSTR(s_sys_ss2b7ae431, "loadXML")) {
-        mcp.ci = &c_DOMDocument::ci_loadxml;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 50:
-      HASH_GUARD_LITSTR(0x7A9C4709CAD09832LL, NAMSTR(s_sys_ss352f67ce, "createEntityReference")) {
-        mcp.ci = &c_DOMDocument::ci_createentityreference;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x1CA408E02262F737LL, NAMSTR(s_sys_ss2262f737, "validate")) {
-        mcp.ci = &c_DOMDocument::ci_validate;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 71:
-      HASH_GUARD_LITSTR(0x29C79E90C6FCC0C7LL, NAMSTR(s_sys_ss39033f39, "createComment")) {
-        mcp.ci = &c_DOMDocument::ci_createcomment;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 72:
-      HASH_GUARD_LITSTR(0x7EB8C68BABDC5648LL, NAMSTR(s_sys_ss5423a9b8, "schemaValidate")) {
-        mcp.ci = &c_DOMDocument::ci_schemavalidate;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 74:
-      HASH_GUARD_LITSTR(0x3FFA3F55ECAB93CALL, NAMSTR(s_sys_ss13546c36, "getElementsByTagName")) {
-        mcp.ci = &c_DOMDocument::ci_getelementsbytagname;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x1A9CC561CA4817CALL, NAMSTR(s_sys_ss35b7e836, "getElementsByTagNameNS")) {
-        mcp.ci = &c_DOMDocument::ci_getelementsbytagnamens;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 77:
-      HASH_GUARD_LITSTR(0x35C0FF513ED3054DLL, NAMSTR(s_sys_ss3ed3054d, "saveHTMLFile")) {
-        mcp.ci = &c_DOMDocument::ci_savehtmlfile;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 83:
-      HASH_GUARD_LITSTR(0x21F3F1C9058310D3LL, NAMSTR(s_sys_ss058310d3, "saveHTML")) {
-        mcp.ci = &c_DOMDocument::ci_savehtml;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMDocument::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x79B7A5774A0943DFLL, NAMSTR(s_sys_ss4a0943df, "load")) {
-        mcp.ci = &c_DOMDocument::ci_load;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 101:
-      HASH_GUARD_LITSTR(0x26D66F56DDDC32E5LL, NAMSTR(s_sys_ss2223cd1b, "saveXML")) {
-        mcp.ci = &c_DOMDocument::ci_savexml;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 106:
-      HASH_GUARD_LITSTR(0x0AC931EAB2FE3D6ALL, NAMSTR(s_sys_ss4d01c296, "normalizeDocument")) {
-        mcp.ci = &c_DOMDocument::ci_normalizedocument;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 107:
-      HASH_GUARD_LITSTR(0x05EA36F416B7EBEBLL, NAMSTR(s_sys_ss16b7ebeb, "createElementNS")) {
-        mcp.ci = &c_DOMDocument::ci_createelementns;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 109:
-      HASH_GUARD_LITSTR(0x2A99431FC6E7BA6DLL, NAMSTR(s_sys_ss39184593, "createProcessingInstruction")) {
-        mcp.ci = &c_DOMDocument::ci_createprocessinginstruction;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 115:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMDocument::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 117:
-      HASH_GUARD_LITSTR(0x615771958E1EB375LL, NAMSTR(s_sys_ss71e14c8b, "registerNodeClass")) {
-        mcp.ci = &c_DOMDocument::ci_registernodeclass;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 120:
-      HASH_GUARD_LITSTR(0x44FD8C24F4EA46F8LL, NAMSTR(s_sys_ss0b15b908, "createDocumentFragment")) {
-        mcp.ci = &c_DOMDocument::ci_createdocumentfragment;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 123:
-      HASH_GUARD_LITSTR(0x6056A5BB9855D7FBLL, NAMSTR(s_sys_ss67aa2805, "createTextNode")) {
-        mcp.ci = &c_DOMDocument::ci_createtextnode;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DOMNode::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMDocument *c_DOMDocument::create(String a0, String a1) {
   CountableHelper h(this);
@@ -33345,25 +30275,8 @@ bool c_LibXMLError::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_LibXMLError::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_LibXMLError::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_LibXMLError::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_LibXMLError *c_LibXMLError::create() {
   CountableHelper h(this);
@@ -33675,32 +30588,8 @@ bool c_SoapFault::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_Exception::os_get_call_info(mcp, hash);
 }
 bool c_SoapFault::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
-    case 3:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed_1, "__tostring")) {
-        mcp.ci = &c_SoapFault::ci___tostring;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_SoapFault::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_SoapFault::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_Exception::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_SoapFault *c_SoapFault::create(Variant a0, String a1, String a2, Variant a3, String a4, Variant a5) {
   CountableHelper h(this);
@@ -35136,157 +32025,8 @@ bool c_DOMElement::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_DOMNode::os_get_call_info(mcp, hash);
 }
 bool c_DOMElement::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 63) {
-    case 10:
-      HASH_GUARD_LITSTR(0x3FFA3F55ECAB93CALL, NAMSTR(s_sys_ss13546c36, "getElementsByTagName")) {
-        mcp.ci = &c_DOMElement::ci_getelementsbytagname;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x1A9CC561CA4817CALL, NAMSTR(s_sys_ss35b7e836, "getElementsByTagNameNS")) {
-        mcp.ci = &c_DOMElement::ci_getelementsbytagnamens;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x29D272CBBC0CDA4ALL, NAMSTR(s_sys_ss43f325b6, "setIDAttributeNode")) {
-        mcp.ci = &c_DOMElement::ci_setidattributenode;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss44f4ab8a_1, "setAttribute")) {
-        mcp.ci = &c_DOMElement::ci_setattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
-        mcp.ci = &c_DOMElement::ci___get;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 16:
-      HASH_GUARD_LITSTR(0x710986B01E1A0890LL, NAMSTR(s_sys_ss1e1a0890, "removeAttributeNS")) {
-        mcp.ci = &c_DOMElement::ci_removeattributens;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x31426AC6A851EE11LL, NAMSTR(s_sys_ss57ae11ef, "setIDAttributeNS")) {
-        mcp.ci = &c_DOMElement::ci_setidattributens;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x482E3873306253D1LL, NAMSTR(s_sys_ss306253d1, "setAttributeNodeNS")) {
-        mcp.ci = &c_DOMElement::ci_setattributenodens;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
-        mcp.ci = &c_DOMElement::ci___set;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x5EF7C3A45311D955LL, NAMSTR(s_sys_ss5311d955, "hasAttributeNS")) {
-        mcp.ci = &c_DOMElement::ci_hasattributens;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 22:
-      HASH_GUARD_LITSTR(0x6F83EC29E110D616LL, NAMSTR(s_sys_ss1eef29ea, "setIDAttribute")) {
-        mcp.ci = &c_DOMElement::ci_setidattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 23:
-      HASH_GUARD_LITSTR(0x62A40E71FAF19157LL, NAMSTR(s_sys_ss050e6ea9, "setAttributeNS")) {
-        mcp.ci = &c_DOMElement::ci_setattributens;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x640FA60DDC80EC18LL, NAMSTR(s_sys_ss237f13e8, "getAttributeNodeNS")) {
-        mcp.ci = &c_DOMElement::ci_getattributenodens;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 25:
-      HASH_GUARD_LITSTR(0x34E103E06D3F0899LL, NAMSTR(s_sys_ss6d3f0899, "getAttributeNS")) {
-        mcp.ci = &c_DOMElement::ci_getattributens;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x606827EF5CF34C5CLL, NAMSTR(s_sys_ss5cf34c5c, "setAttributeNode")) {
-        mcp.ci = &c_DOMElement::ci_setattributenode;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DOMElement::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 40:
-      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss6612fc28_1, "getAttribute")) {
-        mcp.ci = &c_DOMElement::ci_getattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x1BFDB4272EA150EALL, NAMSTR(s_sys_ss2ea150ea, "removeAttributeNode")) {
-        mcp.ci = &c_DOMElement::ci_removeattributenode;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 44:
-      HASH_GUARD_LITSTR(0x6471DF8BB944FFECLL, NAMSTR(s_sys_ss46bb0014, "hasAttribute")) {
-        mcp.ci = &c_DOMElement::ci_hasattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 47:
-      HASH_GUARD_LITSTR(0x47B96C0FC62E1E2FLL, NAMSTR(s_sys_ss39d1e1d1, "removeAttribute")) {
-        mcp.ci = &c_DOMElement::ci_removeattribute;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
-        mcp.ci = &c_DOMElement::ci___destruct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 62:
-      HASH_GUARD_LITSTR(0x343DF562BB5AB1FELL, NAMSTR(s_sys_ss44a54e02, "getAttributeNode")) {
-        mcp.ci = &c_DOMElement::ci_getattributenode;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DOMNode::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DOMElement *c_DOMElement::create(String a0, String a1, String a2) {
   CountableHelper h(this);

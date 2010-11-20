@@ -324,39 +324,8 @@ bool c_Directory::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_Directory::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
-    case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
-        mcp.ci = &c_Directory::ci_close;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_ss1b610cff, "read")) {
-        mcp.ci = &c_Directory::ci_read;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 2:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
-        mcp.ci = &c_Directory::ci_rewind;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_Directory::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_Directory *c_Directory::create(Variant v_path) {
   CountableHelper h(this);

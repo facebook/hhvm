@@ -1211,7 +1211,22 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     outputCPPMethodInvokeTableSupport(cg, ar, funcs, m_functions, false);
     outputCPPMethodInvokeTableSupport(cg, ar, funcs, m_functions, true);
     outputCPPJumpTable(cg, ar, true, dynamicObject, CallInfo);
-    outputCPPJumpTable(cg, ar, false, dynamicObject, CallInfo);
+    if (derivesFromRedeclaring()) {
+      outputCPPJumpTable(cg, ar, false, dynamicObject, CallInfo);
+    } else {
+      cg_indentBegin("bool %s%s::%sget_call_info%s(MethodCallPackage &mcp, "
+                     "%sint64 hash) {\n",
+                     Option::ClassPrefix, getId(cg).c_str(),
+                     Option::ObjectPrefix,
+                     Option::UseMethodIndex ? "_with_index" : "",
+                     Option::UseMethodIndex ? "MethodIndex mi, " : "");
+      cg_printf("mcp.obj = this;\n");
+      cg_printf("return %sget_call_info%s(mcp, %shash);\n",
+                Option::ObjectStaticPrefix,
+                Option::UseMethodIndex ? "_with_index" : "",
+                Option::UseMethodIndex ? "mi, " : "");
+      cg_indentEnd("}\n");
+    }
   }
 
   // Create method

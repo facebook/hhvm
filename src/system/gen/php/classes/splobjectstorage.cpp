@@ -583,74 +583,8 @@ bool c_SplObjectStorage::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_SplObjectStorage::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
-        mcp.ci = &c_SplObjectStorage::ci_valid;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
-        mcp.ci = &c_SplObjectStorage::ci_rewind;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x62DD82BFEB88A4ACLL, NAMSTR(s_sys_ss14775b54, "attach")) {
-        mcp.ci = &c_SplObjectStorage::ci_attach;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 16:
-      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss65104d10, "count")) {
-        mcp.ci = &c_SplObjectStorage::ci_count;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x61B94551FA22D290LL, NAMSTR(s_sys_ss05dd2d70, "contains")) {
-        mcp.ci = &c_SplObjectStorage::ci_contains;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
-        mcp.ci = &c_SplObjectStorage::ci_key;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x3C7D0AC0EBA9A695LL, NAMSTR(s_sys_ss1456596b, "detach")) {
-        mcp.ci = &c_SplObjectStorage::ci_detach;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
-        mcp.ci = &c_SplObjectStorage::ci_next;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
-        mcp.ci = &c_SplObjectStorage::ci_current;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_SplObjectStorage = {
   c_SplObjectStorage::os_getInit,

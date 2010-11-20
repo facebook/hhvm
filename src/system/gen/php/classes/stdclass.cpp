@@ -104,8 +104,8 @@ bool c_stdClass::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_stdClass::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_stdClass = {
   c_stdClass::os_getInit,
@@ -194,8 +194,8 @@ bool c___PHP_Incomplete_Class::os_get_call_info(MethodCallPackage &mcp, int64 ha
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c___PHP_Incomplete_Class::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
   c___PHP_Incomplete_Class::os_getInit,

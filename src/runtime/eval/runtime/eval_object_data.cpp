@@ -221,6 +221,7 @@ bool EvalObjectData::o_get_call_info(MethodCallPackage &mcp,
       return DynamicObjectData::o_get_call_info(mcp, hash);
     }
   } else {
+    mcp.obj = this;
     return ObjectData::o_get_call_info(mcp, hash);
   }
 
@@ -242,6 +243,7 @@ bool EvalObjectData::o_get_call_info_ex(const char *clsname,
       const ClassEvalState::MethodTable &meths = m_cls.getMethodTable();
       if (meths.find(mcp.name.c_str()) == meths.end()) {
         // Absolutely nothing in the hierarchy has this method
+        mcp.obj = this;
         return ObjectData::o_get_call_info(mcp, hash);
       }
     }

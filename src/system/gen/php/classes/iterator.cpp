@@ -1228,159 +1228,8 @@ bool c_ArrayIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_ArrayIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 63) {
-    case 0:
-      HASH_GUARD_LITSTR(0x3E6BCFB9742FC700LL, NAMSTR(s_sys_ss742fc700, "offsetExists")) {
-        mcp.ci = &c_ArrayIterator::ci_offsetexists;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 2:
-      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss2dc69ec2, "append")) {
-        mcp.ci = &c_ArrayIterator::ci_append;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
-        mcp.ci = &c_ArrayIterator::ci_valid;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x4842AF70A71BE6C4LL, NAMSTR(s_sys_ss58e4193c, "uksort")) {
-        mcp.ci = &c_ArrayIterator::ci_uksort;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 6:
-      HASH_GUARD_LITSTR(0x234F6A0A486E8646LL, NAMSTR(s_sys_ss486e8646, "natcasesort")) {
-        mcp.ci = &c_ArrayIterator::ci_natcasesort;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x2FC3A6941D522E0ALL, NAMSTR(s_sys_ss1d522e0a, "setFlags")) {
-        mcp.ci = &c_ArrayIterator::ci_setflags;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 16:
-      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss65104d10, "count")) {
-        mcp.ci = &c_ArrayIterator::ci_count;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
-        mcp.ci = &c_ArrayIterator::ci_key;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x61D11ECEF4404498LL, NAMSTR(s_sys_ss0bbfbb68, "offsetGet")) {
-        mcp.ci = &c_ArrayIterator::ci_offsetget;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x70448A629A74FB18LL, NAMSTR(s_sys_ss658b04e8, "ksort")) {
-        mcp.ci = &c_ArrayIterator::ci_ksort;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
-        mcp.ci = &c_ArrayIterator::ci_current;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_ArrayIterator::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 32:
-      HASH_GUARD_LITSTR(0x6FACBD7F02B6FD60LL, NAMSTR(s_sys_ss02b6fd60, "uasort")) {
-        mcp.ci = &c_ArrayIterator::ci_uasort;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 33:
-      HASH_GUARD_LITSTR(0x0E210679B2DFD461LL, NAMSTR(s_sys_ss4d202b9f, "getArrayCopy")) {
-        mcp.ci = &c_ArrayIterator::ci_getarraycopy;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x27E7DBA875AD17E1LL, NAMSTR(s_sys_ss75ad17e1, "getFlags")) {
-        mcp.ci = &c_ArrayIterator::ci_getflags;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 39:
-      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
-        mcp.ci = &c_ArrayIterator::ci_seek;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
-        mcp.ci = &c_ArrayIterator::ci_rewind;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 46:
-      HASH_GUARD_LITSTR(0x790B7C44A3442BEELL, NAMSTR(s_sys_ss5cbbd412, "asort")) {
-        mcp.ci = &c_ArrayIterator::ci_asort;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 51:
-      HASH_GUARD_LITSTR(0x7DB9D839ACE0DEB3LL, NAMSTR(s_sys_ss531f214d, "natsort")) {
-        mcp.ci = &c_ArrayIterator::ci_natsort;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 56:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
-        mcp.ci = &c_ArrayIterator::ci_next;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x0957F693A48AF738LL, NAMSTR(s_sys_ss5b7508c8, "offsetSet")) {
-        mcp.ci = &c_ArrayIterator::ci_offsetset;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 58:
-      HASH_GUARD_LITSTR(0x08329980E6369ABALL, NAMSTR(s_sys_ss19c96546, "offsetUnset")) {
-        mcp.ci = &c_ArrayIterator::ci_offsetunset;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_ArrayIterator *c_ArrayIterator::create(Variant v_array, Variant v_flags //  = 0LL
 ) {
@@ -2202,74 +2051,8 @@ bool c_AppendIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_AppendIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 2:
-      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss2dc69ec2, "append")) {
-        mcp.ci = &c_AppendIterator::ci_append;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
-        mcp.ci = &c_AppendIterator::ci_valid;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x3106F858B09C7424LL, NAMSTR(s_sys_ss4f638bdc, "getInnerIterator")) {
-        mcp.ci = &c_AppendIterator::ci_getinneriterator;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
-        mcp.ci = &c_AppendIterator::ci_rewind;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x5D73364F53CEEB6CLL, NAMSTR(s_sys_ss53ceeb6c, "__call")) {
-        mcp.ci = &c_AppendIterator::ci___call;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
-        mcp.ci = &c_AppendIterator::ci_key;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
-        mcp.ci = &c_AppendIterator::ci_next;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
-        mcp.ci = &c_AppendIterator::ci_current;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_AppendIterator::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_AppendIterator *c_AppendIterator::create() {
   CountableHelper h(this);
@@ -2565,7 +2348,7 @@ Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
     tmp1.set(tmp2);
     tmp1.set(v_func);
     const Array &tmp3((Array(tmp1)));
-    return x_call_user_func_array(tmp3, toArray(v_params));
+    return x_call_user_func_array(VarNR(tmp3), toArray(v_params));
   }
 }
 namespace hphp_impl_splitter {}
@@ -3253,97 +3036,8 @@ bool c_RecursiveDirectoryIterator::os_get_call_info(MethodCallPackage &mcp, int6
   return c_DirectoryIterator::os_get_call_info(mcp, hash);
 }
 bool c_RecursiveDirectoryIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_valid;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_seek;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 9:
-      HASH_GUARD_LITSTR(0x430BA7B88ED3A809LL, NAMSTR(s_sys_ss712c57f7, "getSubPathname")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_getsubpathname;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_rewind;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x732EC1BDA8EC520FLL, NAMSTR(s_sys_ss5713adf1, "getChildren")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_getchildren;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_key;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci___tostring;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x40044334DA397C15LL, NAMSTR(s_sys_ss25c683eb, "hasChildren")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_haschildren;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_next;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 27:
-      HASH_GUARD_LITSTR(0x7CF26A0E76B5E27BLL, NAMSTR(s_sys_ss76b5e27b, "getSubPath")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_getsubpath;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci_current;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_RecursiveDirectoryIterator::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_DirectoryIterator::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_RecursiveDirectoryIterator *c_RecursiveDirectoryIterator::create(Variant v_path, Variant v_flags //  = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
 ) {
@@ -3438,7 +3132,7 @@ void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags
       {
         {
           p_UnexpectedValueException tmp3 = NEWOBJ(c_UnexpectedValueException)();
-          throw_exception((tmp3->create(concat3(NAMSTR(s_sys_ss35f9d4be, "RecursiveDirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ss0c10eb92, "): failed to open dir"))), tmp3));
+          throw_exception((tmp3->create(VarNR(concat3(NAMSTR(s_sys_ss35f9d4be, "RecursiveDirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ss0c10eb92, "): failed to open dir")))), tmp3));
         }
       }
     }
@@ -4023,76 +3717,8 @@ bool c_DirectoryIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_SplFileInfo::os_get_call_info(mcp, hash);
 }
 bool c_DirectoryIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
-        mcp.ci = &c_DirectoryIterator::ci_valid;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
-        mcp.ci = &c_DirectoryIterator::ci_seek;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
-        mcp.ci = &c_DirectoryIterator::ci_rewind;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
-        mcp.ci = &c_DirectoryIterator::ci_key;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        mcp.ci = &c_DirectoryIterator::ci___tostring;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x08D1EA51B78DA5F4LL, NAMSTR(s_sys_ss48725a0c, "isDot")) {
-        mcp.ci = &c_DirectoryIterator::ci_isdot;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
-        mcp.ci = &c_DirectoryIterator::ci_next;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
-        mcp.ci = &c_DirectoryIterator::ci_current;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_DirectoryIterator::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_SplFileInfo::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_DirectoryIterator *c_DirectoryIterator::create(Variant v_path) {
   CountableHelper h(this);
@@ -4170,7 +3796,7 @@ void c_DirectoryIterator::t___construct(Variant v_path) {
       {
         {
           p_UnexpectedValueException tmp3 = NEWOBJ(c_UnexpectedValueException)();
-          throw_exception((tmp3->create(concat3(NAMSTR(s_sys_ss3c6754b7, "DirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ss0c10eb92, "): failed to open dir"))), tmp3));
+          throw_exception((tmp3->create(VarNR(concat3(NAMSTR(s_sys_ss3c6754b7, "DirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ss0c10eb92, "): failed to open dir")))), tmp3));
         }
       }
     }
@@ -4670,60 +4296,8 @@ bool c_RecursiveIteratorIterator::os_get_call_info(MethodCallPackage &mcp, int64
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_RecursiveIteratorIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
-    case 1:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
-        mcp.ci = &c_RecursiveIteratorIterator::ci_key;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
-        mcp.ci = &c_RecursiveIteratorIterator::ci_valid;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x3106F858B09C7424LL, NAMSTR(s_sys_ss4f638bdc, "getInnerIterator")) {
-        mcp.ci = &c_RecursiveIteratorIterator::ci_getinneriterator;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
-        mcp.ci = &c_RecursiveIteratorIterator::ci_next;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
-        mcp.ci = &c_RecursiveIteratorIterator::ci_rewind;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
-        mcp.ci = &c_RecursiveIteratorIterator::ci_current;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_RecursiveIteratorIterator::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_RecursiveIteratorIterator *c_RecursiveIteratorIterator::create(Variant v_iterator, Variant v_mode //  = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */
 , Variant v_flags //  = 0LL
@@ -4948,8 +4522,8 @@ bool c_FilterIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_FilterIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_FilterIterator = {
   c_FilterIterator::os_getInit,

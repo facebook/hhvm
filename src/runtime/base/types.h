@@ -273,7 +273,7 @@ struct MethodIndexHMap {
     : name(name), methodIndex(methodIndex) {}
   const char* name;
   MethodIndex methodIndex;
-  static MethodIndex methodIndexExists(const char * methodName);
+  static MethodIndex methodIndexExists(CStrRef methodName);
   static void initialize(bool useSystem);
 };
 
@@ -287,11 +287,11 @@ extern const MethodIndexHMap g_methodIndexHMapSys[];
 extern const unsigned g_methodIndexReverseCallIndexSys[];
 extern const char * g_methodIndexReverseIndexSys[];
 
-inline MethodIndex methodIndexExists(const char * methodName) {
+inline MethodIndex methodIndexExists(CStrRef methodName) {
   return MethodIndexHMap::methodIndexExists(methodName);
 }
 
-inline MethodIndex methodIndexLookup(const char * methodName) {
+inline MethodIndex methodIndexLookup(CStrRef methodName) {
   MethodIndex methodIndex = MethodIndexHMap::methodIndexExists(methodName);
   ASSERT(!methodIndex.isFail());
   return methodIndex;

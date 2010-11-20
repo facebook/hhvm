@@ -18,6 +18,7 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/externals.h>
+#include <runtime/base/builtin_functions.h>
 #include <util/util.h>
 
 namespace HPHP {
@@ -147,6 +148,7 @@ bool DynamicObjectData::o_get_call_info(MethodCallPackage &info,
   if (!parent.isNull()) {
     return parent->o_get_call_info(info, hash);
   } else {
+    info.obj = this;
     return ObjectData::o_get_call_info(info, hash);
   }
 }

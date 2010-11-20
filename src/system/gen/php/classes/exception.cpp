@@ -108,8 +108,8 @@ bool c_UnexpectedValueException::os_get_call_info(MethodCallPackage &mcp, int64 
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_UnexpectedValueException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_RuntimeException::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_UnexpectedValueException = {
   c_UnexpectedValueException::os_getInit,
@@ -203,8 +203,8 @@ bool c_OverflowException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_OverflowException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_RuntimeException::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_OverflowException = {
   c_OverflowException::os_getInit,
@@ -298,8 +298,8 @@ bool c_OutOfBoundsException::os_get_call_info(MethodCallPackage &mcp, int64 hash
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_OutOfBoundsException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_RuntimeException::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_OutOfBoundsException = {
   c_OutOfBoundsException::os_getInit,
@@ -392,8 +392,8 @@ bool c_LogicException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_Exception::os_get_call_info(mcp, hash);
 }
 bool c_LogicException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_Exception::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_LogicException = {
   c_LogicException::os_getInit,
@@ -487,8 +487,8 @@ bool c_RangeException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_RangeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_RuntimeException::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_RangeException = {
   c_RangeException::os_getInit,
@@ -584,8 +584,8 @@ bool c_InvalidArgumentException::os_get_call_info(MethodCallPackage &mcp, int64 
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_InvalidArgumentException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_LogicException::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_InvalidArgumentException = {
   c_InvalidArgumentException::os_getInit,
@@ -677,8 +677,8 @@ bool c_UnderflowException::os_get_call_info(MethodCallPackage &mcp, int64 hash) 
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_UnderflowException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_RuntimeException::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_UnderflowException = {
   c_UnderflowException::os_getInit,
@@ -772,8 +772,8 @@ bool c_OutOfRangeException::os_get_call_info(MethodCallPackage &mcp, int64 hash)
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_OutOfRangeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_LogicException::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_OutOfRangeException = {
   c_OutOfRangeException::os_getInit,
@@ -872,8 +872,8 @@ bool c_BadMethodCallException::os_get_call_info(MethodCallPackage &mcp, int64 ha
   return c_BadFunctionCallException::os_get_call_info(mcp, hash);
 }
 bool c_BadMethodCallException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_BadFunctionCallException::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_BadMethodCallException = {
   c_BadMethodCallException::os_getInit,
@@ -964,8 +964,8 @@ bool c_RuntimeException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_Exception::os_get_call_info(mcp, hash);
 }
 bool c_RuntimeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_Exception::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_RuntimeException = {
   c_RuntimeException::os_getInit,
@@ -1537,76 +1537,8 @@ bool c_Exception::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_Exception::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        mcp.ci = &c_Exception::ci___init__;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        mcp.ci = &c_Exception::ci_getline;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        mcp.ci = &c_Exception::ci_gettraceasstring;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        mcp.ci = &c_Exception::ci_getcode;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        mcp.ci = &c_Exception::ci_getmessage;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        mcp.ci = &c_Exception::ci___tostring;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        mcp.ci = &c_Exception::ci_gettrace;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        mcp.ci = &c_Exception::ci_getfile;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_Exception::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_Exception *c_Exception::create(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
@@ -1872,7 +1804,7 @@ String c_Exception::t___tostring() {
   {
     StringBuffer tmp1_buf;
     tmp1_buf.append("exception '", 11);
-    tmp1_buf.append(toString(x_get_class(GET_THIS())));
+    tmp1_buf.append(toString(x_get_class(VarNR(GET_THIS()))));
     tmp1_buf.append("' with message '", 16);
     tmp1_buf.append(toString(t_getmessage()));
     tmp1_buf.append("' in ", 5);
@@ -2124,25 +2056,8 @@ bool c_ErrorException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_Exception::os_get_call_info(mcp, hash);
 }
 bool c_ErrorException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  if (hash < 0) hash = s->hash();
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        mcp.ci = &c_ErrorException::ci___construct;
-        mcp.obj = this;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ss58af461f, "getSeverity")) {
-        mcp.ci = &c_ErrorException::ci_getseverity;
-        mcp.obj = this;
-        return true;
-      }
-      break;
-    default:
-      break;
-  }
-  return c_Exception::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 c_ErrorException *c_ErrorException::create(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
@@ -2394,8 +2309,8 @@ bool c_BadFunctionCallException::os_get_call_info(MethodCallPackage &mcp, int64 
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_BadFunctionCallException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_LogicException::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_BadFunctionCallException = {
   c_BadFunctionCallException::os_getInit,
@@ -2489,8 +2404,8 @@ bool c_LengthException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_LengthException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_LogicException::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_LengthException = {
   c_LengthException::os_getInit,
@@ -2584,8 +2499,8 @@ bool c_DomainException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_DomainException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
-  return c_LogicException::o_get_call_info(mcp, hash);
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_DomainException = {
   c_DomainException::os_getInit,

@@ -596,6 +596,7 @@ next requests.
     MemcacheKey = false
     SQL = false
     SQLTable = false
+    NetworkIO = false
 
     XSL = xsl filename
     XSLProxy = url to get the xsl file

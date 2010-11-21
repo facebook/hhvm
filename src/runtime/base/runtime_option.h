@@ -224,6 +224,7 @@ public:
   static bool EnableMemcacheKeyStats;
   static bool EnableSQLStats;
   static bool EnableSQLTableStats;
+  static bool EnableNetworkIOStatus;
   static std::string StatsXSL;
   static std::string StatsXSLProxy;
   static int StatsSlotDuration;

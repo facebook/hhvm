@@ -26929,6 +26929,21 @@ Variant ifa_php_logo_guid(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 0) return throw_toomany_arguments("php_logo_guid", 0, 1);
   return (f_php_logo_guid());
 }
+Variant i_hphp_set_iostatus_address(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(hphp_set_iostatus_address);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("hphp_set_iostatus_address", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_hphp_set_iostatus_address(arg0), null);
+  }
+}
+Variant ifa_hphp_set_iostatus_address(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("hphp_set_iostatus_address", count, 1, 1, 1);
+  return (f_hphp_set_iostatus_address(a0), null);
+}
 Variant i_time(void *extra, CArrRef params) {
   FUNCTION_INJECTION(time);
   int count __attribute__((__unused__)) = params.size();
@@ -33443,6 +33458,16 @@ Variant i_magickgetimagegreenprimary(void *extra, CArrRef params) {
 Variant ifa_magickgetimagegreenprimary(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("magickgetimagegreenprimary", count, 1, 1, 1);
   return (f_magickgetimagegreenprimary(a0));
+}
+Variant i_hphp_get_iostatus(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(hphp_get_iostatus);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("hphp_get_iostatus", 0, 1);
+  return (f_hphp_get_iostatus());
+}
+Variant ifa_hphp_get_iostatus(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("hphp_get_iostatus", 0, 1);
+  return (f_hphp_get_iostatus());
 }
 Variant i_session_start(void *extra, CArrRef params) {
   FUNCTION_INJECTION(session_start);
@@ -68351,6 +68376,22 @@ Variant ei_php_logo_guid(Eval::VariableEnvironment &env, const Eval::FunctionCal
   if (count > 0) return throw_toomany_arguments("php_logo_guid", 0, 1);
   return (x_php_logo_guid());
 }
+Variant ei_hphp_set_iostatus_address(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("hphp_set_iostatus_address", count, 1, 1, 1);
+  return (x_hphp_set_iostatus_address(a0), null);
+}
 Variant ei_time(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -76376,6 +76417,18 @@ Variant ei_magickgetimagegreenprimary(Eval::VariableEnvironment &env, const Eval
   if (count != 1) return throw_wrong_arguments("magickgetimagegreenprimary", count, 1, 1, 1);
   return (x_magickgetimagegreenprimary(a0));
 }
+Variant ei_hphp_get_iostatus(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("hphp_get_iostatus", 0, 1);
+  return (x_hphp_get_iostatus());
+}
 Variant ei_session_start(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -79648,6 +79701,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1420:
       HASH_INVOKE_FROM_EVAL(0x560C2F71978CE58CLL, shm_put_var);
       break;
+    case 1422:
+      HASH_INVOKE_FROM_EVAL(0x0012B121E023458ELL, hphp_set_iostatus_address);
+      break;
     case 1426:
       HASH_INVOKE_FROM_EVAL(0x3E9519FE856C4592LL, curl_multi_init);
       HASH_INVOKE_FROM_EVAL(0x5464E148E8A0C592LL, get_extension_funcs);
@@ -81492,6 +81548,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3920:
       HASH_INVOKE_FROM_EVAL(0x7978A278AEAFAF50LL, pixelgetmagenta);
+      break;
+    case 3923:
+      HASH_INVOKE_FROM_EVAL(0x7B965BB0B7A8EF53LL, hphp_get_iostatus);
       break;
     case 3926:
       HASH_INVOKE_FROM_EVAL(0x621590803EC88F56LL, imageline);
@@ -86090,6 +86149,7 @@ CallInfo ci_array_flip((void*)&i_array_flip, (void*)&ifa_array_flip, 1, 0, 0x000
 CallInfo ci_count((void*)&i_count, (void*)&ifa_count, 2, 0, 0x0000000000000000LL);
 CallInfo ci_lcg_value((void*)&i_lcg_value, (void*)&ifa_lcg_value, 0, 0, 0x0000000000000000LL);
 CallInfo ci_php_logo_guid((void*)&i_php_logo_guid, (void*)&ifa_php_logo_guid, 0, 0, 0x0000000000000000LL);
+CallInfo ci_hphp_set_iostatus_address((void*)&i_hphp_set_iostatus_address, (void*)&ifa_hphp_set_iostatus_address, 1, 0, 0x0000000000000000LL);
 CallInfo ci_time((void*)&i_time, (void*)&ifa_time, 0, 0, 0x0000000000000000LL);
 CallInfo ci_magickcoalesceimages((void*)&i_magickcoalesceimages, (void*)&ifa_magickcoalesceimages, 1, 0, 0x0000000000000000LL);
 CallInfo ci_pixelgetquantumcolor((void*)&i_pixelgetquantumcolor, (void*)&ifa_pixelgetquantumcolor, 1, 0, 0x0000000000000000LL);
@@ -86478,6 +86538,7 @@ CallInfo ci_imap_bodystruct((void*)&i_imap_bodystruct, (void*)&ifa_imap_bodystru
 CallInfo ci_magickmagnifyimage((void*)&i_magickmagnifyimage, (void*)&ifa_magickmagnifyimage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_is_bool((void*)&i_is_bool, (void*)&ifa_is_bool, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimagegreenprimary((void*)&i_magickgetimagegreenprimary, (void*)&ifa_magickgetimagegreenprimary, 1, 0, 0x0000000000000000LL);
+CallInfo ci_hphp_get_iostatus((void*)&i_hphp_get_iostatus, (void*)&ifa_hphp_get_iostatus, 0, 0, 0x0000000000000000LL);
 CallInfo ci_session_start((void*)&i_session_start, (void*)&ifa_session_start, 0, 0, 0x0000000000000000LL);
 CallInfo ci_filegroup((void*)&i_filegroup, (void*)&ifa_filegroup, 1, 0, 0x0000000000000000LL);
 CallInfo ci_dom_attr_is_id((void*)&i_dom_attr_is_id, (void*)&ifa_dom_attr_is_id, 1, 0, 0x0000000000000000LL);
@@ -88583,6 +88644,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1420:
       HASH_GUARD(0x560C2F71978CE58CLL, shm_put_var) {
         ci = &ci_shm_put_var;
+        return true;
+      }
+      break;
+    case 1422:
+      HASH_GUARD(0x0012B121E023458ELL, hphp_set_iostatus_address) {
+        ci = &ci_hphp_set_iostatus_address;
         return true;
       }
       break;
@@ -92447,6 +92514,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3920:
       HASH_GUARD(0x7978A278AEAFAF50LL, pixelgetmagenta) {
         ci = &ci_pixelgetmagenta;
+        return true;
+      }
+      break;
+    case 3923:
+      HASH_GUARD(0x7B965BB0B7A8EF53LL, hphp_get_iostatus) {
+        ci = &ci_hphp_get_iostatus;
         return true;
       }
       break;

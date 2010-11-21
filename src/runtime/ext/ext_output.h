@@ -70,7 +70,6 @@ inline int f_ob_get_level() {
 inline Array f_ob_get_status(bool full_status = false) {
   return g_context->obGetStatus(full_status);
 }
-Array f_hphp_get_status();
 inline String f_ob_gzhandler(CStrRef buffer, int mode) {
   throw NotSupportedException(__func__, "something that's in transport layer");
 }
@@ -96,6 +95,13 @@ inline void f_hphp_stats(CStrRef name, int64 value) {
 }
 inline int64 f_hphp_get_stats(CStrRef name) {
   return ServerStats::Get(name.data());
+}
+Array f_hphp_get_status();
+inline Array f_hphp_get_iostatus() {
+  return ServerStats::GetThreadIOStatuses();
+}
+inline void f_hphp_set_iostatus_address(CStrRef name) {
+  return ServerStats::SetThreadIOStatusAddress(name);
 }
 Variant f_hphp_get_timers(bool get_as_float = true);
 Variant f_hphp_output_global_state(bool serialize = true);

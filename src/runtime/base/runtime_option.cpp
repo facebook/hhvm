@@ -228,6 +228,7 @@ bool RuntimeOption::EnableMemcacheStats = false;
 bool RuntimeOption::EnableMemcacheKeyStats = false;
 bool RuntimeOption::EnableSQLStats = false;
 bool RuntimeOption::EnableSQLTableStats = false;
+bool RuntimeOption::EnableNetworkIOStatus = false;
 std::string RuntimeOption::StatsXSL;
 std::string RuntimeOption::StatsXSLProxy;
 int RuntimeOption::StatsSlotDuration = 10 * 60; // 10 minutes
@@ -855,6 +856,7 @@ void RuntimeOption::Load(Hdf &config) {
     EnableMemcacheKeyStats = stats["MemcacheKey"].getBool();
     EnableSQLStats = stats["SQL"].getBool();
     EnableSQLTableStats = stats["SQLTable"].getBool();
+    EnableNetworkIOStatus = stats["NetworkIO"].getBool();
 
     if (EnableStats && EnableMallocStats) {
       LeakDetectable::EnableMallocStats(true);

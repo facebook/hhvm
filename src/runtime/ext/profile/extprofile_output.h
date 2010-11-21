@@ -135,6 +135,16 @@ inline Array x_hphp_get_status() {
   return f_hphp_get_status();
 }
 
+inline Array x_hphp_get_iostatus() {
+  FUNCTION_INJECTION_BUILTIN(hphp_get_iostatus);
+  return f_hphp_get_iostatus();
+}
+
+inline void x_hphp_set_iostatus_address(CStrRef name) {
+  FUNCTION_INJECTION_BUILTIN(hphp_set_iostatus_address);
+  f_hphp_set_iostatus_address(name);
+}
+
 inline Variant x_hphp_get_timers(bool get_as_float = true) {
   FUNCTION_INJECTION_BUILTIN(hphp_get_timers);
   return f_hphp_get_timers(get_as_float);

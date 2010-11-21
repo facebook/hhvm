@@ -390,6 +390,35 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "hphp_get_iostatus",
+    'desc'   => "Returns I/O status of current thread. EnableNetworkIOStatus has to be turned on.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => VariantMap,
+      'desc'   => "Array of all I/O so far for current thread.",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "hphp_set_iostatus_address",
+    'desc'   => "Use this name, instead of IP address or URL for I/O status reporting. The name will only be effective for the upcoming I/O and it will be reset immediately after. Use logical network address for grouping network I/O by intention, instead of physical addresses.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => null,
+      'desc'   => "No value is returned.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => String,
+        'desc'   => "Specifies the logical name to replace with.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "hphp_get_timers",
     'desc'   => "Returns timestamps of different request events.",
     'flags'  =>  HasDocComment | HipHopSpecific,

@@ -60,7 +60,9 @@ public:
   static void ReportStatus(std::string &out, Format format);
 
   // io status functions
+  static void SetThreadIOStatusAddress(const char *name);
   static void SetThreadIOStatus(const char *name, const char *addr);
+  static Array GetThreadIOStatuses();
   static void StartNetworkProfile();
   static Array EndNetworkProfile();
 
@@ -135,7 +137,20 @@ private:
   void logBytes(int64 bytes);
   void startRequest(const char *url, const char *clientIP, const char *vhost);
   void setThreadMode(ThreadMode mode);
+
+  void setThreadIOStatusAddress(const char *name);
   void setThreadIOStatus(const char *name, const char *addr);
+  Array getThreadIOStatuses();
+
+  class IOStatus {
+  public:
+    IOStatus() : count(0), wall_time(0) {}
+
+    int64 count;
+    int64 wall_time; // micro-seconds
+  };
+  // keys: "url==>name" and "name==>address"
+  typedef hphp_string_map<IOStatus> IOStatusMap;
 
   class ThreadStatus {
   public:
@@ -159,23 +174,16 @@ private:
     timespec m_ioStart;
 
     char m_ioName[512];
+    char m_ioLogicalName[512];
     char m_ioAddr[512];
     char m_url[1024];
     char m_clientIP[256];
     char m_vhost[256];
+
+    IOStatusMap m_ioStatuses;
   };
   ThreadStatus m_threadStatus;
-
-  class IOStatus {
-  public:
-    IOStatus() : count(0), wall_time(0) {}
-
-    int64 count;
-    int64 wall_time; // micro-seconds
-  };
-  // keys: "url==>name" and "name==>address"
-  typedef hphp_string_map<IOStatus> IOStatusMap;
-  IOStatusMap m_ioStatuses;
+  IOStatusMap m_ioProfiles;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

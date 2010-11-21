@@ -624,8 +624,16 @@ void ServerStats::SetThreadMode(ThreadMode mode) {
   ServerStats::s_logger->setThreadMode(mode);
 }
 
+void ServerStats::SetThreadIOStatusAddress(const char *name) {
+  ServerStats::s_logger->setThreadIOStatusAddress(name);
+}
+
 void ServerStats::SetThreadIOStatus(const char *name, const char *addr) {
   ServerStats::s_logger->setThreadIOStatus(name, addr);
+}
+
+Array ServerStats::GetThreadIOStatuses() {
+  return ServerStats::s_logger->getThreadIOStatuses();
 }
 
 int64 ServerStats::Get(const string &name) {
@@ -906,7 +914,7 @@ void ServerStats::StartNetworkProfile() {
   for (unsigned int i = 0; i < s_loggers.size(); i++) {
     ServerStats *ss = s_loggers[i];
     Lock lock(ss->m_lock, false);
-    ss->m_ioStatuses.clear();
+    ss->m_ioProfiles.clear();
   }
 }
 
@@ -919,7 +927,7 @@ Array ServerStats::EndNetworkProfile() {
     ServerStats *ss = s_loggers[i];
     Lock lock(ss->m_lock, false);
 
-    IOStatusMap &status = ss->m_ioStatuses;
+    IOStatusMap &status = ss->m_ioProfiles;
     for (IOStatusMap::const_iterator iter = status.begin();
          iter != status.end(); ++iter) {
       ret.set(String(iter->first),
@@ -938,6 +946,7 @@ ServerStats::ThreadStatus::ThreadStatus()
       m_mode(Idling), m_ioInProcess(false) {
   m_threadId = Process::GetThreadId();
   memset(m_ioName, 0, sizeof(m_ioName));
+  memset(m_ioLogicalName, 0, sizeof(m_ioLogicalName));
   memset(m_ioAddr, 0, sizeof(m_ioAddr));
   memset(m_url, 0, sizeof(m_url));
   memset(m_clientIP, 0, sizeof(m_clientIP));
@@ -1052,7 +1061,9 @@ void ServerStats::startRequest(const char *url, const char *clientIP,
   m_threadStatus.m_start = time(0);
   m_threadStatus.m_done = 0;
   m_threadStatus.m_mode = Processing;
+  m_threadStatus.m_ioStatuses.clear();
 
+  *m_threadStatus.m_ioLogicalName = 0;
   safe_copy(m_threadStatus.m_url, url, sizeof(m_threadStatus.m_url));
   safe_copy(m_threadStatus.m_clientIP, clientIP,
             sizeof(m_threadStatus.m_clientIP));
@@ -1061,6 +1072,13 @@ void ServerStats::startRequest(const char *url, const char *clientIP,
 
 void ServerStats::setThreadMode(ThreadMode mode) {
   m_threadStatus.m_mode = mode;
+}
+
+void ServerStats::setThreadIOStatusAddress(const char *name) {
+  if (name) {
+    safe_copy(m_threadStatus.m_ioLogicalName, name,
+              sizeof(m_threadStatus.m_ioLogicalName));
+  }
 }
 
 void ServerStats::setThreadIOStatus(const char *name, const char *addr) {
@@ -1081,28 +1099,62 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr) {
 
   } else {
     m_threadStatus.m_ioInProcess = false;
-    if (s_profile_network) {
+
+    if (RuntimeOption::EnableNetworkIOStatus || s_profile_network) {
       timespec now;
       gettime(CLOCK_MONOTONIC, &now);
       int64 wt = gettime_diff_us(m_threadStatus.m_ioStart, now);
 
-      const char *key0 = "main()";
-      string key1 = m_threadStatus.m_url;
-      key1 += "==>";
-      key1 += m_threadStatus.m_ioName;
+      const char *name = m_threadStatus.m_ioName;
+      const char *addr = m_threadStatus.m_ioLogicalName;
+      if (!*addr) addr = m_threadStatus.m_ioAddr;
 
-      string key2 = m_threadStatus.m_ioName;
-      if (*m_threadStatus.m_ioAddr) {
-        key2 += "==>";
-        key2 += m_threadStatus.m_ioAddr;
+      if (RuntimeOption::EnableNetworkIOStatus) {
+        string key = name;
+        if (*addr) {
+          key += ' '; key += addr;
+        }
+        IOStatus &io = m_threadStatus.m_ioStatuses[key];
+        ++io.count;
+        io.wall_time += wt;
       }
 
-      Lock lock(m_lock, false);
-      { IOStatus &io = m_ioStatuses[key0]; ++io.count; io.wall_time += wt;}
-      { IOStatus &io = m_ioStatuses[key1]; ++io.count; io.wall_time += wt;}
-      { IOStatus &io = m_ioStatuses[key2]; ++io.count; io.wall_time += wt;}
+      if (s_profile_network) {
+        const char *key0 = "main()";
+        const char *key1 = m_threadStatus.m_url;
+        string key2 = m_threadStatus.m_url; key2 += "==>"; key2 += name;
+        const char *key3 = name;
+        string key4 = name;
+        if (*addr) {
+          key4 += "==>"; key4 += addr;
+        }
+
+        Lock lock(m_lock, false);
+        { IOStatus &io = m_ioProfiles[key0]; ++io.count; io.wall_time += wt;}
+        { IOStatus &io = m_ioProfiles[key1]; ++io.count; io.wall_time += wt;}
+        { IOStatus &io = m_ioProfiles[key2]; ++io.count; io.wall_time += wt;}
+        { IOStatus &io = m_ioProfiles[key3]; ++io.count; io.wall_time += wt;}
+        if (*addr) {
+          IOStatus &io = m_ioProfiles[key4]; ++io.count; io.wall_time += wt;
+        }
+      }
+
+      *m_threadStatus.m_ioLogicalName = 0;
     }
   }
+}
+
+Array ServerStats::getThreadIOStatuses() {
+  Array ret;
+  IOStatusMap &status = m_threadStatus.m_ioStatuses;
+  for (IOStatusMap::const_iterator iter = status.begin();
+       iter != status.end(); ++iter) {
+    ret.set(String(iter->first),
+            CREATE_MAP2("ct", iter->second.count,
+                        "wt", iter->second.wall_time));
+  }
+  status.clear();
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

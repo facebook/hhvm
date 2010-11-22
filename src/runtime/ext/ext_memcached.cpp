@@ -362,7 +362,7 @@ bool c_Memcached::getMultiImpl(CStrRef server_key, CArrRef keys,
     if (key->empty()) continue;
     keysCopy.push_back(key->data());
     keysLengthCopy.push_back(key->size());
-    if (returnValue) returnValue->set(key, null_variant, true);
+    if (returnValue) returnValue->set(String(key), null_variant, true);
   }
   if (keysCopy.size() == 0) {
     m_impl->rescode = q_Memcached_RES_BAD_KEY_PROVIDED;

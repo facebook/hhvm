@@ -102,11 +102,19 @@ int HttpClient::post(const char *url, const char *data, int size,
   return impl(url, data, size, response, requestHeaders, responseHeaders);
 }
 
+static void set_curl_status(CURL *cp, CURLINFO info, const char *name,
+                            const char *url) {
+  double option;
+  curl_easy_getinfo(cp, info, &option);
+  if (option >= 0) {
+    ServerStats::SetThreadIOStatus(name, url, option * 1000000);
+  }
+}
+
 int HttpClient::impl(const char *url, const char *data, int size,
                      StringBuffer &response, const HeaderMap *requestHeaders,
                      std::vector<String> *responseHeaders) {
   SlowTimer timer(RuntimeOption::HttpSlowQueryThreshold, "curl", url);
-  IOStatusHelper io("http", url);
 
   m_response = &response;
 
@@ -185,13 +193,21 @@ int HttpClient::impl(const char *url, const char *data, int size,
     curl_easy_setopt(cp, CURLOPT_WRITEHEADER, (void*)this);
   }
 
-  CURLcode error_no = curl_easy_perform(cp);
   long code = 0;
-  if (error_no != CURLE_OK) {
-    m_error = error_str;
-  } else {
-    curl_easy_getinfo(cp, CURLINFO_RESPONSE_CODE, &code);
+  {
+    IOStatusHelper io("http", url);
+    CURLcode error_no = curl_easy_perform(cp);
+    if (error_no != CURLE_OK) {
+      m_error = error_str;
+    } else {
+      curl_easy_getinfo(cp, CURLINFO_RESPONSE_CODE, &code);
+    }
   }
+
+  set_curl_status(cp, CURLINFO_NAMELOOKUP_TIME,    "curl-namelookup",    url);
+  set_curl_status(cp, CURLINFO_CONNECT_TIME,       "curl-connect",       url);
+  set_curl_status(cp, CURLINFO_STARTTRANSFER_TIME, "curl-starttransfer", url);
+  set_curl_status(cp, CURLINFO_PRETRANSFER_TIME,   "curl-pretransfer",   url);
 
   if (slist) {
     curl_slist_free_all(slist);

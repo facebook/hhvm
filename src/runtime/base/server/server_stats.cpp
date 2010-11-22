@@ -628,8 +628,9 @@ void ServerStats::SetThreadIOStatusAddress(const char *name) {
   ServerStats::s_logger->setThreadIOStatusAddress(name);
 }
 
-void ServerStats::SetThreadIOStatus(const char *name, const char *addr) {
-  ServerStats::s_logger->setThreadIOStatus(name, addr);
+void ServerStats::SetThreadIOStatus(const char *name, const char *addr,
+                                    int64 usWallTime /* = -1 */) {
+  ServerStats::s_logger->setThreadIOStatus(name, addr, usWallTime);
 }
 
 Array ServerStats::GetThreadIOStatuses() {
@@ -1081,8 +1082,11 @@ void ServerStats::setThreadIOStatusAddress(const char *name) {
   }
 }
 
-void ServerStats::setThreadIOStatus(const char *name, const char *addr) {
-  if ((name && *name) || (addr && *addr)) {
+void ServerStats::setThreadIOStatus(const char *name, const char *addr,
+                                    int64 usWallTime /* = -1 */) {
+  bool starting = ((name && *name) || (addr && *addr));
+
+  if (starting) {
     if (name) {
       safe_copy(m_threadStatus.m_ioName, name,
                 sizeof(m_threadStatus.m_ioName));
@@ -1095,15 +1099,21 @@ void ServerStats::setThreadIOStatus(const char *name, const char *addr) {
     // Mark the current thread as being in the process of completing
     // an io, and record the time that the io started.
     m_threadStatus.m_ioInProcess = true;
-    gettime(CLOCK_MONOTONIC, &m_threadStatus.m_ioStart);
+    if (usWallTime < 0) {
+      gettime(CLOCK_MONOTONIC, &m_threadStatus.m_ioStart);
+    }
+  }
 
-  } else {
+  if (!starting || usWallTime >= 0) {
     m_threadStatus.m_ioInProcess = false;
 
     if (RuntimeOption::EnableNetworkIOStatus || s_profile_network) {
-      timespec now;
-      gettime(CLOCK_MONOTONIC, &now);
-      int64 wt = gettime_diff_us(m_threadStatus.m_ioStart, now);
+      int64 wt = usWallTime;
+      if (wt < 0) {
+        timespec now;
+        gettime(CLOCK_MONOTONIC, &now);
+        wt = gettime_diff_us(m_threadStatus.m_ioStart, now);
+      }
 
       const char *name = m_threadStatus.m_ioName;
       const char *addr = m_threadStatus.m_ioLogicalName;

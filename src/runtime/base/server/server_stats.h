@@ -61,7 +61,8 @@ public:
 
   // io status functions
   static void SetThreadIOStatusAddress(const char *name);
-  static void SetThreadIOStatus(const char *name, const char *addr);
+  static void SetThreadIOStatus(const char *name, const char *addr,
+                                int64 usWallTime = -1);
   static Array GetThreadIOStatuses();
   static void StartNetworkProfile();
   static Array EndNetworkProfile();
@@ -139,7 +140,8 @@ private:
   void setThreadMode(ThreadMode mode);
 
   void setThreadIOStatusAddress(const char *name);
-  void setThreadIOStatus(const char *name, const char *addr);
+  void setThreadIOStatus(const char *name, const char *addr,
+                         int64 usWallTime = -1);
   Array getThreadIOStatuses();
 
   class IOStatus {

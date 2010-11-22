@@ -29,6 +29,7 @@
 #include <compiler/expression/static_member_expression.h>
 #include <runtime/base/class_info.h>
 #include <util/util.h>
+#include <util/parser/location.h>
 
 using namespace std;
 using namespace boost;
@@ -718,8 +719,16 @@ void VariableTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
+static bool by_location(const VariableTable::StaticGlobalInfoPtr &p1,
+                        const VariableTable::StaticGlobalInfoPtr &p2) {
+  return p1->sym->getDeclaration()->getLocation()->
+    compare(p2->sym->getDeclaration()->getLocation().get()) < 0;
+}
+
 void VariableTable::prepareStaticGlobals(CodeGenerator &cg) {
   ASSERT(m_staticGlobals.empty());
+
+  sort(m_staticGlobalsVec.begin(), m_staticGlobalsVec.end(), by_location);
 
   for (unsigned int i = 0; i < m_staticGlobalsVec.size(); i++) {
     StaticGlobalInfoPtr &sgi = m_staticGlobalsVec[i];

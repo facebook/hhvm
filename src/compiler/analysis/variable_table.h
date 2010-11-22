@@ -295,6 +295,24 @@ public:
     return m_emptyJumpTables.find(name) == m_emptyJumpTables.end();
   }
 
+  /**
+   * These are static variables collected from different local scopes,
+   * as they have to be turned into global variables defined in
+   * GlobalVariables class to make ThreadLocal<GlobalVaribles> work.
+   * This data structure is only needed by global scope.
+   */
+  DECLARE_BOOST_TYPES(StaticGlobalInfo);
+  struct StaticGlobalInfo {
+    Symbol *sym;
+    VariableTable *variables; // where this variable was from
+    ClassScopePtr cls;
+    FunctionScopePtr func;
+
+    // get unique identifier for this variable
+    static std::string getId(CodeGenerator &cg, ClassScopePtr cls,
+                             FunctionScopePtr func, const std::string &name);
+  };
+
 private:
   enum StaticSelection {
     NonStatic = 1,
@@ -318,23 +336,6 @@ private:
 
   std::set<JumpTableName> m_emptyJumpTables;
 
-  /**
-   * These are static variables collected from different local scopes,
-   * as they have to be turned into global variables defined in
-   * GlobalVariables class to make ThreadLocal<GlobalVaribles> work.
-   * This data structure is only needed by global scope.
-   */
-  DECLARE_BOOST_TYPES(StaticGlobalInfo);
-  struct StaticGlobalInfo {
-    Symbol *sym;
-    VariableTable *variables; // where this variable was from
-    ClassScopePtr cls;
-    FunctionScopePtr func;
-
-    // get unique identifier for this variable
-    static std::string getId(CodeGenerator &cg, ClassScopePtr cls,
-                             FunctionScopePtr func, const std::string &name);
-  };
   StaticGlobalInfoPtrVec m_staticGlobalsVec;
   StringToStaticGlobalInfoPtrMap m_staticGlobals;
 

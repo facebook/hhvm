@@ -21,9 +21,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ss5977ff8c("path");
-StaticString s_sys_ss5a226667("clear");
-StaticString s_sys_ss5aaea631("helpBody");
 StaticString s_sys_ss5afa6a06("hasChildNodes");
 StaticString s_sys_ss5b143841("outofboundsexception");
 StaticString s_sys_ss5b36d24d("startAttributens");
@@ -36,6 +33,7 @@ StaticString s_sys_ss5c33e23b("begintransaction");
 StaticString s_sys_ss5c5cac7a("isConstructor");
 StaticString s_sys_ss5c6641ba("outputMemory");
 StaticString s_sys_ss5c9a4484("add_accesspoint");
+StaticString s_sys_ss5caea6c0("getOption");
 StaticString s_sys_ss5cbbd412("asort");
 StaticString s_sys_ss5cf34c5c("setAttributeNode");
 StaticString s_sys_ss5d0078af("getCTime");
@@ -61,12 +59,15 @@ StaticString s_sys_ss5fb1cf6e("cloneNode");
 StaticString s_sys_ss5fc59871("__getfunctions");
 StaticString s_sys_ss5fd864a6("asXML");
 StaticString s_sys_ss602f4b44("getProperties");
+StaticString s_sys_ss603f5079("addServers");
 StaticString s_sys_ss60465f1d("isFile");
+StaticString s_sys_ss61635285("setOption");
 StaticString s_sys_ss61a59c37("writeRaw");
 StaticString s_sys_ss61d17d53("children");
 StaticString s_sys_ss62050d99("__soapcall");
 StaticString s_sys_ss6221914b("endComment");
-StaticString s_sys_ss6237aae6("addserver");
+StaticString s_sys_ss6237aae6("addServer");
+StaticString s_sys_ss6237aae6_1("addserver");
 StaticString s_sys_ss62d8d71d("getLine");
 StaticString s_sys_ss633e9909("getClass");
 StaticString s_sys_ss644993a4("Class constant ");
@@ -79,9 +80,11 @@ StaticString s_sys_ss65104d10("count");
 StaticString s_sys_ss658b04e8("ksort");
 StaticString s_sys_ss65cc0de3("attributes");
 StaticString s_sys_ss65e3f324("commit");
-StaticString s_sys_ss65eb8e41("fetchall");
+StaticString s_sys_ss65eb8e41("fetchAll");
+StaticString s_sys_ss65eb8e41_1("fetchall");
 StaticString s_sys_ss6601e385("getElementById");
 StaticString s_sys_ss6612fc28("getattribute");
+StaticString s_sys_ss6612fc28_1("getAttribute");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

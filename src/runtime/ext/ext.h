@@ -50,6 +50,7 @@
 #include <runtime/ext/profile/extprofile_math.h>
 #include <runtime/ext/profile/extprofile_mb.h>
 #include <runtime/ext/profile/extprofile_mcrypt.h>
+#include <runtime/ext/profile/extprofile_memcached.h>
 #include <runtime/ext/profile/extprofile_memcache.h>
 #include <runtime/ext/profile/extprofile_misc.h>
 #include <runtime/ext/profile/extprofile_mysql.h>

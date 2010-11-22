@@ -21,10 +21,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss1b10b1ba("badfunctioncallexception");
 StaticString s_sys_ss1b59269e("getCsvControl");
 StaticString s_sys_ss1b610cff("read");
 StaticString s_sys_ss1b6c6a84("finalize");
 StaticString s_sys_ss1ba41696("bindparam");
+StaticString s_sys_ss1bb9e5a9("getServerList");
 StaticString s_sys_ss1c43db17("serverpool_add_server");
 StaticString s_sys_ss1c4bf05a("getNamespaces");
 StaticString s_sys_ss1c4d64a1("server_version");
@@ -82,6 +84,7 @@ StaticString s_sys_ss25243fd3("__sleep");
 StaticString s_sys_ss2565d86a("getGroup");
 StaticString s_sys_ss2566090c("arg");
 StaticString s_sys_ss25a95208("getDocComment");
+StaticString s_sys_ss25b9517c("multi_add");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

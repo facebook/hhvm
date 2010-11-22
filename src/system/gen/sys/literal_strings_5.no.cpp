@@ -21,11 +21,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ss3ed3054d("saveHTMLFile");
-StaticString s_sys_ss3f2511ba("writeDTDEntity");
-StaticString s_sys_ss3f63dbf6("add_accesspoint_listener");
-StaticString s_sys_ss3ff7318b("serverpool_get_consistent_hashing_version");
-StaticString s_sys_ss400a55be("ask");
 StaticString s_sys_ss403290f5("arrayaccess");
 StaticString s_sys_ss403290f5_1("ArrayAccess");
 StaticString s_sys_ss40c44738("getPosition");
@@ -42,6 +37,7 @@ StaticString s_sys_ss424fa11e("getClosure");
 StaticString s_sys_ss42c3f8cc("getConstant");
 StaticString s_sys_ss42cb6c5a("normalize");
 StaticString s_sys_ss431a6ed8("recursivedirectoryiterator");
+StaticString s_sys_ss4341f605("getMulti");
 StaticString s_sys_ss43880cae("index");
 StaticString s_sys_ss43f325b6("setIDAttributeNode");
 StaticString s_sys_ss446ed36e("\000ReflectionExtension\000info", 25);
@@ -58,6 +54,7 @@ StaticString s_sys_ss454dd8cb("isOptional");
 StaticString s_sys_ss456c2f9d("listIdentifiers");
 StaticString s_sys_ss45d283ee("lastinsertid");
 StaticString s_sys_ss46bb0014("hasAttribute");
+StaticString s_sys_ss47097177("addByKey");
 StaticString s_sys_ss471864c8("class_exists");
 StaticString s_sys_ss47732bd1("importNode");
 StaticString s_sys_ss47b9c59d("isWritable");
@@ -82,6 +79,12 @@ StaticString s_sys_ss4b7e339b("fpassthru");
 StaticString s_sys_ss4ba591af("prepare");
 StaticString s_sys_ss4bf6681d("getValue");
 StaticString s_sys_ss4c82e4b2("createDocument");
+StaticString s_sys_ss4c8b547e("registerPHPFunctions");
+StaticString s_sys_ss4cbf9ed7("setstrength");
+StaticString s_sys_ss4d01c296("normalizeDocument");
+StaticString s_sys_ss4d202b9f("getArrayCopy");
+StaticString s_sys_ss4d6296e0("geterrorcode");
+StaticString s_sys_ss4dbc36ff("__setlocation");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

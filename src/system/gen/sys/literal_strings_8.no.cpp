@@ -21,7 +21,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ss6612fc28_1("getAttribute");
 StaticString s_sys_ss6714d118("deleteData");
 StaticString s_sys_ss6731e29c("getBasename");
 StaticString s_sys_ss6739a3fb("closecursor");
@@ -43,6 +42,7 @@ StaticString s_sys_ss6b362b85("message");
 StaticString s_sys_ss6b4cb5ed("__toString");
 StaticString s_sys_ss6b4cb5ed_1("__tostring");
 StaticString s_sys_ss6b6b0982("writeCData");
+StaticString s_sys_ss6bb3f020("appendByKey");
 StaticString s_sys_ss6bd68143("createaggregate");
 StaticString s_sys_ss6c3ed068("listAbbreviations");
 StaticString s_sys_ss6c87099c("isDefaultNamespace");
@@ -81,7 +81,10 @@ StaticString s_sys_ss71e14c8b("registerNodeClass");
 StaticString s_sys_ss71e244d6("sort");
 StaticString s_sys_ss727ded49("splitText");
 StaticString s_sys_ss72c51c58("isLink");
+StaticString s_sys_ss738836e9("prepend");
 StaticString s_sys_ss73bc832f("geterrormessage");
+StaticString s_sys_ss742bf3c2("openblob");
+StaticString s_sys_ss742fc700("offsetExists");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

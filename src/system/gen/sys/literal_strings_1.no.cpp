@@ -21,6 +21,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss0d71bb50("reflectionmethod");
+StaticString s_sys_ss0dc84a7d("addUrl");
 StaticString s_sys_ss0dcefc3c("invokeArgs");
 StaticString s_sys_ss0e43d437("setMaxLineLen");
 StaticString s_sys_ss0e528c55("setIndentString");
@@ -32,6 +34,7 @@ StaticString s_sys_ss0fe9a82c("createAttribute");
 StaticString s_sys_ss0ff886cb("endAttribute");
 StaticString s_sys_ss105383ac("writeAttributeNS");
 StaticString s_sys_ss10600e60(" {main}");
+StaticString s_sys_ss10b990f2("deleteByKey");
 StaticString s_sys_ss10c5ffd9("fetchcolumn");
 StaticString s_sys_ss10d8f28e("msg");
 StaticString s_sys_ss10e3c595("fetcharray");
@@ -70,6 +73,7 @@ StaticString s_sys_ss169ecc8a("getTraceAsString");
 StaticString s_sys_ss16b7ebeb("createElementNS");
 StaticString s_sys_ss16bfe3b1("isReadable");
 StaticString s_sys_ss1733f4e7("isStatic");
+StaticString s_sys_ss1797b289("setMultiByKey");
 StaticString s_sys_ss17fdf549("lease_get_multi");
 StaticString s_sys_ss18109c83("add_server_listener");
 StaticString s_sys_ss18a8b3dc("runtimeexception");
@@ -81,7 +85,6 @@ StaticString s_sys_ss1958457c("domainexception");
 StaticString s_sys_ss196a9a1b("xpath");
 StaticString s_sys_ss19beead6("addAttribute");
 StaticString s_sys_ss19c96546("offsetUnset");
-StaticString s_sys_ss1b10b1ba("badfunctioncallexception");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

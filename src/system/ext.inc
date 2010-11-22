@@ -33,6 +33,7 @@
 #include "math.inc"
 #include "mb.inc"
 #include "mcrypt.inc"
+#include "memcached.inc"
 #include "memcache.inc"
 #include "misc.inc"
 #include "mysql.inc"

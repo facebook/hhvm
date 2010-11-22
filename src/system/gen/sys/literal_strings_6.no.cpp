@@ -21,14 +21,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ss4c8b547e("registerPHPFunctions");
-StaticString s_sys_ss4cbf9ed7("setstrength");
-StaticString s_sys_ss4d01c296("normalizeDocument");
-StaticString s_sys_ss4d202b9f("getArrayCopy");
-StaticString s_sys_ss4d6296e0("geterrorcode");
-StaticString s_sys_ss4dbc36ff("__setlocation");
 StaticString s_sys_ss4e3f2b26("lease_set");
 StaticString s_sys_ss4e9b09e6("interface_exists");
+StaticString s_sys_ss4eaa1ebc("getResultMessage");
 StaticString s_sys_ss4f02341a("lastinsertrowid");
 StaticString s_sys_ss4f638bdc("getInnerIterator");
 StaticString s_sys_ss4f67744c("\000ArrayIterator\000flags", 20);
@@ -47,9 +42,11 @@ StaticString s_sys_ss52349fb9("private");
 StaticString s_sys_ss529d270c("isLocal");
 StaticString s_sys_ss52b098d1("print");
 StaticString s_sys_ss52b41b72("getOwner");
+StaticString s_sys_ss52bff8a1("cas");
 StaticString s_sys_ss52e92802("connect");
 StaticString s_sys_ss5311d955("hasAttributeNS");
 StaticString s_sys_ss531f214d("natsort");
+StaticString s_sys_ss535c00fd("getResultCode");
 StaticString s_sys_ss5371ad73("outeriterator");
 StaticString s_sys_ss53a3b5b6("getMethod");
 StaticString s_sys_ss53c7cbf2("getavailabledrivers");
@@ -62,7 +59,9 @@ StaticString s_sys_ss549781c8("appenditerator");
 StaticString s_sys_ss54ee5c66("newInstanceArgs");
 StaticString s_sys_ss55073565("format");
 StaticString s_sys_ss5533e10d("__destruct");
+StaticString s_sys_ss556d773d("replaceByKey");
 StaticString s_sys_ss559d6063("getDeclaringClass");
+StaticString s_sys_ss55c9f7b8("setByKey");
 StaticString s_sys_ss55f425c0("__init__");
 StaticString s_sys_ss55f7a324("__wakeup");
 StaticString s_sys_ss5615a9b2(" is a Class");
@@ -74,6 +73,7 @@ StaticString s_sys_ss5713adf1("getChildren");
 StaticString s_sys_ss57ae11ef("setIDAttributeNS");
 StaticString s_sys_ss57c470a3("lookupNamespaceUri");
 StaticString s_sys_ss57e7b987("serverpool_get_consistent_hashing_enabled");
+StaticString s_sys_ss58382d82("getMultiByKey");
 StaticString s_sys_ss58723b7c("isPublic");
 StaticString s_sys_ss58a514eb("createAttributens");
 StaticString s_sys_ss58a82cfa("__getlastresponseheaders");
@@ -82,6 +82,9 @@ StaticString s_sys_ss58b49929("getExtensionName");
 StaticString s_sys_ss58ba5adc("function");
 StaticString s_sys_ss58e4193c("uksort");
 StaticString s_sys_ss590fe203("fault");
+StaticString s_sys_ss5977ff8c("path");
+StaticString s_sys_ss5a226667("clear");
+StaticString s_sys_ss5aaea631("helpBody");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

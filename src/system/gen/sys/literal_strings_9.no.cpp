@@ -21,8 +21,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ss742bf3c2("openblob");
-StaticString s_sys_ss742fc700("offsetExists");
 StaticString s_sys_ss746a8348("setTimezone");
 StaticString s_sys_ss749653da("properties");
 StaticString s_sys_ss74d168d7("argRest");
@@ -67,7 +65,8 @@ StaticString s_sys_ss7c8404a2("loadHTML");
 StaticString s_sys_ss7ca39b31("isInternal");
 StaticString s_sys_ss7ccbfc6b("__set");
 StaticString s_sys_ss7cd10a1c("relaxNGValidate");
-StaticString s_sys_ss7ce59bd9("getstats");
+StaticString s_sys_ss7ce59bd9("getStats");
+StaticString s_sys_ss7ce59bd9_1("getstats");
 StaticString s_sys_ss7cf6fd3a("item");
 StaticString s_sys_ss7db173af("key");
 StaticString s_sys_ss7e2a01fc("outofrangeexception");

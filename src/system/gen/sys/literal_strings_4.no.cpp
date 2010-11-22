@@ -21,8 +21,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ss3536c850("get_multi");
-StaticString s_sys_ss358b69c2("addsoapheader");
 StaticString s_sys_ss35b39fa2("createElement");
 StaticString s_sys_ss35b7e836("getElementsByTagNameNS");
 StaticString s_sys_ss35d13911("isSameNode");
@@ -82,6 +80,11 @@ StaticString s_sys_ss3e2b4c6f("helpSection");
 StaticString s_sys_ss3e6df6cf("appendXML");
 StaticString s_sys_ss3e9ddbc1("getPath");
 StaticString s_sys_ss3ebf7f0d("createCDATASection");
+StaticString s_sys_ss3ed3054d("saveHTMLFile");
+StaticString s_sys_ss3f2511ba("writeDTDEntity");
+StaticString s_sys_ss3f63dbf6("add_accesspoint_listener");
+StaticString s_sys_ss3ff7318b("serverpool_get_consistent_hashing_version");
+StaticString s_sys_ss400a55be("ask");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -32,330 +32,347 @@ namespace HPHP {
 #define M(x, y) MethodIndex(x, y)
 #define H(x,y,z) MethodIndexHMap(#x,MethodIndex(y,z))
 #define Z MethodIndexHMap(0,MethodIndex(0,0))
-const unsigned g_methodIndexHMapSizeSys = 878;
+const unsigned g_methodIndexHMapSizeSys = 924;
 extern const MethodIndexHMap g_methodIndexHMapSys [];
 const MethodIndexHMap g_methodIndexHMapSys [g_methodIndexHMapSizeSys] = {
-Z, H(getArrayCopy,14,1), Z, 
-H(__destruct,35,1), Z, Z, 
-Z, Z, H(addCompletion,162,1), 
-Z, H(insertData,66,1), H(getserverstatus,216,1), 
-H(endDTDEntity,410,1), H(hasChildren,258,1), Z, 
-H(openFile,197,1), Z, Z, 
-Z, Z, H(getElementsByTagNameNS,75,1), 
-Z, Z, H(setValue,327,1), 
-H(getInterfaceNames,280,1), Z, H(getTraceAsString,31,1), 
-H(closecursor,248,1), Z, Z, 
+Z, Z, Z, 
+H(getNodePath,58,1), Z, Z, 
+Z, Z, Z, 
+H(code,155,1), Z, Z, 
+Z, H(isOptional,344,1), H(rowcount,274,1), 
+H(natsort,16,1), Z, Z, 
+H(load,84,1), H(getPath,185,1), H(offsetSet,13,1), 
+Z, Z, Z, 
+Z, H(c14nfile,59,1), Z, 
+Z, H(getResultMessage,229,1), H(item,121,1), 
+H(flush,226,1), H(serialize,371,1), H(createAttribute,94,1), 
+Z, H(tutorial,148,1), H(importNode,88,1), 
+H(key,2,1), H(getFlags,22,1), Z, 
+Z, H(saveXML,81,1), H(onAutoComplete,167,1), 
+Z, H(getByKey,240,1), Z, 
+Z, Z, H(begintransaction,262,1), 
+H(send,166,1), H(endDTDAttlist,424,1), H(__isset,381,1), 
+Z, H(replaceData,68,1), Z, 
+H(writeCData,438,1), H(getNamedItemNS,123,1), Z, 
+Z, Z, H(xpath,373,1), 
+Z, Z, H(isDestructor,338,1), 
+H(getSubPath,280,1), H(relaxNGValidateSource,89,1), Z, 
+Z, Z, H(hasAttribute,105,1), 
+Z, Z, H(getDeclaringClass,335,1), 
+H(relaxNGValidate,77,1), Z, Z, 
+H(getPathname,176,1), H(get,219,1), H(getOwner,191,1), 
+H(getavailabledrivers,260,1), H(getServerByKey,243,1), Z, 
+Z, H(hasChildNodes,64,1), H(setAttributeNS,108,1), 
+Z, H(lookupNamespaceUri,49,1), H(isInterface,308,1), 
+H(writeRaw,447,1), H(writeDTD,432,1), Z, 
+H(getMessage,25,1), Z, H(endComment,431,1), 
+H(unserialize,370,1), Z, H(__construct,6,1), 
+Z, H(getClass,340,1), Z, 
+H(__setsoapheaders,385,1), Z, H(escapestring,356,1), 
+H(replace,225,1), H(query,124,1), Z, 
+H(getextendedstats,227,1), Z, Z, 
+H(reset,367,1), H(getElementsByTagName,72,1), H(getChildren,282,1), 
+H(endElement,446,1), Z, H(listIdentifiers,137,1), 
+H(getElementsByTagNameNS,75,1), H(mapping,203,1), Z, 
+Z, Z, Z, 
+Z, Z, H(getstrength,38,1), 
+Z, Z, Z, 
+H(setcompressthreshold,218,1), Z, H(offsetGet,11,1), 
+H(setOption,234,1), Z, H(wrap,165,1), 
+H(getStartLine,304,1), H(registerXPathNamespace,374,1), H(getversion,222,1), 
+H(getMulti,228,1), H(fstat,418,1), H(printFrame,153,1), 
+H(create,40,1), H(getOffset,130,1), Z, 
+Z, H(startCData,454,1), H(isPrivate,332,1), 
+H(setAttributeNode,116,1), H(__gettypes,393,1), Z, 
+Z, Z, Z, 
+H(xinclude,95,1), Z, Z, 
+H(startDTDEntity,427,1), Z, H(onServer,169,1), 
+Z, Z, H(openblob,360,1), 
+Z, Z, Z, 
+Z, H(getLine,28,1), Z, 
+H(replaceByKey,237,1), H(createEntityReference,79,1), H(prepend,235,1), 
+H(allowsNull,341,1), H(fwrite,417,1), H(fflush,411,1), 
+H(createaggregate,357,1), H(setpersistence,396,1), Z, 
+H(openMemory,457,1), H(createDocumentType,118,1), H(isDot,198,1), 
+Z, H(lasterrormsg,355,1), Z, 
+Z, H(getName,139,1), Z, 
+Z, Z, H(setIDAttributeNS,103,1), 
+H(isLink,187,1), H(splitText,71,1), H(fetchAll,246,1), 
+H(getstats,215,1), H(handle,397,1), H(getFunctions,320,1), 
+H(append,5,1), H(closecursor,273,1), H(asXML,377,1), 
+H(info,152,1), H(getBasename,175,1), Z, 
+H(modify,135,1), H(loadHTMLFile,96,1), H(seek,21,1), 
+H(isReadable,181,1), H(__toString,26,1), H(getPathInfo,183,1), 
+H(getTimezone,132,1), H(getExtensionName,300,1), H(compare,44,1), 
+H(validate,74,1), Z, Z, 
+Z, H(getserverstatus,216,1), Z, 
+Z, H(hasFeature,119,1), H(sortwithsortkeys,34,1), 
+H(getOption,242,1), H(fgetss,403,1), H(decrement,214,1), 
+Z, H(deleteData,69,1), H(createfunction,353,1), 
+Z, Z, Z, 
+H(isInstance,293,1), Z, Z, 
+H(getMTime,192,1), H(removeChild,61,1), Z, 
+H(getLineNo,45,1), H(offsetUnset,12,1), H(setIndent,451,1), 
+H(isSupported,63,1), H(errorcode,254,1), Z, 
+H(saveHTMLFile,97,1), H(version,351,1), Z, 
+Z, Z, H(cloneNode,52,1), 
+H(isUserDefined,286,1), H(isId,48,1), H(endDTDElement,452,1), 
+H(setMultiByKey,247,1), H(prepare,263,1), H(setCsvControl,405,1), 
+H(getValue,347,1), H(removeAttributeNS,110,1), H(isInternal,318,1), 
+H(writeAttributeNS,441,1), H(close,171,1), H(asort,20,1), 
+H(__call,8,1), H(next,1,1), H(appendData,67,1), 
+Z, Z, Z, 
+Z, H(getConstructor,289,1), Z, 
+H(ftell,416,1), H(isPassedByReference,346,1), Z, 
+Z, Z, Z, 
+H(addString,201,1), Z, Z, 
+H(print,154,1), Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
-H(isFinal,271,1), Z, Z, 
-Z, H(getClassNames,299,1), Z, 
-Z, H(getCTime,184,1), Z, 
-Z, H(rewind,9,1), H(startDTD,427,1), 
-H(setFileClass,178,1), H(getFlags,22,1), Z, 
+H(lastinsertrowid,354,1), Z, H(export,296,1), 
+H(getCsvControl,406,1), H(getClosure,331,1), Z, 
+H(getDefaultValue,345,1), Z, H(isConstructor,336,1), 
+Z, H(setTimezone,134,1), Z, 
+Z, H(fpassthru,413,1), Z, 
+Z, H(natcasesort,19,1), H(getExtension,288,1), 
 Z, Z, Z, 
-Z, H(isDestructor,315,1), H(normalize,57,1), 
-H(__getfunctions,367,1), H(loadHTML,78,1), Z, 
-Z, H(fwrite,394,1), H(startElement,412,1), 
-H(openblob,337,1), H(setFlags,17,1), H(query,124,1), 
-H(xend,145,1), H(getParentClass,278,1), H(asXML,354,1), 
-H(close,171,1), Z, H(createAttributens,85,1), 
-Z, H(getInterfaces,293,1), H(registerPHPFunctions,126,1), 
-H(escapestring,333,1), H(appendChild,50,1), H(endAttribute,436,1), 
-H(registerNamespace,127,1), H(seek,21,1), H(numcolumns,342,1), 
-H(__toString,26,1), H(insertBefore,46,1), H(startDTDEntity,404,1), 
-H(cloneNode,52,1), H(endPI,426,1), H(setclass,377,1), 
-H(endElement,423,1), Z, H(endDTDElement,429,1), 
+Z, Z, H(getSubPathname,279,1), 
+Z, H(insertData,66,1), H(lookupPrefix,56,1), 
+H(columntype,364,1), H(getInterfaceNames,303,1), Z, 
+Z, Z, H(getDelayed,233,1), 
+Z, H(geterrorcode,37,1), Z, 
+Z, Z, H(set,211,1), 
+H(children,379,1), H(__unset,376,1), H(isLocal,170,1), 
+H(startDocument,426,1), Z, H(writeDTDEntity,448,1), 
+H(isSameNode,60,1), H(getProperties,297,1), H(attributes,382,1), 
+Z, Z, H(loadextension,352,1), 
+Z, Z, H(addByKey,245,1), 
+Z, Z, H(bindparam,272,1), 
+Z, H(getArrayCopy,14,1), H(text,461,1), 
 Z, Z, Z, 
-H(setfetchmode,245,1), Z, H(fgetcsv,381,1), 
-H(arg,141,1), Z, H(getClosure,308,1), 
-H(hasMethod,269,1), H(relaxNGValidateSource,89,1), Z, 
-H(load,84,1), H(argRest,163,1), H(lasterrorcode,338,1), 
-Z, H(args,161,1), Z, 
+H(helpTitle,146,1), H(setIDAttributeNode,113,1), H(isAbstract,317,1), 
 Z, Z, Z, 
-H(__get,62,1), Z, Z, 
+H(isStatic,334,1), H(current,7,1), H(fgetc,412,1), 
+H(saveHTML,91,1), H(getStackTrace,151,1), H(contains,421,1), 
+H(createAttributens,85,1), H(normalizeDocument,100,1), H(increment,213,1), 
+Z, H(fseek,402,1), Z, 
 Z, Z, Z, 
-Z, H(getSubPathname,256,1), H(delete,223,1), 
-Z, H(getExtensionName,277,1), Z, 
-Z, H(isInstantiable,292,1), H(getcolumnmeta,242,1), 
+Z, Z, H(getNumberOfParameters,325,1), 
+Z, H(prependByKey,252,1), Z, 
+H(listAbbreviations,138,1), H(hasChildren,281,1), Z, 
+Z, Z, H(isProtected,333,1), 
+H(removeAttributeNode,114,1), Z, Z, 
+Z, Z, H(implementsInterface,302,1), 
+H(startDTDElement,437,1), Z, H(startElement,435,1), 
+Z, Z, H(getFilename,189,1), 
+H(getGroup,177,1), Z, H(help,160,1), 
+H(read,172,1), Z, Z, 
+Z, Z, H(querysingle,362,1), 
 Z, Z, Z, 
-H(setMaxLineLen,384,1), H(open,335,1), Z, 
-H(getDeclaringClass,312,1), H(createaggregate,334,1), H(addChild,357,1), 
+H(isDefaultValueAvailable,339,1), Z, Z, 
+Z, H(isSubclassOf,309,1), H(setDate,129,1), 
+H(appendByKey,232,1), Z, Z, 
+H(setoptimeout,217,1), Z, Z, 
+H(setIDAttribute,112,1), H(addServers,250,1), Z, 
+Z, Z, H(commit,259,1), 
+H(writeElement,445,1), H(debugdumpparams,278,1), H(createDocument,117,1), 
+H(getATime,195,1), Z, Z, 
+Z, H(argRest,163,1), H(getDocComment,307,1), 
+H(loadXML,92,1), Z, Z, 
 Z, Z, Z, 
+H(getStaticPropertyValue,285,1), H(open,358,1), H(insertBefore,46,1), 
+H(removeAttribute,115,1), H(delete,223,1), H(registerNamespace,127,1), 
+Z, H(substringData,65,1), Z, 
+Z, H(isDefault,348,1), Z, 
 Z, Z, Z, 
-Z, Z, H(helpCmds,142,1), 
+H(writeElementNS,422,1), H(argValue,149,1), H(isPublic,337,1), 
+H(createCDATASection,73,1), Z, Z, 
+Z, H(startDTDAttlist,453,1), H(addsoapheader,395,1), 
+H(getConstant,305,1), H(count,15,1), Z, 
 Z, Z, Z, 
-Z, Z, H(getLinkTarget,180,1), 
-Z, H(columntype,341,1), Z, 
-H(begintransaction,237,1), Z, Z, 
-H(getPath,185,1), H(fetchcolumn,241,1), Z, 
-H(getPathInfo,183,1), H(isConstructor,313,1), H(isInternal,295,1), 
+H(geterrormessage,43,1), H(errorinfo,264,1), H(setMaxLineLen,407,1), 
+Z, H(getMaxLineLen,408,1), H(ask,143,1), 
+Z, Z, H(setobject,398,1), 
+H(isExecutable,196,1), H(getCode,27,1), Z, 
+Z, H(getMethod,299,1), Z, 
+Z, H(getNamespaces,375,1), H(createElement,86,1), 
 Z, Z, Z, 
-Z, H(loadXML,92,1), H(helpSection,156,1), 
-Z, Z, H(isSubclassOf,286,1), 
-Z, Z, Z, 
-Z, H(attributes,359,1), Z, 
-Z, Z, Z, 
-Z, Z, Z, 
-Z, H(replaceData,68,1), H(startAttributens,411,1), 
-H(isSupported,63,1), H(substringData,65,1), H(startCData,431,1), 
-Z, Z, H(bindcolumn,244,1), 
-H(loadImages,205,1), Z, Z, 
-Z, Z, H(createElementNS,87,1), 
-H(addsoapheader,372,1), H(getversion,222,1), H(onClient,168,1), 
-H(getFileInfo,194,1), H(getConstant,282,1), Z, 
-H(getTimezone,132,1), H(startComment,439,1), Z, 
-Z, Z, Z, 
-H(registerXPathNamespace,351,1), H(setAttributeNS,108,1), H(hasFeature,119,1), 
-H(__sleep,240,1), H(hasAttributeNS,106,1), H(prepare,238,1), 
-Z, Z, H(rollback,233,1), 
-H(outputMemory,402,1), H(getTrace,32,1), H(getAttributeNS,109,1), 
-Z, H(lookupNamespaceUri,49,1), Z, 
-H(sortwithsortkeys,34,1), H(c14n,55,1), H(geterrormessage,43,1), 
-Z, Z, Z, 
-H(setInfoClass,179,1), Z, Z, 
-Z, Z, Z, 
-Z, H(valid,3,1), Z, 
-H(invoke,307,1), H(__isset,358,1), H(saveHTML,91,1), 
-H(getConstants,283,1), H(setAttributeNode,116,1), Z, 
-Z, Z, Z, 
-H(fetcharray,343,1), H(getNamedItem,120,1), Z, 
-Z, Z, H(writeElement,422,1), 
-Z, H(querysingle,339,1), Z, 
-H(getFrame,159,1), Z, H(removeAttribute,115,1), 
-H(getProperty,296,1), H(startDocument,403,1), H(getNamedItemNS,123,1), 
-H(export,273,1), H(send,166,1), H(setIDAttributeNode,113,1), 
-H(isFile,190,1), H(getErrors,207,1), Z, 
-Z, Z, H(getlocale,42,1), 
-Z, Z, H(onServer,169,1), 
-Z, H(implementsInterface,279,1), Z, 
-Z, H(getavailabledrivers,235,1), Z, 
-Z, H(rowcount,249,1), H(mapping,203,1), 
-H(fault,376,1), H(execute,250,1), H(getExtension,265,1), 
-H(replace,225,1), H(getMethods,260,1), H(setIDAttribute,112,1), 
-H(getextendedstats,227,1), H(commit,234,1), Z, 
-Z, H(getDocNamespaces,355,1), Z, 
-Z, H(getLineNo,45,1), H(hasProperty,287,1), 
-Z, Z, H(debugdumpparams,255,1), 
+Z, Z, H(exec,255,1), 
+Z, H(fgets,414,1), H(__get,62,1), 
+H(__wakeup,257,1), Z, Z, 
+Z, Z, H(__dorequest,383,1), 
+H(execute,275,1), Z, Z, 
+H(setValue,350,1), H(rollback,258,1), H(fetcharray,366,1), 
+H(getPosition,342,1), H(hasAttributes,54,1), H(getType,199,1), 
 Z, Z, Z, 
 Z, Z, Z, 
+H(setserverparams,212,1), H(getSize,188,1), Z, 
+Z, Z, Z, 
+H(getLinkTarget,180,1), Z, H(__soapcall,387,1), 
+Z, H(fault,399,1), Z, 
+H(appendXML,102,1), Z, Z, 
+Z, H(changes,359,1), H(newInstanceArgs,290,1), 
+Z, Z, H(writeDTDAttlist,455,1), 
+Z, Z, H(isArray,343,1), 
+H(getAttributeNS,109,1), Z, Z, 
+H(returnsReference,329,1), H(hasAttributeNS,106,1), Z, 
+Z, Z, Z, 
+H(normalize,57,1), H(__setlocation,388,1), Z, 
+Z, Z, Z, 
+Z, H(schemaValidateSource,76,1), H(lastinsertid,256,1), 
 H(setstrength,39,1), Z, Z, 
-H(getType,199,1), Z, Z, 
-H(getName,139,1), H(lookupPrefix,56,1), H(natsort,16,1), 
-H(item,121,1), H(format,128,1), H(setTime,131,1), 
-H(schemaValidate,80,1), H(ksort,23,1), H(saveHTMLFile,97,1), 
-H(createDocument,117,1), Z, H(getInnerIterator,4,1), 
-Z, Z, H(getIterator,122,1), 
-Z, Z, Z, 
-H(isAbstract,294,1), H(__soapcall,364,1), H(read,172,1), 
-H(eof,387,1), H(getNodePath,58,1), Z, 
-Z, H(onAutoComplete,167,1), H(createProcessingInstruction,82,1), 
-H(getStaticProperties,289,1), H(writeAttribute,407,1), H(hasAttribute,105,1), 
-Z, Z, Z, 
-Z, Z, H(getMTime,192,1), 
-H(xpath,350,1), Z, Z, 
-H(quit,157,1), H(ftell,393,1), Z, 
-Z, Z, Z, 
-H(loadDims,202,1), Z, Z, 
-Z, Z, Z, 
-Z, Z, H(getStartLine,281,1), 
-Z, Z, Z, 
-H(isDefaultValueAvailable,316,1), H(createDocumentFragment,101,1), H(hasChildNodes,64,1), 
-H(serialize,348,1), H(isPublic,314,1), Z, 
-Z, H(createComment,99,1), Z, 
-Z, H(relaxNGValidate,77,1), H(setDate,129,1), 
-Z, H(getCommand,147,1), Z, 
-H(unserialize,347,1), Z, H(getattribute,33,1), 
-H(decrement,214,1), Z, Z, 
-Z, Z, Z, 
-Z, H(getFunctions,297,1), H(addserver,210,1), 
-H(listAbbreviations,138,1), H(errorinfo,239,1), Z, 
-H(next,1,1), H(schemaValidateSource,76,1), Z, 
-Z, Z, Z, 
-H(writeDTD,409,1), H(__wakeup,232,1), H(__getlastresponseheaders,368,1), 
-Z, Z, Z, 
-H(getPathname,176,1), H(createTextNode,90,1), H(c14nfile,59,1), 
-H(getATime,195,1), H(removeAttributeNS,110,1), H(getstats,215,1), 
-H(isDir,193,1), H(endDTDAttlist,401,1), H(writeDTDEntity,425,1), 
-H(setTimezone,134,1), H(normalizeDocument,100,1), H(text,438,1), 
-H(css,204,1), H(importNode,88,1), H(modify,135,1), 
-H(__set,51,1), Z, Z, 
-H(getDocComment,284,1), Z, H(finalize,345,1), 
-H(getCsvControl,383,1), H(loadextension,329,1), Z, 
-Z, Z, H(paramcount,346,1), 
-H(createElement,86,1), H(xinclude,95,1), H(error,144,1), 
-Z, H(fgets,391,1), Z, 
-Z, Z, H(newInstance,264,1), 
-H(columnname,340,1), H(lastinsertrowid,331,1), H(getGroup,177,1), 
-Z, H(getCurrentLocation,164,1), Z, 
-Z, H(setIndentString,420,1), Z, 
-Z, Z, Z, 
-H(current,7,1), Z, Z, 
-Z, Z, H(test,288,1), 
-Z, Z, H(offsetSet,13,1), 
-Z, H(writeCData,415,1), Z, 
-H(contains,398,1), Z, H(attach,396,1), 
-Z, H(append,5,1), Z, 
-H(setattribute,41,1), Z, H(__call,8,1), 
-Z, H(createDocumentType,118,1), H(nextrowset,243,1), 
-H(returnsReference,306,1), Z, Z, 
-Z, Z, Z, 
-H(print,154,1), H(isPassedByReference,323,1), Z, 
-Z, Z, H(getElementsByTagName,72,1), 
-H(isStatic,311,1), H(quote,236,1), H(getStaticVariables,303,1), 
-H(getFilename,189,1), H(offsetUnset,12,1), H(fflush,388,1), 
-H(isDefaultNamespace,47,1), H(getAttributeNode,111,1), H(isExecutable,196,1), 
-H(sort,36,1), H(addString,201,1), H(fseek,379,1), 
-Z, Z, Z, 
-Z, Z, H(saveXML,81,1), 
-Z, Z, Z, 
-Z, H(isId,48,1), H(getPerms,173,1), 
-Z, Z, H(count,15,1), 
-Z, H(offsetGet,11,1), H(isPrivate,309,1), 
-H(setobject,375,1), H(output,150,1), Z, 
-H(createfunction,330,1), Z, Z, 
-Z, H(add,221,1), Z, 
-H(appendXML,102,1), H(__getlastrequestheaders,366,1), H(pconnect,220,1), 
-H(flush,226,1), H(setStaticPropertyValue,291,1), H(replaceChild,53,1), 
-H(key,2,1), H(__getlastresponse,369,1), H(writeRaw,424,1), 
-Z, Z, Z, 
-Z, H(isLocal,170,1), Z, 
-Z, Z, Z, 
-H(increment,213,1), H(fgetc,389,1), H(startDTDAttlist,430,1), 
-H(getMethod,276,1), Z, Z, 
-Z, Z, Z, 
-H(getFile,30,1), Z, Z, 
-Z, Z, H(getParameters,304,1), 
-Z, Z, H(deleteData,69,1), 
-H(fpassthru,390,1), H(isArray,320,1), H(getMaxLineLen,385,1), 
-H(exec,230,1), H(setserverparams,212,1), Z, 
-Z, Z, Z, 
-Z, Z, Z, 
-H(__setsoapheaders,362,1), Z, H(isDefault,325,1), 
-Z, H(isSameNode,60,1), Z, 
-H(setIndent,428,1), H(isLink,187,1), H(addUrl,208,1), 
-H(writeAttributeNS,418,1), Z, H(createAttribute,94,1), 
-Z, Z, Z, 
-Z, Z, Z, 
-Z, H(getClasses,300,1), H(set,211,1), 
-H(getEndLine,268,1), Z, Z, 
-H(isnormalized,228,1), H(setpersistence,373,1), Z, 
-H(get,219,1), H(removeChild,61,1), H(setAccessible,326,1), 
-Z, Z, Z, 
-Z, Z, Z, 
-Z, Z, H(columncount,246,1), 
-H(setcompressthreshold,218,1), Z, Z, 
-H(changes,336,1), Z, H(writeComment,406,1), 
-Z, Z, Z, 
-Z, Z, H(getINIEntries,298,1), 
-H(newInstanceArgs,267,1), Z, Z, 
-Z, H(compare,44,1), Z, 
-Z, Z, H(getChildren,259,1), 
-H(isOptional,321,1), H(isUserDefined,263,1), H(allowsNull,318,1), 
-Z, Z, H(ask,143,1), 
-H(save,93,1), H(startElementNS,413,1), H(isInstance,270,1), 
-H(endComment,408,1), H(createEntityReference,79,1), H(handle,374,1), 
-Z, H(getPosition,319,1), Z, 
-H(endDTD,433,1), Z, Z, 
-Z, Z, Z, 
-Z, H(printFrame,153,1), H(getConstructor,266,1), 
-H(__construct,6,1), Z, H(__unset,353,1), 
-H(natcasesort,19,1), H(getOwner,191,1), H(fetchall,252,1), 
-H(__dorequest,360,1), H(setCsvControl,382,1), H(getMessage,25,1), 
-H(asort,20,1), H(__setlocation,365,1), Z, 
-Z, Z, Z, 
-Z, Z, H(lasterrormsg,332,1), 
-Z, H(getNamespaces,352,1), H(getLine,28,1), 
-Z, Z, Z, 
-H(getSeverity,200,1), Z, Z, 
-Z, Z, Z, 
-H(setAttributeNodeNS,107,1), H(addAttribute,349,1), H(fgetss,380,1), 
-H(getBasename,175,1), Z, Z, 
-H(startAttribute,421,1), Z, Z, 
-Z, Z, Z, 
-H(isInterface,285,1), H(getAttributeNodeNS,104,1), Z, 
-H(bindparam,247,1), Z, Z, 
-H(isIterateable,261,1), H(argValue,149,1), Z, 
-H(setISODate,133,1), H(hasConstant,275,1), Z, 
-H(getStackTrace,151,1), Z, H(addfunction,371,1), 
-H(uksort,18,1), H(getElementById,98,1), Z, 
-H(code,155,1), H(getstrength,38,1), Z, 
-Z, Z, H(writePI,419,1), 
-H(registerNodeClass,83,1), H(ftruncate,386,1), H(getNumberOfRequiredParameters,301,1), 
-H(listIdentifiers,137,1), H(invokeArgs,305,1), H(helpBody,158,1), 
-H(getCode,27,1), Z, Z, 
+H(quote,261,1), H(fetch,249,1), H(getNumberOfRequiredParameters,324,1), 
+H(getConstants,306,1), Z, Z, 
+Z, H(setfetchmode,270,1), Z, 
+H(startDTD,450,1), H(uasort,24,1), Z, 
+Z, H(paramcount,369,1), Z, 
+H(createProcessingInstruction,82,1), Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
-H(fetch,254,1), H(getTransitions,136,1), H(writeDTDAttlist,432,1), 
-Z, H(lastinsertid,231,1), H(isWhitespaceInElementContent,70,1), 
-H(__gettypes,370,1), H(isDot,198,1), H(isReadable,181,1), 
-Z, Z, H(getDefaultProperties,290,1), 
-H(connect,224,1), H(setIDAttributeNS,103,1), H(startPI,437,1), 
-Z, H(bindvalue,253,1), H(endCData,405,1), 
-H(getSubPath,257,1), Z, H(__setcookie,363,1), 
+Z, H(deleteByKey,241,1), H(writeAttribute,430,1), 
+Z, Z, H(createElementNS,87,1), 
+H(addFile,209,1), H(getErrors,207,1), Z, 
+H(invoke,330,1), Z, Z, 
 Z, Z, Z, 
-H(helpTitle,146,1), Z, Z, 
-H(argCount,140,1), H(evaluate,125,1), H(startDTDElement,414,1), 
-H(hasAttributes,54,1), H(writeDTDElement,417,1), H(loadHTMLFile,96,1), 
+Z, Z, H(xend,145,1), 
+Z, Z, H(addUrl,208,1), 
 Z, Z, Z, 
-Z, Z, H(appendData,67,1), 
+Z, Z, H(test,311,1), 
+H(endDTDEntity,433,1), H(fetchcolumn,266,1), H(getMultiByKey,248,1), 
+H(writeComment,429,1), H(registerNodeClass,83,1), H(openFile,197,1), 
+H(fgetcsv,404,1), Z, H(endDTD,456,1), 
+Z, Z, H(setMulti,239,1), 
+H(finalize,368,1), H(__set,51,1), H(loadImages,205,1), 
+H(getFileInfo,194,1), H(hasMethod,292,1), H(offsetExists,10,1), 
+H(setFlags,17,1), H(ftruncate,409,1), H(isDefaultNamespace,47,1), 
+H(startElementNS,436,1), Z, H(valid,3,1), 
+H(setclass,400,1), H(getDelayedByKey,238,1), H(getTraceAsString,31,1), 
+H(clear,206,1), H(fetchobject,276,1), H(openURI,458,1), 
+H(helpBody,158,1), H(hasConstant,298,1), H(schemaValidate,80,1), 
+H(getPerms,173,1), Z, Z, 
+Z, Z, H(getCommand,147,1), 
+H(fscanf,401,1), H(endCData,428,1), Z, 
+H(replaceChild,53,1), Z, Z, 
+H(setStaticPropertyValue,314,1), Z, Z, 
 Z, Z, Z, 
-Z, H(removeAttributeNode,114,1), H(detach,397,1), 
-Z, H(splitText,71,1), H(__getlastrequest,361,1), 
 Z, Z, Z, 
-Z, Z, H(getStaticPropertyValue,262,1), 
-Z, Z, H(clear,206,1), 
-Z, H(setoptimeout,217,1), H(geterrorcode,37,1), 
-H(validate,74,1), H(getDefaultValue,322,1), Z, 
+Z, Z, H(setISODate,133,1), 
+H(isFile,190,1), Z, Z, 
+Z, Z, Z, 
+Z, H(getElementById,98,1), H(nextrowset,268,1), 
+H(newInstance,287,1), H(__destruct,35,1), H(getInnerIterator,4,1), 
+Z, Z, Z, 
+Z, H(getStaticProperties,312,1), H(getInode,186,1), 
+Z, H(__getlastrequest,384,1), Z, 
+Z, H(isWritable,174,1), H(addChild,380,1), 
+Z, H(addserver,210,1), Z, 
+H(getClassNames,322,1), H(getDocNamespaces,378,1), H(loadDims,202,1), 
+Z, Z, Z, 
+H(sort,36,1), Z, H(__getlastrequestheaders,389,1), 
+H(getProperty,319,1), H(helpSection,156,1), H(endAttribute,459,1), 
 Z, Z, Z, 
 Z, Z, Z, 
+H(__getlastresponseheaders,391,1), H(getSeverity,200,1), Z, 
+H(isnormalized,253,1), H(addAttribute,372,1), Z, 
+Z, Z, H(outputMemory,425,1), 
+Z, H(getStaticVariables,326,1), Z, 
+Z, H(createTextNode,90,1), Z, 
+Z, H(c14n,55,1), Z, 
 Z, Z, Z, 
-Z, Z, H(reset,344,1), 
-H(getSize,188,1), Z, H(create,40,1), 
-Z, H(openURI,435,1), Z, 
-Z, H(getProperties,274,1), H(endDocument,416,1), 
-H(errorcode,229,1), Z, H(fullEndElement,400,1), 
-H(offsetExists,10,1), H(addFile,209,1), H(getRealPath,182,1), 
-H(fetchobject,251,1), H(getClass,317,1), H(getNumberOfParameters,302,1), 
-H(fstat,395,1), H(flock,392,1), H(children,356,1), 
-H(fscanf,378,1), H(isProtected,310,1), H(isWritable,174,1), 
-H(uasort,24,1), Z, Z, 
-H(createCDATASection,73,1), H(getInode,186,1), Z, 
-H(openMemory,434,1), Z, Z, 
-H(getValue,324,1), Z, H(getOffset,130,1), 
-Z, H(info,152,1), H(tutorial,148,1), 
-Z, H(help,160,1), Z, 
-H(writeElementNS,399,1), Z, H(getModifiers,272,1), 
-H(version,328,1), H(__init__,29,1), Z, 
-Z, H(wrap,165,1)};
+Z, H(ksort,23,1), Z, 
+Z, H(error,144,1), Z, 
+Z, Z, Z, 
+Z, H(addCompletion,162,1), H(getINIEntries,321,1), 
+H(startComment,462,1), H(__init__,29,1), H(casByKey,236,1), 
+Z, H(hasProperty,310,1), H(getEndLine,291,1), 
+Z, H(connect,224,1), H(evaluate,125,1), 
+Z, Z, Z, 
+H(uksort,18,1), H(pconnect,220,1), H(startPI,460,1), 
+Z, Z, H(getattribute,33,1), 
+H(startAttributens,434,1), H(isIterateable,284,1), H(startAttribute,444,1), 
+Z, Z, Z, 
+H(__getfunctions,390,1), H(save,93,1), H(isWhitespaceInElementContent,70,1), 
+Z, Z, Z, 
+Z, H(setAccessible,349,1), Z, 
+H(setAttributeNodeNS,107,1), H(getParameters,327,1), H(output,150,1), 
+H(getCTime,184,1), Z, H(__setcookie,386,1), 
+H(isFinal,294,1), H(add,221,1), Z, 
+Z, H(setattribute,41,1), Z, 
+H(__getlastresponse,392,1), H(setFileClass,178,1), Z, 
+H(getcolumnmeta,267,1), Z, Z, 
+Z, Z, H(getModifiers,295,1), 
+Z, H(rewind,9,1), Z, 
+H(getFile,30,1), H(helpCmds,142,1), H(args,161,1), 
+H(eof,410,1), Z, Z, 
+Z, Z, H(lasterrorcode,361,1), 
+H(getResultCode,230,1), H(getParentClass,301,1), Z, 
+H(attach,419,1), Z, Z, 
+H(getServerList,244,1), Z, Z, 
+Z, Z, H(endDocument,439,1), 
+Z, Z, Z, 
+H(setByKey,231,1), H(__sleep,265,1), Z, 
+Z, Z, Z, 
+H(writePI,442,1), Z, H(getAttributeNodeNS,104,1), 
+Z, H(getMethods,283,1), Z, 
+Z, H(fullEndElement,423,1), H(getNamedItem,120,1), 
+H(onClient,168,1), H(css,204,1), H(detach,420,1), 
+Z, Z, H(setTime,131,1), 
+Z, Z, H(createDocumentFragment,101,1), 
+H(arg,141,1), Z, Z, 
+H(argCount,140,1), Z, Z, 
+H(setIndentString,443,1), H(columncount,271,1), Z, 
+H(endPI,449,1), Z, Z, 
+H(getTransitions,136,1), H(setInfoClass,179,1), H(loadHTML,78,1), 
+Z, H(isInstantiable,315,1), H(getAttributeNode,111,1), 
+H(quit,157,1), Z, H(flock,415,1), 
+H(getRealPath,182,1), H(getClasses,323,1), Z, 
+H(invokeArgs,328,1), Z, H(getInterfaces,316,1), 
+H(appendChild,50,1), Z, Z, 
+Z, Z, Z, 
+Z, H(getTrace,32,1), Z, 
+H(getFrame,159,1), Z, Z, 
+Z, Z, Z, 
+Z, Z, H(columnname,363,1), 
+H(numcolumns,365,1), H(writeDTDElement,440,1), H(getIterator,122,1), 
+Z, H(getCurrentLocation,164,1), H(getlocale,42,1), 
+Z, Z, Z, 
+Z, H(format,128,1), Z, 
+H(bindcolumn,269,1), Z, H(bindvalue,277,1), 
+Z, H(cas,251,1), H(getDefaultProperties,313,1), 
+H(createComment,99,1), H(isDir,193,1), Z, 
+Z, H(addfunction,394,1), Z, 
+Z, H(registerPHPFunctions,126,1), Z
+};
 #undef M
 #undef H
 #undef Z
 extern const unsigned g_methodIndexReverseCallIndexSys[];
 const unsigned g_methodIndexReverseCallIndexSys[] = {0, 
-1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,
-19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,
-39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,
-59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,
-79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,
-99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,
-119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,
-139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,
-159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,
-179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,
-199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,
-219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,
-239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,
-259,260,261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,278,
-279,280,281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,
-299,300,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,
-319,320,321,322,323,324,325,326,327,328,329,330,331,332,333,334,335,336,337,338,
-339,340,341,342,343,344,345,346,347,348,349,350,351,352,353,354,355,356,357,358,
-359,360,361,362,363,364,365,366,367,368,369,370,371,372,373,374,375,376,377,378,
-379,380,381,382,383,384,385,386,387,388,389,390,391,392,393,394,395,396,397,398,
-399,400,401,402,403,404,405,406,407,408,409,410,411,412,413,414,415,416,417,418,
-419,420,421,422,423,424,425,426,427,428,429,430,431,432,433,434,435,436,437,438
-};
+1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
+41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,
+61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,
+81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,
+101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,
+121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,
+141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,
+161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,
+181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,
+201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,
+221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,
+241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,260,
+261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,278,279,280,
+281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,299,300,
+301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,320,
+321,322,323,324,325,326,327,328,329,330,331,332,333,334,335,336,337,338,339,340,
+341,342,343,344,345,346,347,348,349,350,351,352,353,354,355,356,357,358,359,360,
+361,362,363,364,365,366,367,368,369,370,371,372,373,374,375,376,377,378,379,380,
+381,382,383,384,385,386,387,388,389,390,391,392,393,394,395,396,397,398,399,400,
+401,402,403,404,405,406,407,408,409,410,411,412,413,414,415,416,417,418,419,420,
+421,422,423,424,425,426,427,428,429,430,431,432,433,434,435,436,437,438,439,440,
+441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460,
+461};
 extern const char * g_methodIndexReverseIndexSys[];
 const char * g_methodIndexReverseIndexSys[] = {
 "next", "key", "valid", "getInnerIterator", "append", 
@@ -403,49 +420,54 @@ const char * g_methodIndexReverseIndexSys[] = {
 "set", "setserverparams", "increment", "decrement", "getstats", 
 "getserverstatus", "setoptimeout", "setcompressthreshold", "get", "pconnect", 
 "add", "getversion", "delete", "connect", "replace", 
-"flush", "getextendedstats", "isnormalized", "errorcode", "exec", 
+"flush", "getextendedstats", "getMulti", "getResultMessage", "getResultCode", 
+"setByKey", "appendByKey", "getDelayed", "setOption", "prepend", 
+"casByKey", "replaceByKey", "getDelayedByKey", "setMulti", "getByKey", 
+"deleteByKey", "getOption", "getServerByKey", "getServerList", "addByKey", 
+"fetchAll", "setMultiByKey", "getMultiByKey", "fetch", "addServers", 
+"cas", "prependByKey", "isnormalized", "errorcode", "exec", 
 "lastinsertid", "__wakeup", "rollback", "commit", "getavailabledrivers", 
 "quote", "begintransaction", "prepare", "errorinfo", "__sleep", 
 "fetchcolumn", "getcolumnmeta", "nextrowset", "bindcolumn", "setfetchmode", 
 "columncount", "bindparam", "closecursor", "rowcount", "execute", 
-"fetchobject", "fetchall", "bindvalue", "fetch", "debugdumpparams", 
-"getSubPathname", "getSubPath", "hasChildren", "getChildren", "getMethods", 
-"isIterateable", "getStaticPropertyValue", "isUserDefined", "newInstance", "getExtension", 
-"getConstructor", "newInstanceArgs", "getEndLine", "hasMethod", "isInstance", 
-"isFinal", "getModifiers", "export", "getProperties", "hasConstant", 
-"getMethod", "getExtensionName", "getParentClass", "implementsInterface", "getInterfaceNames", 
-"getStartLine", "getConstant", "getConstants", "getDocComment", "isInterface", 
-"isSubclassOf", "hasProperty", "test", "getStaticProperties", "getDefaultProperties", 
-"setStaticPropertyValue", "isInstantiable", "getInterfaces", "isAbstract", "isInternal", 
-"getProperty", "getFunctions", "getINIEntries", "getClassNames", "getClasses", 
-"getNumberOfRequiredParameters", "getNumberOfParameters", "getStaticVariables", "getParameters", "invokeArgs", 
-"returnsReference", "invoke", "getClosure", "isPrivate", "isProtected", 
-"isStatic", "getDeclaringClass", "isConstructor", "isPublic", "isDestructor", 
-"isDefaultValueAvailable", "getClass", "allowsNull", "getPosition", "isArray", 
-"isOptional", "getDefaultValue", "isPassedByReference", "getValue", "isDefault", 
-"setAccessible", "setValue", "version", "loadextension", "createfunction", 
-"lastinsertrowid", "lasterrormsg", "escapestring", "createaggregate", "open", 
-"changes", "openblob", "lasterrorcode", "querysingle", "columnname", 
-"columntype", "numcolumns", "fetcharray", "reset", "finalize", 
-"paramcount", "unserialize", "serialize", "addAttribute", "xpath", 
-"registerXPathNamespace", "getNamespaces", "__unset", "asXML", "getDocNamespaces", 
-"children", "addChild", "__isset", "attributes", "__dorequest", 
-"__getlastrequest", "__setsoapheaders", "__setcookie", "__soapcall", "__setlocation", 
-"__getlastrequestheaders", "__getfunctions", "__getlastresponseheaders", "__getlastresponse", "__gettypes", 
-"addfunction", "addsoapheader", "setpersistence", "handle", "setobject", 
-"fault", "setclass", "fscanf", "fseek", "fgetss", 
-"fgetcsv", "setCsvControl", "getCsvControl", "setMaxLineLen", "getMaxLineLen", 
-"ftruncate", "eof", "fflush", "fgetc", "fpassthru", 
-"fgets", "flock", "ftell", "fwrite", "fstat", 
-"attach", "detach", "contains", "writeElementNS", "fullEndElement", 
-"endDTDAttlist", "outputMemory", "startDocument", "startDTDEntity", "endCData", 
-"writeComment", "writeAttribute", "endComment", "writeDTD", "endDTDEntity", 
-"startAttributens", "startElement", "startElementNS", "startDTDElement", "writeCData", 
-"endDocument", "writeDTDElement", "writeAttributeNS", "writePI", "setIndentString", 
-"startAttribute", "writeElement", "endElement", "writeRaw", "writeDTDEntity", 
-"endPI", "startDTD", "setIndent", "endDTDElement", "startDTDAttlist", 
-"startCData", "writeDTDAttlist", "endDTD", "openMemory", "openURI", 
-"endAttribute", "startPI", "text", "startComment"};
+"fetchobject", "bindvalue", "debugdumpparams", "getSubPathname", "getSubPath", 
+"hasChildren", "getChildren", "getMethods", "isIterateable", "getStaticPropertyValue", 
+"isUserDefined", "newInstance", "getExtension", "getConstructor", "newInstanceArgs", 
+"getEndLine", "hasMethod", "isInstance", "isFinal", "getModifiers", 
+"export", "getProperties", "hasConstant", "getMethod", "getExtensionName", 
+"getParentClass", "implementsInterface", "getInterfaceNames", "getStartLine", "getConstant", 
+"getConstants", "getDocComment", "isInterface", "isSubclassOf", "hasProperty", 
+"test", "getStaticProperties", "getDefaultProperties", "setStaticPropertyValue", "isInstantiable", 
+"getInterfaces", "isAbstract", "isInternal", "getProperty", "getFunctions", 
+"getINIEntries", "getClassNames", "getClasses", "getNumberOfRequiredParameters", "getNumberOfParameters", 
+"getStaticVariables", "getParameters", "invokeArgs", "returnsReference", "invoke", 
+"getClosure", "isPrivate", "isProtected", "isStatic", "getDeclaringClass", 
+"isConstructor", "isPublic", "isDestructor", "isDefaultValueAvailable", "getClass", 
+"allowsNull", "getPosition", "isArray", "isOptional", "getDefaultValue", 
+"isPassedByReference", "getValue", "isDefault", "setAccessible", "setValue", 
+"version", "loadextension", "createfunction", "lastinsertrowid", "lasterrormsg", 
+"escapestring", "createaggregate", "open", "changes", "openblob", 
+"lasterrorcode", "querysingle", "columnname", "columntype", "numcolumns", 
+"fetcharray", "reset", "finalize", "paramcount", "unserialize", 
+"serialize", "addAttribute", "xpath", "registerXPathNamespace", "getNamespaces", 
+"__unset", "asXML", "getDocNamespaces", "children", "addChild", 
+"__isset", "attributes", "__dorequest", "__getlastrequest", "__setsoapheaders", 
+"__setcookie", "__soapcall", "__setlocation", "__getlastrequestheaders", "__getfunctions", 
+"__getlastresponseheaders", "__getlastresponse", "__gettypes", "addfunction", "addsoapheader", 
+"setpersistence", "handle", "setobject", "fault", "setclass", 
+"fscanf", "fseek", "fgetss", "fgetcsv", "setCsvControl", 
+"getCsvControl", "setMaxLineLen", "getMaxLineLen", "ftruncate", "eof", 
+"fflush", "fgetc", "fpassthru", "fgets", "flock", 
+"ftell", "fwrite", "fstat", "attach", "detach", 
+"contains", "writeElementNS", "fullEndElement", "endDTDAttlist", "outputMemory", 
+"startDocument", "startDTDEntity", "endCData", "writeComment", "writeAttribute", 
+"endComment", "writeDTD", "endDTDEntity", "startAttributens", "startElement", 
+"startElementNS", "startDTDElement", "writeCData", "endDocument", "writeDTDElement", 
+"writeAttributeNS", "writePI", "setIndentString", "startAttribute", "writeElement", 
+"endElement", "writeRaw", "writeDTDEntity", "endPI", "startDTD", 
+"setIndent", "endDTDElement", "startDTDAttlist", "startCData", "writeDTDAttlist", 
+"endDTD", "openMemory", "openURI", "endAttribute", "startPI", 
+"text", "startComment"};
 extern struct ObjectStaticCallbacks cw_ReflectionFunctionAbstract;
 extern struct ObjectStaticCallbacks cw_ReflectionObject;
 extern struct ObjectStaticCallbacks cw_SplFileObject;
@@ -9186,6 +9208,2658 @@ struct ObjectStaticCallbacks cw_DebuggerProxy = {
   c_DebuggerProxy::os_constant,
   c_DebuggerProxy::os_get_call_info
 };
+Object co_Memcached(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_Memcached)())->dynCreate(params, init));
+}
+Object coo_Memcached() {
+  Object r(NEW(c_Memcached)());
+  r->init();
+  return r;
+}
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Memcached
+Variant c_Memcached::os_getInit(CStrRef s) {
+  return c_ObjectData::os_getInit(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Memcached
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_Memcached
+Variant c_Memcached::os_get(CStrRef s) {
+  return c_ObjectData::os_get(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_Memcached
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Memcached
+Variant &c_Memcached::os_lval(CStrRef s) {
+  return c_ObjectData::os_lval(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Memcached
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Memcached
+void c_Memcached::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Memcached
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Memcached
+void c_Memcached::o_setArray(CArrRef props) {
+  c_ObjectData::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Memcached
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_Memcached
+Variant * c_Memcached::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_Memcached
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Memcached
+Variant * c_Memcached::o_realPropPublic(CStrRef s, int flags) const {
+  return c_ObjectData::o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Memcached
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Memcached
+Variant * c_Memcached::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Memcached
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Memcached
+Variant c_Memcached::os_constant(const char *s) {
+  int64 hash = hash_string(s);
+  switch (hash & 127) {
+    case 3:
+      HASH_RETURN(0x2CCABB2638D29583LL, q_Memcached_RES_ERRNO, "RES_ERRNO");
+      break;
+    case 5:
+      HASH_RETURN(0x6AF4D4CD7B6B9E85LL, q_Memcached_OPT_TCP_NODELAY, "OPT_TCP_NODELAY");
+      break;
+    case 7:
+      HASH_RETURN(0x1FBB5AC58A77E707LL, q_Memcached_RES_BUFFERED, "RES_BUFFERED");
+      break;
+    case 10:
+      HASH_RETURN(0x261AB88649B2E58ALL, q_Memcached_OPT_SERVER_FAILURE_LIMIT, "OPT_SERVER_FAILURE_LIMIT");
+      HASH_RETURN(0x2072FB05B0D6540ALL, q_Memcached_RES_NO_SERVERS, "RES_NO_SERVERS");
+      break;
+    case 13:
+      HASH_RETURN(0x5EC3EFCB1563B68DLL, q_Memcached_OPT_LIBKETAMA_COMPATIBLE, "OPT_LIBKETAMA_COMPATIBLE");
+      HASH_RETURN(0x0C53D08ECD9ACC0DLL, q_Memcached_RES_SUCCESS, "RES_SUCCESS");
+      break;
+    case 22:
+      HASH_RETURN(0x7071566611A71D96LL, q_Memcached_OPT_PREFIX_KEY, "OPT_PREFIX_KEY");
+      HASH_RETURN(0x425EDC08E649F716LL, q_Memcached_OPT_HASH, "OPT_HASH");
+      break;
+    case 24:
+      HASH_RETURN(0x64B6C925C7A41498LL, q_Memcached_DISTRIBUTION_CONSISTENT, "DISTRIBUTION_CONSISTENT");
+      break;
+    case 28:
+      HASH_RETURN(0x200711C7E62DFB1CLL, q_Memcached_HASH_HSIEH, "HASH_HSIEH");
+      HASH_RETURN(0x6B8DE2AA09E1749CLL, q_Memcached_OPT_BINARY_PROTOCOL, "OPT_BINARY_PROTOCOL");
+      HASH_RETURN(0x47FC6D6596D2411CLL, q_Memcached_RES_UNKNOWN_READ_FAILURE, "RES_UNKNOWN_READ_FAILURE");
+      break;
+    case 29:
+      HASH_RETURN(0x6364909F8AA5869DLL, q_Memcached_RES_NOTFOUND, "RES_NOTFOUND");
+      break;
+    case 34:
+      HASH_RETURN(0x56E8EF0A2966E7A2LL, q_Memcached_RES_PROTOCOL_ERROR, "RES_PROTOCOL_ERROR");
+      HASH_RETURN(0x4A25210D326D0922LL, q_Memcached_RES_CLIENT_ERROR, "RES_CLIENT_ERROR");
+      break;
+    case 35:
+      HASH_RETURN(0x2B230612FB5D80A3LL, q_Memcached_RES_SERVER_ERROR, "RES_SERVER_ERROR");
+      break;
+    case 37:
+      HASH_RETURN(0x49D8D4184B78B3A5LL, q_Memcached_HASH_FNV1A_64, "HASH_FNV1A_64");
+      break;
+    case 47:
+      HASH_RETURN(0x6808EBB81DDE422FLL, q_Memcached_OPT_CACHE_LOOKUPS, "OPT_CACHE_LOOKUPS");
+      break;
+    case 50:
+      HASH_RETURN(0x3A7E842A627341B2LL, q_Memcached_HASH_FNV1_64, "HASH_FNV1_64");
+      break;
+    case 52:
+      HASH_RETURN(0x56895500D1F05334LL, q_Memcached_OPT_SEND_TIMEOUT, "OPT_SEND_TIMEOUT");
+      break;
+    case 67:
+      HASH_RETURN(0x6BC90BF53C6E7CC3LL, q_Memcached_RES_TIMEOUT, "RES_TIMEOUT");
+      HASH_RETURN(0x4155BF3DCFA655C3LL, q_Memcached_RES_BAD_KEY_PROVIDED, "RES_BAD_KEY_PROVIDED");
+      break;
+    case 68:
+      HASH_RETURN(0x490A114712BBA544LL, q_Memcached_RES_SOME_ERRORS, "RES_SOME_ERRORS");
+      break;
+    case 70:
+      HASH_RETURN(0x68724938D592E4C6LL, q_Memcached_OPT_SOCKET_SEND_SIZE, "OPT_SOCKET_SEND_SIZE");
+      break;
+    case 71:
+      HASH_RETURN(0x073E4D38138A7DC7LL, q_Memcached_OPT_COMPRESSION, "OPT_COMPRESSION");
+      break;
+    case 72:
+      HASH_RETURN(0x7B91B2E2CC4DE648LL, q_Memcached_SERIALIZER_PHP, "SERIALIZER_PHP");
+      break;
+    case 75:
+      HASH_RETURN(0x138CD297B9FD244BLL, q_Memcached_OPT_RETRY_TIMEOUT, "OPT_RETRY_TIMEOUT");
+      break;
+    case 78:
+      HASH_RETURN(0x74824687F4C8D7CELL, q_Memcached_HAVE_JSON, "HAVE_JSON");
+      break;
+    case 80:
+      HASH_RETURN(0x7AC058297870C1D0LL, q_Memcached_SERIALIZER_JSON, "SERIALIZER_JSON");
+      break;
+    case 81:
+      HASH_RETURN(0x2B4E411F0C7596D1LL, q_Memcached_SERIALIZER_IGBINARY, "SERIALIZER_IGBINARY");
+      HASH_RETURN(0x1E8ABFABE00D2651LL, q_Memcached_OPT_NO_BLOCK, "OPT_NO_BLOCK");
+      break;
+    case 84:
+      HASH_RETURN(0x49856B6165627AD4LL, q_Memcached_DISTRIBUTION_MODULA, "DISTRIBUTION_MODULA");
+      break;
+    case 85:
+      HASH_RETURN(0x02FAAD1AB87BA2D5LL, q_Memcached_HASH_CRC, "HASH_CRC");
+      HASH_RETURN(0x1045EAC17F112855LL, q_Memcached_RES_WRITE_FAILURE, "RES_WRITE_FAILURE");
+      break;
+    case 87:
+      HASH_RETURN(0x3A3731492FB1B557LL, q_Memcached_HASH_FNV1_32, "HASH_FNV1_32");
+      HASH_RETURN(0x345B7B934684B3D7LL, q_Memcached_OPT_SOCKET_RECV_SIZE, "OPT_SOCKET_RECV_SIZE");
+      break;
+    case 88:
+      HASH_RETURN(0x296424A39A9F1AD8LL, q_Memcached_OPT_POLL_TIMEOUT, "OPT_POLL_TIMEOUT");
+      break;
+    case 91:
+      HASH_RETURN(0x3DD14F50C65BCDDBLL, q_Memcached_OPT_DISTRIBUTION, "OPT_DISTRIBUTION");
+      HASH_RETURN(0x0224412EA957C9DBLL, q_Memcached_RES_CONNECTION_SOCKET_CREATE_FAILURE, "RES_CONNECTION_SOCKET_CREATE_FAILURE");
+      break;
+    case 94:
+      HASH_RETURN(0x6460D48B93209DDELL, q_Memcached_OPT_RECV_TIMEOUT, "OPT_RECV_TIMEOUT");
+      break;
+    case 97:
+      HASH_RETURN(0x68D025242664C361LL, q_Memcached_GET_PRESERVE_ORDER, "GET_PRESERVE_ORDER");
+      break;
+    case 100:
+      HASH_RETURN(0x53A1149CE01E8C64LL, q_Memcached_HASH_DEFAULT, "HASH_DEFAULT");
+      break;
+    case 107:
+      HASH_RETURN(0x76B0604A2B4408EBLL, q_Memcached_OPT_BUFFER_WRITES, "OPT_BUFFER_WRITES");
+      break;
+    case 108:
+      HASH_RETURN(0x3C4C4E1BC9DFDCECLL, q_Memcached_HASH_FNV1A_32, "HASH_FNV1A_32");
+      HASH_RETURN(0x4197FC89C9F88DECLL, q_Memcached_RES_HOST_LOOKUP_FAILURE, "RES_HOST_LOOKUP_FAILURE");
+      break;
+    case 109:
+      HASH_RETURN(0x56C85759C5701DEDLL, q_Memcached_RES_DATA_EXISTS, "RES_DATA_EXISTS");
+      break;
+    case 110:
+      HASH_RETURN(0x153143A96D687E6ELL, q_Memcached_RES_NOTSTORED, "RES_NOTSTORED");
+      break;
+    case 112:
+      HASH_RETURN(0x2BB4CFA54A5085F0LL, q_Memcached_HASH_MD5, "HASH_MD5");
+      break;
+    case 113:
+      HASH_RETURN(0x74109B06DAD2F9F1LL, q_Memcached_RES_END, "RES_END");
+      break;
+    case 116:
+      HASH_RETURN(0x73ABA23A4A0C5D74LL, q_Memcached_OPT_SERIALIZER, "OPT_SERIALIZER");
+      break;
+    case 120:
+      HASH_RETURN(0x460A66958F0524F8LL, q_Memcached_RES_FAILURE, "RES_FAILURE");
+      break;
+    case 121:
+      HASH_RETURN(0x1C014F2A2E707EF9LL, q_Memcached_HAVE_IGBINARY, "HAVE_IGBINARY");
+      break;
+    case 123:
+      HASH_RETURN(0x0443DA24DAD42EFBLL, q_Memcached_OPT_CONNECT_TIMEOUT, "OPT_CONNECT_TIMEOUT");
+      HASH_RETURN(0x35B252ECC21E5F7BLL, q_Memcached_RES_PARTIAL_READ, "RES_PARTIAL_READ");
+      break;
+    case 126:
+      HASH_RETURN(0x7A68C36A2F5D27FELL, q_Memcached_HASH_MURMUR, "HASH_MURMUR");
+      break;
+    case 127:
+      HASH_RETURN(0x6948F797B210F37FLL, q_Memcached_RES_PAYLOAD_FAILURE, "RES_PAYLOAD_FAILURE");
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_constant(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Memcached
+IMPLEMENT_CLASS(Memcached)
+void c_Memcached::destruct() {
+  if (!inCtorDtor()) {
+    incRefCount();
+    try {
+      t___destruct();
+    } catch (...) { handle_destructor_exception();}
+  }
+}
+ObjectData *c_Memcached::cloneImpl() {
+  c_Memcached *obj = NEW(c_Memcached)();
+  cloneSet(obj);
+  return obj;
+}
+void c_Memcached::cloneSet(c_Memcached *clone) {
+  ObjectData::cloneSet(clone);
+}
+Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 127) {
+    case 2:
+      HASH_GUARD_LITSTR(0x38998A4858382D82LL, NAMSTR(s_sys_ss58382d82, "getMultiByKey")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = ref((*it)->refval(env));
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 4) return throw_wrong_arguments("getmultibykey", count, 2, 4, 1);
+        if (count <= 2) return (t_getmultibykey(a0, a1));
+        else if (count == 3) return (t_getmultibykey(a0, a1, ref(a2)));
+        else return (t_getmultibykey(a0, a1, ref(a2), a3));
+      }
+      break;
+    case 5:
+      HASH_GUARD_LITSTR(0x4F31CCB24341F605LL, NAMSTR(s_sys_ss4341f605, "getMulti")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = ref((*it)->refval(env));
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 3) return throw_wrong_arguments("getmulti", count, 1, 3, 1);
+        if (count <= 1) return (t_getmulti(a0));
+        else if (count == 2) return (t_getmulti(a0, ref(a1)));
+        else return (t_getmulti(a0, ref(a1), a2));
+      }
+      HASH_GUARD_LITSTR(0x6FB9087461635285LL, NAMSTR(s_sys_ss61635285, "setOption")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("setoption", count, 2, 2, 1);
+        return (t_setoption(a0, a1));
+      }
+      break;
+    case 7:
+      HASH_GUARD_LITSTR(0x06E29D289FC0AF87LL, NAMSTR(s_sys_ss603f5079, "addServers")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("addservers", count, 1, 1, 1);
+        return (t_addservers(a0));
+      }
+      break;
+    case 11:
+      HASH_GUARD_LITSTR(0x15D34462FC79458BLL, NAMSTR(s_sys_ss0386ba75, "add")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 3) return throw_wrong_arguments("add", count, 2, 3, 1);
+        if (count <= 2) return (t_add(a0, a1));
+        else return (t_add(a0, a1, a2));
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x1C80DDD00742930FLL, NAMSTR(s_sys_ss0742930f, "getServerByKey")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("getserverbykey", count, 1, 1, 1);
+        return (t_getserverbykey(a0));
+      }
+      break;
+    case 22:
+      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316, "getVersion")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getversion", 0, 1);
+        return (t_getversion());
+      }
+      break;
+    case 23:
+      HASH_GUARD_LITSTR(0x65C5EF328C77C917LL, NAMSTR(s_sys_ss738836e9, "prepend")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("prepend", count, 2, 2, 1);
+        return (t_prepend(a0, a1));
+      }
+      break;
+    case 25:
+      HASH_GUARD_LITSTR(0x3B7F419ECE80EE19LL, NAMSTR(s_sys_ss317f11e7, "setMulti")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("setmulti", count, 1, 2, 1);
+        if (count <= 1) return (t_setmulti(a0));
+        else return (t_setmulti(a0, a1));
+      }
+      break;
+    case 33:
+      HASH_GUARD_LITSTR(0x399A6427C2185621LL, NAMSTR(s_sys_ss3de7a9df, "set")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 3) return throw_wrong_arguments("set", count, 2, 3, 1);
+        if (count <= 2) return (t_set(a0, a1));
+        else return (t_set(a0, a1, a2));
+      }
+      HASH_GUARD_LITSTR(0x573E46DE52BFF8A1LL, NAMSTR(s_sys_ss52bff8a1, "cas")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 3 || count > 4) return throw_wrong_arguments("cas", count, 3, 4, 1);
+        if (count <= 3) return (t_cas(a0, a1, a2));
+        else return (t_cas(a0, a1, a2, a3));
+      }
+      break;
+    case 40:
+      HASH_GUARD_LITSTR(0x25DCCC35D69AD828LL, NAMSTR(s_sys_ss296527d8, "get")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = ref((*it)->refval(env));
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 3) return throw_wrong_arguments("get", count, 1, 3, 1);
+        if (count <= 1) return (t_get(a0));
+        else if (count == 2) return (t_get(a0, a1));
+        else return (t_get(a0, a1, ref(a2)));
+      }
+      break;
+    case 47:
+      HASH_GUARD_LITSTR(0x00FBB16B058D5C2FLL, NAMSTR(s_sys_ss058d5c2f, "getDelayedByKey")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 4) return throw_wrong_arguments("getdelayedbykey", count, 2, 4, 1);
+        if (count <= 2) return (t_getdelayedbykey(a0, a1));
+        else if (count == 3) return (t_getdelayedbykey(a0, a1, a2));
+        else return (t_getdelayedbykey(a0, a1, a2, a3));
+      }
+      break;
+    case 56:
+      HASH_GUARD_LITSTR(0x7F4CB6AD55C9F7B8LL, NAMSTR(s_sys_ss55c9f7b8, "setByKey")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 3 || count > 4) return throw_wrong_arguments("setbykey", count, 3, 4, 1);
+        if (count <= 3) return (t_setbykey(a0, a1, a2));
+        else return (t_setbykey(a0, a1, a2, a3));
+      }
+      break;
+    case 61:
+      HASH_GUARD_LITSTR(0x303DBA91556D773DLL, NAMSTR(s_sys_ss556d773d, "replaceByKey")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 3 || count > 4) return throw_wrong_arguments("replacebykey", count, 3, 4, 1);
+        if (count <= 3) return (t_replacebykey(a0, a1, a2));
+        else return (t_replacebykey(a0, a1, a2, a3));
+      }
+      break;
+    case 64:
+      HASH_GUARD_LITSTR(0x402DD1A85CAEA6C0LL, NAMSTR(s_sys_ss5caea6c0, "getOption")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("getoption", count, 1, 1, 1);
+        return (t_getoption(a0));
+      }
+      break;
+    case 65:
+      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss65eb8e41, "fetchAll")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("fetchall", 0, 1);
+        return (t_fetchall());
+      }
+      break;
+    case 66:
+      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss2dc69ec2, "append")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("append", count, 2, 2, 1);
+        return (t_append(a0, a1));
+      }
+      break;
+    case 68:
+      HASH_GUARD_LITSTR(0x5BB1AF59B155E144LL, NAMSTR(s_sys_ss4eaa1ebc, "getResultMessage")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getresultmessage", 0, 1);
+        return (t_getresultmessage());
+      }
+      break;
+    case 70:
+      HASH_GUARD_LITSTR(0x42FAC655280A6146LL, NAMSTR(s_sys_ss280a6146, "replace")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 3) return throw_wrong_arguments("replace", count, 2, 3, 1);
+        if (count <= 2) return (t_replace(a0, a1));
+        else return (t_replace(a0, a1, a2));
+      }
+      break;
+    case 71:
+      HASH_GUARD_LITSTR(0x39099707DF7945C7LL, NAMSTR(s_sys_ss2086ba39, "increment")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("increment", count, 1, 2, 1);
+        if (count <= 1) return (t_increment(a0));
+        else return (t_increment(a0, a1));
+      }
+      break;
+    case 83:
+      HASH_GUARD_LITSTR(0x1C660E5BFA6F55D3LL, NAMSTR(s_sys_ss0590aa2d, "delete")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("delete", count, 1, 2, 1);
+        if (count <= 1) return (t_delete(a0));
+        else return (t_delete(a0, a1));
+      }
+      break;
+    case 87:
+      HASH_GUARD_LITSTR(0x344A3DC90A5BD1D7LL, NAMSTR(s_sys_ss0a5bd1d7, "getByKey")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = ref((*it)->refval(env));
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 4) return throw_wrong_arguments("getbykey", count, 2, 4, 1);
+        if (count <= 2) return (t_getbykey(a0, a1));
+        else if (count == 3) return (t_getbykey(a0, a1, a2));
+        else return (t_getbykey(a0, a1, a2, ref(a3)));
+      }
+      HASH_GUARD_LITSTR(0x5044B38DE4461A57LL, NAMSTR(s_sys_ss1bb9e5a9, "getServerList")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getserverlist", 0, 1);
+        return (t_getserverlist());
+      }
+      break;
+    case 89:
+      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss7ce59bd9, "getStats")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getstats", 0, 1);
+        return (t_getstats());
+      }
+      break;
+    case 90:
+      HASH_GUARD_LITSTR(0x2A733FC12BA4C1DALL, NAMSTR(s_sys_ss2ba4c1da, "decrement")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("decrement", count, 1, 2, 1);
+        if (count <= 1) return (t_decrement(a0));
+        else return (t_decrement(a0, a1));
+      }
+      break;
+    case 95:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
+        if (count <= 0) return (t___construct(), null);
+        else return (t___construct(a0), null);
+      }
+      break;
+    case 96:
+      HASH_GUARD_LITSTR(0x086C8D4E944C0FE0LL, NAMSTR(s_sys_ss6bb3f020, "appendByKey")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("appendbykey", count, 3, 3, 1);
+        return (t_appendbykey(a0, a1, a2));
+      }
+      break;
+    case 102:
+      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss6237aae6, "addServer")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 3) return throw_wrong_arguments("addserver", count, 2, 3, 1);
+        if (count <= 2) return (t_addserver(a0, a1));
+        else return (t_addserver(a0, a1, a2));
+      }
+      break;
+    case 110:
+      HASH_GUARD_LITSTR(0x0EE9EC6BCA56B46ELL, NAMSTR(s_sys_ss35a94b92, "prependByKey")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("prependbykey", count, 3, 3, 1);
+        return (t_prependbykey(a0, a1, a2));
+      }
+      break;
+    case 114:
+      HASH_GUARD_LITSTR(0x3B59E52110B990F2LL, NAMSTR(s_sys_ss10b990f2, "deleteByKey")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 3) return throw_wrong_arguments("deletebykey", count, 2, 3, 1);
+        if (count <= 2) return (t_deletebykey(a0, a1));
+        else return (t_deletebykey(a0, a1, a2));
+      }
+      break;
+    case 115:
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      break;
+    case 118:
+      HASH_GUARD_LITSTR(0x18A8B25BF74FA276LL, NAMSTR(s_sys_ss08b05d8a, "getDelayed")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 3) return throw_wrong_arguments("getdelayed", count, 1, 3, 1);
+        if (count <= 1) return (t_getdelayed(a0));
+        else if (count == 2) return (t_getdelayed(a0, a1));
+        else return (t_getdelayed(a0, a1, a2));
+      }
+      break;
+    case 119:
+      HASH_GUARD_LITSTR(0x03F8E65E47097177LL, NAMSTR(s_sys_ss47097177, "addByKey")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 3 || count > 4) return throw_wrong_arguments("addbykey", count, 3, 4, 1);
+        if (count <= 3) return (t_addbykey(a0, a1, a2));
+        else return (t_addbykey(a0, a1, a2, a3));
+      }
+      HASH_GUARD_LITSTR(0x6AB1842FE8684D77LL, NAMSTR(s_sys_ss1797b289, "setMultiByKey")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 2 || count > 3) return throw_wrong_arguments("setmultibykey", count, 2, 3, 1);
+        if (count <= 2) return (t_setmultibykey(a0, a1));
+        else return (t_setmultibykey(a0, a1, a2));
+      }
+      break;
+    case 121:
+      HASH_GUARD_LITSTR(0x50BC469CFA9BF579LL, NAMSTR(s_sys_ss05640a87, "casByKey")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        Variant a4;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a4 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 4 || count > 5) return throw_wrong_arguments("casbykey", count, 4, 5, 1);
+        if (count <= 4) return (t_casbykey(a0, a1, a2, a3));
+        else return (t_casbykey(a0, a1, a2, a3, a4));
+      }
+      break;
+    case 122:
+      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss24ffa186, "flush")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("flush", 1, 1);
+        if (count <= 0) return (t_flush());
+        else return (t_flush(a0));
+      }
+      break;
+    case 123:
+      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("fetch", 0, 1);
+        return (t_fetch());
+      }
+      break;
+    case 125:
+      HASH_GUARD_LITSTR(0x3F460132535C00FDLL, NAMSTR(s_sys_ss535c00fd, "getResultCode")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("getresultcode", 0, 1);
+        return (t_getresultcode());
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_Memcached::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+CallInfo c_Memcached::ci_getmulti((void*)&c_Memcached::i_getmulti, (void*)&c_Memcached::ifa_getmulti, 3, 4, 0x0000000000000002LL);
+CallInfo c_Memcached::ci_getresultmessage((void*)&c_Memcached::i_getresultmessage, (void*)&c_Memcached::ifa_getresultmessage, 0, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_getresultcode((void*)&c_Memcached::i_getresultcode, (void*)&c_Memcached::ifa_getresultcode, 0, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_setbykey((void*)&c_Memcached::i_setbykey, (void*)&c_Memcached::ifa_setbykey, 4, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_addserver((void*)&c_Memcached::i_addserver, (void*)&c_Memcached::ifa_addserver, 3, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_set((void*)&c_Memcached::i_set, (void*)&c_Memcached::ifa_set, 3, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_appendbykey((void*)&c_Memcached::i_appendbykey, (void*)&c_Memcached::ifa_appendbykey, 3, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_getdelayed((void*)&c_Memcached::i_getdelayed, (void*)&c_Memcached::ifa_getdelayed, 3, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_setoption((void*)&c_Memcached::i_setoption, (void*)&c_Memcached::ifa_setoption, 2, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci___destruct((void*)&c_Memcached::i___destruct, (void*)&c_Memcached::ifa___destruct, 0, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_prepend((void*)&c_Memcached::i_prepend, (void*)&c_Memcached::ifa_prepend, 2, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_append((void*)&c_Memcached::i_append, (void*)&c_Memcached::ifa_append, 2, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci___construct((void*)&c_Memcached::i___construct, (void*)&c_Memcached::ifa___construct, 1, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_replacebykey((void*)&c_Memcached::i_replacebykey, (void*)&c_Memcached::ifa_replacebykey, 4, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_casbykey((void*)&c_Memcached::i_casbykey, (void*)&c_Memcached::ifa_casbykey, 5, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_increment((void*)&c_Memcached::i_increment, (void*)&c_Memcached::ifa_increment, 2, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_decrement((void*)&c_Memcached::i_decrement, (void*)&c_Memcached::ifa_decrement, 2, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_getstats((void*)&c_Memcached::i_getstats, (void*)&c_Memcached::ifa_getstats, 0, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_getdelayedbykey((void*)&c_Memcached::i_getdelayedbykey, (void*)&c_Memcached::ifa_getdelayedbykey, 4, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_setmulti((void*)&c_Memcached::i_setmulti, (void*)&c_Memcached::ifa_setmulti, 2, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_getbykey((void*)&c_Memcached::i_getbykey, (void*)&c_Memcached::ifa_getbykey, 4, 4, 0x0000000000000008LL);
+CallInfo c_Memcached::ci_deletebykey((void*)&c_Memcached::i_deletebykey, (void*)&c_Memcached::ifa_deletebykey, 3, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_get((void*)&c_Memcached::i_get, (void*)&c_Memcached::ifa_get, 3, 4, 0x0000000000000004LL);
+CallInfo c_Memcached::ci_getoption((void*)&c_Memcached::i_getoption, (void*)&c_Memcached::ifa_getoption, 1, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_add((void*)&c_Memcached::i_add, (void*)&c_Memcached::ifa_add, 3, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_getserverbykey((void*)&c_Memcached::i_getserverbykey, (void*)&c_Memcached::ifa_getserverbykey, 1, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_getserverlist((void*)&c_Memcached::i_getserverlist, (void*)&c_Memcached::ifa_getserverlist, 0, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_addbykey((void*)&c_Memcached::i_addbykey, (void*)&c_Memcached::ifa_addbykey, 4, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_getversion((void*)&c_Memcached::i_getversion, (void*)&c_Memcached::ifa_getversion, 0, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_fetchall((void*)&c_Memcached::i_fetchall, (void*)&c_Memcached::ifa_fetchall, 0, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_delete((void*)&c_Memcached::i_delete, (void*)&c_Memcached::ifa_delete, 2, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_setmultibykey((void*)&c_Memcached::i_setmultibykey, (void*)&c_Memcached::ifa_setmultibykey, 3, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_getmultibykey((void*)&c_Memcached::i_getmultibykey, (void*)&c_Memcached::ifa_getmultibykey, 4, 4, 0x0000000000000004LL);
+CallInfo c_Memcached::ci_fetch((void*)&c_Memcached::i_fetch, (void*)&c_Memcached::ifa_fetch, 0, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_addservers((void*)&c_Memcached::i_addservers, (void*)&c_Memcached::ifa_addservers, 1, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_replace((void*)&c_Memcached::i_replace, (void*)&c_Memcached::ifa_replace, 3, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_flush((void*)&c_Memcached::i_flush, (void*)&c_Memcached::ifa_flush, 1, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_cas((void*)&c_Memcached::i_cas, (void*)&c_Memcached::ifa_cas, 4, 4, 0x0000000000000000LL);
+CallInfo c_Memcached::ci_prependbykey((void*)&c_Memcached::i_prependbykey, (void*)&c_Memcached::ifa_prependbykey, 3, 4, 0x0000000000000000LL);
+Variant c_Memcached::i_getmulti(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 3) return throw_wrong_arguments("getmulti", count, 1, 3, 1);
+  const_cast<Array&>(params).escalate(true);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (self->t_getmulti(arg0));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 2) return (self->t_getmulti(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_getmulti(arg0, arg1, arg2));
+  }
+}
+Variant c_Memcached::i_getresultmessage(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("getresultmessage", 0, 1);
+  return (self->t_getresultmessage());
+}
+Variant c_Memcached::i_getresultcode(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("getresultcode", 0, 1);
+  return (self->t_getresultcode());
+}
+Variant c_Memcached::i_setbykey(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 3 || count > 4) return throw_wrong_arguments("setbykey", count, 3, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (self->t_setbykey(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_setbykey(arg0, arg1, arg2, arg3));
+  }
+}
+Variant c_Memcached::i_addserver(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 3) return throw_wrong_arguments("addserver", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (self->t_addserver(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_addserver(arg0, arg1, arg2));
+  }
+}
+Variant c_Memcached::i_set(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 3) return throw_wrong_arguments("set", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (self->t_set(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_set(arg0, arg1, arg2));
+  }
+}
+Variant c_Memcached::i_appendbykey(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 3) return throw_wrong_arguments("appendbykey", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_appendbykey(arg0, arg1, arg2));
+  }
+}
+Variant c_Memcached::i_getdelayed(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 3) return throw_wrong_arguments("getdelayed", count, 1, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (self->t_getdelayed(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 2) return (self->t_getdelayed(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_getdelayed(arg0, arg1, arg2));
+  }
+}
+Variant c_Memcached::i_setoption(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 2) return throw_wrong_arguments("setoption", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_setoption(arg0, arg1));
+  }
+}
+Variant c_Memcached::i___destruct(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+  return (self->t___destruct());
+}
+Variant c_Memcached::i_prepend(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 2) return throw_wrong_arguments("prepend", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_prepend(arg0, arg1));
+  }
+}
+Variant c_Memcached::i_append(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 2) return throw_wrong_arguments("append", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_append(arg0, arg1));
+  }
+}
+Variant c_Memcached::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (self->t___construct(), null);
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___construct(arg0), null);
+  }
+}
+Variant c_Memcached::i_replacebykey(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 3 || count > 4) return throw_wrong_arguments("replacebykey", count, 3, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (self->t_replacebykey(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_replacebykey(arg0, arg1, arg2, arg3));
+  }
+}
+Variant c_Memcached::i_casbykey(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 4 || count > 5) return throw_wrong_arguments("casbykey", count, 4, 5, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 4) return (self->t_casbykey(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_casbykey(arg0, arg1, arg2, arg3, arg4));
+  }
+}
+Variant c_Memcached::i_increment(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 2) return throw_wrong_arguments("increment", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (self->t_increment(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_increment(arg0, arg1));
+  }
+}
+Variant c_Memcached::i_decrement(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 2) return throw_wrong_arguments("decrement", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (self->t_decrement(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_decrement(arg0, arg1));
+  }
+}
+Variant c_Memcached::i_getstats(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("getstats", 0, 1);
+  return (self->t_getstats());
+}
+Variant c_Memcached::i_getdelayedbykey(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 4) return throw_wrong_arguments("getdelayedbykey", count, 2, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (self->t_getdelayedbykey(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 3) return (self->t_getdelayedbykey(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_getdelayedbykey(arg0, arg1, arg2, arg3));
+  }
+}
+Variant c_Memcached::i_setmulti(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 2) return throw_wrong_arguments("setmulti", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (self->t_setmulti(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_setmulti(arg0, arg1));
+  }
+}
+Variant c_Memcached::i_getbykey(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 4) return throw_wrong_arguments("getbykey", count, 2, 4, 1);
+  const_cast<Array&>(params).escalate(true);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (self->t_getbykey(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 3) return (self->t_getbykey(arg0, arg1, arg2));
+    CVarRef arg3(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (self->t_getbykey(arg0, arg1, arg2, arg3));
+  }
+}
+Variant c_Memcached::i_deletebykey(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 3) return throw_wrong_arguments("deletebykey", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (self->t_deletebykey(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_deletebykey(arg0, arg1, arg2));
+  }
+}
+Variant c_Memcached::i_get(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 3) return throw_wrong_arguments("get", count, 1, 3, 1);
+  const_cast<Array&>(params).escalate(true);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (self->t_get(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 2) return (self->t_get(arg0, arg1));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (self->t_get(arg0, arg1, arg2));
+  }
+}
+Variant c_Memcached::i_getoption(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("getoption", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_getoption(arg0));
+  }
+}
+Variant c_Memcached::i_add(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 3) return throw_wrong_arguments("add", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (self->t_add(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_add(arg0, arg1, arg2));
+  }
+}
+Variant c_Memcached::i_getserverbykey(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("getserverbykey", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_getserverbykey(arg0));
+  }
+}
+Variant c_Memcached::i_getserverlist(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("getserverlist", 0, 1);
+  return (self->t_getserverlist());
+}
+Variant c_Memcached::i_addbykey(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 3 || count > 4) return throw_wrong_arguments("addbykey", count, 3, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (self->t_addbykey(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_addbykey(arg0, arg1, arg2, arg3));
+  }
+}
+Variant c_Memcached::i_getversion(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("getversion", 0, 1);
+  return (self->t_getversion());
+}
+Variant c_Memcached::i_fetchall(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("fetchall", 0, 1);
+  return (self->t_fetchall());
+}
+Variant c_Memcached::i_delete(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 2) return throw_wrong_arguments("delete", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (self->t_delete(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_delete(arg0, arg1));
+  }
+}
+Variant c_Memcached::i_setmultibykey(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 3) return throw_wrong_arguments("setmultibykey", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (self->t_setmultibykey(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_setmultibykey(arg0, arg1, arg2));
+  }
+}
+Variant c_Memcached::i_getmultibykey(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 4) return throw_wrong_arguments("getmultibykey", count, 2, 4, 1);
+  const_cast<Array&>(params).escalate(true);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (self->t_getmultibykey(arg0, arg1));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 3) return (self->t_getmultibykey(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_getmultibykey(arg0, arg1, arg2, arg3));
+  }
+}
+Variant c_Memcached::i_fetch(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("fetch", 0, 1);
+  return (self->t_fetch());
+}
+Variant c_Memcached::i_addservers(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("addservers", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_addservers(arg0));
+  }
+}
+Variant c_Memcached::i_replace(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 3) return throw_wrong_arguments("replace", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (self->t_replace(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_replace(arg0, arg1, arg2));
+  }
+}
+Variant c_Memcached::i_flush(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 1) return throw_toomany_arguments("flush", 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (self->t_flush());
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_flush(arg0));
+  }
+}
+Variant c_Memcached::i_cas(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 3 || count > 4) return throw_wrong_arguments("cas", count, 3, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (self->t_cas(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_cas(arg0, arg1, arg2, arg3));
+  }
+}
+Variant c_Memcached::i_prependbykey(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 3) return throw_wrong_arguments("prependbykey", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_prependbykey(arg0, arg1, arg2));
+  }
+}
+Variant c_Memcached::ifa_getmulti(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 3) return throw_wrong_arguments("getmulti", count, 1, 3, 1);
+  if (count <= 1) return (self->t_getmulti(a0));
+  if (count == 2) return (self->t_getmulti(a0, ref(a1)));
+  return (self->t_getmulti(a0, ref(a1), a2));
+}
+Variant c_Memcached::ifa_getresultmessage(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("getresultmessage", 0, 1);
+  return (self->t_getresultmessage());
+}
+Variant c_Memcached::ifa_getresultcode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("getresultcode", 0, 1);
+  return (self->t_getresultcode());
+}
+Variant c_Memcached::ifa_setbykey(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 3 || count > 4) return throw_wrong_arguments("setbykey", count, 3, 4, 1);
+  if (count <= 3) return (self->t_setbykey(a0, a1, a2));
+  return (self->t_setbykey(a0, a1, a2, a3));
+}
+Variant c_Memcached::ifa_addserver(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 3) return throw_wrong_arguments("addserver", count, 2, 3, 1);
+  if (count <= 2) return (self->t_addserver(a0, a1));
+  return (self->t_addserver(a0, a1, a2));
+}
+Variant c_Memcached::ifa_set(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 3) return throw_wrong_arguments("set", count, 2, 3, 1);
+  if (count <= 2) return (self->t_set(a0, a1));
+  return (self->t_set(a0, a1, a2));
+}
+Variant c_Memcached::ifa_appendbykey(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 3) return throw_wrong_arguments("appendbykey", count, 3, 3, 1);
+  return (self->t_appendbykey(a0, a1, a2));
+}
+Variant c_Memcached::ifa_getdelayed(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 3) return throw_wrong_arguments("getdelayed", count, 1, 3, 1);
+  if (count <= 1) return (self->t_getdelayed(a0));
+  if (count == 2) return (self->t_getdelayed(a0, a1));
+  return (self->t_getdelayed(a0, a1, a2));
+}
+Variant c_Memcached::ifa_setoption(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 2) return throw_wrong_arguments("setoption", count, 2, 2, 1);
+  return (self->t_setoption(a0, a1));
+}
+Variant c_Memcached::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+  return (self->t___destruct());
+}
+Variant c_Memcached::ifa_prepend(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 2) return throw_wrong_arguments("prepend", count, 2, 2, 1);
+  return (self->t_prepend(a0, a1));
+}
+Variant c_Memcached::ifa_append(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 2) return throw_wrong_arguments("append", count, 2, 2, 1);
+  return (self->t_append(a0, a1));
+}
+Variant c_Memcached::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
+  if (count <= 0) return (self->t___construct(), null);
+  return (self->t___construct(a0), null);
+}
+Variant c_Memcached::ifa_replacebykey(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 3 || count > 4) return throw_wrong_arguments("replacebykey", count, 3, 4, 1);
+  if (count <= 3) return (self->t_replacebykey(a0, a1, a2));
+  return (self->t_replacebykey(a0, a1, a2, a3));
+}
+Variant c_Memcached::ifa_casbykey(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 4 || count > 5) return throw_wrong_arguments("casbykey", count, 4, 5, 1);
+  if (count <= 4) return (self->t_casbykey(a0, a1, a2, a3));
+  return (self->t_casbykey(a0, a1, a2, a3, a4));
+}
+Variant c_Memcached::ifa_increment(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 2) return throw_wrong_arguments("increment", count, 1, 2, 1);
+  if (count <= 1) return (self->t_increment(a0));
+  return (self->t_increment(a0, a1));
+}
+Variant c_Memcached::ifa_decrement(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 2) return throw_wrong_arguments("decrement", count, 1, 2, 1);
+  if (count <= 1) return (self->t_decrement(a0));
+  return (self->t_decrement(a0, a1));
+}
+Variant c_Memcached::ifa_getstats(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("getstats", 0, 1);
+  return (self->t_getstats());
+}
+Variant c_Memcached::ifa_getdelayedbykey(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 4) return throw_wrong_arguments("getdelayedbykey", count, 2, 4, 1);
+  if (count <= 2) return (self->t_getdelayedbykey(a0, a1));
+  if (count == 3) return (self->t_getdelayedbykey(a0, a1, a2));
+  return (self->t_getdelayedbykey(a0, a1, a2, a3));
+}
+Variant c_Memcached::ifa_setmulti(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 2) return throw_wrong_arguments("setmulti", count, 1, 2, 1);
+  if (count <= 1) return (self->t_setmulti(a0));
+  return (self->t_setmulti(a0, a1));
+}
+Variant c_Memcached::ifa_getbykey(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 4) return throw_wrong_arguments("getbykey", count, 2, 4, 1);
+  if (count <= 2) return (self->t_getbykey(a0, a1));
+  if (count == 3) return (self->t_getbykey(a0, a1, a2));
+  return (self->t_getbykey(a0, a1, a2, ref(a3)));
+}
+Variant c_Memcached::ifa_deletebykey(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 3) return throw_wrong_arguments("deletebykey", count, 2, 3, 1);
+  if (count <= 2) return (self->t_deletebykey(a0, a1));
+  return (self->t_deletebykey(a0, a1, a2));
+}
+Variant c_Memcached::ifa_get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 3) return throw_wrong_arguments("get", count, 1, 3, 1);
+  if (count <= 1) return (self->t_get(a0));
+  if (count == 2) return (self->t_get(a0, a1));
+  return (self->t_get(a0, a1, ref(a2)));
+}
+Variant c_Memcached::ifa_getoption(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("getoption", count, 1, 1, 1);
+  return (self->t_getoption(a0));
+}
+Variant c_Memcached::ifa_add(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 3) return throw_wrong_arguments("add", count, 2, 3, 1);
+  if (count <= 2) return (self->t_add(a0, a1));
+  return (self->t_add(a0, a1, a2));
+}
+Variant c_Memcached::ifa_getserverbykey(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("getserverbykey", count, 1, 1, 1);
+  return (self->t_getserverbykey(a0));
+}
+Variant c_Memcached::ifa_getserverlist(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("getserverlist", 0, 1);
+  return (self->t_getserverlist());
+}
+Variant c_Memcached::ifa_addbykey(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 3 || count > 4) return throw_wrong_arguments("addbykey", count, 3, 4, 1);
+  if (count <= 3) return (self->t_addbykey(a0, a1, a2));
+  return (self->t_addbykey(a0, a1, a2, a3));
+}
+Variant c_Memcached::ifa_getversion(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("getversion", 0, 1);
+  return (self->t_getversion());
+}
+Variant c_Memcached::ifa_fetchall(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("fetchall", 0, 1);
+  return (self->t_fetchall());
+}
+Variant c_Memcached::ifa_delete(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 2) return throw_wrong_arguments("delete", count, 1, 2, 1);
+  if (count <= 1) return (self->t_delete(a0));
+  return (self->t_delete(a0, a1));
+}
+Variant c_Memcached::ifa_setmultibykey(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 3) return throw_wrong_arguments("setmultibykey", count, 2, 3, 1);
+  if (count <= 2) return (self->t_setmultibykey(a0, a1));
+  return (self->t_setmultibykey(a0, a1, a2));
+}
+Variant c_Memcached::ifa_getmultibykey(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 4) return throw_wrong_arguments("getmultibykey", count, 2, 4, 1);
+  if (count <= 2) return (self->t_getmultibykey(a0, a1));
+  if (count == 3) return (self->t_getmultibykey(a0, a1, ref(a2)));
+  return (self->t_getmultibykey(a0, a1, ref(a2), a3));
+}
+Variant c_Memcached::ifa_fetch(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("fetch", 0, 1);
+  return (self->t_fetch());
+}
+Variant c_Memcached::ifa_addservers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("addservers", count, 1, 1, 1);
+  return (self->t_addservers(a0));
+}
+Variant c_Memcached::ifa_replace(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 2 || count > 3) return throw_wrong_arguments("replace", count, 2, 3, 1);
+  if (count <= 2) return (self->t_replace(a0, a1));
+  return (self->t_replace(a0, a1, a2));
+}
+Variant c_Memcached::ifa_flush(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 1) return throw_toomany_arguments("flush", 1, 1);
+  if (count <= 0) return (self->t_flush());
+  return (self->t_flush(a0));
+}
+Variant c_Memcached::ifa_cas(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 3 || count > 4) return throw_wrong_arguments("cas", count, 3, 4, 1);
+  if (count <= 3) return (self->t_cas(a0, a1, a2));
+  return (self->t_cas(a0, a1, a2, a3));
+}
+Variant c_Memcached::ifa_prependbykey(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Memcached *self = NULL;
+  p_Memcached pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Memcached*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 3) return throw_wrong_arguments("prependbykey", count, 3, 3, 1);
+  return (self->t_prependbykey(a0, a1, a2));
+}
+bool c_Memcached::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 127) {
+    case 2:
+      HASH_GUARD_LITSTR(0x38998A4858382D82LL, NAMSTR(s_sys_ss58382d82, "getMultiByKey")) {
+        mcp.ci = &c_Memcached::ci_getmultibykey;
+        return true;
+      }
+      break;
+    case 5:
+      HASH_GUARD_LITSTR(0x4F31CCB24341F605LL, NAMSTR(s_sys_ss4341f605, "getMulti")) {
+        mcp.ci = &c_Memcached::ci_getmulti;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x6FB9087461635285LL, NAMSTR(s_sys_ss61635285, "setOption")) {
+        mcp.ci = &c_Memcached::ci_setoption;
+        return true;
+      }
+      break;
+    case 7:
+      HASH_GUARD_LITSTR(0x06E29D289FC0AF87LL, NAMSTR(s_sys_ss603f5079, "addServers")) {
+        mcp.ci = &c_Memcached::ci_addservers;
+        return true;
+      }
+      break;
+    case 11:
+      HASH_GUARD_LITSTR(0x15D34462FC79458BLL, NAMSTR(s_sys_ss0386ba75, "add")) {
+        mcp.ci = &c_Memcached::ci_add;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x1C80DDD00742930FLL, NAMSTR(s_sys_ss0742930f, "getServerByKey")) {
+        mcp.ci = &c_Memcached::ci_getserverbykey;
+        return true;
+      }
+      break;
+    case 22:
+      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316, "getVersion")) {
+        mcp.ci = &c_Memcached::ci_getversion;
+        return true;
+      }
+      break;
+    case 23:
+      HASH_GUARD_LITSTR(0x65C5EF328C77C917LL, NAMSTR(s_sys_ss738836e9, "prepend")) {
+        mcp.ci = &c_Memcached::ci_prepend;
+        return true;
+      }
+      break;
+    case 25:
+      HASH_GUARD_LITSTR(0x3B7F419ECE80EE19LL, NAMSTR(s_sys_ss317f11e7, "setMulti")) {
+        mcp.ci = &c_Memcached::ci_setmulti;
+        return true;
+      }
+      break;
+    case 33:
+      HASH_GUARD_LITSTR(0x399A6427C2185621LL, NAMSTR(s_sys_ss3de7a9df, "set")) {
+        mcp.ci = &c_Memcached::ci_set;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x573E46DE52BFF8A1LL, NAMSTR(s_sys_ss52bff8a1, "cas")) {
+        mcp.ci = &c_Memcached::ci_cas;
+        return true;
+      }
+      break;
+    case 40:
+      HASH_GUARD_LITSTR(0x25DCCC35D69AD828LL, NAMSTR(s_sys_ss296527d8, "get")) {
+        mcp.ci = &c_Memcached::ci_get;
+        return true;
+      }
+      break;
+    case 47:
+      HASH_GUARD_LITSTR(0x00FBB16B058D5C2FLL, NAMSTR(s_sys_ss058d5c2f, "getDelayedByKey")) {
+        mcp.ci = &c_Memcached::ci_getdelayedbykey;
+        return true;
+      }
+      break;
+    case 56:
+      HASH_GUARD_LITSTR(0x7F4CB6AD55C9F7B8LL, NAMSTR(s_sys_ss55c9f7b8, "setByKey")) {
+        mcp.ci = &c_Memcached::ci_setbykey;
+        return true;
+      }
+      break;
+    case 61:
+      HASH_GUARD_LITSTR(0x303DBA91556D773DLL, NAMSTR(s_sys_ss556d773d, "replaceByKey")) {
+        mcp.ci = &c_Memcached::ci_replacebykey;
+        return true;
+      }
+      break;
+    case 64:
+      HASH_GUARD_LITSTR(0x402DD1A85CAEA6C0LL, NAMSTR(s_sys_ss5caea6c0, "getOption")) {
+        mcp.ci = &c_Memcached::ci_getoption;
+        return true;
+      }
+      break;
+    case 65:
+      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss65eb8e41, "fetchAll")) {
+        mcp.ci = &c_Memcached::ci_fetchall;
+        return true;
+      }
+      break;
+    case 66:
+      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss2dc69ec2, "append")) {
+        mcp.ci = &c_Memcached::ci_append;
+        return true;
+      }
+      break;
+    case 68:
+      HASH_GUARD_LITSTR(0x5BB1AF59B155E144LL, NAMSTR(s_sys_ss4eaa1ebc, "getResultMessage")) {
+        mcp.ci = &c_Memcached::ci_getresultmessage;
+        return true;
+      }
+      break;
+    case 70:
+      HASH_GUARD_LITSTR(0x42FAC655280A6146LL, NAMSTR(s_sys_ss280a6146, "replace")) {
+        mcp.ci = &c_Memcached::ci_replace;
+        return true;
+      }
+      break;
+    case 71:
+      HASH_GUARD_LITSTR(0x39099707DF7945C7LL, NAMSTR(s_sys_ss2086ba39, "increment")) {
+        mcp.ci = &c_Memcached::ci_increment;
+        return true;
+      }
+      break;
+    case 83:
+      HASH_GUARD_LITSTR(0x1C660E5BFA6F55D3LL, NAMSTR(s_sys_ss0590aa2d, "delete")) {
+        mcp.ci = &c_Memcached::ci_delete;
+        return true;
+      }
+      break;
+    case 87:
+      HASH_GUARD_LITSTR(0x344A3DC90A5BD1D7LL, NAMSTR(s_sys_ss0a5bd1d7, "getByKey")) {
+        mcp.ci = &c_Memcached::ci_getbykey;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x5044B38DE4461A57LL, NAMSTR(s_sys_ss1bb9e5a9, "getServerList")) {
+        mcp.ci = &c_Memcached::ci_getserverlist;
+        return true;
+      }
+      break;
+    case 89:
+      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss7ce59bd9, "getStats")) {
+        mcp.ci = &c_Memcached::ci_getstats;
+        return true;
+      }
+      break;
+    case 90:
+      HASH_GUARD_LITSTR(0x2A733FC12BA4C1DALL, NAMSTR(s_sys_ss2ba4c1da, "decrement")) {
+        mcp.ci = &c_Memcached::ci_decrement;
+        return true;
+      }
+      break;
+    case 95:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_Memcached::ci___construct;
+        return true;
+      }
+      break;
+    case 96:
+      HASH_GUARD_LITSTR(0x086C8D4E944C0FE0LL, NAMSTR(s_sys_ss6bb3f020, "appendByKey")) {
+        mcp.ci = &c_Memcached::ci_appendbykey;
+        return true;
+      }
+      break;
+    case 102:
+      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss6237aae6, "addServer")) {
+        mcp.ci = &c_Memcached::ci_addserver;
+        return true;
+      }
+      break;
+    case 110:
+      HASH_GUARD_LITSTR(0x0EE9EC6BCA56B46ELL, NAMSTR(s_sys_ss35a94b92, "prependByKey")) {
+        mcp.ci = &c_Memcached::ci_prependbykey;
+        return true;
+      }
+      break;
+    case 114:
+      HASH_GUARD_LITSTR(0x3B59E52110B990F2LL, NAMSTR(s_sys_ss10b990f2, "deleteByKey")) {
+        mcp.ci = &c_Memcached::ci_deletebykey;
+        return true;
+      }
+      break;
+    case 115:
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+        mcp.ci = &c_Memcached::ci___destruct;
+        return true;
+      }
+      break;
+    case 118:
+      HASH_GUARD_LITSTR(0x18A8B25BF74FA276LL, NAMSTR(s_sys_ss08b05d8a, "getDelayed")) {
+        mcp.ci = &c_Memcached::ci_getdelayed;
+        return true;
+      }
+      break;
+    case 119:
+      HASH_GUARD_LITSTR(0x03F8E65E47097177LL, NAMSTR(s_sys_ss47097177, "addByKey")) {
+        mcp.ci = &c_Memcached::ci_addbykey;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x6AB1842FE8684D77LL, NAMSTR(s_sys_ss1797b289, "setMultiByKey")) {
+        mcp.ci = &c_Memcached::ci_setmultibykey;
+        return true;
+      }
+      break;
+    case 121:
+      HASH_GUARD_LITSTR(0x50BC469CFA9BF579LL, NAMSTR(s_sys_ss05640a87, "casByKey")) {
+        mcp.ci = &c_Memcached::ci_casbykey;
+        return true;
+      }
+      break;
+    case 122:
+      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss24ffa186, "flush")) {
+        mcp.ci = &c_Memcached::ci_flush;
+        return true;
+      }
+      break;
+    case 123:
+      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
+        mcp.ci = &c_Memcached::ci_fetch;
+        return true;
+      }
+      break;
+    case 125:
+      HASH_GUARD_LITSTR(0x3F460132535C00FDLL, NAMSTR(s_sys_ss535c00fd, "getResultCode")) {
+        mcp.ci = &c_Memcached::ci_getresultcode;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_get_call_info(mcp, hash);
+}
+bool c_Memcached::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
+}
+c_Memcached *c_Memcached::create(String a0) {
+  CountableHelper h(this);
+  init();
+  t___construct(a0);
+  return this;
+}
+ObjectData *c_Memcached::dynCreate(CArrRef params, bool construct /* = true */) {
+  init();
+  if (construct) {
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count > 1) throw_toomany_arguments("__construct", 1, 2);
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      if (count <= 0) {
+        (t___construct());
+        break;
+      }
+      CVarRef arg0((ad->getValue(pos)));
+      (t___construct(arg0));
+    } while (false);
+  }
+  return this;
+}
+void c_Memcached::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) throw_toomany_arguments("__construct", 1, 2);
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) {
+      (t___construct());
+      break;
+    }
+    CVarRef arg0((ad->getValue(pos)));
+    (t___construct(arg0));
+  } while (false);
+}
+void c_Memcached::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_Memcached::ci___construct;
+  mcp.obj = this;
+}
+void c_Memcached::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) throw_toomany_arguments("__construct", 1, 1);
+  if (count <= 0) (t___construct(), null);
+  else (t___construct(a0), null);
+}
+struct ObjectStaticCallbacks cw_Memcached = {
+  c_Memcached::os_getInit,
+  c_Memcached::os_get,
+  c_Memcached::os_lval,
+  c_Memcached::os_invoke,
+  c_Memcached::os_constant,
+  c_Memcached::os_get_call_info
+};
 Object co_DOMComment(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_DOMComment)())->dynCreate(params, init));
 }
@@ -14129,7 +16803,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss7ce59bd9, "getstats")) {
+      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss7ce59bd9_1, "getstats")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -14256,7 +16930,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 38:
-      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss6237aae6, "addserver")) {
+      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss6237aae6_1, "addserver")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -15244,7 +17918,7 @@ bool c_Memcache::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss7ce59bd9, "getstats")) {
+      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss7ce59bd9_1, "getstats")) {
         mcp.ci = &c_Memcache::ci_getstats;
         return true;
       }
@@ -15274,7 +17948,7 @@ bool c_Memcache::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
       }
       break;
     case 38:
-      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss6237aae6, "addserver")) {
+      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss6237aae6_1, "addserver")) {
         mcp.ci = &c_Memcache::ci_addserver;
         return true;
       }
@@ -15823,7 +18497,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 1:
-      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss65eb8e41, "fetchall")) {
+      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss65eb8e41_1, "fetchall")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -17144,7 +19818,7 @@ bool c_PDOStatement::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 1:
-      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss65eb8e41, "fetchall")) {
+      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss65eb8e41_1, "fetchall")) {
         mcp.ci = &c_PDOStatement::ci_fetchall;
         return true;
       }
@@ -32186,6 +34860,9 @@ Variant get_builtin_class_var_init(const char *s, const char *var) {
     case 73:
       HASH_GET_CLASS_VAR_INIT(0x5AA2EE582E0D3849LL, UnexpectedValueException);
       break;
+    case 74:
+      HASH_GET_CLASS_VAR_INIT(0x72A49A22C192034ALL, Memcached);
+      break;
     case 75:
       HASH_GET_CLASS_VAR_INIT(0x4860DC2F9B0E6D4BLL, LogicException);
       break;
@@ -32420,6 +35097,9 @@ Object create_builtin_object_only(const char *s, ObjectData* root /* = NULL*/) {
       break;
     case 73:
       HASH_CREATE_OBJECT_ONLY(0x5AA2EE582E0D3849LL, UnexpectedValueException);
+      break;
+    case 74:
+      HASH_CREATE_OBJECT_ONLY(0x72A49A22C192034ALL, Memcached);
       break;
     case 75:
       HASH_CREATE_OBJECT_ONLY(0x4860DC2F9B0E6D4BLL, LogicException);
@@ -32656,6 +35336,9 @@ bool get_call_info_static_method_builtin(MethodCallPackage &mcp) {
       break;
     case 73:
       HASH_CALL_INFO_STATIC_METHOD(0x5AA2EE582E0D3849LL, UnexpectedValueException);
+      break;
+    case 74:
+      HASH_CALL_INFO_STATIC_METHOD(0x72A49A22C192034ALL, Memcached);
       break;
     case 75:
       HASH_CALL_INFO_STATIC_METHOD(0x4860DC2F9B0E6D4BLL, LogicException);
@@ -32894,6 +35577,9 @@ const ObjectStaticCallbacks * get_builtin_object_static_callbacks(const char *s)
       break;
     case 73:
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x5AA2EE582E0D3849LL, UnexpectedValueException);
+      break;
+    case 74:
+      HASH_GET_OBJECT_STATIC_CALLBACKS(0x72A49A22C192034ALL, Memcached);
       break;
     case 75:
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x4860DC2F9B0E6D4BLL, LogicException);

@@ -21,7 +21,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ss25b9517c("multi_add");
 StaticString s_sys_ss25c683eb("hasChildren");
 StaticString s_sys_ss25cd0249("isAbstract");
 StaticString s_sys_ss25d241c5("setInfoClass");
@@ -65,6 +64,7 @@ StaticString s_sys_ss30fa5484("remove_accesspoint");
 StaticString s_sys_ss31035a54("__getlastresponse");
 StaticString s_sys_ss310bf058("writeElementNS");
 StaticString s_sys_ss3132c356("getConstructor");
+StaticString s_sys_ss317f11e7("setMulti");
 StaticString s_sys_ss3181607a("flock");
 StaticString s_sys_ss3195c8e2("line2");
 StaticString s_sys_ss31b5b176("xinclude");
@@ -82,6 +82,9 @@ StaticString s_sys_ss3512adea("Property ");
 StaticString s_sys_ss35281082("reflectionfunctionabstract");
 StaticString s_sys_ss352f67ce("createEntityReference");
 StaticString s_sys_ss352fe1c6("\000SplObjectStorage\000index", 23);
+StaticString s_sys_ss3536c850("get_multi");
+StaticString s_sys_ss358b69c2("addsoapheader");
+StaticString s_sys_ss35a94b92("prependByKey");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

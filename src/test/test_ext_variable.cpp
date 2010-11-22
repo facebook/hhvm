@@ -16,6 +16,7 @@
 
 #include <test/test_ext_variable.h>
 #include <runtime/ext/ext_variable.h>
+#include <runtime/ext/ext_string.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -248,18 +249,51 @@ bool TestExtVariable::test_print_r() {
 }
 
 bool TestExtVariable::test_var_export() {
-  Variant v = CREATE_MAP3("a","apple","b",2,"c",CREATE_VECTOR3(1,"y",3));
-  VS(f_var_export(v, true),
-     "array (\n"
-     "  'a' => 'apple',\n"
-     "  'b' => 2,\n"
-     "  'c' => \n"
-     "  array (\n"
-     "    0 => 1,\n"
-     "    1 => 'y',\n"
-     "    2 => 3,\n"
-     "  ),\n"
-     ")");
+  {
+    Variant v = CREATE_MAP3("a","apple","b",2,"c",CREATE_VECTOR3(1,"y",3));
+    VS(f_var_export(v, true),
+       "array (\n"
+       "  'a' => 'apple',\n"
+       "  'b' => 2,\n"
+       "  'c' => \n"
+       "  array (\n"
+       "    0 => 1,\n"
+       "    1 => 'y',\n"
+       "    2 => 3,\n"
+       "  ),\n"
+       ")");
+  }
+  {
+    String current_locale = f_setlocale(2, k_LC_ALL, "0");
+    if (f_setlocale(2, k_LC_ALL, CREATE_VECTOR5("de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","de_DE.UTF-8"))) {
+      Variant v = CREATE_MAP3("a", -1, "b", 10.5, "c", 5.6);
+      VS(f_var_export(v, true),
+         "array (\n"
+         "  'a' => -1,\n"
+         "  'b' => 10.5,\n"
+         "  'c' => 5.6,\n"
+         ")");
+      f_setlocale(2, k_LC_ALL, current_locale);
+    } else {
+      SKIP("setlocale() failed");
+    }
+  }
+  {
+    const char cs[] = "'\0\\";
+    const char cr[] = "'\\'' . \"\\0\" . '\\\\'";
+    String s(cs, sizeof(cs) - 1, CopyString);
+    String r(cr, sizeof(cr) - 1, CopyString);
+    VS(f_var_export(s, true), cr);
+  }
+  {
+    Variant v = CREATE_MAP3(String("\0", 1, AttachLiteral),"null","","empty","0", "nul");
+    VS(f_var_export(v, true),
+       "array (\n"
+       "  '' . \"\\0\" . '' => 'null',\n"
+       "  '' => 'empty',\n"
+       "  0 => 'nul',\n"
+       ")");
+  }
   return Count(true);
 }
 

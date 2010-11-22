@@ -453,6 +453,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestUnaryOperators);
   RUN_TEST(TestSilenceOperator);
   RUN_TEST(TestPrint);
+  RUN_TEST(TestVarExport);
   RUN_TEST(TestLogicalOperators);
   RUN_TEST(TestGetClass);
   RUN_TEST(TestGetParentClass);
@@ -9286,8 +9287,8 @@ bool TestCodeRun::TestOperationTypes() {
   return true;
 }
 
-#define UNARY_OP(op) \
-  MVCR("<?php " \
+#define UNARY_OP_DATA(op) \
+  "<?php " \
   #op"(!null);" \
   #op"(!true);" \
   #op"(!false);" \
@@ -9572,7 +9573,10 @@ bool TestCodeRun::TestOperationTypes() {
   #op"((float)\"1.7e+319\");" \
   #op"((double)\"1.7e+319\");" \
   #op"((real)\"1.7e+319\");" \
-  #op"((string)\"1.7e+319\");" \
+  #op"((string)\"1.7e+319\");"
+
+#define UNARY_OP_ARRAY_DATA(op) \
+  "<?php " \
   #op"(array(\"\\0\" => 1));" \
   #op"(array(\"\\0\" => \"\\0\"));" \
   #op"(array(\"\\0\" => \"\\\\\"));" \
@@ -9624,7 +9628,11 @@ bool TestCodeRun::TestOperationTypes() {
   "$a = array(\"\\'\" => \"\\'\");" \
   #op"($a);" \
   "$a = array(\"\\a\" => \"\\a\");" \
-  #op"($a);")
+  #op"($a);"
+
+#define UNARY_OP(op) \
+  MVCR(UNARY_OP_DATA(op)) \
+  MVCR(UNARY_OP_ARRAY_DATA(op))
 
 bool TestCodeRun::TestUnaryOperators() {
   UNARY_OP(var_dump);
@@ -9641,8 +9649,70 @@ bool TestCodeRun::TestPrint() {
   UNARY_OP(echo);
   UNARY_OP(print);
   UNARY_OP(print_r);
-  UNARY_OP(var_export);
   UNARY_OP(serialize);
+  return true;
+}
+
+bool TestCodeRun::TestVarExport() {
+  MVCR(UNARY_OP_DATA(var_export));
+
+
+  MVCRO(UNARY_OP_ARRAY_DATA(var_export),
+  "array (\n"
+  "  '' . \"\\0\" . '' => 1,\n"
+  ")array (\n"
+  "  '' . \"\\0\" . '' => '' . \"\\0\" . '',\n"
+  ")array (\n"
+  "  '' . \"\\0\" . '' => '\\\\',\n"
+  ")array (\n"
+  "  '' . \"\\0\" . '' => '\\\\\\\'',\n"
+  ")array (\n"
+  "  '\\\\' => 1,\n"
+  ")array (\n"
+  "  '\\\\' => '' . \"\\0\" . '',\n"
+  ")array (\n"
+  "  '\\\\' => '\\\\',\n"
+  ")array (\n"
+  "  '\\\\' => '\\\\\\\'',\n"
+  ")array (\n"
+  "  '\\\\\\\'' => 1,\n"
+  ")array (\n"
+  "  '\\\\\\\'' => '' . \"\\0\" . '',\n"
+  ")array (\n"
+  "  '\\\\\\\'' => '\\\\',\n"
+  ")array (\n"
+  "  '\\\\\\\'' => '\\\\\\\'',\n"
+  ")array (\n"
+  "  '\\\\a' => '\\\\a',\n"
+  ")falsearray (\n"
+  "  '' . \"\\0\" . '' => '' . \"\\0\" . '',\n"
+  ")11truetrue111'Array''0x10''' . \"\\0\" . ''array (\n"
+  "  '' . \"\\0\" . '' => 1,\n"
+  ")array (\n"
+  "  '' . \"\\0\" . '' => '' . \"\\0\" . '',\n"
+  ")array (\n"
+  "  '' . \"\\0\" . '' => '\\\\',\n"
+  ")array (\n"
+  "  '' . \"\\0\" . '' => '\\\\\\\'',\n"
+  ")array (\n"
+  "  '\\\\' => 1,\n"
+  ")array (\n"
+  "  '\\\\' => '' . \"\\0\" . '',\n"
+  ")array (\n"
+  "  '\\\\' => '\\\\',\n"
+  ")array (\n"
+  "  '\\\\' => '\\\\\\\'',\n"
+  ")array (\n"
+  "  '\\\\\\\'' => 1,\n"
+  ")array (\n"
+  "  '\\\\\\\'' => '' . \"\\0\" . '',\n"
+  ")array (\n"
+  "  '\\\\\\\'' => '\\\\',\n"
+  ")array (\n"
+  "  '\\\\\\\'' => '\\\\\\\'',\n"
+  ")array (\n"
+  "  '\\\\a' => '\\\\a',\n"
+  ")");
   return true;
 }
 

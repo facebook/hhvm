@@ -3528,8 +3528,8 @@ void Variant::unserialize(VariableUnserializer *uns) {
   }
 
   if (type == 'N') {
-    // ASSERT(isNull());
     if(sep != ';') throw Exception("Expected ';' but got '%c'", sep);
+    setNull(); // NULL *IS* the value, without we get undefined warnings
     return;
   }
   if (sep != ':') {

@@ -861,6 +861,12 @@ DefineFunction(
         'type'   => Variant,
         'desc'   => "The input array.",
       ),
+      array(
+        'name'   => "sort_flags",
+        'type'   => Int32,
+        'value'  => "2",
+        'desc'   => "The optional second parameter sort_flags may be used to modify the sorting behavior using these values:\n\nSorting type flags: SORT_REGULAR - compare items normally (don't change types) SORT_NUMERIC - compare items numerically SORT_STRING - compare items as strings SORT_LOCALE_STRING - compare items as strings, based on the current locale.",
+      ),
     ),
   ));
 

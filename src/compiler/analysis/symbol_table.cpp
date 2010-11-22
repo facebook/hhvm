@@ -29,15 +29,14 @@ using namespace boost;
 ///////////////////////////////////////////////////////////////////////////////
 // Symbol
 TypePtr Symbol::getFinalType() const {
-  TypePtr coerced = getType(true);
-  if (coerced &&
-      !coerced->is(Type::KindOfSome) && !coerced->is(Type::KindOfAny)) {
-    return coerced;
+  if (m_coerced &&
+      !m_coerced->is(Type::KindOfSome) && !m_coerced->is(Type::KindOfAny)) {
+    return m_coerced;
   }
   return Type::Variant;
 }
 
-TypePtr Symbol::coerceTo(AnalysisResultPtr ar,
+TypePtr Symbol::CoerceTo(AnalysisResultPtr ar,
                          TypePtr &curType, TypePtr type) {
   if (!curType) {
     curType = type;
@@ -50,20 +49,57 @@ TypePtr Symbol::coerceTo(AnalysisResultPtr ar,
 
 TypePtr Symbol::setType(AnalysisResultPtr ar, BlockScopeRawPtr scope,
                         TypePtr type, bool coerced) {
-  TypePtr oldType = getType(true);
+  if (!type) return type;
+  TypePtr oldType = m_coerced;
   if (!oldType) oldType = Type::Some;
-  if (type) {
-    TypePtr ret = coerceTo(ar, coerced ? m_coerced : m_rtype, type);
-    TypePtr newType = getType(true);
-    if (!newType) newType = Type::Some;
-    if (!Type::SameType(oldType, newType)) {
-      scope->addUpdates(isStatic() ?
-                        BlockScope::UseKindStaticRef :
-                        BlockScope::UseKindNonStaticRef);
-    }
-    return newType;
+  if (!coerced) return oldType;
+
+  type = CoerceTo(ar, m_coerced, type);
+  if (!Type::SameType(oldType, type)) {
+    scope->addUpdates(isStatic() ?
+                      BlockScope::UseKindStaticRef :
+                      BlockScope::UseKindNonStaticRef);
   }
-  return TypePtr();
+
+  return type;
+}
+
+void Symbol::beginLocal() {
+  m_prevCoerced = m_coerced;
+  m_coerced.reset();
+}
+
+void Symbol::endLocal(BlockScopeRawPtr scope) {
+  if (!m_prevCoerced) return;
+  if (!m_coerced || m_coerced->is(Type::KindOfSome) ||
+      m_coerced->is(Type::KindOfAny)) {
+    m_coerced = Type::Variant;
+  }
+  if (!Type::SameType(m_coerced, m_prevCoerced)) {
+    scope->addUpdates(isStatic() ?
+                      BlockScope::UseKindStaticRef :
+                      BlockScope::UseKindNonStaticRef);
+  }
+  m_prevCoerced.reset();
+}
+
+void Symbol::import(BlockScopeRawPtr scope, const Symbol &src_sym) {
+  setName(src_sym.getName());
+  setSystem();
+  if (src_sym.declarationSet()) {
+    ConstructPtr sc = src_sym.getDeclaration();
+    if (sc) sc->resetScope(scope);
+    setDeclaration(sc);
+  }
+  if (src_sym.valueSet()) {
+    ConstructPtr sc = src_sym.getValue();
+    if (sc) sc->resetScope(scope);
+    setValue(sc);
+  }
+  if (src_sym.isDynamic()) {
+    setDynamic();
+  }
+  m_coerced = src_sym.m_coerced;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -93,23 +129,21 @@ void SymbolTable::import(SymbolTablePtr src) {
     Symbol &src_sym = *src->m_symbolVec[i];
     Symbol &dst_sym = m_symbolMap[src_sym.getName()];
     m_symbolVec.push_back(&dst_sym);
-    dst_sym.setName(src_sym.getName());
-    dst_sym.setSystem();
-    if (src_sym.declarationSet()) {
-      ConstructPtr sc = src_sym.getDeclaration();
-      if (sc) sc->resetScope(getBlockScope());
-      dst_sym.setDeclaration(sc);
-    }
-    if (src_sym.valueSet()) {
-      ConstructPtr sc = src_sym.getValue();
-      if (sc) sc->resetScope(getBlockScope());
-      dst_sym.setValue(sc);
-    }
-    if (src_sym.isDynamic()) {
-      dst_sym.setDynamic();
-    }
-    dst_sym.setCoerced(src_sym.getCoerced());
-    dst_sym.setRType(src_sym.getRType());
+    dst_sym.import(getBlockScope(), src_sym);
+  }
+}
+
+void SymbolTable::beginLocal() {
+  for (unsigned int i = 0, s = m_symbolVec.size(); i < s; i++) {
+    Symbol *sym = m_symbolVec[i];
+    sym->beginLocal();
+  }
+}
+
+void SymbolTable::endLocal() {
+  for (unsigned int i = 0, s = m_symbolVec.size(); i < s; i++) {
+    Symbol *sym = m_symbolVec[i];
+    sym->endLocal(BlockScopeRawPtr(&m_blockScope));
   }
 }
 
@@ -166,9 +200,9 @@ Symbol *SymbolTable::getSymbol(const std::string &name, bool add) {
   return NULL;
 }
 
-TypePtr SymbolTable::getType(const std::string &name, bool coerced) {
+TypePtr SymbolTable::getType(const std::string &name) {
   if (Symbol *sym = getSymbol(name)) {
-    return sym->getType(coerced);
+    return sym->getType();
   }
   return TypePtr();
 }
@@ -242,13 +276,7 @@ void SymbolTable::getSymbols(vector<string> &syms) const {
 
 void SymbolTable::getCoerced(StringToTypePtrMap &coerced) const {
   BOOST_FOREACH(Symbol *sym, m_symbolVec) {
-    coerced[sym->getName()] = sym->getCoerced();
-  }
-}
-
-void SymbolTable::getRTypes(StringToTypePtrMap &rtypes) const {
-  BOOST_FOREACH(Symbol *sym, m_symbolVec) {
-    rtypes[sym->getName()] = sym->getRType();
+    coerced[sym->getName()] = sym->getType();
   }
 }
 
@@ -257,12 +285,10 @@ void SymbolTable::getRTypes(StringToTypePtrMap &rtypes) const {
 void SymbolTable::serialize(JSON::OutputStream &out) const {
   vector<string> symbols;
   StringToTypePtrMap coerced;
-  StringToTypePtrMap rtypes;
   getSymbols(symbols);
   getCoerced(coerced);
-  getRTypes(rtypes);
 
-  out << symbols << coerced << rtypes;
+  out << symbols << coerced;
 }
 
 void SymbolTable::countTypes(std::map<std::string, int> &counts) {

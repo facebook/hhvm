@@ -69,6 +69,14 @@ public:
     UseKindAny = (unsigned)-1
   };
 
+  enum Marks {
+    MarkWaitingInQueue = 0,
+    MarkProcessingDeps = 1,
+    MarkProcessing = 2,
+    MarkProcessedInQueue = 3,
+    MarkProcessed = 4
+  };
+
   BlockScope(const std::string &name, const std::string &docComment,
              StatementPtr stmt, KindOf kind);
   virtual ~BlockScope() {}
@@ -139,8 +147,8 @@ public:
     return m_orderedUsers;
   }
 
-  void setMark(int m) { m_mark = m; }
-  int getMark() const { return m_mark; }
+  void setMark(Marks m) { m_mark = m; }
+  Marks getMark() const { return m_mark; }
 
   void setPass(int p) { m_pass = p; }
   void incPass() { m_pass++; }
@@ -169,10 +177,10 @@ protected:
   int m_incLevel;
   ModifierExpressionPtr m_modifiers;
   StatementListPtr m_includes;
-  int m_mark;
   int m_pass;
   int m_updated;
 private:
+  Marks m_mark;
   BlockScopeRawPtrVec m_orderedDeps;
   BlockScopeRawPtrFlagsVec m_orderedUsers;
   BlockScopeRawPtrFlagsHashMap m_userMap;

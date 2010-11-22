@@ -162,7 +162,9 @@ public:
   bool isExactType() const { return IsExactType(m_kindOf); }
   bool mustBe(KindOf kindOf) const { return !(m_kindOf & ~kindOf); }
   bool couldBe(KindOf kindOf) const { return m_kindOf & kindOf; }
-
+  bool isSubsetOf(TypePtr t) const {
+    return m_kindOf != t->m_kindOf && mustBe(t->m_kindOf);
+  }
   KindOf getKindOf() const { return m_kindOf;}
   bool isInteger() const;
   bool isSpecificObject() const;
@@ -172,7 +174,7 @@ public:
   }
   bool isNoObjectInvolved() const;
   const std::string &getName() const { return m_name;}
-  static TypePtr combinedPrimType(TypePtr t1, TypePtr t2);
+  static TypePtr combinedArithmeticType(TypePtr t1, TypePtr t2);
 
   /**
    * Generate type specifier in C++.

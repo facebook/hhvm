@@ -88,18 +88,21 @@ public:
 
   void visitDependencies(BlockScopeRawPtr scope,
                          BlockScopeRawPtrQueue &queue) {
-    scope->setMark(1);
+    scope->setMark(BlockScope::MarkProcessingDeps);
     const BlockScopeRawPtrVec &deps = scope->getDeps();
     for (BlockScopeRawPtrVec::const_iterator it = deps.begin(),
            end = deps.end(); it != end; ++it) {
       BlockScopeRawPtr dep = *it;
-      if (!dep->getMark()) {
+      if (dep->getMark() == BlockScope::MarkWaitingInQueue) {
         this->visitDependencies(dep, queue);
       }
     }
+
+    scope->setMark(BlockScope::MarkProcessing);
     if (int useKinds = this->visitScope(scope)) {
       scope->changed(queue, useKinds);
-    } else if (BlockScopeRawPtrQueue *changed = scope->getChangedScopes()) {
+    }
+    if (BlockScopeRawPtrQueue *changed = scope->getChangedScopes()) {
       for (BlockScopeRawPtrQueue::iterator it = changed->begin(),
              end = changed->end(); it != end; ) {
         BlockScopeRawPtr bs = *it;
@@ -108,23 +111,23 @@ public:
         bs->clearUpdated();
       }
     }
-    scope->setMark(2);
+    scope->setMark(BlockScope::MarkProcessedInQueue);
   }
 
   void visitDepthFirst(BlockScopeRawPtrQueue scopes) {
     BlockScopeRawPtrQueue::iterator end = scopes.end();
     for (BlockScopeRawPtrQueue::iterator it = scopes.begin(); it != end; ++it) {
-      (*it)->setMark(0);
+      (*it)->setMark(BlockScope::MarkWaitingInQueue);
     }
 
     while (true) {
       BlockScopeRawPtrQueue::iterator it = scopes.begin();
       if (it == end) break;
-      if (!(*it)->getMark()) {
+      if ((*it)->getMark() == BlockScope::MarkWaitingInQueue) {
         this->visitDependencies(*it, scopes);
       }
-      assert((*it)->getMark() == 2);
-      (*it)->setMark(3);
+      assert((*it)->getMark() == BlockScope::MarkProcessedInQueue);
+      (*it)->setMark(BlockScope::MarkProcessed);
       scopes.erase(it);
     }
   }

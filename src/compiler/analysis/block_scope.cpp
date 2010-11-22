@@ -34,7 +34,7 @@ BlockScope::BlockScope(const std::string &name, const std::string &docComment,
                        StatementPtr stmt, KindOf kind)
   : m_attributeClassInfo(0), m_docComment(docComment), m_stmt(stmt),
     m_kind(kind), m_loopNestedLevel(0), m_incLevel(0),
-    m_mark(0), m_pass(0), m_updated(0), m_changedScopes(0) {
+    m_pass(0), m_updated(0), m_mark(MarkWaitingInQueue), m_changedScopes(0) {
   m_originalName = name;
   m_name = Util::toLower(name);
   m_variables = VariableTablePtr(new VariableTable(*this));
@@ -108,7 +108,7 @@ void BlockScope::addUse(BlockScopeRawPtr user, int useKinds) {
 }
 
 void BlockScope::addUpdates(int f) {
-  if (!m_updated && m_changedScopes) {
+  if (!m_updated && m_changedScopes && getMark() != MarkProcessing) {
     m_changedScopes->push_back(BlockScopeRawPtr(this));
   }
   m_updated |= f;
@@ -118,11 +118,11 @@ void BlockScope::changed(BlockScopeRawPtrQueue &todo, int useKinds) {
   for (BlockScopeRawPtrFlagsVec::iterator it = m_orderedUsers.begin(),
          end = m_orderedUsers.end(); it != end; ++it) {
     BlockScopeRawPtrFlagsVec::value_type pf = *it;
-    if (pf->second & useKinds && pf->first->getMark() >= 2) {
-      if (pf->first->getMark() == 3) {
+    if (pf->second & useKinds && pf->first->getMark() >= MarkProcessedInQueue) {
+      if (pf->first->getMark() == MarkProcessed) {
         todo.push_back(pf->first);
       }
-      pf->first->setMark(0);
+      pf->first->setMark(MarkWaitingInQueue);
     }
   }
 }

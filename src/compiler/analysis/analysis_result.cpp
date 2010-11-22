@@ -916,11 +916,17 @@ struct InferTypesVisitor {
 
 template<>
 int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
+  StatementPtr stmt = scope->getStmt();
+  MethodStatementPtr m =
+    dynamic_pointer_cast<MethodStatement>(stmt);
+  bool pushPrev = m && !scope->isFirstPass() &&
+    !scope->getContainingFunction()->inPseudoMain() &&
+    this->m_data.m_ar->getPhase() != AnalysisResult::LastInference;
+  if (pushPrev) scope->getVariables()->beginLocal();
+  int ret = 0;
   do {
     scope->clearUpdated();
-    StatementPtr stmt = scope->getStmt();
-    if (MethodStatementPtr m =
-        dynamic_pointer_cast<MethodStatement>(stmt)) {
+    if (m) {
       m->inferFunctionTypes(this->m_data.m_ar);
     } else {
       for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
@@ -932,10 +938,16 @@ int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
       }
     }
 
+    ret |= scope->getUpdated();
     scope->incPass();
   } while (scope->getUpdated());
 
-  return 0;
+  if (pushPrev) {
+    scope->getVariables()->endLocal();
+    ret = scope->getUpdated();
+  }
+
+  return ret;
 }
 
 void AnalysisResult::inferTypes() {

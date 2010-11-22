@@ -240,6 +240,11 @@ TypePtr Type::Coerce(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
         cls2->derivesFrom(ar, type1->m_name, true, false)) {
       return type1;
     }
+    return Type::Object;
+  }
+
+  if (type1->mustBe(type2->m_kindOf)) {
+    return type2;
   }
 
   return Type::Variant;
@@ -380,7 +385,7 @@ bool Type::isNoObjectInvolved() const {
     return true;
 }
 
-TypePtr Type::combinedPrimType(TypePtr t1, TypePtr t2) {
+TypePtr Type::combinedArithmeticType(TypePtr t1, TypePtr t2) {
   KindOf kind = KindOfAny;
 
   if (t1 && t1->isPrimitive()) {
@@ -401,7 +406,11 @@ TypePtr Type::combinedPrimType(TypePtr t1, TypePtr t2) {
     } else {
       kind = KindOfNumeric;
     }
+  } else if ((t1 && t1->mustBe(KindOfNumeric)) ||
+             (t2 && t2->mustBe(KindOfNumeric))) {
+    kind = KindOfNumeric;
   }
+
   if (kind < KindOfInt64) {
     kind = KindOfInt64;
   }

@@ -363,10 +363,10 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   if (m_exp) {
     bool ecoerce = false; // expected type needs m_exp to coerce to
     switch (m_op) {
-    case T_ISSET:
-      ecoerce = true;
-    default:
-      break;
+      case T_ISSET:
+        ecoerce = true;
+      default:
+        break;
     }
 
     TypePtr expType = m_exp->inferAndCheck(ar, et, ecoerce);

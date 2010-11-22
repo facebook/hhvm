@@ -648,7 +648,7 @@ void ClassScope::serialize(JSON::OutputStream &out) const {
 
   JSON::MapStream cs(out);
   BOOST_FOREACH(string cname, cnames) {
-    TypePtr type =  m_constants->getType(cname, true);
+    TypePtr type =  m_constants->getType(cname);
     if (!type) {
       cs.add(cname, -1);
     } else if (type->isSpecificObject()) {

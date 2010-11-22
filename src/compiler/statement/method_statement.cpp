@@ -286,16 +286,6 @@ void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   if (m_stmt) m_stmt->analyzeProgram(ar);
 
   if (ar->isAnalyzeInclude()) {
-    if (!funcScope->isStatic() && getClassScope() &&
-        funcScope->getVariables()->
-        getAttribute(VariableTable::ContainsDynamicVariable)) {
-      // Add this to variable table if we'll need it in a lookup table
-      // Use object because there's no point to specializing, just makes
-      // code gen harder when dealing with redeclared classes.
-      TypePtr tp(Type::Object);
-      funcScope->getVariables()->add("this", tp, true, ar, shared_from_this(),
-                                     ModifierExpressionPtr());
-    }
     FunctionScope::RecordRefParamInfo(m_name, funcScope);
   }
 }
@@ -355,11 +345,12 @@ void MethodStatement::inferTypes(AnalysisResultPtr ar) {
 
 void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
   FunctionScopeRawPtr funcScope = getFunctionScope();
+  bool pseudoMain = funcScope->inPseudoMain();
   funcScope->pushReturnType();
 
   if (ar->getPhase() == AnalysisResult::FirstInference && m_stmt) {
     if (m_stmt->hasRetExp() ||
-        funcScope->inPseudoMain() ||
+        pseudoMain ||
         funcScope->getReturnType()) {
       bool lastIsReturn = false;
       if (m_stmt->getCount()) {
@@ -368,8 +359,7 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
           lastIsReturn = true;
         }
       }
-      if (!lastIsReturn &&
-          !(funcScope->inPseudoMain() && !Option::GenerateCPPMain)) {
+      if (!lastIsReturn && (!pseudoMain || Option::GenerateCPPMain)) {
         ExpressionPtr constant =
           funcScope->inPseudoMain() ? CONSTANT("true") : CONSTANT("null");
         ReturnStatementPtr returnStmt =
@@ -563,7 +553,10 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
               CodeGenerator::NoContext); // no inner functions/classes
             if (!funcScope->isStatic() && funcScope->getVariables()->
                 getAttribute(VariableTable::ContainsDynamicVariable)) {
-              cg_printf("%sthis = this;\n", Option::VariablePrefix);
+              Symbol *sym = funcScope->getVariables()->getSymbol("this");
+              if (sym && sym->declarationSet()) {
+                cg_printf("%sthis = this;\n", Option::VariablePrefix);
+              }
             }
             outputCPPStmt(cg, ar);
           }

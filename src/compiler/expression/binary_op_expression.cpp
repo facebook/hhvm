@@ -633,6 +633,27 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
   switch (m_op) {
   case T_PLUS_EQUAL:
+    {
+      TypePtr rhs = m_exp2->inferAndCheck(ar, et2, coerce2);
+      TypePtr lhs = m_exp1->inferAndCheck(ar, Type::Any, true);
+      if (lhs) {
+        if (lhs->mustBe(Type::KindOfArray)) {
+          rt = Type::Array;
+          break;
+        }
+        if (lhs->mustBe(Type::KindOfNumeric)) {
+          if (!rhs->mustBe(lhs->getKindOf())) {
+            rhs = Type::combinedArithmeticType(lhs, rhs);
+            if (!rhs) rhs = Type::Numeric;
+            lhs = m_exp1->inferAndCheck(ar, rhs, true);
+          }
+          rt = Type::Numeric;
+          break;
+        }
+      }
+      m_exp1->inferAndCheck(ar, rhs, true);
+    }
+    break;
   case T_MINUS_EQUAL:
   case T_MUL_EQUAL:
   case T_DIV_EQUAL:
@@ -664,10 +685,25 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       TypePtr act1 = m_exp1->getActualType();
       TypePtr act2 = m_exp2->getActualType();
 
-      TypePtr combined = Type::combinedPrimType(act1, act2);
-      if (combined &&
-          (combined->isPrimitive() || !rt->isPrimitive())) {
+      TypePtr combined = Type::combinedArithmeticType(act1, act2);
+      if (combined && combined->isSubsetOf(rt)) {
         rt = combined;
+      } else if (m_op == '+') {
+        bool a1 = act1 && act1->is(Type::KindOfArray);
+        bool a2 = act2 && act2->is(Type::KindOfArray);
+        if (a1 || a2) {
+          if (!a1 || !a2) {
+            m_implementedType = Type::Variant;
+          } else {
+            if (!m_exp1->getType()->is(Type::KindOfArray)) {
+              m_exp1->setExpectedType(Type::Array);
+            }
+            if (!m_exp2->getType()->is(Type::KindOfArray)) {
+              m_exp2->setExpectedType(Type::Array);
+            }
+          }
+          rt = Type::Array;
+        }
       }
     }
     break;
@@ -731,11 +767,23 @@ void BinaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 static bool castIfNeeded(TypePtr top, TypePtr arg,
                          CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (top && top->isPrimitive()) {
-    if (!arg || !arg->isPrimitive()) {
-      top->outputCPPCast(cg, ar);
-      cg_printf("(");
-      return true;
+  if (top) {
+    if (top->isPrimitive()) {
+      if (!arg || !arg->isPrimitive()) {
+        top->outputCPPCast(cg, ar);
+        cg_printf("(");
+        return true;
+      }
+    } else if (top->is(Type::KindOfArray)) {
+      if (!arg || !arg->is(Type::KindOfArray)) {
+        cg_printf("((Variant)");
+        return true;
+      }
+    } else if (top->mustBe(Type::KindOfNumeric)) {
+      if (arg && arg->is(Type::KindOfArray)) {
+        cg_printf("((Variant)");
+        return true;
+      }
     }
   }
 
@@ -1116,7 +1164,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
 
     if (actualType &&
         (actualType->is(Type::KindOfString) ||
-         actualType->is(Type::KindOfArray))) {
+         (m_op != '+' && actualType->is(Type::KindOfArray)))) {
       cg_printf("(Variant)(");
       first->outputCPP(cg, ar);
       cg_printf(")");
@@ -1178,7 +1226,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
 
     if (actualType &&
         (actualType->is(Type::KindOfString) ||
-         actualType->is(Type::KindOfArray))) {
+         (m_op != '+' && actualType->is(Type::KindOfArray)))) {
       cg_printf("(Variant)(");
       second->outputCPP(cg, ar);
       cg_printf(")");
@@ -1210,9 +1258,10 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   case T_MINUS_EQUAL:
   case T_MUL_EQUAL:
     {
-      TypePtr t1 = first->getActualType();
-      TypePtr t2 = second->getActualType();
-      if (t1 && t2 && Type::IsCastNeeded(ar, t2, t1)) {
+      TypePtr t1 = first->getCPPType();
+      TypePtr t2 = second->getType();
+      if (t1 && !t1->is(Type::KindOfArray) &&
+          t2 && Type::IsCastNeeded(ar, t2, t1)) {
         t1->outputCPPCast(cg, ar);
         cg_printf("(");
         second->outputCPP(cg, ar);

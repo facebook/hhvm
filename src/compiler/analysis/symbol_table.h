@@ -45,15 +45,14 @@ class Symbol {
 public:
   Symbol() : m_parameter(-1) { m_flags_val = 0; }
 
+  void import(BlockScopeRawPtr scope, const Symbol &src_sym);
+  void beginLocal();
+  void endLocal(BlockScopeRawPtr scope);
+
   void setName(const std::string &name) { m_name = name; }
   const std::string &getName() const { return m_name; }
 
-  TypePtr getCoerced() const { return m_coerced; }
-  TypePtr getRType() const { return m_rtype; }
-  void setCoerced(TypePtr coerced) { m_coerced = coerced; }
-  void setRType(TypePtr rtype) { m_rtype = rtype; }
-
-  TypePtr getType(bool coerced) const { return coerced ? m_coerced : m_rtype; }
+  TypePtr getType() const { return m_coerced; }
   TypePtr getFinalType() const;
   TypePtr setType(AnalysisResultPtr ar, BlockScopeRawPtr scope,
                   TypePtr type, bool coerced);
@@ -181,12 +180,12 @@ private:
   ConstructPtr        m_declaration;
   ConstructPtr        m_value;
   TypePtr             m_coerced;
-  TypePtr             m_rtype;
+  TypePtr             m_prevCoerced;
 
   int                 m_parameter;
   ConstructPtr        m_initVal;
 
-  static TypePtr coerceTo(AnalysisResultPtr ar,
+  static TypePtr CoerceTo(AnalysisResultPtr ar,
                           TypePtr &curType, TypePtr type);
 };
 
@@ -205,6 +204,9 @@ public:
   SymbolTable(BlockScope &blockScope);
   SymbolTable();
   virtual ~SymbolTable();
+
+  void beginLocal();
+  void endLocal();
 
   /**
    * Import system symbols into this.
@@ -237,7 +239,7 @@ public:
   /**
    * Find a symbol's inferred type.
    */
-  TypePtr getType(const std::string &name, bool coerced);
+  TypePtr getType(const std::string &name);
   TypePtr getFinalType(const std::string &name);
 
   /**
@@ -261,7 +263,6 @@ public:
   void canonicalizeSymbolOrder();
   void getSymbols(std::vector<std::string> &syms) const;
   void getCoerced(StringToTypePtrMap &coerced) const;
-  void getRTypes(StringToTypePtrMap &rtypes) const;
 
   virtual TypePtr setType(AnalysisResultPtr ar, const std::string &name,
                           TypePtr type, bool coerced);

@@ -90,13 +90,23 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
     m_sym = variables->getSymbol(m_name, true);
   }
 
-  if (FunctionScopePtr func = getFunctionScope()) {
-    if (m_name == "this" && getClassScope()) {
-      func->setContainsThis();
-      m_this = true;
-    }
-    if (m_sym && !(m_context & AssignmentLHS)) {
-      m_sym->setUsed();
+  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
+    if (FunctionScopePtr func = getFunctionScope()) {
+      if (m_name == "this" && getClassScope()) {
+        func->setContainsThis();
+        m_this = true;
+        if (!hasContext(ObjectContext) &&
+            variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
+          ClassScopePtr cls = getClassScope();
+          TypePtr t = cls->isRedeclaring() ?
+            Type::Variant : Type::CreateObjectType(cls->getName());
+          variables->add(m_sym, t, true, ar, shared_from_this(),
+                         getScope()->getModifiers());
+        }
+      }
+      if (m_sym && !(m_context & AssignmentLHS)) {
+        m_sym->setUsed();
+      }
     }
   }
 }
@@ -136,6 +146,11 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       ret = Type::Variant;
     } else {
       ret = Type::CreateObjectType(cls->getName());
+    }
+    if (!hasContext(ObjectContext) &&
+        variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
+      ret = variables->add(m_sym, ret, true, ar,
+                           construct, scope->getModifiers());
     }
   } else if ((m_context & (LValue|Declaration)) &&
              !(m_context & ObjectContext)) {

@@ -21,6 +21,12 @@ FAST_TESTS := QuickTests TestExt TestCodeRunEval
 SLOW_TESTS := TestCodeRun TestServer
 
 all: fast_tests
+tags: ctags etags
+ctags:
+	-$(V)cd src && ct
+etags:
+	-$(V)cd src && ct -e
+.PHONY: tags ctags etags
 
 $(FAST_TESTS) $(SLOW_TESTS): % : setup
 	cd src && $(TEST) $(if $($@),$($@),$@)

@@ -269,10 +269,9 @@ public:
   virtual const MethodVec &getMethodsVec() const = 0; // non-recursively
   MethodInfo *getMethodInfo(const char *name) const;
   MethodInfo *hasMethod(const char *name, ClassInfo *&classInfo) const;
-  static bool hasAccess(CStrRef className, CStrRef methodName,
+  static bool HasAccess(CStrRef className, CStrRef methodName,
                         bool staticCall, bool hasCallObject);
-  static bool isSubClass(const std::string &className1,
-                         const std::string &className2,
+  static bool IsSubClass(CStrRef className1, CStrRef className2,
                          bool considerInterface);
   const char *getConstructor() const;
 

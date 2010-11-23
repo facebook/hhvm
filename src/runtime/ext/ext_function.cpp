@@ -30,6 +30,10 @@ using namespace boost;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+static StaticString s_class_exists("class_exists");
+static StaticString s_parent("parent");
+static StaticString s_self("self");
+
 Array f_get_defined_functions() {
   Array ret;
   ret.set("internal", ClassInfo::GetSystemFunctions());
@@ -47,16 +51,16 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
     if (!name.isNull()) name = v;
     if (syntax) return true;
 
-    string lowered = Util::toLower((const char *)v.toString());
-    size_t c = lowered.find("::");
-    if (c != 0 && c != string::npos && c+2 < lowered.size()) {
-      string classname = lowered.substr(0, c);
-      string methodname = lowered.substr(c+2);
-      return f_call_user_func(2, "class_exists",
-                              Array::Create(String(classname))) &&
-        ClassInfo::hasAccess(classname, methodname, true, false);
+    String str = v.toString();
+    int c = str.find("::");
+    if (c != 0 && c != String::npos && c + 2 < str.size()) {
+      String classname = str.substr(0, c);
+      String methodname = str.substr(c + 2);
+      return f_call_user_func_array(s_class_exists,
+                                    Array::Create(classname)) &&
+        ClassInfo::HasAccess(classname, methodname, true, false);
     }
-    return f_function_exists(v.toString());
+    return f_function_exists(str);
   }
 
   if (v.is(KindOfArray)) {
@@ -70,23 +74,23 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
         obj = v0.toObject();
         v0 = obj->o_getClassName();
       } else if (v0.isString()) {
-        if (!f_call_user_func(2, "class_exists",
-                              Array::Create(v0))) {
+        if (!f_call_user_func_array(s_class_exists, Array::Create(v0))) {
           return false;
         }
         staticCall = true;
       }
       if (v1.isString()) {
-        string lowered = Util::toLower((const char *)v1.toString());
-        size_t c = lowered.find("::");
-        if (c != 0 && c != string::npos && c+2 < lowered.size()) {
-          string name1 = Util::toLower((const char *)v0.toString());
-          string name2 = lowered.substr(0, c);
-          if (name1 == name2 ||
-              ClassInfo::isSubClass(name1, name2, false)) {
+        String str = v1.toString();
+        int c = str.find("::");
+        if (c != 0 && c != String::npos && c + 2 < str.size()) {
+          String name1 = v0.toString();
+          String name2 = str.substr(0, c);
+          ASSERT(name1.get() && name2.get());
+          if (name1->isame(name2.get()) ||
+              ClassInfo::IsSubClass(name1, name2, false)) {
             staticCall = true;
             v0 = name2;
-            v1 = lowered.substr(c+2);
+            v1 = str.substr(c + 2);
           }
         }
       }
@@ -94,10 +98,10 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
         if (!name.isNull()) {
           name = v0.toString() + "::" + v1.toString();
         }
-        if (same(v0, "self") || same(v0, "parent")) {
+        if (same(v0, s_self) || same(v0, s_parent)) {
           throw NotImplementedException("augmenting class scope info");
         }
-        return ClassInfo::hasAccess(v0, v1, staticCall, !obj.isNull());
+        return ClassInfo::HasAccess(v0, v1, staticCall, !obj.isNull());
       }
     }
   }

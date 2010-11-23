@@ -53,7 +53,7 @@ class DynamicObjectData : public ObjectData {
   // methods
   virtual bool o_get_call_info(MethodCallPackage &info, int64 hash = -1);
   virtual bool o_get_call_info_ex(const char *clsname,
-      MethodCallPackage &info, int64 hash);
+      MethodCallPackage &info, int64 hash = -1);
 
   virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   virtual Variant doRootCall(Variant v_name, Variant v_arguments, bool fatal);

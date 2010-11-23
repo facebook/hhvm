@@ -39,6 +39,9 @@ namespace HPHP {
 static StaticString s_offsetExists("offsetExists");
 static StaticString s_class_exists("class_exists");
 static StaticString s___autoload("__autoload");
+static StaticString s_self("self");
+static StaticString s_parent("parent");
+static StaticString s_static("static");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -75,9 +78,9 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
   if (function.isString()) {
     String sfunction = function.toString();
     int c = sfunction.find("::");
-    if (c != 0 && c != String::npos && c+2 < sfunction.size()) {
-      return invoke_static_method(sfunction.substr(0, c).c_str(),
-                                  sfunction.substr(c+2).c_str(), params,
+    if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {
+      return invoke_static_method(sfunction.substr(0, c),
+                                  sfunction.substr(c + 2), params,
                                   false);
     }
     return invoke(sfunction, params, -1, true, false);
@@ -96,15 +99,15 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
     String method = methodname.toString();
     if (classname.is(KindOfObject)) {
       int c = method.find("::");
-      if (c != 0 && c != String::npos && c+2 < method.size()) {
+      if (c != 0 && c != String::npos && c + 2 < method.size()) {
         String cls = method.substr(0, c);
-        if (cls == "self") {
+        if (cls->same(s_self.get())) {
           cls = FrameInjection::GetClassName(true);
-        } else if (cls == "parent") {
+        } else if (cls->same(s_parent.get())) {
           cls = FrameInjection::GetParentClassName(true);
         }
         return classname.toObject()->o_invoke_ex
-          (cls.c_str(), method.substr(c+2).c_str(), params, -1, false);
+          (cls, method.substr(c + 2), params, false);
       }
       return classname.toObject()->o_invoke(method, params, -1, false);
     } else {
@@ -113,18 +116,16 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
         return null;
       }
       String sclass = classname.toString();
-      if (sclass == "self") {
+      if (sclass->same(s_self.get())) {
         sclass = FrameInjection::GetClassName(true);
-      } else if (sclass == "parent") {
+      } else if (sclass->same(s_parent.get())) {
         sclass = FrameInjection::GetParentClassName(true);
       }
       Object obj = FrameInjection::GetThis(true);
-      if (obj.instanceof(sclass.c_str())) {
-        return obj->o_invoke_ex(sclass.c_str(), method.c_str(), params, -1,
-                                false);
+      if (obj.instanceof(sclass)) {
+        return obj->o_invoke_ex(sclass, method, params, false);
       }
-      return invoke_static_method(sclass.c_str(), method.c_str(),
-                                  params, false);
+      return invoke_static_method(sclass, method, params, false);
     }
   }
   throw_invalid_argument("function: not string or array");
@@ -161,8 +162,8 @@ Variant invoke_builtin(const char *s, const Array &params, int64 hash,
   }
 }
 
-Variant invoke_static_method(const char *s, const char *method,
-    const Array &params, bool fatal /* = true */) {
+Variant invoke_static_method(CStrRef s, CStrRef method,
+                             const Array &params, bool fatal /* = true */) {
   MethodCallPackage mcp;
   if (!fatal) mcp.noFatal();
   mcp.dynamicNamedCall(s, method, -1);
@@ -936,19 +937,18 @@ Variant &get_static_property_lval(const char *s, const char *prop) {
   return Variant::lvalBlackHole();
 }
 
-Variant invoke_static_method_bind(CStrRef s, const char *method,
-                                  const Array &params,
-                                  bool fatal /* = true */) {
+Variant invoke_static_method_bind(CStrRef s, CStrRef method,
+                                  CVarRef params, bool fatal /* = true */) {
   ThreadInfo *info = ThreadInfo::s_threadInfo.get();
 
   String cls = s;
-  bool isStatic = (strcasecmp(cls.data(), "static") == 0);
+  bool isStatic = cls->isame(s_static.get());
   if (isStatic) {
     cls = FrameInjection::GetStaticClassName(info);
   } else {
     FrameInjection::SetStaticClassName(info, cls);
   }
-  Variant ret = invoke_static_method(cls.data(), method, params, fatal);
+  Variant ret = invoke_static_method(cls, method, params, fatal);
   if (!isStatic) {
     FrameInjection::ResetStaticClassName(info);
   }

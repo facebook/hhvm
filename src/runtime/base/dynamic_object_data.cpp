@@ -154,7 +154,7 @@ bool DynamicObjectData::o_get_call_info(MethodCallPackage &info,
 }
 
 bool DynamicObjectData::o_get_call_info_ex(const char *clsname,
-      MethodCallPackage &info, int64 hash) {
+      MethodCallPackage &info, int64 hash /* = -1 */) {
   if (strcasecmp(o_getClassName(), clsname) == 0) {
     return o_get_call_info(info, hash);
   } else if(!parent.isNull()) {

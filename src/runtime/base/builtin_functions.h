@@ -343,6 +343,16 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params);
 
 Variant invoke(CStrRef function, CArrRef params, int64 hash = -1,
                bool tryInterp = true, bool fatal = true);
+/**
+ * Invoking an arbitrary static method.
+ */
+Variant invoke_static_method(CStrRef s, CStrRef method,
+                             CArrRef params, bool fatal = true);
+/**
+ * For "static::" resolution
+ */
+Variant invoke_static_method_bind(CStrRef s, CStrRef method,
+                                  CArrRef params, bool fatal = true);
 
 /**
  * Fallback when a dynamic function call fails to find a user function

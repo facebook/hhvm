@@ -2573,12 +2573,11 @@ Variant Variant::o_root_invoke(CStrRef s, CArrRef params,
   }
 }
 
-Variant Variant::o_invoke_ex(const char *clsname, const char *s,
-                              CArrRef params, int64 hash) {
+Variant Variant::o_invoke_ex(CStrRef clsname, CStrRef s, CArrRef params) {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_invoke_ex(clsname, s, params, hash);
+    return m_data.pobj->o_invoke_ex(clsname, s, params);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_invoke_ex(clsname, s, params, hash);
+    return m_data.pvar->o_invoke_ex(clsname, s, params);
   } else {
     throw InvalidOperandException(
         "Call to a member function on a non-object");

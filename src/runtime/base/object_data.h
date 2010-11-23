@@ -213,8 +213,8 @@ class ObjectData : public Countable {
                            bool fatal = true);
   virtual Variant o_root_invoke(const char *s, CArrRef params, int64 hash,
                                 bool fatal = false);
-  virtual Variant o_invoke_ex(const char *clsname, const char *s,
-                              CArrRef params, int64 hash, bool fatal = true);
+  Variant o_invoke_ex(CStrRef clsname, CStrRef s,
+                      CArrRef params, bool fatal = true);
 
   virtual Variant o_invoke_few_args(const char *s, int64 hash, int count,
                                     INVOKE_FEW_ARGS_DECL_ARGS);
@@ -238,7 +238,7 @@ class ObjectData : public Countable {
                                  INVOKE_FEW_ARGS_DECL_ARGS);
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
   virtual bool o_get_call_info_ex(const char *clsname,
-      MethodCallPackage &mcp, int64 hash);
+      MethodCallPackage &mcp, int64 hash = -1);
   virtual bool o_get_call_info_with_index(MethodCallPackage &mcp,
       MethodIndex mi, int64 hash = -1);
   virtual bool o_get_call_info_with_index_ex(const char *clsname,

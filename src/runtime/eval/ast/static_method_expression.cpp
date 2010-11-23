@@ -70,8 +70,7 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
     if (ms) {
       return ref(ms->invokeInstanceDirect(co, env, this));
     }
-    return ref(co->o_invoke_ex(cname.data(), name.data(), getParams(env),
-                               m_name->hashLwr()));
+    return ref(co->o_invoke_ex(cname, name, getParams(env)));
 
   }
   if (ms) {

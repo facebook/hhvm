@@ -39,6 +39,8 @@ static CallInfo s_ObjectData_call_handler((void*)ObjectData::callHandler,
     (void*)ObjectData::callHandlerFewArgs, 0,
     CallInfo::VarArgs | CallInfo::Method | CallInfo::CallMagicMethod, 0);
 
+static StaticString s___callStatic("__callStatic");
+
 ///////////////////////////////////////////////////////////////////////////////
 // constructor/destructor
 
@@ -126,7 +128,7 @@ Variant ObjectData::os_invoke(const char *c, const char *s,
     obj = create_object(c, Array::Create(), false);
     obj->setDummy();
   }
-  return obj->o_invoke_ex(c, s, params, hash, fatal);
+  return obj->o_invoke_ex(c, s, params, fatal);
 }
 
 Variant ObjectData::os_constant(const char *s) {
@@ -602,13 +604,12 @@ Variant ObjectData::o_root_invoke(const char *s, CArrRef params, int64 hash,
   return o_invoke(s, params, hash, fatal);
 }
 
-Variant ObjectData::o_invoke_ex(const char *clsname, const char *s,
-                                CArrRef params, int64 hash,
-                                bool fatal /* = true */) {
+Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
+                                CArrRef params, bool fatal /* = true */) {
   MethodCallPackage mcp;
   if (!fatal) mcp.noFatal();
   mcp.methodCallEx(this, s);
-  if (o_get_call_info_ex(clsname, mcp, hash)) {
+  if (o_get_call_info_ex(clsname, mcp)) {
     return (mcp.ci->getMeth())(mcp, params);
   }
   return null;
@@ -653,7 +654,8 @@ bool ObjectData::o_get_call_info(MethodCallPackage &mcp,
 }
 
 bool ObjectData::o_get_call_info_ex(const char *clsname,
-                                    MethodCallPackage &mcp, int64 hash) {
+                                    MethodCallPackage &mcp,
+                                    int64 hash /* = -1 */) {
   mcp.obj = this;
   return ObjectData::o_get_call_info(mcp, hash);
 }
@@ -910,7 +912,7 @@ Variant ObjectData::callHandler(MethodCallPackage &info, CArrRef params) {
   } else {
     clsname = info.obj->o_getClassName();
   }
-  return invoke_static_method(clsname.data(), "__callstatic",
+  return invoke_static_method(clsname, s___callStatic,
                               CREATE_VECTOR2(info.name, params));
 }
 

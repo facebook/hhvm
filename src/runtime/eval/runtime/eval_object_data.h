@@ -58,7 +58,7 @@ public:
 
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
   virtual bool o_get_call_info_ex(const char *clsname,
-      MethodCallPackage &mcp, int64 hash);
+      MethodCallPackage &mcp, int64 hash = -1);
 
   virtual bool o_instanceof(CStrRef s) const;
 

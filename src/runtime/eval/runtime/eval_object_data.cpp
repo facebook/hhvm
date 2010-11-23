@@ -227,7 +227,7 @@ bool EvalObjectData::o_get_call_info(MethodCallPackage &mcp,
 
 }
 bool EvalObjectData::o_get_call_info_ex(const char *clsname,
-      MethodCallPackage &mcp, int64 hash) {
+      MethodCallPackage &mcp, int64 hash /* = -1 */) {
   if (m_cls.getClass()->subclassOf(clsname)) {
     bool foundClass;
     const MethodStatement *ms =

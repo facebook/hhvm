@@ -44,17 +44,6 @@ Variant invoke_builtin(const char *s, const Array &params, int64 hash,
     bool fatal);
 
 /**
- * Invoking an arbitrary static method.
- */
-Variant invoke_static_method(const char *s, const char *method,
-    const Array &params, bool fatal = true);
-/**
- * defined in builtin_functions.cpp, used for "static::" resolution
- */
-Variant invoke_static_method_bind(CStrRef s, const char *method,
-                                  const Array &params, bool fatal = true);
-
-/**
  * Getting the object static callbacks for a given class
  */
 struct ObjectStaticCallbacks;

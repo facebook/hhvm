@@ -450,8 +450,7 @@ bool ClassInfo::derivesFromImpl(const char *name, bool considerInterface) const 
   return false;
 }
 
-bool ClassInfo::isSubClass(const string &className1,
-                           const string &className2,
+bool ClassInfo::IsSubClass(CStrRef className1, CStrRef className2,
                            bool considerInterface) {
   const ClassInfo *clsInfo1 = ClassInfo::FindClass(className1.c_str());
   if (!clsInfo1) return false;
@@ -489,24 +488,24 @@ ClassInfo::MethodInfo *ClassInfo::hasMethod(const char *name,
 }
 
 // internal function  className::methodName or callObject->methodName
-bool ClassInfo::hasAccess(CStrRef className, CStrRef methodName,
+bool ClassInfo::HasAccess(CStrRef className, CStrRef methodName,
                           bool staticCall, bool hasCallObject) {
+  // It has to be either a static call or a call with an object.
+  ASSERT(staticCall || hasCallObject);
   const ClassInfo *clsInfo = ClassInfo::FindClass(className.c_str());
   if (!clsInfo || !clsInfo->isDeclared()) return false;
   ClassInfo *defClass;
   ClassInfo::MethodInfo *methodInfo =
     clsInfo->hasMethod(methodName.c_str(), defClass);
   if (!methodInfo) return false;
+  if (methodInfo->attribute & ClassInfo::IsPublic) return true;
   const ClassInfo *ctxClass =
     ClassInfo::FindClass(FrameInjection::GetClassName(true));
-  const Object ctxObject = FrameInjection::GetThis(true);
-  bool hasObject = hasCallObject || !ctxObject.isNull();
-  bool staticMethod = methodInfo->attribute & (ClassInfo::IsStatic);
+  bool hasObject = hasCallObject || !FrameInjection::GetThis(true).isNull();
   if (ctxClass) {
     return ctxClass->checkAccess(defClass, methodInfo, staticCall, hasObject);
   }
-  return (staticMethod || hasObject || staticCall) &&
-          methodInfo->attribute & (ClassInfo::IsPublic);
+  return false;
 }
 
 bool ClassInfo::checkAccess(ClassInfo *defClass,

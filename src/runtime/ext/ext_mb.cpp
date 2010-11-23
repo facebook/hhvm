@@ -45,10 +45,6 @@ extern void mbfl_memory_device_unput(mbfl_memory_device *device);
 #define PARSE_SERVER 5
 #define PARSE_SESSION 6
 
-#define PHP_OUTPUT_HANDLER_START                (1<<0)
-#define PHP_OUTPUT_HANDLER_CONT                 (1<<1)
-#define PHP_OUTPUT_HANDLER_END                  (1<<2)
-
 namespace HPHP {
 
 static class mbstringExtension : public Extension {

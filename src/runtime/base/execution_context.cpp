@@ -274,6 +274,7 @@ bool ExecutionContext::obFlush() {
   if ((int)m_buffers.size() > m_protectedLevel) {
     list<OutputBuffer*>::const_iterator iter = m_buffers.end();
     OutputBuffer *last = *(--iter);
+    const int flag = PHP_OUTPUT_HANDLER_START | PHP_OUTPUT_HANDLER_END;
     if (iter != m_buffers.begin()) {
       OutputBuffer *prev = *(--iter);
       if (last->handler.isNull()) {
@@ -282,7 +283,7 @@ bool ExecutionContext::obFlush() {
         try {
           Variant tout =
             f_call_user_func_array(last->handler,
-                                   CREATE_VECTOR1(last->oss.detach()));
+                                   CREATE_VECTOR2(last->oss.detach(), flag));
           prev->oss.append(tout.toString());
           last->oss.reset();
         } catch (...) {
@@ -291,6 +292,19 @@ bool ExecutionContext::obFlush() {
       }
       return true;
     }
+
+    if (!last->handler.isNull()) {
+      try {
+        Variant tout =
+          f_call_user_func_array(last->handler,
+                                 CREATE_VECTOR2(last->oss.detach(), flag));
+        String sout = tout.toString();
+        writeStdout(sout.data(), sout.size());
+        last->oss.reset();
+        return true;
+      } catch (...) {}
+    }
+
     writeStdout(last->oss.data(), last->oss.size());
     last->oss.reset();
     return true;

@@ -25,6 +25,10 @@
 #include <runtime/base/util/string_buffer.h>
 #include <util/thread_local.h>
 
+#define PHP_OUTPUT_HANDLER_START  (1<<0)
+#define PHP_OUTPUT_HANDLER_CONT   (1<<1)
+#define PHP_OUTPUT_HANDLER_END    (1<<2)
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

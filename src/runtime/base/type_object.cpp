@@ -39,12 +39,12 @@ MutableArrayIterPtr Object::begin(Variant *key, Variant &val,
 }
 
 Array Object::toArray() const {
-  return HPHP::toArray(m_px);
+  return m_px ? m_px->o_toArray(false) : Array();
 }
 
 Variant Object::toKey() const {
   return m_px ? (isResource() ? m_px->o_toInt64() : m_px->t___tostring())
-              : String();
+    : String();
 }
 
 bool Object::equal(CObjRef v2) const {

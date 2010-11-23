@@ -20,6 +20,7 @@
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/util/libevent_http_client.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/server/server_stats.h>
 
 using namespace std;
 
@@ -188,7 +189,12 @@ public:
     m_write.content.clear();
     m_header.clear();
     memset(m_error_str, 0, sizeof(m_error_str));
-    m_error_no = curl_easy_perform(m_cp);
+
+    {
+      IOStatusHelper io("curl_easy_perform", m_url.data());
+      m_error_no = curl_easy_perform(m_cp);
+    }
+    set_curl_statuses(m_cp, m_url.data());
 
     /* CURLE_PARTIAL_FILE is returned by HEAD requests */
     if (m_error_no != CURLE_OK && m_error_no != CURLE_PARTIAL_FILE) {
@@ -969,6 +975,7 @@ Variant f_curl_multi_remove_handle(CObjRef mh, CObjRef ch) {
 Variant f_curl_multi_exec(CObjRef mh, Variant still_running) {
   CHECK_MULTI_RESOURCE(curlm);
   int running = still_running.toInt32();
+  IOStatusHelper io("curl_multi_exec");
   int result = curl_multi_perform(curlm->get(), &running);
   still_running = running;
   return result;
@@ -978,6 +985,7 @@ Variant f_curl_multi_select(CObjRef mh, double timeout /* = 1.0 */) {
   CHECK_MULTI_RESOURCE(curlm);
   int ret;
   unsigned long timeout_ms = (unsigned long)(timeout * 1000.0);
+  IOStatusHelper io("curl_multi_select");
   curl_multi_select(curlm->get(), timeout_ms, &ret);
   return ret;
 }

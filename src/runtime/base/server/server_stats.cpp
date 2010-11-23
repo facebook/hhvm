@@ -1202,7 +1202,8 @@ void ServerStatsHelper::logTime(const std::string &prefix,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IOStatusHelper::IOStatusHelper(const char *name, const char *address,
+IOStatusHelper::IOStatusHelper(const char *name,
+                               const char *address /* = NULL */,
                                int port /* = 0 */) {
   ASSERT(name && *name);
 
@@ -1225,6 +1226,24 @@ IOStatusHelper::~IOStatusHelper() {
       (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats)) {
     ServerStats::SetThreadIOStatus(NULL, NULL);
   }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+static void set_curl_status(CURL *cp, CURLINFO info, const char *name,
+                            const char *url) {
+  double option;
+  curl_easy_getinfo(cp, info, &option);
+  if (option >= 0) {
+    ServerStats::SetThreadIOStatus(name, url, option * 1000000);
+  }
+}
+
+void set_curl_statuses(CURL *cp, const char *url) {
+  set_curl_status(cp, CURLINFO_NAMELOOKUP_TIME,    "curl-namelookup",    url);
+  set_curl_status(cp, CURLINFO_CONNECT_TIME,       "curl-connect",       url);
+  set_curl_status(cp, CURLINFO_STARTTRANSFER_TIME, "curl-starttransfer", url);
+  set_curl_status(cp, CURLINFO_PRETRANSFER_TIME,   "curl-pretransfer",   url);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

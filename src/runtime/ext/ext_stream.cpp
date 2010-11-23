@@ -22,6 +22,7 @@
 #include <runtime/base/file/plain_file.h>
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/zend/zend_printf.h>
+#include <runtime/base/server/server_stats.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <poll.h>
@@ -244,6 +245,7 @@ Variant f_stream_socket_accept(CObjRef server_socket,
   p.fd = sock->fd();
   p.events = (POLLIN|POLLERR|POLLHUP);
   p.revents = 0;
+  IOStatusHelper io("socket_accept");
   n = poll(&p, 1, (uint64)(timeout * 1000.0));
   if (n > 0) {
     struct sockaddr sa;

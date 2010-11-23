@@ -19,6 +19,7 @@
 
 #include <util/lock.h>
 #include <util/thread_local.h>
+#include <curl/curl.h>
 #include <time.h>
 #include <runtime/base/shared/shared_string.h>
 
@@ -213,9 +214,14 @@ private:
  */
 class IOStatusHelper {
 public:
-  IOStatusHelper(const char *name, const char *address, int port = 0);
+  IOStatusHelper(const char *name, const char *address = NULL, int port = 0);
   ~IOStatusHelper();
 };
+
+/**
+ * For profiling CURL calls.
+ */
+void set_curl_statuses(CURL *cp, const char *url);
 
 /**
  * For profiling mutexes.

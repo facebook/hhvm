@@ -627,11 +627,12 @@ Variant f_socket_select(Variant read, Variant write, Variant except,
     sock_array_to_fd_set(except.toArray(), fds, count, POLLPRI);
   }
 
+  IOStatusHelper io("socket_select");
   int timeout_ms = vtv_sec.toInt32() * 1000 + tv_usec / 1000;
   int retval = poll(fds, count, timeout_ms);
   if (retval == -1) {
     raise_warning("unable to select [%d]: %s", errno,
-                    Util::safe_strerror(errno).c_str());
+                  Util::safe_strerror(errno).c_str());
     free(fds);
     return false;
   }

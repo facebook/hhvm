@@ -102,15 +102,6 @@ int HttpClient::post(const char *url, const char *data, int size,
   return impl(url, data, size, response, requestHeaders, responseHeaders);
 }
 
-static void set_curl_status(CURL *cp, CURLINFO info, const char *name,
-                            const char *url) {
-  double option;
-  curl_easy_getinfo(cp, info, &option);
-  if (option >= 0) {
-    ServerStats::SetThreadIOStatus(name, url, option * 1000000);
-  }
-}
-
 int HttpClient::impl(const char *url, const char *data, int size,
                      StringBuffer &response, const HeaderMap *requestHeaders,
                      std::vector<String> *responseHeaders) {
@@ -204,10 +195,7 @@ int HttpClient::impl(const char *url, const char *data, int size,
     }
   }
 
-  set_curl_status(cp, CURLINFO_NAMELOOKUP_TIME,    "curl-namelookup",    url);
-  set_curl_status(cp, CURLINFO_CONNECT_TIME,       "curl-connect",       url);
-  set_curl_status(cp, CURLINFO_STARTTRANSFER_TIME, "curl-starttransfer", url);
-  set_curl_status(cp, CURLINFO_PRETRANSFER_TIME,   "curl-pretransfer",   url);
+  set_curl_statuses(cp, url);
 
   if (slist) {
     curl_slist_free_all(slist);

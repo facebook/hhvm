@@ -22,6 +22,7 @@
 #include <runtime/base/zend/zend_pack.h>
 #include <runtime/base/hphp_system.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/server/server_stats.h>
 #include <util/parser/scanner.h>
 
 namespace HPHP {
@@ -197,11 +198,13 @@ String f_php_strip_whitespace(CStrRef filename) {
 }
 
 int f_sleep(int seconds) {
+  IOStatusHelper io("sleep");
   sleep(seconds);
   return 0;
 }
 
 void f_usleep(int micro_seconds) {
+  IOStatusHelper io("usleep");
   usleep(micro_seconds);
 }
 
@@ -218,6 +221,8 @@ Variant f_time_nanosleep(int seconds, int nanoseconds) {
   struct timespec req, rem;
   req.tv_sec = (time_t)seconds;
   req.tv_nsec = nanoseconds;
+
+  IOStatusHelper io("nanosleep");
   if (!nanosleep(&req, &rem)) {
     return true;
   }
@@ -244,6 +249,8 @@ bool f_time_sleep_until(double timestamp) {
   struct timespec req, rem;
   req.tv_sec = (time_t)c_ts;
   req.tv_nsec = (long)((c_ts - req.tv_sec) * 1000000000.0);
+
+  IOStatusHelper io("nanosleep");
   while (nanosleep(&req, &rem)) {
     if (errno != EINTR) return false;
     req.tv_sec = rem.tv_sec;

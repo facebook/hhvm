@@ -42,14 +42,14 @@ bool TestExtMemcached::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define EXPIRATION 60
-#define CREATE_MEMCACHED() \
-        p_Memcached memc(p_Memcached(NEW(c_Memcached))->create()); \
-        memc->t_addserver(TEST_MEMCACHED_HOSTNAME, TEST_MEMCACHED_PORT); \
-        Variant memc_version = memc->t_getversion(); \
-        if (memc_version.same(false)) { \
-          SKIP("No memcached running"); \
-          return Count(true); \
-        }
+#define CREATE_MEMCACHED()                                              \
+  p_Memcached memc(p_Memcached(NEW(c_Memcached))->create());            \
+  memc->t_addserver(TEST_MEMCACHED_HOSTNAME, TEST_MEMCACHED_PORT);      \
+  Variant memc_version = memc->t_getversion();                          \
+  if (memc_version.same(false)) {                                       \
+    SKIP("No memcached running");                                       \
+    return Count(true);                                                 \
+  }
 
 bool TestExtMemcached::test_Memcached_construct_persistent() {
   p_Memcached memc1(p_Memcached(NEW(c_Memcached))->create("test"));

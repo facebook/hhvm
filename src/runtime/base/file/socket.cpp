@@ -116,6 +116,8 @@ int64 Socket::readImpl(char *buffer, int64 length) {
   ASSERT(m_fd);
   ASSERT(length > 0);
 
+  IOStatusHelper io("socket::recv", m_address.c_str(), m_port);
+
   int recvFlags = 0;
   if (m_timeout > 0) {
     int flags = fcntl(m_fd, F_GETFL, 0);
@@ -128,7 +130,6 @@ int64 Socket::readImpl(char *buffer, int64 length) {
     }
   }
 
-  IOStatusHelper io("socket::recv", m_address.c_str(), m_port);
   int64 ret = recv(m_fd, buffer, length, recvFlags);
   if (ret == 0 || (ret == -1 && errno != EWOULDBLOCK)) {
     m_eof = true;

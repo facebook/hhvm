@@ -17,6 +17,7 @@
 #ifndef __EVAL_STRONG_FOREACH_STATEMENT_H__
 #define __EVAL_STRONG_FOREACH_STATEMENT_H__
 
+#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/statement.h>
 
 namespace HPHP {
@@ -28,13 +29,13 @@ DECLARE_AST_PTR(LvalExpression);
 
 class StrongForEachStatement : public Statement {
 public:
- StrongForEachStatement(STATEMENT_ARGS, LvalExpressionPtr source,
+ StrongForEachStatement(STATEMENT_ARGS, ExpressionPtr source,
                         LvalExpressionPtr key,
                         LvalExpressionPtr value, StatementPtr body);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:
-  LvalExpressionPtr m_source;
+  ExpressionPtr m_source;
   LvalExpressionPtr m_key;
   LvalExpressionPtr m_value;
   StatementPtr m_body;

@@ -15,6 +15,7 @@
 */
 
 #include <runtime/eval/ast/strong_foreach_statement.h>
+#include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/lval_expression.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
@@ -23,7 +24,7 @@ namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 StrongForEachStatement::
-StrongForEachStatement(STATEMENT_ARGS, LvalExpressionPtr source,
+StrongForEachStatement(STATEMENT_ARGS, ExpressionPtr source,
                        LvalExpressionPtr key, LvalExpressionPtr value,
                        StatementPtr body) :
   Statement(STATEMENT_PASS), m_source(source), m_key(key), m_value(value),
@@ -32,7 +33,9 @@ StrongForEachStatement(STATEMENT_ARGS, LvalExpressionPtr source,
 
 void StrongForEachStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
-  Variant source(ref(m_source->lval(env)));
+  LvalExpression* lvalSource = m_source->cast<LvalExpression>();
+  Variant source(lvalSource ? ref(lvalSource->lval(env)) :
+                              ref(m_source->eval(env)));
   source.escalate(true);
   Variant vTemp;
 

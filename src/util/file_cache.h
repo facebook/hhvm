@@ -54,6 +54,8 @@ public:
   bool exists(const char *name, bool isRelative = true) const;
   char *read(const char *name, int &len, bool &compressed) const;
 
+  void dump();
+
   static std::string GetRelativePath(const char *path);
 private:
   struct Buffer {

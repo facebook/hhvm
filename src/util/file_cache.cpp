@@ -465,5 +465,20 @@ char *FileCache::read(const char *name, int &len, bool &compressed) const {
   return NULL;
 }
 
+void FileCache::dump() {
+  // sort by file names
+  std::set<string> files;
+  for (FileMap::const_iterator iter = m_files.begin(); iter != m_files.end();
+       ++iter) {
+    files.insert(iter->first);
+  }
+
+  // output
+  for (set<string>::const_iterator iter = files.begin(); iter != files.end();
+       ++iter) {
+    printf("%s\n", iter->c_str());
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

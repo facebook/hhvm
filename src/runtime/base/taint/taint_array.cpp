@@ -16,6 +16,7 @@
 
 #ifdef TAINTED
 
+#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/complex_types.h>
 
 namespace HPHP {

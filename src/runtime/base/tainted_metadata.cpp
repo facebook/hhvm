@@ -16,8 +16,9 @@
 
 #ifdef TAINTED
 
-#include <runtime/base/tainted_metadata.h>
+#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/frame_injection.h>
+#include <runtime/base/tainted_metadata.h>
 
 namespace HPHP{
   void TaintedMetadata::setTaintedOriginal(const String* str){

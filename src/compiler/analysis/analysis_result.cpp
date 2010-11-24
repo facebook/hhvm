@@ -646,7 +646,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   for (set<string>::const_iterator it = Option::VolatileClasses.begin();
        it != Option::VolatileClasses.end(); ++it) {
     ClassScopePtr cls = findClass(Util::toLower(*it));
-    if (cls) {
+    if (cls && cls->isUserClass()) {
       cls->setVolatile();
     }
   }

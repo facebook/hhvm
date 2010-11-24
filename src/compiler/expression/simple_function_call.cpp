@@ -405,6 +405,12 @@ static ExpressionPtr cloneForInlineRecur(ExpressionPtr exp,
                                 exp->getKindOf(), name));
         rep->copyContext(sv);
         rep->updateSymbol(SimpleVariablePtr());
+        // Conservatively set flags to prevent
+        // the alias manager from getting confused.
+        // On the next pass, it will correct the values,
+        // and optimize appropriately.
+        rep->getSymbol()->setUsed();
+        rep->getSymbol()->setReferenced();
         sepm[name] = rep;
         exp = rep;
       }
@@ -544,6 +550,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
                           KindOfSimpleVariable,
                           prefix + param->getName()));
     var->updateSymbol(SimpleVariablePtr());
+    var->getSymbol()->setUsed();
     bool ref = m_funcScope->isRefParam(i);
     AssignmentExpressionPtr ae
       (new AssignmentExpression(getScope(),

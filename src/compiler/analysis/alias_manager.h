@@ -66,7 +66,7 @@ class BucketMapEntry {
 
 class AliasManager {
  public:
-  AliasManager();
+  AliasManager(int opt);
  public:
   void clear();
   void beginScope();
@@ -128,11 +128,12 @@ class AliasManager {
   void applyAssign(ExpressionPtr lhs, ExpressionPtr rhs);
 
   void canonicalizeKid(ConstructPtr e, ExpressionPtr kid, int i);
+  int canonicalizeKid(ConstructPtr e, ConstructPtr kid, int i);
   ExpressionPtr canonicalizeNode(ExpressionPtr e);
   ExpressionPtr canonicalizeNonNull(ExpressionPtr e);
   ExpressionPtr canonicalizeRecurNonNull(ExpressionPtr e);
   ExpressionPtr canonicalizeRecur(ExpressionPtr e);
-  int canonicalizeRecur(StatementPtr e);
+  StatementPtr canonicalizeRecur(StatementPtr e, int &ret);
 
   void collectAliasInfoRecur(ConstructPtr cs, bool unused);
   void pushStringScope(StatementPtr s);
@@ -159,6 +160,8 @@ class AliasManager {
 
   bool                  m_inlineAsExpr;
   bool                  m_noAdd;
+  bool                  m_preOpt;
+  bool                  m_postOpt;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -80,10 +80,13 @@ public:
 
   LocationPtr getLocation() const { return m_loc;}
   void setLocation(LocationPtr loc) { m_loc = loc;}
-  void setFileLevel() { m_topLevel = m_fileLevel = true;}
-  void setTopLevel() { m_topLevel = true;}
-  bool isFileLevel() const { return m_fileLevel;}
-  bool isTopLevel() const { return m_topLevel;}
+  void setFileLevel() { m_flags.topLevel = m_flags.fileLevel = true;}
+  void setTopLevel() { m_flags.topLevel = true;}
+  void setVisited() { m_flags.visited = true;}
+  void clearVisited() { m_flags.visited = false;}
+  bool isFileLevel() const { return m_flags.fileLevel;}
+  bool isTopLevel() const { return m_flags.topLevel;}
+  bool isVisited() const { return m_flags.visited; }
   BlockScopeRawPtr getScope() const { return m_blockScope; }
   void setBlockScope(BlockScopeRawPtr scope) { m_blockScope = scope; }
   FileScopePtr getFileScope() const {
@@ -173,11 +176,16 @@ public:
 private:
   std::string m_text;
   BlockScopeRawPtr m_blockScope;
-
+  union {
+    unsigned m_flagsVal;
+    struct {
+      unsigned fileLevel : 1; // whether this is at top level of a file
+      unsigned topLevel : 1;  // whether this is at top level of a scope
+      unsigned visited : 1;   // general purpose visited flag for walks
+    } m_flags;
+  };
 protected:
   LocationPtr m_loc;
-  bool m_fileLevel; // whether or not this is at top level of a file
-  bool m_topLevel;  // whether or not this is at top level of a scope
   mutable int m_containedEffects;
   mutable int m_effectsTag;
 

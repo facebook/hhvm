@@ -243,10 +243,11 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     return Type::Variant;
   }
 
-  const char *accessorName = hasContext(DeepAssignmentLHS) ? "__set" :
-    hasContext(ExistContext) ? "__isset" :
-    hasContext(UnsetContext) ? "__unset" : "__get";
-  if (!cls->implementsAccessor(ar, accessorName)) clearEffect(AccessorEffect);
+  int prop = hasContext(AssignmentLHS) ? ClassScope::MayHaveUnknownPropSetter :
+    hasContext(ExistContext) ? ClassScope::MayHaveUnknownPropTester :
+    hasContext(UnsetContext) ? ClassScope::MayHavePropUnsetter :
+        ClassScope::MayHaveUnknownPropGetter;
+  if (!cls->implementsAccessor(ar, prop)) clearEffect(AccessorEffect);
 
   // resolved to this class
   if (m_context & RefValue) {

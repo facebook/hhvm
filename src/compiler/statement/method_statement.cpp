@@ -326,20 +326,6 @@ void MethodStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr MethodStatement::preOptimize(AnalysisResultPtr ar) {
-  if (ar->getPhase() != AnalysisResult::AnalyzeInclude &&
-      Option::LocalCopyProp) {
-    int flag;
-    do {
-      AliasManager am;
-      MethodStatementPtr self =
-        static_pointer_cast<MethodStatement>(shared_from_this());
-      flag = am.optimize(ar, self);
-    } while (flag);
-  }
-  return StatementPtr();
-}
-
 void MethodStatement::inferTypes(AnalysisResultPtr ar) {
 }
 

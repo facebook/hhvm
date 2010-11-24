@@ -50,19 +50,26 @@ public:
   };
 
   enum Attribute {
-    System                        = 1,
-    Extension                     = 2,
+    System                        = 0x001,
+    Extension                     = 0x002,
     /**
      * set iff there is a __construct method. check ClassNameConstructor if
      * you want to know whether there is a class-name constructor.
      */
-    HasConstructor                = 4,
-    ClassNameConstructor          = 8,
-    HasDestructor                 = 16,
-    HasUnknownPropGetter          = 32,   // __get
-    HasUnknownPropSetter          = 64,   // __set
-    HasUnknownMethodHandler       = 128,  // __call
-    HasUnknownStaticMethodHandler = 256,  // __callStatic
+    HasConstructor                = 0x0004,
+    ClassNameConstructor          = 0x0008,
+    HasDestructor                 = 0x0010,
+    HasUnknownPropGetter          = 0x0020, // __get
+    HasUnknownPropSetter          = 0x0040, // __set
+    HasUnknownPropTester          = 0x0080, // __isset
+    HasPropUnsetter               = 0x0100, // __unset
+    HasUnknownMethodHandler       = 0x0200, // __call
+    HasUnknownStaticMethodHandler = 0x0400, // __callStatic
+    MayHaveUnknownPropGetter      = 0x0800, // a derived class defines
+    MayHaveUnknownPropSetter      = 0x1000, // the specified magic
+    MayHaveUnknownPropTester      = 0x2000, // method
+    MayHavePropUnsetter           = 0x4000,
+    MayBeArrayAccess              = 0x8000, // implements ArrayAccess
   };
   enum Modifier {
     Public = 1,
@@ -318,15 +325,11 @@ public:
   void outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar);
 
-  /*
-    returns 1 if it does, -1 if it may, and 0 if it doesnt
-  */
-  int implementsArrayAccess(AnalysisResultPtr ar);
-  /*
-    returns 1 if it does, -1 if it may, and 0 if it doesnt
-  */
-  int implementsAccessor(AnalysisResultPtr ar, const char *name);
-
+  void updateMagicMethods(ClassScopePtr super);
+  /* true if it might, false if it doesnt */
+  bool implementsArrayAccess(AnalysisResultPtr ar);
+  /* true if it might, false if it doesnt */
+  bool implementsAccessor(AnalysisResultPtr ar, int prop);
 
   void clearBases() {
     m_bases.clear();

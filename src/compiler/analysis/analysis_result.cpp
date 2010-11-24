@@ -84,10 +84,11 @@ void AnalysisResult::appendExtraCode(const std::string &key,
 void AnalysisResult::addFileScope(FileScopePtr fileScope) {
   ASSERT(fileScope);
 
-  StringToFileScopePtrMap::const_iterator iter =
-    m_files.find(fileScope->getName());
-  ASSERT(iter == m_files.end());
-  m_files[fileScope->getName()] = fileScope;
+  std::pair<StringToFileScopePtrMap::const_iterator,bool> res =
+    m_files.insert(StringToFileScopePtrMap::value_type(
+                     fileScope->getName(), fileScope));
+
+  ASSERT(res.second);
   vertex_descriptor vertex = add_vertex(m_depGraph);
   fileScope->setVertex(vertex);
   m_fileVertMap[vertex] = fileScope;
@@ -828,12 +829,6 @@ void AnalysisResult::getFuncScopesSet(BlockScopeRawPtrQueue &v,
 }
 
 void AnalysisResult::getScopesSet(BlockScopeRawPtrQueue &v) {
-  for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
-       iter != m_files.end(); ++iter) {
-    FileScopePtr file = iter->second;
-    getFuncScopesSet(v, file);
-  }
-
   for (StringToClassScopePtrVecMap::iterator iter = m_classDecs.begin(),
          end = m_classDecs.end(); iter != end; ++iter) {
     for (ClassScopePtrVec::iterator it = iter->second.begin(),
@@ -844,6 +839,12 @@ void AnalysisResult::getScopesSet(BlockScopeRawPtrQueue &v) {
         getFuncScopesSet(v, cls);
       }
     }
+  }
+
+  for (StringToFileScopePtrMap::const_iterator iter = m_files.begin();
+       iter != m_files.end(); ++iter) {
+    FileScopePtr file = iter->second;
+    getFuncScopesSet(v, file);
   }
 }
 
@@ -862,16 +863,15 @@ template<>
 int DepthFirstVisitor<PreOptVisitor>::visit(BlockScopeRawPtr scope) {
   int optCount = m_optCounter + this->m_data.m_ar->getOptCounter();
   StatementPtr stmt = scope->getStmt();
-  int flags = 0;
-  if (Option::LocalCopyProp | Option::EliminateDeadCode) {
+  if (Option::LocalCopyProp || Option::EliminateDeadCode) {
     if (MethodStatementPtr m =
         dynamic_pointer_cast<MethodStatement>(stmt)) {
-      int flag;
-      while (true) {
-        AliasManager am;
-        flag = am.optimize(this->m_data.m_ar, m);
-        if (!flag) break;
-        flags |= BlockScope::UseKindAny;
+      AliasManager am(-1);
+      if (am.optimize(this->m_data.m_ar, m) ||
+          optCount != m_optCounter + this->m_data.m_ar->getOptCounter()) {
+        return BlockScope::UseKindAny;
+      } else {
+        return 0;
       }
     }
   }
@@ -879,10 +879,10 @@ int DepthFirstVisitor<PreOptVisitor>::visit(BlockScopeRawPtr scope) {
   StatementPtr rep = this->visitStmtRecur(stmt);
   assert(!rep);
   if (optCount != m_optCounter + this->m_data.m_ar->getOptCounter()) {
-    flags |= BlockScope::UseKindAny;
+    return BlockScope::UseKindAny;
   }
 
-  return flags;
+  return 0;
 }
 
 template<>
@@ -982,18 +982,20 @@ template<>
 int DepthFirstVisitor<PostOptVisitor>::visit(BlockScopeRawPtr scope) {
   int optCount = m_optCounter + this->m_data.m_ar->getOptCounter();
   StatementPtr stmt = scope->getStmt();
-  int flags = 0;
-  if (Option::LocalCopyProp |
-      Option::EliminateDeadCode |
-      Option::StringLoopOpts) {
+  bool aliasOpts = Option::LocalCopyProp || Option::EliminateDeadCode;
+  if (aliasOpts || Option::StringLoopOpts) {
     if (MethodStatementPtr m =
         dynamic_pointer_cast<MethodStatement>(stmt)) {
-      int flag;
-      while (true) {
-        AliasManager am;
-        flag = am.optimize(this->m_data.m_ar, m);
-        if (!flag) break;
-        flags |= BlockScope::UseKindAny;
+      AliasManager am(1);
+
+      int flag = am.optimize(this->m_data.m_ar, m);
+      if (aliasOpts) {
+        if (flag ||
+            optCount != m_optCounter + this->m_data.m_ar->getOptCounter()) {
+          return BlockScope::UseKindAny;
+        } else {
+          return 0;
+        }
       }
     }
   }
@@ -1001,10 +1003,10 @@ int DepthFirstVisitor<PostOptVisitor>::visit(BlockScopeRawPtr scope) {
   StatementPtr rep = this->visitStmtRecur(stmt);
   assert(!rep);
   if (optCount != m_optCounter + this->m_data.m_ar->getOptCounter()) {
-    flags |= BlockScope::UseKindAny;
+    return BlockScope::UseKindAny;
   }
 
-  return flags;
+  return 0;
 }
 
 template<>

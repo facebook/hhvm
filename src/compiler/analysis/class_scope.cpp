@@ -72,13 +72,13 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
   BOOST_FOREACH(FunctionScopePtr f, methods) {
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
-    else if (f->getName() == "__call") setAttribute(HasUnknownMethodHandler);
     else if (f->getName() == "__get")  setAttribute(HasUnknownPropGetter);
     else if (f->getName() == "__set")  setAttribute(HasUnknownPropSetter);
     else if (f->getName() == "__call") setAttribute(HasUnknownMethodHandler);
     else if (f->getName() == "__callstatic") {
       setAttribute(HasUnknownStaticMethodHandler);
-    }
+    } else if (f->getName() == "__isset") setAttribute(HasUnknownPropTester);
+    else if (f->getName() == "__unset") setAttribute(HasPropUnsetter);
     addFunction(ar, f);
   }
   setAttribute(Extension);
@@ -106,82 +106,43 @@ std::string ClassScope::getId(CodeGenerator &cg) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int ClassScope::implementsArrayAccess(AnalysisResultPtr ar) {
-  hphp_const_char_imap<int>::iterator it = m_implemented.find("arrayaccess");
-  if (it != m_implemented.end()) {
-    return it->second;
+void ClassScope::updateMagicMethods(ClassScopePtr super) {
+  if (m_attribute & (HasUnknownPropGetter|MayHaveUnknownPropGetter)) {
+    super->setAttribute(MayHaveUnknownPropGetter);
   }
-
-  int ret = 0;
-  unsigned s = m_parent.empty() ? 0 : 1;
-  for (unsigned i = s; i < m_bases.size(); i++) {
-    if (strcasecmp(m_bases[i].c_str(), "arrayaccess")) {
-      ret = 1;
-      break;
-    }
+  if (m_attribute & (HasUnknownPropSetter|MayHaveUnknownPropSetter)) {
+    super->setAttribute(MayHaveUnknownPropSetter);
   }
-
-  if (s && !ret) {
-    int yes = 0, no = 0;
-    ClassScopePtrVec classes = ar->findClasses(m_parent);
-    BOOST_FOREACH(ClassScopePtr cls, classes) {
-      int a = cls->implementsArrayAccess(ar);
-      if (a < 0) {
-        yes = no = 1;
-        break;
-      }
-      if (a > 0) {
-        yes++;
-      } else {
-        no++;
-      }
-    }
-    if (yes) {
-      ret = no ? -1 : 1;
-    }
+  if (m_attribute & (HasUnknownPropTester|MayHaveUnknownPropTester)) {
+    super->setAttribute(MayHaveUnknownPropTester);
   }
-
-  m_implemented["arrayaccess"] = ret;
-  return ret;
+  if (m_attribute & (HasPropUnsetter|MayHavePropUnsetter)) {
+    super->setAttribute(MayHavePropUnsetter);
+  }
+  if (m_attribute & MayBeArrayAccess) {
+    super->setAttribute(MayBeArrayAccess);
+  }
 }
 
-int ClassScope::implementsAccessor(AnalysisResultPtr ar, const char *name) {
-  hphp_const_char_imap<int>::iterator it = m_implemented.find(name);
-  if (it != m_implemented.end()) {
-    return it->second;
+bool ClassScope::implementsArrayAccess(AnalysisResultPtr ar) {
+  return getAttribute(MayBeArrayAccess);
+}
+
+bool ClassScope::implementsAccessor(AnalysisResultPtr ar, int prop) {
+  if (m_attribute & prop) return true;
+  if (prop & MayHaveUnknownPropGetter) {
+    prop |= HasUnknownPropGetter;
   }
-
-  int ret = 0;
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
-         m_functions.begin(); iter != m_functions.end(); ++iter) {
-
-    if (strcasecmp(iter->first.c_str(), name)) {
-      ret = 1;
-    }
+  if (prop & MayHaveUnknownPropSetter) {
+    prop |= HasUnknownPropSetter;
   }
-
-  if (!m_parent.empty() && !ret) {
-    int yes = 0, no = 0;
-    ClassScopePtrVec classes = ar->findClasses(m_parent);
-    BOOST_FOREACH(ClassScopePtr cls, classes) {
-      int a = cls->implementsAccessor(ar, name);
-      if (a < 0) {
-        yes = no = 1;
-        break;
-      }
-      if (a > 0) {
-        yes++;
-      } else {
-        no++;
-      }
-    }
-    if (yes) {
-      ret = no ? -1 : 1;
-    }
+  if (prop & MayHaveUnknownPropTester) {
+    prop |= HasUnknownPropTester;
   }
-
-  m_implemented[name] = ret;
-  return ret;
+  if (prop & MayHavePropUnsetter) {
+    prop |= HasPropUnsetter;
+  }
+  return m_attribute & prop;
 }
 
 void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_set &seen) {
@@ -257,7 +218,11 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
           BOOST_FOREACH(ClassScopePtr cls, classes) {
             cls->m_derivedByDynamic = true;
             StringToFunctionScopePtrMap cur(pristine);
+            updateMagicMethods(cls);
             cls->collectMethods(ar, cur, false, forInvoke);
+            if (cls->getAttribute(MayBeArrayAccess)) {
+              setAttribute(MayBeArrayAccess);
+            }
             funcs.insert(cur.begin(), cur.end());
           }
           m_derivesFromRedeclaring = DirectFromRedeclared;
@@ -268,7 +233,11 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
         }
         setVolatile();
       } else {
+        updateMagicMethods(super);
         super->collectMethods(ar, funcs, false, forInvoke);
+        if (super->getAttribute(MayBeArrayAccess)) {
+          setAttribute(MayBeArrayAccess);
+        }
         if (super->derivesFromRedeclaring()) {
           if (base == m_parent) {
             m_derivesFromRedeclaring = IndirectFromRedeclared;

@@ -34,8 +34,7 @@ using namespace std;
 int Construct::s_effectsTag = 1;
 
 Construct::Construct(BlockScopePtr scope, LocationPtr loc)
-    : m_blockScope(scope), m_loc(loc),
-      m_fileLevel(false), m_topLevel(false),
+    : m_blockScope(scope), m_flagsVal(0), m_loc(loc),
       m_containedEffects(0), m_effectsTag(0) {
 }
 

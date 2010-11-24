@@ -50,10 +50,10 @@ using std::string;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-AliasManager::AliasManager() :
+AliasManager::AliasManager(int opt) :
     m_nextID(1), m_changes(0), m_replaced(0),
     m_wildRefs(0), m_nrvoFix(0), m_inlineAsExpr(true),
-    m_noAdd(false) {
+    m_noAdd(false), m_preOpt(opt<0), m_postOpt(opt>0) {
 }
 
 bool AliasManager::parseOptimizations(const std::string &optimizations,
@@ -703,6 +703,15 @@ static bool sameExpr(ExpressionPtr e1, ExpressionPtr e2) {
 }
 
 ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
+  if (e->isVisited()) return ExpressionPtr();
+  ExpressionPtr ret;
+  if (m_preOpt) ret = e->preOptimize(m_arp);
+  if (m_postOpt) ret = e->postOptimize(m_arp);
+  if (ret) {
+    return canonicalizeRecurNonNull(ret);
+  }
+
+  e->setVisited();
   e->setCanonPtr(ExpressionPtr());
   e->setCanonID(0);
 
@@ -1077,17 +1086,36 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
   return ExpressionPtr();
 }
 
-void AliasManager::canonicalizeKid(ConstructPtr e, ExpressionPtr kid, int i) {
+void AliasManager::canonicalizeKid(ConstructPtr c, ExpressionPtr kid, int i) {
   if (kid) {
     kid = canonicalizeRecur(kid);
     if (kid) {
-      e->setNthKid(i, kid);
+      c->setNthKid(i, kid);
       m_changes++;
     }
   }
 }
 
+int AliasManager::canonicalizeKid(ConstructPtr c, ConstructPtr kid, int i) {
+  int ret = FallThrough;
+  if (kid) {
+    ExpressionPtr e = dpc(Expression, kid);
+    if (e) {
+      canonicalizeKid(c, e, i);
+    } else {
+      StatementPtr s = dpc(Statement, kid);
+      s = canonicalizeRecur(s, ret);
+      if (s) {
+        c->setNthKid(i, s);
+        m_changes++;
+      }
+    }
+  }
+  return ret;
+}
+
 ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
+  if (e->isVisited()) return ExpressionPtr();
   if (ExpressionPtr rep = e->fetchReplacement()) {
     if (e->getContainedEffects() != rep->getContainedEffects()) {
       Expression::recomputeEffects();
@@ -1159,12 +1187,13 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
   return canonicalizeNode(e);
 }
 
-int AliasManager::canonicalizeRecur(StatementPtr s) {
-  if (!s) return FallThrough;
+StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
+  ret = FallThrough;
+  if (!s || s->isVisited()) return StatementPtr();
 
   Statement::KindOf stype = s->getKindOf();
-  int ret = FallThrough;
   int start = 0;
+  int nkid = s->getKidCount();
 
   switch (stype) {
   case Statement::KindOfFunctionStatement:
@@ -1174,7 +1203,7 @@ int AliasManager::canonicalizeRecur(StatementPtr s) {
     // Dont handle nested functions
     // they will be dealt with by another
     // top level call to optimize
-    return ret;
+    return StatementPtr();
   case Statement::KindOfStaticStatement:
     clear();
     ret = Converge;
@@ -1203,13 +1232,14 @@ int AliasManager::canonicalizeRecur(StatementPtr s) {
           canonicalizeKid(ifstmt, cond, 0);
           if (!i) beginScope();
           beginScope();
-          canonicalizeRecur(spc(Statement, ifstmt->getNthKid(1)));
+          canonicalizeKid(ifstmt, ifstmt->getNthKid(1), 1);
           endScope();
           if (i+1 < n) resetScope();
         }
         endScope();
       }
-      return FallThrough;
+      ret = FallThrough;
+      start = nkid;
     }
     break;
 
@@ -1221,10 +1251,12 @@ int AliasManager::canonicalizeRecur(StatementPtr s) {
     canonicalizeKid(s, spc(Expression,s->getNthKid(0)), 0);
     clear();
     canonicalizeKid(s, spc(Expression,s->getNthKid(1)), 1);
-    canonicalizeRecur(spc(Statement, s->getNthKid(2)));
+    canonicalizeKid(s, s->getNthKid(2), 2);
     clear();
     canonicalizeKid(s, spc(Expression,s->getNthKid(3)), 3);
-    return Converge;
+    ret = Converge;
+    start = nkid;
+    break;
 
   case Statement::KindOfWhileStatement:
   case Statement::KindOfDoStatement:
@@ -1248,7 +1280,9 @@ int AliasManager::canonicalizeRecur(StatementPtr s) {
   {
     canonicalizeKid(s, spc(Expression,s->getNthKid(0)), 0);
     killLocals();
-    return FallThrough;
+    ret = FallThrough;
+    start = nkid;
+    break;
   }
 
   case Statement::KindOfBreakStatement:
@@ -1276,19 +1310,19 @@ int AliasManager::canonicalizeRecur(StatementPtr s) {
                                              T_STRING, string("io")));
         add(m_bucketMap[0], e);
       }
-      return FallThrough;
+      ret = FallThrough;
+      start = nkid;
+      break;
     }
   }
 
-  int nkid = s->getKidCount();
   for (int i = start; i < nkid; i++) {
     ConstructPtr cp = s->getNthKid(i);
     if (!cp) {
       continue;
     }
-    if (StatementPtr skid = dpc(Statement, cp)) {
-      int action = canonicalizeRecur(skid);
-      switch (action) {
+    int action = canonicalizeKid(s, cp, i);
+    switch (action) {
       case FallThrough:
       case CondBranch:
         break;
@@ -1298,19 +1332,26 @@ int AliasManager::canonicalizeRecur(StatementPtr s) {
       case Converge:
         clear();
         break;
-      }
-    } else {
-      canonicalizeKid(s, spc(Expression, cp), i);
     }
   }
 
-  return ret;
+  s->setVisited();
+  StatementPtr rep;
+  if (m_preOpt) rep = s->preOptimize(m_arp);
+  if (m_postOpt) rep = s->postOptimize(m_arp);
+  if (rep) {
+    s = canonicalizeRecur(rep, ret);
+    return s ? s : rep;
+  }
+  return StatementPtr();
 }
 
 void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
   if (!cs) {
     return;
   }
+
+  cs->clearVisited();
 
   if (StatementPtr s = dpc(Statement, cs)) {
     switch (s->getKindOf()) {
@@ -1503,7 +1544,11 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
     }
   }
 
-  collectAliasInfoRecur(m->getStmts(), false);
+  int i, nkid = m->getKidCount();
+  for (i = 0; i < nkid; i++) {
+    collectAliasInfoRecur(m->getNthKid(i), false);
+  }
+
   if (func) {
     if (m_inlineAsExpr) {
       if (!Option::AutoInline ||
@@ -1519,7 +1564,11 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
   }
 
   if (Option::LocalCopyProp || Option::EliminateDeadCode) {
-    canonicalizeRecur(m->getStmts());
+    for (i = 0; i < nkid; i++) {
+      if (i) clear();
+      canonicalizeKid(m, m->getNthKid(i), i);
+    }
+
     killLocals();
     if (m_replaced) return -1;
   }

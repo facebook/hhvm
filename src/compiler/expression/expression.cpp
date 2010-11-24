@@ -117,6 +117,7 @@ void Expression::deepCopy(ExpressionPtr exp) {
   exp->m_unused = false;
   exp->m_canonPtr.reset();
   exp->m_replacement.reset();
+  exp->clearVisited();
 };
 
 bool Expression::hasSubExpr(ExpressionPtr sub) const {

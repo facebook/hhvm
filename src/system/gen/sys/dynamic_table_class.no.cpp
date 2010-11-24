@@ -5328,12 +5328,7 @@ Variant c_Normalizer::i___construct(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Normalizer::i_normalize(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
   {
     ArrayData *ad(params.get());
@@ -5346,12 +5341,7 @@ Variant c_Normalizer::i_normalize(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Normalizer::i_isnormalized(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
   {
     ArrayData *ad(params.get());
@@ -5385,23 +5375,13 @@ Variant c_Normalizer::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_
   return (self->t___construct(), null);
 }
 Variant c_Normalizer::ifa_normalize(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
   if (count <= 1) return (c_Normalizer::ti_normalize(c, a0));
   return (c_Normalizer::ti_normalize(c, a0, a1));
 }
 Variant c_Normalizer::ifa_isnormalized(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
   if (count <= 1) return (c_Normalizer::ti_isnormalized(c, a0));
   return (c_Normalizer::ti_isnormalized(c, a0, a1));
@@ -7091,12 +7071,7 @@ Variant c_DateTimeZone::i_gettransitions(MethodCallPackage &mcp, CArrRef params)
 }
 Variant c_DateTimeZone::i_listidentifiers(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
   return (c_DateTimeZone::ti_listidentifiers(c));
 }
@@ -7148,12 +7123,7 @@ Variant c_DateTimeZone::i___construct(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_DateTimeZone::i_listabbreviations(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
   return (c_DateTimeZone::ti_listabbreviations(c));
 }
@@ -7181,12 +7151,7 @@ Variant c_DateTimeZone::ifa_gettransitions(MethodCallPackage &mcp, int count, IN
   return (self->t_gettransitions());
 }
 Variant c_DateTimeZone::ifa_listidentifiers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
   return (c_DateTimeZone::ti_listidentifiers(c));
 }
@@ -7224,12 +7189,7 @@ Variant c_DateTimeZone::ifa___construct(MethodCallPackage &mcp, int count, INVOK
   return (self->t___construct(a0), null);
 }
 Variant c_DateTimeZone::ifa_listabbreviations(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
   return (c_DateTimeZone::ti_listabbreviations(c));
 }
@@ -22538,12 +22498,7 @@ Variant c_Collator::i_setstrength(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_Collator::i_create(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
@@ -22720,12 +22675,7 @@ Variant c_Collator::ifa_setstrength(MethodCallPackage &mcp, int count, INVOKE_FE
   return (self->t_setstrength(a0));
 }
 Variant c_Collator::ifa_create(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
   return (c_Collator::ti_create(c, a0));
 }
@@ -23731,12 +23681,7 @@ Variant c_PDO::i_commit(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_PDO::i_getavailabledrivers(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
   return (c_PDO::ti_getavailabledrivers(c));
 }
@@ -23947,12 +23892,7 @@ Variant c_PDO::ifa_commit(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMP
   return (self->t_commit());
 }
 Variant c_PDO::ifa_getavailabledrivers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
   return (c_PDO::ti_getavailabledrivers(c));
 }
@@ -35268,9 +35208,9 @@ Object create_builtin_object_only(const char *s, ObjectData* root /* = NULL*/) {
   return throw_missing_class(s);
 }
 bool get_call_info_static_method_builtin(MethodCallPackage &mcp) {
-  const char *s __attribute__((__unused__)) (mcp.rootObj.getCStr());
+  StringData *s __attribute__((__unused__)) (mcp.rootObj.getStringData());
   DECLARE_SYSTEM_GLOBALS(g);
-  int64 hash = hash_string(s);
+  int64 hash = s->hash();
   switch (hash & 255) {
     case 8:
       HASH_CALL_INFO_STATIC_METHOD(0x4DA860E5647C3908LL, ImageSprite);

@@ -190,7 +190,8 @@ bool eval_get_call_info_hook(const CallInfo *&ci, void *&extra, const char *s,
 
 bool eval_get_call_info_static_method_hook(MethodCallPackage &info,
                                            bool &foundClass) {
-  const char *s __attribute__((__unused__)) (info.rootObj.getCStr());
+  const char *s __attribute__((__unused__)) =
+    info.rootObj.getStringData()->data();
   const MethodStatement *ms = Eval::RequestEvalState::findMethod(s,
       info.name.data(), foundClass, true);
   if (ms) {

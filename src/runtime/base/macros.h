@@ -296,26 +296,26 @@ do { \
 #define HASH_GET_OBJECT_STATIC_CALLBACKS_VOLATILE(code, f)              \
   if (hash == code && !strcasecmp(s, #f))                               \
     return CLASS_CHECK(&cw_ ## f)
-#define HASH_CALL_INFO_STATIC_METHOD(code, f)                              \
-  if (hash == code && !strcasecmp(s, #f))                               \
+#define HASH_CALL_INFO_STATIC_METHOD(code, f)                           \
+  if (hash == code && !strcasecmp(s->data(), #f))                       \
     return cw_ ## f.os_get_call_info(mcp, -1)
-#define HASH_CALL_INFO_STATIC_METHOD_VOLATILE(code, f)                     \
-  if (hash == code && !strcasecmp(s, #f))                               \
+#define HASH_CALL_INFO_STATIC_METHOD_VOLATILE(code, f)                  \
+  if (hash == code && !strcasecmp(s->data(), #f))                       \
     return CLASS_CHECK(cw_ ## f.os_get_call_info(mcp, -1))
-#define HASH_CALL_INFO_STATIC_METHOD_REDECLARED(code, f)                   \
-  if (hash == code && !strcasecmp(s, #f))                               \
+#define HASH_CALL_INFO_STATIC_METHOD_REDECLARED(code, f)                \
+  if (hash == code && !strcasecmp(s->data(), #f))                       \
     return CLASS_CHECK(g->cso_ ## f->os_get_call_info(mcp, -1))
 #define HASH_GET_OBJECT_STATIC_CALLBACKS_REDECLARED(code, f)            \
   if (hash == code && !strcasecmp(s, #f))                               \
     return CLASS_CHECK(g->cwo_ ## f)
 #define HASH_CALL_INFO_STATIC_METHOD_WITH_INDEX(code, f)                \
-  if (hash == code && !strcasecmp(s, #f))                               \
+  if (hash == code && !strcasecmp(s->data(), #f))                       \
     return cw_ ## f.os_get_call_info_with_index(mcp, mi, -1)
 #define HASH_CALL_INFO_STATIC_METHOD_WITH_INDEX_VOLATILE(code, f)       \
-  if (hash == code && !strcasecmp(s, #f))                               \
+  if (hash == code && !strcasecmp(s->data(), #f))                       \
     return CLASS_CHECK(cw_ ## f.os_get_call_info_with_index(mcp, mi, -1))
 #define HASH_CALL_INFO_STATIC_METHOD_WITH_INDEX_REDECLARED(code, f)     \
-  if (hash == code && !strcasecmp(s, #f))                               \
+  if (hash == code && !strcasecmp(s->data(), #f))                       \
     return CLASS_CHECK(g->cso_ ## f->os_get_call_info_with_index(mcp, mi, -1))
 #define HASH_GET_OBJECT_STATIC_CALLBACKS_REDECLARED(code, f)            \
   if (hash == code && !strcasecmp(s, #f))                               \

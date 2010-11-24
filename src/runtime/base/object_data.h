@@ -126,7 +126,7 @@ class ObjectData : public Countable {
   template<typename T>
   T *bindClass(ThreadInfo *info) {
     bindThis(info);
-    return dynamic_cast<T*>(this);
+    return static_cast<T*>(this);
   }
   void bindThis(ThreadInfo *info);
   void setDummy();

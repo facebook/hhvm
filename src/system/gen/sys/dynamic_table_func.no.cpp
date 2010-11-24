@@ -1447,17 +1447,20 @@ Variant ifa_syslog(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
 Variant i_array_unique(void *extra, CArrRef params) {
   FUNCTION_INJECTION(array_unique);
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("array_unique", count, 1, 1, 1);
+  if (count < 1 || count > 2) return throw_wrong_arguments("array_unique", count, 1, 2, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    return (f_array_unique(arg0));
+    if (count <= 1) return (f_array_unique(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_array_unique(arg0, arg1));
   }
 }
 Variant ifa_array_unique(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 1) return throw_wrong_arguments("array_unique", count, 1, 1, 1);
-  return (f_array_unique(a0));
+  if (count < 1 || count > 2) return throw_wrong_arguments("array_unique", count, 1, 2, 1);
+  if (count <= 1) return (f_array_unique(a0));
+  return (f_array_unique(a0, a1));
 }
 Variant i_bcpow(void *extra, CArrRef params) {
   FUNCTION_INJECTION(bcpow);
@@ -37063,19 +37066,24 @@ Variant ei_syslog(Eval::VariableEnvironment &env, const Eval::FunctionCallExpres
 }
 Variant ei_array_unique(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
+  Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
     a0 = (*it)->eval(env);
     it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("array_unique", count, 1, 1, 1);
-  return (x_array_unique(a0));
+  if (count < 1 || count > 2) return throw_wrong_arguments("array_unique", count, 1, 2, 1);
+  if (count <= 1) return (x_array_unique(a0));
+  else return (x_array_unique(a0, a1));
 }
 Variant ei_bcpow(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -84669,7 +84677,7 @@ CallInfo ci_magicksetimageblueprimary((void*)&i_magicksetimageblueprimary, (void
 CallInfo ci_session_name((void*)&i_session_name, (void*)&ifa_session_name, 1, 0, 0x0000000000000000LL);
 CallInfo ci_get_class_vars((void*)&i_get_class_vars, (void*)&ifa_get_class_vars, 1, 0, 0x0000000000000000LL);
 CallInfo ci_syslog((void*)&i_syslog, (void*)&ifa_syslog, 2, 0, 0x0000000000000000LL);
-CallInfo ci_array_unique((void*)&i_array_unique, (void*)&ifa_array_unique, 1, 0, 0x0000000000000000LL);
+CallInfo ci_array_unique((void*)&i_array_unique, (void*)&ifa_array_unique, 2, 0, 0x0000000000000000LL);
 CallInfo ci_bcpow((void*)&i_bcpow, (void*)&ifa_bcpow, 3, 0, 0x0000000000000000LL);
 CallInfo ci_pixelgetopacityquantum((void*)&i_pixelgetopacityquantum, (void*)&ifa_pixelgetopacityquantum, 1, 0, 0x0000000000000000LL);
 CallInfo ci_php_check_syntax((void*)&i_php_check_syntax, (void*)&ifa_php_check_syntax, 2, 0, 0x0000000000000002LL);

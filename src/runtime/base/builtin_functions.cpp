@@ -1049,8 +1049,8 @@ void MethodCallPackage::construct(CObjRef self) {
 void MethodCallPackage::fail() {
   if (m_fatal) {
     o_invoke_failed(rootObj.is(KindOfObject) ?
-        rootObj.getObjectData()->o_getClassName().c_str() : rootObj.getCStr(),
-        name.data(), true);
+        rootObj.getObjectData()->o_getClassName() : rootObj.toString(),
+        name, true);
   }
 }
 String MethodCallPackage::getClassName() {

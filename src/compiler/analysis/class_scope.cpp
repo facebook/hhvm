@@ -693,9 +693,11 @@ void ClassScope::outputCPPDynamicClassImpl(CodeGenerator &cg,
 void ClassScope::outputCPPClassJumpTable
 (CodeGenerator &cg,
  const StringToClassScopePtrVecMap &classScopes,
- const vector<const char*> &classes, const char* macro) {
+ const vector<const char*> &classes, const char* macro,
+ bool useString /* = false */) {
   cg.printDeclareGlobals();
-  for (JumpTable jt(cg, classes, true, false, false); jt.ready(); jt.next()) {
+  for (JumpTable jt(cg, classes, true, false, useString); jt.ready();
+       jt.next()) {
     const char *clsName = jt.key();
     StringToClassScopePtrVecMap::const_iterator iterClasses =
       classScopes.find(Util::toLower(clsName));
@@ -814,8 +816,8 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
     cg_printf("return get_call_info_static_method_no_index%s(mcp);\n",
         system ? "_builtin" : "");
   } else {
-    cg_printf("const char *s __attribute__((__unused__)) "
-        "(mcp.rootObj.getCStr());\n");
+    cg_printf("StringData *s __attribute__((__unused__)) "
+        "(mcp.rootObj.getStringData());\n");
 
     if (!system && Option::EnableEval == Option::FullEval) {
       cg_printf("bool foundClass = false;\n");
@@ -827,7 +829,7 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
       cg_indentEnd("}\n");
     }
     outputCPPClassJumpTable(cg, classScopes, classes,
-        "HASH_CALL_INFO_STATIC_METHOD");
+        "HASH_CALL_INFO_STATIC_METHOD", true);
 
     if (!system) {
       cg_printf("return get_call_info_static_method_builtin(mcp);\n");
@@ -841,8 +843,8 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
       "(MethodCallPackage &mcp, MethodIndex mi) {\n",
       system ? "_builtin" : "");
   if (Option::UseMethodIndex) {
-    cg_printf("const char *s __attribute__((__unused__)) "
-        "(mcp.rootObj.getCStr());\n");
+    cg_printf("StringData *s __attribute__((__unused__)) "
+        "(mcp.rootObj.getStringData());\n");
 
     if (!system && Option::EnableEval == Option::FullEval) {
       cg_printf("bool foundClass = false;\n");
@@ -854,7 +856,7 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
       cg_indentEnd("}\n");
     }
     outputCPPClassJumpTable(cg, classScopes, classes,
-        "HASH_CALL_INFO_STATIC_METHOD_WITH_INDEX");
+        "HASH_CALL_INFO_STATIC_METHOD_WITH_INDEX", true);
 
     if (!system) {
       cg_printf("return get_call_info_static_method_with_index_builtin(mcp, "
@@ -1383,13 +1385,9 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
     } else {
       // If rootObj is an object, was a static method invoked instance style.
       // Use rootObj's class name as invoking class
-      cg_printf("const char *c;\n");
-      cg_indentBegin("if (mcp.rootObj.is(KindOfObject)) {\n");
-      cg_printf("c = mcp.rootObj.getObjectData()->o_getClassName();\n");
-      cg_indentEnd("");
-      cg_indentBegin("} else {\n");
-      cg_printf("c = mcp.rootObj.getCStr();\n");
-      cg_indentEnd("}\n");
+      cg_printf("CStrRef c(mcp.rootObj.is(KindOfObject)"
+                       " ? mcp.rootObj.getObjectData()->o_getClassName()"
+                       " : mcp.rootObj.toString());\n");
     }
     func->outputCPPDynamicInvoke(cg, ar, prefix.c_str(),
         lname.c_str(), false, fewArgs, true, extra,

@@ -993,12 +993,7 @@ Variant c_ReflectionObject::os_invoke_from_eval(const char *c, const char *s, Ev
 CallInfo c_ReflectionObject::ci_export((void*)&c_ReflectionObject::i_export, (void*)&c_ReflectionObject::ifa_export, 2, 12, 0x0000000000000000LL);
 Variant c_ReflectionObject::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
   {
     ArrayData *ad(params.get());
@@ -1009,12 +1004,7 @@ Variant c_ReflectionObject::i_export(MethodCallPackage &mcp, CArrRef params) {
   }
 }
 Variant c_ReflectionObject::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
   return (c_ReflectionObject::ti_export(c, a0, a1));
 }
@@ -2246,12 +2236,7 @@ Variant c_ReflectionClass::i_getmodifiers(MethodCallPackage &mcp, CArrRef params
 }
 Variant c_ReflectionClass::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
   {
     ArrayData *ad(params.get());
@@ -2800,12 +2785,7 @@ Variant c_ReflectionClass::ifa_getmodifiers(MethodCallPackage &mcp, int count, I
   return (self->t_getmodifiers());
 }
 Variant c_ReflectionClass::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
   return (c_ReflectionClass::ti_export(c, a0, a1));
 }
@@ -4659,12 +4639,7 @@ Variant c_ReflectionExtension::i_getfunctions(MethodCallPackage &mcp, CArrRef pa
 }
 Variant c_ReflectionExtension::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
   {
     ArrayData *ad(params.get());
@@ -4792,12 +4767,7 @@ Variant c_ReflectionExtension::ifa_getfunctions(MethodCallPackage &mcp, int coun
   return (self->t_getfunctions());
 }
 Variant c_ReflectionExtension::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
   return (c_ReflectionExtension::ti_export(c, a0, a1));
 }
@@ -5700,12 +5670,7 @@ Variant c_ReflectionMethod::i_getmodifiers(MethodCallPackage &mcp, CArrRef param
 }
 Variant c_ReflectionMethod::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
   {
     ArrayData *ad(params.get());
@@ -5893,12 +5858,7 @@ Variant c_ReflectionMethod::ifa_getmodifiers(MethodCallPackage &mcp, int count, 
   return (self->t_getmodifiers());
 }
 Variant c_ReflectionMethod::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
   return (c_ReflectionMethod::ti_export(c, a0, a1, a2));
 }
@@ -6873,12 +6833,7 @@ Variant c_ReflectionProperty::i_getmodifiers(MethodCallPackage &mcp, CArrRef par
 }
 Variant c_ReflectionProperty::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
   {
     ArrayData *ad(params.get());
@@ -7056,12 +7011,7 @@ Variant c_ReflectionProperty::ifa_getmodifiers(MethodCallPackage &mcp, int count
   return (self->t_getmodifiers());
 }
 Variant c_ReflectionProperty::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
   return (c_ReflectionProperty::ti_export(c, a0, a1, a2));
 }
@@ -7743,12 +7693,7 @@ Variant c_ReflectionFunction::i_invokeargs(MethodCallPackage &mcp, CArrRef param
 }
 Variant c_ReflectionFunction::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
   {
     ArrayData *ad(params.get());
@@ -7804,12 +7749,7 @@ Variant c_ReflectionFunction::ifa_invokeargs(MethodCallPackage &mcp, int count, 
   return (self->t_invokeargs(a0));
 }
 Variant c_ReflectionFunction::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
   return (c_ReflectionFunction::ti_export(c, a0, a1));
 }
@@ -8417,12 +8357,7 @@ Variant c_ReflectionParameter::i_getclass(MethodCallPackage &mcp, CArrRef params
 }
 Variant c_ReflectionParameter::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
   {
     ArrayData *ad(params.get());
@@ -8573,12 +8508,7 @@ Variant c_ReflectionParameter::ifa_getclass(MethodCallPackage &mcp, int count, I
   return (self->t_getclass());
 }
 Variant c_ReflectionParameter::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  const char *c;
-  if (mcp.rootObj.is(KindOfObject)) {
-    c = mcp.rootObj.getObjectData()->o_getClassName();
-  } else {
-    c = mcp.rootObj.getCStr();
-  }
+  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
   if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
   return (c_ReflectionParameter::ti_export(c, a0, a1, a2));
 }

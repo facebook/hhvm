@@ -914,16 +914,6 @@ class Variant {
     return m_data.pvar;
   }
 
-  const char *getCStr() const {
-    if (isString()) {
-      return m_type == KindOfVariant ? m_data.pvar->m_data.pstr->data() :
-        m_data.pstr->data();
-    } else {
-      ASSERT(false);
-      return NULL;
-    }
-  }
-
   ObjectData *getArrayAccess() const;
   void callOffsetUnset(CVarRef key);
   int64 getNumData() const { return m_data.num; }

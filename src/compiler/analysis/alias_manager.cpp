@@ -969,6 +969,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
                 int i = findInterf(rhs, true, orig);
                 if (i == SameAccess &&
                     (sameExpr(cur, orig) || next && sameExpr(next, orig))) {
+                  Construct::recomputeEffects();
                   return e->replaceValue(canonicalizeRecurNonNull(rhs));
                 }
               }
@@ -1001,6 +1002,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
       ExpressionPtr rhs = bop->getExp2();
       ExpressionPtr lhs = bop->getExp1();
       lhs->clearContext();
+      Construct::recomputeEffects();
       return bop->replaceValue(
         canonicalizeNonNull(ExpressionPtr(
                               new BinaryOpExpression(

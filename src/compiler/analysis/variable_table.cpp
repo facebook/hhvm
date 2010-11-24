@@ -721,8 +721,11 @@ void VariableTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 static bool by_location(const VariableTable::StaticGlobalInfoPtr &p1,
                         const VariableTable::StaticGlobalInfoPtr &p2) {
-  return p1->sym->getDeclaration()->getLocation()->
-    compare(p2->sym->getDeclaration()->getLocation().get()) < 0;
+  ConstructRawPtr d1 = p1->sym->getDeclaration();
+  ConstructRawPtr d2 = p2->sym->getDeclaration();
+  if (!d1) return d2;
+  if (!d2) return false;
+  return d1->getLocation()->compare(d2->getLocation().get()) < 0;
 }
 
 void VariableTable::prepareStaticGlobals(CodeGenerator &cg) {
@@ -732,6 +735,7 @@ void VariableTable::prepareStaticGlobals(CodeGenerator &cg) {
 
   for (unsigned int i = 0; i < m_staticGlobalsVec.size(); i++) {
     StaticGlobalInfoPtr &sgi = m_staticGlobalsVec[i];
+    if (!sgi->sym->getDeclaration()) continue;
     string id = StaticGlobalInfo::getId(cg, sgi->cls, sgi->func,
                                         sgi->sym->getName());
     ASSERT(m_staticGlobals.find(id) == m_staticGlobals.end());

@@ -264,6 +264,7 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
       if (m_exp->isScalar() ||
           (m_exp->is(KindOfExpressionList) &&
            static_pointer_cast<ExpressionList>(m_exp)->getCount() == 0)) {
+        recomputeEffects();
         return CONSTANT("null");
       }
       return ExpressionPtr();
@@ -292,6 +293,7 @@ ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultPtr ar) {
     return CONSTANT("null");
   } else if (m_op == T_UNSET && m_exp->is(KindOfExpressionList) &&
              !static_pointer_cast<ExpressionList>(m_exp)->getCount()) {
+    recomputeEffects();
     return CONSTANT("null");
   }
 

@@ -652,7 +652,7 @@ String f_ini_set(CStrRef varname, CStrRef newvalue) {
 int64 f_memory_get_peak_usage(bool real_usage /* = false */) {
   if (RuntimeOption::EnableMemoryManager) {
     MemoryManager *mm = MemoryManager::TheMemoryManager().get();
-    const MemoryUsageStats &stats = mm->getStats();
+    const MemoryUsageStats &stats = mm->getStats(true);
     return real_usage ? stats.peakUsage : stats.peakAlloc;
   }
   return (int64)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;
@@ -661,7 +661,7 @@ int64 f_memory_get_peak_usage(bool real_usage /* = false */) {
 int64 f_memory_get_usage(bool real_usage /* = false */) {
   if (RuntimeOption::EnableMemoryManager) {
     MemoryManager *mm = MemoryManager::TheMemoryManager().get();
-    const MemoryUsageStats &stats = mm->getStats();
+    const MemoryUsageStats &stats = mm->getStats(true);
     return real_usage ? stats.usage : stats.alloc;
   }
   return (int64)Process::GetProcessRSS(Process::GetProcessId()) * 1024 * 1024;

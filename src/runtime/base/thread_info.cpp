@@ -37,6 +37,8 @@ ThreadInfo::ThreadInfo() : m_executing(Idling) {
     m_allocators[it->first] = it->second->get();
   }
 
+  m_mm = MemoryManager::TheMemoryManager().get();
+
   m_profiler = NULL;
 
   // get the default thread stack size once

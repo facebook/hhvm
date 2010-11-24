@@ -119,14 +119,47 @@ public:
   /**
    * Find out how much memory we have used so far.
    */
-  MemoryUsageStats &getStats() { return m_stats;}
+  MemoryUsageStats &getStats(bool refresh=false) {
+    if (refresh) {
+      refreshStats();
+    }
+    return m_stats;
+  }
 
   /**
    * Called during session starts to reset all usage stats.
    */
   void resetStats();
 
+  /**
+   * Refresh stats to reflect directly malloc()ed memory, and determine whether
+   * the request memory limit has been exceeded.
+   */
+  void refreshStats() {
+#ifdef USE_JEMALLOC
+    // Incrementally incorporate the difference between the previous and current
+    // deltas into the memory usage statistic.  For reference, the total
+    // malloced memory usage could be calculated as such, if delta0 were
+    // recorded in resetStats():
+    //
+    //   int64 musage = delta - delta0;
+    //
+    // Note however, that SmartAllocator subtracts from m_stats.usage when it
+    // calls malloc(), so that later smart allocations that adjust m_stats.usage
+    // don't double-count memory.  Thus musage in the example code may well
+    // substantially exceed m_stats.usage.
+    int64 delta = int64(*m_allocated) - int64(*m_deallocated);
+    m_stats.usage += delta - m_delta;
+    m_delta = delta;
+    if (m_stats.usage > m_stats.peakUsage) {
+      refreshStatsHelper();
+    }
+#endif
+  }
+
 private:
+  void refreshStatsHelper();
+
   static DECLARE_THREAD_LOCAL(MemoryManager, s_singleton);
 
   bool m_enabled;
@@ -137,6 +170,11 @@ private:
   std::set<UnsafePointer*> m_unsafePointers;
 
   MemoryUsageStats m_stats;
+#ifdef USE_JEMALLOC
+  uint64* m_allocated;
+  uint64* m_deallocated;
+  int64  m_delta;
+#endif
 };
 
 ///////////////////////////////////////////////////////////////////////////////

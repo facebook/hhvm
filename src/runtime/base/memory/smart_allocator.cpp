@@ -84,6 +84,10 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
 
   m_colMax = m_itemSize * m_itemCount;
   m_blocks.push_back((char *)malloc(m_colMax));
+#ifdef USE_JEMALLOC
+  // Cancel out jemalloc's accounting for this slab.
+  m_stats->usage -= m_colMax;
+#endif
   m_stats->alloc += m_colMax;
   if (m_stats->alloc > m_stats->peakAlloc) {
     m_stats->peakAlloc = m_stats->alloc;
@@ -144,6 +148,10 @@ void *SmartAllocatorImpl::allocHelper() {
       // used up the last batch
       ASSERT((m_blocks.size() - m_backupBlocks.size()) % m_multiplier == 0);
       m_blocks.push_back((char *)malloc(m_colMax * m_multiplier));
+#ifdef USE_JEMALLOC
+      // Cancel out jemalloc's accounting for this slab.
+      m_stats->usage -= m_colMax * m_multiplier;
+#endif
       m_allocatedBlocks = m_multiplier - 1;
     } else {
       // still have some blocks left from the last batch

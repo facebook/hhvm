@@ -23,6 +23,7 @@
 #include <util/case_insensitive.h>
 #include <vector>
 #include <runtime/base/macros.h>
+#include <runtime/base/memory/memory_manager.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -215,6 +216,8 @@ public:
   // overhead), throw an infinite recursion exception.
   static const int StackSlack = 1024 * 1024;
 
+  MemoryManager* m_mm;
+
   // This pointer is set by ProfilerFactory
   Profiler *m_profiler;
 
@@ -245,6 +248,7 @@ extern bool SegFaulting;
 
 inline void check_request_timeout(ThreadInfo *info) {
   if (SegFaulting) pause_and_exit();
+  info->m_mm->refreshStats();
   if (info->m_reqInjectionData.surprised) check_request_surprise(info);
 }
 

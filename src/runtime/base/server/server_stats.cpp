@@ -1189,7 +1189,7 @@ ServerStatsHelper::~ServerStatsHelper() {
 
     if (m_trackMemory) {
       MemoryManager *mm = MemoryManager::TheMemoryManager().get();
-      int64 mem = mm->getStats().peakUsage;
+      int64 mem = mm->getStats(true).peakUsage;
       ServerStats::Log(string("mem.") + m_section, mem);
     }
   }

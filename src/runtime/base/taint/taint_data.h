@@ -14,30 +14,37 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef __HPHP_TAINT_DATA_H__
+#define __HPHP_TAINT_DATA_H__
+
+#include <stdlib.h>
+#include <string.h>
+
 #ifdef TAINTED
 
-#include <runtime/base/array/array_iterator.h>
-#include <runtime/base/complex_types.h>
+#define TAINT_BIT_HTML (0x01)
+#define TAINT_BIT_SQL  (0x02)
+#define TAINT_BIT_ALL  (0x03)
+#define TAINT_BIT_NONE (0x00)
 
 namespace HPHP {
 
-void taint_array_variant(Variant &v) {
-  if (v.isString()) {
-    v.asStrRef().setTaint((bitstring)1);
-  }
+typedef int bitstring;
 
-  if (v.isArray()) {
-    Array a = v.toArray();
-    for(ArrayIter iter(a); iter; ++iter) {
-      Variant key = iter.first();
-      taint_array_variant(key);
-
-      Variant value = iter.second();
-      taint_array_variant(value);
-    }
-  }
-}
+class TaintData {
+public:
+  TaintData();
+  bitstring getTaint() const;
+  void setTaint(bitstring bits);
+  void unsetTaint(bitstring bits);
+  bitstring* getTaintBitsPtr();
+  void dump() const;
+private:
+  bitstring m_taint_bits;
+};
 
 }
 
 #endif // TAINTED
+
+#endif // __HPHP_TAINT_DATA_H__

@@ -27,7 +27,6 @@
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
-#include <runtime/base/tainted_metadata.h>
 
 namespace HPHP {
 
@@ -40,36 +39,31 @@ StringData::StringData(const char *data,
   : m_data(NULL), _count(0), m_len(0) {
   m_hash = 0;
 
-  #ifdef TAINTED
-  m_tainting = default_tainting;
-  m_tainted_metadata = NULL;
-  #endif
   assign(data, mode);
+
+  TAINT_OBSERVER_REGISTER_MUTATED(this);
 }
 
 StringData::StringData(SharedVariant *shared)
   : m_data(NULL), _count(0), m_len(0) {
   m_hash = 0;
-  #ifdef TAINTED
-  m_tainting = default_tainting;
-  m_tainted_metadata = NULL;
-  #endif
+
   ASSERT(shared);
   shared->incRef();
   m_shared = shared;
   m_data = m_shared->stringData();
   m_len = m_shared->stringLength() | IsShared;
   ASSERT(m_data);
+
+  TAINT_OBSERVER_REGISTER_MUTATED(this);
 }
 
 StringData::StringData(const char *data, int len, StringDataMode mode)
   : m_data(NULL), _count(0), m_len(0) {
   m_hash = 0;
-  #ifdef TAINTED
-  m_tainting = default_tainting;
-  m_tainted_metadata = NULL;
-  #endif
   assign(data, len, mode);
+
+  TAINT_OBSERVER_REGISTER_MUTATED(this);
 }
 
 StringData::~StringData() {
@@ -179,6 +173,8 @@ void StringData::append(const char *s, int len) {
     m_data = NULL;
     throw FatalErrorException(0, "String length exceeded 2^29 - 1: %d", len);
   }
+
+  TAINT_OBSERVER_REGISTER_MUTATED(this);
 }
 
 StringData *StringData::copy(bool sharedMemory /* = false */) const {
@@ -244,6 +240,10 @@ void StringData::dump() const {
       printf("\\x%02x", ch);
     }
   }
+#ifdef TAINTED
+  printf("\n");
+  this->getTaintDataRef().dump();
+#endif
   printf("]\n");
 }
 
@@ -409,41 +409,6 @@ bool StringData::isInteger() const {
 bool StringData::isValidVariableName() const {
   return is_valid_var_name(data(), size());
 }
-
-#ifdef TAINTED
-void StringData::setTaint(bitstring b){
-  m_tainting = m_tainting | b;
-  if(is_tainting_metadata(b)){
-    // resetting the metadata
-    if(m_tainted_metadata != NULL){
-      delete m_tainted_metadata;
-      m_tainted_metadata = NULL;
-    }
-    m_tainted_metadata = new TaintedMetadata();
-  }
-}
-void StringData::unsetTaint(bitstring b){
-  m_tainting = m_tainting & (~b);
-  if(is_tainting_metadata(b)){
-    // erasing the metadata
-    if(m_tainted_metadata != NULL){
-      delete m_tainted_metadata;
-      m_tainted_metadata = NULL;
-    }
-  }
-}
-TaintedMetadata* StringData::getTaintedMetadata() const {
-  return m_tainted_metadata;
-}
-
-bitstring* StringData::getTaintBitString() {
-  return &m_tainting;
-}
-
-TaintedMetadata** StringData::getTaintMetaData() {
- return &m_tainted_metadata;
-}
-#endif
 
 bool StringData::toBoolean() const {
   return !empty() && !isZero();

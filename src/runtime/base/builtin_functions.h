@@ -26,11 +26,10 @@
 #include <runtime/base/intercept.h>
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/taint/taint_data.h>
+#include <runtime/base/taint/taint_observer.h>
 #include <runtime/base/variable_unserializer.h>
 #include <util/case_insensitive.h>
-#ifdef TAINTED
-#include <runtime/base/propagate_tainting.h>
-#endif
 
 #ifdef __APPLE__
 # ifdef isset
@@ -118,25 +117,16 @@ inline double  negate(double v)  { return -v; }
 inline Variant negate(CVarRef v) { return -(Variant)v; }
 
 inline String concat(CStrRef s1, CStrRef s2)         {
-  #ifndef TAINTED
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return s1 + s2;
-  #else
-  String res = s1 + s2;
-  propagate_tainting2(s1, s2, res);
-  return res;
-  #endif
 }
 inline String &concat_assign(String &s1, litstr s2)  {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return s1 += s2;
-  // nothing to be done for tainting
 }
 inline String &concat_assign(String &s1, CStrRef s2) {
-  #ifndef TAINTED
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return s1 += s2;
-  #else
-  propagate_tainting2(s1, s2, s1 += s2);
-  return s1;
-  #endif
 }
 
 #define MAX_CONCAT_ARGS 6
@@ -147,40 +137,34 @@ String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
                CStrRef s6);
 
 inline Variant &concat_assign(Variant &v1, litstr s2) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+
   if (v1.getType() == KindOfString) {
     StringData *data = v1.getStringData();
     if (data->getCount() == 1) {
       data->append(s2, strlen(s2));
-      // nothing to be done for tainting
       return v1;
     }
   }
   String s1 = v1.toString();
   s1 += s2;
   v1 = s1;
-  // nothing to be done for tainting
   return v1;
 }
 
 inline Variant &concat_assign(Variant &v1, CStrRef s2) {
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+
   if (v1.getType() == KindOfString) {
     StringData *data = v1.getStringData();
     if (data->getCount() == 1) {
       data->append(s2.data(), s2.size());
-      #ifndef TAINTED
       return v1;
-      #else
-      String s1 = v1.toString();
-      propagate_tainting2(s1, s2, s1);
-      return v1;
-      #endif
     }
   }
   String s1 = v1.toString();
   s1 += s2;
-  #ifdef TAINTED
-  propagate_tainting2(s1, s2, s1);
-  #endif
+
   v1 = s1;
   return v1;
 }

@@ -32,7 +32,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 class Array;
 class String;
-class TaintedMetadata;
 class VarNR;
 class AtomicString;
 
@@ -319,30 +318,6 @@ public:
   static void compileTimeAssertions() {
     CT_ASSERT(offsetof(String, m_px) == offsetof(Value, m_data));
   }
-
-  #ifdef TAINTED
-  /**
-   * Tainting dynamic analysis
-   */
- public:
-  // TODOjjeannin: comments
-  // These isTainted, taint and untain functions are directly called by the
-  // fb_is_tainted, fb_taint and fb_untaint functions of php.
-  // See src/runtime/ext/ext_fb.cpp, functions f_fb_taint,
-  // f_fb_untaint and f_fb_is_tainted for more details.
-  bitstring getTaint() const;
-  // a call to taint() sets up the tainted metadata
-  // taint() without argument is for a call to fb_taint in the PHP code
-  void setTaint(bitstring b) const;
-  // taint(msg) is for a tainting in the HPHP code with an error message
-  // e.g., when creating the _GET and _POST arrays
-  void setTaint(bitstring b, CStrRef msg) const;
-  void unsetTaint(bitstring b) const;
-  TaintedMetadata* getTaintedMetadata() const;
-  // For String, getTaintBitString() and getTaintMetaData() can return NULL,
-  bitstring* getTaintBitString();
-  TaintedMetadata** getTaintMetaData();
-  #endif
 };
 
 extern const String null_string;

@@ -577,6 +577,16 @@ function generateFuncProfileHeader($func, $f) {
   } else if (!($func['flags'] & NoInjection)) {
     fprintf($f, "  FUNCTION_INJECTION_BUILTIN(%s);\n", $func['name']);
   }
+  if (isset($func['taint_observer'])) {
+    fprintf(
+      $f,
+      "  TAINT_OBSERVER(%d, %d);\n",
+      $func['taint_observer']['set_mask'],
+      $func['taint_observer']['clear_mask']);
+  } else {
+    fprintf($f, "  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);\n");
+  }
+
   fprintf($f, "  ");
 
   if (typename($func['return']) !== 'void') {

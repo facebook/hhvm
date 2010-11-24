@@ -22,14 +22,12 @@
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/macros.h>
 #include <util/hash.h>
-#ifdef TAINTED
-#include <runtime/base/tainting.h>
-#endif
+#include <runtime/base/taint/taint_observer.h>
+#include <runtime/base/taint/taint_data.h>
 
 namespace HPHP {
 
 class SharedVariant;
-class TaintedMetadata;
 class Array;
 class String;
 ///////////////////////////////////////////////////////////////////////////////
@@ -84,10 +82,7 @@ class StringData {
 
   StringData() : m_data(NULL), _count(0), m_len(0) {
     m_hash = 0;
-    #ifdef TAINTED
-    m_tainting = default_tainting;
-    m_tainted_metadata = NULL;
-    #endif
+    TAINT_OBSERVER_REGISTER_MUTATED(this);
   }
 
   /**
@@ -108,7 +103,10 @@ class StringData {
   /**
    * Informational.
    */
-  const char *data() const { return m_data;}
+  const char *data() const {
+    TAINT_OBSERVER_REGISTER_ACCESSED(this);
+    return m_data;
+  }
   int size() const { return m_len & LenMask;}
   bool empty() const { return size() == 0;}
   bool isLiteral() const { return m_len & IsLiteral;}
@@ -128,19 +126,10 @@ class StringData {
   bool isZero() const { return size() == 1 && m_data[0] == '0'; }
   bool isValidVariableName() const;
 
-  #ifdef TAINTED
-  /**
-   * Tainting dynamic analysis
-   */
-  // These functions are directly called from the functions in type_string.h
-  // The real work is done here.
-  bitstring getTaint() const { return m_tainting; }
-  void setTaint(bitstring b);
-  void unsetTaint(bitstring b);
-  TaintedMetadata* getTaintedMetadata() const;
-  bitstring* getTaintBitString();
-  TaintedMetadata** getTaintMetaData();
-  #endif
+#ifdef TAINTED
+  TaintData* getTaintData() { return &m_taint_data; }
+  const TaintData& getTaintDataRef() const { return m_taint_data; }
+#endif
 
   /**
    * Mutations.
@@ -223,10 +212,9 @@ class StringData {
     SharedVariant *m_shared;
     mutable int64  m_hash;   // precompute hash codes for static strings
   };
-  #ifdef TAINTED
-  bitstring m_tainting;
-  TaintedMetadata* m_tainted_metadata;
-  #endif
+#ifdef TAINTED
+  TaintData m_taint_data;
+#endif
 
   void releaseData();
 

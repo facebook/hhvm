@@ -1,0 +1,187 @@
+   +----------------------------------------------------------------------+
+   | HipHop for PHP                                                       |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+
+
+
+1. What is taint / data flow analysis?
+======================================
+
+The purpose of doing data flow analysis is to keep track of the origin of
+strings. When taint analysis is enabled, each php string contains a few extra
+bits of information. These bits can be set in various strings and each operation
+will either clear, set or propagate the bits.
+
+The goal of taint analysis is to detect/prevent security issues. It can be used
+as a defense against XSS and SQL injections. It can also be used to harden
+things like curl, eval, exec by failing to process strings which are controlled
+by the user.
+
+For example, to prevent XSS bugs, we can taint every string in the $_GET,
+$_POST, $_COOKIE and $_SERVER arrays. We can then clear the taint when specific
+sanitization functions are called and propagate the taint in all other cases. We
+then simply need to check the taint while echoing the string to detect XSS bugs.
+
+
+
+2. Compiling HPHP with Taint enabled
+====================================
+
+Edit your hphp/local/<your_unixname>.mk file to contain the following flags:
+DEBUG = 1
+TAINTED = 1
+
+Then do make clobber; make -j
+
+Voila :)
+
+
+
+3. Taint analysis in HPHP
+=========================
+
+After evaluating several possible implementations, we decided to implement a
+TaintObserver object which keeps tracks of which strings are being read. When
+a string is created or mutated, the TaintObserver will tell us if the new string
+needs to be tainted or not.
+
+The advantage of this approach is that we don't need to convert the entire hphp
+codebase to be taint aware. It also means we can continue using raw char*
+operations in places like src/runtime/base/zend/zend_string.cpp.
+
+On the other hand, the disadvantage is that functions like addcslashes will
+return a tainted string even if only the second parameter is tainted. In
+practice, this does not matter and we can live with this false negative.
+
+We modified idl/base.php to instantiate a TaintObserver for each php function.
+The code is designed to support multiple TaintObservers. Each TaintObserver
+lives on the stack. At any given time, the newest TaintObserver is handling
+the taint. When a TaintObserver falls out of scope, the previous
+TaintObserver goes back to handling things.
+
+
+
+4. Overview of taint related code
+=================================
+
+All the taint related code lives in src/runtime/base/taint/.
+
+HPHP has the following classes which represent strings:
+- String: a smart pointer to StringData
+- AtomicString: a smart pointer to StringData
+- StaticString: a smart pointer to StringData
+- Variant: a container which sometimes contains StringData
+- StringData
+- StringBuffer
+
+We only keep track of the taint bits in StringData and StringBuffer,
+since those two classes actually hold the char* data. Everything else
+is just a layer of indirection which we can ignore.
+
+4.1. taint_observer.h / taint_observer.cpp
+==========================================
+
+Keeps track of which strings are being accessed and when a string is mutated,
+the TaintObserver will propagate the taint.
+
+We can't get StringData and StringBuffer to inherit from a single ITaintable
+interface, because of the FAST_REFCOUNT_FOR_VARIANT optimization. We therefore
+use method overloading.
+
+TaintObserver's constructor takes a mask of bits to set and a mask of bits
+to clear. If a bit is neither "set" nor "clear" it will propagate. The
+current propagation rule is always an OR operation. E.g.:
+
+To always set the HTML bit:       TaintObserver(0x01, 0x00);
+To always clear the HTML bit:     TaintObserver(0x00, 0x01);
+To always propagate the HTML bit: TaintObserver(0x00, 0x00);
+
+4.2. taint_data.h / taint_data.cpp
+==================================
+
+The actual taint information we are adding to the strings. Currently it's only
+an int, but this will expand to include additional metadata in the future.
+
+It's important to keep in mind that each time an object which contains TaintData
+is accessed, it needs to notify the TaintObserver. Each time an object which
+contains TaintData is mutated, it also needs to call the TaintObserver so that
+the correct taint bits can be set.
+
+4.3. taint_helper.h / taint_helper.cpp
+======================================
+
+Helper code to taint arrays. Used from src/runtime/base/server/http_protocol.cpp
+to taint the $_GET, $_POST, $_COOKIES and $_SERVER arrays.
+
+Helper code to warn if a tainted string is being used.
+
+
+
+5. Limitations of taint analysis
+================================
+
+5.1. Only strings are tainted
+=============================
+
+Taint analysis is performed at a string level. This means it's possible to loose
+the taint in php code by using chr(ord()):
+
+$s = '';
+for ($i=0; $i<strlen($tainted_string); $i++) {
+  $s .= chr(ord($tainted_string[$i]));
+}
+
+In general it's going to be hard to prevent malicious php code from clearing the
+taint. HTML/XML sanitization is context dependant and we therefore currently
+need to expose a fb_unset_taint method.
+
+5.2. LinearAllocator
+====================
+
+The code currently does not deal with the LinearAllocator. If a string is
+backed up to the LinearAllocator, it's taint state will be lost. Intuitively,
+this should not impact taint analysis, because strings being saved in the
+LinearAllocator should not be user supplied strings.
+
+5.3. Thread local TaintObserver
+===============================
+
+Each tread has zero, one or more TaintObservers. These objects don't know about
+each other's existence. If a shared string is tainted in a thread A, it might
+cause thread B to incorrectly propagate the taint. Again, this should not
+impact the usefulness of the taint analysis, because strings being shared
+between threads should not be user supplied strings.
+
+
+
+6. Future work
+==============
+
+Knowing if a string is tainted is useful, however we often also need to know
+where/why a string was tainted. We are working on attaching this kind of
+metadata to the taint bits.
+
+
+
+7. TODO / Notes
+===============
+
+* Investigate if string_data assign needs to propagate the taint
+* Check if flush() works as expected
+* Add a test for ob_get_status and output buffer handlers
+* Add more tests for str_replace, there's a lot going on there
+* runtime/base/execution_context.cpp has calls to writeStdout. Make sure
+  the right thing is happening there
+* Right now, we are checking m_buffers.size() == 2 in execution_context.cpp.
+  This will fail if output buffering is turned off. We need to find a better
+  solution...

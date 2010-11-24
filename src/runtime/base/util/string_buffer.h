@@ -19,12 +19,12 @@
 
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/taint/taint_data.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 class File;
-class TaintedMetadata;
 
 class StringBufferLimitException : public Exception {
 public:
@@ -116,18 +116,10 @@ public:
   void read(FILE *in, int page_size = 1024);
   void read(File *in, int page_size = 1024);
 
-  #ifdef TAINTED
-  /**
-   * Tainting dynamic analysis
-   */
-  bitstring getTaint() const { return m_tainting; }
-  void setTaint(bitstring b);
-  void unsetTaint(bitstring b);
-  TaintedMetadata* getTaintedMetadata() const;
-
-  bitstring* getTaintBitString();
-  TaintedMetadata** getTaintMetaData();
-  #endif
+#ifdef TAINTED
+  TaintData* getTaintData() { return &m_taint_data; }
+  const TaintData& getTaintDataRef() const { return m_taint_data; }
+#endif
 
 private:
   // disabling copy constructor and assignment
@@ -139,10 +131,9 @@ private:
   int m_maxBytes;
   int m_size;
   int m_pos;
-  #ifdef TAINTED
-  bitstring m_tainting;
-  TaintedMetadata* m_tainted_metadata;
-  #endif
+#ifdef TAINTED
+  TaintData m_taint_data;
+#endif
 
   void grow(int minSize);
 };

@@ -30,13 +30,11 @@
 #include <runtime/base/debug/backtrace.h>
 #include <runtime/base/server/server_stats.h>
 #include <runtime/eval/debugger/debugger.h>
+#include <runtime/base/taint/taint_helper.h>
+#include <runtime/base/taint/taint_data.h>
 #include <util/logger.h>
 #include <util/process.h>
 #include <util/text_color.h>
-
-#ifdef TAINTED
-#include <runtime/base/tainted_metadata.h>
-#endif
 
 using namespace std;
 
@@ -180,17 +178,16 @@ void ExecutionContext::setRequestMemoryMaxBytes(int64 max) {
 // write()
 
 void ExecutionContext::write(CStrRef s) {
-  #ifdef TAINTED
-  /* called by the PHP function echo()
-   * main check point for the tainting analysis
-   */
-  if (is_tainted_html(s.getTaint())) {
-    std::string meta = s.getTaintedMetadata()->stringOfTaintedMetadata();
-    meta = meta + "  the echoed string is : '" + s.data()
-           + "'\n\n[end of the echoed string]\n";
-    raise_warning(meta);
+#ifdef TAINTED
+  if (!getTransport() && !m_out) {
+    // We are running a PHP script and we are about to echo to stdout
+    taint_warn_if_tainted(s, TAINT_BIT_HTML);
+  } else if (getTransport() && m_buffers.size() == 2) {
+    // We are responding to a request and we are about to echo to stdout
+    taint_warn_if_tainted(s, TAINT_BIT_HTML);
   }
-  #endif
+#endif
+
   write(s.data(), s.size());
 }
 

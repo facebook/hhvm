@@ -23,7 +23,6 @@
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/zend/zend_printf.h>
-#include <runtime/base/tainted_metadata.h>
 
 namespace HPHP {
 
@@ -644,53 +643,6 @@ void String::dump() const {
     printf("(null)\n");
   }
 }
-
-  #ifdef TAINTED
-  /**
-   * Tainting dynamic analysis
-   */
-  bitstring String::getTaint() const {
-    return m_px ? m_px->getTaint() : default_tainting;
-    // a null pointer should be considered untainted
-  }
-  void String::setTaint(bitstring b) const {
-    if(m_px) {
-      m_px->setTaint(b);
-      if(is_tainting_metadata(b)){
-        getTaintedMetadata()->setTaintedOriginal(this);
-        getTaintedMetadata()->setTaintedPlace();
-      }
-    }
-  }
-  void String::setTaint(bitstring b, CStrRef msg) const {
-    if(m_px) {
-      m_px->setTaint(b);
-      if(is_tainting_metadata(b)){
-        getTaintedMetadata()->setTaintedOriginal(this);
-        getTaintedMetadata()->setTaintedPlace(msg.toKey());
-      }
-    }
-  }
-  void String::unsetTaint(bitstring b) const {
-    if(m_px) { m_px->unsetTaint(b); }
-  }
-  TaintedMetadata* String::getTaintedMetadata() const {
-    if(m_px) {
-      return m_px->getTaintedMetadata();
-    } else {
-      return NULL;
-    }
-  }
-
-  bitstring* String::getTaintBitString() {
-    return m_px ? m_px->getTaintBitString() : NULL;
-  }
-
-  TaintedMetadata** String::getTaintMetaData() {
-    return m_px ? m_px->getTaintMetaData() : NULL;
-  }
-  #endif
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // StaticString

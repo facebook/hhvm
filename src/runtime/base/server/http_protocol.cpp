@@ -29,7 +29,7 @@
 #include <runtime/base/server/upload.h>
 #include <runtime/base/server/replay_transport.h>
 #include <runtime/base/util/http_client.h>
-#include <runtime/base/taint/taint_array.h>
+#include <runtime/base/taint/taint_helper.h>
 
 #define DEFAULT_POST_CONTENT_TYPE "application/x-www-form-urlencoded"
 

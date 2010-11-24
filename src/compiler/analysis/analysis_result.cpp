@@ -2039,7 +2039,8 @@ void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
   }
   cg_printInclude("<runtime/base/array/zend_array.h>");
   cg_printInclude("<runtime/base/array/small_array.h>");
-  cg_printInclude("<runtime/base/taint.h>");
+  cg_printInclude("<runtime/base/taint/taint_observer.h>");
+  cg_printInclude("<runtime/base/taint/taint_data.h>");
   cg.printImplStarter();
   cg.namespaceBegin();
   if (Option::GenConcat) {
@@ -2080,6 +2081,9 @@ void AnalysisResult::outputConcatImpl(CodeGenerator &cg) {
     ASSERT(num > MAX_CONCAT_ARGS);
     outputConcatNumDecl(cg, num);
     cg_indentBegin(" {\n");
+
+    cg_printf("TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);\n");
+
     for (int i = 1; i <= num; i++) {
       cg_printf("int len%d = s%d.size();\n", i, i);
     }
@@ -2105,13 +2109,6 @@ void AnalysisResult::outputConcatImpl(CodeGenerator &cg) {
     }
     cg_printf("buf[len] = 0;\n");
     cg_printf("String r = String(buf, len, AttachString);\n");
-    cg_printf("#ifdef TAINTED\n");
-    cg_printf("Taint(r) ");
-    for (int i = 1; i <= num; i++) {
-      cg_printf("<< s%d", i);
-    }
-    cg_printf(";\n");
-    cg_printf("#endif\n");
     cg_printf("return r;\n");
     cg_indentEnd("}\n");
   }

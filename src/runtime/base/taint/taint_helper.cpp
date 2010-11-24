@@ -14,44 +14,50 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_TAINT_H__
-#define __HPHP_TAINT_H__
-
 #ifdef TAINTED
 
-#include <runtime/base/tainting.h>
-#include <runtime/base/tainted_metadata.h>
+#include <runtime/base/types.h>
+#include <runtime/base/array/array_iterator.h>
 #include <runtime/base/complex_types.h>
-#include <runtime/base/util/string_buffer.h>
-
-/**
- * This class handles the tainting of strings.
- *
- * Initially the code was duplicated in several places, so this class makes
- * everything cleaner.
- */
-using namespace std;
+#include <runtime/base/taint/taint_data.h>
+#include <runtime/base/taint/taint_helper.h>
 
 namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
 
-class Taint {
-public:
-  Taint(StringBuffer &str);
-  Taint(String &str);
-  Taint& operator<<(const String& src);
-  Taint& operator<<(const StringData& src);
+void taint_warn_if_tainted(CStrRef s, bitstring bit) {
+  if (s.get()->getTaintDataRef().getTaint() & bit) {
+    std::string buf = "using a tainted string: '";
+    buf += s.substr(0, 100).data();
+    buf += "'\n\n";
+    raise_warning(buf);
+  }
+}
 
-private:
-  void propagateMetaData(TaintedMetadata* metadata);
+void taint_array_variant(Variant &v) {
+  if (v.isString()) {
+    v.asStrRef().get()->getTaintData()->setTaint(TAINT_BIT_ALL);
+  }
 
-  bitstring *m_bits;
-  TaintedMetadata **m_metadata;
-};
+  if (v.isArray()) {
+    Array a = v.toArray();
+    for(ArrayIter iter(a); iter; ++iter) {
+      Variant key = iter.first();
 
-///////////////////////////////////////////////////////////////////////////////
+      if (!key.isString()) {
+        // if the URI is /foo.php?123=hello, 123 will be an int, not a string
+        // so just skip it.
+        continue;
+      }
+
+      ASSERT(key.isString());
+      taint_array_variant(key);
+
+      Variant value = iter.second();
+      taint_array_variant(value);
+    }
+  }
+}
+
 }
 
 #endif // TAINTED
-
-#endif // __HPHP_TAINT_H__

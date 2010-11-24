@@ -1,3 +1,4 @@
+<?php
 /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
@@ -13,16 +14,18 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+require_once('setup.inc');
 
-#ifndef __HPHP_TAINT_ARRAY_H__
-#define __HPHP_TAINT_ARRAY_H__
+/**
+ * Check that the reference operator doesn't cause us to loose any taint
+ * information
+ */
 
-#ifdef TAINTED
+$a = $good1;
+$b = &$a;
 
-namespace HPHP {
-  void taint_array_variant(Variant& v);
-}
+$a .= $good2;
+not_tainted($b);
 
-#endif // TAINTED
-
-#endif // __HPHP_TAINT_ARRAY_H__
+$a .= $bad1;
+tainted($b);

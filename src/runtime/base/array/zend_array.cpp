@@ -162,7 +162,8 @@ void ZendArray::iter_dirty_reset() const {
 }
 
 void ZendArray::iter_dirty_check() const {
-  if (RuntimeOption::EnableHipHopErrors && (m_flag & IterationDirty)) {
+  if (RuntimeOption::EnableHipHopErrors && (m_flag & IterationDirty) &&
+      !isStatic()) {
     raise_notice("In PHP, mixing up foreach() and functional style array "
                  "iteration by calling current(), each(), key(), value(), "
                  "prev(), next() may lead to undefined behavior. In HipHop, "

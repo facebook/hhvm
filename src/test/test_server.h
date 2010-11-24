@@ -57,6 +57,9 @@ public:
   // test XboxServer
   bool TestXboxServer();
 
+  // test PageletServer
+  bool TestPageletServer();
+
 protected:
   void RunServer();
   void StopServer();

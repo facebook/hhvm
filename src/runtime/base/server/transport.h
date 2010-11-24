@@ -203,8 +203,8 @@ public:
   /**
    * We define a "server object" as the part of URL without domain name:
    *
-   *   http://facebook.com/foo?x=1       server object is "foo?x=1"
-   *   http://facebook.com/foo/bar?x=1   server object is "foo/bar?x=1"
+   *   http://facebook.com/foo?x=1       server object is "/foo?x=1"
+   *   http://facebook.com/foo/bar?x=1   server object is "/foo/bar?x=1"
    */
   const char *getServerObject();
 

@@ -180,6 +180,7 @@ bool TestServer::RunTests(const std::string &which) {
   RUN_TEST(TestHttpClient);
   RUN_TEST(TestRPCServer);
   RUN_TEST(TestXboxServer);
+  RUN_TEST(TestPageletServer);
 
   return ret;
 }
@@ -617,6 +618,23 @@ bool TestServer::TestXboxServer() {
         "int(0)\n"
         "int(2)\n",
         "string?main=1");
+
+  return true;
+}
+
+bool TestServer::TestPageletServer() {
+  VSGET("<?php\n"
+        "if (array_key_exists('pagelet', $_GET)) {\n"
+        "  echo 'Hello from the pagelet!';\n"
+        "} else {\n"
+        "  $h = array('Host: ' . $_SERVER['HTTP_HOST']);\n"
+        "  $t = pagelet_server_task_start('/string?pagelet=1', $h, '');\n"
+        "  echo 'First! ';\n"
+        "  $r = pagelet_server_task_result($t, $h, $c);\n"
+        "  echo $r;\n"
+        "}\n",
+        "First! Hello from the pagelet!",
+        "string");
 
   return true;
 }

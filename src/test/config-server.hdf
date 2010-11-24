@@ -33,3 +33,7 @@ Xbox {
     MaxDuration = 10
   }
 }
+
+PageletServer {
+  ThreadCount = 5
+}

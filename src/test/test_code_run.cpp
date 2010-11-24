@@ -13016,6 +13016,31 @@ bool TestCodeRun::TestFile() {
   MVCR("<?php "
       "$f = fopen('php://stdout', 'w');"
       "fprintf($f, 'stdout');");
+  MVCR("<?php "
+      "$input = fopen('/tmp/junk.txt', 'w+');"
+      "fwrite($input, 'hello world');"
+      ""
+      "fseek($input, 0);"
+      "$output = fopen('php://memory', 'w+');"
+      "stream_copy_to_stream($input, $output);"
+      "fseek($output, 0);"
+      "$bytes = fread($output, 1024);"
+      "print \"From file, without Maxlen: <\".serialize($bytes).\">.\\n\";"
+      ""
+      "fseek($input, 0);"
+      "$output = fopen('php://memory', 'w+');"
+      "stream_copy_to_stream($input, $output, null);"
+      "fseek($output, 0);"
+      "$bytes = fread($output, 1024);"
+      "print \"From file, using Maxlen null: <\".serialize($bytes).\">.\\n\";"
+      ""
+      ""
+      "fseek($input, 0);"
+      "$output = fopen('php://memory', 'w+');"
+      "stream_copy_to_stream($input, $output, -1);"
+      "fseek($output, 0);"
+      "$bytes = fread($output, 1024);"
+      "print \"From file, using Maxlen -1: <\".serialize($bytes).\">.\\n\";");
   return true;
 }
 

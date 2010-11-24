@@ -67,7 +67,7 @@ inline bool f_stream_context_set_param(CObjRef stream_or_context,
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_stream_copy_to_stream(CObjRef source, CObjRef dest,
-                                int maxlength = 0, int offset = 0);
+                                int maxlength = -1, int offset = 0);
 
 inline bool f_stream_encoding(CObjRef stream, CStrRef encoding = null_string) {
   throw NotSupportedException(__func__, "stream filter is not supported");

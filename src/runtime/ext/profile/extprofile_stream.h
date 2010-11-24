@@ -50,7 +50,7 @@ inline bool x_stream_context_set_param(CObjRef stream_or_context, CArrRef params
   return f_stream_context_set_param(stream_or_context, params);
 }
 
-inline Variant x_stream_copy_to_stream(CObjRef source, CObjRef dest, int maxlength = 0, int offset = 0) {
+inline Variant x_stream_copy_to_stream(CObjRef source, CObjRef dest, int maxlength = -1, int offset = 0) {
   FUNCTION_INJECTION_BUILTIN(stream_copy_to_stream);
   return f_stream_copy_to_stream(source, dest, maxlength, offset);
 }

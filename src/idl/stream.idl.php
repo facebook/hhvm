@@ -183,7 +183,7 @@ DefineFunction(
       array(
         'name'   => "maxlength",
         'type'   => Int32,
-        'value'  => "0",
+        'value'  => "-1",
         'desc'   => "Maximum bytes to copy",
       ),
       array(

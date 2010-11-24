@@ -35,6 +35,7 @@
 #define PHP_STREAM_BUFFER_NONE  0   /* unbuffered */
 #define PHP_STREAM_BUFFER_LINE  1   /* line buffered */
 #define PHP_STREAM_BUFFER_FULL  2   /* fully buffered */
+#define PHP_STREAM_COPY_ALL     (-1)
 
 namespace HPHP {
 
@@ -46,8 +47,10 @@ StaticString StreamContext::s_class_name("StreamContext");
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant f_stream_copy_to_stream(CObjRef source, CObjRef dest,
-                                int maxlength /* = 0 */,
+                                int maxlength /* = -1 */,
                                 int offset /* = 0 */) {
+  if (maxlength == 0) return 0;
+  if (maxlength == PHP_STREAM_COPY_ALL) maxlength = 0;
   Variant ret = f_stream_get_contents(source, maxlength, offset);
   if (same(ret, false)) {
     return false;

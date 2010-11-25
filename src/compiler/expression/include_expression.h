@@ -24,8 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(IncludeExpression);
 
-class IncludeExpression : public UnaryOpExpression,
-                          public IParseHandler {
+class IncludeExpression : public UnaryOpExpression, public IParseHandler {
 public:
   static std::string CheckInclude(ConstructPtr includeExp,
                                   ExpressionPtr fileExp, bool documentRoot);
@@ -45,6 +44,7 @@ public:
   bool isDocumentRoot() { return m_documentRoot;}
   void setPrivateScope() { m_privateScope = true; }
   bool getPrivateScope() const { return m_privateScope; }
+
 private:
   /**
    * There are 3 forms of include paths:
@@ -58,7 +58,6 @@ private:
   bool m_depsSet;
   std::string m_include;
 
-  std::string getCurrentInclude(AnalysisResultPtr ar);
   void analyzeInclude(AnalysisResultPtr ar, const std::string &include);
 };
 

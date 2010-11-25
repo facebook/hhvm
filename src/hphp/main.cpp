@@ -57,6 +57,7 @@ struct ProgramOptions {
   string inputDir;
   vector<string> inputs;
   string inputList;
+  vector<string> includePaths;
   vector<string> modules;
   vector<string> excludeDirs;
   vector<string> excludeFiles;
@@ -199,8 +200,8 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     ("input-list", value<string>(&po.inputList),
      "file containing list of file names, one per line")
     ("include-path",
-     value<vector<string> >(&Option::IncludeSearchPaths)->composing(),
-     "a list of include paths to search for files being included in includes "
+     value<vector<string> >(&po.includePaths)->composing(),
+     "a list of full paths to search for files being included in includes "
      "or requires but cannot be found assuming relative paths")
     ("module", value<vector<string> >(&po.modules)->composing(),
      "directories containing all input files")
@@ -378,6 +379,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
   }
   po.configDir = Util::normalizeDir(po.configDir);
   Option::RootDirectory = po.configDir;
+  Option::IncludeSearchPaths = po.includePaths;
 
   for (unsigned int i = 0; i < po.excludeDirs.size(); i++) {
     Option::PackageExcludeDirs.insert

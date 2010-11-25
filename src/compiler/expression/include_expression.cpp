@@ -184,7 +184,7 @@ string IncludeExpression::CheckInclude(ConstructPtr includeExp,
   string included = get_include_file_path(container, var, documentRoot);
   included = Util::canonicalize(included);
   if (included.empty() || container == included) {
-    if (!included.empty()) {
+    if (!included.empty() && included.find(' ') == string::npos) {
       Compiler::Error(Compiler::BadPHPIncludeFile, includeExp);
     }
     return "";
@@ -198,10 +198,6 @@ void IncludeExpression::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
-
-std::string IncludeExpression::getCurrentInclude(AnalysisResultPtr ar) {
-  return m_include;
-}
 
 void IncludeExpression::analyzeInclude(AnalysisResultPtr ar,
                                        const std::string &include) {
@@ -220,16 +216,14 @@ void IncludeExpression::analyzeInclude(AnalysisResultPtr ar,
 }
 
 void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
-  string include = getCurrentInclude(ar);
-  if (!include.empty()) {
+  if (!m_include.empty()) {
     if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
-      ar->parseOnDemand(include);
+      ar->parseOnDemand(m_include);
     } else if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-      analyzeInclude(ar, include);
+      analyzeInclude(ar, m_include);
     }
   }
-  if (!getScope()->inPseudoMain() &&
-      !m_privateScope) {
+  if (!getScope()->inPseudoMain() && !m_privateScope) {
     VariableTablePtr var = getScope()->getVariables();
     var->setAttribute(VariableTable::ContainsLDynamicVariable);
     var->forceVariants(ar, VariableTable::AnyVars);
@@ -281,7 +275,6 @@ TypePtr IncludeExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 // code generation functions
 
 void IncludeExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-
   UnaryOpExpression::outputPHP(cg, ar);
 }
 
@@ -296,8 +289,8 @@ void IncludeExpression::outputCPPImpl(CodeGenerator &cg,
     "lvar_ptr(LVariableTable())" : "variables";
   bool require = (m_op == T_REQUIRE || m_op == T_REQUIRE_ONCE);
   bool once = (m_op == T_INCLUDE_ONCE || m_op == T_REQUIRE_ONCE);
-  if (!getCurrentInclude(ar).empty()) {
-    FileScopePtr fs = ar->findFileScope(getCurrentInclude(ar));
+  if (!m_include.empty()) {
+    FileScopePtr fs = ar->findFileScope(m_include);
     if (fs) {
       cg_printf("%s%s(%s, %s, %s)", Option::PseudoMainPrefix,
                 fs->pseudoMainName().c_str(),

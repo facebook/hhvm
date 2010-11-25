@@ -359,6 +359,8 @@ public:
   /* true if it might, false if it doesnt */
   bool implementsAccessor(int prop);
 
+  void outputForwardDeclaration(CodeGenerator &cg);
+
   void clearBases() {
     m_bases.clear();
     m_parent = "";

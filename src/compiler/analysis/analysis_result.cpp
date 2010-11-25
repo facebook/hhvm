@@ -944,7 +944,7 @@ int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
 
   if (pushPrev) {
     scope->getVariables()->endLocal();
-    ret = scope->getUpdated();
+    ret = (ret & BlockScope::UseKindCaller) | scope->getUpdated();
   }
 
   return ret;

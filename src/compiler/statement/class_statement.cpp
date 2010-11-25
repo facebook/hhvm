@@ -379,7 +379,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   case CodeGenerator::CppDeclaration:
     {
       if (Option::GenerateCPPMacros) {
-        cg_printf("FORWARD_DECLARE_CLASS(%s);\n", clsName);
+        classScope->outputForwardDeclaration(cg);
       }
 
       bool system = cg.getOutput() == CodeGenerator::SystemCPP;

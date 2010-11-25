@@ -242,12 +242,7 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
     {
       printSource(cg);
       if (Option::GenerateCPPMacros) {
-        if (!Option::UseVirtualDispatch ||
-            classScope->isRedeclaring()) {
-          cg_printf("FORWARD_DECLARE_GENERIC_INTERFACE(%s);\n", clsName);
-        } else {
-          cg_printf("FORWARD_DECLARE_INTERFACE(%s);\n", clsName);
-        }
+        classScope->outputForwardDeclaration(cg);
       }
       cg_printf("class %s%s", Option::ClassPrefix, clsName);
       if (m_base && Option::UseVirtualDispatch &&

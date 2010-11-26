@@ -17,6 +17,11 @@ SIZE_SORTED_SOURCES := $(wildcard ./sys/*.cpp) \
 CXX_SOURCES := $(filter-out $(CXX_NOOPT_SOURCES), $(SIZE_SORTED_SOURCES) \
   $(filter-out $(SIZE_SORTED_SOURCES), $(RECURSIVE_SOURCES)))
 
+ifdef RANDOMIZE_CXX_SOURCES
+CXX_SOURCES := $(shell echo $(CXX_SOURCES) | \
+  perl -MList::Util=shuffle -ne'$$,=" "; print shuffle split/ /')
+endif
+
 -include sep_extensions.mk
 
 CPPFLAGS += -I. $(SEP_EXTENSION_INCLUDE_PATHS)

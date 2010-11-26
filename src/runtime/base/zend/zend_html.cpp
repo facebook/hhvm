@@ -320,28 +320,34 @@ typedef __gnu_cxx::hash_map
 <const char *, std::string, __gnu_cxx::hash<const char *>, eqstr>
 HtmlEntityMap;
 
-static bool EntityMapInited = false;
-static Mutex EntityMapMutex;
 static HtmlEntityMap EntityMap;
 
-static void init_entity_table() {
-  for (unsigned int i = 0; i < sizeof(entity_map)/sizeof(entity_map[0]); i++) {
-    const html_entity_map &em = entity_map[i];
+namespace {
+class EntityMapInitializer {
+public:
+  EntityMapInitializer() {
+    for (unsigned int i = 0; i < sizeof(entity_map) / sizeof(entity_map[0]);
+         i++) {
+      const html_entity_map &em = entity_map[i];
 
-    int index = 0;
-    for (int ch = em.basechar; ch <= em.endchar; ch++, index++) {
-      const char *entity = em.table[index];
-      if (entity) {
-        unsigned char buf[10];
-        utf32_to_utf8(buf, ch);
-        EntityMap[entity] = (const char *)buf;
+      int index = 0;
+      for (int ch = em.basechar; ch <= em.endchar; ch++, index++) {
+        const char *entity = em.table[index];
+        if (entity) {
+          unsigned char buf[10];
+          utf32_to_utf8(buf, ch);
+          EntityMap[entity] = (const char *)buf;
+        }
       }
     }
+    EntityMap["quot"] = "\"";
+    EntityMap["lt"] = "<";
+    EntityMap["gt"] = ">";
+    EntityMap["amp"] = "&";
   }
-  EntityMap["quot"] = "\"";
-  EntityMap["lt"] = "<";
-  EntityMap["gt"] = ">";
-  EntityMap["amp"] = "&";
+};
+
+static EntityMapInitializer MapInitializer;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -455,14 +461,6 @@ char *string_html_decode(const char *input, int &len, bool utf8, bool nbsp) {
     return NULL;
   }
 
-  if (!EntityMapInited) {
-    Lock lock(EntityMapMutex);
-    if (!EntityMapInited) {
-      init_entity_table();
-      EntityMapInited = true;
-    }
-  }
-
   char *ret = (char *)malloc(len + 1);
   char *q = ret;
   for (const char *p = input; *p; p++) {
@@ -526,14 +524,6 @@ Array string_get_html_translation_table(int which, int quote_style) {
   Array ret;
   switch (which) {
   case HTML_ENTITIES:
-    if (!EntityMapInited) {
-      Lock lock(EntityMapMutex);
-      if (!EntityMapInited) {
-        init_entity_table();
-        EntityMapInited = true;
-      }
-    }
-
     for (int j = 0; j < (int)(sizeof(entity_map)/sizeof(entity_map[0])); j++) {
       const html_entity_map &em = entity_map[j];
       for (int i = 0; i <= em.endchar - em.basechar; i++) {

@@ -316,13 +316,14 @@ static int utf32_to_utf8(unsigned char *buf, int k) {
   return retval;
 }
 
+namespace {
 typedef __gnu_cxx::hash_map
 <const char *, std::string, __gnu_cxx::hash<const char *>, eqstr>
 HtmlEntityMap;
 
-static HtmlEntityMap EntityMap;
+static HtmlEntityMap EntityMapUTF8;
+static HtmlEntityMap EntityMapLatin1;
 
-namespace {
 class EntityMapInitializer {
 public:
   EntityMapInitializer() {
@@ -336,14 +337,21 @@ public:
         if (entity) {
           unsigned char buf[10];
           utf32_to_utf8(buf, ch);
-          EntityMap[entity] = (const char *)buf;
+          EntityMapUTF8[entity] = (const char *)buf;
+          if (ch <= 0xff) {
+            buf[0] = ch; buf[1] = '\0';
+            EntityMapLatin1[entity] = (const char *)buf;
+          }
         }
       }
     }
-    EntityMap["quot"] = "\"";
-    EntityMap["lt"] = "<";
-    EntityMap["gt"] = ">";
-    EntityMap["amp"] = "&";
+    HtmlEntityMap *entityMaps[] = { &EntityMapUTF8, &EntityMapLatin1, NULL };
+    for (HtmlEntityMap **entityMap = entityMaps; *entityMap; ++entityMap) {
+      (**entityMap)["quot"] = "\"";
+      (**entityMap)["lt"] = "<";
+      (**entityMap)["gt"] = ">";
+      (**entityMap)["amp"] = "&";
+    }
   }
 };
 
@@ -429,7 +437,7 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
   return ret;
 }
 
-inline static bool decode_entity(char *entity) {
+inline static bool decode_entity(char *entity, bool utf8) {
   ASSERT(entity && *entity);
   if (entity[0] == '#') {
     int code;
@@ -439,14 +447,18 @@ inline static bool decode_entity(char *entity) {
       code = strtol(entity + 1, NULL, 10);
     }
     if (code) {
-      unsigned char buf[10];
-      int size = utf32_to_utf8(buf, code);
-      memcpy(entity, buf, size + 1);
-      return true;
+      if (utf8) {
+        utf32_to_utf8((unsigned char *)entity, code);
+        return true;
+      } else if (code <= 0xff) { // Only convert latin-1 entities
+        entity[0] = code; entity[1] = '\0';
+        return true;
+      }
     }
   } else {
-    HtmlEntityMap::const_iterator iter = EntityMap.find(entity);
-    if (iter != EntityMap.end()) {
+    HtmlEntityMap &entityMap = utf8 ? EntityMapUTF8 : EntityMapLatin1;
+    HtmlEntityMap::const_iterator iter = entityMap.find(entity);
+    if (iter != entityMap.end()) {
       memcpy(entity, iter->second.c_str(), iter->second.length() + 1);
       return true;
     }
@@ -478,7 +490,6 @@ char *string_html_decode(const char *input, int &len, bool utf8, bool nbsp) {
 
       if (*t == ';') {
         if (l > 0) {
-          found = true;
           char buf[16];
           memcpy(buf, p, l);
           buf[l] = '\0';
@@ -491,19 +502,17 @@ char *string_html_decode(const char *input, int &len, bool utf8, bool nbsp) {
                 l = 1;
                 *q = '\xa0';
               }
-            } else {
-              l = 6;
-              memcpy(q, "&nbsp;", l);
+              found = true;
             }
-          } else if (decode_entity(buf)) {
+          } else if (decode_entity(buf, utf8)) {
             l = strlen(buf);
             memcpy(q, buf, l);
-          } else {
-            found = false;
-            break;
+            found = true;
           }
-          p = t;
-          q += l;
+          if (found) {
+            p = t;
+            q += l;
+          }
         }
         break;
       }

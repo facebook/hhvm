@@ -453,6 +453,13 @@ bool TestExtString::test_html_entity_decode() {
   VS(f_bin2hex(f_html_entity_decode("&nbsp;", 3, "UTF-8")), "c2a0");
 
   VS(f_html_entity_decode("&amp; & &amp;", k_ENT_QUOTES, "UTF-8"), "& & &");
+
+  VS(f_bin2hex(f_html_entity_decode("&Egrave;")), "c8");
+  VS(f_bin2hex(f_html_entity_decode("&Egrave;", 3, "UTF-8")), "c388");
+
+  VS(f_html_entity_decode("&Alpha;"), "&Alpha;");
+  VS(f_bin2hex(f_html_entity_decode("&Alpha;", 3, "UTF-8")), "ce91");
+
   return Count(true);
 }
 

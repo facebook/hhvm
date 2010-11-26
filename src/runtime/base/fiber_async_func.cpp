@@ -397,9 +397,13 @@ Array FiberAsyncFunc::Status(CArrRef funcs, int msTimeout) {
     if (!ret.empty()) {
       return ret;
     }
-    s_fiber_data->wait(msTimeout / 1000,
-                       ((int64)msTimeout - 1000 * (int)(msTimeout/1000)) *
-                       1000000);
+    if (msTimeout) {
+      s_fiber_data->wait(msTimeout / 1000,
+                         ((int64)msTimeout - 1000 * (int)(msTimeout/1000)) *
+                         1000000);
+    } else {
+      s_fiber_data->wait();
+    }
   }
   return Status(funcs, -1);
 }

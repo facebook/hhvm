@@ -13,7 +13,6 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-
 #include <runtime/base/complex_types.h>
 #include <runtime/base/comparisons.h>
 #include <runtime/base/zend/zend_functions.h>
@@ -154,13 +153,9 @@ Variant::Variant(Variant *v) : _count(0), m_type(KindOfVariant) {
   }
 }
 
-Variant::Variant(CVarRef v) : _count(0), m_type(KindOfNull) {
-  m_data.num = 0;
-  if (v.isContagious()) {
-    assignContagious(v);
-    return;
-  }
-  bind(v);
+// the version of the high frequency function that is not inlined
+Variant::Variant(CVarRef v) {
+  VariantHelper(v);
 }
 
 void Variant::reset() {

@@ -122,7 +122,6 @@ class Variant {
 
   void destruct();
 
-  // g++ does not inline !isPrimitive()
   ~Variant() { if (IS_REFCOUNTED_TYPE(m_type)) destruct(); }
 
   void reset(); // only for special memory sweeping!
@@ -132,7 +131,6 @@ class Variant {
    * Variant being able to take many other external types, messing up those
    * operator overloads.
    */
-  Variant(CVarRef v);
   Variant(bool    v) : _count(0), m_type(KindOfBoolean) { m_data.num = (v?1:0);}
   Variant(char    v) : _count(0), m_type(KindOfByte   ) { m_data.num = v;}
   Variant(short   v) : _count(0), m_type(KindOfInt16  ) { m_data.num = v;}
@@ -162,6 +160,21 @@ class Variant {
   Variant(const SmartObject<T> &v) : _count(0), m_type(KindOfNull) {
     set(v);
   }
+
+  inline ALWAYS_INLINE void VariantHelper(CVarRef v) {
+    m_countAndTypeUnion = 0;
+    if (v.isContagious()) {
+      assignContagious(v);
+      return;
+    }
+    bind(v);
+  }
+
+#ifdef INLINE_VARIANT_HELPER
+  inline ALWAYS_INLINE Variant(CVarRef v) { VariantHelper(v);}
+#else
+  Variant(CVarRef v);
+#endif
 
  protected:
   // This constructor is only used to construct VarNR

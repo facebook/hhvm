@@ -14,6 +14,7 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
 */
+#define INLINE_VARIANT_HELPER // for selected inlining
 
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/array/array_init.h>
@@ -1443,14 +1444,6 @@ void ZendArray::sweep() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Bucket
-
-ZendArray::Bucket::Bucket() :
-  h(0), key(NULL), pListNext(NULL), pListLast(NULL), pNext(NULL) {
-}
-
-ZendArray::Bucket::Bucket(CVarRef d) :
-  h(0), key(NULL), data(d), pListNext(NULL), pListLast(NULL), pNext(NULL) {
-}
 
 ZendArray::Bucket::~Bucket() {
   if (key && key->decRefCount() == 0) {

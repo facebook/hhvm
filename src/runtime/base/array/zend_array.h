@@ -130,8 +130,12 @@ public:
 
   class Bucket {
   public:
-    Bucket();
-    Bucket(CVarRef d);
+    Bucket() :
+      h(0), key(NULL), pListNext(NULL), pListLast(NULL), pNext(NULL) { }
+
+    Bucket(CVarRef d) :
+      h(0), key(NULL), data(d), pListNext(NULL), pListLast(NULL), pNext(NULL)
+      { }
 
     // These two constructors should never be called directly, they are
     // only called from generated code.

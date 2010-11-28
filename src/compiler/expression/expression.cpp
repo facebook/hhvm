@@ -881,16 +881,6 @@ bool Expression::outputCPPEnd(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (!m_cppTemp.empty()) {
-    bool ref = (m_context & RefValue) &&
-      !(m_context & NoRefWrapper) &&
-      isRefable();
-    if (ref) cg_printf("ref(");
-    cg_printf("%s", m_cppTemp.c_str());
-    if (ref) cg_printf(")");
-    return;
-  }
-
   TypePtr srcType = m_actualType;
   TypePtr dstType = m_expectedType;
   if (m_implementedType && srcType &&
@@ -989,9 +979,18 @@ void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     wrapped = preOutputCPP(cg, ar, 0);
   }
 
-  bool linemap = outputLineMap(cg, ar);
-  outputCPPInternal(cg, ar);
-  if (linemap) cg_printf(")");
+  if (!m_cppTemp.empty()) {
+    bool ref = (m_context & RefValue) &&
+      !(m_context & NoRefWrapper) &&
+      isRefable();
+    if (ref) cg_printf("ref(");
+    cg_printf("%s", m_cppTemp.c_str());
+    if (ref) cg_printf(")");
+  } else {
+    bool linemap = outputLineMap(cg, ar);
+    outputCPPInternal(cg, ar);
+    if (linemap) cg_printf(")");
+  }
 
   m_implementedType = it;
   m_actualType = at;

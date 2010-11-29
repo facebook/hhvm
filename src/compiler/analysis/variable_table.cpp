@@ -796,7 +796,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
       const Symbol *sym = m_symbolVec[i];
       TypePtr type = sym->getFinalType();
-      type2names[type->getCPPDecl(cg, ar)].push_back
+      type2names[type->getCPPDecl(cg, ar, BlockScopeRawPtr())].push_back
         (string("gvm_") + cg.formatLabel(sym->getName()));
     }
   }
@@ -811,7 +811,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     StaticGlobalInfoPtr sgi = iter->second;
     if (sgi->func) {
       TypePtr varType = sgi->sym->getFinalType();
-      type2names[varType->getCPPDecl(cg, ar)].push_back
+      type2names[varType->getCPPDecl(cg, ar, BlockScopeRawPtr())].push_back
         (string(Option::StaticVariablePrefix) + id);
     }
   }
@@ -841,7 +841,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
                                                sgi->sym->getName());
     if (!sgi->func && !sgi->sym->isOverride()) {
       TypePtr varType = sgi->sym->getFinalType();
-      type2names[varType->getCPPDecl(cg, ar)].push_back
+      type2names[varType->getCPPDecl(cg, ar, BlockScopeRawPtr())].push_back
         (string(Option::StaticPropertyPrefix) + id);
     }
   }
@@ -1238,7 +1238,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         (cg, getClassScope(), getFunctionScope(), name);
 
       TypePtr type = sym->getFinalType();
-      type->outputCPPDecl(cg, ar);
+      type->outputCPPDecl(cg, ar, getBlockScope());
       if (ar->needStaticArray(getClassScope(), getFunctionScope())) {
         const char *cname = getFunctionScope()->isStatic() ? "cls" :
           "this->o_getClassName()";
@@ -1265,7 +1265,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
 
       if (needLocalCopy(sym) && !sym->isParameter()) {
-        type->outputCPPDecl(cg, ar);
+        type->outputCPPDecl(cg, ar, getBlockScope());
         cg_printf(" %s%s;\n", Option::VariablePrefix,
                   fname.c_str());
         declared = true;
@@ -1280,13 +1280,13 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
     if (sym->isGlobal()) {
       TypePtr type = sym->getFinalType();
-      type->outputCPPDecl(cg, ar);
+      type->outputCPPDecl(cg, ar, getBlockScope());
       cg_printf(" &%s%s __attribute__((__unused__)) = g->%s;\n",
                 Option::GlobalVariablePrefix, fname.c_str(),
                 getGlobalVariableName(cg, ar, name).c_str());
 
       if (needLocalCopy(name)) {
-        type->outputCPPDecl(cg, ar);
+        type->outputCPPDecl(cg, ar, getBlockScope());
         cg_printf(" %s%s%s", prefix, Option::VariablePrefix,
                   fname.c_str());
         outputCPPVariableInit(cg, ar, inPseudoMain, name);
@@ -1300,7 +1300,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (getAttribute(ContainsDynamicVariable) ||
         inPseudoMain || sym->isUsed() || sym->isNeeded()) {
       TypePtr type = sym->getFinalType();
-      type->outputCPPDecl(cg, ar);
+      type->outputCPPDecl(cg, ar, getBlockScope());
       cg_printf(" %s%s%s", prefix, getVariablePrefix(sym),
                 fname.c_str());
       if (inPseudoMain) {
@@ -1345,11 +1345,11 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
         memDecl += "; ";
         params += ", ";
       }
-      varDecl += type->getCPPDecl(cg, ar) + " &" + Option::TempVariablePrefix +
-        cg.formatLabel(name);
+      varDecl += type->getCPPDecl(cg, ar, getBlockScope()) + " &" +
+        Option::TempVariablePrefix + cg.formatLabel(name);
       initializer += varName + "(" + Option::TempVariablePrefix +
         cg.formatLabel(name) + ")";
-      memDecl += type->getCPPDecl(cg, ar) + " &" + varName;
+      memDecl += type->getCPPDecl(cg, ar, getBlockScope()) + " &" + varName;
       params += varName;
     }
   }
@@ -1482,7 +1482,7 @@ void VariableTable::outputCPPPropertyDecl(CodeGenerator &cg,
     if (sym->isStatic() || sym->isOverride()) continue;
 
     const string &name = sym->getName();
-    sym->getFinalType()->outputCPPDecl(cg, ar);
+    sym->getFinalType()->outputCPPDecl(cg, ar, getBlockScope());
     cg_printf(" %s%s;\n", Option::PropertyPrefix,
               cg.formatLabel(name).c_str());
   }

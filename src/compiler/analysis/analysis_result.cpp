@@ -152,24 +152,6 @@ StatementPtr AnalysisResult::getStatementForSilencer() const {
   return m_stmt;
 }
 
-ClassScopePtr AnalysisResult::resolveClass(ConstructPtr cs,
-                                           std::string &className) {
-  // resolving self and parent
-  if (className == "self") {
-    ClassScopePtr cls = cs->getClassScope();
-    if (cls) {
-      className = cls->getName();
-      return cls;
-    }
-  } else if (className == "parent") {
-    ClassScopePtr cls = cs->getClassScope();
-    if (cls && !cls->getParent().empty()) {
-      className = cls->getParent();
-    }
-  }
-  return findClass(className);
-}
-
 FunctionScopePtr AnalysisResult::findFunction(const std::string &funcName) {
   StringToFunctionScopePtrVecMap::const_iterator bit =
     m_functions.find(funcName);

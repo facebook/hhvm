@@ -182,7 +182,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
 
   TypePtr type = funcScope->getReturnType();
   if (type) {
-    type->outputCPPDecl(cg, ar);
+    type->outputCPPDecl(cg, ar, getScope());
   } else {
     cg_printf("void");
   }

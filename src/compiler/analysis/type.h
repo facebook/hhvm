@@ -29,6 +29,8 @@ class CodeGenerator;
 DECLARE_BOOST_TYPES(Expression);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(Type);
+DECLARE_BOOST_TYPES(BlockScope);
+DECLARE_BOOST_TYPES(ClassScope);
 
 class Type : public JSON::ISerializable {
 public:
@@ -176,16 +178,21 @@ public:
   const std::string &getName() const { return m_name;}
   static TypePtr combinedArithmeticType(TypePtr t1, TypePtr t2);
 
+  ClassScopePtr getClass(AnalysisResultPtr ar, BlockScopeRawPtr scope);
+
   /**
    * Generate type specifier in C++.
    */
-  std::string getCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar);
+  std::string getCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar,
+                         BlockScopeRawPtr scope);
+  void outputCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar,
+                     BlockScopeRawPtr scope);
 
   /**
    * Generate type conversion in C++.
    */
-  void outputCPPCast(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputCPPCast(CodeGenerator &cg, AnalysisResultPtr ar,
+                     BlockScopeRawPtr scope);
 
   /**
    * Generate variable initialization code.

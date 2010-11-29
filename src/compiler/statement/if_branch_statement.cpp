@@ -114,7 +114,7 @@ int IfBranchStatement::outputCPPIfBranch(CodeGenerator &cg,
     if (m_condition->preOutputCPP(cg, ar, 0)) {
       cg_indentBegin("{\n");
       varId = cg.createNewLocalId(shared_from_this());
-      m_condition->getType()->outputCPPDecl(cg, ar);
+      m_condition->getType()->outputCPPDecl(cg, ar, getScope());
       cg_printf(" %s%d;\n", Option::TempPrefix, varId);
 
       m_condition->outputCPPBegin(cg, ar);

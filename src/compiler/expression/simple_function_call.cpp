@@ -97,7 +97,7 @@ SimpleFunctionCall::SimpleFunctionCall
   : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES,
                  ExpressionPtr(), name, params, cls),
     m_type(UnknownType), m_dynamicConstant(false),
-    m_parentClass(false), m_builtinFunction(false), m_noPrefix(false),
+    m_builtinFunction(false), m_noPrefix(false),
     m_invokeFewArgsDecision(true),
     m_dynamicInvoke(false), m_safe(0), m_arrayParams(false) {
 
@@ -185,10 +185,8 @@ void SimpleFunctionCall::addDependencies(AnalysisResultPtr ar) {
   if (!m_class) {
     if (m_className.empty()) {
       addUserFunction(ar, m_name);
-    } else if (m_origClassName != "parent") {
+    } else if (!isParent() && !isSelf()) {
       addUserClass(ar, m_className);
-    } else {
-      m_parentClass = true;
     }
   }
 }
@@ -201,10 +199,7 @@ void SimpleFunctionCall::setupScopes(AnalysisResultPtr ar) {
       func = ar->findFunction(m_name);
     }
   } else {
-    cls = ar->resolveClass(shared_from_this(), m_className);
-    if (cls && cls->isRedeclaring()) {
-      cls = ar->findExactClass(shared_from_this(), m_className);
-    }
+    cls = resolveClass(getScope());
     if (cls) {
       m_classScope = cls;
       if (m_name == "__construct") {
@@ -841,20 +836,13 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       func = ar->findFunction(m_name);
     }
   } else {
-    ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_className);
-    if (cls && cls->isVolatile()) {
+    ClassScopePtr cls = resolveClass(getScope());
+    if (cls && cls->isVolatile() && !isPresent()) {
       getScope()->getVariables()
         ->setAttribute(VariableTable::NeedGlobalPointer);
-
-      if (cls->isRedeclaring()) {
-        cls = ar->findExactClass(shared_from_this(), m_className);
-        if (!cls) {
-          m_redeclaredClass = true;
-        }
-      }
     }
     if (!cls) {
-      if (getScope()->isFirstPass()) {
+      if (!isRedeclared() && getScope()->isFirstPass()) {
         Compiler::Error(Compiler::UnknownClass, self);
       }
       if (m_params) {
@@ -865,7 +853,6 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
     m_classScope = cls;
     m_derivedFromRedeclaring = cls->derivesFromRedeclaring();
-    m_validClass = true;
 
     if (m_name == "__construct") {
       // if the class is known, php will try to identify class-name ctor
@@ -1013,7 +1000,7 @@ void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                       int state) {
-  if (m_validClass && m_classScope && m_classScope->isRedeclaring() &&
+  if (m_classScope && m_classScope->isRedeclaring() &&
       (!m_funcScope || !m_funcScope->isStatic())) {
     /*
       In this case, even though its redeclaring, we were able
@@ -1030,12 +1017,14 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       fully dynamic dispatch.
     */
     m_valid = false;
-    m_redeclaredClass = true;
-    m_validClass = false;
+    setRedeclared();
   }
-  if (m_valid && (!m_arrayParams ||
-        (!m_class && m_className.empty() && m_funcScope->isUserFunction())))
+  if (m_valid &&
+      (!m_arrayParams ||
+       (!m_class && m_className.empty() && m_funcScope->isUserFunction()))) {
     return FunctionCall::preOutputCPP(cg, ar, state);
+  }
+
   // Short circuit out if inExpression() returns false
   if (!ar->inExpression()) return true;
   m_ciTemp = cg.createNewId(shared_from_this());
@@ -1110,19 +1099,18 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     // The call is happening in an instance method
     bool inObj = cscope && !getFunctionScope()->isStatic();
     // The call was like parent::
-    bool parentCall = m_parentClass && inObj;
+    bool parentCall = isParent() && inObj;
     string className;
     if (m_classScope) {
-      if (m_redeclaredClass) {
-        className = cg.formatLabel(m_classScope->getName());
+      if (isRedeclared()) {
+        className = cg.formatLabel(m_className);
       } else {
         className = m_classScope->getId(cg);
       }
     } else {
       className = cg.formatLabel(m_className);
       if (!m_className.empty() && m_cppTemp.empty() &&
-          m_origClassName != "self" && m_origClassName != "parent" &&
-          m_origClassName != "static") {
+          !isSelf() && !isParent() && !isStatic()) {
         // Create a temporary to hold the class name, in case it is not a
         // StaticString.
         m_clsNameTemp = cg.createNewId(shared_from_this());
@@ -1137,7 +1125,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_printf("mcp%d.dynamicNamedCall%s(\"%s\", \"%s\"", m_ciTemp,
                 ms ? "WithIndex" : "",
                 escapedClass.c_str(), escapedName.c_str());
-    } else if (m_redeclaredClass) {
+    } else if (isRedeclared()) {
       if (parentCall) {
         cg_printf("mcp%d.methodCallEx(this, \"%s\");\n", m_ciTemp,
                   escapedName.c_str());
@@ -1151,7 +1139,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                   className.c_str(), Option::ObjectStaticPrefix,
                   ms ? "with_index" : "", m_ciTemp);
       }
-    } else if (m_validClass) {
+    } else if (m_classScope) {
       // In an object, calling a superclass's method
       bool exCall = inObj && getClassScope()->derivesFrom(ar, m_className,
                                                           true, false);
@@ -1284,7 +1272,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
                  !Type::SameType(m_funcScope->getReturnType(),
                                  getActualType())) {
         safeCast = getActualType();
-        safeCast->outputCPPCast(cg, ar);
+        safeCast->outputCPPCast(cg, ar, getScope());
         cg_printf("(");
       }
       if (m_funcScope && !m_funcScope->getReturnType()) {
@@ -1407,7 +1395,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         if (m_safeDef && m_safeDef->getActualType() &&
             !Type::SameType(m_safeDef->getActualType(), getActualType())) {
           safeCast = getActualType();
-          safeCast->outputCPPCast(cg, ar);
+          safeCast->outputCPPCast(cg, ar, getScope());
           cg_printf("(");
         } else {
           safeCast.reset();

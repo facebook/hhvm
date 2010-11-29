@@ -766,11 +766,12 @@ void BinaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 static bool castIfNeeded(TypePtr top, TypePtr arg,
-                         CodeGenerator &cg, AnalysisResultPtr ar) {
+                         CodeGenerator &cg, AnalysisResultPtr ar,
+                         BlockScopeRawPtr scope) {
   if (top) {
     if (top->isPrimitive()) {
       if (!arg || !arg->isPrimitive()) {
-        top->outputCPPCast(cg, ar);
+        top->outputCPPCast(cg, ar, scope);
         cg_printf("(");
         return true;
       }
@@ -1169,7 +1170,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       first->outputCPP(cg, ar);
       cg_printf(")");
     } else {
-      bool flag = castIfNeeded(getActualType(), actualType, cg, ar);
+      bool flag = castIfNeeded(getActualType(), actualType, cg, ar, getScope());
       first->outputCPP(cg, ar);
       if (flag) {
         cg_printf(")");
@@ -1231,7 +1232,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       second->outputCPP(cg, ar);
       cg_printf(")");
     } else {
-      bool flag = castIfNeeded(getActualType(), actualType, cg, ar);
+      bool flag = castIfNeeded(getActualType(), actualType, cg, ar, getScope());
       second->outputCPP(cg, ar);
       if (flag) {
         cg_printf(")");
@@ -1262,7 +1263,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       TypePtr t2 = second->getType();
       if (t1 && !t1->is(Type::KindOfArray) &&
           t2 && Type::IsCastNeeded(ar, t2, t1)) {
-        t1->outputCPPCast(cg, ar);
+        t1->outputCPPCast(cg, ar, getScope());
         cg_printf("(");
         second->outputCPP(cg, ar);
         cg_printf(")");

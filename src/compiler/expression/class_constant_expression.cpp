@@ -37,8 +37,7 @@ ClassConstantExpression::ClassConstantExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr classExp, const std::string &varName)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    StaticClassName(classExp), m_varName(varName), m_valid(false),
-    m_redeclared(false), m_visited(false) {
+    StaticClassName(classExp), m_varName(varName), m_valid(false) {
 }
 
 ExpressionPtr ClassConstantExpression::clone() {
@@ -66,15 +65,10 @@ void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_class) {
     m_class->analyzeProgram(ar);
   } else {
-    if (ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_className)) {
-      if (cls->isRedeclaring()) {
-        cls = ar->findExactClass(shared_from_this(), m_className);
-      }
-      if (cls) {
-        ConstructPtr decl = cls->getConstants()->
-          getValueRecur(ar, m_varName, cls);
-        cls->addUse(getScope(), BlockScope::UseKindConstRef);
-      }
+    if (ClassScopePtr cls = resolveClass(getScope())) {
+      ConstructPtr decl = cls->getConstants()->
+        getValueRecur(ar, m_varName, cls);
+      cls->addUse(getScope(), BlockScope::UseKindConstRef);
     }
     addUserClass(ar, m_className);
   }
@@ -112,20 +106,14 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
   }
   if (m_class) {
     updateClassName();
-    return ExpressionPtr();
+    if (m_class) {
+      return ExpressionPtr();
+    }
   }
 
-  string currentClsName;
-  ClassScopePtr currentCls = getClassScope();
-  if (currentCls) currentClsName = currentCls->getName();
-  bool inCurrentClass = currentClsName == m_className;
-  ClassScopePtr cls =
-    inCurrentClass ? currentCls : ar->findClass(m_className);
-  if (!cls) return ExpressionPtr();
-  if (!inCurrentClass) {
-    if (m_redeclared) return ExpressionPtr();
-    if (cls->isVolatile() || cls->isRedeclaring()) return ExpressionPtr();
-  }
+  ClassScopePtr cls = resolveClass(getScope());
+  if (!cls || (cls->isVolatile() && !isPresent())) return ExpressionPtr();
+
   ConstantTablePtr constants = cls->getConstants();
   ClassScopePtr defClass = cls;
   ConstructPtr decl = constants->getValueRecur(ar, m_varName, defClass);
@@ -158,19 +146,18 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
     return Type::Variant;
   }
 
-  ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_className);
-  if (!cls || cls->isRedeclaring()) {
-    if (cls) {
-      m_redeclared = true;
+  ClassScopePtr cls = resolveClass(getScope());
+  if (!cls) {
+    if (isRedeclared()) {
       getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
-    }
-    if (!cls && getScope()->isFirstPass()) {
+    } else if (getScope()->isFirstPass()) {
       Compiler::Error(Compiler::UnknownClass, self);
     }
     return Type::Variant;
   }
-  if (cls->getConstants()->isDynamic(m_varName) || cls->isVolatile()) {
+
+  if (cls->getConstants()->isDynamic(m_varName) || !isPresent()) {
     getScope()->getVariables()->
       setAttribute(VariableTable::NeedGlobalPointer);
   }
@@ -233,8 +220,7 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
     return;
   }
 
-  bool outsideClass = !ar->checkClassPresent(shared_from_this(),
-                                             m_origClassName);
+  bool outsideClass = !isPresent();
   if (m_valid) {
     string trueClassName;
 
@@ -266,7 +252,7 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
     if (outsideClass) {
       cls->outputVolatileCheckEnd(cg);
     }
-  } else if (m_redeclared) {
+  } else if (isRedeclared()) {
     if (outsideClass) {
       ClassScope::OutputVolatileCheckBegin(cg, ar, getScope(), m_origClassName);
     }

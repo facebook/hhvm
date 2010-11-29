@@ -589,14 +589,14 @@ bool Expression::outputLineMap(CodeGenerator &cg, AnalysisResultPtr ar,
 
 void Expression::outputCPPCast(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_expectedType) {
-    m_expectedType->outputCPPCast(cg, ar);
+    m_expectedType->outputCPPCast(cg, ar, getScope());
   }
 }
 
 void Expression::outputCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar) {
   TypePtr type = m_actualType;
   if (!type) type = Type::Variant;
-  type->outputCPPDecl(cg, ar);
+  type->outputCPPDecl(cg, ar, getScope());
 }
 
 std::string Expression::genCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar) {
@@ -668,7 +668,7 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   if (dstType) {
-    dstType->outputCPPDecl(cg, ar);
+    dstType->outputCPPDecl(cg, ar, getScope());
     std::string t = genCPPTemp(cg, ar);
     const char *ref = (isLvalue || constRef) ? "&" : "";
     /*
@@ -725,9 +725,9 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
 
     cg_printf("));\n");
     if ((isLvalue || hasContext(DeepReference)) && constRef) {
-      dstType->outputCPPDecl(cg, ar);
+      dstType->outputCPPDecl(cg, ar, getScope());
       cg_printf(" &%s_lv = const_cast<", t.c_str());
-      dstType->outputCPPDecl(cg, ar);
+      dstType->outputCPPDecl(cg, ar, getScope());
       cg_printf("&>(%s);\n", t.c_str());
       t += "_lv";
     }
@@ -906,7 +906,7 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
   int closeParen = 0;
   if (dstType && srcType && ((m_context & LValue) == 0) &&
       Type::IsCastNeeded(ar, srcType, dstType)) {
-    dstType->outputCPPCast(cg, ar);
+    dstType->outputCPPCast(cg, ar, getScope());
     cg_printf("(");
     closeParen++;
     outputCPPImpl(cg, ar);

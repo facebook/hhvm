@@ -788,7 +788,7 @@ void FunctionScope::outputCPPParamsImpl(CodeGenerator &cg,
       cg_printf(", ");
     }
     TypePtr type = getParamType(i);
-    type->outputCPPDecl(cg, ar);
+    type->outputCPPDecl(cg, ar, BlockScopeRawPtr(this));
     cg_printf(" a%d", i);
   }
 
@@ -1711,7 +1711,7 @@ void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
     } else {
       if (isStatic()) cg_printf("static ");
       if (type) {
-        type->outputCPPDecl(cg, ar);
+        type->outputCPPDecl(cg, ar, BlockScopeRawPtr(this));
       } else {
         cg_printf("void");
       }
@@ -1720,7 +1720,7 @@ void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
 
     for (int i = 0; i < count; i++) {
       if (i > 0) cg_printf(", ");
-      getParamType(i)->outputCPPDecl(cg, ar);
+      getParamType(i)->outputCPPDecl(cg, ar, BlockScopeRawPtr(this));
       cg_printf(" %s%s", Option::VariablePrefix, getParamName(i).c_str());
     }
     if (isVariableArgument()) {

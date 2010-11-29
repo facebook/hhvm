@@ -43,7 +43,6 @@ private:
   int m_objTemp;
 
   void setInvokeParams(AnalysisResultPtr ar);
-  ClassScopePtr resolveClass(AnalysisResultPtr ar, std::string &name);
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);
   bool canInvokeFewArgs();

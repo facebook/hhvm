@@ -95,7 +95,6 @@ protected:
   int m_type;
   bool m_programSpecific;
   bool m_dynamicConstant;
-  bool m_parentClass;
   std::string m_lambda;
   bool m_builtinFunction;
   bool m_noPrefix;

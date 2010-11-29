@@ -181,7 +181,7 @@ bool QOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       m_expYes->isLiteralString() == m_expNo->isLiteralString() ?
       typeYes : Type::Variant;
 
-    type->outputCPPDecl(cg, ar);
+    type->outputCPPDecl(cg, ar, getScope());
     cg_printf(" %s;\n", tmp.c_str());
     cg_printf("if (");
     m_condition->outputCPP(cg, ar);

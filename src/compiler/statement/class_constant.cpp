@@ -155,7 +155,7 @@ void ClassConstant::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (type->is(Type::KindOfString)) {
         cg_printf("StaticString");
       } else {
-        type->outputCPPDecl(cg, ar);
+        type->outputCPPDecl(cg, ar, getScope());
       }
       cg_printf(" %s%s_%s;\n", Option::ClassConstantPrefix,
                 scope->getId(cg).c_str(),
@@ -167,7 +167,7 @@ void ClassConstant::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (isString) {
         cg_printf("StaticString");
       } else {
-        type->outputCPPDecl(cg, ar);
+        type->outputCPPDecl(cg, ar, getScope());
       }
       value->outputCPPBegin(cg, ar);
       cg_printf(" %s%s_%s", Option::ClassConstantPrefix,

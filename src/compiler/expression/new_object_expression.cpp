@@ -34,8 +34,19 @@ NewObjectExpression::NewObjectExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr variable, ExpressionListPtr params)
   : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES,
-                 variable, "", params, ExpressionPtr()),
-    m_redeclared(false), m_dynamic(false) {
+                 variable, "", params, variable),
+    m_dynamic(false) {
+  /*
+    StaticClassName takes care of parent & self properly, so
+    we pass in variable as the class name.
+    But NewObjectExpression is written to use the class as the
+    function name, so clear it here, to take care of the dynamic
+    case.
+    Also set m_noStatic, to prevent errors in code gen due to
+    m_className being set.
+  */
+  m_class.reset();
+  m_noStatic = true;
 }
 
 ExpressionPtr NewObjectExpression::clone() {
@@ -54,10 +65,9 @@ void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
   FunctionScopePtr func;
   if (!m_name.empty()) {
     addUserClass(ar, m_name);
-    if (ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_name)) {
-      if (!cls->isRedeclaring()) {
-        func = cls->findConstructor(ar, true);
-      }
+    if (ClassScopePtr cls = resolveClass(getScope())) {
+      m_name = m_className;
+      func = cls->findConstructor(ar, true);
     }
   }
 
@@ -73,28 +83,25 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   reset();
   ConstructPtr self = shared_from_this();
   if (!m_name.empty()) {
-    ClassScopePtr cls = ar->resolveClass(self, m_name);
-    if (cls) {
-      m_name = cls->getName();
-    }
-    if (!cls || cls->isRedeclaring()) {
-      if (cls) {
-        m_redeclared = true;
+    ClassScopePtr cls = resolveClass(getScope());
+    m_name = m_className;
+
+    if (!cls) {
+      if (isRedeclared()) {
         getScope()->getVariables()->
           setAttribute(VariableTable::NeedGlobalPointer);
-      }
-      if (!cls && getScope()->isFirstPass()) {
+      } else if (getScope()->isFirstPass()) {
         Compiler::Error(Compiler::UnknownClass, self);
       }
       if (m_params) m_params->inferAndCheck(ar, Type::Any, false);
       return Type::Object;
     }
-    if (cls->isVolatile()) {
+    if (cls->isVolatile() && !isPresent()) {
       getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
     }
     m_dynamic = cls->derivesFromRedeclaring();
-    m_validClass = true;
+    bool valid = true;
     FunctionScopePtr func = cls->findConstructor(ar, true);
     if (!func) {
       if (m_params) {
@@ -108,10 +115,11 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       }
     } else {
       m_extraArg = func->inferParamTypes(ar, self, m_params,
-                                         m_validClass);
+                                         valid);
       m_variableArgument = func->isVariableArgument();
     }
-    if (!m_validClass || m_dynamic) {
+    if (valid) m_classScope = cls;
+    if (!valid || m_dynamic) {
       m_implementedType = Type::Object;
     } else {
       m_implementedType.reset();
@@ -162,11 +170,10 @@ void NewObjectExpression::preOutputStash(CodeGenerator &cg,
 
 void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
-  string &cname = (m_origName == "self" || m_origName == "parent") ?
-    m_name : m_origName;
-  bool outsideClass = !ar->checkClassPresent(shared_from_this(), m_origName);
-  if (!m_name.empty() && !m_redeclared && m_validClass && !m_dynamic) {
-    ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_name);
+  string &cname = isSelf() || isParent() ? m_name : m_origName;
+  bool outsideClass = !isPresent();
+  if (!m_name.empty() && m_classScope && !m_dynamic) {
+    ClassScopePtr cls = m_classScope;
     ASSERT(cls);
     if (m_receiverTemp.empty()) {
       if (outsideClass) {
@@ -211,9 +218,8 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
 
 bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                        int state) {
-  string &cname = (m_origName == "self" || m_origName == "parent") ?
-    m_name : m_origName;
-  if (m_name.empty() || m_redeclared || !m_validClass || m_dynamic) {
+  string &cname = isSelf() || isParent() ? m_name : m_origName;
+  if (m_name.empty() || !m_classScope || m_dynamic) {
     // Short circuit out if inExpression() returns false
     if (!ar->inExpression()) return true;
 
@@ -222,18 +228,15 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     m_ciTemp = cg.createNewId(shared_from_this());
     m_objectTemp = cg.createNewId(shared_from_this());
     cg_printf("Object obj%d(", m_objectTemp);
-    if (m_redeclared) {
-      bool outsideClass = !ar->checkClassPresent(shared_from_this(),
-                                                 m_origName);
-      ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_name);
-      ASSERT(cls);
+    if (isRedeclared()) {
+      bool outsideClass = !isPresent();
       if (outsideClass) {
-        cls->outputVolatileCheckBegin(cg, ar, getScope(), cname);
+        ClassScope::OutputVolatileCheckBegin(cg, ar, getScope(), cname);
       }
       cg_printf("g->%s%s->createOnly()", Option::ClassStaticsObjectPrefix,
                 m_name.c_str());
       if (outsideClass) {
-        cls->outputVolatileCheckEnd(cg);
+        ClassScope::OutputVolatileCheckEnd(cg);
       }
     } else {
       cg_printf("create_object_only(");
@@ -298,20 +301,19 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     }
 
     if (tempRcvr && ar->inExpression()) {
-      bool outsideClass = !ar->checkClassPresent(shared_from_this(),
-                                                 m_origName);
-      ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_name);
-      ASSERT(cls);
+      bool outsideClass = !isPresent();
       ar->wrapExpressionBegin(cg);
       m_receiverTemp = genCPPTemp(cg, ar);
-      cg_printf("%s%s %s = ", Option::SmartPtrPrefix, cls->getId(cg).c_str(),
-          m_receiverTemp.c_str());
+      cg_printf("%s%s %s = ",
+                Option::SmartPtrPrefix, m_classScope->getId(cg).c_str(),
+                m_receiverTemp.c_str());
       if (outsideClass) {
-        cls->outputVolatileCheckBegin(cg, ar, getScope(), cname);
+        m_classScope->outputVolatileCheckBegin(cg, ar, getScope(), cname);
       }
-      cg_printf("NEWOBJ(%s%s)()", Option::ClassPrefix, cls->getId(cg).c_str());
+      cg_printf("NEWOBJ(%s%s)()",
+                Option::ClassPrefix, m_classScope->getId(cg).c_str());
       if (outsideClass) {
-        cls->outputVolatileCheckEnd(cg);
+        m_classScope->outputVolatileCheckEnd(cg);
       }
       cg_printf(";\n");
     }

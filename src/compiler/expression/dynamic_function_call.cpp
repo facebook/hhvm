@@ -68,20 +68,15 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
   reset();
   ConstructPtr self = shared_from_this();
   if (!m_className.empty()) {
-    ClassScopePtr cls = ar->resolveClass(shared_from_this(), m_className);
-    if (!cls || cls->isRedeclaring()) {
-      if (cls) {
-        m_redeclared = true;
+    ClassScopePtr cls = resolveClass(getScope());
+    if (!cls) {
+      if (isRedeclared()) {
         getScope()->getVariables()->
           setAttribute(VariableTable::NeedGlobalPointer);
-      }
-      if (!cls && getScope()->isFirstPass()) {
+      } else if (getScope()->isFirstPass()) {
         Compiler::Error(Compiler::UnknownClass, self);
       }
     } else {
-      m_validClass = true;
-    }
-    if (cls) {
       m_classScope = cls;
     }
   }
@@ -131,7 +126,7 @@ void DynamicFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     int state) {
   bool nonStatic = !m_class && m_className.empty();
-  if (!nonStatic && !m_class && !m_validClass && !m_redeclared)
+  if (!nonStatic && !m_class && !m_classScope && !isRedeclared())
     return FunctionCall::preOutputCPP(cg, ar, state);
   // Short circuit out if inExpression() returns false
   if (!ar->inExpression()) return true;
@@ -145,14 +140,9 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   ar->wrapExpressionBegin(cg);
   m_ciTemp = cg.createNewId(shared_from_this());
   bool lsb = false;
-  ClassScopePtr cls;
-  if (m_validClass) {
-    cls = ar->findClass(m_className);
-  }
 
   if (!m_classScope && !m_className.empty() && m_cppTemp.empty() &&
-      m_origClassName != "self" && m_origClassName != "parent" &&
-      m_origClassName != "static") {
+      !isSelf() && ! isParent() && !isStatic()) {
     // Create a temporary to hold the class name, in case it is not a
     // StaticString.
     m_clsNameTemp = cg.createNewId(shared_from_this());
@@ -179,9 +169,9 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         m_class->outputCPP(cg, ar);
       }
       cg_printf(", ");
-    } else if (m_validClass) {
+    } else if (m_classScope) {
       cg_printf("mcp%d.staticMethodCall(\"%s\", ", m_ciTemp,
-                cls->getId(cg).c_str());
+                m_classScope->getId(cg).c_str());
     } else {
       cg_printf("mcp%d.staticMethodCall(\"%s\", ", m_ciTemp,
                 m_className.c_str());
@@ -200,11 +190,11 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf(");\n");
     if (lsb) cg_printf("mcp%d.lateStaticBind(info);\n");
     cg_printf("const CallInfo *&cit%d = mcp%d.ci;\n", m_ciTemp, m_ciTemp);
-    if (m_validClass) {
+    if (m_classScope) {
       cg_printf("%s%s::%sget_call_info(mcp%d",
-                Option::ClassPrefix, cls->getId(cg).c_str(),
+                Option::ClassPrefix, m_classScope->getId(cg).c_str(),
                 Option::ObjectStaticPrefix, m_ciTemp, m_className.c_str());
-    } else if (m_redeclared) {
+    } else if (isRedeclared()) {
       cg_printf("g->%s%s->%sget_call_info(mcp%d",
                 Option::ClassStaticsObjectPrefix, m_className.c_str(),
                 Option::ObjectStaticPrefix, m_ciTemp, m_className.c_str());
@@ -231,7 +221,7 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
   if (m_class || !m_className.empty()) {
-    if (m_class || m_validClass || m_redeclared) {
+    if (m_class || m_classScope || isRedeclared()) {
       cg.printf("(cit%d->getMeth())(mcp%d, ", m_ciTemp, m_ciTemp);
       if (m_params && m_params->getCount() > 0) {
         ar->pushCallInfo(m_ciTemp);

@@ -70,6 +70,18 @@ FileScopePtr BlockScope::getContainingFile() {
   return FileScopePtr();
 }
 
+AnalysisResultPtr BlockScope::getContainingProgram() {
+  BlockScopePtr bs(shared_from_this());
+  while (bs) {
+    if (bs->is(BlockScope::ProgramScope)) {
+      return dynamic_pointer_cast<AnalysisResult>(bs);
+    }
+    bs = bs->getOuterScope();
+  }
+
+  return AnalysisResultPtr();
+}
+
 ClassScopePtr BlockScope::getContainingClass() {
   int nfunc = 0;
   BlockScopePtr bs = shared_from_this();
@@ -88,6 +100,28 @@ ClassScopePtr BlockScope::getContainingClass() {
 
 FunctionScopePtr BlockScope::getContainingFunction() {
   return dynamic_pointer_cast<HPHP::FunctionScope>(shared_from_this());
+}
+
+ClassScopePtr BlockScope::findExactClass(const std::string &className) {
+  if (ClassScopePtr currentCls = getContainingClass()) {
+    if (className == currentCls->getName()) {
+      return currentCls;
+    }
+  }
+  if (FileScopePtr currentFile = getContainingFile()) {
+    StatementList &stmts = *currentFile->getStmt();
+    for (int i = stmts.getCount(); i--; ) {
+      StatementPtr s = stmts[i];
+      if (s && s->is(Statement::KindOfClassStatement)) {
+        ClassScopePtr scope =
+          static_pointer_cast<ClassStatement>(s)->getClassScope();
+        if (className == scope->getName()) {
+          return scope;
+        }
+      }
+    }
+  }
+  return ClassScopePtr();
 }
 
 void BlockScope::addUse(BlockScopeRawPtr user, int useKinds) {

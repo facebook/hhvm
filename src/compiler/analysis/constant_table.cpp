@@ -298,7 +298,7 @@ void ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (isString) {
       cg_printf("StaticString");
     } else {
-      type->outputCPPDecl(cg, ar);
+      type->outputCPPDecl(cg, ar, getBlockScope());
     }
     if (decl) {
       cg_printf(" %s%s", Option::ConstantPrefix,

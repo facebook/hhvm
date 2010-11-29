@@ -251,11 +251,6 @@ public:
   bool addConstantDependency(FileScopePtr usingFile,
                              const std::string &constantName);
 
-  /**
-   * Find class by that name, and update class name if it's "self" or
-   * "parent".
-   */
-  ClassScopePtr resolveClass(ConstructPtr cs, std::string &className);
   ClassScopePtr findClass(const std::string &className,
                           FindClassBy by = ClassName);
   /**

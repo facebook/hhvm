@@ -38,10 +38,10 @@ FunctionCall::FunctionCall
  ExpressionPtr classExp)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
     StaticClassName(classExp), m_nameExp(nameExp), m_params(params),
-    m_valid(false), m_validClass(false),
+    m_valid(false),
     m_extraArg(0), m_variableArgument(false), m_voidReturn(false),
     m_voidWrapper(false), m_allowVoidReturn(false), m_redeclared(false),
-    m_redeclaredClass(false), m_derivedFromRedeclaring(false),
+    m_derivedFromRedeclaring(false),
     m_noStatic(false), m_argArrayId(-1), m_argArrayHash(-1),
     m_argArrayIndex(-1) {
 
@@ -62,7 +62,6 @@ FunctionCall::FunctionCall
 
 void FunctionCall::reset() {
   m_valid = false;
-  m_validClass = false;
   m_extraArg = 0;
   m_variableArgument = false;
   m_voidWrapper = false;
@@ -204,10 +203,8 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
 
 bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                 int state) {
-  if (isUnused() ||
-      m_className.empty() ||
-      m_origClassName == "self" ||
-      m_origClassName == "parent") {
+  if (m_noStatic || isUnused() || m_className.empty() ||
+      isSelf() || isParent()) {
     return Expression::preOutputCPP(cg, ar, state);
   }
 
@@ -244,8 +241,7 @@ bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool staticClassName = false;
   if (!m_noStatic && !m_className.empty() && m_cppTemp.empty() &&
-      m_origClassName != "self" && m_origClassName != "parent" &&
-      m_origClassName != "static") {
+      !isSelf() && !isParent() && !isStatic()) {
     if (!m_className.empty()) {
       cg_printf("STATIC_CLASS_NAME_CALL(");
       if (m_classScope) {

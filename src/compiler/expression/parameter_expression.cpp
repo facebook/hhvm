@@ -220,9 +220,9 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
     }
     else if (paramType->is(Type::KindOfArray)) cg_printf("CArrRef");
     else if (paramType->is(Type::KindOfString)) cg_printf("CStrRef");
-    else paramType->outputCPPDecl(cg, ar);
+    else paramType->outputCPPDecl(cg, ar, getScope());
   } else {
-    paramType->outputCPPDecl(cg, ar);
+    paramType->outputCPPDecl(cg, ar, getScope());
   }
 
   cg_printf(" %s%s", Option::VariablePrefix, m_name.c_str());

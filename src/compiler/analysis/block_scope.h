@@ -90,6 +90,9 @@ public:
   ClassScopePtr getContainingClass();
   FunctionScopePtr getContainingFunction();
   FileScopePtr getContainingFile();
+  AnalysisResultPtr getContainingProgram();
+
+  ClassScopePtr findExactClass(const std::string &className);
 
   void addUse(BlockScopeRawPtr user, int useFlags);
   void changed(BlockScopeRawPtrQueue &todo, int useKinds);

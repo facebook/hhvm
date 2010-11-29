@@ -424,7 +424,21 @@ TypePtr Type::combinedArithmeticType(TypePtr t1, TypePtr t2) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-string Type::getCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar) {
+ClassScopePtr Type::getClass(AnalysisResultPtr ar, BlockScopeRawPtr scope) {
+  if (m_name.empty()) return ClassScopePtr();
+  ClassScopePtr cls = ar->findClass(m_name);
+  if (cls->isRedeclaring()) {
+    if (!scope) {
+      cls.reset();
+    } else {
+      cls = scope->findExactClass(Util::toLower(m_name));
+    }
+  }
+  return cls;
+}
+
+string Type::getCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar,
+                        BlockScopeRawPtr scope) {
   switch (m_kindOf) {
   case KindOfBoolean:     return "bool";
   case KindOfByte:        return "char";
@@ -439,44 +453,47 @@ string Type::getCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar) {
   case KindOfPlusOperand: return "PlusOperand";
   case KindOfSequence:    return "Sequence";
   case KindOfObject:{
-    if (m_name.empty()) return "Object";
-    ClassScopePtr cls = ar->findClass(m_name);
-    return "p_" + cls->getId(cg);
+    ClassScopePtr cls(getClass(ar, scope));
+    if (!cls) return "Object";
+    return Option::SmartPtrPrefix + cls->getId(cg);
   }
   default:
     return "Variant";
   }
 }
 
-void Type::outputCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg_printf(getCPPDecl(cg, ar).c_str());
+void Type::outputCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar,
+                         BlockScopeRawPtr scope) {
+  cg_printf(getCPPDecl(cg, ar, scope).c_str());
 }
 
-void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultPtr ar) {
+void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultPtr ar,
+                         BlockScopeRawPtr scope) {
   switch (m_kindOf) {
-  case KindOfBoolean:     cg_printf("toBoolean");   break;
-  case KindOfByte:        cg_printf("toByte");      break;
-  case KindOfInt16:       cg_printf("toInt16");     break;
-  case KindOfInt32:       cg_printf("toInt32");     break;
-  case KindOfInt64:       cg_printf("toInt64");     break;
-  case KindOfDouble:      cg_printf("toDouble");    break;
-  case KindOfString:      cg_printf("toString");    break;
-  case KindOfArray:       cg_printf("toArray");     break;
-  case KindOfNumeric:     cg_printf("Numeric");     break;
-  case KindOfPrimitive:   cg_printf("Primitive");   break;
-  case KindOfPlusOperand: cg_printf("PlusOperand"); break;
-  case KindOfSequence:    cg_printf("Sequence");    break;
-  case KindOfObject:
-    if (m_name.empty()) {
-      cg_printf("toObject");
-    } else {
-      ClassScopePtr cls = ar->findClass(m_name);
-      cg_printf("%s%s", Option::SmartPtrPrefix, cls->getId(cg).c_str());
+    case KindOfBoolean:     cg_printf("toBoolean");   break;
+    case KindOfByte:        cg_printf("toByte");      break;
+    case KindOfInt16:       cg_printf("toInt16");     break;
+    case KindOfInt32:       cg_printf("toInt32");     break;
+    case KindOfInt64:       cg_printf("toInt64");     break;
+    case KindOfDouble:      cg_printf("toDouble");    break;
+    case KindOfString:      cg_printf("toString");    break;
+    case KindOfArray:       cg_printf("toArray");     break;
+    case KindOfNumeric:     cg_printf("Numeric");     break;
+    case KindOfPrimitive:   cg_printf("Primitive");   break;
+    case KindOfPlusOperand: cg_printf("PlusOperand"); break;
+    case KindOfSequence:    cg_printf("Sequence");    break;
+    case KindOfObject: {
+      ClassScopePtr cls(getClass(ar, scope));
+      if (!cls) {
+        cg_printf("toObject");
+      } else {
+        cg_printf("%s%s", Option::SmartPtrPrefix, cls->getId(cg).c_str());
+      }
+      break;
     }
-    break;
-  default:
-    cg_printf("Variant");
-    break;
+    default:
+      cg_printf("Variant");
+      break;
   }
 }
 

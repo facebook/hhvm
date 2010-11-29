@@ -38,7 +38,7 @@ StaticMemberExpression::StaticMemberExpression
  ExpressionPtr classExp, ExpressionPtr exp)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
     StaticClassName(classExp), m_exp(exp), m_valid(false),
-    m_dynamicClass(false), m_redeclared(false) {
+    m_dynamicClass(false) {
   if (exp->is(KindOfSimpleVariable)) {
     SimpleVariablePtr s(dynamic_pointer_cast<SimpleVariable>(exp));
     m_exp = ExpressionPtr
@@ -66,8 +66,7 @@ ExpressionPtr StaticMemberExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool StaticMemberExpression::findMember(AnalysisResultPtr ar,
-                                        ClassScopePtr &cls, string &name,
+bool StaticMemberExpression::findMember(AnalysisResultPtr ar, string &name,
                                         Symbol *&sym) {
   if (m_exp->is(Expression::KindOfScalarExpression)) {
     ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
@@ -76,37 +75,21 @@ bool StaticMemberExpression::findMember(AnalysisResultPtr ar,
 
   if (m_class) return false;
 
-  cls = ar->resolveClass(shared_from_this(), m_className);
-
-  if (!cls) return false;
-
   sym = NULL;
+  m_resolvedClass = resolveClass(getScope());
+  if (!m_resolvedClass) return isRedeclared();
 
-  if (cls->isRedeclaring()) {
-    m_redeclared = true;
-    return true;
-
-    /*
-      ClassScopePtr c = ar->findExactClass(shared_from_this(), m_className);
-      if (!c) {
-      m_redeclared = true;
-      return true;
-      }
-      cls = c;
-    */
-  }
-
-  if (cls->derivesFromRedeclaring()) {
+  if (m_resolvedClass->derivesFromRedeclaring()) {
     m_dynamicClass = true;
   }
 
-  if (m_redeclared || m_dynamicClass) return true;
+  if (m_dynamicClass) return true;
 
   if (!name.empty()) {
-    ClassScopePtr parent = cls;
-    sym = cls->findProperty(parent, name, ar, shared_from_this());
+    ClassScopePtr parent = m_resolvedClass;
+    sym = m_resolvedClass->findProperty(parent, name, ar, shared_from_this());
     if (sym && sym->isStatic()) {
-      cls = parent;
+      m_resolvedClass = parent;
     } else {
       sym = NULL;
     }
@@ -119,12 +102,11 @@ void StaticMemberExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_class) {
     m_class->analyzeProgram(ar);
   } else if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
-    ClassScopePtr cls;
     Symbol *sym;
     string name;
-    if (findMember(ar, cls, name, sym)) {
-      if (!m_redeclared && cls) {
-        cls->addUse(getScope(), BlockScope::UseKindStaticRef);
+    if (findMember(ar, name, sym)) {
+      if (m_resolvedClass) {
+        m_resolvedClass->addUse(getScope(), BlockScope::UseKindStaticRef);
       }
     }
     addUserClass(ar, m_className);
@@ -171,11 +153,10 @@ ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultPtr ar) {
 ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultPtr ar) {
   Symbol *sym = NULL;
   if (m_class) updateClassName();
-  if (!m_class && !m_redeclared && m_valid &&
+  if (!m_class && m_resolvedClass && m_valid &&
       m_exp->is(Expression::KindOfScalarExpression)) {
     ClassScopePtr cls = ar->findExactClass(shared_from_this(), m_className);
-    if (cls && (!cls->isVolatile() ||
-                ar->checkClassPresent(shared_from_this(), m_className))) {
+    if (cls && (!cls->isVolatile() || isPresent())) {
       ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
       const std::string &name = var->getString();
 
@@ -226,10 +207,9 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
   m_exp->inferAndCheck(ar, Type::String, false);
   m_valid = true;
 
-  ClassScopePtr cls;
   Symbol *sym;
   string name;
-  m_valid = findMember(ar, cls, name, sym);
+  m_valid = findMember(ar, name, sym);
   if (!m_valid) {
     if (getScope()->isFirstPass()) {
       Compiler::Error(Compiler::UnknownClass, self);
@@ -240,15 +220,13 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
   variables->setAttribute(VariableTable::NeedGlobalPointer);
 
   if (!name.empty()) {
-    if (!cls) {
+    if (!m_resolvedClass && !isRedeclared()) {
       m_implementedType.reset();
       return Type::Variant;
     }
-
     bool found = false;
     TypePtr tp;
-    m_resolvedClassName = m_className;
-    if (m_redeclared) {
+    if (isRedeclared()) {
       BOOST_FOREACH(ClassScopePtr clsr,
                     ar->findRedeclaredClasses(m_className)) {
         sym = clsr->findProperty(clsr, name, ar, self);
@@ -260,8 +238,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
       tp = Type::Variant;
       sym = NULL;
     } else if (sym) {
-      tp = cls->checkProperty(sym, type, coerce, ar);
-      m_resolvedClassName = cls->getName();
+      tp = m_resolvedClass->checkProperty(sym, type, coerce, ar);
       found = true;
       if (modified) {
         sym->setIndirectAltered();
@@ -272,14 +249,14 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
     if (!found && getScope()->isFirstPass()) {
       Compiler::Error(Compiler::MissingObjectContext, self);
     }
-    m_valid = found || m_redeclared || m_dynamicClass;
+    m_valid = found || isRedeclared() || m_dynamicClass;
     m_implementedType.reset();
     return tp;
   }
 
-  if (cls) {
+  if (m_resolvedClass || isRedeclared()) {
     if (modified) {
-      if (m_redeclared) {
+      if (isRedeclared()) {
         BOOST_FOREACH(ClassScopePtr clsr,
                       ar->findRedeclaredClasses(m_className)) {
           int mask = clsr == getOriginalScope() ?
@@ -287,12 +264,11 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
           clsr->getVariables()->forceVariants(ar, mask);
         }
       } else {
-        int mask = cls == getOriginalScope() ?
+        int mask = m_resolvedClass == getOriginalScope() ?
           VariableTable::AnyStaticVars : VariableTable::NonPrivateStaticVars;
-        cls->getVariables()->forceVariants(ar, mask);
+        m_resolvedClass->getVariables()->forceVariants(ar, mask);
       }
     }
-    m_resolvedClassName = m_className;
   }
 
   // we have to use a variant to hold dynamic value
@@ -377,7 +353,7 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
   }
 
   if (!m_valid) {
-    if (m_resolvedClassName.empty()) {
+    if (!m_resolvedClass && !isRedeclared()) {
       cg_printf("throw_fatal(\"unknown class %s\")", m_origClassName.c_str());
     } else {
       cg_printf("throw_fatal(\"Access to undeclared static property: ");
@@ -388,27 +364,21 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
   }
 
   bool volatileCheck = false;
-  bool outsideClass = !ar->checkClassPresent(shared_from_this(),
-                                             m_origClassName);
-  ClassScopePtr cls = ClassScopePtr();
-  if (!m_resolvedClassName.empty()) {
-    cls = ar->findClass(m_resolvedClassName);
-    if (cls && outsideClass) {
-      volatileCheck = cls->isVolatile();
-      if (volatileCheck) {
-        ClassScope::OutputVolatileCheckBegin(cg, ar, getScope(),
-                                             m_origClassName);
-      }
-    }
+  if (!isPresent() &&
+      ((m_resolvedClass && m_resolvedClass->isVolatile()) ||
+       isRedeclared())) {
+    volatileCheck = true;
+    ClassScope::OutputVolatileCheckBegin(cg, ar, getScope(),
+                                         m_origClassName);
   }
 
-  if (m_exp->is(Expression::KindOfScalarExpression) && !m_redeclared &&
+  if (m_exp->is(Expression::KindOfScalarExpression) && !isRedeclared() &&
       !m_dynamicClass) {
 
-    ASSERT(cls);
+    ASSERT(m_resolvedClass);
     ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
-    string clsId = cls->getId(cg);
-    if (cls->needLazyStaticInitializer()) {
+    string clsId = m_resolvedClass->getId(cg);
+    if (m_resolvedClass->needLazyStaticInitializer()) {
       cg_printf("%s%s::lazy_initializer(g)->%s%s%s%s",
                 Option::ClassPrefix, clsId.c_str(),
                 Option::StaticPropertyPrefix, clsId.c_str(),
@@ -421,22 +391,24 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
     }
   } else {
     if (m_context & (LValue | RefValue)) {
-      if (m_redeclared) {
+      if (isRedeclared()) {
         cg_printf("g->%s%s->%slval(", Option::ClassStaticsObjectPrefix,
                   cg.formatLabel(m_className).c_str(),
                   Option::ObjectStaticPrefix);
       } else {
         cg_printf("%s%s::%slval(", Option::ClassPrefix,
-                  cls->getId(cg).c_str(), Option::ObjectStaticPrefix);
+                  m_resolvedClass->getId(cg).c_str(),
+                  Option::ObjectStaticPrefix);
       }
     } else {
-      if (m_redeclared) {
+      if (isRedeclared()) {
         cg_printf("g->%s%s->%sget(", Option::ClassStaticsObjectPrefix,
                   cg.formatLabel(m_className).c_str(),
                   Option::ObjectStaticPrefix);
       } else {
         cg_printf("%s%s::%sget(", Option::ClassPrefix,
-                  cls->getId(cg).c_str(), Option::ObjectStaticPrefix);
+                  m_resolvedClass->getId(cg).c_str(),
+                  Option::ObjectStaticPrefix);
       }
     }
     m_exp->outputCPP(cg, ar);

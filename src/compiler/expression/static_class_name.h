@@ -26,6 +26,16 @@ class StaticClassName {
 public:
   StaticClassName(ExpressionPtr classExp);
 
+  bool isSelf() const { return m_isSelf; }
+  bool isParent() const { return m_isParent; }
+  bool isStatic() const { return m_isStatic; }
+  bool isRedeclared() const { return m_redeclared; }
+  bool isPresent() const { return m_present; }
+
+  void setRedeclared() { m_redeclared = true; }
+
+  ClassScopePtr resolveClass(BlockScopeRawPtr scope);
+  bool checkPresent(BlockScopeRawPtr scope);
 protected:
   ExpressionPtr m_class;
   std::string m_origClassName;
@@ -33,6 +43,12 @@ protected:
 
   void updateClassName();
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
+private:
+  unsigned m_isSelf : 1;
+  unsigned m_isParent : 1;
+  unsigned m_isStatic : 1;
+  unsigned m_redeclared : 1;
+  unsigned m_present : 1;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

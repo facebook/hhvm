@@ -425,7 +425,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
       TypePtr type = funcScope->getReturnType();
       if (type) {
-        type->outputCPPDecl(cg, ar);
+        type->outputCPPDecl(cg, ar, getScope());
       } else {
         cg_printf("void");
       }
@@ -469,7 +469,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (m_stmt) {
         TypePtr type = funcScope->getReturnType();
         if (type) {
-          type->outputCPPDecl(cg, ar);
+          type->outputCPPDecl(cg, ar, getScope());
         } else {
           cg_printf("void");
         }
@@ -673,7 +673,7 @@ void MethodStatement::outputCPPStaticMethodWrapper(CodeGenerator &cg,
   m_modifiers->outputCPP(cg, ar);
   TypePtr type = funcScope->getReturnType();
   if (type) {
-    type->outputCPPDecl(cg, ar);
+    type->outputCPPDecl(cg, ar, getScope());
   } else {
     cg_printf("void");
   }

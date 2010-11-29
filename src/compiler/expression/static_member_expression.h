@@ -40,17 +40,14 @@ public:
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                       int state);
 private:
-  bool findMember(AnalysisResultPtr ar,
-                  ClassScopePtr &cls, std::string &name,
+  bool findMember(AnalysisResultPtr ar, std::string &name,
                   Symbol *&sym);
 
   ExpressionPtr m_exp;
 
   bool m_valid;
-  std::string m_resolvedClassName;
-
+  ClassScopeRawPtr m_resolvedClass;
   bool m_dynamicClass;
-  bool m_redeclared;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

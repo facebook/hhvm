@@ -67,14 +67,12 @@ protected:
   ClassScopePtr m_classScope;
 
   bool m_valid;
-  bool m_validClass;
   int m_extraArg;
   bool m_variableArgument;
   bool m_voidReturn;  // no return type
   bool m_voidWrapper; // void wrapper is needed
   bool m_allowVoidReturn;
   bool m_redeclared;
-  bool m_redeclaredClass;
   bool m_derivedFromRedeclaring;
   bool m_noStatic;
 

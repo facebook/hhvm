@@ -52,23 +52,6 @@ ExpressionPtr ObjectMethodExpression::clone() {
   return exp;
 }
 
-ClassScopePtr ObjectMethodExpression::resolveClass(AnalysisResultPtr ar,
-                                                   string &name) {
-  ClassScopePtr cls = ar->findClass(name, AnalysisResult::MethodName);
-  if (cls) {
-    addUserClass(ar, cls->getName());
-    return cls;
-  }
-  string construct("__construct");
-  cls = ar->findClass(construct, AnalysisResult::MethodName);
-  if (cls && name == cls->getName()) {
-    name = "__construct";
-    cls->setAttribute(ClassScope::ClassNameConstructor);
-    return cls;
-  }
-  return ClassScopePtr();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
@@ -188,9 +171,6 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
 
   if (!cls) {
     if (getScope()->isFirstPass()) {
-      // call resolveClass to mark functions as dynamic
-      // but we cant do anything else with the result.
-      resolveClass(ar, m_name);
       if (!ar->classMemberExists(m_name, AnalysisResult::MethodName)) {
         Compiler::Error(Compiler::UnknownObjectMethod, self);
       }

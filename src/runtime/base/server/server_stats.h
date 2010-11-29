@@ -22,6 +22,7 @@
 #include <curl/curl.h>
 #include <time.h>
 #include <runtime/base/shared/shared_string.h>
+#include <runtime/base/types.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -216,6 +217,9 @@ class IOStatusHelper {
 public:
   IOStatusHelper(const char *name, const char *address = NULL, int port = 0);
   ~IOStatusHelper();
+
+private:
+  ExecutionProfiler m_exeProfiler;
 };
 
 /**

@@ -50,6 +50,8 @@ bool RPCRequestHandler::needReset() const {
 }
 
 void RPCRequestHandler::handleRequest(Transport *transport) {
+  ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
+
   Logger::OnNewRequest();
   m_context->setTransport(transport);
   transport->enableCompression();

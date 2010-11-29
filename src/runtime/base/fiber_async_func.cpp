@@ -277,6 +277,7 @@ public:
   }
 
   virtual void doJob(FiberJob *job) {
+    ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
     job->run();
     m_jobs.push_back(job);
     cleanup();

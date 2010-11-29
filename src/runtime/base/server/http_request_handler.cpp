@@ -103,6 +103,8 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
 }
 
 void HttpRequestHandler::handleRequest(Transport *transport) {
+  ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
+
   Logger::OnNewRequest();
   GetAccessLog().onNewRequest();
   transport->enableCompression();

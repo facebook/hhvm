@@ -1204,7 +1204,8 @@ void ServerStatsHelper::logTime(const std::string &prefix,
 
 IOStatusHelper::IOStatusHelper(const char *name,
                                const char *address /* = NULL */,
-                               int port /* = 0 */) {
+                               int port /* = 0 */)
+    : m_exeProfiler(ThreadInfo::NetworkIO) {
   ASSERT(name && *name);
 
   if (ServerStats::s_profile_network ||

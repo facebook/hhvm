@@ -16,15 +16,19 @@
 #include <runtime/base/types.h>
 #include <runtime/base/hphp_system.h>
 #include <runtime/base/memory/smart_allocator.h>
+#include <util/lock.h>
 
 using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+static Mutex s_thread_info_mutex;
+static std::set<ThreadInfo*> s_thread_infos;
+
 IMPLEMENT_THREAD_LOCAL(ThreadInfo, ThreadInfo::s_threadInfo);
 
-ThreadInfo::ThreadInfo() {
+ThreadInfo::ThreadInfo() : m_executing(Idling) {
   map<int, ObjectAllocatorWrapper *> &wrappers =
     ObjectAllocatorCollector::getWrappers();
   m_allocators.resize(wrappers.rbegin()->first + 1);
@@ -42,6 +46,22 @@ ThreadInfo::ThreadInfo() {
   pthread_attr_destroy(&info);
 
   onSessionInit();
+
+  Lock lock(s_thread_info_mutex);
+  s_thread_infos.insert(this);
+}
+
+ThreadInfo::~ThreadInfo() {
+  Lock lock(s_thread_info_mutex);
+  s_thread_infos.erase(this);
+}
+
+void ThreadInfo::GetExecutionSamples(std::map<Executing, int> &counts) {
+  Lock lock(s_thread_info_mutex);
+  for (std::set<ThreadInfo*>::const_iterator iter = s_thread_infos.begin();
+       iter != s_thread_infos.end(); ++iter) {
+    ++counts[(*iter)->m_executing];
+  }
 }
 
 void ThreadInfo::onSessionInit() {

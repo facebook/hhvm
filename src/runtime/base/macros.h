@@ -402,13 +402,28 @@ do { \
 #define REQUEST_TIMEOUT_INJECTION
 #endif
 
-#ifdef HOTPROFILER
-#define HOTPROFILER_INJECTION(n) ProfilerInjection pi(info, #n);
-#ifndef HOTPROFILER_NO_BUILTIN
-#define HOTPROFILER_INJECTION_BUILTIN(n) ProfilerInjection pi(info, #n);
+#ifdef EXECUTION_PROFILER
+#define EXECUTION_PROFILER_INJECTION(n) ExecutionProfiler ep(info, n);
 #else
-#define HOTPROFILER_INJECTION_BUILTIN(n)
+#define EXECUTION_PROFILER_INJECTION(n)
 #endif
+
+#ifdef HOTPROFILER
+#define HOTPROFILER_INJECTION(n)                \
+  ProfilerInjection pi(info, #n);               \
+  EXECUTION_PROFILER_INJECTION(false)           \
+
+#ifndef HOTPROFILER_NO_BUILTIN
+#define HOTPROFILER_INJECTION_BUILTIN(n)        \
+  ProfilerInjection pi(info, #n);               \
+  EXECUTION_PROFILER_INJECTION(true);           \
+
+#else
+#define HOTPROFILER_INJECTION_BUILTIN(n)        \
+  EXECUTION_PROFILER_INJECTION(true);           \
+
+#endif
+
 #else
 #define HOTPROFILER_INJECTION(n)
 #define HOTPROFILER_INJECTION_BUILTIN(n)

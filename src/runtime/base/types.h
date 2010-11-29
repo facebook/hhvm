@@ -187,6 +187,17 @@ class GlobalVariables;
 // implemented in runtime/base/thread_info
 class ThreadInfo {
 public:
+  enum Executing {
+    Idling,
+    RuntimeFunctions,
+    ExtensionFunctions,
+    UserFunctions,
+    NetworkIO,
+  };
+
+  static void GetExecutionSamples(std::map<Executing, int> &counts);
+
+public:
   static DECLARE_THREAD_LOCAL(ThreadInfo, s_threadInfo);
 
   std::vector<ObjectAllocatorBase *> m_allocators;
@@ -206,8 +217,10 @@ public:
   Profiler *m_profiler;
 
   GlobalVariables *m_globals;
+  Executing m_executing;
 
   ThreadInfo();
+  ~ThreadInfo();
 
   void onSessionInit();
   void onSessionExit();
@@ -237,6 +250,8 @@ inline void check_request_timeout(ThreadInfo *info) {
 extern void begin_profiler_frame(Profiler *p, const char *symbol);
 extern void end_profiler_frame(Profiler *p);
 
+///////////////////////////////////////////////////////////////////////////////
+
 class ProfilerInjection {
 public:
   ProfilerInjection(ThreadInfo *info, const char *symbol) : m_info(info) {
@@ -251,7 +266,29 @@ private:
   ThreadInfo *m_info;
 };
 
-//////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+class ExecutionProfiler {
+public:
+  ExecutionProfiler(ThreadInfo *info, bool builtin) : m_info(info) {
+    m_executing = m_info->m_executing;
+    m_info->m_executing =
+      builtin ? ThreadInfo::ExtensionFunctions : ThreadInfo::UserFunctions;
+  }
+  ExecutionProfiler(ThreadInfo::Executing executing) {
+    m_info = ThreadInfo::s_threadInfo.get();
+    m_executing = m_info->m_executing;
+    m_info->m_executing = executing;
+  }
+  ~ExecutionProfiler() {
+    m_info->m_executing = m_executing;
+  }
+private:
+  ThreadInfo *m_info;
+  ThreadInfo::Executing m_executing;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 // Fast Method Call
 struct MethodIndex {
   unsigned int m_callIndex:32;

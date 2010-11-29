@@ -187,6 +187,9 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/leak-off:        end leak detection and report leaking\n"
         "    cutoff        optional, default 20 seconds, ignore newer allocs\n"
 #endif
+#ifdef EXECUTION_PROFILER
+        "/prof-exe:        returns sampled execution profile\n"
+#endif
       ;
 #ifndef NO_TCMALLOC
         if (MallocExtensionInstance) {
@@ -610,6 +613,21 @@ bool AdminRequestHandler::handleStatsRequest(const std::string &cmd,
 
 bool AdminRequestHandler::handleProfileRequest(const std::string &cmd,
                                                Transport *transport) {
+  if (cmd == "prof-exe") {
+    std::map<ThreadInfo::Executing, int> counts;
+    ThreadInfo::GetExecutionSamples(counts);
+
+    string res = "[ ";
+    for (std::map<ThreadInfo::Executing, int>::const_iterator iter =
+           counts.begin(); iter != counts.end(); ++iter) {
+      res += lexical_cast<string>(iter->first) + ", " +
+        lexical_cast<string>(iter->second) + ", ";
+    }
+    res += "-1 ]";
+    transport->sendString(res);
+
+    return true;
+  }
 #ifdef GOOGLE_CPU_PROFILER
   if (handleCPUProfilerRequest(cmd, transport)) {
     return true;

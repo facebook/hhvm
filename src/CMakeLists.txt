@@ -106,7 +106,7 @@ foreach (CXX_FILE ${CXX_SOURCES})
 	endif()
 endforeach()
 
-ADD_LIBRARY(hphp_runtime_static STATIC ${C_SOURCES} ${CXX_SOURCES})
+ADD_LIBRARY(hphp_runtime_static STATIC ${CXX_SOURCES} ${C_SOURCES})
 #ADD_LIBRARY(hphp_runtime SHARED ${C_SOURCES} ${CXX_SOURCES})
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES OUTPUT_NAME "hphp_runtime")
 SET_TARGET_PROPERTIES(hphp_runtime_static PROPERTIES PREFIX "lib")

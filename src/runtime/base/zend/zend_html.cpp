@@ -462,8 +462,8 @@ char *string_html_decode(const char *input, int &len, bool utf8, bool nbsp) {
   if (!EntityMapInited) {
     Lock lock(EntityMapMutex);
     if (!EntityMapInited) {
-      EntityMapInited = true;
       init_entity_table();
+      EntityMapInited = true;
     }
   }
 
@@ -531,8 +531,8 @@ Array string_get_html_translation_table(int which, int quote_style) {
     if (!EntityMapInited) {
       Lock lock(EntityMapMutex);
       if (!EntityMapInited) {
-        EntityMapInited = true;
         init_entity_table();
+        EntityMapInited = true;
       }
     }
 

@@ -168,6 +168,14 @@ EvalOverrides evalOverrides;
 //////////////////////////////////////////////////////////////////////////////
 ///// Invoke definitions
 
+static Variant invalid_function_call(const char *func) {
+  raise_warning("(1) call the function without enough arguments OR "
+                "(2) Unable to find function \"%s\" OR "
+                "(3) function was not in invoke table OR "
+                "(4) function was renamed to something else.", func);
+  return null;
+}
+
 Variant EvalExtract::InvokeImpl(VariableEnvironment &env,
                                 CArrRef params) {
   int size = params.size();
@@ -176,7 +184,7 @@ Variant EvalExtract::InvokeImpl(VariableEnvironment &env,
   case 2: return extract(&env,params.rvalAt(0), params.rvalAt(1));
   case 3: return extract(&env,params.rvalAt(0), params.rvalAt(1),
                          params.rvalAt(2));
-  default: throw InvalidFunctionCallException("extract");
+  default: return invalid_function_call("extract");
   }
 }
 Variant EvalDefine::InvokeImpl(VariableEnvironment &env,
@@ -194,7 +202,7 @@ Variant EvalDefine::InvokeImpl(VariableEnvironment &env,
         return false;
       }
     }
-  default: throw InvalidFunctionCallException("define");
+  default: return invalid_function_call("define");
   }
 }
 
@@ -209,7 +217,7 @@ Variant EvalFuncGetArg::InvokeImpl(VariableEnvironment &env,
     }
     return false;
   }
-  default: throw InvalidFunctionCallException("func_get_arg");
+  default: return invalid_function_call("func_get_arg");
   }
 }
 
@@ -224,21 +232,19 @@ Variant EvalFuncGetArgs::InvokeImpl(VariableEnvironment &env,
     }
     return res;
   }
-  default: throw InvalidFunctionCallException("func_get_args");
+  default: return invalid_function_call("func_get_args");
   }
 }
 
 Variant EvalFuncNumArgs::InvokeImpl(VariableEnvironment &env,
                                     CArrRef params) {
-  int size = params.size();
-  if (size != 0) throw InvalidFunctionCallException("func_num_args");
   return env.getParams().size();
 }
 
 Variant EvalCompact::InvokeImpl(VariableEnvironment &env,
                                 CArrRef params) {
   int size = params.size();
-  if (size == 0) throw InvalidFunctionCallException("compact");
+  if (size == 0) return invalid_function_call("compact");
   return compact(&env, params.size(), params.rvalAt(0),
                  params.slice(1, params.size() - 1, false));
 }
@@ -246,7 +252,7 @@ Variant EvalCompact::InvokeImpl(VariableEnvironment &env,
 Variant EvalCreateFunction::InvokeImpl(VariableEnvironment &env,
                                        CArrRef params) {
   int size = params.size();
-  if (size != 2) throw InvalidFunctionCallException("create_function");
+  if (size != 2) return invalid_function_call("create_function");
   Variant var = params.rvalAt(0);
   Variant body = params.rvalAt(1);
 
@@ -325,8 +331,9 @@ EvalFunctionExists::EvalFunctionExists() {
 Variant EvalFunctionExists::InvokeImpl(VariableEnvironment &env,
                                        CArrRef params) {
 
-  if (params.size() != 1)
-    throw InvalidFunctionCallException("function_exists");
+  if (params.size() != 1) {
+    return invalid_function_call("function_exists");
+  }
   String fn = params.rvalAt(0).toString();
   if (s_blacklist.find(fn.data()) != s_blacklist.end()) return false;
   return f_function_exists(fn);

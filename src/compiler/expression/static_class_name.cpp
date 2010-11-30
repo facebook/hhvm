@@ -57,6 +57,7 @@ void StaticClassName::updateClassName() {
 
 ClassScopePtr StaticClassName::resolveClass(BlockScopeRawPtr scope) {
   m_present = false;
+  if (m_class) return ClassScopePtr();
   if (m_isSelf) {
     if (ClassScopePtr self = scope->getContainingClass()) {
       m_className = self->getName();

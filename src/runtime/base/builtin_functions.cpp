@@ -63,13 +63,13 @@ String get_static_class_name(CVarRef objOrClassName) {
 
 Variant getDynamicConstant(CVarRef v, CStrRef name) {
   if (isInitialized(v)) return v;
-  raise_notice("Use of undefined constant %s -- assumed '%s'.",
+  raise_notice("Use of undefined constant %s - assumed '%s'",
                name.c_str(), name.c_str());
   return name;
 }
 
 String getUndefinedConstant(CStrRef name) {
-  raise_notice("Use of undefined constant %s -- assumed '%s'.",
+  raise_notice("Use of undefined constant %s - assumed '%s'",
                name.c_str(), name.c_str());
   return name;
 }

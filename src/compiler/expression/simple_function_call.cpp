@@ -260,7 +260,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     // We need to know the name of the constant so that we can associate it
     // with this file before we do type inference.
     if (!m_class && m_className.empty() && m_type == DefineFunction &&
-        m_params && m_params->getCount() >= 2) {
+        m_params && unsigned(m_params->getCount() - 2) <= 1u) {
       ExpressionPtr ename = (*m_params)[0];
       if (ConstantExpressionPtr cname =
           dynamic_pointer_cast<ConstantExpression>(ename)) {
@@ -360,7 +360,8 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
 bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultPtr ar) {
   if (m_class || !m_className.empty()) return false;
-  if (m_type == DefineFunction && m_params && m_params->getCount() >= 2) {
+  if (m_type == DefineFunction && m_params &&
+      unsigned(m_params->getCount() - 2) <= 1u) {
     if (m_dynamicConstant) return false;
     ScalarExpressionPtr name =
       dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
@@ -615,7 +616,8 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
        m_type == ClassExistsFunction ||
        m_type == InterfaceExistsFunction) &&
       m_params &&
-      m_params->getCount() == (m_type == DefineFunction) + 1) {
+      (m_type == DefineFunction ?
+       unsigned(m_params->getCount() - 2) <= 1u : m_params->getCount() == 1)) {
     ExpressionPtr value = (*m_params)[0];
     if (value->isScalar()) {
       ScalarExpressionPtr name = dynamic_pointer_cast<ScalarExpression>(value);
@@ -784,12 +786,12 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
 
   // handling define("CONSTANT", ...);
   if (!m_class && m_className.empty()) {
-    if (m_type == DefineFunction && m_params && m_params->getCount() >= 2) {
+    if (m_type == DefineFunction && m_params &&
+        unsigned(m_params->getCount() - 2) <= 1u) {
       ScalarExpressionPtr name =
         dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
-      string varName;
       if (name) {
-        varName = name->getIdentifier();
+        string varName = name->getIdentifier();
         if (!varName.empty()) {
           ExpressionPtr value = (*m_params)[1];
           TypePtr varType = value->inferAndCheck(ar, Type::Some, false);
@@ -815,10 +817,11 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
             // in case the old 'value' has been optimized
             constants->setValue(ar, varName, value);
           }
+          m_valid = true;
           return checkTypesImpl(ar, type, Type::Boolean, coerce);
         }
       }
-      if (varName.empty() && getScope()->isFirstPass()) {
+      if (getScope()->isFirstPass()) {
         Compiler::Error(Compiler::BadDefine, self);
       }
     } else if (m_type == ExtractFunction) {
@@ -1432,7 +1435,8 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
   }
 
   if (!m_class && m_className.empty()) {
-    if (m_type == DefineFunction && m_params && m_params->getCount() >= 2) {
+    if (m_type == DefineFunction && m_params &&
+        unsigned(m_params->getCount() - 2) <= 1u) {
       ScalarExpressionPtr name =
         dynamic_pointer_cast<ScalarExpression>((*m_params)[0]);
       string varName;

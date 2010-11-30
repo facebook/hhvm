@@ -7821,7 +7821,7 @@ Variant get_builtin_constant(CStrRef name) {
     default:
       break;
   }
-  raise_notice("Use of undefined constant %s -- assumed '%s'.", s, s);
+  raise_notice("Use of undefined constant %s - assumed '%s'", s, s);
   return name;
 }
 

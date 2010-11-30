@@ -2342,8 +2342,8 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
     }
 
     if (system) {
-      cg_printf("raise_notice(\"Use of undefined constant %%s -- "
-          "assumed '%%s'.\", s, s);\n"),
+      cg_printf("raise_notice(\"Use of undefined constant %%s - "
+          "assumed '%%s'\", s, s);\n"),
         cg_printf("return name;\n");
     } else {
       cg_printf("return get_builtin_constant(name);\n");

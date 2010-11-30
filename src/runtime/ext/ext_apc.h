@@ -19,7 +19,7 @@
 #define __EXT_APC_H__
 
 #include <runtime/base/base_includes.h>
-#include <runtime/base/shared/shared_store.h>
+#include <runtime/base/shared/shared_store_base.h>
 #include <runtime/base/server/upload.h>
 
 namespace HPHP {

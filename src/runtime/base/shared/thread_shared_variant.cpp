@@ -92,8 +92,8 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
         m_data.vec = new VectorData(size);
         uint i = 0;
         for (ArrayIter it(arr); !it.end(); it.next(), i++) {
-          ThreadSharedVariant* val = createAnother(it.second(), false, true,
-                                                   unserializeObj);
+          ThreadSharedVariant* val = Create(it.second(), false, true,
+                                            unserializeObj);
           if (val->shouldCache()) setShouldCache();
           m_data.vec->vals[i] = val;
         }
@@ -102,20 +102,20 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
         m_data.gnuMap = new MapData(size);
         uint i = 0;
         for (ArrayIter it(arr); !it.end(); it.next(), i++) {
-          ThreadSharedVariant* key = createAnother(it.first(), false, true,
-                                                   unserializeObj);
-          ThreadSharedVariant* val = createAnother(it.second(), false, true,
-                                                   unserializeObj);
+          ThreadSharedVariant* key = Create(it.first(), false, true,
+                                            unserializeObj);
+          ThreadSharedVariant* val = Create(it.second(), false, true,
+                                            unserializeObj);
           if (val->shouldCache()) setShouldCache();
           m_data.gnuMap->set(i, key, val);
         }
       } else {
         m_data.map = new ImmutableMap(size);
         for (ArrayIter it(arr); !it.end(); it.next()) {
-          ThreadSharedVariant* key = createAnother(it.first(), false, true,
-                                                   unserializeObj);
-          ThreadSharedVariant* val = createAnother(it.second(), false, true,
-                                                   unserializeObj);
+          ThreadSharedVariant* key = Create(it.first(), false, true,
+                                            unserializeObj);
+          ThreadSharedVariant* val = Create(it.second(), false, true,
+                                            unserializeObj);
           if (val->shouldCache()) setShouldCache();
           m_data.map->add(key, val);
         }
@@ -372,7 +372,7 @@ void ThreadSharedVariant::loadElems(ArrayData *&elems,
   if (elems->isStatic()) elems = elems->copy();
 }
 
-ThreadSharedVariant *ThreadSharedVariant::createAnother
+ThreadSharedVariant *ThreadSharedVariant::Create
 (CVarRef source, bool serialized, bool inner /* = false */,
  bool unserializeObj /* = false*/) {
   SharedVariant *wrapped = source.getSharedVariant();

@@ -17,7 +17,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
-#include <runtime/base/shared/shared_store.h>
+#include <runtime/base/shared/shared_store_base.h>
 #include <runtime/base/server/access_log.h>
 #include <runtime/base/util/extended_logger.h>
 #include <runtime/base/fiber_async_func.h>

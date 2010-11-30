@@ -43,6 +43,11 @@ public:
                       bool unserializeObj = false);
   virtual ~ThreadSharedVariant();
 
+  // Create will do the wrapped check before creating a ThreadSharedVariant
+  static ThreadSharedVariant* Create(CVarRef source, bool serialized,
+                                     bool inner = false,
+                                     bool unserializeObj = false);
+
   virtual void incRef() {
     atomic_inc(m_ref);
   }
@@ -109,10 +114,6 @@ public:
   virtual bool isUnserializedObj() { return getIsObj(); }
 
 protected:
-  virtual ThreadSharedVariant *createAnother(CVarRef source, bool serialized,
-                                             bool inner = false,
-                                             bool unserializeObj = false);
-
   virtual SharedVariant* getKeySV(ssize_t pos) const {
     ASSERT(is(KindOfArray));
     if (getIsVector()) return NULL;

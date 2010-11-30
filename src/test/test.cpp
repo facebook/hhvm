@@ -15,7 +15,7 @@
 */
 
 #include <test/test.h>
-#include <runtime/base/shared/shared_store.h>
+#include <runtime/base/shared/shared_store_base.h>
 #include <compiler/option.h>
 
 using namespace HPHP;

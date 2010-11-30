@@ -26,7 +26,7 @@
 #include <runtime/base/time/datetime.h>
 #include <runtime/base/memory/memory_manager.h>
 #include <runtime/base/program_functions.h>
-#include <runtime/base/shared/shared_store.h>
+#include <runtime/base/shared/shared_store_base.h>
 #include <runtime/base/memory/leak_detectable.h>
 #include <runtime/ext/mysql_stats.h>
 #include <runtime/base/shared/shared_store_stats.h>

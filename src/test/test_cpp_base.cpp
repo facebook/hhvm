@@ -23,7 +23,7 @@
 #include <runtime/ext/ext_apc.h>
 #include <runtime/ext/ext_mysql.h>
 #include <runtime/ext/ext_curl.h>
-#include <runtime/base/shared/shared_store.h>
+#include <runtime/base/shared/shared_store_base.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/ip_block_map.h>
 #include <test/test_mysql_info.inc>

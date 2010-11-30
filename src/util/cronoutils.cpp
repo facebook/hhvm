@@ -231,11 +231,15 @@ create_link(char *pfilename,
 #ifndef _WIN32
     if (linktype == S_IFLNK)
     {
-	symlink(pfilename, linkname);
+	if (symlink(pfilename, linkname) < 0) {
+          fprintf(stderr, "Creating link from %s to %s failed", pfilename, linkname);
+        }
     }
     else
     {
-	link(pfilename, linkname);
+	if (link(pfilename, linkname) < 0) {
+          fprintf(stderr, "Creating link from %s to %s failed", pfilename, linkname);
+        }
     }
 #else
     fprintf(stderr, "Creating link from %s to %s not supported", pfilename, linkname);

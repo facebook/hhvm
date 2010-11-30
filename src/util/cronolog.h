@@ -46,6 +46,8 @@ public:
   }
   void setPeriodicity();
   FILE *getOutputFile();
+  static void changeOwner(const std::string &username,
+                          const std::string &symlink);
 public:
   PERIODICITY m_periodicity;
   PERIODICITY m_periodDelayUnits;

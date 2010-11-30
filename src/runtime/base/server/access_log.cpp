@@ -42,18 +42,20 @@ AccessLog::~AccessLog() {
 }
 
 void AccessLog::init(const string &defaultFormat,
-                     vector<AccessLogFileData> &files) {
+                     vector<AccessLogFileData> &files,
+                     const string &username) {
   Lock l(m_lock);
   if (m_initialized) return;
   m_initialized = true;
   m_defaultFormat = defaultFormat;
   m_files = files;
-  openFiles();
+  openFiles(username);
 }
 
 void AccessLog::init(const string &format,
                      const string &symLink,
-                     const string &file) {
+                     const string &file,
+                     const string &username) {
   Lock l(m_lock);
   if (m_initialized) return;
   m_initialized = true;
@@ -61,10 +63,10 @@ void AccessLog::init(const string &format,
   if (!file.empty() && !format.empty()) {
     m_files.push_back(AccessLogFileData(file, symLink, format));
   }
-  openFiles();
+  openFiles(username);
 }
 
-void AccessLog::openFiles() {
+void AccessLog::openFiles(const string &username) {
   ASSERT(m_output.empty() && m_cronOutput.empty());
   if (m_files.empty()) return;
   for (vector<AccessLogFileData>::const_iterator it = m_files.begin();
@@ -79,6 +81,7 @@ void AccessLog::openFiles() {
         cl.m_template = file;
         cl.setPeriodicity();
         cl.m_linkName = symLink;
+        Cronolog::changeOwner(username, symLink);
       } else {
         cl.m_file = fopen(file.c_str(), "a");
       }

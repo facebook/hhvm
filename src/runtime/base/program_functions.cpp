@@ -463,10 +463,12 @@ static int start_server(const std::string &username) {
 
   RuntimeOption::ExecutionMode = "srv";
   HttpRequestHandler::GetAccessLog().init
-    (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::AccessLogs);
+    (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::AccessLogs,
+     username);
   AdminRequestHandler::GetAccessLog().init
     (RuntimeOption::AdminLogFormat, RuntimeOption::AdminLogSymLink,
-     RuntimeOption::AdminLogFile);
+     RuntimeOption::AdminLogFile,
+     username);
 
   void *sslCTX = NULL;
   if (RuntimeOption::EnableSSL) {
@@ -487,6 +489,9 @@ static int start_server(const std::string &username) {
 
 #if !defined(SKIP_USER_CHANGE)
   if (!username.empty()) {
+    if (Logger::UseCronolog) {
+      Cronolog::changeOwner(username, RuntimeOption::LogFileSymLink);
+    }
     Capability::ChangeUnixUser(username);
     LightProcess::ChangeUser(username);
   }

@@ -51,9 +51,10 @@ public:
       m_initialized(false), m_fGetThreadData(f) {}
   ~AccessLog();
   void init(const std::string &defaultFormat,
-            std::vector<AccessLogFileData> &files);
+            std::vector<AccessLogFileData> &files,
+            const std::string &username);
   void init(const std::string &format, const std::string &symLink,
-            const std::string &file);
+            const std::string &file, const std::string &username);
   void log(Transport *transport, const VirtualHost *vhost);
   bool setThreadLog(const char *file);
   void clearThreadLog();
@@ -77,7 +78,7 @@ private:
   std::string m_defaultFormat;
   std::vector<AccessLogFileData> m_files;
 
-  void openFiles();
+  void openFiles(const std::string &username);
   Mutex m_lock;
 };
 

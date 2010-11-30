@@ -15,6 +15,7 @@
 */
 
 #include <util/cronolog.h>
+#include <util/util.h>
 
 using namespace std;
 
@@ -119,6 +120,13 @@ FILE *Cronolog::getOutputFile() {
     }
   }
   return m_file;
+}
+
+void Cronolog::changeOwner(const string &username, const string &symlink) {
+  string cmd = string("/bin/chown -h ") + username + " " + symlink;
+  Util::ssystem(cmd.c_str());
+  cmd = string("/bin/chown ") + username + " " + symlink;
+  Util::ssystem(cmd.c_str());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

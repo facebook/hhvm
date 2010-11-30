@@ -1635,7 +1635,7 @@ static Variant domnode_nodetype_read(CObjRef obj) {
 
 static Variant domnode_parentnode_read(CObjRef obj) {
   CHECK_NODE(nodep);
-  return create_node_object(nodep->parent, domnode->m_doc);
+  return create_node_object(nodep->parent, domnode->doc());
 }
 
 static Variant domnode_childnodes_read(CObjRef obj) {
@@ -1644,7 +1644,7 @@ static Variant domnode_childnodes_read(CObjRef obj) {
     return null;
   }
   c_DOMNodeList *retval = NEW(c_DOMNodeList)();
-  retval->m_doc = domnode->m_doc;
+  retval->m_doc = domnode->doc();
   retval->m_baseobj = obj;
   retval->m_nodetype = XML_ELEMENT_NODE;
   return retval;
@@ -1656,7 +1656,7 @@ static Variant domnode_firstchild_read(CObjRef obj) {
   if (dom_node_children_valid(nodep)) {
     first = nodep->children;
   }
-  return create_node_object(first, domnode->m_doc);
+  return create_node_object(first, domnode->doc());
 }
 
 static Variant domnode_lastchild_read(CObjRef obj) {
@@ -1665,24 +1665,24 @@ static Variant domnode_lastchild_read(CObjRef obj) {
   if (dom_node_children_valid(nodep)) {
     last = nodep->last;
   }
-  return create_node_object(last, domnode->m_doc);
+  return create_node_object(last, domnode->doc());
 }
 
 static Variant domnode_previoussibling_read(CObjRef obj) {
   CHECK_NODE(nodep);
-  return create_node_object(nodep->prev, domnode->m_doc);
+  return create_node_object(nodep->prev, domnode->doc());
 }
 
 static Variant domnode_nextsibling_read(CObjRef obj) {
   CHECK_NODE(nodep);
-  return create_node_object(nodep->next, domnode->m_doc);
+  return create_node_object(nodep->next, domnode->doc());
 }
 
 static Variant domnode_attributes_read(CObjRef obj) {
   CHECK_NODE(nodep);
   if (nodep->type == XML_ELEMENT_NODE) {
     c_DOMNamedNodeMap *nodemap = NEW(c_DOMNamedNodeMap)();
-    nodemap->m_doc = domnode->m_doc;
+    nodemap->m_doc = domnode->doc();
     nodemap->m_baseobj = obj;
     nodemap->m_nodetype = XML_ATTRIBUTE_NODE;
     return nodemap;
@@ -1696,7 +1696,7 @@ static Variant domnode_ownerdocument_read(CObjRef obj) {
       nodep->type == XML_HTML_DOCUMENT_NODE) {
     return null;
   }
-  return create_node_object((xmlNodePtr)nodep->doc, domnode->m_doc);
+  return create_node_object((xmlNodePtr)nodep->doc, domnode->doc());
 }
 
 static Variant domnode_namespaceuri_read(CObjRef obj) {
@@ -1790,7 +1790,7 @@ static void domnode_prefix_write(CObjRef obj, CVarRef value) {
       }
 
       if (ns == NULL) {
-        php_dom_throw_error(NAMESPACE_ERR, domnode->m_doc->m_stricterror);
+        php_dom_throw_error(NAMESPACE_ERR, domnode->doc()->m_stricterror);
         return;
       }
 
@@ -1898,15 +1898,15 @@ Variant c_DOMNode::t_appendchild(CObjRef newnode) {
   xmlNodePtr new_child = NULL;
   if (dom_node_is_read_only(nodep) ||
       (child->parent != NULL && dom_node_is_read_only(child->parent))) {
-    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
     return false;
   }
   if (!dom_hierarchy(nodep, child)) {
-    php_dom_throw_error(HIERARCHY_REQUEST_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(HIERARCHY_REQUEST_ERR, doc()->m_stricterror);
     return false;
   }
   if (!(child->doc == NULL || child->doc == nodep->doc)) {
-    php_dom_throw_error(WRONG_DOCUMENT_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(WRONG_DOCUMENT_ERR, doc()->m_stricterror);
     return false;
   }
   if (child->type == XML_DOCUMENT_FRAG_NODE && child->children == NULL) {
@@ -1955,18 +1955,18 @@ Variant c_DOMNode::t_appendchild(CObjRef newnode) {
       return false;
     }
   }
-  if (newdomnode->m_doc.get()) {
-    removeOrphan(newdomnode->m_doc->m_orphans, newdomnode->m_node);
+  if (newdomnode->doc().get()) {
+    removeOrphan(newdomnode->doc()->m_orphans, newdomnode->m_node);
   }
   dom_reconcile_ns(nodep->doc, new_child);
-  return create_node_object(new_child, m_doc, false);
+  return create_node_object(new_child, doc(), false);
 }
 
 ObjectData *c_DOMNode::clone() {
   ObjectData *obj = cloneImpl();
   c_DOMNode *node = static_cast<c_DOMNode*>(obj);
   node->m_node = m_node;
-  node->m_doc = m_doc;
+  node->m_doc = doc();
   return obj;
 }
 
@@ -2003,7 +2003,7 @@ Variant c_DOMNode::t_clonenode(bool deep /* = false */) {
       node->properties = xmlCopyPropList(node, n->properties);
     }
   }
-  return create_node_object(node, m_doc, true);
+  return create_node_object(node, doc(), true);
 }
 
 int64 c_DOMNode::t_getlineno() {
@@ -2040,7 +2040,7 @@ Variant c_DOMNode::t_insertbefore(CObjRef newnode,
   c_DOMNode *domchildnode = newnode.getTyped<c_DOMNode>();
   xmlNodePtr child = domchildnode->m_node;
   xmlNodePtr new_child = NULL;
-  int stricterror = m_doc->m_stricterror;
+  int stricterror = doc()->m_stricterror;
   if (dom_node_is_read_only(parentp) ||
     (child->parent != NULL && dom_node_is_read_only(child->parent))) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
@@ -2098,7 +2098,7 @@ Variant c_DOMNode::t_insertbefore(CObjRef newnode,
           xmlUnlinkNode((xmlNodePtr)lastattr);
           php_libxml_node_free_resource((xmlNodePtr) lastattr);
         } else {
-          return create_node_object(child, m_doc, false);
+          return create_node_object(child, doc(), false);
         }
       }
     } else if (child->type == XML_DOCUMENT_FRAG_NODE) {
@@ -2138,7 +2138,7 @@ Variant c_DOMNode::t_insertbefore(CObjRef newnode,
           xmlUnlinkNode((xmlNodePtr)lastattr);
           php_libxml_node_free_resource((xmlNodePtr) lastattr);
         } else {
-          return create_node_object(child, m_doc, false);
+          return create_node_object(child, doc(), false);
         }
       }
     } else if (child->type == XML_DOCUMENT_FRAG_NODE) {
@@ -2153,11 +2153,11 @@ Variant c_DOMNode::t_insertbefore(CObjRef newnode,
     raise_warning("Couldn't add newnode as the previous sibling of refnode");
     return false;
   }
-  if (domchildnode->m_doc.get()) {
-    removeOrphan(domchildnode->m_doc->m_orphans, domchildnode->m_node);
+  if (domchildnode->doc().get()) {
+    removeOrphan(domchildnode->doc()->m_orphans, domchildnode->m_node);
   }
   dom_reconcile_ns(parentp->doc, new_child);
-  return create_node_object(new_child, m_doc, false);
+  return create_node_object(new_child, doc(), false);
 }
 
 bool c_DOMNode::t_isdefaultnamespace(CStrRef namespaceuri) {
@@ -2254,7 +2254,7 @@ Variant c_DOMNode::t_removechild(CObjRef node) {
   }
   c_DOMNode *domnode2 = node.getTyped<c_DOMNode>();
   xmlNodePtr child = domnode2->m_node;
-  int stricterror = m_doc->m_stricterror;
+  int stricterror = doc()->m_stricterror;
   if (dom_node_is_read_only(nodep) ||
     (child->parent != NULL && dom_node_is_read_only(child->parent))) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
@@ -2268,7 +2268,7 @@ Variant c_DOMNode::t_removechild(CObjRef node) {
   while (children) {
     if (children == child) {
       xmlUnlinkNode(child);
-      return create_node_object(child, m_doc, true);
+      return create_node_object(child, doc(), true);
     }
     children = children->next;
   }
@@ -2291,7 +2291,7 @@ Variant c_DOMNode::t_replacechild(CObjRef newchildobj, CObjRef oldchildobj) {
   if (!children) {
     return false;
   }
-  int stricterror = m_doc->m_stricterror;
+  int stricterror = doc()->m_stricterror;
   if (dom_node_is_read_only(nodep) ||
     (newchild->parent != NULL && dom_node_is_read_only(newchild->parent))) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
@@ -2331,10 +2331,10 @@ Variant c_DOMNode::t_replacechild(CObjRef newchildobj, CObjRef oldchildobj) {
       node = xmlReplaceNode(oldchild, newchild);
       dom_reconcile_ns(nodep->doc, newchild);
     }
-    return create_node_object(oldchild, m_doc, false);
+    return create_node_object(oldchild, doc(), false);
   }
 
-  php_dom_throw_error(NOT_FOUND_ERR, m_doc->m_stricterror);
+  php_dom_throw_error(NOT_FOUND_ERR, doc()->m_stricterror);
   return false;
 }
 
@@ -2419,7 +2419,7 @@ static void domattr_value_write(CObjRef obj, CVarRef value) {
 
 static Variant domattr_ownerelement_read(CObjRef obj) {
   CHECK_NODE(nodep);
-  return create_node_object(nodep->parent, domnode->m_doc);
+  return create_node_object(nodep->parent, domnode->doc());
 }
 
 static Variant domattr_schematypeinfo_read(CObjRef obj) {
@@ -2577,7 +2577,7 @@ bool c_DOMCharacterData::t_deletedata(int64 offset, int64 count) {
   int length = xmlUTF8Strlen(cur);
   if (offset < 0 || count < 0 || offset > length) {
     xmlFree(cur);
-    php_dom_throw_error(INDEX_SIZE_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(INDEX_SIZE_ERR, doc()->m_stricterror);
     return false;
   }
   if (offset > 0) {
@@ -2608,7 +2608,7 @@ bool c_DOMCharacterData::t_insertdata(int64 offset, CStrRef data) {
   int length = xmlUTF8Strlen(cur);
   if (offset < 0 || offset > length) {
     xmlFree(cur);
-    php_dom_throw_error(INDEX_SIZE_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(INDEX_SIZE_ERR, doc()->m_stricterror);
     return false;
   }
   first = xmlUTF8Strndup(cur, offset);
@@ -2634,7 +2634,7 @@ bool c_DOMCharacterData::t_replacedata(int64 offset, int64 count,
   int length = xmlUTF8Strlen(cur);
   if (offset < 0 || count < 0 || offset > length) {
     xmlFree(cur);
-    php_dom_throw_error(INDEX_SIZE_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(INDEX_SIZE_ERR, doc()->m_stricterror);
     return false;
   }
   if (offset > 0) {
@@ -2670,7 +2670,7 @@ String c_DOMCharacterData::t_substringdata(int64 offset, int64 count) {
   int length = xmlUTF8Strlen(cur);
   if (offset < 0 || count < 0 || offset > length) {
     xmlFree(cur);
-    php_dom_throw_error(INDEX_SIZE_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(INDEX_SIZE_ERR, doc()->m_stricterror);
     return false;
   }
   if ((offset + count) > length) {
@@ -2811,9 +2811,9 @@ Variant c_DOMText::t_splittext(int64 offset) {
     nnode->type = XML_TEXT_NODE;
   }
   c_DOMText *ret = NEW(c_DOMText)();
-  ret->m_doc = m_doc;
+  ret->m_doc = doc();
   ret->m_node = nnode;
-  appendOrphan(m_doc->m_orphans, nnode);
+  appendOrphan(doc()->m_orphans, nnode);
   return ret;
 }
 
@@ -3078,7 +3078,7 @@ Variant c_DOMDocument::t_createattribute(CStrRef name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::createattribute);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   if (xmlValidateName((xmlChar*)name.data(), 0) != 0) {
-    php_dom_throw_error(INVALID_CHARACTER_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(INVALID_CHARACTER_ERR, doc()->m_stricterror);
     return false;
   }
   xmlAttrPtr node = xmlNewDocProp(docp, (xmlChar*)name.data(), NULL);
@@ -3133,7 +3133,7 @@ Variant c_DOMDocument::t_createattributens(CStrRef namespaceuri,
     if (nodep != NULL) {
       xmlFreeProp((xmlAttrPtr) nodep);
     }
-    php_dom_throw_error((dom_exception_code)errorcode, m_doc->m_stricterror);
+    php_dom_throw_error((dom_exception_code)errorcode, doc()->m_stricterror);
     return false;
   }
   if (nodep == NULL) {
@@ -3193,7 +3193,7 @@ Variant c_DOMDocument::t_createelement(CStrRef name,
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::createelement);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   if (xmlValidateName((xmlChar*)name.data(), 0) != 0) {
-    php_dom_throw_error(INVALID_CHARACTER_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(INVALID_CHARACTER_ERR, doc()->m_stricterror);
     return false;
   }
   xmlNode *node = xmlNewDocNode(docp, NULL, (xmlChar*)name.data(),
@@ -3244,7 +3244,7 @@ Variant c_DOMDocument::t_createelementns(CStrRef namespaceuri,
     if (nodep != NULL) {
       xmlFreeNode(nodep);
     }
-    php_dom_throw_error((dom_exception_code)errorcode, m_doc->m_stricterror);
+    php_dom_throw_error((dom_exception_code)errorcode, doc()->m_stricterror);
     return false;
   }
   if (nodep == NULL) {
@@ -3262,7 +3262,7 @@ Variant c_DOMDocument::t_createentityreference(CStrRef name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::createentityreference);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   if (xmlValidateName((xmlChar*)name.data(), 0) != 0) {
-    php_dom_throw_error(INVALID_CHARACTER_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(INVALID_CHARACTER_ERR, doc()->m_stricterror);
     return false;
   }
   xmlNode *node = xmlNewReference(docp, (xmlChar*)name.data());
@@ -3282,7 +3282,7 @@ Variant c_DOMDocument::t_createprocessinginstruction(CStrRef target,
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::createprocessinginstruction);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   if (xmlValidateName((xmlChar*)target.data(), 0) != 0) {
-    php_dom_throw_error(INVALID_CHARACTER_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(INVALID_CHARACTER_ERR, doc()->m_stricterror);
     return false;
   }
   xmlNode *node = xmlNewPI((xmlChar*)target.data(),
@@ -3374,7 +3374,7 @@ Variant c_DOMDocument::t_importnode(CObjRef importednode,
     }
     owner = true;
   }
-  return create_node_object(retnodep, m_doc, owner);
+  return create_node_object(retnodep, doc(), owner);
 }
 
 Variant c_DOMDocument::t_load(CStrRef filename, int64 options /* = 0 */) {
@@ -3522,7 +3522,7 @@ Variant c_DOMDocument::t_savexml(CObjRef node /* = null_object */,
     xmlNodePtr node = domnode->m_node;
     /* Dump contents of Node */
     if (node->doc != docp) {
-      php_dom_throw_error(WRONG_DOCUMENT_ERR, m_doc->m_stricterror);
+      php_dom_throw_error(WRONG_DOCUMENT_ERR, doc()->m_stricterror);
       return false;
     }
     buf = xmlBufferCreate();
@@ -3638,7 +3638,7 @@ bool c_DOMDocumentFragment::t_appendxml(CStrRef data) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocumentFragment, DOMDocumentFragment::appendxml);
   xmlNodePtr nodep = m_node;
   if (dom_node_is_read_only(nodep)) {
-    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
     return false;
   }
   if (!data.empty()) {
@@ -3674,7 +3674,7 @@ static Variant dom_documenttype_name_read(CObjRef obj) {
 static Variant dom_documenttype_entities_read(CObjRef obj) {
   CHECK_DOCTYPE(doctypep);
   c_DOMNamedNodeMap *ret = NEW(c_DOMNamedNodeMap)();
-  ret->m_doc = domdoctype->m_doc;
+  ret->m_doc = domdoctype->doc();
   ret->m_baseobj = obj;
   ret->m_nodetype = XML_ENTITY_NODE;
   ret->m_ht = (xmlHashTable *) doctypep->entities;
@@ -3684,7 +3684,7 @@ static Variant dom_documenttype_entities_read(CObjRef obj) {
 static Variant dom_documenttype_notations_read(CObjRef obj) {
   CHECK_DOCTYPE(doctypep);
   c_DOMNamedNodeMap *ret = NEW(c_DOMNamedNodeMap)();
-  ret->m_doc = domdoctype->m_doc;
+  ret->m_doc = domdoctype->doc();
   ret->m_baseobj = obj;
   ret->m_nodetype = XML_NOTATION_NODE;
   ret->m_ht = (xmlHashTable *) doctypep->notations;
@@ -3935,10 +3935,10 @@ Variant c_DOMElement::t_getattributenode(CStrRef name) {
     owner = true;
   }
   c_DOMNode *ret = NEW(c_DOMAttr)();
-  ret->m_doc = m_doc;
+  ret->m_doc = doc();
   ret->m_node = (xmlNodePtr)attrp;
   if (owner) {
-    appendOrphan(m_doc->m_orphans, (xmlNodePtr)attrp);
+    appendOrphan(doc()->m_orphans, (xmlNodePtr)attrp);
   }
   return ret;
 }
@@ -3954,7 +3954,7 @@ Object c_DOMElement::t_getattributenodens(CStrRef namespaceuri,
     return null_object;
   }
   c_DOMNode *ret = NEW(c_DOMAttr)();
-  ret->m_doc = m_doc;
+  ret->m_doc = doc();
   ret->m_node = (xmlNodePtr)attrp;
   return ret;
 }
@@ -3986,7 +3986,7 @@ String c_DOMElement::t_getattributens(CStrRef namespaceuri,
 Object c_DOMElement::t_getelementsbytagname(CStrRef name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::getelementsbytagname);
   c_DOMNodeList *ret = NEW(c_DOMNodeList)();
-  ret->m_doc = m_doc;
+  ret->m_doc = doc();
   ret->m_baseobj = this;
   ret->m_nodetype = 0;
   ret->m_local = name;
@@ -3997,7 +3997,7 @@ Object c_DOMElement::t_getelementsbytagnamens(CStrRef namespaceuri,
                                               CStrRef localname) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::getelementsbytagnamens);
   c_DOMNodeList *ret = NEW(c_DOMNodeList)();
-  ret->m_doc = m_doc;
+  ret->m_doc = doc();
   ret->m_baseobj = this;
   ret->m_nodetype = 0;
   ret->m_local = localname;
@@ -4037,7 +4037,7 @@ bool c_DOMElement::t_removeattribute(CStrRef name) {
   xmlNodePtr nodep = m_node;
   xmlNodePtr attrp;
   if (dom_node_is_read_only(nodep)) {
-    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
     return false;
   }
   attrp = dom_get_dom1_attribute(nodep, (xmlChar*)name.data());
@@ -4064,18 +4064,18 @@ Variant c_DOMElement::t_removeattributenode(CObjRef oldattr) {
   c_DOMAttr *attr = oldattr.getTyped<c_DOMAttr>();
   xmlAttrPtr attrp = (xmlAttrPtr)attr->m_node;
   if (dom_node_is_read_only(nodep)) {
-    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
     return false;
   }
   if (attrp->type != XML_ATTRIBUTE_NODE || attrp->parent != nodep) {
-    php_dom_throw_error(NOT_FOUND_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NOT_FOUND_ERR, doc()->m_stricterror);
     return false;
   }
   xmlUnlinkNode((xmlNodePtr)attrp);
   c_DOMAttr *ret = NEW(c_DOMAttr)();
-  ret->m_doc = m_doc;
+  ret->m_doc = doc();
   ret->m_node = (xmlNodePtr)attrp;
-  appendOrphan(m_doc->m_orphans, (xmlNodePtr)attrp);
+  appendOrphan(doc()->m_orphans, (xmlNodePtr)attrp);
   return ret;
 }
 
@@ -4086,7 +4086,7 @@ Variant c_DOMElement::t_removeattributens(CStrRef namespaceuri,
   xmlAttr *attrp;
   xmlNsPtr nsptr;
   if (dom_node_is_read_only(nodep)) {
-    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
     return null;
   }
   attrp = xmlHasNsProp(nodep, (xmlChar*)localname.data(),
@@ -4129,7 +4129,7 @@ Variant c_DOMElement::t_setattribute(CStrRef name, CStrRef value) {
     return false;
   }
   if (dom_node_is_read_only(nodep)) {
-    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
     return false;
   }
   attr = dom_get_dom1_attribute(nodep, (xmlChar*)name.data());
@@ -4157,7 +4157,7 @@ Variant c_DOMElement::t_setattribute(CStrRef name, CStrRef value) {
     return false;
   }
   c_DOMAttr *ret = NEW(c_DOMAttr)();
-  ret->m_doc = m_doc;
+  ret->m_doc = doc();
   ret->m_node = (xmlNodePtr)attr;
   return ret;
 }
@@ -4169,7 +4169,7 @@ Variant c_DOMElement::t_setattributenode(CObjRef newattr) {
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->m_node;
   xmlAttr *existattrp = NULL;
   if (dom_node_is_read_only(nodep)) {
-    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
     return false;
   }
   if (attrp->type != XML_ATTRIBUTE_NODE) {
@@ -4177,7 +4177,7 @@ Variant c_DOMElement::t_setattributenode(CObjRef newattr) {
     return false;
   }
   if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
-    php_dom_throw_error(WRONG_DOCUMENT_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(WRONG_DOCUMENT_ERR, doc()->m_stricterror);
     return false;
   }
   existattrp = xmlHasProp(nodep, attrp->name);
@@ -4191,7 +4191,7 @@ Variant c_DOMElement::t_setattributenode(CObjRef newattr) {
   /* Returns old property if removed otherwise NULL */
   if (existattrp != NULL) {
     c_DOMAttr *ret = NEW(c_DOMAttr)();
-    ret->m_doc = m_doc;
+    ret->m_doc = doc();
     ret->m_node = (xmlNodePtr)existattrp;
     return ret;
   }
@@ -4206,7 +4206,7 @@ Variant c_DOMElement::t_setattributenodens(CObjRef newattr) {
   c_DOMAttr *domattr = newattr.getTyped<c_DOMAttr>();
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->m_node;
   if (dom_node_is_read_only(nodep)) {
-    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
     return false;
   }
   if (attrp->type != XML_ATTRIBUTE_NODE) {
@@ -4214,7 +4214,7 @@ Variant c_DOMElement::t_setattributenodens(CObjRef newattr) {
     return false;
   }
   if (!(attrp->doc == NULL || attrp->doc == nodep->doc)) {
-    php_dom_throw_error(WRONG_DOCUMENT_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(WRONG_DOCUMENT_ERR, doc()->m_stricterror);
     return false;
   }
   nsp = attrp->ns;
@@ -4233,7 +4233,7 @@ Variant c_DOMElement::t_setattributenodens(CObjRef newattr) {
   /* Returns old property if removed otherwise NULL */
   if (existattrp != NULL) {
     c_DOMAttr *ret = NEW(c_DOMAttr)();
-    ret->m_doc = m_doc;
+    ret->m_doc = doc();
     ret->m_node = (xmlNodePtr)existattrp;
     return ret;
   }
@@ -4253,7 +4253,7 @@ Variant c_DOMElement::t_setattributens(CStrRef namespaceuri, CStrRef name,
     raise_warning("Attribute Name is required");
     return false;
   }
-  int stricterror = m_doc->m_stricterror;
+  int stricterror = doc()->m_stricterror;
   if (dom_node_is_read_only(elemp)) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
     return null;
@@ -4345,12 +4345,12 @@ Variant c_DOMElement::t_setidattribute(CStrRef name, bool isid) {
   xmlNodePtr nodep = m_node;
   xmlAttrPtr attrp;
   if (dom_node_is_read_only(nodep)) {
-    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
     return null;
   }
   attrp = xmlHasNsProp(nodep, (xmlChar*)name.data(), NULL);
   if (attrp == NULL || attrp->type == XML_ATTRIBUTE_DECL) {
-    php_dom_throw_error(NOT_FOUND_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NOT_FOUND_ERR, doc()->m_stricterror);
   } else {
     php_set_attribute_id(attrp, isid);
   }
@@ -4363,11 +4363,11 @@ Variant c_DOMElement::t_setidattributenode(CObjRef idattr, bool isid) {
   c_DOMAttr *domattr = idattr.getTyped<c_DOMAttr>();
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->m_node;
   if (dom_node_is_read_only(nodep)) {
-    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
     return null;
   }
   if (attrp->parent != nodep) {
-    php_dom_throw_error(NOT_FOUND_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NOT_FOUND_ERR, doc()->m_stricterror);
   } else {
     php_set_attribute_id(attrp, isid);
   }
@@ -4380,13 +4380,13 @@ Variant c_DOMElement::t_setidattributens(CStrRef namespaceuri,
   xmlNodePtr elemp = m_node;
   xmlAttrPtr attrp;
   if (dom_node_is_read_only(elemp)) {
-    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, doc()->m_stricterror);
     return null;
   }
   attrp = xmlHasNsProp(elemp, (xmlChar*)localname.data(),
                        (xmlChar*)namespaceuri.data());
   if (attrp == NULL || attrp->type == XML_ATTRIBUTE_DECL) {
-    php_dom_throw_error(NOT_FOUND_ERR, m_doc->m_stricterror);
+    php_dom_throw_error(NOT_FOUND_ERR, doc()->m_stricterror);
   } else {
     php_set_attribute_id(attrp, isid);
   }
@@ -5431,10 +5431,7 @@ void c_DOMNodeIterator::reset_iterator(dom_iterable *objmap) {
   }
  err:
   if (curnode) {
-    p_DOMDocument doc = m_objmap->m_baseobj.getTyped<c_DOMNode>()->m_doc;
-    if (doc.get() == NULL) {
-      doc = m_objmap->m_baseobj.getTyped<c_DOMDocument>();
-    }
+    p_DOMDocument doc = m_objmap->m_baseobj.getTyped<c_DOMNode>()->doc();
     m_curobj = create_node_object(curnode, doc, owner);
   } else {
     m_curobj.reset();
@@ -5510,10 +5507,7 @@ Variant c_DOMNodeIterator::t_next() {
   }
 err:
   if (curnode) {
-    p_DOMDocument doc = m_objmap->m_baseobj.getTyped<c_DOMNode>()->m_doc;
-    if (doc.get() == NULL) {
-      doc = m_objmap->m_baseobj.getTyped<c_DOMDocument>();
-    }
+    p_DOMDocument doc = m_objmap->m_baseobj.getTyped<c_DOMNode>()->doc();
     m_curobj = create_node_object(curnode, doc, owner);
   } else {
     m_curobj.reset();

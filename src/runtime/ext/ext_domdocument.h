@@ -102,9 +102,7 @@ Variant f_dom_xpath_register_php_functions(CVarRef obj, CVarRef funcs = null);
 // class DOMNode
 
 FORWARD_DECLARE_CLASS(DOMNode);
-class c_DOMNode :
-      public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>,
-      public Sweepable {
+class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>, public Sweepable {
  public:
   BEGIN_CLASS_MAP(DOMNode)
   END_CLASS_MAP(DOMNode)
@@ -168,6 +166,7 @@ class c_DOMNode :
 
 public:
   virtual ObjectData *clone();
+  virtual p_DOMDocument doc() { return m_doc;}
   p_DOMDocument m_doc;
   xmlNodePtr m_node;
 };
@@ -449,6 +448,7 @@ class c_DOMDocument : public c_DOMNode {
   public: virtual void destruct();
 
 public:
+  virtual p_DOMDocument doc() { return this;}
   bool m_formatoutput;
   bool m_validateonparse;
   bool m_resolveexternals;
@@ -788,9 +788,7 @@ public:
 // class DOMNamedNodeMap
 
 FORWARD_DECLARE_CLASS(DOMNamedNodeMap);
-class c_DOMNamedNodeMap :
-      public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>,
-      public dom_iterable {
+class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>, public dom_iterable {
  public:
   BEGIN_CLASS_MAP(DOMNamedNodeMap)
   PARENT_CLASS(IteratorAggregate)
@@ -833,9 +831,7 @@ class c_DOMNamedNodeMap :
 // class DOMNodeList
 
 FORWARD_DECLARE_CLASS(DOMNodeList);
-class c_DOMNodeList :
-      public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>,
-      public dom_iterable {
+class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>, public dom_iterable {
  public:
   BEGIN_CLASS_MAP(DOMNodeList)
   PARENT_CLASS(IteratorAggregate)
@@ -941,9 +937,7 @@ class c_DOMImplementation : public ExtObjectData {
 // class DOMXPath
 
 FORWARD_DECLARE_CLASS(DOMXPath);
-class c_DOMXPath :
-      public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>,
-      public Sweepable {
+class c_DOMXPath : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>, public Sweepable {
  public:
   BEGIN_CLASS_MAP(DOMXPath)
   END_CLASS_MAP(DOMXPath)

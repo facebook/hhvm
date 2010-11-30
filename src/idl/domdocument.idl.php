@@ -1602,6 +1602,7 @@ BeginClass(
 
 public:
   virtual ObjectData *clone();
+  virtual p_DOMDocument doc() { return m_doc;}
   p_DOMDocument m_doc;
   xmlNodePtr m_node;
 EOT
@@ -2433,6 +2434,7 @@ BeginClass(
     'footer' => <<<EOT
 
 public:
+  virtual p_DOMDocument doc() { return this;}
   bool m_formatoutput;
   bool m_validateonparse;
   bool m_resolveexternals;

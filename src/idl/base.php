@@ -656,7 +656,6 @@ EOT
   } else {
     fprintf($f, " : public ExtObjectData");
     if ($flags) {
-      echo "Using Flags!\n";
       fprintf($f, "Flags<%s>", implode('|', $flags));
       $flags = false;
     }

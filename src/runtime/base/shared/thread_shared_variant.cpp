@@ -124,7 +124,6 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
     }
   default:
     {
-      ASSERT(source.isObject());
       m_type = KindOfObject;
       setShouldCache();
       if (unserializeObj) {

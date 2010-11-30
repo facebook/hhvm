@@ -12969,6 +12969,23 @@ bool TestCodeRun::TestDOMDocument() {
        "  }"
        "}");
 
+  MVCR("<?php\n"
+       "$dom = new DOMDocument();\n"
+       "$dom->loadXML('<a><b><c /></b></a>');\n"
+       "$remove = array();\n"
+       "foreach ($dom->getElementsByTagName('b') as $data) {\n"
+       "  foreach ($data->childNodes as $element) {\n"
+       "    if ($element instanceof DOMElement) {\n"
+       "      $remove[] = $element;\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "foreach ($remove as $r) {\n"
+       "  $r->parentNode->removeChild($r);\n"
+       "}\n"
+       "echo $dom->saveXML();\n"
+      );
+
   return true;
 }
 

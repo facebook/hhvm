@@ -5432,6 +5432,9 @@ void c_DOMNodeIterator::reset_iterator(dom_iterable *objmap) {
  err:
   if (curnode) {
     p_DOMDocument doc = m_objmap->m_baseobj.getTyped<c_DOMNode>()->m_doc;
+    if (doc.get() == NULL) {
+      doc = m_objmap->m_baseobj.getTyped<c_DOMDocument>();
+    }
     m_curobj = create_node_object(curnode, doc, owner);
   } else {
     m_curobj.reset();
@@ -5508,6 +5511,9 @@ Variant c_DOMNodeIterator::t_next() {
 err:
   if (curnode) {
     p_DOMDocument doc = m_objmap->m_baseobj.getTyped<c_DOMNode>()->m_doc;
+    if (doc.get() == NULL) {
+      doc = m_objmap->m_baseobj.getTyped<c_DOMDocument>();
+    }
     m_curobj = create_node_object(curnode, doc, owner);
   } else {
     m_curobj.reset();

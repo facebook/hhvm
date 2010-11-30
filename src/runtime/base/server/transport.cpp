@@ -597,7 +597,9 @@ void Transport::prepareHeaders(bool compressed, const void *data, int size) {
 
   if (m_responseHeaders.find("Content-Type") == m_responseHeaders.end() &&
       m_responseCode != 304) {
-    addHeaderImpl("Content-Type", "text/html; charset=utf-8");
+    string contentType = "text/html; charset="
+                         + RuntimeOption::DefaultCharsetName;
+    addHeaderImpl("Content-Type", contentType.c_str());
   }
 
   // shutting down servers, so need to terminate all Keep-Alive connections

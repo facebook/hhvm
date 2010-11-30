@@ -276,7 +276,8 @@ NOTE: the FileCache should be set with absolute path
 
 - ExpiresActive, ExpiresDefault, DefaultCharsetName
 
-These control static content's response headers.
+These control static content's response headers. DefaultCharsetName is also
+used for PHP responses in case no other charset has been set explicitly.
 
     # file access control
     SafeFileAccess = false

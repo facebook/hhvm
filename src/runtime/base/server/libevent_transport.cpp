@@ -19,6 +19,7 @@
 #include <runtime/base/server/server.h>
 #include <runtime/base/runtime_option.h>
 #include <util/util.h>
+#include <util/logger.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -19,6 +19,7 @@
 #include "db_query.h"
 #include "stack_trace.h"
 #include "exception.h"
+#include "logger.h"
 
 using namespace std;
 

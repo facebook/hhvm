@@ -20,7 +20,6 @@
 #include "mutex.h"
 #include "synchronizable.h"
 #include "synchronizable_multi.h"
-#include "logger.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

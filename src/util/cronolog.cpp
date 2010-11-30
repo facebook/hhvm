@@ -71,7 +71,7 @@ static FILE *new_log_file(const char *fileTemplate, const char *linkname,
 
   if (log_fd < 0) {
     perror(pfilename);
-    exit(2);
+    return NULL;
   }
 
   if (linkname) {
@@ -90,20 +90,33 @@ FILE *Cronolog::getOutputFile() {
   if (m_template.empty()) return m_file;
 
   time_t time_now = time(NULL) + m_timeOffset;
-  /* If the current period has finished and there is a log file
-   * open, close the log file
-   */
-  if ((time_now >= m_nextPeriod) && (m_file)) {
-    fclose(m_file);
-    m_file = NULL;
-  }
+  /* If the current period has not finished and there is a log file, use it */
+  if ((time_now < m_nextPeriod) && (m_file)) return m_file;
 
-  /* If there is no log file open then open a new one. */
-  if (m_file == NULL) {
-    m_file = new_log_file(m_template.c_str(), m_linkName.c_str(), S_IFLNK,
-                          m_prevLinkName, m_periodicity, m_periodMultiple,
-                          m_periodDelay, m_fileName, sizeof(m_fileName),
-                          time_now, &m_nextPeriod);
+  /* We need to open a new file under a mutex. */
+  {
+    Lock lock(m_mutex);
+    if ((time_now >= m_nextPeriod)) {
+      /* the current period has finished */
+
+      /* We cannot close m_file because there may be other threads still
+       * writing to it. We save m_file in m_prevFile and leave it open for
+       * an entire period. We simply assume that by the end of the delay
+       * no threads should be still referencing m_prevFile and we can safely
+       * close it.
+       */
+      if (m_prevFile) fclose(m_prevFile);
+      m_prevFile = m_file;
+      m_file = NULL;
+    }
+
+    /* If there is no log file open then open a new one. */
+    if (m_file == NULL) {
+      m_file = new_log_file(m_template.c_str(), m_linkName.c_str(), S_IFLNK,
+                            m_prevLinkName, m_periodicity, m_periodMultiple,
+                            m_periodDelay, m_fileName, sizeof(m_fileName),
+                            time_now, &m_nextPeriod);
+    }
   }
   return m_file;
 }

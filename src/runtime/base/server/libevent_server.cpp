@@ -20,6 +20,7 @@
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/server/http_protocol.h>
 #include <util/compatibility.h>
+#include <util/logger.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // static handler

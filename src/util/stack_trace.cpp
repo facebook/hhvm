@@ -18,6 +18,7 @@
 #include "process.h"
 #include "base.h"
 #include "lock.h"
+#include "logger.h"
 #include "util.h"
 
 #include <execinfo.h>

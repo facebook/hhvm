@@ -19,6 +19,7 @@
 
 #include <string>
 #include <util/cronoutils.h>
+#include <util/lock.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -35,10 +36,12 @@ public:
     m_prevLinkName(NULL),
     m_timeOffset(0),
     m_nextPeriod(0),
+    m_prevFile(NULL),
     m_file(NULL),
     m_bytesWritten(0),
     m_prevBytesWritten(0) {}
   ~Cronolog() {
+    if (m_prevFile) fclose(m_prevFile);
     if (m_file) fclose(m_file);
   }
   void setPeriodicity();
@@ -56,9 +59,11 @@ public:
   char *m_prevLinkName;
   time_t m_timeOffset;
   time_t m_nextPeriod;
+  FILE *m_prevFile;
   FILE *m_file;
   int m_bytesWritten;
   int m_prevBytesWritten;
+  Mutex m_mutex;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

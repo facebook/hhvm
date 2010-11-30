@@ -17,6 +17,7 @@
 #include "process.h"
 #include "base.h"
 #include "util.h"
+#include "logger.h"
 #include "async_func.h"
 #include "text_color.h"
 

@@ -17,6 +17,7 @@
 
 #include <runtime/ext/ext_imap.h>
 #include <runtime/base/zend/zend_string.h>
+#include <util/logger.h>
 #include <system/gen/php/classes/stdclass.h>
 #include <c-client.h> /* includes mail.h and rfc822.h */
 

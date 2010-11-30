@@ -19,6 +19,7 @@
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/builtin_functions.h>
+#include <util/logger.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

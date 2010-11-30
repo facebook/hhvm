@@ -17,6 +17,7 @@
 #include <runtime/eval/debugger/debugger_command.h>
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/eval/debugger/cmd/all.h>
+#include <util/logger.h>
 
 #define POLLING_SECONDS 1
 

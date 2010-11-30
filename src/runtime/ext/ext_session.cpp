@@ -28,6 +28,7 @@
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/array/array_iterator.h>
 #include <util/lock.h>
+#include <util/logger.h>
 #include <util/compatibility.h>
 #include <sys/types.h>
 #include <sys/stat.h>

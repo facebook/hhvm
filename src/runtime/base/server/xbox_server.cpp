@@ -22,6 +22,7 @@
 #include <runtime/ext/ext_json.h>
 #include <util/job_queue.h>
 #include <util/lock.h>
+#include <util/logger.h>
 
 using namespace std;
 

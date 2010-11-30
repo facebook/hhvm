@@ -25,6 +25,7 @@
 #include <runtime/base/frame_injection.h>
 #include <runtime/eval/eval.h>
 #include <util/process.h>
+#include <util/logger.h>
 
 using namespace std;
 using namespace boost;

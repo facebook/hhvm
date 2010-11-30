@@ -23,6 +23,7 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/memory/leak_detectable.h>
 #include <runtime/base/server/server_stats.h>
+#include <util/logger.h>
 #include <util/lfu_table.h>
 #include <tbb/concurrent_hash_map.h>
 #include <queue>

@@ -19,6 +19,7 @@
 #include <runtime/ext/ext_function.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/zend/zend_collator.h>
+#include <util/logger.h>
 
 #define SORT_REGULAR            0
 #define SORT_NUMERIC            1

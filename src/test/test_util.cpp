@@ -15,9 +15,9 @@
 */
 
 #include <test/test_util.h>
+#include <util/logger.h>
 #include <util/lfu_table.h>
 #include <runtime/base/complex_types.h>
-#include <util/logger.h>
 #include <runtime/base/shared/shared_string.h>
 #include <runtime/base/zend/zend_string.h>
 

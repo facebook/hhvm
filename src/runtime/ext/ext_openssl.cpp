@@ -17,6 +17,7 @@
 
 #include <runtime/ext/ext_openssl.h>
 #include <runtime/base/file/ssl_socket.h>
+#include <util/logger.h>
 
 #include <openssl/evp.h>
 #include <openssl/x509.h>

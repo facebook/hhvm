@@ -16,6 +16,7 @@
 
 #include <runtime/eval/debugger/cmd/cmd_extended.h>
 #include <runtime/eval/debugger/cmd/all.h>
+#include <util/logger.h>
 
 using namespace std;
 

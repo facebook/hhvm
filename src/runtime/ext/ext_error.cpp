@@ -23,6 +23,7 @@
 #include <runtime/base/debug/backtrace.h>
 #include <runtime/base/frame_injection.h>
 #include <system/gen/php/globals/constants.h>
+#include <util/logger.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

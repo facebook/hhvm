@@ -17,6 +17,7 @@
 #include "light_process.h"
 #include "process.h"
 #include "util.h"
+#include "logger.h"
 
 #include <afdt.h>
 #include <string>

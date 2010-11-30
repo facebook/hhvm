@@ -37,6 +37,7 @@ Variant f_call_user_func_array_rpc(CStrRef host, int port, CStrRef auth, int tim
 Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth, int timeout, CVarRef function, CArrRef _argv = null_array);
 Variant f_forward_static_call_array(CVarRef function, CArrRef params);
 Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv = null_array);
+String f_get_called_class();
 String f_create_function(CStrRef args, CStrRef code);
 
 ///////////////////////////////////////////////////////////////////////////////

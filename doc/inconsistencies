@@ -178,11 +178,19 @@ Also, in PHP, $GLOBALS can be used as a regular variable, for example,
 
 In HipHop, this is not allowed or not working.
 
-5. Dynamic declared constants
+5. Constants
 
-are not supported, e.g.
+(1) Dynamically declared constants
+
+These are not supported, e.g.
 
   define($name, $value);
+
+(2) Case-insensitive constants
+
+These are not supported, e.g.
+
+  define('FOO', 123, true);
 
 6. Misc
 

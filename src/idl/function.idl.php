@@ -7,6 +7,8 @@
  * any changes that are not part of schema. Use "note" field to comment on
  * schema itself, and "note" fields are not used in any code generation but
  * only staying within this file.
+ *
+ * @nolint
  */
 ///////////////////////////////////////////////////////////////////////////////
 // Preamble: C++ code inserted at beginning of ext_{name}.h
@@ -384,6 +386,17 @@ DefineFunction(
         'type'   => Variant,
         'desc'   => "The function or method to be called. This parameter may be an array, with the name of the class, and the method, or a string, with a function name.",
       ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "get_called_class",
+    'desc'   => "Gets the name of the class the static method is called in.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "Returns the class name. Returns FALSE if called from outside a class.",
     ),
   ));
 

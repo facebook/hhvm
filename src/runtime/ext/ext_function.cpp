@@ -231,7 +231,15 @@ Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv /* = nu
     return null;
   }
   FrameInjection::StaticClassNameHelper h(ThreadInfo::s_threadInfo.get(), cls);
-  return f_call_user_func_array(function, _argv);
+  return f_call_user_func_array(function, _argv, true);
+#else
+  throw NotSupportedException(__func__, "ENABLE_LATE_STATIC_BINDING is off");
+#endif
+}
+
+String f_get_called_class() {
+#ifdef ENABLE_LATE_STATIC_BINDING
+  return FrameInjection::GetStaticClassName(ThreadInfo::s_threadInfo.get());
 #else
   throw NotSupportedException(__func__, "ENABLE_LATE_STATIC_BINDING is off");
 #endif

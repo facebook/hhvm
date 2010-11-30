@@ -74,14 +74,24 @@ String getUndefinedConstant(CStrRef name) {
   return name;
 }
 
-Variant f_call_user_func_array(CVarRef function, CArrRef params) {
+Variant f_call_user_func_array(CVarRef function, CArrRef params,
+                               bool bound /* = false */) {
+#ifndef ENABLE_LATE_STATIC_BINDING
+  bound = true;
+#endif
+
   if (function.isString()) {
     String sfunction = function.toString();
     int c = sfunction.find("::");
     if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {
-      return invoke_static_method(sfunction.substr(0, c),
-                                  sfunction.substr(c + 2), params,
-                                  false);
+      if (bound) {
+        return invoke_static_method(sfunction.substr(0, c),
+                                    sfunction.substr(c + 2), params,
+                                    false);
+      }
+      return invoke_static_method_bind(sfunction.substr(0, c),
+                                       sfunction.substr(c + 2), params,
+                                       false);
     }
     return invoke(sfunction, params, -1, true, false);
   } else if (function.is(KindOfArray)) {
@@ -125,7 +135,10 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
       if (obj.instanceof(sclass)) {
         return obj->o_invoke_ex(sclass, method, params, false);
       }
-      return invoke_static_method(sclass, method, params, false);
+      if (bound) {
+        return invoke_static_method(sclass, method, params, false);
+      }
+      return invoke_static_method_bind(sclass, method, params, false);
     }
   }
   throw_invalid_argument("function: not string or array");
@@ -938,7 +951,7 @@ Variant &get_static_property_lval(const char *s, const char *prop) {
 }
 
 Variant invoke_static_method_bind(CStrRef s, CStrRef method,
-                                  CVarRef params, bool fatal /* = true */) {
+                                  CArrRef params, bool fatal /* = true */) {
   ThreadInfo *info = ThreadInfo::s_threadInfo.get();
 
   String cls = s;

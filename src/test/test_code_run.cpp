@@ -14979,6 +14979,21 @@ bool TestCodeRun::TestVariableClassName() {
 bool TestCodeRun::TestLateStaticBinding() {
   MVCRO(
     "<?php\n"
+    "class B {\n"
+    "  public static $a = 100;\n"
+    "  static function f() {\n"
+    "    var_dump(static::$a);\n"
+    "  }\n"
+    "}\n"
+    "class C extends B {\n"
+    "  public static $a = 1000;\n"
+    "}\n"
+    "call_user_func(array('C', 'f'));\n",
+    "int(1000)\n"
+  );
+
+  MVCRO(
+    "<?php\n"
     "class A {\n"
     "    const NAME = 'A';\n"
     "    public static function test() {\n"

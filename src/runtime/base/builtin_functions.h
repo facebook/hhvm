@@ -339,7 +339,8 @@ inline CVarRef ref(CVarRef v) {
 bool class_exists(CStrRef class_name, bool autoload = true);
 String get_static_class_name(CVarRef objOrClassName);
 
-Variant f_call_user_func_array(CVarRef function, CArrRef params);
+Variant f_call_user_func_array(CVarRef function, CArrRef params,
+                               bool bound = false);
 
 Variant invoke(CStrRef function, CArrRef params, int64 hash = -1,
                bool tryInterp = true, bool fatal = true);

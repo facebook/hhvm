@@ -3046,7 +3046,7 @@ c_DOMDocument::~c_DOMDocument() {
 void c_DOMDocument::t___construct(CStrRef version /* = null_string */,
                                   CStrRef encoding /* = null_string */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::__construct);
-  xmlDoc *docp = xmlNewDoc((xmlChar*)version.data());
+  xmlDoc *docp = xmlNewDoc(version.isNull() ? NULL : (xmlChar*)version.data());
   if (!docp) {
     php_dom_throw_error(INVALID_STATE_ERR, 1);
     return;

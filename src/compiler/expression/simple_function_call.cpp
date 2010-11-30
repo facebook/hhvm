@@ -480,6 +480,9 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
           if (!(*m_params)[i]->getScalarValue(v)) return ExpressionPtr();
           arr.set(i, v);
         }
+        if (m_arrayParams) {
+          arr = arr[0];
+        }
       }
       try {
         g_context->setThrowAllErrors(true);
@@ -840,7 +843,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
   } else {
     ClassScopePtr cls = resolveClass(getScope());
-    if (cls && cls->isVolatile() && !isPresent()) {
+    if (cls && !isPresent()) {
       getScope()->getVariables()
         ->setAttribute(VariableTable::NeedGlobalPointer);
     }
@@ -1003,50 +1006,82 @@ void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                       int state) {
-  if (m_classScope && m_classScope->isRedeclaring() &&
-      (!m_funcScope || !m_funcScope->isStatic())) {
-    /*
-      In this case, even though its redeclaring, we were able
-      to figure out the actual ClassScope for cls. But for a non-static
-      call in a method of class D derived from cls, we cant
-      use the "cls$$n::func()" syntax, because, cls$$n wont actually
-      be a base class of D (D will derive from DynamicObjectData).
+  if (m_valid && m_classScope && !m_funcScope->isStatic()) {
+    if (m_classScope->isRedeclaring()) {
+      /*
+        In this case, even though its redeclaring, we were able
+        to figure out the actual ClassScope for cls. But for a non-static
+        call in a method of class D derived from cls, we cant
+        use the "cls$$n::func()" syntax, because, cls$$n wont actually
+        be a base class of D (D will derive from DynamicObjectData).
 
-      We should improve class derivation so that if D knows which cls
-      its derived from, it should use it.
+        We should improve class derivation so that if D knows which cls
+        its derived from, it should use it.
 
-      And we should improve code gen here, so that we can use
-      p_cls$$n(parent)->cls$$n::func(), rather than resorting to
-      fully dynamic dispatch.
-    */
-    m_valid = false;
-    setRedeclared();
+        And we should improve code gen here, so that we can use
+        p_cls$$n(parent)->cls$$n::func(), rather than resorting to
+        fully dynamic dispatch.
+      */
+      m_valid = false;
+      setRedeclared();
+    } else {
+      ClassScopePtr cur = getOriginalScope();
+      if (!cur || getFunctionScope()->isStatic() ||
+          (cur != m_classScope &&
+           !cur->derivesFrom(ar, m_className, true, false))) {
+        m_valid = false;
+      }
+    }
   }
-  if (m_valid &&
-      (!m_arrayParams ||
-       (!m_class && m_className.empty() && m_funcScope->isUserFunction()))) {
-    return FunctionCall::preOutputCPP(cg, ar, state);
+  if (m_valid) {
+    bool ret = false;
+    if (m_arrayParams) {
+      if (m_classScope) {
+        ret = true;
+        if (cg.inExpression()) {
+          m_ciTemp = cg.createNewLocalId(shared_from_this());
+          cg.wrapExpressionBegin();
+          cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp);
+          if (m_funcScope->isStatic()) {
+            cg_printf("mcp%d.rootObj = %s%s::s_class_name;\n",
+                      m_ciTemp,
+                      Option::ClassPrefix, m_classScope->getId(cg).c_str());
+          } else {
+            assert(getOriginalScope() && !getFunctionScope()->isStatic());
+            cg_printf("mcp%d.obj = this;\n", m_ciTemp);
+          }
+        }
+      } else if (!m_funcScope->isUserFunction()) {
+        ret = true;
+        if (cg.inExpression()) {
+          cg.wrapExpressionBegin();
+          cg_printf("extern Variant %s%s(void*,CArrRef);\n",
+                    Option::InvokePrefix, m_funcScope->getId(cg).c_str());
+        }
+      }
+    }
+    if (FunctionCall::preOutputCPP(cg, ar, state)) {
+      ret = true;
+    }
+    return ret;
   }
 
   // Short circuit out if inExpression() returns false
   if (!cg.inExpression()) return true;
-  m_ciTemp = cg.createNewId(shared_from_this());
+  cg.wrapExpressionBegin();
+  m_ciTemp = cg.createNewLocalId(shared_from_this());
   bool needHash = true;
   string escapedName(cg.escapeLabel(m_origName));
   string escapedClass;
-  ClassScopePtr cls;
+  ClassScopePtr cls = m_classScope;
   if (!m_className.empty()) {
-    cls = ar->findClass(m_className);
-    if (!m_safe && cls &&
-        !ar->checkClassPresent(shared_from_this(), m_origClassName) &&
-        cls->isVolatile()) {
-      ClassScope::OutputVolatileCheck(cg, ar, getScope(),
-                                      cls->getOriginalName(), false);
+    if (!m_safe && !isPresent()) {
+      ClassScope::OutputVolatileCheck(
+        cg, ar, getScope(), m_origClassName, false);
       cg_printf(";\n");
     }
     escapedClass = cg.escapeLabel(m_className);
   }
-  cg.wrapExpressionBegin();
   cg_printf("const CallInfo *cit%d = NULL;\n", m_ciTemp);
   if (!m_class && m_className.empty()) {
     cg_printf("void *vt%d = NULL;\n", m_ciTemp);
@@ -1056,10 +1091,10 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   bool safeCheck = false;
   if (m_safe) {
     if (!m_className.empty()) {
-      if ((!cls || cls->isVolatile()) &&
-          !ar->checkClassPresent(shared_from_this(), m_origClassName)) {
+      if (!isPresent()) {
         cg_indentBegin("if (");
-        ClassScope::OutputVolatileCheck(cg, ar, getScope(), m_className, true);
+        ClassScope::OutputVolatileCheck(cg, ar, getScope(),
+                                        m_origClassName, true);
         safeCheck = true;
       }
     } else if (!m_funcScope || m_funcScope->isVolatile()) {
@@ -1116,7 +1151,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           !isSelf() && !isParent() && !isStatic()) {
         // Create a temporary to hold the class name, in case it is not a
         // StaticString.
-        m_clsNameTemp = cg.createNewId(shared_from_this());
+        m_clsNameTemp = cg.createNewLocalId(shared_from_this());
         cg_printf("CStrRef clsName%d(", m_clsNameTemp);
         cg_printString(m_origClassName, ar, shared_from_this());
         cg_printf(");\n");
@@ -1236,16 +1271,15 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
   TypePtr safeCast;
   if (m_safe) {
     if (!m_className.empty()) {
-      if ((!cls || cls->isVolatile()) &&
-          !ar->checkClassPresent(shared_from_this(), m_origClassName)) {
+      if (!isPresent()) {
         if (m_valid) {
           cg_printf("(");
           ClassScope::OutputVolatileCheck(cg, ar, getScope(),
-                                          m_className, true);
+                                          m_origClassName, true);
         }
         volatileCheck = true;
       }
-    }  else if (!m_funcScope || m_funcScope->isVolatile()) {
+    } else if (!m_funcScope || m_funcScope->isVolatile()) {
       if (m_valid) {
         cg_printf("(%s->FVF(%s)",
             cg.getGlobals(ar),
@@ -1283,8 +1317,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       }
     }
   } else if (!m_className.empty()) {
-    if ((!cls || cls->isVolatile()) &&
-        !ar->checkClassPresent(shared_from_this(), m_origClassName)) {
+    if (!isPresent()) {
       volatileCheck = true;
       ClassScope::OutputVolatileCheckBegin(cg, ar, getScope(), m_origClassName);
     }
@@ -1294,12 +1327,9 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
   if (m_valid && !m_arrayParams) {
     if (!m_className.empty()) {
       assert(cls);
-      cg_printf("%s%s::", Option::ClassPrefix, cls->getId(cg).c_str());
-      std::string name = m_name == "__construct" ?
-        cls->findConstructor(ar, true)->getName() :
-        cg.formatLabel(m_name);
-
-      cg_printf("%s%s(", m_funcScope->getPrefix(m_params), name.c_str());
+      cg_printf("%s%s::%s%s(", Option::ClassPrefix, cls->getId(cg).c_str(),
+                m_funcScope->getPrefix(m_params),
+                cg.formatLabel(m_funcScope->getName()).c_str());
     } else {
       int paramCount = m_params ? m_params->getCount() : 0;
       if (m_name == "get_class" && getClassScope() && paramCount == 0) {
@@ -1332,16 +1362,22 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
                                       m_argArrayHash, m_argArrayIndex);
   } else {
     if (!m_class && m_className.empty()) {
-      if (m_valid && m_funcScope->isUserFunction()) {
-        cg_printf("HPHP::%s%s(NULL, ", Option::InvokePrefix,
-            m_funcScope->getId(cg).c_str());
+      if (m_valid) {
+        cg_printf("%s%s(NULL, ", Option::InvokePrefix,
+                  m_funcScope->getId(cg).c_str());
       } else if (canInvokeFewArgs() && !m_arrayParams) {
         cg_printf("(cit%d->getFuncFewArgs())(vt%d, ", m_ciTemp, m_ciTemp);
       } else {
         cg_printf("(cit%d->getFunc())(vt%d, ", m_ciTemp, m_ciTemp);
       }
     } else {
-      if (canInvokeFewArgs() && !m_arrayParams) {
+      if (m_valid) {
+        cg_printf("%s%s::%s%s(mcp%d, ",
+                  Option::ClassPrefix, cls->getId(cg).c_str(),
+                  Option::InvokePrefix,
+                  cg.formatLabel(m_funcScope->getName()).c_str(),
+                  m_ciTemp);
+      } else if (canInvokeFewArgs() && !m_arrayParams) {
         cg_printf("(cit%d->getMethFewArgs())(mcp%d, ", m_ciTemp, m_ciTemp);
       } else {
         cg_printf("(cit%d->getMeth())(mcp%d, ", m_ciTemp, m_ciTemp);

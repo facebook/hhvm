@@ -219,7 +219,7 @@ bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
               "%s%s::s_class_name);\n",
               Option::ClassPrefix, className.c_str());
   } else {
-    m_clsNameTemp = cg.createNewId(shared_from_this());
+    m_clsNameTemp = cg.createNewLocalId(shared_from_this());
     cg_printf("CStrRef clsName%d(", m_clsNameTemp);
     cg_printString(m_origClassName, ar, shared_from_this());
     cg_printf(");\n");

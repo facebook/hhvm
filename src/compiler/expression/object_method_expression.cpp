@@ -344,7 +344,7 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
   }
   // Short circuit out if inExpression() returns false
   if (!cg.inExpression()) return true;
-  m_ciTemp = cg.createNewId(shared_from_this());
+  m_ciTemp = cg.createNewLocalId(shared_from_this());
 
   cg.wrapExpressionBegin();
   bool isThis = m_object->isThis();

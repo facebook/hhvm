@@ -138,14 +138,14 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   m_nameExp->preOutputCPP(cg, ar, state);
 
   cg.wrapExpressionBegin();
-  m_ciTemp = cg.createNewId(shared_from_this());
+  m_ciTemp = cg.createNewLocalId(shared_from_this());
   bool lsb = false;
 
   if (!m_classScope && !m_className.empty() && m_cppTemp.empty() &&
       !isSelf() && ! isParent() && !isStatic()) {
     // Create a temporary to hold the class name, in case it is not a
     // StaticString.
-    m_clsNameTemp = cg.createNewId(shared_from_this());
+    m_clsNameTemp = cg.createNewLocalId(shared_from_this());
     cg_printf("CStrRef clsName%d(", m_clsNameTemp);
     cg_printString(m_origClassName, ar, shared_from_this());
     cg_printf(");\n");

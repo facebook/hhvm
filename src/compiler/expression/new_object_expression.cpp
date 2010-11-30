@@ -225,8 +225,8 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
     if (m_nameExp) m_nameExp->preOutputCPP(cg, ar, state);
     cg.wrapExpressionBegin();
-    m_ciTemp = cg.createNewId(shared_from_this());
-    m_objectTemp = cg.createNewId(shared_from_this());
+    m_ciTemp = cg.createNewLocalId(shared_from_this());
+    m_objectTemp = cg.createNewLocalId(shared_from_this());
     cg_printf("Object obj%d(", m_objectTemp);
     if (isRedeclared()) {
       bool outsideClass = !isPresent();

@@ -716,16 +716,11 @@ void Util::find(std::vector<std::string> &out,
   while (e = readdir(dir)) {
     char *ename = e->d_name;
 
-    // skipping .  .. hidden files and "tags"
-    if (ename[0] == '.' || strcmp(ename, "tags") == 0 || !*ename) {
+    // skipping .  .. hidden files
+    if (ename[0] == '.' || !*ename) {
       continue;
     }
-    char last = ename[strlen(ename) - 1];
-    if (last == '~' || last == '#') {
-      continue; // emacs leftover
-    }
     string fe = fullPath + ename;
-
     struct stat se;
     if (stat(fe.c_str(), &se)) {
       Logger::Error("Util::find(): unable to stat %s", fe.c_str());
@@ -735,6 +730,17 @@ void Util::find(std::vector<std::string> &out,
     if ((se.st_mode & S_IFMT) == S_IFDIR) {
       string subdir = spath + ename;
       find(out, root, subdir.c_str(), php, excludeDirs, excludeFiles);
+      continue;
+    }
+
+    // skipping "tags" files
+    if (strcmp(ename, "tags") == 0) {
+      continue;
+    }
+
+    // skipping emacs leftovers
+    char last = ename[strlen(ename) - 1];
+    if (last == '~' || last == '#') {
       continue;
     }
 

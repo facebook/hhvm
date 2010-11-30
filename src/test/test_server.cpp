@@ -636,5 +636,19 @@ bool TestServer::TestPageletServer() {
         "First! Hello from the pagelet!",
         "string");
 
+  // POST vs GET
+  VSGET("<?php\n"
+        "if (array_key_exists('pagelet', $_GET)) {\n"
+        "  echo $_SERVER['REQUEST_METHOD'];\n"
+        "} else {\n"
+        "  $h = array('Host: ' . $_SERVER['HTTP_HOST']);\n"
+        "  $t = pagelet_server_task_start('/string?pagelet=1', $h, '');\n"
+        "  echo 'First! ';\n"
+        "  $r = pagelet_server_task_result($t, $h, $c);\n"
+        "  echo $r;\n"
+        "}\n",
+        "First! GET",
+        "string");
+
   return true;
 }

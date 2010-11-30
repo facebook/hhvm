@@ -56,7 +56,7 @@ public:
       }
     }
 
-    if (postData.isNull()) {
+    if (postData.empty()) {
       m_get = true;
     } else {
       m_get = false;

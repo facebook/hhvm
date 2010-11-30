@@ -12,6 +12,7 @@ set it up. The new pagelet server functions work like this,
 
   // This starts a pagelet server thread to process the URL just as if
   // it's a new web request with specified headers and post data.
+  // The request method would be GET if the post data is empty.
   $task = <b>pagelet_server_task_start</b>($url, $headers, $post_data);
   // Main thread can now do extra work while pagelet server is processing.
   ...

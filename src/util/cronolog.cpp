@@ -14,8 +14,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <pwd.h>
 #include <util/cronolog.h>
-#include <util/util.h>
 
 using namespace std;
 
@@ -123,11 +123,39 @@ FILE *Cronolog::getOutputFile() {
 }
 
 void Cronolog::changeOwner(const string &username, const string &symlink) {
-  if (username.empty() || symlink.empty()) return;
-  string cmd = string("/bin/chown -h ") + username + " " + symlink;
-  Util::ssystem(cmd.c_str());
-  cmd = string("/bin/chown ") + username + " " + symlink;
-  Util::ssystem(cmd.c_str());
+  if (username.empty() || symlink.empty()) {
+    return;
+  }
+
+  int username_length = sysconf(_SC_GETPW_R_SIZE_MAX);
+  if (username_length == -1) {
+    username_length = 512;
+  }
+
+  struct passwd user_info, *user_infop;
+  std::vector<char> username_buf(username_length);
+
+  if (getpwnam_r(username.c_str(), &user_info, &username_buf[0],
+                 username_length, &user_infop)) {
+    // invalid user
+    return;
+  }
+
+  if (lchown(symlink.c_str(), user_info.pw_uid, -1) < 0) {
+    fprintf(stderr, "Unable to chmod %s\n", symlink.c_str());
+  }
+
+  // using chown() isn't portable if it is a symlink
+  int fd = open(symlink.c_str(), O_RDONLY | O_NONBLOCK | O_NOCTTY);
+  int success = (fd >= 0 ? fchown(fd, user_info.pw_uid, -1) : -1);
+
+  if (fd >= 0) {
+    close(fd);
+  }
+
+  if (success < 0) {
+    fprintf(stderr, "Unable to chmod %s\n", symlink.c_str());
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

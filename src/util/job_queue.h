@@ -23,6 +23,7 @@
 #include "lock.h"
 #include "atomic.h"
 #include "alloc.h"
+#include "exception.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -306,12 +307,12 @@ public:
 
     m_queue.stop();
     bool exceptioned = false;
-    std::exception exception;
+    Exception exception;
     for (unsigned int i = 0; i < m_funcs.size(); i++) {
       try {
         m_funcs[i]->waitForEnd();
-      } catch (std::exception &e) {
-        exceptioned = true; // glitch, we are not handling 1+ exceptions
+      } catch (Exception &e) {
+        exceptioned = true;
         exception = e;
       }
     }

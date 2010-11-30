@@ -19,9 +19,9 @@
 
 #include "base.h"
 #include <pthread.h>
-#include <exception>
 #include "synchronizable.h"
 #include "lock.h"
+#include "exception.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -161,7 +161,7 @@ private:
   PFN_THREAD_FUNC *m_func;
   pthread_t m_threadId;
   bool m_exceptioned;
-  std::exception m_exception; // exception was thrown and thread was terminated
+  Exception m_exception; // exception was thrown and thread was terminated
 
   /**
    * Called by ThreadFunc() to delegate the work.
@@ -169,10 +169,15 @@ private:
   void threadFuncImpl() {
     try {
       m_func(m_obj);
-    } catch (std::exception &e) {
+    } catch (Exception &e) {
       m_exceptioned = true;
       m_exception = e;
-      // fall through, since we don't want a thread to abort abruptly
+    } catch (std::exception &e) {
+      m_exceptioned = true;
+      m_exception.setMessage(e.what());
+    } catch (...) {
+      m_exceptioned = true;
+      m_exception.setMessage("(unknown exception)");
     }
     {
       Lock lock(m_stopMonitor.getMutex());

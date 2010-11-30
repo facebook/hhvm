@@ -45,6 +45,8 @@ public:
    */
   void format(const char *fmt, va_list ap);
 
+  void setMessage(const char *msg) { m_msg = msg ? msg : "";}
+
   virtual ~Exception() throw();
   virtual const char *what() const throw();
 

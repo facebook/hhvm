@@ -17,6 +17,7 @@
 #include <runtime/eval/ast/static_member_expression.h>
 #include <runtime/eval/ast/name.h>
 #include <runtime/eval/runtime/variable_environment.h>
+#include <util/parser/hphp.tab.hpp>
 
 using namespace std;
 
@@ -28,6 +29,24 @@ StaticMemberExpression::StaticMemberExpression(EXPRESSION_ARGS,
     const NamePtr &cls, const NamePtr &variable)
   : LvalExpression(EXPRESSION_PASS), m_class(cls),
     m_variable(variable) {}
+
+void StaticMemberExpression::unset(VariableEnvironment &env) const {
+  String cls = m_class->get(env);
+  String variable(m_variable->get(env));
+  raise_error("Attempt to unset static property %s::$%s", cls.data(),
+              variable.data());
+}
+
+bool StaticMemberExpression::exist(VariableEnvironment &env, int op) const {
+  String cls = m_class->get(env);
+  String variable(m_variable->get(env));
+  Variant *lv = get_static_property_lv(cls.data(), variable.data());
+  if (op == T_ISSET) {
+    return lv != NULL && !lv->isNull();
+  }
+  ASSERT(op == T_EMPTY);
+  return lv == NULL || !lv->toBoolean();
+}
 
 Variant &StaticMemberExpression::lval(VariableEnvironment &env) const {
   String cls = m_class->get(env);

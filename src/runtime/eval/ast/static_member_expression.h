@@ -30,6 +30,8 @@ class StaticMemberExpression : public LvalExpression {
 public:
   StaticMemberExpression(EXPRESSION_ARGS, const NamePtr &cls,
       const NamePtr &variable);
+  virtual void unset(VariableEnvironment &env) const;
+  virtual bool exist(VariableEnvironment &env, int op) const;
   virtual Variant &lval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:

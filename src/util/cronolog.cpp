@@ -123,6 +123,7 @@ FILE *Cronolog::getOutputFile() {
 }
 
 void Cronolog::changeOwner(const string &username, const string &symlink) {
+  if (username.empty() || symlink.empty()) return;
   string cmd = string("/bin/chown -h ") + username + " " + symlink;
   Util::ssystem(cmd.c_str());
   cmd = string("/bin/chown ") + username + " " + symlink;

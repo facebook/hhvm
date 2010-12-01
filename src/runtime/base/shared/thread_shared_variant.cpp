@@ -122,8 +122,15 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
       }
       break;
     }
+  case KindOfNull:
+    {
+      m_type = KindOfNull;
+      m_data.num = 0;
+      break;
+    }
   default:
     {
+      ASSERT(source.isObject());
       m_type = KindOfObject;
       setShouldCache();
       if (unserializeObj) {
@@ -168,6 +175,10 @@ Variant ThreadSharedVariant::toLocal() {
       }
       return NEW(SharedMap)(this);
     }
+  case KindOfNull:
+    {
+      return null_variant;
+    }
   default:
     {
       ASSERT(m_type == KindOfObject);
@@ -210,6 +221,9 @@ void ThreadSharedVariant::dump(std::string &out) {
     } else {
       SharedMap(this).dump(out);
     }
+    break;
+  case KindOfNull:
+    out += "null";
     break;
   default:
     out += "object: ";
@@ -404,11 +418,9 @@ void ThreadSharedVariant::getStats(SharedVariantStats *stats) {
   stats->initStats();
   stats->variantCount = 1;
   switch (m_type) {
+  case KindOfNull:
   case KindOfBoolean:
   case KindOfInt64:
-    stats->dataSize = sizeof(m_data.num);
-    stats->dataTotalSize = sizeof(ThreadSharedVariant);
-    break;
   case KindOfDouble:
     stats->dataSize = sizeof(m_data.dbl);
     stats->dataTotalSize = sizeof(ThreadSharedVariant);

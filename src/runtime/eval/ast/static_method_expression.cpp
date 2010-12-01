@@ -67,11 +67,11 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
         if (name.empty()) break;
       }
     }
-    if (ms) {
+    if (!ms) {
+      return ref(co->o_invoke_ex(cname, name, getParams(env)));
+    } else if (!(ms->getModifiers() & ClassStatement::Static)) {
       return ref(ms->invokeInstanceDirect(co, env, this));
     }
-    return ref(co->o_invoke_ex(cname, name, getParams(env)));
-
   }
   if (ms) {
     return ref(ms->invokeStaticDirect(cname.data(), env, this));

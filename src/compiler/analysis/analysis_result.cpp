@@ -1060,7 +1060,7 @@ int AnalysisResult::registerScalarArray(bool insideScalarArray,
     m_scalarArrayIds.push_back(pairs);
   }
   if (Option::UseNamedScalarArray) {
-    hash = hash_string(text.data(), text.size());
+    hash = hash_string_cs(text.data(), text.size());
     if (hash < 0) hash = -hash;
     vector<string> &strings = m_namedScalarArrays[hash];
     unsigned int i = 0;
@@ -1081,7 +1081,7 @@ int AnalysisResult::checkScalarArray(const string &text, int &index) {
   Lock lock(m_namedScalarArraysMutex);
 
   assert(Option::ScalarArrayOptimization && Option::UseNamedScalarArray);
-  int hash = hash_string(text.data(), text.size());
+  int hash = hash_string_cs(text.data(), text.size());
   if (hash < 0) hash = -hash;
   vector<string> &strings = m_namedScalarArrays[hash];
   unsigned int i = 0;
@@ -1110,6 +1110,7 @@ void AnalysisResult::outputCPPNamedScalarArrays(const std::string &file) {
 
   cg_printf("\n");
   cg_printInclude("<runtime/base/hphp.h>");
+  cg_printInclude("<sys/scalar_arrays_remap.h>");
   if (!Option::SystemGen) {
     cg_printInclude("<sys/global_variables.h>");
   }
@@ -1426,7 +1427,41 @@ void AnalysisResult::repartitionLargeCPP(const vector<string> &filenames,
   }
 }
 
-///////////////////////////////////////////////////////////////////////////////
+void AnalysisResult::renameStaticNames(map<int, vector<string> > &names,
+                                       const char *file, const char *prefix) {
+  string filename = m_outputPath + "/" + Option::SystemFilePrefix + file;
+  ofstream f(filename.c_str());
+  CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
+  cg.headerBegin(filename);
+
+  for (map<int, vector<string> >::const_iterator it = names.begin();
+       it != names.end();
+       it++) {
+    int hash = it->first;
+    if (names[hash].size() > 1) {
+      vector<string> &strings = names[hash];
+      vector<string> sortedStrings = strings;
+      unsigned int nstrings = strings.size();
+      sort(sortedStrings.begin(), sortedStrings.end());
+      for (unsigned int i = 0; i < strings.size(); i++) {
+        string &s = strings[i];
+        unsigned int j;
+        for (j = 0; j < nstrings; j++) {
+          if (sortedStrings[j] == s) break;
+        }
+        ASSERT(j < nstrings);
+        // remap i to j
+        int64 newHash = hash_string_cs(s.data(), s.size());
+        if (hash < 0) hash = -hash;
+        string name = getHashedName(hash, i, prefix);
+        string newName = getHashedName(newHash, j, prefix, true);
+        cg_printf("#define %s %s\n", name.c_str(), newName.c_str());
+      }
+    }
+  }
+  cg.headerEnd(filename);
+  f.close();
+}
 
 class OutputJob {
 public:
@@ -1608,7 +1643,9 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
   }
   if (threadCount <= 0) threadCount = 1;
 
-  threadCount = 1; // hzhao: wait for Minghui's change to StaticString/Array
+  if (Option::SystemGen) {
+    threadCount = 1;
+  }
 
   // 1st round doing cpp/*.cpp
   vector<string> filenames;
@@ -1699,6 +1736,9 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
   }
 
   // 3rd round code generation
+  renameStaticNames(m_namedStringLiterals, "literal_strings_remap.h", "ss");
+  renameStaticNames(m_namedScalarArrays, "scalar_arrays_remap.h", "sa");
+
   {
     string file = m_outputPath + "/" + Option::SystemFilePrefix +
       "literal_strings";
@@ -2813,12 +2853,19 @@ void AnalysisResult::outputCPPScalarArrayInit(CodeGenerator &cg, int fileCount,
   }
 }
 
-string AnalysisResult::getScalarArrayName(int hash, int index) {
+string AnalysisResult::getHashedName(int64 hash, int index,
+                                     const char *prefix,
+                                     bool longName /* = false */) {
   assert(index >= 0);
-  string name(Option::SystemGen ? "s_sys_sa" : "s_sa");
-  name += boost::str(boost::format("%08x") % hash);
+  string name(Option::SystemGen ? "s_sys_" : "s_");
+  name += prefix;
+  name += boost::str(boost::format(longName ? "%016x" : "%08x") % hash);
   if (index > 0) name += ("_" + lexical_cast<string>(index));
   return name;
+}
+
+string AnalysisResult::getScalarArrayName(int hash, int index) {
+  return getHashedName(hash, index, "sa");
 }
 
 void AnalysisResult::outputCPPScalarArrayId(CodeGenerator &cg, int id,
@@ -3785,18 +3832,14 @@ void AnalysisResult::outputSwigFFIStubs() {
 /**
  * Literal string to String precomputation
  */
-string AnalysisResult::getLiteralStringName(int hash, int index) {
-  assert(index >= 0);
-  string name(Option::SystemGen ? "s_sys_ss" : "s_ss");
-  name += boost::str(boost::format("%08x") % hash);
-  if (index > 0) name += ("_" + lexical_cast<string>(index));
-  return name;
+string AnalysisResult::getLiteralStringName(int64 hash, int index) {
+  return getHashedName(hash, index, "ss");
 }
 
 int AnalysisResult::getLiteralStringId(const std::string &s, int &index) {
   Lock lock(m_namedStringLiteralsMutex);
 
-  int hash = hash_string(s.data(), s.size());
+  int hash = hash_string_cs(s.data(), s.size());
   if (hash < 0) hash = -hash;
   vector<string> &strings = m_namedStringLiterals[hash];
   unsigned int i = 0;
@@ -3891,6 +3934,7 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
   cg.headerBegin(filename);
   if (!genStatic) {
     cg_printInclude("<runtime/base/hphp.h>");
+    cg_printInclude("<sys/literal_strings_remap.h>");
     cg_printf("\n");
   }
   int nstrings = 0;
@@ -3943,6 +3987,7 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
         f.open(filename.c_str());
         cg_printf("\n");
         cg_printInclude("<runtime/base/complex_types.h>");
+        cg_printInclude("<sys/literal_strings_remap.h>");
         cg_printf("\n");
         cg.namespaceBegin();
       }

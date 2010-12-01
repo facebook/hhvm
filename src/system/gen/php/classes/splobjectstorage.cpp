@@ -36,11 +36,11 @@ Variant c_SplObjectStorage::os_getInit(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 2:
-      HASH_RETURN_NAMSTR(0x4B27521443880CAELL, NAMSTR(s_sys_ss43880cae, "index"),
+      HASH_RETURN_NAMSTR(0x4B27521443880CAELL, NAMSTR(s_sys_ss3f00cf7f, "index"),
                          0LL, 5);
       break;
     case 3:
-      HASH_RETURN_NAMSTR(0x17AC96477E2B6DC3LL, NAMSTR(s_sys_ss7e2b6dc3, "storage"),
+      HASH_RETURN_NAMSTR(0x17AC96477E2B6DC3LL, NAMSTR(s_sys_ss64fc2cb1, "storage"),
                          s_sys_sa00000000, 7);
       break;
     default:
@@ -61,15 +61,15 @@ Variant &c_SplObjectStorage::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplObjectStorage
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SplObjectStorage
 void c_SplObjectStorage::o_getArray(Array &props) const {
-  if (isInitialized(m_storage)) props.add(NAMSTR(s_sys_ss3d348351, "\000SplObjectStorage\000storage"), m_storage.isReferenced() ? ref(m_storage) : m_storage, true);
-  props.add(NAMSTR(s_sys_ss352fe1c6, "\000SplObjectStorage\000index"), m_index, true);
+  if (isInitialized(m_storage)) props.add(NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage"), m_storage.isReferenced() ? ref(m_storage) : m_storage, true);
+  props.add(NAMSTR(s_sys_ss10cc4173, "\000SplObjectStorage\000index"), m_index, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SplObjectStorage
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SplObjectStorage
 void c_SplObjectStorage::o_setArray(CArrRef props) {
-  props->load(NAMSTR(s_sys_ss3d348351, "\000SplObjectStorage\000storage"), m_storage);
-  if (props->exists(NAMSTR(s_sys_ss352fe1c6, "\000SplObjectStorage\000index"))) m_index = props->get(NAMSTR(s_sys_ss352fe1c6, "\000SplObjectStorage\000index"));
+  props->load(NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage"), m_storage);
+  if (props->exists(NAMSTR(s_sys_ss10cc4173, "\000SplObjectStorage\000index"))) m_index = props->get(NAMSTR(s_sys_ss10cc4173, "\000SplObjectStorage\000index"));
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SplObjectStorage
@@ -119,14 +119,14 @@ bool c_SplObjectStorage::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_INSTANCEOF(0x795F86375EE263D1LL, NAMSTR(s_sys_ss5ee263d1, "countable"));
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      HASH_INSTANCEOF(0x795F86375EE263D1LL, NAMSTR(s_sys_ss4315c511, "countable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss5c70ced5, "traversable"));
       break;
     case 6:
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
       break;
     case 7:
-      HASH_INSTANCEOF(0x5BA243B9FBA7A64FLL, NAMSTR(s_sys_ss045859b1, "splobjectstorage"));
+      HASH_INSTANCEOF(0x5BA243B9FBA7A64FLL, NAMSTR(s_sys_ss4a225734, "splobjectstorage"));
       break;
     default:
       break;
@@ -147,7 +147,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -161,7 +161,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -175,7 +175,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x62DD82BFEB88A4ACLL, NAMSTR(s_sys_ss14775b54, "attach")) {
+      HASH_GUARD_LITSTR(0x62DD82BFEB88A4ACLL, NAMSTR(s_sys_ss716a33e7, "attach")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -193,7 +193,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 16:
-      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss65104d10, "count")) {
+      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss0d54babb, "count")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -205,7 +205,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::count", 0, 1);
         return (t_count());
       }
-      HASH_GUARD_LITSTR(0x61B94551FA22D290LL, NAMSTR(s_sys_ss05dd2d70, "contains")) {
+      HASH_GUARD_LITSTR(0x61B94551FA22D290LL, NAMSTR(s_sys_ss3382a209, "contains")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -223,7 +223,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -237,7 +237,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x3C7D0AC0EBA9A695LL, NAMSTR(s_sys_ss1456596b, "detach")) {
+      HASH_GUARD_LITSTR(0x3C7D0AC0EBA9A695LL, NAMSTR(s_sys_ss4e3b07b3, "detach")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -255,7 +255,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -269,7 +269,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -526,53 +526,53 @@ bool c_SplObjectStorage::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         mcp.ci = &c_SplObjectStorage::ci_valid;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         mcp.ci = &c_SplObjectStorage::ci_rewind;
         return true;
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x62DD82BFEB88A4ACLL, NAMSTR(s_sys_ss14775b54, "attach")) {
+      HASH_GUARD_LITSTR(0x62DD82BFEB88A4ACLL, NAMSTR(s_sys_ss716a33e7, "attach")) {
         mcp.ci = &c_SplObjectStorage::ci_attach;
         return true;
       }
       break;
     case 16:
-      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss65104d10, "count")) {
+      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss0d54babb, "count")) {
         mcp.ci = &c_SplObjectStorage::ci_count;
         return true;
       }
-      HASH_GUARD_LITSTR(0x61B94551FA22D290LL, NAMSTR(s_sys_ss05dd2d70, "contains")) {
+      HASH_GUARD_LITSTR(0x61B94551FA22D290LL, NAMSTR(s_sys_ss3382a209, "contains")) {
         mcp.ci = &c_SplObjectStorage::ci_contains;
         return true;
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         mcp.ci = &c_SplObjectStorage::ci_key;
         return true;
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x3C7D0AC0EBA9A695LL, NAMSTR(s_sys_ss1456596b, "detach")) {
+      HASH_GUARD_LITSTR(0x3C7D0AC0EBA9A695LL, NAMSTR(s_sys_ss4e3b07b3, "detach")) {
         mcp.ci = &c_SplObjectStorage::ci_detach;
         return true;
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         mcp.ci = &c_SplObjectStorage::ci_next;
         return true;
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         mcp.ci = &c_SplObjectStorage::ci_current;
         return true;
       }
@@ -710,7 +710,7 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
                 m_storage.weakRemove(v_idx);
                 {
                   MethodCallPackage mcp4;
-                  mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss21d85096, "rewind"), 0x1670096FDE27AF6ALL);
+                  mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss6be35da1, "rewind"), 0x1670096FDE27AF6ALL);
                   const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
                   (mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant);
                 }

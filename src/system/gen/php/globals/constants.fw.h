@@ -19,6 +19,8 @@
 #define __GENERATED_php_globals_constants_fw_h0205675d__
 
 #include <runtime/base/hphp_system.h>
+#include <sys/literal_strings_remap.h>
+#include <sys/scalar_arrays_remap.h>
 
 // Forward Declarations
 

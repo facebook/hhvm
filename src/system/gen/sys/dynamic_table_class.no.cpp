@@ -579,7 +579,7 @@ Variant c_PDOException::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -591,7 +591,7 @@ Variant c_PDOException::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -665,11 +665,11 @@ bool c_PDOException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_PDOException::ci___destruct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_PDOException::ci___construct;
         return true;
       }
@@ -802,7 +802,7 @@ Variant c_DOMDocumentFragment::o_invoke_from_eval(const char *s, Eval::VariableE
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 1:
-      HASH_GUARD_LITSTR(0x1E44C8E8C1920931LL, NAMSTR(s_sys_ss3e6df6cf, "appendXML")) {
+      HASH_GUARD_LITSTR(0x1E44C8E8C1920931LL, NAMSTR(s_sys_ss582264a0, "appendXML")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -820,7 +820,7 @@ Variant c_DOMDocumentFragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -834,7 +834,7 @@ Variant c_DOMDocumentFragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -937,19 +937,19 @@ bool c_DOMDocumentFragment::os_get_call_info(MethodCallPackage &mcp, int64 hash)
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_GUARD_LITSTR(0x1E44C8E8C1920931LL, NAMSTR(s_sys_ss3e6df6cf, "appendXML")) {
+      HASH_GUARD_LITSTR(0x1E44C8E8C1920931LL, NAMSTR(s_sys_ss582264a0, "appendXML")) {
         mcp.ci = &c_DOMDocumentFragment::ci_appendxml;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMDocumentFragment::ci___destruct;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMDocumentFragment::ci___construct;
         return true;
       }
@@ -1082,7 +1082,7 @@ Variant c_DOMText::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1096,7 +1096,7 @@ Variant c_DOMText::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1118,7 +1118,7 @@ Variant c_DOMText::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x714D38308D8212B7LL, NAMSTR(s_sys_ss727ded49, "splitText")) {
+      HASH_GUARD_LITSTR(0x714D38308D8212B7LL, NAMSTR(s_sys_ss5d3c002e, "splitText")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1136,7 +1136,7 @@ Variant c_DOMText::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 13:
-      HASH_GUARD_LITSTR(0x28FBAB4F0F6C02DDLL, NAMSTR(s_sys_ss0f6c02dd, "isWhitespaceInElementContent")) {
+      HASH_GUARD_LITSTR(0x28FBAB4F0F6C02DDLL, NAMSTR(s_sys_ss0b391f0b, "isWhitespaceInElementContent")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1150,7 +1150,7 @@ Variant c_DOMText::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1167,7 +1167,7 @@ Variant c_DOMText::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         if (count <= 0) return (t___construct(), null);
         else return (t___construct(a0), null);
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1364,35 +1364,35 @@ bool c_DOMText::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMText::ci___destruct;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         mcp.ci = &c_DOMText::ci___set;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x714D38308D8212B7LL, NAMSTR(s_sys_ss727ded49, "splitText")) {
+      HASH_GUARD_LITSTR(0x714D38308D8212B7LL, NAMSTR(s_sys_ss5d3c002e, "splitText")) {
         mcp.ci = &c_DOMText::ci_splittext;
         return true;
       }
       break;
     case 13:
-      HASH_GUARD_LITSTR(0x28FBAB4F0F6C02DDLL, NAMSTR(s_sys_ss0f6c02dd, "isWhitespaceInElementContent")) {
+      HASH_GUARD_LITSTR(0x28FBAB4F0F6C02DDLL, NAMSTR(s_sys_ss0b391f0b, "isWhitespaceInElementContent")) {
         mcp.ci = &c_DOMText::ci_iswhitespaceinelementcontent;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMText::ci___construct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_DOMText::ci___get;
         return true;
       }
@@ -1577,7 +1577,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 0:
-      HASH_GUARD_LITSTR(0x07768FF90B181780LL, NAMSTR(s_sys_ss0b181780, "addCompletion")) {
+      HASH_GUARD_LITSTR(0x07768FF90B181780LL, NAMSTR(s_sys_ss38d893f5, "addCompletion")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1595,7 +1595,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x20F2EA2BBFF5AA42LL, NAMSTR(s_sys_ss400a55be, "ask")) {
+      HASH_GUARD_LITSTR(0x20F2EA2BBFF5AA42LL, NAMSTR(s_sys_ss0ddf3c34, "ask")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1615,7 +1615,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x0E836DA3377C4984LL, NAMSTR(s_sys_ss377c4984, "getFrame")) {
+      HASH_GUARD_LITSTR(0x0E836DA3377C4984LL, NAMSTR(s_sys_ss143f106a, "getFrame")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1629,7 +1629,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x1D033DFD1DCAEA85LL, NAMSTR(s_sys_ss1dcaea85, "printFrame")) {
+      HASH_GUARD_LITSTR(0x1D033DFD1DCAEA85LL, NAMSTR(s_sys_ss0ab49528, "printFrame")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1647,7 +1647,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x3E0170A7802E3888LL, NAMSTR(s_sys_ss7fd1c778, "send")) {
+      HASH_GUARD_LITSTR(0x3E0170A7802E3888LL, NAMSTR(s_sys_ss70eaeb85, "send")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1665,7 +1665,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x7A24AFD8ADE43B8ELL, NAMSTR(s_sys_ss521bc472, "args")) {
+      HASH_GUARD_LITSTR(0x7A24AFD8ADE43B8ELL, NAMSTR(s_sys_ss06898e62, "args")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1679,7 +1679,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss6c5c70db, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1691,7 +1691,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         if (count > 0) return throw_toomany_arguments("getcode", 0, 1);
         return (t_getcode());
       }
-      HASH_GUARD_LITSTR(0x6B3BF595A55159CFLL, NAMSTR(s_sys_ss5aaea631, "helpBody")) {
+      HASH_GUARD_LITSTR(0x6B3BF595A55159CFLL, NAMSTR(s_sys_ss6aa5ef61, "helpBody")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1709,7 +1709,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x687DF38195F5B951LL, NAMSTR(s_sys_ss6a0a46af, "helpCmds")) {
+      HASH_GUARD_LITSTR(0x687DF38195F5B951LL, NAMSTR(s_sys_ss1fae0dcb, "helpCmds")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1731,7 +1731,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         if (count <= 2) return (t_helpcmds(count, a0, a1), null);
         return (t_helpcmds(count, a0, a1,vargs), null);
       }
-      HASH_GUARD_LITSTR(0x1015EB3F52B098D1LL, NAMSTR(s_sys_ss52b098d1, "print")) {
+      HASH_GUARD_LITSTR(0x1015EB3F52B098D1LL, NAMSTR(s_sys_ss3731975a, "print")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1751,7 +1751,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 23:
-      HASH_GUARD_LITSTR(0x182AC39D2C493A97LL, NAMSTR(s_sys_ss2c493a97, "getCommand")) {
+      HASH_GUARD_LITSTR(0x182AC39D2C493A97LL, NAMSTR(s_sys_ss45e71386, "getCommand")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1763,7 +1763,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         if (count > 0) return throw_toomany_arguments("getcommand", 0, 1);
         return (t_getcommand());
       }
-      HASH_GUARD_LITSTR(0x67A7ABCB74D168D7LL, NAMSTR(s_sys_ss74d168d7, "argRest")) {
+      HASH_GUARD_LITSTR(0x67A7ABCB74D168D7LL, NAMSTR(s_sys_ss514ac10d, "argRest")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1781,7 +1781,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x016509DCA13DB6DFLL, NAMSTR(s_sys_ss5ec24921, "error")) {
+      HASH_GUARD_LITSTR(0x016509DCA13DB6DFLL, NAMSTR(s_sys_ss61aea759, "error")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1799,7 +1799,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         if (count <= 1) return (t_error(count, a0), null);
         return (t_error(count, a0,vargs), null);
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1811,7 +1811,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
-      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info")) {
+      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1831,7 +1831,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 35:
-      HASH_GUARD_LITSTR(0x5F8B4ACA3731C423LL, NAMSTR(s_sys_ss3731c423, "helpTitle")) {
+      HASH_GUARD_LITSTR(0x5F8B4ACA3731C423LL, NAMSTR(s_sys_ss4fa2c4dd, "helpTitle")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1849,7 +1849,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 38:
-      HASH_GUARD_LITSTR(0x2191643700554726LL, NAMSTR(s_sys_ss00554726, "getCurrentLocation")) {
+      HASH_GUARD_LITSTR(0x2191643700554726LL, NAMSTR(s_sys_ss4723e39a, "getCurrentLocation")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1863,7 +1863,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 40:
-      HASH_GUARD_LITSTR(0x620C55BAC770E928LL, NAMSTR(s_sys_ss388f16d8, "argValue")) {
+      HASH_GUARD_LITSTR(0x620C55BAC770E928LL, NAMSTR(s_sys_ss72d6b4ff, "argValue")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1881,7 +1881,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 44:
-      HASH_GUARD_LITSTR(0x6CB0A07E0516B6ACLL, NAMSTR(s_sys_ss0516b6ac, "tutorial")) {
+      HASH_GUARD_LITSTR(0x6CB0A07E0516B6ACLL, NAMSTR(s_sys_ss082575cd, "tutorial")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1899,7 +1899,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x5412C8462A696DEFLL, NAMSTR(s_sys_ss2a696def, "argCount")) {
+      HASH_GUARD_LITSTR(0x5412C8462A696DEFLL, NAMSTR(s_sys_ss5916f77a, "argCount")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1911,7 +1911,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         if (count > 0) return throw_toomany_arguments("argcount", 0, 1);
         return (t_argcount());
       }
-      HASH_GUARD_LITSTR(0x5CE665973E2B4C6FLL, NAMSTR(s_sys_ss3e2b4c6f, "helpSection")) {
+      HASH_GUARD_LITSTR(0x5CE665973E2B4C6FLL, NAMSTR(s_sys_ss29d06307, "helpSection")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1929,7 +1929,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1943,7 +1943,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 52:
-      HASH_GUARD_LITSTR(0x64C0B4BCDA99F6F4LL, NAMSTR(s_sys_ss2566090c, "arg")) {
+      HASH_GUARD_LITSTR(0x64C0B4BCDA99F6F4LL, NAMSTR(s_sys_ss651e56d8, "arg")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1963,7 +1963,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         if (count != 2) return throw_wrong_arguments("arg", count, 2, 2, 1);
         return (t_arg(a0, a1));
       }
-      HASH_GUARD_LITSTR(0x665AFB5CDFD23534LL, NAMSTR(s_sys_ss202dcacc, "help")) {
+      HASH_GUARD_LITSTR(0x665AFB5CDFD23534LL, NAMSTR(s_sys_ss425530dc, "help")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1983,7 +1983,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 54:
-      HASH_GUARD_LITSTR(0x04A108469024B7B6LL, NAMSTR(s_sys_ss6fdb484a, "xend")) {
+      HASH_GUARD_LITSTR(0x04A108469024B7B6LL, NAMSTR(s_sys_ss5d87bdfd, "xend")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -2001,7 +2001,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 55:
-      HASH_GUARD_LITSTR(0x7C41EEC813FC6FB7LL, NAMSTR(s_sys_ss13fc6fb7, "getStackTrace")) {
+      HASH_GUARD_LITSTR(0x7C41EEC813FC6FB7LL, NAMSTR(s_sys_ss79892305, "getStackTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -2013,7 +2013,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         if (count > 0) return throw_toomany_arguments("getstacktrace", 0, 1);
         return (t_getstacktrace());
       }
-      HASH_GUARD_LITSTR(0x6C5E35754AA2B277LL, NAMSTR(s_sys_ss4aa2b277, "wrap")) {
+      HASH_GUARD_LITSTR(0x6C5E35754AA2B277LL, NAMSTR(s_sys_ss0c730b8d, "wrap")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -2031,7 +2031,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 57:
-      HASH_GUARD_LITSTR(0x58C72230857ACDB9LL, NAMSTR(s_sys_ss7a853247, "code")) {
+      HASH_GUARD_LITSTR(0x58C72230857ACDB9LL, NAMSTR(s_sys_ss5485e214, "code")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -2064,7 +2064,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 58:
-      HASH_GUARD_LITSTR(0x0732FA520631017ALL, NAMSTR(s_sys_ss0631017a, "quit")) {
+      HASH_GUARD_LITSTR(0x0732FA520631017ALL, NAMSTR(s_sys_ss7e545a5a, "quit")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -2078,7 +2078,7 @@ Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 63:
-      HASH_GUARD_LITSTR(0x07B89E83B77C677FLL, NAMSTR(s_sys_ss48839881, "output")) {
+      HASH_GUARD_LITSTR(0x07B89E83B77C677FLL, NAMSTR(s_sys_ss7a5dbb24, "output")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -2996,165 +2996,165 @@ bool c_DebuggerClient::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 0:
-      HASH_GUARD_LITSTR(0x07768FF90B181780LL, NAMSTR(s_sys_ss0b181780, "addCompletion")) {
+      HASH_GUARD_LITSTR(0x07768FF90B181780LL, NAMSTR(s_sys_ss38d893f5, "addCompletion")) {
         mcp.ci = &c_DebuggerClient::ci_addcompletion;
         return true;
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x20F2EA2BBFF5AA42LL, NAMSTR(s_sys_ss400a55be, "ask")) {
+      HASH_GUARD_LITSTR(0x20F2EA2BBFF5AA42LL, NAMSTR(s_sys_ss0ddf3c34, "ask")) {
         mcp.ci = &c_DebuggerClient::ci_ask;
         return true;
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x0E836DA3377C4984LL, NAMSTR(s_sys_ss377c4984, "getFrame")) {
+      HASH_GUARD_LITSTR(0x0E836DA3377C4984LL, NAMSTR(s_sys_ss143f106a, "getFrame")) {
         mcp.ci = &c_DebuggerClient::ci_getframe;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x1D033DFD1DCAEA85LL, NAMSTR(s_sys_ss1dcaea85, "printFrame")) {
+      HASH_GUARD_LITSTR(0x1D033DFD1DCAEA85LL, NAMSTR(s_sys_ss0ab49528, "printFrame")) {
         mcp.ci = &c_DebuggerClient::ci_printframe;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x3E0170A7802E3888LL, NAMSTR(s_sys_ss7fd1c778, "send")) {
+      HASH_GUARD_LITSTR(0x3E0170A7802E3888LL, NAMSTR(s_sys_ss70eaeb85, "send")) {
         mcp.ci = &c_DebuggerClient::ci_send;
         return true;
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x7A24AFD8ADE43B8ELL, NAMSTR(s_sys_ss521bc472, "args")) {
+      HASH_GUARD_LITSTR(0x7A24AFD8ADE43B8ELL, NAMSTR(s_sys_ss06898e62, "args")) {
         mcp.ci = &c_DebuggerClient::ci_args;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss6c5c70db, "getCode")) {
         mcp.ci = &c_DebuggerClient::ci_getcode;
         return true;
       }
-      HASH_GUARD_LITSTR(0x6B3BF595A55159CFLL, NAMSTR(s_sys_ss5aaea631, "helpBody")) {
+      HASH_GUARD_LITSTR(0x6B3BF595A55159CFLL, NAMSTR(s_sys_ss6aa5ef61, "helpBody")) {
         mcp.ci = &c_DebuggerClient::ci_helpbody;
         return true;
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x687DF38195F5B951LL, NAMSTR(s_sys_ss6a0a46af, "helpCmds")) {
+      HASH_GUARD_LITSTR(0x687DF38195F5B951LL, NAMSTR(s_sys_ss1fae0dcb, "helpCmds")) {
         mcp.ci = &c_DebuggerClient::ci_helpcmds;
         return true;
       }
-      HASH_GUARD_LITSTR(0x1015EB3F52B098D1LL, NAMSTR(s_sys_ss52b098d1, "print")) {
+      HASH_GUARD_LITSTR(0x1015EB3F52B098D1LL, NAMSTR(s_sys_ss3731975a, "print")) {
         mcp.ci = &c_DebuggerClient::ci_print;
         return true;
       }
       break;
     case 23:
-      HASH_GUARD_LITSTR(0x182AC39D2C493A97LL, NAMSTR(s_sys_ss2c493a97, "getCommand")) {
+      HASH_GUARD_LITSTR(0x182AC39D2C493A97LL, NAMSTR(s_sys_ss45e71386, "getCommand")) {
         mcp.ci = &c_DebuggerClient::ci_getcommand;
         return true;
       }
-      HASH_GUARD_LITSTR(0x67A7ABCB74D168D7LL, NAMSTR(s_sys_ss74d168d7, "argRest")) {
+      HASH_GUARD_LITSTR(0x67A7ABCB74D168D7LL, NAMSTR(s_sys_ss514ac10d, "argRest")) {
         mcp.ci = &c_DebuggerClient::ci_argrest;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x016509DCA13DB6DFLL, NAMSTR(s_sys_ss5ec24921, "error")) {
+      HASH_GUARD_LITSTR(0x016509DCA13DB6DFLL, NAMSTR(s_sys_ss61aea759, "error")) {
         mcp.ci = &c_DebuggerClient::ci_error;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DebuggerClient::ci___construct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info")) {
+      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info")) {
         mcp.ci = &c_DebuggerClient::ci_info;
         return true;
       }
       break;
     case 35:
-      HASH_GUARD_LITSTR(0x5F8B4ACA3731C423LL, NAMSTR(s_sys_ss3731c423, "helpTitle")) {
+      HASH_GUARD_LITSTR(0x5F8B4ACA3731C423LL, NAMSTR(s_sys_ss4fa2c4dd, "helpTitle")) {
         mcp.ci = &c_DebuggerClient::ci_helptitle;
         return true;
       }
       break;
     case 38:
-      HASH_GUARD_LITSTR(0x2191643700554726LL, NAMSTR(s_sys_ss00554726, "getCurrentLocation")) {
+      HASH_GUARD_LITSTR(0x2191643700554726LL, NAMSTR(s_sys_ss4723e39a, "getCurrentLocation")) {
         mcp.ci = &c_DebuggerClient::ci_getcurrentlocation;
         return true;
       }
       break;
     case 40:
-      HASH_GUARD_LITSTR(0x620C55BAC770E928LL, NAMSTR(s_sys_ss388f16d8, "argValue")) {
+      HASH_GUARD_LITSTR(0x620C55BAC770E928LL, NAMSTR(s_sys_ss72d6b4ff, "argValue")) {
         mcp.ci = &c_DebuggerClient::ci_argvalue;
         return true;
       }
       break;
     case 44:
-      HASH_GUARD_LITSTR(0x6CB0A07E0516B6ACLL, NAMSTR(s_sys_ss0516b6ac, "tutorial")) {
+      HASH_GUARD_LITSTR(0x6CB0A07E0516B6ACLL, NAMSTR(s_sys_ss082575cd, "tutorial")) {
         mcp.ci = &c_DebuggerClient::ci_tutorial;
         return true;
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x5412C8462A696DEFLL, NAMSTR(s_sys_ss2a696def, "argCount")) {
+      HASH_GUARD_LITSTR(0x5412C8462A696DEFLL, NAMSTR(s_sys_ss5916f77a, "argCount")) {
         mcp.ci = &c_DebuggerClient::ci_argcount;
         return true;
       }
-      HASH_GUARD_LITSTR(0x5CE665973E2B4C6FLL, NAMSTR(s_sys_ss3e2b4c6f, "helpSection")) {
+      HASH_GUARD_LITSTR(0x5CE665973E2B4C6FLL, NAMSTR(s_sys_ss29d06307, "helpSection")) {
         mcp.ci = &c_DebuggerClient::ci_helpsection;
         return true;
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DebuggerClient::ci___destruct;
         return true;
       }
       break;
     case 52:
-      HASH_GUARD_LITSTR(0x64C0B4BCDA99F6F4LL, NAMSTR(s_sys_ss2566090c, "arg")) {
+      HASH_GUARD_LITSTR(0x64C0B4BCDA99F6F4LL, NAMSTR(s_sys_ss651e56d8, "arg")) {
         mcp.ci = &c_DebuggerClient::ci_arg;
         return true;
       }
-      HASH_GUARD_LITSTR(0x665AFB5CDFD23534LL, NAMSTR(s_sys_ss202dcacc, "help")) {
+      HASH_GUARD_LITSTR(0x665AFB5CDFD23534LL, NAMSTR(s_sys_ss425530dc, "help")) {
         mcp.ci = &c_DebuggerClient::ci_help;
         return true;
       }
       break;
     case 54:
-      HASH_GUARD_LITSTR(0x04A108469024B7B6LL, NAMSTR(s_sys_ss6fdb484a, "xend")) {
+      HASH_GUARD_LITSTR(0x04A108469024B7B6LL, NAMSTR(s_sys_ss5d87bdfd, "xend")) {
         mcp.ci = &c_DebuggerClient::ci_xend;
         return true;
       }
       break;
     case 55:
-      HASH_GUARD_LITSTR(0x7C41EEC813FC6FB7LL, NAMSTR(s_sys_ss13fc6fb7, "getStackTrace")) {
+      HASH_GUARD_LITSTR(0x7C41EEC813FC6FB7LL, NAMSTR(s_sys_ss79892305, "getStackTrace")) {
         mcp.ci = &c_DebuggerClient::ci_getstacktrace;
         return true;
       }
-      HASH_GUARD_LITSTR(0x6C5E35754AA2B277LL, NAMSTR(s_sys_ss4aa2b277, "wrap")) {
+      HASH_GUARD_LITSTR(0x6C5E35754AA2B277LL, NAMSTR(s_sys_ss0c730b8d, "wrap")) {
         mcp.ci = &c_DebuggerClient::ci_wrap;
         return true;
       }
       break;
     case 57:
-      HASH_GUARD_LITSTR(0x58C72230857ACDB9LL, NAMSTR(s_sys_ss7a853247, "code")) {
+      HASH_GUARD_LITSTR(0x58C72230857ACDB9LL, NAMSTR(s_sys_ss5485e214, "code")) {
         mcp.ci = &c_DebuggerClient::ci_code;
         return true;
       }
       break;
     case 58:
-      HASH_GUARD_LITSTR(0x0732FA520631017ALL, NAMSTR(s_sys_ss0631017a, "quit")) {
+      HASH_GUARD_LITSTR(0x0732FA520631017ALL, NAMSTR(s_sys_ss7e545a5a, "quit")) {
         mcp.ci = &c_DebuggerClient::ci_quit;
         return true;
       }
       break;
     case 63:
-      HASH_GUARD_LITSTR(0x07B89E83B77C677FLL, NAMSTR(s_sys_ss48839881, "output")) {
+      HASH_GUARD_LITSTR(0x07B89E83B77C677FLL, NAMSTR(s_sys_ss7a5dbb24, "output")) {
         mcp.ci = &c_DebuggerClient::ci_output;
         return true;
       }
@@ -3287,7 +3287,7 @@ Variant c_DOMCDATASection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3299,7 +3299,7 @@ Variant c_DOMCDATASection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -3382,11 +3382,11 @@ bool c_DOMCDATASection::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMCDATASection::ci___destruct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMCDATASection::ci___construct;
         return true;
       }
@@ -3542,7 +3542,7 @@ Variant c_Locale::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &e
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3554,7 +3554,7 @@ Variant c_Locale::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &e
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3628,11 +3628,11 @@ bool c_Locale::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_Locale::ci___destruct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_Locale::ci___construct;
         return true;
       }
@@ -3765,7 +3765,7 @@ Variant c_DOMDocumentType::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3779,7 +3779,7 @@ Variant c_DOMDocumentType::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -3801,7 +3801,7 @@ Variant c_DOMDocumentType::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3813,7 +3813,7 @@ Variant c_DOMDocumentType::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -3950,23 +3950,23 @@ bool c_DOMDocumentType::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMDocumentType::ci___destruct;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         mcp.ci = &c_DOMDocumentType::ci___set;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMDocumentType::ci___construct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_DOMDocumentType::ci___get;
         return true;
       }
@@ -4099,7 +4099,7 @@ Variant c_SQLite3Stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD_LITSTR(0x340A51AE22A924E0LL, NAMSTR(s_sys_ss22a924e0, "reset")) {
+      HASH_GUARD_LITSTR(0x340A51AE22A924E0LL, NAMSTR(s_sys_ss5c8999e5, "reset")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4113,7 +4113,7 @@ Variant c_SQLite3Stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
+      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss0fad1395, "close")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4127,7 +4127,7 @@ Variant c_SQLite3Stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x436E6AFC3628E403LL, NAMSTR(s_sys_ss3628e403, "bindvalue")) {
+      HASH_GUARD_LITSTR(0x436E6AFC3628E403LL, NAMSTR(s_sys_ss0e2f6a78, "bindvalue")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -4154,7 +4154,7 @@ Variant c_SQLite3Stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x31DA235C5A226667LL, NAMSTR(s_sys_ss5a226667, "clear")) {
+      HASH_GUARD_LITSTR(0x31DA235C5A226667LL, NAMSTR(s_sys_ss7d4c47c4, "clear")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4168,7 +4168,7 @@ Variant c_SQLite3Stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x187C7F43EB57714ELL, NAMSTR(s_sys_ss14a88eb2, "execute")) {
+      HASH_GUARD_LITSTR(0x187C7F43EB57714ELL, NAMSTR(s_sys_ss5ac66c5d, "execute")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4182,7 +4182,7 @@ Variant c_SQLite3Stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4196,7 +4196,7 @@ Variant c_SQLite3Stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x77B13FCF1BA41696LL, NAMSTR(s_sys_ss1ba41696, "bindparam")) {
+      HASH_GUARD_LITSTR(0x77B13FCF1BA41696LL, NAMSTR(s_sys_ss1b64dec9, "bindparam")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -4223,7 +4223,7 @@ Variant c_SQLite3Stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 23:
-      HASH_GUARD_LITSTR(0x72FA987001E93357LL, NAMSTR(s_sys_ss01e93357, "paramcount")) {
+      HASH_GUARD_LITSTR(0x72FA987001E93357LL, NAMSTR(s_sys_ss727dc9b8, "paramcount")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4237,7 +4237,7 @@ Variant c_SQLite3Stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4512,55 +4512,55 @@ bool c_SQLite3Stmt::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
-      HASH_GUARD_LITSTR(0x340A51AE22A924E0LL, NAMSTR(s_sys_ss22a924e0, "reset")) {
+      HASH_GUARD_LITSTR(0x340A51AE22A924E0LL, NAMSTR(s_sys_ss5c8999e5, "reset")) {
         mcp.ci = &c_SQLite3Stmt::ci_reset;
         return true;
       }
       break;
     case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
+      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss0fad1395, "close")) {
         mcp.ci = &c_SQLite3Stmt::ci_close;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x436E6AFC3628E403LL, NAMSTR(s_sys_ss3628e403, "bindvalue")) {
+      HASH_GUARD_LITSTR(0x436E6AFC3628E403LL, NAMSTR(s_sys_ss0e2f6a78, "bindvalue")) {
         mcp.ci = &c_SQLite3Stmt::ci_bindvalue;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x31DA235C5A226667LL, NAMSTR(s_sys_ss5a226667, "clear")) {
+      HASH_GUARD_LITSTR(0x31DA235C5A226667LL, NAMSTR(s_sys_ss7d4c47c4, "clear")) {
         mcp.ci = &c_SQLite3Stmt::ci_clear;
         return true;
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x187C7F43EB57714ELL, NAMSTR(s_sys_ss14a88eb2, "execute")) {
+      HASH_GUARD_LITSTR(0x187C7F43EB57714ELL, NAMSTR(s_sys_ss5ac66c5d, "execute")) {
         mcp.ci = &c_SQLite3Stmt::ci_execute;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_SQLite3Stmt::ci___destruct;
         return true;
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x77B13FCF1BA41696LL, NAMSTR(s_sys_ss1ba41696, "bindparam")) {
+      HASH_GUARD_LITSTR(0x77B13FCF1BA41696LL, NAMSTR(s_sys_ss1b64dec9, "bindparam")) {
         mcp.ci = &c_SQLite3Stmt::ci_bindparam;
         return true;
       }
       break;
     case 23:
-      HASH_GUARD_LITSTR(0x72FA987001E93357LL, NAMSTR(s_sys_ss01e93357, "paramcount")) {
+      HASH_GUARD_LITSTR(0x72FA987001E93357LL, NAMSTR(s_sys_ss727dc9b8, "paramcount")) {
         mcp.ci = &c_SQLite3Stmt::ci_paramcount;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_SQLite3Stmt::ci___construct;
         return true;
       }
@@ -4713,7 +4713,7 @@ Variant c_DOMNodeList::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4725,7 +4725,7 @@ Variant c_DOMNodeList::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
-      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss32a12503, "getIterator")) {
+      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss0167520c, "getIterator")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4739,7 +4739,7 @@ Variant c_DOMNodeList::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4761,7 +4761,7 @@ Variant c_DOMNodeList::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 6:
-      HASH_GUARD_LITSTR(0x0A41DBE0830902C6LL, NAMSTR(s_sys_ss7cf6fd3a, "item")) {
+      HASH_GUARD_LITSTR(0x0A41DBE0830902C6LL, NAMSTR(s_sys_ss1247a693, "item")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -4779,7 +4779,7 @@ Variant c_DOMNodeList::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4791,7 +4791,7 @@ Variant c_DOMNodeList::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -4981,33 +4981,33 @@ bool c_DOMNodeList::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMNodeList::ci___destruct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss32a12503, "getIterator")) {
+      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss0167520c, "getIterator")) {
         mcp.ci = &c_DOMNodeList::ci_getiterator;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         mcp.ci = &c_DOMNodeList::ci___set;
         return true;
       }
       break;
     case 6:
-      HASH_GUARD_LITSTR(0x0A41DBE0830902C6LL, NAMSTR(s_sys_ss7cf6fd3a, "item")) {
+      HASH_GUARD_LITSTR(0x0A41DBE0830902C6LL, NAMSTR(s_sys_ss1247a693, "item")) {
         mcp.ci = &c_DOMNodeList::ci_item;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMNodeList::ci___construct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_DOMNodeList::ci___get;
         return true;
       }
@@ -5166,7 +5166,7 @@ Variant c_Normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 2:
-      HASH_GUARD_LITSTR(0x11A2D4B742CB6C5ALL, NAMSTR(s_sys_ss42cb6c5a, "normalize")) {
+      HASH_GUARD_LITSTR(0x11A2D4B742CB6C5ALL, NAMSTR(s_sys_ss679e8b98, "normalize")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -5189,7 +5189,7 @@ Variant c_Normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5203,7 +5203,7 @@ Variant c_Normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x58CF37E15F66ED1DLL, NAMSTR(s_sys_ss5f66ed1d, "isnormalized")) {
+      HASH_GUARD_LITSTR(0x58CF37E15F66ED1DLL, NAMSTR(s_sys_ss34cb01dd, "isnormalized")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -5226,7 +5226,7 @@ Variant c_Normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5248,7 +5248,7 @@ Variant c_Normalizer::os_invoke_from_eval(const char *c, const char *s, Eval::Va
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 1:
-      HASH_GUARD_LITSTR(0x58CF37E15F66ED1DLL, NAMSTR(s_sys_ss5f66ed1d, "isnormalized")) {
+      HASH_GUARD_LITSTR(0x58CF37E15F66ED1DLL, NAMSTR(s_sys_ss34cb01dd, "isnormalized")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -5271,7 +5271,7 @@ Variant c_Normalizer::os_invoke_from_eval(const char *c, const char *s, Eval::Va
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x11A2D4B742CB6C5ALL, NAMSTR(s_sys_ss42cb6c5a, "normalize")) {
+      HASH_GUARD_LITSTR(0x11A2D4B742CB6C5ALL, NAMSTR(s_sys_ss679e8b98, "normalize")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -5391,25 +5391,25 @@ bool c_Normalizer::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 2:
-      HASH_GUARD_LITSTR(0x11A2D4B742CB6C5ALL, NAMSTR(s_sys_ss42cb6c5a, "normalize")) {
+      HASH_GUARD_LITSTR(0x11A2D4B742CB6C5ALL, NAMSTR(s_sys_ss679e8b98, "normalize")) {
         mcp.ci = &c_Normalizer::ci_normalize;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_Normalizer::ci___destruct;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x58CF37E15F66ED1DLL, NAMSTR(s_sys_ss5f66ed1d, "isnormalized")) {
+      HASH_GUARD_LITSTR(0x58CF37E15F66ED1DLL, NAMSTR(s_sys_ss34cb01dd, "isnormalized")) {
         mcp.ci = &c_Normalizer::ci_isnormalized;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_Normalizer::ci___construct;
         return true;
       }
@@ -5542,7 +5542,7 @@ Variant c_DOMCharacterData::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 13:
-      HASH_GUARD_LITSTR(0x3DAC04A51FD2D92DLL, NAMSTR(s_sys_ss1fd2d92d, "appendData")) {
+      HASH_GUARD_LITSTR(0x3DAC04A51FD2D92DLL, NAMSTR(s_sys_ss3efc66d1, "appendData")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -5560,7 +5560,7 @@ Variant c_DOMCharacterData::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -5578,7 +5578,7 @@ Variant c_DOMCharacterData::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x2D8D2253C2149972LL, NAMSTR(s_sys_ss3deb668e, "substringData")) {
+      HASH_GUARD_LITSTR(0x2D8D2253C2149972LL, NAMSTR(s_sys_ss05c2645c, "substringData")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -5600,7 +5600,7 @@ Variant c_DOMCharacterData::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5614,7 +5614,7 @@ Variant c_DOMCharacterData::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x470F2F0EA1F3D4B4LL, NAMSTR(s_sys_ss5e0c2b4c, "replaceData")) {
+      HASH_GUARD_LITSTR(0x470F2F0EA1F3D4B4LL, NAMSTR(s_sys_ss2107c673, "replaceData")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -5640,7 +5640,7 @@ Variant c_DOMCharacterData::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -5662,7 +5662,7 @@ Variant c_DOMCharacterData::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x7543EC746714D118LL, NAMSTR(s_sys_ss6714d118, "deleteData")) {
+      HASH_GUARD_LITSTR(0x7543EC746714D118LL, NAMSTR(s_sys_ss01c141eb, "deleteData")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -5684,7 +5684,7 @@ Variant c_DOMCharacterData::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 29:
-      HASH_GUARD_LITSTR(0x0E19CE7886BCEF3DLL, NAMSTR(s_sys_ss794310c3, "insertData")) {
+      HASH_GUARD_LITSTR(0x0E19CE7886BCEF3DLL, NAMSTR(s_sys_ss21f66b11, "insertData")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -5706,7 +5706,7 @@ Variant c_DOMCharacterData::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5989,55 +5989,55 @@ bool c_DOMCharacterData::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 13:
-      HASH_GUARD_LITSTR(0x3DAC04A51FD2D92DLL, NAMSTR(s_sys_ss1fd2d92d, "appendData")) {
+      HASH_GUARD_LITSTR(0x3DAC04A51FD2D92DLL, NAMSTR(s_sys_ss3efc66d1, "appendData")) {
         mcp.ci = &c_DOMCharacterData::ci_appenddata;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_DOMCharacterData::ci___get;
         return true;
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x2D8D2253C2149972LL, NAMSTR(s_sys_ss3deb668e, "substringData")) {
+      HASH_GUARD_LITSTR(0x2D8D2253C2149972LL, NAMSTR(s_sys_ss05c2645c, "substringData")) {
         mcp.ci = &c_DOMCharacterData::ci_substringdata;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMCharacterData::ci___destruct;
         return true;
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x470F2F0EA1F3D4B4LL, NAMSTR(s_sys_ss5e0c2b4c, "replaceData")) {
+      HASH_GUARD_LITSTR(0x470F2F0EA1F3D4B4LL, NAMSTR(s_sys_ss2107c673, "replaceData")) {
         mcp.ci = &c_DOMCharacterData::ci_replacedata;
         return true;
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         mcp.ci = &c_DOMCharacterData::ci___set;
         return true;
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x7543EC746714D118LL, NAMSTR(s_sys_ss6714d118, "deleteData")) {
+      HASH_GUARD_LITSTR(0x7543EC746714D118LL, NAMSTR(s_sys_ss01c141eb, "deleteData")) {
         mcp.ci = &c_DOMCharacterData::ci_deletedata;
         return true;
       }
       break;
     case 29:
-      HASH_GUARD_LITSTR(0x0E19CE7886BCEF3DLL, NAMSTR(s_sys_ss794310c3, "insertData")) {
+      HASH_GUARD_LITSTR(0x0E19CE7886BCEF3DLL, NAMSTR(s_sys_ss21f66b11, "insertData")) {
         mcp.ci = &c_DOMCharacterData::ci_insertdata;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMCharacterData::ci___construct;
         return true;
       }
@@ -6170,7 +6170,7 @@ Variant c_DOMEntityReference::o_invoke_from_eval(const char *s, Eval::VariableEn
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6182,7 +6182,7 @@ Variant c_DOMEntityReference::o_invoke_from_eval(const char *s, Eval::VariableEn
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -6265,11 +6265,11 @@ bool c_DOMEntityReference::os_get_call_info(MethodCallPackage &mcp, int64 hash) 
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMEntityReference::ci___destruct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMEntityReference::ci___construct;
         return true;
       }
@@ -6416,7 +6416,7 @@ Variant c_SimpleXMLElementIterator::o_invoke_from_eval(const char *s, Eval::Vari
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 1:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6430,7 +6430,7 @@ Variant c_SimpleXMLElementIterator::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6444,7 +6444,7 @@ Variant c_SimpleXMLElementIterator::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6458,7 +6458,7 @@ Variant c_SimpleXMLElementIterator::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6472,7 +6472,7 @@ Variant c_SimpleXMLElementIterator::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6486,7 +6486,7 @@ Variant c_SimpleXMLElementIterator::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6500,7 +6500,7 @@ Variant c_SimpleXMLElementIterator::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6694,43 +6694,43 @@ bool c_SimpleXMLElementIterator::os_get_call_info(MethodCallPackage &mcp, int64 
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 1:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         mcp.ci = &c_SimpleXMLElementIterator::ci_key;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_SimpleXMLElementIterator::ci___destruct;
         return true;
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         mcp.ci = &c_SimpleXMLElementIterator::ci_valid;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         mcp.ci = &c_SimpleXMLElementIterator::ci_next;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         mcp.ci = &c_SimpleXMLElementIterator::ci_rewind;
         return true;
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         mcp.ci = &c_SimpleXMLElementIterator::ci_current;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_SimpleXMLElementIterator::ci___construct;
         return true;
       }
@@ -6906,7 +6906,7 @@ Variant c_DateTimeZone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 3:
-      HASH_GUARD_LITSTR(0x6D7CD16BBA93D063LL, NAMSTR(s_sys_ss456c2f9d, "listIdentifiers")) {
+      HASH_GUARD_LITSTR(0x6D7CD16BBA93D063LL, NAMSTR(s_sys_ss6640e60f, "listIdentifiers")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6918,7 +6918,7 @@ Variant c_DateTimeZone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
         return (ti_listidentifiers(o_getClassName()));
       }
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6932,7 +6932,7 @@ Variant c_DateTimeZone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x63D3CF3884CE93F4LL, NAMSTR(s_sys_ss7b316c0c, "getTransitions")) {
+      HASH_GUARD_LITSTR(0x63D3CF3884CE93F4LL, NAMSTR(s_sys_ss4960e6a0, "getTransitions")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6946,7 +6946,7 @@ Variant c_DateTimeZone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss3d20de82, "getName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6960,7 +6960,7 @@ Variant c_DateTimeZone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x2D0CCAB16C3ED068LL, NAMSTR(s_sys_ss6c3ed068, "listAbbreviations")) {
+      HASH_GUARD_LITSTR(0x2D0CCAB16C3ED068LL, NAMSTR(s_sys_ss5cbda8d0, "listAbbreviations")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6974,7 +6974,7 @@ Variant c_DateTimeZone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 11:
-      HASH_GUARD_LITSTR(0x68DB66F60B55BD0BLL, NAMSTR(s_sys_ss0b55bd0b, "getOffset")) {
+      HASH_GUARD_LITSTR(0x68DB66F60B55BD0BLL, NAMSTR(s_sys_ss71028683, "getOffset")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -6992,7 +6992,7 @@ Variant c_DateTimeZone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -7018,7 +7018,7 @@ Variant c_DateTimeZone::os_invoke_from_eval(const char *c, const char *s, Eval::
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 0:
-      HASH_GUARD_LITSTR(0x2D0CCAB16C3ED068LL, NAMSTR(s_sys_ss6c3ed068, "listAbbreviations")) {
+      HASH_GUARD_LITSTR(0x2D0CCAB16C3ED068LL, NAMSTR(s_sys_ss5cbda8d0, "listAbbreviations")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -7032,7 +7032,7 @@ Variant c_DateTimeZone::os_invoke_from_eval(const char *c, const char *s, Eval::
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x6D7CD16BBA93D063LL, NAMSTR(s_sys_ss456c2f9d, "listIdentifiers")) {
+      HASH_GUARD_LITSTR(0x6D7CD16BBA93D063LL, NAMSTR(s_sys_ss6640e60f, "listIdentifiers")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -7209,41 +7209,41 @@ bool c_DateTimeZone::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
-      HASH_GUARD_LITSTR(0x6D7CD16BBA93D063LL, NAMSTR(s_sys_ss456c2f9d, "listIdentifiers")) {
+      HASH_GUARD_LITSTR(0x6D7CD16BBA93D063LL, NAMSTR(s_sys_ss6640e60f, "listIdentifiers")) {
         mcp.ci = &c_DateTimeZone::ci_listidentifiers;
         return true;
       }
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DateTimeZone::ci___destruct;
         return true;
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x63D3CF3884CE93F4LL, NAMSTR(s_sys_ss7b316c0c, "getTransitions")) {
+      HASH_GUARD_LITSTR(0x63D3CF3884CE93F4LL, NAMSTR(s_sys_ss4960e6a0, "getTransitions")) {
         mcp.ci = &c_DateTimeZone::ci_gettransitions;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss3d20de82, "getName")) {
         mcp.ci = &c_DateTimeZone::ci_getname;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x2D0CCAB16C3ED068LL, NAMSTR(s_sys_ss6c3ed068, "listAbbreviations")) {
+      HASH_GUARD_LITSTR(0x2D0CCAB16C3ED068LL, NAMSTR(s_sys_ss5cbda8d0, "listAbbreviations")) {
         mcp.ci = &c_DateTimeZone::ci_listabbreviations;
         return true;
       }
       break;
     case 11:
-      HASH_GUARD_LITSTR(0x68DB66F60B55BD0BLL, NAMSTR(s_sys_ss0b55bd0b, "getOffset")) {
+      HASH_GUARD_LITSTR(0x68DB66F60B55BD0BLL, NAMSTR(s_sys_ss71028683, "getOffset")) {
         mcp.ci = &c_DateTimeZone::ci_getoffset;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DateTimeZone::ci___construct;
         return true;
       }
@@ -7390,7 +7390,7 @@ Variant c_DOMNodeIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 1:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -7404,7 +7404,7 @@ Variant c_DOMNodeIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -7418,7 +7418,7 @@ Variant c_DOMNodeIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -7432,7 +7432,7 @@ Variant c_DOMNodeIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -7446,7 +7446,7 @@ Variant c_DOMNodeIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -7460,7 +7460,7 @@ Variant c_DOMNodeIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -7474,7 +7474,7 @@ Variant c_DOMNodeIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -7668,43 +7668,43 @@ bool c_DOMNodeIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 1:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         mcp.ci = &c_DOMNodeIterator::ci_key;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMNodeIterator::ci___destruct;
         return true;
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         mcp.ci = &c_DOMNodeIterator::ci_valid;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         mcp.ci = &c_DOMNodeIterator::ci_next;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         mcp.ci = &c_DOMNodeIterator::ci_rewind;
         return true;
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         mcp.ci = &c_DOMNodeIterator::ci_current;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMNodeIterator::ci___construct;
         return true;
       }
@@ -7837,7 +7837,7 @@ Variant c_DOMImplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 3:
-      HASH_GUARD_LITSTR(0x3CB56A796F3DBAC3LL, NAMSTR(s_sys_ss6f3dbac3, "createDocumentType")) {
+      HASH_GUARD_LITSTR(0x3CB56A796F3DBAC3LL, NAMSTR(s_sys_ss7a1c6fcd, "createDocumentType")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -7864,7 +7864,7 @@ Variant c_DOMImplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
         else if (count == 2) return (t_createdocumenttype(a0, a1));
         else return (t_createdocumenttype(a0, a1, a2));
       }
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -7876,7 +7876,7 @@ Variant c_DOMImplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
-      HASH_GUARD_LITSTR(0x280878EAC306A6A3LL, NAMSTR(s_sys_ss3cf9595d, "hasFeature")) {
+      HASH_GUARD_LITSTR(0x280878EAC306A6A3LL, NAMSTR(s_sys_ss08d2b5d8, "hasFeature")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -7898,7 +7898,7 @@ Variant c_DOMImplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x30855E95B37D1B4ELL, NAMSTR(s_sys_ss4c82e4b2, "createDocument")) {
+      HASH_GUARD_LITSTR(0x30855E95B37D1B4ELL, NAMSTR(s_sys_ss3dea3a84, "createDocument")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -7927,7 +7927,7 @@ Variant c_DOMImplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8105,27 +8105,27 @@ bool c_DOMImplementation::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
-      HASH_GUARD_LITSTR(0x3CB56A796F3DBAC3LL, NAMSTR(s_sys_ss6f3dbac3, "createDocumentType")) {
+      HASH_GUARD_LITSTR(0x3CB56A796F3DBAC3LL, NAMSTR(s_sys_ss7a1c6fcd, "createDocumentType")) {
         mcp.ci = &c_DOMImplementation::ci_createdocumenttype;
         return true;
       }
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMImplementation::ci___destruct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x280878EAC306A6A3LL, NAMSTR(s_sys_ss3cf9595d, "hasFeature")) {
+      HASH_GUARD_LITSTR(0x280878EAC306A6A3LL, NAMSTR(s_sys_ss08d2b5d8, "hasFeature")) {
         mcp.ci = &c_DOMImplementation::ci_hasfeature;
         return true;
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x30855E95B37D1B4ELL, NAMSTR(s_sys_ss4c82e4b2, "createDocument")) {
+      HASH_GUARD_LITSTR(0x30855E95B37D1B4ELL, NAMSTR(s_sys_ss3dea3a84, "createDocument")) {
         mcp.ci = &c_DOMImplementation::ci_createdocument;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMImplementation::ci___construct;
         return true;
       }
@@ -8258,7 +8258,7 @@ Variant c_SoapHeader::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8270,7 +8270,7 @@ Variant c_SoapHeader::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -8382,11 +8382,11 @@ bool c_SoapHeader::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_SoapHeader::ci___destruct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_SoapHeader::ci___construct;
         return true;
       }
@@ -8584,7 +8584,7 @@ Variant c_DOMNotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8598,7 +8598,7 @@ Variant c_DOMNotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -8620,7 +8620,7 @@ Variant c_DOMNotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8632,7 +8632,7 @@ Variant c_DOMNotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -8769,23 +8769,23 @@ bool c_DOMNotation::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMNotation::ci___destruct;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         mcp.ci = &c_DOMNotation::ci___set;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMNotation::ci___construct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_DOMNotation::ci___get;
         return true;
       }
@@ -8918,7 +8918,7 @@ Variant c_DebuggerProxy::o_invoke_from_eval(const char *s, Eval::VariableEnviron
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 0:
-      HASH_GUARD_LITSTR(0x3E0170A7802E3888LL, NAMSTR(s_sys_ss7fd1c778, "send")) {
+      HASH_GUARD_LITSTR(0x3E0170A7802E3888LL, NAMSTR(s_sys_ss70eaeb85, "send")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -8936,7 +8936,7 @@ Variant c_DebuggerProxy::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8950,7 +8950,7 @@ Variant c_DebuggerProxy::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x7B58587A529D270CLL, NAMSTR(s_sys_ss529d270c, "isLocal")) {
+      HASH_GUARD_LITSTR(0x7B58587A529D270CLL, NAMSTR(s_sys_ss139484bb, "isLocal")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8964,7 +8964,7 @@ Variant c_DebuggerProxy::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -9091,25 +9091,25 @@ bool c_DebuggerProxy::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 0:
-      HASH_GUARD_LITSTR(0x3E0170A7802E3888LL, NAMSTR(s_sys_ss7fd1c778, "send")) {
+      HASH_GUARD_LITSTR(0x3E0170A7802E3888LL, NAMSTR(s_sys_ss70eaeb85, "send")) {
         mcp.ci = &c_DebuggerProxy::ci_send;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DebuggerProxy::ci___destruct;
         return true;
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x7B58587A529D270CLL, NAMSTR(s_sys_ss529d270c, "isLocal")) {
+      HASH_GUARD_LITSTR(0x7B58587A529D270CLL, NAMSTR(s_sys_ss139484bb, "isLocal")) {
         mcp.ci = &c_DebuggerProxy::ci_islocal;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DebuggerProxy::ci___construct;
         return true;
       }
@@ -9392,7 +9392,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 2:
-      HASH_GUARD_LITSTR(0x38998A4858382D82LL, NAMSTR(s_sys_ss58382d82, "getMultiByKey")) {
+      HASH_GUARD_LITSTR(0x38998A4858382D82LL, NAMSTR(s_sys_ss6c5e1663, "getMultiByKey")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -9424,7 +9424,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x4F31CCB24341F605LL, NAMSTR(s_sys_ss4341f605, "getMulti")) {
+      HASH_GUARD_LITSTR(0x4F31CCB24341F605LL, NAMSTR(s_sys_ss0939351d, "getMulti")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -9450,7 +9450,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         else if (count == 2) return (t_getmulti(a0, ref(a1)));
         else return (t_getmulti(a0, ref(a1), a2));
       }
-      HASH_GUARD_LITSTR(0x6FB9087461635285LL, NAMSTR(s_sys_ss61635285, "setOption")) {
+      HASH_GUARD_LITSTR(0x6FB9087461635285LL, NAMSTR(s_sys_ss2f8e5140, "setOption")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -9472,7 +9472,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x06E29D289FC0AF87LL, NAMSTR(s_sys_ss603f5079, "addServers")) {
+      HASH_GUARD_LITSTR(0x06E29D289FC0AF87LL, NAMSTR(s_sys_ss41cb9189, "addServers")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -9490,7 +9490,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 11:
-      HASH_GUARD_LITSTR(0x15D34462FC79458BLL, NAMSTR(s_sys_ss0386ba75, "add")) {
+      HASH_GUARD_LITSTR(0x15D34462FC79458BLL, NAMSTR(s_sys_ss6db5a215, "add")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -9517,7 +9517,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x1C80DDD00742930FLL, NAMSTR(s_sys_ss0742930f, "getServerByKey")) {
+      HASH_GUARD_LITSTR(0x1C80DDD00742930FLL, NAMSTR(s_sys_ss0fe15fdf, "getServerByKey")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -9535,7 +9535,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316, "getVersion")) {
+      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss1b5e3529, "getVersion")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -9549,7 +9549,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 23:
-      HASH_GUARD_LITSTR(0x65C5EF328C77C917LL, NAMSTR(s_sys_ss738836e9, "prepend")) {
+      HASH_GUARD_LITSTR(0x65C5EF328C77C917LL, NAMSTR(s_sys_ss2da130db, "prepend")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -9571,7 +9571,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x3B7F419ECE80EE19LL, NAMSTR(s_sys_ss317f11e7, "setMulti")) {
+      HASH_GUARD_LITSTR(0x3B7F419ECE80EE19LL, NAMSTR(s_sys_ss038035c6, "setMulti")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -9594,7 +9594,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 33:
-      HASH_GUARD_LITSTR(0x399A6427C2185621LL, NAMSTR(s_sys_ss3de7a9df, "set")) {
+      HASH_GUARD_LITSTR(0x399A6427C2185621LL, NAMSTR(s_sys_ss0241fb06, "set")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -9619,7 +9619,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         if (count <= 2) return (t_set(a0, a1));
         else return (t_set(a0, a1, a2));
       }
-      HASH_GUARD_LITSTR(0x573E46DE52BFF8A1LL, NAMSTR(s_sys_ss52bff8a1, "cas")) {
+      HASH_GUARD_LITSTR(0x573E46DE52BFF8A1LL, NAMSTR(s_sys_ss449b0823, "cas")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -9650,7 +9650,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 40:
-      HASH_GUARD_LITSTR(0x25DCCC35D69AD828LL, NAMSTR(s_sys_ss296527d8, "get")) {
+      HASH_GUARD_LITSTR(0x25DCCC35D69AD828LL, NAMSTR(s_sys_ss153b6861, "get")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -9678,7 +9678,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x00FBB16B058D5C2FLL, NAMSTR(s_sys_ss058d5c2f, "getDelayedByKey")) {
+      HASH_GUARD_LITSTR(0x00FBB16B058D5C2FLL, NAMSTR(s_sys_ss69e3dc9b, "getDelayedByKey")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -9710,7 +9710,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 56:
-      HASH_GUARD_LITSTR(0x7F4CB6AD55C9F7B8LL, NAMSTR(s_sys_ss55c9f7b8, "setByKey")) {
+      HASH_GUARD_LITSTR(0x7F4CB6AD55C9F7B8LL, NAMSTR(s_sys_ss5097084d, "setByKey")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -9741,7 +9741,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 61:
-      HASH_GUARD_LITSTR(0x303DBA91556D773DLL, NAMSTR(s_sys_ss556d773d, "replaceByKey")) {
+      HASH_GUARD_LITSTR(0x303DBA91556D773DLL, NAMSTR(s_sys_ss18bebdc2, "replaceByKey")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -9772,7 +9772,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 64:
-      HASH_GUARD_LITSTR(0x402DD1A85CAEA6C0LL, NAMSTR(s_sys_ss5caea6c0, "getOption")) {
+      HASH_GUARD_LITSTR(0x402DD1A85CAEA6C0LL, NAMSTR(s_sys_ss7d2a9ef4, "getOption")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -9790,7 +9790,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 65:
-      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss65eb8e41, "fetchAll")) {
+      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss21dd0673, "fetchAll")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -9804,7 +9804,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 66:
-      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss2dc69ec2, "append")) {
+      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss459a2a12, "append")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -9826,7 +9826,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 68:
-      HASH_GUARD_LITSTR(0x5BB1AF59B155E144LL, NAMSTR(s_sys_ss4eaa1ebc, "getResultMessage")) {
+      HASH_GUARD_LITSTR(0x5BB1AF59B155E144LL, NAMSTR(s_sys_ss2ec4df0b, "getResultMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -9840,7 +9840,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 70:
-      HASH_GUARD_LITSTR(0x42FAC655280A6146LL, NAMSTR(s_sys_ss280a6146, "replace")) {
+      HASH_GUARD_LITSTR(0x42FAC655280A6146LL, NAMSTR(s_sys_ss3029c43a, "replace")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -9867,7 +9867,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 71:
-      HASH_GUARD_LITSTR(0x39099707DF7945C7LL, NAMSTR(s_sys_ss2086ba39, "increment")) {
+      HASH_GUARD_LITSTR(0x39099707DF7945C7LL, NAMSTR(s_sys_ss312d8bcf, "increment")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -9890,7 +9890,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 83:
-      HASH_GUARD_LITSTR(0x1C660E5BFA6F55D3LL, NAMSTR(s_sys_ss0590aa2d, "delete")) {
+      HASH_GUARD_LITSTR(0x1C660E5BFA6F55D3LL, NAMSTR(s_sys_ss4ca209c3, "delete")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -9913,7 +9913,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 87:
-      HASH_GUARD_LITSTR(0x344A3DC90A5BD1D7LL, NAMSTR(s_sys_ss0a5bd1d7, "getByKey")) {
+      HASH_GUARD_LITSTR(0x344A3DC90A5BD1D7LL, NAMSTR(s_sys_ss33591ad3, "getByKey")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -9943,7 +9943,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         else if (count == 3) return (t_getbykey(a0, a1, a2));
         else return (t_getbykey(a0, a1, a2, ref(a3)));
       }
-      HASH_GUARD_LITSTR(0x5044B38DE4461A57LL, NAMSTR(s_sys_ss1bb9e5a9, "getServerList")) {
+      HASH_GUARD_LITSTR(0x5044B38DE4461A57LL, NAMSTR(s_sys_ss7e17c9c6, "getServerList")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -9957,7 +9957,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 89:
-      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss7ce59bd9, "getStats")) {
+      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss3a0ef2e6, "getStats")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -9971,7 +9971,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 90:
-      HASH_GUARD_LITSTR(0x2A733FC12BA4C1DALL, NAMSTR(s_sys_ss2ba4c1da, "decrement")) {
+      HASH_GUARD_LITSTR(0x2A733FC12BA4C1DALL, NAMSTR(s_sys_ss2a19cdf6, "decrement")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -9994,7 +9994,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -10013,7 +10013,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 96:
-      HASH_GUARD_LITSTR(0x086C8D4E944C0FE0LL, NAMSTR(s_sys_ss6bb3f020, "appendByKey")) {
+      HASH_GUARD_LITSTR(0x086C8D4E944C0FE0LL, NAMSTR(s_sys_ss31a97990, "appendByKey")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -10039,7 +10039,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 102:
-      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss6237aae6, "addServer")) {
+      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss163bad01, "addServer")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -10066,7 +10066,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 110:
-      HASH_GUARD_LITSTR(0x0EE9EC6BCA56B46ELL, NAMSTR(s_sys_ss35a94b92, "prependByKey")) {
+      HASH_GUARD_LITSTR(0x0EE9EC6BCA56B46ELL, NAMSTR(s_sys_ss106b4dd7, "prependByKey")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -10092,7 +10092,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 114:
-      HASH_GUARD_LITSTR(0x3B59E52110B990F2LL, NAMSTR(s_sys_ss10b990f2, "deleteByKey")) {
+      HASH_GUARD_LITSTR(0x3B59E52110B990F2LL, NAMSTR(s_sys_ss172df677, "deleteByKey")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -10119,7 +10119,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 115:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -10133,7 +10133,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 118:
-      HASH_GUARD_LITSTR(0x18A8B25BF74FA276LL, NAMSTR(s_sys_ss08b05d8a, "getDelayed")) {
+      HASH_GUARD_LITSTR(0x18A8B25BF74FA276LL, NAMSTR(s_sys_ss4bab1591, "getDelayed")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -10161,7 +10161,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 119:
-      HASH_GUARD_LITSTR(0x03F8E65E47097177LL, NAMSTR(s_sys_ss47097177, "addByKey")) {
+      HASH_GUARD_LITSTR(0x03F8E65E47097177LL, NAMSTR(s_sys_ss6ae7fa54, "addByKey")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -10190,7 +10190,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         if (count <= 3) return (t_addbykey(a0, a1, a2));
         else return (t_addbykey(a0, a1, a2, a3));
       }
-      HASH_GUARD_LITSTR(0x6AB1842FE8684D77LL, NAMSTR(s_sys_ss1797b289, "setMultiByKey")) {
+      HASH_GUARD_LITSTR(0x6AB1842FE8684D77LL, NAMSTR(s_sys_ss1cfbc2c8, "setMultiByKey")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -10217,7 +10217,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 121:
-      HASH_GUARD_LITSTR(0x50BC469CFA9BF579LL, NAMSTR(s_sys_ss05640a87, "casByKey")) {
+      HASH_GUARD_LITSTR(0x50BC469CFA9BF579LL, NAMSTR(s_sys_ss3bd544b6, "casByKey")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -10252,7 +10252,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 122:
-      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss24ffa186, "flush")) {
+      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss56c1ddfb, "flush")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -10271,7 +10271,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 123:
-      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
+      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss0b929a80, "fetch")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -10285,7 +10285,7 @@ Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 125:
-      HASH_GUARD_LITSTR(0x3F460132535C00FDLL, NAMSTR(s_sys_ss535c00fd, "getResultCode")) {
+      HASH_GUARD_LITSTR(0x3F460132535C00FDLL, NAMSTR(s_sys_ss4efec04e, "getResultCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -11518,227 +11518,227 @@ bool c_Memcached::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 127) {
     case 2:
-      HASH_GUARD_LITSTR(0x38998A4858382D82LL, NAMSTR(s_sys_ss58382d82, "getMultiByKey")) {
+      HASH_GUARD_LITSTR(0x38998A4858382D82LL, NAMSTR(s_sys_ss6c5e1663, "getMultiByKey")) {
         mcp.ci = &c_Memcached::ci_getmultibykey;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x4F31CCB24341F605LL, NAMSTR(s_sys_ss4341f605, "getMulti")) {
+      HASH_GUARD_LITSTR(0x4F31CCB24341F605LL, NAMSTR(s_sys_ss0939351d, "getMulti")) {
         mcp.ci = &c_Memcached::ci_getmulti;
         return true;
       }
-      HASH_GUARD_LITSTR(0x6FB9087461635285LL, NAMSTR(s_sys_ss61635285, "setOption")) {
+      HASH_GUARD_LITSTR(0x6FB9087461635285LL, NAMSTR(s_sys_ss2f8e5140, "setOption")) {
         mcp.ci = &c_Memcached::ci_setoption;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x06E29D289FC0AF87LL, NAMSTR(s_sys_ss603f5079, "addServers")) {
+      HASH_GUARD_LITSTR(0x06E29D289FC0AF87LL, NAMSTR(s_sys_ss41cb9189, "addServers")) {
         mcp.ci = &c_Memcached::ci_addservers;
         return true;
       }
       break;
     case 11:
-      HASH_GUARD_LITSTR(0x15D34462FC79458BLL, NAMSTR(s_sys_ss0386ba75, "add")) {
+      HASH_GUARD_LITSTR(0x15D34462FC79458BLL, NAMSTR(s_sys_ss6db5a215, "add")) {
         mcp.ci = &c_Memcached::ci_add;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x1C80DDD00742930FLL, NAMSTR(s_sys_ss0742930f, "getServerByKey")) {
+      HASH_GUARD_LITSTR(0x1C80DDD00742930FLL, NAMSTR(s_sys_ss0fe15fdf, "getServerByKey")) {
         mcp.ci = &c_Memcached::ci_getserverbykey;
         return true;
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316, "getVersion")) {
+      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss1b5e3529, "getVersion")) {
         mcp.ci = &c_Memcached::ci_getversion;
         return true;
       }
       break;
     case 23:
-      HASH_GUARD_LITSTR(0x65C5EF328C77C917LL, NAMSTR(s_sys_ss738836e9, "prepend")) {
+      HASH_GUARD_LITSTR(0x65C5EF328C77C917LL, NAMSTR(s_sys_ss2da130db, "prepend")) {
         mcp.ci = &c_Memcached::ci_prepend;
         return true;
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x3B7F419ECE80EE19LL, NAMSTR(s_sys_ss317f11e7, "setMulti")) {
+      HASH_GUARD_LITSTR(0x3B7F419ECE80EE19LL, NAMSTR(s_sys_ss038035c6, "setMulti")) {
         mcp.ci = &c_Memcached::ci_setmulti;
         return true;
       }
       break;
     case 33:
-      HASH_GUARD_LITSTR(0x399A6427C2185621LL, NAMSTR(s_sys_ss3de7a9df, "set")) {
+      HASH_GUARD_LITSTR(0x399A6427C2185621LL, NAMSTR(s_sys_ss0241fb06, "set")) {
         mcp.ci = &c_Memcached::ci_set;
         return true;
       }
-      HASH_GUARD_LITSTR(0x573E46DE52BFF8A1LL, NAMSTR(s_sys_ss52bff8a1, "cas")) {
+      HASH_GUARD_LITSTR(0x573E46DE52BFF8A1LL, NAMSTR(s_sys_ss449b0823, "cas")) {
         mcp.ci = &c_Memcached::ci_cas;
         return true;
       }
       break;
     case 40:
-      HASH_GUARD_LITSTR(0x25DCCC35D69AD828LL, NAMSTR(s_sys_ss296527d8, "get")) {
+      HASH_GUARD_LITSTR(0x25DCCC35D69AD828LL, NAMSTR(s_sys_ss153b6861, "get")) {
         mcp.ci = &c_Memcached::ci_get;
         return true;
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x00FBB16B058D5C2FLL, NAMSTR(s_sys_ss058d5c2f, "getDelayedByKey")) {
+      HASH_GUARD_LITSTR(0x00FBB16B058D5C2FLL, NAMSTR(s_sys_ss69e3dc9b, "getDelayedByKey")) {
         mcp.ci = &c_Memcached::ci_getdelayedbykey;
         return true;
       }
       break;
     case 56:
-      HASH_GUARD_LITSTR(0x7F4CB6AD55C9F7B8LL, NAMSTR(s_sys_ss55c9f7b8, "setByKey")) {
+      HASH_GUARD_LITSTR(0x7F4CB6AD55C9F7B8LL, NAMSTR(s_sys_ss5097084d, "setByKey")) {
         mcp.ci = &c_Memcached::ci_setbykey;
         return true;
       }
       break;
     case 61:
-      HASH_GUARD_LITSTR(0x303DBA91556D773DLL, NAMSTR(s_sys_ss556d773d, "replaceByKey")) {
+      HASH_GUARD_LITSTR(0x303DBA91556D773DLL, NAMSTR(s_sys_ss18bebdc2, "replaceByKey")) {
         mcp.ci = &c_Memcached::ci_replacebykey;
         return true;
       }
       break;
     case 64:
-      HASH_GUARD_LITSTR(0x402DD1A85CAEA6C0LL, NAMSTR(s_sys_ss5caea6c0, "getOption")) {
+      HASH_GUARD_LITSTR(0x402DD1A85CAEA6C0LL, NAMSTR(s_sys_ss7d2a9ef4, "getOption")) {
         mcp.ci = &c_Memcached::ci_getoption;
         return true;
       }
       break;
     case 65:
-      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss65eb8e41, "fetchAll")) {
+      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss21dd0673, "fetchAll")) {
         mcp.ci = &c_Memcached::ci_fetchall;
         return true;
       }
       break;
     case 66:
-      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss2dc69ec2, "append")) {
+      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss459a2a12, "append")) {
         mcp.ci = &c_Memcached::ci_append;
         return true;
       }
       break;
     case 68:
-      HASH_GUARD_LITSTR(0x5BB1AF59B155E144LL, NAMSTR(s_sys_ss4eaa1ebc, "getResultMessage")) {
+      HASH_GUARD_LITSTR(0x5BB1AF59B155E144LL, NAMSTR(s_sys_ss2ec4df0b, "getResultMessage")) {
         mcp.ci = &c_Memcached::ci_getresultmessage;
         return true;
       }
       break;
     case 70:
-      HASH_GUARD_LITSTR(0x42FAC655280A6146LL, NAMSTR(s_sys_ss280a6146, "replace")) {
+      HASH_GUARD_LITSTR(0x42FAC655280A6146LL, NAMSTR(s_sys_ss3029c43a, "replace")) {
         mcp.ci = &c_Memcached::ci_replace;
         return true;
       }
       break;
     case 71:
-      HASH_GUARD_LITSTR(0x39099707DF7945C7LL, NAMSTR(s_sys_ss2086ba39, "increment")) {
+      HASH_GUARD_LITSTR(0x39099707DF7945C7LL, NAMSTR(s_sys_ss312d8bcf, "increment")) {
         mcp.ci = &c_Memcached::ci_increment;
         return true;
       }
       break;
     case 83:
-      HASH_GUARD_LITSTR(0x1C660E5BFA6F55D3LL, NAMSTR(s_sys_ss0590aa2d, "delete")) {
+      HASH_GUARD_LITSTR(0x1C660E5BFA6F55D3LL, NAMSTR(s_sys_ss4ca209c3, "delete")) {
         mcp.ci = &c_Memcached::ci_delete;
         return true;
       }
       break;
     case 87:
-      HASH_GUARD_LITSTR(0x344A3DC90A5BD1D7LL, NAMSTR(s_sys_ss0a5bd1d7, "getByKey")) {
+      HASH_GUARD_LITSTR(0x344A3DC90A5BD1D7LL, NAMSTR(s_sys_ss33591ad3, "getByKey")) {
         mcp.ci = &c_Memcached::ci_getbykey;
         return true;
       }
-      HASH_GUARD_LITSTR(0x5044B38DE4461A57LL, NAMSTR(s_sys_ss1bb9e5a9, "getServerList")) {
+      HASH_GUARD_LITSTR(0x5044B38DE4461A57LL, NAMSTR(s_sys_ss7e17c9c6, "getServerList")) {
         mcp.ci = &c_Memcached::ci_getserverlist;
         return true;
       }
       break;
     case 89:
-      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss7ce59bd9, "getStats")) {
+      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss3a0ef2e6, "getStats")) {
         mcp.ci = &c_Memcached::ci_getstats;
         return true;
       }
       break;
     case 90:
-      HASH_GUARD_LITSTR(0x2A733FC12BA4C1DALL, NAMSTR(s_sys_ss2ba4c1da, "decrement")) {
+      HASH_GUARD_LITSTR(0x2A733FC12BA4C1DALL, NAMSTR(s_sys_ss2a19cdf6, "decrement")) {
         mcp.ci = &c_Memcached::ci_decrement;
         return true;
       }
       break;
     case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_Memcached::ci___construct;
         return true;
       }
       break;
     case 96:
-      HASH_GUARD_LITSTR(0x086C8D4E944C0FE0LL, NAMSTR(s_sys_ss6bb3f020, "appendByKey")) {
+      HASH_GUARD_LITSTR(0x086C8D4E944C0FE0LL, NAMSTR(s_sys_ss31a97990, "appendByKey")) {
         mcp.ci = &c_Memcached::ci_appendbykey;
         return true;
       }
       break;
     case 102:
-      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss6237aae6, "addServer")) {
+      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss163bad01, "addServer")) {
         mcp.ci = &c_Memcached::ci_addserver;
         return true;
       }
       break;
     case 110:
-      HASH_GUARD_LITSTR(0x0EE9EC6BCA56B46ELL, NAMSTR(s_sys_ss35a94b92, "prependByKey")) {
+      HASH_GUARD_LITSTR(0x0EE9EC6BCA56B46ELL, NAMSTR(s_sys_ss106b4dd7, "prependByKey")) {
         mcp.ci = &c_Memcached::ci_prependbykey;
         return true;
       }
       break;
     case 114:
-      HASH_GUARD_LITSTR(0x3B59E52110B990F2LL, NAMSTR(s_sys_ss10b990f2, "deleteByKey")) {
+      HASH_GUARD_LITSTR(0x3B59E52110B990F2LL, NAMSTR(s_sys_ss172df677, "deleteByKey")) {
         mcp.ci = &c_Memcached::ci_deletebykey;
         return true;
       }
       break;
     case 115:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_Memcached::ci___destruct;
         return true;
       }
       break;
     case 118:
-      HASH_GUARD_LITSTR(0x18A8B25BF74FA276LL, NAMSTR(s_sys_ss08b05d8a, "getDelayed")) {
+      HASH_GUARD_LITSTR(0x18A8B25BF74FA276LL, NAMSTR(s_sys_ss4bab1591, "getDelayed")) {
         mcp.ci = &c_Memcached::ci_getdelayed;
         return true;
       }
       break;
     case 119:
-      HASH_GUARD_LITSTR(0x03F8E65E47097177LL, NAMSTR(s_sys_ss47097177, "addByKey")) {
+      HASH_GUARD_LITSTR(0x03F8E65E47097177LL, NAMSTR(s_sys_ss6ae7fa54, "addByKey")) {
         mcp.ci = &c_Memcached::ci_addbykey;
         return true;
       }
-      HASH_GUARD_LITSTR(0x6AB1842FE8684D77LL, NAMSTR(s_sys_ss1797b289, "setMultiByKey")) {
+      HASH_GUARD_LITSTR(0x6AB1842FE8684D77LL, NAMSTR(s_sys_ss1cfbc2c8, "setMultiByKey")) {
         mcp.ci = &c_Memcached::ci_setmultibykey;
         return true;
       }
       break;
     case 121:
-      HASH_GUARD_LITSTR(0x50BC469CFA9BF579LL, NAMSTR(s_sys_ss05640a87, "casByKey")) {
+      HASH_GUARD_LITSTR(0x50BC469CFA9BF579LL, NAMSTR(s_sys_ss3bd544b6, "casByKey")) {
         mcp.ci = &c_Memcached::ci_casbykey;
         return true;
       }
       break;
     case 122:
-      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss24ffa186, "flush")) {
+      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss56c1ddfb, "flush")) {
         mcp.ci = &c_Memcached::ci_flush;
         return true;
       }
       break;
     case 123:
-      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
+      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss0b929a80, "fetch")) {
         mcp.ci = &c_Memcached::ci_fetch;
         return true;
       }
       break;
     case 125:
-      HASH_GUARD_LITSTR(0x3F460132535C00FDLL, NAMSTR(s_sys_ss535c00fd, "getResultCode")) {
+      HASH_GUARD_LITSTR(0x3F460132535C00FDLL, NAMSTR(s_sys_ss4efec04e, "getResultCode")) {
         mcp.ci = &c_Memcached::ci_getresultcode;
         return true;
       }
@@ -11894,7 +11894,7 @@ Variant c_DOMComment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -11906,7 +11906,7 @@ Variant c_DOMComment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -11992,11 +11992,11 @@ bool c_DOMComment::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMComment::ci___destruct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMComment::ci___construct;
         return true;
       }
@@ -12152,7 +12152,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
+      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss0fad1395, "close")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -12166,7 +12166,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x6081F282094466C2LL, NAMSTR(s_sys_ss094466c2, "lasterrormsg")) {
+      HASH_GUARD_LITSTR(0x6081F282094466C2LL, NAMSTR(s_sys_ss500f232f, "lasterrormsg")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -12178,7 +12178,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         if (count > 0) return throw_toomany_arguments("lasterrormsg", 0, 1);
         return (t_lasterrormsg());
       }
-      HASH_GUARD_LITSTR(0x65BD6700742BF3C2LL, NAMSTR(s_sys_ss742bf3c2, "openblob")) {
+      HASH_GUARD_LITSTR(0x65BD6700742BF3C2LL, NAMSTR(s_sys_ss2351cce7, "openblob")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -12209,7 +12209,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x3AA4CCEC6BD68143LL, NAMSTR(s_sys_ss6bd68143, "createaggregate")) {
+      HASH_GUARD_LITSTR(0x3AA4CCEC6BD68143LL, NAMSTR(s_sys_ss786e966e, "createaggregate")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -12240,7 +12240,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x21F68C010C124BC4LL, NAMSTR(s_sys_ss0c124bc4, "open")) {
+      HASH_GUARD_LITSTR(0x21F68C010C124BC4LL, NAMSTR(s_sys_ss39fdd73a, "open")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -12268,7 +12268,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x632B468FC2FCAB0ALL, NAMSTR(s_sys_ss3d0354f6, "lasterrorcode")) {
+      HASH_GUARD_LITSTR(0x632B468FC2FCAB0ALL, NAMSTR(s_sys_ss556e9ccf, "lasterrorcode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -12282,7 +12282,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x4F1D1ED7B087208CLL, NAMSTR(s_sys_ss4f78df74, "exec")) {
+      HASH_GUARD_LITSTR(0x4F1D1ED7B087208CLL, NAMSTR(s_sys_ss17f0e883, "exec")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -12300,7 +12300,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 13:
-      HASH_GUARD_LITSTR(0x7CECF508291057CDLL, NAMSTR(s_sys_ss291057cd, "createfunction")) {
+      HASH_GUARD_LITSTR(0x7CECF508291057CDLL, NAMSTR(s_sys_ss1f612ec4, "createfunction")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -12327,7 +12327,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x64D2BDB189B02819LL, NAMSTR(s_sys_ss764fd7e7, "changes")) {
+      HASH_GUARD_LITSTR(0x64D2BDB189B02819LL, NAMSTR(s_sys_ss2a44d071, "changes")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -12341,7 +12341,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -12355,7 +12355,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 36:
-      HASH_GUARD_LITSTR(0x1B3CDE890A487664LL, NAMSTR(s_sys_ss0a487664, "loadextension")) {
+      HASH_GUARD_LITSTR(0x1B3CDE890A487664LL, NAMSTR(s_sys_ss4d19daaa, "loadextension")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -12373,7 +12373,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 38:
-      HASH_GUARD_LITSTR(0x5024F08DB0FDCBE6LL, NAMSTR(s_sys_ss4f02341a, "lastinsertrowid")) {
+      HASH_GUARD_LITSTR(0x5024F08DB0FDCBE6LL, NAMSTR(s_sys_ss1bbd440a, "lastinsertrowid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -12387,7 +12387,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 42:
-      HASH_GUARD_LITSTR(0x5AE41239FF63D86ALL, NAMSTR(s_sys_ss009c2796, "version")) {
+      HASH_GUARD_LITSTR(0x5AE41239FF63D86ALL, NAMSTR(s_sys_ss7cd91db4, "version")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -12401,7 +12401,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 46:
-      HASH_GUARD_LITSTR(0x156B1FAE4132ABEELL, NAMSTR(s_sys_ss4132abee, "querysingle")) {
+      HASH_GUARD_LITSTR(0x156B1FAE4132ABEELL, NAMSTR(s_sys_ss733880ae, "querysingle")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -12424,7 +12424,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x540020AE4BA591AFLL, NAMSTR(s_sys_ss4ba591af, "prepare")) {
+      HASH_GUARD_LITSTR(0x540020AE4BA591AFLL, NAMSTR(s_sys_ss48724660, "prepare")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -12442,7 +12442,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -12456,7 +12456,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 53:
-      HASH_GUARD_LITSTR(0x607C4C73BB251635LL, NAMSTR(s_sys_ss44dae9cb, "escapestring")) {
+      HASH_GUARD_LITSTR(0x607C4C73BB251635LL, NAMSTR(s_sys_ss69f4b5d8, "escapestring")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -12474,7 +12474,7 @@ Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 55:
-      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss414da377, "query")) {
+      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss1c0ab7fa, "query")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -13009,107 +13009,107 @@ bool c_SQLite3::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
+      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss0fad1395, "close")) {
         mcp.ci = &c_SQLite3::ci_close;
         return true;
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x6081F282094466C2LL, NAMSTR(s_sys_ss094466c2, "lasterrormsg")) {
+      HASH_GUARD_LITSTR(0x6081F282094466C2LL, NAMSTR(s_sys_ss500f232f, "lasterrormsg")) {
         mcp.ci = &c_SQLite3::ci_lasterrormsg;
         return true;
       }
-      HASH_GUARD_LITSTR(0x65BD6700742BF3C2LL, NAMSTR(s_sys_ss742bf3c2, "openblob")) {
+      HASH_GUARD_LITSTR(0x65BD6700742BF3C2LL, NAMSTR(s_sys_ss2351cce7, "openblob")) {
         mcp.ci = &c_SQLite3::ci_openblob;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x3AA4CCEC6BD68143LL, NAMSTR(s_sys_ss6bd68143, "createaggregate")) {
+      HASH_GUARD_LITSTR(0x3AA4CCEC6BD68143LL, NAMSTR(s_sys_ss786e966e, "createaggregate")) {
         mcp.ci = &c_SQLite3::ci_createaggregate;
         return true;
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x21F68C010C124BC4LL, NAMSTR(s_sys_ss0c124bc4, "open")) {
+      HASH_GUARD_LITSTR(0x21F68C010C124BC4LL, NAMSTR(s_sys_ss39fdd73a, "open")) {
         mcp.ci = &c_SQLite3::ci_open;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x632B468FC2FCAB0ALL, NAMSTR(s_sys_ss3d0354f6, "lasterrorcode")) {
+      HASH_GUARD_LITSTR(0x632B468FC2FCAB0ALL, NAMSTR(s_sys_ss556e9ccf, "lasterrorcode")) {
         mcp.ci = &c_SQLite3::ci_lasterrorcode;
         return true;
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x4F1D1ED7B087208CLL, NAMSTR(s_sys_ss4f78df74, "exec")) {
+      HASH_GUARD_LITSTR(0x4F1D1ED7B087208CLL, NAMSTR(s_sys_ss17f0e883, "exec")) {
         mcp.ci = &c_SQLite3::ci_exec;
         return true;
       }
       break;
     case 13:
-      HASH_GUARD_LITSTR(0x7CECF508291057CDLL, NAMSTR(s_sys_ss291057cd, "createfunction")) {
+      HASH_GUARD_LITSTR(0x7CECF508291057CDLL, NAMSTR(s_sys_ss1f612ec4, "createfunction")) {
         mcp.ci = &c_SQLite3::ci_createfunction;
         return true;
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x64D2BDB189B02819LL, NAMSTR(s_sys_ss764fd7e7, "changes")) {
+      HASH_GUARD_LITSTR(0x64D2BDB189B02819LL, NAMSTR(s_sys_ss2a44d071, "changes")) {
         mcp.ci = &c_SQLite3::ci_changes;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_SQLite3::ci___construct;
         return true;
       }
       break;
     case 36:
-      HASH_GUARD_LITSTR(0x1B3CDE890A487664LL, NAMSTR(s_sys_ss0a487664, "loadextension")) {
+      HASH_GUARD_LITSTR(0x1B3CDE890A487664LL, NAMSTR(s_sys_ss4d19daaa, "loadextension")) {
         mcp.ci = &c_SQLite3::ci_loadextension;
         return true;
       }
       break;
     case 38:
-      HASH_GUARD_LITSTR(0x5024F08DB0FDCBE6LL, NAMSTR(s_sys_ss4f02341a, "lastinsertrowid")) {
+      HASH_GUARD_LITSTR(0x5024F08DB0FDCBE6LL, NAMSTR(s_sys_ss1bbd440a, "lastinsertrowid")) {
         mcp.ci = &c_SQLite3::ci_lastinsertrowid;
         return true;
       }
       break;
     case 42:
-      HASH_GUARD_LITSTR(0x5AE41239FF63D86ALL, NAMSTR(s_sys_ss009c2796, "version")) {
+      HASH_GUARD_LITSTR(0x5AE41239FF63D86ALL, NAMSTR(s_sys_ss7cd91db4, "version")) {
         mcp.ci = &c_SQLite3::ci_version;
         return true;
       }
       break;
     case 46:
-      HASH_GUARD_LITSTR(0x156B1FAE4132ABEELL, NAMSTR(s_sys_ss4132abee, "querysingle")) {
+      HASH_GUARD_LITSTR(0x156B1FAE4132ABEELL, NAMSTR(s_sys_ss733880ae, "querysingle")) {
         mcp.ci = &c_SQLite3::ci_querysingle;
         return true;
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x540020AE4BA591AFLL, NAMSTR(s_sys_ss4ba591af, "prepare")) {
+      HASH_GUARD_LITSTR(0x540020AE4BA591AFLL, NAMSTR(s_sys_ss48724660, "prepare")) {
         mcp.ci = &c_SQLite3::ci_prepare;
         return true;
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_SQLite3::ci___destruct;
         return true;
       }
       break;
     case 53:
-      HASH_GUARD_LITSTR(0x607C4C73BB251635LL, NAMSTR(s_sys_ss44dae9cb, "escapestring")) {
+      HASH_GUARD_LITSTR(0x607C4C73BB251635LL, NAMSTR(s_sys_ss69f4b5d8, "escapestring")) {
         mcp.ci = &c_SQLite3::ci_escapestring;
         return true;
       }
       break;
     case 55:
-      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss414da377, "query")) {
+      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss1c0ab7fa, "query")) {
         mcp.ci = &c_SQLite3::ci_query;
         return true;
       }
@@ -13242,7 +13242,7 @@ Variant c_DOMAttr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -13256,7 +13256,7 @@ Variant c_DOMAttr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x30A9329415D17F24LL, NAMSTR(s_sys_ss15d17f24, "isId")) {
+      HASH_GUARD_LITSTR(0x30A9329415D17F24LL, NAMSTR(s_sys_ss78810491, "isId")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -13270,7 +13270,7 @@ Variant c_DOMAttr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -13292,7 +13292,7 @@ Variant c_DOMAttr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -13313,7 +13313,7 @@ Variant c_DOMAttr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         if (count <= 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -13482,29 +13482,29 @@ bool c_DOMAttr::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMAttr::ci___destruct;
         return true;
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x30A9329415D17F24LL, NAMSTR(s_sys_ss15d17f24, "isId")) {
+      HASH_GUARD_LITSTR(0x30A9329415D17F24LL, NAMSTR(s_sys_ss78810491, "isId")) {
         mcp.ci = &c_DOMAttr::ci_isid;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         mcp.ci = &c_DOMAttr::ci___set;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMAttr::ci___construct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_DOMAttr::ci___get;
         return true;
       }
@@ -13666,7 +13666,7 @@ Variant c_SoapVar::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -13678,7 +13678,7 @@ Variant c_SoapVar::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -13798,11 +13798,11 @@ bool c_SoapVar::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_SoapVar::ci___destruct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_SoapVar::ci___construct;
         return true;
       }
@@ -14015,7 +14015,7 @@ Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -14027,7 +14027,7 @@ Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
-      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss32a12503, "getIterator")) {
+      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss0167520c, "getIterator")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -14041,7 +14041,7 @@ Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -14063,7 +14063,7 @@ Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 6:
-      HASH_GUARD_LITSTR(0x0A41DBE0830902C6LL, NAMSTR(s_sys_ss7cf6fd3a, "item")) {
+      HASH_GUARD_LITSTR(0x0A41DBE0830902C6LL, NAMSTR(s_sys_ss1247a693, "item")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -14081,7 +14081,7 @@ Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x5D3CEC627F9ADC3ALL, NAMSTR(s_sys_ss7f9adc3a, "getNamedItem")) {
+      HASH_GUARD_LITSTR(0x5D3CEC627F9ADC3ALL, NAMSTR(s_sys_ss21369918, "getNamedItem")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -14099,7 +14099,7 @@ Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 11:
-      HASH_GUARD_LITSTR(0x53B4D840FF4F0F1BLL, NAMSTR(s_sys_ss00b0f0e5, "getNamedItemNS")) {
+      HASH_GUARD_LITSTR(0x53B4D840FF4F0F1BLL, NAMSTR(s_sys_ss7cd11f20, "getNamedItemNS")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -14121,7 +14121,7 @@ Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -14133,7 +14133,7 @@ Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -14382,45 +14382,45 @@ bool c_DOMNamedNodeMap::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMNamedNodeMap::ci___destruct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss32a12503, "getIterator")) {
+      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss0167520c, "getIterator")) {
         mcp.ci = &c_DOMNamedNodeMap::ci_getiterator;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         mcp.ci = &c_DOMNamedNodeMap::ci___set;
         return true;
       }
       break;
     case 6:
-      HASH_GUARD_LITSTR(0x0A41DBE0830902C6LL, NAMSTR(s_sys_ss7cf6fd3a, "item")) {
+      HASH_GUARD_LITSTR(0x0A41DBE0830902C6LL, NAMSTR(s_sys_ss1247a693, "item")) {
         mcp.ci = &c_DOMNamedNodeMap::ci_item;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x5D3CEC627F9ADC3ALL, NAMSTR(s_sys_ss7f9adc3a, "getNamedItem")) {
+      HASH_GUARD_LITSTR(0x5D3CEC627F9ADC3ALL, NAMSTR(s_sys_ss21369918, "getNamedItem")) {
         mcp.ci = &c_DOMNamedNodeMap::ci_getnameditem;
         return true;
       }
       break;
     case 11:
-      HASH_GUARD_LITSTR(0x53B4D840FF4F0F1BLL, NAMSTR(s_sys_ss00b0f0e5, "getNamedItemNS")) {
+      HASH_GUARD_LITSTR(0x53B4D840FF4F0F1BLL, NAMSTR(s_sys_ss7cd11f20, "getNamedItemNS")) {
         mcp.ci = &c_DOMNamedNodeMap::ci_getnameditemns;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMNamedNodeMap::ci___construct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_DOMNamedNodeMap::ci___get;
         return true;
       }
@@ -14553,7 +14553,7 @@ Variant c_SQLite3Result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 0:
-      HASH_GUARD_LITSTR(0x340A51AE22A924E0LL, NAMSTR(s_sys_ss22a924e0, "reset")) {
+      HASH_GUARD_LITSTR(0x340A51AE22A924E0LL, NAMSTR(s_sys_ss5c8999e5, "reset")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -14567,7 +14567,7 @@ Variant c_SQLite3Result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -14581,7 +14581,7 @@ Variant c_SQLite3Result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 6:
-      HASH_GUARD_LITSTR(0x4C7702FC22784996LL, NAMSTR(s_sys_ss22784996, "numcolumns")) {
+      HASH_GUARD_LITSTR(0x4C7702FC22784996LL, NAMSTR(s_sys_ss64e0c478, "numcolumns")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -14595,7 +14595,7 @@ Variant c_SQLite3Result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x696EFC04EE7E47F8LL, NAMSTR(s_sys_ss1181b808, "columnname")) {
+      HASH_GUARD_LITSTR(0x696EFC04EE7E47F8LL, NAMSTR(s_sys_ss72bc97a5, "columnname")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -14613,7 +14613,7 @@ Variant c_SQLite3Result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 11:
-      HASH_GUARD_LITSTR(0x59F73C4DEF1C3A6BLL, NAMSTR(s_sys_ss10e3c595, "fetcharray")) {
+      HASH_GUARD_LITSTR(0x59F73C4DEF1C3A6BLL, NAMSTR(s_sys_ss42994feb, "fetcharray")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -14632,7 +14632,7 @@ Variant c_SQLite3Result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x32A58B0CE493957CLL, NAMSTR(s_sys_ss1b6c6a84, "finalize")) {
+      HASH_GUARD_LITSTR(0x32A58B0CE493957CLL, NAMSTR(s_sys_ss2d350426, "finalize")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -14646,7 +14646,7 @@ Variant c_SQLite3Result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 13:
-      HASH_GUARD_LITSTR(0x42EDB5CA009D8C6DLL, NAMSTR(s_sys_ss009d8c6d, "columntype")) {
+      HASH_GUARD_LITSTR(0x42EDB5CA009D8C6DLL, NAMSTR(s_sys_ss3c4bceb1, "columntype")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -14664,7 +14664,7 @@ Variant c_SQLite3Result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -14899,49 +14899,49 @@ bool c_SQLite3Result::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 0:
-      HASH_GUARD_LITSTR(0x340A51AE22A924E0LL, NAMSTR(s_sys_ss22a924e0, "reset")) {
+      HASH_GUARD_LITSTR(0x340A51AE22A924E0LL, NAMSTR(s_sys_ss5c8999e5, "reset")) {
         mcp.ci = &c_SQLite3Result::ci_reset;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_SQLite3Result::ci___destruct;
         return true;
       }
       break;
     case 6:
-      HASH_GUARD_LITSTR(0x4C7702FC22784996LL, NAMSTR(s_sys_ss22784996, "numcolumns")) {
+      HASH_GUARD_LITSTR(0x4C7702FC22784996LL, NAMSTR(s_sys_ss64e0c478, "numcolumns")) {
         mcp.ci = &c_SQLite3Result::ci_numcolumns;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x696EFC04EE7E47F8LL, NAMSTR(s_sys_ss1181b808, "columnname")) {
+      HASH_GUARD_LITSTR(0x696EFC04EE7E47F8LL, NAMSTR(s_sys_ss72bc97a5, "columnname")) {
         mcp.ci = &c_SQLite3Result::ci_columnname;
         return true;
       }
       break;
     case 11:
-      HASH_GUARD_LITSTR(0x59F73C4DEF1C3A6BLL, NAMSTR(s_sys_ss10e3c595, "fetcharray")) {
+      HASH_GUARD_LITSTR(0x59F73C4DEF1C3A6BLL, NAMSTR(s_sys_ss42994feb, "fetcharray")) {
         mcp.ci = &c_SQLite3Result::ci_fetcharray;
         return true;
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x32A58B0CE493957CLL, NAMSTR(s_sys_ss1b6c6a84, "finalize")) {
+      HASH_GUARD_LITSTR(0x32A58B0CE493957CLL, NAMSTR(s_sys_ss2d350426, "finalize")) {
         mcp.ci = &c_SQLite3Result::ci_finalize;
         return true;
       }
       break;
     case 13:
-      HASH_GUARD_LITSTR(0x42EDB5CA009D8C6DLL, NAMSTR(s_sys_ss009d8c6d, "columntype")) {
+      HASH_GUARD_LITSTR(0x42EDB5CA009D8C6DLL, NAMSTR(s_sys_ss3c4bceb1, "columntype")) {
         mcp.ci = &c_SQLite3Result::ci_columntype;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_SQLite3Result::ci___construct;
         return true;
       }
@@ -15074,7 +15074,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 0:
-      HASH_GUARD_LITSTR(0x3E6BCFB9742FC700LL, NAMSTR(s_sys_ss742fc700, "offsetExists")) {
+      HASH_GUARD_LITSTR(0x3E6BCFB9742FC700LL, NAMSTR(s_sys_ss6cc6b367, "offsetExists")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -15092,7 +15092,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss32a12503, "getIterator")) {
+      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss0167520c, "getIterator")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -15106,7 +15106,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -15124,7 +15124,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 16:
-      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss65104d10, "count")) {
+      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss0d54babb, "count")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -15138,7 +15138,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -15152,7 +15152,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x2DDE12A9866FC794LL, NAMSTR(s_sys_ss7990386c, "addChild")) {
+      HASH_GUARD_LITSTR(0x2DDE12A9866FC794LL, NAMSTR(s_sys_ss793fe5ea, "addChild")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -15180,7 +15180,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -15202,7 +15202,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x52F7AA6C19BEEAD6LL, NAMSTR(s_sys_ss19beead6, "addAttribute")) {
+      HASH_GUARD_LITSTR(0x52F7AA6C19BEEAD6LL, NAMSTR(s_sys_ss48139170, "addAttribute")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -15230,7 +15230,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x61D11ECEF4404498LL, NAMSTR(s_sys_ss0bbfbb68, "offsetGet")) {
+      HASH_GUARD_LITSTR(0x61D11ECEF4404498LL, NAMSTR(s_sys_ss62975ff0, "offsetGet")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -15248,7 +15248,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 27:
-      HASH_GUARD_LITSTR(0x0817454F196A9A1BLL, NAMSTR(s_sys_ss196a9a1b, "xpath")) {
+      HASH_GUARD_LITSTR(0x0817454F196A9A1BLL, NAMSTR(s_sys_ss1fe1e1ea, "xpath")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -15264,7 +15264,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         if (count != 1) return throw_wrong_arguments("xpath", count, 1, 1, 1);
         return (t_xpath(a0));
       }
-      HASH_GUARD_LITSTR(0x04FB7028C9A2079BLL, NAMSTR(s_sys_ss365df865, "__unset")) {
+      HASH_GUARD_LITSTR(0x04FB7028C9A2079BLL, NAMSTR(s_sys_ss32d46a21, "__unset")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -15282,7 +15282,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 29:
-      HASH_GUARD_LITSTR(0x4B65E1A09A33F21DLL, NAMSTR(s_sys_ss65cc0de3, "attributes")) {
+      HASH_GUARD_LITSTR(0x4B65E1A09A33F21DLL, NAMSTR(s_sys_ss0fc37e03, "attributes")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -15306,7 +15306,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -15344,7 +15344,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 37:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss3d20de82, "getName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -15358,7 +15358,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 38:
-      HASH_GUARD_LITSTR(0x6D9D75B7E3B40FA6LL, NAMSTR(s_sys_ss1c4bf05a, "getNamespaces")) {
+      HASH_GUARD_LITSTR(0x6D9D75B7E3B40FA6LL, NAMSTR(s_sys_ss36a35582, "getNamespaces")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -15375,7 +15375,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         if (count <= 0) return (t_getnamespaces());
         else return (t_getnamespaces(a0));
       }
-      HASH_GUARD_LITSTR(0x5C09D9345FD864A6LL, NAMSTR(s_sys_ss5fd864a6, "asXML")) {
+      HASH_GUARD_LITSTR(0x5C09D9345FD864A6LL, NAMSTR(s_sys_ss20098bac, "asXML")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -15394,7 +15394,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 45:
-      HASH_GUARD_LITSTR(0x2B299E949E2E82ADLL, NAMSTR(s_sys_ss61d17d53, "children")) {
+      HASH_GUARD_LITSTR(0x2B299E949E2E82ADLL, NAMSTR(s_sys_ss717877f6, "children")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -15418,7 +15418,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 46:
-      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ss51de8712, "__isset")) {
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ss4cfc0bef, "__isset")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -15436,7 +15436,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 49:
-      HASH_GUARD_LITSTR(0x0D08AA5F0B2F34F1LL, NAMSTR(s_sys_ss0b2f34f1, "getDocNamespaces")) {
+      HASH_GUARD_LITSTR(0x0D08AA5F0B2F34F1LL, NAMSTR(s_sys_ss6456a3a6, "getDocNamespaces")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -15455,7 +15455,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -15469,7 +15469,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 56:
-      HASH_GUARD_LITSTR(0x0957F693A48AF738LL, NAMSTR(s_sys_ss5b7508c8, "offsetSet")) {
+      HASH_GUARD_LITSTR(0x0957F693A48AF738LL, NAMSTR(s_sys_ss41d45e54, "offsetSet")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -15491,7 +15491,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 58:
-      HASH_GUARD_LITSTR(0x08329980E6369ABALL, NAMSTR(s_sys_ss19c96546, "offsetUnset")) {
+      HASH_GUARD_LITSTR(0x08329980E6369ABALL, NAMSTR(s_sys_ss1a6fd792, "offsetUnset")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -15509,7 +15509,7 @@ Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 61:
-      HASH_GUARD_LITSTR(0x3FE8F6937854F83DLL, NAMSTR(s_sys_ss7854f83d, "registerXPathNamespace")) {
+      HASH_GUARD_LITSTR(0x3FE8F6937854F83DLL, NAMSTR(s_sys_ss50ad79e8, "registerXPathNamespace")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -16228,135 +16228,135 @@ bool c_SimpleXMLElement::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 0:
-      HASH_GUARD_LITSTR(0x3E6BCFB9742FC700LL, NAMSTR(s_sys_ss742fc700, "offsetExists")) {
+      HASH_GUARD_LITSTR(0x3E6BCFB9742FC700LL, NAMSTR(s_sys_ss6cc6b367, "offsetExists")) {
         mcp.ci = &c_SimpleXMLElement::ci_offsetexists;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss32a12503, "getIterator")) {
+      HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ss0167520c, "getIterator")) {
         mcp.ci = &c_SimpleXMLElement::ci_getiterator;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_SimpleXMLElement::ci___get;
         return true;
       }
       break;
     case 16:
-      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss65104d10, "count")) {
+      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss0d54babb, "count")) {
         mcp.ci = &c_SimpleXMLElement::ci_count;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         mcp.ci = &c_SimpleXMLElement::ci___tostring;
         return true;
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x2DDE12A9866FC794LL, NAMSTR(s_sys_ss7990386c, "addChild")) {
+      HASH_GUARD_LITSTR(0x2DDE12A9866FC794LL, NAMSTR(s_sys_ss793fe5ea, "addChild")) {
         mcp.ci = &c_SimpleXMLElement::ci_addchild;
         return true;
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         mcp.ci = &c_SimpleXMLElement::ci___set;
         return true;
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x52F7AA6C19BEEAD6LL, NAMSTR(s_sys_ss19beead6, "addAttribute")) {
+      HASH_GUARD_LITSTR(0x52F7AA6C19BEEAD6LL, NAMSTR(s_sys_ss48139170, "addAttribute")) {
         mcp.ci = &c_SimpleXMLElement::ci_addattribute;
         return true;
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x61D11ECEF4404498LL, NAMSTR(s_sys_ss0bbfbb68, "offsetGet")) {
+      HASH_GUARD_LITSTR(0x61D11ECEF4404498LL, NAMSTR(s_sys_ss62975ff0, "offsetGet")) {
         mcp.ci = &c_SimpleXMLElement::ci_offsetget;
         return true;
       }
       break;
     case 27:
-      HASH_GUARD_LITSTR(0x0817454F196A9A1BLL, NAMSTR(s_sys_ss196a9a1b, "xpath")) {
+      HASH_GUARD_LITSTR(0x0817454F196A9A1BLL, NAMSTR(s_sys_ss1fe1e1ea, "xpath")) {
         mcp.ci = &c_SimpleXMLElement::ci_xpath;
         return true;
       }
-      HASH_GUARD_LITSTR(0x04FB7028C9A2079BLL, NAMSTR(s_sys_ss365df865, "__unset")) {
+      HASH_GUARD_LITSTR(0x04FB7028C9A2079BLL, NAMSTR(s_sys_ss32d46a21, "__unset")) {
         mcp.ci = &c_SimpleXMLElement::ci___unset;
         return true;
       }
       break;
     case 29:
-      HASH_GUARD_LITSTR(0x4B65E1A09A33F21DLL, NAMSTR(s_sys_ss65cc0de3, "attributes")) {
+      HASH_GUARD_LITSTR(0x4B65E1A09A33F21DLL, NAMSTR(s_sys_ss0fc37e03, "attributes")) {
         mcp.ci = &c_SimpleXMLElement::ci_attributes;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_SimpleXMLElement::ci___construct;
         return true;
       }
       break;
     case 37:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss3d20de82, "getName")) {
         mcp.ci = &c_SimpleXMLElement::ci_getname;
         return true;
       }
       break;
     case 38:
-      HASH_GUARD_LITSTR(0x6D9D75B7E3B40FA6LL, NAMSTR(s_sys_ss1c4bf05a, "getNamespaces")) {
+      HASH_GUARD_LITSTR(0x6D9D75B7E3B40FA6LL, NAMSTR(s_sys_ss36a35582, "getNamespaces")) {
         mcp.ci = &c_SimpleXMLElement::ci_getnamespaces;
         return true;
       }
-      HASH_GUARD_LITSTR(0x5C09D9345FD864A6LL, NAMSTR(s_sys_ss5fd864a6, "asXML")) {
+      HASH_GUARD_LITSTR(0x5C09D9345FD864A6LL, NAMSTR(s_sys_ss20098bac, "asXML")) {
         mcp.ci = &c_SimpleXMLElement::ci_asxml;
         return true;
       }
       break;
     case 45:
-      HASH_GUARD_LITSTR(0x2B299E949E2E82ADLL, NAMSTR(s_sys_ss61d17d53, "children")) {
+      HASH_GUARD_LITSTR(0x2B299E949E2E82ADLL, NAMSTR(s_sys_ss717877f6, "children")) {
         mcp.ci = &c_SimpleXMLElement::ci_children;
         return true;
       }
       break;
     case 46:
-      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ss51de8712, "__isset")) {
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ss4cfc0bef, "__isset")) {
         mcp.ci = &c_SimpleXMLElement::ci___isset;
         return true;
       }
       break;
     case 49:
-      HASH_GUARD_LITSTR(0x0D08AA5F0B2F34F1LL, NAMSTR(s_sys_ss0b2f34f1, "getDocNamespaces")) {
+      HASH_GUARD_LITSTR(0x0D08AA5F0B2F34F1LL, NAMSTR(s_sys_ss6456a3a6, "getDocNamespaces")) {
         mcp.ci = &c_SimpleXMLElement::ci_getdocnamespaces;
         return true;
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_SimpleXMLElement::ci___destruct;
         return true;
       }
       break;
     case 56:
-      HASH_GUARD_LITSTR(0x0957F693A48AF738LL, NAMSTR(s_sys_ss5b7508c8, "offsetSet")) {
+      HASH_GUARD_LITSTR(0x0957F693A48AF738LL, NAMSTR(s_sys_ss41d45e54, "offsetSet")) {
         mcp.ci = &c_SimpleXMLElement::ci_offsetset;
         return true;
       }
       break;
     case 58:
-      HASH_GUARD_LITSTR(0x08329980E6369ABALL, NAMSTR(s_sys_ss19c96546, "offsetUnset")) {
+      HASH_GUARD_LITSTR(0x08329980E6369ABALL, NAMSTR(s_sys_ss1a6fd792, "offsetUnset")) {
         mcp.ci = &c_SimpleXMLElement::ci_offsetunset;
         return true;
       }
       break;
     case 61:
-      HASH_GUARD_LITSTR(0x3FE8F6937854F83DLL, NAMSTR(s_sys_ss7854f83d, "registerXPathNamespace")) {
+      HASH_GUARD_LITSTR(0x3FE8F6937854F83DLL, NAMSTR(s_sys_ss50ad79e8, "registerXPathNamespace")) {
         mcp.ci = &c_SimpleXMLElement::ci_registerxpathnamespace;
         return true;
       }
@@ -16563,7 +16563,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
+      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss0fad1395, "close")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -16577,7 +16577,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 6:
-      HASH_GUARD_LITSTR(0x42FAC655280A6146LL, NAMSTR(s_sys_ss280a6146, "replace")) {
+      HASH_GUARD_LITSTR(0x42FAC655280A6146LL, NAMSTR(s_sys_ss3029c43a, "replace")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -16609,7 +16609,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x39099707DF7945C7LL, NAMSTR(s_sys_ss2086ba39, "increment")) {
+      HASH_GUARD_LITSTR(0x39099707DF7945C7LL, NAMSTR(s_sys_ss312d8bcf, "increment")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -16632,7 +16632,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 11:
-      HASH_GUARD_LITSTR(0x3BF3710A1661DE0BLL, NAMSTR(s_sys_ss1661de0b, "setoptimeout")) {
+      HASH_GUARD_LITSTR(0x3BF3710A1661DE0BLL, NAMSTR(s_sys_ss49ecd311, "setoptimeout")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -16648,7 +16648,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         if (count != 1) return throw_wrong_arguments("setoptimeout", count, 1, 1, 1);
         return (t_setoptimeout(a0));
       }
-      HASH_GUARD_LITSTR(0x15D34462FC79458BLL, NAMSTR(s_sys_ss0386ba75, "add")) {
+      HASH_GUARD_LITSTR(0x15D34462FC79458BLL, NAMSTR(s_sys_ss6db5a215, "add")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -16680,7 +16680,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x710DE893BB376C4FLL, NAMSTR(s_sys_ss44c893b1, "getserverstatus")) {
+      HASH_GUARD_LITSTR(0x710DE893BB376C4FLL, NAMSTR(s_sys_ss2f8c5ff7, "getserverstatus")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -16703,7 +16703,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x030429D528A8EA92LL, NAMSTR(s_sys_ss28a8ea92, "setcompressthreshold")) {
+      HASH_GUARD_LITSTR(0x030429D528A8EA92LL, NAMSTR(s_sys_ss542ed87e, "setcompressthreshold")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -16726,7 +16726,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x1C660E5BFA6F55D3LL, NAMSTR(s_sys_ss0590aa2d, "delete")) {
+      HASH_GUARD_LITSTR(0x1C660E5BFA6F55D3LL, NAMSTR(s_sys_ss4ca209c3, "delete")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -16749,7 +16749,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316_1, "getversion")) {
+      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3504108f, "getversion")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -16763,7 +16763,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss7ce59bd9_1, "getstats")) {
+      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss3403085f, "getstats")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -16792,7 +16792,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 26:
-      HASH_GUARD_LITSTR(0x2A733FC12BA4C1DALL, NAMSTR(s_sys_ss2ba4c1da, "decrement")) {
+      HASH_GUARD_LITSTR(0x2A733FC12BA4C1DALL, NAMSTR(s_sys_ss2a19cdf6, "decrement")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -16815,7 +16815,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -16829,7 +16829,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 33:
-      HASH_GUARD_LITSTR(0x399A6427C2185621LL, NAMSTR(s_sys_ss3de7a9df, "set")) {
+      HASH_GUARD_LITSTR(0x399A6427C2185621LL, NAMSTR(s_sys_ss0241fb06, "set")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -16861,7 +16861,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 37:
-      HASH_GUARD_LITSTR(0x4770E54B86BF7765LL, NAMSTR(s_sys_ss7940889b, "getextendedstats")) {
+      HASH_GUARD_LITSTR(0x4770E54B86BF7765LL, NAMSTR(s_sys_ss3f63bb07, "getextendedstats")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -16890,7 +16890,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 38:
-      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss6237aae6_1, "addserver")) {
+      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss0eb9302b, "addserver")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -16948,7 +16948,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 40:
-      HASH_GUARD_LITSTR(0x25DCCC35D69AD828LL, NAMSTR(s_sys_ss296527d8, "get")) {
+      HASH_GUARD_LITSTR(0x25DCCC35D69AD828LL, NAMSTR(s_sys_ss153b6861, "get")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -16971,7 +16971,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -16985,7 +16985,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 57:
-      HASH_GUARD_LITSTR(0x742B441E13CD7279LL, NAMSTR(s_sys_ss13cd7279, "pconnect")) {
+      HASH_GUARD_LITSTR(0x742B441E13CD7279LL, NAMSTR(s_sys_ss452eaf4f, "pconnect")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -17018,7 +17018,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 58:
-      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss24ffa186, "flush")) {
+      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss56c1ddfb, "flush")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -17037,7 +17037,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 61:
-      HASH_GUARD_LITSTR(0x1780351E8EFF92BDLL, NAMSTR(s_sys_ss71006d43, "setserverparams")) {
+      HASH_GUARD_LITSTR(0x1780351E8EFF92BDLL, NAMSTR(s_sys_ss2d912142, "setserverparams")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -17080,7 +17080,7 @@ Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 62:
-      HASH_GUARD_LITSTR(0x7032C660AD16D7FELL, NAMSTR(s_sys_ss52e92802, "connect")) {
+      HASH_GUARD_LITSTR(0x7032C660AD16D7FELL, NAMSTR(s_sys_ss53985c4b, "connect")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -17826,125 +17826,125 @@ bool c_Memcache::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
+      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss0fad1395, "close")) {
         mcp.ci = &c_Memcache::ci_close;
         return true;
       }
       break;
     case 6:
-      HASH_GUARD_LITSTR(0x42FAC655280A6146LL, NAMSTR(s_sys_ss280a6146, "replace")) {
+      HASH_GUARD_LITSTR(0x42FAC655280A6146LL, NAMSTR(s_sys_ss3029c43a, "replace")) {
         mcp.ci = &c_Memcache::ci_replace;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x39099707DF7945C7LL, NAMSTR(s_sys_ss2086ba39, "increment")) {
+      HASH_GUARD_LITSTR(0x39099707DF7945C7LL, NAMSTR(s_sys_ss312d8bcf, "increment")) {
         mcp.ci = &c_Memcache::ci_increment;
         return true;
       }
       break;
     case 11:
-      HASH_GUARD_LITSTR(0x3BF3710A1661DE0BLL, NAMSTR(s_sys_ss1661de0b, "setoptimeout")) {
+      HASH_GUARD_LITSTR(0x3BF3710A1661DE0BLL, NAMSTR(s_sys_ss49ecd311, "setoptimeout")) {
         mcp.ci = &c_Memcache::ci_setoptimeout;
         return true;
       }
-      HASH_GUARD_LITSTR(0x15D34462FC79458BLL, NAMSTR(s_sys_ss0386ba75, "add")) {
+      HASH_GUARD_LITSTR(0x15D34462FC79458BLL, NAMSTR(s_sys_ss6db5a215, "add")) {
         mcp.ci = &c_Memcache::ci_add;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x710DE893BB376C4FLL, NAMSTR(s_sys_ss44c893b1, "getserverstatus")) {
+      HASH_GUARD_LITSTR(0x710DE893BB376C4FLL, NAMSTR(s_sys_ss2f8c5ff7, "getserverstatus")) {
         mcp.ci = &c_Memcache::ci_getserverstatus;
         return true;
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x030429D528A8EA92LL, NAMSTR(s_sys_ss28a8ea92, "setcompressthreshold")) {
+      HASH_GUARD_LITSTR(0x030429D528A8EA92LL, NAMSTR(s_sys_ss542ed87e, "setcompressthreshold")) {
         mcp.ci = &c_Memcache::ci_setcompressthreshold;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x1C660E5BFA6F55D3LL, NAMSTR(s_sys_ss0590aa2d, "delete")) {
+      HASH_GUARD_LITSTR(0x1C660E5BFA6F55D3LL, NAMSTR(s_sys_ss4ca209c3, "delete")) {
         mcp.ci = &c_Memcache::ci_delete;
         return true;
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316_1, "getversion")) {
+      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3504108f, "getversion")) {
         mcp.ci = &c_Memcache::ci_getversion;
         return true;
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss7ce59bd9_1, "getstats")) {
+      HASH_GUARD_LITSTR(0x1CCDC4317CE59BD9LL, NAMSTR(s_sys_ss3403085f, "getstats")) {
         mcp.ci = &c_Memcache::ci_getstats;
         return true;
       }
       break;
     case 26:
-      HASH_GUARD_LITSTR(0x2A733FC12BA4C1DALL, NAMSTR(s_sys_ss2ba4c1da, "decrement")) {
+      HASH_GUARD_LITSTR(0x2A733FC12BA4C1DALL, NAMSTR(s_sys_ss2a19cdf6, "decrement")) {
         mcp.ci = &c_Memcache::ci_decrement;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_Memcache::ci___construct;
         return true;
       }
       break;
     case 33:
-      HASH_GUARD_LITSTR(0x399A6427C2185621LL, NAMSTR(s_sys_ss3de7a9df, "set")) {
+      HASH_GUARD_LITSTR(0x399A6427C2185621LL, NAMSTR(s_sys_ss0241fb06, "set")) {
         mcp.ci = &c_Memcache::ci_set;
         return true;
       }
       break;
     case 37:
-      HASH_GUARD_LITSTR(0x4770E54B86BF7765LL, NAMSTR(s_sys_ss7940889b, "getextendedstats")) {
+      HASH_GUARD_LITSTR(0x4770E54B86BF7765LL, NAMSTR(s_sys_ss3f63bb07, "getextendedstats")) {
         mcp.ci = &c_Memcache::ci_getextendedstats;
         return true;
       }
       break;
     case 38:
-      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss6237aae6_1, "addserver")) {
+      HASH_GUARD_LITSTR(0x56CD24186237AAE6LL, NAMSTR(s_sys_ss0eb9302b, "addserver")) {
         mcp.ci = &c_Memcache::ci_addserver;
         return true;
       }
       break;
     case 40:
-      HASH_GUARD_LITSTR(0x25DCCC35D69AD828LL, NAMSTR(s_sys_ss296527d8, "get")) {
+      HASH_GUARD_LITSTR(0x25DCCC35D69AD828LL, NAMSTR(s_sys_ss153b6861, "get")) {
         mcp.ci = &c_Memcache::ci_get;
         return true;
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_Memcache::ci___destruct;
         return true;
       }
       break;
     case 57:
-      HASH_GUARD_LITSTR(0x742B441E13CD7279LL, NAMSTR(s_sys_ss13cd7279, "pconnect")) {
+      HASH_GUARD_LITSTR(0x742B441E13CD7279LL, NAMSTR(s_sys_ss452eaf4f, "pconnect")) {
         mcp.ci = &c_Memcache::ci_pconnect;
         return true;
       }
       break;
     case 58:
-      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss24ffa186, "flush")) {
+      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss56c1ddfb, "flush")) {
         mcp.ci = &c_Memcache::ci_flush;
         return true;
       }
       break;
     case 61:
-      HASH_GUARD_LITSTR(0x1780351E8EFF92BDLL, NAMSTR(s_sys_ss71006d43, "setserverparams")) {
+      HASH_GUARD_LITSTR(0x1780351E8EFF92BDLL, NAMSTR(s_sys_ss2d912142, "setserverparams")) {
         mcp.ci = &c_Memcache::ci_setserverparams;
         return true;
       }
       break;
     case 62:
-      HASH_GUARD_LITSTR(0x7032C660AD16D7FELL, NAMSTR(s_sys_ss52e92802, "connect")) {
+      HASH_GUARD_LITSTR(0x7032C660AD16D7FELL, NAMSTR(s_sys_ss53985c4b, "connect")) {
         mcp.ci = &c_Memcache::ci_connect;
         return true;
       }
@@ -18077,7 +18077,7 @@ Variant c_DOMProcessingInstruction::o_invoke_from_eval(const char *s, Eval::Vari
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18091,7 +18091,7 @@ Variant c_DOMProcessingInstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -18113,7 +18113,7 @@ Variant c_DOMProcessingInstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -18134,7 +18134,7 @@ Variant c_DOMProcessingInstruction::o_invoke_from_eval(const char *s, Eval::Vari
         if (count <= 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -18279,23 +18279,23 @@ bool c_DOMProcessingInstruction::os_get_call_info(MethodCallPackage &mcp, int64 
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMProcessingInstruction::ci___destruct;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         mcp.ci = &c_DOMProcessingInstruction::ci___set;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMProcessingInstruction::ci___construct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_DOMProcessingInstruction::ci___get;
         return true;
       }
@@ -18457,7 +18457,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 1:
-      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss65eb8e41_1, "fetchall")) {
+      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss6018bb35, "fetchall")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -18486,7 +18486,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x436E6AFC3628E403LL, NAMSTR(s_sys_ss3628e403, "bindvalue")) {
+      HASH_GUARD_LITSTR(0x436E6AFC3628E403LL, NAMSTR(s_sys_ss0e2f6a78, "bindvalue")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -18513,7 +18513,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18527,7 +18527,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x75A2E23098C65C05LL, NAMSTR(s_sys_ss6739a3fb, "closecursor")) {
+      HASH_GUARD_LITSTR(0x75A2E23098C65C05LL, NAMSTR(s_sys_ss74e55247, "closecursor")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18541,7 +18541,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x6D0664CC2372F2C7LL, NAMSTR(s_sys_ss2372f2c7, "errorcode")) {
+      HASH_GUARD_LITSTR(0x6D0664CC2372F2C7LL, NAMSTR(s_sys_ss31a11388, "errorcode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18555,7 +18555,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss44f4ab8a, "setattribute")) {
+      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss1b71aee5, "setattribute")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -18577,7 +18577,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x187C7F43EB57714ELL, NAMSTR(s_sys_ss14a88eb2, "execute")) {
+      HASH_GUARD_LITSTR(0x187C7F43EB57714ELL, NAMSTR(s_sys_ss5ac66c5d, "execute")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -18596,7 +18596,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x32A381ECDC91918FLL, NAMSTR(s_sys_ss236e6e71, "columncount")) {
+      HASH_GUARD_LITSTR(0x32A381ECDC91918FLL, NAMSTR(s_sys_ss2b845c3b, "columncount")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18610,7 +18610,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18624,7 +18624,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x31A8917EC4F2A252LL, NAMSTR(s_sys_ss3b0d5dae, "nextrowset")) {
+      HASH_GUARD_LITSTR(0x31A8917EC4F2A252LL, NAMSTR(s_sys_ss04bcc4ac, "nextrowset")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18638,7 +18638,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x77B13FCF1BA41696LL, NAMSTR(s_sys_ss1ba41696, "bindparam")) {
+      HASH_GUARD_LITSTR(0x77B13FCF1BA41696LL, NAMSTR(s_sys_ss1b64dec9, "bindparam")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -18675,7 +18675,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x5C38814410C5FFD9LL, NAMSTR(s_sys_ss10c5ffd9, "fetchcolumn")) {
+      HASH_GUARD_LITSTR(0x5C38814410C5FFD9LL, NAMSTR(s_sys_ss46e7e29a, "fetchcolumn")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -18694,7 +18694,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 26:
-      HASH_GUARD_LITSTR(0x0D43A7148903299ALL, NAMSTR(s_sys_ss76fcd666, "rowcount")) {
+      HASH_GUARD_LITSTR(0x0D43A7148903299ALL, NAMSTR(s_sys_ss0a95ac22, "rowcount")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18708,7 +18708,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x4389F50CAA085CDCLL, NAMSTR(s_sys_ss55f7a324, "__wakeup")) {
+      HASH_GUARD_LITSTR(0x4389F50CAA085CDCLL, NAMSTR(s_sys_ss0723515e, "__wakeup")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18720,7 +18720,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
         return (t___wakeup());
       }
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18734,7 +18734,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 29:
-      HASH_GUARD_LITSTR(0x1C87AD14A095219DLL, NAMSTR(s_sys_ss5f6ade63, "bindcolumn")) {
+      HASH_GUARD_LITSTR(0x1C87AD14A095219DLL, NAMSTR(s_sys_ss55c15f8a, "bindcolumn")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -18769,7 +18769,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         else if (count == 4) return (t_bindcolumn(a0, ref(a1), a2, a3));
         else return (t_bindcolumn(a0, ref(a1), a2, a3, a4));
       }
-      HASH_GUARD_LITSTR(0x0E1814AA3327229DLL, NAMSTR(s_sys_ss3327229d, "fetchobject")) {
+      HASH_GUARD_LITSTR(0x0E1814AA3327229DLL, NAMSTR(s_sys_ss45f15bcd, "fetchobject")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -18793,7 +18793,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 30:
-      HASH_GUARD_LITSTR(0x1DDD412E7F04605ELL, NAMSTR(s_sys_ss7f04605e, "errorinfo")) {
+      HASH_GUARD_LITSTR(0x1DDD412E7F04605ELL, NAMSTR(s_sys_ss07706afb, "errorinfo")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18807,7 +18807,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18821,7 +18821,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 33:
-      HASH_GUARD_LITSTR(0x78C9BF8620136861LL, NAMSTR(s_sys_ss20136861, "setfetchmode")) {
+      HASH_GUARD_LITSTR(0x78C9BF8620136861LL, NAMSTR(s_sys_ss7fd7d2bc, "setfetchmode")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -18841,7 +18841,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 34:
-      HASH_GUARD_LITSTR(0x699F5A1E3BD7B2A2LL, NAMSTR(s_sys_ss3bd7b2a2, "debugdumpparams")) {
+      HASH_GUARD_LITSTR(0x699F5A1E3BD7B2A2LL, NAMSTR(s_sys_ss2d73fa0d, "debugdumpparams")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18855,7 +18855,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 40:
-      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss6612fc28, "getattribute")) {
+      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss740bb93c, "getattribute")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -18873,7 +18873,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 42:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18887,7 +18887,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 45:
-      HASH_GUARD_LITSTR(0x61D1244DDADBC02DLL, NAMSTR(s_sys_ss25243fd3, "__sleep")) {
+      HASH_GUARD_LITSTR(0x61D1244DDADBC02DLL, NAMSTR(s_sys_ss0c905545, "__sleep")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18901,7 +18901,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18915,7 +18915,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 56:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -18929,7 +18929,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 59:
-      HASH_GUARD_LITSTR(0x5B6B980006E717FBLL, NAMSTR(s_sys_ss06e717fb, "getcolumnmeta")) {
+      HASH_GUARD_LITSTR(0x5B6B980006E717FBLL, NAMSTR(s_sys_ss6b51d6cb, "getcolumnmeta")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -18945,7 +18945,7 @@ Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         if (count != 1) return throw_wrong_arguments("getcolumnmeta", count, 1, 1, 1);
         return (t_getcolumnmeta(a0));
       }
-      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
+      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss0b929a80, "fetch")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -19778,163 +19778,163 @@ bool c_PDOStatement::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 1:
-      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss65eb8e41_1, "fetchall")) {
+      HASH_GUARD_LITSTR(0x5740729B65EB8E41LL, NAMSTR(s_sys_ss6018bb35, "fetchall")) {
         mcp.ci = &c_PDOStatement::ci_fetchall;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x436E6AFC3628E403LL, NAMSTR(s_sys_ss3628e403, "bindvalue")) {
+      HASH_GUARD_LITSTR(0x436E6AFC3628E403LL, NAMSTR(s_sys_ss0e2f6a78, "bindvalue")) {
         mcp.ci = &c_PDOStatement::ci_bindvalue;
         return true;
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         mcp.ci = &c_PDOStatement::ci_valid;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x75A2E23098C65C05LL, NAMSTR(s_sys_ss6739a3fb, "closecursor")) {
+      HASH_GUARD_LITSTR(0x75A2E23098C65C05LL, NAMSTR(s_sys_ss74e55247, "closecursor")) {
         mcp.ci = &c_PDOStatement::ci_closecursor;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x6D0664CC2372F2C7LL, NAMSTR(s_sys_ss2372f2c7, "errorcode")) {
+      HASH_GUARD_LITSTR(0x6D0664CC2372F2C7LL, NAMSTR(s_sys_ss31a11388, "errorcode")) {
         mcp.ci = &c_PDOStatement::ci_errorcode;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss44f4ab8a, "setattribute")) {
+      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss1b71aee5, "setattribute")) {
         mcp.ci = &c_PDOStatement::ci_setattribute;
         return true;
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x187C7F43EB57714ELL, NAMSTR(s_sys_ss14a88eb2, "execute")) {
+      HASH_GUARD_LITSTR(0x187C7F43EB57714ELL, NAMSTR(s_sys_ss5ac66c5d, "execute")) {
         mcp.ci = &c_PDOStatement::ci_execute;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x32A381ECDC91918FLL, NAMSTR(s_sys_ss236e6e71, "columncount")) {
+      HASH_GUARD_LITSTR(0x32A381ECDC91918FLL, NAMSTR(s_sys_ss2b845c3b, "columncount")) {
         mcp.ci = &c_PDOStatement::ci_columncount;
         return true;
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         mcp.ci = &c_PDOStatement::ci_key;
         return true;
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x31A8917EC4F2A252LL, NAMSTR(s_sys_ss3b0d5dae, "nextrowset")) {
+      HASH_GUARD_LITSTR(0x31A8917EC4F2A252LL, NAMSTR(s_sys_ss04bcc4ac, "nextrowset")) {
         mcp.ci = &c_PDOStatement::ci_nextrowset;
         return true;
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x77B13FCF1BA41696LL, NAMSTR(s_sys_ss1ba41696, "bindparam")) {
+      HASH_GUARD_LITSTR(0x77B13FCF1BA41696LL, NAMSTR(s_sys_ss1b64dec9, "bindparam")) {
         mcp.ci = &c_PDOStatement::ci_bindparam;
         return true;
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x5C38814410C5FFD9LL, NAMSTR(s_sys_ss10c5ffd9, "fetchcolumn")) {
+      HASH_GUARD_LITSTR(0x5C38814410C5FFD9LL, NAMSTR(s_sys_ss46e7e29a, "fetchcolumn")) {
         mcp.ci = &c_PDOStatement::ci_fetchcolumn;
         return true;
       }
       break;
     case 26:
-      HASH_GUARD_LITSTR(0x0D43A7148903299ALL, NAMSTR(s_sys_ss76fcd666, "rowcount")) {
+      HASH_GUARD_LITSTR(0x0D43A7148903299ALL, NAMSTR(s_sys_ss0a95ac22, "rowcount")) {
         mcp.ci = &c_PDOStatement::ci_rowcount;
         return true;
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x4389F50CAA085CDCLL, NAMSTR(s_sys_ss55f7a324, "__wakeup")) {
+      HASH_GUARD_LITSTR(0x4389F50CAA085CDCLL, NAMSTR(s_sys_ss0723515e, "__wakeup")) {
         mcp.ci = &c_PDOStatement::ci___wakeup;
         return true;
       }
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         mcp.ci = &c_PDOStatement::ci_current;
         return true;
       }
       break;
     case 29:
-      HASH_GUARD_LITSTR(0x1C87AD14A095219DLL, NAMSTR(s_sys_ss5f6ade63, "bindcolumn")) {
+      HASH_GUARD_LITSTR(0x1C87AD14A095219DLL, NAMSTR(s_sys_ss55c15f8a, "bindcolumn")) {
         mcp.ci = &c_PDOStatement::ci_bindcolumn;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0E1814AA3327229DLL, NAMSTR(s_sys_ss3327229d, "fetchobject")) {
+      HASH_GUARD_LITSTR(0x0E1814AA3327229DLL, NAMSTR(s_sys_ss45f15bcd, "fetchobject")) {
         mcp.ci = &c_PDOStatement::ci_fetchobject;
         return true;
       }
       break;
     case 30:
-      HASH_GUARD_LITSTR(0x1DDD412E7F04605ELL, NAMSTR(s_sys_ss7f04605e, "errorinfo")) {
+      HASH_GUARD_LITSTR(0x1DDD412E7F04605ELL, NAMSTR(s_sys_ss07706afb, "errorinfo")) {
         mcp.ci = &c_PDOStatement::ci_errorinfo;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_PDOStatement::ci___construct;
         return true;
       }
       break;
     case 33:
-      HASH_GUARD_LITSTR(0x78C9BF8620136861LL, NAMSTR(s_sys_ss20136861, "setfetchmode")) {
+      HASH_GUARD_LITSTR(0x78C9BF8620136861LL, NAMSTR(s_sys_ss7fd7d2bc, "setfetchmode")) {
         mcp.ci = &c_PDOStatement::ci_setfetchmode;
         return true;
       }
       break;
     case 34:
-      HASH_GUARD_LITSTR(0x699F5A1E3BD7B2A2LL, NAMSTR(s_sys_ss3bd7b2a2, "debugdumpparams")) {
+      HASH_GUARD_LITSTR(0x699F5A1E3BD7B2A2LL, NAMSTR(s_sys_ss2d73fa0d, "debugdumpparams")) {
         mcp.ci = &c_PDOStatement::ci_debugdumpparams;
         return true;
       }
       break;
     case 40:
-      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss6612fc28, "getattribute")) {
+      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss740bb93c, "getattribute")) {
         mcp.ci = &c_PDOStatement::ci_getattribute;
         return true;
       }
       break;
     case 42:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         mcp.ci = &c_PDOStatement::ci_rewind;
         return true;
       }
       break;
     case 45:
-      HASH_GUARD_LITSTR(0x61D1244DDADBC02DLL, NAMSTR(s_sys_ss25243fd3, "__sleep")) {
+      HASH_GUARD_LITSTR(0x61D1244DDADBC02DLL, NAMSTR(s_sys_ss0c905545, "__sleep")) {
         mcp.ci = &c_PDOStatement::ci___sleep;
         return true;
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_PDOStatement::ci___destruct;
         return true;
       }
       break;
     case 56:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         mcp.ci = &c_PDOStatement::ci_next;
         return true;
       }
       break;
     case 59:
-      HASH_GUARD_LITSTR(0x5B6B980006E717FBLL, NAMSTR(s_sys_ss06e717fb, "getcolumnmeta")) {
+      HASH_GUARD_LITSTR(0x5B6B980006E717FBLL, NAMSTR(s_sys_ss6b51d6cb, "getcolumnmeta")) {
         mcp.ci = &c_PDOStatement::ci_getcolumnmeta;
         return true;
       }
-      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
+      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss0b929a80, "fetch")) {
         mcp.ci = &c_PDOStatement::ci_fetch;
         return true;
       }
@@ -20070,7 +20070,7 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 4:
-      HASH_GUARD_LITSTR(0x5C5C1E24A140F6E4LL, NAMSTR(s_sys_ss5ebf091c, "__getlastrequest")) {
+      HASH_GUARD_LITSTR(0x5C5C1E24A140F6E4LL, NAMSTR(s_sys_ss2d5cec41, "__getlastrequest")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -20084,7 +20084,7 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x3648EE7D3B37DE8CLL, NAMSTR(s_sys_ss3b37de8c, "__getlastrequestheaders")) {
+      HASH_GUARD_LITSTR(0x3648EE7D3B37DE8CLL, NAMSTR(s_sys_ss6775c5a7, "__getlastrequestheaders")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -20096,7 +20096,7 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         if (count > 0) return throw_toomany_arguments("__getlastrequestheaders", 0, 1);
         return (t___getlastrequestheaders());
       }
-      HASH_GUARD_LITSTR(0x5D73364F53CEEB6CLL, NAMSTR(s_sys_ss53ceeb6c, "__call")) {
+      HASH_GUARD_LITSTR(0x5D73364F53CEEB6CLL, NAMSTR(s_sys_ss377f1476, "__call")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -20118,7 +20118,7 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x1365B3105FC59871LL, NAMSTR(s_sys_ss5fc59871, "__getfunctions")) {
+      HASH_GUARD_LITSTR(0x1365B3105FC59871LL, NAMSTR(s_sys_ss63eef794, "__getfunctions")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -20132,7 +20132,7 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -20146,7 +20146,7 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x3CA9145031035A54LL, NAMSTR(s_sys_ss31035a54, "__getlastresponse")) {
+      HASH_GUARD_LITSTR(0x3CA9145031035A54LL, NAMSTR(s_sys_ss4ae2597c, "__getlastresponse")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -20160,7 +20160,7 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x19A26CEC7E8AAEF5LL, NAMSTR(s_sys_ss7e8aaef5, "__dorequest")) {
+      HASH_GUARD_LITSTR(0x19A26CEC7E8AAEF5LL, NAMSTR(s_sys_ss68bc25e3, "__dorequest")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -20193,7 +20193,7 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         if (count <= 4) return (t___dorequest(a0, a1, a2, a3));
         else return (t___dorequest(a0, a1, a2, a3, a4));
       }
-      HASH_GUARD_LITSTR(0x52C6ABACCBFD0C75LL, NAMSTR(s_sys_ss3402f38b, "__setcookie")) {
+      HASH_GUARD_LITSTR(0x52C6ABACCBFD0C75LL, NAMSTR(s_sys_ss30120c29, "__setcookie")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -20214,7 +20214,7 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         if (count <= 1) return (t___setcookie(a0));
         else return (t___setcookie(a0, a1));
       }
-      HASH_GUARD_LITSTR(0x628D398E7604B9D5LL, NAMSTR(s_sys_ss7604b9d5, "__gettypes")) {
+      HASH_GUARD_LITSTR(0x628D398E7604B9D5LL, NAMSTR(s_sys_ss4b959501, "__gettypes")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -20228,7 +20228,7 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x4A2F89F662050D99LL, NAMSTR(s_sys_ss62050d99, "__soapcall")) {
+      HASH_GUARD_LITSTR(0x4A2F89F662050D99LL, NAMSTR(s_sys_ss2bf685d4, "__soapcall")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -20265,7 +20265,7 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 26:
-      HASH_GUARD_LITSTR(0x0C94657A58A82CFALL, NAMSTR(s_sys_ss58a82cfa, "__getlastresponseheaders")) {
+      HASH_GUARD_LITSTR(0x0C94657A58A82CFALL, NAMSTR(s_sys_ss350e6cf4, "__getlastresponseheaders")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -20279,7 +20279,7 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 27:
-      HASH_GUARD_LITSTR(0x14842228D5E335BBLL, NAMSTR(s_sys_ss2a1cca45, "__setsoapheaders")) {
+      HASH_GUARD_LITSTR(0x14842228D5E335BBLL, NAMSTR(s_sys_ss69c97e19, "__setsoapheaders")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -20298,7 +20298,7 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x232D13904DBC36FFLL, NAMSTR(s_sys_ss4dbc36ff, "__setlocation")) {
+      HASH_GUARD_LITSTR(0x232D13904DBC36FFLL, NAMSTR(s_sys_ss425e765b, "__setlocation")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -20315,7 +20315,7 @@ Variant c_SoapClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         if (count <= 0) return (t___setlocation());
         else return (t___setlocation(a0));
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -20749,77 +20749,77 @@ bool c_SoapClient::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 4:
-      HASH_GUARD_LITSTR(0x5C5C1E24A140F6E4LL, NAMSTR(s_sys_ss5ebf091c, "__getlastrequest")) {
+      HASH_GUARD_LITSTR(0x5C5C1E24A140F6E4LL, NAMSTR(s_sys_ss2d5cec41, "__getlastrequest")) {
         mcp.ci = &c_SoapClient::ci___getlastrequest;
         return true;
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x3648EE7D3B37DE8CLL, NAMSTR(s_sys_ss3b37de8c, "__getlastrequestheaders")) {
+      HASH_GUARD_LITSTR(0x3648EE7D3B37DE8CLL, NAMSTR(s_sys_ss6775c5a7, "__getlastrequestheaders")) {
         mcp.ci = &c_SoapClient::ci___getlastrequestheaders;
         return true;
       }
-      HASH_GUARD_LITSTR(0x5D73364F53CEEB6CLL, NAMSTR(s_sys_ss53ceeb6c, "__call")) {
+      HASH_GUARD_LITSTR(0x5D73364F53CEEB6CLL, NAMSTR(s_sys_ss377f1476, "__call")) {
         mcp.ci = &c_SoapClient::ci___call;
         return true;
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x1365B3105FC59871LL, NAMSTR(s_sys_ss5fc59871, "__getfunctions")) {
+      HASH_GUARD_LITSTR(0x1365B3105FC59871LL, NAMSTR(s_sys_ss63eef794, "__getfunctions")) {
         mcp.ci = &c_SoapClient::ci___getfunctions;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_SoapClient::ci___destruct;
         return true;
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x3CA9145031035A54LL, NAMSTR(s_sys_ss31035a54, "__getlastresponse")) {
+      HASH_GUARD_LITSTR(0x3CA9145031035A54LL, NAMSTR(s_sys_ss4ae2597c, "__getlastresponse")) {
         mcp.ci = &c_SoapClient::ci___getlastresponse;
         return true;
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x19A26CEC7E8AAEF5LL, NAMSTR(s_sys_ss7e8aaef5, "__dorequest")) {
+      HASH_GUARD_LITSTR(0x19A26CEC7E8AAEF5LL, NAMSTR(s_sys_ss68bc25e3, "__dorequest")) {
         mcp.ci = &c_SoapClient::ci___dorequest;
         return true;
       }
-      HASH_GUARD_LITSTR(0x52C6ABACCBFD0C75LL, NAMSTR(s_sys_ss3402f38b, "__setcookie")) {
+      HASH_GUARD_LITSTR(0x52C6ABACCBFD0C75LL, NAMSTR(s_sys_ss30120c29, "__setcookie")) {
         mcp.ci = &c_SoapClient::ci___setcookie;
         return true;
       }
-      HASH_GUARD_LITSTR(0x628D398E7604B9D5LL, NAMSTR(s_sys_ss7604b9d5, "__gettypes")) {
+      HASH_GUARD_LITSTR(0x628D398E7604B9D5LL, NAMSTR(s_sys_ss4b959501, "__gettypes")) {
         mcp.ci = &c_SoapClient::ci___gettypes;
         return true;
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x4A2F89F662050D99LL, NAMSTR(s_sys_ss62050d99, "__soapcall")) {
+      HASH_GUARD_LITSTR(0x4A2F89F662050D99LL, NAMSTR(s_sys_ss2bf685d4, "__soapcall")) {
         mcp.ci = &c_SoapClient::ci___soapcall;
         return true;
       }
       break;
     case 26:
-      HASH_GUARD_LITSTR(0x0C94657A58A82CFALL, NAMSTR(s_sys_ss58a82cfa, "__getlastresponseheaders")) {
+      HASH_GUARD_LITSTR(0x0C94657A58A82CFALL, NAMSTR(s_sys_ss350e6cf4, "__getlastresponseheaders")) {
         mcp.ci = &c_SoapClient::ci___getlastresponseheaders;
         return true;
       }
       break;
     case 27:
-      HASH_GUARD_LITSTR(0x14842228D5E335BBLL, NAMSTR(s_sys_ss2a1cca45, "__setsoapheaders")) {
+      HASH_GUARD_LITSTR(0x14842228D5E335BBLL, NAMSTR(s_sys_ss69c97e19, "__setsoapheaders")) {
         mcp.ci = &c_SoapClient::ci___setsoapheaders;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x232D13904DBC36FFLL, NAMSTR(s_sys_ss4dbc36ff, "__setlocation")) {
+      HASH_GUARD_LITSTR(0x232D13904DBC36FFLL, NAMSTR(s_sys_ss425e765b, "__setlocation")) {
         mcp.ci = &c_SoapClient::ci___setlocation;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_SoapClient::ci___construct;
         return true;
       }
@@ -20981,7 +20981,7 @@ Variant c_SoapParam::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -20993,7 +20993,7 @@ Variant c_SoapParam::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -21081,11 +21081,11 @@ bool c_SoapParam::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_SoapParam::ci___destruct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_SoapParam::ci___construct;
         return true;
       }
@@ -21270,7 +21270,7 @@ Variant c_DateTime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 7:
-      HASH_GUARD_LITSTR(0x65A9B2950F080587LL, NAMSTR(s_sys_ss0f080587, "modify")) {
+      HASH_GUARD_LITSTR(0x65A9B2950F080587LL, NAMSTR(s_sys_ss70529da2, "modify")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -21288,7 +21288,7 @@ Variant c_DateTime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 11:
-      HASH_GUARD_LITSTR(0x67314943DC9D120BLL, NAMSTR(s_sys_ss2362edf5, "setDate")) {
+      HASH_GUARD_LITSTR(0x67314943DC9D120BLL, NAMSTR(s_sys_ss658c946d, "setDate")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -21312,7 +21312,7 @@ Variant c_DateTime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         if (count != 3) return throw_wrong_arguments("setdate", count, 3, 3, 1);
         return (t_setdate(a0, a1, a2));
       }
-      HASH_GUARD_LITSTR(0x68DB66F60B55BD0BLL, NAMSTR(s_sys_ss0b55bd0b, "getOffset")) {
+      HASH_GUARD_LITSTR(0x68DB66F60B55BD0BLL, NAMSTR(s_sys_ss71028683, "getOffset")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -21326,7 +21326,7 @@ Variant c_DateTime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x688601F33BE7716CLL, NAMSTR(s_sys_ss3be7716c, "getTimezone")) {
+      HASH_GUARD_LITSTR(0x688601F33BE7716CLL, NAMSTR(s_sys_ss424e8241, "getTimezone")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -21340,7 +21340,7 @@ Variant c_DateTime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -21354,7 +21354,7 @@ Variant c_DateTime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x16D6DBFD6EE55A74LL, NAMSTR(s_sys_ss6ee55a74, "setISODate")) {
+      HASH_GUARD_LITSTR(0x16D6DBFD6EE55A74LL, NAMSTR(s_sys_ss7358e00d, "setISODate")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -21381,7 +21381,7 @@ Variant c_DateTime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x07CB96AB34F4C258LL, NAMSTR(s_sys_ss34f4c258, "setTime")) {
+      HASH_GUARD_LITSTR(0x07CB96AB34F4C258LL, NAMSTR(s_sys_ss61782b95, "setTime")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -21406,7 +21406,7 @@ Variant c_DateTime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         if (count <= 2) return (t_settime(a0, a1));
         else return (t_settime(a0, a1, a2));
       }
-      HASH_GUARD_LITSTR(0x3B576E558B957CB8LL, NAMSTR(s_sys_ss746a8348, "setTimezone")) {
+      HASH_GUARD_LITSTR(0x3B576E558B957CB8LL, NAMSTR(s_sys_ss53950219, "setTimezone")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -21424,7 +21424,7 @@ Variant c_DateTime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 27:
-      HASH_GUARD_LITSTR(0x1B6DDAF6AAF8CA9BLL, NAMSTR(s_sys_ss55073565, "format")) {
+      HASH_GUARD_LITSTR(0x1B6DDAF6AAF8CA9BLL, NAMSTR(s_sys_ss19281e76, "format")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -21442,7 +21442,7 @@ Variant c_DateTime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -21768,57 +21768,57 @@ bool c_DateTime::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 7:
-      HASH_GUARD_LITSTR(0x65A9B2950F080587LL, NAMSTR(s_sys_ss0f080587, "modify")) {
+      HASH_GUARD_LITSTR(0x65A9B2950F080587LL, NAMSTR(s_sys_ss70529da2, "modify")) {
         mcp.ci = &c_DateTime::ci_modify;
         return true;
       }
       break;
     case 11:
-      HASH_GUARD_LITSTR(0x67314943DC9D120BLL, NAMSTR(s_sys_ss2362edf5, "setDate")) {
+      HASH_GUARD_LITSTR(0x67314943DC9D120BLL, NAMSTR(s_sys_ss658c946d, "setDate")) {
         mcp.ci = &c_DateTime::ci_setdate;
         return true;
       }
-      HASH_GUARD_LITSTR(0x68DB66F60B55BD0BLL, NAMSTR(s_sys_ss0b55bd0b, "getOffset")) {
+      HASH_GUARD_LITSTR(0x68DB66F60B55BD0BLL, NAMSTR(s_sys_ss71028683, "getOffset")) {
         mcp.ci = &c_DateTime::ci_getoffset;
         return true;
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x688601F33BE7716CLL, NAMSTR(s_sys_ss3be7716c, "getTimezone")) {
+      HASH_GUARD_LITSTR(0x688601F33BE7716CLL, NAMSTR(s_sys_ss424e8241, "getTimezone")) {
         mcp.ci = &c_DateTime::ci_gettimezone;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DateTime::ci___destruct;
         return true;
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x16D6DBFD6EE55A74LL, NAMSTR(s_sys_ss6ee55a74, "setISODate")) {
+      HASH_GUARD_LITSTR(0x16D6DBFD6EE55A74LL, NAMSTR(s_sys_ss7358e00d, "setISODate")) {
         mcp.ci = &c_DateTime::ci_setisodate;
         return true;
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x07CB96AB34F4C258LL, NAMSTR(s_sys_ss34f4c258, "setTime")) {
+      HASH_GUARD_LITSTR(0x07CB96AB34F4C258LL, NAMSTR(s_sys_ss61782b95, "setTime")) {
         mcp.ci = &c_DateTime::ci_settime;
         return true;
       }
-      HASH_GUARD_LITSTR(0x3B576E558B957CB8LL, NAMSTR(s_sys_ss746a8348, "setTimezone")) {
+      HASH_GUARD_LITSTR(0x3B576E558B957CB8LL, NAMSTR(s_sys_ss53950219, "setTimezone")) {
         mcp.ci = &c_DateTime::ci_settimezone;
         return true;
       }
       break;
     case 27:
-      HASH_GUARD_LITSTR(0x1B6DDAF6AAF8CA9BLL, NAMSTR(s_sys_ss55073565, "format")) {
+      HASH_GUARD_LITSTR(0x1B6DDAF6AAF8CA9BLL, NAMSTR(s_sys_ss19281e76, "format")) {
         mcp.ci = &c_DateTime::ci_format;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DateTime::ci___construct;
         return true;
       }
@@ -22054,7 +22054,7 @@ Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD_LITSTR(0x43E057044D6296E0LL, NAMSTR(s_sys_ss4d6296e0, "geterrorcode")) {
+      HASH_GUARD_LITSTR(0x43E057044D6296E0LL, NAMSTR(s_sys_ss269cdcbb, "geterrorcode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -22068,7 +22068,7 @@ Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x2C7E06EB2965CE02LL, NAMSTR(s_sys_ss2965ce02, "getlocale")) {
+      HASH_GUARD_LITSTR(0x2C7E06EB2965CE02LL, NAMSTR(s_sys_ss7a6049f4, "getlocale")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -22087,7 +22087,7 @@ Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss6612fc28, "getattribute")) {
+      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss740bb93c, "getattribute")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -22105,7 +22105,7 @@ Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1F4984938E1DBB2ALL, NAMSTR(s_sys_ss71e244d6, "sort")) {
+      HASH_GUARD_LITSTR(0x1F4984938E1DBB2ALL, NAMSTR(s_sys_ss7416f7f1, "sort")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -22126,7 +22126,7 @@ Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         if (count <= 1) return (t_sort(ref(a0)));
         else return (t_sort(ref(a0), a1));
       }
-      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss44f4ab8a, "setattribute")) {
+      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss1b71aee5, "setattribute")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -22148,7 +22148,7 @@ Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 11:
-      HASH_GUARD_LITSTR(0x365C573D887803EBLL, NAMSTR(s_sys_ss7787fc15, "sortwithsortkeys")) {
+      HASH_GUARD_LITSTR(0x365C573D887803EBLL, NAMSTR(s_sys_ss61f821f0, "sortwithsortkeys")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -22166,7 +22166,7 @@ Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x790B7C44A3442BEELL, NAMSTR(s_sys_ss5cbbd412, "asort")) {
+      HASH_GUARD_LITSTR(0x790B7C44A3442BEELL, NAMSTR(s_sys_ss3763e869, "asort")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -22189,7 +22189,7 @@ Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x3B4D97DC8C437CD1LL, NAMSTR(s_sys_ss73bc832f, "geterrormessage")) {
+      HASH_GUARD_LITSTR(0x3B4D97DC8C437CD1LL, NAMSTR(s_sys_ss343a37dc, "geterrormessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -22203,7 +22203,7 @@ Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x1BF74792BDECF352LL, NAMSTR(s_sys_ss42130cae, "compare")) {
+      HASH_GUARD_LITSTR(0x1BF74792BDECF352LL, NAMSTR(s_sys_ss7c760c1c, "compare")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -22225,7 +22225,7 @@ Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -22239,7 +22239,7 @@ Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x3A0A2C5D90518456LL, NAMSTR(s_sys_ss6fae7baa, "create")) {
+      HASH_GUARD_LITSTR(0x3A0A2C5D90518456LL, NAMSTR(s_sys_ss52e73952, "create")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -22257,7 +22257,7 @@ Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 23:
-      HASH_GUARD_LITSTR(0x0B7AA0ED4CBF9ED7LL, NAMSTR(s_sys_ss4cbf9ed7, "setstrength")) {
+      HASH_GUARD_LITSTR(0x0B7AA0ED4CBF9ED7LL, NAMSTR(s_sys_ss2cb2e0eb, "setstrength")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -22275,7 +22275,7 @@ Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 30:
-      HASH_GUARD_LITSTR(0x1C15B5A1A05B4C5ELL, NAMSTR(s_sys_ss5fa4b3a2, "getstrength")) {
+      HASH_GUARD_LITSTR(0x1C15B5A1A05B4C5ELL, NAMSTR(s_sys_ss795eabe2, "getstrength")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -22289,7 +22289,7 @@ Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -22315,7 +22315,7 @@ Variant c_Collator::os_invoke_from_eval(const char *c, const char *s, Eval::Vari
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
-      HASH_GUARD_LITSTR(0x3A0A2C5D90518456LL, NAMSTR(s_sys_ss6fae7baa, "create")) {
+      HASH_GUARD_LITSTR(0x3A0A2C5D90518456LL, NAMSTR(s_sys_ss52e73952, "create")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -22729,83 +22729,83 @@ bool c_Collator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
-      HASH_GUARD_LITSTR(0x43E057044D6296E0LL, NAMSTR(s_sys_ss4d6296e0, "geterrorcode")) {
+      HASH_GUARD_LITSTR(0x43E057044D6296E0LL, NAMSTR(s_sys_ss269cdcbb, "geterrorcode")) {
         mcp.ci = &c_Collator::ci_geterrorcode;
         return true;
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x2C7E06EB2965CE02LL, NAMSTR(s_sys_ss2965ce02, "getlocale")) {
+      HASH_GUARD_LITSTR(0x2C7E06EB2965CE02LL, NAMSTR(s_sys_ss7a6049f4, "getlocale")) {
         mcp.ci = &c_Collator::ci_getlocale;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss6612fc28, "getattribute")) {
+      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss740bb93c, "getattribute")) {
         mcp.ci = &c_Collator::ci_getattribute;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1F4984938E1DBB2ALL, NAMSTR(s_sys_ss71e244d6, "sort")) {
+      HASH_GUARD_LITSTR(0x1F4984938E1DBB2ALL, NAMSTR(s_sys_ss7416f7f1, "sort")) {
         mcp.ci = &c_Collator::ci_sort;
         return true;
       }
-      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss44f4ab8a, "setattribute")) {
+      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss1b71aee5, "setattribute")) {
         mcp.ci = &c_Collator::ci_setattribute;
         return true;
       }
       break;
     case 11:
-      HASH_GUARD_LITSTR(0x365C573D887803EBLL, NAMSTR(s_sys_ss7787fc15, "sortwithsortkeys")) {
+      HASH_GUARD_LITSTR(0x365C573D887803EBLL, NAMSTR(s_sys_ss61f821f0, "sortwithsortkeys")) {
         mcp.ci = &c_Collator::ci_sortwithsortkeys;
         return true;
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x790B7C44A3442BEELL, NAMSTR(s_sys_ss5cbbd412, "asort")) {
+      HASH_GUARD_LITSTR(0x790B7C44A3442BEELL, NAMSTR(s_sys_ss3763e869, "asort")) {
         mcp.ci = &c_Collator::ci_asort;
         return true;
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x3B4D97DC8C437CD1LL, NAMSTR(s_sys_ss73bc832f, "geterrormessage")) {
+      HASH_GUARD_LITSTR(0x3B4D97DC8C437CD1LL, NAMSTR(s_sys_ss343a37dc, "geterrormessage")) {
         mcp.ci = &c_Collator::ci_geterrormessage;
         return true;
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x1BF74792BDECF352LL, NAMSTR(s_sys_ss42130cae, "compare")) {
+      HASH_GUARD_LITSTR(0x1BF74792BDECF352LL, NAMSTR(s_sys_ss7c760c1c, "compare")) {
         mcp.ci = &c_Collator::ci_compare;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_Collator::ci___destruct;
         return true;
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x3A0A2C5D90518456LL, NAMSTR(s_sys_ss6fae7baa, "create")) {
+      HASH_GUARD_LITSTR(0x3A0A2C5D90518456LL, NAMSTR(s_sys_ss52e73952, "create")) {
         mcp.ci = &c_Collator::ci_create;
         return true;
       }
       break;
     case 23:
-      HASH_GUARD_LITSTR(0x0B7AA0ED4CBF9ED7LL, NAMSTR(s_sys_ss4cbf9ed7, "setstrength")) {
+      HASH_GUARD_LITSTR(0x0B7AA0ED4CBF9ED7LL, NAMSTR(s_sys_ss2cb2e0eb, "setstrength")) {
         mcp.ci = &c_Collator::ci_setstrength;
         return true;
       }
       break;
     case 30:
-      HASH_GUARD_LITSTR(0x1C15B5A1A05B4C5ELL, NAMSTR(s_sys_ss5fa4b3a2, "getstrength")) {
+      HASH_GUARD_LITSTR(0x1C15B5A1A05B4C5ELL, NAMSTR(s_sys_ss795eabe2, "getstrength")) {
         mcp.ci = &c_Collator::ci_getstrength;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_Collator::ci___construct;
         return true;
       }
@@ -23184,7 +23184,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 7:
-      HASH_GUARD_LITSTR(0x6D0664CC2372F2C7LL, NAMSTR(s_sys_ss2372f2c7, "errorcode")) {
+      HASH_GUARD_LITSTR(0x6D0664CC2372F2C7LL, NAMSTR(s_sys_ss31a11388, "errorcode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -23198,7 +23198,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss44f4ab8a, "setattribute")) {
+      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss1b71aee5, "setattribute")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -23220,7 +23220,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x4F1D1ED7B087208CLL, NAMSTR(s_sys_ss4f78df74, "exec")) {
+      HASH_GUARD_LITSTR(0x4F1D1ED7B087208CLL, NAMSTR(s_sys_ss17f0e883, "exec")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -23238,7 +23238,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x7FF4D594AC38340ELL, NAMSTR(s_sys_ss53c7cbf2, "getavailabledrivers")) {
+      HASH_GUARD_LITSTR(0x7FF4D594AC38340ELL, NAMSTR(s_sys_ss717a7024, "getavailabledrivers")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -23252,7 +23252,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x25466EABBA2D7C12LL, NAMSTR(s_sys_ss45d283ee, "lastinsertid")) {
+      HASH_GUARD_LITSTR(0x25466EABBA2D7C12LL, NAMSTR(s_sys_ss0bb83e44, "lastinsertid")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -23271,7 +23271,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x4389F50CAA085CDCLL, NAMSTR(s_sys_ss55f7a324, "__wakeup")) {
+      HASH_GUARD_LITSTR(0x4389F50CAA085CDCLL, NAMSTR(s_sys_ss0723515e, "__wakeup")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -23285,7 +23285,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 30:
-      HASH_GUARD_LITSTR(0x1DDD412E7F04605ELL, NAMSTR(s_sys_ss7f04605e, "errorinfo")) {
+      HASH_GUARD_LITSTR(0x1DDD412E7F04605ELL, NAMSTR(s_sys_ss07706afb, "errorinfo")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -23299,7 +23299,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -23332,7 +23332,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 36:
-      HASH_GUARD_LITSTR(0x24D23BE465E3F324LL, NAMSTR(s_sys_ss65e3f324, "commit")) {
+      HASH_GUARD_LITSTR(0x24D23BE465E3F324LL, NAMSTR(s_sys_ss580793a6, "commit")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -23346,7 +23346,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 40:
-      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss6612fc28, "getattribute")) {
+      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss740bb93c, "getattribute")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -23364,7 +23364,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 45:
-      HASH_GUARD_LITSTR(0x61D1244DDADBC02DLL, NAMSTR(s_sys_ss25243fd3, "__sleep")) {
+      HASH_GUARD_LITSTR(0x61D1244DDADBC02DLL, NAMSTR(s_sys_ss0c905545, "__sleep")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -23378,7 +23378,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 46:
-      HASH_GUARD_LITSTR(0x1740B14E849464EELL, NAMSTR(s_sys_ss7b6b9b12, "quote")) {
+      HASH_GUARD_LITSTR(0x1740B14E849464EELL, NAMSTR(s_sys_ss3d6f0745, "quote")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -23401,7 +23401,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x540020AE4BA591AFLL, NAMSTR(s_sys_ss4ba591af, "prepare")) {
+      HASH_GUARD_LITSTR(0x540020AE4BA591AFLL, NAMSTR(s_sys_ss48724660, "prepare")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -23424,7 +23424,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -23438,7 +23438,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 54:
-      HASH_GUARD_LITSTR(0x374B46BC6D79EC36LL, NAMSTR(s_sys_ss6d79ec36, "rollback")) {
+      HASH_GUARD_LITSTR(0x374B46BC6D79EC36LL, NAMSTR(s_sys_ss4e21b0f1, "rollback")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -23452,7 +23452,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 55:
-      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss414da377, "query")) {
+      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss1c0ab7fa, "query")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -23470,7 +23470,7 @@ Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 59:
-      HASH_GUARD_LITSTR(0x0DE392135C33E23BLL, NAMSTR(s_sys_ss5c33e23b, "begintransaction")) {
+      HASH_GUARD_LITSTR(0x0DE392135C33E23BLL, NAMSTR(s_sys_ss1a3870d9, "begintransaction")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -23492,7 +23492,7 @@ Variant c_PDO::os_invoke_from_eval(const char *c, const char *s, Eval::VariableE
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
-      HASH_GUARD_LITSTR(0x7FF4D594AC38340ELL, NAMSTR(s_sys_ss53c7cbf2, "getavailabledrivers")) {
+      HASH_GUARD_LITSTR(0x7FF4D594AC38340ELL, NAMSTR(s_sys_ss717a7024, "getavailabledrivers")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -23969,103 +23969,103 @@ bool c_PDO::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 7:
-      HASH_GUARD_LITSTR(0x6D0664CC2372F2C7LL, NAMSTR(s_sys_ss2372f2c7, "errorcode")) {
+      HASH_GUARD_LITSTR(0x6D0664CC2372F2C7LL, NAMSTR(s_sys_ss31a11388, "errorcode")) {
         mcp.ci = &c_PDO::ci_errorcode;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss44f4ab8a, "setattribute")) {
+      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss1b71aee5, "setattribute")) {
         mcp.ci = &c_PDO::ci_setattribute;
         return true;
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x4F1D1ED7B087208CLL, NAMSTR(s_sys_ss4f78df74, "exec")) {
+      HASH_GUARD_LITSTR(0x4F1D1ED7B087208CLL, NAMSTR(s_sys_ss17f0e883, "exec")) {
         mcp.ci = &c_PDO::ci_exec;
         return true;
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x7FF4D594AC38340ELL, NAMSTR(s_sys_ss53c7cbf2, "getavailabledrivers")) {
+      HASH_GUARD_LITSTR(0x7FF4D594AC38340ELL, NAMSTR(s_sys_ss717a7024, "getavailabledrivers")) {
         mcp.ci = &c_PDO::ci_getavailabledrivers;
         return true;
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x25466EABBA2D7C12LL, NAMSTR(s_sys_ss45d283ee, "lastinsertid")) {
+      HASH_GUARD_LITSTR(0x25466EABBA2D7C12LL, NAMSTR(s_sys_ss0bb83e44, "lastinsertid")) {
         mcp.ci = &c_PDO::ci_lastinsertid;
         return true;
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x4389F50CAA085CDCLL, NAMSTR(s_sys_ss55f7a324, "__wakeup")) {
+      HASH_GUARD_LITSTR(0x4389F50CAA085CDCLL, NAMSTR(s_sys_ss0723515e, "__wakeup")) {
         mcp.ci = &c_PDO::ci___wakeup;
         return true;
       }
       break;
     case 30:
-      HASH_GUARD_LITSTR(0x1DDD412E7F04605ELL, NAMSTR(s_sys_ss7f04605e, "errorinfo")) {
+      HASH_GUARD_LITSTR(0x1DDD412E7F04605ELL, NAMSTR(s_sys_ss07706afb, "errorinfo")) {
         mcp.ci = &c_PDO::ci_errorinfo;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_PDO::ci___construct;
         return true;
       }
       break;
     case 36:
-      HASH_GUARD_LITSTR(0x24D23BE465E3F324LL, NAMSTR(s_sys_ss65e3f324, "commit")) {
+      HASH_GUARD_LITSTR(0x24D23BE465E3F324LL, NAMSTR(s_sys_ss580793a6, "commit")) {
         mcp.ci = &c_PDO::ci_commit;
         return true;
       }
       break;
     case 40:
-      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss6612fc28, "getattribute")) {
+      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss740bb93c, "getattribute")) {
         mcp.ci = &c_PDO::ci_getattribute;
         return true;
       }
       break;
     case 45:
-      HASH_GUARD_LITSTR(0x61D1244DDADBC02DLL, NAMSTR(s_sys_ss25243fd3, "__sleep")) {
+      HASH_GUARD_LITSTR(0x61D1244DDADBC02DLL, NAMSTR(s_sys_ss0c905545, "__sleep")) {
         mcp.ci = &c_PDO::ci___sleep;
         return true;
       }
       break;
     case 46:
-      HASH_GUARD_LITSTR(0x1740B14E849464EELL, NAMSTR(s_sys_ss7b6b9b12, "quote")) {
+      HASH_GUARD_LITSTR(0x1740B14E849464EELL, NAMSTR(s_sys_ss3d6f0745, "quote")) {
         mcp.ci = &c_PDO::ci_quote;
         return true;
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x540020AE4BA591AFLL, NAMSTR(s_sys_ss4ba591af, "prepare")) {
+      HASH_GUARD_LITSTR(0x540020AE4BA591AFLL, NAMSTR(s_sys_ss48724660, "prepare")) {
         mcp.ci = &c_PDO::ci_prepare;
         return true;
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_PDO::ci___destruct;
         return true;
       }
       break;
     case 54:
-      HASH_GUARD_LITSTR(0x374B46BC6D79EC36LL, NAMSTR(s_sys_ss6d79ec36, "rollback")) {
+      HASH_GUARD_LITSTR(0x374B46BC6D79EC36LL, NAMSTR(s_sys_ss4e21b0f1, "rollback")) {
         mcp.ci = &c_PDO::ci_rollback;
         return true;
       }
       break;
     case 55:
-      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss414da377, "query")) {
+      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss1c0ab7fa, "query")) {
         mcp.ci = &c_PDO::ci_query;
         return true;
       }
       break;
     case 59:
-      HASH_GUARD_LITSTR(0x0DE392135C33E23BLL, NAMSTR(s_sys_ss5c33e23b, "begintransaction")) {
+      HASH_GUARD_LITSTR(0x0DE392135C33E23BLL, NAMSTR(s_sys_ss1a3870d9, "begintransaction")) {
         mcp.ci = &c_PDO::ci_begintransaction;
         return true;
       }
@@ -24257,7 +24257,7 @@ Variant c_ImageSprite::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD_LITSTR(0x05D2634BA4310200LL, NAMSTR(s_sys_ss5bcefe00, "getErrors")) {
+      HASH_GUARD_LITSTR(0x05D2634BA4310200LL, NAMSTR(s_sys_ss7ef23ee0, "getErrors")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -24271,7 +24271,7 @@ Variant c_ImageSprite::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x6A37A496C57D57A2LL, NAMSTR(s_sys_ss3a82a85e, "loadDims")) {
+      HASH_GUARD_LITSTR(0x6A37A496C57D57A2LL, NAMSTR(s_sys_ss0801e92d, "loadDims")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -24290,7 +24290,7 @@ Variant c_ImageSprite::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x31DA235C5A226667LL, NAMSTR(s_sys_ss5a226667, "clear")) {
+      HASH_GUARD_LITSTR(0x31DA235C5A226667LL, NAMSTR(s_sys_ss7d4c47c4, "clear")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -24309,7 +24309,7 @@ Variant c_ImageSprite::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x13A96E5A21D1906FLL, NAMSTR(s_sys_ss21d1906f, "addFile")) {
+      HASH_GUARD_LITSTR(0x13A96E5A21D1906FLL, NAMSTR(s_sys_ss1d93a968, "addFile")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -24332,7 +24332,7 @@ Variant c_ImageSprite::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -24346,7 +24346,7 @@ Variant c_ImageSprite::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x305D94BB2EC0B554LL, NAMSTR(s_sys_ss2ec0b554, "loadImages")) {
+      HASH_GUARD_LITSTR(0x305D94BB2EC0B554LL, NAMSTR(s_sys_ss07cc46bd, "loadImages")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -24365,7 +24365,7 @@ Variant c_ImageSprite::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 23:
-      HASH_GUARD_LITSTR(0x4D8226FDFA2CA297LL, NAMSTR(s_sys_ss05d35d69, "mapping")) {
+      HASH_GUARD_LITSTR(0x4D8226FDFA2CA297LL, NAMSTR(s_sys_ss1acbf5cf, "mapping")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -24379,7 +24379,7 @@ Variant c_ImageSprite::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 26:
-      HASH_GUARD_LITSTR(0x386BF72B932D233ALL, NAMSTR(s_sys_ss6cd2dcc6, "addString")) {
+      HASH_GUARD_LITSTR(0x386BF72B932D233ALL, NAMSTR(s_sys_ss1be35cfc, "addString")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -24406,7 +24406,7 @@ Variant c_ImageSprite::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x63388F643871547CLL, NAMSTR(s_sys_ss3871547c, "css")) {
+      HASH_GUARD_LITSTR(0x63388F643871547CLL, NAMSTR(s_sys_ss672a5730, "css")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -24439,7 +24439,7 @@ Variant c_ImageSprite::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 29:
-      HASH_GUARD_LITSTR(0x79CFC8610DC84A7DLL, NAMSTR(s_sys_ss0dc84a7d, "addUrl")) {
+      HASH_GUARD_LITSTR(0x79CFC8610DC84A7DLL, NAMSTR(s_sys_ss044c14ae, "addUrl")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -24467,7 +24467,7 @@ Variant c_ImageSprite::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -24479,7 +24479,7 @@ Variant c_ImageSprite::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
-      HASH_GUARD_LITSTR(0x07B89E83B77C677FLL, NAMSTR(s_sys_ss48839881, "output")) {
+      HASH_GUARD_LITSTR(0x07B89E83B77C677FLL, NAMSTR(s_sys_ss7a5dbb24, "output")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -24884,71 +24884,71 @@ bool c_ImageSprite::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
-      HASH_GUARD_LITSTR(0x05D2634BA4310200LL, NAMSTR(s_sys_ss5bcefe00, "getErrors")) {
+      HASH_GUARD_LITSTR(0x05D2634BA4310200LL, NAMSTR(s_sys_ss7ef23ee0, "getErrors")) {
         mcp.ci = &c_ImageSprite::ci_geterrors;
         return true;
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x6A37A496C57D57A2LL, NAMSTR(s_sys_ss3a82a85e, "loadDims")) {
+      HASH_GUARD_LITSTR(0x6A37A496C57D57A2LL, NAMSTR(s_sys_ss0801e92d, "loadDims")) {
         mcp.ci = &c_ImageSprite::ci_loaddims;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x31DA235C5A226667LL, NAMSTR(s_sys_ss5a226667, "clear")) {
+      HASH_GUARD_LITSTR(0x31DA235C5A226667LL, NAMSTR(s_sys_ss7d4c47c4, "clear")) {
         mcp.ci = &c_ImageSprite::ci_clear;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x13A96E5A21D1906FLL, NAMSTR(s_sys_ss21d1906f, "addFile")) {
+      HASH_GUARD_LITSTR(0x13A96E5A21D1906FLL, NAMSTR(s_sys_ss1d93a968, "addFile")) {
         mcp.ci = &c_ImageSprite::ci_addfile;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_ImageSprite::ci___destruct;
         return true;
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x305D94BB2EC0B554LL, NAMSTR(s_sys_ss2ec0b554, "loadImages")) {
+      HASH_GUARD_LITSTR(0x305D94BB2EC0B554LL, NAMSTR(s_sys_ss07cc46bd, "loadImages")) {
         mcp.ci = &c_ImageSprite::ci_loadimages;
         return true;
       }
       break;
     case 23:
-      HASH_GUARD_LITSTR(0x4D8226FDFA2CA297LL, NAMSTR(s_sys_ss05d35d69, "mapping")) {
+      HASH_GUARD_LITSTR(0x4D8226FDFA2CA297LL, NAMSTR(s_sys_ss1acbf5cf, "mapping")) {
         mcp.ci = &c_ImageSprite::ci_mapping;
         return true;
       }
       break;
     case 26:
-      HASH_GUARD_LITSTR(0x386BF72B932D233ALL, NAMSTR(s_sys_ss6cd2dcc6, "addString")) {
+      HASH_GUARD_LITSTR(0x386BF72B932D233ALL, NAMSTR(s_sys_ss1be35cfc, "addString")) {
         mcp.ci = &c_ImageSprite::ci_addstring;
         return true;
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x63388F643871547CLL, NAMSTR(s_sys_ss3871547c, "css")) {
+      HASH_GUARD_LITSTR(0x63388F643871547CLL, NAMSTR(s_sys_ss672a5730, "css")) {
         mcp.ci = &c_ImageSprite::ci_css;
         return true;
       }
       break;
     case 29:
-      HASH_GUARD_LITSTR(0x79CFC8610DC84A7DLL, NAMSTR(s_sys_ss0dc84a7d, "addUrl")) {
+      HASH_GUARD_LITSTR(0x79CFC8610DC84A7DLL, NAMSTR(s_sys_ss044c14ae, "addUrl")) {
         mcp.ci = &c_ImageSprite::ci_addurl;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_ImageSprite::ci___construct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x07B89E83B77C677FLL, NAMSTR(s_sys_ss48839881, "output")) {
+      HASH_GUARD_LITSTR(0x07B89E83B77C677FLL, NAMSTR(s_sys_ss7a5dbb24, "output")) {
         mcp.ci = &c_ImageSprite::ci_output;
         return true;
       }
@@ -25081,7 +25081,7 @@ Variant c_DOMEntity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -25095,7 +25095,7 @@ Variant c_DOMEntity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -25117,7 +25117,7 @@ Variant c_DOMEntity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -25129,7 +25129,7 @@ Variant c_DOMEntity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -25266,23 +25266,23 @@ bool c_DOMEntity::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMEntity::ci___destruct;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         mcp.ci = &c_DOMEntity::ci___set;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMEntity::ci___construct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_DOMEntity::ci___get;
         return true;
       }
@@ -25415,7 +25415,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 2:
-      HASH_GUARD_LITSTR(0x1EBCBEA66B6B0982LL, NAMSTR(s_sys_ss6b6b0982, "writeCData")) {
+      HASH_GUARD_LITSTR(0x1EBCBEA66B6B0982LL, NAMSTR(s_sys_ss27a7fe99, "writeCData")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -25433,7 +25433,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x55E29E84E96ACF83LL, NAMSTR(s_sys_ss1695307d, "startDTD")) {
+      HASH_GUARD_LITSTR(0x55E29E84E96ACF83LL, NAMSTR(s_sys_ss2559ca9a, "startDTD")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -25461,7 +25461,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x7C1FF8A79BAB3608LL, NAMSTR(s_sys_ss6454c9f8, "writeDTD")) {
+      HASH_GUARD_LITSTR(0x7C1FF8A79BAB3608LL, NAMSTR(s_sys_ss6cdf7ec6, "writeDTD")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -25494,7 +25494,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x119CC9E7C3E7EF0ELL, NAMSTR(s_sys_ss3c1810f2, "openMemory")) {
+      HASH_GUARD_LITSTR(0x119CC9E7C3E7EF0ELL, NAMSTR(s_sys_ss210f927a, "openMemory")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -25508,7 +25508,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 16:
-      HASH_GUARD_LITSTR(0x0A7FE14C41766610LL, NAMSTR(s_sys_ss41766610, "endCData")) {
+      HASH_GUARD_LITSTR(0x0A7FE14C41766610LL, NAMSTR(s_sys_ss72e840b6, "endCData")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -25522,7 +25522,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x75F8C992981A4093LL, NAMSTR(s_sys_ss67e5bf6d, "writeComment")) {
+      HASH_GUARD_LITSTR(0x75F8C992981A4093LL, NAMSTR(s_sys_ss0e5b3f43, "writeComment")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -25538,7 +25538,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         if (count != 1) return throw_wrong_arguments("writecomment", count, 1, 1, 1);
         return (t_writecomment(a0));
       }
-      HASH_GUARD_LITSTR(0x5A7AE5A26994FF13LL, NAMSTR(s_sys_ss6994ff13, "startAttribute")) {
+      HASH_GUARD_LITSTR(0x5A7AE5A26994FF13LL, NAMSTR(s_sys_ss5ee96b8f, "startAttribute")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -25556,7 +25556,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x337EFFF3783B919CLL, NAMSTR(s_sys_ss783b919c, "writeElement")) {
+      HASH_GUARD_LITSTR(0x337EFFF3783B919CLL, NAMSTR(s_sys_ss33896428, "writeElement")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -25579,7 +25579,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 29:
-      HASH_GUARD_LITSTR(0x4D26D167066BB11DLL, NAMSTR(s_sys_ss066bb11d, "text")) {
+      HASH_GUARD_LITSTR(0x4D26D167066BB11DLL, NAMSTR(s_sys_ss4dd3a743, "text")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -25597,7 +25597,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 32:
-      HASH_GUARD_LITSTR(0x7DF0368A44C01B20LL, NAMSTR(s_sys_ss44c01b20, "startCData")) {
+      HASH_GUARD_LITSTR(0x7DF0368A44C01B20LL, NAMSTR(s_sys_ss7239f6f3, "startCData")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -25611,7 +25611,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 33:
-      HASH_GUARD_LITSTR(0x5D49A460168D5C21LL, NAMSTR(s_sys_ss168d5c21, "endPI")) {
+      HASH_GUARD_LITSTR(0x5D49A460168D5C21LL, NAMSTR(s_sys_ss225c5a00, "endPI")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -25625,7 +25625,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 41:
-      HASH_GUARD_LITSTR(0x1D81ABDC9890C5A9LL, NAMSTR(s_sys_ss676f3a57, "writeDTDAttlist")) {
+      HASH_GUARD_LITSTR(0x1D81ABDC9890C5A9LL, NAMSTR(s_sys_ss73e73811, "writeDTDAttlist")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -25647,7 +25647,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 43:
-      HASH_GUARD_LITSTR(0x0DEAF425F1AD73ABLL, NAMSTR(s_sys_ss0e528c55, "setIndentString")) {
+      HASH_GUARD_LITSTR(0x0DEAF425F1AD73ABLL, NAMSTR(s_sys_ss61185a01, "setIndentString")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -25665,7 +25665,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x78A7A5D96EF2F4AFLL, NAMSTR(s_sys_ss6ef2f4af, "endElement")) {
+      HASH_GUARD_LITSTR(0x78A7A5D96EF2F4AFLL, NAMSTR(s_sys_ss6b750a79, "endElement")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -25679,7 +25679,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 53:
-      HASH_GUARD_LITSTR(0x75B357D89DDE6EB5LL, NAMSTR(s_sys_ss6221914b, "endComment")) {
+      HASH_GUARD_LITSTR(0x75B357D89DDE6EB5LL, NAMSTR(s_sys_ss1d41740f, "endComment")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -25693,7 +25693,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 55:
-      HASH_GUARD_LITSTR(0x4B0F1F6361A59C37LL, NAMSTR(s_sys_ss61a59c37, "writeRaw")) {
+      HASH_GUARD_LITSTR(0x4B0F1F6361A59C37LL, NAMSTR(s_sys_ss11ccda13, "writeRaw")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -25711,7 +25711,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 56:
-      HASH_GUARD_LITSTR(0x7FC89CF1AFFB1E38LL, NAMSTR(s_sys_ss5004e1c8, "startDocument")) {
+      HASH_GUARD_LITSTR(0x7FC89CF1AFFB1E38LL, NAMSTR(s_sys_ss55bd51a4, "startDocument")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -25740,7 +25740,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 58:
-      HASH_GUARD_LITSTR(0x0D155D1E5C6641BALL, NAMSTR(s_sys_ss5c6641ba, "outputMemory")) {
+      HASH_GUARD_LITSTR(0x0D155D1E5C6641BALL, NAMSTR(s_sys_ss78542bc8, "outputMemory")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -25759,7 +25759,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 62:
-      HASH_GUARD_LITSTR(0x1FBE635680ADB7BELL, NAMSTR(s_sys_ss7f524842, "openURI")) {
+      HASH_GUARD_LITSTR(0x1FBE635680ADB7BELL, NAMSTR(s_sys_ss4e8fec21, "openURI")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -25777,7 +25777,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 68:
-      HASH_GUARD_LITSTR(0x275896BFD7A77144LL, NAMSTR(s_sys_ss28588ebc, "endDTD")) {
+      HASH_GUARD_LITSTR(0x275896BFD7A77144LL, NAMSTR(s_sys_ss3bc7ae68, "endDTD")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -25791,7 +25791,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 70:
-      HASH_GUARD_LITSTR(0x5D4650E5C0DAEE46LL, NAMSTR(s_sys_ss3f2511ba, "writeDTDEntity")) {
+      HASH_GUARD_LITSTR(0x5D4650E5C0DAEE46LL, NAMSTR(s_sys_ss2d431bd1, "writeDTDEntity")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -25833,7 +25833,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 71:
-      HASH_GUARD_LITSTR(0x017687FD7029CCC7LL, NAMSTR(s_sys_ss7029ccc7, "endDTDElement")) {
+      HASH_GUARD_LITSTR(0x017687FD7029CCC7LL, NAMSTR(s_sys_ss6d15497b, "endDTDElement")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -25847,7 +25847,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 75:
-      HASH_GUARD_LITSTR(0x3954A2C0306CCCCBLL, NAMSTR(s_sys_ss306ccccb, "writeAttribute")) {
+      HASH_GUARD_LITSTR(0x3954A2C0306CCCCBLL, NAMSTR(s_sys_ss770c7dcd, "writeAttribute")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -25867,7 +25867,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         if (count != 2) return throw_wrong_arguments("writeattribute", count, 2, 2, 1);
         return (t_writeattribute(a0, a1));
       }
-      HASH_GUARD_LITSTR(0x7C43ECE80FF886CBLL, NAMSTR(s_sys_ss0ff886cb, "endAttribute")) {
+      HASH_GUARD_LITSTR(0x7C43ECE80FF886CBLL, NAMSTR(s_sys_ss5943b0ab, "endAttribute")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -25881,7 +25881,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 77:
-      HASH_GUARD_LITSTR(0x4F1D890D5B36D24DLL, NAMSTR(s_sys_ss5b36d24d, "startAttributens")) {
+      HASH_GUARD_LITSTR(0x4F1D890D5B36D24DLL, NAMSTR(s_sys_ss42fc2063, "startAttributens")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -25907,7 +25907,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 82:
-      HASH_GUARD_LITSTR(0x1357CA1E92397452LL, NAMSTR(s_sys_ss6dc68bae, "writeDTDElement")) {
+      HASH_GUARD_LITSTR(0x1357CA1E92397452LL, NAMSTR(s_sys_ss540d86c3, "writeDTDElement")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -25929,7 +25929,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 84:
-      HASH_GUARD_LITSTR(0x154AE94AEFAC7C54LL, NAMSTR(s_sys_ss105383ac, "writeAttributeNS")) {
+      HASH_GUARD_LITSTR(0x154AE94AEFAC7C54LL, NAMSTR(s_sys_ss5ec345b7, "writeAttributeNS")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -25959,7 +25959,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 86:
-      HASH_GUARD_LITSTR(0x4520735705A382D6LL, NAMSTR(s_sys_ss05a382d6, "endDTDEntity")) {
+      HASH_GUARD_LITSTR(0x4520735705A382D6LL, NAMSTR(s_sys_ss0ad7057a, "endDTDEntity")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -25971,7 +25971,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         if (count > 0) return throw_toomany_arguments("enddtdentity", 0, 1);
         return (t_enddtdentity());
       }
-      HASH_GUARD_LITSTR(0x37D51A94C6EE8F56LL, NAMSTR(s_sys_ss391170aa, "writePI")) {
+      HASH_GUARD_LITSTR(0x37D51A94C6EE8F56LL, NAMSTR(s_sys_ss7a0832b7, "writePI")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -25993,7 +25993,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 88:
-      HASH_GUARD_LITSTR(0x24A376E9310BF058LL, NAMSTR(s_sys_ss310bf058, "writeElementNS")) {
+      HASH_GUARD_LITSTR(0x24A376E9310BF058LL, NAMSTR(s_sys_ss470cc511, "writeElementNS")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -26024,7 +26024,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 89:
-      HASH_GUARD_LITSTR(0x390B6C01AE7C4159LL, NAMSTR(s_sys_ss5183bea7, "startPI")) {
+      HASH_GUARD_LITSTR(0x390B6C01AE7C4159LL, NAMSTR(s_sys_ss525fabde, "startPI")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -26042,7 +26042,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 92:
-      HASH_GUARD_LITSTR(0x0DC5AC1E0A2F63DCLL, NAMSTR(s_sys_ss0a2f63dc, "endDocument")) {
+      HASH_GUARD_LITSTR(0x0DC5AC1E0A2F63DCLL, NAMSTR(s_sys_ss2fb43add, "endDocument")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -26056,7 +26056,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 93:
-      HASH_GUARD_LITSTR(0x75A033B824EA1ADDLL, NAMSTR(s_sys_ss24ea1add, "startDTDEntity")) {
+      HASH_GUARD_LITSTR(0x75A033B824EA1ADDLL, NAMSTR(s_sys_ss35f0e00c, "startDTDEntity")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -26078,7 +26078,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -26092,7 +26092,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 98:
-      HASH_GUARD_LITSTR(0x55BFFBE5717EFD62LL, NAMSTR(s_sys_ss717efd62, "startElement")) {
+      HASH_GUARD_LITSTR(0x55BFFBE5717EFD62LL, NAMSTR(s_sys_ss52cc26aa, "startElement")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -26110,7 +26110,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 101:
-      HASH_GUARD_LITSTR(0x349B7446B5EE65E5LL, NAMSTR(s_sys_ss4a119a1b, "setIndent")) {
+      HASH_GUARD_LITSTR(0x349B7446B5EE65E5LL, NAMSTR(s_sys_ss3d0277bb, "setIndent")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -26128,7 +26128,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 105:
-      HASH_GUARD_LITSTR(0x608A2D39DE12E169LL, NAMSTR(s_sys_ss21ed1e97, "startElementNS")) {
+      HASH_GUARD_LITSTR(0x608A2D39DE12E169LL, NAMSTR(s_sys_ss5ea3f5ac, "startElementNS")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -26154,7 +26154,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 112:
-      HASH_GUARD_LITSTR(0x0CBB10FA542B7D70LL, NAMSTR(s_sys_ss542b7d70, "startDTDAttlist")) {
+      HASH_GUARD_LITSTR(0x0CBB10FA542B7D70LL, NAMSTR(s_sys_ss3d09e8a5, "startDTDAttlist")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -26172,7 +26172,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 113:
-      HASH_GUARD_LITSTR(0x496175DBD52E1771LL, NAMSTR(s_sys_ss2ad1e88f, "endDTDAttlist")) {
+      HASH_GUARD_LITSTR(0x496175DBD52E1771LL, NAMSTR(s_sys_ss75ec94fd, "endDTDAttlist")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -26186,7 +26186,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 115:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -26200,7 +26200,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 120:
-      HASH_GUARD_LITSTR(0x451436438EBA2AF8LL, NAMSTR(s_sys_ss7145d508, "startDTDElement")) {
+      HASH_GUARD_LITSTR(0x451436438EBA2AF8LL, NAMSTR(s_sys_ss01b8f0d7, "startDTDElement")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -26218,7 +26218,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 122:
-      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss24ffa186, "flush")) {
+      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss56c1ddfb, "flush")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -26237,7 +26237,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 126:
-      HASH_GUARD_LITSTR(0x3174CCE00BFB9FFELL, NAMSTR(s_sys_ss0bfb9ffe, "fullEndElement")) {
+      HASH_GUARD_LITSTR(0x3174CCE00BFB9FFELL, NAMSTR(s_sys_ss17c3d085, "fullEndElement")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -26251,7 +26251,7 @@ Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 127:
-      HASH_GUARD_LITSTR(0x6A8CC27A7F0466FFLL, NAMSTR(s_sys_ss7f0466ff, "startComment")) {
+      HASH_GUARD_LITSTR(0x6A8CC27A7F0466FFLL, NAMSTR(s_sys_ss5cea87cb, "startComment")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -27533,259 +27533,259 @@ bool c_XMLWriter::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 127) {
     case 2:
-      HASH_GUARD_LITSTR(0x1EBCBEA66B6B0982LL, NAMSTR(s_sys_ss6b6b0982, "writeCData")) {
+      HASH_GUARD_LITSTR(0x1EBCBEA66B6B0982LL, NAMSTR(s_sys_ss27a7fe99, "writeCData")) {
         mcp.ci = &c_XMLWriter::ci_writecdata;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x55E29E84E96ACF83LL, NAMSTR(s_sys_ss1695307d, "startDTD")) {
+      HASH_GUARD_LITSTR(0x55E29E84E96ACF83LL, NAMSTR(s_sys_ss2559ca9a, "startDTD")) {
         mcp.ci = &c_XMLWriter::ci_startdtd;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x7C1FF8A79BAB3608LL, NAMSTR(s_sys_ss6454c9f8, "writeDTD")) {
+      HASH_GUARD_LITSTR(0x7C1FF8A79BAB3608LL, NAMSTR(s_sys_ss6cdf7ec6, "writeDTD")) {
         mcp.ci = &c_XMLWriter::ci_writedtd;
         return true;
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x119CC9E7C3E7EF0ELL, NAMSTR(s_sys_ss3c1810f2, "openMemory")) {
+      HASH_GUARD_LITSTR(0x119CC9E7C3E7EF0ELL, NAMSTR(s_sys_ss210f927a, "openMemory")) {
         mcp.ci = &c_XMLWriter::ci_openmemory;
         return true;
       }
       break;
     case 16:
-      HASH_GUARD_LITSTR(0x0A7FE14C41766610LL, NAMSTR(s_sys_ss41766610, "endCData")) {
+      HASH_GUARD_LITSTR(0x0A7FE14C41766610LL, NAMSTR(s_sys_ss72e840b6, "endCData")) {
         mcp.ci = &c_XMLWriter::ci_endcdata;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x75F8C992981A4093LL, NAMSTR(s_sys_ss67e5bf6d, "writeComment")) {
+      HASH_GUARD_LITSTR(0x75F8C992981A4093LL, NAMSTR(s_sys_ss0e5b3f43, "writeComment")) {
         mcp.ci = &c_XMLWriter::ci_writecomment;
         return true;
       }
-      HASH_GUARD_LITSTR(0x5A7AE5A26994FF13LL, NAMSTR(s_sys_ss6994ff13, "startAttribute")) {
+      HASH_GUARD_LITSTR(0x5A7AE5A26994FF13LL, NAMSTR(s_sys_ss5ee96b8f, "startAttribute")) {
         mcp.ci = &c_XMLWriter::ci_startattribute;
         return true;
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x337EFFF3783B919CLL, NAMSTR(s_sys_ss783b919c, "writeElement")) {
+      HASH_GUARD_LITSTR(0x337EFFF3783B919CLL, NAMSTR(s_sys_ss33896428, "writeElement")) {
         mcp.ci = &c_XMLWriter::ci_writeelement;
         return true;
       }
       break;
     case 29:
-      HASH_GUARD_LITSTR(0x4D26D167066BB11DLL, NAMSTR(s_sys_ss066bb11d, "text")) {
+      HASH_GUARD_LITSTR(0x4D26D167066BB11DLL, NAMSTR(s_sys_ss4dd3a743, "text")) {
         mcp.ci = &c_XMLWriter::ci_text;
         return true;
       }
       break;
     case 32:
-      HASH_GUARD_LITSTR(0x7DF0368A44C01B20LL, NAMSTR(s_sys_ss44c01b20, "startCData")) {
+      HASH_GUARD_LITSTR(0x7DF0368A44C01B20LL, NAMSTR(s_sys_ss7239f6f3, "startCData")) {
         mcp.ci = &c_XMLWriter::ci_startcdata;
         return true;
       }
       break;
     case 33:
-      HASH_GUARD_LITSTR(0x5D49A460168D5C21LL, NAMSTR(s_sys_ss168d5c21, "endPI")) {
+      HASH_GUARD_LITSTR(0x5D49A460168D5C21LL, NAMSTR(s_sys_ss225c5a00, "endPI")) {
         mcp.ci = &c_XMLWriter::ci_endpi;
         return true;
       }
       break;
     case 41:
-      HASH_GUARD_LITSTR(0x1D81ABDC9890C5A9LL, NAMSTR(s_sys_ss676f3a57, "writeDTDAttlist")) {
+      HASH_GUARD_LITSTR(0x1D81ABDC9890C5A9LL, NAMSTR(s_sys_ss73e73811, "writeDTDAttlist")) {
         mcp.ci = &c_XMLWriter::ci_writedtdattlist;
         return true;
       }
       break;
     case 43:
-      HASH_GUARD_LITSTR(0x0DEAF425F1AD73ABLL, NAMSTR(s_sys_ss0e528c55, "setIndentString")) {
+      HASH_GUARD_LITSTR(0x0DEAF425F1AD73ABLL, NAMSTR(s_sys_ss61185a01, "setIndentString")) {
         mcp.ci = &c_XMLWriter::ci_setindentstring;
         return true;
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x78A7A5D96EF2F4AFLL, NAMSTR(s_sys_ss6ef2f4af, "endElement")) {
+      HASH_GUARD_LITSTR(0x78A7A5D96EF2F4AFLL, NAMSTR(s_sys_ss6b750a79, "endElement")) {
         mcp.ci = &c_XMLWriter::ci_endelement;
         return true;
       }
       break;
     case 53:
-      HASH_GUARD_LITSTR(0x75B357D89DDE6EB5LL, NAMSTR(s_sys_ss6221914b, "endComment")) {
+      HASH_GUARD_LITSTR(0x75B357D89DDE6EB5LL, NAMSTR(s_sys_ss1d41740f, "endComment")) {
         mcp.ci = &c_XMLWriter::ci_endcomment;
         return true;
       }
       break;
     case 55:
-      HASH_GUARD_LITSTR(0x4B0F1F6361A59C37LL, NAMSTR(s_sys_ss61a59c37, "writeRaw")) {
+      HASH_GUARD_LITSTR(0x4B0F1F6361A59C37LL, NAMSTR(s_sys_ss11ccda13, "writeRaw")) {
         mcp.ci = &c_XMLWriter::ci_writeraw;
         return true;
       }
       break;
     case 56:
-      HASH_GUARD_LITSTR(0x7FC89CF1AFFB1E38LL, NAMSTR(s_sys_ss5004e1c8, "startDocument")) {
+      HASH_GUARD_LITSTR(0x7FC89CF1AFFB1E38LL, NAMSTR(s_sys_ss55bd51a4, "startDocument")) {
         mcp.ci = &c_XMLWriter::ci_startdocument;
         return true;
       }
       break;
     case 58:
-      HASH_GUARD_LITSTR(0x0D155D1E5C6641BALL, NAMSTR(s_sys_ss5c6641ba, "outputMemory")) {
+      HASH_GUARD_LITSTR(0x0D155D1E5C6641BALL, NAMSTR(s_sys_ss78542bc8, "outputMemory")) {
         mcp.ci = &c_XMLWriter::ci_outputmemory;
         return true;
       }
       break;
     case 62:
-      HASH_GUARD_LITSTR(0x1FBE635680ADB7BELL, NAMSTR(s_sys_ss7f524842, "openURI")) {
+      HASH_GUARD_LITSTR(0x1FBE635680ADB7BELL, NAMSTR(s_sys_ss4e8fec21, "openURI")) {
         mcp.ci = &c_XMLWriter::ci_openuri;
         return true;
       }
       break;
     case 68:
-      HASH_GUARD_LITSTR(0x275896BFD7A77144LL, NAMSTR(s_sys_ss28588ebc, "endDTD")) {
+      HASH_GUARD_LITSTR(0x275896BFD7A77144LL, NAMSTR(s_sys_ss3bc7ae68, "endDTD")) {
         mcp.ci = &c_XMLWriter::ci_enddtd;
         return true;
       }
       break;
     case 70:
-      HASH_GUARD_LITSTR(0x5D4650E5C0DAEE46LL, NAMSTR(s_sys_ss3f2511ba, "writeDTDEntity")) {
+      HASH_GUARD_LITSTR(0x5D4650E5C0DAEE46LL, NAMSTR(s_sys_ss2d431bd1, "writeDTDEntity")) {
         mcp.ci = &c_XMLWriter::ci_writedtdentity;
         return true;
       }
       break;
     case 71:
-      HASH_GUARD_LITSTR(0x017687FD7029CCC7LL, NAMSTR(s_sys_ss7029ccc7, "endDTDElement")) {
+      HASH_GUARD_LITSTR(0x017687FD7029CCC7LL, NAMSTR(s_sys_ss6d15497b, "endDTDElement")) {
         mcp.ci = &c_XMLWriter::ci_enddtdelement;
         return true;
       }
       break;
     case 75:
-      HASH_GUARD_LITSTR(0x3954A2C0306CCCCBLL, NAMSTR(s_sys_ss306ccccb, "writeAttribute")) {
+      HASH_GUARD_LITSTR(0x3954A2C0306CCCCBLL, NAMSTR(s_sys_ss770c7dcd, "writeAttribute")) {
         mcp.ci = &c_XMLWriter::ci_writeattribute;
         return true;
       }
-      HASH_GUARD_LITSTR(0x7C43ECE80FF886CBLL, NAMSTR(s_sys_ss0ff886cb, "endAttribute")) {
+      HASH_GUARD_LITSTR(0x7C43ECE80FF886CBLL, NAMSTR(s_sys_ss5943b0ab, "endAttribute")) {
         mcp.ci = &c_XMLWriter::ci_endattribute;
         return true;
       }
       break;
     case 77:
-      HASH_GUARD_LITSTR(0x4F1D890D5B36D24DLL, NAMSTR(s_sys_ss5b36d24d, "startAttributens")) {
+      HASH_GUARD_LITSTR(0x4F1D890D5B36D24DLL, NAMSTR(s_sys_ss42fc2063, "startAttributens")) {
         mcp.ci = &c_XMLWriter::ci_startattributens;
         return true;
       }
       break;
     case 82:
-      HASH_GUARD_LITSTR(0x1357CA1E92397452LL, NAMSTR(s_sys_ss6dc68bae, "writeDTDElement")) {
+      HASH_GUARD_LITSTR(0x1357CA1E92397452LL, NAMSTR(s_sys_ss540d86c3, "writeDTDElement")) {
         mcp.ci = &c_XMLWriter::ci_writedtdelement;
         return true;
       }
       break;
     case 84:
-      HASH_GUARD_LITSTR(0x154AE94AEFAC7C54LL, NAMSTR(s_sys_ss105383ac, "writeAttributeNS")) {
+      HASH_GUARD_LITSTR(0x154AE94AEFAC7C54LL, NAMSTR(s_sys_ss5ec345b7, "writeAttributeNS")) {
         mcp.ci = &c_XMLWriter::ci_writeattributens;
         return true;
       }
       break;
     case 86:
-      HASH_GUARD_LITSTR(0x4520735705A382D6LL, NAMSTR(s_sys_ss05a382d6, "endDTDEntity")) {
+      HASH_GUARD_LITSTR(0x4520735705A382D6LL, NAMSTR(s_sys_ss0ad7057a, "endDTDEntity")) {
         mcp.ci = &c_XMLWriter::ci_enddtdentity;
         return true;
       }
-      HASH_GUARD_LITSTR(0x37D51A94C6EE8F56LL, NAMSTR(s_sys_ss391170aa, "writePI")) {
+      HASH_GUARD_LITSTR(0x37D51A94C6EE8F56LL, NAMSTR(s_sys_ss7a0832b7, "writePI")) {
         mcp.ci = &c_XMLWriter::ci_writepi;
         return true;
       }
       break;
     case 88:
-      HASH_GUARD_LITSTR(0x24A376E9310BF058LL, NAMSTR(s_sys_ss310bf058, "writeElementNS")) {
+      HASH_GUARD_LITSTR(0x24A376E9310BF058LL, NAMSTR(s_sys_ss470cc511, "writeElementNS")) {
         mcp.ci = &c_XMLWriter::ci_writeelementns;
         return true;
       }
       break;
     case 89:
-      HASH_GUARD_LITSTR(0x390B6C01AE7C4159LL, NAMSTR(s_sys_ss5183bea7, "startPI")) {
+      HASH_GUARD_LITSTR(0x390B6C01AE7C4159LL, NAMSTR(s_sys_ss525fabde, "startPI")) {
         mcp.ci = &c_XMLWriter::ci_startpi;
         return true;
       }
       break;
     case 92:
-      HASH_GUARD_LITSTR(0x0DC5AC1E0A2F63DCLL, NAMSTR(s_sys_ss0a2f63dc, "endDocument")) {
+      HASH_GUARD_LITSTR(0x0DC5AC1E0A2F63DCLL, NAMSTR(s_sys_ss2fb43add, "endDocument")) {
         mcp.ci = &c_XMLWriter::ci_enddocument;
         return true;
       }
       break;
     case 93:
-      HASH_GUARD_LITSTR(0x75A033B824EA1ADDLL, NAMSTR(s_sys_ss24ea1add, "startDTDEntity")) {
+      HASH_GUARD_LITSTR(0x75A033B824EA1ADDLL, NAMSTR(s_sys_ss35f0e00c, "startDTDEntity")) {
         mcp.ci = &c_XMLWriter::ci_startdtdentity;
         return true;
       }
       break;
     case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_XMLWriter::ci___construct;
         return true;
       }
       break;
     case 98:
-      HASH_GUARD_LITSTR(0x55BFFBE5717EFD62LL, NAMSTR(s_sys_ss717efd62, "startElement")) {
+      HASH_GUARD_LITSTR(0x55BFFBE5717EFD62LL, NAMSTR(s_sys_ss52cc26aa, "startElement")) {
         mcp.ci = &c_XMLWriter::ci_startelement;
         return true;
       }
       break;
     case 101:
-      HASH_GUARD_LITSTR(0x349B7446B5EE65E5LL, NAMSTR(s_sys_ss4a119a1b, "setIndent")) {
+      HASH_GUARD_LITSTR(0x349B7446B5EE65E5LL, NAMSTR(s_sys_ss3d0277bb, "setIndent")) {
         mcp.ci = &c_XMLWriter::ci_setindent;
         return true;
       }
       break;
     case 105:
-      HASH_GUARD_LITSTR(0x608A2D39DE12E169LL, NAMSTR(s_sys_ss21ed1e97, "startElementNS")) {
+      HASH_GUARD_LITSTR(0x608A2D39DE12E169LL, NAMSTR(s_sys_ss5ea3f5ac, "startElementNS")) {
         mcp.ci = &c_XMLWriter::ci_startelementns;
         return true;
       }
       break;
     case 112:
-      HASH_GUARD_LITSTR(0x0CBB10FA542B7D70LL, NAMSTR(s_sys_ss542b7d70, "startDTDAttlist")) {
+      HASH_GUARD_LITSTR(0x0CBB10FA542B7D70LL, NAMSTR(s_sys_ss3d09e8a5, "startDTDAttlist")) {
         mcp.ci = &c_XMLWriter::ci_startdtdattlist;
         return true;
       }
       break;
     case 113:
-      HASH_GUARD_LITSTR(0x496175DBD52E1771LL, NAMSTR(s_sys_ss2ad1e88f, "endDTDAttlist")) {
+      HASH_GUARD_LITSTR(0x496175DBD52E1771LL, NAMSTR(s_sys_ss75ec94fd, "endDTDAttlist")) {
         mcp.ci = &c_XMLWriter::ci_enddtdattlist;
         return true;
       }
       break;
     case 115:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_XMLWriter::ci___destruct;
         return true;
       }
       break;
     case 120:
-      HASH_GUARD_LITSTR(0x451436438EBA2AF8LL, NAMSTR(s_sys_ss7145d508, "startDTDElement")) {
+      HASH_GUARD_LITSTR(0x451436438EBA2AF8LL, NAMSTR(s_sys_ss01b8f0d7, "startDTDElement")) {
         mcp.ci = &c_XMLWriter::ci_startdtdelement;
         return true;
       }
       break;
     case 122:
-      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss24ffa186, "flush")) {
+      HASH_GUARD_LITSTR(0x6A3D9F8EDB005E7ALL, NAMSTR(s_sys_ss56c1ddfb, "flush")) {
         mcp.ci = &c_XMLWriter::ci_flush;
         return true;
       }
       break;
     case 126:
-      HASH_GUARD_LITSTR(0x3174CCE00BFB9FFELL, NAMSTR(s_sys_ss0bfb9ffe, "fullEndElement")) {
+      HASH_GUARD_LITSTR(0x3174CCE00BFB9FFELL, NAMSTR(s_sys_ss17c3d085, "fullEndElement")) {
         mcp.ci = &c_XMLWriter::ci_fullendelement;
         return true;
       }
       break;
     case 127:
-      HASH_GUARD_LITSTR(0x6A8CC27A7F0466FFLL, NAMSTR(s_sys_ss7f0466ff, "startComment")) {
+      HASH_GUARD_LITSTR(0x6A8CC27A7F0466FFLL, NAMSTR(s_sys_ss5cea87cb, "startComment")) {
         mcp.ci = &c_XMLWriter::ci_startcomment;
         return true;
       }
@@ -27918,7 +27918,7 @@ Variant c_DOMException::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -27930,7 +27930,7 @@ Variant c_DOMException::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -28024,11 +28024,11 @@ bool c_DOMException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMException::ci___destruct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMException::ci___construct;
         return true;
       }
@@ -28199,7 +28199,7 @@ Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 2:
-      HASH_GUARD_LITSTR(0x144FADF6B374AB82LL, NAMSTR(s_sys_ss4c8b547e, "registerPHPFunctions")) {
+      HASH_GUARD_LITSTR(0x144FADF6B374AB82LL, NAMSTR(s_sys_ss53c4a65d, "registerPHPFunctions")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -28218,7 +28218,7 @@ Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -28232,7 +28232,7 @@ Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -28254,7 +28254,7 @@ Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss414da377, "query")) {
+      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss1c0ab7fa, "query")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -28277,7 +28277,7 @@ Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x47ACFB6D8681B0E8LL, NAMSTR(s_sys_ss797e4f18, "registerNamespace")) {
+      HASH_GUARD_LITSTR(0x47ACFB6D8681B0E8LL, NAMSTR(s_sys_ss6159a18c, "registerNamespace")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -28299,7 +28299,7 @@ Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -28315,7 +28315,7 @@ Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         return (t___construct(a0), null);
       }
-      HASH_GUARD_LITSTR(0x2443593B6F3C912FLL, NAMSTR(s_sys_ss6f3c912f, "evaluate")) {
+      HASH_GUARD_LITSTR(0x2443593B6F3C912FLL, NAMSTR(s_sys_ss0bbd95ea, "evaluate")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -28336,7 +28336,7 @@ Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         if (count <= 1) return (t_evaluate(a0));
         else return (t_evaluate(a0, a1));
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -28603,45 +28603,45 @@ bool c_DOMXPath::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 2:
-      HASH_GUARD_LITSTR(0x144FADF6B374AB82LL, NAMSTR(s_sys_ss4c8b547e, "registerPHPFunctions")) {
+      HASH_GUARD_LITSTR(0x144FADF6B374AB82LL, NAMSTR(s_sys_ss53c4a65d, "registerPHPFunctions")) {
         mcp.ci = &c_DOMXPath::ci_registerphpfunctions;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMXPath::ci___destruct;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         mcp.ci = &c_DOMXPath::ci___set;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss414da377, "query")) {
+      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_ss1c0ab7fa, "query")) {
         mcp.ci = &c_DOMXPath::ci_query;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x47ACFB6D8681B0E8LL, NAMSTR(s_sys_ss797e4f18, "registerNamespace")) {
+      HASH_GUARD_LITSTR(0x47ACFB6D8681B0E8LL, NAMSTR(s_sys_ss6159a18c, "registerNamespace")) {
         mcp.ci = &c_DOMXPath::ci_registernamespace;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMXPath::ci___construct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x2443593B6F3C912FLL, NAMSTR(s_sys_ss6f3c912f, "evaluate")) {
+      HASH_GUARD_LITSTR(0x2443593B6F3C912FLL, NAMSTR(s_sys_ss0bbd95ea, "evaluate")) {
         mcp.ci = &c_DOMXPath::ci_evaluate;
         return true;
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_DOMXPath::ci___get;
         return true;
       }
@@ -28788,7 +28788,7 @@ Variant c_SoapServer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 3:
-      HASH_GUARD_LITSTR(0x758A4E04590FE203LL, NAMSTR(s_sys_ss590fe203, "fault")) {
+      HASH_GUARD_LITSTR(0x758A4E04590FE203LL, NAMSTR(s_sys_ss238e31cb, "fault")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -28825,7 +28825,7 @@ Variant c_SoapServer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x5E77DD94E0A69328LL, NAMSTR(s_sys_ss1f596cd8, "setpersistence")) {
+      HASH_GUARD_LITSTR(0x5E77DD94E0A69328LL, NAMSTR(s_sys_ss7257a6f2, "setpersistence")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -28843,7 +28843,7 @@ Variant c_SoapServer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1dd0e851_1, "getfunctions")) {
+      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss6fc6c6bf, "getfunctions")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -28857,7 +28857,7 @@ Variant c_SoapServer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x5C4CA333F4541532LL, NAMSTR(s_sys_ss0babeace, "handle")) {
+      HASH_GUARD_LITSTR(0x5C4CA333F4541532LL, NAMSTR(s_sys_ss46eeef5c, "handle")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -28876,7 +28876,7 @@ Variant c_SoapServer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -28890,7 +28890,7 @@ Variant c_SoapServer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x597B151CC4F70834LL, NAMSTR(s_sys_ss3b08f7cc, "setclass")) {
+      HASH_GUARD_LITSTR(0x597B151CC4F70834LL, NAMSTR(s_sys_ss47724c46, "setclass")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -28910,7 +28910,7 @@ Variant c_SoapServer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x559622F84FE626B9LL, NAMSTR(s_sys_ss4fe626b9, "setobject")) {
+      HASH_GUARD_LITSTR(0x559622F84FE626B9LL, NAMSTR(s_sys_ss42a11cef, "setobject")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -28928,7 +28928,7 @@ Variant c_SoapServer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 30:
-      HASH_GUARD_LITSTR(0x278B0E6CCA74963ELL, NAMSTR(s_sys_ss358b69c2, "addsoapheader")) {
+      HASH_GUARD_LITSTR(0x278B0E6CCA74963ELL, NAMSTR(s_sys_ss5eba20da, "addsoapheader")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -28946,7 +28946,7 @@ Variant c_SoapServer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x48B5852A397D2D9FLL, NAMSTR(s_sys_ss397d2d9f, "addfunction")) {
+      HASH_GUARD_LITSTR(0x48B5852A397D2D9FLL, NAMSTR(s_sys_ss508b1d41, "addfunction")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -28962,7 +28962,7 @@ Variant c_SoapServer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         if (count != 1) return throw_wrong_arguments("addfunction", count, 1, 1, 1);
         return (t_addfunction(a0), null);
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -29300,59 +29300,59 @@ bool c_SoapServer::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 3:
-      HASH_GUARD_LITSTR(0x758A4E04590FE203LL, NAMSTR(s_sys_ss590fe203, "fault")) {
+      HASH_GUARD_LITSTR(0x758A4E04590FE203LL, NAMSTR(s_sys_ss238e31cb, "fault")) {
         mcp.ci = &c_SoapServer::ci_fault;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x5E77DD94E0A69328LL, NAMSTR(s_sys_ss1f596cd8, "setpersistence")) {
+      HASH_GUARD_LITSTR(0x5E77DD94E0A69328LL, NAMSTR(s_sys_ss7257a6f2, "setpersistence")) {
         mcp.ci = &c_SoapServer::ci_setpersistence;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1dd0e851_1, "getfunctions")) {
+      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss6fc6c6bf, "getfunctions")) {
         mcp.ci = &c_SoapServer::ci_getfunctions;
         return true;
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x5C4CA333F4541532LL, NAMSTR(s_sys_ss0babeace, "handle")) {
+      HASH_GUARD_LITSTR(0x5C4CA333F4541532LL, NAMSTR(s_sys_ss46eeef5c, "handle")) {
         mcp.ci = &c_SoapServer::ci_handle;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_SoapServer::ci___destruct;
         return true;
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x597B151CC4F70834LL, NAMSTR(s_sys_ss3b08f7cc, "setclass")) {
+      HASH_GUARD_LITSTR(0x597B151CC4F70834LL, NAMSTR(s_sys_ss47724c46, "setclass")) {
         mcp.ci = &c_SoapServer::ci_setclass;
         return true;
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x559622F84FE626B9LL, NAMSTR(s_sys_ss4fe626b9, "setobject")) {
+      HASH_GUARD_LITSTR(0x559622F84FE626B9LL, NAMSTR(s_sys_ss42a11cef, "setobject")) {
         mcp.ci = &c_SoapServer::ci_setobject;
         return true;
       }
       break;
     case 30:
-      HASH_GUARD_LITSTR(0x278B0E6CCA74963ELL, NAMSTR(s_sys_ss358b69c2, "addsoapheader")) {
+      HASH_GUARD_LITSTR(0x278B0E6CCA74963ELL, NAMSTR(s_sys_ss5eba20da, "addsoapheader")) {
         mcp.ci = &c_SoapServer::ci_addsoapheader;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x48B5852A397D2D9FLL, NAMSTR(s_sys_ss397d2d9f, "addfunction")) {
+      HASH_GUARD_LITSTR(0x48B5852A397D2D9FLL, NAMSTR(s_sys_ss508b1d41, "addfunction")) {
         mcp.ci = &c_SoapServer::ci_addfunction;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_SoapServer::ci___construct;
         return true;
       }
@@ -29514,7 +29514,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 3:
-      HASH_GUARD_LITSTR(0x69797649716AE343LL, NAMSTR(s_sys_ss716ae343, "getNodePath")) {
+      HASH_GUARD_LITSTR(0x69797649716AE343LL, NAMSTR(s_sys_ss2c8e4dfb, "getNodePath")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -29528,7 +29528,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x77570221C582ED8ALL, NAMSTR(s_sys_ss3a7d1276, "c14n")) {
+      HASH_GUARD_LITSTR(0x77570221C582ED8ALL, NAMSTR(s_sys_ss6412883b, "c14n")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -29562,7 +29562,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x1C51CE3C2356D08ELL, NAMSTR(s_sys_ss2356d08e, "replaceChild")) {
+      HASH_GUARD_LITSTR(0x1C51CE3C2356D08ELL, NAMSTR(s_sys_ss11fcf5b7, "replaceChild")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -29584,7 +29584,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0B44A59A023E75CFLL, NAMSTR(s_sys_ss023e75cf, "appendChild")) {
+      HASH_GUARD_LITSTR(0x0B44A59A023E75CFLL, NAMSTR(s_sys_ss0e0c542f, "appendChild")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -29600,7 +29600,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -29618,7 +29618,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x4F615934A04E3092LL, NAMSTR(s_sys_ss5fb1cf6e, "cloneNode")) {
+      HASH_GUARD_LITSTR(0x4F615934A04E3092LL, NAMSTR(s_sys_ss34dcd74e, "cloneNode")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -29637,7 +29637,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -29659,7 +29659,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x58F8D846AF9E5D18LL, NAMSTR(s_sys_ss5061a2e8, "getLineNo")) {
+      HASH_GUARD_LITSTR(0x58F8D846AF9E5D18LL, NAMSTR(s_sys_ss52fe5cd5, "getLineNo")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -29673,7 +29673,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 26:
-      HASH_GUARD_LITSTR(0x11A2D4B742CB6C5ALL, NAMSTR(s_sys_ss42cb6c5a, "normalize")) {
+      HASH_GUARD_LITSTR(0x11A2D4B742CB6C5ALL, NAMSTR(s_sys_ss679e8b98, "normalize")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -29687,7 +29687,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 29:
-      HASH_GUARD_LITSTR(0x28D1E151A83B8F5DLL, NAMSTR(s_sys_ss57c470a3, "lookupNamespaceUri")) {
+      HASH_GUARD_LITSTR(0x28D1E151A83B8F5DLL, NAMSTR(s_sys_ss6e9f1eba, "lookupNamespaceUri")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -29703,7 +29703,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
-      HASH_GUARD_LITSTR(0x72044C28B65364DDLL, NAMSTR(s_sys_ss49ac9b23, "removeChild")) {
+      HASH_GUARD_LITSTR(0x72044C28B65364DDLL, NAMSTR(s_sys_ss13622d08, "removeChild")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -29721,7 +29721,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -29735,7 +29735,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 33:
-      HASH_GUARD_LITSTR(0x599DE23996CB7D61LL, NAMSTR(s_sys_ss6934829f, "lookupPrefix")) {
+      HASH_GUARD_LITSTR(0x599DE23996CB7D61LL, NAMSTR(s_sys_ss135b2bb6, "lookupPrefix")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -29753,7 +29753,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 36:
-      HASH_GUARD_LITSTR(0x643EFC8E9378F664LL, NAMSTR(s_sys_ss6c87099c, "isDefaultNamespace")) {
+      HASH_GUARD_LITSTR(0x643EFC8E9378F664LL, NAMSTR(s_sys_ss750a46b0, "isDefaultNamespace")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -29771,7 +29771,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x102549E9CA2EC6EFLL, NAMSTR(s_sys_ss35d13911, "isSameNode")) {
+      HASH_GUARD_LITSTR(0x102549E9CA2EC6EFLL, NAMSTR(s_sys_ss4431a364, "isSameNode")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -29789,7 +29789,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 49:
-      HASH_GUARD_LITSTR(0x3CFA6EECF6F5AEB1LL, NAMSTR(s_sys_ss090a514f, "hasAttributes")) {
+      HASH_GUARD_LITSTR(0x3CFA6EECF6F5AEB1LL, NAMSTR(s_sys_ss344c5db6, "hasAttributes")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -29803,7 +29803,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x076FF0CF9185C433LL, NAMSTR(s_sys_ss6e7a3bcd, "insertBefore")) {
+      HASH_GUARD_LITSTR(0x076FF0CF9185C433LL, NAMSTR(s_sys_ss31ec77af, "insertBefore")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -29824,7 +29824,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         if (count <= 1) return (t_insertbefore(a0));
         else return (t_insertbefore(a0, a1));
       }
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -29838,7 +29838,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 53:
-      HASH_GUARD_LITSTR(0x1D1768A6CF365A75LL, NAMSTR(s_sys_ss30c9a58b, "c14nfile")) {
+      HASH_GUARD_LITSTR(0x1D1768A6CF365A75LL, NAMSTR(s_sys_ss717b8b62, "c14nfile")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -29876,7 +29876,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 58:
-      HASH_GUARD_LITSTR(0x279AA1B214B7677ALL, NAMSTR(s_sys_ss14b7677a, "isSupported")) {
+      HASH_GUARD_LITSTR(0x279AA1B214B7677ALL, NAMSTR(s_sys_ss44a1dc88, "isSupported")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -29896,7 +29896,7 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
-      HASH_GUARD_LITSTR(0x5F63574EA50595FALL, NAMSTR(s_sys_ss5afa6a06, "hasChildNodes")) {
+      HASH_GUARD_LITSTR(0x5F63574EA50595FALL, NAMSTR(s_sys_ss14eade34, "hasChildNodes")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -30527,119 +30527,119 @@ bool c_DOMNode::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 3:
-      HASH_GUARD_LITSTR(0x69797649716AE343LL, NAMSTR(s_sys_ss716ae343, "getNodePath")) {
+      HASH_GUARD_LITSTR(0x69797649716AE343LL, NAMSTR(s_sys_ss2c8e4dfb, "getNodePath")) {
         mcp.ci = &c_DOMNode::ci_getnodepath;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x77570221C582ED8ALL, NAMSTR(s_sys_ss3a7d1276, "c14n")) {
+      HASH_GUARD_LITSTR(0x77570221C582ED8ALL, NAMSTR(s_sys_ss6412883b, "c14n")) {
         mcp.ci = &c_DOMNode::ci_c14n;
         return true;
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x1C51CE3C2356D08ELL, NAMSTR(s_sys_ss2356d08e, "replaceChild")) {
+      HASH_GUARD_LITSTR(0x1C51CE3C2356D08ELL, NAMSTR(s_sys_ss11fcf5b7, "replaceChild")) {
         mcp.ci = &c_DOMNode::ci_replacechild;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0B44A59A023E75CFLL, NAMSTR(s_sys_ss023e75cf, "appendChild")) {
+      HASH_GUARD_LITSTR(0x0B44A59A023E75CFLL, NAMSTR(s_sys_ss0e0c542f, "appendChild")) {
         mcp.ci = &c_DOMNode::ci_appendchild;
         return true;
       }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_DOMNode::ci___get;
         return true;
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x4F615934A04E3092LL, NAMSTR(s_sys_ss5fb1cf6e, "cloneNode")) {
+      HASH_GUARD_LITSTR(0x4F615934A04E3092LL, NAMSTR(s_sys_ss34dcd74e, "cloneNode")) {
         mcp.ci = &c_DOMNode::ci_clonenode;
         return true;
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         mcp.ci = &c_DOMNode::ci___set;
         return true;
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x58F8D846AF9E5D18LL, NAMSTR(s_sys_ss5061a2e8, "getLineNo")) {
+      HASH_GUARD_LITSTR(0x58F8D846AF9E5D18LL, NAMSTR(s_sys_ss52fe5cd5, "getLineNo")) {
         mcp.ci = &c_DOMNode::ci_getlineno;
         return true;
       }
       break;
     case 26:
-      HASH_GUARD_LITSTR(0x11A2D4B742CB6C5ALL, NAMSTR(s_sys_ss42cb6c5a, "normalize")) {
+      HASH_GUARD_LITSTR(0x11A2D4B742CB6C5ALL, NAMSTR(s_sys_ss679e8b98, "normalize")) {
         mcp.ci = &c_DOMNode::ci_normalize;
         return true;
       }
       break;
     case 29:
-      HASH_GUARD_LITSTR(0x28D1E151A83B8F5DLL, NAMSTR(s_sys_ss57c470a3, "lookupNamespaceUri")) {
+      HASH_GUARD_LITSTR(0x28D1E151A83B8F5DLL, NAMSTR(s_sys_ss6e9f1eba, "lookupNamespaceUri")) {
         mcp.ci = &c_DOMNode::ci_lookupnamespaceuri;
         return true;
       }
-      HASH_GUARD_LITSTR(0x72044C28B65364DDLL, NAMSTR(s_sys_ss49ac9b23, "removeChild")) {
+      HASH_GUARD_LITSTR(0x72044C28B65364DDLL, NAMSTR(s_sys_ss13622d08, "removeChild")) {
         mcp.ci = &c_DOMNode::ci_removechild;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMNode::ci___construct;
         return true;
       }
       break;
     case 33:
-      HASH_GUARD_LITSTR(0x599DE23996CB7D61LL, NAMSTR(s_sys_ss6934829f, "lookupPrefix")) {
+      HASH_GUARD_LITSTR(0x599DE23996CB7D61LL, NAMSTR(s_sys_ss135b2bb6, "lookupPrefix")) {
         mcp.ci = &c_DOMNode::ci_lookupprefix;
         return true;
       }
       break;
     case 36:
-      HASH_GUARD_LITSTR(0x643EFC8E9378F664LL, NAMSTR(s_sys_ss6c87099c, "isDefaultNamespace")) {
+      HASH_GUARD_LITSTR(0x643EFC8E9378F664LL, NAMSTR(s_sys_ss750a46b0, "isDefaultNamespace")) {
         mcp.ci = &c_DOMNode::ci_isdefaultnamespace;
         return true;
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x102549E9CA2EC6EFLL, NAMSTR(s_sys_ss35d13911, "isSameNode")) {
+      HASH_GUARD_LITSTR(0x102549E9CA2EC6EFLL, NAMSTR(s_sys_ss4431a364, "isSameNode")) {
         mcp.ci = &c_DOMNode::ci_issamenode;
         return true;
       }
       break;
     case 49:
-      HASH_GUARD_LITSTR(0x3CFA6EECF6F5AEB1LL, NAMSTR(s_sys_ss090a514f, "hasAttributes")) {
+      HASH_GUARD_LITSTR(0x3CFA6EECF6F5AEB1LL, NAMSTR(s_sys_ss344c5db6, "hasAttributes")) {
         mcp.ci = &c_DOMNode::ci_hasattributes;
         return true;
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x076FF0CF9185C433LL, NAMSTR(s_sys_ss6e7a3bcd, "insertBefore")) {
+      HASH_GUARD_LITSTR(0x076FF0CF9185C433LL, NAMSTR(s_sys_ss31ec77af, "insertBefore")) {
         mcp.ci = &c_DOMNode::ci_insertbefore;
         return true;
       }
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMNode::ci___destruct;
         return true;
       }
       break;
     case 53:
-      HASH_GUARD_LITSTR(0x1D1768A6CF365A75LL, NAMSTR(s_sys_ss30c9a58b, "c14nfile")) {
+      HASH_GUARD_LITSTR(0x1D1768A6CF365A75LL, NAMSTR(s_sys_ss717b8b62, "c14nfile")) {
         mcp.ci = &c_DOMNode::ci_c14nfile;
         return true;
       }
       break;
     case 58:
-      HASH_GUARD_LITSTR(0x279AA1B214B7677ALL, NAMSTR(s_sys_ss14b7677a, "isSupported")) {
+      HASH_GUARD_LITSTR(0x279AA1B214B7677ALL, NAMSTR(s_sys_ss44a1dc88, "isSupported")) {
         mcp.ci = &c_DOMNode::ci_issupported;
         return true;
       }
-      HASH_GUARD_LITSTR(0x5F63574EA50595FALL, NAMSTR(s_sys_ss5afa6a06, "hasChildNodes")) {
+      HASH_GUARD_LITSTR(0x5F63574EA50595FALL, NAMSTR(s_sys_ss14eade34, "hasChildNodes")) {
         mcp.ci = &c_DOMNode::ci_haschildnodes;
         return true;
       }
@@ -30772,7 +30772,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 5:
-      HASH_GUARD_LITSTR(0x515FE7746601E385LL, NAMSTR(s_sys_ss6601e385, "getElementById")) {
+      HASH_GUARD_LITSTR(0x515FE7746601E385LL, NAMSTR(s_sys_ss3727867b, "getElementById")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -30790,7 +30790,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x142A28F8CE4A4E8ALL, NAMSTR(s_sys_ss31b5b176, "xinclude")) {
+      HASH_GUARD_LITSTR(0x142A28F8CE4A4E8ALL, NAMSTR(s_sys_ss11e815e7, "xinclude")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -30809,7 +30809,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 13:
-      HASH_GUARD_LITSTR(0x0D128C363EBF7F0DLL, NAMSTR(s_sys_ss3ebf7f0d, "createCDATASection")) {
+      HASH_GUARD_LITSTR(0x0D128C363EBF7F0DLL, NAMSTR(s_sys_ss4d3aaeee, "createCDATASection")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -30827,7 +30827,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -30845,7 +30845,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x69C6F7D584EC5011LL, NAMSTR(s_sys_ss7b13afef, "schemaValidateSource")) {
+      HASH_GUARD_LITSTR(0x69C6F7D584EC5011LL, NAMSTR(s_sys_ss6863d210, "schemaValidateSource")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -30863,7 +30863,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x04F8F7CEA46D0514LL, NAMSTR(s_sys_ss5b92faec, "save")) {
+      HASH_GUARD_LITSTR(0x04F8F7CEA46D0514LL, NAMSTR(s_sys_ss71377747, "save")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -30886,7 +30886,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -30906,7 +30906,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
-      HASH_GUARD_LITSTR(0x2FC58024A75AEB15LL, NAMSTR(s_sys_ss58a514eb, "createAttributens")) {
+      HASH_GUARD_LITSTR(0x2FC58024A75AEB15LL, NAMSTR(s_sys_ss7aa4dd63, "createAttributens")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -30928,7 +30928,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x1A78385D7CD10A1CLL, NAMSTR(s_sys_ss7cd10a1c, "relaxNGValidate")) {
+      HASH_GUARD_LITSTR(0x1A78385D7CD10A1CLL, NAMSTR(s_sys_ss587edbef, "relaxNGValidate")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -30946,7 +30946,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 34:
-      HASH_GUARD_LITSTR(0x1B0F4D437C8404A2LL, NAMSTR(s_sys_ss7c8404a2, "loadHTML")) {
+      HASH_GUARD_LITSTR(0x1B0F4D437C8404A2LL, NAMSTR(s_sys_ss274b0685, "loadHTML")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -30962,7 +30962,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         if (count != 1) return throw_wrong_arguments("loadhtml", count, 1, 1, 1);
         return (t_loadhtml(a0));
       }
-      HASH_GUARD_LITSTR(0x4C40B0F935B39FA2LL, NAMSTR(s_sys_ss35b39fa2, "createElement")) {
+      HASH_GUARD_LITSTR(0x4C40B0F935B39FA2LL, NAMSTR(s_sys_ss608280fa, "createElement")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -30985,7 +30985,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 44:
-      HASH_GUARD_LITSTR(0x1304C35F6E006FACLL, NAMSTR(s_sys_ss6e006fac, "relaxNGValidateSource")) {
+      HASH_GUARD_LITSTR(0x1304C35F6E006FACLL, NAMSTR(s_sys_ss3b7c2fd5, "relaxNGValidateSource")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -31001,7 +31001,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         if (count != 1) return throw_wrong_arguments("relaxngvalidatesource", count, 1, 1, 1);
         return (t_relaxngvalidatesource(a0));
       }
-      HASH_GUARD_LITSTR(0x2BFDE9CF0FE9A82CLL, NAMSTR(s_sys_ss0fe9a82c, "createAttribute")) {
+      HASH_GUARD_LITSTR(0x2BFDE9CF0FE9A82CLL, NAMSTR(s_sys_ss331d21f7, "createAttribute")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -31019,7 +31019,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x4A6C6D9AB88CD42FLL, NAMSTR(s_sys_ss47732bd1, "importNode")) {
+      HASH_GUARD_LITSTR(0x4A6C6D9AB88CD42FLL, NAMSTR(s_sys_ss2ec5d965, "importNode")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -31040,7 +31040,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         if (count <= 1) return (t_importnode(a0));
         else return (t_importnode(a0, a1));
       }
-      HASH_GUARD_LITSTR(0x5FE94CA513F14AAFLL, NAMSTR(s_sys_ss13f14aaf, "loadHTMLFile")) {
+      HASH_GUARD_LITSTR(0x5FE94CA513F14AAFLL, NAMSTR(s_sys_ss0fb4316d, "loadHTMLFile")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -31058,7 +31058,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 49:
-      HASH_GUARD_LITSTR(0x20E2B2FD2B7AE431LL, NAMSTR(s_sys_ss2b7ae431, "loadXML")) {
+      HASH_GUARD_LITSTR(0x20E2B2FD2B7AE431LL, NAMSTR(s_sys_ss6a2e848f, "loadXML")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -31081,7 +31081,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 50:
-      HASH_GUARD_LITSTR(0x7A9C4709CAD09832LL, NAMSTR(s_sys_ss352f67ce, "createEntityReference")) {
+      HASH_GUARD_LITSTR(0x7A9C4709CAD09832LL, NAMSTR(s_sys_ss6d67e79b, "createEntityReference")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -31099,7 +31099,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 55:
-      HASH_GUARD_LITSTR(0x1CA408E02262F737LL, NAMSTR(s_sys_ss2262f737, "validate")) {
+      HASH_GUARD_LITSTR(0x1CA408E02262F737LL, NAMSTR(s_sys_ss4805e14f, "validate")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -31113,7 +31113,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 71:
-      HASH_GUARD_LITSTR(0x29C79E90C6FCC0C7LL, NAMSTR(s_sys_ss39033f39, "createComment")) {
+      HASH_GUARD_LITSTR(0x29C79E90C6FCC0C7LL, NAMSTR(s_sys_ss15cc67bc, "createComment")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -31131,7 +31131,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 72:
-      HASH_GUARD_LITSTR(0x7EB8C68BABDC5648LL, NAMSTR(s_sys_ss5423a9b8, "schemaValidate")) {
+      HASH_GUARD_LITSTR(0x7EB8C68BABDC5648LL, NAMSTR(s_sys_ss46e9d423, "schemaValidate")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -31149,7 +31149,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 74:
-      HASH_GUARD_LITSTR(0x3FFA3F55ECAB93CALL, NAMSTR(s_sys_ss13546c36, "getElementsByTagName")) {
+      HASH_GUARD_LITSTR(0x3FFA3F55ECAB93CALL, NAMSTR(s_sys_ss2b6d2a95, "getElementsByTagName")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -31165,7 +31165,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
         return (t_getelementsbytagname(a0));
       }
-      HASH_GUARD_LITSTR(0x1A9CC561CA4817CALL, NAMSTR(s_sys_ss35b7e836, "getElementsByTagNameNS")) {
+      HASH_GUARD_LITSTR(0x1A9CC561CA4817CALL, NAMSTR(s_sys_ss49400bc1, "getElementsByTagNameNS")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -31187,7 +31187,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 77:
-      HASH_GUARD_LITSTR(0x35C0FF513ED3054DLL, NAMSTR(s_sys_ss3ed3054d, "saveHTMLFile")) {
+      HASH_GUARD_LITSTR(0x35C0FF513ED3054DLL, NAMSTR(s_sys_ss427e7c24, "saveHTMLFile")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -31205,7 +31205,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 83:
-      HASH_GUARD_LITSTR(0x21F3F1C9058310D3LL, NAMSTR(s_sys_ss058310d3, "saveHTML")) {
+      HASH_GUARD_LITSTR(0x21F3F1C9058310D3LL, NAMSTR(s_sys_ss690e46e7, "saveHTML")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -31219,7 +31219,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -31241,7 +31241,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         else if (count == 1) return (t___construct(a0), null);
         else return (t___construct(a0, a1), null);
       }
-      HASH_GUARD_LITSTR(0x79B7A5774A0943DFLL, NAMSTR(s_sys_ss4a0943df, "load")) {
+      HASH_GUARD_LITSTR(0x79B7A5774A0943DFLL, NAMSTR(s_sys_ss5853bc97, "load")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -31264,7 +31264,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 101:
-      HASH_GUARD_LITSTR(0x26D66F56DDDC32E5LL, NAMSTR(s_sys_ss2223cd1b, "saveXML")) {
+      HASH_GUARD_LITSTR(0x26D66F56DDDC32E5LL, NAMSTR(s_sys_ss6f5ad507, "saveXML")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -31288,7 +31288,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 106:
-      HASH_GUARD_LITSTR(0x0AC931EAB2FE3D6ALL, NAMSTR(s_sys_ss4d01c296, "normalizeDocument")) {
+      HASH_GUARD_LITSTR(0x0AC931EAB2FE3D6ALL, NAMSTR(s_sys_ss5d0c7971, "normalizeDocument")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -31302,7 +31302,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 107:
-      HASH_GUARD_LITSTR(0x05EA36F416B7EBEBLL, NAMSTR(s_sys_ss16b7ebeb, "createElementNS")) {
+      HASH_GUARD_LITSTR(0x05EA36F416B7EBEBLL, NAMSTR(s_sys_ss3983a61c, "createElementNS")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -31329,7 +31329,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 109:
-      HASH_GUARD_LITSTR(0x2A99431FC6E7BA6DLL, NAMSTR(s_sys_ss39184593, "createProcessingInstruction")) {
+      HASH_GUARD_LITSTR(0x2A99431FC6E7BA6DLL, NAMSTR(s_sys_ss73b46b63, "createProcessingInstruction")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -31352,7 +31352,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 115:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -31366,7 +31366,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 117:
-      HASH_GUARD_LITSTR(0x615771958E1EB375LL, NAMSTR(s_sys_ss71e14c8b, "registerNodeClass")) {
+      HASH_GUARD_LITSTR(0x615771958E1EB375LL, NAMSTR(s_sys_ss0915cca1, "registerNodeClass")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -31388,7 +31388,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 120:
-      HASH_GUARD_LITSTR(0x44FD8C24F4EA46F8LL, NAMSTR(s_sys_ss0b15b908, "createDocumentFragment")) {
+      HASH_GUARD_LITSTR(0x44FD8C24F4EA46F8LL, NAMSTR(s_sys_ss212dc503, "createDocumentFragment")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -31402,7 +31402,7 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 123:
-      HASH_GUARD_LITSTR(0x6056A5BB9855D7FBLL, NAMSTR(s_sys_ss67aa2805, "createTextNode")) {
+      HASH_GUARD_LITSTR(0x6056A5BB9855D7FBLL, NAMSTR(s_sys_ss3bb8fb3e, "createTextNode")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -32431,193 +32431,193 @@ bool c_DOMDocument::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 127) {
     case 5:
-      HASH_GUARD_LITSTR(0x515FE7746601E385LL, NAMSTR(s_sys_ss6601e385, "getElementById")) {
+      HASH_GUARD_LITSTR(0x515FE7746601E385LL, NAMSTR(s_sys_ss3727867b, "getElementById")) {
         mcp.ci = &c_DOMDocument::ci_getelementbyid;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x142A28F8CE4A4E8ALL, NAMSTR(s_sys_ss31b5b176, "xinclude")) {
+      HASH_GUARD_LITSTR(0x142A28F8CE4A4E8ALL, NAMSTR(s_sys_ss11e815e7, "xinclude")) {
         mcp.ci = &c_DOMDocument::ci_xinclude;
         return true;
       }
       break;
     case 13:
-      HASH_GUARD_LITSTR(0x0D128C363EBF7F0DLL, NAMSTR(s_sys_ss3ebf7f0d, "createCDATASection")) {
+      HASH_GUARD_LITSTR(0x0D128C363EBF7F0DLL, NAMSTR(s_sys_ss4d3aaeee, "createCDATASection")) {
         mcp.ci = &c_DOMDocument::ci_createcdatasection;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_DOMDocument::ci___get;
         return true;
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x69C6F7D584EC5011LL, NAMSTR(s_sys_ss7b13afef, "schemaValidateSource")) {
+      HASH_GUARD_LITSTR(0x69C6F7D584EC5011LL, NAMSTR(s_sys_ss6863d210, "schemaValidateSource")) {
         mcp.ci = &c_DOMDocument::ci_schemavalidatesource;
         return true;
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x04F8F7CEA46D0514LL, NAMSTR(s_sys_ss5b92faec, "save")) {
+      HASH_GUARD_LITSTR(0x04F8F7CEA46D0514LL, NAMSTR(s_sys_ss71377747, "save")) {
         mcp.ci = &c_DOMDocument::ci_save;
         return true;
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         mcp.ci = &c_DOMDocument::ci___set;
         return true;
       }
-      HASH_GUARD_LITSTR(0x2FC58024A75AEB15LL, NAMSTR(s_sys_ss58a514eb, "createAttributens")) {
+      HASH_GUARD_LITSTR(0x2FC58024A75AEB15LL, NAMSTR(s_sys_ss7aa4dd63, "createAttributens")) {
         mcp.ci = &c_DOMDocument::ci_createattributens;
         return true;
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x1A78385D7CD10A1CLL, NAMSTR(s_sys_ss7cd10a1c, "relaxNGValidate")) {
+      HASH_GUARD_LITSTR(0x1A78385D7CD10A1CLL, NAMSTR(s_sys_ss587edbef, "relaxNGValidate")) {
         mcp.ci = &c_DOMDocument::ci_relaxngvalidate;
         return true;
       }
       break;
     case 34:
-      HASH_GUARD_LITSTR(0x1B0F4D437C8404A2LL, NAMSTR(s_sys_ss7c8404a2, "loadHTML")) {
+      HASH_GUARD_LITSTR(0x1B0F4D437C8404A2LL, NAMSTR(s_sys_ss274b0685, "loadHTML")) {
         mcp.ci = &c_DOMDocument::ci_loadhtml;
         return true;
       }
-      HASH_GUARD_LITSTR(0x4C40B0F935B39FA2LL, NAMSTR(s_sys_ss35b39fa2, "createElement")) {
+      HASH_GUARD_LITSTR(0x4C40B0F935B39FA2LL, NAMSTR(s_sys_ss608280fa, "createElement")) {
         mcp.ci = &c_DOMDocument::ci_createelement;
         return true;
       }
       break;
     case 44:
-      HASH_GUARD_LITSTR(0x1304C35F6E006FACLL, NAMSTR(s_sys_ss6e006fac, "relaxNGValidateSource")) {
+      HASH_GUARD_LITSTR(0x1304C35F6E006FACLL, NAMSTR(s_sys_ss3b7c2fd5, "relaxNGValidateSource")) {
         mcp.ci = &c_DOMDocument::ci_relaxngvalidatesource;
         return true;
       }
-      HASH_GUARD_LITSTR(0x2BFDE9CF0FE9A82CLL, NAMSTR(s_sys_ss0fe9a82c, "createAttribute")) {
+      HASH_GUARD_LITSTR(0x2BFDE9CF0FE9A82CLL, NAMSTR(s_sys_ss331d21f7, "createAttribute")) {
         mcp.ci = &c_DOMDocument::ci_createattribute;
         return true;
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x4A6C6D9AB88CD42FLL, NAMSTR(s_sys_ss47732bd1, "importNode")) {
+      HASH_GUARD_LITSTR(0x4A6C6D9AB88CD42FLL, NAMSTR(s_sys_ss2ec5d965, "importNode")) {
         mcp.ci = &c_DOMDocument::ci_importnode;
         return true;
       }
-      HASH_GUARD_LITSTR(0x5FE94CA513F14AAFLL, NAMSTR(s_sys_ss13f14aaf, "loadHTMLFile")) {
+      HASH_GUARD_LITSTR(0x5FE94CA513F14AAFLL, NAMSTR(s_sys_ss0fb4316d, "loadHTMLFile")) {
         mcp.ci = &c_DOMDocument::ci_loadhtmlfile;
         return true;
       }
       break;
     case 49:
-      HASH_GUARD_LITSTR(0x20E2B2FD2B7AE431LL, NAMSTR(s_sys_ss2b7ae431, "loadXML")) {
+      HASH_GUARD_LITSTR(0x20E2B2FD2B7AE431LL, NAMSTR(s_sys_ss6a2e848f, "loadXML")) {
         mcp.ci = &c_DOMDocument::ci_loadxml;
         return true;
       }
       break;
     case 50:
-      HASH_GUARD_LITSTR(0x7A9C4709CAD09832LL, NAMSTR(s_sys_ss352f67ce, "createEntityReference")) {
+      HASH_GUARD_LITSTR(0x7A9C4709CAD09832LL, NAMSTR(s_sys_ss6d67e79b, "createEntityReference")) {
         mcp.ci = &c_DOMDocument::ci_createentityreference;
         return true;
       }
       break;
     case 55:
-      HASH_GUARD_LITSTR(0x1CA408E02262F737LL, NAMSTR(s_sys_ss2262f737, "validate")) {
+      HASH_GUARD_LITSTR(0x1CA408E02262F737LL, NAMSTR(s_sys_ss4805e14f, "validate")) {
         mcp.ci = &c_DOMDocument::ci_validate;
         return true;
       }
       break;
     case 71:
-      HASH_GUARD_LITSTR(0x29C79E90C6FCC0C7LL, NAMSTR(s_sys_ss39033f39, "createComment")) {
+      HASH_GUARD_LITSTR(0x29C79E90C6FCC0C7LL, NAMSTR(s_sys_ss15cc67bc, "createComment")) {
         mcp.ci = &c_DOMDocument::ci_createcomment;
         return true;
       }
       break;
     case 72:
-      HASH_GUARD_LITSTR(0x7EB8C68BABDC5648LL, NAMSTR(s_sys_ss5423a9b8, "schemaValidate")) {
+      HASH_GUARD_LITSTR(0x7EB8C68BABDC5648LL, NAMSTR(s_sys_ss46e9d423, "schemaValidate")) {
         mcp.ci = &c_DOMDocument::ci_schemavalidate;
         return true;
       }
       break;
     case 74:
-      HASH_GUARD_LITSTR(0x3FFA3F55ECAB93CALL, NAMSTR(s_sys_ss13546c36, "getElementsByTagName")) {
+      HASH_GUARD_LITSTR(0x3FFA3F55ECAB93CALL, NAMSTR(s_sys_ss2b6d2a95, "getElementsByTagName")) {
         mcp.ci = &c_DOMDocument::ci_getelementsbytagname;
         return true;
       }
-      HASH_GUARD_LITSTR(0x1A9CC561CA4817CALL, NAMSTR(s_sys_ss35b7e836, "getElementsByTagNameNS")) {
+      HASH_GUARD_LITSTR(0x1A9CC561CA4817CALL, NAMSTR(s_sys_ss49400bc1, "getElementsByTagNameNS")) {
         mcp.ci = &c_DOMDocument::ci_getelementsbytagnamens;
         return true;
       }
       break;
     case 77:
-      HASH_GUARD_LITSTR(0x35C0FF513ED3054DLL, NAMSTR(s_sys_ss3ed3054d, "saveHTMLFile")) {
+      HASH_GUARD_LITSTR(0x35C0FF513ED3054DLL, NAMSTR(s_sys_ss427e7c24, "saveHTMLFile")) {
         mcp.ci = &c_DOMDocument::ci_savehtmlfile;
         return true;
       }
       break;
     case 83:
-      HASH_GUARD_LITSTR(0x21F3F1C9058310D3LL, NAMSTR(s_sys_ss058310d3, "saveHTML")) {
+      HASH_GUARD_LITSTR(0x21F3F1C9058310D3LL, NAMSTR(s_sys_ss690e46e7, "saveHTML")) {
         mcp.ci = &c_DOMDocument::ci_savehtml;
         return true;
       }
       break;
     case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMDocument::ci___construct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x79B7A5774A0943DFLL, NAMSTR(s_sys_ss4a0943df, "load")) {
+      HASH_GUARD_LITSTR(0x79B7A5774A0943DFLL, NAMSTR(s_sys_ss5853bc97, "load")) {
         mcp.ci = &c_DOMDocument::ci_load;
         return true;
       }
       break;
     case 101:
-      HASH_GUARD_LITSTR(0x26D66F56DDDC32E5LL, NAMSTR(s_sys_ss2223cd1b, "saveXML")) {
+      HASH_GUARD_LITSTR(0x26D66F56DDDC32E5LL, NAMSTR(s_sys_ss6f5ad507, "saveXML")) {
         mcp.ci = &c_DOMDocument::ci_savexml;
         return true;
       }
       break;
     case 106:
-      HASH_GUARD_LITSTR(0x0AC931EAB2FE3D6ALL, NAMSTR(s_sys_ss4d01c296, "normalizeDocument")) {
+      HASH_GUARD_LITSTR(0x0AC931EAB2FE3D6ALL, NAMSTR(s_sys_ss5d0c7971, "normalizeDocument")) {
         mcp.ci = &c_DOMDocument::ci_normalizedocument;
         return true;
       }
       break;
     case 107:
-      HASH_GUARD_LITSTR(0x05EA36F416B7EBEBLL, NAMSTR(s_sys_ss16b7ebeb, "createElementNS")) {
+      HASH_GUARD_LITSTR(0x05EA36F416B7EBEBLL, NAMSTR(s_sys_ss3983a61c, "createElementNS")) {
         mcp.ci = &c_DOMDocument::ci_createelementns;
         return true;
       }
       break;
     case 109:
-      HASH_GUARD_LITSTR(0x2A99431FC6E7BA6DLL, NAMSTR(s_sys_ss39184593, "createProcessingInstruction")) {
+      HASH_GUARD_LITSTR(0x2A99431FC6E7BA6DLL, NAMSTR(s_sys_ss73b46b63, "createProcessingInstruction")) {
         mcp.ci = &c_DOMDocument::ci_createprocessinginstruction;
         return true;
       }
       break;
     case 115:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMDocument::ci___destruct;
         return true;
       }
       break;
     case 117:
-      HASH_GUARD_LITSTR(0x615771958E1EB375LL, NAMSTR(s_sys_ss71e14c8b, "registerNodeClass")) {
+      HASH_GUARD_LITSTR(0x615771958E1EB375LL, NAMSTR(s_sys_ss0915cca1, "registerNodeClass")) {
         mcp.ci = &c_DOMDocument::ci_registernodeclass;
         return true;
       }
       break;
     case 120:
-      HASH_GUARD_LITSTR(0x44FD8C24F4EA46F8LL, NAMSTR(s_sys_ss0b15b908, "createDocumentFragment")) {
+      HASH_GUARD_LITSTR(0x44FD8C24F4EA46F8LL, NAMSTR(s_sys_ss212dc503, "createDocumentFragment")) {
         mcp.ci = &c_DOMDocument::ci_createdocumentfragment;
         return true;
       }
       break;
     case 123:
-      HASH_GUARD_LITSTR(0x6056A5BB9855D7FBLL, NAMSTR(s_sys_ss67aa2805, "createTextNode")) {
+      HASH_GUARD_LITSTR(0x6056A5BB9855D7FBLL, NAMSTR(s_sys_ss3bb8fb3e, "createTextNode")) {
         mcp.ci = &c_DOMDocument::ci_createtextnode;
         return true;
       }
@@ -32788,7 +32788,7 @@ Variant c_LibXMLError::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -32800,7 +32800,7 @@ Variant c_LibXMLError::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -32874,11 +32874,11 @@ bool c_LibXMLError::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_LibXMLError::ci___destruct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_LibXMLError::ci___construct;
         return true;
       }
@@ -33011,7 +33011,7 @@ Variant c_SoapFault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 3:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed_1, "__tostring")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss5dc1dc95, "__tostring")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -33023,7 +33023,7 @@ Variant c_SoapFault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
         return (t___tostring());
       }
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -33037,7 +33037,7 @@ Variant c_SoapFault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -33181,17 +33181,17 @@ bool c_SoapFault::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 3:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed_1, "__tostring")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss5dc1dc95, "__tostring")) {
         mcp.ci = &c_SoapFault::ci___tostring;
         return true;
       }
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_SoapFault::ci___destruct;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_SoapFault::ci___construct;
         return true;
       }
@@ -33404,7 +33404,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 10:
-      HASH_GUARD_LITSTR(0x3FFA3F55ECAB93CALL, NAMSTR(s_sys_ss13546c36, "getElementsByTagName")) {
+      HASH_GUARD_LITSTR(0x3FFA3F55ECAB93CALL, NAMSTR(s_sys_ss2b6d2a95, "getElementsByTagName")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -33420,7 +33420,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
         return (t_getelementsbytagname(a0));
       }
-      HASH_GUARD_LITSTR(0x1A9CC561CA4817CALL, NAMSTR(s_sys_ss35b7e836, "getElementsByTagNameNS")) {
+      HASH_GUARD_LITSTR(0x1A9CC561CA4817CALL, NAMSTR(s_sys_ss49400bc1, "getElementsByTagNameNS")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33440,7 +33440,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
         return (t_getelementsbytagnamens(a0, a1));
       }
-      HASH_GUARD_LITSTR(0x29D272CBBC0CDA4ALL, NAMSTR(s_sys_ss43f325b6, "setIDAttributeNode")) {
+      HASH_GUARD_LITSTR(0x29D272CBBC0CDA4ALL, NAMSTR(s_sys_ss58a78f5c, "setIDAttributeNode")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33460,7 +33460,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         if (count != 2) return throw_wrong_arguments("setidattributenode", count, 2, 2, 1);
         return (t_setidattributenode(a0, a1));
       }
-      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss44f4ab8a_1, "setAttribute")) {
+      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss625d0a69, "setAttribute")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33482,7 +33482,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -33500,7 +33500,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 16:
-      HASH_GUARD_LITSTR(0x710986B01E1A0890LL, NAMSTR(s_sys_ss1e1a0890, "removeAttributeNS")) {
+      HASH_GUARD_LITSTR(0x710986B01E1A0890LL, NAMSTR(s_sys_ss3fca29c8, "removeAttributeNS")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33522,7 +33522,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x31426AC6A851EE11LL, NAMSTR(s_sys_ss57ae11ef, "setIDAttributeNS")) {
+      HASH_GUARD_LITSTR(0x31426AC6A851EE11LL, NAMSTR(s_sys_ss0bfd696f, "setIDAttributeNS")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -33546,7 +33546,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         if (count != 3) return throw_wrong_arguments("setidattributens", count, 3, 3, 1);
         return (t_setidattributens(a0, a1, a2));
       }
-      HASH_GUARD_LITSTR(0x482E3873306253D1LL, NAMSTR(s_sys_ss306253d1, "setAttributeNodeNS")) {
+      HASH_GUARD_LITSTR(0x482E3873306253D1LL, NAMSTR(s_sys_ss34df4c9f, "setAttributeNodeNS")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -33564,7 +33564,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33584,7 +33584,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
-      HASH_GUARD_LITSTR(0x5EF7C3A45311D955LL, NAMSTR(s_sys_ss5311d955, "hasAttributeNS")) {
+      HASH_GUARD_LITSTR(0x5EF7C3A45311D955LL, NAMSTR(s_sys_ss1303cc56, "hasAttributeNS")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33606,7 +33606,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x6F83EC29E110D616LL, NAMSTR(s_sys_ss1eef29ea, "setIDAttribute")) {
+      HASH_GUARD_LITSTR(0x6F83EC29E110D616LL, NAMSTR(s_sys_ss102b70c6, "setIDAttribute")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33628,7 +33628,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 23:
-      HASH_GUARD_LITSTR(0x62A40E71FAF19157LL, NAMSTR(s_sys_ss050e6ea9, "setAttributeNS")) {
+      HASH_GUARD_LITSTR(0x62A40E71FAF19157LL, NAMSTR(s_sys_ss3d2102a4, "setAttributeNS")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -33654,7 +33654,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x640FA60DDC80EC18LL, NAMSTR(s_sys_ss237f13e8, "getAttributeNodeNS")) {
+      HASH_GUARD_LITSTR(0x640FA60DDC80EC18LL, NAMSTR(s_sys_ss2aa43f67, "getAttributeNodeNS")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33676,7 +33676,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x34E103E06D3F0899LL, NAMSTR(s_sys_ss6d3f0899, "getAttributeNS")) {
+      HASH_GUARD_LITSTR(0x34E103E06D3F0899LL, NAMSTR(s_sys_ss29474452, "getAttributeNS")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33698,7 +33698,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x606827EF5CF34C5CLL, NAMSTR(s_sys_ss5cf34c5c, "setAttributeNode")) {
+      HASH_GUARD_LITSTR(0x606827EF5CF34C5CLL, NAMSTR(s_sys_ss28e44b58, "setAttributeNode")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -33716,7 +33716,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -33744,7 +33744,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 40:
-      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss6612fc28_1, "getAttribute")) {
+      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss0a49a8a1, "getAttribute")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -33762,7 +33762,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 42:
-      HASH_GUARD_LITSTR(0x1BFDB4272EA150EALL, NAMSTR(s_sys_ss2ea150ea, "removeAttributeNode")) {
+      HASH_GUARD_LITSTR(0x1BFDB4272EA150EALL, NAMSTR(s_sys_ss7e98a0fb, "removeAttributeNode")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -33780,7 +33780,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 44:
-      HASH_GUARD_LITSTR(0x6471DF8BB944FFECLL, NAMSTR(s_sys_ss46bb0014, "hasAttribute")) {
+      HASH_GUARD_LITSTR(0x6471DF8BB944FFECLL, NAMSTR(s_sys_ss28995563, "hasAttribute")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -33798,7 +33798,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x47B96C0FC62E1E2FLL, NAMSTR(s_sys_ss39d1e1d1, "removeAttribute")) {
+      HASH_GUARD_LITSTR(0x47B96C0FC62E1E2FLL, NAMSTR(s_sys_ss5ef57bc3, "removeAttribute")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -33816,7 +33816,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -33830,7 +33830,7 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 62:
-      HASH_GUARD_LITSTR(0x343DF562BB5AB1FELL, NAMSTR(s_sys_ss44a54e02, "getAttributeNode")) {
+      HASH_GUARD_LITSTR(0x343DF562BB5AB1FELL, NAMSTR(s_sys_ss0b3b5e04, "getAttributeNode")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -34512,123 +34512,123 @@ bool c_DOMElement::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 10:
-      HASH_GUARD_LITSTR(0x3FFA3F55ECAB93CALL, NAMSTR(s_sys_ss13546c36, "getElementsByTagName")) {
+      HASH_GUARD_LITSTR(0x3FFA3F55ECAB93CALL, NAMSTR(s_sys_ss2b6d2a95, "getElementsByTagName")) {
         mcp.ci = &c_DOMElement::ci_getelementsbytagname;
         return true;
       }
-      HASH_GUARD_LITSTR(0x1A9CC561CA4817CALL, NAMSTR(s_sys_ss35b7e836, "getElementsByTagNameNS")) {
+      HASH_GUARD_LITSTR(0x1A9CC561CA4817CALL, NAMSTR(s_sys_ss49400bc1, "getElementsByTagNameNS")) {
         mcp.ci = &c_DOMElement::ci_getelementsbytagnamens;
         return true;
       }
-      HASH_GUARD_LITSTR(0x29D272CBBC0CDA4ALL, NAMSTR(s_sys_ss43f325b6, "setIDAttributeNode")) {
+      HASH_GUARD_LITSTR(0x29D272CBBC0CDA4ALL, NAMSTR(s_sys_ss58a78f5c, "setIDAttributeNode")) {
         mcp.ci = &c_DOMElement::ci_setidattributenode;
         return true;
       }
-      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss44f4ab8a_1, "setAttribute")) {
+      HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss625d0a69, "setAttribute")) {
         mcp.ci = &c_DOMElement::ci_setattribute;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss74fa338f, "__get")) {
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_DOMElement::ci___get;
         return true;
       }
       break;
     case 16:
-      HASH_GUARD_LITSTR(0x710986B01E1A0890LL, NAMSTR(s_sys_ss1e1a0890, "removeAttributeNS")) {
+      HASH_GUARD_LITSTR(0x710986B01E1A0890LL, NAMSTR(s_sys_ss3fca29c8, "removeAttributeNS")) {
         mcp.ci = &c_DOMElement::ci_removeattributens;
         return true;
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x31426AC6A851EE11LL, NAMSTR(s_sys_ss57ae11ef, "setIDAttributeNS")) {
+      HASH_GUARD_LITSTR(0x31426AC6A851EE11LL, NAMSTR(s_sys_ss0bfd696f, "setIDAttributeNS")) {
         mcp.ci = &c_DOMElement::ci_setidattributens;
         return true;
       }
-      HASH_GUARD_LITSTR(0x482E3873306253D1LL, NAMSTR(s_sys_ss306253d1, "setAttributeNodeNS")) {
+      HASH_GUARD_LITSTR(0x482E3873306253D1LL, NAMSTR(s_sys_ss34df4c9f, "setAttributeNodeNS")) {
         mcp.ci = &c_DOMElement::ci_setattributenodens;
         return true;
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss7ccbfc6b, "__set")) {
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_ss17981e9a, "__set")) {
         mcp.ci = &c_DOMElement::ci___set;
         return true;
       }
-      HASH_GUARD_LITSTR(0x5EF7C3A45311D955LL, NAMSTR(s_sys_ss5311d955, "hasAttributeNS")) {
+      HASH_GUARD_LITSTR(0x5EF7C3A45311D955LL, NAMSTR(s_sys_ss1303cc56, "hasAttributeNS")) {
         mcp.ci = &c_DOMElement::ci_hasattributens;
         return true;
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x6F83EC29E110D616LL, NAMSTR(s_sys_ss1eef29ea, "setIDAttribute")) {
+      HASH_GUARD_LITSTR(0x6F83EC29E110D616LL, NAMSTR(s_sys_ss102b70c6, "setIDAttribute")) {
         mcp.ci = &c_DOMElement::ci_setidattribute;
         return true;
       }
       break;
     case 23:
-      HASH_GUARD_LITSTR(0x62A40E71FAF19157LL, NAMSTR(s_sys_ss050e6ea9, "setAttributeNS")) {
+      HASH_GUARD_LITSTR(0x62A40E71FAF19157LL, NAMSTR(s_sys_ss3d2102a4, "setAttributeNS")) {
         mcp.ci = &c_DOMElement::ci_setattributens;
         return true;
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x640FA60DDC80EC18LL, NAMSTR(s_sys_ss237f13e8, "getAttributeNodeNS")) {
+      HASH_GUARD_LITSTR(0x640FA60DDC80EC18LL, NAMSTR(s_sys_ss2aa43f67, "getAttributeNodeNS")) {
         mcp.ci = &c_DOMElement::ci_getattributenodens;
         return true;
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x34E103E06D3F0899LL, NAMSTR(s_sys_ss6d3f0899, "getAttributeNS")) {
+      HASH_GUARD_LITSTR(0x34E103E06D3F0899LL, NAMSTR(s_sys_ss29474452, "getAttributeNS")) {
         mcp.ci = &c_DOMElement::ci_getattributens;
         return true;
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x606827EF5CF34C5CLL, NAMSTR(s_sys_ss5cf34c5c, "setAttributeNode")) {
+      HASH_GUARD_LITSTR(0x606827EF5CF34C5CLL, NAMSTR(s_sys_ss28e44b58, "setAttributeNode")) {
         mcp.ci = &c_DOMElement::ci_setattributenode;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DOMElement::ci___construct;
         return true;
       }
       break;
     case 40:
-      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss6612fc28_1, "getAttribute")) {
+      HASH_GUARD_LITSTR(0x49F89C466612FC28LL, NAMSTR(s_sys_ss0a49a8a1, "getAttribute")) {
         mcp.ci = &c_DOMElement::ci_getattribute;
         return true;
       }
       break;
     case 42:
-      HASH_GUARD_LITSTR(0x1BFDB4272EA150EALL, NAMSTR(s_sys_ss2ea150ea, "removeAttributeNode")) {
+      HASH_GUARD_LITSTR(0x1BFDB4272EA150EALL, NAMSTR(s_sys_ss7e98a0fb, "removeAttributeNode")) {
         mcp.ci = &c_DOMElement::ci_removeattributenode;
         return true;
       }
       break;
     case 44:
-      HASH_GUARD_LITSTR(0x6471DF8BB944FFECLL, NAMSTR(s_sys_ss46bb0014, "hasAttribute")) {
+      HASH_GUARD_LITSTR(0x6471DF8BB944FFECLL, NAMSTR(s_sys_ss28995563, "hasAttribute")) {
         mcp.ci = &c_DOMElement::ci_hasattribute;
         return true;
       }
       break;
     case 47:
-      HASH_GUARD_LITSTR(0x47B96C0FC62E1E2FLL, NAMSTR(s_sys_ss39d1e1d1, "removeAttribute")) {
+      HASH_GUARD_LITSTR(0x47B96C0FC62E1E2FLL, NAMSTR(s_sys_ss5ef57bc3, "removeAttribute")) {
         mcp.ci = &c_DOMElement::ci_removeattribute;
         return true;
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_DOMElement::ci___destruct;
         return true;
       }
       break;
     case 62:
-      HASH_GUARD_LITSTR(0x343DF562BB5AB1FELL, NAMSTR(s_sys_ss44a54e02, "getAttributeNode")) {
+      HASH_GUARD_LITSTR(0x343DF562BB5AB1FELL, NAMSTR(s_sys_ss0b3b5e04, "getAttributeNode")) {
         mcp.ci = &c_DOMElement::ci_getattributenode;
         return true;
       }

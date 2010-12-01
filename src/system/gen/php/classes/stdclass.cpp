@@ -78,7 +78,7 @@ bool c_stdClass::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_INSTANCEOF(0x3D69936178BA13F7LL, NAMSTR(s_sys_ss78ba13f7, "stdclass"));
+      HASH_INSTANCEOF(0x3D69936178BA13F7LL, NAMSTR(s_sys_ss41c7a197, "stdclass"));
       break;
     default:
       break;
@@ -168,7 +168,7 @@ bool c___PHP_Incomplete_Class::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 0:
-      HASH_INSTANCEOF(0x6576EACCCE24D694LL, NAMSTR(s_sys_ss31db296c, "__php_incomplete_class"));
+      HASH_INSTANCEOF(0x6576EACCCE24D694LL, NAMSTR(s_sys_ss765bcc63, "__php_incomplete_class"));
       break;
     default:
       break;

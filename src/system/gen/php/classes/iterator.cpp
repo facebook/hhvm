@@ -42,11 +42,11 @@ Variant c_ArrayIterator::os_getInit(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
-      HASH_RETURN_NAMSTR(0x7D2126D089B92EA5LL, NAMSTR(s_sys_ss7646d15b, "arr"),
+      HASH_RETURN_NAMSTR(0x7D2126D089B92EA5LL, NAMSTR(s_sys_ss7cb08d68, "arr"),
                          null, 3);
       break;
     case 3:
-      HASH_RETURN_NAMSTR(0x7401482B86AFCBFBLL, NAMSTR(s_sys_ss79503405, "flags"),
+      HASH_RETURN_NAMSTR(0x7401482B86AFCBFBLL, NAMSTR(s_sys_ss28fae70d, "flags"),
                          null, 5);
       break;
     default:
@@ -67,15 +67,15 @@ Variant &c_ArrayIterator::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ArrayIterator
 void c_ArrayIterator::o_getArray(Array &props) const {
-  if (isInitialized(m_arr)) props.add(NAMSTR(s_sys_ss00ce7919, "\000ArrayIterator\000arr"), m_arr.isReferenced() ? ref(m_arr) : m_arr, true);
-  if (isInitialized(m_flags)) props.add(NAMSTR(s_sys_ss4f67744c, "\000ArrayIterator\000flags"), m_flags.isReferenced() ? ref(m_flags) : m_flags, true);
+  if (isInitialized(m_arr)) props.add(NAMSTR(s_sys_ss4479eecb, "\000ArrayIterator\000arr"), m_arr.isReferenced() ? ref(m_arr) : m_arr, true);
+  if (isInitialized(m_flags)) props.add(NAMSTR(s_sys_ss3e0fa602, "\000ArrayIterator\000flags"), m_flags.isReferenced() ? ref(m_flags) : m_flags, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ArrayIterator
 void c_ArrayIterator::o_setArray(CArrRef props) {
-  props->load(NAMSTR(s_sys_ss00ce7919, "\000ArrayIterator\000arr"), m_arr);
-  props->load(NAMSTR(s_sys_ss4f67744c, "\000ArrayIterator\000flags"), m_flags);
+  props->load(NAMSTR(s_sys_ss4479eecb, "\000ArrayIterator\000arr"), m_arr);
+  props->load(NAMSTR(s_sys_ss3e0fa602, "\000ArrayIterator\000flags"), m_flags);
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ArrayIterator
@@ -124,18 +124,18 @@ bool c_ArrayIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 15) {
     case 1:
-      HASH_INSTANCEOF(0x795F86375EE263D1LL, NAMSTR(s_sys_ss5ee263d1, "countable"));
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      HASH_INSTANCEOF(0x795F86375EE263D1LL, NAMSTR(s_sys_ss4315c511, "countable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss5c70ced5, "traversable"));
       break;
     case 3:
-      HASH_INSTANCEOF(0x3D5870E53BF89873LL, NAMSTR(s_sys_ss3bf89873, "arrayiterator"));
-      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ss1eba23bd, "seekableiterator"));
+      HASH_INSTANCEOF(0x3D5870E53BF89873LL, NAMSTR(s_sys_ss580b6292, "arrayiterator"));
+      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ss58cce40f, "seekableiterator"));
       break;
     case 11:
-      HASH_INSTANCEOF(0x3BDD11EABFCD6F0BLL, NAMSTR(s_sys_ss403290f5, "arrayaccess"));
+      HASH_INSTANCEOF(0x3BDD11EABFCD6F0BLL, NAMSTR(s_sys_ss6d2fac1b, "arrayaccess"));
       break;
     case 14:
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
       break;
     default:
       break;
@@ -156,7 +156,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 0:
-      HASH_GUARD_LITSTR(0x3E6BCFB9742FC700LL, NAMSTR(s_sys_ss742fc700, "offsetExists")) {
+      HASH_GUARD_LITSTR(0x3E6BCFB9742FC700LL, NAMSTR(s_sys_ss6cc6b367, "offsetExists")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -174,7 +174,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss2dc69ec2, "append")) {
+      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss459a2a12, "append")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -192,7 +192,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -204,7 +204,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         if (count > 0) return throw_toomany_arguments("ArrayIterator::valid", 0, 1);
         return (t_valid());
       }
-      HASH_GUARD_LITSTR(0x4842AF70A71BE6C4LL, NAMSTR(s_sys_ss58e4193c, "uksort")) {
+      HASH_GUARD_LITSTR(0x4842AF70A71BE6C4LL, NAMSTR(s_sys_ss01cdf654, "uksort")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -222,7 +222,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 6:
-      HASH_GUARD_LITSTR(0x234F6A0A486E8646LL, NAMSTR(s_sys_ss486e8646, "natcasesort")) {
+      HASH_GUARD_LITSTR(0x234F6A0A486E8646LL, NAMSTR(s_sys_ss2c18aae1, "natcasesort")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -236,7 +236,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x2FC3A6941D522E0ALL, NAMSTR(s_sys_ss1d522e0a, "setFlags")) {
+      HASH_GUARD_LITSTR(0x2FC3A6941D522E0ALL, NAMSTR(s_sys_ss1fa5c668, "setFlags")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -254,7 +254,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 16:
-      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss65104d10, "count")) {
+      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss0d54babb, "count")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -268,7 +268,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -282,7 +282,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x61D11ECEF4404498LL, NAMSTR(s_sys_ss0bbfbb68, "offsetGet")) {
+      HASH_GUARD_LITSTR(0x61D11ECEF4404498LL, NAMSTR(s_sys_ss62975ff0, "offsetGet")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -298,7 +298,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         if (count != 1) return throw_wrong_arguments("ArrayIterator::offsetGet", count, 1, 1, 1);
         return (t_offsetget(a0));
       }
-      HASH_GUARD_LITSTR(0x70448A629A74FB18LL, NAMSTR(s_sys_ss658b04e8, "ksort")) {
+      HASH_GUARD_LITSTR(0x70448A629A74FB18LL, NAMSTR(s_sys_ss372c9151, "ksort")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -312,7 +312,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -326,7 +326,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -349,7 +349,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 32:
-      HASH_GUARD_LITSTR(0x6FACBD7F02B6FD60LL, NAMSTR(s_sys_ss02b6fd60, "uasort")) {
+      HASH_GUARD_LITSTR(0x6FACBD7F02B6FD60LL, NAMSTR(s_sys_ss0626a7ce, "uasort")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -367,7 +367,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 33:
-      HASH_GUARD_LITSTR(0x0E210679B2DFD461LL, NAMSTR(s_sys_ss4d202b9f, "getArrayCopy")) {
+      HASH_GUARD_LITSTR(0x0E210679B2DFD461LL, NAMSTR(s_sys_ss1971840b, "getArrayCopy")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -379,7 +379,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         if (count > 0) return throw_toomany_arguments("ArrayIterator::getArrayCopy", 0, 1);
         return (t_getarraycopy());
       }
-      HASH_GUARD_LITSTR(0x27E7DBA875AD17E1LL, NAMSTR(s_sys_ss75ad17e1, "getFlags")) {
+      HASH_GUARD_LITSTR(0x27E7DBA875AD17E1LL, NAMSTR(s_sys_ss5dfde84b, "getFlags")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -393,7 +393,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 39:
-      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
+      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss6a9626a3, "seek")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -411,7 +411,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 42:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -425,7 +425,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 46:
-      HASH_GUARD_LITSTR(0x790B7C44A3442BEELL, NAMSTR(s_sys_ss5cbbd412, "asort")) {
+      HASH_GUARD_LITSTR(0x790B7C44A3442BEELL, NAMSTR(s_sys_ss3763e869, "asort")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -439,7 +439,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7DB9D839ACE0DEB3LL, NAMSTR(s_sys_ss531f214d, "natsort")) {
+      HASH_GUARD_LITSTR(0x7DB9D839ACE0DEB3LL, NAMSTR(s_sys_ss0142a166, "natsort")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -453,7 +453,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 56:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -465,7 +465,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         if (count > 0) return throw_toomany_arguments("ArrayIterator::next", 0, 1);
         return (t_next());
       }
-      HASH_GUARD_LITSTR(0x0957F693A48AF738LL, NAMSTR(s_sys_ss5b7508c8, "offsetSet")) {
+      HASH_GUARD_LITSTR(0x0957F693A48AF738LL, NAMSTR(s_sys_ss41d45e54, "offsetSet")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -487,7 +487,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 58:
-      HASH_GUARD_LITSTR(0x08329980E6369ABALL, NAMSTR(s_sys_ss19c96546, "offsetUnset")) {
+      HASH_GUARD_LITSTR(0x08329980E6369ABALL, NAMSTR(s_sys_ss1a6fd792, "offsetUnset")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1099,125 +1099,125 @@ bool c_ArrayIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 0:
-      HASH_GUARD_LITSTR(0x3E6BCFB9742FC700LL, NAMSTR(s_sys_ss742fc700, "offsetExists")) {
+      HASH_GUARD_LITSTR(0x3E6BCFB9742FC700LL, NAMSTR(s_sys_ss6cc6b367, "offsetExists")) {
         mcp.ci = &c_ArrayIterator::ci_offsetexists;
         return true;
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss2dc69ec2, "append")) {
+      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss459a2a12, "append")) {
         mcp.ci = &c_ArrayIterator::ci_append;
         return true;
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         mcp.ci = &c_ArrayIterator::ci_valid;
         return true;
       }
-      HASH_GUARD_LITSTR(0x4842AF70A71BE6C4LL, NAMSTR(s_sys_ss58e4193c, "uksort")) {
+      HASH_GUARD_LITSTR(0x4842AF70A71BE6C4LL, NAMSTR(s_sys_ss01cdf654, "uksort")) {
         mcp.ci = &c_ArrayIterator::ci_uksort;
         return true;
       }
       break;
     case 6:
-      HASH_GUARD_LITSTR(0x234F6A0A486E8646LL, NAMSTR(s_sys_ss486e8646, "natcasesort")) {
+      HASH_GUARD_LITSTR(0x234F6A0A486E8646LL, NAMSTR(s_sys_ss2c18aae1, "natcasesort")) {
         mcp.ci = &c_ArrayIterator::ci_natcasesort;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x2FC3A6941D522E0ALL, NAMSTR(s_sys_ss1d522e0a, "setFlags")) {
+      HASH_GUARD_LITSTR(0x2FC3A6941D522E0ALL, NAMSTR(s_sys_ss1fa5c668, "setFlags")) {
         mcp.ci = &c_ArrayIterator::ci_setflags;
         return true;
       }
       break;
     case 16:
-      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss65104d10, "count")) {
+      HASH_GUARD_LITSTR(0x5CEFA5A265104D10LL, NAMSTR(s_sys_ss0d54babb, "count")) {
         mcp.ci = &c_ArrayIterator::ci_count;
         return true;
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         mcp.ci = &c_ArrayIterator::ci_key;
         return true;
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x61D11ECEF4404498LL, NAMSTR(s_sys_ss0bbfbb68, "offsetGet")) {
+      HASH_GUARD_LITSTR(0x61D11ECEF4404498LL, NAMSTR(s_sys_ss62975ff0, "offsetGet")) {
         mcp.ci = &c_ArrayIterator::ci_offsetget;
         return true;
       }
-      HASH_GUARD_LITSTR(0x70448A629A74FB18LL, NAMSTR(s_sys_ss658b04e8, "ksort")) {
+      HASH_GUARD_LITSTR(0x70448A629A74FB18LL, NAMSTR(s_sys_ss372c9151, "ksort")) {
         mcp.ci = &c_ArrayIterator::ci_ksort;
         return true;
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         mcp.ci = &c_ArrayIterator::ci_current;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_ArrayIterator::ci___construct;
         return true;
       }
       break;
     case 32:
-      HASH_GUARD_LITSTR(0x6FACBD7F02B6FD60LL, NAMSTR(s_sys_ss02b6fd60, "uasort")) {
+      HASH_GUARD_LITSTR(0x6FACBD7F02B6FD60LL, NAMSTR(s_sys_ss0626a7ce, "uasort")) {
         mcp.ci = &c_ArrayIterator::ci_uasort;
         return true;
       }
       break;
     case 33:
-      HASH_GUARD_LITSTR(0x0E210679B2DFD461LL, NAMSTR(s_sys_ss4d202b9f, "getArrayCopy")) {
+      HASH_GUARD_LITSTR(0x0E210679B2DFD461LL, NAMSTR(s_sys_ss1971840b, "getArrayCopy")) {
         mcp.ci = &c_ArrayIterator::ci_getarraycopy;
         return true;
       }
-      HASH_GUARD_LITSTR(0x27E7DBA875AD17E1LL, NAMSTR(s_sys_ss75ad17e1, "getFlags")) {
+      HASH_GUARD_LITSTR(0x27E7DBA875AD17E1LL, NAMSTR(s_sys_ss5dfde84b, "getFlags")) {
         mcp.ci = &c_ArrayIterator::ci_getflags;
         return true;
       }
       break;
     case 39:
-      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
+      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss6a9626a3, "seek")) {
         mcp.ci = &c_ArrayIterator::ci_seek;
         return true;
       }
       break;
     case 42:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         mcp.ci = &c_ArrayIterator::ci_rewind;
         return true;
       }
       break;
     case 46:
-      HASH_GUARD_LITSTR(0x790B7C44A3442BEELL, NAMSTR(s_sys_ss5cbbd412, "asort")) {
+      HASH_GUARD_LITSTR(0x790B7C44A3442BEELL, NAMSTR(s_sys_ss3763e869, "asort")) {
         mcp.ci = &c_ArrayIterator::ci_asort;
         return true;
       }
       break;
     case 51:
-      HASH_GUARD_LITSTR(0x7DB9D839ACE0DEB3LL, NAMSTR(s_sys_ss531f214d, "natsort")) {
+      HASH_GUARD_LITSTR(0x7DB9D839ACE0DEB3LL, NAMSTR(s_sys_ss0142a166, "natsort")) {
         mcp.ci = &c_ArrayIterator::ci_natsort;
         return true;
       }
       break;
     case 56:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         mcp.ci = &c_ArrayIterator::ci_next;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0957F693A48AF738LL, NAMSTR(s_sys_ss5b7508c8, "offsetSet")) {
+      HASH_GUARD_LITSTR(0x0957F693A48AF738LL, NAMSTR(s_sys_ss41d45e54, "offsetSet")) {
         mcp.ci = &c_ArrayIterator::ci_offsetset;
         return true;
       }
       break;
     case 58:
-      HASH_GUARD_LITSTR(0x08329980E6369ABALL, NAMSTR(s_sys_ss19c96546, "offsetUnset")) {
+      HASH_GUARD_LITSTR(0x08329980E6369ABALL, NAMSTR(s_sys_ss1a6fd792, "offsetUnset")) {
         mcp.ci = &c_ArrayIterator::ci_offsetunset;
         return true;
       }
@@ -1511,7 +1511,7 @@ Variant c_AppendIterator::os_getInit(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_RETURN_NAMSTR(0x60EA38C41F14FF71LL, NAMSTR(s_sys_ss1f14ff71, "iterators"),
+      HASH_RETURN_NAMSTR(0x60EA38C41F14FF71LL, NAMSTR(s_sys_ss2b507dbc, "iterators"),
                          null, 9);
       break;
     default:
@@ -1532,13 +1532,13 @@ Variant &c_AppendIterator::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_AppendIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_AppendIterator
 void c_AppendIterator::o_getArray(Array &props) const {
-  if (isInitialized(m_iterators)) props.add(NAMSTR(s_sys_ss5b908ab0, "\000AppendIterator\000iterators"), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, true);
+  if (isInitialized(m_iterators)) props.add(NAMSTR(s_sys_ss4c031b92, "\000AppendIterator\000iterators"), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_AppendIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_AppendIterator
 void c_AppendIterator::o_setArray(CArrRef props) {
-  props->load(NAMSTR(s_sys_ss5b908ab0, "\000AppendIterator\000iterators"), m_iterators);
+  props->load(NAMSTR(s_sys_ss4c031b92, "\000AppendIterator\000iterators"), m_iterators);
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_AppendIterator
@@ -1584,16 +1584,16 @@ bool c_AppendIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 0:
-      HASH_INSTANCEOF(0x2E363D51549781C8LL, NAMSTR(s_sys_ss549781c8, "appenditerator"));
+      HASH_INSTANCEOF(0x2E363D51549781C8LL, NAMSTR(s_sys_ss73e9ca7d, "appenditerator"));
       break;
     case 1:
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss5c70ced5, "traversable"));
       break;
     case 5:
-      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss5371ad73, "outeriterator"));
+      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss67488f90, "outeriterator"));
       break;
     case 6:
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
       break;
     default:
       break;
@@ -1616,7 +1616,7 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
-      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss2dc69ec2, "append")) {
+      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss459a2a12, "append")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1635,7 +1635,7 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1647,7 +1647,7 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         if (count > 0) return throw_toomany_arguments("AppendIterator::valid", 0, 1);
         return (t_valid());
       }
-      HASH_GUARD_LITSTR(0x3106F858B09C7424LL, NAMSTR(s_sys_ss4f638bdc, "getInnerIterator")) {
+      HASH_GUARD_LITSTR(0x3106F858B09C7424LL, NAMSTR(s_sys_ss37eff1c8, "getInnerIterator")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1661,7 +1661,7 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1675,7 +1675,7 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x5D73364F53CEEB6CLL, NAMSTR(s_sys_ss53ceeb6c, "__call")) {
+      HASH_GUARD_LITSTR(0x5D73364F53CEEB6CLL, NAMSTR(s_sys_ss377f1476, "__call")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1697,7 +1697,7 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1711,7 +1711,7 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1725,7 +1725,7 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1739,7 +1739,7 @@ Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1994,53 +1994,53 @@ bool c_AppendIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 2:
-      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss2dc69ec2, "append")) {
+      HASH_GUARD_LITSTR(0x4DEE4A472DC69EC2LL, NAMSTR(s_sys_ss459a2a12, "append")) {
         mcp.ci = &c_AppendIterator::ci_append;
         return true;
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         mcp.ci = &c_AppendIterator::ci_valid;
         return true;
       }
-      HASH_GUARD_LITSTR(0x3106F858B09C7424LL, NAMSTR(s_sys_ss4f638bdc, "getInnerIterator")) {
+      HASH_GUARD_LITSTR(0x3106F858B09C7424LL, NAMSTR(s_sys_ss37eff1c8, "getInnerIterator")) {
         mcp.ci = &c_AppendIterator::ci_getinneriterator;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         mcp.ci = &c_AppendIterator::ci_rewind;
         return true;
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x5D73364F53CEEB6CLL, NAMSTR(s_sys_ss53ceeb6c, "__call")) {
+      HASH_GUARD_LITSTR(0x5D73364F53CEEB6CLL, NAMSTR(s_sys_ss377f1476, "__call")) {
         mcp.ci = &c_AppendIterator::ci___call;
         return true;
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         mcp.ci = &c_AppendIterator::ci_key;
         return true;
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         mcp.ci = &c_AppendIterator::ci_next;
         return true;
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         mcp.ci = &c_AppendIterator::ci_current;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_AppendIterator::ci___construct;
         return true;
       }
@@ -2116,13 +2116,13 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 941 */
 void c_AppendIterator::t_append(CVarRef v_it) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::append);
-  if(!v_it.instanceof(NAMSTR(s_sys_ss4af9d29e, "iterator"))) {
+  if(!v_it.instanceof(NAMSTR(s_sys_ss2fd353cc, "iterator"))) {
     throw_unexpected_argument_type(1,"AppendIterator::append()","iterator",v_it);
     return;
   }
   {
     MethodCallPackage mcp1;
-    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss2dc69ec2, "append"), 0x4DEE4A472DC69EC2LL);
+    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss459a2a12, "append"), 0x4DEE4A472DC69EC2LL);
     const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
     (mcp1.bindClass(info)->getMethFewArgs())(mcp1, 1, v_it, null_variant, null_variant, null_variant, null_variant, null_variant);
   }
@@ -2133,7 +2133,7 @@ Variant c_AppendIterator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::getInnerIterator);
   {
     MethodCallPackage mcp1;
-    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss7b94de24, "current"), 0x5B3A4A72846B21DCLL);
+    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss4c5a3e4d, "current"), 0x5B3A4A72846B21DCLL);
     const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
     return wrap_variant((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant));
   }
@@ -2144,7 +2144,7 @@ void c_AppendIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::rewind);
   {
     MethodCallPackage mcp1;
-    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss21d85096, "rewind"), 0x1670096FDE27AF6ALL);
+    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss6be35da1, "rewind"), 0x1670096FDE27AF6ALL);
     const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
     (mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant);
   }
@@ -2152,7 +2152,7 @@ void c_AppendIterator::t_rewind() {
     bool tmp2;
     {
       MethodCallPackage mcp3;
-      mcp3.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+      mcp3.methodCall((m_iterators), NAMSTR(s_sys_ss66bc340c, "valid"), 0x6413CB5154808C44LL);
       const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
       tmp2 = (toBoolean((mcp3.bindClass(info)->getMethFewArgs())(mcp3, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
     }
@@ -2160,10 +2160,10 @@ void c_AppendIterator::t_rewind() {
       {
         {
           MethodCallPackage mcp5;
-          mcp5.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+          mcp5.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
           const CallInfo *cit5  __attribute__((__unused__)) = mcp5.ci;
           MethodCallPackage mcp4;
-          mcp4.methodCall(((mcp5.bindClass(info)->getMethFewArgs())(mcp5, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss21d85096, "rewind"), 0x1670096FDE27AF6ALL);
+          mcp4.methodCall(((mcp5.bindClass(info)->getMethFewArgs())(mcp5, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss6be35da1, "rewind"), 0x1670096FDE27AF6ALL);
           const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
           (mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant);
         }
@@ -2177,15 +2177,15 @@ bool c_AppendIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::valid);
   {
     MethodCallPackage mcp1;
-    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss66bc340c, "valid"), 0x6413CB5154808C44LL);
     const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
     bool tmp2 = (toBoolean((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
     if (tmp2) {
       MethodCallPackage mcp4;
-      mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+      mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
       const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
       MethodCallPackage mcp3;
-      mcp3.methodCall(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+      mcp3.methodCall(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss66bc340c, "valid"), 0x6413CB5154808C44LL);
       const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
       tmp2 = (toBoolean((mcp3.bindClass(info)->getMethFewArgs())(mcp3, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
     }
@@ -2198,15 +2198,15 @@ Variant c_AppendIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::current);
   {
     MethodCallPackage mcp1;
-    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss66bc340c, "valid"), 0x6413CB5154808C44LL);
     const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
     Variant tmp2;
     if (toBoolean((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant))) {
       MethodCallPackage mcp4;
-      mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+      mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
       const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
       MethodCallPackage mcp3;
-      mcp3.methodCall(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss7b94de24, "current"), 0x5B3A4A72846B21DCLL);
+      mcp3.methodCall(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss4c5a3e4d, "current"), 0x5B3A4A72846B21DCLL);
       const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
       tmp2 = ((mcp3.bindClass(info)->getMethFewArgs())(mcp3, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant));
     } else {
@@ -2221,15 +2221,15 @@ Variant c_AppendIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::key);
   {
     MethodCallPackage mcp1;
-    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss66bc340c, "valid"), 0x6413CB5154808C44LL);
     const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
     Variant tmp2;
     if (toBoolean((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant))) {
       MethodCallPackage mcp4;
-      mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+      mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
       const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
       MethodCallPackage mcp3;
-      mcp3.methodCall(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss7db173af, "key"), 0x56EDB60C824E8C51LL);
+      mcp3.methodCall(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss12e90587, "key"), 0x56EDB60C824E8C51LL);
       const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
       tmp2 = ((mcp3.bindClass(info)->getMethFewArgs())(mcp3, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant));
     } else {
@@ -2246,7 +2246,7 @@ void c_AppendIterator::t_next() {
     bool tmp1;
     {
       MethodCallPackage mcp2;
-      mcp2.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+      mcp2.methodCall((m_iterators), NAMSTR(s_sys_ss66bc340c, "valid"), 0x6413CB5154808C44LL);
       const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
       tmp1 = (!(toBoolean((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant))));
     }
@@ -2258,10 +2258,10 @@ void c_AppendIterator::t_next() {
   }
   {
     MethodCallPackage mcp4;
-    mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+    mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
     const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
     MethodCallPackage mcp3;
-    mcp3.methodCall(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss447efd48, "next"), 0x3C6D50F3BB8102B8LL);
+    mcp3.methodCall(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss50652d33, "next"), 0x3C6D50F3BB8102B8LL);
     const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
     (mcp3.bindClass(info)->getMethFewArgs())(mcp3, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant);
   }
@@ -2269,10 +2269,10 @@ void c_AppendIterator::t_next() {
     bool tmp5;
     {
       MethodCallPackage mcp7;
-      mcp7.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+      mcp7.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
       const CallInfo *cit7  __attribute__((__unused__)) = mcp7.ci;
       MethodCallPackage mcp6;
-      mcp6.methodCall(((mcp7.bindClass(info)->getMethFewArgs())(mcp7, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+      mcp6.methodCall(((mcp7.bindClass(info)->getMethFewArgs())(mcp7, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss66bc340c, "valid"), 0x6413CB5154808C44LL);
       const CallInfo *cit6  __attribute__((__unused__)) = mcp6.ci;
       tmp5 = (toBoolean((mcp6.bindClass(info)->getMethFewArgs())(mcp6, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
     }
@@ -2284,7 +2284,7 @@ void c_AppendIterator::t_next() {
   }
   {
     MethodCallPackage mcp8;
-    mcp8.methodCall((m_iterators), NAMSTR(s_sys_ss447efd48, "next"), 0x3C6D50F3BB8102B8LL);
+    mcp8.methodCall((m_iterators), NAMSTR(s_sys_ss50652d33, "next"), 0x3C6D50F3BB8102B8LL);
     const CallInfo *cit8  __attribute__((__unused__)) = mcp8.ci;
     (mcp8.bindClass(info)->getMethFewArgs())(mcp8, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant);
   }
@@ -2293,7 +2293,7 @@ void c_AppendIterator::t_next() {
     while (true) {
       {
         MethodCallPackage mcp10;
-        mcp10.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+        mcp10.methodCall((m_iterators), NAMSTR(s_sys_ss66bc340c, "valid"), 0x6413CB5154808C44LL);
         const CallInfo *cit10  __attribute__((__unused__)) = mcp10.ci;
         if (!(toBoolean((mcp10.bindClass(info)->getMethFewArgs())(mcp10, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)))) break;
       }
@@ -2301,10 +2301,10 @@ void c_AppendIterator::t_next() {
       {
         {
           MethodCallPackage mcp12;
-          mcp12.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+          mcp12.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
           const CallInfo *cit12  __attribute__((__unused__)) = mcp12.ci;
           MethodCallPackage mcp11;
-          mcp11.methodCall(((mcp12.bindClass(info)->getMethFewArgs())(mcp12, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss21d85096, "rewind"), 0x1670096FDE27AF6ALL);
+          mcp11.methodCall(((mcp12.bindClass(info)->getMethFewArgs())(mcp12, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss6be35da1, "rewind"), 0x1670096FDE27AF6ALL);
           const CallInfo *cit11  __attribute__((__unused__)) = mcp11.ci;
           (mcp11.bindClass(info)->getMethFewArgs())(mcp11, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant);
         }
@@ -2312,10 +2312,10 @@ void c_AppendIterator::t_next() {
           bool tmp13;
           {
             MethodCallPackage mcp15;
-            mcp15.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+            mcp15.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
             const CallInfo *cit15  __attribute__((__unused__)) = mcp15.ci;
             MethodCallPackage mcp14;
-            mcp14.methodCall(((mcp15.bindClass(info)->getMethFewArgs())(mcp15, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+            mcp14.methodCall(((mcp15.bindClass(info)->getMethFewArgs())(mcp15, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss66bc340c, "valid"), 0x6413CB5154808C44LL);
             const CallInfo *cit14  __attribute__((__unused__)) = mcp14.ci;
             tmp13 = (toBoolean((mcp14.bindClass(info)->getMethFewArgs())(mcp14, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
           }
@@ -2327,7 +2327,7 @@ void c_AppendIterator::t_next() {
         }
         {
           MethodCallPackage mcp16;
-          mcp16.methodCall((m_iterators), NAMSTR(s_sys_ss447efd48, "next"), 0x3C6D50F3BB8102B8LL);
+          mcp16.methodCall((m_iterators), NAMSTR(s_sys_ss50652d33, "next"), 0x3C6D50F3BB8102B8LL);
           const CallInfo *cit16  __attribute__((__unused__)) = mcp16.ci;
           (mcp16.bindClass(info)->getMethFewArgs())(mcp16, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant);
         }
@@ -2342,7 +2342,7 @@ Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
   {
     ArrayInit tmp1(2, true);
     MethodCallPackage mcp2;
-    mcp2.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+    mcp2.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
     const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
     const Variant &tmp3(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
     tmp1.set(tmp3);
@@ -2432,21 +2432,21 @@ bool c_RecursiveDirectoryIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 15) {
     case 1:
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss5c70ced5, "traversable"));
       break;
     case 3:
-      HASH_INSTANCEOF(0x191964700AF036D3LL, NAMSTR(s_sys_ss0af036d3, "recursiveiterator"));
-      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ss1eba23bd, "seekableiterator"));
+      HASH_INSTANCEOF(0x191964700AF036D3LL, NAMSTR(s_sys_ss00b9627b, "recursiveiterator"));
+      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ss58cce40f, "seekableiterator"));
       break;
     case 7:
-      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss016dc059, "splfileinfo"));
+      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss5e897de5, "splfileinfo"));
       break;
     case 8:
-      HASH_INSTANCEOF(0x464D3427431A6ED8LL, NAMSTR(s_sys_ss431a6ed8, "recursivedirectoryiterator"));
+      HASH_INSTANCEOF(0x464D3427431A6ED8LL, NAMSTR(s_sys_ss170bfaa5, "recursivedirectoryiterator"));
       break;
     case 14:
-      HASH_INSTANCEOF(0x7754323897E8A15ELL, NAMSTR(s_sys_ss68175ea2, "directoryiterator"));
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      HASH_INSTANCEOF(0x7754323897E8A15ELL, NAMSTR(s_sys_ss235cdf3b, "directoryiterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
       break;
     default:
       break;
@@ -2465,7 +2465,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -2479,7 +2479,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
+      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss6a9626a3, "seek")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -2497,7 +2497,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 9:
-      HASH_GUARD_LITSTR(0x430BA7B88ED3A809LL, NAMSTR(s_sys_ss712c57f7, "getSubPathname")) {
+      HASH_GUARD_LITSTR(0x430BA7B88ED3A809LL, NAMSTR(s_sys_ss0f1c382a, "getSubPathname")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -2511,7 +2511,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -2525,7 +2525,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x732EC1BDA8EC520FLL, NAMSTR(s_sys_ss5713adf1, "getChildren")) {
+      HASH_GUARD_LITSTR(0x732EC1BDA8EC520FLL, NAMSTR(s_sys_ss68d731f7, "getChildren")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -2539,7 +2539,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -2553,7 +2553,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -2567,7 +2567,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x40044334DA397C15LL, NAMSTR(s_sys_ss25c683eb, "hasChildren")) {
+      HASH_GUARD_LITSTR(0x40044334DA397C15LL, NAMSTR(s_sys_ss09419907, "hasChildren")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -2581,7 +2581,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -2595,7 +2595,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 27:
-      HASH_GUARD_LITSTR(0x7CF26A0E76B5E27BLL, NAMSTR(s_sys_ss76b5e27b, "getSubPath")) {
+      HASH_GUARD_LITSTR(0x7CF26A0E76B5E27BLL, NAMSTR(s_sys_ss1c87c2bf, "getSubPath")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -2609,7 +2609,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -2623,7 +2623,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -2959,73 +2959,73 @@ bool c_RecursiveDirectoryIterator::os_get_call_info(MethodCallPackage &mcp, int6
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         mcp.ci = &c_RecursiveDirectoryIterator::ci_valid;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
+      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss6a9626a3, "seek")) {
         mcp.ci = &c_RecursiveDirectoryIterator::ci_seek;
         return true;
       }
       break;
     case 9:
-      HASH_GUARD_LITSTR(0x430BA7B88ED3A809LL, NAMSTR(s_sys_ss712c57f7, "getSubPathname")) {
+      HASH_GUARD_LITSTR(0x430BA7B88ED3A809LL, NAMSTR(s_sys_ss0f1c382a, "getSubPathname")) {
         mcp.ci = &c_RecursiveDirectoryIterator::ci_getsubpathname;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         mcp.ci = &c_RecursiveDirectoryIterator::ci_rewind;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x732EC1BDA8EC520FLL, NAMSTR(s_sys_ss5713adf1, "getChildren")) {
+      HASH_GUARD_LITSTR(0x732EC1BDA8EC520FLL, NAMSTR(s_sys_ss68d731f7, "getChildren")) {
         mcp.ci = &c_RecursiveDirectoryIterator::ci_getchildren;
         return true;
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         mcp.ci = &c_RecursiveDirectoryIterator::ci_key;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         mcp.ci = &c_RecursiveDirectoryIterator::ci___tostring;
         return true;
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x40044334DA397C15LL, NAMSTR(s_sys_ss25c683eb, "hasChildren")) {
+      HASH_GUARD_LITSTR(0x40044334DA397C15LL, NAMSTR(s_sys_ss09419907, "hasChildren")) {
         mcp.ci = &c_RecursiveDirectoryIterator::ci_haschildren;
         return true;
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         mcp.ci = &c_RecursiveDirectoryIterator::ci_next;
         return true;
       }
       break;
     case 27:
-      HASH_GUARD_LITSTR(0x7CF26A0E76B5E27BLL, NAMSTR(s_sys_ss76b5e27b, "getSubPath")) {
+      HASH_GUARD_LITSTR(0x7CF26A0E76B5E27BLL, NAMSTR(s_sys_ss1c87c2bf, "getSubPath")) {
         mcp.ci = &c_RecursiveDirectoryIterator::ci_getsubpath;
         return true;
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         mcp.ci = &c_RecursiveDirectoryIterator::ci_current;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_RecursiveDirectoryIterator::ci___construct;
         return true;
       }
@@ -3132,7 +3132,7 @@ void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags
       {
         {
           p_UnexpectedValueException tmp3 = NEWOBJ(c_UnexpectedValueException)();
-          throw_exception((tmp3->create(VarNR(concat3(NAMSTR(s_sys_ss35f9d4be, "RecursiveDirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ss0c10eb92, "): failed to open dir")))), tmp3));
+          throw_exception((tmp3->create(VarNR(concat3(NAMSTR(s_sys_ss0f15753f, "RecursiveDirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ss049bed2c, "): failed to open dir")))), tmp3));
         }
       }
     }
@@ -3257,17 +3257,17 @@ bool c_DirectoryIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 15) {
     case 1:
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss5c70ced5, "traversable"));
       break;
     case 3:
-      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ss1eba23bd, "seekableiterator"));
+      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ss58cce40f, "seekableiterator"));
       break;
     case 7:
-      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss016dc059, "splfileinfo"));
+      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss5e897de5, "splfileinfo"));
       break;
     case 14:
-      HASH_INSTANCEOF(0x7754323897E8A15ELL, NAMSTR(s_sys_ss68175ea2, "directoryiterator"));
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      HASH_INSTANCEOF(0x7754323897E8A15ELL, NAMSTR(s_sys_ss235cdf3b, "directoryiterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
       break;
     default:
       break;
@@ -3286,7 +3286,7 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3300,7 +3300,7 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
+      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss6a9626a3, "seek")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -3318,7 +3318,7 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3332,7 +3332,7 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3346,7 +3346,7 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3360,7 +3360,7 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x08D1EA51B78DA5F4LL, NAMSTR(s_sys_ss48725a0c, "isDot")) {
+      HASH_GUARD_LITSTR(0x08D1EA51B78DA5F4LL, NAMSTR(s_sys_ss5baf0fe3, "isDot")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3374,7 +3374,7 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3388,7 +3388,7 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3402,7 +3402,7 @@ Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -3658,55 +3658,55 @@ bool c_DirectoryIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         mcp.ci = &c_DirectoryIterator::ci_valid;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
+      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss6a9626a3, "seek")) {
         mcp.ci = &c_DirectoryIterator::ci_seek;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         mcp.ci = &c_DirectoryIterator::ci_rewind;
         return true;
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         mcp.ci = &c_DirectoryIterator::ci_key;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         mcp.ci = &c_DirectoryIterator::ci___tostring;
         return true;
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x08D1EA51B78DA5F4LL, NAMSTR(s_sys_ss48725a0c, "isDot")) {
+      HASH_GUARD_LITSTR(0x08D1EA51B78DA5F4LL, NAMSTR(s_sys_ss5baf0fe3, "isDot")) {
         mcp.ci = &c_DirectoryIterator::ci_isdot;
         return true;
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         mcp.ci = &c_DirectoryIterator::ci_next;
         return true;
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         mcp.ci = &c_DirectoryIterator::ci_current;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_DirectoryIterator::ci___construct;
         return true;
       }
@@ -3796,7 +3796,7 @@ void c_DirectoryIterator::t___construct(Variant v_path) {
       {
         {
           p_UnexpectedValueException tmp3 = NEWOBJ(c_UnexpectedValueException)();
-          throw_exception((tmp3->create(VarNR(concat3(NAMSTR(s_sys_ss3c6754b7, "DirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ss0c10eb92, "): failed to open dir")))), tmp3));
+          throw_exception((tmp3->create(VarNR(concat3(NAMSTR(s_sys_ss22dcc450, "DirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ss049bed2c, "): failed to open dir")))), tmp3));
         }
       }
     }
@@ -3922,16 +3922,16 @@ bool c_RecursiveIteratorIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss5c70ced5, "traversable"));
       break;
     case 2:
-      HASH_INSTANCEOF(0x365899865E2EAA32LL, NAMSTR(s_sys_ss5e2eaa32, "recursiveiteratoriterator"));
+      HASH_INSTANCEOF(0x365899865E2EAA32LL, NAMSTR(s_sys_ss272a9829, "recursiveiteratoriterator"));
       break;
     case 5:
-      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss5371ad73, "outeriterator"));
+      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss67488f90, "outeriterator"));
       break;
     case 6:
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
       break;
     default:
       break;
@@ -3950,7 +3950,7 @@ Variant c_RecursiveIteratorIterator::o_invoke_from_eval(const char *s, Eval::Var
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 1:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3964,7 +3964,7 @@ Variant c_RecursiveIteratorIterator::o_invoke_from_eval(const char *s, Eval::Var
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3976,7 +3976,7 @@ Variant c_RecursiveIteratorIterator::o_invoke_from_eval(const char *s, Eval::Var
         if (count > 0) return throw_toomany_arguments("RecursiveIteratorIterator::valid", 0, 1);
         return (t_valid());
       }
-      HASH_GUARD_LITSTR(0x3106F858B09C7424LL, NAMSTR(s_sys_ss4f638bdc, "getInnerIterator")) {
+      HASH_GUARD_LITSTR(0x3106F858B09C7424LL, NAMSTR(s_sys_ss37eff1c8, "getInnerIterator")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -3990,7 +3990,7 @@ Variant c_RecursiveIteratorIterator::o_invoke_from_eval(const char *s, Eval::Var
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4004,7 +4004,7 @@ Variant c_RecursiveIteratorIterator::o_invoke_from_eval(const char *s, Eval::Var
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4018,7 +4018,7 @@ Variant c_RecursiveIteratorIterator::o_invoke_from_eval(const char *s, Eval::Var
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4032,7 +4032,7 @@ Variant c_RecursiveIteratorIterator::o_invoke_from_eval(const char *s, Eval::Var
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -4251,41 +4251,41 @@ bool c_RecursiveIteratorIterator::os_get_call_info(MethodCallPackage &mcp, int64
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 1:
-      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         mcp.ci = &c_RecursiveIteratorIterator::ci_key;
         return true;
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
         mcp.ci = &c_RecursiveIteratorIterator::ci_valid;
         return true;
       }
-      HASH_GUARD_LITSTR(0x3106F858B09C7424LL, NAMSTR(s_sys_ss4f638bdc, "getInnerIterator")) {
+      HASH_GUARD_LITSTR(0x3106F858B09C7424LL, NAMSTR(s_sys_ss37eff1c8, "getInnerIterator")) {
         mcp.ci = &c_RecursiveIteratorIterator::ci_getinneriterator;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss50652d33, "next")) {
         mcp.ci = &c_RecursiveIteratorIterator::ci_next;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
         mcp.ci = &c_RecursiveIteratorIterator::ci_rewind;
         return true;
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
         mcp.ci = &c_RecursiveIteratorIterator::ci_current;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_RecursiveIteratorIterator::ci___construct;
         return true;
       }
@@ -4489,14 +4489,14 @@ bool c_FilterIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_INSTANCEOF(0x7A394042E7488231LL, NAMSTR(s_sys_ss18b77dcf, "filteriterator"));
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      HASH_INSTANCEOF(0x7A394042E7488231LL, NAMSTR(s_sys_ss444e6f93, "filteriterator"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss5c70ced5, "traversable"));
       break;
     case 5:
-      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss5371ad73, "outeriterator"));
+      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss67488f90, "outeriterator"));
       break;
     case 6:
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
       break;
     default:
       break;

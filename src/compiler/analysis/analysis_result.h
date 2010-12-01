@@ -290,7 +290,7 @@ public:
   /**
    * Literal string to String precomputation
    */
-  std::string getLiteralStringName(int hash, int index);
+  std::string getLiteralStringName(int64 hash, int index);
   int getLiteralStringId(const std::string &s, int &index);
 
   /**
@@ -414,6 +414,10 @@ private:
                    std::map<std::string, FileScopePtr> &trueDeps);
   void clusterByFileSizes(StringToFileScopePtrVecMap &clusters,
                           int clusterCount);
+  std::string getHashedName(int64 hash, int index, const char *prefix,
+                            bool longName = false);
+  void renameStaticNames(std::map<int, std::vector<std::string> > &names,
+                         const char *file, const char *prefix);
 
   std::map<std::string, std::map<int, LocationPtr> > m_sourceInfos;
   std::map<std::string, std::set<std::pair<std::string, int> > > m_clsNameMap;

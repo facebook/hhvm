@@ -89,9 +89,9 @@ class c_SplFileInfo : public ExtObjectData {
   public: String t_getlinktarget();
   public: Variant t_getrealpath();
   public: String t___tostring();
-  public: Object t_openfile(CVarRef v_mode = NAMSTR(s_sys_ss122506fb, "r"), CVarRef v_use_include_path = false, CVarRef v_context = null_variant);
-  public: void t_setfileclass(CVarRef v_class_name = NAMSTR(s_sys_ss5da6122e_1, "SplFileObject"));
-  public: void t_setinfoclass(CVarRef v_class_name = NAMSTR(s_sys_ss016dc059_1, "SplFileInfo"));
+  public: Object t_openfile(CVarRef v_mode = NAMSTR(s_sys_ss0d42ecf6, "r"), CVarRef v_use_include_path = false, CVarRef v_context = null_variant);
+  public: void t_setfileclass(CVarRef v_class_name = NAMSTR(s_sys_ss5d909898, "SplFileObject"));
+  public: void t_setinfoclass(CVarRef v_class_name = NAMSTR(s_sys_ss6eb5a717, "SplFileInfo"));
   public: Variant m_rsrc;
   DECLARE_METHOD_INVOKE_HELPERS(getperms);
   DECLARE_METHOD_INVOKE_HELPERS(iswritable);

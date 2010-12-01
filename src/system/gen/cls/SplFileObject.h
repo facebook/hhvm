@@ -63,8 +63,8 @@ class c_SplFileObject : public c_SplFileInfo {
   public:
   DECLARE_INVOKES_FROM_EVAL
   void init();
-  public: void t___construct(Variant v_filename, Variant v_open_mode = NAMSTR(s_sys_ss122506fb, "r"), Variant v_use_include_path = false, Variant v_context = null);
-  public: c_SplFileObject *create(Variant v_filename, Variant v_open_mode = NAMSTR(s_sys_ss122506fb, "r"), Variant v_use_include_path = false, Variant v_context = null);
+  public: void t___construct(Variant v_filename, Variant v_open_mode = NAMSTR(s_sys_ss0d42ecf6, "r"), Variant v_use_include_path = false, Variant v_context = null);
+  public: c_SplFileObject *create(Variant v_filename, Variant v_open_mode = NAMSTR(s_sys_ss0d42ecf6, "r"), Variant v_use_include_path = false, Variant v_context = null);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
@@ -73,7 +73,7 @@ class c_SplFileObject : public c_SplFileInfo {
   public: bool t_eof();
   public: bool t_fflush();
   public: String t_fgetc();
-  public: Variant t_fgetcsv(CVarRef v_delimiter = NAMSTR(s_sys_ss2d8b6f3b, ","), CVarRef v_enclosure = NAMSTR(s_sys_ss228ee909, "\""), CVarRef v_escape = NAMSTR(s_sys_ss2a618761, "\\"));
+  public: Variant t_fgetcsv(CVarRef v_delimiter = NAMSTR(s_sys_ss2ccd4559, ","), CVarRef v_enclosure = NAMSTR(s_sys_ss7e5fc106, "\""), CVarRef v_escape = NAMSTR(s_sys_ss2a618761, "\\"));
   public: String t_fgets();
   public: String t_fgetss(CVarRef v_allowable_tags);
   public: bool t_flock(CVarRef v_operation, Variant v_wouldblock);
@@ -93,7 +93,7 @@ class c_SplFileObject : public c_SplFileInfo {
   public: void t_next();
   public: void t_rewind();
   public: void t_seek(CVarRef v_line_pos);
-  public: void t_setcsvcontrol(CVarRef v_delimiter = NAMSTR(s_sys_ss2d8b6f3b, ","), CVarRef v_enclosure = NAMSTR(s_sys_ss228ee909, "\""), CVarRef v_escape = NAMSTR(s_sys_ss2a618761, "\\"));
+  public: void t_setcsvcontrol(CVarRef v_delimiter = NAMSTR(s_sys_ss2ccd4559, ","), CVarRef v_enclosure = NAMSTR(s_sys_ss7e5fc106, "\""), CVarRef v_escape = NAMSTR(s_sys_ss2a618761, "\\"));
   public: void t_setflags(CVarRef v_flags);
   public: void t_setmaxlinelen(CVarRef v_max_len);
   public: bool t_valid();

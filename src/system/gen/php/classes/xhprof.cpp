@@ -86,7 +86,7 @@ bool c_XhprofFrame::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_INSTANCEOF(0x3D290BF933ED12FDLL, NAMSTR(s_sys_ss33ed12fd, "xhprofframe"));
+      HASH_INSTANCEOF(0x3D290BF933ED12FDLL, NAMSTR(s_sys_ss43575cbb, "xhprofframe"));
       break;
     default:
       break;
@@ -105,7 +105,7 @@ Variant c_XhprofFrame::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -117,7 +117,7 @@ Variant c_XhprofFrame::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         if (count > 0) return throw_toomany_arguments("XhprofFrame::__destruct", 0, 1);
         return (t___destruct());
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -200,11 +200,11 @@ bool c_XhprofFrame::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5533e10d, "__destruct")) {
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ss5a580b07, "__destruct")) {
         mcp.ci = &c_XhprofFrame::ci___destruct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_XhprofFrame::ci___construct;
         return true;
       }

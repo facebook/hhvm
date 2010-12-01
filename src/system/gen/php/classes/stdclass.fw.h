@@ -19,6 +19,8 @@
 #define __GENERATED_php_classes_stdclass_fw_h759c0578__
 
 #include <runtime/base/hphp_system.h>
+#include <sys/literal_strings_remap.h>
+#include <sys/scalar_arrays_remap.h>
 
 // Forward Declarations
 

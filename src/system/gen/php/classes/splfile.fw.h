@@ -19,6 +19,8 @@
 #define __GENERATED_php_classes_splfile_fw_h5b847279__
 
 #include <runtime/base/hphp_system.h>
+#include <sys/literal_strings_remap.h>
+#include <sys/scalar_arrays_remap.h>
 
 // Forward Declarations
 
@@ -27,12 +29,12 @@ namespace HPHP {
 
 // 1. Static Strings
 extern StaticString s_sys_ss00000000;
-extern StaticString s_sys_ss228ee909;
-extern StaticString s_sys_ss2d8b6f3b;
-extern StaticString s_sys_ss016dc059_1;
-extern StaticString s_sys_ss5da6122e_1;
+extern StaticString s_sys_ss7e5fc106;
+extern StaticString s_sys_ss2ccd4559;
+extern StaticString s_sys_ss6eb5a717;
+extern StaticString s_sys_ss5d909898;
 extern StaticString s_sys_ss2a618761;
-extern StaticString s_sys_ss122506fb;
+extern StaticString s_sys_ss0d42ecf6;
 
 // 2. Static Arrays
 

@@ -38,7 +38,7 @@ Variant c_ReflectionFunctionAbstract::os_getInit(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info"),
+      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"),
                          null, 4);
       break;
     default:
@@ -59,7 +59,7 @@ Variant &c_ReflectionFunctionAbstract::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunctionAbstract
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionFunctionAbstract
 void c_ReflectionFunctionAbstract::o_getArray(Array &props) const {
-  if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss157d479f, "info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
+  if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss33988b3e, "info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionFunctionAbstract
@@ -101,7 +101,7 @@ bool c_ReflectionFunctionAbstract::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 0:
-      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss35281082, "reflectionfunctionabstract"));
+      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss4c3498c2, "reflectionfunctionabstract"));
       break;
     default:
       break;
@@ -121,7 +121,7 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss365fcaa0, "getNumberOfParameters")) {
+      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss775738d8, "getNumberOfParameters")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -135,7 +135,7 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 1:
-      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss24059ddf, "getNumberOfRequiredParameters")) {
+      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss7012c9dc, "getNumberOfRequiredParameters")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -149,7 +149,7 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
+      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss771be533, "getClosure")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -163,7 +163,7 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
+      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5e0a51ee, "isUserDefined")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -175,7 +175,7 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
         return (t_isuserdefined());
       }
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
+      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss07c6a5b3, "getStartLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -189,7 +189,7 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss3d20de82, "getName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -203,7 +203,7 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss4a3329a8, "getStaticVariables")) {
+      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss33872dc4, "getStaticVariables")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -215,7 +215,7 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
         return (t_getstaticvariables());
       }
-      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss276d2668, "returnsReference")) {
+      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss06d80b5c, "returnsReference")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -229,7 +229,7 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 13:
-      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss32c2a32d, "getParameters")) {
+      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss1902bc14, "getParameters")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -241,7 +241,7 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
         return (t_getparameters());
       }
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss3a783e44, "getFileName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -255,7 +255,7 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
+      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss504bc94d, "isInternal")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -269,7 +269,7 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 16:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
+      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss76cb0a04, "getEndLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -283,7 +283,7 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
+      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss2a2442b9, "getDocComment")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -621,73 +621,73 @@ bool c_ReflectionFunctionAbstract::os_get_call_info(MethodCallPackage &mcp, int6
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
-      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss365fcaa0, "getNumberOfParameters")) {
+      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss775738d8, "getNumberOfParameters")) {
         mcp.ci = &c_ReflectionFunctionAbstract::ci_getnumberofparameters;
         return true;
       }
       break;
     case 1:
-      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss24059ddf, "getNumberOfRequiredParameters")) {
+      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss7012c9dc, "getNumberOfRequiredParameters")) {
         mcp.ci = &c_ReflectionFunctionAbstract::ci_getnumberofrequiredparameters;
         return true;
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
+      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss771be533, "getClosure")) {
         mcp.ci = &c_ReflectionFunctionAbstract::ci_getclosure;
         return true;
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
+      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5e0a51ee, "isUserDefined")) {
         mcp.ci = &c_ReflectionFunctionAbstract::ci_isuserdefined;
         return true;
       }
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
+      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss07c6a5b3, "getStartLine")) {
         mcp.ci = &c_ReflectionFunctionAbstract::ci_getstartline;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss3d20de82, "getName")) {
         mcp.ci = &c_ReflectionFunctionAbstract::ci_getname;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss4a3329a8, "getStaticVariables")) {
+      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss33872dc4, "getStaticVariables")) {
         mcp.ci = &c_ReflectionFunctionAbstract::ci_getstaticvariables;
         return true;
       }
-      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss276d2668, "returnsReference")) {
+      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss06d80b5c, "returnsReference")) {
         mcp.ci = &c_ReflectionFunctionAbstract::ci_returnsreference;
         return true;
       }
       break;
     case 13:
-      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss32c2a32d, "getParameters")) {
+      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss1902bc14, "getParameters")) {
         mcp.ci = &c_ReflectionFunctionAbstract::ci_getparameters;
         return true;
       }
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss3a783e44, "getFileName")) {
         mcp.ci = &c_ReflectionFunctionAbstract::ci_getfilename;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
+      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss504bc94d, "isInternal")) {
         mcp.ci = &c_ReflectionFunctionAbstract::ci_isinternal;
         return true;
       }
       break;
     case 16:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
+      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss76cb0a04, "getEndLine")) {
         mcp.ci = &c_ReflectionFunctionAbstract::ci_getendline;
         return true;
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
+      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss2a2442b9, "getDocComment")) {
         mcp.ci = &c_ReflectionFunctionAbstract::ci_getdoccomment;
         return true;
       }
@@ -715,61 +715,61 @@ void c_ReflectionFunctionAbstract::init() {
 /* SRC: classes/reflection.php line 261 */
 Variant c_ReflectionFunctionAbstract::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getName);
-  return m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 276 */
 Variant c_ReflectionFunctionAbstract::t_isinternal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::isInternal);
-  return m_info.rvalAt(NAMSTR(s_sys_ss71135554, "internal"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss6ccd5754, "internal"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 280 */
 Variant c_ReflectionFunctionAbstract::t_getclosure() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getClosure);
-  return m_info.rvalAt(NAMSTR(s_sys_ss6d16d594, "closure"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss4cd61020, "closure"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 295 */
 bool c_ReflectionFunctionAbstract::t_isuserdefined() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::isUserDefined);
-  return !(toBoolean(m_info.rvalAt(NAMSTR(s_sys_ss71135554, "internal"), true, true)));
+  return !(toBoolean(m_info.rvalAt(NAMSTR(s_sys_ss6ccd5754, "internal"), true, true)));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 309 */
 Variant c_ReflectionFunctionAbstract::t_getfilename() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getFileName);
-  return m_info.rvalAt(NAMSTR(s_sys_ss70cc2eb1, "file"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss731824a5, "file"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 323 */
 Variant c_ReflectionFunctionAbstract::t_getstartline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getStartLine);
-  return m_info.rvalAt(NAMSTR(s_sys_ss028b2c66, "line1"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss2b3988db, "line1"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 338 */
 Variant c_ReflectionFunctionAbstract::t_getendline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getEndLine);
-  return m_info.rvalAt(NAMSTR(s_sys_ss3195c8e2, "line2"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss4101cd58, "line2"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 352 */
 Variant c_ReflectionFunctionAbstract::t_getdoccomment() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getDocComment);
-  return m_info.rvalAt(NAMSTR(s_sys_ss70714913, "doc"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss6305e85a, "doc"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 367 */
 Variant c_ReflectionFunctionAbstract::t_getstaticvariables() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getStaticVariables);
-  return m_info.rvalAt(NAMSTR(s_sys_ss70133db3, "static_variables"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss5be7a94a, "static_variables"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 382 */
 Variant c_ReflectionFunctionAbstract::t_returnsreference() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::returnsReference);
-  return m_info.rvalAt(NAMSTR(s_sys_ss208f545e, "ref"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss134fd5fa, "ref"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 397 */
@@ -783,7 +783,7 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss5646283f, "params"), true, true);
+    Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss1f20ac62, "params"), true, true);
     for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_info);
@@ -807,7 +807,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 419 */
 int c_ReflectionFunctionAbstract::t_getnumberofparameters() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getNumberOfParameters);
-  return x_count(m_info.rvalAt(NAMSTR(s_sys_ss5646283f, "params"), true, true));
+  return x_count(m_info.rvalAt(NAMSTR(s_sys_ss1f20ac62, "params"), true, true));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 435 */
@@ -834,7 +834,7 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
           bool tmp5;
           {
             MethodCallPackage mcp6;
-            mcp6.methodCall((v_param), NAMSTR(s_sys_ss454dd8cb, "isOptional"), 0x2D6EF48BBAB22735LL);
+            mcp6.methodCall((v_param), NAMSTR(s_sys_ss6d9ef7e5, "isOptional"), 0x2D6EF48BBAB22735LL);
             const CallInfo *cit6  __attribute__((__unused__)) = mcp6.ci;
             tmp5 = (toBoolean((mcp6.bindClass(info)->getMethFewArgs())(mcp6, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
           }
@@ -911,11 +911,11 @@ bool c_ReflectionObject::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 2:
-      HASH_INSTANCEOF(0x41A9F7D81254DD7ALL, NAMSTR(s_sys_ss1254dd7a, "reflectionobject"));
+      HASH_INSTANCEOF(0x41A9F7D81254DD7ALL, NAMSTR(s_sys_ss03e94c12, "reflectionobject"));
       break;
     case 5:
-      HASH_INSTANCEOF(0x35A44A5E6AE2E71DLL, NAMSTR(s_sys_ss6ae2e71d, "reflectionclass"));
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss47c0a605, "reflector"));
+      HASH_INSTANCEOF(0x35A44A5E6AE2E71DLL, NAMSTR(s_sys_ss0d39406b, "reflectionclass"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0cd079e5, "reflector"));
       break;
     default:
       break;
@@ -934,7 +934,7 @@ Variant c_ReflectionObject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -964,7 +964,7 @@ Variant c_ReflectionObject::os_invoke_from_eval(const char *c, const char *s, Ev
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1013,7 +1013,7 @@ bool c_ReflectionObject::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 1) {
     case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         mcp.ci = &c_ReflectionObject::ci_export;
         return true;
       }
@@ -1109,8 +1109,8 @@ bool c_ReflectionException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_INSTANCEOF(0x672AD818DDE95538LL, NAMSTR(s_sys_ss2216aac8, "reflectionexception"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      HASH_INSTANCEOF(0x672AD818DDE95538LL, NAMSTR(s_sys_ss300adb77, "reflectionexception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
       break;
     default:
       break;
@@ -1160,11 +1160,11 @@ Variant c_ReflectionClass::os_getInit(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 2:
-      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ss77e35232, "name"),
+      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ss23c34224, "name"),
                          null, 4);
       break;
     case 3:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info"),
+      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"),
                          null, 4);
       break;
     default:
@@ -1185,14 +1185,14 @@ Variant &c_ReflectionClass::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionClass
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionClass
 void c_ReflectionClass::o_getArray(Array &props) const {
-  if (isInitialized(m_name)) props.set(NAMSTR(s_sys_ss77e35232, "name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
-  if (isInitialized(m_info)) props.add(NAMSTR(s_sys_ss77c51ddf, "\000ReflectionClass\000info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
+  if (isInitialized(m_name)) props.set(NAMSTR(s_sys_ss23c34224, "name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
+  if (isInitialized(m_info)) props.add(NAMSTR(s_sys_ss7b1e2763, "\000ReflectionClass\000info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionClass
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionClass
 void c_ReflectionClass::o_setArray(CArrRef props) {
-  props->load(NAMSTR(s_sys_ss77c51ddf, "\000ReflectionClass\000info"), m_info);
+  props->load(NAMSTR(s_sys_ss7b1e2763, "\000ReflectionClass\000info"), m_info);
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionClass
@@ -1258,8 +1258,8 @@ bool c_ReflectionClass::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
-      HASH_INSTANCEOF(0x35A44A5E6AE2E71DLL, NAMSTR(s_sys_ss6ae2e71d, "reflectionclass"));
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss47c0a605, "reflector"));
+      HASH_INSTANCEOF(0x35A44A5E6AE2E71DLL, NAMSTR(s_sys_ss0d39406b, "reflectionclass"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0cd079e5, "reflector"));
       break;
     default:
       break;
@@ -1280,7 +1280,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 4:
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
+      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss07c6a5b3, "getStartLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1294,7 +1294,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ss34bc6371, "hasProperty")) {
+      HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ss0c0a28bc, "hasProperty")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1312,7 +1312,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1326,7 +1326,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss684eaf9e, "getModifiers")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1340,7 +1340,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_ss5b8cc668, "hasMethod")) {
+      HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_ss1e005831, "hasMethod")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1358,7 +1358,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 27:
-      HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ss13b3dd65, "getDefaultProperties")) {
+      HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ss38285ae6, "getDefaultProperties")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1372,7 +1372,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 30:
-      HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss7676509e, "isInterface")) {
+      HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss27634730, "isInterface")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1386,7 +1386,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 34:
-      HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss05797b22, "getStaticProperties")) {
+      HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss1ce69cd5, "getStaticProperties")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1400,7 +1400,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 41:
-      HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss142f8c29, "isInstance")) {
+      HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss43d0dde2, "isInstance")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1416,7 +1416,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
         return (t_isinstance(a0));
       }
-      HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss58b49929, "getExtensionName")) {
+      HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss7157d1ae, "getExtensionName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1430,7 +1430,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 42:
-      HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss6488aaaa, "getMethods")) {
+      HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss4483b6ae, "getMethods")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1447,7 +1447,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         if (count <= 0) return (t_getmethods());
         else return (t_getmethods(a0));
       }
-      HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss3132c356, "getConstructor")) {
+      HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss53ec6e8f, "getConstructor")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1459,7 +1459,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
         return (t_getconstructor());
       }
-      HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss2de08356, "getInterfaceNames")) {
+      HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss71d5420d, "getInterfaceNames")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1473,7 +1473,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 46:
-      HASH_GUARD_LITSTR(0x3C882D4A895F612ELL, NAMSTR(s_sys_ss76a09ed2, "getStaticPropertyValue")) {
+      HASH_GUARD_LITSTR(0x3C882D4A895F612ELL, NAMSTR(s_sys_ss5e1f54fe, "getStaticPropertyValue")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1494,7 +1494,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         if (count <= 1) return (t_getstaticpropertyvalue(a0));
         else return (t_getstaticpropertyvalue(a0, a1));
       }
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
+      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3aa92e4b, "isFinal")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1508,7 +1508,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 48:
-      HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss01fe7030, "newInstance")) {
+      HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss56c85b78, "newInstance")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1523,7 +1523,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 52:
-      HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss42c3f8cc, "getConstant")) {
+      HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss0f90caf6, "getConstant")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1541,7 +1541,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 54:
-      HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_ss53a3b5b6, "getMethod")) {
+      HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_ss3244d299, "getMethod")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1559,7 +1559,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 55:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
+      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss20cb3f4c, "isAbstract")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1573,7 +1573,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 59:
-      HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_ss6ea191c5, "getExtension")) {
+      HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_ss32f40512, "getExtension")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1587,7 +1587,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 60:
-      HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss5d4432c4, "isInstantiable")) {
+      HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss4d6442de, "isInstantiable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1601,7 +1601,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 63:
-      HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss3b59d4c1, "hasConstant")) {
+      HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss37217e60, "hasConstant")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1619,7 +1619,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 67:
-      HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ss673ff4bd, "getInterfaces")) {
+      HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ss29112515, "getInterfaces")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1633,7 +1633,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 68:
-      HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss602f4b44, "getProperties")) {
+      HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss7ace3627, "getProperties")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1647,7 +1647,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 71:
-      HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ss04fdcfb9, "getProperty")) {
+      HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ss2fd63e54, "getProperty")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1665,7 +1665,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 77:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss3a783e44, "getFileName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1679,7 +1679,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 78:
-      HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss370b68ce, "isIterateable")) {
+      HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss70642fbc, "isIterateable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1693,7 +1693,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 79:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
+      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss504bc94d, "isInternal")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1707,7 +1707,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 85:
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
+      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss6c17831d, "getConstants")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1721,7 +1721,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1739,7 +1739,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 100:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
+      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5e0a51ee, "isUserDefined")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1753,7 +1753,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 101:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss3d20de82, "getName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1767,7 +1767,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 102:
-      HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ss54ee5c66, "newInstanceArgs")) {
+      HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ss27385429, "newInstanceArgs")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1785,7 +1785,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 103:
-      HASH_GUARD_LITSTR(0x37349B25A0ED29E7LL, NAMSTR(s_sys_ss5f12d619, "test")) {
+      HASH_GUARD_LITSTR(0x37349B25A0ED29E7LL, NAMSTR(s_sys_ss593015ed, "test")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1807,7 +1807,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 104:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1829,7 +1829,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 112:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
+      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss76cb0a04, "getEndLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1843,7 +1843,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 113:
-      HASH_GUARD_LITSTR(0x07ECA928E37717F1LL, NAMSTR(s_sys_ss1c88e80f, "setStaticPropertyValue")) {
+      HASH_GUARD_LITSTR(0x07ECA928E37717F1LL, NAMSTR(s_sys_ss6b8aaff2, "setStaticPropertyValue")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1865,7 +1865,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 114:
-      HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss16957472, "getParentClass")) {
+      HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss24749844, "getParentClass")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1879,7 +1879,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 120:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
+      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss2a2442b9, "getDocComment")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1893,7 +1893,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 123:
-      HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ss15c7d6fb, "implementsInterface")) {
+      HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ss10ad1b1f, "implementsInterface")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1909,7 +1909,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
         return (t_implementsinterface(a0));
       }
-      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
+      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss0b929a80, "fetch")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1927,7 +1927,7 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 126:
-      HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ss1926c97e, "isSubclassOf")) {
+      HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ss22caa4d5, "isSubclassOf")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -1953,7 +1953,7 @@ Variant c_ReflectionClass::os_invoke_from_eval(const char *c, const char *s, Eva
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -3080,243 +3080,243 @@ bool c_ReflectionClass::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 127) {
     case 4:
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
+      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss07c6a5b3, "getStartLine")) {
         mcp.ci = &c_ReflectionClass::ci_getstartline;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ss34bc6371, "hasProperty")) {
+      HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ss0c0a28bc, "hasProperty")) {
         mcp.ci = &c_ReflectionClass::ci_hasproperty;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         mcp.ci = &c_ReflectionClass::ci___tostring;
         return true;
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss684eaf9e, "getModifiers")) {
         mcp.ci = &c_ReflectionClass::ci_getmodifiers;
         return true;
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_ss5b8cc668, "hasMethod")) {
+      HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_ss1e005831, "hasMethod")) {
         mcp.ci = &c_ReflectionClass::ci_hasmethod;
         return true;
       }
       break;
     case 27:
-      HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ss13b3dd65, "getDefaultProperties")) {
+      HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ss38285ae6, "getDefaultProperties")) {
         mcp.ci = &c_ReflectionClass::ci_getdefaultproperties;
         return true;
       }
       break;
     case 30:
-      HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss7676509e, "isInterface")) {
+      HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss27634730, "isInterface")) {
         mcp.ci = &c_ReflectionClass::ci_isinterface;
         return true;
       }
       break;
     case 34:
-      HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss05797b22, "getStaticProperties")) {
+      HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss1ce69cd5, "getStaticProperties")) {
         mcp.ci = &c_ReflectionClass::ci_getstaticproperties;
         return true;
       }
       break;
     case 41:
-      HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss142f8c29, "isInstance")) {
+      HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss43d0dde2, "isInstance")) {
         mcp.ci = &c_ReflectionClass::ci_isinstance;
         return true;
       }
-      HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss58b49929, "getExtensionName")) {
+      HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss7157d1ae, "getExtensionName")) {
         mcp.ci = &c_ReflectionClass::ci_getextensionname;
         return true;
       }
       break;
     case 42:
-      HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss6488aaaa, "getMethods")) {
+      HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss4483b6ae, "getMethods")) {
         mcp.ci = &c_ReflectionClass::ci_getmethods;
         return true;
       }
-      HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss3132c356, "getConstructor")) {
+      HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss53ec6e8f, "getConstructor")) {
         mcp.ci = &c_ReflectionClass::ci_getconstructor;
         return true;
       }
-      HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss2de08356, "getInterfaceNames")) {
+      HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss71d5420d, "getInterfaceNames")) {
         mcp.ci = &c_ReflectionClass::ci_getinterfacenames;
         return true;
       }
       break;
     case 46:
-      HASH_GUARD_LITSTR(0x3C882D4A895F612ELL, NAMSTR(s_sys_ss76a09ed2, "getStaticPropertyValue")) {
+      HASH_GUARD_LITSTR(0x3C882D4A895F612ELL, NAMSTR(s_sys_ss5e1f54fe, "getStaticPropertyValue")) {
         mcp.ci = &c_ReflectionClass::ci_getstaticpropertyvalue;
         return true;
       }
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
+      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3aa92e4b, "isFinal")) {
         mcp.ci = &c_ReflectionClass::ci_isfinal;
         return true;
       }
       break;
     case 48:
-      HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss01fe7030, "newInstance")) {
+      HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss56c85b78, "newInstance")) {
         mcp.ci = &c_ReflectionClass::ci_newinstance;
         return true;
       }
       break;
     case 52:
-      HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss42c3f8cc, "getConstant")) {
+      HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss0f90caf6, "getConstant")) {
         mcp.ci = &c_ReflectionClass::ci_getconstant;
         return true;
       }
       break;
     case 54:
-      HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_ss53a3b5b6, "getMethod")) {
+      HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_ss3244d299, "getMethod")) {
         mcp.ci = &c_ReflectionClass::ci_getmethod;
         return true;
       }
       break;
     case 55:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
+      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss20cb3f4c, "isAbstract")) {
         mcp.ci = &c_ReflectionClass::ci_isabstract;
         return true;
       }
       break;
     case 59:
-      HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_ss6ea191c5, "getExtension")) {
+      HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_ss32f40512, "getExtension")) {
         mcp.ci = &c_ReflectionClass::ci_getextension;
         return true;
       }
       break;
     case 60:
-      HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss5d4432c4, "isInstantiable")) {
+      HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss4d6442de, "isInstantiable")) {
         mcp.ci = &c_ReflectionClass::ci_isinstantiable;
         return true;
       }
       break;
     case 63:
-      HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss3b59d4c1, "hasConstant")) {
+      HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss37217e60, "hasConstant")) {
         mcp.ci = &c_ReflectionClass::ci_hasconstant;
         return true;
       }
       break;
     case 67:
-      HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ss673ff4bd, "getInterfaces")) {
+      HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ss29112515, "getInterfaces")) {
         mcp.ci = &c_ReflectionClass::ci_getinterfaces;
         return true;
       }
       break;
     case 68:
-      HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss602f4b44, "getProperties")) {
+      HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss7ace3627, "getProperties")) {
         mcp.ci = &c_ReflectionClass::ci_getproperties;
         return true;
       }
       break;
     case 71:
-      HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ss04fdcfb9, "getProperty")) {
+      HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ss2fd63e54, "getProperty")) {
         mcp.ci = &c_ReflectionClass::ci_getproperty;
         return true;
       }
       break;
     case 77:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss3a783e44, "getFileName")) {
         mcp.ci = &c_ReflectionClass::ci_getfilename;
         return true;
       }
       break;
     case 78:
-      HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss370b68ce, "isIterateable")) {
+      HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss70642fbc, "isIterateable")) {
         mcp.ci = &c_ReflectionClass::ci_isiterateable;
         return true;
       }
       break;
     case 79:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
+      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss504bc94d, "isInternal")) {
         mcp.ci = &c_ReflectionClass::ci_isinternal;
         return true;
       }
       break;
     case 85:
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
+      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss6c17831d, "getConstants")) {
         mcp.ci = &c_ReflectionClass::ci_getconstants;
         return true;
       }
       break;
     case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_ReflectionClass::ci___construct;
         return true;
       }
       break;
     case 100:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
+      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5e0a51ee, "isUserDefined")) {
         mcp.ci = &c_ReflectionClass::ci_isuserdefined;
         return true;
       }
       break;
     case 101:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss3d20de82, "getName")) {
         mcp.ci = &c_ReflectionClass::ci_getname;
         return true;
       }
       break;
     case 102:
-      HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ss54ee5c66, "newInstanceArgs")) {
+      HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ss27385429, "newInstanceArgs")) {
         mcp.ci = &c_ReflectionClass::ci_newinstanceargs;
         return true;
       }
       break;
     case 103:
-      HASH_GUARD_LITSTR(0x37349B25A0ED29E7LL, NAMSTR(s_sys_ss5f12d619, "test")) {
+      HASH_GUARD_LITSTR(0x37349B25A0ED29E7LL, NAMSTR(s_sys_ss593015ed, "test")) {
         mcp.ci = &c_ReflectionClass::ci_test;
         return true;
       }
       break;
     case 104:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         mcp.ci = &c_ReflectionClass::ci_export;
         return true;
       }
       break;
     case 112:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
+      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss76cb0a04, "getEndLine")) {
         mcp.ci = &c_ReflectionClass::ci_getendline;
         return true;
       }
       break;
     case 113:
-      HASH_GUARD_LITSTR(0x07ECA928E37717F1LL, NAMSTR(s_sys_ss1c88e80f, "setStaticPropertyValue")) {
+      HASH_GUARD_LITSTR(0x07ECA928E37717F1LL, NAMSTR(s_sys_ss6b8aaff2, "setStaticPropertyValue")) {
         mcp.ci = &c_ReflectionClass::ci_setstaticpropertyvalue;
         return true;
       }
       break;
     case 114:
-      HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss16957472, "getParentClass")) {
+      HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss24749844, "getParentClass")) {
         mcp.ci = &c_ReflectionClass::ci_getparentclass;
         return true;
       }
       break;
     case 120:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
+      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss2a2442b9, "getDocComment")) {
         mcp.ci = &c_ReflectionClass::ci_getdoccomment;
         return true;
       }
       break;
     case 123:
-      HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ss15c7d6fb, "implementsInterface")) {
+      HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ss10ad1b1f, "implementsInterface")) {
         mcp.ci = &c_ReflectionClass::ci_implementsinterface;
         return true;
       }
-      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
+      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss0b929a80, "fetch")) {
         mcp.ci = &c_ReflectionClass::ci_fetch;
         return true;
       }
       break;
     case 126:
-      HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ss1926c97e, "isSubclassOf")) {
+      HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ss22caa4d5, "isSubclassOf")) {
         mcp.ci = &c_ReflectionClass::ci_issubclassof;
         return true;
       }
@@ -3410,10 +3410,10 @@ void c_ReflectionClass::t___construct(Variant v_name) {
       {
         bool tmp2;
         {
-          bool tmp3((toBoolean(x_call_user_func(2, NAMSTR(s_sys_ss471864c8, "class_exists"), Array(ArrayInit(1, true).setRef(v_name).create())))));
+          bool tmp3((toBoolean(x_call_user_func(2, NAMSTR(s_sys_ss4851aaa3, "class_exists"), Array(ArrayInit(1, true).setRef(v_name).create())))));
           bool tmp4 = (!(tmp3));
           if (tmp4) {
-            bool tmp5((toBoolean(x_call_user_func(2, NAMSTR(s_sys_ss4e9b09e6, "interface_exists"), Array(ArrayInit(1, true).setRef(v_name).create())))));
+            bool tmp5((toBoolean(x_call_user_func(2, NAMSTR(s_sys_ss5f48f4d6, "interface_exists"), Array(ArrayInit(1, true).setRef(v_name).create())))));
             tmp4 = (!(tmp5));
           }
           tmp2 = (tmp4);
@@ -3422,7 +3422,7 @@ void c_ReflectionClass::t___construct(Variant v_name) {
           {
             {
               p_ReflectionException tmp6 = NEWOBJ(c_ReflectionException)();
-              throw_exception((tmp6->create(VarNR(concat3(NAMSTR(s_sys_ss1f74c210_1, "Class "), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist")))), tmp6));
+              throw_exception((tmp6->create(VarNR(concat3(NAMSTR(s_sys_ss58710815, "Class "), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))), tmp6));
             }
           }
         }
@@ -3446,20 +3446,20 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
   if (!(toBoolean(m_info))) {
     {
       {
-        const Variant &tmp1((x_call_user_func(2, NAMSTR(s_sys_ss5f965e7b, "hphp_get_class_info"), Array(ArrayInit(1, true).setRef(m_name).create()))));
+        const Variant &tmp1((x_call_user_func(2, NAMSTR(s_sys_ss7732a9a6, "hphp_get_class_info"), Array(ArrayInit(1, true).setRef(m_name).create()))));
         m_info = tmp1;
       }
       if (empty(m_info)) {
         {
           {
             p_ReflectionException tmp2 = NEWOBJ(c_ReflectionException)();
-            throw_exception((tmp2->create(VarNR(concat3(NAMSTR(s_sys_ss1f74c210_1, "Class "), toString(m_name), NAMSTR(s_sys_ss20448282, " does not exist")))), tmp2));
+            throw_exception((tmp2->create(VarNR(concat3(NAMSTR(s_sys_ss58710815, "Class "), toString(m_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))), tmp2));
           }
         }
       }
       {
         LOOP_COUNTER(3);
-        Variant map4 = m_info.rvalAt(NAMSTR(s_sys_ss56221a08, "interfaces"), true, true);
+        Variant map4 = m_info.rvalAt(NAMSTR(s_sys_ss30471dac, "interfaces"), true, true);
         for (ArrayIterPtr iter5 = map4.begin(s_class_name, true); !iter5->end(); iter5->next()) {
           LOOP_COUNTER_CHECK(3);
           iter5->second(v__);
@@ -3471,50 +3471,50 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
               v_p = tmp6;
             }
             {
-              const Variant &tmp7((v_p->t_fetch(NAMSTR(s_sys_ss68683632, "methods"))));
-              m_info.setOpEqual(277, NAMSTR(s_sys_ss68683632, "methods"), (tmp7), true);
+              const Variant &tmp7((v_p->t_fetch(NAMSTR(s_sys_ss5b229ad5, "methods"))));
+              m_info.setOpEqual(277, NAMSTR(s_sys_ss5b229ad5, "methods"), (tmp7), true);
             }
             {
-              Variant tmp8((v_p->m_info.rvalAt(NAMSTR(s_sys_ss1d07a592, "constants"), true, true)));
-              m_info.setOpEqual(277, NAMSTR(s_sys_ss1d07a592, "constants"), (tmp8), true);
+              Variant tmp8((v_p->m_info.rvalAt(NAMSTR(s_sys_ss623ae369, "constants"), true, true)));
+              m_info.setOpEqual(277, NAMSTR(s_sys_ss623ae369, "constants"), (tmp8), true);
             }
             {
-              Variant tmp9((v_p->m_info.rvalAt(NAMSTR(s_sys_ss56221a08, "interfaces"), true, true)));
-              m_info.setOpEqual(277, NAMSTR(s_sys_ss56221a08, "interfaces"), (tmp9), true);
+              Variant tmp9((v_p->m_info.rvalAt(NAMSTR(s_sys_ss30471dac, "interfaces"), true, true)));
+              m_info.setOpEqual(277, NAMSTR(s_sys_ss30471dac, "interfaces"), (tmp9), true);
             }
           }
         }
       }
-      if (!(empty(m_info, NAMSTR(s_sys_ss2d13045e, "parent"), true))) {
+      if (!(empty(m_info, NAMSTR(s_sys_ss04ef0274, "parent"), true))) {
         {
           {
             p_ReflectionClass tmp10 = NEWOBJ(c_ReflectionClass)();
-            (tmp10->create(m_info.rvalAt(NAMSTR(s_sys_ss2d13045e, "parent"), true, true)));
+            (tmp10->create(m_info.rvalAt(NAMSTR(s_sys_ss04ef0274, "parent"), true, true)));
             v_p = tmp10;
           }
           if (toBoolean(t_isinterface())) {
             {
               {
-                Variant tmp11((m_info.rvalAt(NAMSTR(s_sys_ss2d13045e, "parent"), true, true)));
-                lval(m_info.lvalAt(NAMSTR(s_sys_ss56221a08, "interfaces"), false, true)).append((tmp11));
+                Variant tmp11((m_info.rvalAt(NAMSTR(s_sys_ss04ef0274, "parent"), true, true)));
+                lval(m_info.lvalAt(NAMSTR(s_sys_ss30471dac, "interfaces"), false, true)).append((tmp11));
               }
             }
           }
           {
-            const Variant &tmp12((v_p->t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"))));
-            m_info.setOpEqual(277, NAMSTR(s_sys_ss56221a08, "interfaces"), (tmp12), true);
+            const Variant &tmp12((v_p->t_fetch(NAMSTR(s_sys_ss30471dac, "interfaces"))));
+            m_info.setOpEqual(277, NAMSTR(s_sys_ss30471dac, "interfaces"), (tmp12), true);
           }
           {
-            Variant tmp13((v_p->m_info.rvalAt(NAMSTR(s_sys_ss749653da, "properties"), true, true)));
-            m_info.setOpEqual(277, NAMSTR(s_sys_ss749653da, "properties"), (tmp13), true);
+            Variant tmp13((v_p->m_info.rvalAt(NAMSTR(s_sys_ss6fd96bfc, "properties"), true, true)));
+            m_info.setOpEqual(277, NAMSTR(s_sys_ss6fd96bfc, "properties"), (tmp13), true);
           }
           {
-            Variant tmp14((v_p->m_info.rvalAt(NAMSTR(s_sys_ss68683632, "methods"), true, true)));
-            m_info.setOpEqual(277, NAMSTR(s_sys_ss68683632, "methods"), (tmp14), true);
+            Variant tmp14((v_p->m_info.rvalAt(NAMSTR(s_sys_ss5b229ad5, "methods"), true, true)));
+            m_info.setOpEqual(277, NAMSTR(s_sys_ss5b229ad5, "methods"), (tmp14), true);
           }
           {
-            Variant tmp15((v_p->m_info.rvalAt(NAMSTR(s_sys_ss1d07a592, "constants"), true, true)));
-            m_info.setOpEqual(277, NAMSTR(s_sys_ss1d07a592, "constants"), (tmp15), true);
+            Variant tmp15((v_p->m_info.rvalAt(NAMSTR(s_sys_ss623ae369, "constants"), true, true)));
+            m_info.setOpEqual(277, NAMSTR(s_sys_ss623ae369, "constants"), (tmp15), true);
           }
         }
       }
@@ -3565,20 +3565,20 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 628 */
 Variant c_ReflectionClass::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getName);
-  return t_fetch(NAMSTR(s_sys_ss77e35232, "name"));
+  return t_fetch(NAMSTR(s_sys_ss23c34224, "name"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 642 */
 Variant c_ReflectionClass::t_isinternal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInternal);
-  return t_fetch(NAMSTR(s_sys_ss71135554, "internal"));
+  return t_fetch(NAMSTR(s_sys_ss6ccd5754, "internal"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 655 */
 bool c_ReflectionClass::t_isuserdefined() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isUserDefined);
   {
-    bool tmp1((toBoolean(t_fetch(NAMSTR(s_sys_ss71135554, "internal")))));
+    bool tmp1((toBoolean(t_fetch(NAMSTR(s_sys_ss6ccd5754, "internal")))));
     return !(tmp1);
   }
 }
@@ -3587,7 +3587,7 @@ namespace hphp_impl_splitter {}
 bool c_ReflectionClass::t_isinstantiable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInstantiable);
   {
-    bool tmp1((toBoolean(t_fetch(NAMSTR(s_sys_ss01d79b38, "abstract")))));
+    bool tmp1((toBoolean(t_fetch(NAMSTR(s_sys_ss12c8a8a6, "abstract")))));
     return !(tmp1);
   }
 }
@@ -3595,7 +3595,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 684 */
 bool c_ReflectionClass::t_hasconstant(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::hasConstant);
-  return t_test(NAMSTR(s_sys_ss1d07a592, "constants"), v_name);
+  return t_test(NAMSTR(s_sys_ss623ae369, "constants"), v_name);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 698 */
@@ -3603,38 +3603,38 @@ bool c_ReflectionClass::t_hasmethod(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::hasMethod);
   {
     const String &tmp1((x_strtolower(toString(v_name))));
-    return t_test(NAMSTR(s_sys_ss68683632, "methods"), VarNR(tmp1));
+    return t_test(NAMSTR(s_sys_ss5b229ad5, "methods"), VarNR(tmp1));
   }
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 713 */
 bool c_ReflectionClass::t_hasproperty(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::hasProperty);
-  return t_test(NAMSTR(s_sys_ss749653da, "properties"), v_name);
+  return t_test(NAMSTR(s_sys_ss6fd96bfc, "properties"), v_name);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 728 */
 Variant c_ReflectionClass::t_getfilename() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getFileName);
-  return t_fetch(NAMSTR(s_sys_ss70cc2eb1, "file"));
+  return t_fetch(NAMSTR(s_sys_ss731824a5, "file"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 742 */
 Variant c_ReflectionClass::t_getstartline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getStartLine);
-  return t_fetch(NAMSTR(s_sys_ss028b2c66, "line1"));
+  return t_fetch(NAMSTR(s_sys_ss2b3988db, "line1"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 755 */
 Variant c_ReflectionClass::t_getendline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getEndLine);
-  return t_fetch(NAMSTR(s_sys_ss3195c8e2, "line2"));
+  return t_fetch(NAMSTR(s_sys_ss4101cd58, "line2"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 769 */
 Variant c_ReflectionClass::t_getdoccomment() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getDocComment);
-  return t_fetch(NAMSTR(s_sys_ss70714913, "doc"));
+  return t_fetch(NAMSTR(s_sys_ss6305e85a, "doc"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 783 */
@@ -3642,15 +3642,15 @@ Variant c_ReflectionClass::t_getconstructor() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getConstructor);
   Variant v_name;
 
-  if (t_hasmethod(NAMSTR(s_sys_ss229c615f, "__construct"))) {
+  if (t_hasmethod(NAMSTR(s_sys_ss5e478259, "__construct"))) {
     {
-      return t_getmethod(NAMSTR(s_sys_ss229c615f, "__construct"));
+      return t_getmethod(NAMSTR(s_sys_ss5e478259, "__construct"));
     }
   }
   {
     bool tmp1;
     {
-      const Variant &tmp2((t_fetch(NAMSTR(s_sys_ss77e35232, "name"))));
+      const Variant &tmp2((t_fetch(NAMSTR(s_sys_ss23c34224, "name"))));
       tmp1 = (t_hasmethod((v_name = tmp2)));
     }
     if (tmp1) {
@@ -3675,18 +3675,18 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
     v_lname = tmp1;
   }
   {
-    const Variant &tmp2((t_fetch(NAMSTR(s_sys_ss68683632, "methods"))));
+    const Variant &tmp2((t_fetch(NAMSTR(s_sys_ss5b229ad5, "methods"))));
     v_methods = tmp2;
   }
   if (!(isset(v_methods, v_lname))) {
     {
       {
-        Variant tmp3((m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true)));
+        Variant tmp3((m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true)));
         v_class = tmp3;
       }
       {
         p_ReflectionException tmp4 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp4->create(VarNR(concat5(NAMSTR(s_sys_ss76d82ece, "Method "), toString(v_class), NAMSTR(s_sys_ss1cfa5b62, "::"), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist")))), tmp4));
+        throw_exception((tmp4->create(VarNR(concat5(NAMSTR(s_sys_ss2391fd3e, "Method "), toString(v_class), NAMSTR(s_sys_ss7e6b7e0d, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))), tmp4));
       }
     }
   }
@@ -3700,18 +3700,18 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
   }
   v_ret->m_name = v_lname;
   {
-    Variant tmp7((m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true)));
+    Variant tmp7((m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true)));
     v_ret->m_class = tmp7;
   }
   {
     bool tmp8;
     {
-      bool tmp9 = (equal(v_lname, NAMSTR(s_sys_ss229c615f, "__construct")));
+      bool tmp9 = (equal(v_lname, NAMSTR(s_sys_ss5e478259, "__construct")));
       if (!tmp9) {
         bool tmp10((toBoolean(x_strcasecmp(v_lname, toString(v_ret->m_class)))));
         bool tmp11 = (!(tmp10));
         if (tmp11) {
-          bool tmp12((t_hasmethod(NAMSTR(s_sys_ss229c615f, "__construct"))));
+          bool tmp12((t_hasmethod(NAMSTR(s_sys_ss5e478259, "__construct"))));
           tmp11 = (!(tmp12));
         }
         tmp9 = (tmp11);
@@ -3720,7 +3720,7 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
     }
     if (tmp8) {
       {
-        v_ret->m_info.set(NAMSTR(s_sys_ss3a464145, "constructor"), (true), true);
+        v_ret->m_info.set(NAMSTR(s_sys_ss10134623, "constructor"), (true), true);
       }
     }
   }
@@ -3739,7 +3739,7 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = 65535LL
 
   v_ret = s_sys_sa00000000;
   {
-    const Variant &tmp1((t_fetch(NAMSTR(s_sys_ss68683632, "methods"))));
+    const Variant &tmp1((t_fetch(NAMSTR(s_sys_ss5b229ad5, "methods"))));
     v_methods = tmp1;
   }
   {
@@ -3775,18 +3775,18 @@ p_ReflectionProperty c_ReflectionClass::t_getproperty(CVarRef v_name) {
   p_ReflectionProperty v_ret;
 
   {
-    const Variant &tmp1((t_fetch(NAMSTR(s_sys_ss749653da, "properties"))));
+    const Variant &tmp1((t_fetch(NAMSTR(s_sys_ss6fd96bfc, "properties"))));
     v_properties = tmp1;
   }
   if (!(isset(v_properties, v_name))) {
     {
       {
-        Variant tmp2((m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true)));
+        Variant tmp2((m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true)));
         v_class = tmp2;
       }
       {
         p_ReflectionException tmp3 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp3->create(VarNR(concat5(NAMSTR(s_sys_ss3512adea, "Property "), toString(v_class), NAMSTR(s_sys_ss1cfa5b62, "::"), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist")))), tmp3));
+        throw_exception((tmp3->create(VarNR(concat5(NAMSTR(s_sys_ss686a2038, "Property "), toString(v_class), NAMSTR(s_sys_ss7e6b7e0d, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))), tmp3));
       }
     }
   }
@@ -3800,7 +3800,7 @@ p_ReflectionProperty c_ReflectionClass::t_getproperty(CVarRef v_name) {
   }
   v_ret->m_name = v_name;
   {
-    Variant tmp6((m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true)));
+    Variant tmp6((m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true)));
     v_ret->m_class = tmp6;
   }
   return v_ret;
@@ -3816,7 +3816,7 @@ Array c_ReflectionClass::t_getproperties() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMSTR(s_sys_ss749653da, "properties"));
+    Variant map2 = t_fetch(NAMSTR(s_sys_ss6fd96bfc, "properties"));
     for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v__);
@@ -3835,7 +3835,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 910 */
 Variant c_ReflectionClass::t_getconstants() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getConstants);
-  return t_fetch(NAMSTR(s_sys_ss1d07a592, "constants"));
+  return t_fetch(NAMSTR(s_sys_ss623ae369, "constants"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 924 */
@@ -3845,18 +3845,18 @@ Variant c_ReflectionClass::t_getconstant(CVarRef v_name) {
   Variant v_class;
 
   {
-    const Variant &tmp1((t_fetch(NAMSTR(s_sys_ss1d07a592, "constants"))));
+    const Variant &tmp1((t_fetch(NAMSTR(s_sys_ss623ae369, "constants"))));
     v_constants = tmp1;
   }
   if (!(isset(v_constants, v_name))) {
     {
       {
-        Variant tmp2((m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true)));
+        Variant tmp2((m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true)));
         v_class = tmp2;
       }
       {
         p_ReflectionException tmp3 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp3->create(VarNR(concat5(NAMSTR(s_sys_ss644993a4, "Class constant "), toString(v_class), NAMSTR(s_sys_ss1cfa5b62, "::"), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist")))), tmp3));
+        throw_exception((tmp3->create(VarNR(concat5(NAMSTR(s_sys_ss27e907a0, "Class constant "), toString(v_class), NAMSTR(s_sys_ss7e6b7e0d, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))), tmp3));
       }
     }
   }
@@ -3874,7 +3874,7 @@ Array c_ReflectionClass::t_getinterfaces() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
+    Variant map2 = t_fetch(NAMSTR(s_sys_ss30471dac, "interfaces"));
     for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v__);
@@ -3911,7 +3911,7 @@ Array c_ReflectionClass::t_getinterfacenames() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
+    Variant map2 = t_fetch(NAMSTR(s_sys_ss30471dac, "interfaces"));
     for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v__);
@@ -3939,25 +3939,25 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 986 */
 Variant c_ReflectionClass::t_isinterface() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInterface);
-  return t_fetch(NAMSTR(s_sys_ss1558c380, "interface"));
+  return t_fetch(NAMSTR(s_sys_ss7228e959, "interface"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 998 */
 Variant c_ReflectionClass::t_isabstract() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isAbstract);
-  return t_fetch(NAMSTR(s_sys_ss01d79b38, "abstract"));
+  return t_fetch(NAMSTR(s_sys_ss12c8a8a6, "abstract"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1010 */
 Variant c_ReflectionClass::t_isfinal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isFinal);
-  return t_fetch(NAMSTR(s_sys_ss2f433c87, "final"));
+  return t_fetch(NAMSTR(s_sys_ss2145036e, "final"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1023 */
 Variant c_ReflectionClass::t_getmodifiers() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getModifiers);
-  return t_fetch(NAMSTR(s_sys_ss6d6e147d, "modifiers"));
+  return t_fetch(NAMSTR(s_sys_ss60dbb380, "modifiers"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1037 */
@@ -3994,7 +3994,7 @@ Variant c_ReflectionClass::t_getparentclass() {
   {
     bool tmp1;
     {
-      const Variant &tmp2((t_fetch(NAMSTR(s_sys_ss2d13045e, "parent"))));
+      const Variant &tmp2((t_fetch(NAMSTR(s_sys_ss04ef0274, "parent"))));
       tmp1 = (empty(tmp2));
     }
     if (tmp1) {
@@ -4005,7 +4005,7 @@ Variant c_ReflectionClass::t_getparentclass() {
   }
   {
     p_ReflectionClass tmp3 = NEWOBJ(c_ReflectionClass)();
-    const Variant &tmp4((t_fetch(NAMSTR(s_sys_ss2d13045e, "parent"))));
+    const Variant &tmp4((t_fetch(NAMSTR(s_sys_ss04ef0274, "parent"))));
     return (tmp3->create(tmp4), tmp3);
   }
 }
@@ -4016,20 +4016,20 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   Primitive v_name = 0;
   Variant v__;
 
-  if (instanceOf(v_cls, NAMSTR(s_sys_ss6ae2e71d, "reflectionclass"))) {
+  if (instanceOf(v_cls, NAMSTR(s_sys_ss0d39406b, "reflectionclass"))) {
     {
       {
         MethodCallPackage mcp1;
-        mcp1.methodCall((v_cls), NAMSTR(s_sys_ss446f4f05, "fetch"), 0x5E82B850BB90B0FBLL);
+        mcp1.methodCall((v_cls), NAMSTR(s_sys_ss0b929a80, "fetch"), 0x5E82B850BB90B0FBLL);
         const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-        Variant tmp2(((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 1, NAMSTR(s_sys_ss77e35232, "name"), null_variant, null_variant, null_variant, null_variant, null_variant)));
+        Variant tmp2(((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 1, NAMSTR(s_sys_ss23c34224, "name"), null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_cls = tmp2;
       }
     }
   }
   {
     LOOP_COUNTER(3);
-    Variant map4 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
+    Variant map4 = t_fetch(NAMSTR(s_sys_ss30471dac, "interfaces"));
     for (ArrayIterPtr iter5 = map4.begin(s_class_name, true); !iter5->end(); iter5->next()) {
       LOOP_COUNTER_CHECK(3);
       iter5->second(v__);
@@ -4053,7 +4053,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   {
     bool tmp8;
     {
-      const Variant &tmp9((t_fetch(NAMSTR(s_sys_ss2d13045e, "parent"))));
+      const Variant &tmp9((t_fetch(NAMSTR(s_sys_ss04ef0274, "parent"))));
       tmp8 = (empty(tmp9));
     }
     if (tmp8) {
@@ -4066,7 +4066,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
     bool tmp10;
     {
       const String &tmp11((toString(v_cls)));
-      const String &tmp12((toString(t_fetch(NAMSTR(s_sys_ss2d13045e, "parent")))));
+      const String &tmp12((toString(t_fetch(NAMSTR(s_sys_ss04ef0274, "parent")))));
       int tmp13((x_strcasecmp(tmp11, tmp12)));
       tmp10 = (equal(tmp13, 0LL));
     }
@@ -4078,7 +4078,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   }
   {
     MethodCallPackage mcp14;
-    mcp14.methodCall((t_getparentclass()), NAMSTR(s_sys_ss1926c97e, "isSubclassOf"), 0x373333991926C97ELL);
+    mcp14.methodCall((t_getparentclass()), NAMSTR(s_sys_ss22caa4d5, "isSubclassOf"), 0x373333991926C97ELL);
     const CallInfo *cit14  __attribute__((__unused__)) = mcp14.ci;
     return wrap_variant((mcp14.bindClass(info)->getMethFewArgs())(mcp14, 1, v_cls, null_variant, null_variant, null_variant, null_variant, null_variant));
   }
@@ -4102,14 +4102,14 @@ Array c_ReflectionClass::t_getstaticproperties() {
           bool tmp4;
           {
             MethodCallPackage mcp5;
-            mcp5.methodCall((v_prop), NAMSTR(s_sys_ss1733f4e7, "isStatic"), 0x7A15DC56E8CC0B19LL);
+            mcp5.methodCall((v_prop), NAMSTR(s_sys_ss404bf1b4, "isStatic"), 0x7A15DC56E8CC0B19LL);
             const CallInfo *cit5  __attribute__((__unused__)) = mcp5.ci;
             tmp4 = (toBoolean((mcp5.bindClass(info)->getMethFewArgs())(mcp5, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
           }
           if (tmp4) {
             {
               {
-                const Variant &tmp6((v_prop.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
+                const Variant &tmp6((v_prop.o_getPublic(NAMSTR(s_sys_ss23c34224, "name"), true)));
                 Variant tmp7((v_prop));
                 v_ret.set(tmp6, (tmp7));
               }
@@ -4169,14 +4169,14 @@ Array c_ReflectionClass::t_getdefaultproperties() {
           bool tmp4;
           {
             MethodCallPackage mcp5;
-            mcp5.methodCall((v_prop), NAMSTR(s_sys_ss7ab11f15, "isDefault"), 0x384A52597AB11F15LL);
+            mcp5.methodCall((v_prop), NAMSTR(s_sys_ss6252bc99, "isDefault"), 0x384A52597AB11F15LL);
             const CallInfo *cit5  __attribute__((__unused__)) = mcp5.ci;
             tmp4 = (toBoolean((mcp5.bindClass(info)->getMethFewArgs())(mcp5, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
           }
           if (tmp4) {
             {
               {
-                const Variant &tmp6((v_prop.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
+                const Variant &tmp6((v_prop.o_getPublic(NAMSTR(s_sys_ss23c34224, "name"), true)));
                 Variant tmp7((v_prop));
                 v_ret.set(tmp6, (tmp7));
               }
@@ -4192,7 +4192,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1204 */
 Variant c_ReflectionClass::t_isiterateable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isIterateable);
-  return t_issubclassof(NAMSTR(s_sys_ss403290f5_1, "ArrayAccess"));
+  return t_issubclassof(NAMSTR(s_sys_ss6dcf9365, "ArrayAccess"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1219 */
@@ -4202,13 +4202,13 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   Primitive v_name = 0;
   Variant v__;
 
-  if (instanceOf(v_cls, NAMSTR(s_sys_ss6ae2e71d, "reflectionclass"))) {
+  if (instanceOf(v_cls, NAMSTR(s_sys_ss0d39406b, "reflectionclass"))) {
     {
       {
         MethodCallPackage mcp1;
-        mcp1.methodCall((v_cls), NAMSTR(s_sys_ss446f4f05, "fetch"), 0x5E82B850BB90B0FBLL);
+        mcp1.methodCall((v_cls), NAMSTR(s_sys_ss0b929a80, "fetch"), 0x5E82B850BB90B0FBLL);
         const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-        Variant tmp2(((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 1, NAMSTR(s_sys_ss77e35232, "name"), null_variant, null_variant, null_variant, null_variant, null_variant)));
+        Variant tmp2(((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 1, NAMSTR(s_sys_ss23c34224, "name"), null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_cls = tmp2;
       }
     }
@@ -4228,14 +4228,14 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
       {
         {
           p_ReflectionException tmp6 = NEWOBJ(c_ReflectionException)();
-          throw_exception((tmp6->create(VarNR(concat3(NAMSTR(s_sys_ss1558c380_1, "Interface "), toString(v_cls), NAMSTR(s_sys_ss5615a9b2, " is a Class")))), tmp6));
+          throw_exception((tmp6->create(VarNR(concat3(NAMSTR(s_sys_ss44fe7272, "Interface "), toString(v_cls), NAMSTR(s_sys_ss4c77dad1, " is a Class")))), tmp6));
         }
       }
     }
   }
   {
     LOOP_COUNTER(7);
-    Variant map8 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
+    Variant map8 = t_fetch(NAMSTR(s_sys_ss30471dac, "interfaces"));
     for (ArrayIterPtr iter9 = map8.begin(s_class_name, true); !iter9->end(); iter9->next()) {
       LOOP_COUNTER_CHECK(7);
       iter9->second(v__);
@@ -4262,7 +4262,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1245 */
 Variant c_ReflectionClass::t_getextension() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtension);
-  return t_fetch(NAMSTR(s_sys_ss02406793, "extension"));
+  return t_fetch(NAMSTR(s_sys_ss1640bb00, "extension"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1259 */
@@ -4270,7 +4270,7 @@ Variant c_ReflectionClass::t_getextensionname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtensionName);
   {
     MethodCallPackage mcp1;
-    mcp1.methodCall((t_fetch(NAMSTR(s_sys_ss02406793, "extension"))), NAMSTR(s_sys_ss33e6769b, "getName"), 0x23F51CDECC198965LL);
+    mcp1.methodCall((t_fetch(NAMSTR(s_sys_ss1640bb00, "extension"))), NAMSTR(s_sys_ss3d20de82, "getName"), 0x23F51CDECC198965LL);
     const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
     return wrap_variant((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant));
   }
@@ -4283,11 +4283,11 @@ Variant c_ReflectionExtension::os_getInit(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 2:
-      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ss77e35232, "name"),
+      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ss23c34224, "name"),
                          null, 4);
       break;
     case 3:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info"),
+      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"),
                          null, 4);
       break;
     default:
@@ -4308,15 +4308,15 @@ Variant &c_ReflectionExtension::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionExtension
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionExtension
 void c_ReflectionExtension::o_getArray(Array &props) const {
-  if (isInitialized(m_name)) props.add(NAMSTR(s_sys_ss7730b079, "\000ReflectionExtension\000name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
-  if (isInitialized(m_info)) props.add(NAMSTR(s_sys_ss446ed36e, "\000ReflectionExtension\000info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
+  if (isInitialized(m_name)) props.add(NAMSTR(s_sys_ss74437122, "\000ReflectionExtension\000name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
+  if (isInitialized(m_info)) props.add(NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionExtension
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionExtension
 void c_ReflectionExtension::o_setArray(CArrRef props) {
-  props->load(NAMSTR(s_sys_ss7730b079, "\000ReflectionExtension\000name"), m_name);
-  props->load(NAMSTR(s_sys_ss446ed36e, "\000ReflectionExtension\000info"), m_info);
+  props->load(NAMSTR(s_sys_ss74437122, "\000ReflectionExtension\000name"), m_name);
+  props->load(NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info"), m_info);
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionExtension
@@ -4365,10 +4365,10 @@ bool c_ReflectionExtension::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss47c0a605, "reflector"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0cd079e5, "reflector"));
       break;
     case 3:
-      HASH_INSTANCEOF(0x0B61E0BFCFA06573LL, NAMSTR(s_sys_ss305f9a8d, "reflectionextension"));
+      HASH_INSTANCEOF(0x0B61E0BFCFA06573LL, NAMSTR(s_sys_ss2d0bb32f, "reflectionextension"));
       break;
     default:
       break;
@@ -4389,7 +4389,7 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
-      HASH_GUARD_LITSTR(0x0113D73FC859EDC2LL, NAMSTR(s_sys_ss37a6123e, "getClasses")) {
+      HASH_GUARD_LITSTR(0x0113D73FC859EDC2LL, NAMSTR(s_sys_ss2a3367d5, "getClasses")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4403,7 +4403,7 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss3d20de82, "getName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4417,7 +4417,7 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4439,7 +4439,7 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1dd0e851, "getFunctions")) {
+      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1d6e06d8, "getFunctions")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4453,7 +4453,7 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4467,7 +4467,7 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x5CE2786E11341594LL, NAMSTR(s_sys_ss11341594, "getClassNames")) {
+      HASH_GUARD_LITSTR(0x5CE2786E11341594LL, NAMSTR(s_sys_ss09d4c665, "getClassNames")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4481,7 +4481,7 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x306B5F4D1D03D335LL, NAMSTR(s_sys_ss1d03d335, "getINIEntries")) {
+      HASH_GUARD_LITSTR(0x306B5F4D1D03D335LL, NAMSTR(s_sys_ss5b1ebd2f, "getINIEntries")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4493,7 +4493,7 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
         if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
         return (t_getinientries());
       }
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
+      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss6c17831d, "getConstants")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4507,7 +4507,7 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316, "getVersion")) {
+      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss1b5e3529, "getVersion")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4521,7 +4521,7 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -4537,7 +4537,7 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
         if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
-      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info")) {
+      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -4559,7 +4559,7 @@ Variant c_ReflectionExtension::os_invoke_from_eval(const char *c, const char *s,
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4853,63 +4853,63 @@ bool c_ReflectionExtension::os_get_call_info(MethodCallPackage &mcp, int64 hash)
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 2:
-      HASH_GUARD_LITSTR(0x0113D73FC859EDC2LL, NAMSTR(s_sys_ss37a6123e, "getClasses")) {
+      HASH_GUARD_LITSTR(0x0113D73FC859EDC2LL, NAMSTR(s_sys_ss2a3367d5, "getClasses")) {
         mcp.ci = &c_ReflectionExtension::ci_getclasses;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss3d20de82, "getName")) {
         mcp.ci = &c_ReflectionExtension::ci_getname;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         mcp.ci = &c_ReflectionExtension::ci_export;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1dd0e851, "getFunctions")) {
+      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1d6e06d8, "getFunctions")) {
         mcp.ci = &c_ReflectionExtension::ci_getfunctions;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         mcp.ci = &c_ReflectionExtension::ci___tostring;
         return true;
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x5CE2786E11341594LL, NAMSTR(s_sys_ss11341594, "getClassNames")) {
+      HASH_GUARD_LITSTR(0x5CE2786E11341594LL, NAMSTR(s_sys_ss09d4c665, "getClassNames")) {
         mcp.ci = &c_ReflectionExtension::ci_getclassnames;
         return true;
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x306B5F4D1D03D335LL, NAMSTR(s_sys_ss1d03d335, "getINIEntries")) {
+      HASH_GUARD_LITSTR(0x306B5F4D1D03D335LL, NAMSTR(s_sys_ss5b1ebd2f, "getINIEntries")) {
         mcp.ci = &c_ReflectionExtension::ci_getinientries;
         return true;
       }
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
+      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss6c17831d, "getConstants")) {
         mcp.ci = &c_ReflectionExtension::ci_getconstants;
         return true;
       }
       break;
     case 22:
-      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316, "getVersion")) {
+      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss1b5e3529, "getVersion")) {
         mcp.ci = &c_ReflectionExtension::ci_getversion;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_ReflectionExtension::ci___construct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info")) {
+      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info")) {
         mcp.ci = &c_ReflectionExtension::ci_info;
         return true;
       }
@@ -5027,37 +5027,37 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1847 */
 Variant c_ReflectionExtension::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getName);
-  return m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1860 */
 Variant c_ReflectionExtension::t_getversion() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getVersion);
-  return m_info.rvalAt(NAMSTR(s_sys_ss009c2796, "version"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss7cd91db4, "version"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1876 */
 Variant c_ReflectionExtension::t_getfunctions() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getFunctions);
-  return m_info.rvalAt(NAMSTR(s_sys_ss18fea5e1, "functions"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss37c694fe, "functions"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1889 */
 Variant c_ReflectionExtension::t_getconstants() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getConstants);
-  return m_info.rvalAt(NAMSTR(s_sys_ss1d07a592, "constants"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss623ae369, "constants"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1903 */
 Variant c_ReflectionExtension::t_getinientries() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getINIEntries);
-  return m_info.rvalAt(NAMSTR(s_sys_ss3a6b8527, "ini"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss31210a24, "ini"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1918 */
 Variant c_ReflectionExtension::t_getclasses() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getClasses);
-  return m_info.rvalAt(NAMSTR(s_sys_ss251b7f2b, "classes"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss0415e4a0, "classes"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1933 */
@@ -5069,7 +5069,7 @@ Array c_ReflectionExtension::t_getclassnames() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss251b7f2b, "classes"), true, true);
+    Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss0415e4a0, "classes"), true, true);
     for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_cls);
@@ -5077,7 +5077,7 @@ Array c_ReflectionExtension::t_getclassnames() {
         {
           const Object &tmp5((toObject(v_cls)));
           MethodCallPackage mcp4;
-          mcp4.methodCall((tmp5), NAMSTR(s_sys_ss33e6769b, "getName"), 0x23F51CDECC198965LL);
+          mcp4.methodCall((tmp5), NAMSTR(s_sys_ss3d20de82, "getName"), 0x23F51CDECC198965LL);
           const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
           Variant tmp6(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
           v_ret.append((tmp6));
@@ -5091,7 +5091,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1949 */
 Variant c_ReflectionExtension::t_info() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::info);
-  return m_info.rvalAt(NAMSTR(s_sys_ss157d479f, "info"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss33988b3e, "info"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1555 */
@@ -5107,11 +5107,11 @@ Variant c_ReflectionMethod::os_getInit(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_RETURN_NAMSTR(0x2E3A246D1F74C210LL, NAMSTR(s_sys_ss1f74c210, "class"),
+      HASH_RETURN_NAMSTR(0x2E3A246D1F74C210LL, NAMSTR(s_sys_ss37d242ee, "class"),
                          null, 5);
       break;
     case 2:
-      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ss77e35232, "name"),
+      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ss23c34224, "name"),
                          null, 4);
       break;
     default:
@@ -5132,8 +5132,8 @@ Variant &c_ReflectionMethod::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionMethod
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionMethod
 void c_ReflectionMethod::o_getArray(Array &props) const {
-  if (isInitialized(m_name)) props.set(NAMSTR(s_sys_ss77e35232, "name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
-  if (isInitialized(m_class)) props.set(NAMSTR(s_sys_ss1f74c210, "class"), m_class.isReferenced() ? ref(m_class) : m_class, true);
+  if (isInitialized(m_name)) props.set(NAMSTR(s_sys_ss23c34224, "name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
+  if (isInitialized(m_class)) props.set(NAMSTR(s_sys_ss37d242ee, "class"), m_class.isReferenced() ? ref(m_class) : m_class, true);
   c_ReflectionFunctionAbstract::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionMethod
@@ -5199,13 +5199,13 @@ bool c_ReflectionMethod::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 0:
-      HASH_INSTANCEOF(0x43BBC8F6F28E44B0LL, NAMSTR(s_sys_ss0d71bb50, "reflectionmethod"));
+      HASH_INSTANCEOF(0x43BBC8F6F28E44B0LL, NAMSTR(s_sys_ss75530bea, "reflectionmethod"));
       break;
     case 2:
-      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss35281082, "reflectionfunctionabstract"));
+      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss4c3498c2, "reflectionfunctionabstract"));
       break;
     case 5:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss47c0a605, "reflector"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0cd079e5, "reflector"));
       break;
     default:
       break;
@@ -5226,7 +5226,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
-      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
+      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss36f1dc65, "invoke")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -5244,7 +5244,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         if (count <= 1) return (t_invoke(count, a0));
         return (t_invoke(count, a0,vargs));
       }
-      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
+      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss771be533, "getClosure")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5258,7 +5258,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss6b1369b4, "getDeclaringClass")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5272,7 +5272,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
+      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss1fa13716, "invokeArgs")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -5294,7 +5294,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x51A20EA0E327F607LL, NAMSTR(s_sys_ss1cd809f9, "isDestructor")) {
+      HASH_GUARD_LITSTR(0x51A20EA0E327F607LL, NAMSTR(s_sys_ss69ce0d16, "isDestructor")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5308,7 +5308,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -5334,7 +5334,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
+      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss317f0899, "isProtected")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5348,7 +5348,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
+      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3aa92e4b, "isFinal")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5362,7 +5362,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
+      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss57ed89f5, "isPrivate")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5376,7 +5376,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5390,7 +5390,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss684eaf9e, "getModifiers")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5404,7 +5404,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 23:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
+      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss20cb3f4c, "isAbstract")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5418,7 +5418,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
+      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss404bf1b4, "isStatic")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5432,7 +5432,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 26:
-      HASH_GUARD_LITSTR(0x654B5F965C5CAC7ALL, NAMSTR(s_sys_ss5c5cac7a, "isConstructor")) {
+      HASH_GUARD_LITSTR(0x654B5F965C5CAC7ALL, NAMSTR(s_sys_ss6f2621a9, "isConstructor")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5446,7 +5446,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
+      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss213c3f10, "isPublic")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -5460,7 +5460,7 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -5490,7 +5490,7 @@ Variant c_ReflectionMethod::os_invoke_from_eval(const char *c, const char *s, Ev
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -5929,95 +5929,95 @@ bool c_ReflectionMethod::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 2:
-      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
+      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss36f1dc65, "invoke")) {
         mcp.ci = &c_ReflectionMethod::ci_invoke;
         return true;
       }
-      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
+      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss771be533, "getClosure")) {
         mcp.ci = &c_ReflectionMethod::ci_getclosure;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss6b1369b4, "getDeclaringClass")) {
         mcp.ci = &c_ReflectionMethod::ci_getdeclaringclass;
         return true;
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
+      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss1fa13716, "invokeArgs")) {
         mcp.ci = &c_ReflectionMethod::ci_invokeargs;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x51A20EA0E327F607LL, NAMSTR(s_sys_ss1cd809f9, "isDestructor")) {
+      HASH_GUARD_LITSTR(0x51A20EA0E327F607LL, NAMSTR(s_sys_ss69ce0d16, "isDestructor")) {
         mcp.ci = &c_ReflectionMethod::ci_isdestructor;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         mcp.ci = &c_ReflectionMethod::ci_export;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
+      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss317f0899, "isProtected")) {
         mcp.ci = &c_ReflectionMethod::ci_isprotected;
         return true;
       }
       break;
     case 14:
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
+      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3aa92e4b, "isFinal")) {
         mcp.ci = &c_ReflectionMethod::ci_isfinal;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
+      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss57ed89f5, "isPrivate")) {
         mcp.ci = &c_ReflectionMethod::ci_isprivate;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         mcp.ci = &c_ReflectionMethod::ci___tostring;
         return true;
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss684eaf9e, "getModifiers")) {
         mcp.ci = &c_ReflectionMethod::ci_getmodifiers;
         return true;
       }
       break;
     case 23:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
+      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss20cb3f4c, "isAbstract")) {
         mcp.ci = &c_ReflectionMethod::ci_isabstract;
         return true;
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
+      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss404bf1b4, "isStatic")) {
         mcp.ci = &c_ReflectionMethod::ci_isstatic;
         return true;
       }
       break;
     case 26:
-      HASH_GUARD_LITSTR(0x654B5F965C5CAC7ALL, NAMSTR(s_sys_ss5c5cac7a, "isConstructor")) {
+      HASH_GUARD_LITSTR(0x654B5F965C5CAC7ALL, NAMSTR(s_sys_ss6f2621a9, "isConstructor")) {
         mcp.ci = &c_ReflectionMethod::ci_isconstructor;
         return true;
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
+      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss213c3f10, "isPublic")) {
         mcp.ci = &c_ReflectionMethod::ci_ispublic;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_ReflectionMethod::ci___construct;
         return true;
       }
@@ -6118,7 +6118,7 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name) {
       }
       {
         MethodCallPackage mcp2;
-        mcp2.methodCall((v_cls), NAMSTR(s_sys_ss53a3b5b6, "getMethod"), 0x0D81ECE253A3B5B6LL);
+        mcp2.methodCall((v_cls), NAMSTR(s_sys_ss3244d299, "getMethod"), 0x0D81ECE253A3B5B6LL);
         const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
         Variant tmp3(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_method = tmp3;
@@ -6126,15 +6126,15 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name) {
       if (toBoolean(v_method)) {
         {
           {
-            const Variant &tmp4((v_method.o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
+            const Variant &tmp4((v_method.o_getPublic(NAMSTR(s_sys_ss33988b3e, "info"), true)));
             m_info = tmp4;
           }
           {
-            const Variant &tmp5((v_method.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
+            const Variant &tmp5((v_method.o_getPublic(NAMSTR(s_sys_ss23c34224, "name"), true)));
             m_name = tmp5;
           }
           {
-            const Variant &tmp6((v_method.o_getPublic(NAMSTR(s_sys_ss1f74c210, "class"), true)));
+            const Variant &tmp6((v_method.o_getPublic(NAMSTR(s_sys_ss37d242ee, "class"), true)));
             m_class = tmp6;
           }
         }
@@ -6165,7 +6165,7 @@ Variant c_ReflectionMethod::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name
   }
   {
     MethodCallPackage mcp2;
-    mcp2.methodCall((v_cls), NAMSTR(s_sys_ss53a3b5b6, "getMethod"), 0x0D81ECE253A3B5B6LL);
+    mcp2.methodCall((v_cls), NAMSTR(s_sys_ss3244d299, "getMethod"), 0x0D81ECE253A3B5B6LL);
     const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
     Variant tmp3(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
     v_obj = tmp3;
@@ -6192,8 +6192,8 @@ Variant c_ReflectionMethod::t_invoke(int num_args, CVarRef v_obj, Array args /* 
   x_array_shift(ref(v_args));
   {
     Variant tmp2((v_obj));
-    const String &tmp3((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
-    const String &tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+    const String &tmp3((toString(m_info.rvalAt(NAMSTR(s_sys_ss37d242ee, "class"), true, true))));
+    const String &tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true))));
     return x_hphp_invoke_method(tmp2, tmp3, tmp4, toArray(v_args));
   }
 }
@@ -6203,8 +6203,8 @@ Variant c_ReflectionMethod::t_invokeargs(CVarRef v_obj, CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::invokeArgs);
   {
     Variant tmp1((v_obj));
-    const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
-    const String &tmp3((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+    const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss37d242ee, "class"), true, true))));
+    const String &tmp3((toString(m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true))));
     const Array &tmp4((toArray(x_array_values(v_args))));
     return x_hphp_invoke_method(tmp1, tmp2, tmp3, tmp4);
   }
@@ -6213,43 +6213,43 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1655 */
 Variant c_ReflectionMethod::t_isfinal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isFinal);
-  return m_info.rvalAt(NAMSTR(s_sys_ss2f433c87, "final"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss2145036e, "final"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1668 */
 Variant c_ReflectionMethod::t_isabstract() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isAbstract);
-  return m_info.rvalAt(NAMSTR(s_sys_ss01d79b38, "abstract"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss12c8a8a6, "abstract"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1680 */
 bool c_ReflectionMethod::t_ispublic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isPublic);
-  return equal(m_info.rvalAt(NAMSTR(s_sys_ss7b513d57, "access"), true, true), NAMSTR(s_sys_ss13766fad, "public"));
+  return equal(m_info.rvalAt(NAMSTR(s_sys_ss750cda3b, "access"), true, true), NAMSTR(s_sys_ss4ce85288, "public"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1693 */
 bool c_ReflectionMethod::t_isprivate() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isPrivate);
-  return equal(m_info.rvalAt(NAMSTR(s_sys_ss7b513d57, "access"), true, true), NAMSTR(s_sys_ss52349fb9, "private"));
+  return equal(m_info.rvalAt(NAMSTR(s_sys_ss750cda3b, "access"), true, true), NAMSTR(s_sys_ss187e0826, "private"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1706 */
 bool c_ReflectionMethod::t_isprotected() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isProtected);
-  return equal(m_info.rvalAt(NAMSTR(s_sys_ss7b513d57, "access"), true, true), NAMSTR(s_sys_ss649ab5a0, "protected"));
+  return equal(m_info.rvalAt(NAMSTR(s_sys_ss750cda3b, "access"), true, true), NAMSTR(s_sys_ss604a9687, "protected"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1718 */
 Variant c_ReflectionMethod::t_isstatic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isStatic);
-  return m_info.rvalAt(NAMSTR(s_sys_ss796d376e, "static"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss0f72dfa3, "static"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1731 */
 bool c_ReflectionMethod::t_isconstructor() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isConstructor);
-  return isset(m_info, NAMSTR(s_sys_ss3a464145, "constructor"), true);
+  return isset(m_info, NAMSTR(s_sys_ss10134623, "constructor"), true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1744 */
@@ -6257,33 +6257,33 @@ bool c_ReflectionMethod::t_isdestructor() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isDestructor);
   {
     const Variant &tmp1((t_getname()));
-    return equal(tmp1, NAMSTR(s_sys_ss5533e10d, "__destruct"));
+    return equal(tmp1, NAMSTR(s_sys_ss5a580b07, "__destruct"));
   }
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1766 */
 Variant c_ReflectionMethod::t_getmodifiers() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getModifiers);
-  return m_info.rvalAt(NAMSTR(s_sys_ss6d6e147d, "modifiers"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss60dbb380, "modifiers"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1770 */
 Variant c_ReflectionMethod::t_getclosure() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getClosure);
-  return m_info.rvalAt(NAMSTR(s_sys_ss6d16d594, "closure"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss4cd61020, "closure"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1784 */
 Variant c_ReflectionMethod::t_getdeclaringclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getDeclaringClass);
-  if (empty(m_info, NAMSTR(s_sys_ss1f74c210, "class"), true)) {
+  if (empty(m_info, NAMSTR(s_sys_ss37d242ee, "class"), true)) {
     {
       return null;
     }
   }
   {
     p_ReflectionClass tmp1 = NEWOBJ(c_ReflectionClass)();
-    return (tmp1->create(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true)), tmp1);
+    return (tmp1->create(m_info.rvalAt(NAMSTR(s_sys_ss37d242ee, "class"), true, true)), tmp1);
   }
 }
 namespace hphp_impl_splitter {}
@@ -6298,15 +6298,15 @@ Variant c_ReflectionProperty::os_getInit(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 0:
-      HASH_RETURN_NAMSTR(0x2E3A246D1F74C210LL, NAMSTR(s_sys_ss1f74c210, "class"),
+      HASH_RETURN_NAMSTR(0x2E3A246D1F74C210LL, NAMSTR(s_sys_ss37d242ee, "class"),
                          null, 5);
       break;
     case 2:
-      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ss77e35232, "name"),
+      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, NAMSTR(s_sys_ss23c34224, "name"),
                          null, 4);
       break;
     case 7:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info"),
+      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"),
                          null, 4);
       break;
     default:
@@ -6327,9 +6327,9 @@ Variant &c_ReflectionProperty::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionProperty
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionProperty
 void c_ReflectionProperty::o_getArray(Array &props) const {
-  if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss157d479f, "info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
-  if (isInitialized(m_name)) props.set(NAMSTR(s_sys_ss77e35232, "name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
-  if (isInitialized(m_class)) props.set(NAMSTR(s_sys_ss1f74c210, "class"), m_class.isReferenced() ? ref(m_class) : m_class, true);
+  if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss33988b3e, "info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
+  if (isInitialized(m_name)) props.set(NAMSTR(s_sys_ss23c34224, "name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
+  if (isInitialized(m_class)) props.set(NAMSTR(s_sys_ss37d242ee, "class"), m_class.isReferenced() ? ref(m_class) : m_class, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionProperty
@@ -6394,10 +6394,10 @@ bool c_ReflectionProperty::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_INSTANCEOF(0x75AA2571BDB659E4LL, NAMSTR(s_sys_ss4249a61c, "reflectionproperty"));
+      HASH_INSTANCEOF(0x75AA2571BDB659E4LL, NAMSTR(s_sys_ss71d03997, "reflectionproperty"));
       break;
     case 1:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss47c0a605, "reflector"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0cd079e5, "reflector"));
       break;
     default:
       break;
@@ -6419,7 +6419,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
-      HASH_GUARD_LITSTR(0x791E9751F5B8C5A2LL, NAMSTR(s_sys_ss0a473a5e, "setAccessible")) {
+      HASH_GUARD_LITSTR(0x791E9751F5B8C5A2LL, NAMSTR(s_sys_ss3fe4822b, "setAccessible")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6433,7 +6433,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x56879BCEB40997E3LL, NAMSTR(s_sys_ss4bf6681d, "getValue")) {
+      HASH_GUARD_LITSTR(0x56879BCEB40997E3LL, NAMSTR(s_sys_ss2eb142f8, "getValue")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -6450,7 +6450,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
         if (count <= 0) return (t_getvalue());
         else return (t_getvalue(a0));
       }
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss6b1369b4, "getDeclaringClass")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6464,7 +6464,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss3d20de82, "getName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6478,7 +6478,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -6504,7 +6504,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
+      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss317f0899, "isProtected")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6518,7 +6518,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
+      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss57ed89f5, "isPrivate")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6532,7 +6532,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6546,7 +6546,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss684eaf9e, "getModifiers")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6560,7 +6560,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x384A52597AB11F15LL, NAMSTR(s_sys_ss7ab11f15, "isDefault")) {
+      HASH_GUARD_LITSTR(0x384A52597AB11F15LL, NAMSTR(s_sys_ss6252bc99, "isDefault")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6572,7 +6572,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
         if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
         return (t_isdefault());
       }
-      HASH_GUARD_LITSTR(0x36FBED35008C8DB5LL, NAMSTR(s_sys_ss008c8db5, "setValue")) {
+      HASH_GUARD_LITSTR(0x36FBED35008C8DB5LL, NAMSTR(s_sys_ss325815c1, "setValue")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -6594,7 +6594,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
+      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss2a2442b9, "getDocComment")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6608,7 +6608,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
+      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss404bf1b4, "isStatic")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6622,7 +6622,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
+      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss213c3f10, "isPublic")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -6636,7 +6636,7 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -6666,7 +6666,7 @@ Variant c_ReflectionProperty::os_invoke_from_eval(const char *c, const char *s, 
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -7075,87 +7075,87 @@ bool c_ReflectionProperty::os_get_call_info(MethodCallPackage &mcp, int64 hash) 
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 2:
-      HASH_GUARD_LITSTR(0x791E9751F5B8C5A2LL, NAMSTR(s_sys_ss0a473a5e, "setAccessible")) {
+      HASH_GUARD_LITSTR(0x791E9751F5B8C5A2LL, NAMSTR(s_sys_ss3fe4822b, "setAccessible")) {
         mcp.ci = &c_ReflectionProperty::ci_setaccessible;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x56879BCEB40997E3LL, NAMSTR(s_sys_ss4bf6681d, "getValue")) {
+      HASH_GUARD_LITSTR(0x56879BCEB40997E3LL, NAMSTR(s_sys_ss2eb142f8, "getValue")) {
         mcp.ci = &c_ReflectionProperty::ci_getvalue;
         return true;
       }
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss6b1369b4, "getDeclaringClass")) {
         mcp.ci = &c_ReflectionProperty::ci_getdeclaringclass;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss3d20de82, "getName")) {
         mcp.ci = &c_ReflectionProperty::ci_getname;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         mcp.ci = &c_ReflectionProperty::ci_export;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
+      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss317f0899, "isProtected")) {
         mcp.ci = &c_ReflectionProperty::ci_isprotected;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
+      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss57ed89f5, "isPrivate")) {
         mcp.ci = &c_ReflectionProperty::ci_isprivate;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         mcp.ci = &c_ReflectionProperty::ci___tostring;
         return true;
       }
       break;
     case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss684eaf9e, "getModifiers")) {
         mcp.ci = &c_ReflectionProperty::ci_getmodifiers;
         return true;
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x384A52597AB11F15LL, NAMSTR(s_sys_ss7ab11f15, "isDefault")) {
+      HASH_GUARD_LITSTR(0x384A52597AB11F15LL, NAMSTR(s_sys_ss6252bc99, "isDefault")) {
         mcp.ci = &c_ReflectionProperty::ci_isdefault;
         return true;
       }
-      HASH_GUARD_LITSTR(0x36FBED35008C8DB5LL, NAMSTR(s_sys_ss008c8db5, "setValue")) {
+      HASH_GUARD_LITSTR(0x36FBED35008C8DB5LL, NAMSTR(s_sys_ss325815c1, "setValue")) {
         mcp.ci = &c_ReflectionProperty::ci_setvalue;
         return true;
       }
       break;
     case 24:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
+      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss2a2442b9, "getDocComment")) {
         mcp.ci = &c_ReflectionProperty::ci_getdoccomment;
         return true;
       }
       break;
     case 25:
-      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
+      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss404bf1b4, "isStatic")) {
         mcp.ci = &c_ReflectionProperty::ci_isstatic;
         return true;
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
+      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss213c3f10, "isPublic")) {
         mcp.ci = &c_ReflectionProperty::ci_ispublic;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_ReflectionProperty::ci___construct;
         return true;
       }
@@ -7256,7 +7256,7 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
       }
       {
         MethodCallPackage mcp2;
-        mcp2.methodCall((v_cls), NAMSTR(s_sys_ss04fdcfb9, "getProperty"), 0x0FD73627FB023047LL);
+        mcp2.methodCall((v_cls), NAMSTR(s_sys_ss2fd63e54, "getProperty"), 0x0FD73627FB023047LL);
         const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
         Variant tmp3(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_prop = tmp3;
@@ -7264,15 +7264,15 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
       if (toBoolean(v_prop)) {
         {
           {
-            const Variant &tmp4((v_prop.o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
+            const Variant &tmp4((v_prop.o_getPublic(NAMSTR(s_sys_ss33988b3e, "info"), true)));
             m_info = tmp4;
           }
           {
-            const Variant &tmp5((v_prop.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
+            const Variant &tmp5((v_prop.o_getPublic(NAMSTR(s_sys_ss23c34224, "name"), true)));
             m_name = tmp5;
           }
           {
-            const Variant &tmp6((v_prop.o_getPublic(NAMSTR(s_sys_ss1f74c210, "class"), true)));
+            const Variant &tmp6((v_prop.o_getPublic(NAMSTR(s_sys_ss37d242ee, "class"), true)));
             m_class = tmp6;
           }
         }
@@ -7303,7 +7303,7 @@ Variant c_ReflectionProperty::ti_export(CStrRef cls, Variant v_cls, CVarRef v_na
   }
   {
     MethodCallPackage mcp2;
-    mcp2.methodCall((v_cls), NAMSTR(s_sys_ss04fdcfb9, "getProperty"), 0x0FD73627FB023047LL);
+    mcp2.methodCall((v_cls), NAMSTR(s_sys_ss2fd63e54, "getProperty"), 0x0FD73627FB023047LL);
     const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
     Variant tmp3(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
     v_obj = tmp3;
@@ -7321,37 +7321,37 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1369 */
 Variant c_ReflectionProperty::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getName);
-  return m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1382 */
 bool c_ReflectionProperty::t_ispublic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isPublic);
-  return equal(m_info.rvalAt(NAMSTR(s_sys_ss7b513d57, "access"), true, true), NAMSTR(s_sys_ss13766fad, "public"));
+  return equal(m_info.rvalAt(NAMSTR(s_sys_ss750cda3b, "access"), true, true), NAMSTR(s_sys_ss4ce85288, "public"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1395 */
 bool c_ReflectionProperty::t_isprivate() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isPrivate);
-  return equal(m_info.rvalAt(NAMSTR(s_sys_ss7b513d57, "access"), true, true), NAMSTR(s_sys_ss52349fb9, "private"));
+  return equal(m_info.rvalAt(NAMSTR(s_sys_ss750cda3b, "access"), true, true), NAMSTR(s_sys_ss187e0826, "private"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1408 */
 bool c_ReflectionProperty::t_isprotected() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isProtected);
-  return equal(m_info.rvalAt(NAMSTR(s_sys_ss7b513d57, "access"), true, true), NAMSTR(s_sys_ss649ab5a0, "protected"));
+  return equal(m_info.rvalAt(NAMSTR(s_sys_ss750cda3b, "access"), true, true), NAMSTR(s_sys_ss604a9687, "protected"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1421 */
 Variant c_ReflectionProperty::t_isstatic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isStatic);
-  return m_info.rvalAt(NAMSTR(s_sys_ss796d376e, "static"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss0f72dfa3, "static"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1435 */
 Variant c_ReflectionProperty::t_isdefault() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isDefault);
-  return m_info.rvalAt(NAMSTR(s_sys_ss6463ffdf, "default"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss570270cc, "default"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1449 */
@@ -7361,7 +7361,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1462 */
 Variant c_ReflectionProperty::t_getmodifiers() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getModifiers);
-  return m_info.rvalAt(NAMSTR(s_sys_ss6d6e147d, "modifiers"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss60dbb380, "modifiers"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1478 */
@@ -7371,8 +7371,8 @@ Variant c_ReflectionProperty::t_getvalue(CVarRef v_obj //  = null_variant
   if (toBoolean(t_isstatic())) {
     {
       {
-        const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
-        const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+        const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ss37d242ee, "class"), true, true))));
+        const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true))));
         return x_hphp_get_static_property(tmp1, tmp2);
       }
     }
@@ -7381,8 +7381,8 @@ Variant c_ReflectionProperty::t_getvalue(CVarRef v_obj //  = null_variant
     {
       {
         const Object &tmp3((toObject(v_obj)));
-        const String &tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
-        const String &tmp5((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+        const String &tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ss37d242ee, "class"), true, true))));
+        const String &tmp5((toString(m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true))));
         return x_hphp_get_property(tmp3, tmp4, tmp5);
       }
     }
@@ -7396,8 +7396,8 @@ void c_ReflectionProperty::t_setvalue(CVarRef v_obj, CVarRef v_value) {
   if (toBoolean(t_isstatic())) {
     {
       {
-        const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
-        const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+        const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ss37d242ee, "class"), true, true))));
+        const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true))));
         x_hphp_set_static_property(tmp1, tmp2, v_value);
       }
     }
@@ -7406,8 +7406,8 @@ void c_ReflectionProperty::t_setvalue(CVarRef v_obj, CVarRef v_value) {
     {
       {
         const Object &tmp3((toObject(v_obj)));
-        const String &tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
-        const String &tmp5((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+        const String &tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ss37d242ee, "class"), true, true))));
+        const String &tmp5((toString(m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true))));
         x_hphp_set_property(tmp3, tmp4, tmp5, v_value);
       }
     }
@@ -7417,21 +7417,21 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1523 */
 Variant c_ReflectionProperty::t_getdeclaringclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getDeclaringClass);
-  if (empty(m_info, NAMSTR(s_sys_ss1f74c210, "class"), true)) {
+  if (empty(m_info, NAMSTR(s_sys_ss37d242ee, "class"), true)) {
     {
       return null;
     }
   }
   {
     p_ReflectionClass tmp1 = NEWOBJ(c_ReflectionClass)();
-    return (tmp1->create(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true)), tmp1);
+    return (tmp1->create(m_info.rvalAt(NAMSTR(s_sys_ss37d242ee, "class"), true, true)), tmp1);
   }
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1540 */
 Variant c_ReflectionProperty::t_getdoccomment() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getDocComment);
-  return m_info.rvalAt(NAMSTR(s_sys_ss70714913, "doc"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss6305e85a, "doc"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 461 */
@@ -7494,13 +7494,13 @@ bool c_ReflectionFunction::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_INSTANCEOF(0x21EF70351574EC09LL, NAMSTR(s_sys_ss1574ec09, "reflectionfunction"));
+      HASH_INSTANCEOF(0x21EF70351574EC09LL, NAMSTR(s_sys_ss60fd7fd6, "reflectionfunction"));
       break;
     case 2:
-      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss35281082, "reflectionfunctionabstract"));
+      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss4c3498c2, "reflectionfunctionabstract"));
       break;
     case 5:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss47c0a605, "reflector"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0cd079e5, "reflector"));
       break;
     default:
       break;
@@ -7519,7 +7519,7 @@ Variant c_ReflectionFunction::o_invoke_from_eval(const char *s, Eval::VariableEn
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 2:
-      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
+      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss36f1dc65, "invoke")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -7534,7 +7534,7 @@ Variant c_ReflectionFunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -7548,7 +7548,7 @@ Variant c_ReflectionFunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
+      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss1fa13716, "invokeArgs")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -7566,7 +7566,7 @@ Variant c_ReflectionFunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -7588,7 +7588,7 @@ Variant c_ReflectionFunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -7614,7 +7614,7 @@ Variant c_ReflectionFunction::os_invoke_from_eval(const char *c, const char *s, 
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -7776,31 +7776,31 @@ bool c_ReflectionFunction::os_get_call_info(MethodCallPackage &mcp, int64 hash) 
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 2:
-      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
+      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss36f1dc65, "invoke")) {
         mcp.ci = &c_ReflectionFunction::ci_invoke;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         mcp.ci = &c_ReflectionFunction::ci___tostring;
         return true;
       }
       break;
     case 4:
-      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
+      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss1fa13716, "invokeArgs")) {
         mcp.ci = &c_ReflectionFunction::ci_invokeargs;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         mcp.ci = &c_ReflectionFunction::ci_export;
         return true;
       }
       break;
     case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_ReflectionFunction::ci___construct;
         return true;
       }
@@ -7888,7 +7888,7 @@ void c_ReflectionFunction::t___construct(Variant v_name) {
     {
       {
         p_ReflectionException tmp2 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp2->create(VarNR(concat3(NAMSTR(s_sys_ss38ae19c4, "Function "), toString(v_name), NAMSTR(s_sys_ss20448282, " does not exist")))), tmp2));
+        throw_exception((tmp2->create(VarNR(concat3(NAMSTR(s_sys_ss67a277a2, "Function "), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))), tmp2));
       }
     }
   }
@@ -7932,7 +7932,7 @@ Variant c_ReflectionFunction::t_invoke(int num_args, Array args /* = Array() */)
     v_args = tmp1;
   }
   {
-    const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+    const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true))));
     return x_hphp_invoke(tmp2, v_args);
   }
 }
@@ -7941,7 +7941,7 @@ namespace hphp_impl_splitter {}
 Variant c_ReflectionFunction::t_invokeargs(CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::invokeArgs);
   {
-    const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+    const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true))));
     const Array &tmp2((toArray(x_array_values(v_args))));
     return x_hphp_invoke(tmp1, tmp2);
   }
@@ -7954,7 +7954,7 @@ Variant c_ReflectionParameter::os_getInit(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info"),
+      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info"),
                          null, 4);
       break;
     default:
@@ -7975,7 +7975,7 @@ Variant &c_ReflectionParameter::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionParameter
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionParameter
 void c_ReflectionParameter::o_getArray(Array &props) const {
-  if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss157d479f, "info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
+  if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss33988b3e, "info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionParameter
@@ -8017,10 +8017,10 @@ bool c_ReflectionParameter::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss47c0a605, "reflector"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0cd079e5, "reflector"));
       break;
     case 3:
-      HASH_INSTANCEOF(0x2E7081C468A05993LL, NAMSTR(s_sys_ss68a05993, "reflectionparameter"));
+      HASH_INSTANCEOF(0x2E7081C468A05993LL, NAMSTR(s_sys_ss6421f8b4, "reflectionparameter"));
       break;
     default:
       break;
@@ -8040,7 +8040,7 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 3:
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss6b1369b4, "getDeclaringClass")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8054,7 +8054,7 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss3d20de82, "getName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8068,7 +8068,7 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -8092,7 +8092,7 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
         if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
         return (ti_export(o_getClassName(), a0, a1, a2));
       }
-      HASH_GUARD_LITSTR(0x4044F1EEBF3BB8C8LL, NAMSTR(s_sys_ss40c44738, "getPosition")) {
+      HASH_GUARD_LITSTR(0x4044F1EEBF3BB8C8LL, NAMSTR(s_sys_ss0e42e563, "getPosition")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8106,7 +8106,7 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 9:
-      HASH_GUARD_LITSTR(0x4F51DA0B633E9909LL, NAMSTR(s_sys_ss633e9909, "getClass")) {
+      HASH_GUARD_LITSTR(0x4F51DA0B633E9909LL, NAMSTR(s_sys_ss6965d6ed, "getClass")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8118,7 +8118,7 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
         if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
         return (t_getclass());
       }
-      HASH_GUARD_LITSTR(0x24ED05F4504C4C09LL, NAMSTR(s_sys_ss504c4c09, "allowsNull")) {
+      HASH_GUARD_LITSTR(0x24ED05F4504C4C09LL, NAMSTR(s_sys_ss5bfa95ac, "allowsNull")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8132,7 +8132,7 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x27C482A6C7951E0CLL, NAMSTR(s_sys_ss386ae1f4, "getDefaultValue")) {
+      HASH_GUARD_LITSTR(0x27C482A6C7951E0CLL, NAMSTR(s_sys_ss1c65f80a, "getDefaultValue")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8146,7 +8146,7 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x13E3F304BDD89FB1LL, NAMSTR(s_sys_ss4227604f, "isPassedByReference")) {
+      HASH_GUARD_LITSTR(0x13E3F304BDD89FB1LL, NAMSTR(s_sys_ss6e47b4b1, "isPassedByReference")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8160,7 +8160,7 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x6E34805C91257C92LL, NAMSTR(s_sys_ss6eda836e, "isDefaultValueAvailable")) {
+      HASH_GUARD_LITSTR(0x6E34805C91257C92LL, NAMSTR(s_sys_ss0b202331, "isDefaultValueAvailable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8174,7 +8174,7 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8188,7 +8188,7 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x2D6EF48BBAB22735LL, NAMSTR(s_sys_ss454dd8cb, "isOptional")) {
+      HASH_GUARD_LITSTR(0x2D6EF48BBAB22735LL, NAMSTR(s_sys_ss6d9ef7e5, "isOptional")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8202,7 +8202,7 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 29:
-      HASH_GUARD_LITSTR(0x5A9CE40C0F25871DLL, NAMSTR(s_sys_ss0f25871d, "isArray")) {
+      HASH_GUARD_LITSTR(0x5A9CE40C0F25871DLL, NAMSTR(s_sys_ss43a6f315, "isArray")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -8216,7 +8216,7 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -8246,7 +8246,7 @@ Variant c_ReflectionParameter::os_invoke_from_eval(const char *c, const char *s,
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -8594,75 +8594,75 @@ bool c_ReflectionParameter::os_get_call_info(MethodCallPackage &mcp, int64 hash)
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 3:
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss6b1369b4, "getDeclaringClass")) {
         mcp.ci = &c_ReflectionParameter::ci_getdeclaringclass;
         return true;
       }
       break;
     case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss3d20de82, "getName")) {
         mcp.ci = &c_ReflectionParameter::ci_getname;
         return true;
       }
       break;
     case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss2fb4d148, "export")) {
         mcp.ci = &c_ReflectionParameter::ci_export;
         return true;
       }
-      HASH_GUARD_LITSTR(0x4044F1EEBF3BB8C8LL, NAMSTR(s_sys_ss40c44738, "getPosition")) {
+      HASH_GUARD_LITSTR(0x4044F1EEBF3BB8C8LL, NAMSTR(s_sys_ss0e42e563, "getPosition")) {
         mcp.ci = &c_ReflectionParameter::ci_getposition;
         return true;
       }
       break;
     case 9:
-      HASH_GUARD_LITSTR(0x4F51DA0B633E9909LL, NAMSTR(s_sys_ss633e9909, "getClass")) {
+      HASH_GUARD_LITSTR(0x4F51DA0B633E9909LL, NAMSTR(s_sys_ss6965d6ed, "getClass")) {
         mcp.ci = &c_ReflectionParameter::ci_getclass;
         return true;
       }
-      HASH_GUARD_LITSTR(0x24ED05F4504C4C09LL, NAMSTR(s_sys_ss504c4c09, "allowsNull")) {
+      HASH_GUARD_LITSTR(0x24ED05F4504C4C09LL, NAMSTR(s_sys_ss5bfa95ac, "allowsNull")) {
         mcp.ci = &c_ReflectionParameter::ci_allowsnull;
         return true;
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x27C482A6C7951E0CLL, NAMSTR(s_sys_ss386ae1f4, "getDefaultValue")) {
+      HASH_GUARD_LITSTR(0x27C482A6C7951E0CLL, NAMSTR(s_sys_ss1c65f80a, "getDefaultValue")) {
         mcp.ci = &c_ReflectionParameter::ci_getdefaultvalue;
         return true;
       }
       break;
     case 17:
-      HASH_GUARD_LITSTR(0x13E3F304BDD89FB1LL, NAMSTR(s_sys_ss4227604f, "isPassedByReference")) {
+      HASH_GUARD_LITSTR(0x13E3F304BDD89FB1LL, NAMSTR(s_sys_ss6e47b4b1, "isPassedByReference")) {
         mcp.ci = &c_ReflectionParameter::ci_ispassedbyreference;
         return true;
       }
       break;
     case 18:
-      HASH_GUARD_LITSTR(0x6E34805C91257C92LL, NAMSTR(s_sys_ss6eda836e, "isDefaultValueAvailable")) {
+      HASH_GUARD_LITSTR(0x6E34805C91257C92LL, NAMSTR(s_sys_ss0b202331, "isDefaultValueAvailable")) {
         mcp.ci = &c_ReflectionParameter::ci_isdefaultvalueavailable;
         return true;
       }
       break;
     case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         mcp.ci = &c_ReflectionParameter::ci___tostring;
         return true;
       }
       break;
     case 21:
-      HASH_GUARD_LITSTR(0x2D6EF48BBAB22735LL, NAMSTR(s_sys_ss454dd8cb, "isOptional")) {
+      HASH_GUARD_LITSTR(0x2D6EF48BBAB22735LL, NAMSTR(s_sys_ss6d9ef7e5, "isOptional")) {
         mcp.ci = &c_ReflectionParameter::ci_isoptional;
         return true;
       }
       break;
     case 29:
-      HASH_GUARD_LITSTR(0x5A9CE40C0F25871DLL, NAMSTR(s_sys_ss0f25871d, "isArray")) {
+      HASH_GUARD_LITSTR(0x5A9CE40C0F25871DLL, NAMSTR(s_sys_ss43a6f315, "isArray")) {
         mcp.ci = &c_ReflectionParameter::ci_isarray;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
         mcp.ci = &c_ReflectionParameter::ci___construct;
         return true;
       }
@@ -8754,13 +8754,13 @@ void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
     {
       {
         MethodCallPackage mcp1;
-        mcp1.methodCall((v_func), NAMSTR(s_sys_ss32c2a32d, "getParameters"), 0x3E62225132C2A32DLL);
+        mcp1.methodCall((v_func), NAMSTR(s_sys_ss1902bc14, "getParameters"), 0x3E62225132C2A32DLL);
         const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
         Variant tmp2(((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_params = tmp2;
       }
       {
-        const Variant &tmp3((v_params.rvalAt(v_param, true).o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
+        const Variant &tmp3((v_params.rvalAt(v_param, true).o_getPublic(NAMSTR(s_sys_ss33988b3e, "info"), true)));
         m_info = tmp3;
       }
     }
@@ -8798,65 +8798,65 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 93 */
 Variant c_ReflectionParameter::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getName);
-  return m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss23c34224, "name"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 108 */
 Variant c_ReflectionParameter::t_ispassedbyreference() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isPassedByReference);
-  return m_info.rvalAt(NAMSTR(s_sys_ss208f545e, "ref"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss134fd5fa, "ref"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 122 */
 Variant c_ReflectionParameter::t_getdeclaringclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getDeclaringClass);
-  if (empty(m_info, NAMSTR(s_sys_ss1f74c210, "class"), true)) {
+  if (empty(m_info, NAMSTR(s_sys_ss37d242ee, "class"), true)) {
     {
       return null;
     }
   }
   {
     p_ReflectionClass tmp1 = NEWOBJ(c_ReflectionClass)();
-    return (tmp1->create(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true)), tmp1);
+    return (tmp1->create(m_info.rvalAt(NAMSTR(s_sys_ss37d242ee, "class"), true, true)), tmp1);
   }
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 139 */
 Variant c_ReflectionParameter::t_getclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getClass);
-  if (empty(m_info, NAMSTR(s_sys_ss1fe107ad, "type"), true)) {
+  if (empty(m_info, NAMSTR(s_sys_ss724a760a, "type"), true)) {
     {
       return null;
     }
   }
   {
     p_ReflectionClass tmp1 = NEWOBJ(c_ReflectionClass)();
-    return (tmp1->create(m_info.rvalAt(NAMSTR(s_sys_ss1fe107ad, "type"), true, true)), tmp1);
+    return (tmp1->create(m_info.rvalAt(NAMSTR(s_sys_ss724a760a, "type"), true, true)), tmp1);
   }
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 155 */
 bool c_ReflectionParameter::t_isarray() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isArray);
-  return equal(m_info.rvalAt(NAMSTR(s_sys_ss1fe107ad, "type"), true, true), NAMSTR(s_sys_ss7eaeeecb, "array"));
+  return equal(m_info.rvalAt(NAMSTR(s_sys_ss724a760a, "type"), true, true), NAMSTR(s_sys_ss73fb46a0, "array"));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 169 */
 Variant c_ReflectionParameter::t_allowsnull() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::allowsNull);
-  return m_info.rvalAt(NAMSTR(s_sys_ss781593b7, "nullable"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss122b85bd, "nullable"), true, true);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 182 */
 bool c_ReflectionParameter::t_isoptional() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isOptional);
-  return x_array_key_exists(NAMSTR(s_sys_ss6463ffdf, "default"), m_info);
+  return x_array_key_exists(NAMSTR(s_sys_ss570270cc, "default"), m_info);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 197 */
 bool c_ReflectionParameter::t_isdefaultvalueavailable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isDefaultValueAvailable);
-  return x_array_key_exists(NAMSTR(s_sys_ss6463ffdf, "default"), m_info);
+  return x_array_key_exists(NAMSTR(s_sys_ss570270cc, "default"), m_info);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 212 */
@@ -8872,18 +8872,18 @@ Variant c_ReflectionParameter::t_getdefaultvalue() {
     }
     if (tmp1) {
       {
-        throw_exception(p_ReflectionException((NEWOBJ(c_ReflectionException)())->create(NAMSTR(s_sys_ss4fc853c6, "Parameter is not optional"))));
+        throw_exception(p_ReflectionException((NEWOBJ(c_ReflectionException)())->create(NAMSTR(s_sys_ss4ad0c110, "Parameter is not optional"))));
       }
     }
   }
   {
-    Variant tmp3((m_info.rvalAt(NAMSTR(s_sys_ss6463ffdf, "default"), true, true)));
+    Variant tmp3((m_info.rvalAt(NAMSTR(s_sys_ss570270cc, "default"), true, true)));
     v_defaultValue = tmp3;
   }
-  if (instanceOf(v_defaultValue, NAMSTR(s_sys_ss78ba13f7, "stdclass"))) {
+  if (instanceOf(v_defaultValue, NAMSTR(s_sys_ss41c7a197, "stdclass"))) {
     {
       {
-        const String &tmp4((toString(v_defaultValue.o_getPublic(NAMSTR(s_sys_ss10d8f28e, "msg"), true))));
+        const String &tmp4((toString(v_defaultValue.o_getPublic(NAMSTR(s_sys_ss309aefff, "msg"), true))));
         x_hphp_throw_fatal_error(tmp4);
       }
     }
@@ -8894,7 +8894,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 233 */
 Variant c_ReflectionParameter::t_getposition() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::getPosition);
-  return m_info.rvalAt(NAMSTR(s_sys_ss43880cae, "index"), true, true);
+  return m_info.rvalAt(NAMSTR(s_sys_ss3f00cf7f, "index"), true, true);
 }
 namespace hphp_impl_splitter {}
 Object co_ReflectionFunctionAbstract(CArrRef params, bool init /* = true */) {

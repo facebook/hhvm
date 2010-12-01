@@ -1427,6 +1427,9 @@ public:
   }
 
   void start(Level level, long flags) {
+    if (!RuntimeOption::EnableHotProfiler) {
+      return;
+    }
     if (m_profiler == NULL) {
       switch (level) {
       case Simple:

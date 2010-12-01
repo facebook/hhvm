@@ -239,6 +239,7 @@ public:
   static bool EnableAPCSizeDetail;
   static bool EnableAPCFetchStats;
   static bool APCSizeCountPrime;
+  static bool EnableHotProfiler;
   static int32 ProfilerTraceBuffer;
   static double ProfilerTraceExpansion;
 

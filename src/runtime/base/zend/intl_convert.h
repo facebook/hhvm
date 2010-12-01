@@ -18,8 +18,8 @@
 #ifndef __HPHP_INTL_CONVERT_H__
 #define __HPHP_INTL_CONVERT_H__
 
-#include <unicode/ustring.h>
 #include <runtime/base/complex_types.h>
+#include <unicode/ustring.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

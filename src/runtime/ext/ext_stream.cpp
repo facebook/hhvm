@@ -189,7 +189,7 @@ static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
   char abuf[256];
   char *buf = NULL;
   char *textaddr = NULL;
-  long textaddrlen;
+  long textaddrlen = 0;
 
   switch (sa->sa_family) {
   case AF_INET:
@@ -232,7 +232,7 @@ static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
     break;
   }
 
-  if (textaddr) {
+  if (textaddrlen) {
     return String(textaddr, textaddrlen, AttachString);
   }
   return String();

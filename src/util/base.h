@@ -254,8 +254,8 @@ struct file_closer {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// ICC compat
-#if !defined(__ICC) || __ICC>=1200
+// Non-gcc compat
+#if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3) || __ICC >= 1200 || __GNUC__ > 4
 #define ATTRIBUTE_COLD __attribute__((cold))
 #else
 #define ATTRIBUTE_COLD

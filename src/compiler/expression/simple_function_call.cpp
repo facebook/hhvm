@@ -858,7 +858,6 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       return checkTypesImpl(ar, type, Type::Variant, coerce);
     }
     m_classScope = cls;
-    m_derivedFromRedeclaring = cls->derivesFromRedeclaring();
 
     if (m_name == "__construct") {
       // if the class is known, php will try to identify class-name ctor
@@ -871,7 +870,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       ClassScopePtr clsThis = getClassScope();
       FunctionScopePtr funcThis = getFunctionScope();
       if (!clsThis ||
-          (clsThis->getName() != m_className &&
+          (clsThis != m_classScope &&
            !clsThis->derivesFrom(ar, m_className, true, false)) ||
           funcThis->isStatic()) {
         func->setDynamic();
@@ -879,7 +878,6 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
           Compiler::Error(Compiler::MissingObjectContext, self);
           errorFlagged = true;
         }
-        func.reset();
       }
     }
   }
@@ -1007,63 +1005,60 @@ void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                       int state) {
   if (m_valid && m_classScope && !m_funcScope->isStatic()) {
-    if (m_classScope->isRedeclaring()) {
+    ClassScopePtr cur = getOriginalScope();
+    if (cur && !getFunctionScope()->isStatic() &&
+        cur->derivesFromRedeclaring() &&
+        cur != m_classScope &&
+        !cur->derivesFrom(ar, m_className, true, false) &&
+        cur->derivesFrom(ar, m_className, true, true)) {
       /*
-        In this case, even though its redeclaring, we were able
-        to figure out the actual ClassScope for cls. But for a non-static
-        call in a method of class D derived from cls, we cant
-        use the "cls$$n::func()" syntax, because, cls$$n wont actually
-        be a base class of D (D will derive from DynamicObjectData).
-
-        We should improve class derivation so that if D knows which cls
-        its derived from, it should use it.
-
-        And we should improve code gen here, so that we can use
-        p_cls$$n(parent)->cls$$n::func(), rather than resorting to
-        fully dynamic dispatch.
+        We have X::foo (which is non-static) inside a non-static
+        method of Y, where Y may or may not be derived from X, depending
+        on redeclared classes.
+        Revert to dynamic dispatch for this case.
       */
       m_valid = false;
-      setRedeclared();
-    } else {
-      ClassScopePtr cur = getOriginalScope();
-      if (!cur || getFunctionScope()->isStatic() ||
-          (cur != m_classScope &&
-           !cur->derivesFrom(ar, m_className, true, false))) {
-        m_valid = false;
-      }
     }
   }
   if (m_valid) {
     bool ret = false;
-    if (m_arrayParams) {
-      if (m_classScope) {
-        ret = true;
-        if (cg.inExpression()) {
-          m_ciTemp = cg.createNewLocalId(shared_from_this());
+    if (m_classScope &&
+        (m_arrayParams || !m_funcScope->isStatic())) {
+      ret = true;
+      if (cg.inExpression()) {
+        if (m_funcScope->isStatic()) {
           cg.wrapExpressionBegin();
+          m_ciTemp = cg.createNewLocalId(shared_from_this());
           cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp);
-          if (m_funcScope->isStatic()) {
-            cg_printf("mcp%d.rootObj = %s%s::s_class_name;\n",
-                      m_ciTemp,
-                      Option::ClassPrefix, m_classScope->getId(cg).c_str());
-          } else {
-            assert(getOriginalScope() && !getFunctionScope()->isStatic());
+          cg_printf("mcp%d.rootObj = %s%s::s_class_name;\n",
+                    m_ciTemp,
+                    Option::ClassPrefix, m_classScope->getId(cg).c_str());
+        } else {
+          FunctionScopeRawPtr thisFunc = getFunctionScope();
+          ClassScopePtr thisCls = getOriginalScope();
+          bool objCall = thisFunc && !thisFunc->isStatic() && thisCls &&
+            (thisCls == m_classScope ||
+             thisCls->derivesFrom(ar, m_className, true, false));
+          if (!objCall || m_arrayParams) {
+            cg.wrapExpressionBegin();
+            m_ciTemp = cg.createNewLocalId(shared_from_this());
+            cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp);
+          }
+          if (objCall && m_arrayParams) {
             cg_printf("mcp%d.obj = this;\n", m_ciTemp);
           }
         }
-      } else if (!m_funcScope->isUserFunction()) {
-        ret = true;
-        if (cg.inExpression()) {
-          cg.wrapExpressionBegin();
-          cg_printf("extern Variant %s%s(void*,CArrRef);\n",
-                    Option::InvokePrefix, m_funcScope->getId(cg).c_str());
-        }
+      }
+    } else if (m_arrayParams && !m_funcScope->isUserFunction()) {
+      ret = true;
+      if (cg.inExpression()) {
+        cg.wrapExpressionBegin();
+        cg_printf("extern Variant %s%s(void*,CArrRef);\n",
+                  Option::InvokePrefix, m_funcScope->getId(cg).c_str());
       }
     }
-    if (FunctionCall::preOutputCPP(cg, ar, state)) {
-      ret = true;
-    }
-    return ret;
+
+    return FunctionCall::preOutputCPP(cg, ar, state) || ret;
   }
 
   // Short circuit out if inExpression() returns false
@@ -1323,10 +1318,14 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
     }
   }
 
-
-  if (m_valid && !m_arrayParams) {
+  if (m_valid && m_ciTemp < 0 && !m_arrayParams) {
     if (!m_className.empty()) {
       assert(cls);
+      if (!m_funcScope->isStatic() && m_classScope->isRedeclaring() &&
+          m_classScope != getOriginalScope()) {
+        cg_printf("((%s%s*)getRedeclaredParent())->",
+                  Option::ClassPrefix, cls->getId(cg).c_str());
+      }
       cg_printf("%s%s::%s%s(", Option::ClassPrefix, cls->getId(cg).c_str(),
                 m_funcScope->getPrefix(m_params),
                 cg.formatLabel(m_funcScope->getName()).c_str());
@@ -1363,6 +1362,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
   } else {
     if (!m_class && m_className.empty()) {
       if (m_valid) {
+        assert(m_arrayParams && m_ciTemp < 0);
         cg_printf("%s%s(NULL, ", Option::InvokePrefix,
                   m_funcScope->getId(cg).c_str());
       } else if (canInvokeFewArgs() && !m_arrayParams) {
@@ -1372,9 +1372,12 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       }
     } else {
       if (m_valid) {
+        const char *prefix = m_arrayParams || !canInvokeFewArgs() ?
+          Option::InvokePrefix : Option::InvokeFewArgsPrefix;
+
         cg_printf("%s%s::%s%s(mcp%d, ",
                   Option::ClassPrefix, cls->getId(cg).c_str(),
-                  Option::InvokePrefix,
+                  prefix,
                   cg.formatLabel(m_funcScope->getName()).c_str(),
                   m_ciTemp);
       } else if (canInvokeFewArgs() && !m_arrayParams) {

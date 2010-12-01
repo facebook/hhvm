@@ -73,7 +73,6 @@ protected:
   bool m_voidWrapper; // void wrapper is needed
   bool m_allowVoidReturn;
   bool m_redeclared;
-  bool m_derivedFromRedeclaring;
   bool m_noStatic;
 
   // Extra arguments form an array, to which the scalar array optimization

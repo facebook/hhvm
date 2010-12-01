@@ -37,11 +37,10 @@ FunctionCall::FunctionCall
  ExpressionPtr nameExp, const std::string &name, ExpressionListPtr params,
  ExpressionPtr classExp)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    StaticClassName(classExp), m_nameExp(nameExp), m_params(params),
-    m_valid(false),
+    StaticClassName(classExp), m_nameExp(nameExp),
+    m_ciTemp(-1), m_params(params), m_valid(false),
     m_extraArg(0), m_variableArgument(false), m_voidReturn(false),
     m_voidWrapper(false), m_allowVoidReturn(false), m_redeclared(false),
-    m_derivedFromRedeclaring(false),
     m_noStatic(false), m_argArrayId(-1), m_argArrayHash(-1),
     m_argArrayIndex(-1) {
 

@@ -709,10 +709,10 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
               {
                 m_storage.weakRemove(v_idx);
                 {
-                  MethodCallPackage mcp1;
-                  mcp1.methodCall((GET_THIS()), NAMSTR(s_sys_ss21d85096, "rewind"), 0x1670096FDE27AF6ALL);
-                  const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-                  (mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant);
+                  MethodCallPackage mcp4;
+                  mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss21d85096, "rewind"), 0x1670096FDE27AF6ALL);
+                  const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
+                  (mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant);
                 }
                 return;
               }

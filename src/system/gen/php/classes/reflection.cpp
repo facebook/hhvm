@@ -833,10 +833,10 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
         {
           bool tmp5;
           {
-            MethodCallPackage mcp1;
-            mcp1.methodCall((v_param), NAMSTR(s_sys_ss454dd8cb, "isOptional"), 0x2D6EF48BBAB22735LL);
-            const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-            tmp5 = (toBoolean((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+            MethodCallPackage mcp6;
+            mcp6.methodCall((v_param), NAMSTR(s_sys_ss454dd8cb, "isOptional"), 0x2D6EF48BBAB22735LL);
+            const CallInfo *cit6  __attribute__((__unused__)) = mcp6.ci;
+            tmp5 = (toBoolean((mcp6.bindClass(info)->getMethFewArgs())(mcp6, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
           }
           if (tmp5) {
             {
@@ -4019,29 +4019,29 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   if (instanceOf(v_cls, NAMSTR(s_sys_ss6ae2e71d, "reflectionclass"))) {
     {
       {
-        MethodCallPackage mcp2;
-        mcp2.methodCall((v_cls), NAMSTR(s_sys_ss446f4f05, "fetch"), 0x5E82B850BB90B0FBLL);
-        const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
-        Variant tmp1(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 1, NAMSTR(s_sys_ss77e35232, "name"), null_variant, null_variant, null_variant, null_variant, null_variant)));
-        v_cls = tmp1;
+        MethodCallPackage mcp1;
+        mcp1.methodCall((v_cls), NAMSTR(s_sys_ss446f4f05, "fetch"), 0x5E82B850BB90B0FBLL);
+        const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+        Variant tmp2(((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 1, NAMSTR(s_sys_ss77e35232, "name"), null_variant, null_variant, null_variant, null_variant, null_variant)));
+        v_cls = tmp2;
       }
     }
   }
   {
-    LOOP_COUNTER(2);
-    Variant map3 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
-    for (ArrayIterPtr iter4 = map3.begin(s_class_name, true); !iter4->end(); iter4->next()) {
-      LOOP_COUNTER_CHECK(2);
-      iter4->second(v__);
-      v_name = iter4->first();
+    LOOP_COUNTER(3);
+    Variant map4 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
+    for (ArrayIterPtr iter5 = map4.begin(s_class_name, true); !iter5->end(); iter5->next()) {
+      LOOP_COUNTER_CHECK(3);
+      iter5->second(v__);
+      v_name = iter5->first();
       {
         {
-          bool tmp5;
+          bool tmp6;
           {
-            int tmp6((x_strcasecmp(toString(v_cls), toString(v_name))));
-            tmp5 = (equal(tmp6, 0LL));
+            int tmp7((x_strcasecmp(toString(v_cls), toString(v_name))));
+            tmp6 = (equal(tmp7, 0LL));
           }
-          if (tmp5) {
+          if (tmp6) {
             {
               return true;
             }
@@ -4051,36 +4051,36 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
     }
   }
   {
-    bool tmp7;
+    bool tmp8;
     {
-      const Variant &tmp8((t_fetch(NAMSTR(s_sys_ss2d13045e, "parent"))));
-      tmp7 = (empty(tmp8));
+      const Variant &tmp9((t_fetch(NAMSTR(s_sys_ss2d13045e, "parent"))));
+      tmp8 = (empty(tmp9));
     }
-    if (tmp7) {
+    if (tmp8) {
       {
         return false;
       }
     }
   }
   {
-    bool tmp9;
+    bool tmp10;
     {
-      const String &tmp10((toString(v_cls)));
-      const String &tmp11((toString(t_fetch(NAMSTR(s_sys_ss2d13045e, "parent")))));
-      int tmp12((x_strcasecmp(tmp10, tmp11)));
-      tmp9 = (equal(tmp12, 0LL));
+      const String &tmp11((toString(v_cls)));
+      const String &tmp12((toString(t_fetch(NAMSTR(s_sys_ss2d13045e, "parent")))));
+      int tmp13((x_strcasecmp(tmp11, tmp12)));
+      tmp10 = (equal(tmp13, 0LL));
     }
-    if (tmp9) {
+    if (tmp10) {
       {
         return true;
       }
     }
   }
   {
-    MethodCallPackage mcp3;
-    mcp3.methodCall((t_getparentclass()), NAMSTR(s_sys_ss1926c97e, "isSubclassOf"), 0x373333991926C97ELL);
-    const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
-    return wrap_variant((mcp3.bindClass(info)->getMethFewArgs())(mcp3, 1, v_cls, null_variant, null_variant, null_variant, null_variant, null_variant));
+    MethodCallPackage mcp14;
+    mcp14.methodCall((t_getparentclass()), NAMSTR(s_sys_ss1926c97e, "isSubclassOf"), 0x373333991926C97ELL);
+    const CallInfo *cit14  __attribute__((__unused__)) = mcp14.ci;
+    return wrap_variant((mcp14.bindClass(info)->getMethFewArgs())(mcp14, 1, v_cls, null_variant, null_variant, null_variant, null_variant, null_variant));
   }
 }
 namespace hphp_impl_splitter {}
@@ -4101,17 +4101,17 @@ Array c_ReflectionClass::t_getstaticproperties() {
         {
           bool tmp4;
           {
-            MethodCallPackage mcp4;
-            mcp4.methodCall((v_prop), NAMSTR(s_sys_ss1733f4e7, "isStatic"), 0x7A15DC56E8CC0B19LL);
-            const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
-            tmp4 = (toBoolean((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+            MethodCallPackage mcp5;
+            mcp5.methodCall((v_prop), NAMSTR(s_sys_ss1733f4e7, "isStatic"), 0x7A15DC56E8CC0B19LL);
+            const CallInfo *cit5  __attribute__((__unused__)) = mcp5.ci;
+            tmp4 = (toBoolean((mcp5.bindClass(info)->getMethFewArgs())(mcp5, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
           }
           if (tmp4) {
             {
               {
-                const Variant &tmp5((v_prop.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
-                Variant tmp6((v_prop));
-                v_ret.set(tmp5, (tmp6));
+                const Variant &tmp6((v_prop.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
+                Variant tmp7((v_prop));
+                v_ret.set(tmp6, (tmp7));
               }
             }
           }
@@ -4176,9 +4176,9 @@ Array c_ReflectionClass::t_getdefaultproperties() {
           if (tmp4) {
             {
               {
-                const Variant &tmp5((v_prop.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
-                Variant tmp6((v_prop));
-                v_ret.set(tmp5, (tmp6));
+                const Variant &tmp6((v_prop.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
+                Variant tmp7((v_prop));
+                v_ret.set(tmp6, (tmp7));
               }
             }
           }
@@ -4205,49 +4205,49 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   if (instanceOf(v_cls, NAMSTR(s_sys_ss6ae2e71d, "reflectionclass"))) {
     {
       {
-        MethodCallPackage mcp6;
-        mcp6.methodCall((v_cls), NAMSTR(s_sys_ss446f4f05, "fetch"), 0x5E82B850BB90B0FBLL);
-        const CallInfo *cit6  __attribute__((__unused__)) = mcp6.ci;
-        Variant tmp1(((mcp6.bindClass(info)->getMethFewArgs())(mcp6, 1, NAMSTR(s_sys_ss77e35232, "name"), null_variant, null_variant, null_variant, null_variant, null_variant)));
-        v_cls = tmp1;
+        MethodCallPackage mcp1;
+        mcp1.methodCall((v_cls), NAMSTR(s_sys_ss446f4f05, "fetch"), 0x5E82B850BB90B0FBLL);
+        const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+        Variant tmp2(((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 1, NAMSTR(s_sys_ss77e35232, "name"), null_variant, null_variant, null_variant, null_variant, null_variant)));
+        v_cls = tmp2;
       }
     }
   }
   {
-    p_ReflectionClass tmp2 = NEWOBJ(c_ReflectionClass)();
-    (tmp2->create(v_cls));
-    v_clsObj = tmp2;
+    p_ReflectionClass tmp3 = NEWOBJ(c_ReflectionClass)();
+    (tmp3->create(v_cls));
+    v_clsObj = tmp3;
   }
   {
-    bool tmp3;
+    bool tmp4;
     {
-      bool tmp4((toBoolean(v_clsObj->t_isinterface())));
-      tmp3 = (!(tmp4));
+      bool tmp5((toBoolean(v_clsObj->t_isinterface())));
+      tmp4 = (!(tmp5));
     }
-    if (tmp3) {
+    if (tmp4) {
       {
         {
-          p_ReflectionException tmp5 = NEWOBJ(c_ReflectionException)();
-          throw_exception((tmp5->create(VarNR(concat3(NAMSTR(s_sys_ss1558c380_1, "Interface "), toString(v_cls), NAMSTR(s_sys_ss5615a9b2, " is a Class")))), tmp5));
+          p_ReflectionException tmp6 = NEWOBJ(c_ReflectionException)();
+          throw_exception((tmp6->create(VarNR(concat3(NAMSTR(s_sys_ss1558c380_1, "Interface "), toString(v_cls), NAMSTR(s_sys_ss5615a9b2, " is a Class")))), tmp6));
         }
       }
     }
   }
   {
-    LOOP_COUNTER(6);
-    Variant map7 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
-    for (ArrayIterPtr iter8 = map7.begin(s_class_name, true); !iter8->end(); iter8->next()) {
-      LOOP_COUNTER_CHECK(6);
-      iter8->second(v__);
-      v_name = iter8->first();
+    LOOP_COUNTER(7);
+    Variant map8 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
+    for (ArrayIterPtr iter9 = map8.begin(s_class_name, true); !iter9->end(); iter9->next()) {
+      LOOP_COUNTER_CHECK(7);
+      iter9->second(v__);
+      v_name = iter9->first();
       {
         {
-          bool tmp9;
+          bool tmp10;
           {
-            int tmp10((x_strcasecmp(toString(v_cls), toString(v_name))));
-            tmp9 = (equal(tmp10, 0LL));
+            int tmp11((x_strcasecmp(toString(v_cls), toString(v_name))));
+            tmp10 = (equal(tmp11, 0LL));
           }
-          if (tmp9) {
+          if (tmp10) {
             {
               return true;
             }
@@ -4269,10 +4269,10 @@ namespace hphp_impl_splitter {}
 Variant c_ReflectionClass::t_getextensionname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtensionName);
   {
-    MethodCallPackage mcp7;
-    mcp7.methodCall((t_fetch(NAMSTR(s_sys_ss02406793, "extension"))), NAMSTR(s_sys_ss33e6769b, "getName"), 0x23F51CDECC198965LL);
-    const CallInfo *cit7  __attribute__((__unused__)) = mcp7.ci;
-    return wrap_variant((mcp7.bindClass(info)->getMethFewArgs())(mcp7, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant));
+    MethodCallPackage mcp1;
+    mcp1.methodCall((t_fetch(NAMSTR(s_sys_ss02406793, "extension"))), NAMSTR(s_sys_ss33e6769b, "getName"), 0x23F51CDECC198965LL);
+    const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+    return wrap_variant((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant));
   }
 }
 namespace hphp_impl_splitter {}
@@ -5075,12 +5075,12 @@ Array c_ReflectionExtension::t_getclassnames() {
       iter3->second(v_cls);
       {
         {
-          const Object &tmp4((toObject(v_cls)));
-          MethodCallPackage mcp8;
-          mcp8.methodCall((tmp4), NAMSTR(s_sys_ss33e6769b, "getName"), 0x23F51CDECC198965LL);
-          const CallInfo *cit8  __attribute__((__unused__)) = mcp8.ci;
-          Variant tmp5(((mcp8.bindClass(info)->getMethFewArgs())(mcp8, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
-          v_ret.append((tmp5));
+          const Object &tmp5((toObject(v_cls)));
+          MethodCallPackage mcp4;
+          mcp4.methodCall((tmp5), NAMSTR(s_sys_ss33e6769b, "getName"), 0x23F51CDECC198965LL);
+          const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
+          Variant tmp6(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+          v_ret.append((tmp6));
         }
       }
     }
@@ -6117,25 +6117,25 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name) {
         }
       }
       {
-        MethodCallPackage mcp9;
-        mcp9.methodCall((v_cls), NAMSTR(s_sys_ss53a3b5b6, "getMethod"), 0x0D81ECE253A3B5B6LL);
-        const CallInfo *cit9  __attribute__((__unused__)) = mcp9.ci;
-        Variant tmp2(((mcp9.bindClass(info)->getMethFewArgs())(mcp9, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
-        v_method = tmp2;
+        MethodCallPackage mcp2;
+        mcp2.methodCall((v_cls), NAMSTR(s_sys_ss53a3b5b6, "getMethod"), 0x0D81ECE253A3B5B6LL);
+        const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
+        Variant tmp3(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
+        v_method = tmp3;
       }
       if (toBoolean(v_method)) {
         {
           {
-            const Variant &tmp3((v_method.o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
-            m_info = tmp3;
+            const Variant &tmp4((v_method.o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
+            m_info = tmp4;
           }
           {
-            const Variant &tmp4((v_method.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
-            m_name = tmp4;
+            const Variant &tmp5((v_method.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
+            m_name = tmp5;
           }
           {
-            const Variant &tmp5((v_method.o_getPublic(NAMSTR(s_sys_ss1f74c210, "class"), true)));
-            m_class = tmp5;
+            const Variant &tmp6((v_method.o_getPublic(NAMSTR(s_sys_ss1f74c210, "class"), true)));
+            m_class = tmp6;
           }
         }
       }
@@ -6164,11 +6164,11 @@ Variant c_ReflectionMethod::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name
     }
   }
   {
-    MethodCallPackage mcp10;
-    mcp10.methodCall((v_cls), NAMSTR(s_sys_ss53a3b5b6, "getMethod"), 0x0D81ECE253A3B5B6LL);
-    const CallInfo *cit10  __attribute__((__unused__)) = mcp10.ci;
-    Variant tmp2(((mcp10.bindClass(info)->getMethFewArgs())(mcp10, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
-    v_obj = tmp2;
+    MethodCallPackage mcp2;
+    mcp2.methodCall((v_cls), NAMSTR(s_sys_ss53a3b5b6, "getMethod"), 0x0D81ECE253A3B5B6LL);
+    const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
+    Variant tmp3(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
+    v_obj = tmp3;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -7255,25 +7255,25 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
         }
       }
       {
-        MethodCallPackage mcp11;
-        mcp11.methodCall((v_cls), NAMSTR(s_sys_ss04fdcfb9, "getProperty"), 0x0FD73627FB023047LL);
-        const CallInfo *cit11  __attribute__((__unused__)) = mcp11.ci;
-        Variant tmp2(((mcp11.bindClass(info)->getMethFewArgs())(mcp11, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
-        v_prop = tmp2;
+        MethodCallPackage mcp2;
+        mcp2.methodCall((v_cls), NAMSTR(s_sys_ss04fdcfb9, "getProperty"), 0x0FD73627FB023047LL);
+        const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
+        Variant tmp3(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
+        v_prop = tmp3;
       }
       if (toBoolean(v_prop)) {
         {
           {
-            const Variant &tmp3((v_prop.o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
-            m_info = tmp3;
+            const Variant &tmp4((v_prop.o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
+            m_info = tmp4;
           }
           {
-            const Variant &tmp4((v_prop.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
-            m_name = tmp4;
+            const Variant &tmp5((v_prop.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
+            m_name = tmp5;
           }
           {
-            const Variant &tmp5((v_prop.o_getPublic(NAMSTR(s_sys_ss1f74c210, "class"), true)));
-            m_class = tmp5;
+            const Variant &tmp6((v_prop.o_getPublic(NAMSTR(s_sys_ss1f74c210, "class"), true)));
+            m_class = tmp6;
           }
         }
       }
@@ -7302,11 +7302,11 @@ Variant c_ReflectionProperty::ti_export(CStrRef cls, Variant v_cls, CVarRef v_na
     }
   }
   {
-    MethodCallPackage mcp12;
-    mcp12.methodCall((v_cls), NAMSTR(s_sys_ss04fdcfb9, "getProperty"), 0x0FD73627FB023047LL);
-    const CallInfo *cit12  __attribute__((__unused__)) = mcp12.ci;
-    Variant tmp2(((mcp12.bindClass(info)->getMethFewArgs())(mcp12, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
-    v_obj = tmp2;
+    MethodCallPackage mcp2;
+    mcp2.methodCall((v_cls), NAMSTR(s_sys_ss04fdcfb9, "getProperty"), 0x0FD73627FB023047LL);
+    const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
+    Variant tmp3(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
+    v_obj = tmp3;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -8753,15 +8753,15 @@ void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
   if ((toBoolean(v_func) && toBoolean(v_param))) {
     {
       {
-        MethodCallPackage mcp13;
-        mcp13.methodCall((v_func), NAMSTR(s_sys_ss32c2a32d, "getParameters"), 0x3E62225132C2A32DLL);
-        const CallInfo *cit13  __attribute__((__unused__)) = mcp13.ci;
-        Variant tmp1(((mcp13.bindClass(info)->getMethFewArgs())(mcp13, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
-        v_params = tmp1;
+        MethodCallPackage mcp1;
+        mcp1.methodCall((v_func), NAMSTR(s_sys_ss32c2a32d, "getParameters"), 0x3E62225132C2A32DLL);
+        const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+        Variant tmp2(((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+        v_params = tmp2;
       }
       {
-        const Variant &tmp2((v_params.rvalAt(v_param, true).o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
-        m_info = tmp2;
+        const Variant &tmp3((v_params.rvalAt(v_param, true).o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
+        m_info = tmp3;
       }
     }
   }

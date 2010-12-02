@@ -221,6 +221,19 @@ static void wrapValue(CodeGenerator &cg, AnalysisResultPtr ar,
   if (close) cg_printf(")");
 }
 
+void AssignmentExpression::preOutputStash(CodeGenerator &cg,
+                                          AnalysisResultPtr ar, int state) {
+  if (hasCPPTemp()) return;
+  if (m_value->hasCPPTemp() && Type::SameType(getType(), m_value->getType())) {
+    setUnused(true);
+    outputCPP(cg, ar);
+    cg_printf(";\n");
+    m_cppTemp = m_value->cppTemp();
+    return;
+  }
+  return Expression::preOutputStash(cg, ar, state);
+}
+
 bool AssignmentExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                         int state) {
   if (m_variable->is(Expression::KindOfArrayElementExpression)) {

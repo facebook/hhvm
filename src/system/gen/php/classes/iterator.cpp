@@ -2132,10 +2132,10 @@ namespace hphp_impl_splitter {}
 Variant c_AppendIterator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::getInnerIterator);
   {
-    MethodCallPackage mcp2;
-    mcp2.methodCall((m_iterators), NAMSTR(s_sys_ss7b94de24, "current"), 0x5B3A4A72846B21DCLL);
-    const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
-    return wrap_variant((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant));
+    MethodCallPackage mcp1;
+    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss7b94de24, "current"), 0x5B3A4A72846B21DCLL);
+    const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+    return wrap_variant((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant));
   }
 }
 namespace hphp_impl_splitter {}
@@ -2143,29 +2143,29 @@ namespace hphp_impl_splitter {}
 void c_AppendIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::rewind);
   {
-    MethodCallPackage mcp3;
-    mcp3.methodCall((m_iterators), NAMSTR(s_sys_ss21d85096, "rewind"), 0x1670096FDE27AF6ALL);
-    const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
-    (mcp3.bindClass(info)->getMethFewArgs())(mcp3, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant);
+    MethodCallPackage mcp1;
+    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss21d85096, "rewind"), 0x1670096FDE27AF6ALL);
+    const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+    (mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant);
   }
   {
-    bool tmp1;
+    bool tmp2;
     {
-      MethodCallPackage mcp4;
-      mcp4.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
-      const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
-      tmp1 = (toBoolean((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+      MethodCallPackage mcp3;
+      mcp3.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+      const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
+      tmp2 = (toBoolean((mcp3.bindClass(info)->getMethFewArgs())(mcp3, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
     }
-    if (tmp1) {
+    if (tmp2) {
       {
         {
-          MethodCallPackage mcp6;
-          mcp6.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
-          const CallInfo *cit6  __attribute__((__unused__)) = mcp6.ci;
           MethodCallPackage mcp5;
-          mcp5.methodCall(((mcp6.bindClass(info)->getMethFewArgs())(mcp6, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss21d85096, "rewind"), 0x1670096FDE27AF6ALL);
+          mcp5.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
           const CallInfo *cit5  __attribute__((__unused__)) = mcp5.ci;
-          (mcp5.bindClass(info)->getMethFewArgs())(mcp5, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant);
+          MethodCallPackage mcp4;
+          mcp4.methodCall(((mcp5.bindClass(info)->getMethFewArgs())(mcp5, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss21d85096, "rewind"), 0x1670096FDE27AF6ALL);
+          const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
+          (mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant);
         }
       }
     }
@@ -2176,20 +2176,20 @@ namespace hphp_impl_splitter {}
 bool c_AppendIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::valid);
   {
-    MethodCallPackage mcp7;
-    mcp7.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
-    const CallInfo *cit7  __attribute__((__unused__)) = mcp7.ci;
-    bool tmp1 = (toBoolean((mcp7.bindClass(info)->getMethFewArgs())(mcp7, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
-    if (tmp1) {
-      MethodCallPackage mcp9;
-      mcp9.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
-      const CallInfo *cit9  __attribute__((__unused__)) = mcp9.ci;
-      MethodCallPackage mcp8;
-      mcp8.methodCall(((mcp9.bindClass(info)->getMethFewArgs())(mcp9, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
-      const CallInfo *cit8  __attribute__((__unused__)) = mcp8.ci;
-      tmp1 = (toBoolean((mcp8.bindClass(info)->getMethFewArgs())(mcp8, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+    MethodCallPackage mcp1;
+    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+    const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+    bool tmp2 = (toBoolean((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+    if (tmp2) {
+      MethodCallPackage mcp4;
+      mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+      const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
+      MethodCallPackage mcp3;
+      mcp3.methodCall(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+      const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
+      tmp2 = (toBoolean((mcp3.bindClass(info)->getMethFewArgs())(mcp3, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
     }
-    return tmp1;
+    return tmp2;
   }
 }
 namespace hphp_impl_splitter {}
@@ -2197,22 +2197,22 @@ namespace hphp_impl_splitter {}
 Variant c_AppendIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::current);
   {
-    MethodCallPackage mcp10;
-    mcp10.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
-    const CallInfo *cit10  __attribute__((__unused__)) = mcp10.ci;
-    Variant tmp1;
-    if (toBoolean((mcp10.bindClass(info)->getMethFewArgs())(mcp10, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant))) {
-      MethodCallPackage mcp12;
-      mcp12.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
-      const CallInfo *cit12  __attribute__((__unused__)) = mcp12.ci;
-      MethodCallPackage mcp11;
-      mcp11.methodCall(((mcp12.bindClass(info)->getMethFewArgs())(mcp12, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss7b94de24, "current"), 0x5B3A4A72846B21DCLL);
-      const CallInfo *cit11  __attribute__((__unused__)) = mcp11.ci;
-      tmp1 = ((mcp11.bindClass(info)->getMethFewArgs())(mcp11, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant));
+    MethodCallPackage mcp1;
+    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+    const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+    Variant tmp2;
+    if (toBoolean((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant))) {
+      MethodCallPackage mcp4;
+      mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+      const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
+      MethodCallPackage mcp3;
+      mcp3.methodCall(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss7b94de24, "current"), 0x5B3A4A72846B21DCLL);
+      const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
+      tmp2 = ((mcp3.bindClass(info)->getMethFewArgs())(mcp3, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant));
     } else {
-      tmp1 = (null);
+      tmp2 = (null);
     }
-    return tmp1;
+    return tmp2;
   }
 }
 namespace hphp_impl_splitter {}
@@ -2220,22 +2220,22 @@ namespace hphp_impl_splitter {}
 Variant c_AppendIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::key);
   {
-    MethodCallPackage mcp13;
-    mcp13.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
-    const CallInfo *cit13  __attribute__((__unused__)) = mcp13.ci;
-    Variant tmp1;
-    if (toBoolean((mcp13.bindClass(info)->getMethFewArgs())(mcp13, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant))) {
-      MethodCallPackage mcp15;
-      mcp15.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
-      const CallInfo *cit15  __attribute__((__unused__)) = mcp15.ci;
-      MethodCallPackage mcp14;
-      mcp14.methodCall(((mcp15.bindClass(info)->getMethFewArgs())(mcp15, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss7db173af, "key"), 0x56EDB60C824E8C51LL);
-      const CallInfo *cit14  __attribute__((__unused__)) = mcp14.ci;
-      tmp1 = ((mcp14.bindClass(info)->getMethFewArgs())(mcp14, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant));
+    MethodCallPackage mcp1;
+    mcp1.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+    const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+    Variant tmp2;
+    if (toBoolean((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant))) {
+      MethodCallPackage mcp4;
+      mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+      const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
+      MethodCallPackage mcp3;
+      mcp3.methodCall(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss7db173af, "key"), 0x56EDB60C824E8C51LL);
+      const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
+      tmp2 = ((mcp3.bindClass(info)->getMethFewArgs())(mcp3, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant));
     } else {
-      tmp1 = (null);
+      tmp2 = (null);
     }
-    return tmp1;
+    return tmp2;
   }
 }
 namespace hphp_impl_splitter {}
@@ -2245,10 +2245,10 @@ void c_AppendIterator::t_next() {
   {
     bool tmp1;
     {
-      MethodCallPackage mcp16;
-      mcp16.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
-      const CallInfo *cit16  __attribute__((__unused__)) = mcp16.ci;
-      tmp1 = (!(toBoolean((mcp16.bindClass(info)->getMethFewArgs())(mcp16, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant))));
+      MethodCallPackage mcp2;
+      mcp2.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+      const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
+      tmp1 = (!(toBoolean((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant))));
     }
     if (tmp1) {
       {
@@ -2257,79 +2257,79 @@ void c_AppendIterator::t_next() {
     }
   }
   {
-    MethodCallPackage mcp18;
-    mcp18.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
-    const CallInfo *cit18  __attribute__((__unused__)) = mcp18.ci;
-    MethodCallPackage mcp17;
-    mcp17.methodCall(((mcp18.bindClass(info)->getMethFewArgs())(mcp18, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss447efd48, "next"), 0x3C6D50F3BB8102B8LL);
-    const CallInfo *cit17  __attribute__((__unused__)) = mcp17.ci;
-    (mcp17.bindClass(info)->getMethFewArgs())(mcp17, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant);
+    MethodCallPackage mcp4;
+    mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+    const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
+    MethodCallPackage mcp3;
+    mcp3.methodCall(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss447efd48, "next"), 0x3C6D50F3BB8102B8LL);
+    const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
+    (mcp3.bindClass(info)->getMethFewArgs())(mcp3, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant);
   }
   {
-    bool tmp2;
+    bool tmp5;
     {
-      MethodCallPackage mcp20;
-      mcp20.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
-      const CallInfo *cit20  __attribute__((__unused__)) = mcp20.ci;
-      MethodCallPackage mcp19;
-      mcp19.methodCall(((mcp20.bindClass(info)->getMethFewArgs())(mcp20, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
-      const CallInfo *cit19  __attribute__((__unused__)) = mcp19.ci;
-      tmp2 = (toBoolean((mcp19.bindClass(info)->getMethFewArgs())(mcp19, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+      MethodCallPackage mcp7;
+      mcp7.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+      const CallInfo *cit7  __attribute__((__unused__)) = mcp7.ci;
+      MethodCallPackage mcp6;
+      mcp6.methodCall(((mcp7.bindClass(info)->getMethFewArgs())(mcp7, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+      const CallInfo *cit6  __attribute__((__unused__)) = mcp6.ci;
+      tmp5 = (toBoolean((mcp6.bindClass(info)->getMethFewArgs())(mcp6, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
     }
-    if (tmp2) {
+    if (tmp5) {
       {
         return;
       }
     }
   }
   {
-    MethodCallPackage mcp21;
-    mcp21.methodCall((m_iterators), NAMSTR(s_sys_ss447efd48, "next"), 0x3C6D50F3BB8102B8LL);
-    const CallInfo *cit21  __attribute__((__unused__)) = mcp21.ci;
-    (mcp21.bindClass(info)->getMethFewArgs())(mcp21, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant);
+    MethodCallPackage mcp8;
+    mcp8.methodCall((m_iterators), NAMSTR(s_sys_ss447efd48, "next"), 0x3C6D50F3BB8102B8LL);
+    const CallInfo *cit8  __attribute__((__unused__)) = mcp8.ci;
+    (mcp8.bindClass(info)->getMethFewArgs())(mcp8, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant);
   }
-  LOOP_COUNTER(3);
+  LOOP_COUNTER(9);
   {
     while (true) {
       {
-        MethodCallPackage mcp22;
-        mcp22.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
-        const CallInfo *cit22  __attribute__((__unused__)) = mcp22.ci;
-        if (!(toBoolean((mcp22.bindClass(info)->getMethFewArgs())(mcp22, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)))) break;
+        MethodCallPackage mcp10;
+        mcp10.methodCall((m_iterators), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+        const CallInfo *cit10  __attribute__((__unused__)) = mcp10.ci;
+        if (!(toBoolean((mcp10.bindClass(info)->getMethFewArgs())(mcp10, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)))) break;
       }
-      LOOP_COUNTER_CHECK(3);
+      LOOP_COUNTER_CHECK(9);
       {
         {
-          MethodCallPackage mcp24;
-          mcp24.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
-          const CallInfo *cit24  __attribute__((__unused__)) = mcp24.ci;
-          MethodCallPackage mcp23;
-          mcp23.methodCall(((mcp24.bindClass(info)->getMethFewArgs())(mcp24, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss21d85096, "rewind"), 0x1670096FDE27AF6ALL);
-          const CallInfo *cit23  __attribute__((__unused__)) = mcp23.ci;
-          (mcp23.bindClass(info)->getMethFewArgs())(mcp23, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant);
+          MethodCallPackage mcp12;
+          mcp12.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+          const CallInfo *cit12  __attribute__((__unused__)) = mcp12.ci;
+          MethodCallPackage mcp11;
+          mcp11.methodCall(((mcp12.bindClass(info)->getMethFewArgs())(mcp12, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss21d85096, "rewind"), 0x1670096FDE27AF6ALL);
+          const CallInfo *cit11  __attribute__((__unused__)) = mcp11.ci;
+          (mcp11.bindClass(info)->getMethFewArgs())(mcp11, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant);
         }
         {
-          bool tmp4;
+          bool tmp13;
           {
-            MethodCallPackage mcp26;
-            mcp26.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
-            const CallInfo *cit26  __attribute__((__unused__)) = mcp26.ci;
-            MethodCallPackage mcp25;
-            mcp25.methodCall(((mcp26.bindClass(info)->getMethFewArgs())(mcp26, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
-            const CallInfo *cit25  __attribute__((__unused__)) = mcp25.ci;
-            tmp4 = (toBoolean((mcp25.bindClass(info)->getMethFewArgs())(mcp25, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+            MethodCallPackage mcp15;
+            mcp15.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+            const CallInfo *cit15  __attribute__((__unused__)) = mcp15.ci;
+            MethodCallPackage mcp14;
+            mcp14.methodCall(((mcp15.bindClass(info)->getMethFewArgs())(mcp15, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)), NAMSTR(s_sys_ss54808c44, "valid"), 0x6413CB5154808C44LL);
+            const CallInfo *cit14  __attribute__((__unused__)) = mcp14.ci;
+            tmp13 = (toBoolean((mcp14.bindClass(info)->getMethFewArgs())(mcp14, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
           }
-          if (tmp4) {
+          if (tmp13) {
             {
               return;
             }
           }
         }
         {
-          MethodCallPackage mcp27;
-          mcp27.methodCall((m_iterators), NAMSTR(s_sys_ss447efd48, "next"), 0x3C6D50F3BB8102B8LL);
-          const CallInfo *cit27  __attribute__((__unused__)) = mcp27.ci;
-          (mcp27.bindClass(info)->getMethFewArgs())(mcp27, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant);
+          MethodCallPackage mcp16;
+          mcp16.methodCall((m_iterators), NAMSTR(s_sys_ss447efd48, "next"), 0x3C6D50F3BB8102B8LL);
+          const CallInfo *cit16  __attribute__((__unused__)) = mcp16.ci;
+          (mcp16.bindClass(info)->getMethFewArgs())(mcp16, 0, null, null_variant, null_variant, null_variant, null_variant, null_variant);
         }
       }
     }
@@ -2341,14 +2341,14 @@ Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__call);
   {
     ArrayInit tmp1(2, true);
-    MethodCallPackage mcp28;
-    mcp28.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
-    const CallInfo *cit28  __attribute__((__unused__)) = mcp28.ci;
-    const Variant &tmp2(((mcp28.bindClass(info)->getMethFewArgs())(mcp28, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
-    tmp1.set(tmp2);
+    MethodCallPackage mcp2;
+    mcp2.methodCall((GET_THIS()), NAMSTR(s_sys_ss4f638bdc, "getInnerIterator"), 0x3106F858B09C7424LL);
+    const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
+    const Variant &tmp3(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+    tmp1.set(tmp3);
     tmp1.set(v_func);
-    const Array &tmp3((Array(tmp1)));
-    return x_call_user_func_array(VarNR(tmp3), toArray(v_params));
+    const Array &tmp4((Array(tmp1)));
+    return x_call_user_func_array(VarNR(tmp4), toArray(v_params));
   }
 }
 namespace hphp_impl_splitter {}

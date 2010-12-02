@@ -47,6 +47,7 @@ public:
   ExpressionPtr getValue() { return m_value;}
   int getLocalEffects() const;
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
+  void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar, int state);
   static bool SpecialAssignment(CodeGenerator &cg,
                                 AnalysisResultPtr ar,
                                 ExpressionPtr lval,

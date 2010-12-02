@@ -443,7 +443,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
   for (int i = 0; i < params->getCount(); i++) {
     ExpressionPtr param = (*params)[i];
     if (param->hasContext(Expression::RefParameter)) {
-      Symbol *sym = getVariables()->getSymbol(m_paramNames[i], true);
+      Symbol *sym = getVariables()->addSymbol(m_paramNames[i]);
       sym->setLvalParam();
       sym->setCallTimeRef();
     }
@@ -602,7 +602,7 @@ void FunctionScope::pushReturnType() {
   m_returnType.reset();
 }
 
-void FunctionScope::popReturnType(AnalysisResultPtr ar) {
+void FunctionScope::popReturnType() {
   if (m_overriding || m_perfectVirtual || m_pseudoMain) return;
 
   if (m_returnType) {

@@ -56,9 +56,15 @@ TypePtr Symbol::setType(AnalysisResultPtr ar, BlockScopeRawPtr scope,
 
   type = CoerceTo(ar, m_coerced, type);
   if (!Type::SameType(oldType, type)) {
-    scope->addUpdates(isStatic() ?
-                      BlockScope::UseKindStaticRef :
-                      BlockScope::UseKindNonStaticRef);
+    int useKind = BlockScope::UseKindNonStaticRef;
+    if (isConstant()) {
+      useKind = BlockScope::UseKindConstRef;
+    } else if (isStatic()) {
+      useKind = BlockScope::UseKindStaticRef;
+    } else if (isParameter()) {
+      useKind = BlockScope::UseKindCaller;
+    }
+    scope->addUpdates(useKind);
   }
 
   return type;
@@ -76,9 +82,15 @@ void Symbol::endLocal(BlockScopeRawPtr scope) {
     m_coerced = Type::Variant;
   }
   if (!Type::SameType(m_coerced, m_prevCoerced)) {
-    scope->addUpdates(isStatic() ?
-                      BlockScope::UseKindStaticRef :
-                      BlockScope::UseKindNonStaticRef);
+    int useKind = BlockScope::UseKindNonStaticRef;
+    if (isConstant()) {
+      useKind = BlockScope::UseKindConstRef;
+    } else if (isStatic()) {
+      useKind = BlockScope::UseKindStaticRef;
+    } else if (isParameter()) {
+      useKind = BlockScope::UseKindCaller;
+    }
+    scope->addUpdates(useKind);
   }
   m_prevCoerced.reset();
 }
@@ -99,6 +111,9 @@ void Symbol::import(BlockScopeRawPtr scope, const Symbol &src_sym) {
   if (src_sym.isDynamic()) {
     setDynamic();
   }
+  if (src_sym.isConstant()) {
+    setConstant();
+  }
   m_coerced = src_sym.m_coerced;
 }
 
@@ -116,7 +131,8 @@ void SymbolTable::CountTypes(std::map<std::string, int> &counts) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SymbolTable::SymbolTable(BlockScope &blockScope) : m_blockScope(blockScope) {
+SymbolTable::SymbolTable(BlockScope &blockScope, bool isConst) :
+    m_blockScope(blockScope), m_const(isConst) {
 }
 
 SymbolTable::~SymbolTable() {
@@ -183,17 +199,17 @@ Symbol *SymbolTable::getSymbol(const std::string &name) const {
   return NULL;
 }
 
-Symbol *SymbolTable::getSymbol(const std::string &name, bool add) {
+Symbol *SymbolTable::genSymbol(const std::string &name, bool konst) {
   std::map<std::string,Symbol>::iterator it = m_symbolMap.find(name);
   if (it != m_symbolMap.end()) {
+    ASSERT(konst == it->second.isConstant());
     return &it->second;
   }
-  if (add) {
-    Symbol *sym = &m_symbolMap[name];
-    sym->setName(name);
-    return sym;
-  }
-  return NULL;
+
+  Symbol *sym = &m_symbolMap[name];
+  sym->setName(name);
+  if (konst) sym->setConstant();
+  return sym;
 }
 
 TypePtr SymbolTable::getType(const std::string &name) {
@@ -232,7 +248,7 @@ ConstructPtr SymbolTable::getValue(const std::string &name) {
 }
 
 void SymbolTable::setSepExtension(const std::string &name) {
-  getSymbol(name, true)->setSep();
+  genSymbol(name, m_const)->setSep();
 }
 
 bool SymbolTable::isSepExtension(const std::string &name) const {
@@ -244,7 +260,7 @@ bool SymbolTable::isSepExtension(const std::string &name) const {
 
 TypePtr SymbolTable::setType(AnalysisResultPtr ar, const std::string &name,
                              TypePtr type, bool coerced) {
-  return setType(ar, getSymbol(name, true), type, coerced);
+  return setType(ar, genSymbol(name, m_const), type, coerced);
 }
 
 TypePtr SymbolTable::setType(AnalysisResultPtr ar, Symbol *sym,

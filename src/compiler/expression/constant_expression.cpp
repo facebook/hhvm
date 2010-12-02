@@ -139,7 +139,10 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultPtr ar) {
       BlockScopePtr block = ar->findConstantDeclarer(m_name);
       if (block) {
         sym = block->getConstants()->getSymbol(m_name);
-        if (sym && sym->isDynamic()) sym = 0;
+        if (sym && sym->isDynamic()) {
+          sym = 0;
+          m_dynamic = true;
+        }
       }
     }
     if (sym && sym->getValue()) {

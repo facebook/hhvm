@@ -61,7 +61,6 @@ AnalysisResult::AnalysisResult()
   : BlockScope("Root", "", StatementPtr(), BlockScope::ProgramScope),
     m_package(NULL), m_parseOnDemand(false), m_phase(ParseAllFiles),
     m_dynamicClass(false), m_dynamicFunction(false),
-    m_optCounter(0),
     m_scalarArraysCounter(0), m_paramRTTICounter(0),
     m_scalarArraySortedAvgLen(0), m_scalarArraySortedIndex(0),
     m_scalarArraySortedSumLen(0), m_scalarArrayCompressedTextSize(0),
@@ -850,28 +849,36 @@ struct PreOptVisitor {
 
 template<>
 int DepthFirstVisitor<PreOptVisitor>::visit(BlockScopeRawPtr scope) {
-  int optCount = m_optCounter + this->m_data.m_ar->getOptCounter();
+  scope->clearUpdated();
   StatementPtr stmt = scope->getStmt();
-  if (Option::LocalCopyProp || Option::EliminateDeadCode) {
-    if (MethodStatementPtr m =
-        dynamic_pointer_cast<MethodStatement>(stmt)) {
-      AliasManager am(-1);
-      if (am.optimize(this->m_data.m_ar, m) ||
-          optCount != m_optCounter + this->m_data.m_ar->getOptCounter()) {
-        return BlockScope::UseKindAny;
+  if (MethodStatementPtr m =
+      dynamic_pointer_cast<MethodStatement>(stmt)) {
+    while (true) {
+      if (Option::LocalCopyProp || Option::EliminateDeadCode) {
+        AliasManager am(-1);
+        if (am.optimize(this->m_data.m_ar, m)) {
+          scope->addUpdates(BlockScope::UseKindCaller);
+        }
       } else {
-        return 0;
+        StatementPtr rep = this->visitStmtRecur(stmt);
+        assert(!rep);
       }
+      int updates = scope->getUpdated();
+      scope->clearUpdated();
+      if (updates & BlockScope::UseKindCaller) {
+        if (!m->getFunctionScope()->getInlineAsExpr()) {
+          updates &= ~BlockScope::UseKindCaller;
+          if (!updates) continue;
+        }
+      }
+      return updates;
     }
+  } else {
+    StatementPtr rep = this->visitStmtRecur(stmt);
+    assert(!rep);
   }
 
-  StatementPtr rep = this->visitStmtRecur(stmt);
-  assert(!rep);
-  if (optCount != m_optCounter + this->m_data.m_ar->getOptCounter()) {
-    return BlockScope::UseKindAny;
-  }
-
-  return 0;
+  return scope->getUpdated();
 }
 
 template<>
@@ -911,7 +918,11 @@ int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
   bool pushPrev = m && !scope->isFirstPass() &&
     !scope->getContainingFunction()->inPseudoMain() &&
     this->m_data.m_ar->getPhase() != AnalysisResult::LastInference;
-  if (pushPrev) scope->getVariables()->beginLocal();
+  if (m) {
+    if (pushPrev) scope->getVariables()->beginLocal();
+    scope->getContainingFunction()->pushReturnType();
+  }
+
   int ret = 0;
   do {
     scope->clearUpdated();
@@ -931,9 +942,14 @@ int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
     scope->incPass();
   } while (scope->getUpdated());
 
-  if (pushPrev) {
-    scope->getVariables()->endLocal();
-    ret = (ret & BlockScope::UseKindCaller) | scope->getUpdated();
+  if (m) {
+    scope->getContainingFunction()->popReturnType();
+    if (pushPrev) {
+      scope->getVariables()->endLocal();
+      ret = 0;
+    }
+    ret |= scope->getUpdated();
+    scope->clearUpdated();
   }
 
   return ret;
@@ -957,6 +973,7 @@ void AnalysisResult::inferTypes() {
   for (BlockScopeRawPtrQueue::iterator it = scopes.begin(), end = scopes.end();
        it != end; ++it) {
     (*it)->setChangedScopes(&changed);
+    (*it)->clearUpdated();
   }
   dfv.visitDepthFirst(scopes);
 
@@ -979,33 +996,31 @@ struct PostOptVisitor {
 
 template<>
 int DepthFirstVisitor<PostOptVisitor>::visit(BlockScopeRawPtr scope) {
-  int optCount = m_optCounter + this->m_data.m_ar->getOptCounter();
+  scope->clearUpdated();
   StatementPtr stmt = scope->getStmt();
-  bool aliasOpts = Option::LocalCopyProp || Option::EliminateDeadCode;
-  if (aliasOpts || Option::StringLoopOpts) {
-    if (MethodStatementPtr m =
-        dynamic_pointer_cast<MethodStatement>(stmt)) {
+  bool done = false;
+  if (MethodStatementPtr m =
+      dynamic_pointer_cast<MethodStatement>(stmt)) {
+    bool aliasOpts = Option::LocalCopyProp || Option::EliminateDeadCode;
+    if (aliasOpts || Option::StringLoopOpts) {
       AliasManager am(1);
 
       int flag = am.optimize(this->m_data.m_ar, m);
       if (aliasOpts) {
-        if (flag ||
-            optCount != m_optCounter + this->m_data.m_ar->getOptCounter()) {
-          return BlockScope::UseKindAny;
-        } else {
-          return 0;
+        done = true;
+        if (flag) {
+          scope->addUpdates(BlockScope::UseKindCaller);
         }
       }
     }
   }
 
-  StatementPtr rep = this->visitStmtRecur(stmt);
-  assert(!rep);
-  if (optCount != m_optCounter + this->m_data.m_ar->getOptCounter()) {
-    return BlockScope::UseKindAny;
+  if (!done) {
+    StatementPtr rep = this->visitStmtRecur(stmt);
+    assert(!rep);
   }
 
-  return 0;
+  return scope->getUpdated();
 }
 
 template<>

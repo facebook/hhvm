@@ -160,7 +160,7 @@ ExpressionPtr Expression::unneededHelper(AnalysisResultPtr ar) {
   }
 
   if (change) {
-    ar->incOptCounter();
+    getScope()->addUpdates(BlockScope::UseKindCaller);
   }
 
   int n = elist->getCount();
@@ -177,7 +177,7 @@ ExpressionPtr Expression::unneeded(AnalysisResultPtr ar) {
     return static_pointer_cast<Expression>(shared_from_this());
   }
   if (!getContainedEffects()) {
-    ar->incOptCounter();
+    getScope()->addUpdates(BlockScope::UseKindCaller);
     return ScalarExpressionPtr
       (new ScalarExpression(getScope(), getLocation(),
                             Expression::KindOfScalarExpression,

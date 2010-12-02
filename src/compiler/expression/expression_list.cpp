@@ -349,7 +349,7 @@ void ExpressionList::optimize(AnalysisResultPtr ar) {
     }
   }
   if (changed) {
-    ar->incOptCounter();
+    getScope()->addUpdates(BlockScope::UseKindCaller);
   }
 }
 

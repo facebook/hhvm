@@ -34,7 +34,8 @@ using namespace boost;
 ///////////////////////////////////////////////////////////////////////////////
 
 ConstantTable::ConstantTable(BlockScope &blockScope)
-    : SymbolTable(blockScope), m_emptyJumpTable(false), m_hasDynamic(false) {
+    : SymbolTable(blockScope, true), m_emptyJumpTable(false),
+      m_hasDynamic(false) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,7 +48,7 @@ TypePtr ConstantTable::add(const std::string &name, TypePtr type,
     return Type::Boolean;
   }
 
-  Symbol *sym = getSymbol(name, true);
+  Symbol *sym = genSymbol(name, true);
   if (!sym->declarationSet()) {
     setType(ar, sym, type, true);
     sym->setDeclaration(construct);
@@ -74,7 +75,7 @@ TypePtr ConstantTable::add(const std::string &name, TypePtr type,
 }
 
 void ConstantTable::setDynamic(AnalysisResultPtr ar, const std::string &name) {
-  Symbol *sym = getSymbol(name, true);
+  Symbol *sym = genSymbol(name, true);
   sym->setDynamic();
   m_hasDynamic = true;
   setType(ar, sym, Type::Variant, true);
@@ -82,7 +83,7 @@ void ConstantTable::setDynamic(AnalysisResultPtr ar, const std::string &name) {
 
 void ConstantTable::setValue(AnalysisResultPtr ar, const std::string &name,
                              ExpressionPtr value) {
-  getSymbol(name, true)->setValue(value);
+  genSymbol(name, true)->setValue(value);
 }
 
 bool ConstantTable::isRecursivelyDeclared(AnalysisResultPtr ar,
@@ -159,7 +160,7 @@ TypePtr ConstantTable::check(const std::string &name, TypePtr type,
   if (name == "true" || name == "false") {
     actualType = Type::Boolean;
   } else {
-    Symbol *sym = getSymbol(name, true);
+    Symbol *sym = genSymbol(name, true);
     if (!sym->valueSet()) {
       if (ar->getPhase() != AnalysisResult::AnalyzeInclude) {
         actualType = checkBases(name, type, coerce, ar, construct,

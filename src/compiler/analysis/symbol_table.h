@@ -64,6 +64,8 @@ public:
   bool isSep() const { return m_flags.m_sep; }
   void setSystem() { m_flags.m_system = true; }
   void setSep() { m_flags.m_sep = true; }
+  bool isConstant() const { return m_flags.m_constant; }
+  void setConstant() { m_flags.m_constant = true; }
 
   ConstructPtr getValue() const { return m_value; }
   ConstructPtr getDeclaration() const { return m_declaration; }
@@ -151,6 +153,7 @@ private:
       unsigned m_value_set : 1;
       unsigned m_hasStaticInit : 1;
       unsigned m_hasClassInit : 1;
+      unsigned m_constant : 1;
 
       /* common */
       unsigned m_system : 1;
@@ -201,7 +204,7 @@ public:
   BlockScope *getScopePtr() const { return &m_blockScope; }
   BlockScopeRawPtr getBlockScope() { return BlockScopeRawPtr(&m_blockScope); }
 public:
-  SymbolTable(BlockScope &blockScope);
+  SymbolTable(BlockScope &blockScope, bool isConst);
   SymbolTable();
   virtual ~SymbolTable();
 
@@ -269,12 +272,12 @@ public:
   virtual TypePtr setType(AnalysisResultPtr ar, Symbol *sym,
                           TypePtr type, bool coerced);
   Symbol *getSymbol(const std::string &name) const;
-  Symbol *getSymbol(const std::string &name, bool add);
 
   FunctionScopeRawPtr getFunctionScope();
   ClassScopeRawPtr getClassScope();
   FileScopeRawPtr getFileScope();
 protected:
+  Symbol *genSymbol(const std::string &name, bool konst);
   typedef std::map<std::string,Symbol> StringToSymbolMap;
   BlockScope &m_blockScope;     // owner
 
@@ -283,6 +286,8 @@ protected:
 
   void countTypes(std::map<std::string, int> &counts);
   std::string getEscapedText(Variant v, int &len);
+private:
+  bool m_const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

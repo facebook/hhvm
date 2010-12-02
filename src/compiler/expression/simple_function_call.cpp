@@ -264,7 +264,11 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       ExpressionPtr ename = (*m_params)[0];
       if (ConstantExpressionPtr cname =
           dynamic_pointer_cast<ConstantExpression>(ename)) {
-
+        /*
+          Hack: If the name of the constant being defined is itself
+          a constant expression, assume that its not yet defined.
+          So define(FOO, 'bar') is equivalent to define('FOO', 'bar').
+        */
         ename = ExpressionPtr(
           new ScalarExpression(cname->getScope(), cname->getLocation(),
                                KindOfScalarExpression,
@@ -638,12 +642,11 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
           // not found (i.e., undefined)
           if (!block) break;
           constants = block->getConstants();
-          // already set to be dynamic
           Symbol *sym = constants->getSymbol(symbol);
           assert(sym);
           if (!sym->isDynamic() && sym->getValue() != (*m_params)[1]) {
             sym->setValue((*m_params)[1]);
-            ar->incOptCounter();
+            getScope()->addUpdates(BlockScope::UseKindConstRef);
           }
           break;
         }

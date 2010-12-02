@@ -110,7 +110,7 @@ StatementPtr ClassConstant::preOptimize(AnalysisResultPtr ar) {
 
     Symbol *sym = getScope()->getConstants()->getSymbol(name);
     if (sym->getValue() != val) {
-      ar->incOptCounter();
+      getScope()->addUpdates(BlockScope::UseKindConstRef);
       sym->setValue(val);
     }
   }

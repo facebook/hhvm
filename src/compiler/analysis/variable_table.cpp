@@ -61,7 +61,7 @@ string VariableTable::StaticGlobalInfo::getId
 ///////////////////////////////////////////////////////////////////////////////
 
 VariableTable::VariableTable(BlockScope &blockScope)
-    : SymbolTable(blockScope), m_attribute(0), m_nextParam(0),
+    : SymbolTable(blockScope, false), m_attribute(0), m_nextParam(0),
       m_hasGlobal(false), m_hasStatic(false),
       m_hasPrivate(false), m_hasNonStaticPrivate(false),
       m_forcedVariants(0) {
@@ -264,7 +264,7 @@ ConstructPtr VariableTable::getStaticInitVal(string varName) {
 
 bool VariableTable::setStaticInitVal(string varName,
                                      ConstructPtr value) {
-  Symbol *sym = getSymbol(varName, true);
+  Symbol *sym = addSymbol(varName);
   bool exists = sym->getStaticInitVal();
   sym->setStaticInitVal(value);
   return exists;
@@ -278,7 +278,7 @@ ConstructPtr VariableTable::getClassInitVal(string varName) {
 }
 
 bool VariableTable::setClassInitVal(string varName, ConstructPtr value) {
-  Symbol *sym = getSymbol(varName, true);
+  Symbol *sym = addSymbol(varName);
   bool exists = sym->getClassInitVal();
   sym->setClassInitVal(value);
   return exists;
@@ -288,7 +288,7 @@ bool VariableTable::setClassInitVal(string varName, ConstructPtr value) {
 
 TypePtr VariableTable::addParam(const string &name, TypePtr type,
                                 AnalysisResultPtr ar, ConstructPtr construct) {
-  Symbol *sym = getSymbol(name, true);
+  Symbol *sym = addSymbol(name);
   if (!sym->isParameter()) {
     sym->setParameterIndex(m_nextParam++);
   }
@@ -340,7 +340,7 @@ TypePtr VariableTable::add(const string &name, TypePtr type,
                            ConstructPtr construct,
                            ModifierExpressionPtr modifiers,
                            bool checkError /* = true */) {
-  return add(getSymbol(name, true), type, implicit, ar,
+  return add(addSymbol(name), type, implicit, ar,
              construct, modifiers, checkError);
 }
 
@@ -405,7 +405,7 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
 TypePtr VariableTable::checkVariable(const string &name, TypePtr type,
                                      bool coerce, AnalysisResultPtr ar,
                                      ConstructPtr construct, int &properties) {
-  return checkVariable(getSymbol(name, true), type,
+  return checkVariable(addSymbol(name), type,
                        coerce, ar, construct, properties);
 }
 
@@ -468,7 +468,7 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
     }
 
     if (!cls) {
-      sym = getSymbol(name, true);
+      sym = addSymbol(name);
       if (m_blockScope.is(BlockScope::ClassScope)) {
         Compiler::Error(Compiler::UseUndeclaredVariable, construct);
       }
@@ -517,23 +517,23 @@ bool VariableTable::checkRedeclared(const string &name,
 }
 
 void VariableTable::addLocalGlobal(const string &name) {
-  getSymbol(name, true)->setLocalGlobal();
+  addSymbol(name)->setLocalGlobal();
 }
 
 void VariableTable::addNestedStatic(const string &name) {
-  getSymbol(name, true)->setNestedStatic();
+  addSymbol(name)->setNestedStatic();
 }
 
 void VariableTable::addLvalParam(const string &name) {
-  getSymbol(name, true)->setLvalParam();
+  addSymbol(name)->setLvalParam();
 }
 
 void VariableTable::addUsed(const string &name) {
-  getSymbol(name, true)->setUsed();
+  addSymbol(name)->setUsed();
 }
 
 void VariableTable::addNeeded(const string &name) {
-  getSymbol(name, true)->setNeeded();
+  addSymbol(name)->setNeeded();
 }
 
 bool VariableTable::checkUnused(Symbol *sym) {
@@ -604,7 +604,7 @@ void VariableTable::forceVariant(AnalysisResultPtr ar,
 
 TypePtr VariableTable::setType(AnalysisResultPtr ar, const std::string &name,
                                TypePtr type, bool coerce) {
-  return setType(ar, getSymbol(name, true), type, coerce);
+  return setType(ar, addSymbol(name), type, coerce);
 }
 
 TypePtr VariableTable::setType(AnalysisResultPtr ar, Symbol *sym,
@@ -645,7 +645,7 @@ void VariableTable::dumpStats(std::map<string, int> &typeCounts) {
 }
 
 void VariableTable::addSuperGlobal(const string &name) {
-  getSymbol(name, true)->setSuperGlobal();
+  addSymbol(name)->setSuperGlobal();
 }
 
 bool VariableTable::isConvertibleSuperGlobal(const string &name) const {

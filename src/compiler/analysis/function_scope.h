@@ -182,7 +182,7 @@ public:
   TypePtr getReturnType() const {
     return m_prevReturn ? m_prevReturn : m_returnType;
   }
-  void popReturnType(AnalysisResultPtr ar);
+  void popReturnType();
   bool needsTypeCheckWrapper() const;
   const char *getPrefix(ExpressionListPtr params);
 

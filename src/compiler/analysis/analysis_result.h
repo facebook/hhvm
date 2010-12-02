@@ -141,9 +141,6 @@ public:
   void inferTypes();
   void postOptimize();
 
-  void incOptCounter() { m_optCounter++; }
-  int getOptCounter() const { return m_optCounter; }
-
   void containsDynamicFunctionCall() { m_dynamicFunction = true;}
   void containsDynamicClass() { m_dynamicClass = true;}
 
@@ -355,7 +352,6 @@ private:
   StatementPtr m_stmt;
 
   std::string m_outputPath;
-  int m_optCounter;
 
   std::map<std::string, int> m_scalarArrays;
   Mutex m_namedScalarArraysMutex;

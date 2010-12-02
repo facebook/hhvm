@@ -163,6 +163,10 @@ public:
   void getNames(std::set<std::string> &names,
                 bool collectPrivate = true) const;
 
+  Symbol *addSymbol(const std::string &name) {
+    return genSymbol(name, false);
+  }
+
   /**
    * Add a function's parameter to this table.
    */

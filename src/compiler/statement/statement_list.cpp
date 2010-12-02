@@ -370,7 +370,7 @@ StatementPtr StatementList::postOptimize(AnalysisResultPtr ar) {
       if (Option::EliminateDeadCode ||
           static_pointer_cast<ExpStatement>(s)->getExpression()->isScalar()) {
         removeElement(i--);
-        ar->incOptCounter();
+        getScope()->addUpdates(BlockScope::UseKindCaller);
         continue;
       }
     }

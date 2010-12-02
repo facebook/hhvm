@@ -332,7 +332,6 @@ void MethodStatement::inferTypes(AnalysisResultPtr ar) {
 void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
   FunctionScopeRawPtr funcScope = getFunctionScope();
   bool pseudoMain = funcScope->inPseudoMain();
-  funcScope->pushReturnType();
 
   if (ar->getPhase() == AnalysisResult::FirstInference && m_stmt) {
     if (m_stmt->hasRetExp() ||
@@ -347,7 +346,7 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
       }
       if (!lastIsReturn && (!pseudoMain || Option::GenerateCPPMain)) {
         ExpressionPtr constant =
-          funcScope->inPseudoMain() ? CONSTANT("true") : CONSTANT("null");
+          makeConstant(ar, funcScope->inPseudoMain() ? "true" : "null");
         ReturnStatementPtr returnStmt =
           ReturnStatementPtr(new ReturnStatement(getScope(), getLocation(),
             Statement::KindOfReturnStatement, constant));
@@ -362,7 +361,6 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
   if (m_stmt) {
     m_stmt->inferTypes(ar);
   }
-  funcScope->popReturnType(ar);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

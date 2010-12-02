@@ -52,7 +52,7 @@ ExpressionPtr SimpleVariable::clone() {
 // static analysis functions
 
 void SimpleVariable::updateSymbol(SimpleVariablePtr src) {
-  m_sym = getScope()->getVariables()->getSymbol(m_name, true);
+  m_sym = getScope()->getVariables()->addSymbol(m_name);
   if (src && src->m_sym) {
     m_sym->update(src->m_sym);
   }
@@ -87,7 +87,7 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
   } else if (m_name == "GLOBALS") {
     m_globals = true;
   } else {
-    m_sym = variables->getSymbol(m_name, true);
+    m_sym = variables->addSymbol(m_name);
   }
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {

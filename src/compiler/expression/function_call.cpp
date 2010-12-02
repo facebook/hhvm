@@ -126,8 +126,7 @@ void FunctionCall::markRefParams(FunctionScopePtr func,
           func->isReferenceVariableArgument()) {
         p->setContext(Expression::RefValue);
       } else if (i < mpc && p->hasContext(RefParameter)) {
-        Symbol *sym = func->getVariables()->getSymbol(
-          func->getParamName(i), true);
+        Symbol *sym = func->getVariables()->addSymbol(func->getParamName(i));
         sym->setLvalParam();
         sym->setCallTimeRef();
       }

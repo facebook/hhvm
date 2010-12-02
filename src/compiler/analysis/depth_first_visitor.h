@@ -27,14 +27,14 @@ namespace HPHP {
 template <class T>
 class DepthFirstVisitor {
 public:
-  DepthFirstVisitor(T d) : m_data(d), m_optCounter(0) {}
+  DepthFirstVisitor(T d) : m_data(d) {}
 
   ExpressionPtr visitExprRecur(ExpressionPtr e) {
     for (int i = 0, n = e->getKidCount(); i < n; i++) {
       if (ExpressionPtr kid = e->getNthExpr(i)) {
         ExpressionPtr rep = visitExprRecur(kid);
         if (rep) {
-          m_optCounter++;
+          e->getScope()->addUpdates(BlockScope::UseKindCaller);
           e->setNthKid(i, rep);
         }
       }
@@ -61,14 +61,14 @@ public:
           if (scope) scope->incLoopNestedLevel();
           if (StatementPtr rep = visitStmtRecur(s)) {
             stmt->setNthKid(i, rep);
-            m_optCounter++;
+            stmt->getScope()->addUpdates(BlockScope::UseKindCaller);
           }
           if (scope) scope->decLoopNestedLevel();
         } else {
           ExpressionPtr e = boost::dynamic_pointer_cast<Expression>(kid);
           if (ExpressionPtr rep = visitExprRecur(e)) {
             stmt->setNthKid(i, rep);
-            m_optCounter++;
+            stmt->getScope()->addUpdates(BlockScope::UseKindCaller);
           }
         }
       }
@@ -107,7 +107,7 @@ public:
              end = changed->end(); it != end; ) {
         BlockScopeRawPtr bs = *it;
         changed->erase(it++);
-        bs->changed(queue, bs->getUpdated() | BlockScope::UseKindAny);
+        bs->changed(queue, bs->getUpdated());
         bs->clearUpdated();
       }
     }
@@ -137,7 +137,6 @@ public:
   int visit(BlockScopeRawPtr scope);
 private:
   T     m_data;
-  int   m_optCounter;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

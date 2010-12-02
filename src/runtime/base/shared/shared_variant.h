@@ -79,6 +79,7 @@ public:
 
   // recursively get stats from the SharedVariant
   virtual void getStats(SharedVariantStats *stat) = 0;
+  virtual int32 getSpaceUsage() { return 0; }
 
   // whether it is an object, or an array that recursively contains an object
   // or an array with circular reference

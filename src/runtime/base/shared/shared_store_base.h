@@ -36,6 +36,7 @@ public:
   bool expired() const;
   SharedVariant *var;
   int64 expiry;
+  int32 size;
 };
 
 class SharedStore {
@@ -69,6 +70,7 @@ public:
     litstr key;
     int len;
     SharedVariant *value;
+    int32 size;
   };
   virtual void prime(const std::vector<KeyValuePair> &vars) = 0;
 

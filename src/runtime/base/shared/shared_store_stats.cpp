@@ -213,7 +213,6 @@ int32 SharedStoreStats::s_keySize = 0;
 int32 SharedStoreStats::s_variantCount = 0;
 int64 SharedStoreStats::s_dataSize = 0;
 int64 SharedStoreStats::s_dataTotalSize = 0;
-int64 SharedStoreStats::s_totalSize = 0;
 int64 SharedStoreStats::s_deleteSize = 0;
 int64 SharedStoreStats::s_replaceSize = 0;
 
@@ -229,7 +228,7 @@ string SharedStoreStats::report_basic() {
   out << "{\n";
   out << "\"APCSizeStats\": {\n";
   writeEntryInt(out, "Key_Count", s_keyCount, 1);
-  writeEntryInt(out, "Size_Total", s_totalSize, 1);
+  writeEntryInt(out, "Size_Total", s_keySize + s_dataTotalSize, 1);
   writeEntryInt(out, "Size_Key", s_keySize, 1);
   writeEntryInt(out, "Size_Data", s_dataTotalSize, 1, true);
   out << "}\n";
@@ -239,7 +238,7 @@ string SharedStoreStats::report_basic() {
 
 string SharedStoreStats::report_basic_flat() {
   ostringstream out;
-  out << "{ " << "\"hphp.apc.size_total\":" << s_totalSize
+  out << "{ " << "\"hphp.apc.size_total\":" << s_keySize + s_dataTotalSize
       << ", " << "\"hphp.apc.key_count\":" << s_keyCount
       << ", " << "\"hphp.apc.size_key\":" << s_keySize
       << ", " << "\"hphp.apc.size_data\":" << s_dataTotalSize
@@ -332,7 +331,6 @@ void SharedStoreStats::remove(SharedValueProfile *svp, bool replace) {
   s_dataSize -= svp->var.dataSize;
   s_dataTotalSize -= svp->var.dataTotalSize;
   s_variantCount -= svp->var.variantCount;
-  s_totalSize -= svp->totalSize;
   s_keySize -= svp->keySize;
   if (replace) s_replaceSize += svp->totalSize;
   else s_deleteSize += svp->totalSize;
@@ -343,13 +341,35 @@ void SharedStoreStats::add(SharedValueProfile *svp) {
   s_dataSize += svp->var.dataSize;
   s_dataTotalSize += svp->var.dataTotalSize;
   s_variantCount += svp->var.variantCount;
-  s_totalSize += svp->totalSize;
   s_keySize += svp->keySize;
   s_keyCount++;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // Hooks
+
+void SharedStoreStats::addDirect(int32 keySize, int32 dataTotal) {
+  lock();
+  s_keyCount++;
+  s_keySize += keySize;
+  s_dataTotalSize += dataTotal;
+  unlock();
+}
+
+void SharedStoreStats::removeDirect(int32 keySize, int32 dataTotal) {
+  lock();
+  s_keyCount--;
+  s_keySize -= keySize;
+  s_dataTotalSize -= dataTotal;
+  unlock();
+}
+
+void SharedStoreStats::updateDirect(int32 dataTotalOld, int32 dataTotalNew) {
+  lock();
+  s_dataTotalSize -= dataTotalOld;
+  s_dataTotalSize += dataTotalNew;
+  unlock();
+}
 
 void SharedStoreStats::onClear() {
   lock();
@@ -382,7 +402,6 @@ void SharedStoreStats::onDelete(StringData *key, SharedVariant *var,
   svpTemp.calcInd(key, var);
 
   lock();
-  remove(&svpTemp, replace);
 
   if (RuntimeOption::EnableAPCSizeDetail) {
     SharedValueProfile *svp;
@@ -442,8 +461,6 @@ void SharedStoreStats::onStore(StringData *key, SharedVariant *var,
   }
 
   lock();
-
-  add(svpInd);
 
   if (RuntimeOption::EnableAPCSizeGroup) {
     SharedValueProfile *group;

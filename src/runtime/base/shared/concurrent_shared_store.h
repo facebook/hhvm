@@ -41,22 +41,7 @@ public:
   virtual int size() {
     return m_vars.size();
   }
-  virtual void count(int &reachable, int &expired, int &persistent) {
-    reachable = expired = persistent = 0;
-    int now = time(NULL);
-    WriteLock l(m_lock);
-    for (Map::const_iterator iter = m_vars.begin();
-         iter != m_vars.end(); ++iter) {
-      reachable += iter->second.var->countReachable();
-
-      int64 expiration = iter->second.expiry;
-      if (expiration == 0) {
-        persistent++;
-      } else if (expiration <= now) {
-        expired++;
-      }
-    }
-  }
+  virtual void count(int &reachable, int &expired, int &persistent);
   virtual bool get(CStrRef key, Variant &value);
   virtual bool store(CStrRef key, CVarRef val, int64 ttl,
                      bool overwrite = true);
@@ -96,42 +81,9 @@ protected:
   typedef tbb::concurrent_hash_map<const char*, StoreValue, charHashCompare>
     Map;
 
-  virtual void clear() {
-    WriteLock l(m_lock);
-    if (RuntimeOption::EnableAPCSizeStats) {
-      SharedStoreStats::onClear();
-    }
-    for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
-         ++iter) {
-      iter->second.var->decRef();
-      free((void *)iter->first);
-    }
-    m_vars.clear();
-  }
+  virtual void clear();
 
-  /**
-   * The Map::accessor here establishes a write lock, which means that other
-   * threads, protected by read locks through Map::const_accessor, will not
-   * read erased values from APC.
-   * The ReadLock here is to sync with clear(), which only has a WriteLock,
-   * not a specific accessor.
-   */
-  virtual bool eraseImpl(CStrRef key, bool expired) {
-    if (key.isNull()) return false;
-    ReadLock l(m_lock);
-    Map::accessor acc;
-    if (m_vars.find(acc, key.data())) {
-      if (expired && !acc->second.expired()) {
-        return false;
-      }
-      if (RuntimeOption::EnableAPCSizeStats) {
-        SharedStoreStats::onDelete(key.get(), acc->second.var, false);
-      }
-      eraseAcc(acc);
-      return true;
-    }
-    return false;
-  }
+  virtual bool eraseImpl(CStrRef key, bool expired);
 
   void eraseAcc(Map::accessor &acc) {
     acc->second.var->decRef();
@@ -165,43 +117,7 @@ protected:
   uint64 m_purgeCounter;
 
   // Should be called outside m_lock
-  void purgeExpired() {
-    if ((atomic_add(m_purgeCounter, (uint64)1) %
-         RuntimeOption::ApcPurgeFrequency) != 0) return;
-    time_t now = time(NULL);
-    {
-      // Check if there's work to do
-      ReadLock lock(m_expirationQueueLock);
-      if (m_expirationQueue.empty() || m_expirationQueue.top().second > now) {
-        // No work
-        return;
-      }
-    }
-    // Purge items n at a time. The only operation under the write lock is
-    // the pop
-#define PURGE_RATE 256
-    const char* s[PURGE_RATE];
-    while (true) {
-      int i;
-      {
-        WriteLock lock(m_expirationQueueLock);
-        const ExpirationPair *p = NULL;
-        for (i = 0; i < PURGE_RATE && !m_expirationQueue.empty() &&
-               (p = &m_expirationQueue.top())->second < now;
-             ++i, m_expirationQueue.pop()) {
-          s[i] = p->first;
-        }
-      }
-      for (int j = 0; j < i; ++j) {
-        eraseImpl(s[j], true);
-        free((void *)s[j]);
-      }
-      if (i < PURGE_RATE) {
-        // No work left
-        break;
-      }
-    }
-  }
+  void purgeExpired();
 
   void addToExpirationQueue(const char* key, int64 etime) {
     const char *copy = strdup(key);
@@ -209,7 +125,6 @@ protected:
     WriteLock lock(m_expirationQueueLock);
     m_expirationQueue.push(p);
   }
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

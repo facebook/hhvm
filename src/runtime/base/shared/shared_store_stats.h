@@ -97,7 +97,6 @@ public:
     s_variantCount = 0;
     s_dataSize = 0;
     s_dataTotalSize = 0;
-    s_totalSize = 0;
     s_deleteSize = 0;
     s_replaceSize = 0;
   }
@@ -106,6 +105,10 @@ public:
   static std::string report_basic_flat();
   static std::string report_keys();
   static bool snapshot(const char *filename, std::string& keySample);
+
+  static void addDirect(int32 keySize, int32 dataTotal);
+  static void removeDirect(int32 keySize, int32 dataTotal);
+  static void updateDirect(int32 dataTotalOld, int32 dataTotalNew);
 
 protected:
   static Mutex s_lock;
@@ -116,7 +119,6 @@ protected:
   static int64 s_dataSize; // how large is the data
   static int64 s_dataTotalSize; // how much space to hold data
                                 // including structures
-  static int64 s_totalSize; // total memory usage
   static int64 s_deleteSize;
   static int64 s_replaceSize;
 

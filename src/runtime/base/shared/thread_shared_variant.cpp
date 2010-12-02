@@ -414,6 +414,48 @@ SharedVariant* ThreadSharedVariant::convertObj(CVarRef var) {
   return tmp;
 }
 
+int32 ThreadSharedVariant::getSpaceUsage() {
+  int32 size = sizeof(ThreadSharedVariant);
+  if (m_type <= KindOfDouble) return size;
+  switch (m_type) {
+  case KindOfObject:
+    if (getIsObj()) {
+      return size + m_data.obj->getSpaceUsage();
+    }
+    // fall through
+  case KindOfString:
+    if (m_data.str->isStatic()) {
+      break;
+    }
+    size += sizeof(StringData) + m_data.str->size();
+    break;
+  default:
+    ASSERT(is(KindOfArray));
+    if (getSerializedArray()) {
+      size += sizeof(StringData) + m_data.str->size();
+    } else if (getIsVector()) {
+      size += sizeof(VectorData) +
+              sizeof(ThreadSharedVariant*) * m_data.vec->size;
+      for (size_t i = 0; i < m_data.vec->size; i++) {
+        size += m_data.vec->vals[i]->getSpaceUsage();
+      }
+    } else if (RuntimeOption::ApcUseGnuMap) {
+      // Not accurate
+      size += sizeof(MapData);
+    } else {
+      ImmutableMap *map = m_data.map;
+      size += map->getStructSize();
+      for (int i = 0; i < map->size(); i++) {
+        size += map->getKeyIndex(i)->getSpaceUsage();
+        size += map->getValIndex(i)->getSpaceUsage();
+      }
+    }
+    break;
+  }
+  return size;
+}
+
+
 void ThreadSharedVariant::getStats(SharedVariantStats *stats) {
   stats->initStats();
   stats->variantCount = 1;

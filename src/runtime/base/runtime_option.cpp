@@ -897,6 +897,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
       }
       EnableAPCSizeDetail = apcSize["Individual"].getBool();
       EnableAPCFetchStats = apcSize["FetchStats"].getBool();
+      if (EnableAPCFetchStats) EnableAPCSizeDetail = true;
+      if (EnableAPCSizeDetail) EnableAPCSizeGroup = true;
       APCSizeCountPrime = apcSize["CountPrime"].getBool();
     }
 

@@ -104,6 +104,7 @@ public:
   virtual void dump(std::string &out);
 
   virtual void getStats(SharedVariantStats *stats);
+  virtual int32 getSpaceUsage();
 
   StringData *getStringData() const {
     ASSERT(is(KindOfString));

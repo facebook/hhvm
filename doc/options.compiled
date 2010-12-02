@@ -665,6 +665,7 @@ on admin port. 'CountPrime' controls whether size stats includes primed keys.
 'Individual' controls whether size profiling is enabled for each key, which
 could incur some space overhead. 'FetchStats' can be enabled to also profile
 apc_fetch, which further increases time overhead.
+'FetchStats' implies 'Individual', and 'Individual' implies 'Group'
 
 = Sandbox Environment
 

@@ -34,7 +34,7 @@ Variant c_Directory::os_getInit(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_RETURN_NAMSTR(0x1429F792A6880074LL, NAMSTR(s_sys_ss0c9d4c3c, "path"),
+      HASH_RETURN_NAMSTR(0x1429F792A6880074LL, NAMSTR(s_sys_ssf362b3c4, "path"),
                          null, 4);
       break;
     case 2:
@@ -59,7 +59,7 @@ Variant &c_Directory::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Directory
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Directory
 void c_Directory::o_getArray(Array &props) const {
-  if (isInitialized(m_path)) props.set(NAMSTR(s_sys_ss0c9d4c3c, "path"), m_path.isReferenced() ? ref(m_path) : m_path, true);
+  if (isInitialized(m_path)) props.set(NAMSTR(s_sys_ssf362b3c4, "path"), m_path.isReferenced() ? ref(m_path) : m_path, true);
   if (isInitialized(m_handle)) props.set(NAMSTR(s_sys_ss46eeef5c, "handle"), m_handle.isReferenced() ? ref(m_handle) : m_handle, true);
   c_ObjectData::o_getArray(props);
 }
@@ -126,7 +126,7 @@ Variant c_Directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss0fad1395, "close")) {
+      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ssf052ec6b, "close")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -138,7 +138,7 @@ Variant c_Directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
         return (t_close(), null);
       }
-      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_ss176934f7, "read")) {
+      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_sse896cb09, "read")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -152,7 +152,7 @@ Variant c_Directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss941ca25f, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -166,7 +166,7 @@ Variant c_Directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -297,23 +297,23 @@ bool c_Directory::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss0fad1395, "close")) {
+      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ssf052ec6b, "close")) {
         mcp.ci = &c_Directory::ci_close;
         return true;
       }
-      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_ss176934f7, "read")) {
+      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_sse896cb09, "read")) {
         mcp.ci = &c_Directory::ci_read;
         return true;
       }
       break;
     case 2:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss941ca25f, "rewind")) {
         mcp.ci = &c_Directory::ci_rewind;
         return true;
       }
       break;
     case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         mcp.ci = &c_Directory::ci___construct;
         return true;
       }

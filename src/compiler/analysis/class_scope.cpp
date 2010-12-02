@@ -1395,14 +1395,10 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
           ms->getOverloadIndex());
     } else  {
       int index = -1;
-      if (cg.checkLiteralString(origName, index, ar, shared_from_this()) >= 0) {
-        cg_indentBegin("HASH_GUARD_LITSTR(0x%016llXLL, ", hash_string_i(name));
-        cg_printString(origName, ar, shared_from_this());
-        cg_printf(") {\n");
-      } else {
-        cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
-            hash_string_i(name), name);
-      }
+      cg.checkLiteralString(origName, index, ar, shared_from_this());
+      cg_indentBegin("HASH_GUARD_LITSTR(0x%016llXLL, ", hash_string_i(name));
+      cg_printString(origName, ar, shared_from_this());
+      cg_printf(") {\n");
     }
     switch (type) {
       case Invoke:

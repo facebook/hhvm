@@ -78,10 +78,10 @@ bool c_UnexpectedValueException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_INSTANCEOF(0x5AA2EE582E0D3849LL, NAMSTR(s_sys_ss1f6357ae, "unexpectedvalueexception"));
+      HASH_INSTANCEOF(0x5AA2EE582E0D3849LL, NAMSTR(s_sys_sse09ca852, "unexpectedvalueexception"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss479587f3, "runtimeexception"));
       break;
     default:
@@ -173,10 +173,10 @@ bool c_OverflowException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_INSTANCEOF(0x0E4CCE95F6A727D9LL, NAMSTR(s_sys_ss1dcbbded, "overflowexception"));
+      HASH_INSTANCEOF(0x0E4CCE95F6A727D9LL, NAMSTR(s_sys_sse2344213, "overflowexception"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss479587f3, "runtimeexception"));
       break;
     default:
@@ -268,10 +268,10 @@ bool c_OutOfBoundsException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_INSTANCEOF(0x227C70ED5B143841LL, NAMSTR(s_sys_ss3a88357f, "outofboundsexception"));
+      HASH_INSTANCEOF(0x227C70ED5B143841LL, NAMSTR(s_sys_ssc577ca81, "outofboundsexception"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss479587f3, "runtimeexception"));
       break;
     default:
@@ -363,7 +363,7 @@ bool c_LogicException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       break;
     case 3:
       HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss22a53db9, "logicexception"));
@@ -457,10 +457,10 @@ bool c_RangeException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 3:
-      HASH_INSTANCEOF(0x6AF83706F76A9D53LL, NAMSTR(s_sys_ss70946468, "rangeexception"));
+      HASH_INSTANCEOF(0x6AF83706F76A9D53LL, NAMSTR(s_sys_ss8f6b9b98, "rangeexception"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss479587f3, "runtimeexception"));
       break;
     default:
@@ -555,10 +555,10 @@ bool c_InvalidArgumentException::o_instanceof(CStrRef s) const {
       HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss22a53db9, "logicexception"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       break;
     case 5:
-      HASH_INSTANCEOF(0x085A4F6FD393D475LL, NAMSTR(s_sys_ss122b9994, "invalidargumentexception"));
+      HASH_INSTANCEOF(0x085A4F6FD393D475LL, NAMSTR(s_sys_ssedd4666c, "invalidargumentexception"));
       break;
     default:
       break;
@@ -649,8 +649,8 @@ bool c_UnderflowException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 4:
-      HASH_INSTANCEOF(0x5E623FEAF7B068D4LL, NAMSTR(s_sys_ss5bb1da6d, "underflowexception"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x5E623FEAF7B068D4LL, NAMSTR(s_sys_ssa44e2593, "underflowexception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss479587f3, "runtimeexception"));
       break;
     default:
@@ -746,7 +746,7 @@ bool c_OutOfRangeException::o_instanceof(CStrRef s) const {
       break;
     case 4:
       HASH_INSTANCEOF(0x622D4DF07E2A01FCLL, NAMSTR(s_sys_ss20636eb7, "outofrangeexception"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       break;
     default:
       break;
@@ -837,16 +837,16 @@ bool c_BadMethodCallException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 0:
-      HASH_INSTANCEOF(0x06335FF83CDEA590LL, NAMSTR(s_sys_ss7092ddbe, "badmethodcallexception"));
+      HASH_INSTANCEOF(0x06335FF83CDEA590LL, NAMSTR(s_sys_ss8f6d2242, "badmethodcallexception"));
       break;
     case 3:
       HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss22a53db9, "logicexception"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       break;
     case 6:
-      HASH_INSTANCEOF(0x66282FC8E4EF4E46LL, NAMSTR(s_sys_ss66dab6cf, "badfunctioncallexception"));
+      HASH_INSTANCEOF(0x66282FC8E4EF4E46LL, NAMSTR(s_sys_ss99254931, "badfunctioncallexception"));
       break;
     default:
       break;
@@ -938,7 +938,7 @@ bool c_RuntimeException::o_instanceof(CStrRef s) const {
   switch (hash & 3) {
     case 0:
       HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss479587f3, "runtimeexception"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       break;
     default:
       break;
@@ -985,15 +985,15 @@ Variant c_Exception::os_getInit(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 15) {
     case 7:
-      HASH_RETURN_NAMSTR(0x3CCB986B2CF0A747LL, NAMSTR(s_sys_ss6b363189, "trace"),
+      HASH_RETURN_NAMSTR(0x3CCB986B2CF0A747LL, NAMSTR(s_sys_ss94c9ce77, "trace"),
                          null, 5);
       break;
     case 9:
-      HASH_RETURN_NAMSTR(0x58C72230857ACDB9LL, NAMSTR(s_sys_ss5485e214, "code"),
+      HASH_RETURN_NAMSTR(0x58C72230857ACDB9LL, NAMSTR(s_sys_ssab7a1dec, "code"),
                          0LL, 4);
       break;
     case 10:
-      HASH_RETURN_NAMSTR(0x04AB35CACF8C8C9ALL, NAMSTR(s_sys_ss22078d74, "line"),
+      HASH_RETURN_NAMSTR(0x04AB35CACF8C8C9ALL, NAMSTR(s_sys_ssddf8728c, "line"),
                          null, 4);
       break;
     case 11:
@@ -1001,7 +1001,7 @@ Variant c_Exception::os_getInit(CStrRef s) {
                          NAMSTR(s_sys_ss00000000, ""), 7);
       break;
     case 15:
-      HASH_RETURN_NAMSTR(0x7863294A8F33D14FLL, NAMSTR(s_sys_ss731824a5, "file"),
+      HASH_RETURN_NAMSTR(0x7863294A8F33D14FLL, NAMSTR(s_sys_ss8ce7db5b, "file"),
                          null, 4);
       break;
     default:
@@ -1023,10 +1023,10 @@ Variant &c_Exception::os_lval(CStrRef s) {
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Exception
 void c_Exception::o_getArray(Array &props) const {
   if (isInitialized(m_message)) props.set(NAMSTR(s_sys_ss155366df, "message"), m_message.isReferenced() ? ref(m_message) : m_message, true);
-  if (isInitialized(m_code)) props.set(NAMSTR(s_sys_ss5485e214, "code"), m_code.isReferenced() ? ref(m_code) : m_code, true);
-  if (isInitialized(m_file)) props.set(NAMSTR(s_sys_ss731824a5, "file"), m_file.isReferenced() ? ref(m_file) : m_file, true);
-  if (isInitialized(m_line)) props.set(NAMSTR(s_sys_ss22078d74, "line"), m_line.isReferenced() ? ref(m_line) : m_line, true);
-  if (isInitialized(m_trace)) props.set(NAMSTR(s_sys_ss6b363189, "trace"), m_trace.isReferenced() ? ref(m_trace) : m_trace, true);
+  if (isInitialized(m_code)) props.set(NAMSTR(s_sys_ssab7a1dec, "code"), m_code.isReferenced() ? ref(m_code) : m_code, true);
+  if (isInitialized(m_file)) props.set(NAMSTR(s_sys_ss8ce7db5b, "file"), m_file.isReferenced() ? ref(m_file) : m_file, true);
+  if (isInitialized(m_line)) props.set(NAMSTR(s_sys_ssddf8728c, "line"), m_line.isReferenced() ? ref(m_line) : m_line, true);
+  if (isInitialized(m_trace)) props.set(NAMSTR(s_sys_ss94c9ce77, "trace"), m_trace.isReferenced() ? ref(m_trace) : m_trace, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Exception
@@ -1080,7 +1080,7 @@ bool c_Exception::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 0:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       break;
     default:
       break;
@@ -1104,7 +1104,7 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss5d941229, "__init__")) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ssa26bedd7, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1118,7 +1118,7 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss4f6cc3ae, "getLine")) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ssb0933c52, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1188,7 +1188,7 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss334458e2, "getTrace")) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ssccbba71e, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1202,7 +1202,7 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0bfe33de, "getFile")) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ssf401cc22, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -1216,7 +1216,7 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1478,13 +1478,13 @@ bool c_Exception::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss5d941229, "__init__")) {
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ssa26bedd7, "__init__")) {
         mcp.ci = &c_Exception::ci___init__;
         return true;
       }
       break;
     case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss4f6cc3ae, "getLine")) {
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ssb0933c52, "getLine")) {
         mcp.ci = &c_Exception::ci_getline;
         return true;
       }
@@ -1514,19 +1514,19 @@ bool c_Exception::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
       }
       break;
     case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss334458e2, "getTrace")) {
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ssccbba71e, "getTrace")) {
         mcp.ci = &c_Exception::ci_gettrace;
         return true;
       }
       break;
     case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0bfe33de, "getFile")) {
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ssf401cc22, "getFile")) {
         mcp.ci = &c_Exception::ci_getfile;
         return true;
       }
       break;
     case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         mcp.ci = &c_Exception::ci___construct;
         return true;
       }
@@ -1655,21 +1655,21 @@ void c_Exception::t___init__() {
         {
           bool tmp4;
           {
-            bool tmp5 = (empty(v_top, NAMSTR(s_sys_ss37d242ee, "class"), true));
+            bool tmp5 = (empty(v_top, NAMSTR(s_sys_ssc82dbd12, "class"), true));
             if (!tmp5) {
-              bool tmp6 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), true, true)), NAMSTR(s_sys_ss5d941229, "__init__"))) && toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), true, true)), NAMSTR(s_sys_ss5e478259, "__construct")))));
+              bool tmp6 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), true, true)), NAMSTR(s_sys_ssa26bedd7, "__init__"))) && toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), true, true)), NAMSTR(s_sys_ssa1b87da7, "__construct")))));
               if (tmp6) {
                 const String &tmp7((toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), true, true))));
-                const String &tmp8((toString(v_top.rvalAt(NAMSTR(s_sys_ss37d242ee, "class"), true, true))));
+                const String &tmp8((toString(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), true, true))));
                 tmp6 = (toBoolean(x_strcasecmp(tmp7, tmp8)));
               }
               tmp5 = (tmp6);
             }
             bool tmp9 = (tmp5);
             if (!tmp9) {
-              bool tmp10 = (toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss37d242ee, "class"), true, true)), NAMSTR(s_sys_ss5178e853, "exception"))));
+              bool tmp10 = (toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), true, true)), NAMSTR(s_sys_ssae8717ad, "exception"))));
               if (tmp10) {
-                bool tmp11((x_is_subclass_of(v_top.rvalAt(NAMSTR(s_sys_ss37d242ee, "class"), true, true), NAMSTR(s_sys_ss5178e853, "exception"))));
+                bool tmp11((x_is_subclass_of(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), true, true), NAMSTR(s_sys_ssae8717ad, "exception"))));
                 tmp10 = (!(tmp11));
               }
               tmp9 = (tmp10);
@@ -1689,15 +1689,15 @@ void c_Exception::t___init__() {
       }
     }
   }
-  if (isset(v_frame, NAMSTR(s_sys_ss731824a5, "file"), true)) {
+  if (isset(v_frame, NAMSTR(s_sys_ss8ce7db5b, "file"), true)) {
     {
-      Variant tmp13((v_frame.rvalAt(NAMSTR(s_sys_ss731824a5, "file"), true, true)));
+      Variant tmp13((v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), true, true)));
       m_file = tmp13;
     }
   }
-  if (isset(v_frame, NAMSTR(s_sys_ss22078d74, "line"), true)) {
+  if (isset(v_frame, NAMSTR(s_sys_ssddf8728c, "line"), true)) {
     {
-      Variant tmp14((v_frame.rvalAt(NAMSTR(s_sys_ss22078d74, "line"), true, true)));
+      Variant tmp14((v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), true, true)));
       m_line = tmp14;
     }
   }
@@ -1770,13 +1770,13 @@ String c_Exception::t_gettraceasstring() {
             tmp4_buf.append("#", 1);
             tmp4_buf.append(toString(v_i));
             tmp4_buf.append(" ", 1);
-            tmp4_buf.append(toString((isset(v_frame, NAMSTR(s_sys_ss731824a5, "file"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ss731824a5, "file"), true, true))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
+            tmp4_buf.append(toString((isset(v_frame, NAMSTR(s_sys_ss8ce7db5b, "file"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), true, true))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
             tmp4_buf.append("(", 1);
-            tmp4_buf.append(toString((isset(v_frame, NAMSTR(s_sys_ss22078d74, "line"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ss22078d74, "line"), true, true))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
+            tmp4_buf.append(toString((isset(v_frame, NAMSTR(s_sys_ssddf8728c, "line"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), true, true))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
             tmp4_buf.append("): ", 3);
             Variant tmp5;
-            if (isset(v_frame, NAMSTR(s_sys_ss37d242ee, "class"), true)) {
-              const String &tmp6((toString(v_frame.rvalAt(NAMSTR(s_sys_ss37d242ee, "class"), true, true))));
+            if (isset(v_frame, NAMSTR(s_sys_ssc82dbd12, "class"), true)) {
+              const String &tmp6((toString(v_frame.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), true, true))));
               const String &tmp7((toString(v_frame.rvalAt(NAMSTR(s_sys_ss724a760a, "type"), true, true))));
               tmp5 = (concat(tmp6, tmp7));
             } else {
@@ -1794,7 +1794,7 @@ String c_Exception::t_gettraceasstring() {
       concat_assign(v_s, tmp_sbuf_v_s.detach());
     }
   }
-  concat_assign(v_s, concat3(NAMSTR(s_sys_ss723caa56, "#"), toString(v_i), NAMSTR(s_sys_ss054cdbfe, " {main}")));
+  concat_assign(v_s, concat3(NAMSTR(s_sys_ss8dc355aa, "#"), toString(v_i), NAMSTR(s_sys_ssfab32402, " {main}")));
   return v_s;
 }
 namespace hphp_impl_splitter {}
@@ -1825,7 +1825,7 @@ Variant c_ErrorException::os_getInit(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_RETURN_NAMSTR(0x4FDAA620FA5F15F9LL, NAMSTR(s_sys_ss47b37306, "severity"),
+      HASH_RETURN_NAMSTR(0x4FDAA620FA5F15F9LL, NAMSTR(s_sys_ssb84c8cfa, "severity"),
                          null, 8);
       break;
     default:
@@ -1846,7 +1846,7 @@ Variant &c_ErrorException::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ErrorException
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ErrorException
 void c_ErrorException::o_getArray(Array &props) const {
-  if (isInitialized(m_severity)) props.set(NAMSTR(s_sys_ss47b37306, "severity"), m_severity.isReferenced() ? ref(m_severity) : m_severity, true);
+  if (isInitialized(m_severity)) props.set(NAMSTR(s_sys_ssb84c8cfa, "severity"), m_severity.isReferenced() ? ref(m_severity) : m_severity, true);
   c_Exception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ErrorException
@@ -1888,10 +1888,10 @@ bool c_ErrorException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       break;
     case 3:
-      HASH_INSTANCEOF(0x69EDCA1CC29CFE0BLL, NAMSTR(s_sys_ss12e53ea4, "errorexception"));
+      HASH_INSTANCEOF(0x69EDCA1CC29CFE0BLL, NAMSTR(s_sys_ssed1ac15c, "errorexception"));
       break;
     default:
       break;
@@ -1911,7 +1911,7 @@ Variant c_ErrorException::o_invoke_from_eval(const char *s, Eval::VariableEnviro
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -1948,7 +1948,7 @@ Variant c_ErrorException::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         else if (count == 4) return (t___construct(a0, a1, a2, a3), null);
         else return (t___construct(a0, a1, a2, a3, a4), null);
       }
-      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ss2cdc060c, "getSeverity")) {
+      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ssd323f9f4, "getSeverity")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -2041,11 +2041,11 @@ bool c_ErrorException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss5e478259, "__construct")) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         mcp.ci = &c_ErrorException::ci___construct;
         return true;
       }
-      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ss2cdc060c, "getSeverity")) {
+      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ssd323f9f4, "getSeverity")) {
         mcp.ci = &c_ErrorException::ci_getseverity;
         return true;
       }
@@ -2280,10 +2280,10 @@ bool c_BadFunctionCallException::o_instanceof(CStrRef s) const {
       HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss22a53db9, "logicexception"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       break;
     case 6:
-      HASH_INSTANCEOF(0x66282FC8E4EF4E46LL, NAMSTR(s_sys_ss66dab6cf, "badfunctioncallexception"));
+      HASH_INSTANCEOF(0x66282FC8E4EF4E46LL, NAMSTR(s_sys_ss99254931, "badfunctioncallexception"));
       break;
     default:
       break;
@@ -2378,7 +2378,7 @@ bool c_LengthException::o_instanceof(CStrRef s) const {
       HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss22a53db9, "logicexception"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       break;
     default:
       break;
@@ -2472,8 +2472,8 @@ bool c_DomainException::o_instanceof(CStrRef s) const {
       HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss22a53db9, "logicexception"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x70D4A29DE6A7BA84LL, NAMSTR(s_sys_ss64c911b9, "domainexception"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss5178e853, "exception"));
+      HASH_INSTANCEOF(0x70D4A29DE6A7BA84LL, NAMSTR(s_sys_ss9b36ee47, "domainexception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
       break;
     default:
       break;

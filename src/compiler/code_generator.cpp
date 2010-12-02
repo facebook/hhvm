@@ -188,7 +188,6 @@ std::string CodeGenerator::getFormattedName(const std::string &file) {
   Util::replaceAll(formatted, "$", "_");
 
   int hash = hash_string(file.data(), file.size());
-  if (hash < 0) hash = -hash;
   formatted += boost::str(boost::format("%08x") % hash);
   return formatted;
 }
@@ -453,40 +452,35 @@ bool CodeGenerator::findLabelId(const char *name, int labelId) {
 
 int CodeGenerator::checkLiteralString(const std::string &str, int &index,
                                       AnalysisResultPtr ar, BlockScopePtr bs) {
-  if (getContext() != CodeGenerator::CppConstantsDecl &&
-      getContext() != CodeGenerator::CppClassConstantsImpl) {
-    int stringId = ar->getLiteralStringId(str, index);
-    if (bs && bs != ar) {
-      FileScopePtr fs = bs->getContainingFile();
-      if (fs) {
-        fs->addUsedLiteralString(str);
-        if (m_context == CppParameterDefaultValueDecl ||
-            m_context == CppStaticMethodWrapper) {
-          fs->addUsedLiteralStringHeader(str);
-        }
+  if (getContext() == CodeGenerator::CppConstantsDecl ||
+      getContext() == CodeGenerator::CppClassConstantsImpl) {
+    assert(false);
+  }
+  int stringId = ar->getLiteralStringId(str, index);
+  if (bs && bs != ar) {
+    FileScopePtr fs = bs->getContainingFile();
+    if (fs) {
+      fs->addUsedLiteralString(str);
+      if (m_context == CppParameterDefaultValueDecl ||
+          m_context == CppStaticMethodWrapper) {
+        fs->addUsedLiteralStringHeader(str);
       }
     }
-    if (stringId >= 0) return stringId;
   }
-  index = -1;
-  return -1;
+  return stringId;
 }
 
 void CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
                                 BlockScopeRawPtr bs,
                                 bool stringWrapper /* = true */) {
   int index = -1;
-  int stringId = bs ? checkLiteralString(str, index, ar, bs) : -1;
   bool isBinary = false;
   string escaped = escapeLabel(str, &isBinary);
-  if (stringId >= 0) {
-    if (index == -1) {
-      printf("LITSTR(%d, \"%s\")", stringId, escaped.c_str());
-    } else {
-      assert(index >= 0);
-      string lisnam = ar->getLiteralStringName(stringId, index);
-      printf("NAMSTR(%s, \"%s\")", lisnam.c_str(), escaped.c_str());
-    }
+  if (bs) {
+    int stringId = checkLiteralString(str, index, ar, bs);
+    assert(index >= 0);
+    string lisnam = ar->getLiteralStringName(stringId, index);
+    printf("NAMSTR(%s, \"%s\")", lisnam.c_str(), escaped.c_str());
   } else if (isBinary) {
     if (stringWrapper) {
       printf("String(\"%s\", %d, AttachLiteral)",

@@ -36,7 +36,7 @@ Variant c_SplObjectStorage::os_getInit(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 2:
-      HASH_RETURN_NAMSTR(0x4B27521443880CAELL, NAMSTR(s_sys_ss3f00cf7f, "index"),
+      HASH_RETURN_NAMSTR(0x4B27521443880CAELL, NAMSTR(s_sys_ssc0ff3081, "index"),
                          0LL, 5);
       break;
     case 3:
@@ -62,14 +62,14 @@ Variant &c_SplObjectStorage::os_lval(CStrRef s) {
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SplObjectStorage
 void c_SplObjectStorage::o_getArray(Array &props) const {
   if (isInitialized(m_storage)) props.add(NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage"), m_storage.isReferenced() ? ref(m_storage) : m_storage, true);
-  props.add(NAMSTR(s_sys_ss10cc4173, "\000SplObjectStorage\000index"), m_index, true);
+  props.add(NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"), m_index, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SplObjectStorage
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SplObjectStorage
 void c_SplObjectStorage::o_setArray(CArrRef props) {
   props->load(NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage"), m_storage);
-  if (props->exists(NAMSTR(s_sys_ss10cc4173, "\000SplObjectStorage\000index"))) m_index = props->get(NAMSTR(s_sys_ss10cc4173, "\000SplObjectStorage\000index"));
+  if (props->exists(NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"))) m_index = props->get(NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"));
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SplObjectStorage
@@ -120,13 +120,13 @@ bool c_SplObjectStorage::o_instanceof(CStrRef s) const {
   switch (hash & 7) {
     case 1:
       HASH_INSTANCEOF(0x795F86375EE263D1LL, NAMSTR(s_sys_ss4315c511, "countable"));
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss5c70ced5, "traversable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ssa38f312b, "traversable"));
       break;
     case 6:
       HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
       break;
     case 7:
-      HASH_INSTANCEOF(0x5BA243B9FBA7A64FLL, NAMSTR(s_sys_ss4a225734, "splobjectstorage"));
+      HASH_INSTANCEOF(0x5BA243B9FBA7A64FLL, NAMSTR(s_sys_ssb5dda8cc, "splobjectstorage"));
       break;
     default:
       break;
@@ -147,7 +147,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss9943cbf4, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -161,7 +161,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss941ca25f, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -175,7 +175,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x62DD82BFEB88A4ACLL, NAMSTR(s_sys_ss716a33e7, "attach")) {
+      HASH_GUARD_LITSTR(0x62DD82BFEB88A4ACLL, NAMSTR(s_sys_ss8e95cc19, "attach")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -269,7 +269,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ssb3a5c1b3, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
@@ -526,19 +526,19 @@ bool c_SplObjectStorage::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 4:
-      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss66bc340c, "valid")) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss9943cbf4, "valid")) {
         mcp.ci = &c_SplObjectStorage::ci_valid;
         return true;
       }
       break;
     case 10:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss6be35da1, "rewind")) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss941ca25f, "rewind")) {
         mcp.ci = &c_SplObjectStorage::ci_rewind;
         return true;
       }
       break;
     case 12:
-      HASH_GUARD_LITSTR(0x62DD82BFEB88A4ACLL, NAMSTR(s_sys_ss716a33e7, "attach")) {
+      HASH_GUARD_LITSTR(0x62DD82BFEB88A4ACLL, NAMSTR(s_sys_ss8e95cc19, "attach")) {
         mcp.ci = &c_SplObjectStorage::ci_attach;
         return true;
       }
@@ -572,7 +572,7 @@ bool c_SplObjectStorage::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
       }
       break;
     case 28:
-      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss4c5a3e4d, "current")) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ssb3a5c1b3, "current")) {
         mcp.ci = &c_SplObjectStorage::ci_current;
         return true;
       }
@@ -710,7 +710,7 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
                 m_storage.weakRemove(v_idx);
                 {
                   MethodCallPackage mcp4;
-                  mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss6be35da1, "rewind"), 0x1670096FDE27AF6ALL);
+                  mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
                   const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
                   (mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant);
                 }

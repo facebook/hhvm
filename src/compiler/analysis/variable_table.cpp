@@ -1849,23 +1849,11 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
     case VariableTable::JumpInitializedString: {
       int index = -1;
       int stringId = cg.checkLiteralString(name, index, ar, getBlockScope());
-      if (stringId >= 0) {
-        if (index == -1) {
-          cg_printf("HASH_INITIALIZED_LITSTR(0x%016llXLL, %d, %s,\n",
-                    hash_string(name), stringId, varName.c_str());
-        } else {
-          assert(index >= 0);
-          string lisnam = ar->getLiteralStringName(stringId, index);
-          cg_printf("HASH_INITIALIZED_NAMSTR(0x%016llXLL, %s, %s,\n",
-                    hash_string(name), lisnam.c_str(), varName.c_str());
-        }
-        cg_printf("                   %d);\n", strlen(name));
-      } else {
-        cg_printf("HASH_INITIALIZED_STRING(0x%016llXLL, %s,\n",
-                  hash_string(name), varName.c_str());
-        cg_printf("                   \"%s\", %d);\n",
-                  cg.escapeLabel(name).c_str(), strlen(name));
-      }
+      assert(index >= 0);
+      string lisnam = ar->getLiteralStringName(stringId, index);
+      cg_printf("HASH_INITIALIZED_NAMSTR(0x%016llXLL, %s, %s,\n",
+                hash_string(name), lisnam.c_str(), varName.c_str());
+      cg_printf("                   %d);\n", strlen(name));
       break;
     }
     case VariableTable::JumpIndex:
@@ -1880,23 +1868,11 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
     case VariableTable::JumpReturnString: {
       int index = -1;
       int stringId = cg.checkLiteralString(name, index, ar, getBlockScope());
-      if (stringId >= 0) {
-        if (index == -1) {
-          cg_printf("HASH_RETURN_LITSTR(0x%016llXLL, %d, %s,\n",
-                    hash_string(name), stringId, varName.c_str());
-        } else {
-          assert(index >= 0);
-          string lisnam = ar->getLiteralStringName(stringId, index);
-          cg_printf("HASH_RETURN_NAMSTR(0x%016llXLL, %s, %s,\n",
-                    hash_string(name), lisnam.c_str(), varName.c_str());
-        }
-        cg_printf("                   %d);\n", strlen(name));
-      } else {
-        cg_printf("HASH_RETURN_STRING(0x%016llXLL, %s,\n",
-                  hash_string(name), varName.c_str());
-        cg_printf("                   \"%s\", %d);\n",
-                  cg.escapeLabel(name).c_str(), strlen(name));
-      }
+      assert(index >= 0);
+      string lisnam = ar->getLiteralStringName(stringId, index);
+      cg_printf("HASH_RETURN_NAMSTR(0x%016llXLL, %s, %s,\n",
+                hash_string(name), lisnam.c_str(), varName.c_str());
+      cg_printf("                   %d);\n", strlen(name));
       break;
     }
     case VariableTable::JumpReturnInit:

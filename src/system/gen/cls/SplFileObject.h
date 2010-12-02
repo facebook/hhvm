@@ -73,7 +73,7 @@ class c_SplFileObject : public c_SplFileInfo {
   public: bool t_eof();
   public: bool t_fflush();
   public: String t_fgetc();
-  public: Variant t_fgetcsv(CVarRef v_delimiter = NAMSTR(s_sys_ss2ccd4559, ","), CVarRef v_enclosure = NAMSTR(s_sys_ss7e5fc106, "\""), CVarRef v_escape = NAMSTR(s_sys_ss2a618761, "\\"));
+  public: Variant t_fgetcsv(CVarRef v_delimiter = NAMSTR(s_sys_ssd332baa7, ","), CVarRef v_enclosure = NAMSTR(s_sys_ss7e5fc106, "\""), CVarRef v_escape = NAMSTR(s_sys_ssd59e789f, "\\"));
   public: String t_fgets();
   public: String t_fgetss(CVarRef v_allowable_tags);
   public: bool t_flock(CVarRef v_operation, Variant v_wouldblock);
@@ -93,7 +93,7 @@ class c_SplFileObject : public c_SplFileInfo {
   public: void t_next();
   public: void t_rewind();
   public: void t_seek(CVarRef v_line_pos);
-  public: void t_setcsvcontrol(CVarRef v_delimiter = NAMSTR(s_sys_ss2ccd4559, ","), CVarRef v_enclosure = NAMSTR(s_sys_ss7e5fc106, "\""), CVarRef v_escape = NAMSTR(s_sys_ss2a618761, "\\"));
+  public: void t_setcsvcontrol(CVarRef v_delimiter = NAMSTR(s_sys_ssd332baa7, ","), CVarRef v_enclosure = NAMSTR(s_sys_ss7e5fc106, "\""), CVarRef v_escape = NAMSTR(s_sys_ssd59e789f, "\\"));
   public: void t_setflags(CVarRef v_flags);
   public: void t_setmaxlinelen(CVarRef v_max_len);
   public: bool t_valid();

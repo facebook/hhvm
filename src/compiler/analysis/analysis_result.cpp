@@ -1061,7 +1061,6 @@ int AnalysisResult::registerScalarArray(bool insideScalarArray,
   }
   if (Option::UseNamedScalarArray) {
     hash = hash_string_cs(text.data(), text.size());
-    if (hash < 0) hash = -hash;
     vector<string> &strings = m_namedScalarArrays[hash];
     unsigned int i = 0;
     for (; i < strings.size(); i++) {
@@ -1082,7 +1081,6 @@ int AnalysisResult::checkScalarArray(const string &text, int &index) {
 
   assert(Option::ScalarArrayOptimization && Option::UseNamedScalarArray);
   int hash = hash_string_cs(text.data(), text.size());
-  if (hash < 0) hash = -hash;
   vector<string> &strings = m_namedScalarArrays[hash];
   unsigned int i = 0;
   for (; i < strings.size(); i++) {
@@ -1452,7 +1450,6 @@ void AnalysisResult::renameStaticNames(map<int, vector<string> > &names,
         ASSERT(j < nstrings);
         // remap i to j
         int64 newHash = hash_string_cs(s.data(), s.size());
-        if (hash < 0) hash = -hash;
         string name = getHashedName(hash, i, prefix);
         string newName = getHashedName(newHash, j, prefix, true);
         cg_printf("#define %s %s\n", name.c_str(), newName.c_str());
@@ -2859,7 +2856,8 @@ string AnalysisResult::getHashedName(int64 hash, int index,
   assert(index >= 0);
   string name(Option::SystemGen ? "s_sys_" : "s_");
   name += prefix;
-  name += boost::str(boost::format(longName ? "%016x" : "%08x") % hash);
+  name += longName ? boost::str(boost::format("%016x") % hash)
+                   : boost::str(boost::format("%08x") % (int)hash);
   if (index > 0) name += ("_" + lexical_cast<string>(index));
   return name;
 }
@@ -3840,7 +3838,6 @@ int AnalysisResult::getLiteralStringId(const std::string &s, int &index) {
   Lock lock(m_namedStringLiteralsMutex);
 
   int hash = hash_string_cs(s.data(), s.size());
-  if (hash < 0) hash = -hash;
   vector<string> &strings = m_namedStringLiterals[hash];
   unsigned int i = 0;
   for (; i < strings.size(); i++) {

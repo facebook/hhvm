@@ -591,7 +591,7 @@ void RequestEvalState::fiberInit(RequestEvalState *res,
         const_iterator it = res->m_methodStatics.begin();
       it != res->m_methodStatics.end(); ++it) {
     for (map<string, LVariableTable>::const_iterator it2 = it->second.begin();
-        it2 != it->second.end(); ++it) {
+        it2 != it->second.end(); ++it2) {
       m_methodStatics[it->first][it2->first].
         Array::operator=(it2->second.fiberMarshal(refMap));
     }

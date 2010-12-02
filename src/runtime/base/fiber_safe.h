@@ -36,8 +36,8 @@ namespace HPHP {
  *      care of it.
  *
  *   2. If an object needs to copy certain members, when creating fiber's own
- *      copy, derive a new class from FiberLocal. Implement onFiberInit() and
- *      onFiberExit() to marshal and unmarshal data members.
+ *      copy, derive a new class from FiberLocal. Implement fiberInit() and
+ *      fiberExit() to marshal and unmarshal data members.
  *
  *   3. If an object has to be shared to work, derive it from FiberSafe class,
  *      mark it as shared object by calling incFiberCount() in fiberInit()

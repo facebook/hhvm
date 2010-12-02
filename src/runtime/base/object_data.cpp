@@ -941,13 +941,21 @@ Variant ExtObjectData::o_root_invoke_few_args(const char *s, int64 h, int count,
 Object ObjectData::fiberMarshal(FiberReferenceMap &refMap) const {
   ObjectData *px = (ObjectData*)refMap.lookup((void*)this);
   if (px == NULL) {
-    Object copy = create_object(o_getClassName(), null_array);
+    Object copy = create_object(o_getClassName(), null_array, false);
     // ahead of deep copy
     refMap.insert(const_cast<ObjectData*>(this), copy.get());
     Array props;
     o_getArray(props);
     if (!props.empty()) {
       copy->o_setArray(props.fiberMarshal(refMap));
+    }
+    FiberLocal *src = dynamic_cast<FiberLocal*>(const_cast<ObjectData*>(this));
+    if (src) {
+      FiberLocal *dest = dynamic_cast<FiberLocal*>(copy.get());
+      ASSERT(dest);
+      if (dest) {
+        dest->fiberInit(src, refMap);
+      }
     }
     return copy;
   }

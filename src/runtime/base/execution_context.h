@@ -92,7 +92,7 @@ public:
   void backupSession();
   void restoreSession();
 
-  // implementing FiberSafe
+  // implementing FiberLocal
   virtual void fiberInit(FiberLocal *src, FiberReferenceMap &refMap);
   virtual void fiberExit(FiberLocal *src, FiberReferenceMap &refMap);
 

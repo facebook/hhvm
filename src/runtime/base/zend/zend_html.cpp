@@ -423,7 +423,7 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
   return ret;
 }
 
-inline static void decode_entity(char *entity) {
+inline static bool decode_entity(char *entity) {
   ASSERT(entity && *entity);
   if (entity[0] == '#') {
     int code;
@@ -436,21 +436,17 @@ inline static void decode_entity(char *entity) {
       unsigned char buf[10];
       int size = utf32_to_utf8(buf, code);
       memcpy(entity, buf, size + 1);
-      return;
+      return true;
     }
   } else {
     HtmlEntityMap::const_iterator iter = EntityMap.find(entity);
     if (iter != EntityMap.end()) {
       memcpy(entity, iter->second.c_str(), iter->second.length() + 1);
-      return;
+      return true;
     }
   }
 
-  // bad entity
-  std::string s = "&";
-  s += entity;
-  s += ";";
-  memcpy(entity, s.c_str(), s.length() + 1);
+  return false;
 }
 
 char *string_html_decode(const char *input, int &len, bool utf8, bool nbsp) {
@@ -501,10 +497,12 @@ char *string_html_decode(const char *input, int &len, bool utf8, bool nbsp) {
               l = 6;
               memcpy(q, "&nbsp;", l);
             }
-          } else {
-            decode_entity(buf);
+          } else if (decode_entity(buf)) {
             l = strlen(buf);
             memcpy(q, buf, l);
+          } else {
+            found = false;
+            break;
           }
           p = t;
           q += l;

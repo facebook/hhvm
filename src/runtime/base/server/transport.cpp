@@ -84,10 +84,14 @@ const char *Transport::getMethodName() {
 
 const char *Transport::getServerObject() {
   const char *url = getUrl();
-  const char *p = strstr(url, "//");
-  if (!p) return url;
-
-  p = strchr(p + 2, '/');
+  int strip = 0;
+  if (strncmp(url, "http://", 7) == 0) {
+    strip = 7;
+  } else if (strncmp(url, "https://", 8) == 0) {
+    strip = 8;
+  }
+  if (strip == 0) return url;
+  char *p = strchr(url + strip, '/');
   if (p) return p;
 
   return "";

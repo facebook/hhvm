@@ -431,6 +431,11 @@ void throw_bad_type_exception(const char *fmt, ...);
 void throw_invalid_argument(const char *fmt, ...);
 
 /**
+ * Unsetting ClassName::StaticProperty.
+ */
+Variant throw_fatal_unset_static_property(const char *s, const char *prop);
+
+/**
  * Exceptions injected code throws
  */
 void throw_infinite_loop_exception() ATTRIBUTE_COLD;

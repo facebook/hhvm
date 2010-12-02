@@ -136,6 +136,7 @@ void StaticMemberExpression::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
       m_class = boost::dynamic_pointer_cast<Expression>(cp);
+      break;
     case 1:
       m_exp = boost::dynamic_pointer_cast<Expression>(cp);
       break;
@@ -331,10 +332,15 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
   if (m_class) {
     const char *func_suffix = "";
-    if (m_context & (LValue | RefValue)) {
+    if (m_context & (LValue | RefValue | UnsetContext)) {
       func_suffix = "_lval";
     }
-    cg_printf("get_static_property%s(", func_suffix);
+
+    if (!hasContext(UnsetContext) || !hasContext(LValue)) {
+      cg_printf("get_static_property%s(", func_suffix);
+    } else {
+      cg_printf("throw_fatal_unset_static_property(");
+    }
 
     if (m_class->is(KindOfScalarExpression)) {
       ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
@@ -345,6 +351,16 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
       m_class->outputCPP(cg, ar);
       cg_printf(").data()");
     }
+
+    cg_printf(", toString(");
+    m_exp->outputCPP(cg, ar);
+    cg_printf(").data())");
+    return;
+  }
+
+  if (hasContext(UnsetContext) && hasContext(LValue)) {
+    cg_printf("throw_fatal_unset_static_property(\"%s\"",
+              m_origClassName.c_str());
 
     cg_printf(", toString(");
     m_exp->outputCPP(cg, ar);
@@ -390,7 +406,7 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
                 cg.formatLabel(var->getString()).c_str());
     }
   } else {
-    if (m_context & (LValue | RefValue)) {
+    if (m_context & (LValue | RefValue | UnsetContext)) {
       if (isRedeclared()) {
         cg_printf("g->%s%s->%slval(", Option::ClassStaticsObjectPrefix,
                   cg.formatLabel(m_className).c_str(),

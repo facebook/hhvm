@@ -459,6 +459,11 @@ void throw_invalid_argument(const char *fmt, ...) {
   raise_warning("Invalid argument: %s", msg.c_str());
 }
 
+Variant throw_fatal_unset_static_property(const char *s, const char *prop) {
+  raise_error("Attempt to unset static property %s::$%s", s, prop);
+  return null;
+}
+
 void throw_infinite_loop_exception() {
   if (!RuntimeOption::NoInfiniteLoopDetection) {
     throw FatalErrorException(0, "loop iterated over %d times", MAX_LOOP_COUNT);

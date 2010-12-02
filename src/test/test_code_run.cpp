@@ -5498,6 +5498,9 @@ bool TestCodeRun::TestComparisons() {
 // semantics
 
 bool TestCodeRun::TestUnset() {
+  MVCR("<?php class A { static $foo = array(123);} $a = 'A'; "
+       "unset($a::$foo[0]); unset(A::$foo[0]);");
+
   MVCR("<?php $a = 10; unset($a); var_dump($a);");
   MVCR("<?php $a = array(10); "
       "function test() { global $a; unset($a[0]); var_dump($a);}"

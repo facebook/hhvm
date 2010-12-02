@@ -181,7 +181,8 @@ void Logger::log(bool err, const std::string &msg,
                      tf);
     }
     if (threadData->hook) {
-      threadData->hook(header.c_str(), escaped, ending, threadData->hookData);
+      threadData->hook(header.c_str(), msg.c_str(), ending,
+                       threadData->hookData);
     }
     if (escape) {
       free((void*)escaped);

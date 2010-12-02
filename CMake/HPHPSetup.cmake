@@ -6,6 +6,10 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+IF(NOT DEFINED CMAKE_PREFIX_PATH)
+  message(STATUS "CMAKE_PREFIX_PATH was missing, proceeding anyway")
+endif()
+
 if(CMAKE_COMPILER_IS_GNUCC)
 	INCLUDE(CheckCSourceCompiles)
 	CHECK_C_SOURCE_COMPILES("#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)

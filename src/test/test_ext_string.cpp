@@ -482,6 +482,8 @@ bool TestExtString::test_htmlspecialchars_decode() {
 
   VS(f_htmlspecialchars_decode("&lt;"), "<");
   VS(f_htmlspecialchars_decode("&nbsp;"), "&nbsp;");
+  VS(f_htmlspecialchars_decode("&amp; &Eacute; &Alpha; &#039;"),
+                               "& &Eacute; &Alpha; '");
 
   return Count(true);
 }

@@ -31,7 +31,7 @@ RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
                        const std::string &pathTranslation)
   :  m_rewritten(false), m_defaultDoc(false), m_done(false) {
   if (!process(vhost, transport, sourceRoot, pathTranslation,
-               transport->getServerObject())) {
+               transport->getUrl())) {
     if (!RuntimeOption::ErrorDocument404.empty()) {
       String redirectURL(RuntimeOption::ErrorDocument404);
       if (m_queryString != "") {

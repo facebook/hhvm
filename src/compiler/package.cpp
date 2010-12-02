@@ -43,8 +43,7 @@ Package::Package(const char *root, bool bShortTags /* = true */,
                  bool bAspTags /* = false */)
   : m_bShortTags(bShortTags), m_bAspTags(bAspTags), m_files(4000),
     m_lineCount(0), m_charCount(0) {
-  m_root = root;
-  if (!m_root.empty() && m_root[m_root.size() - 1] != '/') m_root += "/";
+  m_root = Util::normalizeDir(root);
   m_ar = AnalysisResultPtr(new AnalysisResult());
   m_fileCache = FileCachePtr(new FileCache());
 }

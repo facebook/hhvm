@@ -103,13 +103,19 @@ bool AnalysisResult::inParseOnDemandDirs(const string &filename) {
 }
 
 void AnalysisResult::parseOnDemand(const std::string &name) {
-  if (m_package &&
-      m_files.find(name) == m_files.end() &&
-      (m_parseOnDemand || inParseOnDemandDirs(name)) &&
-      Option::PackageExcludeFiles.find(name) ==
-      Option::PackageExcludeFiles.end() &&
-      !Option::IsFileExcluded(name, Option::PackageExcludePatterns)) {
-    m_package->addSourceFile(name.c_str());
+  if (m_package) {
+    const std::string &root = m_package->getRoot();
+    string rname = name;
+    if (name.find(root) == 0) {
+      rname = name.substr(root.length());
+    }
+    if (m_files.find(rname) == m_files.end() &&
+        (m_parseOnDemand || inParseOnDemandDirs(rname)) &&
+        Option::PackageExcludeFiles.find(rname) ==
+        Option::PackageExcludeFiles.end() &&
+        !Option::IsFileExcluded(rname, Option::PackageExcludePatterns)) {
+      m_package->addSourceFile(rname.c_str());
+    }
   }
 }
 

@@ -552,7 +552,7 @@ public:
    */
   virtual void endFrame(bool endMain = false) __attribute__ ((noinline)) ;
 
-  void endAllFrames() {
+  virtual void endAllFrames() {
     while (m_stack) {
       endFrame(true);
     }
@@ -1002,20 +1002,37 @@ public:
   static TraceEntry *s_trace;
   static int s_n_backing;
   int nTrace;
+  bool full;
 
-  bool trace_space_available(int nWanted) {
-    // reserve two slots to track realloc costs
-    return nWanted < s_n_backing - 2;
+  bool trace_space_available() {
+    // the two slots are reserved for internal use
+    return nTrace < s_n_backing - 3;
   }
 
-  void trace_get_space() {
+  bool trace_get_space() {
     bool track_realloc = FALSE;
+    if (full) {
+      return false;
+    }
     if (s_n_backing == 0) {
       s_n_backing = RuntimeOption::ProfilerTraceBuffer;
     } else {
-      // we always have at least one free slot
+      int new_array_size = s_n_backing * RuntimeOption::ProfilerTraceExpansion;
+      if (RuntimeOption::ProfilerMaxTraceBuffer != 0
+          && new_array_size > RuntimeOption::ProfilerMaxTraceBuffer)
+      {
+        new_array_size = RuntimeOption::ProfilerMaxTraceBuffer;
+      }
+      if (new_array_size - nTrace <= 5) {
+        // for this operation to succeed, we need room for the entry we're
+        // adding, two realloc entries, and two entries to mark the end of
+        // the trace.
+        full = true;
+        collectStats("(trace buffer terminated)", s_trace[nTrace++]);
+        return false;
+      }
       collectStats("(trace buffer realloc)", s_trace[nTrace++]);
-      s_n_backing *= RuntimeOption::ProfilerTraceExpansion;
+      s_n_backing = new_array_size;
       track_realloc = TRUE;
     }
     s_trace = (TraceEntry*)realloc((void *)s_trace,
@@ -1023,6 +1040,7 @@ public:
     if (track_realloc) {
       collectStats(NULL, s_trace[nTrace++]);
     }
+    return true;
   }
 
   static pthread_mutex_t s_in_use;
@@ -1035,7 +1053,8 @@ public:
   typedef __gnu_cxx::hash_map<std::string, CountMap, string_hash> StatsMap;
   StatsMap m_stats; // outcome
 
-  TraceProfiler(int flags) : Profiler(), nTrace(0), m_flags(flags) {
+  TraceProfiler(int flags) : Profiler(), nTrace(0),
+                             full(false), m_flags(flags) {
     if (pthread_mutex_trylock(&s_in_use)) {
       m_successful = false;
     }
@@ -1057,6 +1076,14 @@ public:
 
   virtual void endFrame(bool endMain = false) {
     doTrace(NULL);
+  }
+
+  virtual void endAllFrames() {
+    Profiler::endAllFrames();
+    if (s_trace && nTrace < s_n_backing - 1) {
+      collectStats(NULL, s_trace[nTrace++]);
+      full = true;
+    }
   }
 
   void collectStats(const char *symbol, TraceEntry& te) {
@@ -1084,16 +1111,18 @@ public:
     }
   }
 
-  TraceEntry& next_trace() {
-    if (!trace_space_available(nTrace)) {
-      trace_get_space();
+  TraceEntry* next_trace() {
+    if (!trace_space_available() && !trace_get_space()) {
+      return 0;
     }
-    return s_trace[nTrace++];
+    return &s_trace[nTrace++];
   }
 
   void doTrace(const char *symbol) {
-    TraceEntry &te = next_trace();
-    collectStats(symbol, te);
+    TraceEntry *te = next_trace();
+    if (te != NULL) {
+      collectStats(symbol, *te);
+    }
   }
 
   virtual void writeStats(Array &ret) {

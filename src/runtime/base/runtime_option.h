@@ -242,6 +242,7 @@ public:
   static bool EnableHotProfiler;
   static int32 ProfilerTraceBuffer;
   static double ProfilerTraceExpansion;
+  static int32 ProfilerMaxTraceBuffer;
 
   static int64 MaxRSS;
   static int64 MaxRSSPollingCycle;

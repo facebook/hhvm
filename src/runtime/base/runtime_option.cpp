@@ -325,6 +325,7 @@ int RuntimeOption::PregRecursionLimit = 100000;
 bool RuntimeOption::EnableHotProfiler = true;
 int RuntimeOption::ProfilerTraceBuffer = 2000000;
 double RuntimeOption::ProfilerTraceExpansion = 1.2;
+int RuntimeOption::ProfilerMaxTraceBuffer = 0;
 
 ///////////////////////////////////////////////////////////////////////////////
 // keep this block after all the above static variables, or we will have
@@ -895,6 +896,7 @@ void RuntimeOption::Load(Hdf &config) {
     EnableHotProfiler = stats["EnableHotProfiler"].getBool(true);
     ProfilerTraceBuffer = stats["ProfilerTraceBuffer"].getInt32(2000000);
     ProfilerTraceExpansion = stats["ProfilerTraceExpansion"].getDouble(1.2);
+    ProfilerMaxTraceBuffer = stats["ProfilerMaxTraceBuffer"].getInt32(0);
   }
   {
     config["ServerVariables"].get(ServerVariables);

@@ -286,6 +286,17 @@ void ExpressionList::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
+ExpressionPtr ExpressionList::listValue() const {
+  if (size_t i = m_exps.size()) {
+    if (m_kind == ListKindComma || m_kind == ListKindWrapped) {
+      return m_exps[i-1];
+    } else if (m_kind == ListKindLeft) {
+      return m_exps[0];
+    }
+  }
+  return ExpressionPtr();
+}
+
 void ExpressionList::optimize(AnalysisResultPtr ar) {
   bool changed = false;
   size_t i = m_exps.size();

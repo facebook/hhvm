@@ -179,7 +179,30 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultPtr ar) {
   if (Option::EliminateDeadCode &&
       ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
     // otherwise used & needed flags may not be up to date yet
-    return optimize(ar);
+    ExpressionPtr rep = optimize(ar);
+    if (rep) return rep;
+  }
+  ExpressionPtr val = m_value;
+  while (val) {
+    if (val->is(KindOfExpressionList)) {
+      ExpressionListPtr el(static_pointer_cast<ExpressionList>(val));
+      val = el->listValue();
+      continue;
+    }
+    if (val->is(KindOfAssignmentExpression)) {
+      val = static_pointer_cast<AssignmentExpression>(val)->m_value;
+      continue;
+    }
+    break;
+  }
+  if (val && val != m_value && val->isScalar()) {
+    ExpressionListPtr rep(new ExpressionList(getScope(), getLocation(),
+                                             KindOfExpressionList,
+                                             ExpressionList::ListKindWrapped));
+    rep->addElement(m_value);
+    m_value = val->clone();
+    rep->addElement(static_pointer_cast<Expression>(shared_from_this()));
+    return replaceValue(rep);
   }
   return ExpressionPtr();
 }

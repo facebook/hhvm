@@ -56,6 +56,7 @@ public:
   virtual bool getScalarValue(Variant &value);
   virtual bool isRefable(bool checkError = false) const;
   virtual bool kidUnused(int i) const;
+  ExpressionPtr listValue() const;
 
   bool isScalarArrayPairs() const;
 

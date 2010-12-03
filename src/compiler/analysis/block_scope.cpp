@@ -87,7 +87,7 @@ ClassScopeRawPtr BlockScope::getContainingClass() {
   if (bs->is(BlockScope::FunctionScope)) {
     bs = bs->m_outerScope.get();
   }
-  if (!bs->is(BlockScope::ClassScope)) {
+  if (bs && !bs->is(BlockScope::ClassScope)) {
     bs = 0;
   }
   return ClassScopeRawPtr((HPHP::ClassScope*)bs);

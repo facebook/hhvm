@@ -336,7 +336,7 @@ ssize_t HphpArray::iter_rewind(ssize_t pos) const {
     return ArrayData::invalid_index;
   }
   Elm* elms = data2Elms(m_data);
-  return prevElm(elms, (ssize_t)(m_lastE+1));
+  return prevElm(elms, pos);
 }
 
 Variant HphpArray::getKey(ssize_t pos) const {
@@ -1232,7 +1232,7 @@ bool HphpArray::nextInsertWithRef(CVarRef data) {
   if (m_linear) {
     delinearize();
   }
-  resize();
+  resizeIfNeeded();
   int64 ki = m_nextKI;
   ElmInd* ei = findForInsert(ki);
   ASSERT(!validElmInd(*ei));
@@ -1413,7 +1413,7 @@ inline bool HphpArray::addValWithRef(int64 ki, CVarRef data,
   if (m_linear) {
     delinearize();
   }
-  resize();
+  resizeIfNeeded();
   ElmInd* ei = findForInsert(ki);
   if (checkExists && validElmInd(*ei)) {
     return false;
@@ -1443,7 +1443,7 @@ inline bool HphpArray::addValWithRef(StringData* key, CVarRef data,
   if (m_linear) {
     delinearize();
   }
-  resize();
+  resizeIfNeeded();
   int64 h = key->hash();
   ElmInd* ei = findForInsert(key->data(), key->size(), h);
   if (checkExists && validElmInd(*ei)) {

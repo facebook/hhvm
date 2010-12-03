@@ -64,6 +64,8 @@ static char **build_envp(CArrRef envs, std::vector<String> &senvs) {
 ///////////////////////////////////////////////////////////////////////////////
 // pcntl
 
+IMPLEMENT_DEFAULT_EXTENSION(pcntl);
+
 void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
                   CArrRef envs /* = null_array */) {
   // build argumnent list

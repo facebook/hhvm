@@ -79,7 +79,7 @@ typedef SmartPtr<MutableArrayIter> MutableArrayIterPtr;
  *   pvar    strong    x (pointer)                      x
  */
 
-#define null (Variant())
+#define null ((Variant()))
 
 class Variant {
  public:

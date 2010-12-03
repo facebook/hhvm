@@ -7142,6 +7142,8 @@ bool TestCodeRun::TestCompilation() {
        "  bar($a++);"
        "}");
 
+  MVCR("<?php function test($a) { return null * $a; }");
+
   return true;
 }
 

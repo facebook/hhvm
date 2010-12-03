@@ -21,9 +21,6 @@ include(HPHPSetup)
 set(RECURSIVE_SOURCE_SUBDIRS runtime/base runtime/eval runtime/ext system/gen util)
 foreach (dir ${RECURSIVE_SOURCE_SUBDIRS})
 
-	auto_sources(files "*.no.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}")
-	list(APPEND CXX_NOOPT_SOURCES ${files})
-
 	auto_sources(files "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/${dir}") 
 	list(APPEND CXX_SOURCES ${files})
 

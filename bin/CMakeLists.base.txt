@@ -44,11 +44,7 @@ if ("${PROGRAM_NAME}" STREQUAL "")
 	set(PROGRAM_NAME program)
 endif()
 
-auto_sources(SOURCES1 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/php")
-auto_sources(SOURCES2 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/sys")
-auto_sources(SOURCES3 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/cls")
-auto_sources(SOURCES4 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/cpp")
-set(SOURCES ${SOURCES1} ${SOURCES2} ${SOURCES3} ${SOURCES4})
+auto_sources(SOURCES "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_executable(${PROGRAM_NAME} ${SOURCES})
 

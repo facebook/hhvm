@@ -4,30 +4,38 @@ function(auto_sources RETURN_VALUE PATTERN SOURCE_SUBDIRS)
 		SET(PATH ".")
 		if (${ARGC} EQUAL 4)
 			list(GET ARGV 3 PATH)
-		endif (${ARGC} EQUAL 4)
-	endif("${SOURCE_SUBDIRS}" STREQUAL "RECURSE")
+		endif ()
+	endif()
 
 	if ("${SOURCE_SUBDIRS}" STREQUAL "RECURSE")
+		unset(${RETURN_VALUE})
+		file(GLOB SUBDIR_FILES "${PATH}/${PATTERN}")
+		list(APPEND ${RETURN_VALUE} ${SUBDIR_FILES})
 
-		file(GLOB_RECURSE ${RETURN_VALUE} "${PATH}/${PATTERN}")
+		file(GLOB subdirs RELATIVE ${PATH} ${PATH}/*)
 
-	else ("${SOURCE_SUBDIRS}" STREQUAL "RECURSE")
-
+		foreach(DIR ${subdirs})
+			if (IS_DIRECTORY ${PATH}/${DIR})
+				if (NOT "${DIR}" STREQUAL "CMakeFiles")
+					file(GLOB_RECURSE SUBDIR_FILES "${PATH}/${DIR}/${PATTERN}")
+					list(APPEND ${RETURN_VALUE} ${SUBDIR_FILES})
+				endif()
+			endif()
+		endforeach()
+	else ()
 		file(GLOB ${RETURN_VALUE} "${PATTERN}")
 
 		foreach (PATH ${SOURCE_SUBDIRS})
 			file(GLOB SUBDIR_FILES "${PATH}/${PATTERN}")
 			list(APPEND ${RETURN_VALUE} ${SUBDIR_FILES})
 		endforeach(PATH ${SOURCE_SUBDIRS})
-
-	endif ("${SOURCE_SUBDIRS}" STREQUAL "RECURSE")
+	endif ()
 
 	if (${FILTER_OUT})
 		list(REMOVE_ITEM ${RETURN_VALUE} ${FILTER_OUT})
-	endif(${FILTER_OUT})
+	endif()
 
 	set(${RETURN_VALUE} ${${RETURN_VALUE}} PARENT_SCOPE)
-  
 endfunction(auto_sources)
 
 macro(MYSQL_SOCKET_SEARCH)

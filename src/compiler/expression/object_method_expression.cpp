@@ -148,7 +148,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
   reset();
 
   ConstructPtr self = shared_from_this();
-  TypePtr objectType = m_object->inferAndCheck(ar, Type::Object, false);
+  TypePtr objectType = m_object->inferAndCheck(ar, Type::Some, false);
   m_valid = true;
   m_bindClass = true;
 
@@ -260,77 +260,43 @@ void ObjectMethodExpression::outputPHP(CodeGenerator &cg,
   cg_printf(")");
 }
 
-bool ObjectMethodExpression::directVariantProxy(AnalysisResultPtr ar) {
-  TypePtr actualType = m_object->getActualType();
-  if (actualType && actualType->is(Type::KindOfVariant) &&
-      (!m_valid || m_name.empty() ||
-       !m_object->getType()->isSpecificObject())) {
-    if (m_object->is(KindOfSimpleVariable)) {
-      SimpleVariablePtr var =
-        dynamic_pointer_cast<SimpleVariable>(m_object);
-      const std::string &name = var->getName();
-      FunctionScopePtr func = getFunctionScope();
-      VariableTablePtr variables = func->getVariables();
-      if (!variables->isParameter(name) || variables->isLvalParam(name)) {
-        return true;
-      }
-      if (variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
-          variables->getAttribute(VariableTable::ContainsExtract)) {
-        return true;
-      }
-    } else {
-      return true;
-    }
-  }
-  return false;
-}
 void ObjectMethodExpression::outputCPPObject(CodeGenerator &cg,
-    AnalysisResultPtr ar) {
+                                             AnalysisResultPtr ar) {
   bool isThis = m_object->isThis();
   if (isThis && getFunctionScope()->isStatic()) {
     cg_printf("GET_THIS_ARROW()");
   }
 
   if (!isThis) {
-    if (!m_object->getActualType() ||
-        (directVariantProxy(ar) && !m_object->hasCPPTemp())) {
-      TypePtr expectedType = m_object->getExpectedType();
-      ASSERT(!expectedType || expectedType->is(Type::KindOfObject));
-      // Clear m_expectedType to avoid type cast (toObject).
-      m_object->setExpectedType(TypePtr());
-      m_object->outputCPP(cg, ar);
-      m_object->setExpectedType(expectedType);
-    } else {
-      m_object->outputCPP(cg, ar);
+    TypePtr t = m_object->getType();
+    bool ok = !t || t->is(Type::KindOfObject) || t->is(Type::KindOfVariant);
+    if (!ok) cg_printf("CVarRef(");
+    m_object->outputCPP(cg, ar);
+    if (!ok) cg_printf(")");
+    if (!ok || !t || !t->is(Type::KindOfObject)) {
+      cg_printf(".objectForCall()");
     }
   }
 }
+
 void ObjectMethodExpression::outputCPPObjectCall(CodeGenerator &cg,
-    AnalysisResultPtr ar) {
+                                                 AnalysisResultPtr ar) {
   outputCPPObject(cg, ar);
   bool isThis = m_object->isThis();
   if (!isThis) {
-    if (directVariantProxy(ar) && !m_object->hasCPPTemp()) {
-      if (m_bindClass) {
-        cg_printf(". BIND_CLASS_DOT ");
-      } else {
-        cg_printf(".");
-      }
+    string objType;
+    TypePtr type = m_object->getType();
+    if (type->isSpecificObject() && !m_name.empty() && m_valid) {
+      objType = type->getName();
+      ClassScopePtr cls = ar->findClass(objType);
+      objType = cls->getId(cg);
     } else {
-      string objType;
-      TypePtr type = m_object->getType();
-      if (type->isSpecificObject() && !m_name.empty() && m_valid) {
-        objType = type->getName();
-        ClassScopePtr cls = ar->findClass(objType);
-        objType = cls->getId(cg);
-      } else {
-        objType = "ObjectData";
-      }
-      if (m_bindClass) {
-        cg_printf("-> BIND_CLASS_ARROW(%s) ", objType.c_str());
-      } else {
-        cg_printf("->");
-      }
+      objType = "ObjectData";
+    }
+    if (m_bindClass) {
+      cg_printf("-> BIND_CLASS_ARROW(%s) ", objType.c_str());
+    } else {
+      cg_printf("->");
     }
   } else if (m_bindClass && m_classScope) {
     cg_printf(" BIND_CLASS_ARROW(%s) ", m_classScope->getId(cg).c_str());
@@ -338,7 +304,7 @@ void ObjectMethodExpression::outputCPPObjectCall(CodeGenerator &cg,
 }
 
 bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
-    AnalysisResultPtr ar, int state) {
+                                          AnalysisResultPtr ar, int state) {
   if (!m_name.empty() && m_valid && m_object->getType()->isSpecificObject()) {
     return FunctionCall::preOutputCPP(cg, ar, state);
   }

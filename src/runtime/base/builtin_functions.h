@@ -442,6 +442,7 @@ void throw_infinite_loop_exception() ATTRIBUTE_COLD;
 void throw_infinite_recursion_exception() ATTRIBUTE_COLD;
 void throw_request_timeout_exception() ATTRIBUTE_COLD;
 void throw_memory_exceeded_exception() ATTRIBUTE_COLD __attribute__((noreturn));
+void throw_call_non_object() ATTRIBUTE_COLD __attribute__((noreturn));
 
 /**
  * Cloning an object.
@@ -536,11 +537,11 @@ public:
     self->o_get_call_info(*this, prehash);
   }
   void methodCallWithIndex(CObjRef self, CStrRef method, MethodIndex mi,
-      int64 prehash = -1) {
+                           int64 prehash = -1) {
     methodCallWithIndex(self.get(), method, mi, prehash);
   }
   void methodCallWithIndex(ObjectData *self, CStrRef method, MethodIndex mi,
-      int64 prehash = -1) {
+                           int64 prehash = -1) {
     rootObj = self;
     name = method;
     self->o_get_call_info_with_index(*this, mi, prehash);

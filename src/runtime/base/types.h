@@ -232,6 +232,7 @@ public:
 };
 
 extern void throw_infinite_recursion_exception();
+extern void throw_call_non_object() ATTRIBUTE_COLD __attribute__((noreturn));
 
 // The ThreadInfo pointer itself must be from the current stack frame.
 inline void check_recursion(ThreadInfo *&info) {

@@ -291,7 +291,9 @@ TypePtr Expression::checkTypesImpl(AnalysisResultPtr ar, TypePtr expectedType,
 
 void Expression::setTypes(TypePtr actualType, TypePtr expectedType) {
   m_actualType = actualType;
-  if (!Type::SameType(expectedType, actualType)) {
+  if (!Type::SameType(expectedType, actualType) &&
+      !expectedType->is(Type::KindOfAny) &&
+      !expectedType->is(Type::KindOfSome)) {
     m_expectedType = expectedType;
   } else {
     // Clear expected type since expectedType == actualType

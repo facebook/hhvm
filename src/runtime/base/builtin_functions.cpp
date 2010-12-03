@@ -498,6 +498,10 @@ void throw_memory_exceeded_exception() {
   throw UncatchableException("request has exceeded memory limit");
 }
 
+void throw_call_non_object() {
+  throw FatalErrorException("Call to a member function on a non-object");
+}
+
 void throw_unexpected_argument_type(int argNum, const char *fnName,
                                     const char *expected, CVarRef val) {
   const char *otype = NULL;

@@ -238,6 +238,16 @@ class Variant {
     return *(Object*)(this);
   }
 
+  ObjectData *objectForCall() const {
+    if (m_type == KindOfObject) return m_data.pobj;
+    if (m_type == KindOfVariant) {
+      Variant *t = m_data.pvar;
+      if (t->m_type == KindOfObject) return t->m_data.pobj;
+    }
+    throw_call_non_object();
+    return 0;
+  }
+
   /**
    * Type testing functions
    */

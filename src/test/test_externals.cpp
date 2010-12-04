@@ -341,7 +341,7 @@ Variant invoke_file(CStrRef path, bool once /* = false */,
 Variant get_static_property(const char *s, const char *prop) {
   return null;
 }
-Variant get_constant(CStrRef name) {
+Variant get_constant(CStrRef name, bool error) {
   return name;
 }
 Variant get_class_constant(const char *s, const char *prop,

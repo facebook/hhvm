@@ -2059,7 +2059,7 @@ extern const bool k_ZEND_THREAD_SAFE;
 
 
 // Get Constant Table
-Variant get_builtin_constant(CStrRef name) {
+Variant get_builtin_constant(CStrRef name, bool error) {
   DECLARE_SYSTEM_GLOBALS(g);
   const char* s = name.data();
   int64 hash = hash_string(s);
@@ -7821,7 +7821,7 @@ Variant get_builtin_constant(CStrRef name) {
     default:
       break;
   }
-  raise_notice("Use of undefined constant %s - assumed '%s'", s, s);
+  if (error) raise_notice("Use of undefined constant %s - assumed '%s'", s, s);
   return name;
 }
 

@@ -58,7 +58,7 @@ static void zend_ini_do_op(char type, String &result,
 
 static void zend_ini_get_constant(String &result, CStrRef name) {
   if (name.find(':') < 0) {
-    result = get_constant(name).toString();
+    result = get_constant(name, false).toString();
   } else {
     result = name;
   }

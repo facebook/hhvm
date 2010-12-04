@@ -2460,7 +2460,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
     }
 
     cg.printSection("Get Constant Table");
-    cg_indentBegin("Variant get_%sconstant(CStrRef name) {\n",
+    cg_indentBegin("Variant get_%sconstant(CStrRef name, bool error) {\n",
         system ? "builtin_" : "");
     cg.printDeclareGlobals();
 
@@ -2495,11 +2495,11 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
     }
 
     if (system) {
-      cg_printf("raise_notice(\"Use of undefined constant %%s - "
-          "assumed '%%s'\", s, s);\n"),
-        cg_printf("return name;\n");
+      cg_printf("if (error) raise_notice(\"Use of undefined constant %%s - "
+                "assumed '%%s'\", s, s);\n");
+      cg_printf("return name;\n");
     } else {
-      cg_printf("return get_builtin_constant(name);\n");
+      cg_printf("return get_builtin_constant(name, error);\n");
     }
     cg_indentEnd("}\n");
     cg.namespaceEnd();

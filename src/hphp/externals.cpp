@@ -51,8 +51,8 @@ Variant invoke_file(CStrRef path, bool once /* = false */,
   return false;
 }
 
-Variant get_constant(CStrRef name) { return name;}
-Variant get_builtin_constant(CStrRef name) { return name;}
+Variant get_constant(CStrRef name, bool error) { return name;}
+Variant get_builtin_constant(CStrRef name, bool error) { return name;}
 Variant get_class_constant(const char *s, const char *prop,
                            bool fatal /* = true */) {
   return null;

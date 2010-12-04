@@ -72,8 +72,8 @@ extern Variant get_builtin_class_var_init(const char *s, const char *var);
 /**
  * Getting a constant
  */
-extern Variant get_constant(CStrRef name);
-extern Variant get_builtin_constant(CStrRef name);
+extern Variant get_constant(CStrRef name, bool error = true);
+extern Variant get_builtin_constant(CStrRef name, bool error = true);
 
 /**
  * Getting a class constant

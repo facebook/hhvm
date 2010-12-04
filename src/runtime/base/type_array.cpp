@@ -169,6 +169,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
   }
   SortImpl(perm1, array, opaque1, cmp, by_key, cmp_data);
 
+  Variant tmp;
   for (ArrayIter iter(*this); iter; ++iter) {
     Variant target;
     if (by_key) {
@@ -184,7 +185,8 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
       mid = (max + min) / 2;
       ssize_t pos = opaque1.positions[perm1[mid]];
       int cmp_res =  cmp(target,
-                         by_key ? array->getKey(pos) : array->getValueRef(pos),
+                         by_key ? array->getKey(pos)
+                                : array->getValueRef(pos, tmp),
                          cmp_data);
       if (cmp_res > 0) { // outer is bigger
         min = mid + 1;
@@ -205,7 +207,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
           if (key_cmp_function(target, array->getKey(pos), key_data) != 0) {
             break;
           }
-          if (value_cmp_function(val, array->getValueRef(pos),
+          if (value_cmp_function(val, array->getValueRef(pos, tmp),
                                  value_data) == 0) {
             found = true;
             break;
@@ -217,7 +219,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
             if (key_cmp_function(target, array->getKey(pos), key_data) != 0) {
               break;
             }
-            if (value_cmp_function(val, array->getValueRef(pos),
+            if (value_cmp_function(val, array->getValueRef(pos, tmp),
                                    value_data) == 0) {
               found = true;
               break;

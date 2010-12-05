@@ -891,7 +891,7 @@ bool f_fb_output_compression(bool new_value) {
 static Variant s_exit_callback;
 
 void f_fb_set_exit_callback(CVarRef function) {
-  s_exit_callback = function;
+  //s_exit_callback = function;
 }
 
 void invoke_exit_callback(const ExitException &e) {

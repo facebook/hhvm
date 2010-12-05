@@ -834,7 +834,7 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
           bool tmp5;
           {
             MethodCallPackage mcp6;
-            mcp6.methodCall((v_param), NAMSTR(s_sys_ss6d9ef7e5, "isOptional"), 0x2D6EF48BBAB22735LL);
+            mcp6.methodCall((v_param.objectForCall()), NAMSTR(s_sys_ss6d9ef7e5, "isOptional"), 0x2D6EF48BBAB22735LL);
             const CallInfo *cit6  __attribute__((__unused__)) = mcp6.ci;
             tmp5 = (toBoolean((mcp6.bindClass(info)->getMethFewArgs())(mcp6, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
           }
@@ -4020,7 +4020,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
     {
       {
         MethodCallPackage mcp1;
-        mcp1.methodCall((v_cls), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
+        mcp1.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
         const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
         Variant tmp2(((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 1, NAMSTR(s_sys_ssdc3cbddc, "name"), null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_cls = tmp2;
@@ -4078,7 +4078,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   }
   {
     MethodCallPackage mcp14;
-    mcp14.methodCall((t_getparentclass()), NAMSTR(s_sys_ssdd355b2b, "isSubclassOf"), 0x373333991926C97ELL);
+    mcp14.methodCall((t_getparentclass().objectForCall()), NAMSTR(s_sys_ssdd355b2b, "isSubclassOf"), 0x373333991926C97ELL);
     const CallInfo *cit14  __attribute__((__unused__)) = mcp14.ci;
     return wrap_variant((mcp14.bindClass(info)->getMethFewArgs())(mcp14, 1, v_cls, null_variant, null_variant, null_variant, null_variant, null_variant));
   }
@@ -4102,7 +4102,7 @@ Array c_ReflectionClass::t_getstaticproperties() {
           bool tmp4;
           {
             MethodCallPackage mcp5;
-            mcp5.methodCall((v_prop), NAMSTR(s_sys_ss404bf1b4, "isStatic"), 0x7A15DC56E8CC0B19LL);
+            mcp5.methodCall((v_prop.objectForCall()), NAMSTR(s_sys_ss404bf1b4, "isStatic"), 0x7A15DC56E8CC0B19LL);
             const CallInfo *cit5  __attribute__((__unused__)) = mcp5.ci;
             tmp4 = (toBoolean((mcp5.bindClass(info)->getMethFewArgs())(mcp5, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
           }
@@ -4169,7 +4169,7 @@ Array c_ReflectionClass::t_getdefaultproperties() {
           bool tmp4;
           {
             MethodCallPackage mcp5;
-            mcp5.methodCall((v_prop), NAMSTR(s_sys_ss9dad4367, "isDefault"), 0x384A52597AB11F15LL);
+            mcp5.methodCall((v_prop.objectForCall()), NAMSTR(s_sys_ss9dad4367, "isDefault"), 0x384A52597AB11F15LL);
             const CallInfo *cit5  __attribute__((__unused__)) = mcp5.ci;
             tmp4 = (toBoolean((mcp5.bindClass(info)->getMethFewArgs())(mcp5, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
           }
@@ -4206,7 +4206,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
     {
       {
         MethodCallPackage mcp1;
-        mcp1.methodCall((v_cls), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
+        mcp1.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
         const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
         Variant tmp2(((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 1, NAMSTR(s_sys_ssdc3cbddc, "name"), null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_cls = tmp2;
@@ -4270,7 +4270,7 @@ Variant c_ReflectionClass::t_getextensionname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtensionName);
   {
     MethodCallPackage mcp1;
-    mcp1.methodCall((t_fetch(NAMSTR(s_sys_sse9bf4500, "extension"))), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
+    mcp1.methodCall((t_fetch(NAMSTR(s_sys_sse9bf4500, "extension")).objectForCall()), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
     const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
     return wrap_variant((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant));
   }
@@ -5075,9 +5075,9 @@ Array c_ReflectionExtension::t_getclassnames() {
       iter3->second(v_cls);
       {
         {
-          const Object &tmp5((toObject(v_cls)));
+          Variant tmp5((v_cls));
           MethodCallPackage mcp4;
-          mcp4.methodCall((tmp5), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
+          mcp4.methodCall((tmp5.objectForCall()), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
           const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
           Variant tmp6(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
           v_ret.append((tmp6));
@@ -6118,7 +6118,7 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name) {
       }
       {
         MethodCallPackage mcp2;
-        mcp2.methodCall((v_cls), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
+        mcp2.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
         const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
         Variant tmp3(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_method = tmp3;
@@ -6165,7 +6165,7 @@ Variant c_ReflectionMethod::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name
   }
   {
     MethodCallPackage mcp2;
-    mcp2.methodCall((v_cls), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
+    mcp2.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
     const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
     Variant tmp3(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
     v_obj = tmp3;
@@ -7256,7 +7256,7 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
       }
       {
         MethodCallPackage mcp2;
-        mcp2.methodCall((v_cls), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
+        mcp2.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
         const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
         Variant tmp3(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_prop = tmp3;
@@ -7303,7 +7303,7 @@ Variant c_ReflectionProperty::ti_export(CStrRef cls, Variant v_cls, CVarRef v_na
   }
   {
     MethodCallPackage mcp2;
-    mcp2.methodCall((v_cls), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
+    mcp2.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
     const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
     Variant tmp3(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
     v_obj = tmp3;
@@ -8754,7 +8754,7 @@ void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
     {
       {
         MethodCallPackage mcp1;
-        mcp1.methodCall((v_func), NAMSTR(s_sys_ss1902bc14, "getParameters"), 0x3E62225132C2A32DLL);
+        mcp1.methodCall((v_func.objectForCall()), NAMSTR(s_sys_ss1902bc14, "getParameters"), 0x3E62225132C2A32DLL);
         const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
         Variant tmp2(((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_params = tmp2;

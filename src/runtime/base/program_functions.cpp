@@ -58,6 +58,7 @@
 #include <libgen.h>
 
 #include <runtime/eval/runtime/eval_state.h>
+#include <runtime/eval/parser/parser.h>
 
 using namespace std;
 using namespace boost::program_options;
@@ -77,6 +78,7 @@ struct ProgramOptions {
   int        admin_port;
   string     user;
   string     file;
+  string     lint;
   bool       isTempFile;
   int        count;
   bool       noSafeAccessCheck;
@@ -598,6 +600,8 @@ static int execute_program_impl(int argc, char **argv) {
      "run server under this user account")
     ("file,f", value<string>(&po.file),
      "executing specified file")
+    ("lint,l", value<string>(&po.lint),
+     "lint specified file")
     ("temp-file",
      "file specified is temporary and removed after execution")
     ("count", value<int>(&po.count)->default_value(1),
@@ -715,6 +719,27 @@ static int execute_program_impl(int argc, char **argv) {
 
   MethodIndexHMap::initialize(false);
   ShmCounters::initialize(true, Logger::Error);
+
+  if (!po.lint.empty()) {
+    int ret = 0;
+    try {
+      Scanner scanner(po.lint.c_str(), Scanner::AllowShortTags);
+      std::vector<Eval::StaticStatementPtr> statics;
+      Eval::Parser parser(scanner, po.lint.c_str(), statics);
+      if (!parser.parse()) {
+        Logger::Error("Unable to parse file %s: %s", po.lint.c_str(),
+                      parser.getMessage().c_str());
+        ret = 1;
+      } else {
+        Logger::Info("No syntax errors detected in %s", po.lint.c_str());
+      }
+    } catch (FileOpenException &e) {
+      Logger::Error("%s", e.getMessage().c_str());
+      ret = 1;
+    }
+    return ret;
+  }
+
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {
     RuntimeOption::ExecutionMode = "cli";
 

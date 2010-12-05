@@ -33,8 +33,6 @@ public:
   TempFile(bool autoDelete = true);
   virtual ~TempFile();
 
-  const std::string getName() const { return m_name;}
-
   static StaticString s_class_name;
   // overriding ResourceData
   CStrRef o_getClassName() const { return s_class_name; }
@@ -45,7 +43,6 @@ public:
 
 private:
   bool m_autoDelete;
-  std::string m_name;
 
   bool closeImpl();
 };

@@ -53,6 +53,7 @@ public:
   virtual bool truncate(int64 size);
 
   FILE *getStream() { return m_stream;}
+  virtual const char *getStreamType() const { return "STDIO";}
 
   static CVarRef getStdIn();
   static CVarRef getStdOut();

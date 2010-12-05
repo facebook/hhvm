@@ -56,6 +56,7 @@ public:
 
   int fd() const { return m_fd;}
   bool valid() const { return m_fd >= 0;}
+  const std::string getName() const { return m_name;}
 
   /**
    * How to open this type of file.
@@ -94,7 +95,9 @@ public:
   virtual bool truncate(int64 size);
   virtual bool lock(int operation);
   virtual bool lock(int operation, bool &wouldblock);
+
   virtual Array getMetaData();
+  virtual const char *getStreamType() const { return "";}
 
   /**
    * Read one line a time. Returns a null string on failure or eof.
@@ -143,6 +146,10 @@ protected:
   // fields useful for both reads and writes
   int64 m_position; // the current cursor position
 
+  std::string m_name;
+  std::string m_mode;
+
+  static Object OpenImpl(CStrRef filename, CStrRef mode, CArrRef options);
   void closeImpl();
 
 private:

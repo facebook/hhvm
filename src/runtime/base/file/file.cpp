@@ -116,6 +116,17 @@ bool File::IsPlainFilePath(CStrRef filename) {
 
 Variant File::Open(CStrRef filename, CStrRef mode,
                    CArrRef options /* = null_array */) {
+  Object ret = OpenImpl(filename, mode, options);
+  if (!ret.isNull()) {
+    File *file = ret.getTyped<File>();
+    file->m_name = filename.data();
+    file->m_mode = mode.data();
+    return ret;
+  }
+  return false;
+}
+
+Object File::OpenImpl(CStrRef filename, CStrRef mode, CArrRef options) {
   static const char http_prefix[] = "http://";
   static const char https_prefix[] = "https://";
   static const char zlib_prefix[] = "compress.zlib://";
@@ -136,7 +147,7 @@ Variant File::Open(CStrRef filename, CStrRef mode,
       TempFile *file = NEW(TempFile)();
       if (!file->valid()) {
         raise_warning("Unable to create temporary file");
-        return false;
+        return Object();
       }
       return Object(file);
     }
@@ -158,7 +169,7 @@ Variant File::Open(CStrRef filename, CStrRef mode,
     }
 
     raise_warning("Unable to open file %s", filename.c_str());
-    return false;
+    return Object();
   }
 
   if (!strncmp(filename.data(), http_prefix, sizeof(http_prefix) - 1) ||
@@ -195,7 +206,7 @@ Variant File::Open(CStrRef filename, CStrRef mode,
     if (!ret) {
       raise_warning("Failed to open %s (%s)", filename.data(),
                     file->getLastError().c_str());
-      return false;
+      return Object();
     }
     return obj;
   }
@@ -228,7 +239,7 @@ Variant File::Open(CStrRef filename, CStrRef mode,
     bool ret = file->open(File::TranslatePath(name), mode);
     if (!ret) {
       raise_warning("%s", file->getLastError().c_str());
-      return false;
+      return Object();
     }
     return obj;
   }
@@ -238,7 +249,7 @@ Variant File::Open(CStrRef filename, CStrRef mode,
   bool ret = file->open(File::TranslatePath(name), mode);
   if (!ret) {
     raise_warning("%s", file->getLastError().c_str());
-    return false;
+    return Object();
   }
   return obj;
 }
@@ -425,7 +436,15 @@ bool File::lock(int operation, bool &wouldblock /* = false */) {
 
 Array File::getMetaData() {
   Array ret = Array::Create();
-  ret.set("eof", eof());
+  ret.set("wrapper_type", o_getClassName());
+  ret.set("stream_type",  getStreamType());
+  ret.set("mode",         String(m_mode));
+  ret.set("unread_bytes", 0);
+  ret.set("seekable",     seekable());
+  ret.set("uri",          String(m_name));
+  ret.set("timed_out",    false);
+  ret.set("blocked",      true);
+  ret.set("eof",          eof());
   return ret;
 }
 

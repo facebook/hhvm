@@ -157,20 +157,20 @@ Variant ObjectPropertyExpression::setOp(VariableEnvironment &env, int op,
 }
 
 bool ObjectPropertyExpression::exist(VariableEnvironment &env, int op) const {
-  Object obj;
+  Variant obj;
   String name;
   if (m_reverseOrder) {
-    obj = toObject(m_obj->evalExist(env));
+    obj = m_obj->evalExist(env);
     name = m_name->get(env);
   } else {
     name = m_name->get(env);
-    obj = toObject(m_obj->evalExist(env));
+    obj = m_obj->evalExist(env);
   }
   SET_LINE;
   if (op == T_ISSET) {
-    return obj->o_isset(name);
+    return obj.o_isset(name);
   } else {
-    return obj->o_empty(name);
+    return obj.o_empty(name);
   }
 }
 
@@ -179,11 +179,11 @@ void ObjectPropertyExpression::unset(VariableEnvironment &env) const {
   Variant *obj;
   if (lobj && lobj->weakLval(env, obj)) {
     String name(m_name->get(env));
-    toObject(*obj)->o_unset(name);
-  } else {
-    Object obj(toObject(m_obj->evalExist(env)));
-    String name(m_name->get(env));
     obj->o_unset(name);
+  } else {
+    Variant obj(m_obj->evalExist(env));
+    String name(m_name->get(env));
+    obj.o_unset(name);
   }
 }
 

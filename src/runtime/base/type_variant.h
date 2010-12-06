@@ -776,6 +776,9 @@ class Variant {
                        CStrRef context = null_string);
   Variant o_argval(bool byRef, CStrRef propName, bool error = true,
       CStrRef context = null_string) const;
+  bool o_empty(CStrRef propName, CStrRef context = null_string) const;
+  bool o_isset(CStrRef propName, CStrRef context = null_string) const;
+  void o_unset(CStrRef propName, CStrRef context = null_string);
 
   Variant o_invoke(const char *s, CArrRef params, int64 hash = -1);
   Variant o_invoke(CStrRef s, CArrRef params, int64 hash = -1);

@@ -51,8 +51,8 @@ public:
   bool isNonPrivate(AnalysisResultPtr ar);
   bool isValid() const { return m_valid; }
   void outputCPPProperty(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPObject(CodeGenerator &cg, AnalysisResultPtr ar,
-                       int directVariant = -1);
+  bool outputCPPObject(CodeGenerator &cg, AnalysisResultPtr ar,
+                       bool noEvalOnError = false);
 private:
   void setEffect(Effect effect);
   void clearEffect(Effect effect);
@@ -72,7 +72,7 @@ private:
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);
   void outputCPPObjProperty(CodeGenerator &cg, AnalysisResultPtr ar,
-                            bool directVariant, int doExist);
+                            int doExist);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

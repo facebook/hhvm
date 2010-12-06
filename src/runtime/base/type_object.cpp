@@ -113,20 +113,19 @@ Variant &Object::o_unsetLval(CStrRef propName, CVarRef tmpForGet,
 
 bool Object::o_isset(CStrRef propName,
                      CStrRef context /* = null_string */) const {
-  if (!m_px) throw NullPointerException();
+  if (!m_px) return false;
   return m_px->o_isset(propName, context);
 }
 
 bool Object::o_empty(CStrRef propName,
                      CStrRef context /* = null_string */) const {
-  if (!m_px) throw NullPointerException();
+  if (!m_px) return true;
   return m_px->o_empty(propName, context);
 }
 
-Variant Object::o_unset(CStrRef propName,
-                        CStrRef context /* = null_string */) const {
-  if (!m_px) throw NullPointerException();
-  return m_px->o_unset(propName, context);
+void Object::o_unset(CStrRef propName,
+                     CStrRef context /* = null_string */) const {
+  if (m_px) m_px->o_unset(propName, context);
 }
 
 Variant Object::o_argval(bool byRef, CStrRef propName,

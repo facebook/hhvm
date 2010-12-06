@@ -726,7 +726,8 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
     m_context = save;
 
     cg_printf("));\n");
-    if ((isLvalue || hasContext(DeepReference)) && constRef) {
+    if ((isLvalue || hasContext(DeepReference) || hasContext(UnsetContext)) &&
+        constRef) {
       dstType->outputCPPDecl(cg, ar, getScope());
       cg_printf(" &%s_lv = const_cast<", t.c_str());
       dstType->outputCPPDecl(cg, ar, getScope());

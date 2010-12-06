@@ -260,7 +260,7 @@ class ObjectData : public Countable {
 
   bool o_isset(CStrRef prop, CStrRef context = null_string);
   bool o_empty(CStrRef prop, CStrRef context = null_string);
-  Variant o_unset(CStrRef prop, CStrRef context = null_string);
+  void o_unset(CStrRef prop, CStrRef context = null_string);
 
   // magic methods
   // __construct is handled in a special way

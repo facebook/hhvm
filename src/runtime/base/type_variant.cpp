@@ -2464,6 +2464,43 @@ Variant Variant::o_getPublic(CStrRef propName, bool error /* = true */) const {
   return null_variant;
 }
 
+bool Variant::o_empty(CStrRef propName,
+                      CStrRef context /* = null_string */) const {
+  if (m_type == KindOfObject) {
+    return m_data.pobj->o_empty(propName, context);
+  }
+  if (m_type == KindOfVariant) {
+    return m_data.pvar->o_empty(propName, context);
+  }
+  if (m_type == KindOfArray) {
+    return empty(rvalAt(propName, false));
+  }
+  return true;
+}
+
+bool Variant::o_isset(CStrRef propName,
+                      CStrRef context /* = null_string */) const {
+  if (m_type == KindOfObject) {
+    return m_data.pobj->o_isset(propName, context);
+  }
+  if (m_type == KindOfVariant) {
+    return m_data.pvar->o_isset(propName, context);
+  }
+  if (m_type == KindOfArray) {
+    return isset(rvalAt(propName, false));
+  }
+  return false;
+}
+
+void Variant::o_unset(CStrRef propName, CStrRef context /* = null_string */) {
+  if (m_type == KindOfObject) {
+    m_data.pobj->o_unset(propName, context);
+  }
+  if (m_type == KindOfVariant) {
+    m_data.pvar->o_unset(propName, context);
+  }
+}
+
 Variant Variant::o_argval(bool byRef, CStrRef propName,
     bool error /* = true */, CStrRef context /* = null_string */) const {
   if (m_type == KindOfObject) {

@@ -812,18 +812,18 @@ bool ObjectData::o_empty(CStrRef prop, CStrRef context) {
     (AttributeClearer(UseGet, this),empty(t___get(prop)));
 }
 
-Variant ObjectData::o_unset(CStrRef prop, CStrRef context) {
+void ObjectData::o_unset(CStrRef prop, CStrRef context) {
   if (getAttribute(UseUnset)) {
     AttributeClearer a(UseUnset, this);
-    return t___unset(prop);
+    t___unset(prop);
   } else {
-    if (Variant *t = o_realProp(prop, RealPropWrite|RealPropNoDynamic)) {
+    if (Variant *t = o_realProp(prop,
+                                RealPropWrite|RealPropNoDynamic, context)) {
       unset(*t);
     } else if (o_properties && o_properties->exists(prop, true)) {
       o_properties->weakRemove(prop, true);
     }
   }
-  return null;
 }
 
 

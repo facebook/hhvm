@@ -581,7 +581,7 @@ private:
       Node *&child = m_heap[pos - 1];
       Node *&parent = m_heap[pos/2 - 1];
       if (parent->frequency() > child->frequency()) {
-        swap(child, parent);
+        std::swap(child, parent);
         child->heapIndex = pos;
         parent->heapIndex = pos/2;
         pos = pos/2;
@@ -603,7 +603,7 @@ private:
         child = pos * 2 + 1;
       }
       if (m_heap[pos - 1]->frequency() > m_heap[child - 1]->frequency()) {
-        swap(m_heap[pos - 1], m_heap[child - 1]);
+        std::swap(m_heap[pos - 1], m_heap[child - 1]);
         m_heap[pos - 1]->heapIndex = pos;
         m_heap[child - 1]->heapIndex = child;
         pos = child;

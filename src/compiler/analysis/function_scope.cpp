@@ -517,7 +517,7 @@ TypePtr FunctionScope::setParamType(AnalysisResultPtr ar, int index,
   if (type && !Type::SameType(paramType, type)) {
     addUpdates(UseKindNonStaticRef);
     if (!isFirstPass()) {
-      Logger::Verbose("Corrected type of parameter %d of %s: %s -> %s",
+      HPHPLOG_VERBOSE("Corrected type of parameter %d of %s: %s -> %s",
                       index, m_name.c_str(),
                       paramType->toString().c_str(), type->toString().c_str());
     }
@@ -612,7 +612,7 @@ void FunctionScope::popReturnType() {
         return;
       }
       if (!isFirstPass()) {
-        Logger::Verbose("Corrected function return type %s -> %s",
+        HPHPLOG_VERBOSE("Corrected function return type %s -> %s",
                         m_prevReturn->toString().c_str(),
                         m_returnType->toString().c_str());
       }

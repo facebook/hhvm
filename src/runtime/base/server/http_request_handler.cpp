@@ -110,7 +110,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   transport->enableCompression();
 
   ServerStatsHelper ssh("all", true);
-  Logger::Verbose("receiving %s", transport->getCommand().c_str());
+  HPHPLOG_VERBOSE("receiving %s", transport->getCommand().c_str());
 
   // will clear all extra logging when this function goes out of scope
   StackTraceNoHeap::ExtraLoggingClearer clearer;
@@ -247,7 +247,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
     transport->onSendEnd();
     hphp_context_exit(g_context.get(), true, true, transport->getUrl());
   } catch (...) {
-    Logger::Error("Unhandled exception in HPHP server engine.");
+    HPHPLOG_ERROR("Unhandled exception in HPHP server engine.");
   }
   GetAccessLog().log(transport, vhost);
   hphp_session_exit();
@@ -339,7 +339,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
           String content = context->obDetachContents();
           transport->sendRaw((void*)content.data(), content.size());
         } else {
-          Logger::Error("Unable to invoke error page %s", errorPage.c_str());
+          HPHPLOG_ERROR("Unable to invoke error page %s", errorPage.c_str());
           errorPage.clear(); // so we fall back to 500 return
         }
       }

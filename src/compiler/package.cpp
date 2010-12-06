@@ -150,7 +150,7 @@ FileCachePtr Package::getFileCache() {
       string &file = files[i];
       string rpath = file.substr(m_root.size());
       if (!m_fileCache->fileExists(rpath.c_str())) {
-        Logger::Verbose("saving %s", file.c_str());
+        HPHPLOG_VERBOSE("saving %s", file.c_str());
         m_fileCache->write(rpath.c_str(), file.c_str());
       }
     }
@@ -163,7 +163,7 @@ FileCachePtr Package::getFileCache() {
       string &file = files[i];
       string rpath = file.substr(m_root.size());
       if (!m_fileCache->fileExists(rpath.c_str())) {
-        Logger::Verbose("saving %s", file.c_str());
+        HPHPLOG_VERBOSE("saving %s", file.c_str());
         m_fileCache->write(rpath.c_str(), file.c_str());
       }
     }
@@ -173,7 +173,7 @@ FileCachePtr Package::getFileCache() {
     const char *file = iter->c_str();
     if (!m_fileCache->fileExists(file)) {
       string fullpath = m_root + file;
-      Logger::Verbose("saving %s", fullpath.c_str());
+      HPHPLOG_VERBOSE("saving %s", fullpath.c_str());
       m_fileCache->write(file, fullpath.c_str());
     }
   }
@@ -192,7 +192,7 @@ public:
       Package *package = (Package*)m_opaque;
       m_ret = package->parseImpl(filename);
     } catch (Exception &e) {
-      Logger::Error("%s", e.getMessage().c_str());
+      HPHPLOG_ERROR("%s", e.getMessage().c_str());
       m_ret = false;
     }
   }
@@ -246,18 +246,18 @@ bool Package::parseImpl(const char *fileName) {
   struct stat sb;
   if (stat(fullPath.c_str(), &sb)) {
     if (fullPath.find(' ') == string::npos) {
-      Logger::Error("Unable to stat file %s", fullPath.c_str());
+      HPHPLOG_ERROR("Unable to stat file %s", fullPath.c_str());
     }
     return false;
   }
   if ((sb.st_mode & S_IFMT) == S_IFDIR) {
-    Logger::Error("Unable to parse directory: %s", fullPath.c_str());
+    HPHPLOG_ERROR("Unable to parse directory: %s", fullPath.c_str());
     return false;
   }
 
   int lines = 0;
   try {
-    Logger::Verbose("parsing %s ...", fullPath.c_str());
+    HPHPLOG_VERBOSE("parsing %s ...", fullPath.c_str());
     Scanner scanner(fullPath.c_str(), Option::ScannerType);
     Compiler::Parser parser(scanner, fileName, m_ar, sb.st_size);
     if (!parser.parse()) {
@@ -267,7 +267,7 @@ bool Package::parseImpl(const char *fileName) {
 
     lines = parser.line1();
   } catch (FileOpenException &e) {
-    Logger::Error("%s", e.getMessage().c_str());
+    HPHPLOG_ERROR("%s", e.getMessage().c_str());
     return false;
   }
 

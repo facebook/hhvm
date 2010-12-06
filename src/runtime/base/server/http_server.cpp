@@ -133,11 +133,11 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
     handler.handleRequest(&rt);
     int code = rt.getResponseCode();
     if (code == 200) {
-      Logger::Info("StartupDocument %s returned 200 OK: %s",
+      HPHPLOG_INFO("StartupDocument %s returned 200 OK: %s",
                    RuntimeOption::StartupDocument.c_str(),
                    rt.getResponse().c_str());
     } else {
-      Logger::Error("StartupDocument %s failed %d: %s",
+      HPHPLOG_ERROR("StartupDocument %s failed %d: %s",
                     RuntimeOption::StartupDocument.c_str(),
                     code, rt.getResponse().data());
       return;
@@ -154,7 +154,7 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
 void HttpServer::onServerShutdown() {
   Eval::Debugger::Stop();
   if (RuntimeOption::EnableDebuggerServer) {
-    Logger::Info("debugger server stopped");
+    HPHPLOG_INFO("debugger server stopped");
   }
 
   // When a new instance of HPHP has taken over our page server socket,
@@ -162,11 +162,11 @@ void HttpServer::onServerShutdown() {
   for (unsigned int i = 0; i < m_satellites.size(); i++) {
     string name = m_satellites[i]->getName();
     m_satellites[i]->stop();
-    Logger::Info("satellite server %s stopped", name.c_str());
+    HPHPLOG_INFO("satellite server %s stopped", name.c_str());
   }
   if (RuntimeOption::AdminServerPort) {
     m_adminServer->stop();
-    Logger::Info("admin server stopped");
+    HPHPLOG_INFO("admin server stopped");
   }
 
   // start dangling servers, so they can serve old version of pages
@@ -174,9 +174,9 @@ void HttpServer::onServerShutdown() {
     string name = m_danglings[i]->getName();
     try {
       m_danglings[i]->start();
-      Logger::Info("dangling server %s started", name.c_str());
+      HPHPLOG_INFO("dangling server %s started", name.c_str());
     } catch (Exception &e) {
-      Logger::Error("Unable to start danglings server %s: %s",
+      HPHPLOG_ERROR("Unable to start danglings server %s: %s",
                     name.c_str(), e.getMessage().c_str());
       // it's okay not able to start them
     }
@@ -210,28 +210,28 @@ void HttpServer::run() {
 
   if (RuntimeOption::ServerPort) {
     if (!startServer(true)) {
-      Logger::Error("Unable to start page server");
+      HPHPLOG_ERROR("Unable to start page server");
       return;
     }
-    Logger::Info("page server started");
+    HPHPLOG_INFO("page server started");
   }
 
   if (RuntimeOption::AdminServerPort) {
     if (!startServer(false)) {
-      Logger::Error("Unable to start admin server");
+      HPHPLOG_ERROR("Unable to start admin server");
       abortServers();
       return;
     }
-    Logger::Info("admin server started");
+    HPHPLOG_INFO("admin server started");
   }
 
   for (unsigned int i = 0; i < m_satellites.size(); i++) {
     string name = m_satellites[i]->getName();
     try {
       m_satellites[i]->start();
-      Logger::Info("satellite server %s started", name.c_str());
+      HPHPLOG_INFO("satellite server %s started", name.c_str());
     } catch (Exception &e) {
-      Logger::Error("Unable to start satellite server %s: %s",
+      HPHPLOG_ERROR("Unable to start satellite server %s: %s",
                     name.c_str(), e.getMessage().c_str());
       abortServers();
       return;
@@ -239,15 +239,15 @@ void HttpServer::run() {
   }
 
   if (!Eval::Debugger::StartServer()) {
-    Logger::Error("Unable to start debugger server");
+    HPHPLOG_ERROR("Unable to start debugger server");
     abortServers();
     return;
   } else if (RuntimeOption::EnableDebuggerServer) {
-    Logger::Info("debugger server started");
+    HPHPLOG_INFO("debugger server started");
   }
 
   {
-    Logger::Info("all servers started");
+    HPHPLOG_INFO("all servers started");
     createPid();
     Lock lock(this);
     // continously running until /stop is received on admin server
@@ -255,7 +255,7 @@ void HttpServer::run() {
       wait();
     }
     removePid();
-    Logger::Info("page server stopped");
+    HPHPLOG_INFO("page server stopped");
   }
 
   onServerShutdown(); // dangling server already started here
@@ -273,7 +273,7 @@ void HttpServer::run() {
 
   for (unsigned int i = 0; i < m_danglings.size(); i++) {
     m_danglings[i]->stop();
-    Logger::Info("dangling server %s stopped",
+    HPHPLOG_INFO("dangling server %s stopped",
                  m_danglings[i]->getName().c_str());
   }
 
@@ -284,7 +284,7 @@ void HttpServer::run() {
   hphp_process_exit();
   m_watchDog.waitForEnd();
   m_loggerThread.waitForEnd();
-  Logger::Info("all servers stopped");
+  HPHPLOG_INFO("all servers stopped");
 }
 
 static void exit_on_timeout(int sig) {
@@ -326,7 +326,7 @@ void HttpServer::createPid() {
       fwrite(buf, strlen(buf), 1, f);
       fclose(f);
     } else {
-      Logger::Error("Unable to open pid file %s for write",
+      HPHPLOG_ERROR("Unable to open pid file %s for write",
                     RuntimeOption::PidFile.c_str());
     }
   }
@@ -348,7 +348,7 @@ void HttpServer::killPid() {
         return;
       }
     }
-    Logger::Error("Unable to read pid file %s for any meaningful pid",
+    HPHPLOG_ERROR("Unable to read pid file %s for any meaningful pid",
                   RuntimeOption::PidFile.c_str());
   }
 }
@@ -451,11 +451,11 @@ bool HttpServer::startServer(bool pageServer) {
       return true;
     } catch (FailedToListenException &e) {
       if (i == 0) {
-        Logger::Info("shutting down old HPHP server by /stop command");
+        HPHPLOG_INFO("shutting down old HPHP server by /stop command");
       }
 
       if (errno == EACCES) {
-        Logger::Error("Permission denied listening on port %d", port);
+        HPHPLOG_ERROR("Permission denied listening on port %d", port);
         return false;
       }
 
@@ -484,7 +484,7 @@ bool HttpServer::startServer(bool pageServer) {
         return true;
       } catch (FailedToListenException &e) {
         if (i == 0) {
-          Logger::Info("shutting down old HPHP server by pid file");
+          HPHPLOG_INFO("shutting down old HPHP server by pid file");
         }
         killPid();
         sleep(1);
@@ -504,7 +504,7 @@ bool HttpServer::startServer(bool pageServer) {
         return true;
       } catch (FailedToListenException &e) {
         if (i == 0) {
-          Logger::Info("killing anything listening on port %d", port);
+          HPHPLOG_INFO("killing anything listening on port %d", port);
         }
 
         string cmd = "lsof -t -i :";

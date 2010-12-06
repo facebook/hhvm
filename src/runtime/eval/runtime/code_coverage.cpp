@@ -75,7 +75,7 @@ void CodeCoverage::Report(const std::string &filename) {
 
   ofstream f(filename.c_str());
   if (!f) {
-    Logger::Error("unable to open %s", filename.c_str());
+    HPHPLOG_ERROR("unable to open %s", filename.c_str());
     return;
   }
 

@@ -39,7 +39,7 @@ ServiceThread::ServiceThread(const std::string &url) :
 }
 
 void ServiceThread::threadRun() {
-  Logger::Info("Service thread %s started", m_url.c_str());
+  HPHPLOG_INFO("Service thread %s started", m_url.c_str());
   s_service_threads.set(this);
 
   Hdf hdf;
@@ -53,7 +53,7 @@ void ServiceThread::threadRun() {
   handler.disablePathTranslation();
   handler.handleRequest(&rt);
 
-  Logger::Info("Service thread %s stopped", m_url.c_str());
+  HPHPLOG_INFO("Service thread %s stopped", m_url.c_str());
 }
 
 void ServiceThread::waitForStarted() {

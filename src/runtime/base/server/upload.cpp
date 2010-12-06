@@ -705,7 +705,7 @@ void rfc1867PostHandler(Transport *transport,
   /* Initialize the buffer */
   if (!(mbuff = multipart_buffer_new(transport,
                                      (const char *)data, size, boundary))) {
-    Logger::Warning("Unable to initialize the input buffer");
+    HPHPLOG_WARNING("Unable to initialize the input buffer");
     return;
   }
 
@@ -824,7 +824,7 @@ void rfc1867PostHandler(Transport *transport,
 
       /* Return with an error if the posted data is garbled */
       if (!param && !filename) {
-        Logger::Warning("File Upload Mime headers garbled");
+        HPHPLOG_WARNING("File Upload Mime headers garbled");
         goto fileupload_done;
       }
 
@@ -870,8 +870,8 @@ void rfc1867PostHandler(Transport *transport,
                  RuntimeOption::UploadTmpDir.c_str());
         fd = mkstemp(path);
         if (fd == -1) {
-          Logger::Warning("Unable to open temporary file");
-          Logger::Warning("File upload error - unable to create a "
+          HPHPLOG_WARNING("Unable to open temporary file");
+          HPHPLOG_WARNING("File upload error - unable to create a "
                           "temporary file");
           cancel_upload = UPLOAD_ERROR_E;
         }
@@ -910,7 +910,7 @@ void rfc1867PostHandler(Transport *transport,
       }
 
       if(strlen(filename) == 0) {
-        Logger::Verbose("No file uploaded");
+        HPHPLOG_VERBOSE("No file uploaded");
         cancel_upload = UPLOAD_ERROR_D;
       }
 
@@ -939,13 +939,13 @@ void rfc1867PostHandler(Transport *transport,
 
         if (RuntimeOption::UploadMaxFileSize > 0 &&
             total_bytes > RuntimeOption::UploadMaxFileSize) {
-          Logger::Verbose("upload_max_filesize of %ld bytes exceeded - file "
+          HPHPLOG_VERBOSE("upload_max_filesize of %ld bytes exceeded - file "
                           "[%s=%s] not saved",
                           RuntimeOption::UploadMaxFileSize,
                           param, filename);
           cancel_upload = UPLOAD_ERROR_A;
         } else if (max_file_size && (total_bytes > max_file_size)) {
-          Logger::Verbose("MAX_FILE_SIZE of %ld bytes exceeded - "
+          HPHPLOG_VERBOSE("MAX_FILE_SIZE of %ld bytes exceeded - "
                           "file [%s=%s] not saved",
                           max_file_size, param, filename);
           cancel_upload = UPLOAD_ERROR_B;
@@ -954,7 +954,7 @@ void rfc1867PostHandler(Transport *transport,
           wlen = write(fd, buff, blen);
 
           if (wlen < blen) {
-            Logger::Verbose("Only %d bytes were written, expected to "
+            HPHPLOG_VERBOSE("Only %d bytes were written, expected to "
                             "write %d", wlen, blen);
             cancel_upload = UPLOAD_ERROR_F;
           } else {
@@ -968,12 +968,12 @@ void rfc1867PostHandler(Transport *transport,
         close(fd);
       }
       if (!cancel_upload && !end) {
-        Logger::Verbose("Missing mime boundary at the end of the data for "
+        HPHPLOG_VERBOSE("Missing mime boundary at the end of the data for "
                         "file %s", strlen(filename) > 0 ? filename : "");
         cancel_upload = UPLOAD_ERROR_C;
       }
       if(strlen(filename) > 0 && total_bytes == 0 && !cancel_upload) {
-        Logger::Verbose("Uploaded file size 0 - file [%s=%s] not saved",
+        HPHPLOG_VERBOSE("Uploaded file size 0 - file [%s=%s] not saved",
                         param, filename);
         cancel_upload = 5;
       }

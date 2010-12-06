@@ -268,7 +268,7 @@ bool hphpIncludeFile(HPHP::HphpSession *s, const char *file) {
     hphp_ffi_include_file(file);
     return true;
   } catch (const HPHP::Exception &e) {
-    HPHP::Logger::Error("%s", e.getMessage().c_str());
+    HPHP::HPHPLOG_ERROR("%s", e.getMessage().c_str());
     const HPHP::ExtendedException *ee =
       dynamic_cast<const HPHP::ExtendedException *>(&e);
     if (ee) HPHP::ExtendedLogger::Log(true, *ee->getBackTrace());
@@ -285,7 +285,7 @@ HPHP::Variant *hphpInvoke(HPHP::HphpSession *s, const char *func,
     s->addVariant(ret);
     return ret;
   } catch (const HPHP::Exception &e) {
-    HPHP::Logger::Error("%s", e.getMessage().c_str());
+    HPHP::HPHPLOG_ERROR("%s", e.getMessage().c_str());
     const HPHP::ExtendedException *ee =
       dynamic_cast<const HPHP::ExtendedException *>(&e);
     if (ee) HPHP::ExtendedLogger::Log(true, *ee->getBackTrace());
@@ -303,7 +303,7 @@ HPHP::Variant *hphpInvokeMethod(HPHP::HphpSession *s, HPHP::Variant *target,
     s->addVariant(ret);
     return ret;
   } catch (const HPHP::Exception &e) {
-    HPHP::Logger::Error("%s", e.getMessage().c_str());
+    HPHP::HPHPLOG_ERROR("%s", e.getMessage().c_str());
     const HPHP::ExtendedException *ee =
       dynamic_cast<const HPHP::ExtendedException *>(&e);
     if (ee) HPHP::ExtendedLogger::Log(true, *ee->getBackTrace());
@@ -321,7 +321,7 @@ HPHP::Variant *hphpInvokeStaticMethod(HPHP::HphpSession *s, const char *cls,
     s->addVariant(ret);
     return ret;
   } catch (const HPHP::Exception &e) {
-    HPHP::Logger::Error("%s", e.getMessage().c_str());
+    HPHP::HPHPLOG_ERROR("%s", e.getMessage().c_str());
     const HPHP::ExtendedException *ee =
       dynamic_cast<const HPHP::ExtendedException *>(&e);
     if (ee) HPHP::ExtendedLogger::Log(true, *ee->getBackTrace());

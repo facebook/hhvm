@@ -332,7 +332,7 @@ bool BuiltinSymbols::LoadSepExtensionSymbols(AnalysisResultPtr ar,
     s_handle_main = dlopen(NULL, RTLD_NOW | RTLD_GLOBAL);
     if (!s_handle_main) {
       const char *error = dlerror();
-      Logger::Error("Unable to load main program's symbols: %s",
+      HPHPLOG_ERROR("Unable to load main program's symbols: %s",
                     error ? error : "(unknown)");
     }
   }
@@ -346,13 +346,13 @@ bool BuiltinSymbols::LoadSepExtensionSymbols(AnalysisResultPtr ar,
     handle = dlopen(soname.c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (!handle) {
       const char *error = dlerror();
-      Logger::Error("Unable to load %s: %s", soname.c_str(),
+      HPHPLOG_ERROR("Unable to load %s: %s", soname.c_str(),
                     error ? error : "(unknown)");
       return false;
     }
     symbols = (const char ***)dlsym(handle, mapname.c_str());
     if (!symbols) {
-      Logger::Error("Unable to find %s in %s", mapname.c_str(),
+      HPHPLOG_ERROR("Unable to find %s in %s", mapname.c_str(),
                     soname.c_str());
       dlclose(handle);
       return false;
@@ -408,12 +408,12 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
         Scanner scanner(fileName, Option::ScannerType);
         Compiler::Parser parser(scanner, baseName, ar);
         if (!parser.parse()) {
-          Logger::Error("Unable to parse file %s: %s", fileName,
+          HPHPLOG_ERROR("Unable to parse file %s: %s", fileName,
                         parser.getMessage().c_str());
           ASSERT(false);
         }
       } catch (FileOpenException &e) {
-        Logger::Error("%s", e.getMessage().c_str());
+        HPHPLOG_ERROR("%s", e.getMessage().c_str());
       }
     }
     ar->analyzeProgram(true);
@@ -486,11 +486,11 @@ AnalysisResultPtr BuiltinSymbols::LoadGlobalSymbols(const char *fileName) {
     Compiler::Parser parser(scanner, baseName, ar);
     if (!parser.parse()) {
       ASSERT(false);
-      Logger::Error("Unable to parse file %s: %s", fileName,
+      HPHPLOG_ERROR("Unable to parse file %s: %s", fileName,
                     parser.getMessage().c_str());
     }
   } catch (FileOpenException &e) {
-    Logger::Error("%s", e.getMessage().c_str());
+    HPHPLOG_ERROR("%s", e.getMessage().c_str());
   }
   ar->analyzeProgram(true);
   ar->inferTypes();

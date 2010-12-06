@@ -849,7 +849,7 @@ static bool php_openssl_make_REQ(struct php_x509_request *req, X509_REQ *csr,
            * are not recognizable, and I don't think it should be treated as
            * fatal errors.
            */
-          Logger::Verbose("add1_attr_by_txt %s -> %s (failed)", v->name,
+          HPHPLOG_VERBOSE("add1_attr_by_txt %s -> %s (failed)", v->name,
                           v->value);
           // return false;
         }

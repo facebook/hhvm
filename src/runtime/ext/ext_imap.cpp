@@ -56,7 +56,7 @@ public:
 
   bool checkMsgNumber(int64 msgindex) {
     if ((msgindex < 1) || ((unsigned) msgindex > m_stream->nmsgs)) {
-      Logger::Warning("Bad message number");
+      HPHPLOG_WARNING("Bad message number");
       return false;
     }
     return true;
@@ -109,7 +109,7 @@ public:
     if (m_errorstack != NIL) {
       /* output any remaining errors at their original error level */
       for (ERRORLIST *ecur = m_errorstack; ecur != NIL; ecur = ecur->next) {
-        Logger::Warning("%s (errflg=%ld)", ecur->text.data, ecur->errflg);
+        HPHPLOG_WARNING("%s (errflg=%ld)", ecur->text.data, ecur->errflg);
       }
       mail_free_errorlist(&m_errorstack);
       m_errorstack = NIL;
@@ -118,7 +118,7 @@ public:
     if (m_alertstack != NIL) {
       /* output any remaining alerts at E_NOTICE level */
       for (STRINGLIST *acur = m_alertstack; acur != NIL; acur = acur->next) {
-        Logger::Warning("%s", acur->text.data);
+        HPHPLOG_WARNING("%s", acur->text.data);
       }
       mail_free_stringlist(&m_alertstack);
       m_alertstack = NIL;
@@ -266,7 +266,7 @@ static int _php_imap_address_size (ADDRESS *addresslist) {
 static char *_php_rfc822_write_address(ADDRESS *addresslist) {
   char address[SENDBUFLEN];
   if (_php_imap_address_size(addresslist) >= SENDBUFLEN) {
-    Logger::Error("Address buffer overflow");
+    HPHPLOG_ERROR("Address buffer overflow");
     return NULL;
   }
   address[0] = 0;
@@ -784,7 +784,7 @@ bool f_imap_close(CObjRef imap_stream, int64 flag /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (flag) {
     if (flag != PHP_EXPUNGE) {
-      Logger::Warning("invalid value for the flags parameter");
+      HPHPLOG_WARNING("invalid value for the flags parameter");
       return false;
     }
     flag = CL_EXPUNGE;
@@ -820,7 +820,7 @@ bool f_imap_expunge(CObjRef imap_stream) {
 Variant f_imap_fetch_overview(CObjRef imap_stream, CStrRef sequence,
                               int64 options /* = 0 */) {
   if (options && options != FT_UID) {
-    Logger::Warning("invalid value for the options parameter");
+    HPHPLOG_WARNING("invalid value for the options parameter");
     return false;
   }
 
@@ -911,7 +911,7 @@ Variant f_imap_fetchbody(CObjRef imap_stream, int64 msg_number,
 Variant f_imap_fetchheader(CObjRef imap_stream, int64 msg_number,
                            int64 options /* = 0 */) {
   if (options && ((options & ~(FT_UID|FT_INTERNAL|FT_PREFETCHTEXT)) != 0)) {
-    Logger::Warning("invalid value for the options parameter");
+    HPHPLOG_WARNING("invalid value for the options parameter");
     return false;
   }
 
@@ -1015,11 +1015,11 @@ Variant f_imap_headerinfo(CObjRef imap_stream, int64 msg_number,
                           CStrRef defaulthost /* = "" */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
   if (fromlength < 0 || fromlength > MAILTMPLEN) {
-    Logger::Warning("From length has to be between 0 and %d", MAILTMPLEN);
+    HPHPLOG_WARNING("From length has to be between 0 and %d", MAILTMPLEN);
     return false;
   }
   if (subjectlength < 0 || subjectlength > MAILTMPLEN) {
-    Logger::Warning("Subject length has to be between 0 and %d", MAILTMPLEN);
+    HPHPLOG_WARNING("Subject length has to be between 0 and %d", MAILTMPLEN);
     return false;
   }
   if (!obj->checkMsgNumber(msg_number)) {
@@ -1179,7 +1179,7 @@ Variant f_imap_open(CStrRef mailbox, CStrRef username, CStrRef password,
   }
 
   if (retries < 0) {
-    Logger::Warning("Retries must be greater or equal to 0");
+    HPHPLOG_WARNING("Retries must be greater or equal to 0");
   } else {
     mail_parameters(NIL, SET_MAXLOGINTRIALS, (void *) retries);
   }
@@ -1189,7 +1189,7 @@ Variant f_imap_open(CStrRef mailbox, CStrRef username, CStrRef password,
 
   MAILSTREAM *stream = mail_open(NIL, (char*)filename.data(), options);
   if (stream == NIL) {
-    Logger::Warning("Couldn't open stream %s", filename.data());
+    HPHPLOG_WARNING("Couldn't open stream %s", filename.data());
     IMAPG(user).clear();
     IMAPG(password).clear();
     return false;

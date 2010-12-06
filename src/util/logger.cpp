@@ -29,15 +29,12 @@ using namespace std;
 
 #define IMPLEMENT_LOGLEVEL(LOGLEVEL, err)                               \
   void Logger::LOGLEVEL(const char *fmt, ...) {                         \
-    if (LogLevel < Log ## LOGLEVEL) return;                             \
     va_list ap; va_start(ap, fmt); Log(err, fmt, ap); va_end(ap);       \
   }                                                                     \
   void Logger::LOGLEVEL(const std::string &msg) {                       \
-    if (LogLevel < Log ## LOGLEVEL) return;                             \
     Log(err, msg, NULL);                                                \
   }                                                                     \
   void Logger::Raw ## LOGLEVEL(const std::string &msg) {                \
-    if (LogLevel < Log ## LOGLEVEL) return;                             \
     Log(err, msg, NULL, false);                                         \
   }                                                                     \
 

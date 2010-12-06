@@ -92,7 +92,7 @@ static void bt_handler(int sig) {
   // is completely undefined behavior, but we seem to get away with it.
   // Do it last just in case
 
-  Logger::Error("Core dumped: %s", strsignal(sig));
+  HPHPLOG_ERROR("Core dumped: %s", strsignal(sig));
 
   // re-raise the signal and pass it to the default handler
   // to terminate the process.

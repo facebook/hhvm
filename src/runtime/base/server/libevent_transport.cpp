@@ -190,7 +190,7 @@ void LibEventTransport::addHeaderImpl(const char *name, const char *value) {
   ASSERT(m_request->output_headers);
 
   if (m_sendStarted) {
-    Logger::Error("trying to add header '%s: %s' after 1st chunk",
+    HPHPLOG_ERROR("trying to add header '%s: %s' after 1st chunk",
                   name, value);
     return;
   }
@@ -206,7 +206,7 @@ void LibEventTransport::removeHeaderImpl(const char *name) {
   ASSERT(m_request->output_headers);
 
   if (m_sendStarted) {
-    Logger::Error("trying to remove header '%s' after 1st chunk", name);
+    HPHPLOG_ERROR("trying to remove header '%s' after 1st chunk", name);
     return;
   }
 

@@ -894,7 +894,7 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
 
     return false;
   }
-  Logger::Verbose("runtime/ext_mysql: successfully executed [%dms] [%s]",
+  HPHPLOG_VERBOSE("runtime/ext_mysql: successfully executed [%dms] [%s]",
                   (int)timer.getTime(), query.data());
 
   MYSQL_RES *mysql_result;

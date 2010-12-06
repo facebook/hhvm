@@ -944,7 +944,7 @@ bool TestCppBase::TestMemoryManager() {
     VS(globals->m_array2["0"], "value");
     VS(globals->m_array2["1"], "s");
     VS(globals->m_string2, "apple");
-    Logger::Verbose("%s", SharedStores::ReportStats(0).c_str());
+    HPHPLOG_VERBOSE("%s", SharedStores::ReportStats(0).c_str());
 
     VS(globals->m_string, "appleorange");
 

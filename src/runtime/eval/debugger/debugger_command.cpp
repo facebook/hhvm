@@ -33,7 +33,7 @@ bool DebuggerCommand::send(DebuggerThriftBuffer &thrift) {
     sendImpl(thrift);
     thrift.flush();
   } catch (...) {
-    Logger::Verbose("DebuggerCommand::send(): a socket error has happened");
+    HPHPLOG_VERBOSE("DebuggerCommand::send(): a socket error has happened");
     thrift.close();
     return false;
   }
@@ -44,7 +44,7 @@ bool DebuggerCommand::recv(DebuggerThriftBuffer &thrift) {
   try {
     recvImpl(thrift);
   } catch (...) {
-    Logger::Verbose("DebuggerCommand::recv(): a socket error has happened");
+    HPHPLOG_VERBOSE("DebuggerCommand::recv(): a socket error has happened");
     thrift.close();
     return false;
   }
@@ -85,7 +85,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
     thrift.read(type);
     thrift.read(clsname);
   } catch (...) {
-    Logger::Verbose("%s => DebuggerCommand::Receive(): socket error", caller);
+    HPHPLOG_VERBOSE("%s => DebuggerCommand::Receive(): socket error", caller);
     return true;
   }
 
@@ -127,7 +127,7 @@ bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,
 
     default:
       ASSERT(false);
-      Logger::Error("%s => DebuggerCommand::Receive(): bad cmd type: %d",
+      HPHPLOG_ERROR("%s => DebuggerCommand::Receive(): bad cmd type: %d",
                     caller, type);
       return true;
   }
@@ -157,7 +157,7 @@ bool DebuggerCommand::onClient(DebuggerClient *client) {
 
 bool DebuggerCommand::onServer(DebuggerProxy *proxy) {
   ASSERT(false);
-  Logger::Error("DebuggerCommand::onServer(): bad cmd type: %d", m_type);
+  HPHPLOG_ERROR("DebuggerCommand::onServer(): bad cmd type: %d", m_type);
   return false;
 }
 

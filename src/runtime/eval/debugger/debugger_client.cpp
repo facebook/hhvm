@@ -217,7 +217,7 @@ const char *DebuggerClient::LoadColor(Hdf hdf, const char *defaultName) {
   hdf = name;  // for starter
   const char *color = Util::get_color_by_name(name);
   if (color == NULL) {
-    Logger::Error("Bad color name %s", name);
+    HPHPLOG_ERROR("Bad color name %s", name);
     color = Util::get_color_by_name(defaultName);
   }
   return color;
@@ -228,7 +228,7 @@ const char *DebuggerClient::LoadBgColor(Hdf hdf, const char *defaultName) {
   hdf = name;  // for starter
   const char *color = Util::get_bgcolor_by_name(name);
   if (color == NULL) {
-    Logger::Error("Bad color name %s", name);
+    HPHPLOG_ERROR("Bad color name %s", name);
     color = Util::get_bgcolor_by_name(defaultName);
   }
   return color;
@@ -550,7 +550,7 @@ void DebuggerClient::run() {
         continue;
       }
     } catch (...) {
-      Logger::Error("Unhandled exception from DebuggerClient::runImpl().");
+      HPHPLOG_ERROR("Unhandled exception from DebuggerClient::runImpl().");
     }
     break;
   }
@@ -616,7 +616,7 @@ bool DebuggerClient::setCompletion(const char *text, int start, int end) {
 
 void DebuggerClient::addCompletion(AutoComplete type) {
   if (type < 0 || type >= AutoCompleteCount) {
-    Logger::Error("Invalid auto completion enum: %d", type);
+    HPHPLOG_ERROR("Invalid auto completion enum: %d", type);
     return;
   }
 
@@ -784,7 +784,7 @@ bool DebuggerClient::initializeMachine() {
         m_machine->m_sandboxAttached = true;
       }
       if (!m_machine->m_sandboxAttached) {
-        Logger::Error("Unable to communicate with default sandbox.");
+        HPHPLOG_ERROR("Unable to communicate with default sandbox.");
         return false;
       }
 
@@ -805,23 +805,23 @@ void DebuggerClient::runImpl() {
       DebuggerCommandPtr cmd;
       if (DebuggerCommand::Receive(m_machine->m_thrift, cmd, func)) {
         if (!cmd) {
-          Logger::Error("Unable to communicate with server. Server's down?");
+          HPHPLOG_ERROR("Unable to communicate with server. Server's down?");
           throw DebuggerServerLostException();
         }
         if (cmd->is(DebuggerCommand::KindOfSignal)) {
           if (!cmd->onClient(this)) {
-            Logger::Error("%s: unable to poll signal", func);
+            HPHPLOG_ERROR("%s: unable to poll signal", func);
             return;
           }
           continue;
         }
         if (!cmd->is(DebuggerCommand::KindOfInterrupt)) {
-          Logger::Error("%s: bad cmd type: %d", func, cmd->getType());
+          HPHPLOG_ERROR("%s: bad cmd type: %d", func, cmd->getType());
           return;
         }
         m_sigTime = 0;
         if (!cmd->onClient(this)) {
-          Logger::Error("%s: unable to process %d", func, cmd->getType());
+          HPHPLOG_ERROR("%s: unable to process %d", func, cmd->getType());
           return;
         }
         m_machine->m_interrupting = true;
@@ -1397,11 +1397,11 @@ DebuggerCommandPtr DebuggerClient::send(DebuggerCommand *cmd, int expected) {
         if (res->is((DebuggerCommand::Type)expected)) {
           return res;
         }
-        Logger::Error("DebuggerClient::send(): unexpected return: %d",
+        HPHPLOG_ERROR("DebuggerClient::send(): unexpected return: %d",
                       res->getType());
         throw DebuggerProtocolException();
       } else {
-        Logger::Error("Unable to communicate with server. Server's down?");
+        HPHPLOG_ERROR("Unable to communicate with server. Server's down?");
         throw DebuggerServerLostException();
       }
     } else {
@@ -1735,7 +1735,7 @@ void DebuggerClient::loadConfig() {
   try {
     m_config.open(m_configFileName);
   } catch (const HdfException &e) {
-    Logger::Error("Unable to load configuration file: %s", e.what());
+    HPHPLOG_ERROR("Unable to load configuration file: %s", e.what());
     m_configFileName.clear();
   }
 

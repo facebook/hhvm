@@ -198,7 +198,7 @@ static Variant unserialize_with_no_notice(CStrRef str) {
   try {
     v = vu.unserialize();
   } catch (Exception &e) {
-    Logger::Error("unserialize(): %s", e.getMessage().c_str());
+    HPHPLOG_ERROR("unserialize(): %s", e.getMessage().c_str());
   }
   return v;
 }

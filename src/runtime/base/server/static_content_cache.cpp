@@ -46,7 +46,7 @@ void StaticContentCache::load() {
       TheFileCache->load(RuntimeOption::FileCache.c_str(),
                          RuntimeOption::EnableOnDemandUncompress, version);
     }
-    Logger::Info("loaded file cache from %s",
+    HPHPLOG_INFO("loaded file cache from %s",
                  RuntimeOption::FileCache.c_str());
     return;
   }
@@ -55,7 +55,7 @@ void StaticContentCache::load() {
   if (rootSize == 0) return;
 
   // get a list of all files, one for each extension
-  Logger::Info("searching all files under source root...");
+  HPHPLOG_INFO("searching all files under source root...");
   int count = 0;
   map<string, vector<string> > ext2files;
   {
@@ -75,7 +75,7 @@ void StaticContentCache::load() {
     }
   }
 
-  Logger::Info("analyzing %d files under source root...", count);
+  HPHPLOG_INFO("analyzing %d files under source root...", count);
   for (hphp_string_imap<string>::const_iterator iter =
          RuntimeOption::StaticFileExtensions.begin();
        iter != RuntimeOption::StaticFileExtensions.end(); ++iter) {
@@ -110,10 +110,10 @@ void StaticContentCache::load() {
         total += sb->size();
       }
     }
-    Logger::Info("..loaded %d bytes of %s files", total, iter->first.c_str());
+    HPHPLOG_INFO("..loaded %d bytes of %s files", total, iter->first.c_str());
     m_totalSize += total;
   }
-  Logger::Info("loaded %d bytes of static content in total", m_totalSize);
+  HPHPLOG_INFO("loaded %d bytes of static content in total", m_totalSize);
 }
 
 bool StaticContentCache::find(const std::string &name, const char *&data,

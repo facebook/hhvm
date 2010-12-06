@@ -78,7 +78,7 @@ Variant f_print_r(CVarRef expression, bool ret /* = false */) {
     VariableSerializer vs(VariableSerializer::PrintR);
     res = vs.serialize(expression, ret);
   } catch (StringBufferLimitException &e) {
-    Logger::Error("print_r() exceeded max bytes limit");
+    HPHPLOG_ERROR("print_r() exceeded max bytes limit");
     res = e.m_result;
   }
   return res;
@@ -90,7 +90,7 @@ Variant f_var_export(CVarRef expression, bool ret /* = false */) {
     VariableSerializer vs(VariableSerializer::VarExport);
     res = vs.serialize(expression, ret);
   } catch (StringBufferLimitException &e) {
-    Logger::Error("var_export() exceeded max bytes limit");
+    HPHPLOG_ERROR("var_export() exceeded max bytes limit");
   }
   return res;
 }

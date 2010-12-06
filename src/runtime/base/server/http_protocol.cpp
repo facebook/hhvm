@@ -120,7 +120,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
       if (rfc1867Post) {
         if (content_length > RuntimeOption::MaxPostSize) {
           // $_POST and $_FILES are empty
-          Logger::Warning("POST Content-Length of %d bytes exceeds "
+          HPHPLOG_WARNING("POST Content-Length of %d bytes exceeds "
                           "the limit of %ld bytes",
                           content_length, RuntimeOption::MaxPostSize);
           needDelete = read_all_post_data(transport, data, size);
@@ -330,7 +330,7 @@ std::string HttpProtocol::RecordRequest(Transport *transport) {
 
     ReplayTransport rt;
     rt.recordInput(transport, tmpfile);
-    Logger::Info("request recorded in %s", tmpfile);
+    HPHPLOG_INFO("request recorded in %s", tmpfile);
     return tmpfile;
   }
   return "";
@@ -339,7 +339,7 @@ std::string HttpProtocol::RecordRequest(Transport *transport) {
 void HttpProtocol::ClearRecord(bool success, const std::string &tmpfile) {
   if (success && RuntimeOption::ClearInputOnSuccess && !tmpfile.empty()) {
     unlink(tmpfile.c_str());
-    Logger::Info("request %s deleted", tmpfile.c_str());
+    HPHPLOG_INFO("request %s deleted", tmpfile.c_str());
   }
 }
 
@@ -451,7 +451,7 @@ bool HttpProtocol::IsRfc1867(const string contentType, string &boundary) {
   }
   s = strstr(s, "boundary");
   if (!s || !(s=strchr(s, '='))) {
-    Logger::Warning("Missing boundary in multipart/form-data POST data");
+    HPHPLOG_WARNING("Missing boundary in multipart/form-data POST data");
     return false;
   }
   s++;
@@ -460,7 +460,7 @@ bool HttpProtocol::IsRfc1867(const string contentType, string &boundary) {
     s++;
     e = strchr(s, '"');
     if (!e) {
-      Logger::Warning("Invalid boundary in multipart/form-data POST data");
+      HPHPLOG_WARNING("Invalid boundary in multipart/form-data POST data");
       return false;
     }
   } else {
@@ -570,7 +570,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
   }
   if (code == 0) {
     if (!force) return false; // so we can retry
-    Logger::Error("Unable to proxy %s: %s", url.c_str(),
+    HPHPLOG_ERROR("Unable to proxy %s: %s", url.c_str(),
                   http.getLastError().c_str());
     error = http.getLastError();
     return true;
@@ -590,7 +590,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
   if (!respData) {
     respData = "";
   }
-  Logger::Verbose("Response code was %d when proxying %s", code, url.c_str());
+  HPHPLOG_VERBOSE("Response code was %d when proxying %s", code, url.c_str());
   return true;
 }
 

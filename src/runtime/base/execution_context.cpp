@@ -530,7 +530,7 @@ void ExecutionContext::onShutdownPostSend() {
       onUnhandledException(e);
     }
   } catch (...) {
-    Logger::Error("unknown exception was thrown from psp");
+    HPHPLOG_ERROR("unknown exception was thrown from psp");
   }
   ServerStats::SetThreadMode(ServerStats::Idling);
 }
@@ -683,7 +683,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
 bool ExecutionContext::onUnhandledException(Object e) {
   String err = e.toString();
   if (RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Error("HipHop Fatal error: Uncaught exception %s", err.data());
+    HPHPLOG_ERROR("HipHop Fatal error: Uncaught exception %s", err.data());
   }
 
   if (e.instanceof("Exception")) {
@@ -698,7 +698,7 @@ bool ExecutionContext::onUnhandledException(Object e) {
   m_lastError = err;
 
   if (!RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Error("HipHop Fatal error: Uncaught exception: %s", err.data());
+    HPHPLOG_ERROR("HipHop Fatal error: Uncaught exception: %s", err.data());
   }
   return false;
 }

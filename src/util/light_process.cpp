@@ -103,7 +103,7 @@ static void do_popen(FILE *fin, FILE *fout, int afdt_fd) {
     if (chdir(cwd)) {
       // Ignore chdir failures, because the compiled version might not have the
       // directory any more.
-      Logger::Warning("Light Process failed chdir to %s.", cwd);
+      HPHPLOG_WARNING("Light Process failed chdir to %s.", cwd);
     }
   }
 
@@ -114,7 +114,7 @@ static void do_popen(FILE *fin, FILE *fout, int afdt_fd) {
   }
 
   if (f == NULL) {
-    Logger::Error("Light process failed popen: %d (%s).", errno,
+    HPHPLOG_ERROR("Light process failed popen: %d (%s).", errno,
                   strerror(errno));
     fprintf(fout, "error\n");
     fflush(fout);
@@ -311,13 +311,13 @@ bool LightProcess::initShadow(const std::string &prefix, int id) {
   afdt_error_t err;
   int lfd = afdt_listen(m_afdtFilename.c_str(), &err);
   if (lfd < 0) {
-    Logger::Warning("Unable to afdt_listen");
+    HPHPLOG_WARNING("Unable to afdt_listen");
     return false;
   }
 
   CPipe p1, p2;
   if (!p1.open() || !p2.open()) {
-    Logger::Warning("Unable to create pipe: %d %s", errno,
+    HPHPLOG_WARNING("Unable to create pipe: %d %s", errno,
                     Util::safe_strerror(errno).c_str());
     return false;
   }
@@ -327,13 +327,13 @@ bool LightProcess::initShadow(const std::string &prefix, int id) {
     // child
     pid_t sid = setsid();
     if (sid < 0) {
-      Logger::Warning("Unable to setsid");
+      HPHPLOG_WARNING("Unable to setsid");
       exit(-1);
     }
     m_afdt_fd =
       afdt_connect(m_afdtFilename.c_str(), &err);
     if (m_afdt_fd < 0) {
-      Logger::Warning("Unable to afdt_connect");
+      HPHPLOG_WARNING("Unable to afdt_connect");
       exit(-1);
     }
     int fd1 = p1.detachOut();
@@ -343,7 +343,7 @@ bool LightProcess::initShadow(const std::string &prefix, int id) {
     runShadow(fd1, fd2);
   } else if (child < 0) {
     // failed
-    Logger::Warning("Unable to fork lightly: %d %s", errno,
+    HPHPLOG_WARNING("Unable to fork lightly: %d %s", errno,
                     Util::safe_strerror(errno).c_str());
     return false;
   } else {
@@ -356,7 +356,7 @@ bool LightProcess::initShadow(const std::string &prefix, int id) {
     socklen_t addrlen;
     m_afdt_fd = accept(lfd, &addr, &addrlen);
     if (m_afdt_fd < 0) {
-      Logger::Warning("Unable to establish afdt connection");
+      HPHPLOG_WARNING("Unable to establish afdt connection");
       closeShadow();
       return false;
     }
@@ -443,14 +443,14 @@ FILE *LightProcess::popen(const char *cmd, const char *type,
                           const char *cwd /* = NULL */) {
   if (!Available()) {
     // fallback to normal popen
-    Logger::Verbose("Light-weight fork not available; "
+    HPHPLOG_VERBOSE("Light-weight fork not available; "
                     "use the heavy one instead.");
   } else {
     FILE *f = LightPopenImpl(cmd, type, cwd);
     if (f) {
       return f;
     }
-    Logger::Verbose("Light-weight fork failed; use the heavy one instead.");
+    HPHPLOG_VERBOSE("Light-weight fork failed; use the heavy one instead.");
   }
   return HeavyPopenImpl(cmd, type, cwd);
 }
@@ -462,7 +462,7 @@ FILE *LightProcess::HeavyPopenImpl(const char *cmd, const char *type,
     if (old_cwd != cwd) {
       Lock lock(s_mutex);
       if (chdir(cwd)) {
-        Logger::Warning("Failed to chdir to %s.", cwd);
+        HPHPLOG_WARNING("Failed to chdir to %s.", cwd);
       }
       FILE *f = ::popen(cmd, type);
       if (chdir(old_cwd.c_str())) {
@@ -492,13 +492,13 @@ FILE *LightProcess::LightPopenImpl(const char *cmd, const char *type,
   read_buf(g_procs[id].m_fin, buf);
   sscanf(buf, "%lld", &fptr);
   if (!fptr) {
-    Logger::Error("Light process failed to return the file pointer.");
+    HPHPLOG_ERROR("Light process failed to return the file pointer.");
     return NULL;
   }
 
   int fd = recv_fd(g_procs[id].m_afdt_fd);
   if (fd < 0) {
-    Logger::Error("Light process failed to send the file descriptor.");
+    HPHPLOG_ERROR("Light process failed to send the file descriptor.");
     return NULL;
   }
   FILE *f = fdopen(fd, type);

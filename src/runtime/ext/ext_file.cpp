@@ -54,7 +54,7 @@
 
 #define CHECK_SYSTEM(exp)                                 \
   if ((exp) != 0) {                                       \
-    Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,  \
+    HPHPLOG_VERBOSE("%s/%d: %s", __FUNCTION__, __LINE__,  \
                     Util::safe_strerror(errno).c_str());  \
     return false;                                         \
   }                                                       \
@@ -89,7 +89,7 @@ namespace HPHP {
 
 static bool check_error(const char *function, int line, bool ret) {
   if (!ret) {
-    Logger::Verbose("%s/%d: %s", function, line,
+    HPHPLOG_VERBOSE("%s/%d: %s", function, line,
                     Util::safe_strerror(errno).c_str());
   }
   return ret;
@@ -337,7 +337,7 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
                   (flags & PHP_FILE_APPEND) ? "ab" : "wb");
   Object closer(NEW(PlainFile)(f));
   if (!f) {
-    Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
+    HPHPLOG_VERBOSE("%s/%d: %s", __FUNCTION__, __LINE__,
                     Util::safe_strerror(errno).c_str());
     return false;
   }
@@ -464,7 +464,7 @@ Variant f_readfile(CStrRef filename, bool use_include_path /* = false */,
                    CVarRef context /* = null */) {
   Variant f = f_fopen(filename, "rb", use_include_path, context);
   if (same(f, false)) {
-    Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
+    HPHPLOG_VERBOSE("%s/%d: %s", __FUNCTION__, __LINE__,
                     Util::safe_strerror(errno).c_str());
     return false;
   }
@@ -771,7 +771,7 @@ Variant f_readlink_internal(CStrRef path, bool warning_compliance) {
   char buff[PATH_MAX];
   int ret = readlink(File::TranslatePath(path).data(), buff, PATH_MAX-1);
   if (ret < 0) {
-    Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
+    HPHPLOG_VERBOSE("%s/%d: %s", __FUNCTION__, __LINE__,
                     Util::safe_strerror(errno).c_str());
     if (warning_compliance) {
       raise_warning("readlink(): No such file or directory %s",path.c_str());
@@ -888,7 +888,7 @@ static int get_uid(CVarRef user) {
     String suser = user.toString();
     struct passwd *pw = getpwnam(suser.data());
     if (!pw) {
-      Logger::Verbose("%s/%d: Unable to find uid for %s",
+      HPHPLOG_VERBOSE("%s/%d: Unable to find uid for %s",
                       __FUNCTION__, __LINE__, suser.data());
       return 0;
     }
@@ -919,7 +919,7 @@ static int get_gid(CVarRef group) {
     String sgroup = group.toString();
     struct group *gr = getgrnam(sgroup.data());
     if (!gr) {
-      Logger::Verbose("%s/%d: Unable to find gid for %s",
+      HPHPLOG_VERBOSE("%s/%d: Unable to find gid for %s",
                       __FUNCTION__, __LINE__, sgroup.data());
       return 0;
     }
@@ -951,7 +951,7 @@ bool f_touch(CStrRef filename, int64 mtime /* = 0 */, int64 atime /* = 0 */) {
   if (access(translated.data(), F_OK)) {
     FILE *f = fopen(translated.data(), "w");
     if (f == NULL) {
-      Logger::Verbose("%s/%d: Unable to create file %s because %s",
+      HPHPLOG_VERBOSE("%s/%d: Unable to create file %s because %s",
                       __FUNCTION__, __LINE__, translated.data(),
                       Util::safe_strerror(errno).c_str());
       return false;
@@ -1149,7 +1149,7 @@ Variant f_tempnam(CStrRef dir, CStrRef prefix) {
   strcpy(buf, templ.data());
   int fd = mkstemp(buf);
   if (fd < 0) {
-    Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
+    HPHPLOG_VERBOSE("%s/%d: %s", __FUNCTION__, __LINE__,
                     Util::safe_strerror(errno).c_str());
     return false;
   }

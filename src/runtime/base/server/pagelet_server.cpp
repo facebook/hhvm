@@ -51,7 +51,7 @@ public:
           string value = header.substr(pos + 2).data();
           m_requestHeaders[name].push_back(value);
         } else {
-          Logger::Error("throwing away bad header: %s", header.data());
+          HPHPLOG_ERROR("throwing away bad header: %s", header.data());
         }
       }
     }
@@ -178,7 +178,7 @@ public:
       HttpRequestHandler().handleRequest(job);
       job->decRefCount();
     } catch (...) {
-      Logger::Error("HttpRequestHandler leaked exceptions");
+      HPHPLOG_ERROR("HttpRequestHandler leaked exceptions");
     }
   }
 };
@@ -233,7 +233,7 @@ void PageletServer::Restart() {
        RuntimeOption::ServerThreadRoundRobin,
        RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
        NULL);
-    Logger::Info("pagelet server started");
+    HPHPLOG_INFO("pagelet server started");
     s_dispatcher->start();
   }
 }

@@ -100,12 +100,12 @@ bool f_error_log(CStrRef message, int message_type /* = 0 */,
                  CStrRef destination /* = null_string */,
                  CStrRef extra_headers /* = null_string */) {
   // error_log() should not invoke the user error handler,
-  // so we use Logger::Error() instead of raise_warning()
+  // so we use HPHPLOG_ERROR() instead of raise_warning()
   std::string line(message.data(),
                    // Truncate to 512k
                    message.size() > (1<<19) ? (1<<19) : message.size());
   if (strcmp(RuntimeOption::ExecutionMode, "srv") == 0) {
-    Logger::Error(line);
+    HPHPLOG_ERROR(line);
   } else {
     Logger::RawError(line);
 

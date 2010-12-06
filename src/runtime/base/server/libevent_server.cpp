@@ -179,7 +179,7 @@ int LibEventServer::getAcceptSocket() {
   ret = evhttp_bind_socket_backlog_fd(m_server, m_address.c_str(),
                                       m_port, RuntimeOption::ServerBacklog);
   if (ret < 0) {
-    Logger::Error("Fail to bind port %d", m_port);
+    HPHPLOG_ERROR("Fail to bind port %d", m_port);
     return -1;
   }
   m_accept_sock = ret;
@@ -198,10 +198,10 @@ void LibEventServer::start() {
     // called from subclass (LibEventServerWithTakeover). If it is (==-2)
     // we delay the getAcceptSocketSSL();
     if (getAcceptSocketSSL() != 0) {
-      Logger::Error("Fail to listen on ssl port %d", m_port_ssl);
+      HPHPLOG_ERROR("Fail to listen on ssl port %d", m_port_ssl);
       throw FailedToListenException(m_address, m_port_ssl);
     }
-    Logger::Info("Listen on ssl port %d",m_port_ssl);
+    HPHPLOG_INFO("Listen on ssl port %d",m_port_ssl);
   }
 
   setStatus(RUNNING);
@@ -284,7 +284,7 @@ bool LibEventServer::enableSSL(void *sslCTX, int port) {
 #ifdef _EVENT_USE_OPENSSL
   m_server_ssl = evhttp_new_openssl_ctx(m_eventBase, sslCTX);
   if (m_server_ssl == NULL) {
-    Logger::Error("evhttp_new_openssl_ctx failed");
+    HPHPLOG_ERROR("evhttp_new_openssl_ctx failed");
     return false;
   }
   m_port_ssl = port;
@@ -293,7 +293,7 @@ bool LibEventServer::enableSSL(void *sslCTX, int port) {
   evhttp_set_gencb(m_server_ssl, on_request, this);
   return true;
 #else
-  Logger::Error("A SSL enabled libevent is required");
+  HPHPLOG_ERROR("A SSL enabled libevent is required");
   return false;
 #endif
 }
@@ -302,10 +302,10 @@ int LibEventServer::getAcceptSocketSSL() {
   int ret = evhttp_bind_socket_backlog_fd(m_server_ssl, m_address.c_str(),
       m_port_ssl, RuntimeOption::ServerBacklog);
   if (ret < 0) {
-    Logger::Error("Failed to bind port %d for SSL", m_port_ssl);
+    HPHPLOG_ERROR("Failed to bind port %d for SSL", m_port_ssl);
     return -1;
   }
-  Logger::Info("SSL enabled");
+  HPHPLOG_INFO("SSL enabled");
   m_accept_sock_ssl = ret;
   return 0;
 }
@@ -329,7 +329,7 @@ void LibEventServer::onRequest(struct evhttp_request *request) {
   if (getStatus() == RUNNING) {
     m_dispatcher.enqueue(LibEventJobPtr(new LibEventJob(request)));
   } else {
-    Logger::Error("throwing away one new request while shutting down");
+    HPHPLOG_ERROR("throwing away one new request while shutting down");
   }
 }
 

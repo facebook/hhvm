@@ -80,7 +80,7 @@ bool MemFile::open(CStrRef filename, CStrRef mode) {
     return true;
   }
   if (len != INT_MIN) {
-    Logger::Error("Cannot open a PHP file or a directory as MemFile: %s",
+    HPHPLOG_ERROR("Cannot open a PHP file or a directory as MemFile: %s",
                   filename.c_str());
   }
   return false;

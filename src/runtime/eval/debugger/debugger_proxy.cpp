@@ -250,7 +250,7 @@ void DebuggerProxy::pollSignal() {
 
     CmdSignalPtr sig = dynamic_pointer_cast<CmdSignal>(res);
     if (!sig) {
-      Logger::Error("bad response from signal polling: %d", res->getType());
+      HPHPLOG_ERROR("bad response from signal polling: %d", res->getType());
       break;
     }
 
@@ -377,7 +377,7 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     } catch (const DebuggerException &e) {
       throw;
     } catch (...) {
-      Logger::Error("onServer() throws non DebuggerException: %d",
+      HPHPLOG_ERROR("onServer() throws non DebuggerException: %d",
                     res->getType());
       Debugger::RemoveProxy(shared_from_this());
       return;

@@ -154,22 +154,22 @@ bool Process::Exec(const char *path, const char *argv[], const char *in,
   int status;
   bool ret = false;
   if (waitpid(pid, &status, 0) != pid) {
-    Logger::Error("Failed to wait for `%s'\n", path);
+    HPHPLOG_ERROR("Failed to wait for `%s'\n", path);
   } else if (WIFEXITED(status)) {
     if (WEXITSTATUS(status) != 0) {
-      Logger::Verbose("Status %d running command: `%s'\n",
+      HPHPLOG_VERBOSE("Status %d running command: `%s'\n",
                       WEXITSTATUS(status), path);
       while (*argv) {
-        Logger::Verbose("  arg: `%s'\n", *argv);
+        HPHPLOG_VERBOSE("  arg: `%s'\n", *argv);
         argv++;
       }
     } else {
       ret = true;
     }
   } else {
-    Logger::Verbose("Non-normal exit\n");
+    HPHPLOG_VERBOSE("Non-normal exit\n");
     if (WIFSIGNALED(status)) {
-      Logger::Verbose("  signaled with %d\n", WTERMSIG(status));
+      HPHPLOG_VERBOSE("  signaled with %d\n", WTERMSIG(status));
     }
   }
   return ret;
@@ -185,7 +185,7 @@ int Process::Exec(const std::string &cmd, const std::string &outf,
 
   int pid = fork();
   if (pid < 0) {
-    Logger::Error("Unable to fork: %d %s", errno,
+    HPHPLOG_ERROR("Unable to fork: %d %s", errno,
                   Util::safe_strerror(errno).c_str());
     return 0;
   }
@@ -203,7 +203,7 @@ int Process::Exec(const std::string &cmd, const std::string &outf,
     argv[count] = NULL;
 
     execvp(argv[0], argv);
-    Logger::Error("Failed to exec `%s'\n", cmd.c_str());
+    HPHPLOG_ERROR("Failed to exec `%s'\n", cmd.c_str());
     _exit(-1);
   }
   int status = -1;
@@ -220,7 +220,7 @@ int Process::Exec(const char *path, const char *argv[], int *fdin, int *fdout,
 
   int pid = fork();
   if (pid < 0) {
-    Logger::Error("Unable to fork: %d %s", errno,
+    HPHPLOG_ERROR("Unable to fork: %d %s", errno,
                   Util::safe_strerror(errno).c_str());
     return 0;
   }
@@ -239,7 +239,7 @@ int Process::Exec(const char *path, const char *argv[], int *fdin, int *fdout,
       const char *argvnull[2] = {"", NULL};
       execvp(path, const_cast<char**>(argv ? argv : argvnull));
     }
-    Logger::Error("Failed to exec `%s'\n", path);
+    HPHPLOG_ERROR("Failed to exec `%s'\n", path);
     _exit(-1);
   }
   if (fdout) *fdout = pipeout.detachOut();

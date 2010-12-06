@@ -200,7 +200,7 @@ bool LibEventHttpClient::send(const std::string &url,
         continue;
       }
     }
-    Logger::Error("invalid request header: [%s]", header.c_str());
+    HPHPLOG_ERROR("invalid request header: [%s]", header.c_str());
   }
   if (keepalive) {
     evhttp_add_header(request->output_headers, "Connection", "keep-alive");
@@ -230,7 +230,7 @@ bool LibEventHttpClient::send(const std::string &url,
 
   int ret = evhttp_make_request(m_conn, request, cmd, url.c_str());
   if (ret != 0) {
-    Logger::Error("evhttp_make_request failed");
+    HPHPLOG_ERROR("evhttp_make_request failed");
     return false;
   }
 

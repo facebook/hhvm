@@ -75,15 +75,15 @@ bool DebuggerServer::start() {
   setsockopt(m_sock->fd(), SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 
   if (!m_sock->valid()) {
-    HPHPLOG_ERROR("unable to create debugger server socket");
+    Logger::Error("unable to create debugger server socket");
     return false;
   }
   if (bind(m_sock->fd(), (struct sockaddr *)&la, sizeof(la)) < 0) {
-    HPHPLOG_ERROR("unable to bind to port %d for debugger server", port);
+    Logger::Error("unable to bind to port %d for debugger server", port);
     return false;
   }
   if (listen(m_sock->fd(), backlog) < 0) {
-    HPHPLOG_ERROR("unable to listen on port %d for debugger server", port);
+    Logger::Error("unable to listen on port %d for debugger server", port);
     return false;
   }
 
@@ -115,14 +115,14 @@ void DebuggerServer::accept() {
           if (new_sock->valid()) {
             Debugger::RegisterProxy(ret, false);
           } else {
-            HPHPLOG_ERROR("unable to accept incoming debugger request");
+            Logger::Error("unable to accept incoming debugger request");
           }
         } catch (Exception &e) {
-          HPHPLOG_ERROR("%s", e.getMessage().c_str());
+          Logger::Error("%s", e.getMessage().c_str());
         } catch (std::exception &e) {
-          HPHPLOG_ERROR("%s", e.what());
+          Logger::Error("%s", e.what());
         } catch (...) {
-          HPHPLOG_ERROR("(unknown exception was thrown)");
+          Logger::Error("(unknown exception was thrown)");
         }
       }
     } // else timed out, then we have a chance to check m_stopped bit

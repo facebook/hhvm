@@ -57,7 +57,7 @@ static void fd_transfer_error_hander(
     const struct afdt_error_t* err,
     void* userdata) {
   (void)userdata;
-  HPHPLOG_ERROR(
+  Logger::Error(
       "AFDT ERROR: phase=%s operation=%s "
       "message=\"%s\" errno=\"%s\"",
       afdt_phase_str(err->phase),
@@ -91,9 +91,9 @@ LibEventServerWithTakeover::LibEventServerWithTakeover
 }
 
 int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
-  HPHPLOG_INFO("takeover: received request");
+  Logger::Info("takeover: received request");
   if (request == P_VERSION C_FD_REQ) {
-    HPHPLOG_INFO("takeover: request is a listen socket request");
+    Logger::Info("takeover: request is a listen socket request");
     int ret;
     *response = P_VERSION C_FD_RESP;
     // Make evhttp forget our copy of the accept socket so we don't accept any
@@ -105,11 +105,11 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
     if (ret < 0) {
       // This will fail if we get a second AFDT request, but the spurious
       // log message is not too harmful.
-      HPHPLOG_ERROR("Unable to delete accept socket");
+      Logger::Error("Unable to delete accept socket");
     }
     return m_accept_sock;
   } else if (request == P_VERSION C_TERM_REQ) {
-    HPHPLOG_INFO("takeover: request is a terminate request");
+    Logger::Info("takeover: request is a terminate request");
     // It is a little bit of a hack to use an AFDT request/response
     // to shut down our accept socket, but it has to be done from
     // within the main libevent thread.
@@ -117,7 +117,7 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
     *response = P_VERSION C_TERM_BAD;
     ret = close(m_accept_sock);
     if (ret < 0) {
-      HPHPLOG_ERROR("Unable to close accept socket");
+      Logger::Error("Unable to close accept socket");
       return -1;
     }
     m_accept_sock = -1;
@@ -127,34 +127,34 @@ int LibEventServerWithTakeover::afdtRequest(String request, String* response) {
       ASSERT(m_accept_sock_ssl > 0);
       ret = evhttp_del_accept_socket(m_server_ssl, m_accept_sock_ssl);
       if (ret < 0) {
-        HPHPLOG_ERROR("Unable to delete accept socket for SSL in evhttp");
+        Logger::Error("Unable to delete accept socket for SSL in evhttp");
         return -1;
       }
       ret = close(m_accept_sock_ssl);
       if (ret < 0) {
-        HPHPLOG_ERROR("Unable to close accept socket for SSL");
+        Logger::Error("Unable to close accept socket for SSL");
         return -1;
       }
     }
 
     ret = afdt_close_server(m_delete_handle);
     if (ret < 0) {
-      HPHPLOG_ERROR("Unable to close afdt server");
+      Logger::Error("Unable to close afdt server");
       return -1;
     }
     m_delete_handle = NULL;
 
     *response = P_VERSION C_TERM_OK;
-    HPHPLOG_INFO("takeover: notifying all listeners");
+    Logger::Info("takeover: notifying all listeners");
     for (std::set<TakeoverListener*>::iterator it =
            m_takeover_listeners.begin();
          it != m_takeover_listeners.end(); ++it) {
       (*it)->takeoverShutdown(this);
     }
-    HPHPLOG_INFO("takeover: notification complete");
+    Logger::Info("takeover: notification complete");
     return -1;
   } else {
-    HPHPLOG_INFO("takeover: request is unrecognize");
+    Logger::Info("takeover: request is unrecognize");
     *response = P_VERSION C_UNKNOWN;
     return -1;
   }
@@ -164,7 +164,7 @@ void LibEventServerWithTakeover::setupFdServer() {
   int ret;
   ret = unlink(m_transfer_fname.c_str());
   if (ret < 0 && errno != ENOENT) {
-    HPHPLOG_ERROR("Unalbe to unlink '%s': %s",
+    Logger::Error("Unalbe to unlink '%s': %s",
                   m_transfer_fname.c_str(), Util::safe_strerror(errno).c_str());
     return;
   }
@@ -181,7 +181,7 @@ void LibEventServerWithTakeover::setupFdServer() {
   // If it didn't, the next invocation of the server
   // will just have to kill us.
   if (ret >= 0) {
-    HPHPLOG_INFO("takeover: fd server set up successfully");
+    Logger::Info("takeover: fd server set up successfully");
   }
 }
 
@@ -189,7 +189,7 @@ int LibEventServerWithTakeover::getAcceptSocket() {
   int ret;
 
   if (m_accept_sock != -1) {
-    HPHPLOG_WARNING("LibEventServerWithTakeover trying to get a socket, "
+    Logger::Warning("LibEventServerWithTakeover trying to get a socket, "
         "but m_accept_sock is not -1.  Possibly leaking file descriptors.");
     m_accept_sock = -1;
   }
@@ -197,7 +197,7 @@ int LibEventServerWithTakeover::getAcceptSocket() {
   ret = evhttp_bind_socket_backlog_fd(m_server, m_address.c_str(),
                                    m_port, RuntimeOption::ServerBacklog);
   if (ret >= 0) {
-    HPHPLOG_INFO("takeover: bound directly to port %d", m_port);
+    Logger::Info("takeover: bound directly to port %d", m_port);
     m_accept_sock = ret;
     return 0;
   } else if (errno != EADDRINUSE) {
@@ -208,7 +208,7 @@ int LibEventServerWithTakeover::getAcceptSocket() {
     return -1;
   }
 
-  HPHPLOG_INFO("takeover: beginning listen socket acquisition");
+  Logger::Info("takeover: beginning listen socket acquisition");
   uint8_t fd_request[3] = P_VERSION C_FD_REQ;
   uint8_t fd_response[3] = {0,0,0};
   uint32_t response_len = sizeof(fd_response);
@@ -230,7 +230,7 @@ int LibEventServerWithTakeover::getAcceptSocket() {
     return -1;
   } else if (m_accept_sock < 0) {
     String resp((const char*)fd_response, response_len, CopyString);
-    HPHPLOG_ERROR(
+    Logger::Error(
         "AFDT did not receive a file descriptor: "
         "response = '%s'",
         StringUtil::CEncode(resp, null_string).data());
@@ -238,12 +238,12 @@ int LibEventServerWithTakeover::getAcceptSocket() {
     return -1;
   }
 
-  HPHPLOG_INFO("takeover: acquired listen socket");
+  Logger::Info("takeover: acquired listen socket");
   m_took_over = true;
 
   ret = evhttp_accept_socket(m_server, m_accept_sock);
   if (ret < 0) {
-    HPHPLOG_ERROR("evhttp_accept_socket: %s",
+    Logger::Error("evhttp_accept_socket: %s",
         Util::safe_strerror(errno).c_str());
     int errno_save = errno;
     close(m_accept_sock);
@@ -266,7 +266,7 @@ void LibEventServerWithTakeover::start() {
   LibEventServer::start();
 
   if (m_took_over) {
-    HPHPLOG_INFO("takeover: requesting shutdown of satellites");
+    Logger::Info("takeover: requesting shutdown of satellites");
     // Use AFDT to synchronously shut down the old server's satellites
     // so we can take their ports using accept.  The main server will be
     // stopped asynchronously.
@@ -291,26 +291,26 @@ void LibEventServerWithTakeover::start() {
         &err);
     if (ret < 0) {
       fd_transfer_error_hander(&err, NULL);
-      HPHPLOG_WARNING("Failed to shut-down old server with AFDT.");
+      Logger::Warning("Failed to shut-down old server with AFDT.");
       // The higher-level start logic will try *very* hard to recover from this.
     }
     String resp((const char*)shutdown_response, response_len, CopyString);
     if (resp != P_VERSION C_TERM_OK) {
-      HPHPLOG_ERROR(
+      Logger::Error(
           "Old server could not shut down: "
           "response = '%s'",
           StringUtil::CEncode(resp, null_string).data());
     } else {
-      HPHPLOG_INFO("takeover: old satellites have shut down");
+      Logger::Info("takeover: old satellites have shut down");
     }
   }
 
   if (m_server_ssl) {
     if (getAcceptSocketSSL() != 0) {
-      HPHPLOG_ERROR("Fail to listen on ssl port %d", m_port_ssl);
+      Logger::Error("Fail to listen on ssl port %d", m_port_ssl);
       throw FailedToListenException(m_address, m_port_ssl);
     }
-    HPHPLOG_INFO("Listen on ssl port %d",m_port_ssl);
+    Logger::Info("Listen on ssl port %d",m_port_ssl);
   }
 
   setupFdServer();

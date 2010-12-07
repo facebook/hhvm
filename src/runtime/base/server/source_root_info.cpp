@@ -74,11 +74,11 @@ void SourceRootInfo::createFromCommonRoot(const String &sandboxName) {
   String logPath = logsRoot + "/" + sandboxName + "_error.log";
   String accessLogPath = logsRoot + "/" + sandboxName + "_access.log";
   if (!Logger::SetThreadLog(logPath.c_str())) {
-    HPHPLOG_WARNING("Sandbox error log %s could not be opened",
+    Logger::Warning("Sandbox error log %s could not be opened",
                     logPath.c_str());
   }
   if (!HttpRequestHandler::GetAccessLog().setThreadLog(accessLogPath.c_str())) {
-    HPHPLOG_WARNING("Sandbox access log %s could not be opened",
+    Logger::Warning("Sandbox access log %s could not be opened",
                     accessLogPath.c_str());
   }
 }
@@ -146,7 +146,7 @@ void SourceRootInfo::createFromUserConfig() {
       lp = homePath + lp;
     }
     if (!Logger::SetThreadLog(lp.c_str())) {
-      HPHPLOG_WARNING("Sandbox error log %s could not be opened",
+      Logger::Warning("Sandbox error log %s could not be opened",
                       lp.c_str());
     }
   }
@@ -155,7 +155,7 @@ void SourceRootInfo::createFromUserConfig() {
       alp = homePath + alp;
     }
     if (!HttpRequestHandler::GetAccessLog().setThreadLog(alp.c_str())) {
-      HPHPLOG_WARNING("Sandbox access log %s could not be opened",
+      Logger::Warning("Sandbox access log %s could not be opened",
                       alp.c_str());
     }
   }

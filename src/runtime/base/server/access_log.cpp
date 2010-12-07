@@ -94,7 +94,7 @@ void AccessLog::openFiles(const string &username) {
         fp = fopen(file.c_str(), "a");
       }
       if (!fp) {
-        HPHPLOG_ERROR("Could not open access log file %s", file.c_str());
+        Logger::Error("Could not open access log file %s", file.c_str());
       }
       m_output.push_back(LogFileData(fp));
     }

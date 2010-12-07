@@ -314,7 +314,7 @@ void FileCache::load(const char *filename, bool onDemandUncompress,
 
 void FileCache::adviseOutMemory() {
   if (posix_madvise(m_addr, m_size, POSIX_MADV_DONTNEED)) {
-    HPHPLOG_ERROR("posix_madvise failed: %s",
+    Logger::Error("posix_madvise failed: %s",
                   Util::safe_strerror(errno).c_str());
   }
 }

@@ -157,7 +157,7 @@ public:
       createRequestHandler()->handleRequest(job);
       job->decRefCount();
     } catch (...) {
-      HPHPLOG_ERROR("RpcRequestHandler leaked exceptions");
+      Logger::Error("RpcRequestHandler leaked exceptions");
     }
   }
 };
@@ -179,7 +179,7 @@ void XboxServer::Restart() {
        RuntimeOption::ServerThreadRoundRobin,
        RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
        NULL);
-    HPHPLOG_INFO("xbox server started");
+    Logger::Info("xbox server started");
     s_dispatcher->start();
   }
 }

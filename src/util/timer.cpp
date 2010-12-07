@@ -23,7 +23,7 @@ namespace HPHP {
 Timer::Timer(Type type, const char *name /* = NULL */) : m_type(type) {
   if (name) {
     m_name = name;
-    HPHPLOG_INFO("%s...", name);
+    Logger::Info("%s...", name);
   }
   m_start = measure();
 }
@@ -41,7 +41,7 @@ int64 Timer::getMicroSeconds() const {
 void Timer::report() const {
   int64 ms = getMicroSeconds();
   int seconds = ms / 1000000;
-  HPHPLOG_INFO("%s took %d'%02d\" (%d ms) %s", m_name.c_str(),
+  Logger::Info("%s took %d'%02d\" (%d ms) %s", m_name.c_str(),
                seconds / 60, seconds % 60, ms/1000, getName());
 }
 
@@ -91,7 +91,7 @@ SlowTimer::SlowTimer(int64 msThreshold, const char *location, const char *info)
 SlowTimer::~SlowTimer() {
   int64 msec = getTime();
   if (msec >= m_msThreshold) {
-    HPHPLOG_ERROR("SlowTimer [%dms] at %s: %s",
+    Logger::Error("SlowTimer [%dms] at %s: %s",
                   msec, m_location.c_str(), m_info.c_str());
   }
 }

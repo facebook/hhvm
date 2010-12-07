@@ -150,9 +150,9 @@ int main(int argc, char **argv) {
       }
     }
     if (ret) {
-      HPHPLOG_ERROR("hphp failed");
+      Logger::Error("hphp failed");
     } else {
-      HPHPLOG_INFO("all files saved in %s ...", po.outputDir.c_str());
+      Logger::Info("all files saved in %s ...", po.outputDir.c_str());
     }
     return ret;
   } catch (Exception &e) {
@@ -367,7 +367,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
   vector<string> badnodes;
   config.lint(badnodes);
   for (unsigned int i = 0; i < badnodes.size(); i++) {
-    HPHPLOG_ERROR("Possible bad config node: %s", badnodes[i].c_str());
+    Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
 
   if (po.dump) Option::DumpAst = true;
@@ -451,7 +451,7 @@ public:
 
     struct stat sb;
     stat(m_name, &sb);
-    HPHPLOG_INFO("%dMB %s saved", (int64)sb.st_size/(1024*1024), m_name);
+    Logger::Info("%dMB %s saved", (int64)sb.st_size/(1024*1024), m_name);
   }
 
 private:
@@ -584,7 +584,7 @@ int process(const ProgramOptions &po) {
   } else if (po.target == "sep-ext-cpp") {
     ret = generateSepExtCpp(po, ar);
   } else {
-    HPHPLOG_ERROR("Unknown target: %s", po.target.c_str());
+    Logger::Error("Unknown target: %s", po.target.c_str());
     return 1;
   }
 
@@ -596,7 +596,7 @@ int process(const ProgramOptions &po) {
   if (po.target == "analyze" || po.genStats || !po.dbStats.empty()) {
     int seconds = timer.getMicroSeconds() / 1000000;
 
-    HPHPLOG_INFO("saving code errors and stats...");
+    Logger::Info("saving code errors and stats...");
     Timer timer(Timer::WallTime, "saving stats");
 
     if (!po.dbStats.empty()) {
@@ -606,14 +606,14 @@ int process(const ProgramOptions &po) {
                                           po.revision);
         package.commitStats(server, runId);
       } catch (DatabaseException e) {
-        HPHPLOG_ERROR("%s", e.what());
+        Logger::Error("%s", e.what());
       }
     } else {
       Compiler::SaveErrors((po.outputDir + "/CodeError.js").c_str());
       package.saveStatsToFile((po.outputDir + "/Stats.js").c_str(), seconds);
     }
   } else if (Compiler::HasError()) {
-    HPHPLOG_INFO("saving code errors...");
+    Logger::Info("saving code errors...");
     Compiler::SaveErrors((po.outputDir + "/CodeError.js").c_str());
   }
 
@@ -634,14 +634,14 @@ int lintTarget(const ProgramOptions &po) {
       Compiler::Parser parser(scanner, filename.c_str(),
                               AnalysisResultPtr(new AnalysisResult()));
       if (!parser.parse()) {
-        HPHPLOG_ERROR("Unable to parse file %s: %s", filename.c_str(),
+        Logger::Error("Unable to parse file %s: %s", filename.c_str(),
                       parser.getMessage().c_str());
         ret = 1;
       } else {
-        HPHPLOG_INFO("%s parsed successfully...", filename.c_str());
+        Logger::Info("%s parsed successfully...", filename.c_str());
       }
     } catch (FileOpenException &e) {
-      HPHPLOG_ERROR("%s", e.getMessage().c_str());
+      Logger::Error("%s", e.getMessage().c_str());
       ret = 1;
     }
   }
@@ -686,27 +686,27 @@ int phpTarget(const ProgramOptions &po, AnalysisResultPtr ar) {
     Option::GenerateInferredTypes = true;
   }
   if (formatCount == 0) {
-    HPHPLOG_ERROR("Unknown format for PHP target: %s", po.format.c_str());
+    Logger::Error("Unknown format for PHP target: %s", po.format.c_str());
     return 1;
   }
 
   // analyze
   if (Option::GenerateInferredTypes || Option::ConvertSuperGlobals) {
-    HPHPLOG_INFO("inferring types...");
+    Logger::Info("inferring types...");
     ar->inferTypes();
   }
 
   // generate
   ar->setOutputPath(po.outputDir);
   if (Option::GeneratePickledPHP) {
-    HPHPLOG_INFO("creating pickled PHP files...");
+    Logger::Info("creating pickled PHP files...");
     string outputDir = po.outputDir;
     if (formatCount > 1) outputDir += "/pickled";
     mkdir(outputDir.c_str(), 0777);
     ar->outputAllPHP(CodeGenerator::PickledPHP);
   }
   if (Option::GenerateInlinedPHP) {
-    HPHPLOG_INFO("creating inlined PHP files...");
+    Logger::Info("creating inlined PHP files...");
     string outputDir = po.outputDir;
     if (formatCount > 1) outputDir += "/inlined";
     mkdir(outputDir.c_str(), 0777);
@@ -715,7 +715,7 @@ int phpTarget(const ProgramOptions &po, AnalysisResultPtr ar) {
     }
   }
   if (Option::GenerateTrimmedPHP) {
-    HPHPLOG_INFO("creating trimmed PHP files...");
+    Logger::Info("creating trimmed PHP files...");
     string outputDir = po.outputDir;
     if (formatCount > 1) outputDir += "/trimmed";
     mkdir(outputDir.c_str(), 0777);
@@ -749,7 +749,7 @@ int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
   }
 
   if (format == CodeGenerator::InvalidOutput) {
-    HPHPLOG_ERROR("Unknown format for CPP target: %s", po.format.c_str());
+    Logger::Error("Unknown format for CPP target: %s", po.format.c_str());
     return 1;
   }
 
@@ -822,18 +822,18 @@ int buildTarget(const ProgramOptions &po) {
                         po.program.c_str(), flags.c_str(), NULL};
 
   if (getenv("SHOW_COMPILE")) {
-    HPHPLOG_INFO("Compile command: %s %s %s", po.outputDir.c_str(),
+    Logger::Info ("Compile command: %s %s %s", po.outputDir.c_str(),
         po.program.c_str(), flags.c_str());
   }
   Timer timer(Timer::WallTime, "compiling and linking CPP files");
   string out, err;
   bool ret = Process::Exec(cmd.c_str(), argv, NULL, out, &err);
   if (getenv("SHOW_COMPILE")) {
-    HPHPLOG_INFO("%s", out.c_str());
+    Logger::Info("%s", out.c_str());
   } else {
-    HPHPLOG_VERBOSE("%s", out.c_str());
+    Logger::Verbose("%s", out.c_str());
   }
-  HPHPLOG_ERROR("%s", err.c_str());
+  Logger::Error("%s", err.c_str());
   if (!ret) {
     return 1;
   }
@@ -872,12 +872,12 @@ int runTarget(const ProgramOptions &po) {
   // run the executable
   string cmd = po.outputDir + '/' + po.program + ' ' + "--file " +
     (po.inputs.size() == 1 ? po.inputs[0] : "") + po.programArgs;
-  HPHPLOG_INFO("running executable %s...", cmd.c_str());
+  Logger::Info("running executable %s...", cmd.c_str());
   Util::ssystem(cmd.c_str());
 
   // delete the temporary directory if not needed
   if (!po.keepTempDir) {
-    HPHPLOG_INFO("deleting temporary directory %s...", po.outputDir.c_str());
+    Logger::Info("deleting temporary directory %s...", po.outputDir.c_str());
     boost::filesystem::remove_all(po.outputDir);
   }
   return 0;
@@ -896,12 +896,12 @@ void createOutputDirectory(ProgramOptions &po) {
     strncpy(path, temp.c_str(), PATH_MAX);
     path[PATH_MAX] = '\0';
     po.outputDir = mkdtemp(path);
-    HPHPLOG_INFO("creating temporary directory %s ...", po.outputDir.c_str());
+    Logger::Info("creating temporary directory %s ...", po.outputDir.c_str());
   }
   mkdir(po.outputDir.c_str(), 0777);
 
   if (!po.syncDir.empty()) {
-    HPHPLOG_INFO("re-creating sync directory %s ...", po.syncDir.c_str());
+    Logger::Info("re-creating sync directory %s ...", po.syncDir.c_str());
     boost::filesystem::remove_all(po.syncDir);
     mkdir(po.syncDir.c_str(), 0777);
   }

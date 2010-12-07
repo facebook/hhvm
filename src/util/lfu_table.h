@@ -331,19 +331,19 @@ public:
     while (n) {
       if (m_map.find(n->key) == m_map.end()) {
         fail = true;
-        HPHPLOG_ERROR("Value in queue not in map");
+        Logger::Error("Value in queue not in map");
         ASSERT(!fail);
       }
       if (n->prev != prev) {
         fail = true;
-        HPHPLOG_ERROR("Queue list corrupted");
+        Logger::Error("Queue list corrupted");
         ASSERT(!fail);
       }
       prev = n;
       n = n->next;
       if (!n && prev != m_tail) {
         fail = true;
-        HPHPLOG_ERROR("Queue tail incorrect");
+        Logger::Error("Queue tail incorrect");
         ASSERT(!fail);
       }
     }
@@ -352,19 +352,19 @@ public:
       Node *n = m_heap[i];
       if (m_map.find(n->key) == m_map.end()) {
         fail = true;
-        HPHPLOG_ERROR("Value in queue not in heap");
+        Logger::Error("Value in queue not in heap");
         ASSERT(!fail);
       }
       size_t child = (i+1) * 2;
       if (child <= hsize && n->frequency() > m_heap[child-1]->frequency()) {
         fail = true;
-        HPHPLOG_ERROR("Heap property violated");
+        Logger::Error("Heap property violated");
         ASSERT(!fail);
       }
       child++;
       if (child <= hsize && n->frequency() > m_heap[child-1]->frequency()) {
         fail = true;
-        HPHPLOG_ERROR("Heap property violated");
+        Logger::Error("Heap property violated");
         ASSERT(!fail);
       }
     }

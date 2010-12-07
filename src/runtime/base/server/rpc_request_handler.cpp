@@ -36,7 +36,7 @@ RPCRequestHandler::RPCRequestHandler() : m_count(0), m_reset(false) {
   m_created = time(0);
 
   Logger::ResetRequestCount();
-  HPHPLOG_INFO("creating new RPC request handler");
+  Logger::Info("creating new RPC request handler");
 }
 
 RPCRequestHandler::~RPCRequestHandler() {
@@ -57,7 +57,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
   transport->enableCompression();
 
   ServerStatsHelper ssh("all", true);
-  HPHPLOG_VERBOSE("receiving %s", transport->getCommand().c_str());
+  Logger::Verbose("receiving %s", transport->getCommand().c_str());
 
   // will clear all extra logging when this function goes out of scope
   StackTraceNoHeap::ExtraLoggingClearer clearer;

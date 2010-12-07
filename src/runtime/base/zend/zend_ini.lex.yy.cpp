@@ -799,7 +799,7 @@ void ini_error(char *msg) {
     smsg.append("Invalid configuration directive\n");
   }
 
-  HPHPLOG_WARNING("%s", smsg.data());
+  Logger::Warning("%s", smsg.data());
 }
 
 #define YY_USE_PROTOS
@@ -1347,7 +1347,7 @@ YY_RULE_SETUP
 #line 377 "zend_ini.x"
 {
 /* #Comment */
-  HPHPLOG_ERROR("Comments starting with '#' are deprecated in %s on line %d",
+  Logger::Error("Comments starting with '#' are deprecated in %s on line %d",
                 SCNG(filename).data(), SCNG(lineno));
   BEGIN(INITIAL);
   SCNG(lineno)++;

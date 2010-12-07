@@ -164,7 +164,7 @@ void register_variable(Variant &variables, char *name, CVarRef value,
     int nest_level = 0;
     while (true) {
       if (++nest_level > MAX_INPUT_NESTING_LEVEL) {
-        HPHPLOG_WARNING("Input variable nesting level exceeded");
+        Logger::Warning("Input variable nesting level exceeded");
         return;
       }
 
@@ -258,7 +258,7 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
     }
   } catch (const PhpFileDoesNotExistException &e) {
     if (where == WarmupDocException) {
-      HPHPLOG_ERROR("warmup error: %s", e.getMessage().c_str());
+      Logger::Error("warmup error: %s", e.getMessage().c_str());
     }
   } catch (const UncatchableException &e) {
     if (RuntimeOption::ServerStackTrace) {
@@ -268,7 +268,7 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
       errorMsg += " ";
       errorMsg += e.getMessage();
     }
-    HPHPLOG_ERROR("%s", errorMsg.c_str());
+    Logger::Error("%s", errorMsg.c_str());
     error = true;
   } catch (const Exception &e) {
     if (where == HandlerException) {
@@ -286,7 +286,7 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
       error = !ret;
     } else {
       error = true;
-      HPHPLOG_ERROR("%s", errorMsg.c_str());
+      Logger::Error("%s", errorMsg.c_str());
     }
   } catch (const Object &e) {
     if (where == HandlerException) {
@@ -300,13 +300,13 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
     if (where == InvokeException) {
       ret = context->onUnhandledException(e);
     } else {
-      HPHPLOG_ERROR("%s", errorMsg.c_str());
+      Logger::Error("%s", errorMsg.c_str());
     }
     error = true;
   } catch (...) {
     if (where == InvokeException) throw;
     errorMsg = "(unknown exception was thrown)";
-    HPHPLOG_ERROR("%s", errorMsg.c_str());
+    Logger::Error("%s", errorMsg.c_str());
     error = true;
   }
   return ret;
@@ -352,7 +352,7 @@ void handle_destructor_exception() {
       errorMsg += " ";
       errorMsg += e.getMessage();
     }
-    HPHPLOG_ERROR("%s", errorMsg.c_str());
+    Logger::Error("%s", errorMsg.c_str());
   } catch (Object &e) {
     errorMsg = "Destructor threw an object exception: ";
     try {
@@ -360,10 +360,10 @@ void handle_destructor_exception() {
     } catch (...) {
       errorMsg += "(unable to call toString())";
     }
-    HPHPLOG_ERROR("%s", errorMsg.c_str());
+    Logger::Error("%s", errorMsg.c_str());
   } catch (...) {
     errorMsg = "(unknown exception was thrown from destructor)";
-    HPHPLOG_ERROR("%s", errorMsg.c_str());
+    Logger::Error("%s", errorMsg.c_str());
   }
 }
 
@@ -486,10 +486,10 @@ static int start_server(const std::string &username) {
       config.pk_file = (char*)RuntimeOption::SSLCertificateKeyFile.c_str();
       sslCTX = evhttp_init_openssl(&config);
     } else {
-      HPHPLOG_ERROR("Invalid certificate file or key file");
+      Logger::Error("Invalid certificate file or key file");
     }
 #else
-    HPHPLOG_ERROR("A SSL enabled libevent is required");
+    Logger::Error("A SSL enabled libevent is required");
 #endif
   }
 
@@ -680,7 +680,7 @@ static int execute_program_impl(int argc, char **argv) {
   vector<string> badnodes;
   config.lint(badnodes);
   for (unsigned int i = 0; i < badnodes.size(); i++) {
-    HPHPLOG_ERROR("Possible bad config node: %s", badnodes[i].c_str());
+    Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
 
   RuntimeOption::BuildId = po.buildId;
@@ -1018,7 +1018,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
     //       objects, not things like ClassInfo.
     //   (2) The php files under sandbox mode is subject to frequent change,
     //       which might invalidate the warmed-up state.
-    HPHPLOG_WARNING("WarmupDocument is ignored under the sandbox mode; "
+    Logger::Warning("WarmupDocument is ignored under the sandbox mode; "
                     "use RequestInitDocument instead.");
   }
 

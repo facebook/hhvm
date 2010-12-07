@@ -35,19 +35,19 @@ bool IpBlockMap::ReadIPv4Address(const char *ip, unsigned int &start,
     if (ch >= '0' && ch <= '9') {
       tp = tp * 10 + (unsigned int)(ch - '0');
       if (tp > 255) {
-        HPHPLOG_ERROR("octet larger than 255: %s", ip);
+        Logger::Error("octet larger than 255: %s", ip);
         return false;
       }
       if (!saw_digit) {
         if (++octets > 4) {
-          HPHPLOG_ERROR("more than 4 octets: %s", ip);
+          Logger::Error("more than 4 octets: %s", ip);
           return false;
         }
         saw_digit = true;
       }
     } else if (ch == '.' && saw_digit) {
       if (octets == 4) {
-        HPHPLOG_ERROR("dot after 4 octet bits: %s", ip);
+        Logger::Error("dot after 4 octet bits: %s", ip);
         return false;
       }
       start <<= 8;
@@ -57,12 +57,12 @@ bool IpBlockMap::ReadIPv4Address(const char *ip, unsigned int &start,
     } else if (ch == '/') {
       break;
     } else {
-      HPHPLOG_ERROR("invalid character: %s", ip);
+      Logger::Error("invalid character: %s", ip);
       return false;
     }
   }
   if (octets < 4) {
-    HPHPLOG_ERROR("less than 4 octets: %s", ip);
+    Logger::Error("less than 4 octets: %s", ip);
     return false;
   }
   start <<= 8;
@@ -76,25 +76,25 @@ bool IpBlockMap::ReadIPv4Address(const char *ip, unsigned int &start,
   ASSERT(ch == '/');
   ch = *p++;
   if (ch == '\0') {
-    HPHPLOG_ERROR("missing mask: %s", ip);
+    Logger::Error("missing mask: %s", ip);
     return false;
   }
   if (ch < '0' || ch > '9') {
-    HPHPLOG_ERROR("non-digit mask: %s", ip);
+    Logger::Error("non-digit mask: %s", ip);
     return false;
   }
   tp = (unsigned int)(ch - '0');
   ch = *p++;
   if (ch != '\0') {
     if (ch < '0' || ch > '9') {
-      HPHPLOG_ERROR("non-digit mask: %s", ip);
+      Logger::Error("non-digit mask: %s", ip);
       return false;
     }
     tp = tp * 10 + (unsigned int)(ch - '0');
     ch = *p++;
   }
   if (ch != '\0' || tp > 31 || tp == 0) {
-    HPHPLOG_ERROR("invalid mask: %s", ip);
+    Logger::Error("invalid mask: %s", ip);
     return false;
   }
 

@@ -845,14 +845,14 @@ public:
 
   bool setAttribute(int64 attr, int64 val) {
     if (!m_ucoll) {
-      HPHPLOG_VERBOSE("m_ucoll is NULL");
+      Logger::Verbose("m_ucoll is NULL");
       return false;
     }
     m_errcode.clear();
     ucol_setAttribute(m_ucoll, (UColAttribute)attr,
                       (UColAttributeValue)val, &(m_errcode.code));
     if (U_FAILURE(m_errcode.code)) {
-      HPHPLOG_VERBOSE("Error setting attribute value");
+      Logger::Verbose("Error setting attribute value");
       return false;
     }
     return true;
@@ -860,7 +860,7 @@ public:
 
   bool setStrength(int64 strength) {
     if (!m_ucoll) {
-      HPHPLOG_VERBOSE("m_ucoll is NULL");
+      Logger::Verbose("m_ucoll is NULL");
       return false;
     }
     ucol_setStrength(m_ucoll, (UCollationStrength)strength);
@@ -869,7 +869,7 @@ public:
 
   Variant getErrorCode() {
     if (!m_ucoll) {
-      HPHPLOG_VERBOSE("m_ucoll is NULL");
+      Logger::Verbose("m_ucoll is NULL");
       return false;
     }
     return m_errcode.code;

@@ -600,7 +600,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   getVariables()->setAttribute(VariableTable::ForceGlobal);
 
   // Analyze Includes
-  HPHPLOG_VERBOSE("Analyzing Includes");
+  Logger::Verbose("Analyzing Includes");
   setPhase(AnalysisResult::AnalyzeInclude);
   sort(m_fileScopes.begin(), m_fileScopes.end(), by_filename); // fixed order
   unsigned int i = 0; int round = 0;
@@ -645,7 +645,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   checkClassDerivations();
 
   // Analyze All
-  HPHPLOG_VERBOSE("Analyzing All");
+  Logger::Verbose("Analyzing All");
   setPhase(AnalysisResult::AnalyzeAll);
   for (i = 0; i < m_fileScopes.size(); i++) {
     m_fileScopes[i]->analyzeProgram(ar);
@@ -1238,11 +1238,11 @@ bool AnalysisResult::outputAllPHP(CodeGenerator::Output output) {
       if (f) {
         CodeGenerator cg(&f, output);
         cg_printf("<?php\n");
-        HPHPLOG_INFO("Generating %s...", fullPath.c_str());
+        Logger::Info("Generating %s...", fullPath.c_str());
         iter->second->getStmt()->outputPHP(cg, ar);
         f.close();
       } else {
-        HPHPLOG_ERROR("Unable to open %s for write", fullPath.c_str());
+        Logger::Error("Unable to open %s for write", fullPath.c_str());
       }
     }
     return true; // we are done
@@ -1416,7 +1416,7 @@ void AnalysisResult::repartitionLargeCPP(const vector<string> &filenames,
       totalSize += results.st_size;
       count++;
     } else {
-      HPHPLOG_ERROR("unable to stat %s", filenames[i].c_str());
+      Logger::Error("unable to stat %s", filenames[i].c_str());
     }
   }
   int64 averageSize = count > 1 ? (totalSize / count) : totalSize;

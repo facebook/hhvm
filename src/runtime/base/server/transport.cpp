@@ -494,14 +494,14 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int64 expire /* = 0 */,
                           bool httponly /* = false */,
                           bool encode_url /* = true */) {
   if (!name.empty() && strpbrk(name.data(), "=,; \t\r\n\013\014")) {
-    HPHPLOG_WARNING("Cookie names can not contain any of the following "
+    Logger::Warning("Cookie names can not contain any of the following "
                     "'=,; \\t\\r\\n\\013\\014'");
     return false;
   }
 
   if (!encode_url &&
       !value.empty() && strpbrk(value.data(), ",; \t\r\n\013\014")) {
-    HPHPLOG_WARNING("Cookie values can not contain any of the following "
+    Logger::Warning("Cookie values can not contain any of the following "
                     "',; \\t\\r\\n\\013\\014'");
     return false;
   }
@@ -651,7 +651,7 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
         compressed = true;
       }
     } else {
-      HPHPLOG_ERROR("Unable to compress response: level=%d len=%d",
+      Logger::Error("Unable to compress response: level=%d len=%d",
                     RuntimeOption::GzipCompressionLevel, len);
     }
   }
@@ -745,18 +745,18 @@ bool Transport::isUploadedFile(CStrRef filename) {
 // Move a file if and only if it was created by an upload
 bool Transport::moveUploadedFile(CStrRef filename, CStrRef destination) {
   if (!is_uploaded_file(filename.c_str())) {
-    HPHPLOG_ERROR("%s is not an uploaded file.", filename.c_str());
+    Logger::Error("%s is not an uploaded file.", filename.c_str());
     return false;
   }
   // Do access check.
   String dest = File::TranslatePath(destination);
   if (Util::rename(filename.c_str(), dest.c_str()) < 0) {
-    HPHPLOG_ERROR("Unable to move uploaded file %s to %s: %s.",
+    Logger::Error("Unable to move uploaded file %s to %s: %s.",
                   filename.c_str(), dest.c_str(),
                   Util::safe_strerror(errno).c_str());
     return false;
   }
-  HPHPLOG_VERBOSE("Successfully moved uploaded file %s to %s.",
+  Logger::Verbose("Successfully moved uploaded file %s to %s.",
                   filename.c_str(), dest.c_str());
   return true;
 }

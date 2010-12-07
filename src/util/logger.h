@@ -144,34 +144,6 @@ private:
 
 };
 
-#define HPHPLOG_ERROR(m, ...) \
-do { \
-  if (HPHP::Logger::LogLevel >= Logger::LogError) { \
-    HPHP::Logger::Error(m, ## __VA_ARGS__); \
-  } \
-} while (false);
-
-#define HPHPLOG_WARNING(m, ...) \
-do { \
-  if (HPHP::Logger::LogLevel >= Logger::LogWarning) { \
-    HPHP::Logger::Warning(m, ## __VA_ARGS__); \
-  } \
-} while (false);
-
-#define HPHPLOG_INFO(m, ...) \
-do { \
-  if (HPHP::Logger::LogLevel >= Logger::LogInfo) { \
-    HPHP::Logger::Info(m, ## __VA_ARGS__); \
-  } \
-} while (false);
-
-#define HPHPLOG_VERBOSE(m, ...) \
-do { \
-  if (HPHP::Logger::LogLevel >= Logger::LogVerbose) { \
-    HPHP::Logger::Verbose(m, ## __VA_ARGS__); \
-  } \
-} while (false);
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -134,7 +134,7 @@ void ini_error(char *msg) {
     smsg.append("Invalid configuration directive\n");
   }
 
-  HPHPLOG_WARNING("%s", smsg.data());
+  Logger::Warning("%s", smsg.data());
 }
 
 #define YY_USE_PROTOS
@@ -376,7 +376,7 @@ DOUBLE_QUOTES_CHARS ([^$"\\]|("\\"[^"])|{LITERAL_DOLLAR}|"\\"["][^\r\n])
 
 <INITIAL>{TABS_AND_SPACES}*[#][^\r\n]*{NEWLINE} {
 /* #Comment */
-  HPHPLOG_ERROR("Comments starting with '#' are deprecated in %s on line %d",
+  Logger::Error("Comments starting with '#' are deprecated in %s on line %d",
                 SCNG(filename).data(), SCNG(lineno));
   BEGIN(INITIAL);
   SCNG(lineno)++;

@@ -108,7 +108,7 @@ bool Util::mkdir(const std::string &path, int mode /* = 0777 */) {
       if (subpath.empty()) continue;
       if (access(subpath.c_str(), F_OK) < 0 &&
           ::mkdir(subpath.c_str(), mode) < 0) {
-        HPHPLOG_ERROR("unable to mkdir %s", subpath.c_str());
+        Logger::Error("unable to mkdir %s", subpath.c_str());
         return false;
       }
     }
@@ -119,13 +119,13 @@ bool Util::mkdir(const std::string &path, int mode /* = 0777 */) {
 static bool same(const char *file1, const char *file2) {
   FILE *f1 = fopen(file1, "r");
   if (f1 == NULL) {
-    HPHPLOG_ERROR("unable to read %s", file1);
+    Logger::Error("unable to read %s", file1);
     return false;
   }
   FILE *f2 = fopen(file2, "r");
   if (f2 == NULL) {
     fclose(f1);
-    HPHPLOG_ERROR("unable to read %s", file2);
+    Logger::Error("unable to read %s", file2);
     return false;
   }
 
@@ -168,14 +168,14 @@ void Util::syncdir(const std::string &dest_, const std::string &src_,
 
   DIR *ddest = opendir(dest.c_str());
   if (ddest == NULL) {
-    HPHPLOG_ERROR("syncdir: unable to open dest %s", dest.c_str());
+    Logger::Error("syncdir: unable to open dest %s", dest.c_str());
     return;
   }
 
   DIR *dsrc = opendir(src.c_str());
   if (dsrc == NULL) {
     closedir(ddest);
-    HPHPLOG_ERROR("syncdir: unable to open src %s", src.c_str());
+    Logger::Error("syncdir: unable to open src %s", src.c_str());
     return;
   }
 
@@ -226,7 +226,7 @@ void Util::syncdir(const std::string &dest_, const std::string &src_,
   if (!todelete.empty()) {
     for (set<string>::const_iterator iter = todelete.begin();
          iter != todelete.end(); ++iter) {
-      HPHPLOG_INFO("sync: deleting %s", iter->c_str());
+      Logger::Info("sync: deleting %s", iter->c_str());
       boost::filesystem::remove_all(*iter);
     }
   }
@@ -235,7 +235,7 @@ void Util::syncdir(const std::string &dest_, const std::string &src_,
   while ((e = readdir(dsrc))) {
     string fdest = dest + e->d_name;
     if (access(fdest.c_str(), F_OK) < 0) {
-      HPHPLOG_INFO("sync: updating %s", fdest.c_str());
+      Logger::Info("sync: updating %s", fdest.c_str());
       if (keepSrc) {
         ssystem((string("cp -R ") + src + e->d_name + " " + dest).c_str());
       } else {
@@ -262,10 +262,10 @@ int Util::copy(const char *srcfile, const char *dstfile) {
     if (rbytes == 0) break;
     if (rbytes == -1) {
       err = true;
-      HPHPLOG_ERROR("read failed: %s", safe_strerror(errno).c_str());
+      Logger::Error("read failed: %s", safe_strerror(errno).c_str());
     } else if ((wbytes = write(dstFd, buf, rbytes)) != rbytes) {
       err = true;
-      HPHPLOG_ERROR("write failed: %d, %s", wbytes,
+      Logger::Error("write failed: %d, %s", wbytes,
                     safe_strerror(errno).c_str());
     }
     if (err) {
@@ -319,26 +319,26 @@ int Util::directCopy(const char *srcfile, const char *dstfile) {
 
     if (rbytes == -1) {
       err = true;
-      HPHPLOG_ERROR("read failed: %s", safe_strerror(errno).c_str());
+      Logger::Error("read failed: %s", safe_strerror(errno).c_str());
     } else if (force_sync(srcFd) == -1) {
       err = true;
-      HPHPLOG_ERROR("read sync failed: %s",
+      Logger::Error("read sync failed: %s",
                     safe_strerror(errno).c_str());
     } else if (drop_cache(srcFd) == -1) {
       err = true;
-      HPHPLOG_ERROR("read cache drop failed: %s",
+      Logger::Error("read cache drop failed: %s",
                     safe_strerror(errno).c_str());
     } else if ((wbytes = write(dstFd, buf, rbytes)) != rbytes) {
       err = true;
-      HPHPLOG_ERROR("write failed: %d, %s", wbytes,
+      Logger::Error("write failed: %d, %s", wbytes,
                     safe_strerror(errno).c_str());
     } else if (force_sync(dstFd) == -1) {
       err = true;
-      HPHPLOG_ERROR("write sync failed: %s",
+      Logger::Error("write sync failed: %s",
                     safe_strerror(errno).c_str());
     } else if (drop_cache(dstFd) == -1) {
       err = true;
-      HPHPLOG_ERROR("write cache drop failed: %s",
+      Logger::Error("write cache drop failed: %s",
                     safe_strerror(errno).c_str());
     }
     if (err) {
@@ -375,9 +375,9 @@ int Util::directRename(const char *oldname, const char *newname) {
 int Util::ssystem(const char* command) {
   int ret = system(command);
   if (ret == -1) {
-    HPHPLOG_ERROR("system(\"%s\"): %s", command, safe_strerror(errno).c_str());
+    Logger::Error("system(\"%s\"): %s", command, safe_strerror(errno).c_str());
   } else if (ret != 0) {
-    HPHPLOG_ERROR("command failed: \"%s\"", command);
+    Logger::Error("command failed: \"%s\"", command);
   }
   return ret;
 }
@@ -704,7 +704,7 @@ void Util::find(std::vector<std::string> &out,
   }
   DIR *dir = opendir(fullPath.c_str());
   if (dir == NULL) {
-    HPHPLOG_ERROR("Util::find(): unable to open directory %s",
+    Logger::Error("Util::find(): unable to open directory %s",
                   fullPath.c_str());
     return;
   }
@@ -723,7 +723,7 @@ void Util::find(std::vector<std::string> &out,
     string fe = fullPath + ename;
     struct stat se;
     if (stat(fe.c_str(), &se)) {
-      HPHPLOG_ERROR("Util::find(): unable to stat %s", fe.c_str());
+      Logger::Error("Util::find(): unable to stat %s", fe.c_str());
       continue;
     }
 
@@ -758,7 +758,7 @@ void Util::find(std::vector<std::string> &out,
           }
         }
       } catch (...) {
-        HPHPLOG_ERROR("Util::find(): unable to read %s", fe.c_str());
+        Logger::Error("Util::find(): unable to read %s", fe.c_str());
       }
     }
 

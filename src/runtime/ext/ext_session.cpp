@@ -299,11 +299,11 @@ String SessionModule::create_sid() {
 
   Variant context = f_hash_init(PS(hash_func));
   if (same(context, false)) {
-    HPHPLOG_ERROR("Invalid session hash function: %s", PS(hash_func).c_str());
+    Logger::Error("Invalid session hash function: %s", PS(hash_func).c_str());
     return String();
   }
   if (!f_hash_update(context, buf.detach())) {
-    HPHPLOG_ERROR("hash_update() failed");
+    Logger::Error("hash_update() failed");
     return String();
   }
 
@@ -319,7 +319,7 @@ String SessionModule::create_sid() {
         if (n <= 0) break;
         if (!f_hash_update(context,
                            String((const char *)rbuf, n, AttachLiteral))) {
-          HPHPLOG_ERROR("hash_update() failed");
+          Logger::Error("hash_update() failed");
           ::close(fd);
           return String();
         }

@@ -355,7 +355,7 @@ static void setResourceLimit(int resource, Hdf rlimit, const char *nodeName) {
     }
     int ret = setrlimit(resource, &rl);
     if (ret) {
-      HPHPLOG_ERROR("Unable to set %s to %ld: %s (%d)", nodeName, rl.rlim_cur,
+      Logger::Error("Unable to set %s to %ld: %s (%d)", nodeName, rl.rlim_cur,
                     Util::safe_strerror(errno).c_str(), errno);
     }
   }

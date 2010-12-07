@@ -203,7 +203,7 @@ DebuggerCommandPtr CmdExtended::CreateExtendedCommand(const std::string &cls) {
   if (ret) {
     ret->m_class = cls;
   } else {
-    HPHPLOG_ERROR("Unable to create %s extended command", cls.c_str());
+    Logger::Error("Unable to create %s extended command", cls.c_str());
   }
   return ret;
 }

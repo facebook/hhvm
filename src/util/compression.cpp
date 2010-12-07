@@ -268,7 +268,7 @@ char *StreamCompressor::compress(const char *data, int &len, bool trailer) {
   }
 
   free(s2);
-  HPHPLOG_ERROR("%s", zError(status));
+  Logger::Error("%s", zError(status));
   return NULL;
 }
 
@@ -276,12 +276,12 @@ char *StreamCompressor::compress(const char *data, int &len, bool trailer) {
 
 char *gzencode(const char *data, int &len, int level, int encoding_mode) {
   if (level < -1 || level > 9) {
-    HPHPLOG_WARNING("compression level(%ld) must be within -1..9", level);
+    Logger::Warning("compression level(%ld) must be within -1..9", level);
     return NULL;
   }
 
   if (encoding_mode != CODING_GZIP && encoding_mode != CODING_DEFLATE) {
-    HPHPLOG_WARNING("encoding mode must be FORCE_GZIP or FORCE_DEFLATE");
+    Logger::Warning("encoding mode must be FORCE_GZIP or FORCE_DEFLATE");
     return NULL;
   }
 
@@ -316,13 +316,13 @@ char *gzencode(const char *data, int &len, int level, int encoding_mode) {
     /* windowBits is passed < 0 to suppress zlib header & trailer */
     if ((status = deflateInit2(&stream, level, Z_DEFLATED, -MAX_WBITS,
                                MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY)) != Z_OK) {
-      HPHPLOG_WARNING("%s", zError(status));
+      Logger::Warning("%s", zError(status));
       return false;
     }
     break;
   case CODING_DEFLATE:
     if ((status = deflateInit(&stream, level)) != Z_OK) {
-      HPHPLOG_WARNING("%s", zError(status));
+      Logger::Warning("%s", zError(status));
       return false;
     }
     break;
@@ -369,7 +369,7 @@ char *gzencode(const char *data, int &len, int level, int encoding_mode) {
   }
 
   free(s2);
-  HPHPLOG_WARNING("%s", zError(status));
+  Logger::Warning("%s", zError(status));
   return NULL;
 }
 
@@ -386,7 +386,7 @@ char *gzdecode(const char *data, int &len) {
     stream.next_in = (Bytef *)data;
     stream.avail_in = (uInt)len + 1; /* there is room for \0 */
     if (check_header(stream) != Z_OK) {
-      HPHPLOG_WARNING("gzdecode: header is in wrong format");
+      Logger::Warning("gzdecode: header is in wrong format");
       return NULL;
     }
 
@@ -428,7 +428,7 @@ char *gzdecode(const char *data, int &len) {
   }
 
   free(s2);
-  HPHPLOG_WARNING("%s", zError(status));
+  Logger::Warning("%s", zError(status));
   return NULL;
 }
 
@@ -436,7 +436,7 @@ char *gzdecode(const char *data, int &len) {
 
 char *gzcompress(const char *data, int &len, int level /* = -1 */) {
   if (level < -1 || level > 9) {
-    HPHPLOG_WARNING("compression level(%ld) must be within -1..9", level);
+    Logger::Warning("compression level(%ld) must be within -1..9", level);
     return NULL;
   }
 
@@ -462,13 +462,13 @@ char *gzcompress(const char *data, int &len, int level /* = -1 */) {
   }
 
   free(s2);
-  HPHPLOG_WARNING("%s", zError(status));
+  Logger::Warning("%s", zError(status));
   return NULL;
 }
 
 char *gzuncompress(const char *data, int &len, int limit /* = 0 */) {
   if (limit < 0) {
-    HPHPLOG_WARNING("length (%ld) must be greater or equal zero", limit);
+    Logger::Warning("length (%ld) must be greater or equal zero", limit);
     return NULL;
   }
 
@@ -497,7 +497,7 @@ char *gzuncompress(const char *data, int &len, int limit /* = 0 */) {
   }
 
   free(s2);
-  HPHPLOG_WARNING("%s", zError(status));
+  Logger::Warning("%s", zError(status));
   return NULL;
 }
 
@@ -505,7 +505,7 @@ char *gzuncompress(const char *data, int &len, int limit /* = 0 */) {
 
 char *gzdeflate(const char *data, int &len, int level /* = -1 */) {
   if (level < -1 || level > 9) {
-    HPHPLOG_WARNING("compression level(%ld) must be within -1..9", level);
+    Logger::Warning("compression level(%ld) must be within -1..9", level);
     return NULL;
   }
 
@@ -552,7 +552,7 @@ char *gzdeflate(const char *data, int &len, int level /* = -1 */) {
   }
 
   free(s2);
-  HPHPLOG_WARNING("%s", zError(status));
+  Logger::Warning("%s", zError(status));
   return NULL;
 }
 
@@ -562,7 +562,7 @@ char *gzinflate(const char *data, int &len, int limit /* = 0 */) {
   }
 
   if (limit < 0) {
-    HPHPLOG_WARNING("length (%ld) must be greater or equal zero", limit);
+    Logger::Warning("length (%ld) must be greater or equal zero", limit);
     return NULL;
   }
   unsigned long plength = limit;
@@ -614,7 +614,7 @@ char *gzinflate(const char *data, int &len, int limit /* = 0 */) {
   }
 
   free(s2);
-  HPHPLOG_WARNING("%s", zError(status));
+  Logger::Warning("%s", zError(status));
   return NULL;
 }
 

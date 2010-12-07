@@ -660,7 +660,7 @@ static void pprof(const std::string &file, const char *extra = NULL) {
       if (f) {
         fwrite(out.c_str(), 1, out.size(), f);
         fclose(f);
-        HPHPLOG_INFO("pprof generated %s", filename);
+        Logger::Info("pprof generated %s", filename);
       }
     }
   }
@@ -747,7 +747,7 @@ bool AdminRequestHandler::handleHeapProfilerRequest(const std::string &cmd,
         base += out[0];
         pprof(out[out.size() - 1], base.c_str());
       } else {
-        HPHPLOG_ERROR("Unable to find heap profiler output");
+        Logger::Error("Unable to find heap profiler output");
       }
     }
     return true;

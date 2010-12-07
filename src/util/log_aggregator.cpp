@@ -162,9 +162,9 @@ void LogAggregator::flush(ServerDataPtr server) {
     qGroup->execute();
 
   } catch (Exception e) {
-    HPHPLOG_ERROR("unable to upload errors: %s", e.getMessage().c_str());
+    Logger::Error("unable to upload errors: %s", e.getMessage().c_str());
   } catch (...) {
-    HPHPLOG_ERROR("unable to upload errors: (unknown error)");
+    Logger::Error("unable to upload errors: (unknown error)");
   }
 
   // we have to dump errors even if we were not able to upload them, because

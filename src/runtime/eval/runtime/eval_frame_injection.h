@@ -38,7 +38,7 @@ public:
   EvalFrameInjection(CStrRef cls, const char *name,
                      VariableEnvironment &env, const char *file,
                      ObjectData *obj = NULL, int fs = 0)
-    : FrameInjection(ThreadInfo::s_threadInfo.get(), cls, name,
+    : FrameInjection(m_info, cls, name,
                      obj ? obj->getRoot() : NULL, fs),
       m_env(env), m_file(file) { }
 

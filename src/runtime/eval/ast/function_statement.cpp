@@ -213,9 +213,6 @@ Variant FunctionStatement::invoke(CArrRef params) const {
   DECLARE_THREAD_INFO
   RECURSION_INJECTION
   REQUEST_TIMEOUT_INJECTION
-#ifdef HOTPROFILER
-  ProfilerInjection pi(info, m_name.c_str());
-#endif
   FuncScopeVariableEnvironment env(this, params.size());
   EvalFrameInjection fi(empty_string, m_name.c_str(), env, loc()->file);
   if (m_ref) {
@@ -298,9 +295,6 @@ Variant FunctionStatement::directInvoke(VariableEnvironment &env,
   DECLARE_THREAD_INFO
   RECURSION_INJECTION
   REQUEST_TIMEOUT_INJECTION
-#ifdef HOTPROFILER
-  ProfilerInjection pi(info, m_name.c_str());
-#endif
   FuncScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
   EvalFrameInjection fi(empty_string, m_name.c_str(), fenv, loc()->file);

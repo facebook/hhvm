@@ -375,6 +375,9 @@ do { \
   ThreadInfo *info __attribute__((__unused__)) = \
     ThreadInfo::s_threadInfo.get();
 
+#define DECLARE_THREAD_INFO_NOINIT               \
+  ThreadInfo *info __attribute__((__unused__));
+
 #define MAX_LOOP_COUNT 1000000
 
 #ifdef INFINITE_LOOP_DETECTION
@@ -408,37 +411,6 @@ do { \
 #define EXECUTION_PROFILER_INJECTION(n)
 #endif
 
-#ifdef HOTPROFILER
-#define HOTPROFILER_INJECTION(n)                \
-  ProfilerInjection pi(info, #n);               \
-  EXECUTION_PROFILER_INJECTION(false)           \
-
-#ifndef HOTPROFILER_NO_BUILTIN
-#define HOTPROFILER_INJECTION_BUILTIN(n)        \
-  ProfilerInjection pi(info, #n);               \
-  EXECUTION_PROFILER_INJECTION(true);           \
-
-#else
-#define HOTPROFILER_INJECTION_BUILTIN(n)        \
-  EXECUTION_PROFILER_INJECTION(true);           \
-
-#endif
-
-#else
-#define HOTPROFILER_INJECTION(n)
-#define HOTPROFILER_INJECTION_BUILTIN(n)
-#endif
-
-// Stack frame injection is also for correctness, and cannot be disabled.
-#define FRAME_INJECTION(c, n) FrameInjection fi(info, c, #n);
-#define FRAME_INJECTION_FLAGS(c, n, f) FrameInjection fi(info, c, #n, NULL, f);
-// For classes that might have redeclaring subclasses
-#define FRAME_INJECTION_WITH_THIS(c, n) \
-  FrameInjection fi(info, c, #n, this->getRoot());
-// For classes that do not have redeclaring subclasses
-#define FRAME_INJECTION_WITH_ONLY_THIS(c, n) \
-  FrameInjection fi(info, c, #n, this);
-
 #ifdef ENABLE_FULL_SETLINE
 #define LINE(n, e) (set_line(n), e)
 #else
@@ -461,90 +433,101 @@ do { \
     if (!variables) variables = g;                \
   }
 
+// Stack frame injection is also for correctness, and cannot be disabled.
+#define FRAME_INJECTION(c, n) FrameInjection fi(info, c, #n);
+#define FRAME_INJECTION_FLAGS(c, n, f) FrameInjection fi(info, c, #n, f);
+// For classes that might have redeclaring subclasse
+#define FRAME_INJECTION_WITH_THIS(c, n) \
+  FrameInjection fi(info, c, #n, this->getRoot());
+// For classes that do not have redeclaring subclasses
+#define FRAME_INJECTION_WITH_ONLY_THIS(c, n) \
+  FrameInjection fi(info, c, #n, this);
+
+#ifndef HOTPROFILER_NO_BUILTIN
+  #define FRAME_INJECTION_BUILTIN FRAME_INJECTION
+  #define FRAME_INJECTION_FLAGS_BUILTIN FRAME_INJECTION_FLAGS
+  #define FRAME_INJECTION_WITH_THIS_BUILTIN FRAME_INJECTION_WITH_THIS
+  #define FRAME_INJECTION_WITH_ONLY_THIS_BUILTIN FRAME_INJECTION_WITH_ONLY_THIS
+#else
+  #define FRAME_INJECTION_BUILTIN(c, n) \
+    FrameInjection fi(info, c, #n, true);
+
+  #define FRAME_INJECTION_FLAGS_BUILTIN(c, n, f) \
+    FrameInjection fi(info, c, #n, f, true);
+
+  #define FRAME_INJECTION_WITH_THIS_BUILTIN(c, n) \
+    FrameInjection fi(info, c, #n, this->getRoot(), true);
+
+  #define FRAME_INJECTION_WITH_ONLY_THIS_BUILTIN(c, n) \
+    FrameInjection fi(info, c, #n, this, true);
+#endif
+
 // code injected into beginning of every function/method
 #define FUNCTION_INJECTION(n)                   \
-  DECLARE_THREAD_INFO                           \
-  RECURSION_INJECTION                           \
-  REQUEST_TIMEOUT_INJECTION                     \
-  HOTPROFILER_INJECTION(n)                      \
+  DECLARE_THREAD_INFO_NOINIT                    \
   FRAME_INJECTION(empty_string, n)              \
   DECLARE_GLOBAL_VARIABLES_INJECTION(g)         \
+  EXECUTION_PROFILER_INJECTION(false)           \
 
 #define STATIC_METHOD_INJECTION(c, n)           \
-  DECLARE_THREAD_INFO                           \
-  RECURSION_INJECTION                           \
-  REQUEST_TIMEOUT_INJECTION                     \
-  HOTPROFILER_INJECTION(n)                      \
+  DECLARE_THREAD_INFO_NOINIT                    \
   FRAME_INJECTION(s_class_name, n)              \
   DECLARE_GLOBAL_VARIABLES_INJECTION(g)         \
+  EXECUTION_PROFILER_INJECTION(false)           \
 
 #define INSTANCE_METHOD_INJECTION(c, n)         \
-  DECLARE_THREAD_INFO                           \
-  RECURSION_INJECTION                           \
-  REQUEST_TIMEOUT_INJECTION                     \
-  HOTPROFILER_INJECTION(n)                      \
+  DECLARE_THREAD_INFO_NOINIT                    \
   FRAME_INJECTION_WITH_THIS(s_class_name, n)    \
   DECLARE_GLOBAL_VARIABLES_INJECTION(g)         \
+  EXECUTION_PROFILER_INJECTION(false)           \
 
 #define INSTANCE_METHOD_INJECTION_ROOTLESS(c, n)  \
-  DECLARE_THREAD_INFO                             \
-  RECURSION_INJECTION                             \
-  REQUEST_TIMEOUT_INJECTION                       \
-  HOTPROFILER_INJECTION(n)                        \
+  DECLARE_THREAD_INFO_NOINIT                      \
   FRAME_INJECTION_WITH_ONLY_THIS(s_class_name, n) \
   DECLARE_GLOBAL_VARIABLES_INJECTION(g)           \
+  EXECUTION_PROFILER_INJECTION(false)             \
 
 #define PSEUDOMAIN_INJECTION(n, esc)               \
+  DECLARE_THREAD_INFO_NOINIT                       \
   GlobalVariables *g = (GlobalVariables *)globals; \
   CHECK_ONCE(esc)                                  \
-  DECLARE_THREAD_INFO                              \
-  RECURSION_INJECTION                              \
-  REQUEST_TIMEOUT_INJECTION                        \
-  HOTPROFILER_INJECTION(n)                         \
   FRAME_INJECTION_FLAGS(empty_string, n, FrameInjection::PseudoMain) \
+  EXECUTION_PROFILER_INJECTION(false)              \
 
 // code injected into every profiled builtin function/method
 #define FUNCTION_INJECTION_BUILTIN(n)           \
-  DECLARE_THREAD_INFO                           \
-  RECURSION_INJECTION                           \
-  REQUEST_TIMEOUT_INJECTION                     \
-  HOTPROFILER_INJECTION_BUILTIN(n)              \
-  FRAME_INJECTION_FLAGS(empty_string, n, FrameInjection::BuiltinFunction) \
+  DECLARE_THREAD_INFO_NOINIT                    \
+  FRAME_INJECTION_FLAGS_BUILTIN(empty_string, n, \
+                                FrameInjection::BuiltinFunction) \
   DECLARE_SYSTEM_GLOBALS_INJECTION(g)           \
+  EXECUTION_PROFILER_INJECTION(true);           \
 
 // code injected into every unprofiled builtin function/method
-#define FUNCTION_NOPROFILE_BUILTIN(n)           \
-  DECLARE_THREAD_INFO                           \
-  RECURSION_INJECTION                           \
-  REQUEST_TIMEOUT_INJECTION                     \
-  FRAME_INJECTION_FLAGS(empty_string, n, FrameInjection::BuiltinFunction) \
+#define FUNCTION_NOPROFILE_BUILTIN(n) \
+  DECLARE_THREAD_INFO_NOINIT                    \
+  FrameInjection fi(info, empty_string, #n, \
+                    FrameInjection::BuiltinFunction, true); \
   DECLARE_SYSTEM_GLOBALS_INJECTION(g)           \
 
 #define STATIC_METHOD_INJECTION_BUILTIN(c, n)   \
-  DECLARE_THREAD_INFO                           \
-  RECURSION_INJECTION                           \
-  REQUEST_TIMEOUT_INJECTION                     \
-  HOTPROFILER_INJECTION_BUILTIN(n)              \
-  FRAME_INJECTION(s_class_name, n)              \
+  DECLARE_THREAD_INFO_NOINIT                    \
+  FRAME_INJECTION_BUILTIN(s_class_name, n)      \
   DECLARE_SYSTEM_GLOBALS_INJECTION(g)           \
+  EXECUTION_PROFILER_INJECTION(true);           \
 
 #define INSTANCE_METHOD_INJECTION_BUILTIN(c, n) \
   if (!o_id) throw_instance_method_fatal(#n);   \
-  DECLARE_THREAD_INFO                           \
-  RECURSION_INJECTION                           \
-  REQUEST_TIMEOUT_INJECTION                     \
-  HOTPROFILER_INJECTION_BUILTIN(n)              \
-  FRAME_INJECTION_WITH_THIS(s_class_name, n)    \
+  DECLARE_THREAD_INFO_NOINIT                    \
+  FRAME_INJECTION_WITH_THIS_BUILTIN(s_class_name, n)   \
   DECLARE_SYSTEM_GLOBALS_INJECTION(g)           \
+  EXECUTION_PROFILER_INJECTION(true);           \
 
 #define PSEUDOMAIN_INJECTION_BUILTIN(n, esc)    \
   SystemGlobals *g = (SystemGlobals *)globals;  \
   CHECK_ONCE(esc)                               \
-  DECLARE_THREAD_INFO                           \
-  RECURSION_INJECTION                           \
-  REQUEST_TIMEOUT_INJECTION                     \
-  HOTPROFILER_INJECTION_BUILTIN(n)              \
-  FRAME_INJECTION_FLAGS(empty_string, n, FrameInjection::PseudoMain) \
+  DECLARE_THREAD_INFO_NOINIT                    \
+  FRAME_INJECTION_FLAGS_BUILTIN(empty_string, n, FrameInjection::PseudoMain) \
+  EXECUTION_PROFILER_INJECTION(true);           \
 
 #define INTERCEPT_INJECTION_ALWAYS(name, func, args, rr)                \
   static char intercepted = -1;                                         \

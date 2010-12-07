@@ -65,20 +65,25 @@ public:
 
 public:
   // NOTE: obj has to be the root object
-  FrameInjection(ThreadInfo *info, CStrRef cls, const char *name,
-                 ObjectData *obj = NULL, int fs = 0)
-      : m_info(info), m_class(cls), m_name(name),
-        m_object(obj), m_line(0), m_flags(fs),
-        m_staticClass(NULL), m_callingObject(NULL) {
-    ASSERT(m_class.get());
-    ASSERT(m_name);
-    m_prev = m_info->m_top;
-    m_info->m_top = this;
-  }
+  // constructors with hot profiler
+  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name);
+  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
+                 ObjectData *obj);
+  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name, int fs);
+  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
+                 ObjectData *obj, int fs);
 
-  virtual ~FrameInjection() {
-    m_info->m_top = m_prev;
-  }
+  // constructors without hot profiler
+  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
+                 bool unused);
+  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
+                 ObjectData *obj, bool unused);
+  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name, int fs,
+                 bool unused);
+  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
+                 ObjectData *obj, int fs, bool unused);
+
+  virtual ~FrameInjection();
 
   /**
    * Simple accessors
@@ -124,12 +129,16 @@ public:
     ThreadInfo *m_info;
   };
 
-private:
+protected:
   ThreadInfo     *m_info;
+private:
   FrameInjection *m_prev;
   CStrRef         m_class;
   const char     *m_name;
   Object          m_object;
+#ifdef HOTPROFILER
+  bool            m_prof;
+#endif
 
   int             m_line;
   int             m_flags;
@@ -137,6 +146,23 @@ private:
   // for static late binding
   const String   *m_staticClass;
   ObjectData     *m_callingObject;
+
+  inline ThreadInfo *doCommon() {
+    m_info = ThreadInfo::s_threadInfo.get();
+    ASSERT(m_class.get());
+    ASSERT(m_name);
+    m_prev = m_info->m_top;
+    m_info->m_top = this;
+    return m_info;
+  }
+  inline void hotProfilerInit(ThreadInfo *info, const char *name) {
+#ifdef HOTPROFILER
+    m_prof = true;
+    Profiler *prof = m_info->m_profiler;
+    if (prof) begin_profiler_frame(prof, name);
+#endif
+  }
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

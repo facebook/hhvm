@@ -69,9 +69,6 @@ Variant MethodStatement::invokeInstance(CObjRef obj, CArrRef params,
   DECLARE_THREAD_INFO
   RECURSION_INJECTION
   REQUEST_TIMEOUT_INJECTION
-#ifdef HOTPROFILER
-  ProfilerInjection pi(info, m_fullName.c_str());
-#endif
   MethScopeVariableEnvironment env(this, params.size());
   env.setCurrentObject(obj);
   String clsName(m_class->name().c_str(), m_class->name().size(),
@@ -94,9 +91,6 @@ invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
   DECLARE_THREAD_INFO
   RECURSION_INJECTION
   REQUEST_TIMEOUT_INJECTION
-#ifdef HOTPROFILER
-  ProfilerInjection pi(info, m_fullName.c_str());
-#endif
   MethScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
   fenv.setCurrentObject(obj);
@@ -116,9 +110,6 @@ Variant MethodStatement::invokeStatic(const char* cls, CArrRef params,
   DECLARE_THREAD_INFO
   RECURSION_INJECTION
   REQUEST_TIMEOUT_INJECTION
-#ifdef HOTPROFILER
-  ProfilerInjection pi(info, m_fullName.c_str());
-#endif
   MethScopeVariableEnvironment env(this, params.size());
   env.setCurrentClass(cls);
   String clsName(m_class->name().c_str(), m_class->name().size(),
@@ -141,9 +132,6 @@ invokeStaticDirect(const char* cls, VariableEnvironment &env,
   DECLARE_THREAD_INFO
   RECURSION_INJECTION
   REQUEST_TIMEOUT_INJECTION
-#ifdef HOTPROFILER
-  ProfilerInjection pi(info, m_fullName.c_str());
-#endif
   String clsName(m_class->name().c_str(), m_class->name().size(),
                  AttachLiteral);
   EvalFrameInjection fi(clsName, m_fullName.c_str(), fenv,

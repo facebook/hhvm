@@ -34,6 +34,110 @@ static StaticString s_type("type");
 
 ///////////////////////////////////////////////////////////////////////////////
 
+
+static inline void injection_check(ThreadInfo *info) {
+#ifdef INFINITE_RECURSION_DETECTION
+  check_recursion(info);
+#endif
+
+#ifdef REQUEST_TIMEOUT_DETECTION
+  check_request_timeout(info);
+#endif
+}
+
+// constructors with hot profiler
+FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
+                               const char *name)
+    : m_class(cls), m_name(name),
+      m_object(NULL), m_line(0), m_flags(0),
+      m_staticClass(NULL), m_callingObject(NULL) {
+  info = doCommon();
+  hotProfilerInit(info, name);
+  injection_check(info);
+}
+
+FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
+                               const char *name, ObjectData *obj)
+    : m_class(cls), m_name(name),
+      m_object(obj), m_line(0), m_flags(0),
+      m_staticClass(NULL), m_callingObject(NULL) {
+  info = doCommon();
+  hotProfilerInit(info, name);
+  injection_check(info);
+}
+
+FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
+                               const char *name, int fs)
+    : m_class(cls), m_name(name),
+      m_object(NULL), m_line(0), m_flags(fs),
+      m_staticClass(NULL), m_callingObject(NULL) {
+  info = doCommon();
+  hotProfilerInit(info, name);
+  injection_check(info);
+}
+
+FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
+                               const char *name, ObjectData *obj, int fs)
+    : m_class(cls), m_name(name),
+      m_object(obj), m_line(0), m_flags(fs),
+      m_staticClass(NULL), m_callingObject(NULL) {
+  info = doCommon();
+  hotProfilerInit(info, name);
+  injection_check(info);
+}
+
+// constructors without hot profiler
+FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
+                               const char *name, bool unused)
+    : m_class(cls), m_name(name),
+      m_object(NULL), m_line(0), m_flags(0),
+      m_staticClass(NULL), m_callingObject(NULL) {
+  info = doCommon();
+  m_prof = false;
+  injection_check(info);
+}
+
+FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
+                               const char *name, ObjectData *obj, bool unused)
+    : m_class(cls), m_name(name),
+      m_object(obj), m_line(0), m_flags(0),
+      m_staticClass(NULL), m_callingObject(NULL) {
+  info = doCommon();
+  m_prof = false;
+  injection_check(info);
+}
+
+FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
+                               const char *name, int fs, bool unused)
+    : m_class(cls), m_name(name),
+      m_object(NULL), m_line(0), m_flags(fs),
+      m_staticClass(NULL), m_callingObject(NULL) {
+  info = doCommon();
+  m_prof = false;
+  injection_check(info);
+}
+
+FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
+                               const char *name, ObjectData *obj,
+                               int fs, bool unused)
+    : m_info(info), m_class(cls), m_name(name),
+      m_object(obj), m_line(0), m_flags(fs),
+      m_staticClass(NULL), m_callingObject(NULL) {
+  info = doCommon();
+  m_prof = false;
+  injection_check(info);
+}
+
+FrameInjection::~FrameInjection() {
+  m_info->m_top = m_prev;
+#ifdef HOTPROFILER
+  if (m_prof) {
+    Profiler *prof = m_info->m_profiler;
+    if (prof) end_profiler_frame(prof);
+  }
+#endif
+}
+
 CStrRef FrameInjection::GetClassName(bool skip /* = false */) {
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {

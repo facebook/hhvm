@@ -259,22 +259,6 @@ extern void end_profiler_frame(Profiler *p);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ProfilerInjection {
-public:
-  ProfilerInjection(ThreadInfo *info, const char *symbol) : m_info(info) {
-    Profiler *prof = m_info->m_profiler;
-    if (prof) begin_profiler_frame(prof, symbol);
-  }
-  ~ProfilerInjection() {
-    Profiler *prof = m_info->m_profiler;
-    if (prof) end_profiler_frame(prof);
-  }
-private:
-  ThreadInfo *m_info;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 class ExecutionProfiler {
 public:
   ExecutionProfiler(ThreadInfo *info, bool builtin) : m_info(info) {

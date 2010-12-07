@@ -55,9 +55,10 @@ Variant *AssocList::getPtr(CStrRef name) {
   return NULL;
 }
 
-bool AssocList::exists(CStrRef name) const {
+bool AssocList::exists(CStrRef name, bool checkInit /* = false */) const {
   for (VarAssocPair *vp = m_list; vp; vp = vp->next()) {
     if (name.same(vp->name())) {
+      if (checkInit && !vp->var().isInitialized()) return false;
       return true;
     }
   }

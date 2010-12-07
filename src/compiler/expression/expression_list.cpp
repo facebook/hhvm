@@ -23,6 +23,7 @@
 #include <compiler/expression/array_pair_expression.h>
 #include <compiler/analysis/function_scope.h>
 #include <runtime/base/array/array_init.h>
+#include <compiler/parser/parser.h>
 
 using namespace HPHP;
 using namespace std;
@@ -87,6 +88,10 @@ void ExpressionList::removeElement(int index) {
   m_exps.erase(m_exps.begin() + index, m_exps.begin() + index + 1);
 }
 
+void ExpressionList::clearElements() {
+  m_exps.clear();
+}
+
 bool ExpressionList::isRefable(bool checkError /* = false */) const {
   if (m_kind == ListKindWrapped || m_kind == ListKindLeft) {
     // Its legal to ref a list...
@@ -144,6 +149,34 @@ void ExpressionList::getStrings(std::vector<std::string> &strings) {
     ScalarExpressionPtr s = dynamic_pointer_cast<ScalarExpression>(m_exps[i]);
     strings.push_back(s->getString());
   }
+}
+
+bool
+ExpressionList::flattenLiteralStrings(vector<ExpressionPtr> &literals) const {
+  for (unsigned i = 0; i < m_exps.size(); i++) {
+    ExpressionPtr e = m_exps[i];
+    if (e->is(Expression::KindOfArrayPairExpression)) {
+      ArrayPairExpressionPtr ap = dynamic_pointer_cast<ArrayPairExpression>(e);
+      if (ap->getName()) return false;
+      e = ap->getValue();
+    }
+    if (e->is(Expression::KindOfUnaryOpExpression)) {
+      UnaryOpExpressionPtr unary = dynamic_pointer_cast<UnaryOpExpression>(e);
+      if (unary->getOp() == T_ARRAY) {
+        ExpressionListPtr el =
+          dynamic_pointer_cast<ExpressionList>(unary->getExpression());
+        if (!el->flattenLiteralStrings(literals)) {
+          return false;
+        }
+      }
+    }
+    else if (e->isLiteralString()) {
+      literals.push_back(e);
+    } else {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool ExpressionList::getScalarValue(Variant &value) {

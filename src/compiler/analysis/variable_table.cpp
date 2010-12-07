@@ -537,8 +537,7 @@ void VariableTable::addNeeded(const string &name) {
 }
 
 bool VariableTable::checkUnused(Symbol *sym) {
-  if (isPseudoMainTable() ||
-      getAttribute(VariableTable::ContainsDynamicVariable)) {
+  if (isPseudoMainTable() || getAttribute(ContainsDynamicVariable)) {
     return false;
   }
   if (sym) {

@@ -5931,6 +5931,17 @@ bool TestCodeRun::TestDynamicVariables() {
       "  var_dump(compact('a', array('ab', 'b')));"
       "} test(); ");
 
+  MVCR("<?php\n"
+       "function f() { return true; }\n"
+       "function test() {\n"
+       "  $a = 100;\n"
+       "  if (compact('a', 'b')) { }\n"
+       "  var_dump(compact('a', 'b'));\n"
+       "  if (f()) $b = 1; else $b = new Exception();\n"
+       "  return $b;\n"
+       "}\n"
+       "test();\n");
+
   // get_defined_vars
   MVCR("<?php\n"
        "function simple_getdefined_test() {\n"

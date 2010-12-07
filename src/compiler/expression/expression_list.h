@@ -53,6 +53,7 @@ public:
   bool isNoObjectInvolved() const;
   virtual bool containsDynamicConstant(AnalysisResultPtr ar) const;
   void removeElement(int index);
+  void clearElements();
   virtual bool getScalarValue(Variant &value);
   virtual bool isRefable(bool checkError = false) const;
   virtual bool kidUnused(int i) const;
@@ -91,6 +92,13 @@ public:
                                     int64 max,
                                     bool arrayElements = true,
                                     unsigned int start = 0);
+  /**
+   * Checks whether the expression list contains only literal strings and
+   * (recursive) arrays of literal strings. Also returns the list of strings
+   * if so.
+   */
+  bool flattenLiteralStrings(std::vector<ExpressionPtr> &literals) const;
+
 private:
   void optimize(AnalysisResultPtr ar);
   unsigned int checkLitstrKeys() const;

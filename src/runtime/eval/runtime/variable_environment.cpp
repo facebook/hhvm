@@ -210,7 +210,7 @@ Array FuncScopeVariableEnvironment::getParams() const {
 }
 
 bool FuncScopeVariableEnvironment::exists(CStrRef name) const {
-  return m_alist.exists(name);
+  return m_alist.exists(name, true);
   //return LVariableTable::exists(name, hash);
 }
 Variant &FuncScopeVariableEnvironment::getImpl(CStrRef s) {

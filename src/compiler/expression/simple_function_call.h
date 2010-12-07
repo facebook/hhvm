@@ -79,6 +79,7 @@ protected:
     VariableArgumentFunction,
     ExtractFunction,
     CompactFunction,
+    StaticCompactFunction, // compact() with statically known variable names
     ShellExecFunction,
     ConstantFunction,
     DefinedFunction,

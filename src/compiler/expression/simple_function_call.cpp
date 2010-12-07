@@ -163,10 +163,22 @@ void SimpleFunctionCall::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
       fs->setAttribute(FileScope::ContainsLDynamicVariable);
       fs->setAttribute(FileScope::ContainsExtract);
       break;
-    case CompactFunction:
-      fs->setAttribute(FileScope::ContainsDynamicVariable);
+    case CompactFunction: {
+      // If all the parameters in the compact() call are statically known,
+      // there is no need to create a variable table.
+      vector<ExpressionPtr> literals;
+      if (m_params->flattenLiteralStrings(literals)) {
+        m_type = StaticCompactFunction;
+        m_params->clearElements();
+        for (unsigned i = 0; i < literals.size(); i++) {
+          m_params->addElement(literals[i]);
+        }
+      } else {
+        fs->setAttribute(FileScope::ContainsDynamicVariable);
+      }
       fs->setAttribute(FileScope::ContainsCompact);
       break;
+    }
     case GetDefinedVarsFunction:
       fs->setAttribute(FileScope::ContainsDynamicVariable);
       fs->setAttribute(FileScope::ContainsGetDefinedVars);
@@ -346,6 +358,39 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
           default:
             ASSERT(false);
           }
+        }
+      }
+    }
+
+    if (!m_class && m_className.empty() && m_type == StaticCompactFunction) {
+      FunctionScopePtr fs = getFunctionScope();
+      VariableTablePtr vt = fs->getVariables();
+      if (vt->isPseudoMainTable()
+       || vt->getAttribute(VariableTable::ContainsDynamicVariable)) {
+        // When there is a variable table already, we will keep the ordinary
+        // compact() call.
+        m_type = CompactFunction;
+      } else {
+        // compact('a', 'b', 'c') becomes compact('a', $a, 'b', $b, 'c', $c),
+        // but only for variables that exist in the variable table.
+        vector<ExpressionPtr> new_params;
+        for (int i = 0; i < m_params->getCount(); i++) {
+          ExpressionPtr e = (*m_params)[i];
+          assert(e->isLiteralString());
+          string name = e->getLiteralString();
+          if (vt->getSymbol(name)) {
+            SimpleVariablePtr var(new SimpleVariable(
+                                    e->getScope(), e->getLocation(),
+                                    KindOfSimpleVariable, name));
+            var->copyContext(e);
+            var->updateSymbol(SimpleVariablePtr());
+            new_params.push_back(e);
+            new_params.push_back(var);
+          }
+        }
+        m_params->clearElements();
+        for (unsigned i = 0; i < new_params.size(); i++) {
+          m_params->addElement(new_params[i]);
         }
       }
     }
@@ -1007,6 +1052,31 @@ void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                       int state) {
+  if (!m_class && m_className.empty() && m_type == StaticCompactFunction) {
+    if (!cg.inExpression()) return true;
+    cg.wrapExpressionBegin();
+    m_ciTemp = cg.createNewLocalId(shared_from_this());
+    cg_printf("ArrayInit compact%d(%d, false);\n",
+              m_ciTemp, m_params->getCount() / 2);
+    for (int i = 0; i < m_params->getCount(); i += 2) {
+      assert((*m_params)[i]->isLiteralString());
+      string p = (*m_params)[i]->getLiteralString();
+      ExpressionPtr e = (*m_params)[i + 1];
+      if (e->is(KindOfSimpleVariable)
+       && Type::SameType(e->getCPPType(), Type::Variant)) {
+        SimpleVariablePtr sv = dynamic_pointer_cast<SimpleVariable>(e);
+        cg_printf("if (%s%s.isInitialized()) ",
+                  Option::VariablePrefix, sv->getName().c_str());
+      }
+      cg_printf("compact%d.set(", m_ciTemp);
+      cg_printString(p, ar, shared_from_this());
+      cg_printf(", ");
+      e->outputCPP(cg, ar);
+      cg_printf(");\n");
+    }
+    return true;
+  }
+
   if (m_valid && m_classScope && !m_funcScope->isStatic()) {
     ClassScopePtr cur = getOriginalScope();
     if (cur && !getFunctionScope()->isStatic() &&
@@ -1258,6 +1328,9 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, -1,
                                         true);
       cg_printf(")");
+      return;
+    case StaticCompactFunction:
+      cg_printf("Array(compact%d.create())", m_ciTemp);
       return;
     default:
       break;

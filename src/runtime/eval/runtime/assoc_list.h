@@ -41,7 +41,7 @@ public:
   Variant &prepend(CStrRef name);
   Variant &get(CStrRef name);
   Variant *getPtr(CStrRef name);
-  bool exists(CStrRef name) const;
+  bool exists(CStrRef name, bool checkInit = false) const;
   Array toArray() const;
 private:
   VarAssocPair *m_list;

@@ -45,6 +45,8 @@ using namespace HPHP;
 using namespace std;
 using namespace boost::program_options;
 
+///////////////////////////////////////////////////////////////////////////////
+
 struct ProgramOptions {
   string target;
   string format;
@@ -98,6 +100,32 @@ struct ProgramOptions {
   string ppp;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
+class AsyncFileCacheSaver : public AsyncFunc<AsyncFileCacheSaver> {
+public:
+  AsyncFileCacheSaver(Package *package, const char *name)
+      : AsyncFunc<AsyncFileCacheSaver>(this, &AsyncFileCacheSaver::saveCache),
+        m_package(package), m_name(name) {
+  }
+
+  void saveCache() {
+    Timer timer(Timer::WallTime, "saving file cache...");
+    m_package->getFileCache()->save(m_name);
+
+    struct stat sb;
+    stat(m_name, &sb);
+    Logger::Info("%dMB %s saved", (int64)sb.st_size/(1024*1024), m_name);
+  }
+
+private:
+  Package *m_package;
+  const char *m_name;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// forward declarations
+
 int prepareOptions(ProgramOptions &po, int argc, char **argv);
 void createOutputDirectory(ProgramOptions &po);
 int process(const ProgramOptions &po);
@@ -105,8 +133,9 @@ int lintTarget(const ProgramOptions &po);
 int analyzeTarget(const ProgramOptions &po, AnalysisResultPtr ar);
 int phpTarget(const ProgramOptions &po, AnalysisResultPtr ar);
 int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
-              bool allowSys = true);
-int runTargetCheck(const ProgramOptions &po, AnalysisResultPtr ar);
+              AsyncFileCacheSaver &fcThread, bool allowSys = true);
+int runTargetCheck(const ProgramOptions &po, AnalysisResultPtr ar,
+                   AsyncFileCacheSaver &fcThread);
 int buildTarget(const ProgramOptions &po);
 int runTarget(const ProgramOptions &po);
 int generateSepExtCpp(const ProgramOptions &po, AnalysisResultPtr ar);
@@ -438,29 +467,6 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class AsyncFileCacheSaver : public AsyncFunc<AsyncFileCacheSaver> {
-public:
-  AsyncFileCacheSaver(Package *package, const char *name)
-      : AsyncFunc<AsyncFileCacheSaver>(this, &AsyncFileCacheSaver::saveCache),
-        m_package(package), m_name(name) {
-  }
-
-  void saveCache() {
-    Timer timer(Timer::WallTime, "saving file cache...");
-    m_package->getFileCache()->save(m_name);
-
-    struct stat sb;
-    stat(m_name, &sb);
-    Logger::Info("%dMB %s saved", (int64)sb.st_size/(1024*1024), m_name);
-  }
-
-private:
-  Package *m_package;
-  const char *m_name;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
 int process(const ProgramOptions &po) {
   if (po.coredump) {
 #if defined(__APPLE__)
@@ -574,10 +580,10 @@ int process(const ProgramOptions &po) {
   } else if (po.target == "php") {
     ret = phpTarget(po, ar);
   } else if (po.target == "cpp") {
-    ret = cppTarget(po, ar);
+    ret = cppTarget(po, ar, fileCacheThread);
     fatalErrorOnly = true;
   } else if (po.target == "run") {
-    ret = runTargetCheck(po, ar);
+    ret = runTargetCheck(po, ar, fileCacheThread);
     fatalErrorOnly = true;
   } else if (po.target == "filecache") {
     // do nothing
@@ -730,7 +736,7 @@ int phpTarget(const ProgramOptions &po, AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 
 int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
-              bool allowSys /* = true */) {
+              AsyncFileCacheSaver &fcThread, bool allowSys /* = true */) {
   int ret = 0;
   int clusterCount = po.clusterCount;
   // format
@@ -789,6 +795,9 @@ int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
     } else {
       ar->setOutputPath(po.syncDir);
       ar->outputAllCPP(format, clusterCount, &po.outputDir);
+      if (!po.filecache.empty()) {
+        fcThread.waitForEnd();
+      }
       Util::syncdir(po.outputDir, po.syncDir);
       boost::filesystem::remove_all(po.syncDir);
     }
@@ -841,9 +850,10 @@ int buildTarget(const ProgramOptions &po) {
   return 0;
 }
 
-int runTargetCheck(const ProgramOptions &po, AnalysisResultPtr ar) {
+int runTargetCheck(const ProgramOptions &po, AnalysisResultPtr ar,
+                   AsyncFileCacheSaver &fcThread) {
   // generate code
-  if (po.format != "sep" && cppTarget(po, ar, false)) {
+  if (po.format != "sep" && cppTarget(po, ar, fcThread, false)) {
     return 1;
   }
 

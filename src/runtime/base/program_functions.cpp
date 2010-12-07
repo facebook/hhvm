@@ -45,6 +45,7 @@
 #include <runtime/ext/ext_json.h>
 #include <runtime/ext/ext_variable.h>
 #include <runtime/ext/ext_apc.h>
+#include <runtime/ext/ext_function.h>
 #include <runtime/eval/runtime/code_coverage.h>
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/eval/debugger/debugger_client.h>
@@ -239,8 +240,6 @@ enum ContextOfException {
   HandlerException,
 };
 
-extern void invoke_exit_callback(const ExitException &e);
-
 static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
                              ContextOfException where, bool &error) {
   bool ret = false;
@@ -251,7 +250,12 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
   } catch (const ExitException &e) {
     ret = true;
     // ExitException is fine
-    invoke_exit_callback(e);
+    if (!context->getExitCallback().isNull() &&
+        f_is_callable(context->getExitCallback())) {
+      Array stack = e.getBackTrace()->get();
+      Array argv = CREATE_VECTOR2(e.ExitCode, stack);
+      f_call_user_func_array(context->getExitCallback(), argv);
+    }
   } catch (const PhpFileDoesNotExistException &e) {
     if (where == WarmupDocException) {
       HPHPLOG_ERROR("warmup error: %s", e.getMessage().c_str());

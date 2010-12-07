@@ -888,18 +888,8 @@ bool f_fb_output_compression(bool new_value) {
   return false;
 }
 
-static Variant s_exit_callback;
-
 void f_fb_set_exit_callback(CVarRef function) {
-  //s_exit_callback = function;
-}
-
-void invoke_exit_callback(const ExitException &e) {
-  if (s_exit_callback.isNull()) return;
-  if (!f_is_callable(s_exit_callback)) return;
-  Array stack = e.getBackTrace()->get();
-  Array argv = CREATE_VECTOR2(e.ExitCode, stack);
-  f_call_user_func_array(s_exit_callback, argv);
+  g_context->setExitCallback(function);
 }
 
 Array f_fb_get_flush_stat() {

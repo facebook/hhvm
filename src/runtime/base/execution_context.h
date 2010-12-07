@@ -205,6 +205,9 @@ public:
   }
   void setArgSeparatorOutput(CStrRef s) { m_argSeparatorOutput = s;}
   void setThrowAllErrors(bool f) { m_throwAllErrors = f; }
+  void setExitCallback(Variant f) { m_exitCallback = f; }
+  Variant getExitCallback() { return m_exitCallback; }
+
 private:
   class OutputBuffer {
   public:
@@ -255,6 +258,8 @@ private:
   Array m_shutdownsBackup;
   std::vector<std::pair<Variant,int> > m_userErrorHandlersBackup;
   std::vector<Variant> m_userExceptionHandlersBackup;
+
+  Variant m_exitCallback;
 
   // helper functions
   void resetCurrentBuffer();

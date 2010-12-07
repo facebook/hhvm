@@ -1547,9 +1547,9 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
   return StatementPtr();
 }
 
-void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
+int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
   if (!cs) {
-    return;
+    return 0;
   }
 
   cs->clearVisited();
@@ -1561,22 +1561,34 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       case Statement::KindOfClassStatement:
       case Statement::KindOfInterfaceStatement:
         m_inlineAsExpr = false;
-        return;
+        return 0;
       default:
         break;
     }
   }
 
   int nkid = cs->getKidCount();
-
+  int kidCost = 0;
   for (int i = 0; i < nkid; i++) {
     ConstructPtr kid = cs->getNthKid(i);
     if (kid) {
-      collectAliasInfoRecur(kid, cs->kidUnused(i));
+      kidCost += collectAliasInfoRecur(kid, cs->kidUnused(i));
     }
   }
 
   if (ExpressionPtr e = dpc(Expression, cs)) {
+    if (!kidCost) {
+      if (!nkid && !e->isScalar()) {
+        if (e->is(Expression::KindOfSimpleVariable)) {
+          Symbol *sym = spc(SimpleVariable, e)->getSymbol();
+          if (!sym || !sym->isParameter()) kidCost = 1;
+        } else {
+          kidCost = 1;
+        }
+      }
+    } else if (!e->is(Expression::KindOfExpressionList)) {
+      ++kidCost;
+    }
     e->setUnused(unused);
     int context = e->getContext();
     switch (e->getKindOf()) {
@@ -1614,7 +1626,9 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       break;
     case Expression::KindOfSimpleVariable:
       {
-        if (Symbol *sym = spc(SimpleVariable, e)->getSymbol()) {
+        SimpleVariablePtr sv(spc(SimpleVariable, e));
+        if (Symbol *sym = sv->getSymbol()) {
+          if (sv->isThis()) sv->getFunctionScope()->setContainsThis();
           if (context & Expression::RefValue) {
             sym->setReferenced();
           }
@@ -1740,6 +1754,7 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       m_inlineAsExpr = false;
     }
   }
+  return kidCost;
 }
 
 int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
@@ -1776,24 +1791,32 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
     m_variables->clearAttribute(VariableTable::ContainsExtract);
   }
 
-  int i, nkid = m->getKidCount();
+  func->setContainsThis(false);
+  func->setInlineSameContext(false);
+
+  int i, nkid = m->getKidCount(), cost = 0;
   for (i = 0; i < nkid; i++) {
-    collectAliasInfoRecur(m->getNthKid(i), false);
+    ConstructPtr cp(m->getNthKid(i));
+    int c = collectAliasInfoRecur(cp, false);
+    if (cp == m->getStmts()) cost = c;
   }
 
-  if (func) {
-    if (m_inlineAsExpr) {
-      if (!Option::AutoInline ||
-          func->isVariableArgument() ||
-          m_variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
-          m_variables->getAttribute(VariableTable::ContainsExtract) ||
-          m_variables->getAttribute(VariableTable::ContainsCompact) ||
-          m_variables->getAttribute(VariableTable::ContainsGetDefinedVars)) {
-        m_inlineAsExpr = false;
-      }
-    }
-    func->setInlineAsExpr(m_inlineAsExpr);
+  if (func->containsThis() && !m->getClassScope()) {
+    func->setContainsThis(false);
   }
+
+  if (m_inlineAsExpr) {
+    if (!Option::AutoInline ||
+        cost > 10 ||
+        func->isVariableArgument() ||
+        m_variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
+        m_variables->getAttribute(VariableTable::ContainsExtract) ||
+        m_variables->getAttribute(VariableTable::ContainsCompact) ||
+        m_variables->getAttribute(VariableTable::ContainsGetDefinedVars)) {
+      m_inlineAsExpr = false;
+    }
+  }
+  func->setInlineAsExpr(m_inlineAsExpr);
 
   if (Option::LocalCopyProp || Option::EliminateDeadCode) {
     for (i = 0; i < nkid; i++) {

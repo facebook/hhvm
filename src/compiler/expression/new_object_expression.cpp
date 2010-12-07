@@ -69,7 +69,7 @@ void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
     FunctionScopePtr func;
     if (!m_name.empty()) {
       addUserClass(ar, m_name);
-      if (ClassScopePtr cls = resolveClass(getScope())) {
+      if (ClassScopePtr cls = resolveClass()) {
         m_name = m_className;
         func = cls->findConstructor(ar, true);
       }
@@ -88,7 +88,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   m_funcScope.reset();
   ConstructPtr self = shared_from_this();
   if (!m_name.empty()) {
-    ClassScopePtr cls = resolveClass(getScope());
+    ClassScopePtr cls = resolveClass();
     m_name = m_className;
 
     if (!cls) {

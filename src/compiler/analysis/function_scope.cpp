@@ -55,8 +55,9 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
       m_virtual(false), m_perfectVirtual(false), m_overriding(false),
       m_redeclaring(-1), m_volatile(false), m_pseudoMain(inPseudoMain),
       m_magicMethod(false), m_system(false), m_inlineable(false), m_sep(false),
-      m_containsThis(false), m_nrvoFix(true), m_inlineAsExpr(false),
-      m_inlineIndex(0), m_directInvoke(false),
+      m_containsThis(false), m_nrvoFix(true),
+      m_inlineAsExpr(false), m_inlineSameContext(false),
+      m_inlineIndex(0), m_directInvoke(false), m_inlining(false),
       m_optFunction(0) {
   bool canInline = true;
   if (inPseudoMain) {
@@ -141,8 +142,10 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_virtual(false), m_perfectVirtual(false), m_overriding(false),
       m_redeclaring(-1), m_volatile(false), m_pseudoMain(false),
       m_magicMethod(false), m_system(true), m_inlineable(false), m_sep(false),
-      m_containsThis(false), m_nrvoFix(true), m_inlineAsExpr(false),
-      m_inlineIndex(0), m_directInvoke(false), m_optFunction(0) {
+      m_containsThis(false), m_nrvoFix(true),
+      m_inlineAsExpr(false), m_inlineSameContext(false),
+      m_inlineIndex(0), m_directInvoke(false), m_inlining(false),
+      m_optFunction(0) {
   m_dynamic = Option::IsDynamicFunction(method, m_name);
   m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
     Option::DynamicInvokeFunctions.end();

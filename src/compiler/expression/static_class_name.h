@@ -26,16 +26,19 @@ class StaticClassName {
 public:
   StaticClassName(ExpressionPtr classExp);
 
-  bool isSelf() const { return m_isSelf; }
-  bool isParent() const { return m_isParent; }
-  bool isStatic() const { return m_isStatic; }
+  bool isSelf() const { return m_self; }
+  bool isParent() const { return m_parent; }
+  bool isStatic() const { return m_static; }
   bool isRedeclared() const { return m_redeclared; }
   bool isPresent() const { return m_present; }
+  bool isUnknown() const { return m_unknown; }
 
   void setRedeclared() { m_redeclared = true; }
 
-  ClassScopePtr resolveClass(BlockScopeRawPtr scope);
-  bool checkPresent(BlockScopeRawPtr scope);
+  void resolveStatic(const std::string &name);
+
+  ClassScopePtr resolveClass();
+  bool checkPresent();
 protected:
   ExpressionPtr m_class;
   std::string m_origClassName;
@@ -44,11 +47,13 @@ protected:
   void updateClassName();
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
 private:
-  unsigned m_isSelf : 1;
-  unsigned m_isParent : 1;
-  unsigned m_isStatic : 1;
+  virtual void dummyForDynamicCast() {}
+  unsigned m_self : 1;
+  unsigned m_parent : 1;
+  unsigned m_static : 1;
   unsigned m_redeclared : 1;
   unsigned m_present : 1;
+  unsigned m_unknown : 1;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

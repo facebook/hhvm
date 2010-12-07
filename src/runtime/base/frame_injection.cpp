@@ -386,7 +386,9 @@ CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
   for (FrameInjection *t = info->m_top; t; t = t->m_prev) {
     if (t != info->m_top) {
       if (t->m_staticClass) return *t->m_staticClass;
-      if (t->m_callingObject) return t->m_callingObject->o_getClassName();
+      if (t->m_callingObject) {
+        return t->m_callingObject->getRoot()->o_getClassName();
+      }
     }
     if (!t->m_object.isNull() && t->m_object->o_getId()) {
       return t->m_object->o_getClassName();

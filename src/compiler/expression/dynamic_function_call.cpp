@@ -65,7 +65,7 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
   reset();
   ConstructPtr self = shared_from_this();
   if (!m_className.empty()) {
-    ClassScopePtr cls = resolveClass(getScope());
+    ClassScopePtr cls = resolveClass();
     if (!cls) {
       if (isRedeclared()) {
         getScope()->getVariables()->

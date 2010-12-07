@@ -76,7 +76,7 @@ bool StaticMemberExpression::findMember(AnalysisResultPtr ar, string &name,
   if (m_class) return false;
 
   sym = NULL;
-  m_resolvedClass = resolveClass(getScope());
+  m_resolvedClass = resolveClass();
   if (!m_resolvedClass) return isRedeclared();
 
   if (m_resolvedClass->derivesFromRedeclaring()) {
@@ -188,16 +188,19 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
                                            TypePtr type, bool coerce) {
   ConstructPtr self = shared_from_this();
 
-  bool modified = m_context & (LValue | RefValue | UnsetContext);
-
+  bool modified = m_context & (LValue | RefValue | UnsetContext | RefParameter);
+  if (m_context & (RefValue|RefParameter)) {
+    coerce = true;
+    type = Type::Variant;
+  }
   if (m_class) {
     if (modified) {
       if (m_exp->is(Expression::KindOfScalarExpression)) {
         ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
         const std::string &name = var->getString();
-        ar->forceClassVariants(name, getOriginalScope(), true);
+        ar->forceClassVariants(name, getOriginalClass(), true);
       } else {
-        ar->forceClassVariants(getOriginalScope(), true);
+        ar->forceClassVariants(getOriginalClass(), true);
       }
     }
     m_class->inferAndCheck(ar, Type::Any, false);
@@ -215,6 +218,8 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
     if (getScope()->isFirstPass()) {
       Compiler::Error(Compiler::UnknownClass, self);
     }
+  } else if (m_resolvedClass) {
+    m_resolvedClass->addUse(getScope(), BlockScope::UseKindStaticRef);
   }
 
   VariableTablePtr variables = getScope()->getVariables();
@@ -260,12 +265,12 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
       if (isRedeclared()) {
         BOOST_FOREACH(ClassScopePtr clsr,
                       ar->findRedeclaredClasses(m_className)) {
-          int mask = clsr == getOriginalScope() ?
+          int mask = clsr == getOriginalClass() ?
             VariableTable::AnyStaticVars : VariableTable::NonPrivateStaticVars;
           clsr->getVariables()->forceVariants(ar, mask);
         }
       } else {
-        int mask = m_resolvedClass == getOriginalScope() ?
+        int mask = m_resolvedClass == getOriginalClass() ?
           VariableTable::AnyStaticVars : VariableTable::NonPrivateStaticVars;
         m_resolvedClass->getVariables()->forceVariants(ar, mask);
       }

@@ -310,6 +310,9 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   if (flags & ClassInfo::FunctionIsFoldable) {
     f->setIsFoldable();
   }
+  if (flags & ClassInfo::ContextSensitive) {
+    f->setContextSensitive(true);
+  }
   return f;
 }
 

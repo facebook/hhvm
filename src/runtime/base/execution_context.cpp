@@ -887,10 +887,11 @@ void MethodIndexHMap::initialize(bool useSystem) {
 }
 
 MethodIndex MethodIndexHMap::methodIndexExists(CStrRef methodName) {
-  const MethodIndexHMap *map =
-    g_methodIndexUseSys ? g_methodIndexHMapSys : g_methodIndexHMap;
   unsigned size =
     g_methodIndexUseSys ? g_methodIndexHMapSizeSys : g_methodIndexHMapSize;
+  if (!size) return MethodIndex::fail();
+  const MethodIndexHMap *map =
+    g_methodIndexUseSys ? g_methodIndexHMapSys : g_methodIndexHMap;
   unsigned hash = (unsigned)(methodName->hash() % size);
   while (map[hash].name && strcasecmp(map[hash].name, methodName.data())!=0) {
     hash = hash ? hash - 1 : size - 1;

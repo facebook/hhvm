@@ -502,6 +502,10 @@ void throw_call_non_object() {
   throw FatalErrorException("Call to a member function on a non-object");
 }
 
+Variant throw_assign_this() {
+  throw FatalErrorException("Cannot re-assign $this");
+}
+
 void throw_unexpected_argument_type(int argNum, const char *fnName,
                                     const char *expected, CVarRef val) {
   const char *otype = NULL;

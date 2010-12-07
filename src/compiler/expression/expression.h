@@ -166,7 +166,9 @@ public:
   const std::string &cppTemp() const { return m_cppTemp; }
   std::string genCPPTemp(CodeGenerator &cg, AnalysisResultPtr ar);
   void setCPPTemp(const std::string &s) { m_cppTemp = s; }
-  ClassScopePtr getOriginalScope();
+  BlockScopeRawPtr getOriginalScope();
+  ClassScopeRawPtr getOriginalClass();
+  FunctionScopeRawPtr getOriginalFunction();
   std::string originalClassName(CodeGenerator &cg, bool withComma);
 
   /**
@@ -342,7 +344,7 @@ protected:
  private:
   void outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar);
 
-  ClassScopeRawPtr m_originalScope;
+  BlockScopeRawPtr m_originalScope;
   bool m_originalScopeSet;
   unsigned m_canon_id;
   ExpressionPtr m_canonPtr;

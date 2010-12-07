@@ -87,10 +87,15 @@ public:
   bool isRefReturn() const { return m_refReturn;}
   bool isDynamicInvoke() const { return m_dynamicInvoke; }
   bool hasImpl() const;
-
+  bool isInlining() const { return m_inlining; }
+  void setInlining(bool f) { m_inlining = f; }
   void setDirectInvoke() { m_directInvoke = true; }
   bool hasDirectInvoke() const { return m_directInvoke; }
 
+  void setInlineSameContext(bool f) { m_inlineSameContext = f; }
+  bool getInlineSameContext() const { return m_inlineSameContext; }
+  void setContextSensitive(bool f) { m_contextSensitive = f; }
+  bool getContextSensitive() const { return m_contextSensitive; }
   void setInlineAsExpr(bool f) { m_inlineAsExpr = f; }
   bool getInlineAsExpr() const { return m_inlineAsExpr; }
   int nextInlineIndex() { return ++m_inlineIndex; }
@@ -165,7 +170,7 @@ public:
    * Whether this function contains a usage of $this
    */
   bool containsThis() const { return m_containsThis;}
-  void setContainsThis() { m_containsThis = true;}
+  void setContainsThis(bool f=true) { m_containsThis = f;}
 
   /**
    * How many parameters a caller should provide.
@@ -420,8 +425,11 @@ private:
   StatementPtr m_stmtCloned; // cloned method body stmt
   bool m_nrvoFix;
   bool m_inlineAsExpr;
+  bool m_inlineSameContext;
+  bool m_contextSensitive;
   int m_inlineIndex;
   bool m_directInvoke;
+  bool m_inlining;
   FunctionOptPtr m_optFunction;
   bool outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
       bool ret, bool constructor);

@@ -68,7 +68,7 @@ bool ObjectPropertyExpression::isTemporary() const {
 
 bool ObjectPropertyExpression::isNonPrivate(AnalysisResultPtr ar) {
   // To tell whether a property is declared as private in the context
-  ClassScopePtr cls = getOriginalScope();
+  ClassScopePtr cls = getOriginalClass();
   if (!cls || !cls->getVariables()->hasNonStaticPrivate()) return true;
   if (m_property->getKindOf() != Expression::KindOfScalarExpression) {
     return false;
@@ -204,7 +204,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     // any type inference could be wrong. Instead, we just force variants on
     // all class variables.
     if (m_context & (LValue | RefValue)) {
-      ar->forceClassVariants(getOriginalScope(), false);
+      ar->forceClassVariants(getOriginalClass(), false);
     }
 
     return Type::Variant; // we have to use a variant to hold dynamic value
@@ -221,33 +221,26 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     // what object-> has told us
     cls = ar->findExactClass(shared_from_this(), objectType->getName());
   } else {
-    // what ->property has told us
-    cls = ar->findClass(name, AnalysisResult::PropertyName);
-    if (cls) {
-      objectType =
-        m_object->inferAndCheck(ar, Type::CreateObjectType(cls->getName()),
-                                false);
-    }
-    if ((m_context & LValue) &&
-        objectType && !objectType->is(Type::KindOfObject) &&
-                      !objectType->is(Type::KindOfVariant) &&
-                      !objectType->is(Type::KindOfSome) &&
-                      !objectType->is(Type::KindOfAny)) {
+    if ((m_context & LValue) && objectType &&
+        !objectType->is(Type::KindOfObject) &&
+        !objectType->is(Type::KindOfVariant) &&
+        !objectType->is(Type::KindOfSome) &&
+        !objectType->is(Type::KindOfAny)) {
       m_object->inferAndCheck(ar, Type::Object, true);
     }
   }
 
   if (!cls) {
     if (m_context & (LValue | RefValue | UnsetContext)) {
-      ar->forceClassVariants(name, getOriginalScope(), false);
+      ar->forceClassVariants(name, getOriginalClass(), false);
     }
     return Type::Variant;
   }
 
   int prop = hasContext(AssignmentLHS) ? ClassScope::MayHaveUnknownPropSetter :
     hasContext(ExistContext) ? ClassScope::MayHaveUnknownPropTester :
-    hasContext(UnsetContext) ? ClassScope::MayHavePropUnsetter :
-        ClassScope::MayHaveUnknownPropGetter;
+    hasContext(UnsetContext) && hasContext(LValue) ?
+    ClassScope::MayHavePropUnsetter : ClassScope::MayHaveUnknownPropGetter;
   if (!cls->implementsAccessor(ar, prop)) clearEffect(AccessorEffect);
 
   // resolved to this class
@@ -258,7 +251,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
 
   // use $this inside a static function
   if (m_object->isThis()) {
-    FunctionScopePtr func = getFunctionScope();
+    FunctionScopePtr func = m_object->getOriginalFunction();
     if (!func || func->isStatic()) {
       if (getScope()->isFirstPass()) {
         Compiler::Error(Compiler::MissingObjectContext, self);
@@ -278,7 +271,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     }
     m_propSymValid = m_propSym->isPresent() &&
       (!m_propSym->isPrivate() ||
-       getOriginalScope() == parent) &&
+       getOriginalClass() == parent) &&
       !m_propSym->isStatic();
 
     if (m_propSymValid) {
@@ -408,11 +401,14 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
                                                bool noEvalOnError) {
   if (m_object->isThis()) {
     if (m_valid) {
-      if (!m_object->getOriginalScope()) {
+      if (!m_object->getOriginalClass()) {
         m_valid = false;
       } else {
-        FunctionScopeRawPtr fs = m_object->getFunctionScope();
+        FunctionScopeRawPtr fs = m_object->getOriginalFunction();
         if (!fs || fs->isStatic()) {
+          m_valid = false;
+        } else if (m_object->getOriginalClass() != getClassScope() &&
+                   m_object->getOriginalClass()->isRedeclaring()) {
           m_valid = false;
         }
       }

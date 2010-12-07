@@ -29,15 +29,15 @@ namespace HPHP {
 
 StaticClassName::StaticClassName(ExpressionPtr classExp)
     : m_class(classExp),
-      m_isSelf(false), m_isParent(false), m_isStatic(false),
-      m_redeclared(false), m_present(false) {
+      m_self(false), m_parent(false), m_static(false),
+      m_redeclared(false), m_present(false), m_unknown(true) {
   updateClassName();
   if (m_origClassName == "parent") {
-    m_isParent = true;
+    m_parent = true;
   } else if (m_origClassName == "self") {
-    m_isSelf = true;
+    m_self = true;
   } else if (m_origClassName == "static") {
-    m_isStatic = true;
+    m_static = true;
     m_present = true;
     m_class = classExp;
     m_className = m_origClassName = "";
@@ -46,7 +46,7 @@ StaticClassName::StaticClassName(ExpressionPtr classExp)
 
 void StaticClassName::updateClassName() {
   if (m_class && m_class->is(Expression::KindOfScalarExpression) &&
-      !m_isStatic) {
+      !m_static) {
     ScalarExpressionPtr s(dynamic_pointer_cast<ScalarExpression>(m_class));
     const string &className = s->getString();
     m_className = Util::toLower(className);
@@ -55,27 +55,40 @@ void StaticClassName::updateClassName() {
   }
 }
 
-ClassScopePtr StaticClassName::resolveClass(BlockScopeRawPtr scope) {
+void StaticClassName::resolveStatic(const string &name) {
+  assert(isStatic());
+  m_static = m_self = m_parent = false;
   m_present = false;
+  m_class.reset();
+  m_origClassName = name;
+  m_className = Util::toLower(name);
+}
+
+ClassScopePtr StaticClassName::resolveClass() {
+  m_present = false;
+  m_unknown = true;
   if (m_class) return ClassScopePtr();
-  if (m_isSelf) {
+  BlockScopeRawPtr scope = dynamic_cast<Expression*>(this)->getOriginalScope();
+  if (m_self) {
     if (ClassScopePtr self = scope->getContainingClass()) {
       m_className = self->getName();
       m_present = true;
+      m_unknown = false;
       return self;
     }
-  } else if (m_isParent) {
+  } else if (m_parent) {
     if (ClassScopePtr self = scope->getContainingClass()) {
       if (!self->getParent().empty()) {
         m_className = self->getParent();
         m_present = true;
       }
     } else {
-      m_isParent = false;
+      m_parent = false;
     }
   }
   ClassScopePtr cls = scope->getContainingProgram()->findClass(m_className);
   if (cls) {
+    m_unknown = false;
     if (cls->isRedeclaring()) {
       cls = scope->findExactClass(m_className);
       if (!cls) {
@@ -84,7 +97,7 @@ ClassScopePtr StaticClassName::resolveClass(BlockScopeRawPtr scope) {
         m_present = true;
       }
     } else if (cls->isVolatile()) {
-      m_present = checkPresent(scope);
+      m_present = checkPresent();
     } else {
       m_present = true;
     }
@@ -92,8 +105,9 @@ ClassScopePtr StaticClassName::resolveClass(BlockScopeRawPtr scope) {
   return cls;
 }
 
-bool StaticClassName::checkPresent(BlockScopeRawPtr scope) {
-  if (m_isSelf || m_isParent || m_isStatic) return true;
+bool StaticClassName::checkPresent() {
+  if (m_self || m_parent || m_static) return true;
+  BlockScopeRawPtr scope = dynamic_cast<Expression*>(this)->getOriginalScope();
   if (ClassScopePtr self = scope->getContainingClass()) {
     if (m_className == self->getName() ||
         self->derivesFrom(scope->getContainingProgram(), m_className,

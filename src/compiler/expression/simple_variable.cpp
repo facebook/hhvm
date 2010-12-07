@@ -148,9 +148,9 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     m_sym->setLvalParam();
   }
   if (m_this) {
-    ClassScopePtr cls = getOriginalScope();
-    if (cls->isRedeclaring()) {
-      ret = Type::Variant;
+    ClassScopePtr cls = getOriginalClass();
+    if (!hasContext(ObjectContext) && cls->derivedByDynamic()) {
+      ret = Type::Object;
     } else {
       ret = Type::CreateObjectType(cls->getName());
     }
@@ -222,12 +222,21 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
 void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_this) {
     ASSERT((getContext() & ObjectContext) == 0);
-    if (hasContext(LValue)) {
-      // LValue and not ObjectContext must be $this = or $this[..] =
-      // Wrap with Variant to avoid compiler error
+    if (hasContext(OprLValue) || hasContext(AssignmentLHS)) {
+      cg_printf("throw_assign_this()");
+    } else if (hasContext(DeepOprLValue) ||
+               hasContext(DeepAssignmentLHS) ||
+               hasContext(LValue)) {
+      // $this[] op= ...; or $this[] = ...
       cg_printf("Variant(GET_THIS())");
     } else {
-      cg_printf("GET_THIS()");
+      ClassScopePtr cls = getOriginalClass();
+      if (cls->derivedByDynamic()) {
+        cg_printf("GET_THIS()");
+      } else {
+        cg_printf("((%s%s&)GET_THIS())",
+                  Option::SmartPtrPrefix, cls->getId(cg).c_str());
+      }
     }
   } else if (m_superGlobal) {
     VariableTablePtr variables = getScope()->getVariables();

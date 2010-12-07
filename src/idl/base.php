@@ -130,6 +130,7 @@ define('NoInjection',                    1 << 22);
 define('HasOptFunction',                 1 << 23);
 define('AllowIntercept',                 1 << 24);
 define('NoProfile',                      1 << 25);
+define('ContextSensitive',               1 << 26);
 
 // Mask for checking the flags related to variable arguments
 define('VarArgsMask', (VariableArguments | RefVariableArguments |
@@ -160,6 +161,7 @@ function get_flag_names($arr, $name) {
   if ($flag & HasOptFunction        ) $ret .= ' | HasOptFunction'        ;
   if ($flag & AllowIntercept        ) $ret .= ' | AllowIntercept'        ;
   if ($flag & NoProfile             ) $ret .= ' | NoProfile'             ;
+  if ($flag & ContextSensitive      ) $ret .= ' | ContextSensitive'      ;
 
   if ($ret == '') {
     throw new Exception("invalid flag $flag");

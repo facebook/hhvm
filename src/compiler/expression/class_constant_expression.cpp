@@ -65,7 +65,7 @@ void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_class) {
     m_class->analyzeProgram(ar);
   } else {
-    if (ClassScopePtr cls = resolveClass(getScope())) {
+    if (ClassScopePtr cls = resolveClass()) {
       ConstructPtr decl = cls->getConstants()->
         getValueRecur(ar, m_varName, cls);
       cls->addUse(getScope(), BlockScope::UseKindConstRef);
@@ -111,7 +111,7 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
     }
   }
 
-  ClassScopePtr cls = resolveClass(getScope());
+  ClassScopePtr cls = resolveClass();
   if (!cls || (cls->isVolatile() && !isPresent())) return ExpressionPtr();
 
   ConstantTablePtr constants = cls->getConstants();
@@ -146,7 +146,7 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
     return Type::Variant;
   }
 
-  ClassScopePtr cls = resolveClass(getScope());
+  ClassScopePtr cls = resolveClass();
   if (!cls) {
     if (isRedeclared()) {
       getScope()->getVariables()->
@@ -167,6 +167,9 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
   if (decl) { // No decl means an extension class.
     cls = defClass;
     m_valid = true;
+    if (cls->isUserClass()) {
+      cls->addUse(getScope(), BlockScope::UseKindConstRef);
+    }
   }
   BlockScope *defScope;
   TypePtr t = cls->checkConst(m_varName, type, coerce, ar,

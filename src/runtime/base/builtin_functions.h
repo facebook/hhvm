@@ -397,6 +397,7 @@ Variant throw_toomany_arguments(const char *fn, int num, int level = 0);
 Variant throw_wrong_arguments(const char *fn, int count, int cmin, int cmax,
                               int level = 0);
 Variant throw_missing_typed_argument(const char *fn, const char *type, int arg);
+Variant throw_assign_this();
 
 /**
  * When fatal coding errors are transformed to this function call.

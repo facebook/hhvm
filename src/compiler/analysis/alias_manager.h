@@ -142,7 +142,7 @@ class AliasManager {
   ExpressionPtr canonicalizeRecur(ExpressionPtr e);
   StatementPtr canonicalizeRecur(StatementPtr e, int &ret);
 
-  void collectAliasInfoRecur(ConstructPtr cs, bool unused);
+  int collectAliasInfoRecur(ConstructPtr cs, bool unused);
   void pushStringScope(StatementPtr s);
   void popStringScope(StatementPtr s);
   void stringOptsRecur(StatementPtr s);

@@ -240,23 +240,33 @@ TypePtr Expression::propagateTypes(AnalysisResultPtr ar, TypePtr inType) {
 void Expression::analyzeProgram(AnalysisResultPtr ar) {
 }
 
-ClassScopePtr Expression::getOriginalScope() {
+BlockScopeRawPtr Expression::getOriginalScope() {
   if (!m_originalScopeSet) {
     m_originalScopeSet = true;
-    m_originalScope = getClassScope();
+    m_originalScope = getScope();
   }
-  return m_originalScope.lock();
+  return m_originalScope;
+}
+
+ClassScopeRawPtr Expression::getOriginalClass() {
+  BlockScopeRawPtr scope = getOriginalScope();
+  return scope ? scope->getContainingClass() : ClassScopeRawPtr();
+}
+
+FunctionScopeRawPtr Expression::getOriginalFunction() {
+  BlockScopeRawPtr scope = getOriginalScope();
+  return scope ? scope->getContainingFunction() : FunctionScopeRawPtr();
 }
 
 string Expression::originalClassName(CodeGenerator &cg, bool withComma) {
-  ClassScopePtr cls = getOriginalScope();
+  ClassScopeRawPtr cls = getOriginalClass();
   string ret = withComma ? ", " : "";
   if (cls) {
     if (cls == getClassScope()) {
       return ret + "s_class_name";
     }
-    return ret + cls->getId(cg) + "::s_class_name";
-  } else if (FunctionScopePtr funcScope = getFunctionScope()) {
+    return ret + Option::ClassPrefix + cls->getId(cg) + "::s_class_name";
+  } else if (FunctionScopePtr funcScope = getOriginalFunction()) {
     if (!funcScope->inPseudoMain()) {
       return ret + "empty_string";
     }

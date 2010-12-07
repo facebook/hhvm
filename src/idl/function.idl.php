@@ -84,7 +84,7 @@ DefineFunction(
   array(
     'name'   => "is_callable",
     'desc'   => "Verify that the contents of a variable can be called as a function. This can check that a simple variable contains the name of a valid function, or that an array contains a properly encoded object and function name.",
-    'flags'  =>  HasDocComment | HasOptFunction,
+    'flags'  =>  HasDocComment | HasOptFunction | ContextSensitive,
     'opt'    => "hphp_opt_is_callable",
     'return' => array(
       'type'   => Boolean,
@@ -115,7 +115,7 @@ DefineFunction(
   array(
     'name'   => "call_user_func_array",
     'desc'   => "Call a user defined function with the parameters in param_arr.",
-    'flags'  =>  HasDocComment | HasOptFunction | NoProfile,
+    'flags'  =>  HasDocComment | HasOptFunction | NoProfile | ContextSensitive,
     'opt'    => "hphp_opt_call_user_func",
     'return' => array(
       'type'   => Variant,
@@ -139,7 +139,7 @@ DefineFunction(
   array(
     'name'   => "call_user_func",
     'desc'   => "Call a user defined function given by the function parameter.",
-    'flags'  =>  HasDocComment | MixedVariableArguments | HasOptFunction | NoProfile,
+    'flags'  =>  HasDocComment | MixedVariableArguments | HasOptFunction | NoProfile | ContextSensitive,
     'opt'    => "hphp_opt_call_user_func",
     'return' => array(
       'type'   => Variant,
@@ -158,7 +158,7 @@ DefineFunction(
   array(
     'name'   => "call_user_func_array_async",
     'desc'   => "Same as call_user_func_array(), but returns an object immediately without waiting for the function to finish. The object can be used with end_user_func_async() to eventually retrieve function's return, if needed.",
-    'flags'  =>  HasDocComment | HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific | ContextSensitive,
     'return' => array(
       'type'   => Object,
       'desc'   => "An object end_user_func_async() uses for final waiting of function's return.",
@@ -181,7 +181,7 @@ DefineFunction(
   array(
     'name'   => "call_user_func_async",
     'desc'   => "Same as call_user_func(), but returns an object immediately without waiting for the function to finish. The object can be used with end_user_func_async() to eventually retrieve function's return, if needed.",
-    'flags'  =>  HasDocComment | HipHopSpecific | MixedVariableArguments,
+    'flags'  =>  HasDocComment | HipHopSpecific | MixedVariableArguments | ContextSensitive,
     'return' => array(
       'type'   => Object,
       'desc'   => "An object end_user_func_async() uses for final waiting of function's return.",
@@ -352,7 +352,7 @@ DefineFunction(
   array(
     'name'   => "forward_static_call_array",
     'desc'   => "Calls a user defined function or method given by the function parameter. This function must be called within a method context, it can't be used outside a class. All arguments of the forwarded method are passed as values, and as an array, similarly to call_user_func_array().",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | ContextSensitive,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the function result, or FALSE on error.",
@@ -375,7 +375,7 @@ DefineFunction(
   array(
     'name'   => "forward_static_call",
     'desc'   => "Calls a user defined function or method given by the function parameter, with the following arguments. This function must be called within a method context, it can't be used outside a class.",
-    'flags'  =>  HasDocComment | MixedVariableArguments,
+    'flags'  =>  HasDocComment | MixedVariableArguments | ContextSensitive,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the function result, or FALSE on error.",

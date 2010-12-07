@@ -42,6 +42,7 @@ public:
   void setValid() { m_valid = true; }
   void setNoPrefix() { m_noPrefix = true; }
   void setArrayParams() { m_arrayParams = true; }
+  void setNoInline() { m_noInline = true; }
 
   virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                 bool coerce);
@@ -66,7 +67,7 @@ public:
   void setSafeDefault(ExpressionPtr def) { m_safeDef = def; }
   virtual ConstructPtr getNthKid(int n) const;
   virtual void setNthKid(int n, ConstructPtr cp);
-  static SimpleFunctionCallPtr getFunctionCallForCallUserFunc(
+  static SimpleFunctionCallPtr GetFunctionCallForCallUserFunc(
     AnalysisResultPtr ar, SimpleFunctionCallPtr call, bool testOnly,
     int firstParam, bool &error);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
@@ -74,6 +75,7 @@ public:
   bool readsLocals() const;
   bool writesLocals() const;
   void updateVtFlags();
+  void setLocalThis(const std::string &name) { m_localThis = name; }
 protected:
   enum FunctionType {
     UnknownType,
@@ -97,23 +99,26 @@ protected:
 
   static std::map<std::string, int> FunctionTypeMap;
   int m_type;
-  bool m_programSpecific;
-  bool m_dynamicConstant;
-  std::string m_lambda;
-  bool m_builtinFunction;
-  bool m_noPrefix;
+  unsigned m_dynamicConstant : 1;
+  unsigned m_builtinFunction : 1;
+  unsigned m_noPrefix : 1;
+  unsigned m_invokeFewArgsDecision : 1;
+  unsigned m_dynamicInvoke : 1;
+  unsigned m_arrayParams : 1;
+  unsigned m_noInline : 1;
 
-  void outputCPPParamOrderControlled(CodeGenerator &cg, AnalysisResultPtr ar);
+  int m_safe;
+  ExpressionPtr m_safeDef;
+  std::string m_lambda;
 
   // only used for redeclared functions
   bool canInvokeFewArgs();
-  bool m_invokeFewArgsDecision;
-  bool m_dynamicInvoke;
-  int m_safe;
-  ExpressionPtr m_safeDef;
-  bool m_arrayParams;
-
+  void outputCPPParamOrderControlled(CodeGenerator &cg, AnalysisResultPtr ar);
   ExpressionPtr optimize(AnalysisResultPtr ar);
+private:
+  int checkObjCall(AnalysisResultPtr ar);
+  std::string getThisString(bool withArrow);
+  std::string m_localThis;
 };
 
 SimpleFunctionCallPtr NewSimpleFunctionCall(

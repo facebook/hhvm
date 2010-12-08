@@ -105,7 +105,7 @@ private:
   unsigned int checkIntegerKeys(int64 &max) const;
   bool outputCPPArrayCreate(CodeGenerator &cg, AnalysisResultPtr ar,
                             bool isVector, bool pre);
-  void outputCPPInternal(CodeGenerator &cg,
+  bool outputCPPInternal(CodeGenerator &cg,
                          AnalysisResultPtr ar, bool needed, bool pre);
 
   ExpressionPtrVec m_exps;

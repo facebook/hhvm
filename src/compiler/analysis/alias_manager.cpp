@@ -23,11 +23,13 @@
 #include <compiler/expression/unary_op_expression.h>
 #include <compiler/expression/simple_variable.h>
 #include <compiler/expression/scalar_expression.h>
+#include <compiler/expression/simple_function_call.h>
 #include <compiler/expression/array_element_expression.h>
 #include <compiler/expression/object_property_expression.h>
 #include <compiler/expression/parameter_expression.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/expression.h>
+#include <compiler/expression/include_expression.h>
 #include <compiler/statement/statement.h>
 #include <compiler/statement/statement_list.h>
 #include <compiler/statement/catch_statement.h>
@@ -53,8 +55,9 @@ using std::string;
 
 AliasManager::AliasManager(int opt) :
     m_nextID(1), m_changes(0), m_replaced(0),
-    m_wildRefs(0), m_nrvoFix(0), m_inlineAsExpr(true),
-    m_noAdd(false), m_preOpt(opt<0), m_postOpt(opt>0) {
+    m_wildRefs(false), m_nrvoFix(0), m_inlineAsExpr(true),
+    m_noAdd(false), m_preOpt(opt<0), m_postOpt(opt>0),
+    m_cleared(false), m_inPseudoMain(false) {
 }
 
 bool AliasManager::parseOptimizations(const std::string &optimizations,
@@ -213,6 +216,7 @@ void AliasManager::clearHelper(BucketMap::value_type &it) {
 void AliasManager::clear() {
   m_bucketMap.clear();
   m_stack.resize(0);
+  m_cleared = true;
 
   //  std::for_each(m_bucketMap.begin(), m_bucketMap.end(),
   //              clearHelper);
@@ -366,9 +370,23 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
           }
           return DisjointAccess;
 
+        case Expression::KindOfSimpleFunctionCall: {
+          SimpleFunctionCallPtr call(spc(SimpleFunctionCall, e2));
+          if (call->readsLocals() || call->writesLocals()) {
+            return InterfAccess;
+          }
+          goto def;
+        }
+        case Expression::KindOfIncludeExpression: {
+          IncludeExpressionPtr inc(spc(IncludeExpression, e2));
+          if (!inc->getPrivateScope()) {
+            return InterfAccess;
+          }
+          goto def;
+        }
         case Expression::KindOfStaticMemberExpression:
         case Expression::KindOfObjectPropertyExpression:
-        default:
+        default: def:
           if (m_wildRefs || sv1->couldBeAliased()) {
             return InterfAccess;
           }
@@ -377,7 +395,11 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
         // mustnt get here (we would loop forever).
         ASSERT(false);
       }
-
+    case Expression::KindOfSimpleFunctionCall:
+    case Expression::KindOfIncludeExpression:
+      if (k1 == Expression::KindOfSimpleVariable) {
+        break;
+      }
     default:
       return InterfAccess;
     }
@@ -535,8 +557,15 @@ void AliasManager::killLocals() {
         if (e->hasContext(Expression::UnsetContext) &&
             e->hasContext(Expression::LValue)) {
           if (!(effects & emask) && okToKill(e, true)) {
-            e->setReplacement(e->makeConstant(m_arp, "null"));
-            m_replaced++;
+            bool ok = (m_postOpt || !e->is(Expression::KindOfSimpleVariable));
+            if (!ok) {
+              Symbol *sym = spc(SimpleVariable,e)->getSymbol();
+              ok = !sym || (!sym->isNeeded() && !sym->isUsed());
+            }
+            if (ok) {
+              e->setReplacement(e->makeConstant(m_arp, "null"));
+              m_replaced++;
+            }
           } else {
             effects |= Expression::UnknownEffect;
           }
@@ -570,6 +599,7 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
     case Expression::KindOfDynamicFunctionCall:
     case Expression::KindOfSimpleFunctionCall:
     case Expression::KindOfNewObjectExpression:
+    case Expression::KindOfIncludeExpression:
       isLoad = false;
       return testAccesses(rv, e);
 
@@ -605,7 +635,7 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
       return testAccesses(spc(AssignmentExpression,e)->getVariable(), rv);
 
     default:
-      break;
+      assert(false);
   }
 
   return DisjointAccess;
@@ -615,8 +645,13 @@ int AliasManager::findInterf(ExpressionPtr rv, bool isLoad,
                              ExpressionPtr &rep) {
   BucketMapEntry &lvs = m_bucketMap[0];
 
-  rep = ExpressionPtr();
+  rep.reset();
   ExpressionPtrList::reverse_iterator it = lvs.rbegin(), end = lvs.rend();
+
+  bool unset_simple = !isLoad && !m_inPseudoMain &&
+    rv->hasContext(Expression::UnsetContext) &&
+    rv->hasContext(Expression::LValue) &&
+    rv->is(Expression::KindOfSimpleVariable);
 
   int depth = 0, min_depth = 0, max_depth = 0;
   for (; it != end; ++it) {
@@ -640,6 +675,20 @@ int AliasManager::findInterf(ExpressionPtr rv, bool isLoad,
           max_depth = depth;
         }
       } else {
+        if (unset_simple) {
+          if (a == InterfAccess) {
+            if (!rep) {
+              rep = e;
+            }
+            continue;
+          } else if (a == SameAccess && rep) {
+            if (!e->is(Expression::KindOfSimpleVariable) ||
+                !e->hasContext(Expression::UnsetContext) ||
+                !e->hasContext(Expression::LValue)) {
+              return InterfAccess;
+            }
+          }
+        }
         if (eIsLoad) {
           if (a == SameAccess) {
             if (isLoad) {
@@ -709,10 +758,12 @@ static bool sameExpr(ExpressionPtr e1, ExpressionPtr e2) {
 ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
   if (e->isVisited()) return ExpressionPtr();
   ExpressionPtr ret;
-  if (m_preOpt) ret = e->preOptimize(m_arp);
-  if (m_postOpt) ret = e->postOptimize(m_arp);
-  if (ret) {
-    return canonicalizeRecurNonNull(ret);
+  if (!m_noAdd) {
+    if (m_preOpt) ret = e->preOptimize(m_arp);
+    if (m_postOpt) ret = e->postOptimize(m_arp);
+    if (ret) {
+      return canonicalizeRecurNonNull(ret);
+    }
   }
 
   e->setVisited();
@@ -724,6 +775,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
   case Expression::KindOfDynamicFunctionCall:
   case Expression::KindOfSimpleFunctionCall:
   case Expression::KindOfNewObjectExpression:
+  case Expression::KindOfIncludeExpression:
     add(m_bucketMap[0], e);
     break;
 
@@ -897,7 +949,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
                               canonicalizeRecurNonNull(
                                 value->makeConstant(m_arp, "null")));
                             a->setNthKid(1, value);
-                            m_changes++;
+                            m_changes += !m_noAdd;
                           } else {
                             ExpressionListPtr el(
                               new ExpressionList(
@@ -947,8 +999,29 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
                                Expression::UnsetContext))) {
         ExpressionPtr rep;
         int interf = findInterf(e, true, rep);
+        if (!m_inPseudoMain && interf == DisjointAccess && !m_cleared &&
+            e->is(Expression::KindOfSimpleVariable) &&
+            !e->isThis()) {
+          Symbol *s = spc(SimpleVariable, e)->getSymbol();
+          if (s && !s->isParameter()) {
+            rep = e->makeConstant(m_arp, "null");
+            if (m_variables->getAttribute(VariableTable::ContainsCompact)) {
+              rep = ExpressionPtr(
+                new UnaryOpExpression(e->getScope(), e->getLocation(),
+                                      Expression::KindOfUnaryOpExpression,
+                                      rep, T_UNSET_CAST, true));
+            }
+            return e->replaceValue(canonicalizeRecurNonNull(rep));
+          }
+        }
         if (interf == SameAccess) {
           if (rep->getKindOf() == e->getKindOf()) {
+            if (rep->hasContext(Expression::UnsetContext) &&
+                rep->hasContext(Expression::LValue) &&
+                !rep->is(Expression::KindOfConstantExpression)) {
+              return e->replaceValue(
+                canonicalizeRecurNonNull(e->makeConstant(m_arp, "null")));
+            }
             add(m_bucketMap[0], e);
             e->setCanonID(rep->getCanonID());
             e->setCanonPtr(rep);
@@ -1095,7 +1168,7 @@ void AliasManager::canonicalizeKid(ConstructPtr c, ExpressionPtr kid, int i) {
     kid = canonicalizeRecur(kid);
     if (kid) {
       c->setNthKid(i, kid);
-      m_changes++;
+      m_changes += !m_noAdd;
     }
   }
 }
@@ -1111,7 +1184,7 @@ int AliasManager::canonicalizeKid(ConstructPtr c, ConstructPtr kid, int i) {
       s = canonicalizeRecur(s, ret);
       if (s) {
         c->setNthKid(i, s);
-        m_changes++;
+        m_changes += !m_noAdd;
       }
     }
   }
@@ -1541,6 +1614,7 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
   FunctionScopePtr func = m->getFunctionScope();
   m_variables = func->getVariables();
   m_variables->clearUsed();
+  m_inPseudoMain = func->inPseudoMain();
 
   if (ExpressionListPtr pPtr = m->getParams()) {
     ExpressionList &params = *pPtr;
@@ -1575,7 +1649,10 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
 
   if (Option::LocalCopyProp || Option::EliminateDeadCode) {
     for (i = 0; i < nkid; i++) {
-      if (i) clear();
+      if (i) {
+        clear();
+        m_cleared = false;
+      }
       canonicalizeKid(m, m->getNthKid(i), i);
     }
 

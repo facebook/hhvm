@@ -70,7 +70,9 @@ public:
     AnalysisResultPtr ar, SimpleFunctionCallPtr call, bool testOnly,
     int firstParam, bool &error);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
-
+  void setupScopes(AnalysisResultPtr ar);
+  bool readsLocals() const;
+  bool writesLocals() const;
 protected:
   enum FunctionType {
     UnknownType,
@@ -101,7 +103,6 @@ protected:
   bool m_noPrefix;
 
   void outputCPPParamOrderControlled(CodeGenerator &cg, AnalysisResultPtr ar);
-  void setupScopes(AnalysisResultPtr ar);
 
   // only used for redeclared functions
   bool canInvokeFewArgs();

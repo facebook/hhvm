@@ -19,6 +19,8 @@
 #include <compiler/statement/statement_list.h>
 #include <compiler/expression/constant_expression.h>
 #include <compiler/statement/block_statement.h>
+#include <compiler/analysis/function_scope.h>
+#include <runtime/base/complex_types.h>
 
 using namespace HPHP;
 using namespace std;
@@ -94,46 +96,47 @@ StatementPtr IfStatement::preOptimize(AnalysisResultPtr ar) {
   bool changed = false;
   int i;
   int j;
+  Variant value;
+  bool hoist = false;
   for (i = 0; i < m_stmts->getCount(); i++) {
     IfBranchStatementPtr branch =
       dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[i]);
     ExpressionPtr condition = branch->getCondition();
     if (!condition) {
       StatementPtr stmt = branch->getStmt();
-      if (stmt && stmt->is(KindOfIfStatement)) {
-        StatementListPtr sub_stmts =
-          dynamic_pointer_cast<IfStatement>(stmt)->m_stmts;
-        m_stmts->removeElement(i);
-        changed = true;
-        for (j = 0; j < sub_stmts->getCount(); j++) {
-          m_stmts->insertElement((*sub_stmts)[j], i++);
+      if (stmt) {
+        if (!i &&
+            ((getFunctionScope() && !getFunctionScope()->inPseudoMain()) ||
+             !stmt->hasDecl())) {
+          hoist = true;
+          break;
+        }
+        if (stmt->is(KindOfIfStatement)) {
+          StatementListPtr sub_stmts =
+            dynamic_pointer_cast<IfStatement>(stmt)->m_stmts;
+          m_stmts->removeElement(i);
+          changed = true;
+          for (j = 0; j < sub_stmts->getCount(); j++) {
+            m_stmts->insertElement((*sub_stmts)[j], i++);
+          }
         }
       }
       break;
-    } else if (condition->is(Expression::KindOfConstantExpression)) {
-      ConstantExpressionPtr exp =
-        dynamic_pointer_cast<ConstantExpression>(condition);
-      if (exp->isBoolean()) {
-        if (exp->getBooleanValue()) {
-          // if (true) branch
-          for (j = i + 1; j < m_stmts->getCount(); j++) {
-            if ((*m_stmts)[j]->hasDecl()) break;
-          }
-          // no declarations after if (true)
-          if (j == m_stmts->getCount()) break;
-        } else {
-          // if (false) branch
-          if (!branch->hasDecl()) {
-            m_stmts->removeElement(i);
-            changed = true;
-            i--;
-          }
-        }
+    } else if (condition->isScalar() &&
+               condition->getScalarValue(value)) {
+      if (value.toBoolean()) {
+        hoist = !i &&
+          ((getFunctionScope() && !getFunctionScope()->inPseudoMain()) ||
+           !branch->hasDecl());
+        break;
+      } else {
+        m_stmts->removeElement(i--);
+        changed = true;
       }
     }
   }
 
-  if (i == m_stmts->getCount()) return StatementPtr();
+  if (!changed && i && i == m_stmts->getCount()) return StatementPtr();
 
   // either else branch or if (true) branch without further declarations
 
@@ -144,8 +147,10 @@ StatementPtr IfStatement::preOptimize(AnalysisResultPtr ar) {
   }
 
   // if there is only one branch left, return stmt.
-  if (m_stmts->getCount() == 1) {
-    return dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[0])->getStmt();
+  if (hoist) {
+    IfBranchStatementPtr branch =
+      dynamic_pointer_cast<IfBranchStatement>((*m_stmts)[0]);
+    return branch->getStmt() ? branch->getStmt() : NULL_STATEMENT();
   } else if (m_stmts->getCount() == 0) {
     return NULL_STATEMENT();
   } else {

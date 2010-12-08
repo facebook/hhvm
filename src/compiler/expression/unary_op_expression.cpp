@@ -187,33 +187,45 @@ void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
-  switch(m_op) {
-  case '!':
-    result = (!toBoolean(value)); break;
-  case '+':
-    result = value.unary_plus(); break;
-  case '-':
-    result = value.negate(); break;
-  case '~':
-    result = ~value; break;
-  case '(':
-  case '@':
-    result = value; break;
-  case T_INT_CAST:
-    result = value.toInt64(); break;
-  case T_DOUBLE_CAST:
-    result = toDouble(value); break;
-  case T_STRING_CAST:
-    result = toString(value); break;
-  case T_BOOL_CAST:
-    result = toBoolean(value); break;
-  case T_INC:
-  case T_DEC:
-    ASSERT(false);
-  default:
-    return false;
+  bool ret = true;
+  try {
+    g_context->setThrowAllErrors(true);
+    switch(m_op) {
+      case '!':
+        result = (!toBoolean(value)); break;
+      case '+':
+        result = value.unary_plus(); break;
+      case '-':
+        result = value.negate(); break;
+      case '~':
+        result = ~value; break;
+      case '(':
+      case '@':
+        result = value; break;
+      case T_INT_CAST:
+        result = value.toInt64(); break;
+      case T_DOUBLE_CAST:
+        result = toDouble(value); break;
+      case T_STRING_CAST:
+        result = toString(value); break;
+      case T_BOOL_CAST:
+        result = toBoolean(value); break;
+      case T_EMPTY:
+        result = empty(value); break;
+      case T_ISSET:
+        result = isset(value); break;
+      case T_INC:
+      case T_DEC:
+        ASSERT(false);
+      default:
+        ret = false;
+        break;
+    }
+  } catch (...) {
+    ret = false;
   }
-  return true;
+  g_context->setThrowAllErrors(false);
+  return ret;
 }
 
 ConstructPtr UnaryOpExpression::getNthKid(int n) const {
@@ -271,7 +283,23 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
     }
   }
 
-  if (m_op != T_ARRAY &&
+  if (m_op == T_ISSET && m_exp->is(KindOfExpressionList) &&
+      static_pointer_cast<ExpressionList>(m_exp)->getListKind() ==
+      ExpressionList::ListKindParam) {
+    ExpressionListPtr el(static_pointer_cast<ExpressionList>(m_exp));
+    result = true;
+    int i = 0, n = el->getCount();
+    for (; i < n; i++) {
+      ExpressionPtr e((*el)[i]);
+      if (!e || !e->isScalar() || !e->getScalarValue(value)) break;
+      if (!isset(value)) {
+        result = false;
+      }
+    }
+    if (i == n) {
+      return replaceValue(makeScalarExpression(ar, result));
+    }
+  } else if (m_op != T_ARRAY &&
       m_exp &&
       m_exp->isScalar() &&
       m_exp->getScalarValue(value) &&
@@ -290,7 +318,11 @@ ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultPtr ar) {
   }
 
   if (m_op == T_UNSET_CAST && !hasEffect()) {
-    return CONSTANT("null");
+    if (!getScope()->getVariables()->
+        getAttribute(VariableTable::ContainsCompact) ||
+        !m_exp->isScalar()) {
+      return CONSTANT("null");
+    }
   } else if (m_op == T_UNSET && m_exp->is(KindOfExpressionList) &&
              !static_pointer_cast<ExpressionList>(m_exp)->getCount()) {
     recomputeEffects();
@@ -690,6 +722,10 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     case T_OBJECT_CAST:   cg_printf("(");          break;
     case T_BOOL_CAST:     cg_printf("(");          break;
     case T_UNSET_CAST:
+      if (m_exp->isScalar()) {
+        cg_printf("(null)");
+        return;
+      }
       if (m_exp->hasCPPTemp()) {
         cg_printf("(id(");
       } else {

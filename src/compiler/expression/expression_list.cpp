@@ -446,8 +446,17 @@ void ExpressionList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void ExpressionList::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                     int state) {
-  if (m_kind == ListKindParam || m_arrayElements) {
+  if (hasCPPTemp() || m_kind == ListKindParam || m_arrayElements) {
     return;
+  }
+  int n = m_exps.size();
+  int i = m_kind == ListKindLeft ? 0 : n - 1;
+  if (m_exps[i]->hasCPPTemp() &&
+      Type::SameType(getType(), m_exps[i]->getType())) {
+    setUnused(true);
+    outputCPP(cg, ar);
+    cg_printf(";\n");
+    m_cppTemp = m_exps[i]->cppTemp();
   }
   return Expression::preOutputStash(cg, ar, state);
 }
@@ -509,6 +518,8 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           cg_printf(";\n");
         }
         e->setCPPTemp("/**/");
+      } else if (e->hasCPPTemp() && Type::SameType(e->getType(), getType())) {
+        setCPPTemp(e->cppTemp());
       } else if (!i && n > 1) {
         e->Expression::preOutputStash(cg, ar, state | FixOrder);
         if (!(state & FixOrder)) {
@@ -665,10 +676,11 @@ bool ExpressionList::outputCPPArrayCreate(CodeGenerator &cg,
   return true;
 }
 
-void ExpressionList::outputCPPInternal(CodeGenerator &cg,
+bool ExpressionList::outputCPPInternal(CodeGenerator &cg,
                                        AnalysisResultPtr ar,
                                        bool needed, bool pre) {
   bool needsComma = false;
+  bool anyOutput = false;
   if (m_arrayElements) {
     bool isVector = true;
     for (unsigned int i = 0; i < m_exps.size(); i++) {
@@ -679,7 +691,7 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
         break;
       }
     }
-    if (outputCPPArrayCreate(cg, ar, isVector, pre)) return;
+    if (outputCPPArrayCreate(cg, ar, isVector, pre)) return true;
     cg_printf("ArrayInit");
     if (pre) {
       cg_printf(" %s", m_cppTemp.c_str());
@@ -687,8 +699,10 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
     cg_printf("(%d, %s)", m_exps.size(), isVector ? "true" : "false");
     if (pre) cg_printf(";\n");
     needsComma = true;
+    anyOutput = true;
   }
 
+  bool trailingComma = false;
   unsigned i = 0, s = m_exps.size();
   unsigned ix = m_kind == ListKindLeft ? 0 : s - 1;
   for ( ; i < s; i++) {
@@ -697,7 +711,10 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
         exp->preOutputCPP(cg, ar, 0);
         cg_printf("%s", m_cppTemp.c_str());
       }
-      if (needsComma) cg_printf(m_arrayElements ? "." : ", ");
+      if (needsComma) {
+        cg_printf(m_arrayElements ? "." : ", ");
+        trailingComma = true;
+      }
       if (m_arrayElements) {
         ArrayPairExpressionPtr ap =
           dynamic_pointer_cast<ArrayPairExpression>(exp);
@@ -720,14 +737,20 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
         exp->outputCPP(cg, ar);
         needsComma = true;
       }
+      if (needsComma) {
+        trailingComma = false;
+        anyOutput = true;
+      }
     }
   }
-  if (i && !needsComma) {
+  if (trailingComma) {
     cg_printf("id(0)");
   }
   if (m_arrayElements && !pre) {
     cg_printf(".create()");
+    anyOutput = true;
   }
+  return anyOutput;
 }
 
 void ExpressionList::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
@@ -747,12 +770,12 @@ bool ExpressionList::outputCPPUnneeded(CodeGenerator &cg,
     wrapped = preOutputCPP(cg, ar, 0);
   }
 
-  outputCPPInternal(cg, ar, false, false);
+  bool ret = outputCPPInternal(cg, ar, false, false);
 
   if (!inExpression) {
     if (wrapped) cg_printf(";\n");
     cg.wrapExpressionEnd();
     cg.setInExpression(inExpression);
   }
-  return true;
+  return ret || wrapped;
 }

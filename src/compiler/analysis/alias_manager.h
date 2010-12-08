@@ -162,6 +162,8 @@ class AliasManager {
   bool                  m_noAdd;
   bool                  m_preOpt;
   bool                  m_postOpt;
+  bool                  m_cleared;
+  bool                  m_inPseudoMain;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

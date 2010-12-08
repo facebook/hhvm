@@ -91,7 +91,7 @@ const char *Transport::getServerObject() {
     strip = 8;
   }
   if (strip == 0) return url;
-  char *p = strchr(url + strip, '/');
+  const char *p = strchr(url + strip, '/');
   if (p) return p;
 
   return "";

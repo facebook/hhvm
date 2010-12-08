@@ -296,6 +296,11 @@ ifdef WWW_INTERN
 OPT = -Os
 else
 OPT = -O3
+
+# Disable global common subexpression elimination, which made binary code
+# larger, but not faster.
+OPT += -fno-gcse
+
 endif
 endif
 

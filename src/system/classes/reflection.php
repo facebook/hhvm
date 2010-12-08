@@ -1564,7 +1564,14 @@ implements Reflector {
   public $name;
   public $class;
 
-  public function __construct($cls, $name) {
+  public function __construct($cls, $name = '') {
+    if (!$name && is_string($cls)) {
+      $arr = explode('::', $cls);
+      if (count($arr) == 2) {
+        $cls = $arr[0];
+        $name = $arr[1];
+      }
+    }
     if ($cls && $name) {
       if (!is_object($cls)) $cls = new ReflectionClass($cls);
       $method = $cls->getMethod($name);

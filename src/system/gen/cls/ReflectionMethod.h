@@ -63,8 +63,8 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   public:
   DECLARE_INVOKES_FROM_EVAL
   void init();
-  public: void t___construct(Variant v_cls, Variant v_name);
-  public: c_ReflectionMethod *create(Variant v_cls, Variant v_name);
+  public: void t___construct(Variant v_cls, Variant v_name = NAMSTR(s_sys_ss00000000, ""));
+  public: c_ReflectionMethod *create(Variant v_cls, Variant v_name = NAMSTR(s_sys_ss00000000, ""));
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);

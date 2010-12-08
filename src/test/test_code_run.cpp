@@ -7150,6 +7150,11 @@ bool TestCodeRun::TestCompilation() {
 }
 
 bool TestCodeRun::TestReflection() {
+  MVCR("<?php\n"
+       "class A { public function foo() {}}\n"
+       "$x = new ReflectionMethod('A::foo');\n"
+       "var_dump($x->name, $x->class);\n");
+
   MVCR("<?php class A { public static function test() { print 'ok';}}"
       "var_dump(is_callable('A::test'));"
       "var_dump(function_exists('A::test'));");

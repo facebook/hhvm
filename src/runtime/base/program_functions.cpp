@@ -669,6 +669,10 @@ static int execute_program_impl(int argc, char **argv) {
 
   po.isTempFile = vm.count("temp-file");
 
+  if (po.mode == "daemon") {
+    Process::Daemonize();
+  }
+
   Hdf config;
   if (!po.config.empty()) {
     config.open(po.config);
@@ -819,11 +823,7 @@ static int execute_program_impl(int argc, char **argv) {
     return ret;
   }
 
-  if (po.mode == "daemon") {
-    Process::Daemonize();
-    return start_server(po.user);
-  }
-  if (po.mode == "server") {
+  if (po.mode == "daemon" || po.mode == "server") {
     return start_server(po.user);
   }
 

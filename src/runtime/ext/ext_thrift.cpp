@@ -17,6 +17,7 @@
 
 #include <runtime/ext/ext_thrift.h>
 #include <runtime/ext/ext_class.h>
+#include <util/logger.h>
 
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -204,7 +205,19 @@ public:
   }
 
   ~PHPInputTransport() {
-    put_back();
+    try {
+      put_back();
+    } catch (Exception &e) {
+      Logger::Error("%s", e.getMessage().c_str());
+    } catch (Object &e) {
+      try {
+        Logger::Error("%s", e.toString().c_str());
+      } catch (...) {
+        Logger::Error("(e.toString() failed)");
+      }
+    } catch (...) {
+      Logger::Error("(unknown exception)");
+    }
   }
 
   void put_back() {

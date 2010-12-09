@@ -91,7 +91,7 @@ public:
   static String RegExEncode(CStrRef input);
   static String HtmlEncode(CStrRef input, QuoteStyle quoteStyle,
                            const char *charset, bool nbsp);
-  static String HtmlDecode(CStrRef input, const char *charset, bool nbsp);
+  static String HtmlDecode(CStrRef input, const char *charset, bool all);
   static String QuotedPrintableEncode(CStrRef input);
   static String QuotedPrintableDecode(CStrRef input);
   static String HexEncode(CStrRef input);

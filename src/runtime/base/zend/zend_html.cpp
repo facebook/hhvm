@@ -463,6 +463,12 @@ static void init_entity_table() {
     EntityMap[charset]["gt"] = ">";
     EntityMap[charset]["amp"] = "&";
   }
+
+  // the first element is an empty table
+  EntityMap[cs_terminator]["quot"] = "\"";
+  EntityMap[cs_terminator]["lt"] = "<";
+  EntityMap[cs_terminator]["gt"] = ">";
+  EntityMap[cs_terminator]["amp"] = "&";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -545,9 +551,10 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
 }
 
 inline static bool decode_entity(char *entity, int *len,
-                                 enum entity_charset charset) {
+                                 enum entity_charset charset, bool all) {
   // entity is 16 bytes, allocated statically below
-
+  // default in PHP
+  int quote_style = ENT_COMPAT;
   ASSERT(entity && *entity);
   if (entity[0] == '#') {
     int code;
@@ -576,7 +583,7 @@ inline static bool decode_entity(char *entity, int *len,
         if ((code >= 0x80 && code < 0xa0) || code > 0xff) {
           return false;
         } else {
-          if (code == 39/* || !quote_style*/) {
+          if (code == 39 || !quote_style) {
             return false;
           }
           entity[0] = code;
@@ -620,8 +627,14 @@ inline static bool decode_entity(char *entity, int *len,
     *len = l;
     return true;
   } else {
-    HtmlEntityMap::const_iterator iter = EntityMap[charset].find(entity);
-    if (iter != EntityMap[charset].end()) {
+    HtmlEntityMap *entityMap;
+    if (all) {
+      entityMap = &EntityMap[charset];
+    } else {
+      entityMap = &EntityMap[cs_terminator];
+    }
+    HtmlEntityMap::const_iterator iter = entityMap->find(entity);
+    if (iter != entityMap->end()) {
       memcpy(entity, iter->second.c_str(), iter->second.length() + 1);
       *len = iter->second.length();
       return true;
@@ -632,7 +645,7 @@ inline static bool decode_entity(char *entity, int *len,
 }
 
 char *string_html_decode(const char *input, int &len,
-                         const char *charset_hint, bool nbsp) {
+                         const char *charset_hint, bool all) {
   ASSERT(input);
   if (!*input) {
     return NULL;
@@ -668,22 +681,9 @@ char *string_html_decode(const char *input, int &len,
           char buf[16];
           memcpy(buf, p, l);
           buf[l] = '\0';
-          if (strcmp(buf, "nbsp") == 0) {
-            if (nbsp) {
-              if (charset == cs_utf_8) {
-                l = 2;
-                *q = '\xc2'; *(q+1) = '\xa0';
-              } else {
-                l = 1;
-                *q = '\xa0';
-              }
-              found = true;
-            }
-          } else if (decode_entity(buf, &l, charset)) {
+          if (decode_entity(buf, &l, charset, all)) {
             memcpy(q, buf, l);
             found = true;
-          }
-          if (found) {
             p = t;
             q += l;
           }

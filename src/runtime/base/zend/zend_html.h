@@ -49,7 +49,7 @@ namespace HPHP {
 char *string_html_encode(const char *input, int &len, bool encode_double_quote,
                          bool encode_single_quote, bool utf8, bool nbsp);
 char *string_html_decode(const char *input, int &len, const char *charset_hint,
-                         bool nbsp);
+                         bool all);
 Array string_get_html_translation_table(int which, int quote_style);
 bool html_supported_charset(const char *charset);
 

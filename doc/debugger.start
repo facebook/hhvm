@@ -13,15 +13,25 @@ letters. Therefore, a single letter is sufficient to issue the command.
 
 Use TAB to auto-complete.
 
-(3) help
+(3) input PHP code
+
+For single line of PHP code, use "=" to print an expression's value, OR,
+use "@" to execute an expression or statement without printing return
+values, OR, start an assignment with "$" variable name.
+
+For multi-line PHP code, type "<" then TAB. Now you can type or paste
+multiple lines of code. Hit return to start a new line, then TAB. That
+will auto-complete "?>" to finish the block. Hit return to execute.
+
+(4) help
 
 Use "help" to read more about command details.
 
-(4) info and list
+(5) info and list
 
 Use "info" and "list" commands to read more about source code.
 
-(5) readline
+(6) readline
 
 Debugger is written with readline library, which has rich feature set,
 including switching between emacs and vi editing mode. Please read its

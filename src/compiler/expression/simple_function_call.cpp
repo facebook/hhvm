@@ -416,6 +416,28 @@ bool SimpleFunctionCall::writesLocals() const {
   return m_type == ExtractFunction;
 }
 
+void SimpleFunctionCall::updateVtFlags() {
+  if (m_type != UnknownType) {
+    VariableTablePtr vt = getScope()->getVariables();
+    switch (m_type) {
+      case ExtractFunction:
+        vt->setAttribute(VariableTable::ContainsLDynamicVariable);
+        vt->setAttribute(VariableTable::ContainsExtract);
+        break;
+      case CompactFunction:
+        vt->setAttribute(VariableTable::ContainsDynamicVariable);
+      case StaticCompactFunction:
+        vt->setAttribute(VariableTable::ContainsCompact);
+        break;
+      case GetDefinedVarsFunction:
+        vt->setAttribute(VariableTable::ContainsDynamicVariable);
+        vt->setAttribute(VariableTable::ContainsGetDefinedVars);
+        vt->setAttribute(VariableTable::ContainsCompact);
+        break;
+    }
+  }
+}
+
 bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultPtr ar) {
   if (m_class || !m_className.empty()) return false;
   if (m_type == DefineFunction && m_params &&

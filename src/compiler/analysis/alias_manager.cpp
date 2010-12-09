@@ -1502,8 +1502,21 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       }
       break;
     case Expression::KindOfDynamicVariable:
-      if (context & Expression::RefValue) {
-        m_wildRefs = true;
+      m_variables->setAttribute(VariableTable::ContainsDynamicVariable);
+      if (context & (Expression::RefValue|
+                     Expression::LValue)) {
+        m_variables->setAttribute(VariableTable::ContainsLDynamicVariable);
+        if (context & Expression::RefValue) {
+          m_wildRefs = true;
+        }
+      }
+      break;
+    case Expression::KindOfIncludeExpression:
+      {
+        IncludeExpressionPtr inc(spc(IncludeExpression, e));
+        if (!inc->getPrivateScope()) {
+          m_variables->setAttribute(VariableTable::ContainsLDynamicVariable);
+        }
       }
       break;
     case Expression::KindOfArrayElementExpression:
@@ -1535,6 +1548,9 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
           }
         }
       }
+      break;
+    case Expression::KindOfSimpleFunctionCall:
+      spc(SimpleFunctionCall, e)->updateVtFlags();
       break;
     default:
       break;
@@ -1626,6 +1642,13 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
         }
       }
     }
+  }
+
+  if (!m_inPseudoMain) {
+    m_variables->clearAttribute(VariableTable::ContainsLDynamicVariable);
+    m_variables->clearAttribute(VariableTable::ContainsDynamicVariable);
+    m_variables->clearAttribute(VariableTable::ContainsCompact);
+    m_variables->clearAttribute(VariableTable::ContainsExtract);
   }
 
   int i, nkid = m->getKidCount();

@@ -73,6 +73,7 @@ public:
   void setupScopes(AnalysisResultPtr ar);
   bool readsLocals() const;
   bool writesLocals() const;
+  void updateVtFlags();
 protected:
   enum FunctionType {
     UnknownType,

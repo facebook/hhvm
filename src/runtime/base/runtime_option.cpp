@@ -386,7 +386,7 @@ static bool matchHdfPattern(const std::string &value, Hdf hdfPattern) {
   return true;
 }
 
-void RuntimeOption::Load(Hdf &config) {
+void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
   PidFile = config["PidFile"].getString("www.pid");
 
   // Machine metrics
@@ -419,6 +419,13 @@ void RuntimeOption::Load(Hdf &config) {
         // no break here, so we can continue to match more overwrites
       }
       hdf["overwrite"].setVisited(); // avoid lint complaining
+    }
+  }
+
+  // More overwrites
+  if (overwrites) {
+    for (unsigned int i = 0; i < overwrites->size(); i++) {
+      config.fromString(overwrites->at(i).c_str());
     }
   }
 

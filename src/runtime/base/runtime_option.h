@@ -31,7 +31,7 @@ class AccessLogFileData;
  */
 class RuntimeOption {
 public:
-  static void Load(Hdf &config);
+  static void Load(Hdf &config, StringVec *overwrites = NULL);
 
   static const char *ExecutionMode;
   static std::string BuildId;

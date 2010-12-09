@@ -677,10 +677,7 @@ static int execute_program_impl(int argc, char **argv) {
   if (!po.config.empty()) {
     config.open(po.config);
   }
-  for (unsigned int i = 0; i < po.confStrings.size(); i++) {
-    config.fromString(po.confStrings[i].c_str());
-  }
-  RuntimeOption::Load(config);
+  RuntimeOption::Load(config, &po.confStrings);
   vector<string> badnodes;
   config.lint(badnodes);
   for (unsigned int i = 0; i < badnodes.size(); i++) {

@@ -591,6 +591,13 @@ DefineFunction(
   ));
 
 
+DefineConstant(
+  array(
+    'name'   => "CURLINFO_LOCAL_PORT",
+    'type'   => Int64,
+  ));
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
 //

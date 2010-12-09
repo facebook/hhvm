@@ -35,6 +35,7 @@ using namespace std;
 #define PHP_CURL_BINARY 6
 #define PHP_CURL_IGNORE 7
 
+
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(curl);
 ///////////////////////////////////////////////////////////////////////////////
@@ -758,6 +759,11 @@ Variant f_curl_getinfo(CObjRef ch, int opt /* = 0 */) {
     if (curl_easy_getinfo(cp, CURLINFO_REDIRECT_COUNT, &l_code) == CURLE_OK) {
       ret.set("redirect_count", l_code);
     }
+#if LIBCURL_VERSION_NUM >= 0x071500
+    if (curl_easy_getinfo(cp, CURLINFO_LOCAL_PORT, &l_code) == CURLE_OK) {
+      ret.set("local_port", l_code);
+    }
+#endif
     if (curl_easy_getinfo(cp, CURLINFO_TOTAL_TIME, &d_code) == CURLE_OK) {
       ret.set("total_time", d_code);
     }
@@ -821,6 +827,9 @@ Variant f_curl_getinfo(CObjRef ch, int opt /* = 0 */) {
   case CURLINFO_REQUEST_SIZE:
   case CURLINFO_FILETIME:
   case CURLINFO_SSL_VERIFYRESULT:
+#if LIBCURL_VERSION_NUM >= 0x071500
+  case CURLINFO_LOCAL_PORT:
+#endif
   case CURLINFO_REDIRECT_COUNT: {
     long code = 0;
     if (curl_easy_getinfo(cp, (CURLINFO)opt, &code) == CURLE_OK) {
@@ -1177,5 +1186,10 @@ Variant f_evhttp_recv(CObjRef handle) {
   return false;
 }
 
+#if LIBCURL_VERSION_NUM >= 0x071500
+const int64 k_CURLINFO_LOCAL_PORT = CURLINFO_LOCAL_PORT;
+#else
+const int64 k_CURLINFO_LOCAL_PORT = CURLINFO_NONE;
+#endif
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -2934,6 +2934,9 @@ Variant get_builtin_constant(CStrRef name, bool error) {
     case 1159:
       HASH_RETURN(0x5AF69B2C92692487LL, k_T_LOGICAL_XOR, "T_LOGICAL_XOR");
       break;
+    case 1168:
+      HASH_RETURN(0x690667910E5D2490LL, k_CURLINFO_LOCAL_PORT, "CURLINFO_LOCAL_PORT");
+      break;
     case 1171:
       HASH_RETURN(0x352745952809A493LL, k_MW_UndefinedMetric, "MW_UndefinedMetric");
       break;

@@ -27,6 +27,7 @@
 "evhttp_recv", T(Variant), S(0), "handle", T(Object), NULL, NULL, S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Block and wait until HTTP response is ready.\n *\n * @handle     object  The object created by calling evhttp_async_get() or\n *                     evhttp_async_post().\n *\n * @return     mixed   HTTP response. FALSE if any failure.\n */", 
 
 #elif EXT_TYPE == 1
+"CURLINFO_LOCAL_PORT", T(Int64),
 
 #elif EXT_TYPE == 2
 

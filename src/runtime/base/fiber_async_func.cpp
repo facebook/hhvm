@@ -116,35 +116,43 @@ public:
   void run() {
     // make local copy of m_function and m_params
     if (m_async) {
-      ExecutionContext *context = g_context.get();
-      if (context && m_context) {
-        context->fiberInit(m_context, m_refMap);
-        m_context = context; // switching role
+      try {
+        ExecutionContext *context = g_context.get();
+        if (context && m_context) {
+          context->fiberInit(m_context, m_refMap);
+          m_context = context; // switching role
+        }
+        (m_evalState = Eval::RequestEvalState::Get())->
+          fiberInit(m_unmarshaled_evalState, m_refMap);
+        m_function = m_function.fiberMarshal(m_refMap);
+        m_params = m_params.fiberMarshal(m_refMap);
+        ThreadInfo::s_threadInfo->m_globals =
+          m_global_variables = get_global_variables();
+        fiber_marshal_global_state(m_global_variables,
+                                   m_unmarshaled_global_variables, m_refMap);
+      } catch (const Exception &e) {
+        m_fatal = String(e.getMessage());
+      } catch (...) {
+        m_fatal = String("unknown exception was thrown");
       }
-      (m_evalState = Eval::RequestEvalState::Get())->
-        fiberInit(m_unmarshaled_evalState, m_refMap);
-      m_function = m_function.fiberMarshal(m_refMap);
-      m_params = m_params.fiberMarshal(m_refMap);
-      ThreadInfo::s_threadInfo->m_globals =
-        m_global_variables = get_global_variables();
-      fiber_marshal_global_state(m_global_variables,
-                                 m_unmarshaled_global_variables, m_refMap);
 
       Lock lock(this);
       m_ready = true;
       notify();
     }
 
-    try {
-      m_return = f_call_user_func_array(m_function, m_params);
-    } catch (const ExitException &e) {
-      m_exit = true;
-    } catch (const Exception &e) {
-      m_fatal = String(e.getMessage());
-    } catch (Object e) {
-      m_exception = e;
-    } catch (...) {
-      m_fatal = String("unknown exception was thrown");
+    if (m_fatal.isNull()) {
+      try {
+        m_return = f_call_user_func_array(m_function, m_params);
+      } catch (const ExitException &e) {
+        m_exit = true;
+      } catch (const Exception &e) {
+        m_fatal = String(e.getMessage());
+      } catch (Object e) {
+        m_exception = e;
+      } catch (...) {
+        m_fatal = String("unknown exception was thrown");
+      }
     }
 
     {
@@ -180,26 +188,31 @@ public:
       while (!m_done) wait();
     }
 
-    ExecutionContext *context = g_context.get();
-    if (context && m_context) {
-      context->fiberExit(m_context, m_refMap);
-      m_context = NULL;
-    }
-
-    Eval::RequestEvalState::Get()->fiberExit(m_evalState, m_refMap,
-                                             default_strategy);
-    fiber_unmarshal_global_state(get_global_variables(), m_global_variables,
-                                 m_refMap, default_strategy, resolver);
-
-    // these are needed in case they have references or objects
-    if (!m_refMap.empty()) {
-      m_function.fiberUnmarshal(m_refMap);
-      m_params.fiberUnmarshal(m_refMap);
-    }
-
-    Object unmarshaled_exception = m_exception.fiberUnmarshal(m_refMap);
-    Variant unmarshaled_return = m_return.fiberUnmarshal(m_refMap);
+    Variant unmarshaled_return;
     try {
+      ExecutionContext *context = g_context.get();
+      if (context && m_context) {
+        context->fiberExit(m_context, m_refMap);
+        m_context = NULL;
+      }
+
+      Eval::RequestEvalState::Get()->fiberExit(m_evalState, m_refMap,
+                                               default_strategy);
+      if (m_global_variables) {
+        fiber_unmarshal_global_state(get_global_variables(),
+                                     m_global_variables,
+                                     m_refMap, default_strategy, resolver);
+      }
+
+      // these are needed in case they have references or objects
+      if (!m_refMap.empty()) {
+        m_function.fiberUnmarshal(m_refMap);
+        m_params.fiberUnmarshal(m_refMap);
+      }
+
+      Object unmarshaled_exception = m_exception.fiberUnmarshal(m_refMap);
+      unmarshaled_return = m_return.fiberUnmarshal(m_refMap);
+
       if (m_exit) {
         throw ExitException(0);
       }
@@ -267,20 +280,30 @@ private:
 class FiberWorker : public JobQueueWorker<FiberJob*> {
 public:
   FiberWorker() {
-    hphp_session_init();
-    hphp_context_init();
   }
 
   ~FiberWorker() {
-    hphp_context_exit(g_context.get(), false, false);
-    hphp_session_exit();
   }
 
   virtual void doJob(FiberJob *job) {
     ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
-    job->run();
-    m_jobs.push_back(job);
-    cleanup();
+    try {
+      job->run();
+      m_jobs.push_back(job);
+      cleanup();
+    } catch (...) {
+      Logger::Error("Internal Fiber Engine Error");
+    }
+  }
+
+  virtual void onThreadEnter() {
+    hphp_session_init();
+    hphp_context_init();
+  }
+
+  virtual void onThreadExit() {
+    hphp_context_exit(g_context.get(), false, false);
+    hphp_session_exit();
   }
 
   void cleanup() {
@@ -299,11 +322,8 @@ public:
     // we're suffocated to death, but in reality, fiber threads should be able
     // to take breaks from time to time, or the count should be increased.
     if (m_jobs.empty()) {
-      hphp_context_exit(g_context.get(), false, true);
-      hphp_session_exit();
-
-      hphp_session_init();
-      hphp_context_init();
+      onThreadExit();
+      onThreadEnter();
     }
   }
 

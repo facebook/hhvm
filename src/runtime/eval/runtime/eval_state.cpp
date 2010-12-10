@@ -78,13 +78,14 @@ void ClassEvalState::fiberInit(ClassEvalState &oces,
   m_class = oces.m_class;
   m_methodTable = oces.m_methodTable;
   m_constructor = oces.m_constructor;
-
-  Array sv(oces.m_statics.fiberMarshal(refMap));
-  m_statics.Array::operator=(sv);
-
   m_initializedInstance = oces.m_initializedInstance;
   m_initializedStatics = oces.m_initializedStatics;
   m_doneSemanticCheck = oces.m_doneSemanticCheck;
+}
+void ClassEvalState::fiberInitStatics(ClassEvalState &oces,
+                                      FiberReferenceMap &refMap) {
+  Array sv(oces.m_statics.fiberMarshal(refMap));
+  m_statics.Array::operator=(sv);
 }
 void ClassEvalState::fiberExit(ClassEvalState &oces,
                                FiberReferenceMap &refMap,
@@ -100,6 +101,12 @@ void ClassEvalState::fiberExit(ClassEvalState &oces,
   if (default_strategy != FiberAsyncFunc::GlobalStateIgnore) {
     m_initializedStatics |= oces.m_initializedStatics;
   }
+}
+void ClassEvalState::fiberExitStatics(ClassEvalState &oces,
+                                      FiberReferenceMap &refMap,
+                                      FiberAsyncFunc::Strategy
+                                      default_strategy) {
+  refMap.unmarshal(m_statics, oces.m_statics, default_strategy);
 }
 
 
@@ -570,32 +577,8 @@ void RequestEvalState::fiberInit(RequestEvalState *res,
       ++it) {
     addCodeContainer(*it);
   }
-  // Classes
-  for (hphp_const_char_imap<ClassEvalState>::iterator it =
-      res->m_classes.begin(); it != res->m_classes.end(); ++it) {
-    ClassEvalState &ces = m_classes[it->first];
-    ClassEvalState &oces = it->second;
-    ces.fiberInit(oces, refMap);
-  }
   // Functions
   m_functions = res->m_functions;
-  // Function Statics
-  for (map<const FunctionStatement*, LVariableTable>::const_iterator it =
-      res->m_functionStatics.begin(); it != res->m_functionStatics.end();
-      ++it) {
-    m_functionStatics[it->first].
-      Array::operator=(it->second.fiberMarshal(refMap));
-  }
-  // Method statics
-  for (map<const MethodStatement*, map<string, LVariableTable> >::
-        const_iterator it = res->m_methodStatics.begin();
-      it != res->m_methodStatics.end(); ++it) {
-    for (map<string, LVariableTable>::const_iterator it2 = it->second.begin();
-        it2 != it->second.end(); ++it2) {
-      m_methodStatics[it->first][it2->first].
-        Array::operator=(it2->second.fiberMarshal(refMap));
-    }
-  }
   // Constants
   m_constants = res->m_constants.fiberMarshal(refMap);
   // Constant Info
@@ -618,6 +601,38 @@ void RequestEvalState::fiberInit(RequestEvalState *res,
       res->m_interfaceInfos.begin(); it != res->m_interfaceInfos.end(); ++it) {
     m_interfaceInfos[it->first] = it->second;
   }
+  // Classes
+  for (hphp_const_char_imap<ClassEvalState>::iterator it =
+      res->m_classes.begin(); it != res->m_classes.end(); ++it) {
+    ClassEvalState &ces = m_classes[it->first];
+    ClassEvalState &oces = it->second;
+    ces.fiberInit(oces, refMap);
+  }
+
+  // Class Statics
+  for (hphp_const_char_imap<ClassEvalState>::iterator it =
+      res->m_classes.begin(); it != res->m_classes.end(); ++it) {
+    ClassEvalState &ces = m_classes[it->first];
+    ClassEvalState &oces = it->second;
+    ces.fiberInitStatics(oces, refMap);
+  }
+  // Function Statics
+  for (map<const FunctionStatement*, LVariableTable>::const_iterator it =
+      res->m_functionStatics.begin(); it != res->m_functionStatics.end();
+      ++it) {
+    m_functionStatics[it->first].
+      Array::operator=(it->second.fiberMarshal(refMap));
+  }
+  // Method statics
+  for (map<const MethodStatement*, map<string, LVariableTable> >::
+        const_iterator it = res->m_methodStatics.begin();
+      it != res->m_methodStatics.end(); ++it) {
+    for (map<string, LVariableTable>::const_iterator it2 = it->second.begin();
+        it2 != it->second.end(); ++it2) {
+      m_methodStatics[it->first][it2->first].
+        Array::operator=(it2->second.fiberMarshal(refMap));
+    }
+  }
 }
 void RequestEvalState::fiberExit(RequestEvalState *res,
                                  FiberReferenceMap &refMap,
@@ -637,13 +652,6 @@ void RequestEvalState::fiberExit(RequestEvalState *res,
     // Could be re-adding it but that's ok
     addCodeContainer(*it);
   }
-  // Classes
-  for (hphp_const_char_imap<ClassEvalState>::iterator it =
-      res->m_classes.begin(); it != res->m_classes.end(); ++it) {
-    ClassEvalState &ces = m_classes[it->first];
-    ClassEvalState &oces = it->second;
-    ces.fiberExit(oces, refMap, default_strategy);
-  }
   // Functions
   for (hphp_const_char_imap<const FunctionStatement*>::iterator it =
       res->m_functions.begin(); it != res->m_functions.end(); ++it) {
@@ -654,23 +662,6 @@ void RequestEvalState::fiberExit(RequestEvalState *res,
     } else if (fit->second != it->second) {
       raise_error("Different function of the same name (%s) defined in fiber",
                   fit->first);
-    }
-  }
-  // Function Statics
-  for (map<const FunctionStatement*, LVariableTable>::const_iterator it =
-      res->m_functionStatics.begin(); it != res->m_functionStatics.end();
-      ++it) {
-    refMap.unmarshal((Array&)m_functionStatics[it->first], (Array&)it->second,
-                     default_strategy);
-  }
-  // Method statics
-  for (map<const MethodStatement*, map<string, LVariableTable> >::
-        const_iterator it = res->m_methodStatics.begin();
-      it != res->m_methodStatics.end(); ++it) {
-    for (map<string, LVariableTable>::const_iterator it2 = it->second.begin();
-        it2 != it->second.end(); ++it) {
-      refMap.unmarshal((Array&)m_methodStatics[it->first][it2->first],
-                       (Array&)it2->second, default_strategy);
     }
   }
   // Constants
@@ -694,6 +685,38 @@ void RequestEvalState::fiberExit(RequestEvalState *res,
   for (map<string, SmartPtr<ClassInfoEvaled> >::iterator it =
       res->m_interfaceInfos.begin(); it != res->m_interfaceInfos.end(); ++it) {
     m_interfaceInfos[it->first] = it->second;
+  }
+  // Classes
+  for (hphp_const_char_imap<ClassEvalState>::iterator it =
+      res->m_classes.begin(); it != res->m_classes.end(); ++it) {
+    ClassEvalState &ces = m_classes[it->first];
+    ClassEvalState &oces = it->second;
+    ces.fiberExit(oces, refMap, default_strategy);
+  }
+
+  // Class Statics
+  for (hphp_const_char_imap<ClassEvalState>::iterator it =
+      res->m_classes.begin(); it != res->m_classes.end(); ++it) {
+    ClassEvalState &ces = m_classes[it->first];
+    ClassEvalState &oces = it->second;
+    ces.fiberExitStatics(oces, refMap, default_strategy);
+  }
+  // Function Statics
+  for (map<const FunctionStatement*, LVariableTable>::const_iterator it =
+      res->m_functionStatics.begin(); it != res->m_functionStatics.end();
+      ++it) {
+    refMap.unmarshal((Array&)m_functionStatics[it->first], (Array&)it->second,
+                     default_strategy);
+  }
+  // Method statics
+  for (map<const MethodStatement*, map<string, LVariableTable> >::
+        const_iterator it = res->m_methodStatics.begin();
+      it != res->m_methodStatics.end(); ++it) {
+    for (map<string, LVariableTable>::const_iterator it2 = it->second.begin();
+        it2 != it->second.end(); ++it) {
+      refMap.unmarshal((Array&)m_methodStatics[it->first][it2->first],
+                       (Array&)it2->second, default_strategy);
+    }
   }
 }
 

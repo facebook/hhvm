@@ -970,7 +970,7 @@ Object ObjectData::fiberUnmarshal(FiberReferenceMap &refMap) const {
     // was i in original thread?
     px = (ObjectData*)refMap.reverseLookup((void*)this);
     if (px == NULL) {
-      copy = create_object(o_getClassName(), null_array);
+      copy = create_object(o_getClassName(), null_array, false);
       px = copy.get();
     }
     // ahead of deep copy
@@ -979,6 +979,14 @@ Object ObjectData::fiberUnmarshal(FiberReferenceMap &refMap) const {
     o_getArray(props);
     if (!props.empty()) {
       px->o_setArray(props.fiberUnmarshal(refMap));
+    }
+    FiberLocal *src = dynamic_cast<FiberLocal*>(const_cast<ObjectData*>(this));
+    if (src) {
+      FiberLocal *dest = dynamic_cast<FiberLocal*>(px);
+      ASSERT(dest);
+      if (dest) {
+        dest->fiberExit(src, refMap);
+      }
     }
   }
   return Object(px);

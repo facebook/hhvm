@@ -62,8 +62,11 @@ public:
   void initializeStatics();
   void semanticCheck();
   void fiberInit(ClassEvalState &oces, FiberReferenceMap &refMap);
+  void fiberInitStatics(ClassEvalState &oces, FiberReferenceMap &refMap);
   void fiberExit(ClassEvalState &oces, FiberReferenceMap &refMap,
                  FiberAsyncFunc::Strategy default_strategy);
+  void fiberExitStatics(ClassEvalState &oces, FiberReferenceMap &refMap,
+                        FiberAsyncFunc::Strategy default_strategy);
 private:
   const ClassStatement *m_class;
   MethodTable m_methodTable;

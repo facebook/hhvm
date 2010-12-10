@@ -311,11 +311,18 @@ void ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (value) {
         ExpressionPtr exp = dynamic_pointer_cast<Expression>(value);
         ASSERT(!exp->getExpectedType());
-        ScalarExpressionPtr scalarExp =
-          dynamic_pointer_cast<ScalarExpression>(exp);
-        if (isString && scalarExp) {
-          cg_printf("LITSTR_INIT(%s)",
-                    scalarExp->getCPPLiteralString(cg).c_str());
+        if (isString && exp->isScalar()) {
+          ScalarExpressionPtr scalarExp =
+            dynamic_pointer_cast<ScalarExpression>(exp);
+          if (scalarExp) {
+            cg_printf("LITSTR_INIT(%s)",
+                      scalarExp->getCPPLiteralString(cg).c_str());
+          } else {
+            Variant v;
+            exp->getScalarValue(v);
+            cg_printf("LITSTR_INIT(\"%s\")",
+                      cg.escapeLabel(v.toString().data()).c_str());
+          }
         } else {
           exp->outputCPP(cg, ar);
         }

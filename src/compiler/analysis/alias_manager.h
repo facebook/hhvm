@@ -75,7 +75,12 @@ class AliasManager {
   ExpressionPtr getCanonical(ExpressionPtr e);
 
   int optimize(AnalysisResultPtr ar, MethodStatementPtr s);
-  void setChanged() { m_changes++; }
+  void setChanged() {
+    if (!m_noAdd) {
+      m_changes++;
+      m_scope->addUpdates(BlockScope::UseKindCaller);
+    }
+  }
 
   static bool parseOptimizations(const std::string &optimizations,
                                  std::string &errs);
@@ -164,6 +169,7 @@ class AliasManager {
   bool                  m_postOpt;
   bool                  m_cleared;
   bool                  m_inPseudoMain;
+  BlockScopeRawPtr      m_scope;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

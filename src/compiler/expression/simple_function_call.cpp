@@ -28,6 +28,8 @@
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/parameter_expression.h>
 #include <compiler/expression/assignment_expression.h>
+#include <compiler/expression/array_pair_expression.h>
+#include <compiler/expression/array_element_expression.h>
 #include <compiler/expression/unary_op_expression.h>
 #include <compiler/analysis/constant_table.h>
 #include <compiler/analysis/variable_table.h>
@@ -41,6 +43,7 @@
 #include <runtime/base/execution_context.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/string_util.h>
+#include <runtime/ext/ext_variable.h>
 
 using namespace HPHP;
 using namespace std;
@@ -481,13 +484,18 @@ static ExpressionPtr cloneForInlineRecur(ExpressionPtr exp,
                                 exp->getKindOf(), name));
         rep->copyContext(sv);
         rep->updateSymbol(SimpleVariablePtr());
+        rep->getSymbol()->setHidden();
         // Conservatively set flags to prevent
         // the alias manager from getting confused.
         // On the next pass, it will correct the values,
         // and optimize appropriately.
         rep->getSymbol()->setUsed();
         rep->getSymbol()->setReferenced();
-        sepm[name] = rep;
+        if (exp->getContext() & (Expression::LValue|
+                                 Expression::RefValue|
+                                 Expression::RefParameter)) {
+          sepm[name] = rep;
+        }
         exp = rep;
       }
     }
@@ -591,15 +599,10 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
   }
 
   FunctionScopePtr fs = getFunctionScope();
-  if (!fs || fs->inPseudoMain()) return ExpressionPtr();
-  VariableTablePtr vt = fs->getVariables();
+  if (!fs) return ExpressionPtr();
   int nAct = m_params ? m_params->getCount() : 0;
   int nMax = m_funcScope->getMaxParamCount();
-  if (unsigned(nAct - m_funcScope->getMinParamCount()) > (unsigned)nMax ||
-      vt->getAttribute(VariableTable::ContainsDynamicVariable) ||
-      vt->getAttribute(VariableTable::ContainsExtract) ||
-      vt->getAttribute(VariableTable::ContainsCompact) ||
-      vt->getAttribute(VariableTable::ContainsGetDefinedVars)) {
+  if (unsigned(nAct - m_funcScope->getMinParamCount()) > (unsigned)nMax) {
     return ExpressionPtr();
   }
 
@@ -608,7 +611,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
                                              ExpressionList::ListKindWrapped));
 
   std::ostringstream oss;
-  oss << "inl" << m_funcScope->nextInlineIndex() << "_" << m_name << "_";
+  oss << fs->nextInlineIndex() << "_" << m_name << "_";
   std::string prefix = oss.str();
 
   MethodStatementPtr m
@@ -629,7 +632,9 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
                           KindOfSimpleVariable,
                           prefix + param->getName()));
     var->updateSymbol(SimpleVariablePtr());
+    var->getSymbol()->setHidden();
     var->getSymbol()->setUsed();
+    var->getSymbol()->setReferenced();
     bool ref = m_funcScope->isRefParam(i);
     AssignmentExpressionPtr ae
       (new AssignmentExpression(getScope(),

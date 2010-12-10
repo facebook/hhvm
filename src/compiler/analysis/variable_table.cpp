@@ -224,6 +224,8 @@ const char *VariableTable::getVariablePrefix(const Symbol *sym) const {
       return Option::GlobalVariablePrefix;
     }
   }
+
+  if (sym->isHidden()) return Option::HiddenVariablePrefix;
   return Option::VariablePrefix;
 }
 
@@ -246,7 +248,9 @@ string VariableTable::getVariableName(CodeGenerator &cg, AnalysisResultPtr ar,
       return getGlobalVariableName(cg, ar, name);
     }
   }
-  return string(Option::VariablePrefix) + cg.formatLabel(name);
+  return (sym->isHidden() ?
+          Option::HiddenVariablePrefix : Option::VariablePrefix) +
+    cg.formatLabel(name);
 }
 
 string
@@ -369,7 +373,7 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
       ar->getVariables()->setType(ar, sym->getName(), type, true);
     }
   } else if (ar->getPhase() == AnalysisResult::FirstInference &&
-             isPseudoMainTable()) {
+             !sym->isHidden() && isPseudoMainTable()) {
     // A variable used in a pseudomain
     ar->getVariables()->add(sym->getName(), type, implicit, ar,
                             construct, modifiers,
@@ -537,7 +541,8 @@ void VariableTable::addNeeded(const string &name) {
 }
 
 bool VariableTable::checkUnused(Symbol *sym) {
-  if (isPseudoMainTable() || getAttribute(ContainsDynamicVariable)) {
+  if ((!sym || !sym->isHidden()) &&
+      (isPseudoMainTable() || getAttribute(ContainsDynamicVariable))) {
     return false;
   }
   if (sym) {
@@ -550,7 +555,7 @@ void VariableTable::clearUsed() {
   typedef std::pair<const string,Symbol> symPair;
   bool ps = isPseudoMainTable();
   BOOST_FOREACH(symPair &sym, m_symbolMap) {
-    if (!ps) {
+    if (!ps || sym.second.isHidden()) {
       sym.second.clearUsed();
       sym.second.clearNeeded();
       sym.second.clearReferenced();
@@ -569,7 +574,7 @@ void VariableTable::forceVariants(AnalysisResultPtr ar, int varClass) {
     if (mask) {
       for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
         Symbol *sym = m_symbolVec[i];
-        if (sym->declarationSet() &&
+        if (!sym->isHidden() && sym->declarationSet() &&
             mask & GetVarClassMask(sym->isPrivate(), sym->isStatic())) {
           setType(ar, sym, Type::Variant, true);
           sym->setIndirectAltered();
@@ -593,7 +598,7 @@ void VariableTable::forceVariant(AnalysisResultPtr ar,
   if (!m_hasStatic) mask &= ~AnyStaticVars;
   if (!mask) return;
   if (Symbol *sym = getSymbol(name)) {
-    if (sym->declarationSet() &&
+    if (!sym->isHidden() && sym->declarationSet() &&
         mask & GetVarClassMask(sym->isPrivate(), sym->isStatic())) {
       setType(ar, sym, Type::Variant, true);
       sym->setIndirectAltered();
@@ -610,7 +615,7 @@ TypePtr VariableTable::setType(AnalysisResultPtr ar, Symbol *sym,
                                TypePtr type, bool coerce) {
   bool force_coerce = coerce;
   int mask = GetVarClassMask(sym->isPrivate(), sym->isStatic());
-  if (m_forcedVariants & mask) {
+  if (m_forcedVariants & mask && !sym->isHidden()) {
     type = Type::Variant;
     force_coerce = true;
   }
@@ -1275,7 +1280,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (sym->isParameter()) continue;
 
     const char* prefix = "";
-    if (inPseudoMain) prefix = "&";
+    if (inPseudoMain && !sym->isHidden()) prefix = "&";
 
     if (sym->isGlobal()) {
       TypePtr type = sym->getFinalType();
@@ -1296,13 +1301,14 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     }
 
     // local variables
-    if (getAttribute(ContainsDynamicVariable) ||
-        inPseudoMain || sym->isUsed() || sym->isNeeded()) {
+    if (((getAttribute(ContainsDynamicVariable) || inPseudoMain) &&
+         !sym->isHidden()) ||
+        sym->isUsed() || sym->isNeeded()) {
       TypePtr type = sym->getFinalType();
       type->outputCPPDecl(cg, ar, getBlockScope());
       cg_printf(" %s%s%s", prefix, getVariablePrefix(sym),
                 fname.c_str());
-      if (inPseudoMain) {
+      if (inPseudoMain && !sym->isHidden()) {
         outputCPPVariableInit(cg, ar, inPseudoMain, name);
       } else {
         const char *initializer = type->getCPPInitializer();
@@ -1333,6 +1339,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
   string varDecl, initializer, memDecl, params;
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const Symbol *sym = m_symbolVec[i];
+    if (sym->isHidden()) continue;
     const string &name = sym->getName();
     string varName = string(getVariablePrefix(sym)) +
       cg.formatLabel(name);
@@ -1768,7 +1775,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
     const Symbol *sym = m_symbolVec[i];
     const string &name = sym->getName();
     bool stat = sym->isStatic();
-    if (sym->isOverride()) continue;
+    if (sym->isOverride() || sym->isHidden()) continue;
     if (!stat && isInherited(name)) continue;
     if (!stat &&
         (sym->isPrivate() && privateVar == NonPrivate ||

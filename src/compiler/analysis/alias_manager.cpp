@@ -949,7 +949,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
                               canonicalizeRecurNonNull(
                                 value->makeConstant(m_arp, "null")));
                             a->setNthKid(1, value);
-                            m_changes += !m_noAdd;
+                            setChanged();
                           } else {
                             ExpressionListPtr el(
                               new ExpressionList(
@@ -1168,7 +1168,7 @@ void AliasManager::canonicalizeKid(ConstructPtr c, ExpressionPtr kid, int i) {
     kid = canonicalizeRecur(kid);
     if (kid) {
       c->setNthKid(i, kid);
-      m_changes += !m_noAdd;
+      setChanged();
     }
   }
 }
@@ -1184,7 +1184,7 @@ int AliasManager::canonicalizeKid(ConstructPtr c, ConstructPtr kid, int i) {
       s = canonicalizeRecur(s, ret);
       if (s) {
         c->setNthKid(i, s);
-        m_changes += !m_noAdd;
+        setChanged();
       }
     }
   }
@@ -1628,6 +1628,7 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
   }
 
   FunctionScopePtr func = m->getFunctionScope();
+  m_scope = func;
   m_variables = func->getVariables();
   m_variables->clearUsed();
   m_inPseudoMain = func->inPseudoMain();

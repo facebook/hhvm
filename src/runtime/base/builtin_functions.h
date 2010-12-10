@@ -265,7 +265,7 @@ inline Variant unset(Variant &v)               { v.unset();   return null;}
 inline Variant unset(CVarRef v)                {              return null;}
 inline Variant setNull(Variant &v)             { v.setNull(); return null;}
 inline Variant unset(Object &v)                { v.reset();   return null;}
-
+inline Variant unset(Array &v)                 { v.reset();   return null;}
 ///////////////////////////////////////////////////////////////////////////////
 // special variable contexts
 

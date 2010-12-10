@@ -99,6 +99,7 @@ const char *Option::CreateObjectPrefix = "co_";
 const char *Option::CreateObjectOnlyPrefix = "coo_";
 const char *Option::PseudoMainPrefix = "pm_";
 const char *Option::VariablePrefix = "v_";
+const char *Option::HiddenVariablePrefix = "h_";
 const char *Option::GlobalVariablePrefix = "gv_";
 const char *Option::StaticVariablePrefix = "sv_";
 const char *Option::ScalarArrayName = "sa_";
@@ -287,6 +288,7 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(CreateObjectPrefix);
     READ_CG_OPTION(PseudoMainPrefix);
     READ_CG_OPTION(VariablePrefix);
+    READ_CG_OPTION(HiddenVariablePrefix);
     READ_CG_OPTION(GlobalVariablePrefix);
     READ_CG_OPTION(StaticVariablePrefix);
     READ_CG_OPTION(ScalarArrayName);

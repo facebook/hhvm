@@ -5942,6 +5942,14 @@ bool TestCodeRun::TestDynamicVariables() {
        "}\n"
        "test();\n");
 
+  MVCR("<?php "
+       "function f() { return 3; }"
+       "function test($f) {"
+       "  $x = $f();"
+       "  return compact('x');"
+       "}"
+       "var_dump(test('f'));");
+
   // get_defined_vars
   MVCR("<?php\n"
        "function simple_getdefined_test() {\n"

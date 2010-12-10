@@ -1068,6 +1068,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         cg_printf("if (%s%s.isInitialized()) ",
                   Option::VariablePrefix, sv->getName().c_str());
       }
+      e->preOutputCPP(cg, ar, 0);
       cg_printf("compact%d.set(", m_ciTemp);
       cg_printString(p, ar, shared_from_this());
       cg_printf(", ");

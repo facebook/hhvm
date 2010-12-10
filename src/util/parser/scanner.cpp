@@ -24,8 +24,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Scanner::Scanner(const char *filename, int type)
-    : m_source(NULL), m_len(0), m_pos(0), m_type(type), m_yyscanner(NULL),
-      m_token(NULL), m_loc(NULL) {
+    : m_source(NULL), m_len(0), m_pos(0), m_state(Start), m_type(type),
+      m_yyscanner(NULL), m_token(NULL), m_loc(NULL) {
   m_stream = new ifstream(filename);
   m_streamOwner = true;
   if (m_stream->bad()) {
@@ -88,7 +88,7 @@ void Scanner::setHashBang(const char *rawText, int rawLeng) {
   if (m_type & ReturnAllTokens) {
     setToken(rawText, rawLeng);
   } else {
-    setToken("", 0);
+    m_token->setText("", 0);
     incLoc(rawText, rawLeng);
   }
 }
@@ -146,16 +146,35 @@ void Scanner::error(const char* fmt, ...) {
 }
 
 void Scanner::incLoc(const char *rawText, int rawLeng) {
-  m_loc->line0 = m_loc->line1;
-  m_loc->char0 = m_loc->char1;
+  ASSERT(rawText);
+  ASSERT(rawLeng > 0);
+
+  switch (m_state) {
+    case Start:
+      break; // scanner set to (1, 1, 1, 1) already
+    case NoLineFeed:
+      m_loc->line0 = m_loc->line1;
+      m_loc->char0 = m_loc->char1 + 1;
+      break;
+    case HadLineFeed:
+      m_loc->line0 = m_loc->line1 + 1;
+      m_loc->char0 = 1;
+      break;
+  }
   const char *p = rawText;
   for (int i = 0; i < rawLeng; i++) {
-    if (*p++ == '\n') {
-      m_loc->line1++;
-      m_loc->char1 = 0;
-    } else {
-      m_loc->char1++;
+    switch (m_state) {
+      case Start:
+        break; // scanner set to (1, 1, 1, 1) already
+      case NoLineFeed:
+        m_loc->char1++;
+        break;
+      case HadLineFeed:
+        m_loc->line1++;
+        m_loc->char1 = 1;
+        break;
     }
+    m_state = (*p++ == '\n' ? HadLineFeed : NoLineFeed);
   }
 }
 

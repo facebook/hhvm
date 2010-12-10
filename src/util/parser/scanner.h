@@ -158,6 +158,13 @@ private:
   int m_len;
   int m_pos;
 
+  enum State {
+    Start = -1,
+    NoLineFeed,
+    HadLineFeed,
+  };
+  State m_state;
+
   int m_type;
   void *m_yyscanner;
   ScannerToken *m_token;

@@ -25,7 +25,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(Location);
 class Location {
 public:
-  Location() : file(""), line0(1), char0(0), line1(1), char1(0) {}
+  Location() : file(""), line0(1), char0(1), line1(1), char1(1) {}
 
   const char *file;
   int line0;

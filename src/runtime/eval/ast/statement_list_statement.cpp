@@ -30,7 +30,10 @@ StatementListStatement::StatementListStatement(STATEMENT_ARGS)
   : Statement(STATEMENT_PASS) {}
 
 void StatementListStatement::eval(VariableEnvironment &env) const {
-  ENTER_STMT;
+  // if m_exp hasn't set the line yet, set it, otherwise, we can skip
+  if (loc()->line1 != ThreadInfo::s_threadInfo->m_top->getLine()) {
+    ENTER_STMT;
+  }
   for (vector<StatementPtr>::const_iterator it = m_stmts.begin();
        it != m_stmts.end(); ++it) {
     EVAL_STMT(*it, env);

@@ -58,7 +58,12 @@ Then let it run, until it hits the breakpoints,
 
   hphpd> run
 
-At breakpoints, examine variables or evaluate expressions,
+The debugger will highlight current statement or expression that is just
+about to evaluate. Sometimes a statement is highlighted first, then
+sub-expressions inside the statement are highlighted one after another
+while repeating step commands.
+
+At any breakpoints, examine variables or evaluate expressions,
 
   hphpd> variable
   hphpd> print $a

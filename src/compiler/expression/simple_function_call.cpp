@@ -559,6 +559,152 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
   if (m_class || !m_className.empty() || !m_funcScope) return ExpressionPtr();
 
   if (!m_funcScope->isUserFunction()) {
+    if (m_type == ExtractFunction && m_params && m_params->getCount() >= 1) {
+      ExpressionPtr vars = (*m_params)[0];
+      while (vars) {
+        if (vars->is(KindOfUnaryOpExpression) &&
+            static_pointer_cast<UnaryOpExpression>(vars)->getOp() == T_ARRAY) {
+          break;
+        }
+        if (vars->is(KindOfExpressionList)) {
+          vars = static_pointer_cast<ExpressionList>(vars)->listValue();
+        } else {
+          vars = vars->getCanonPtr();
+        }
+      }
+      if (vars) {
+        bool svar = vars->isScalar();
+        if (!svar && getScope()->getUpdated()) {
+          /*
+           * kind of a hack. If the extract param is non-scalar,
+           * and we've made changes already, dont try to optimize yet.
+           * this gives us a better chance of getting a scalar result.
+           * Later, we should add more array optimizations, which would
+           * allow us to optimize the generated code once the scalar
+           * expressions are resolved
+           */
+          return ExpressionPtr();
+        }
+        int n = m_params->getCount();
+        String prefix;
+        int mode = EXTR_OVERWRITE;
+        if (n >= 2) {
+          Variant v;
+          ExpressionPtr m = (*m_params)[1];
+          if (m->isScalar() && m->getScalarValue(v)) {
+            mode = v.toInt64();
+          }
+          if (n >= 3) {
+            ExpressionPtr p = (*m_params)[2];
+            if (p->isScalar() && p->getScalarValue(v)) {
+              prefix = v.toString();
+            }
+          }
+        }
+        bool ref = mode & EXTR_REFS;
+        mode &= ~EXTR_REFS;
+        switch (mode) {
+          case EXTR_PREFIX_ALL:
+          case EXTR_PREFIX_INVALID:
+          case EXTR_OVERWRITE: {
+            ExpressionListPtr arr(
+              static_pointer_cast<ExpressionList>(
+                static_pointer_cast<UnaryOpExpression>(vars)->getExpression()));
+            ExpressionListPtr rep(
+              new ExpressionList(getScope(), getLocation(),
+                                 Expression::KindOfExpressionList,
+                                 ExpressionList::ListKindWrapped));
+            string root_name;
+            int n = arr->getCount();
+            int i, j, k;
+            for (i = j = k = 0; i < n; i++) {
+              ArrayPairExpressionPtr ap(
+                dynamic_pointer_cast<ArrayPairExpression>((*arr)[i]));
+              assert(ap);
+              String name;
+              Variant voff;
+              if (!ap->getName()) {
+                voff = j++;
+              } else {
+                if (!ap->getName()->isScalar() ||
+                    !ap->getName()->getScalarValue(voff)) {
+                  return ExpressionPtr();
+                }
+              }
+              name = voff.toString();
+              if (mode == EXTR_PREFIX_ALL ||
+                  (mode == EXTR_PREFIX_INVALID &&
+                   !name.isValidVariableName())) {
+                name = prefix + "_" + name;
+              }
+              if (!name.isValidVariableName()) continue;
+              SimpleVariablePtr var(
+                new SimpleVariable(getScope(), getLocation(),
+                                   KindOfSimpleVariable, name.data()));
+              var->updateSymbol(SimpleVariablePtr());
+              ExpressionPtr val(ap->getValue());
+              if (!val->isScalar()) {
+                if (root_name.empty()) {
+                  root_name = "t" + lexical_cast<string>(
+                    getFunctionScope()->nextInlineIndex());
+                  SimpleVariablePtr rv(
+                    new SimpleVariable(getScope(), getLocation(),
+                                       KindOfSimpleVariable, root_name));
+                  rv->updateSymbol(SimpleVariablePtr());
+                  rv->getSymbol()->setHidden();
+                  ExpressionPtr root(
+                    new AssignmentExpression(getScope(), getLocation(),
+                                             KindOfAssignmentExpression,
+                                             rv, (*m_params)[0], false));
+                  rep->insertElement(root);
+                }
+
+                SimpleVariablePtr rv(
+                  new SimpleVariable(getScope(), getLocation(),
+                                     KindOfSimpleVariable, root_name));
+                rv->updateSymbol(SimpleVariablePtr());
+                rv->getSymbol()->setHidden();
+                ExpressionPtr offset(makeScalarExpression(ar, voff));
+                val = ExpressionPtr(
+                  new ArrayElementExpression(getScope(), getLocation(),
+                                             KindOfArrayElementExpression,
+                                             rv, offset));
+              }
+              ExpressionPtr a(
+                new AssignmentExpression(getScope(), getLocation(),
+                                         KindOfAssignmentExpression,
+                                         var, val, ref));
+              rep->addElement(a);
+              k++;
+            }
+            if (root_name.empty()) {
+              if ((*m_params)[0]->hasEffect()) {
+                rep->insertElement((*m_params)[0]);
+              }
+            } else {
+              ExpressionListPtr unset_list
+                (new ExpressionList(getScope(), getLocation(),
+                                    KindOfExpressionList));
+
+              SimpleVariablePtr rv(
+                new SimpleVariable(getScope(), getLocation(),
+                                   KindOfSimpleVariable, root_name));
+              rv->updateSymbol(SimpleVariablePtr());
+              unset_list->addElement(rv);
+
+              ExpressionPtr unset(
+                new UnaryOpExpression(getScope(), getLocation(),
+                                      KindOfUnaryOpExpression,
+                                      unset_list, T_UNSET, true));
+              rep->addElement(unset);
+            }
+            rep->addElement(makeScalarExpression(ar, k));
+            return replaceValue(rep);
+          }
+          default: break;
+        }
+      }
+    }
     if (m_type == UnknownType && m_funcScope->isFoldable()) {
       Array arr;
       if (m_params) {

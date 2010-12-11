@@ -33,6 +33,7 @@
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/simple_function_call.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/builtin_functions.h>
 
 using namespace HPHP;
 using namespace std;
@@ -182,6 +183,9 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultPtr ar) {
     ExpressionPtr rep = optimize(ar);
     if (rep) return rep;
   }
+  if (m_variable->getContainedEffects() & ~(CreateEffect|AccessorEffect)) {
+    return ExpressionPtr();
+  }
   ExpressionPtr val = m_value;
   while (val) {
     if (val->is(KindOfExpressionList)) {
@@ -195,14 +199,62 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultPtr ar) {
     }
     break;
   }
-  if (val && val != m_value && val->isScalar()) {
-    ExpressionListPtr rep(new ExpressionList(getScope(), getLocation(),
-                                             KindOfExpressionList,
-                                             ExpressionList::ListKindWrapped));
-    rep->addElement(m_value);
-    m_value = val->clone();
-    rep->addElement(static_pointer_cast<Expression>(shared_from_this()));
-    return replaceValue(rep);
+  if (val && val->isScalar()) {
+    if (val != m_value) {
+      ExpressionListPtr rep(new ExpressionList(
+                              getScope(), getLocation(),
+                              KindOfExpressionList,
+                              ExpressionList::ListKindWrapped));
+      rep->addElement(m_value);
+      m_value = val->clone();
+      rep->addElement(static_pointer_cast<Expression>(shared_from_this()));
+      return replaceValue(rep);
+    }
+    if (!m_ref && m_variable->is(KindOfArrayElementExpression)) {
+      ArrayElementExpressionPtr ae(
+        static_pointer_cast<ArrayElementExpression>(m_variable));
+      ExpressionPtr avar(ae->getVariable());
+      ExpressionPtr aoff(ae->getOffset());
+      if (!aoff || aoff->isScalar()) {
+        avar = avar->getCanonLVal();
+        while (avar) {
+          if (avar->isScalar()) {
+            Variant v,o,r;
+            if (!avar->getScalarValue(v)) break;
+            if (!val->getScalarValue(r)) break;
+            try {
+              g_context->setThrowAllErrors(true);
+              if (aoff) {
+                if (!aoff->getScalarValue(o)) break;
+                v.set(o, r);
+              } else {
+                v.append(r);
+              }
+              g_context->setThrowAllErrors(false);
+            } catch (...) {
+              break;
+            }
+            ExpressionPtr rep(
+              new AssignmentExpression(
+                getScope(), getLocation(), KindOfAssignmentExpression,
+                m_variable->replaceValue(Clone(ae->getVariable())),
+                makeScalarExpression(ar, v), false));
+            if (!isUnused()) {
+              ExpressionListPtr el(
+                new ExpressionList(
+                  getScope(), getLocation(), KindOfExpressionList,
+                  ExpressionList::ListKindWrapped));
+              el->addElement(rep);
+              el->addElement(val);
+              rep = el;
+            }
+            return replaceValue(rep);
+          }
+          avar = avar->getCanonPtr();
+        }
+        g_context->setThrowAllErrors(false);
+      }
+    }
   }
   return ExpressionPtr();
 }

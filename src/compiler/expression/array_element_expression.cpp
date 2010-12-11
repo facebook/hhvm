@@ -24,6 +24,7 @@
 #include <compiler/analysis/function_scope.h>
 #include <util/parser/hphp.tab.hpp>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/builtin_functions.h>
 
 using namespace HPHP;
 using namespace std;
@@ -184,6 +185,27 @@ void ArrayElementExpression::clearEffect(Effect effect) {
     recomputeEffects();
     m_localEffects &= ~effect;
   }
+}
+
+ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultPtr ar) {
+  if (!(m_context & (RefValue|LValue|UnsetContext|OprLValue|
+                     InvokeArgument|DeepReference|DeepOprLValue))) {
+    if (m_offset && m_variable->isScalar() && m_offset->isScalar()) {
+      Variant v, o;
+      if (m_variable->getScalarValue(v) &&
+          m_offset->getScalarValue(o)) {
+        try {
+          g_context->setThrowAllErrors(true);
+          Variant res = v.rvalAt(o, !hasContext(ExistContext));
+          g_context->setThrowAllErrors(false);
+          return replaceValue(makeScalarExpression(ar, res));
+        } catch (...) {
+          g_context->setThrowAllErrors(false);
+        }
+      }
+    }
+  }
+  return ExpressionPtr();
 }
 
 /**

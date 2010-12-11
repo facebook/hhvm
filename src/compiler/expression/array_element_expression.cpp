@@ -341,7 +341,17 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
         m_variable->outputCPP(cg, ar);
         cg_printf(")");
       } else {
+        TypePtr act;
+        if (!m_variable->hasCPPTemp() && m_variable->getImplementedType() &&
+            type->is(Type::KindOfArray) &&
+            !Type::SameType(m_variable->getImplementedType(), type)) {
+          act = type;
+          m_variable->setActualType(m_variable->getImplementedType());
+        }
         m_variable->outputCPP(cg, ar);
+        if (act) {
+          m_variable->setActualType(act);
+        }
       }
     }
     if (m_offset) {

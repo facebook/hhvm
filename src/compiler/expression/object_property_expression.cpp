@@ -427,7 +427,25 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
       cg_printf("GET_THIS_DOT()");
     }
   } else if (m_valid) {
+    TypePtr act;
+    if (!m_object->hasCPPTemp() && m_object->getImplementedType() &&
+        !Type::SameType(m_object->getImplementedType(),
+                         m_object->getActualType())) {
+      act = m_object->getActualType();
+      m_object->setActualType(m_object->getImplementedType());
+      ClassScopePtr cls = ar->findExactClass(shared_from_this(),
+                                             act->getName());
+      cg_printf("((%s%s*)", Option::ClassPrefix, cls->getId(cg).c_str());
+    }
     m_object->outputCPP(cg, ar);
+    if (act) {
+      if (m_object->getImplementedType()->is(Type::KindOfObject)) {
+        cg_printf(".get())");
+      } else {
+        cg_printf(".getObjectData())");
+      }
+      m_object->setActualType(act);
+    }
     cg_printf("->");
   } else {
     TypePtr t = m_object->getType();

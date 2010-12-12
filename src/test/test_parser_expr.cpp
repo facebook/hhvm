@@ -15,6 +15,8 @@
 */
 
 #include <test/test_parser_expr.h>
+#include <compiler/option.h>
+#include <util/parser/scanner.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -43,6 +45,9 @@ bool TestParserExpr::RunTests(const std::string &which) {
   RUN_TEST(TestModifierExpression);
   RUN_TEST(TestConstant);
   RUN_TEST(TestEncapsListExpression);
+
+  RUN_TEST(TestXHP);
+
   return ret;
 }
 
@@ -208,7 +213,7 @@ bool TestParserExpr::TestUnaryOpExpression() {
   V("<?php -$a;",             "-$a;\n");
   V("<?php !$a;",             "!$a;\n");
   V("<?php ~$a;",             "~$a;\n");
-  V("<?php ($a);",            "($a);\n");
+  V("<?php ($a);",            "$a;\n");
   V("<?php (int)$a;",         "(int)$a;\n");
   V("<?php (real)$a;",        "(double)$a;\n");
   V("<?php (string)$a;",      "(string)$a;\n");
@@ -371,5 +376,221 @@ bool TestParserExpr::TestEncapsListExpression() {
   V("<?php \"\\\"$a\";",          "'\"' . $a;\n");
   V("<?php \"\\$a\";",            "'$a';\n");
   V("<?php \"${a}\";",            "$a;\n");
+  return true;
+}
+
+bool TestParserExpr::TestXHP() {
+  //HPHP::Option::ScannerType |= HPHP::Scanner::PreprocessXHP;
+  //HPHP::RuntimeOption::ScannerType |= HPHP::Scanner::PreprocessXHP;
+
+  // basics
+  V("<?php $x = <thing />;",
+    "$x = new xhp_thing(array(), array());\n");
+
+  // white spaces
+  V("<?php $x = <x> a{ 'b' }c </x>;",
+    "$x = new xhp_x(array(), array(' a', 'b', 'c '));\n");
+  V("<?php $x = <x> a { 'b' } c </x>;",
+    "$x = new xhp_x(array(), array(' a ', 'b', ' c '));\n");
+  V("<?php $x = <x>\n    foo\n   </x>;",
+    "$x = new xhp_x(array(), array(' foo '));\n");
+  V("<?php $x = <x>\n    foo\n   bar\n   </x>;",
+    "$x = new xhp_x(array(), array(' foo bar '));\n");
+
+  // attributes
+  V("<?php $x = <x:y attr={:tag::CONSTANT} />;",
+    "$x = new xhp_x__y(array('attr' => xhp_tag::CONSTANT), array());\n");
+  V("<?php $x = <a b=\"&nbsp;\">c</a>;",
+    "$x = new xhp_a(array('b' => '\xC2\xA0'), array('c'));\n");
+  V("<?php $x = <a b=\"\" />;",
+    "$x = new xhp_a(array('b' => ''), array());\n");
+
+  // children
+  V("<?php $x = <x> <x /> {'a'} </x>;",
+    "$x = new xhp_x(array(), array(new xhp_x(array(), array()), 'a'));\n");
+  V("<?php $x = <x> {'a'}<x /></x>;",
+    "$x = new xhp_x(array(), array('a', new xhp_x(array(), array())));");
+  V("<?php $x = <x>\n<x>\n</x>.\n</x>;",
+    "$x = new xhp_x(array(), array(new xhp_x(array(), array()), '. '));\n");
+  V("<?php <div><a />=<a /></div>;",
+    "new xhp_div(array(), array(new xhp_a(array(), array()), '=', "
+    "new xhp_a(array(), array())));\n");
+
+  // closing tag
+  V("<?php $x = <a><a><a>hi</a></></a>;",
+    "$x = new xhp_a(array(), array(new xhp_a(array(), "
+    "array(new xhp_a(array(), array('hi'))))));\n");
+
+  // class name with PHP keyword
+  V("<?php class :a:b:switch-links { }",
+    "class xhp_a__b__switch_links {\n}\n");
+
+  V("<?php if ($obj instanceof :a:b:switch-links) { }",
+    "if ($obj instanceof xhp_a__b__switch_links) {\n}\n");
+
+  // class attributes
+  V("<?php class :thing { attribute Thing a, Thing b; }",
+
+    "class xhp_thing {\n"
+    "protected static function &__xhpAttributeDeclaration() {\n"
+    "static $_ = -1;\n"
+    "if ($_ === -1) {\n"
+    "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
+    "array('a' => array(5, 'Thing', null, 0), "
+    "'b' => array(5, 'Thing', null, 0)));\n"
+    "}\n"
+    "return $_;\n"
+    "}\n"
+    "}\n");
+
+  // enum attributes
+  V("<?php class :thing { attribute enum { 123, 456 } a; }",
+
+    "class xhp_thing {\n"
+    "protected static function &__xhpAttributeDeclaration() {\n"
+    "static $_ = -1;\n"
+    "if ($_ === -1) {\n"
+    "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
+    "array('a' => array(7, array(123, 456), null, 0)));\n"
+    "}\n"
+    "return $_;\n"
+    "}\n"
+    "}\n");
+
+  // base attributes
+  V("<?php class :foo { attribute string foo; }"
+    " class :bar { attribute :foo, :foo, string bar; }",
+
+    "class xhp_foo {\n"
+    "protected static function &__xhpAttributeDeclaration() {\n"
+    "static $_ = -1;\n"
+    "if ($_ === -1) {\n"
+    "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
+    "array('foo' => array(1, null, null, 0)));\n"
+    "}\n"
+    "return $_;\n"
+    "}\n"
+    "}\n"
+    "class xhp_bar {\n"
+    "protected static function &__xhpAttributeDeclaration() {\n"
+    "static $_ = -1;\n"
+    "if ($_ === -1) {\n"
+    "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
+    "xhp_foo::__xhpAttributeDeclaration(), "
+    "xhp_foo::__xhpAttributeDeclaration(), "
+    "array('bar' => array(1, null, null, 0)));\n"
+    "}\n"
+    "return $_;\n"
+    "}\n"
+    "}\n");
+
+  // attribute default and required
+  V("<?php class :thing { attribute int a = 123 @required, var b; }",
+
+    "class xhp_thing {\n"
+    "protected static function &__xhpAttributeDeclaration() {\n"
+    "static $_ = -1;\n"
+    "if ($_ === -1) {\n"
+    "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
+    "array('a' => array(3, null, 123, 1), 'b' => array(6, null, null, 0)));\n"
+    "}\n"
+    "return $_;\n"
+    "}\n"
+    "}\n");
+
+  // categories
+  V("<?php class :thing { category %a:foo, %b; }",
+
+    "class xhp_thing {\n"
+    "protected function &__xhpCategoryDeclaration() {\n"
+    "static $_ = array('a:foo' => 1, 'b' => 1);\n"
+    "return $_;\n"
+    "}\n"
+    "}\n");
+
+  // children
+  V("<?php class :thing { children(any,any); }",
+
+    "class xhp_thing {\n"
+    "protected function &__xhpChildrenDeclaration() {\n"
+    "static $_ = array(0, 5, array(4, array(0, 1, null), "
+    "array(0, 1, null)));\n"
+    "return $_;\n"
+    "}\n"
+    "}\n");
+
+  V("<?php class :thing { children any; }",
+
+    "class xhp_thing {\n"
+    "protected function &__xhpChildrenDeclaration() {\n"
+    "static $_ = 1;\n"
+    "return $_;\n"
+    "}\n"
+    "}\n");
+
+  V("<?php class :thing { children ((:a:foo | %b:bar)+, pcdata); }",
+
+    "class xhp_thing {\n"
+    "protected function &__xhpChildrenDeclaration() {\n"
+    "static $_ = array(0, 5, array(4, array(3, 5, "
+    "array(5, array(0, 3, 'xhp_a__foo'), array(0, 4, 'b__bar'))), "
+    "array(0, 2, null)));\n"
+    "return $_;\n"
+    "}\n"
+    "}\n");
+
+  // comments
+  V("<?php class :thing {\n"
+    "  category %a:foo, %b; // comments\n"
+    "  children any; }",
+
+    "class xhp_thing {\n"
+    "protected function &__xhpCategoryDeclaration() {\n"
+    "static $_ = array('a:foo' => 1, 'b' => 1);\n"
+    "return $_;\n"
+    "}\n"
+    "protected function &__xhpChildrenDeclaration() {\n"
+    "static $_ = 1;\n"
+    "return $_;\n"
+    "}\n"
+    "}\n");
+
+  // multiple interleaved
+  V("<?php "
+    "class :thing { "
+    "  attribute Thing a; category %a; children any; "
+    "  function foo() {}"
+    "  attribute Thing b;"
+    "  function bar() {}"
+    "}",
+
+    "class xhp_thing {\n"
+    "protected function &__xhpCategoryDeclaration() {\n"
+    "static $_ = array('a' => 1);\n"
+    "return $_;\n"
+    "}\n"
+    "protected function &__xhpChildrenDeclaration() {\n"
+    "static $_ = 1;\n"
+    "return $_;\n"
+    "}\n"
+    "public function foo() {\n"
+    "}\n"
+    "public function bar() {\n"
+    "}\n"
+    "protected static function &__xhpAttributeDeclaration() {\n"
+    "static $_ = -1;\n"
+    "if ($_ === -1) {\n"
+    "$_ = array_merge(parent::__xhpAttributeDeclaration(), "
+    "array('a' => array(5, 'Thing', null, 0), "
+    "'b' => array(5, 'Thing', null, 0)));\n"
+    "}\n"
+    "return $_;\n"
+    "}\n"
+    "}\n");
+
+  // idx
+  V("<?php foo()[bar()];",
+    "__xhp_idx(foo(), bar());\n");
+
   return true;
 }

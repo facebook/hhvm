@@ -458,6 +458,26 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "__xhp_idx",
+    'desc'   => "Helper function for XHP's extended array element expression.",
+    'flags'  =>  HipHopSpecific | NoInjection,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "arr",
+        'type'   => Variant,
+      ),
+      array(
+        'name'   => "idx",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "xhprof_enable",
     'desc'   => "Starts xhprof profiling. For details on how to use this function, please refer to http://mirror.facebook.net/facebook/xhprof/doc.html.",
     'flags'  =>  HasDocComment | HipHopSpecific,

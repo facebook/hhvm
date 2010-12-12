@@ -19,6 +19,22 @@
 
 #include <util/parser/scanner.h>
 
+#define IMPLEMENT_XHP_ATTRIBUTES                \
+  Token m_xhpAttributes;                        \
+  Token *xhpGetAttributes() {                   \
+    if (m_xhpAttributes.num()) {                \
+      return &m_xhpAttributes;                  \
+    }                                           \
+    return NULL;                                \
+  }                                             \
+  void xhpSetAttributes(Token &t) {             \
+    m_xhpAttributes = t;                        \
+    m_xhpAttributes = 1;                        \
+  }                                             \
+  void xhpResetAttributes() {                   \
+    m_xhpAttributes.reset();                    \
+  }                                             \
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -36,6 +52,8 @@ public:
   ParserBase(Scanner &scanner, const char *fileName);
   virtual ~ParserBase();
 
+  Scanner &scanner() { return m_scanner;}
+
   /**
    * Main function to call to start parsing the file. This function is already
    * implemented in hphp.y. Therefore, a subclass only has to declare it.
@@ -43,10 +61,15 @@ public:
   virtual bool parse() = 0;
 
   /**
+   * How to decide whether to turn on XHP.
+   */
+  virtual bool enableXHP() = 0;
+
+  /**
    * Public accessors.
    */
   const char *file() const { return m_fileName;}
-  std::string getMessage() const;
+  std::string getMessage(bool filename = false) const;
   LocationPtr getLocation() const;
   void getLocation(Location &loc) const {
     loc = *m_loc;
@@ -67,11 +90,15 @@ public:
   }
   void fatal(Location *loc, ParserBase *parser, const char *msg) {}
 
+  void pushFuncLocation();
+  LocationPtr popFuncLocation();
+
 protected:
   Scanner &m_scanner;
   const char *m_fileName;
 
   Location *m_loc;
+  LocationPtrVec m_funcLocs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

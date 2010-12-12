@@ -64,6 +64,7 @@ public:
     KindOfBreakStatement,
     KindOfContinueStatement,
     KindOfReturnStatement,
+    KindOfYieldStatement,
     KindOfGlobalStatement,
     KindOfStaticStatement,
     KindOfEchoStatement,

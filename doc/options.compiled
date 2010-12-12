@@ -704,9 +704,13 @@ users can use the same machine serving their own source files.
 = HPHPi Settings
 
   Eval {
+    EnableHipHopSyntax = false
+    EnableHipHopExperimentalSyntax = false
+
     EnableShortTags = true   # is <? allowed
     EnableAspTags = false    # is <% %> allowed
     EnableXHP = true         # XHP extension
+    NativeXHP = true         # Use HPHP to directly handle XHP
 
     # error level, strict mode is a lot more picky about coding errors
     EnableStrict = false

@@ -22,6 +22,32 @@ namespace Eval {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
+Construct::TypePtrMap Construct::TypeHintTypes;
+
+const Construct::TypePtrMap &Construct::GetTypeHintTypes() {
+  if (TypeHintTypes.empty()) {
+    TypeHintTypes["array"] = KindOfArray;
+    if (RuntimeOption::EnableHipHopExperimentalSyntax) {
+      TypeHintTypes["vector"]  = KindOfArray;
+      TypeHintTypes["map"]     = KindOfArray;
+      TypeHintTypes["set"]     = KindOfArray;
+    }
+    if (RuntimeOption::EnableHipHopSyntax) {
+      TypeHintTypes["bool"]    = KindOfBoolean;
+      TypeHintTypes["boolean"] = KindOfBoolean;
+      TypeHintTypes["int"]     = KindOfInt64;
+      TypeHintTypes["integer"] = KindOfInt64;
+      TypeHintTypes["real"]    = KindOfDouble;
+      TypeHintTypes["double"]  = KindOfDouble;
+      TypeHintTypes["float"]   = KindOfDouble;
+      TypeHintTypes["string"]  = KindOfString;
+    }
+  }
+  return TypeHintTypes;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 Construct::Construct(CONSTRUCT_ARGS) : _count(0) {
   parser->getLocation(m_loc);
 }

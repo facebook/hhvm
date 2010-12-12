@@ -34,6 +34,14 @@ public:
   void setNum(int num) {
     m_num = num;
   }
+  void set(int num, const char *t) {
+    m_num = num;
+    m_text = t;
+  }
+  void set(int num, const std::string &t) {
+    m_num = num;
+    m_text = t;
+  }
   void operator++(int) {
     ++m_num;
   }
@@ -45,12 +53,25 @@ public:
   const std::string &text() const {
     return m_text;
   }
+  bool same(const char *s) const {
+    return strcasecmp(m_text.c_str(), s) == 0;
+  }
   void setText(const char *t, int len) {
     m_text = std::string(t, len);
   }
   void setText(const char *t) {
     m_text = t;
   }
+  void setText(const std::string &t) {
+    m_text = t;
+  }
+  void setText(const ScannerToken &token) {
+    m_text = token.m_text;
+  }
+
+  void xhpLabel(bool prefix = true);
+  bool htmlTrim(); // true if non-empty after trimming
+  void htmlDecode();
 
 protected:
   int m_num; // internal token id
@@ -89,6 +110,24 @@ public:
   int scan();
 
   /**
+   * Setting scanner states by parser.
+   */
+  void xhpCloseTag();
+  void xhpChild();
+  void xhpAttribute();
+  void xhpStatement();
+  void xhpAttributeDecl();
+  void xhpReset();
+
+  void setXhpState(int state) { m_xhpState = state;}
+  int getXhpState() const { return m_xhpState;}
+  bool isXhpState() const { return m_xhpState != 0;}
+
+  bool hasGap() const { return m_gap;}
+  bool inScript() const { return m_inScript;}
+  void setInScript(bool inScript) { m_inScript = inScript;}
+
+  /**
    * Called by lex.yy.cpp for YY_INPUT (see hphp.x)
    */
   int read(char *text, int &result, int max);
@@ -99,6 +138,7 @@ public:
   bool shortTags() const { return m_type & AllowShortTags;}
   bool aspTags() const { return m_type & AllowAspTags;}
   bool full() const { return m_type & ReturnAllTokens;}
+  int lastToken() const { return m_lastToken;}
   void setToken(const char *rawText, int rawLeng) {
     m_token->setText(rawText, rawLeng);
     incLoc(rawText, rawLeng);
@@ -120,6 +160,7 @@ public:
   }
   void setHashBang(const char *rawText, int rawLeng);
   void error(const char* fmt, ...); // also used for YY_FATAL_ERROR in hphp.x
+  void warn(const char* fmt, ...);
   std::string escape(char *str, int len, char quote_type) const;
 
   /**
@@ -151,6 +192,7 @@ public:
   }
 
 private:
+  std::string m_filename;
   bool m_streamOwner;
   std::istream *m_stream;
   std::stringstream m_sstream; // XHP helper
@@ -173,6 +215,12 @@ private:
 
   std::string m_docComment;
   std::string m_heredocLabel;
+
+  // fields for XHP parsing
+  int m_lastToken;
+  bool m_gap;      // was whitespace token
+  bool m_inScript; // inside <script language="php"> </script>
+  int m_xhpState;
 
   void incLoc(const char *rawText, int rawLeng);
 };

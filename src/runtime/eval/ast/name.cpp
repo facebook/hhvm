@@ -76,7 +76,12 @@ int64 StringName::hash() const {
 bool StringName::isSp() const { return m_isSp; }
 
 void StringName::dump(std::ostream &out) const {
-  out << m_name.c_str();
+  const std::string &originalText = getOriginalText();
+  if (!originalText.empty()) {
+    out << originalText;
+  } else {
+    out << m_name.c_str();
+  }
 }
 
 ExprName::ExprName(CONSTRUCT_ARGS, ExpressionPtr name)

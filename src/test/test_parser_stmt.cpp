@@ -469,7 +469,7 @@ bool TestParserStmt::TestSwitchStatement() {
   V("<?php switch($a) { ;default;; }",
     "switch ($a) {\ndefault:\n}\n");
 
-  V("<?php switch($a) :default;; endswitch;",
+  V("<?php switch($a) : default;; endswitch;",
     "switch ($a) {\ndefault:\n}\n");
 
   V("<?php switch($a) :;default;; endswitch;",

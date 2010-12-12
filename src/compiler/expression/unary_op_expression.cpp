@@ -105,7 +105,6 @@ bool UnaryOpExpression::isScalar() const {
   case '-':
   case '~':
   case '@':
-  case '(':
     return m_exp->isScalar();
   case T_ARRAY:
     return (!m_exp || m_exp->isScalar());
@@ -116,14 +115,13 @@ bool UnaryOpExpression::isScalar() const {
 }
 
 bool UnaryOpExpression::isRefable(bool checkError /*= false */) const {
-  if (m_op == '(' || m_op == T_INC || m_op == T_DEC) {
+  if (m_op == T_INC || m_op == T_DEC) {
     return m_exp->isRefable(checkError);
   }
   return false;
 }
 
 bool UnaryOpExpression::isThis() const {
-  if (m_op == '(') return m_exp->isThis();
   return false;
 }
 
@@ -199,7 +197,6 @@ bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
         result = value.negate(); break;
       case '~':
         result = ~value; break;
-      case '(':
       case '@':
         result = value; break;
       case T_INT_CAST:
@@ -269,9 +266,6 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
   Variant result;
 
   if (m_exp && ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
-    if (m_op == '(') {
-      return m_exp;
-    }
     if (m_op == T_UNSET) {
       if (m_exp->isScalar() ||
           (m_exp->is(KindOfExpressionList) &&
@@ -362,7 +356,6 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case '~':             et = rt = Type::Primitive;                   break;
   case T_CLONE:         et = Type::Some;      rt = Type::Object;     break;
   case '@':             et = type;            rt = Type::Variant;    break;
-  case '(':             et = rt = type;                              break;
   case T_INT_CAST:      et = rt = Type::Int64;                       break;
   case T_DOUBLE_CAST:   et = rt = Type::Double;                      break;
   case T_STRING_CAST:   et = rt = Type::String;                      break;
@@ -410,19 +403,6 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     }
 
     switch (m_op) {
-    case '(':
-      /*
-        Need to make sure that type conversion happens at the right point.
-        Without this, types are inferred differently:
-        Consider (a+b)+1 and (a+b)."foo".
-        In the first one, the "(" expression ends up with actualType int, in
-        the second it ends up with actualType string. This is bad for cse,
-        and type propagation (we rely on the fact that the same expression,
-        with the same arguments, must have the same actual type).
-      */
-      m_exp->setExpectedType(TypePtr());
-      rt = m_exp->getType();
-      break;
     case '+':
     case '-':
       if (Type::SameType(expType, Type::Int64) ||
@@ -473,7 +453,6 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case '-':             cg_printf("-");             break;
     case '!':             cg_printf("!");             break;
     case '~':             cg_printf("~");             break;
-    case '(':             cg_printf("(");             break;
     case T_INT_CAST:      cg_printf("(int)");         break;
     case T_DOUBLE_CAST:   cg_printf("(double)");      break;
     case T_STRING_CAST:   cg_printf("(string)");      break;
@@ -503,7 +482,6 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (m_front) {
     switch (m_op) {
-    case '(':
     case T_UNSET:
     case T_EXIT:
     case T_ARRAY:
@@ -714,7 +692,6 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     case '-':             cg_printf("negate(");    break;
     case '!':             cg_printf("!(");         break;
     case '~':             cg_printf("~");          break;
-    case '(':             cg_printf("(");          break;
     case T_INT_CAST:      cg_printf("(");          break;
     case T_DOUBLE_CAST:   cg_printf("(");          break;
     case T_STRING_CAST:   cg_printf("(");          break;
@@ -822,7 +799,6 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       }
     case T_CLONE:
     case '!':
-    case '(':
     case '-':
     case T_INT_CAST:
     case T_DOUBLE_CAST:

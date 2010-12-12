@@ -60,6 +60,7 @@
 #include <compiler/statement/break_statement.h>
 #include <compiler/statement/continue_statement.h>
 #include <compiler/statement/return_statement.h>
+#include <compiler/statement/yield_statement.h>
 #include <compiler/statement/global_statement.h>
 #include <compiler/statement/static_statement.h>
 #include <compiler/statement/echo_statement.h>
@@ -77,6 +78,7 @@
 
 #include <util/preprocess.h>
 #include <util/lock.h>
+#include <util/logger.h>
 
 #ifdef FACEBOOK
 #include <../facebook/src/compiler/fb_compiler_hooks.h>
@@ -124,8 +126,8 @@ StatementListPtr Parser::ParseString(const char *input, AnalysisResultPtr ar,
   if (parser.parse()) {
     return parser.getTree();
   }
-  printf("Error parsing %s: %s\n%s\n", fileName,
-         parser.getMessage().c_str(), input);
+  Logger::Error("Error parsing %s: %s\n%s\n", fileName,
+                parser.getMessage().c_str(), input);
   return StatementListPtr();
 }
 
@@ -140,6 +142,10 @@ Parser::Parser(Scanner &scanner, const char *fileName,
 
   Lock lock(m_ar->getMutex());
   m_ar->addFileScope(m_file);
+}
+
+bool Parser::enableXHP() {
+  return Option::EnableXHP;
 }
 
 void Parser::pushComment() {
@@ -419,7 +425,7 @@ void Parser::encapArray(Token &out, Token &var, Token &expr) {
 ///////////////////////////////////////////////////////////////////////////////
 // expressions
 
-void Parser::onConstant(Token &out, Token &constant) {
+void Parser::onConstantValue(Token &out, Token &constant) {
   out->exp = NEW_EXP(ConstantExpression, constant->text());
 }
 
@@ -532,18 +538,25 @@ void Parser::onBinaryOpExp(Token &out, Token &operand1, Token &operand2,
   out->exp = NEW_EXP(BinaryOpExpression, operand1->exp, operand2->exp, op);
 }
 
-void Parser::onQOp(Token &out, Token &exprCond, Token &expYes, Token &expNo) {
-  out->exp = NEW_EXP(QOpExpression, exprCond->exp, expYes->exp, expNo->exp);
+void Parser::onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo) {
+  out->exp = NEW_EXP(QOpExpression, exprCond->exp,
+                     expYes ? expYes->exp : ExpressionPtr(), expNo->exp);
 }
 
-void Parser::onArray(Token &out, Token &pairs) {
+void Parser::onArray(Token &out, Token &pairs, int op /* = T_ARRAY */) {
+  if (op != T_ARRAY && !Option::EnableHipHopSyntax) {
+    Logger::Error("Typed collection is not enabled: %s", getMessage().c_str());
+    return;
+  }
   onUnaryOpExp(out, pairs, T_ARRAY, true);
 }
 
 void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                          bool ref) {
+  if (!value->exp) return;
+
   ExpressionPtr expList;
-  if (pairs) {
+  if (pairs && pairs->exp) {
     expList = pairs->exp;
   } else {
     expList = NEW_EXP0(ExpressionList);
@@ -573,8 +586,8 @@ void Parser::onMethodStart(Token &name, Token &mods) {
   onFunctionStart(name);
 }
 
-void Parser::onFunction(Token &out, Token &ref, Token &name, Token &params,
-                        Token &stmt) {
+void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
+                        Token &params, Token &stmt) {
   if (!stmt->stmt) {
     stmt->stmt = NEW_STMT0(StatementList);
   }
@@ -584,6 +597,7 @@ void Parser::onFunction(Token &out, Token &ref, Token &name, Token &params,
      dynamic_pointer_cast<StatementList>(stmt->stmt),
      m_file->popAttribute(),
      popComment());
+  func->setLocation(popFuncLocation());
   out->stmt = func;
   {
     Lock lock(m_ar->getMutex());
@@ -592,6 +606,10 @@ void Parser::onFunction(Token &out, Token &ref, Token &name, Token &params,
   completeScope(func->getFunctionScope());
   if (func->ignored()) {
     out->stmt = NEW_STMT0(StatementList);
+  }
+
+  if (hasType(ret)) {
+    // TODO
   }
 }
 
@@ -610,6 +628,13 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
 }
 
 void Parser::onClassStart(int type, Token &name, Token *parent) {
+  if (name.text() == "self" || name.text() == "parent" ||
+      Type::GetTypeHintTypes().find(name.text()) !=
+      Type::GetTypeHintTypes().end()) {
+    Logger::Error("Cannot use '%s' as class name as it is reserved: %s",
+                  name.text().c_str(), getMessage().c_str());
+  }
+
   pushComment();
   newScope();
 }
@@ -664,7 +689,8 @@ void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
   out->exp = expList;
 }
 
-void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl) {
+void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
+                                  Token *type) {
   if (modifiers) {
     ModifierExpressionPtr exp = modifiers->exp ?
       dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
@@ -676,10 +702,15 @@ void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl) {
     out->stmt =
       NEW_STMT(ClassConstant, dynamic_pointer_cast<ExpressionList>(decl->exp));
   }
+
+  if (type && hasType(*type)) {
+    // TODO
+  }
 }
 
-void Parser::onMethod(Token &out, Token &modifiers, Token &ref, Token &name,
-                      Token &params, Token &stmt) {
+void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
+                      Token &name, Token &params, Token &stmt,
+                      bool reloc /* = true */) {
   ModifierExpressionPtr exp = modifiers->exp ?
     dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
     : NEW_EXP0(ModifierExpression);
@@ -696,10 +727,17 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ref, Token &name,
      dynamic_pointer_cast<ExpressionList>(params->exp), stmts,
      m_file->popAttribute(),
      popComment());
+  if (reloc) {
+    mth->setLocation(popFuncLocation());
+  }
 
   Lock lock(m_ar->getMutex());
   completeScope(mth->onInitialParse(m_ar, m_file, true));
   out->stmt = mth;
+
+  if (hasType(ret)) {
+    // TODO
+  }
 }
 
 void Parser::onMemberModifier(Token &out, Token *modifiers, Token &modifier) {
@@ -853,6 +891,14 @@ void Parser::onReturn(Token &out, Token *expr) {
   out->stmt = NEW_STMT(ReturnStatement, expr ? expr->exp : ExpressionPtr());
 }
 
+void Parser::onYield(Token &out, Token *expr) {
+  if (!Option::EnableHipHopSyntax) {
+    Logger::Error("Yield is not enabled: %s", getMessage().c_str());
+    return;
+  }
+  out->stmt = NEW_STMT(YieldStatement, expr ? expr->exp : ExpressionPtr());
+}
+
 void Parser::onGlobal(Token &out, Token &expr) {
   out->stmt = NEW_STMT(GlobalStatement,
                        dynamic_pointer_cast<ExpressionList>(expr->exp));
@@ -953,17 +999,61 @@ void Parser::onThrow(Token &out, Token &expr) {
   out->stmt = NEW_STMT(ThrowStatement, expr->exp);
 }
 
-void Parser::onHphpNoteExpr(Token &out, Token &note, Token &expr) {
-  out->exp = expr->exp;
-}
-void Parser::onHphpNoteStatement(Token &out, Token &note, Token &stmt) {
-  out->stmt = stmt->stmt;
+void Parser::onNamespaceStart(Token &out, Token &ns) {
 }
 
-void Parser::addHphpDeclare(Token &declare) {
+void Parser::onNamespace(Token &out, Token *ns, Token &stmts) {
 }
 
-void Parser::addHphpSuppressError(Token &error) {
+void Parser::onUseNamespaces(Token &out, Token *uses, Token &use) {
+}
+
+void Parser::onUseNamespace(Token &out, Token &ns, Token *as, bool absolute) {
+}
+
+void Parser::onConstant(Token &out, Token *exprs, Token &var, Token &value) {
+}
+
+void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params,
+                       Token &cparams, Token &stmts) {
+  popFuncLocation();
+  if (hasType(ret)) {
+    // TODO
+  }
+}
+
+void Parser::onClosureParam(Token &out, Token *params, Token &param,
+                            bool ref) {
+}
+
+void Parser::onLabel(Token &out, Token &label) {
+}
+
+void Parser::onGoto(Token &out, Token &label) {
+}
+
+void Parser::onTypeDecl(Token &out, Token &type, Token &decl) {
+  if (!Option::EnableHipHopExperimentalSyntax) {
+    Logger::Error("Type hint is not enabled: %s", getMessage().c_str());
+    return;
+  }
+}
+
+void Parser::onTypedVariable(Token &out, Token *exprs, Token &var,
+                             Token *value) {
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool Parser::hasType(Token &type) {
+  if (!type.text().empty()) {
+    if (!Option::EnableHipHopSyntax) {
+      Logger::Error("Type hint is not enabled: %s", getMessage().c_str());
+      return false;
+    }
+    return true;
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

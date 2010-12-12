@@ -57,6 +57,7 @@
 #include <runtime/eval/ast/if_statement.h>
 #include <runtime/eval/ast/method_statement.h>
 #include <runtime/eval/ast/return_statement.h>
+#include <runtime/eval/ast/yield_statement.h>
 #include <runtime/eval/ast/statement_list_statement.h>
 #include <runtime/eval/ast/static_statement.h>
 #include <runtime/eval/ast/strong_foreach_statement.h>
@@ -70,6 +71,7 @@
 #include <util/preprocess.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/util/string_buffer.h>
+#include <runtime/base/util/exceptions.h>
 
 using namespace HPHP;
 using namespace HPHP::Eval;
@@ -203,6 +205,10 @@ StatementPtr Parser::ParseFile(const char *fileName,
 Parser::Parser(Scanner &scanner, const char *fileName,
                vector<StaticStatementPtr> &statics)
     : ParserBase(scanner, fileName), m_staticStatements(statics) {
+}
+
+bool Parser::enableXHP() {
+  return RuntimeOption::EnableXHP;
 }
 
 ClassStatementPtr Parser::currentClass() const {
@@ -416,12 +422,12 @@ ExpressionPtr Parser::createDynamicVariable(ExpressionPtr exp) {
 }
 
 void Parser::onCallParam(Token &out, Token *params, Token &expr, bool ref) {
+  ExpressionPtr param = expr->exp();
   if (params) {
     out = *params;
   } else {
     out.reset();
   }
-  ExpressionPtr param = expr->exp();
   if (ref) {
     param = NEW_EXP(RefParam, param->unsafe_cast<LvalExpression>());
   }
@@ -590,7 +596,7 @@ void Parser::encapArray(Token &out, Token &var, Token &expr) {
 ///////////////////////////////////////////////////////////////////////////////
 // expressions
 
-void Parser::onConstant(Token &out, Token &constant) {
+void Parser::onConstantValue(Token &out, Token &constant) {
   out.reset();
   string lower = Util::toLower(constant.text());
   if (lower == "true") {
@@ -807,18 +813,25 @@ void Parser::onBinaryOpExp(Token &out, Token &operand1, Token &operand2,
   }
 }
 
-void Parser::onQOp(Token &out, Token &exprCond, Token &expYes, Token &expNo) {
+void Parser::onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo) {
   out.reset();
-  out->exp() = NEW_EXP(QOp, exprCond->exp(), expYes->exp(), expNo->exp());
+  out->exp() = NEW_EXP(QOp, exprCond->exp(),
+                       expYes ? expYes->exp() : ExpressionPtr(), expNo->exp());
 }
 
-void Parser::onArray(Token &out, Token &pairs) {
+void Parser::onArray(Token &out, Token &pairs, int op /* = T_ARRAY */) {
+  if (op != T_ARRAY && !RuntimeOption::EnableHipHopSyntax) {
+    raise_error("Typed collection is not enabled: %s", getMessage().c_str());
+    return;
+  }
   out.reset();
   out->exp() = NEW_EXP(Array, pairs->arrayPairs());
 }
 
 void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                          bool ref) {
+  if (!value->exp()) return;
+
   if (pairs) {
     out = *pairs;
   } else {
@@ -863,11 +876,12 @@ void Parser::onFunctionStart(Token &name) {
   pushFunc(func);
 }
 
-void Parser::onFunction(Token &out, Token &ref, Token &name, Token &params,
-                        Token &stmt) {
+void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
+                        Token &params, Token &stmt) {
   out.reset();
   FunctionStatementPtr func = peekFunc();
   ASSERT(func);
+  func->setLoc(popFuncLocation().get());
   StatementListStatementPtr body = stmt->getStmtList();
   func->init(this, ref.num(), params->params(), body, m_hasCallToGetArgs);
   out->stmt() = func;
@@ -893,9 +907,11 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
 }
 
 void Parser::onClassStart(int type, Token &name, Token *parent) {
-  if (name.text() == "self" || name.text() == "parent") {
-    raise_error("Cannot use '%s' as class name as it is reserved "
-                "in %s on line %d", name.text().c_str(), file(), line1());
+  if (name.text() == "self" || name.text() == "parent" ||
+      Construct::GetTypeHintTypes().find(name.text()) !=
+      Construct::GetTypeHintTypes().end()) {
+    raise_error("Cannot use '%s' as class name as it is reserved: %s",
+                name.text().c_str(), getMessage().c_str());
   }
 
   ClassStatementPtr cs = NEW_STMT(Class, name.text(),
@@ -941,6 +957,13 @@ void Parser::onClassVariableModifer(Token &mod) {
   m_classVarMods = mod.num();
 }
 
+void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl,
+                                  Token *type) {
+  if (type && hasType(*type)) {
+    // TODO
+  }
+}
+
 void Parser::onClassVariable(Token &out, Token *exprs, Token &name,
                              Token *val) {
   ClassStatementPtr cs = peekClass();
@@ -968,11 +991,15 @@ void Parser::onMethodStart(Token &name, Token &modifiers) {
   pushFunc(func);
 }
 
-void Parser::onMethod(Token &out, Token &modifiers, Token &ref, Token &name,
-                      Token &params, Token &stmt) {
+void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
+                      Token &name, Token &params, Token &stmt,
+                      bool reloc /* = true */) {
   ClassStatementPtr cs = peekClass();
   MethodStatementPtr ms = peekFunc()->unsafe_cast<MethodStatement>();
   ASSERT(ms);
+  if (reloc) {
+    ms->setLoc(popFuncLocation().get());
+  }
   popFunc();
   StatementListStatementPtr stmts = stmt->getStmtList();
   ms->resetLoc(this);
@@ -999,26 +1026,26 @@ void Parser::onMemberModifier(Token &out, Token *modifiers, Token &modifier) {
 
   if ((out.num() & ClassStatement::AccessMask) &&
       (mod & ClassStatement::AccessMask)) {
-    raise_error("Multiple access type modifiers are not allowed "
-                "in %s on line %d", file(), line1());
+    raise_error("Multiple access type modifiers are not allowed: %s",
+                getMessage().c_str());
   }
   if ((out.num() & ClassStatement::Static) && (mod & ClassStatement::Static)) {
-    raise_error("Multiple static modifiers are not allowed "
-                "in %s on line %d", file(), line1());
+    raise_error("Multiple static modifiers are not allowed: %s",
+                getMessage().c_str());
   }
   if ((out.num() & ClassStatement::Abstract) &&
       (mod & ClassStatement::Abstract)) {
-    raise_error("Multiple abstract modifiers are not allowed "
-                "in %s on line %d", file(), line1());
+    raise_error("Multiple abstract modifiers are not allowed: %s",
+                getMessage().c_str());
   }
   if ((out.num() & ClassStatement::Final) && (mod & ClassStatement::Final)) {
-    raise_error("Multiple final modifiers are not allowed "
-                "in %s on line %d", file(), line1());
+    raise_error("Multiple final modifiers are not allowed: %s",
+                getMessage().c_str());
   }
   if (((out.num()|mod) & (ClassStatement::Abstract|ClassStatement::Final)) ==
       (ClassStatement::Abstract|ClassStatement::Final)) {
-    raise_error("Cannot use the final modifier on an abstract class member "
-                "in %s on line %d", file(), line1());
+    raise_error("Cannot use final modifier on an abstract class member: %s",
+                getMessage().c_str());
   }
 
   out.setNum(out.num() | mod);
@@ -1160,6 +1187,16 @@ void Parser::onReturn(Token &out, Token *expr) {
                          (*expr)->exp() : ExpressionPtr());
 }
 
+void Parser::onYield(Token &out, Token *expr) {
+  if (!RuntimeOption::EnableHipHopSyntax) {
+    raise_error("Yield is not enabled: %s", getMessage().c_str());
+    return;
+  }
+  out.reset();
+  out->stmt() = NEW_STMT(Yield, expr ?
+                         (*expr)->exp() : ExpressionPtr());
+}
+
 void Parser::onGlobal(Token &out, Token &expr) {
   out.reset();
   out->stmt() = NEW_STMT(Global, expr->names());
@@ -1271,41 +1308,48 @@ void Parser::onThrow(Token &out, Token &expr) {
   out->stmt() = NEW_STMT(Throw, expr->exp());
 }
 
-  /*
-void Parser::addHphpNote(ConstructPtr c, const std::string &note) {
+void Parser::onNamespaceStart(Token &out, Token &ns) {
+}
 
-  if (note[0] == '@') {
-    CodeError::ErrorType e;
-    if (CodeError::lookupErrorType(note.substr(1), e)) {
-      c->addSuppressError(e);
-    } else {
-      c->addHphpNote(note);
-    }
-  } else {
-    c->addHphpNote(note);
+void Parser::onNamespace(Token &out, Token *ns, Token &stmts) {
+}
+
+void Parser::onUseNamespaces(Token &out, Token *uses, Token &use) {
+}
+
+void Parser::onUseNamespace(Token &out, Token &ns, Token *as, bool absolute) {
+}
+
+void Parser::onConstant(Token &out, Token *exprs, Token &var, Token &value) {
+}
+
+void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params,
+                       Token &cparams, Token &stmts) {
+  popFuncLocation();
+}
+
+void Parser::onClosureParam(Token &out, Token *params, Token &param,
+                            bool ref) {
+}
+
+void Parser::onLabel(Token &out, Token &label) {
+}
+
+void Parser::onGoto(Token &out, Token &label) {
+}
+
+void Parser::onTypeDecl(Token &out, Token &type, Token &decl) {
+  if (!RuntimeOption::EnableHipHopExperimentalSyntax) {
+    raise_error("Type hint is not enabled: %s", getMessage().c_str());
+    return;
   }
-
-}
-  */
-
-void Parser::onHphpNoteExpr(Token &out, Token &note, Token &expr) {
-  out.reset();
-  //addHphpNote(expr->exp(), note.text());
-  out->exp() = expr->exp();
-}
-void Parser::onHphpNoteStatement(Token &out, Token &note, Token &stmt) {
-  out.reset();
-  //addHphpNote(stmt->stmt(), note.text());
-  out->stmt() = stmt->stmt();
 }
 
-void Parser::addHphpDeclare(Token &declare) {
-
+void Parser::onTypedVariable(Token &out, Token *exprs, Token &var,
+                             Token *value) {
 }
 
-void Parser::addHphpSuppressError(Token &error) {
-
-}
+///////////////////////////////////////////////////////////////////////////////
 
 NamePtr Parser::procStaticClassName(Token &className, bool text) {
   NamePtr cname;
@@ -1317,16 +1361,30 @@ NamePtr Parser::procStaticClassName(Token &className, bool text) {
     } else {
       cname = Name::fromString(this, className.text());
     }
+    cname->setOriginalText(className.text());
 
   } else {
     cname = className->name();
     if (haveClass() && cname->get()) {
       if (cname->get() == "self") {
         cname = Name::fromString(this, peekClass()->name(), true);
+        cname->setOriginalText("self");
       } else if (cname->get() == "parent") {
         cname = Name::fromString(this, peekClass()->parent(), true);
+        cname->setOriginalText("parent");
       }
     }
   }
   return cname;
+}
+
+bool Parser::hasType(Token &type) {
+  if (!type.text().empty()) {
+    if (!RuntimeOption::EnableHipHopSyntax) {
+      raise_error("Type hint is not enabled: %s", getMessage().c_str());
+      return false;
+    }
+    return true;
+  }
+  return false;
 }

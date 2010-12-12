@@ -41,6 +41,12 @@ public:
   static NamePtr fromExp(CONSTRUCT_ARGS, ExpressionPtr e);
   static NamePtr fromStaticClassExp(CONSTRUCT_ARGS, ExpressionPtr e);
   static NamePtr LateStatic(CONSTRUCT_ARGS);
+
+  void setOriginalText(const std::string &text) { m_originalText = text;}
+  const std::string &getOriginalText() const { return m_originalText;}
+
+private:
+  std::string m_originalText;
 };
 
 class StringName : public Name {

@@ -46,8 +46,11 @@ Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
     m_ref(ref), m_nullDefault(false) {
   if (!type.empty()) {
     m_fnName = parser->peekFunc()->fullName() + "()";
-    if (strcasecmp(type.c_str(), "array") == 0) {
-      m_kind = KindOfArray;
+
+    const TypePtrMap &types = GetTypeHintTypes();
+    TypePtrMap::const_iterator iter;
+    if ((iter = types.find(type)) != types.end()) {
+      m_kind = iter->second;
     } else {
       m_kind = KindOfObject;
       if (strcasecmp(type.c_str(), "self") == 0 && parser->haveClass()) {

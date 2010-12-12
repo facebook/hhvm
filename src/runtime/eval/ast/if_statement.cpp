@@ -45,7 +45,7 @@ Variant IfBranch::evalCond(VariableEnvironment &env) const {
 void IfBranch::dump(std::ostream &out) const {
   out << "if (";
   m_cond->dump(out);
-  out << ") {";
+  out << ") {\n";
   if (m_body) m_body->dump(out);
   out << "}";
 }
@@ -72,7 +72,7 @@ void IfStatement::eval(VariableEnvironment &env) const {
 void IfStatement::dump(std::ostream &out) const {
   dumpVector(out, m_branches, "else");
   if (m_else) {
-    out << "else {";
+    out << "else {\n";
     m_else->dump(out);
     out << "}";
   }

@@ -30,15 +30,17 @@ ParserBase::ParserBase(Scanner &scanner, const char *fileName)
 ParserBase::~ParserBase() {
 }
 
-std::string ParserBase::getMessage() const {
+std::string ParserBase::getMessage(bool filename /* = false */) const {
   int line = m_scanner.getLocation()->line1;
   int column = m_scanner.getLocation()->char1;
 
   string ret = m_scanner.getError();
   ret += " (";
+  if (filename) {
+    ret += string("File: ") + file() + ", ";
+  }
   ret += string("Line: ") + lexical_cast<string>(line);
-  ret += ", Char: " + lexical_cast<string>(column) + "): ";
-  //ret += m_err.str() + "\n";
+  ret += ", Char: " + lexical_cast<string>(column) + ")";
   return ret;
 }
 
@@ -50,6 +52,17 @@ LocationPtr ParserBase::getLocation() const {
   location->line1 = line1();
   location->char1 = char1();
   return location;
+}
+
+void ParserBase::pushFuncLocation() {
+  m_funcLocs.push_back(getLocation());
+}
+
+LocationPtr ParserBase::popFuncLocation() {
+  ASSERT(!m_funcLocs.empty());
+  LocationPtr loc = m_funcLocs.back();
+  m_funcLocs.pop_back();
+  return loc;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

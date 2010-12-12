@@ -13,9 +13,21 @@
     _scanner->error(msg); \
   } while (0) \
 
+#define DECLARE_YYCURSOR \
+  char *&cursor = yyg->yy_c_buf_p; *cursor = yyg->yy_hold_char;
+#define DECLARE_YYLIMIT \
+  char *limit = YY_CURRENT_BUFFER->yy_ch_buf + yyg->yy_n_chars;
+#define YYCURSOR  cursor
+#define YYLIMIT   limit
+#define RESET_YYCURSOR yyg->yy_hold_char = *YYCURSOR; *YYCURSOR = '\0';
+
 // macros for rules
 #define SETTOKEN _scanner->setToken(yytext, yyleng)
 #define STEPPOS  _scanner->stepPos(yytext, yyleng)
+
+#define IS_LABEL_START(c) \
+  (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || \
+   (c) == '_' || (c) >= 0x7F)
 %}
 
 %x ST_IN_HTML
@@ -23,7 +35,7 @@
 %x ST_DOUBLE_QUOTES
 %x ST_BACKQUOTE
 %x ST_HEREDOC
-%x ST_START_HEREDOC
+%x ST_NOWDOC
 %x ST_END_HEREDOC
 %x ST_LOOKING_FOR_PROPERTY
 %x ST_LOOKING_FOR_VARNAME
@@ -31,6 +43,13 @@
 %x ST_COMMENT
 %x ST_DOC_COMMENT
 %x ST_ONE_LINE_COMMENT
+
+%x ST_XHP_CLOSE_TAG
+%x ST_XHP_CHILD
+%x ST_XHP_ATTRIBUTE
+%x ST_XHP_STATEMENT
+%x ST_XHP_ATTRIBUTE_DECL
+
 %option stack
 
 LNUM    [0-9]+
@@ -44,6 +63,7 @@ TABS_AND_SPACES [ \t]*
 TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
 ANY_CHAR (.|[\n])
 NEWLINE ("\r"|"\n"|"\r\n")
+XHPLABEL {LABEL}([:-]{LABEL})*
 
 /*
  * LITERAL_DOLLAR matches unescaped $ that aren't followed by a label character
@@ -52,37 +72,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
  */
 DOUBLE_QUOTES_LITERAL_DOLLAR ("$"+([^a-zA-Z_\x7f-\xff$"\\{]|("\\"{ANY_CHAR})))
 BACKQUOTE_LITERAL_DOLLAR     ("$"+([^a-zA-Z_\x7f-\xff$`\\{]|("\\"{ANY_CHAR})))
-HEREDOC_LITERAL_DOLLAR       ("$"+([^a-zA-Z_\x7f-\xff$\n\r\\{]|("\\"[^\n\r])))
-/*
- * Usually, HEREDOC_NEWLINE will just function like a simple NEWLINE, but some
- * special cases need to be handled. HEREDOC_CHARS doesn't allow a line to
- * match when { or $, and/or \ is at the end. (("{"*|"$"*)"\\"?) handles that,
- * along with cases where { or $, and/or \ is the ONLY thing on a line
- *
- * The other case is when a line contains a label, followed by ONLY
- * { or $, and/or \  Handled by ({LABEL}";"?((("{"+|"$"+)"\\"?)|"\\"))
- */
-HEREDOC_NEWLINE ((({LABEL}";"?((("{"+|"$"+)"\\"?)|"\\"))|(("{"*|"$"*)"\\"?)){NEWLINE})
 
-/*
- * This pattern is just used in the next 2 for matching { or literal $, and/or
- * \ escape sequence immediately at the beginning of a line or after a label
- */
-HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR (("{"+[^$\n\r\\{])|("{"*"\\"[^\n\r])|{HEREDOC_LITERAL_DOLLAR})
-
-/*
- * These 2 label-related patterns allow HEREDOC_CHARS to continue "regular"
- * matching after a newline that starts with either a non-label character or a
- * label that isn't followed by a newline. Like HEREDOC_CHARS, they won't match
- * a variable or "{$"  Matching a newline, and possibly label, up TO a variable
- * or "{$", is handled in the heredoc rules
- *
- * The HEREDOC_LABEL_NO_NEWLINE pattern (";"[^$\n\r\\{]) handles cases where ;
- * follows a label. [^a-zA-Z0-9_\x7f-\xff;$\n\r\\{] is needed to prevent a label
- * character or ; from matching on a possible (real) ending label
- */
-HEREDOC_NON_LABEL ([^a-zA-Z_\x7f-\xff$\n\r\\{]|{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})
-HEREDOC_LABEL_NO_NEWLINE ({LABEL}([^a-zA-Z0-9_\x7f-\xff;$\n\r\\{]|(";"[^$\n\r\\{])|(";"?{HEREDOC_CURLY_OR_ESCAPE_OR_DOLLAR})))
 /*
  * CHARS matches everything up to a variable or "{$"
  * {'s are matched as long as they aren't followed by a $
@@ -93,47 +83,46 @@ HEREDOC_LABEL_NO_NEWLINE ({LABEL}([^a-zA-Z0-9_\x7f-\xff;$\n\r\\{]|(";"[^$\n\r\\{
  */
 DOUBLE_QUOTES_CHARS ("{"*([^$"\\{]|("\\"{ANY_CHAR}))|{DOUBLE_QUOTES_LITERAL_DOLLAR})
 BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
-HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({HEREDOC_NEWLINE}+({HEREDOC_NON_LABEL}|{HEREDOC_LABEL_NO_NEWLINE})))
 
 %%
 
-<ST_IN_SCRIPTING>"exit"                 {STEPPOS; return T_EXIT;}
-<ST_IN_SCRIPTING>"die"                  {STEPPOS; return T_EXIT;}
-<ST_IN_SCRIPTING>"function"             {STEPPOS; return T_FUNCTION;}
-<ST_IN_SCRIPTING>"const"                {STEPPOS; return T_CONST;}
-<ST_IN_SCRIPTING>"return"               {STEPPOS; return T_RETURN;}
-<ST_IN_SCRIPTING>"try"                  {STEPPOS; return T_TRY;}
-<ST_IN_SCRIPTING>"catch"                {STEPPOS; return T_CATCH;}
-<ST_IN_SCRIPTING>"throw"                {STEPPOS; return T_THROW;}
-<ST_IN_SCRIPTING>"if"                   {STEPPOS; return T_IF;}
-<ST_IN_SCRIPTING>"elseif"               {STEPPOS; return T_ELSEIF;}
-<ST_IN_SCRIPTING>"endif"                {STEPPOS; return T_ENDIF;}
-<ST_IN_SCRIPTING>"else"                 {STEPPOS; return T_ELSE;}
-<ST_IN_SCRIPTING>"while"                {STEPPOS; return T_WHILE;}
-<ST_IN_SCRIPTING>"endwhile"             {STEPPOS; return T_ENDWHILE;}
-<ST_IN_SCRIPTING>"do"                   {STEPPOS; return T_DO;}
-<ST_IN_SCRIPTING>"for"                  {STEPPOS; return T_FOR;}
-<ST_IN_SCRIPTING>"endfor"               {STEPPOS; return T_ENDFOR;}
-<ST_IN_SCRIPTING>"foreach"              {STEPPOS; return T_FOREACH;}
-<ST_IN_SCRIPTING>"endforeach"           {STEPPOS; return T_ENDFOREACH;}
-<ST_IN_SCRIPTING>"declare"              {STEPPOS; return T_DECLARE;}
-<ST_IN_SCRIPTING>"enddeclare"           {STEPPOS; return T_ENDDECLARE;}
-<ST_IN_SCRIPTING>"instanceof"           {STEPPOS; return T_INSTANCEOF;}
-<ST_IN_SCRIPTING>"as"                   {STEPPOS; return T_AS;}
-<ST_IN_SCRIPTING>"switch"               {STEPPOS; return T_SWITCH;}
-<ST_IN_SCRIPTING>"endswitch"            {STEPPOS; return T_ENDSWITCH;}
-<ST_IN_SCRIPTING>"case"                 {STEPPOS; return T_CASE;}
-<ST_IN_SCRIPTING>"default"              {STEPPOS; return T_DEFAULT;}
-<ST_IN_SCRIPTING>"break"                {STEPPOS; return T_BREAK;}
-<ST_IN_SCRIPTING>"continue"             {STEPPOS; return T_CONTINUE;}
-<ST_IN_SCRIPTING>"echo"                 {STEPPOS; return T_ECHO;}
-<ST_IN_SCRIPTING>"print"                {STEPPOS; return T_PRINT;}
-<ST_IN_SCRIPTING>"class"                {STEPPOS; return T_CLASS;}
-<ST_IN_SCRIPTING>"interface"            {STEPPOS; return T_INTERFACE;}
-<ST_IN_SCRIPTING>"extends"              {STEPPOS; return T_EXTENDS;}
-<ST_IN_SCRIPTING>"implements"           {STEPPOS; return T_IMPLEMENTS;}
-
-<ST_IN_SCRIPTING>^"#HPHP_DECLARE"      {STEPPOS; return T_HPHP_DECLARE;}
+<ST_IN_SCRIPTING>"exit"                 { SETTOKEN; return T_EXIT;}
+<ST_IN_SCRIPTING>"die"                  { SETTOKEN; return T_EXIT;}
+<ST_IN_SCRIPTING>"function"             { SETTOKEN; return T_FUNCTION;}
+<ST_IN_SCRIPTING>"const"                { SETTOKEN; return T_CONST;}
+<ST_IN_SCRIPTING>"return"               { SETTOKEN; return T_RETURN;}
+<ST_IN_SCRIPTING>"yield"                { SETTOKEN; return T_YIELD;}
+<ST_IN_SCRIPTING>"try"                  { SETTOKEN; return T_TRY;}
+<ST_IN_SCRIPTING>"catch"                { SETTOKEN; return T_CATCH;}
+<ST_IN_SCRIPTING>"throw"                { SETTOKEN; return T_THROW;}
+<ST_IN_SCRIPTING>"if"                   { SETTOKEN; return T_IF;}
+<ST_IN_SCRIPTING>"elseif"               { SETTOKEN; return T_ELSEIF;}
+<ST_IN_SCRIPTING>"endif"                { SETTOKEN; return T_ENDIF;}
+<ST_IN_SCRIPTING>"else"                 { SETTOKEN; return T_ELSE;}
+<ST_IN_SCRIPTING>"while"                { SETTOKEN; return T_WHILE;}
+<ST_IN_SCRIPTING>"endwhile"             { SETTOKEN; return T_ENDWHILE;}
+<ST_IN_SCRIPTING>"do"                   { SETTOKEN; return T_DO;}
+<ST_IN_SCRIPTING>"for"                  { SETTOKEN; return T_FOR;}
+<ST_IN_SCRIPTING>"endfor"               { SETTOKEN; return T_ENDFOR;}
+<ST_IN_SCRIPTING>"foreach"              { SETTOKEN; return T_FOREACH;}
+<ST_IN_SCRIPTING>"endforeach"           { SETTOKEN; return T_ENDFOREACH;}
+<ST_IN_SCRIPTING>"declare"              { SETTOKEN; return T_DECLARE;}
+<ST_IN_SCRIPTING>"enddeclare"           { SETTOKEN; return T_ENDDECLARE;}
+<ST_IN_SCRIPTING>"instanceof"           { SETTOKEN; return T_INSTANCEOF;}
+<ST_IN_SCRIPTING>"as"                   { SETTOKEN; return T_AS;}
+<ST_IN_SCRIPTING>"switch"               { SETTOKEN; return T_SWITCH;}
+<ST_IN_SCRIPTING>"endswitch"            { SETTOKEN; return T_ENDSWITCH;}
+<ST_IN_SCRIPTING>"case"                 { SETTOKEN; return T_CASE;}
+<ST_IN_SCRIPTING>"default"              { SETTOKEN; return T_DEFAULT;}
+<ST_IN_SCRIPTING>"break"                { SETTOKEN; return T_BREAK;}
+<ST_IN_SCRIPTING>"continue"             { SETTOKEN; return T_CONTINUE;}
+<ST_IN_SCRIPTING>"goto"                 { SETTOKEN; return T_GOTO;}
+<ST_IN_SCRIPTING>"echo"                 { SETTOKEN; return T_ECHO;}
+<ST_IN_SCRIPTING>"print"                { SETTOKEN; return T_PRINT;}
+<ST_IN_SCRIPTING>"class"                { SETTOKEN; return T_CLASS;}
+<ST_IN_SCRIPTING>"interface"            { SETTOKEN; return T_INTERFACE;}
+<ST_IN_SCRIPTING>"extends"              { SETTOKEN; return T_EXTENDS;}
+<ST_IN_SCRIPTING>"implements"           { SETTOKEN; return T_IMPLEMENTS;}
 
 <ST_IN_SCRIPTING>"->" {
         STEPPOS;
@@ -157,10 +146,11 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         yy_pop_state(yyscanner);
 }
 
-<ST_IN_SCRIPTING>"::"                {STEPPOS;return T_PAAMAYIM_NEKUDOTAYIM;}
-<ST_IN_SCRIPTING>"new"               {STEPPOS;return T_NEW;}
-<ST_IN_SCRIPTING>"clone"             {STEPPOS;return T_CLONE;}
-<ST_IN_SCRIPTING>"var"               {STEPPOS;return T_VAR;}
+<ST_IN_SCRIPTING>"::"                { STEPPOS;return T_PAAMAYIM_NEKUDOTAYIM;}
+<ST_IN_SCRIPTING>"\\"                { STEPPOS;return T_NS_SEPARATOR;}
+<ST_IN_SCRIPTING>"new"               { SETTOKEN;return T_NEW;}
+<ST_IN_SCRIPTING>"clone"             { SETTOKEN;return T_CLONE;}
+<ST_IN_SCRIPTING>"var"               { SETTOKEN;return T_VAR;}
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
         STEPPOS;
@@ -202,52 +192,97 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         return T_UNSET_CAST;
 }
 
-<ST_IN_SCRIPTING>"eval"               {STEPPOS; return T_EVAL;}
-<ST_IN_SCRIPTING>"include"            {STEPPOS; return T_INCLUDE;}
-<ST_IN_SCRIPTING>"include_once"       {STEPPOS; return T_INCLUDE_ONCE;}
-<ST_IN_SCRIPTING>"require"            {STEPPOS; return T_REQUIRE;}
-<ST_IN_SCRIPTING>"require_once"       {STEPPOS; return T_REQUIRE_ONCE;}
-<ST_IN_SCRIPTING>"use"                {STEPPOS; return T_USE;}
-<ST_IN_SCRIPTING>"global"             {STEPPOS; return T_GLOBAL;}
-<ST_IN_SCRIPTING>"isset"              {STEPPOS; return T_ISSET;}
-<ST_IN_SCRIPTING>"empty"              {STEPPOS; return T_EMPTY;}
-<ST_IN_SCRIPTING>"__halt_compiler"    {STEPPOS; return T_HALT_COMPILER;}
-<ST_IN_SCRIPTING>"static"             {SETTOKEN; return T_STATIC;}
-<ST_IN_SCRIPTING>"abstract"           {STEPPOS; return T_ABSTRACT;}
-<ST_IN_SCRIPTING>"final"              {STEPPOS; return T_FINAL;}
-<ST_IN_SCRIPTING>"private"            {STEPPOS; return T_PRIVATE;}
-<ST_IN_SCRIPTING>"protected"          {STEPPOS; return T_PROTECTED;}
-<ST_IN_SCRIPTING>"public"             {STEPPOS; return T_PUBLIC;}
-<ST_IN_SCRIPTING>"unset"              {STEPPOS; return T_UNSET;}
-<ST_IN_SCRIPTING>"=>"                 {STEPPOS; return T_DOUBLE_ARROW;}
-<ST_IN_SCRIPTING>"list"               {STEPPOS; return T_LIST;}
-<ST_IN_SCRIPTING>"array"              {STEPPOS; return T_ARRAY;}
-<ST_IN_SCRIPTING>"++"                 {STEPPOS; return T_INC;}
-<ST_IN_SCRIPTING>"--"                 {STEPPOS; return T_DEC;}
-<ST_IN_SCRIPTING>"==="                {STEPPOS; return T_IS_IDENTICAL;}
-<ST_IN_SCRIPTING>"!=="                {STEPPOS; return T_IS_NOT_IDENTICAL;}
-<ST_IN_SCRIPTING>"=="                 {STEPPOS; return T_IS_EQUAL;}
-<ST_IN_SCRIPTING>"!="|"<>"            {STEPPOS; return T_IS_NOT_EQUAL;}
-<ST_IN_SCRIPTING>"<="                 {STEPPOS; return T_IS_SMALLER_OR_EQUAL;}
-<ST_IN_SCRIPTING>">="                 {STEPPOS; return T_IS_GREATER_OR_EQUAL;}
-<ST_IN_SCRIPTING>"+="                 {STEPPOS; return T_PLUS_EQUAL;}
-<ST_IN_SCRIPTING>"-="                 {STEPPOS; return T_MINUS_EQUAL;}
-<ST_IN_SCRIPTING>"*="                 {STEPPOS; return T_MUL_EQUAL;}
-<ST_IN_SCRIPTING>"/="                 {STEPPOS; return T_DIV_EQUAL;}
-<ST_IN_SCRIPTING>".="                 {STEPPOS; return T_CONCAT_EQUAL;}
-<ST_IN_SCRIPTING>"%="                 {STEPPOS; return T_MOD_EQUAL;}
-<ST_IN_SCRIPTING>"<<="                {STEPPOS; return T_SL_EQUAL;}
-<ST_IN_SCRIPTING>">>="                {STEPPOS; return T_SR_EQUAL;}
-<ST_IN_SCRIPTING>"&="                 {STEPPOS; return T_AND_EQUAL;}
-<ST_IN_SCRIPTING>"|="                 {STEPPOS; return T_OR_EQUAL;}
-<ST_IN_SCRIPTING>"^="                 {STEPPOS; return T_XOR_EQUAL;}
-<ST_IN_SCRIPTING>"||"                 {STEPPOS; return T_BOOLEAN_OR;}
-<ST_IN_SCRIPTING>"&&"                 {STEPPOS; return T_BOOLEAN_AND;}
-<ST_IN_SCRIPTING>"OR"                 {STEPPOS; return T_LOGICAL_OR;}
-<ST_IN_SCRIPTING>"AND"                {STEPPOS; return T_LOGICAL_AND;}
-<ST_IN_SCRIPTING>"XOR"                {STEPPOS; return T_LOGICAL_XOR;}
-<ST_IN_SCRIPTING>"<<"                 {STEPPOS; return T_SL;}
-<ST_IN_SCRIPTING>">>"                 {STEPPOS; return T_SR;}
+<ST_IN_SCRIPTING>"eval"               { SETTOKEN; return T_EVAL;}
+<ST_IN_SCRIPTING>"include"            { SETTOKEN; return T_INCLUDE;}
+<ST_IN_SCRIPTING>"include_once"       { SETTOKEN; return T_INCLUDE_ONCE;}
+<ST_IN_SCRIPTING>"require"            { SETTOKEN; return T_REQUIRE;}
+<ST_IN_SCRIPTING>"require_once"       { SETTOKEN; return T_REQUIRE_ONCE;}
+<ST_IN_SCRIPTING>"namespace"          { SETTOKEN; return T_NAMESPACE;}
+<ST_IN_SCRIPTING>"use"                { SETTOKEN; return T_USE;}
+<ST_IN_SCRIPTING>"global"             { SETTOKEN; return T_GLOBAL;}
+<ST_IN_SCRIPTING>"isset"              { SETTOKEN; return T_ISSET;}
+<ST_IN_SCRIPTING>"empty"              { SETTOKEN; return T_EMPTY;}
+<ST_IN_SCRIPTING>"__halt_compiler"    { SETTOKEN; return T_HALT_COMPILER;}
+<ST_IN_SCRIPTING>"static"             { SETTOKEN; return T_STATIC;}
+<ST_IN_SCRIPTING>"abstract"           { SETTOKEN; return T_ABSTRACT;}
+<ST_IN_SCRIPTING>"final"              { SETTOKEN; return T_FINAL;}
+<ST_IN_SCRIPTING>"private"            { SETTOKEN; return T_PRIVATE;}
+<ST_IN_SCRIPTING>"protected"          { SETTOKEN; return T_PROTECTED;}
+<ST_IN_SCRIPTING>"public"             { SETTOKEN; return T_PUBLIC;}
+<ST_IN_SCRIPTING>"unset"              { SETTOKEN; return T_UNSET;}
+<ST_IN_SCRIPTING>"=>"                 { STEPPOS; return T_DOUBLE_ARROW;}
+<ST_IN_SCRIPTING>"list"               { SETTOKEN; return T_LIST;}
+<ST_IN_SCRIPTING>"array"              { SETTOKEN; return T_ARRAY;}
+<ST_IN_SCRIPTING>"++"                 { STEPPOS; return T_INC;}
+<ST_IN_SCRIPTING>"--"                 { STEPPOS; return T_DEC;}
+<ST_IN_SCRIPTING>"==="                { STEPPOS; return T_IS_IDENTICAL;}
+<ST_IN_SCRIPTING>"!=="                { STEPPOS; return T_IS_NOT_IDENTICAL;}
+<ST_IN_SCRIPTING>"=="                 { STEPPOS; return T_IS_EQUAL;}
+<ST_IN_SCRIPTING>"!="|"<>"            { STEPPOS; return T_IS_NOT_EQUAL;}
+<ST_IN_SCRIPTING>"<="                 { STEPPOS; return T_IS_SMALLER_OR_EQUAL;}
+<ST_IN_SCRIPTING>">="                 { STEPPOS; return T_IS_GREATER_OR_EQUAL;}
+<ST_IN_SCRIPTING>"+="                 { STEPPOS; return T_PLUS_EQUAL;}
+<ST_IN_SCRIPTING>"-="                 { STEPPOS; return T_MINUS_EQUAL;}
+<ST_IN_SCRIPTING>"*="                 { STEPPOS; return T_MUL_EQUAL;}
+<ST_IN_SCRIPTING>"/="                 { STEPPOS; return T_DIV_EQUAL;}
+<ST_IN_SCRIPTING>".="                 { STEPPOS; return T_CONCAT_EQUAL;}
+<ST_IN_SCRIPTING>"%="                 { STEPPOS; return T_MOD_EQUAL;}
+<ST_IN_SCRIPTING>"<<="                { STEPPOS; return T_SL_EQUAL;}
+<ST_IN_SCRIPTING>">>="                { STEPPOS; return T_SR_EQUAL;}
+<ST_IN_SCRIPTING>"&="                 { STEPPOS; return T_AND_EQUAL;}
+<ST_IN_SCRIPTING>"|="                 { STEPPOS; return T_OR_EQUAL;}
+<ST_IN_SCRIPTING>"^="                 { STEPPOS; return T_XOR_EQUAL;}
+<ST_IN_SCRIPTING>"||"                 { STEPPOS; return T_BOOLEAN_OR;}
+<ST_IN_SCRIPTING>"&&"                 { STEPPOS; return T_BOOLEAN_AND;}
+<ST_IN_SCRIPTING>"OR"                 { SETTOKEN; return T_LOGICAL_OR;}
+<ST_IN_SCRIPTING>"AND"                { SETTOKEN; return T_LOGICAL_AND;}
+<ST_IN_SCRIPTING>"XOR"                { SETTOKEN; return T_LOGICAL_XOR;}
+<ST_IN_SCRIPTING>"<<"                 { STEPPOS; return T_SL;}
+<ST_IN_SCRIPTING>">>"                 { STEPPOS; return T_SR;}
+
+<ST_IN_SCRIPTING>":"{XHPLABEL}  {
+  switch (_scanner->lastToken()) {
+    case ',': case '=': case '|': case '^': case '&': case '<': case '>':
+    case '+': case '-': case '%': case '!': case '~': case '[': case '(':
+    case '{': case '.': case ';':
+    case T_LOGICAL_OR:   case T_LOGICAL_XOR:      case T_LOGICAL_AND:
+    case T_PLUS_EQUAL:   case T_MINUS_EQUAL:      case T_MUL_EQUAL:
+    case T_DIV_EQUAL:    case T_CONCAT_EQUAL:     case T_MOD_EQUAL:
+    case T_AND_EQUAL:    case T_OR_EQUAL:         case T_XOR_EQUAL:
+    case T_SL_EQUAL:     case T_SR_EQUAL:         case T_BOOLEAN_OR:
+    case T_BOOLEAN_AND:  case T_IS_EQUAL:         case T_IS_NOT_EQUAL:
+    case T_IS_IDENTICAL: case T_IS_NOT_IDENTICAL: case T_IS_SMALLER_OR_EQUAL:
+    case T_ECHO:         case T_RETURN:           case T_IS_GREATER_OR_EQUAL:
+    case T_EXTENDS:      case T_INSTANCEOF:       case T_DOUBLE_ARROW:
+    case T_CLASS:
+    case T_XHP_ATTRIBUTE:
+      yytext++; yyleng--; // skipping the first colon
+      SETTOKEN;
+      return T_XHP_LABEL;
+    case ')':
+    case T_ELSE:
+      _scanner->warn("Ambiguous XHP syntax. Use white space after ':' or "
+                     "use {} to surround xhp statement to resolve.");
+      // fall through, treating them as normal PHP syntax
+    default:
+      yyless(1);
+      return ':';
+  }
+}
+
+<ST_IN_SCRIPTING>"%"{XHPLABEL}  {
+  switch (_scanner->lastToken()) {
+    case ',': case '(': case '|':
+    case T_XHP_CATEGORY:
+      yytext++; yyleng--; // skipping "%"
+      SETTOKEN;
+      return T_XHP_CATEGORY_LABEL;
+    default:
+      yyless(1);
+      return '%';
+  }
+}
+
 <ST_IN_SCRIPTING>{TOKENS}             {STEPPOS; return yytext[0];}
 
 <ST_IN_SCRIPTING>"{" {
@@ -329,6 +364,8 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 <ST_IN_SCRIPTING>"__METHOD__"           { SETTOKEN; return T_METHOD_C;}
 <ST_IN_SCRIPTING>"__LINE__"             { SETTOKEN; return T_LINE;    }
 <ST_IN_SCRIPTING>"__FILE__"             { SETTOKEN; return T_FILE;    }
+<ST_IN_SCRIPTING>"__DIR__"              { SETTOKEN; return T_DIR;     }
+<ST_IN_SCRIPTING>"__NAMESPACE__"        { SETTOKEN; return T_NS_C;    }
 
 <INITIAL>"#"[^\n]*"\n" {
         _scanner->setHashBang(yytext, yyleng);
@@ -350,6 +387,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 <INITIAL,ST_IN_HTML>"<?"|"<script"{WHITESPACE}+"language"{WHITESPACE}*"="{WHITESPACE}*("php"|"\"php\""|"\'php\'"){WHITESPACE}*">" {
         SETTOKEN;
         if (_scanner->shortTags() || yyleng > 2) {
+                _scanner->setInScript(true);
                 BEGIN(ST_IN_SCRIPTING);
                 return T_OPEN_TAG;
         } else {
@@ -428,12 +466,12 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         return T_STRING;
 }
 
-<ST_IN_SCRIPTING>{WHITESPACE} {
+<ST_IN_SCRIPTING,ST_XHP_ATTRIBUTE,ST_XHP_STATEMENT,ST_XHP_ATTRIBUTE_DECL>{WHITESPACE} {
         STEPPOS;
         return T_WHITESPACE;
 }
 
-<ST_IN_SCRIPTING>"#"|"//" {
+<ST_IN_SCRIPTING,ST_XHP_ATTRIBUTE,ST_XHP_STATEMENT,ST_XHP_ATTRIBUTE_DECL>"#"|"//" {
         BEGIN(ST_ONE_LINE_COMMENT);
         yymore();
 }
@@ -452,14 +490,22 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
                 break;
         default:
                 STEPPOS;
-                BEGIN(ST_IN_SCRIPTING);
+                if (_scanner->isXhpState()) {
+                  BEGIN(_scanner->getXhpState());
+                } else {
+                  BEGIN(ST_IN_SCRIPTING);
+                }
                 return T_COMMENT;
         }
 }
 
 <ST_ONE_LINE_COMMENT>{NEWLINE} {
         STEPPOS;
-        BEGIN(ST_IN_SCRIPTING);
+        if (_scanner->isXhpState()) {
+          BEGIN(_scanner->getXhpState());
+        } else {
+          BEGIN(ST_IN_SCRIPTING);
+        }
         return T_COMMENT;
 }
 
@@ -467,19 +513,23 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         if (_scanner->aspTags() || yytext[yyleng-2] != '%') {
                 _scanner->setToken(yytext, yyleng-2, yytext, yyleng-2);
                 yyless(yyleng-2);
-                BEGIN(ST_IN_SCRIPTING);
+                if (_scanner->isXhpState()) {
+                  BEGIN(_scanner->getXhpState());
+                } else {
+                  BEGIN(ST_IN_SCRIPTING);
+                }
                 return T_COMMENT;
         } else {
                 yymore();
         }
 }
 
-<ST_IN_SCRIPTING>"/**"{WHITESPACE} {
+<ST_IN_SCRIPTING,ST_XHP_ATTRIBUTE,ST_XHP_STATEMENT,ST_XHP_ATTRIBUTE_DECL>"/**"{WHITESPACE} {
         BEGIN(ST_DOC_COMMENT);
         yymore();
 }
 
-<ST_IN_SCRIPTING>"/*" {
+<ST_IN_SCRIPTING,ST_XHP_ATTRIBUTE,ST_XHP_STATEMENT,ST_XHP_ATTRIBUTE_DECL>"/*" {
         BEGIN(ST_COMMENT);
         yymore();
 }
@@ -491,19 +541,21 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 <ST_DOC_COMMENT>"*/" {
         STEPPOS;
         _scanner->setDocComment(yytext, yyleng);
-        BEGIN(ST_IN_SCRIPTING);
+        if (_scanner->isXhpState()) {
+          BEGIN(_scanner->getXhpState());
+        } else {
+          BEGIN(ST_IN_SCRIPTING);
+        }
         return T_DOC_COMMENT;
 }
 
 <ST_COMMENT>"*/" {
         STEPPOS;
-        BEGIN(ST_IN_SCRIPTING);
-#ifdef HPHP_NOTE
-        if (yyleng > 6 && yytext[2] == '|' && yytext[yyleng-3] == '|') {
-                _scanner->setToken(yytext, yyleng, yytext+3, yyleng-6);
-                return T_HPHP_NOTE;
+        if (_scanner->isXhpState()) {
+          BEGIN(_scanner->getXhpState());
+        } else {
+          BEGIN(ST_IN_SCRIPTING);
         }
-#endif
         return T_COMMENT;
 }
 
@@ -511,7 +563,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         yymore();
 }
 
-<ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">"){NEWLINE}? {
+<ST_IN_SCRIPTING>"?>"{NEWLINE}? {
         STEPPOS;
         BEGIN(ST_IN_HTML);
         if (_scanner->full()) {
@@ -519,6 +571,22 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         } else {
           return ';';
         }
+}
+
+<ST_IN_SCRIPTING>"</script"{WHITESPACE}*">"{NEWLINE}? {
+    if (_scanner->inScript()) {
+        _scanner->setInScript(false);
+        STEPPOS;
+        BEGIN(ST_IN_HTML);
+        if (_scanner->full()) {
+          return T_CLOSE_TAG;
+        } else {
+          return ';';
+        }
+    } else {
+        yyless(1);
+        return '<';
+    }
 }
 
 <ST_IN_SCRIPTING>"%>"{NEWLINE}? {
@@ -562,7 +630,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         return '\"';
 }
 
-<ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}{LABEL}{NEWLINE} {
+<ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}({LABEL}|[']{LABEL}[']|["]{LABEL}["]){NEWLINE} {
         int bprefix = (yytext[0] != '<') ? 1 : 0;
         int label_len = yyleng-bprefix-3-1-(yytext[yyleng-2]=='\r'?1:0);
         char *s = yytext+bprefix+3;
@@ -570,9 +638,35 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
                 s++;
                 label_len--;
         }
+        if (*s == '\'') {
+                s++;
+                label_len -= 2;
+                BEGIN(ST_NOWDOC);
+        } else {
+                if (*s == '"') {
+                       s++;
+                       label_len -= 2;
+                }
+                BEGIN(ST_HEREDOC);
+        }
         _scanner->setHeredocLabel(s, label_len);
         _scanner->setToken(yytext, yyleng, s, label_len);
-        BEGIN(ST_START_HEREDOC);
+
+        DECLARE_YYCURSOR;
+        DECLARE_YYLIMIT;
+
+        /* Check for ending label on the next line */
+        if (label_len < YYLIMIT - YYCURSOR &&
+            !memcmp(YYCURSOR, s, label_len)) {
+                const char *end = YYCURSOR + label_len;
+                if (*end == ';') {
+                        end++;
+                }
+                if (*end == '\n' || *end == '\r') {
+                        BEGIN(ST_END_HEREDOC);
+                }
+        }
+
         return T_START_HEREDOC;
 }
 
@@ -582,61 +676,218 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         return '`';
 }
 
-<ST_START_HEREDOC>({NOTLABEL}|{LABEL}(";"[^\n\r]|[^;\n\r])) {
-        yyless(0);
-        BEGIN(ST_HEREDOC);
+<ST_XHP_ATTRIBUTE>[{] {
+  STEPPOS;
+  _scanner->xhpReset();
+  return '{';
+}
+<ST_XHP_ATTRIBUTE>["][^"]*["] {
+  _scanner->setToken(yytext, yyleng, yytext+1, yyleng-2);
+  _scanner->xhpReset();
+  return T_XHP_TEXT;
+}
+<ST_XHP_CLOSE_TAG>[>] {
+  STEPPOS;
+  _scanner->xhpReset();
+  return '>';
+}
+<ST_XHP_CLOSE_TAG>{XHPLABEL} {
+  SETTOKEN;
+  return T_XHP_LABEL;
+}
+<ST_XHP_CHILD>[{<] {
+  STEPPOS;
+  _scanner->xhpReset();
+  return yytext[0];
+}
+<ST_XHP_CHILD>[^{<]+ {
+  SETTOKEN;
+  _scanner->xhpReset();
+  return T_XHP_TEXT;
 }
 
-<ST_START_HEREDOC>{LABEL}";"?[\n\r] {
-        int label_len = yyleng-1;
-        if (yytext[label_len-1]==';') {
-                label_len--;
-        }
-        if (label_len == _scanner->getHeredocLabelLen() &&
-            !memcmp(yytext, _scanner->getHeredocLabel(), label_len)) {
-                _scanner->setToken(yytext, label_len, yytext, label_len);
-                yyless(label_len);
-                _scanner->resetHeredoc();
-                BEGIN(ST_IN_SCRIPTING);
-                return T_END_HEREDOC;
-        } else {
-                yyless(0);
-                BEGIN(ST_HEREDOC);
-        }
+<ST_XHP_STATEMENT>"attribute" {
+  STEPPOS;
+  _scanner->xhpReset();
+  return T_XHP_ATTRIBUTE;
+}
+<ST_XHP_STATEMENT>"category" {
+  STEPPOS;
+  _scanner->xhpReset();
+  return T_XHP_CATEGORY;
+}
+<ST_XHP_STATEMENT>"children" {
+  STEPPOS;
+  _scanner->xhpReset();
+  return T_XHP_CHILDREN;
+}
+<ST_XHP_STATEMENT>{ANY_CHAR} {
+  _scanner->xhpReset();
+  yyless(0);
 }
 
-<ST_HEREDOC>{HEREDOC_CHARS}*{HEREDOC_NEWLINE}+{LABEL}";"?[\n\r] {
-        char *end = yytext + yyleng - 1;
+<ST_XHP_ATTRIBUTE_DECL>("bool"|"boolean") {
+  STEPPOS; _scanner->xhpReset(); return T_BOOL_CAST;
+}
+<ST_XHP_ATTRIBUTE_DECL>("int"|"integer") {
+  STEPPOS; _scanner->xhpReset(); return T_INT_CAST;
+}
+<ST_XHP_ATTRIBUTE_DECL>("real"|"double"|"float") {
+  STEPPOS; _scanner->xhpReset(); return T_DOUBLE_CAST;
+}
+<ST_XHP_ATTRIBUTE_DECL>"var" {
+  STEPPOS; _scanner->xhpReset(); return T_VAR;
+}
+<ST_XHP_ATTRIBUTE_DECL>"array" {
+  STEPPOS; _scanner->xhpReset(); return T_ARRAY_CAST;
+}
+<ST_XHP_ATTRIBUTE_DECL>"string" {
+  STEPPOS; _scanner->xhpReset(); return T_STRING_CAST;
+}
+<ST_XHP_ATTRIBUTE_DECL>"enum" {
+  STEPPOS; _scanner->xhpReset(); return T_XHP_ENUM;
+}
+<ST_XHP_ATTRIBUTE_DECL>"required" {
+  STEPPOS; _scanner->xhpReset(); return T_XHP_REQUIRED;
+}
+<ST_XHP_ATTRIBUTE_DECL>{LABEL} {
+  SETTOKEN; _scanner->xhpReset(); return T_STRING;
+}
+<ST_XHP_ATTRIBUTE_DECL>{ANY_CHAR} {
+  _scanner->xhpReset();
+  yyless(0);
+}
 
-        if (end[-1] == ';') {
-                end--;
-                yyleng--;
+<ST_HEREDOC>{ANY_CHAR} {
+  int newline = 0;
+
+  DECLARE_YYCURSOR;
+  DECLARE_YYLIMIT;
+
+  if (YYCURSOR > YYLIMIT) {
+    return 0;
+  }
+
+  YYCURSOR--;
+
+  int heredocLen = _scanner->getHeredocLabelLen();
+  while (YYCURSOR < YYLIMIT) {
+    switch (*YYCURSOR++) {
+      case '\r':
+        if (*YYCURSOR == '\n') {
+          YYCURSOR++;
         }
-        int heredocLen = _scanner->getHeredocLabelLen();
-        if (yyleng > heredocLen &&
-            !memcmp(end - heredocLen, _scanner->getHeredocLabel(),
-                    heredocLen)) {
-                int len = yyleng - heredocLen - 2;
-                           /* 2 for newline before and after label */
-                if (len > 0 &&
-                    yytext[len - 1] == '\r' && yytext[len] == '\n') {
-                        len--;
-                }
-                yyless(len + 1);
-                std::string strval =
-                  _scanner->escape(yytext, len, 0);
-                _scanner->setToken(yytext, yyleng,
-                                   strval.c_str(), strval.length());
-                BEGIN(ST_END_HEREDOC);
-                return T_ENCAPSED_AND_WHITESPACE;
-        } else {
-          /* Go back to end of label, so the next match works correctly in
-           * case of a variable or another label at the beginning of the
-           * next line
-           */
-          yyless(yyleng - 1);
-          yymore();
+        /* fall through */
+      case '\n':
+        /* Check for ending label on the next line */
+        if (IS_LABEL_START(*YYCURSOR) &&
+            heredocLen < YYLIMIT - YYCURSOR &&
+            !memcmp(YYCURSOR, _scanner->getHeredocLabel(), heredocLen)) {
+          const char *end = YYCURSOR + heredocLen;
+          if (*end == ';') {
+            end++;
+          }
+          if (*end == '\n' || *end == '\r') {
+            /* newline before label will be subtracted from returned text, but
+               yyleng/yytext will include it, for zend_highlight/strip,
+               tokenizer, etc. */
+            if (YYCURSOR[-2] == '\r' && YYCURSOR[-1] == '\n') {
+              newline = 2; /* Windows newline */
+            } else {
+              newline = 1;
+            }
+
+            BEGIN(ST_END_HEREDOC);
+            goto heredoc_scan_done;
+          }
         }
+        continue;
+      case '$':
+        if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
+          break;
+        }
+        continue;
+      case '{':
+        if (*YYCURSOR == '$') {
+          break;
+        }
+        continue;
+      case '\\':
+        if (YYCURSOR < YYLIMIT && *YYCURSOR != '\n' && *YYCURSOR != '\r') {
+          YYCURSOR++;
+        }
+        /* fall through */
+      default:
+        continue;
+    }
+
+    YYCURSOR--;
+    break;
+  }
+
+heredoc_scan_done:
+  yyleng = YYCURSOR - yytext;
+  RESET_YYCURSOR;
+  std::string strval = _scanner->escape(yytext, yyleng - newline, 0);
+  _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
+  return T_ENCAPSED_AND_WHITESPACE;
+}
+
+<ST_NOWDOC>{ANY_CHAR} {
+  int newline = 0;
+
+  DECLARE_YYCURSOR;
+  DECLARE_YYLIMIT;
+
+  if (YYCURSOR > YYLIMIT) {
+    return 0;
+  }
+
+  YYCURSOR--;
+
+  int heredocLen = _scanner->getHeredocLabelLen();
+  while (YYCURSOR < YYLIMIT) {
+    switch (*YYCURSOR++) {
+      case '\r':
+        if (*YYCURSOR == '\n') {
+          YYCURSOR++;
+        }
+        /* fall through */
+      case '\n':
+        /* Check for ending label on the next line */
+        if (IS_LABEL_START(*YYCURSOR) &&
+            heredocLen < YYLIMIT - YYCURSOR &&
+            !memcmp(YYCURSOR, _scanner->getHeredocLabel(), heredocLen)) {
+          const char *end = YYCURSOR + heredocLen;
+          if (*end == ';') {
+            end++;
+          }
+          if (*end == '\n' || *end == '\r') {
+            /* newline before label will be subtracted from returned text, but
+               yyleng/yytext will include it, for zend_highlight/strip,
+               tokenizer, etc. */
+            if (YYCURSOR[-2] == '\r' && YYCURSOR[-1] == '\n') {
+              newline = 2; /* Windows newline */
+            } else {
+              newline = 1;
+            }
+
+            BEGIN(ST_END_HEREDOC);
+            goto nowdoc_scan_done;
+          }
+        }
+        /* fall through */
+      default:
+        continue;
+    }
+  }
+
+nowdoc_scan_done:
+  yyleng = YYCURSOR - yytext;
+  RESET_YYCURSOR;
+  std::string strval(yytext, yyleng - newline);
+  _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
+  return T_ENCAPSED_AND_WHITESPACE;
 }
 
 <ST_END_HEREDOC>{LABEL} {
@@ -678,19 +929,6 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         return T_ENCAPSED_AND_WHITESPACE;
 }
 
-<ST_HEREDOC>{HEREDOC_CHARS}*({HEREDOC_NEWLINE}+({LABEL}";"?)?)? {
-        std::string strval = _scanner->escape(yytext, yyleng, 0);
-        _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
-        return T_ENCAPSED_AND_WHITESPACE;
-}
-
-<ST_HEREDOC>{HEREDOC_CHARS}*({HEREDOC_NEWLINE}+({LABEL}";"?)?)?("{"{2,}|"$"{2,}) {
-        yyless(yyleng - 1);
-        std::string strval = _scanner->escape(yytext, yyleng, 0);
-        _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
-        return T_ENCAPSED_AND_WHITESPACE;
-}
-
 <ST_DOUBLE_QUOTES>["] {
         BEGIN(ST_IN_SCRIPTING);
         return '"';
@@ -718,6 +956,40 @@ namespace HPHP {
     yylex_init_extra(this, &m_yyscanner);
     struct yyguts_t *yyg = (struct yyguts_t *)m_yyscanner;
     BEGIN(INITIAL);
+  }
+
+  void Scanner::xhpCloseTag() {
+    struct yyguts_t *yyg = (struct yyguts_t *)m_yyscanner;
+    BEGIN(ST_XHP_CLOSE_TAG);
+  }
+
+  void Scanner::xhpChild() {
+    struct yyguts_t *yyg = (struct yyguts_t *)m_yyscanner;
+    BEGIN(ST_XHP_CHILD);
+  }
+
+  void Scanner::xhpAttribute() {
+    struct yyguts_t *yyg = (struct yyguts_t *)m_yyscanner;
+    setXhpState(ST_XHP_ATTRIBUTE);
+    BEGIN(ST_XHP_ATTRIBUTE);
+  }
+
+  void Scanner::xhpStatement() {
+    struct yyguts_t *yyg = (struct yyguts_t *)m_yyscanner;
+    setXhpState(ST_XHP_STATEMENT);
+    BEGIN(ST_XHP_STATEMENT);
+  }
+
+  void Scanner::xhpAttributeDecl() {
+    struct yyguts_t *yyg = (struct yyguts_t *)m_yyscanner;
+    setXhpState(ST_XHP_ATTRIBUTE_DECL);
+    BEGIN(ST_XHP_ATTRIBUTE_DECL);
+  }
+
+  void Scanner::xhpReset() {
+    struct yyguts_t *yyg = (struct yyguts_t *)m_yyscanner;
+    setXhpState(0);
+    BEGIN(ST_IN_SCRIPTING);
   }
 
   int Scanner::scan() {

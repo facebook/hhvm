@@ -213,9 +213,10 @@ bool TestExtMisc::test_sys_getloadavg() {
 
 bool TestExtMisc::test_token_get_all() {
   String src = "blarb <?php 1";
-  VS(f_token_get_all(src), CREATE_VECTOR3(CREATE_VECTOR3(311, "blarb ", 1),
-                                          CREATE_VECTOR3(367, "<?php ", 1),
-                                          CREATE_VECTOR3(305, "1", 1)));
+  VS(f_token_get_all(src),
+     CREATE_VECTOR3(CREATE_VECTOR3(k_T_INLINE_HTML, "blarb ", 1),
+                    CREATE_VECTOR3(k_T_OPEN_TAG, "<?php ", 1),
+                    CREATE_VECTOR3(k_T_LNUMBER, "1", 1)));
   return Count(true);
 }
 bool TestExtMisc::test_token_name() {

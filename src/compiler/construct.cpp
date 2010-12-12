@@ -208,6 +208,9 @@ void Construct::dumpNode(int spc, AnalysisResultPtr ar) {
     case Statement::KindOfReturnStatement:
       name="ReturnStatement";
       break;
+    case Statement::KindOfYieldStatement:
+      name="YieldStatement";
+      break;
     case Statement::KindOfGlobalStatement:
       name="GlobalStatement";
       break;

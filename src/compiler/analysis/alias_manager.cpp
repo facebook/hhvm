@@ -1478,6 +1478,7 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
     break;
 
   case Statement::KindOfReturnStatement:
+  case Statement::KindOfYieldStatement:
   {
     canonicalizeKid(s, spc(Expression,s->getNthKid(0)), 0);
     killLocals();

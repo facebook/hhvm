@@ -95,6 +95,10 @@ inline Variant x_fb_get_code_coverage(bool flush) {
   return f_fb_get_code_coverage(flush);
 }
 
+inline Variant x___xhp_idx(CVarRef arr, CVarRef idx) {
+  return f___xhp_idx(arr, idx);
+}
+
 inline void x_xhprof_enable(int flags, CArrRef args = null_array) {
   FUNCTION_INJECTION_BUILTIN(xhprof_enable);
   f_xhprof_enable(flags, args);

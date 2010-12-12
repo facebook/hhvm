@@ -497,6 +497,8 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestVariableClassName);
   RUN_TEST(TestLateStaticBinding); // requires ENABLE_LATE_STATIC_BINDING
   RUN_TEST(TestCallStatic);
+  RUN_TEST(TestNowDoc);
+  RUN_TEST(TestTernaryShortcut);
 
   RUN_TEST(TestAdHoc);
   return ret;
@@ -15320,6 +15322,7 @@ bool TestCodeRun::TestCallStatic() {
         "\n"
         "c3::test1b();\n"
         "d3::test1b();\n",
+
         "c3::__callStatic\n"
         "c3::__callStatic\n"
        );
@@ -15497,10 +15500,72 @@ bool TestCodeRun::TestCallStatic() {
         "$obj = new MethodTest;\n"
         "$obj->runTest('in object context');\n"
         "MethodTest::runTest('in static context');\n",
+
         "string(7) \"runTest\"\n"
         "string(17) \"in object context\"\n"
         "string(7) \"runTest\"\n"
         "string(17) \"in static context\"\n");
+
+  return true;
+}
+
+bool TestCodeRun::TestNowDoc() {
+  MVCRO("<?php\n"
+        "$b = 'bad';\n"
+        "$a = <<<'NOWDOC'\n"
+        "$b\n"
+        "NOWDOC;\n"
+        "var_dump($a);\n"
+        "$a = <<<\"NOWDOC\"\n"
+        "$b\n"
+        "NOWDOC;\n"
+        "var_dump($a);\n"
+        "$a = <<<NOWDOC\n"
+        "$b\n"
+        "NOWDOC;\n"
+        "var_dump($a);\n",
+
+        "string(2) \"$b\"\n"
+        "string(3) \"bad\"\n"
+        "string(3) \"bad\"\n"
+       );
+
+  MVCRO("<?php\n"
+        "$a = <<<NOWDOC\n"
+        "\"'\\t\n"
+        "NOWDOC;\n"
+        "var_dump($a);\n"
+        "$a = <<<'NOWDOC'\n"
+        "\"'\\t\n"
+        "NOWDOC;\n"
+        "var_dump($a);\n"
+        "$a = <<<\"NOWDOC\"\n"
+        "\"'\\t\n"
+        "NOWDOC;\n"
+        "var_dump($a);\n",
+
+        "string(3) \"\"'\t\"\n"
+        "string(4) \"\"'\\t\"\n"
+        "string(3) \"\"'\t\"\n"
+       );
+
+  return true;
+}
+
+bool TestCodeRun::TestTernaryShortcut() {
+  MVCRO("<?php\n"
+        "function foo() { var_dump('hello'); return 789;}\n"
+        "$a = 123 ?: 456;\n"
+        "var_dump($a);\n"
+        "$b[123] = 456;\n"
+        "var_dump(isset($b[123]) ?: false);\n"
+        "var_dump(foo()?:123);\n",
+
+        "int(123)\n"
+        "bool(true)\n"
+        "string(5) \"hello\"\n"
+        "int(789)\n"
+       );
 
   return true;
 }

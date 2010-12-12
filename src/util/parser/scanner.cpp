@@ -17,15 +17,73 @@
 #include "scanner.h"
 #include <util/util.h>
 #include <util/preprocess.h>
+#include <util/logger.h>
 
 using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+void ScannerToken::xhpLabel(bool prefix /* = true */) {
+  Util::replaceAll(m_text, ":", "__");
+  Util::replaceAll(m_text, "-", "_");
+  if (prefix) {
+    m_text = "xhp_" + m_text;
+  }
+}
+
+bool ScannerToken::htmlTrim() {
+  ASSERT(!m_text.empty());
+
+  const char *p0 = m_text.c_str();
+  const char *p1 = m_text.c_str() + m_text.size() - 1;
+  const char *p00 = p0;
+  const char *p10 = p1;
+  while (isspace(*p0) && p0 <= p10) ++p0;
+  if (p0 > p10) {
+    m_text.clear();
+    return false;
+  }
+  while (isspace(*p1) && p1 > p0) --p1;
+  string text;
+  text.reserve(m_text.length());
+  if (p0 != p00) {
+    text = " ";
+  }
+  for (const char *p = p0; p <= p1; ++p) {
+    if (!isspace(*p)) {
+      text += *p;
+    } else {
+      while (isspace(*p)) ++p;
+      text += ' ';
+      text += *p;
+    }
+  }
+  if (p1 != p10) {
+    text += " ";
+  }
+  m_text = text;
+  return true;
+}
+
+// hzhao: This is to avoid including headers from runtime/base.
+extern char *string_html_decode(const char *input, int &len,
+                                const char *charset_hint, bool all);
+
+void ScannerToken::htmlDecode() {
+  int len = m_text.size();
+  char *ret = string_html_decode(m_text.data(), len, "UTF-8", true);
+  m_text = string(ret, len);
+  free(ret);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 Scanner::Scanner(const char *filename, int type)
-    : m_source(NULL), m_len(0), m_pos(0), m_state(Start), m_type(type),
-      m_yyscanner(NULL), m_token(NULL), m_loc(NULL) {
+    : m_filename(filename), m_source(NULL), m_len(0), m_pos(0),
+      m_state(Start), m_type(type), m_yyscanner(NULL), m_token(NULL),
+      m_loc(NULL), m_lastToken(-1), m_gap(false), m_inScript(false),
+      m_xhpState(0) {
   m_stream = new ifstream(filename);
   m_streamOwner = true;
   if (m_stream->bad()) {
@@ -44,8 +102,9 @@ Scanner::Scanner(const char *filename, int type)
 }
 
 Scanner::Scanner(istream &stream, int type, const char *fileName /* = "" */)
-    : m_source(NULL), m_len(0), m_pos(0), m_type(type), m_yyscanner(NULL),
-      m_token(NULL), m_loc(NULL) {
+    : m_filename(fileName), m_source(NULL), m_len(0), m_pos(0), m_type(type),
+      m_yyscanner(NULL), m_token(NULL), m_loc(NULL), m_lastToken(-1),
+      m_gap(false), m_inScript(false), m_xhpState(0) {
   m_stream = &stream;
   m_streamOwner = false;
   if (type & PreprocessXHP) {
@@ -59,8 +118,9 @@ Scanner::Scanner(istream &stream, int type, const char *fileName /* = "" */)
 
 Scanner::Scanner(const char *source, int len, int type,
                  const char *fileName /* = "" */)
-    : m_source(source), m_len(len), m_pos(0), m_type(type), m_yyscanner(NULL),
-      m_token(NULL), m_loc(NULL) {
+    : m_filename(fileName), m_source(source), m_len(len), m_pos(0),
+      m_type(type), m_yyscanner(NULL), m_token(NULL), m_loc(NULL),
+      m_lastToken(-1), m_gap(false), m_inScript(false), m_xhpState(0) {
   ASSERT(m_source);
   m_stream = NULL;
   m_streamOwner = false;
@@ -99,6 +159,7 @@ int Scanner::getNextToken(ScannerToken &t, Location &l) {
 
   int tokid;
   bool done = false;
+  m_gap = false;
   do {
     tokid = scan();
     switch (tokid) {
@@ -106,6 +167,7 @@ int Scanner::getNextToken(ScannerToken &t, Location &l) {
       case T_DOC_COMMENT:
       case T_OPEN_TAG:
       case T_WHITESPACE:
+        m_gap = true;
         break;
       default:
         done = true;
@@ -113,6 +175,7 @@ int Scanner::getNextToken(ScannerToken &t, Location &l) {
     }
   } while (!done && (m_type & ReturnAllTokens) == 0);
 
+  m_lastToken = tokid;
   return tokid;
 }
 
@@ -143,6 +206,17 @@ void Scanner::error(const char* fmt, ...) {
   va_start(ap, fmt);
   Util::string_vsnprintf(m_error, fmt, ap);
   va_end(ap);
+}
+
+void Scanner::warn(const char* fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  string msg;
+  Util::string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
+
+  Logger::Warning("%s: %s (Line: %d, Char %d)", msg.c_str(),
+                  m_filename.c_str(), m_loc->line0, m_loc->char0);
 }
 
 void Scanner::incLoc(const char *rawText, int rawLeng) {

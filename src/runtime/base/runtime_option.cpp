@@ -287,9 +287,12 @@ std::map<std::string, std::string> RuntimeOption::EnvVariables;
 std::string RuntimeOption::LightProcessFilePrefix;
 int RuntimeOption::LightProcessCount;
 
+bool RuntimeOption::EnableHipHopSyntax = false;
+bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
 bool RuntimeOption::EnableShortTags = true;
 bool RuntimeOption::EnableAspTags = false;
 bool RuntimeOption::EnableXHP = true;
+bool RuntimeOption::NativeXHP = true;
 int RuntimeOption::ScannerType = 0;
 
 bool RuntimeOption::EnableStrict = false;
@@ -921,6 +924,9 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
   }
   {
     Hdf eval = config["Eval"];
+    EnableHipHopSyntax = eval["EnableHipHopSyntax"].getBool();
+    EnableHipHopExperimentalSyntax =
+      eval["EnableHipHopExperimentalSyntax"].getBool();
     EnableShortTags= eval["EnableShortTags"].getBool(true);
     if (EnableShortTags) ScannerType |= Scanner::AllowShortTags;
     else ScannerType &= ~Scanner::AllowShortTags;
@@ -930,7 +936,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     else ScannerType &= ~Scanner::AllowAspTags;
 
     EnableXHP = eval["EnableXHP"].getBool(true);
-    if (EnableXHP) ScannerType |= Scanner::PreprocessXHP;
+    NativeXHP = eval["NativeXHP"].getBool(true);
+    if (EnableXHP && !NativeXHP) ScannerType |= Scanner::PreprocessXHP;
     else ScannerType &= ~Scanner::PreprocessXHP;
 
     EnableStrict = eval["EnableStrict"].getBool();

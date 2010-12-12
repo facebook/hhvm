@@ -299,9 +299,12 @@ public:
   static int LightProcessCount;
 
   // Eval options
+  static bool EnableHipHopSyntax;
+  static bool EnableHipHopExperimentalSyntax;
   static bool EnableShortTags;
   static bool EnableAspTags;
   static bool EnableXHP;
+  static bool NativeXHP;
   static int ScannerType;
 
   static bool EnableStrict;

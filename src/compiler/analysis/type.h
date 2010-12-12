@@ -19,6 +19,7 @@
 
 #include <compiler/hphp.h>
 #include <util/json.h>
+#include <util/case_insensitive.h>
 
 #define NEW_TYPE(s) TypePtr(new Type(Type::KindOf ## s))
 
@@ -95,6 +96,9 @@ public:
 
   static TypePtr Any;
   static TypePtr Some;
+
+  typedef hphp_string_imap<TypePtr> TypePtrMap;
+  static const TypePtrMap &GetTypeHintTypes();
 
   /**
    * Uncertain types: types that are ambiguous yet.
@@ -222,6 +226,8 @@ public:
   void count(std::map<std::string, int> &counts);
 
 private:
+  static TypePtrMap TypeHintTypes;
+
   KindOf m_kindOf;
   std::string m_name;
 };

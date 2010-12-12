@@ -35,6 +35,10 @@ class Parser;
  */
 class Construct {
 public:
+  typedef hphp_string_imap<DataType> TypePtrMap;
+  static const TypePtrMap &GetTypeHintTypes();
+
+public:
   Construct(CONSTRUCT_ARGS);
   Construct(const Location *loc);
   virtual ~Construct() {}
@@ -85,12 +89,15 @@ public:
     }
   }
   const Location *loc() const { return &m_loc; }
+  void setLoc(Location *loc) { m_loc = *loc;}
   void resetLoc(Parser *parser);
   void dumpLoc() const;
 protected:
   Location m_loc;
 private:
   int _count;
+
+  static TypePtrMap TypeHintTypes;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

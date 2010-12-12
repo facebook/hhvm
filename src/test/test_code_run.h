@@ -177,6 +177,8 @@ class TestCodeRun : public TestBase {
   bool TestVariableClassName();
   bool TestLateStaticBinding();
   bool TestCallStatic();
+  bool TestNowDoc();
+  bool TestTernaryShortcut();
 
   // debugging purpose
   bool TestAdHoc();

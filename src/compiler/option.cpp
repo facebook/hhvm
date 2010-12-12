@@ -186,9 +186,12 @@ std::string Option::JavaFFIRootPackage;
 std::string Option::ProgramName;
 std::string Option::PreprocessedPartitionConfig;
 
+bool Option::EnableHipHopSyntax = false;
+bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;
 bool Option::EnableAspTags = false;
-bool Option::EnableXHP = false;
+bool Option::EnableXHP = true;
+bool Option::NativeXHP = true;
 int Option::ScannerType = Scanner::AllowShortTags;
 int Option::ParserThreadCount = 0;
 
@@ -372,6 +375,9 @@ void Option::Load(Hdf &config) {
     ScalarArrayCompression = true;
   }
 
+  EnableHipHopSyntax = config["EnableHipHopSyntax"].getBool();
+  EnableHipHopExperimentalSyntax =
+    config["EnableHipHopExperimentalSyntax"].getBool();
   EnableShortTags = config["EnableShortTags"].getBool(true);
   if (EnableShortTags) ScannerType |= Scanner::AllowShortTags;
   else ScannerType &= ~Scanner::AllowShortTags;
@@ -380,8 +386,9 @@ void Option::Load(Hdf &config) {
   if (EnableAspTags) ScannerType |= Scanner::AllowAspTags;
   else ScannerType &= ~Scanner::AllowAspTags;
 
-  EnableXHP = config["EnableXHP"].getBool();
-  if (EnableXHP) ScannerType |= Scanner::PreprocessXHP;
+  EnableXHP = config["EnableXHP"].getBool(true);
+  NativeXHP = config["NativeXHP"].getBool(true);
+  if (EnableXHP && !NativeXHP) ScannerType |= Scanner::PreprocessXHP;
   else ScannerType &= ~Scanner::PreprocessXHP;
 
   ParserThreadCount = config["ParserThreadCount"].getInt32(0);

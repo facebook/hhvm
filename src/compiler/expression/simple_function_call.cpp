@@ -1023,7 +1023,7 @@ void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (m_class || !m_className.empty()) {
     StaticClassName::outputPHP(cg, ar);
-    cg_printf("::%s(", m_name.c_str());
+    cg_printf("::%s(", m_origName.c_str());
   } else {
 
     if (cg.getOutput() == CodeGenerator::InlinedPHP ||
@@ -1057,9 +1057,9 @@ void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
           }
         }
       }
-      cg_printf("%s(", m_name.c_str());
+      cg_printf("%s(", m_origName.c_str());
     } else {
-      cg_printf("%s(", m_name.c_str());
+      cg_printf("%s(", m_origName.c_str());
     }
   }
 

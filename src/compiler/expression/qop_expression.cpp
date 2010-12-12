@@ -48,7 +48,9 @@ ExpressionPtr QOpExpression::clone() {
 
 void QOpExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_condition->analyzeProgram(ar);
-  m_expYes->analyzeProgram(ar);
+  if (m_expYes) {
+    m_expYes->analyzeProgram(ar);
+  }
   m_expNo->analyzeProgram(ar);
 }
 
@@ -91,15 +93,21 @@ void QOpExpression::setNthKid(int n, ConstructPtr cp) {
 ExpressionPtr QOpExpression::preOptimize(AnalysisResultPtr ar) {
   Variant value;
   if (m_condition->getScalarValue(value)) {
-    if (value.toBoolean()) return m_expYes; else return m_expNo;
-  } else {
-    return ExpressionPtr();
+    if (value.toBoolean()) {
+      if (m_expYes) {
+        return m_expYes;
+      }
+      return m_condition;
+    }
+    return m_expNo;
   }
+
+  return ExpressionPtr();
 }
 
 ExpressionPtr QOpExpression::postOptimize(AnalysisResultPtr ar) {
   if (getActualType() && getActualType()->is(Type::KindOfString) &&
-      m_expYes->isLiteralString() != m_expNo->isLiteralString()) {
+      m_expYes && m_expYes->isLiteralString() != m_expNo->isLiteralString()) {
     setActualType(Type::Variant);
     setExpectedType(Type::String);
     m_expYes->setExpectedType(Type::Variant);
@@ -110,25 +118,39 @@ ExpressionPtr QOpExpression::postOptimize(AnalysisResultPtr ar) {
 
 TypePtr QOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                   bool coerce) {
-  m_condition->inferAndCheck(ar, Type::Boolean, false);
+  if (m_expYes) {
+    m_condition->inferAndCheck(ar, Type::Boolean, false);
+    TypePtr typeYes = m_expYes->inferAndCheck(ar, Type::Some, coerce);
+    TypePtr typeNo = m_expNo->inferAndCheck(ar, Type::Some, coerce);
+    if (Type::SameType(typeYes, typeNo) &&
+        m_expYes->isLiteralString() == m_expNo->isLiteralString()) {
+      // already the same type, no coercion needed
+      // special case on literal string since String is slower than Variant
+      m_expYes->inferAndCheck(ar, typeYes, false);
+      m_expNo->inferAndCheck(ar, typeYes, false);
+      return typeYes;
+    }
+  } else {
+    TypePtr typeYes = m_condition->inferAndCheck(ar, Type::Some, coerce);
+    TypePtr typeNo = m_expNo->inferAndCheck(ar, Type::Some, coerce);
+    if (Type::SameType(typeYes, typeNo) &&
+        m_condition->isLiteralString() == m_expNo->isLiteralString()) {
+      // already the same type, no coercion needed
+      // special case on literal string since String is slower than Variant
+      m_condition->inferAndCheck(ar, typeYes, false);
+      m_expNo->inferAndCheck(ar, typeYes, false);
+      return typeYes;
+    }
+  }
 
-  TypePtr typeYes = m_expYes->inferAndCheck(ar, Type::Some, coerce);
-  TypePtr typeNo = m_expNo->inferAndCheck(ar, Type::Some, coerce);
-  if (Type::SameType(typeYes, typeNo)
-   && m_expYes->isLiteralString() == m_expNo->isLiteralString()) {
-    // already the same type, no coercion needed
-    // special case on literal string since String is slower than Variant
-    m_expYes->inferAndCheck(ar, typeYes, false);
-    m_expNo->inferAndCheck(ar, typeYes, false);
-    return typeYes;
-  }
-  else {
-    return Type::Variant;
-  }
+  return Type::Variant;
 }
 
 ExpressionPtr QOpExpression::unneededHelper(AnalysisResultPtr ar) {
-  bool yesEffect = m_expYes->getContainedEffects();
+  bool yesEffect = false;
+  if (m_expYes) {
+    yesEffect = m_expYes->getContainedEffects();
+  }
   bool noEffect = m_expNo->getContainedEffects();
 
   if (!yesEffect && !noEffect) {
@@ -136,7 +158,9 @@ ExpressionPtr QOpExpression::unneededHelper(AnalysisResultPtr ar) {
   }
 
   m_expNo = m_expNo->unneeded(ar);
-  m_expYes = m_expYes->unneeded(ar);
+  if (m_expYes) {
+    m_expYes = m_expYes->unneeded(ar);
+  }
   return static_pointer_cast<Expression>(shared_from_this());
 }
 
@@ -146,7 +170,9 @@ ExpressionPtr QOpExpression::unneededHelper(AnalysisResultPtr ar) {
 void QOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_condition->outputPHP(cg, ar);
   cg_printf(" ? ");
-  m_expYes->outputPHP(cg, ar);
+  if (m_expYes) {
+    m_expYes->outputPHP(cg, ar);
+  }
   cg_printf(" : ");
   m_expNo->outputPHP(cg, ar);
 }
@@ -160,12 +186,12 @@ bool QOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   bool fix_condition = m_condition->preOutputCPP(cg, ar, 0);
   if (!cg.inExpression()) {
     return fix_condition ||
-      m_expYes->preOutputCPP(cg, ar, 0) ||
+      (m_expYes && m_expYes->preOutputCPP(cg, ar, 0)) ||
       m_expNo->preOutputCPP(cg, ar, 0);
   }
 
   cg.setInExpression(false);
-  bool fix_yes = m_expYes->preOutputCPP(cg, ar, 0);
+  bool fix_yes = (!m_expYes || m_expYes->preOutputCPP(cg, ar, 0));
   bool fix_no = m_expNo->preOutputCPP(cg, ar, 0);
   cg.setInExpression(true);
 
@@ -173,23 +199,40 @@ bool QOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg.wrapExpressionBegin();
     std::string tmp = genCPPTemp(cg, ar);
 
-    TypePtr typeYes = m_expYes->getActualType();
-    TypePtr typeNo = m_expNo->getActualType();
-    TypePtr type =
-      typeYes && typeNo && Type::SameType(typeYes, typeNo) &&
-      !typeYes->is(Type::KindOfVariant) &&
-      m_expYes->isLiteralString() == m_expNo->isLiteralString() ?
-      typeYes : Type::Variant;
+    if (m_expYes) {
+      TypePtr typeYes = m_expYes->getActualType();
+      TypePtr typeNo = m_expNo->getActualType();
+      TypePtr type =
+        typeYes && typeNo && Type::SameType(typeYes, typeNo) &&
+        !typeYes->is(Type::KindOfVariant) &&
+        m_expYes->isLiteralString() == m_expNo->isLiteralString() ?
+        typeYes : Type::Variant;
 
-    type->outputCPPDecl(cg, ar, getScope());
-    cg_printf(" %s;\n", tmp.c_str());
-    cg_printf("if (");
-    m_condition->outputCPP(cg, ar);
-    cg_indentBegin(") {\n");
-    m_expYes->preOutputCPP(cg, ar, 0);
-    cg_printf("%s = (", tmp.c_str());
-    m_expYes->outputCPP(cg, ar);
-    cg_indentEnd(");\n");
+      type->outputCPPDecl(cg, ar, getScope());
+      cg_printf(" %s;\n", tmp.c_str());
+      cg_printf("if (");
+      m_condition->outputCPP(cg, ar);
+      cg_indentBegin(") {\n");
+      m_expYes->preOutputCPP(cg, ar, 0);
+      cg_printf("%s = (", tmp.c_str());
+      m_expYes->outputCPP(cg, ar);
+      cg_indentEnd(");\n");
+    } else {
+      TypePtr typeYes = m_condition->getActualType();
+      TypePtr typeNo = m_expNo->getActualType();
+      TypePtr type =
+        typeYes && typeNo && Type::SameType(typeYes, typeNo) &&
+        !typeYes->is(Type::KindOfVariant) &&
+        m_condition->isLiteralString() == m_expNo->isLiteralString() ?
+        typeYes : Type::Variant;
+
+      type->outputCPPDecl(cg, ar, getScope());
+      cg_printf(" %s = ", tmp.c_str());
+      m_condition->outputCPP(cg, ar);
+      cg_printf(";\n");
+      cg_printf("if (toBoolean(%s)) {\n", tmp.c_str());
+    }
+
     cg_indentBegin("} else {\n");
     m_expNo->preOutputCPP(cg, ar, 0);
     cg_printf("%s = (", tmp.c_str());
@@ -197,6 +240,7 @@ bool QOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf(");\n");
     cg_indentEnd("}\n");
     m_cppValue = tmp;
+
   } else if (state & FixOrder) {
     preOutputStash(cg, ar, state);
     return true;
@@ -221,6 +265,7 @@ void QOpExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (!m_cppValue.empty()) {
     cg_printf("%s", m_cppValue.c_str());
   } else {
+    ExpressionPtr expYes = m_expYes ? m_expYes : m_condition;
     bool wrapped = !isUnused();
     if (wrapped) {
       cg_printf("(");
@@ -228,20 +273,20 @@ void QOpExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     m_condition->outputCPP(cg, ar);
     if (isUnused()) {
       cg_printf(" ? ");
-      outputUnneededExpr(cg, ar, m_expYes);
+      outputUnneededExpr(cg, ar, expYes);
       cg_printf(" : ");
       outputUnneededExpr(cg, ar, m_expNo);
     } else {
-      TypePtr typeYes = m_expYes->getActualType();
+      TypePtr typeYes = expYes->getActualType();
       TypePtr typeNo = m_expNo->getActualType();
       const char *castType =
         typeYes && typeNo && Type::SameType(typeYes, typeNo) &&
         !typeYes->is(Type::KindOfVariant) &&
-        m_expYes->isLiteralString() == m_expNo->isLiteralString()
+        expYes->isLiteralString() == m_expNo->isLiteralString()
         ? "" : "(Variant)";
 
       cg_printf(" ? (%s(", castType);
-      m_expYes->outputCPP(cg, ar);
+      expYes->outputCPP(cg, ar);
       cg_printf(")) : (%s(", castType);
       m_expNo->outputCPP(cg, ar);
       cg_printf("))");

@@ -25,6 +25,11 @@
 #endif
 #define HPHP_PARSER_NS Compiler
 
+#ifdef HPHP_PARSER_ERROR
+#undef HPHP_PARSER_ERROR
+#endif
+#define HPHP_PARSER_ERROR HPHP::Logger::Error
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -44,6 +49,15 @@ public:
   ExpressionPtr exp;
   StatementPtr stmt;
 
+  Token &operator+(const char *str) {
+    m_text += str;
+    return *this;
+  }
+  Token &operator+(const Token &token) {
+    m_num += token.m_num;
+    m_text += token.m_text;
+    return *this;
+  }
   Token *operator->() {
     return this;
   }
@@ -76,6 +90,8 @@ public:
 
   // implementing ParserBase
   virtual bool parse();
+  virtual bool enableXHP();
+  IMPLEMENT_XHP_ATTRIBUTES;
 
   // result
   StatementListPtr getTree() const { return m_tree;}
@@ -87,7 +103,8 @@ public:
                   bool constant = false);
   void onStaticVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onClassVariableModifer(Token &mod) {}
-  void onClassVariableStart(Token &out, Token *modifiers, Token &decl);
+  void onClassVariableStart(Token &out, Token *modifiers, Token &decl,
+                            Token *type);
   void onClassVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onClassConstant(Token &out, Token *exprs, Token &var, Token &value);
   void onSimpleVariable(Token &out, Token &var);
@@ -103,7 +120,7 @@ public:
   void encapRefDim(Token &out, Token &var, Token &offset);
   void encapObjProp(Token &out, Token &var, Token &name);
   void encapArray(Token &out, Token &var, Token &expr);
-  void onConstant(Token &out, Token &constant);
+  void onConstantValue(Token &out, Token &constant);
   void onScalar(Token &out, int type, Token &scalar);
   void onExprListElem(Token &out, Token *exprs, Token &expr);
 
@@ -121,14 +138,14 @@ public:
   void onNewObject(Token &out, Token &name, Token &args);
   void onUnaryOpExp(Token &out, Token &operand, int op, bool front);
   void onBinaryOpExp(Token &out, Token &operand1, Token &operand2, int op);
-  void onQOp(Token &out, Token &exprCond, Token &expYes, Token &expNo);
-  void onArray(Token &out, Token &pairs);
+  void onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo);
+  void onArray(Token &out, Token &pairs, int op = T_ARRAY);
   void onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                    bool ref);
   void onClassConst(Token &out, Token &cls, Token &name, bool text);
   void onFunctionStart(Token &name);
-  void onFunction(Token &out, Token &ref, Token &name, Token &params,
-                  Token &stmt);
+  void onFunction(Token &out, Token &ret, Token &ref, Token &name,
+                  Token &params, Token &stmt);
   void onParam(Token &out, Token *params, Token &type, Token &var,
                bool ref, Token *defValue);
   void onClassStart(int type, Token &name, Token *parent);
@@ -137,8 +154,8 @@ public:
   void onInterface(Token &out, Token &name, Token &base, Token &stmt);
   void onInterfaceName(Token &out, Token *names, Token &name);
   void onMethodStart(Token &name, Token &mods);
-  void onMethod(Token &out, Token &modifiers, Token &ref, Token &name,
-                Token &params, Token &stmt);
+  void onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
+                Token &name, Token &params, Token &stmt, bool reloc = true);
   void onMemberModifier(Token &out, Token *modifiers, Token &modifier);
   void onStatementListStart(Token &out);
   void addStatement(Token &out, Token &stmts, Token &new_stmt);
@@ -159,6 +176,7 @@ public:
   void onBreak(Token &out, Token *expr);
   void onContinue(Token &out, Token *expr);
   void onReturn(Token &out, Token *expr);
+  void onYield(Token &out, Token *expr);
   void onGlobal(Token &out, Token &expr);
   void onGlobalVar(Token &out, Token *exprs, Token &expr);
   void onStatic(Token &out, Token &expr);
@@ -173,11 +191,20 @@ public:
                Token &stmt);
   void onThrow(Token &out, Token &expr);
 
-  void onHphpNoteExpr(Token &out, Token &note, Token &expr);
-  void onHphpNoteStatement(Token &out, Token &note, Token &stmt);
+  void onNamespaceStart(Token &out, Token &ns);
+  void onNamespace(Token &out, Token *ns, Token &stmts);
+  void onUseNamespaces(Token &out, Token *uses, Token &use);
+  void onUseNamespace(Token &out, Token &ns, Token *as, bool absolute);
+  void onConstant(Token &out, Token *exprs, Token &var, Token &value);
 
-  void addHphpDeclare(Token &declare);
-  void addHphpSuppressError(Token &error);
+  void onClosure(Token &out, Token &ret, Token &ref, Token &params,
+                 Token &cparams, Token &stmts);
+  void onClosureParam(Token &out, Token *params, Token &param, bool ref);
+  void onLabel(Token &out, Token &label);
+  void onGoto(Token &out, Token &label);
+
+  void onTypeDecl(Token &out, Token &type, Token &decl);
+  void onTypedVariable(Token &out, Token *exprs, Token &var, Token *value);
 
 private:
   AnalysisResultPtr m_ar;
@@ -197,6 +224,8 @@ private:
 
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);
+
+  bool hasType(Token &type);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

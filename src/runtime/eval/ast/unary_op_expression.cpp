@@ -45,7 +45,6 @@ Variant UnaryOpExpression::eval(VariableEnvironment &env) const {
   case '-':           return negate(exp);
   case '!':           return !exp;
   case '~':           return ~exp;
-  case '(':           return exp;
   case T_INT_CAST:    return toInt64(exp);
   case T_DOUBLE_CAST: return toDouble(exp);
   case T_STRING_CAST: return toString(exp);
@@ -64,20 +63,10 @@ Variant UnaryOpExpression::eval(VariableEnvironment &env) const {
 
 Variant UnaryOpExpression::refval(VariableEnvironment &env,
     int strict /* = 2 */) const {
-  if (m_op == '(') {
-    return ref(m_exp->refval(env, strict));
-  } else {
-    return ref(Expression::refval(env, strict));
-  }
+  return ref(Expression::refval(env, strict));
 }
 
 void UnaryOpExpression::dump(std::ostream &out) const {
-  if (m_op == '(') {
-    out << "(";
-    m_exp->dump(out);
-    out << ")";
-    return;
-  }
   if (m_front) {
     dumpOp(out);
   }

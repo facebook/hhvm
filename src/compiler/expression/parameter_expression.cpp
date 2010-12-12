@@ -104,11 +104,14 @@ void ParameterExpression::setNthKid(int n, ConstructPtr cp) {
 
 TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar,
                                          bool forInference) {
+  const Type::TypePtrMap &types = Type::GetTypeHintTypes();
+  Type::TypePtrMap::const_iterator iter;
+
   TypePtr ret;
   if (m_type.empty() || (forInference && m_defaultValue)) {
     ret = Type::Some;
-  } else if (m_type == "array") {
-    ret = Type::Array;
+  } else if ((iter = types.find(m_type)) != types.end()) {
+    ret = iter->second;
   } else {
     if (forInference) {
       ClassScopePtr cls = ar->findClass(m_type);

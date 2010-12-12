@@ -14,37 +14,27 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/qop_expression.h>
+#ifndef __YIELD_STATEMENT_H__
+#define __YIELD_STATEMENT_H__
+
+#include <compiler/statement/statement.h>
 
 namespace HPHP {
-namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-QOpExpression::QOpExpression(EXPRESSION_ARGS, ExpressionPtr cond,
-                             ExpressionPtr t, ExpressionPtr f)
-  : Expression(EXPRESSION_PASS), m_cond(cond), m_true(t), m_false(f) {}
+DECLARE_BOOST_TYPES(YieldStatement);
 
-Variant QOpExpression::eval(VariableEnvironment &env) const {
-  Variant cond(m_cond->eval(env));
-  if (cond) {
-    if (m_true) {
-      return m_true->eval(env);
-    }
-    return cond;
-  } else {
-    return m_false->eval(env);
-  }
-}
+class YieldStatement : public Statement {
+public:
+  YieldStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
 
-void QOpExpression::dump(std::ostream &out) const {
-  m_cond->dump(out);
-  out << " ? ";
-  m_true->dump(out);
-  out << " : ";
-  m_false->dump(out);
-}
+  DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
+  virtual bool hasRetExp() const { return m_exp; }
+  ExpressionPtr getRetExp() const { return m_exp; }
+private:
+  ExpressionPtr m_exp;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-}
-
+#endif // __YIELD_STATEMENT_H__

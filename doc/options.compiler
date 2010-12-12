@@ -157,6 +157,17 @@ Still under development, but this option specifies where to store runtime
 type information collected by RTTI profiler. We intend to use this information
 to compile better code, similar to g++'s PGO.
 
+= EnableHipHopSyntax
+
+Default is false. Enables new syntax, including yield, new type names for
+function parameter, function return and class variable type hints (string,
+int, boolean, etc..), new array types (vector, map, set).
+
+= EnableHipHopExperimentalSyntax
+
+Default is false. Enables experimental syntax, including type hints for local
+variables and global variables.
+
 = EnableShortTags
 
 Default is true. Is &lt;? allowed with PHP code?
@@ -169,6 +180,10 @@ Default is false. Is &lt;% %&gt; allowed with PHP code?
 
 Whether to enable XHP extension. XHP adds some syntax sugar to allow better and
 safer HTML templating. For more information, search XHP.
+
+= NativeXHP
+
+Whether to use HPHP to directly handle XHP.
 
 = ParserThreadCount
 

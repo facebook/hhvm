@@ -1,3 +1,3 @@
 
 all:
-	php ../../../bin/gen_constants.php > constants.php
+	php ../../../bin/gen_constants.php php53.constants.php > constants.php

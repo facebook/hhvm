@@ -14,34 +14,38 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/qop_expression.h>
+#include <runtime/eval/ast/yield_statement.h>
+#include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/lval_expression.h>
+#include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-QOpExpression::QOpExpression(EXPRESSION_ARGS, ExpressionPtr cond,
-                             ExpressionPtr t, ExpressionPtr f)
-  : Expression(EXPRESSION_PASS), m_cond(cond), m_true(t), m_false(f) {}
+YieldStatement::YieldStatement(STATEMENT_ARGS, ExpressionPtr value)
+  : Statement(STATEMENT_PASS), m_value(value) {}
 
-Variant QOpExpression::eval(VariableEnvironment &env) const {
-  Variant cond(m_cond->eval(env));
-  if (cond) {
-    if (m_true) {
-      return m_true->eval(env);
+void YieldStatement::eval(VariableEnvironment &env) const {
+  ENTER_STMT;
+  if (m_value) {
+    if (env.refReturn()) {
+      env.setRet(ref(m_value->refval(env, 1)));
+      return;
     }
-    return cond;
-  } else {
-    return m_false->eval(env);
+    env.setRet(m_value->eval(env));
+    return;
   }
+  env.setRet();
 }
 
-void QOpExpression::dump(std::ostream &out) const {
-  m_cond->dump(out);
-  out << " ? ";
-  m_true->dump(out);
-  out << " : ";
-  m_false->dump(out);
+void YieldStatement::dump(std::ostream &out) const {
+  out << "yield";
+  if (m_value) {
+    out << " ";
+    m_value->dump(out);
+  }
+  out << ";\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

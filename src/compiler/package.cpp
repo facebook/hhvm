@@ -262,7 +262,7 @@ bool Package::parseImpl(const char *fileName) {
     Scanner scanner(fullPath.c_str(), Option::ScannerType);
     Compiler::Parser parser(scanner, fileName, m_ar, sb.st_size);
     if (!parser.parse()) {
-      throw Exception("Unable to parse file: %s\n%s", fullPath.c_str(),
+      throw Exception("Unable to parse file: %s %s", fullPath.c_str(),
                       parser.getMessage().c_str());
     }
 

@@ -14,37 +14,29 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/qop_expression.h>
+#ifndef __EVAL_YIELD_STATEMENT_H__
+#define __EVAL_YIELD_STATEMENT_H__
+
+#include <runtime/eval/ast/statement.h>
 
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-QOpExpression::QOpExpression(EXPRESSION_ARGS, ExpressionPtr cond,
-                             ExpressionPtr t, ExpressionPtr f)
-  : Expression(EXPRESSION_PASS), m_cond(cond), m_true(t), m_false(f) {}
+DECLARE_AST_PTR(YieldStatement);
+DECLARE_AST_PTR(Expression);
 
-Variant QOpExpression::eval(VariableEnvironment &env) const {
-  Variant cond(m_cond->eval(env));
-  if (cond) {
-    if (m_true) {
-      return m_true->eval(env);
-    }
-    return cond;
-  } else {
-    return m_false->eval(env);
-  }
-}
-
-void QOpExpression::dump(std::ostream &out) const {
-  m_cond->dump(out);
-  out << " ? ";
-  m_true->dump(out);
-  out << " : ";
-  m_false->dump(out);
-}
+class YieldStatement : public Statement {
+public:
+  YieldStatement(STATEMENT_ARGS, ExpressionPtr value);
+  virtual void eval(VariableEnvironment &env) const;
+  virtual void dump(std::ostream &out) const;
+private:
+  ExpressionPtr m_value;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
 
+#endif /* __EVAL_YIELD_STATEMENT_H__ */

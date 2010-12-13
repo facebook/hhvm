@@ -210,9 +210,7 @@ void FunctionStatement::eval(VariableEnvironment &env) const {
 }
 
 Variant FunctionStatement::invoke(CArrRef params) const {
-  DECLARE_THREAD_INFO
-  RECURSION_INJECTION
-  REQUEST_TIMEOUT_INJECTION
+  DECLARE_THREAD_INFO_NOINIT
   FuncScopeVariableEnvironment env(this, params.size());
   EvalFrameInjection fi(empty_string, m_name.c_str(), env, loc()->file);
   if (m_ref) {
@@ -292,9 +290,7 @@ Variant FunctionStatement::evalBody(VariableEnvironment &env) const {
 Variant FunctionStatement::directInvoke(VariableEnvironment &env,
                                         const FunctionCallExpression *caller)
   const {
-  DECLARE_THREAD_INFO
-  RECURSION_INJECTION
-  REQUEST_TIMEOUT_INJECTION
+  DECLARE_THREAD_INFO_NOINIT
   FuncScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
   EvalFrameInjection fi(empty_string, m_name.c_str(), fenv, loc()->file);

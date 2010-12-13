@@ -55,7 +55,7 @@ void DummySandbox::run() {
       char *argv[] = {"", NULL};
       execute_command_line_begin(1, argv, 0);
 
-      DECLARE_THREAD_INFO;
+      DECLARE_THREAD_INFO_NOINIT;
       FRAME_INJECTION_FLAGS(empty_string, _, FrameInjection::PseudoMain);
 
       DSandboxInfo sandbox = m_proxy->getSandbox();

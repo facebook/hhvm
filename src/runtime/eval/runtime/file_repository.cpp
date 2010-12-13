@@ -46,9 +46,7 @@ PhpFile::~PhpFile() {
 
 Variant PhpFile::eval(LVariableTable *vars) {
   NestedVariableEnvironment env(vars, *this);
-  DECLARE_THREAD_INFO
-  RECURSION_INJECTION
-  REQUEST_TIMEOUT_INJECTION
+  DECLARE_THREAD_INFO_NOINIT
   EvalFrameInjection fi(empty_string, m_profName.c_str(), env,
       m_tree->loc()->file, NULL, FrameInjection::PseudoMain);
   m_tree->eval(env);

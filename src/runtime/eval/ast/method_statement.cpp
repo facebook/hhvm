@@ -66,9 +66,7 @@ Variant MethodStatement::invokeInstance(CObjRef obj, CArrRef params,
   }
   if (check) attemptAccess(FrameInjection::GetClassName(false));
   // The debug frame should have been pushed at ObjectMethodExpression
-  DECLARE_THREAD_INFO
-  RECURSION_INJECTION
-  REQUEST_TIMEOUT_INJECTION
+  DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment env(this, params.size());
   env.setCurrentObject(obj);
   String clsName(m_class->name().c_str(), m_class->name().size(),
@@ -88,9 +86,7 @@ invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
     return invokeStaticDirect(obj->o_getClassName(), env, caller);
   }
   attemptAccess(FrameInjection::GetClassName(false));
-  DECLARE_THREAD_INFO
-  RECURSION_INJECTION
-  REQUEST_TIMEOUT_INJECTION
+  DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
   fenv.setCurrentObject(obj);
@@ -107,9 +103,7 @@ invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
 Variant MethodStatement::invokeStatic(const char* cls, CArrRef params,
     bool check /* = true */) const {
   if (check) attemptAccess(FrameInjection::GetClassName(false));
-  DECLARE_THREAD_INFO
-  RECURSION_INJECTION
-  REQUEST_TIMEOUT_INJECTION
+  DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment env(this, params.size());
   env.setCurrentClass(cls);
   String clsName(m_class->name().c_str(), m_class->name().size(),
@@ -129,9 +123,7 @@ invokeStaticDirect(const char* cls, VariableEnvironment &env,
   MethScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
   fenv.setCurrentClass(cls);
-  DECLARE_THREAD_INFO
-  RECURSION_INJECTION
-  REQUEST_TIMEOUT_INJECTION
+  DECLARE_THREAD_INFO_NOINIT
   String clsName(m_class->name().c_str(), m_class->name().size(),
                  AttachLiteral);
   EvalFrameInjection fi(clsName, m_fullName.c_str(), fenv,

@@ -298,11 +298,10 @@ public:
 
   virtual void onThreadEnter() {
     hphp_session_init();
-    hphp_context_init();
   }
 
   virtual void onThreadExit() {
-    hphp_context_exit(g_context.get(), false, false);
+    hphp_context_exit(g_context.get(), false, true);
     hphp_session_exit();
   }
 

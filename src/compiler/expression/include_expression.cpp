@@ -203,8 +203,10 @@ void IncludeExpression::analyzeInclude(AnalysisResultPtr ar,
                                        const std::string &include) {
   ConstructPtr self = shared_from_this();
   FileScopePtr file = ar->findFileScope(include);
-  if (!file && !include.empty()) {
-    Compiler::Error(Compiler::PHPIncludeFileNotFound, self);
+  if (!file) {
+    if (!include.empty() && include.find(' ') == string::npos) {
+      Compiler::Error(Compiler::PHPIncludeFileNotFound, self);
+    }
     return;
   }
   FunctionScopePtr func = getFunctionScope();

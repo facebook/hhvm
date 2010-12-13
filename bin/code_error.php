@@ -6,7 +6,12 @@ $SourceRoot = $argv[2];
 $errors = json_decode(file_get_contents($CodeErrorJS), true);
 
 $emails = array();
-$reporting = array('TooFewArgument', 'TooManyArgument');
+$reporting = array(
+  'BadPHPIncludeFile',
+  'PHPIncludeFileNotFound',
+  'TooFewArgument',
+  'TooManyArgument',
+);
 $count = 0;
 foreach ($reporting as $type) {
   echo $type;
@@ -28,17 +33,16 @@ foreach ($reporting as $type) {
       $body .= "Type: $type\nError: $details\nCode:\n\n";
       $body .= get_code_block($file, $line0, $char0, $line1, $char1);
       $emails[$blame] = $body;
-    }
-
-    echo ".";
-    if (++$count > 100) {
-      break;
+      echo ".";
+    } else {
+      echo "x";
     }
   }
   echo "\n";
 }
 
 foreach ($emails as $blame => $body) {
+  echo "sending mail to $blame...\n";
   mail($blame, "[nemo] A bug's life ends here",
        "Hi, there\n\n".
        "HipHop compiler might have found some bugs with PHP code you were working on. Would you take a quick look to see if they are real problems?\n".$body);
@@ -58,7 +62,8 @@ function get_blame($file, $line) {
   global $SourceRoot;
 
   $cmd = "svn blame $SourceRoot/$file 2>/dev/null | head -$line | tail -1";
-  if (preg_match('/^[0-9]+ (\w+)/', shell_exec($cmd), $m)) {
+  $ret = shell_exec($cmd);
+  if (preg_match('/^[0-9]+ +(\w+)/', $ret, $m)) {
     return $m[1];
   }
 }

@@ -38,7 +38,7 @@ ArrayElementExpression::ArrayElementExpression
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
     m_variable(variable), m_offset(offset), m_global(false),
     m_dynamicGlobal(false), m_localEffects(AccessorEffect) {
-  m_variable->setContext(Expression::ArrayContext);
+  m_variable->setContext(Expression::AccessContext);
 }
 
 ExpressionPtr ArrayElementExpression::clone() {

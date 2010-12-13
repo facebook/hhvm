@@ -109,7 +109,7 @@ public:
   virtual bool kidUnused(int i) const { return false; }
 
   template<typename T>
-  static boost::shared_ptr<T> Clone(boost::shared_ptr<T> &constr) {
+  static boost::shared_ptr<T> Clone(boost::shared_ptr<T> constr) {
     if (constr) {
       return boost::dynamic_pointer_cast<T>(constr->clone());
     }

@@ -5075,12 +5075,11 @@ Array c_ReflectionExtension::t_getclassnames() {
       iter3->second(v_cls);
       {
         {
-          Variant tmp5((v_cls));
           MethodCallPackage mcp4;
-          mcp4.methodCall((tmp5.objectForCall()), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
+          mcp4.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
           const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
-          Variant tmp6(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
-          v_ret.append((tmp6));
+          Variant tmp5(((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+          v_ret.append((tmp5));
         }
       }
     }

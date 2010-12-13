@@ -99,7 +99,8 @@ public:
     DeepReference = 0x40000,     // Value is not available for copy propagation
                                  // because it is referenced in some way
                                  // eg $b in &$b['foo']
-    ArrayContext = 0x80000       // $a in $a[?]
+    AccessContext = 0x80000      // ArrayElementExpression::m_variable or
+                                 // ObjectPropertyExpression::m_object
   };
 
   enum Order {
@@ -183,7 +184,13 @@ public:
   void setCanonID(unsigned id) { m_canon_id = id; }
   unsigned getCanonID() const { return m_canon_id; }
   void setCanonPtr(ExpressionPtr e) { m_canonPtr = e; }
-  ExpressionPtr getCanonPtr() const { return m_canonPtr; }
+  ExpressionPtr getCanonPtr() const {
+    return m_context & (LValue|RefValue|UnsetContext) ?
+      ExpressionPtr() : m_canonPtr;
+  }
+  ExpressionPtr getCanonLVal() const {
+    return m_canonPtr;
+  }
 
   /**
    * Type checking without RTTI.

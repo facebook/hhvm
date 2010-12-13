@@ -63,7 +63,7 @@ ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
   if (rep->is(KindOfSimpleVariable) && !is(KindOfSimpleVariable)) {
     static_pointer_cast<SimpleVariable>(rep)->setAlwaysStash();
   }
-  rep->copyContext(m_context & ~DeadStore);
+  rep->copyContext(m_context & ~(DeadStore|AccessContext));
   if (TypePtr t1 = getType()) {
     if (TypePtr t2 = rep->getType()) {
       if (!Type::SameType(t1, t2)) {
@@ -113,6 +113,7 @@ void Expression::setArgNum(int n) {
 void Expression::deepCopy(ExpressionPtr exp) {
   exp->m_actualType = m_actualType;
   exp->m_expectedType = m_expectedType;
+  exp->m_implementedType = m_implementedType;
   exp->m_canon_id = 0;
   exp->m_unused = false;
   exp->m_canonPtr.reset();
@@ -221,7 +222,7 @@ TypePtr Expression::getCPPType() {
 }
 
 TypePtr Expression::propagateTypes(AnalysisResultPtr ar, TypePtr inType) {
-  ExpressionPtr e = this->m_canonPtr;
+  ExpressionPtr e = this->getCanonPtr();
   TypePtr ret = inType;
 
   while (e) {
@@ -231,7 +232,7 @@ TypePtr Expression::propagateTypes(AnalysisResultPtr ar, TypePtr inType) {
     } else {
       ret = inferred;
     }
-    e = e->m_canonPtr;
+    e = e->getCanonPtr();
   }
 
   return ret;
@@ -836,7 +837,7 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
                                     AnalysisResultPtr ar,
                                     int state) {
   bool ret = (state & FixOrder);
-  if (!(m_context & (ObjectContext|ArrayContext))) {
+  if (!hasContext(AccessContext)) {
     if (!ret) {
       ret = checkOffsetChain(getNthExpr(0));
       if (!ret &&
@@ -862,7 +863,7 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
     e1->preOutputCPP(cg, ar, state & ~(StashVars));
   }
 
-  if (!(m_context & (ObjectContext|ArrayContext))) {
+  if (!hasContext(AccessContext)) {
     if (!(m_context & (AssignmentLHS | OprLValue |
                        ExistContext | UnsetContext))) {
       Expression::preOutputStash(cg, ar, state);

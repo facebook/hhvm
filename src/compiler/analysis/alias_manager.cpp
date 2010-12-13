@@ -283,6 +283,17 @@ void AliasManager::resetScope() {
                 resetScopeHelper);
 }
 
+void AliasManager::dumpAccessChain() {
+  BucketMapEntry &lvs = m_bucketMap[0];
+  ExpressionPtrList::reverse_iterator it = lvs.rbegin(), end = lvs.rend();
+
+  while (it != end) {
+    ExpressionPtr e = *it;
+    e->dump(0, m_arp);
+    ++it;
+  }
+}
+
 int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
   Expression::KindOf k1 = e1->getKindOf(), k2 = e2->getKindOf();
   while (true) {
@@ -361,12 +372,6 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
         case Expression::KindOfArrayElementExpression:
           if (m_wildRefs || sv1->couldBeAliased()) {
             return InterfAccess;
-          } else {
-            // $a = "foo"; $a[0] = "x";
-            ExpressionPtr var = spc(ArrayElementExpression, e2)->getVariable();
-            if (e1->canonCompare(var)) {
-              return InterfAccess;
-            }
           }
           return DisjointAccess;
 
@@ -748,16 +753,53 @@ ExpressionPtr AliasManager::canonicalizeRecurNonNull(ExpressionPtr e) {
 
 static bool sameExpr(ExpressionPtr e1, ExpressionPtr e2) {
   if (e1 == e2) return true;
-  while (e2->getCanonPtr()) {
+  while (true) {
     e2 = e2->getCanonPtr();
+    if (!e2) break;
     if (e2 == e1) return true;
   }
   return false;
 }
 
-ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
-  if (e->isVisited()) return ExpressionPtr();
+void AliasManager::processAccessChain(ExpressionPtr e) {
+  if (!e) return;
+  if (!e->is(Expression::KindOfObjectPropertyExpression) &&
+      !e->is(Expression::KindOfArrayElementExpression)) {
+    return;
+  }
+  for (int i = 0, n = e->getKidCount(); i < n; ++i) {
+    ExpressionPtr kid(e->getNthExpr(i));
+    if (kid && kid->hasContext(Expression::AccessContext)) {
+      processAccessChain(kid);
+      ExpressionPtr rep(canonicalizeNode(kid, true));
+      if (rep) {
+        e->setNthKid(i, rep);
+      }
+      break;
+    }
+  }
+}
+
+ExpressionPtr AliasManager::canonicalizeNode(
+  ExpressionPtr e, bool doAccessChains /* = false */) {
+  if (e->isVisited() ||
+      (!doAccessChains &&
+       e->getContext() & (Expression::AccessContext|
+                          Expression::AssignmentLHS|
+                          Expression::OprLValue))) {
+    return ExpressionPtr();
+  }
+
   ExpressionPtr ret;
+  switch (e->getKindOf()) {
+    case Expression::KindOfAssignmentExpression:
+    case Expression::KindOfBinaryOpExpression:
+    case Expression::KindOfUnaryOpExpression:
+      processAccessChain(e->getNthExpr(0));
+      break;
+    default:
+      break;
+  }
   if (!m_noAdd) {
     if (m_preOpt) ret = e->preOptimize(m_arp);
     if (m_postOpt) ret = e->postOptimize(m_arp);
@@ -770,6 +812,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
   e->setCanonPtr(ExpressionPtr());
   e->setCanonID(0);
 
+  bool ac = false;
   switch (e->getKindOf()) {
   case Expression::KindOfObjectMethodExpression:
   case Expression::KindOfDynamicFunctionCall:
@@ -789,29 +832,30 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
       Construct::recomputeEffects();
       return ae->replaceValue(ae->getValue());
     }
+
     ExpressionPtr rep;
     int interf = findInterf(ae->getVariable(), false, rep);
     if (interf == SameAccess) {
       switch (rep->getKindOf()) {
-      default:
-        break;
-      case Expression::KindOfAssignmentExpression:
+      case Expression::KindOfAssignmentExpression: {
+        AssignmentExpressionPtr a = spc(AssignmentExpression, rep);
+        rep = a->getVariable();
         if (Option::EliminateDeadCode) {
-          AssignmentExpressionPtr a = spc(AssignmentExpression, rep);
           ExpressionPtr value = a->getValue();
           if (value->getContext() & Expression::RefValue) {
             break;
           }
           if (!Expression::CheckNeeded(m_arp, a->getVariable(), value) ||
               m_bucketMap[0].isSubLast(a)) {
-            rep->setReplacement(value);
+            a->setReplacement(value);
             m_replaced++;
           }
         }
         break;
-      case Expression::KindOfBinaryOpExpression:
+      }
+      case Expression::KindOfBinaryOpExpression: {
+        BinaryOpExpressionPtr b = spc(BinaryOpExpression, rep);
         if (Option::EliminateDeadCode) {
-          BinaryOpExpressionPtr b = spc(BinaryOpExpression, rep);
           bool ok = b->getActualType() &&
             b->getActualType()->isNoObjectInvolved();
           if (!ok) {
@@ -846,10 +890,12 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
             m_replaced++;
           }
         }
+        rep = b->getExp1();
         break;
-      case Expression::KindOfUnaryOpExpression:
+      }
+      case Expression::KindOfUnaryOpExpression: {
+        UnaryOpExpressionPtr u = spc(UnaryOpExpression, rep);
         if (Option::EliminateDeadCode) {
-          UnaryOpExpressionPtr u = spc(UnaryOpExpression, rep);
           if (u->getActualType() && u->getActualType()->isInteger()) {
             ExpressionPtr val = u->getExpression()->clone();
             val->clearContext();
@@ -870,21 +916,31 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
             u->setReplacement(val);
             m_replaced++;
           }
+          rep = u->getExpression();
         }
         break;
       }
+      default:
+        break;
+      }
+      assert(rep->getKindOf() == ae->getVariable()->getKindOf());
+      ae->getVariable()->setCanonID(rep->getCanonID());
+    } else {
+      ae->getVariable()->setCanonID(m_nextID++);
     }
     add(m_bucketMap[0], e);
     break;
   }
 
-  case Expression::KindOfSimpleVariable:
-  case Expression::KindOfDynamicVariable:
   case Expression::KindOfArrayElementExpression:
   case Expression::KindOfObjectPropertyExpression:
+    ac = true;
+  case Expression::KindOfSimpleVariable:
+  case Expression::KindOfDynamicVariable:
   case Expression::KindOfStaticMemberExpression:
     if (e->hasContext(Expression::UnsetContext) &&
         e->hasContext(Expression::LValue)) {
+      if (ac) processAccessChain(e);
       if (Option::EliminateDeadCode) {
         ExpressionPtr rep;
         int interf = findInterf(e, false, rep);
@@ -989,10 +1045,43 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
         by the respective Assignment += ++ operators etc
         Dont add them to the chain again, or it will prevent dead
         store elimination
+        Expressions with AccessContext need to be taken care of
+        by processAccessChain(), which adds the entire access chain
+        to the access list after all its side effects have taken place.
+        In the case of assignment, or binary op assignment, its added
+        after the rhs has been fully processed too.
       */
-      if (!(e->getContext() & (Expression::DeepAssignmentLHS|
-                               Expression::DeepOprLValue|
-                               Expression::LValue|
+      if (e->hasContext(Expression::AccessContext)) {
+        if (!doAccessChains) break;
+        if (e->getContext() & (Expression::LValue|
+                               Expression::RefValue|
+                               Expression::RefParameter|
+                               Expression::DeepReference|
+                               Expression::UnsetContext)) {
+          ExpressionPtr rep;
+          int interf = findInterf(e, true, rep);
+          add(m_bucketMap[0], e);
+          if (interf == SameAccess) {
+            if (e->getKindOf() == rep->getKindOf()) {
+              // e->setCanonID(rep->getCanonID());
+            } else if (rep->is(Expression::KindOfBinaryOpExpression) ||
+                       rep->is(Expression::KindOfUnaryOpExpression)) {
+              break;
+            } else if (rep->is(Expression::KindOfAssignmentExpression)) {
+              //e->setCanonID(
+              //  spc(AssignmentExpression, rep)->getVariable()->getCanonID());
+              do {
+                rep = spc(AssignmentExpression, rep)->getValue();
+              } while (rep->is(Expression::KindOfAssignmentExpression));
+            }
+            e->setCanonPtr(rep);
+          }
+          break;
+        }
+      } else if (ac) {
+        processAccessChain(e);
+      }
+      if (!(e->getContext() & (Expression::LValue|
                                Expression::RefValue|
                                Expression::RefParameter|
                                Expression::DeepReference|
@@ -1075,8 +1164,6 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
         }
       }
       add(m_bucketMap[0], e);
-    } else {
-      getCanonical(e);
     }
     break;
 
@@ -1100,27 +1187,43 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
       ExpressionPtr lhs = bop->getExp1();
       ExpressionPtr alt;
       int interf = findInterf(lhs, true, alt);
-      if (interf == SameAccess &&
-          alt->is(Expression::KindOfAssignmentExpression)) {
-        ExpressionPtr op0 = spc(AssignmentExpression,alt)->getValue();
-        if (op0->isScalar()) {
-          ExpressionPtr op1 = bop->getExp2();
-          ExpressionPtr rhs(
-            (new BinaryOpExpression(e->getScope(), e->getLocation(),
-                                    Expression::KindOfBinaryOpExpression,
-                                    op0->clone(), op1->clone(), rop)));
+      if (interf == SameAccess) {
+        switch (alt->getKindOf()) {
+          case Expression::KindOfAssignmentExpression: {
+            ExpressionPtr op0 = spc(AssignmentExpression,alt)->getValue();
+            if (op0->isScalar()) {
+              ExpressionPtr op1 = bop->getExp2();
+              ExpressionPtr rhs(
+                (new BinaryOpExpression(e->getScope(), e->getLocation(),
+                                        Expression::KindOfBinaryOpExpression,
+                                        op0->clone(), op1->clone(), rop)));
 
-          lhs = lhs->clone();
-          lhs->clearContext(Expression::OprLValue);
-          return e->replaceValue(
-            canonicalizeRecurNonNull(
-              ExpressionPtr(new AssignmentExpression(
-                              e->getScope(), e->getLocation(),
-                              Expression::KindOfAssignmentExpression,
-                              lhs, rhs, false))));
+              lhs = lhs->clone();
+              lhs->clearContext(Expression::OprLValue);
+              return e->replaceValue(
+                canonicalizeRecurNonNull(
+                  ExpressionPtr(new AssignmentExpression(
+                                  e->getScope(), e->getLocation(),
+                                  Expression::KindOfAssignmentExpression,
+                                  lhs, rhs, false))));
+            }
+            alt = spc(AssignmentExpression,alt)->getVariable();
+            break;
+          }
+          case Expression::KindOfBinaryOpExpression:
+            alt = spc(BinaryOpExpression,alt)->getExp1();
+            break;
+          case Expression::KindOfUnaryOpExpression:
+            alt = spc(UnaryOpExpression,alt)->getExpression();
+            break;
+          default:
+            break;
         }
+        assert(alt->getKindOf() == lhs->getKindOf());
+        lhs->setCanonID(alt->getCanonID());
+      } else {
+        lhs->setCanonID(m_nextID++);
       }
-
       add(m_bucketMap[0], e);
     } else {
       getCanonical(e);
@@ -1128,20 +1231,41 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
     break;
   }
 
-  case Expression::KindOfUnaryOpExpression:
-    {
-      UnaryOpExpressionPtr uop = spc(UnaryOpExpression, e);
-      switch (uop->getOp()) {
+  case Expression::KindOfUnaryOpExpression: {
+    UnaryOpExpressionPtr uop = spc(UnaryOpExpression, e);
+    switch (uop->getOp()) {
       case T_INC:
-      case T_DEC:
+      case T_DEC: {
+        ExpressionPtr alt;
+        int interf = findInterf(uop->getExpression(), true, alt);
+        if (interf == SameAccess) {
+          switch (alt->getKindOf()) {
+            case Expression::KindOfAssignmentExpression:
+              alt = spc(AssignmentExpression,alt)->getVariable();
+              break;
+            case Expression::KindOfBinaryOpExpression:
+              alt = spc(BinaryOpExpression,alt)->getExp1();
+              break;
+            case Expression::KindOfUnaryOpExpression:
+              alt = spc(UnaryOpExpression,alt)->getExpression();
+              break;
+            default:
+              break;
+          }
+          assert(alt->getKindOf() == uop->getExpression()->getKindOf());
+          uop->getExpression()->setCanonID(alt->getCanonID());
+        } else {
+          uop->getExpression()->setCanonID(m_nextID++);
+        }
         add(m_bucketMap[0], e);
         break;
+      }
       default:
         getCanonical(e);
         break;
-      }
-      break;
     }
+    break;
+  }
 
   case Expression::KindOfExpressionList:
     if (e->hasContext(Expression::UnsetContext) &&

@@ -149,6 +149,7 @@ void Construct::dumpNode(int spc, AnalysisResultPtr ar) {
   std::string type_info = "";
   unsigned id = 0;
   ExpressionPtr idPtr = ExpressionPtr();
+  int ef = 0;
 
   if (Statement *s = dynamic_cast<Statement*>(this)) {
     Statement::KindOf stype = s->getKindOf();
@@ -238,7 +239,8 @@ void Construct::dumpNode(int spc, AnalysisResultPtr ar) {
     type = (int)stype;
   } else if (Expression *e = dynamic_cast<Expression*>(this)) {
     id = e->getCanonID();
-    idPtr = e->getCanonPtr();
+    idPtr = e->getCanonLVal();
+    ef = e->getLocalEffects();
 
     Expression::KindOf etype = e->getKindOf();
     switch (etype) {
@@ -366,10 +368,14 @@ void Construct::dumpNode(int spc, AnalysisResultPtr ar) {
     if (c & Expression::DeepOprLValue) {
       scontext += "|DeepOprLValue";
     }
+    if (c & Expression::AccessContext) {
+      scontext += "|AccessContext";
+    }
 
     if (scontext != "") {
       scontext = " (" + scontext.substr(1) + ")";
     }
+
     type = (int)etype;
 
     if (e->getActualType()) {
@@ -407,7 +413,29 @@ void Construct::dumpNode(int spc, AnalysisResultPtr ar) {
   if (value != "") {
     std::cout << "[" << value << "] ";
   }
-  std::cout << type_info << nkid << scontext;
+
+  string sef;
+  if ((ef & UnknownEffect) == UnknownEffect) {
+    sef = "|UnknownEffect";
+  } else {
+    if (ef & IOEffect) sef += "|IOEffect";
+    if (ef & AssignEffect) sef += "|AssignEffect";
+    if (ef & GlobalEffect) sef += "|GlobalEffect";
+    if (ef & LocalEffect) sef += "|LocalEffect";
+    if (ef & ParamEffect) sef += "|ParamEffect";
+    if (ef & DeepParamEffect) sef += "|DeepParamEffect";
+    if (ef & DynamicParamEffect) sef += "|DynamicParamEffect";
+    if (ef & CanThrow) sef += "|CanThrow";
+    if (ef & AccessorEffect) sef += "|AccessorEffect";
+    if (ef & CreateEffect) sef += "|CreateEffect";
+    if (ef & DiagnosticEffect) sef += "|DiagnosticEffect";
+    if (ef & OtherEffect) sef += "|OtherEffect";
+  }
+  if (sef != "") {
+    sef = " (" + sef.substr(1) + ")";
+  }
+
+  std::cout << type_info << nkid << scontext << sef;
   if (m_loc) {
     std::cout << " " << m_loc->file << ":" <<
       m_loc->line1 << "@" << m_loc->char1;

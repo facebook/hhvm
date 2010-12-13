@@ -120,6 +120,7 @@ class AliasManager {
 
   void add(BucketMapEntry &em, ExpressionPtr e);
 
+  void dumpAccessChain();
   int testAccesses(ExpressionPtr e1, ExpressionPtr e2);
   void cleanInterf(ExpressionPtr rv,
                    ExpressionPtrList::reverse_iterator it,
@@ -131,10 +132,11 @@ class AliasManager {
                   int &depth, int &effects);
   int findInterf(ExpressionPtr rv, bool isLoad, ExpressionPtr &rep);
   void applyAssign(ExpressionPtr lhs, ExpressionPtr rhs);
+  void processAccessChain(ExpressionPtr e);
 
   void canonicalizeKid(ConstructPtr e, ExpressionPtr kid, int i);
   int canonicalizeKid(ConstructPtr e, ConstructPtr kid, int i);
-  ExpressionPtr canonicalizeNode(ExpressionPtr e);
+  ExpressionPtr canonicalizeNode(ExpressionPtr e, bool doAccessChains = false);
   ExpressionPtr canonicalizeNonNull(ExpressionPtr e);
   ExpressionPtr canonicalizeRecurNonNull(ExpressionPtr e);
   ExpressionPtr canonicalizeRecur(ExpressionPtr e);

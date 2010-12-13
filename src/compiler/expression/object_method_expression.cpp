@@ -43,6 +43,7 @@ ObjectMethodExpression::ObjectMethodExpression
     m_invokeFewArgsDecision(true), m_bindClass(true) {
   m_object->setContext(Expression::ObjectContext);
   m_object->clearContext(Expression::LValue);
+  m_object->clearContext(Expression::AccessContext);
 }
 
 ExpressionPtr ObjectMethodExpression::clone() {
@@ -315,10 +316,15 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
   cg.wrapExpressionBegin();
   bool isThis = m_object->isThis();
   if (!isThis) {
-    m_object->preOutputCPP(cg, ar, state);
+    int s = 0;
+    if (m_name.empty() &&
+        m_nameExp->hasEffect() && !m_object->isScalar()) {
+      s = FixOrder;
+    }
+    m_object->preOutputCPP(cg, ar, s);
   }
   if (m_name.empty()) {
-    m_nameExp->preOutputCPP(cg, ar, state);
+    m_nameExp->preOutputCPP(cg, ar, 0);
   }
   const MethodSlot *ms = NULL;
   if (!m_name.empty()) {
@@ -353,7 +359,7 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
 
   if (m_params && m_params->getCount() > 0) {
     cg.pushCallInfo(m_ciTemp);
-    m_params->preOutputCPP(cg, ar, state);
+    m_params->preOutputCPP(cg, ar, 0);
     cg.popCallInfo();
   }
 

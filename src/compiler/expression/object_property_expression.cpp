@@ -42,6 +42,7 @@ ObjectPropertyExpression::ObjectPropertyExpression
   m_valid = false;
   m_propSymValid = false;
   m_object->setContext(Expression::ObjectContext);
+  m_object->setContext(Expression::AccessContext);
 }
 
 ExpressionPtr ObjectPropertyExpression::clone() {

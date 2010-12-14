@@ -22,6 +22,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss6aa5ef61("helpBody");
+StaticString s_sys_ss6ae7fa54("addByKey");
 StaticString s_sys_ss6b51d6cb("getcolumnmeta");
 StaticString s_sys_ss6b750a79("endElement");
 StaticString s_sys_ss6b8aaff2("setStaticPropertyValue");
@@ -34,6 +36,7 @@ StaticString s_sys_ss6d15497b("endDTDElement");
 StaticString s_sys_ss6d67e79b("createEntityReference");
 StaticString s_sys_ss6d9ef7e5("isOptional");
 StaticString s_sys_ss6e47b4b1("isPassedByReference");
+StaticString s_sys_ss6e6aaece("RangeException");
 StaticString s_sys_ss6e9f1eba("lookupNamespaceUri");
 StaticString s_sys_ss70529da2("modify");
 StaticString s_sys_ss70eaeb85("send");
@@ -44,19 +47,15 @@ StaticString s_sys_ss7165f45b("setCsvControl");
 StaticString s_sys_ss717877f6("children");
 StaticString s_sys_ss717a7024("getavailabledrivers");
 StaticString s_sys_ss717b8b62("c14nfile");
-StaticString s_sys_ss71d03997("reflectionproperty");
 StaticString s_sys_ss7228e959("interface");
 StaticString s_sys_ss724a760a("type");
 StaticString s_sys_ss7257a6f2("setpersistence");
 StaticString s_sys_ss7358e00d("setISODate");
 StaticString s_sys_ss73e73811("writeDTDAttlist");
-StaticString s_sys_ss73e9ca7d("appenditerator");
 StaticString s_sys_ss7416f7f1("sort");
 StaticString s_sys_ss750cda3b("access");
-StaticString s_sys_ss75530bea("reflectionmethod");
 StaticString s_sys_ss75ec94fd("endDTDAttlist");
 StaticString s_sys_ss764ad06c("fpassthru");
-StaticString s_sys_ss765bcc63("__php_incomplete_class");
 StaticString s_sys_ss7732a9a6("hphp_get_class_info");
 StaticString s_sys_ss7854bd7b("getTraceAsString");
 StaticString s_sys_ss78cb1b27("\000SplObjectStorage\000storage", 25);
@@ -65,6 +64,7 @@ StaticString s_sys_ss7a0832b7("writePI");
 StaticString s_sys_ss7a1c6fcd("createDocumentType");
 StaticString s_sys_ss7a5dbb24("output");
 StaticString s_sys_ss7ace3627("getProperties");
+StaticString s_sys_ss7c2432f2("UnexpectedValueException");
 StaticString s_sys_ss7cb08d68("arr");
 StaticString s_sys_ss7cd91db4("version");
 StaticString s_sys_ss7d1afda2("getBasename");

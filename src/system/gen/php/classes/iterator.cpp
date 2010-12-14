@@ -124,18 +124,18 @@ bool c_ArrayIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 15) {
     case 1:
-      HASH_INSTANCEOF(0x795F86375EE263D1LL, NAMSTR(s_sys_ss4315c511, "countable"));
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ssa38f312b, "traversable"));
+      HASH_INSTANCEOF(0x795F86375EE263D1LL, NAMSTR(s_sys_ss5b753b53, "Countable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
       break;
     case 3:
-      HASH_INSTANCEOF(0x3D5870E53BF89873LL, NAMSTR(s_sys_ssa7f49d6e, "arrayiterator"));
-      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ss58cce40f, "seekableiterator"));
+      HASH_INSTANCEOF(0x3D5870E53BF89873LL, NAMSTR(s_sys_ss993f2e69, "ArrayIterator"));
+      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ssc1c38583, "SeekableIterator"));
       break;
     case 11:
-      HASH_INSTANCEOF(0x3BDD11EABFCD6F0BLL, NAMSTR(s_sys_ss92d053e5, "arrayaccess"));
+      HASH_INSTANCEOF(0x3BDD11EABFCD6F0BLL, NAMSTR(s_sys_ss92306c9b, "ArrayAccess"));
       break;
     case 14:
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
       break;
     default:
       break;
@@ -1584,16 +1584,16 @@ bool c_AppendIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 0:
-      HASH_INSTANCEOF(0x2E363D51549781C8LL, NAMSTR(s_sys_ss73e9ca7d, "appenditerator"));
+      HASH_INSTANCEOF(0x2E363D51549781C8LL, NAMSTR(s_sys_ss0fad9ac4, "AppendIterator"));
       break;
     case 1:
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ssa38f312b, "traversable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
       break;
     case 5:
-      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss98b77070, "outeriterator"));
+      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss299bd55e, "OuterIterator"));
       break;
     case 6:
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
       break;
     default:
       break;
@@ -2432,21 +2432,21 @@ bool c_RecursiveDirectoryIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 15) {
     case 1:
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ssa38f312b, "traversable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
       break;
     case 3:
-      HASH_INSTANCEOF(0x191964700AF036D3LL, NAMSTR(s_sys_ssff469d85, "recursiveiterator"));
-      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ss58cce40f, "seekableiterator"));
+      HASH_INSTANCEOF(0x191964700AF036D3LL, NAMSTR(s_sys_ss49963173, "RecursiveIterator"));
+      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ssc1c38583, "SeekableIterator"));
       break;
     case 7:
-      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss5e897de5, "splfileinfo"));
+      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss914a58e9, "SplFileInfo"));
       break;
     case 8:
-      HASH_INSTANCEOF(0x464D3427431A6ED8LL, NAMSTR(s_sys_ss170bfaa5, "recursivedirectoryiterator"));
+      HASH_INSTANCEOF(0x464D3427431A6ED8LL, NAMSTR(s_sys_ss80c39bb4, "RecursiveDirectoryIterator"));
       break;
     case 14:
-      HASH_INSTANCEOF(0x7754323897E8A15ELL, NAMSTR(s_sys_ssdca320c5, "directoryiterator"));
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
+      HASH_INSTANCEOF(0x7754323897E8A15ELL, NAMSTR(s_sys_ssc72eef1f, "DirectoryIterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
       break;
     default:
       break;
@@ -3257,17 +3257,17 @@ bool c_DirectoryIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 15) {
     case 1:
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ssa38f312b, "traversable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
       break;
     case 3:
-      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ss58cce40f, "seekableiterator"));
+      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ssc1c38583, "SeekableIterator"));
       break;
     case 7:
-      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss5e897de5, "splfileinfo"));
+      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss914a58e9, "SplFileInfo"));
       break;
     case 14:
-      HASH_INSTANCEOF(0x7754323897E8A15ELL, NAMSTR(s_sys_ssdca320c5, "directoryiterator"));
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
+      HASH_INSTANCEOF(0x7754323897E8A15ELL, NAMSTR(s_sys_ssc72eef1f, "DirectoryIterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
       break;
     default:
       break;
@@ -3922,16 +3922,16 @@ bool c_RecursiveIteratorIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ssa38f312b, "traversable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
       break;
     case 2:
-      HASH_INSTANCEOF(0x365899865E2EAA32LL, NAMSTR(s_sys_ss272a9829, "recursiveiteratoriterator"));
+      HASH_INSTANCEOF(0x365899865E2EAA32LL, NAMSTR(s_sys_ssc57472df, "RecursiveIteratorIterator"));
       break;
     case 5:
-      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss98b77070, "outeriterator"));
+      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss299bd55e, "OuterIterator"));
       break;
     case 6:
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
       break;
     default:
       break;
@@ -4489,14 +4489,14 @@ bool c_FilterIterator::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_INSTANCEOF(0x7A394042E7488231LL, NAMSTR(s_sys_ss444e6f93, "filteriterator"));
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ssa38f312b, "traversable"));
+      HASH_INSTANCEOF(0x7A394042E7488231LL, NAMSTR(s_sys_ss92c34a85, "FilterIterator"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
       break;
     case 5:
-      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss98b77070, "outeriterator"));
+      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss299bd55e, "OuterIterator"));
       break;
     case 6:
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
       break;
     default:
       break;

@@ -78,11 +78,11 @@ bool c_UnexpectedValueException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_INSTANCEOF(0x5AA2EE582E0D3849LL, NAMSTR(s_sys_sse09ca852, "unexpectedvalueexception"));
+      HASH_INSTANCEOF(0x5AA2EE582E0D3849LL, NAMSTR(s_sys_ss7c2432f2, "UnexpectedValueException"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
-      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss479587f3, "runtimeexception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
+      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss5e40e701, "RuntimeException"));
       break;
     default:
       break;
@@ -173,11 +173,11 @@ bool c_OverflowException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_INSTANCEOF(0x0E4CCE95F6A727D9LL, NAMSTR(s_sys_sse2344213, "overflowexception"));
+      HASH_INSTANCEOF(0x0E4CCE95F6A727D9LL, NAMSTR(s_sys_ssbc297b7f, "OverflowException"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
-      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss479587f3, "runtimeexception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
+      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss5e40e701, "RuntimeException"));
       break;
     default:
       break;
@@ -268,11 +268,11 @@ bool c_OutOfBoundsException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_INSTANCEOF(0x227C70ED5B143841LL, NAMSTR(s_sys_ssc577ca81, "outofboundsexception"));
+      HASH_INSTANCEOF(0x227C70ED5B143841LL, NAMSTR(s_sys_ss0c50ad86, "OutOfBoundsException"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
-      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss479587f3, "runtimeexception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
+      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss5e40e701, "RuntimeException"));
       break;
     default:
       break;
@@ -363,10 +363,10 @@ bool c_LogicException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
       break;
     case 3:
-      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss22a53db9, "logicexception"));
+      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ssa37fe34e, "LogicException"));
       break;
     default:
       break;
@@ -457,11 +457,11 @@ bool c_RangeException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 3:
-      HASH_INSTANCEOF(0x6AF83706F76A9D53LL, NAMSTR(s_sys_ss8f6b9b98, "rangeexception"));
+      HASH_INSTANCEOF(0x6AF83706F76A9D53LL, NAMSTR(s_sys_ss6e6aaece, "RangeException"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
-      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss479587f3, "runtimeexception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
+      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss5e40e701, "RuntimeException"));
       break;
     default:
       break;
@@ -552,13 +552,13 @@ bool c_InvalidArgumentException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 3:
-      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss22a53db9, "logicexception"));
+      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ssa37fe34e, "LogicException"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
       break;
     case 5:
-      HASH_INSTANCEOF(0x085A4F6FD393D475LL, NAMSTR(s_sys_ssedd4666c, "invalidargumentexception"));
+      HASH_INSTANCEOF(0x085A4F6FD393D475LL, NAMSTR(s_sys_ss079dd82d, "InvalidArgumentException"));
       break;
     default:
       break;
@@ -649,9 +649,9 @@ bool c_UnderflowException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 4:
-      HASH_INSTANCEOF(0x5E623FEAF7B068D4LL, NAMSTR(s_sys_ssa44e2593, "underflowexception"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
-      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss479587f3, "runtimeexception"));
+      HASH_INSTANCEOF(0x5E623FEAF7B068D4LL, NAMSTR(s_sys_ssb8a9ecc6, "UnderflowException"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
+      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss5e40e701, "RuntimeException"));
       break;
     default:
       break;
@@ -742,11 +742,11 @@ bool c_OutOfRangeException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 3:
-      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss22a53db9, "logicexception"));
+      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ssa37fe34e, "LogicException"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x622D4DF07E2A01FCLL, NAMSTR(s_sys_ss20636eb7, "outofrangeexception"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
+      HASH_INSTANCEOF(0x622D4DF07E2A01FCLL, NAMSTR(s_sys_ss0a60a5a3, "OutOfRangeException"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
       break;
     default:
       break;
@@ -837,16 +837,16 @@ bool c_BadMethodCallException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 0:
-      HASH_INSTANCEOF(0x06335FF83CDEA590LL, NAMSTR(s_sys_ss8f6d2242, "badmethodcallexception"));
+      HASH_INSTANCEOF(0x06335FF83CDEA590LL, NAMSTR(s_sys_ss033e1025, "BadMethodCallException"));
       break;
     case 3:
-      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss22a53db9, "logicexception"));
+      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ssa37fe34e, "LogicException"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
       break;
     case 6:
-      HASH_INSTANCEOF(0x66282FC8E4EF4E46LL, NAMSTR(s_sys_ss99254931, "badfunctioncallexception"));
+      HASH_INSTANCEOF(0x66282FC8E4EF4E46LL, NAMSTR(s_sys_ss57956ee3, "BadFunctionCallException"));
       break;
     default:
       break;
@@ -937,8 +937,8 @@ bool c_RuntimeException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss479587f3, "runtimeexception"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
+      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss5e40e701, "RuntimeException"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
       break;
     default:
       break;
@@ -1080,7 +1080,7 @@ bool c_Exception::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 0:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
       break;
     default:
       break;
@@ -1888,10 +1888,10 @@ bool c_ErrorException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
       break;
     case 3:
-      HASH_INSTANCEOF(0x69EDCA1CC29CFE0BLL, NAMSTR(s_sys_ssed1ac15c, "errorexception"));
+      HASH_INSTANCEOF(0x69EDCA1CC29CFE0BLL, NAMSTR(s_sys_ssac0b0f60, "ErrorException"));
       break;
     default:
       break;
@@ -2277,13 +2277,13 @@ bool c_BadFunctionCallException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 3:
-      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss22a53db9, "logicexception"));
+      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ssa37fe34e, "LogicException"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
       break;
     case 6:
-      HASH_INSTANCEOF(0x66282FC8E4EF4E46LL, NAMSTR(s_sys_ss99254931, "badfunctioncallexception"));
+      HASH_INSTANCEOF(0x66282FC8E4EF4E46LL, NAMSTR(s_sys_ss57956ee3, "BadFunctionCallException"));
       break;
     default:
       break;
@@ -2374,11 +2374,11 @@ bool c_LengthException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 3:
-      HASH_INSTANCEOF(0x3CAE91CFA2AAD16BLL, NAMSTR(s_sys_ss062e1593, "lengthexception"));
-      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss22a53db9, "logicexception"));
+      HASH_INSTANCEOF(0x3CAE91CFA2AAD16BLL, NAMSTR(s_sys_ssadd5fee2, "LengthException"));
+      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ssa37fe34e, "LogicException"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
       break;
     default:
       break;
@@ -2469,11 +2469,11 @@ bool c_DomainException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 3:
-      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss22a53db9, "logicexception"));
+      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ssa37fe34e, "LogicException"));
       break;
     case 4:
-      HASH_INSTANCEOF(0x70D4A29DE6A7BA84LL, NAMSTR(s_sys_ss9b36ee47, "domainexception"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
+      HASH_INSTANCEOF(0x70D4A29DE6A7BA84LL, NAMSTR(s_sys_ssb65737a4, "DomainException"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
       break;
     default:
       break;

@@ -119,14 +119,14 @@ bool c_SplObjectStorage::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_INSTANCEOF(0x795F86375EE263D1LL, NAMSTR(s_sys_ss4315c511, "countable"));
-      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ssa38f312b, "traversable"));
+      HASH_INSTANCEOF(0x795F86375EE263D1LL, NAMSTR(s_sys_ss5b753b53, "Countable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
       break;
     case 6:
-      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss2fd353cc, "iterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
       break;
     case 7:
-      HASH_INSTANCEOF(0x5BA243B9FBA7A64FLL, NAMSTR(s_sys_ssb5dda8cc, "splobjectstorage"));
+      HASH_INSTANCEOF(0x5BA243B9FBA7A64FLL, NAMSTR(s_sys_ss0ec14ee2, "SplObjectStorage"));
       break;
     default:
       break;

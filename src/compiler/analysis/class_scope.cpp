@@ -1109,7 +1109,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     bases.erase(unique(bases.begin(), bases.end()), bases.end());
     vector<const char *> ancestors;
     // Convert to char * and add self
-    ancestors.push_back(m_name.c_str());
+    ancestors.push_back(m_originalName.c_str());
     for (unsigned int i = 0; i < bases.size(); i++) {
       ancestors.push_back(bases[i].c_str());
     }

@@ -86,7 +86,7 @@ bool c_XhprofFrame::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_INSTANCEOF(0x3D290BF933ED12FDLL, NAMSTR(s_sys_ss43575cbb, "xhprofframe"));
+      HASH_INSTANCEOF(0x3D290BF933ED12FDLL, NAMSTR(s_sys_ssd44d37cf, "XhprofFrame"));
       break;
     default:
       break;

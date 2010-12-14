@@ -22,7 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ss50ad79e8("registerXPathNamespace");
 StaticString s_sys_ss52403931("function");
 StaticString s_sys_ss52fe5cd5("getLineNo");
 StaticString s_sys_ss53950219("setTimezone");
@@ -31,16 +30,19 @@ StaticString s_sys_ss540d86c3("writeDTDElement");
 StaticString s_sys_ss5596f6c8("\000ReflectionExtension\000info", 25);
 StaticString s_sys_ss55bd51a4("startDocument");
 StaticString s_sys_ss55c15f8a("bindcolumn");
+StaticString s_sys_ss55fe8ad6("Directory");
 StaticString s_sys_ss56c85b78("newInstance");
 StaticString s_sys_ss570270cc("default");
 StaticString s_sys_ss5784ed2b(" does not exist");
+StaticString s_sys_ss57956ee3("BadFunctionCallException");
 StaticString s_sys_ss5853bc97("load");
 StaticString s_sys_ss587edbef("relaxNGValidate");
 StaticString s_sys_ss58a78f5c("setIDAttributeNode");
-StaticString s_sys_ss58cce40f("seekableiterator");
 StaticString s_sys_ss5916f77a("argCount");
 StaticString s_sys_ss5ac66c5d("execute");
 StaticString s_sys_ss5b229ad5("methods");
+StaticString s_sys_ss5b2a52c1("ReflectionFunctionAbstract");
+StaticString s_sys_ss5b753b53("Countable");
 StaticString s_sys_ss5baf0fe3("isDot");
 StaticString s_sys_ss5be7a94a("static_variables");
 StaticString s_sys_ss5bfa95ac("allowsNull");
@@ -49,7 +51,7 @@ StaticString s_sys_ss5d0c7971("normalizeDocument");
 StaticString s_sys_ss5d909898("SplFileObject");
 StaticString s_sys_ss5e0a51ee("isUserDefined");
 StaticString s_sys_ss5e1f54fe("getStaticPropertyValue");
-StaticString s_sys_ss5e897de5("splfileinfo");
+StaticString s_sys_ss5e40e701("RuntimeException");
 StaticString s_sys_ss5ea3f5ac("startElementNS");
 StaticString s_sys_ss5eba20da("addsoapheader");
 StaticString s_sys_ss5ee96b8f("startAttribute");
@@ -80,8 +82,6 @@ StaticString s_sys_ss690e46e7("saveHTML");
 StaticString s_sys_ss6974a1cc("__toString");
 StaticString s_sys_ss69f4b5d8("escapestring");
 StaticString s_sys_ss6a9626a3("seek");
-StaticString s_sys_ss6aa5ef61("helpBody");
-StaticString s_sys_ss6ae7fa54("addByKey");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

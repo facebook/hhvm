@@ -23,39 +23,43 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 StaticString s_sys_ssfc2d4779("getType");
+StaticString s_sys_ssfc63c2bb("ReflectionClass");
 StaticString s_sys_ssfdbe04fa("set");
 StaticString s_sys_ssfe3209ac("uksort");
 StaticString s_sys_ssfe470f29("startDTDElement");
 StaticString s_sys_ssfe98adf4("getIterator");
 StaticString s_sys_ssfebd5e9a("natsort");
-StaticString s_sys_ssff469d85("recursiveiterator");
+StaticString s_sys_ssff10260d("ReflectionExtension");
 StaticString s_sys_ss00000000("");
 StaticString s_sys_ss01c141eb("deleteData");
+StaticString s_sys_ss033e1025("BadMethodCallException");
 StaticString s_sys_ss038035c6("setMulti");
-StaticString s_sys_ss03e94c12("reflectionobject");
 StaticString s_sys_ss0415e4a0("classes");
 StaticString s_sys_ss05c2645c("substringData");
 StaticString s_sys_ss0626a7ce("uasort");
-StaticString s_sys_ss062e1593("lengthexception");
 StaticString s_sys_ss06d80b5c("returnsReference");
 StaticString s_sys_ss0723515e("__wakeup");
 StaticString s_sys_ss077ab997("getFilename");
+StaticString s_sys_ss079dd82d("InvalidArgumentException");
 StaticString s_sys_ss0915cca1("registerNodeClass");
 StaticString s_sys_ss09d4c665("getClassNames");
 StaticString s_sys_ss0a49a8a1("getAttribute");
+StaticString s_sys_ss0a60a5a3("OutOfRangeException");
 StaticString s_sys_ss0ab49528("printFrame");
 StaticString s_sys_ss0bb83e44("lastinsertid");
 StaticString s_sys_ss0bfd696f("setIDAttributeNS");
 StaticString s_sys_ss0c3a6c4a("getPath");
+StaticString s_sys_ss0c50ad86("OutOfBoundsException");
 StaticString s_sys_ss0c905545("__sleep");
-StaticString s_sys_ss0cd079e5("reflector");
-StaticString s_sys_ss0d39406b("reflectionclass");
 StaticString s_sys_ss0d42ecf6("r");
 StaticString s_sys_ss0d54babb("count");
+StaticString s_sys_ss0d7533cf("Reflector");
 StaticString s_sys_ss0e0c542f("appendChild");
 StaticString s_sys_ss0e5b3f43("writeComment");
 StaticString s_sys_ss0eb9302b("addserver");
+StaticString s_sys_ss0ec14ee2("SplObjectStorage");
 StaticString s_sys_ss0f90caf6("getConstant");
+StaticString s_sys_ss0fad9ac4("AppendIterator");
 StaticString s_sys_ss0fc37e03("attributes");
 StaticString s_sys_ss0fe15fdf("getServerByKey");
 StaticString s_sys_ss102b70c6("setIDAttribute");
@@ -76,12 +80,8 @@ StaticString s_sys_ss155366df("message");
 StaticString s_sys_ss15a9d310("fgetcsv");
 StaticString s_sys_ss163bad01("addServer");
 StaticString s_sys_ss164363b4("getPathname");
-StaticString s_sys_ss170bfaa5("recursivedirectoryiterator");
 StaticString s_sys_ss172df677("deleteByKey");
 StaticString s_sys_ss17c3d085("fullEndElement");
-StaticString s_sys_ss17f0e883("exec");
-StaticString s_sys_ss1863b3c7("getGroup");
-StaticString s_sys_ss18bebdc2("replaceByKey");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

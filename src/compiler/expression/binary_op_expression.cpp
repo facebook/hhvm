@@ -1248,9 +1248,8 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     {
       if (second->isScalar()) {
         std::string s = second->getLiteralString();
-        std::string sLower = Util::toLower(s);
-        if (sLower != "") {
-          cg_printString(sLower, ar, shared_from_this());
+        if (s != "") {
+          cg_printString(s, ar, shared_from_this());
         } else {
           second->outputCPP(cg, ar);
         }

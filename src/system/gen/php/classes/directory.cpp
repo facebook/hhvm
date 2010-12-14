@@ -105,7 +105,7 @@ bool c_Directory::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_INSTANCEOF(0x34C95AF311506C8FLL, NAMSTR(s_sys_ss2a557ab9, "directory"));
+      HASH_INSTANCEOF(0x34C95AF311506C8FLL, NAMSTR(s_sys_ss55fe8ad6, "Directory"));
       break;
     default:
       break;

@@ -22,6 +22,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss17f0e883("exec");
+StaticString s_sys_ss1863b3c7("getGroup");
+StaticString s_sys_ss18bebdc2("replaceByKey");
 StaticString s_sys_ss1902bc14("getParameters");
 StaticString s_sys_ss19281e76("format");
 StaticString s_sys_ss1b64dec9("bindparam");
@@ -30,32 +33,30 @@ StaticString s_sys_ss1c65f80a("getDefaultValue");
 StaticString s_sys_ss1ce69cd5("getStaticProperties");
 StaticString s_sys_ss1cfbc2c8("setMultiByKey");
 StaticString s_sys_ss1d6e06d8("getFunctions");
+StaticString s_sys_ss1da57557("ReflectionException");
 StaticString s_sys_ss1f20ac62("params");
 StaticString s_sys_ss1fa13716("invokeArgs");
 StaticString s_sys_ss1fa5c668("setFlags");
 StaticString s_sys_ss1fe1e1ea("xpath");
 StaticString s_sys_ss20098bac("asXML");
-StaticString s_sys_ss20636eb7("outofrangeexception");
 StaticString s_sys_ss2145036e("final");
 StaticString s_sys_ss225c5a00("endPI");
-StaticString s_sys_ss22a53db9("logicexception");
+StaticString s_sys_ss22bfe43e("Traversable");
 StaticString s_sys_ss24749844("getParentClass");
 StaticString s_sys_ss2559ca9a("startDTD");
 StaticString s_sys_ss26e41480("fscanf");
-StaticString s_sys_ss272a9829("recursiveiteratoriterator");
 StaticString s_sys_ss274b0685("loadHTML");
 StaticString s_sys_ss27634730("isInterface");
 StaticString s_sys_ss28e44b58("setAttributeNode");
 StaticString s_sys_ss28fae70d("flags");
+StaticString s_sys_ss299bd55e("OuterIterator");
 StaticString s_sys_ss29d06307("helpSection");
 StaticString s_sys_ss2a19cdf6("decrement");
 StaticString s_sys_ss2a44d071("changes");
-StaticString s_sys_ss2a557ab9("directory");
 StaticString s_sys_ss2a6293f6("getSize");
 StaticString s_sys_ss2aa43f67("getAttributeNodeNS");
 StaticString s_sys_ss2c18aae1("natcasesort");
 StaticString s_sys_ss2cb2e0eb("setstrength");
-StaticString s_sys_ss2d0bb32f("reflectionextension");
 StaticString s_sys_ss2d350426("finalize");
 StaticString s_sys_ss2d431bd1("writeDTDEntity");
 StaticString s_sys_ss2d5cec41("__getlastrequest");
@@ -81,7 +82,6 @@ StaticString s_sys_ss372c9151("ksort");
 StaticString s_sys_ss37eff1c8("getInnerIterator");
 StaticString s_sys_ss38d893f5("addCompletion");
 StaticString s_sys_ss3983a61c("createElementNS");
-StaticString s_sys_ss3a783e44("getFileName");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

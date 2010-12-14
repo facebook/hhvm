@@ -22,24 +22,22 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ssb303f411("__isset");
-StaticString s_sys_ssb30ca8a5("setMaxLineLen");
-StaticString s_sys_ssb3a5c1b3("current");
-StaticString s_sys_ssb3cb673e("reflectionfunctionabstract");
 StaticString s_sys_ssb3fce46e("\000AppendIterator\000iterators", 25);
-StaticString s_sys_ssb4d8f490("splfileobject");
-StaticString s_sys_ssb5dda8cc("splobjectstorage");
+StaticString s_sys_ssb5a1e6bc("ReflectionObject");
 StaticString s_sys_ssb6132cef("setoptimeout");
+StaticString s_sys_ssb65737a4("DomainException");
 StaticString s_sys_ssb69f1960("getTransitions");
 StaticString s_sys_ssb6bff43f("getElementsByTagNameNS");
 StaticString s_sys_ssb7ae555d("class_exists");
 StaticString s_sys_ssb7fa1eb1("validate");
 StaticString s_sys_ssb84c8cfa("severity");
+StaticString s_sys_ssb8a9ecc6("UnderflowException");
 StaticString s_sys_ssb8f33aef("writeElementNS");
 StaticString s_sys_ssba65d5ee("append");
 StaticString s_sys_ssbac40e3d("fseek");
 StaticString s_sys_ssbad150b1("pconnect");
 StaticString s_sys_ssbb861135("\000ArrayIterator\000arr", 18);
+StaticString s_sys_ssbc297b7f("OverflowException");
 StaticString s_sys_ssbc590ceb("isArray");
 StaticString s_sys_ssbd66b015("fetcharray");
 StaticString s_sys_ssbd8183dc("saveHTMLFile");
@@ -52,15 +50,18 @@ StaticString s_sys_ssc035d638("removeAttributeNS");
 StaticString s_sys_ssc09df55f("isFile");
 StaticString s_sys_ssc0ff3081("index");
 StaticString s_sys_ssc103992f("appendData");
+StaticString s_sys_ssc1c38583("SeekableIterator");
 StaticString s_sys_ssc2defd5c("setAttributeNS");
 StaticString s_sys_ssc2df217e("getName");
 StaticString s_sys_ssc2fd8845("setIndent");
 StaticString s_sys_ssc4385198("endDTD");
 StaticString s_sys_ssc483d02b("relaxNGValidateSource");
 StaticString s_sys_ssc556d1b5("isFinal");
-StaticString s_sys_ssc577ca81("outofboundsexception");
+StaticString s_sys_ssc57472df("RecursiveIteratorIterator");
 StaticString s_sys_ssc5f10d1a("getStats");
 StaticString s_sys_ssc60228c6("open");
+StaticString s_sys_ssc64ebfff("Iterator");
+StaticString s_sys_ssc72eef1f("DirectoryIterator");
 StaticString s_sys_ssc7d7a51a("getDefaultProperties");
 StaticString s_sys_ssc82dbd12("class");
 StaticString s_sys_ssc8396b02("functions");
@@ -79,9 +80,8 @@ StaticString s_sys_sscb34fe23("isnormalized");
 StaticString s_sys_sscca6e52d("getByKey");
 StaticString s_sys_ssccbba71e("getTrace");
 StaticString s_sys_sscd0bfaee("getExtension");
+StaticString s_sys_sscd5dc41e("ReflectionParameter");
 StaticString s_sys_sscdbb2d67("getMethod");
-StaticString s_sys_ssce568670("appendByKey");
-StaticString s_sys_ssce80f767("isProtected");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

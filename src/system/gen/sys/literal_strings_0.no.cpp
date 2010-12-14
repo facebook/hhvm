@@ -22,6 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss80c39bb4("RecursiveDirectoryIterator");
 StaticString s_sys_ss81675f05("removeAttributeNode");
 StaticString s_sys_ss819481f3("::");
 StaticString s_sys_ss81e8363a("getServerList");
@@ -58,8 +59,7 @@ StaticString s_sys_ss8dc355aa("#");
 StaticString s_sys_ss8dc6090d("startCData");
 StaticString s_sys_ss8e2abdf3("getInterfaceNames");
 StaticString s_sys_ss8e95cc19("attach");
-StaticString s_sys_ss8f6b9b98("rangeexception");
-StaticString s_sys_ss8f6d2242("badmethodcallexception");
+StaticString s_sys_ss8f4d0eb2("ReflectionMethod");
 StaticString s_sys_ss8f9bd044("isIterateable");
 StaticString s_sys_ss8fed3624("getNumberOfRequiredParameters");
 StaticString s_sys_ss90269404("properties");
@@ -70,7 +70,7 @@ StaticString s_sys_ss90f68f81("getLinkTarget");
 StaticString s_sys_ss914a58e9("SplFileInfo");
 StaticString s_sys_ss92306c9b("ArrayAccess");
 StaticString s_sys_ss924a5deb("add");
-StaticString s_sys_ss92d053e5("arrayaccess");
+StaticString s_sys_ss92c34a85("FilterIterator");
 StaticString s_sys_ss9332a8ac("internal");
 StaticString s_sys_ss93a1e99d("getMultiByKey");
 StaticString s_sys_ss941ca25f("rewind");

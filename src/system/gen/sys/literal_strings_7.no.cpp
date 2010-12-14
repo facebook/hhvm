@@ -22,6 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss3a783e44("getFileName");
 StaticString s_sys_ss3bb8fb3e("createTextNode");
 StaticString s_sys_ss3bd544b6("casByKey");
 StaticString s_sys_ss3bdd1f72("getCsvControl");
@@ -35,13 +36,11 @@ StaticString s_sys_ss3fe4822b("setAccessible");
 StaticString s_sys_ss404bf1b4("isStatic");
 StaticString s_sys_ss41c7a197("stdclass");
 StaticString s_sys_ss424e8241("getTimezone");
+StaticString s_sys_ss426361a3("stdClass");
 StaticString s_sys_ss42a11cef("setobject");
 StaticString s_sys_ss42fc2063("startAttributens");
-StaticString s_sys_ss4315c511("countable");
-StaticString s_sys_ss43575cbb("xhprofframe");
 StaticString s_sys_ss43d0dde2("isInstance");
 StaticString s_sys_ss4431a364("isSameNode");
-StaticString s_sys_ss444e6f93("filteriterator");
 StaticString s_sys_ss4483b6ae("getMethods");
 StaticString s_sys_ss449b0823("cas");
 StaticString s_sys_ss44a1dc88("isSupported");
@@ -54,9 +53,9 @@ StaticString s_sys_ss46e9d423("schemaValidate");
 StaticString s_sys_ss46eeef5c("handle");
 StaticString s_sys_ss4723e39a("getCurrentLocation");
 StaticString s_sys_ss47724c46("setclass");
-StaticString s_sys_ss479587f3("runtimeexception");
 StaticString s_sys_ss48139170("addAttribute");
 StaticString s_sys_ss48724660("prepare");
+StaticString s_sys_ss49963173("RecursiveIterator");
 StaticString s_sys_ss49fef19f("getPerms");
 StaticString s_sys_ss4ad0c110("Parameter is not optional");
 StaticString s_sys_ss4ae2597c("__getlastresponse");
@@ -82,6 +81,7 @@ StaticString s_sys_ss504bc94d("isInternal");
 StaticString s_sys_ss50652d33("next");
 StaticString s_sys_ss508b1d41("addfunction");
 StaticString s_sys_ss5097084d("setByKey");
+StaticString s_sys_ss50ad79e8("registerXPathNamespace");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

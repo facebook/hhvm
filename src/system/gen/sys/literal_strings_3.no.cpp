@@ -22,11 +22,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ssce568670("appendByKey");
+StaticString s_sys_ssce80f767("isProtected");
 StaticString s_sys_ssced27431("increment");
 StaticString s_sys_sscedef5dc("ini");
 StaticString s_sys_sscfb8e254("interfaces");
 StaticString s_sys_sscfd63bc6("replace");
-StaticString s_sys_sscff52489("reflectionexception");
 StaticString s_sys_ssd029c1ac("getProperty");
 StaticString s_sys_ssd04b2eb8("export");
 StaticString s_sys_ssd04bc523("endDocument");
@@ -41,6 +42,7 @@ StaticString s_sys_ssd323f9f4("getSeverity");
 StaticString s_sys_ssd332baa7(",");
 StaticString s_sys_ssd371b205("getNodePath");
 StaticString s_sys_ssd4097a2c("__soapcall");
+StaticString s_sys_ssd44d37cf("XhprofFrame");
 StaticString s_sys_ssd47ba3c5("columncount");
 StaticString s_sys_ssd492d56b("getElementsByTagName");
 StaticString s_sys_ssd4af8244("iterators");
@@ -53,12 +55,12 @@ StaticString s_sys_ssd6eedaeb("getInterfaces");
 StaticString s_sys_ssd766aa9d("hasAttribute");
 StaticString s_sys_ssd816f860("Class constant ");
 StaticString s_sys_ssd8580167("writeCData");
+StaticString s_sys_ssd8c10a25("__PHP_Incomplete_Class");
 StaticString s_sys_ssd8c7abd7("newInstanceArgs");
 StaticString s_sys_ssd9632345("geterrorcode");
 StaticString s_sys_ssdc3cbddc("name");
 StaticString s_sys_ssdc6e02c2("Method ");
 StaticString s_sys_ssdc71ce35("fault");
-StaticString s_sys_ssdca320c5("directoryiterator");
 StaticString s_sys_ssdcae3319("openblob");
 StaticString s_sys_ssdd233bb0("DirectoryIterator::__construct(");
 StaticString s_sys_ssdd355b2b("isSubclassOf");
@@ -72,10 +74,8 @@ StaticString s_sys_ssdef06d86("openMemory");
 StaticString s_sys_ssdef8398d("replaceData");
 StaticString s_sys_ssdf34c0b4("isAbstract");
 StaticString s_sys_sse051f235("helpCmds");
-StaticString s_sys_sse09ca852("unexpectedvalueexception");
 StaticString s_sys_sse09ed13c("createfunction");
 StaticString s_sys_sse1ffa7cf("hasMethod");
-StaticString s_sys_sse2344213("overflowexception");
 StaticString s_sys_sse26c5698("addFile");
 StaticString s_sys_sse27b119d("fgetc");
 StaticString s_sys_sse2be8bf1("endComment");

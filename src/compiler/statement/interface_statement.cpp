@@ -197,10 +197,8 @@ void InterfaceStatement::getAllParents(AnalysisResultPtr ar,
     for (unsigned int i = 0; i < bases.size(); i++) {
       ClassScopePtr cls = ar->findClass(bases[i]);
       if (cls) {
-        if (!cls->isRedeclaring()) {
-          cls->getAllParents(ar, names);
-        }
-        names.push_back(bases[i]);
+        cls->getAllParents(ar, names);
+        names.push_back(cls->getOriginalName());
       }
     }
   }

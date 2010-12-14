@@ -101,7 +101,7 @@ bool c_ReflectionFunctionAbstract::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 0:
-      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ssb3cb673e, "reflectionfunctionabstract"));
+      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss5b2a52c1, "ReflectionFunctionAbstract"));
       break;
     default:
       break;
@@ -911,11 +911,11 @@ bool c_ReflectionObject::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 2:
-      HASH_INSTANCEOF(0x41A9F7D81254DD7ALL, NAMSTR(s_sys_ss03e94c12, "reflectionobject"));
+      HASH_INSTANCEOF(0x41A9F7D81254DD7ALL, NAMSTR(s_sys_ssb5a1e6bc, "ReflectionObject"));
       break;
     case 5:
-      HASH_INSTANCEOF(0x35A44A5E6AE2E71DLL, NAMSTR(s_sys_ss0d39406b, "reflectionclass"));
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0cd079e5, "reflector"));
+      HASH_INSTANCEOF(0x35A44A5E6AE2E71DLL, NAMSTR(s_sys_ssfc63c2bb, "ReflectionClass"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0d7533cf, "Reflector"));
       break;
     default:
       break;
@@ -1109,8 +1109,8 @@ bool c_ReflectionException::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_INSTANCEOF(0x672AD818DDE95538LL, NAMSTR(s_sys_sscff52489, "reflectionexception"));
-      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ssae8717ad, "exception"));
+      HASH_INSTANCEOF(0x672AD818DDE95538LL, NAMSTR(s_sys_ss1da57557, "ReflectionException"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_sseacf71c9, "Exception"));
       break;
     default:
       break;
@@ -1258,8 +1258,8 @@ bool c_ReflectionClass::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
-      HASH_INSTANCEOF(0x35A44A5E6AE2E71DLL, NAMSTR(s_sys_ss0d39406b, "reflectionclass"));
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0cd079e5, "reflector"));
+      HASH_INSTANCEOF(0x35A44A5E6AE2E71DLL, NAMSTR(s_sys_ssfc63c2bb, "ReflectionClass"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0d7533cf, "Reflector"));
       break;
     default:
       break;
@@ -4016,7 +4016,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   Primitive v_name = 0;
   Variant v__;
 
-  if (instanceOf(v_cls, NAMSTR(s_sys_ss0d39406b, "reflectionclass"))) {
+  if (instanceOf(v_cls, NAMSTR(s_sys_ssfc63c2bb, "ReflectionClass"))) {
     {
       {
         MethodCallPackage mcp1;
@@ -4202,7 +4202,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   Primitive v_name = 0;
   Variant v__;
 
-  if (instanceOf(v_cls, NAMSTR(s_sys_ss0d39406b, "reflectionclass"))) {
+  if (instanceOf(v_cls, NAMSTR(s_sys_ssfc63c2bb, "ReflectionClass"))) {
     {
       {
         MethodCallPackage mcp1;
@@ -4365,10 +4365,10 @@ bool c_ReflectionExtension::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0cd079e5, "reflector"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0d7533cf, "Reflector"));
       break;
     case 3:
-      HASH_INSTANCEOF(0x0B61E0BFCFA06573LL, NAMSTR(s_sys_ss2d0bb32f, "reflectionextension"));
+      HASH_INSTANCEOF(0x0B61E0BFCFA06573LL, NAMSTR(s_sys_ssff10260d, "ReflectionExtension"));
       break;
     default:
       break;
@@ -5198,13 +5198,13 @@ bool c_ReflectionMethod::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 0:
-      HASH_INSTANCEOF(0x43BBC8F6F28E44B0LL, NAMSTR(s_sys_ss75530bea, "reflectionmethod"));
+      HASH_INSTANCEOF(0x43BBC8F6F28E44B0LL, NAMSTR(s_sys_ss8f4d0eb2, "ReflectionMethod"));
       break;
     case 2:
-      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ssb3cb673e, "reflectionfunctionabstract"));
+      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss5b2a52c1, "ReflectionFunctionAbstract"));
       break;
     case 5:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0cd079e5, "reflector"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0d7533cf, "Reflector"));
       break;
     default:
       break;
@@ -6435,10 +6435,10 @@ bool c_ReflectionProperty::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_INSTANCEOF(0x75AA2571BDB659E4LL, NAMSTR(s_sys_ss71d03997, "reflectionproperty"));
+      HASH_INSTANCEOF(0x75AA2571BDB659E4LL, NAMSTR(s_sys_ssec8fccc4, "ReflectionProperty"));
       break;
     case 1:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0cd079e5, "reflector"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0d7533cf, "Reflector"));
       break;
     default:
       break;
@@ -7535,13 +7535,13 @@ bool c_ReflectionFunction::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 1:
-      HASH_INSTANCEOF(0x21EF70351574EC09LL, NAMSTR(s_sys_ss9f02802a, "reflectionfunction"));
+      HASH_INSTANCEOF(0x21EF70351574EC09LL, NAMSTR(s_sys_ss99f908fe, "ReflectionFunction"));
       break;
     case 2:
-      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ssb3cb673e, "reflectionfunctionabstract"));
+      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss5b2a52c1, "ReflectionFunctionAbstract"));
       break;
     case 5:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0cd079e5, "reflector"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0d7533cf, "Reflector"));
       break;
     default:
       break;
@@ -8058,10 +8058,10 @@ bool c_ReflectionParameter::o_instanceof(CStrRef s) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
-      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0cd079e5, "reflector"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss0d7533cf, "Reflector"));
       break;
     case 3:
-      HASH_INSTANCEOF(0x2E7081C468A05993LL, NAMSTR(s_sys_ss9bde074c, "reflectionparameter"));
+      HASH_INSTANCEOF(0x2E7081C468A05993LL, NAMSTR(s_sys_sscd5dc41e, "ReflectionParameter"));
       break;
     default:
       break;

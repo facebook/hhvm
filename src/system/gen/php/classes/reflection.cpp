@@ -3496,7 +3496,7 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
             {
               {
                 Variant tmp11((m_info.rvalAt(NAMSTR(s_sys_ssfb10fd8c, "parent"), true, true)));
-                lval(m_info.lvalAt(NAMSTR(s_sys_sscfb8e254, "interfaces"), false, true)).append((tmp11));
+                lval(m_info.lvalAt(NAMSTR(s_sys_sscfb8e254, "interfaces"), true, true)).append((tmp11));
               }
             }
           }

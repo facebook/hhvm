@@ -782,12 +782,13 @@ ArrayData *ZendArray::lval(int64 k, Variant *&ret, bool copy,
     return a;
   }
   Bucket *p = find(k);
-  if (p) {
+  if (p &&
+      (p->data.isReferenced() || p->data.isObject())) {
     ret = &p->data;
     return NULL;
   }
   ZendArray *a = copyImpl();
-  a->addLvalImpl(k, &ret, false);
+  a->addLvalImpl(k, &ret, p);
   return a;
 }
 
@@ -805,12 +806,13 @@ ArrayData *ZendArray::lval(CStrRef k, Variant *&ret, bool copy,
     return a;
   }
   Bucket *p = find(key->data(), key->size(), prehash);
-  if (p) {
+  if (p &&
+      (p->data.isReferenced() || p->data.isObject())) {
     ret = &p->data;
     return NULL;
   }
   ZendArray *a = copyImpl();
-  a->addLvalImpl(key, prehash, &ret, false);
+  a->addLvalImpl(key, prehash, &ret, p);
   return a;
 }
 

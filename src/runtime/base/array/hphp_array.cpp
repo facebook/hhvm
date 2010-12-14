@@ -1741,8 +1741,11 @@ ArrayData* HphpArray::lval(int64 k, Variant*& ret, bool copy,
     Elm* e = &elms[pos];
     // Integer keys do not support KindOfIndirect
     ASSERT(e->data.m_type != KindOfIndirect);
-    ret = &(tvAsVariant(&e->data));
-    return NULL;
+    if (tvAsVariant(&e->data).isReferenced() ||
+        tvAsVariant(&e->data).isObject()) {
+      ret = &(tvAsVariant(&e->data));
+      return NULL;
+    }
   }
   HphpArray* a = copyImpl();
   a->addLvalImpl(k, &ret, false);
@@ -1772,18 +1775,16 @@ ArrayData* HphpArray::lval(CStrRef k, Variant*& ret, bool copy,
   if (pos != (ssize_t)ElmIndEmpty) {
     Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
-    if (e->data.m_type != KindOfIndirect) {
-      ret = &(tvAsVariant(&e->data));
-    } else {
-      TypedValue* tv = e->data.m_data.ptv;
-      if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
-        goto miss;
-      }
-      ret = &(tvAsVariant(tv));
+    TypedValue* tv = &e->data;
+    if (tv->m_type == KindOfIndirect) {
+      tv = tv->m_data.ptv;
     }
-    return NULL;
+    if (tvAsVariant(tv).isReferenced() ||
+        tvAsVariant(tv).isObject()) {
+      ret = &(tvAsVariant(tv));
+      return NULL;
+    }
   }
-miss:
   HphpArray* a = copyImpl();
   a->addLvalImpl(key, prehash, &ret, false);
   return a;

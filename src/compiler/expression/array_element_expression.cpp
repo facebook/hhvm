@@ -399,8 +399,14 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
             cg_printf(", false");
           }
         } else if (lvalAt) {
-          if (hasContext(ObjectContext)) {
-            // object target might not trigger an array copy
+          if (hasContext(AccessContext)) {
+            // Dont copy the array if the element is an object, or
+            // is referenced.
+            // This is safe in AccessContext (the parent is an ArrayElement,
+            // or an ObjectProperty) because applying [] to an object will
+            // either invoke OffsetGet, or fatal, and modifications to a
+            // referenced element would be reflected in all copies
+            // of the array anyway.
             cg_printf(", true");
           } else {
             cg_printf(", false");

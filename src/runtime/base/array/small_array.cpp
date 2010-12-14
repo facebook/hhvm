@@ -614,7 +614,8 @@ ArrayData *SmallArray::lval(int64 k, Variant *&ret, bool copy,
     return result;
   }
 
-  if (copy && !checkExist) {
+  if (copy && (!checkExist ||
+               (!pb->data.isReferenced() && !pb->data.isObject()))) {
     result = copyImpl();
     pb = result->m_arBuckets + p;
   }
@@ -646,7 +647,8 @@ ArrayData *SmallArray::lval(litstr k, Variant *&ret, bool copy,
     return result;
   }
 
-  if (copy && !checkExist) {
+  if (copy && (!checkExist ||
+               (!pb->data.isReferenced() && !pb->data.isObject()))) {
     result = copyImpl();
     pb = result->m_arBuckets + p;
   }
@@ -678,7 +680,8 @@ ArrayData *SmallArray::lval(CStrRef k, Variant *&ret, bool copy,
     return result;
   }
 
-  if (copy && !checkExist) {
+  if (copy && (!checkExist ||
+               (!pb->data.isReferenced() && !pb->data.isObject()))) {
     result = copyImpl();
     pb = result->m_arBuckets + p;
   }

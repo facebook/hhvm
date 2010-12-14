@@ -1035,8 +1035,12 @@ public:
       s_n_backing = new_array_size;
       track_realloc = TRUE;
     }
-    s_trace = (TraceEntry*)realloc((void *)s_trace,
+    {
+      DECLARE_THREAD_INFO
+      MemoryManager::MaskAlloc masker(info->m_mm);
+      s_trace = (TraceEntry*)realloc((void *)s_trace,
                                     s_n_backing * sizeof(TraceEntry));
+    }
     if (track_realloc) {
       collectStats(NULL, s_trace[nTrace++]);
     }
@@ -1064,6 +1068,7 @@ public:
   ~TraceProfiler() {
     if (m_successful) {
       free(s_trace);
+      nTrace = 0;
       s_trace = NULL;
       s_n_backing = 0;
       pthread_mutex_unlock(&s_in_use);
@@ -1137,7 +1142,10 @@ public:
       ret.set("(compressed_trace)", traceData);
       fprintf(stderr, "%d bytes\n", traceData.size());
     }
-    nTrace = 0;
+    CountMap trace_buffer;
+    trace_buffer.count = 0;
+    trace_buffer.peak_memory = trace_buffer.memory = nTrace * sizeof(*s_trace);
+    returnVals(ret, "(trace buffer alloc)", trace_buffer, m_flags, m_MHz);
     if (m_flags & MeasureXhprofDisable) {
       CountMap my_end;
       collectStats((TraceData&)my_end);

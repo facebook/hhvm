@@ -157,6 +157,21 @@ public:
 #endif
   }
 
+  class MaskAlloc {
+    MemoryManager *m_mm;
+  public:
+    MaskAlloc(MemoryManager *mm) : m_mm(mm) {
+      // capture all mallocs prior to construction
+      m_mm->refreshStats();
+    }
+    ~MaskAlloc() {
+#ifdef USE_JEMALLOC
+      // exclude mallocs and frees since construction
+      m_mm->m_delta = int64(*m_mm->m_allocated) - int64(*m_mm->m_deallocated);
+#endif
+    }
+  };
+
 private:
   void refreshStatsHelper();
 

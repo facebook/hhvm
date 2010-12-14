@@ -123,7 +123,7 @@ namespace HPHP {
   virtual Variant *o_realProp(CStrRef prop, int flags,                  \
                         CStrRef context = null_string) const;           \
   Variant *o_realPropPrivate(CStrRef s, int flags) const;               \
-  virtual void o_getArray(Array &props) const;                          \
+  virtual void o_getArray(Array &props, bool pubOnly = false) const;    \
   virtual void o_setArray(CArrRef props);                               \
 
 #define DECLARE_INSTANCE_PUBLIC_PROP_OPS                                \

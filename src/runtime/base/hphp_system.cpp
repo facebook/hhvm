@@ -20,10 +20,10 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-CVarRef Globals::declareConstant(const char *name, Variant &constant,
+CVarRef Globals::declareConstant(CStrRef name, Variant &constant,
                                  CVarRef value) {
   if (!m_dynamicConstants.exists(name)) {
-    m_dynamicConstants.set(String(name, CopyString), value);
+    m_dynamicConstants.set(name, value);
     constant = value;
   }
   return value;
@@ -46,11 +46,11 @@ void Globals::declareFunctionLit(CStrRef name) {
   }
 }
 
-bool Globals::defined(const char *name) {
+bool Globals::defined(CStrRef name) {
   return m_dynamicConstants.exists(name);
 }
 
-Variant Globals::getConstant(const char *name) {
+Variant Globals::getConstant(CStrRef name) {
   return m_dynamicConstants[name];
 }
 
@@ -62,7 +62,7 @@ bool Globals::function_exists(CStrRef name) {
   return m_volatileFunctions.exists(Util::toLower(name.data()).c_str(), true);
 }
 
-bool Globals::class_exists(const char *name) {
+bool Globals::class_exists(CStrRef name) {
   return false;
 }
 

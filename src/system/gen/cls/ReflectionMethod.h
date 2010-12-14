@@ -46,7 +46,7 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual void o_getArray(Array &props) const;
+  virtual void o_getArray(Array &props, bool pubOnly = false) const;
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionMethod 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_ReflectionMethod 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionMethod 1

@@ -1883,9 +1883,9 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
         if (varName.empty()) {
           cg_printf("throw_fatal(\"bad define\")");
         } else if (m_dynamicConstant) {
-          cg_printf("g->declareConstant(\"%s\", g->%s%s, ",
-                    varName.c_str(), Option::ConstantPrefix,
-                    varName.c_str());
+          cg_printf("g->declareConstant(");
+          cg_printString(varName, ar, shared_from_this());
+          cg_printf(", g->%s%s, ", Option::ConstantPrefix, varName.c_str());
           value->outputCPP(cg, ar);
           cg_printf(")");
         } else {

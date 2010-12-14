@@ -28,7 +28,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-Mutex ClassInfo::s_mutex;
 bool ClassInfo::s_loaded = false;
 ClassInfo *ClassInfo::s_systemFuncs = NULL;
 ClassInfo *ClassInfo::s_userFuncs = NULL;
@@ -37,28 +36,26 @@ ClassInfo::ClassMap ClassInfo::s_interfaces;
 ClassInfoHook *ClassInfo::s_hook = NULL;
 
 Array ClassInfo::GetSystemFunctions() {
-  if (!s_loaded) Load();
+  ASSERT(s_loaded);
 
   Array ret = Array::Create();
   if (s_systemFuncs) {
     const MethodVec &methods = s_systemFuncs->getMethodsVec();
-    for (MethodVec::const_iterator iter = methods.begin();
-         iter != methods.end(); ++iter) {
-      ret.append((*iter)->name);
+    for (unsigned i = 0; i < methods.size(); i++) {
+      ret.append(methods[i]->name);
     }
   }
   return ret;
 }
 
 Array ClassInfo::GetUserFunctions() {
-  if (!s_loaded) Load();
+  ASSERT(s_loaded);
 
   Array ret = Array::Create();
   if (s_userFuncs) {
     const MethodVec &methods = s_userFuncs->getMethodsVec();
-    for (MethodVec::const_iterator iter = methods.begin();
-         iter != methods.end(); ++iter) {
-      ret.append((*iter)->name);
+    for (unsigned i = 0; i < methods.size(); i++) {
+      ret.append(methods[i]->name);
     }
   }
   if (s_hook) {
@@ -70,9 +67,9 @@ Array ClassInfo::GetUserFunctions() {
   return ret;
 }
 
-const ClassInfo::MethodInfo *ClassInfo::FindFunction(const char *name) {
-  ASSERT(name);
-  if (!s_loaded) Load();
+const ClassInfo::MethodInfo *ClassInfo::FindFunction(CStrRef name) {
+  ASSERT(!name.isNull());
+  ASSERT(s_loaded);
 
   const MethodInfo *ret = s_systemFuncs->getMethodInfo(name);
   if (ret == NULL && s_hook) {
@@ -85,7 +82,7 @@ const ClassInfo::MethodInfo *ClassInfo::FindFunction(const char *name) {
 }
 
 Array ClassInfo::GetClasses(bool declaredOnly) {
-  if (!s_loaded) Load();
+  ASSERT(s_loaded);
 
   Array ret;
   for (ClassMap::const_iterator iter = s_classes.begin();
@@ -103,18 +100,18 @@ Array ClassInfo::GetClasses(bool declaredOnly) {
   return ret;
 }
 
-bool ClassInfo::HasClass(const char *name) {
-  ASSERT(name);
-  if (!s_loaded) Load();
+bool ClassInfo::HasClass(CStrRef name) {
+  ASSERT(!name.isNull());
+  ASSERT(s_loaded);
 
   if (s_hook && s_hook->findClass(name)) return true;
 
   return s_classes.find(name) != s_classes.end();
 }
 
-const ClassInfo *ClassInfo::FindClass(const char *name) {
-  ASSERT(name);
-  if (!s_loaded) Load();
+const ClassInfo *ClassInfo::FindClass(CStrRef name) {
+  ASSERT(!name.isNull());
+  ASSERT(s_loaded);
 
   if (s_hook) {
     const ClassInfo *cl = s_hook->findClass(name);
@@ -128,7 +125,7 @@ const ClassInfo *ClassInfo::FindClass(const char *name) {
 }
 
 Array ClassInfo::GetInterfaces(bool declaredOnly) {
-  if (!s_loaded) Load();
+  ASSERT(s_loaded);
 
   Array ret;
   for (ClassMap::const_iterator iter = s_interfaces.begin();
@@ -146,9 +143,9 @@ Array ClassInfo::GetInterfaces(bool declaredOnly) {
   return ret;
 }
 
-bool ClassInfo::HasInterface(const char *name) {
-  ASSERT(name);
-  if (!s_loaded) Load();
+bool ClassInfo::HasInterface(CStrRef name) {
+  ASSERT(!name.isNull());
+  ASSERT(s_loaded);
 
   if (s_hook && s_hook->findInterface(name)) return true;
   return s_interfaces.find(name) != s_interfaces.end();
@@ -156,9 +153,9 @@ bool ClassInfo::HasInterface(const char *name) {
 
 // NOTE: FindInterface() currently cannot find interfaces redeclared by
 // classes.
-const ClassInfo *ClassInfo::FindInterface(const char *name) {
-  ASSERT(name);
-  if (!s_loaded) Load();
+const ClassInfo *ClassInfo::FindInterface(CStrRef name) {
+  ASSERT(!name.isNull());
+  ASSERT(s_loaded);
 
   if (s_hook) {
     const ClassInfo *iface = s_hook->findInterface(name);
@@ -171,9 +168,9 @@ const ClassInfo *ClassInfo::FindInterface(const char *name) {
   return NULL;
 }
 
-const ClassInfo::ConstantInfo *ClassInfo::FindConstant(const char *name) {
-  ASSERT(name);
-  if (!s_loaded) Load();
+const ClassInfo::ConstantInfo *ClassInfo::FindConstant(CStrRef name) {
+  ASSERT(!name.isNull());
+  ASSERT(s_loaded);
   const ConstantInfo *info;
   info = s_systemFuncs->getConstantInfo(name);
   if (info) return info;
@@ -204,7 +201,7 @@ void ClassInfo::ConstantInfo::setValue(CVarRef v) {
 }
 
 Array ClassInfo::GetConstants() {
-  if (!s_loaded) Load();
+  ASSERT(s_loaded);
   Array res;
   Array dyn;
   {
@@ -232,9 +229,9 @@ Array ClassInfo::GetConstants() {
   return res;
 }
 
-void ClassInfo::GetClassMethods(MethodVec &ret, const char *classname,
+void ClassInfo::GetClassMethods(MethodVec &ret, CStrRef classname,
                                 int type /* = 0 */) {
-  if (classname && *classname) {
+  if (!classname.empty()) {
     const ClassInfo *classInfo = NULL;
     switch (type) {
     case 0:
@@ -259,8 +256,8 @@ void ClassInfo::GetClassMethods(MethodVec &ret, const char *classname,
       ret.insert(ret.end(), methods.begin(), methods.end());
 
       if (type != 2) {
-        const char *parentClass = classInfo->getParentClass();
-        if (parentClass && *parentClass) {
+        CStrRef parentClass = classInfo->getParentClass();
+        if (!parentClass.empty()) {
           GetClassMethods(ret, parentClass, 1);
         }
       }
@@ -274,8 +271,8 @@ void ClassInfo::GetClassMethods(MethodVec &ret, const char *classname,
   }
 }
 
-void ClassInfo::GetClassProperties(PropertyMap &props, const char *classname) {
-  if (classname && *classname) {
+void ClassInfo::GetClassProperties(PropertyMap &props, CStrRef classname) {
+  if (!classname.empty()) {
     const ClassInfo *classInfo = FindClass(classname);
     if (classInfo) {
       classInfo->getAllProperties(props);
@@ -283,8 +280,8 @@ void ClassInfo::GetClassProperties(PropertyMap &props, const char *classname) {
   }
 }
 
-void ClassInfo::GetClassProperties(PropertyVec &props, const char *classname) {
-  if (classname && *classname) {
+void ClassInfo::GetClassProperties(PropertyVec &props, CStrRef classname) {
+  if (!classname.empty()) {
     const ClassInfo *classInfo = FindClass(classname);
     if (classInfo) {
       classInfo->getAllProperties(props);
@@ -400,8 +397,8 @@ bool ClassInfo::isDeclared() const {
 }
 
 void ClassInfo::getAllParentsVec(ClassVec &parents) const {
-  const char *parent = getParentClass();
-  if (parent && *parent) {
+  CStrRef parent = getParentClass();
+  if (!parent.empty()) {
     parents.push_back(parent);
     const ClassInfo *info = FindClass(parent);
     if (info) info->getAllParentsVec(parents);
@@ -411,20 +408,20 @@ void ClassInfo::getAllParentsVec(ClassVec &parents) const {
 void ClassInfo::getAllInterfacesVec(InterfaceVec &interfaces) const {
   const InterfaceVec &ifs = getInterfacesVec();
   for (unsigned int i = 0; i < ifs.size(); i++) {
-    const char *intf = ifs[i];
+    CStrRef intf = ifs[i];
     interfaces.push_back(intf);
     const ClassInfo *info = FindInterface(intf);
     if (info) info->getAllInterfacesVec(interfaces);
   }
 }
 
-bool ClassInfo::derivesFrom(const char *name, bool considerInterface) const {
-  ASSERT(name);
+bool ClassInfo::derivesFrom(CStrRef name, bool considerInterface) const {
+  ASSERT(!name.isNull());
   return derivesFromImpl(name, considerInterface);
 }
 
-bool ClassInfo::derivesFromImpl(const char *name, bool considerInterface) const {
-  if (strcasecmp(name, getParentClass()) == 0) {
+bool ClassInfo::derivesFromImpl(CStrRef name, bool considerInterface) const {
+  if (name->isame(getParentClass().get())) {
     return true;
   }
 
@@ -435,10 +432,10 @@ bool ClassInfo::derivesFromImpl(const char *name, bool considerInterface) const 
   }
 
   if (considerInterface) {
-    const InterfaceMap &interfaces = getInterfaces();
-    for (InterfaceMap::const_iterator iter = interfaces.begin();
+    const InterfaceSet &interfaces = getInterfaces();
+    for (InterfaceSet::const_iterator iter = interfaces.begin();
          iter != interfaces.end(); ++iter) {
-      if (strcasecmp(name, *iter) == 0) {
+      if (name->isame(iter->get())) {
         return true;
       }
       const ClassInfo *parent = FindInterface(*iter);
@@ -452,14 +449,14 @@ bool ClassInfo::derivesFromImpl(const char *name, bool considerInterface) const 
 
 bool ClassInfo::IsSubClass(CStrRef className1, CStrRef className2,
                            bool considerInterface) {
-  const ClassInfo *clsInfo1 = ClassInfo::FindClass(className1.c_str());
+  const ClassInfo *clsInfo1 = ClassInfo::FindClass(className1);
   if (!clsInfo1) return false;
 
-  return clsInfo1->derivesFrom(className2.c_str(), considerInterface);
+  return clsInfo1->derivesFrom(className2, considerInterface);
 }
 
-ClassInfo::MethodInfo *ClassInfo::getMethodInfo(const char *name) const {
-  ASSERT(name);
+ClassInfo::MethodInfo *ClassInfo::getMethodInfo(CStrRef name) const {
+  ASSERT(!name.isNull());
 
   const MethodMap &methods = getMethods();
   MethodMap::const_iterator iter = methods.find(name);
@@ -469,9 +466,9 @@ ClassInfo::MethodInfo *ClassInfo::getMethodInfo(const char *name) const {
   return NULL;
 }
 
-ClassInfo::MethodInfo *ClassInfo::hasMethod(const char *name,
+ClassInfo::MethodInfo *ClassInfo::hasMethod(CStrRef name,
                                             ClassInfo* &classInfo) const {
-  ASSERT(name);
+  ASSERT(!name.isNull());
   classInfo = (ClassInfo *)this;
   const MethodMap &methods = getMethods();
   MethodMap::const_iterator it = methods.find(name);
@@ -492,11 +489,11 @@ bool ClassInfo::HasAccess(CStrRef className, CStrRef methodName,
                           bool staticCall, bool hasCallObject) {
   // It has to be either a static call or a call with an object.
   ASSERT(staticCall || hasCallObject);
-  const ClassInfo *clsInfo = ClassInfo::FindClass(className.c_str());
+  const ClassInfo *clsInfo = ClassInfo::FindClass(className);
   if (!clsInfo || !clsInfo->isDeclared()) return false;
   ClassInfo *defClass;
   ClassInfo::MethodInfo *methodInfo =
-    clsInfo->hasMethod(methodName.c_str(), defClass);
+    clsInfo->hasMethod(methodName, defClass);
   if (!methodInfo) return false;
   if (methodInfo->attribute & ClassInfo::IsPublic) return true;
   const ClassInfo *ctxClass =
@@ -513,7 +510,7 @@ bool ClassInfo::checkAccess(ClassInfo *defClass,
                             bool staticCall,
                             bool hasObject) const {
   ASSERT(defClass && methodInfo);
-  if (!strcasecmp(m_name, defClass->m_name)) {
+  if ((m_name->isame(defClass->m_name.get()))) {
     if (methodInfo->attribute & ClassInfo::IsStatic) return true;
     return hasObject;
   }
@@ -550,8 +547,8 @@ void ClassInfo::getAllProperties(PropertyMap &props) const {
   const PropertyMap &properties = getProperties();
   props.insert(properties.begin(), properties.end());
 
-  const char *parentClass = getParentClass();
-  if (parentClass && *parentClass) {
+  CStrRef parentClass = getParentClass();
+  if (!parentClass.empty()) {
     GetClassProperties(props, parentClass);
   }
 }
@@ -560,14 +557,27 @@ void ClassInfo::getAllProperties(PropertyVec &props) const {
   const PropertyVec &properties = getPropertiesVec();
   props.insert(props.end(), properties.begin(), properties.end());
 
-  const char *parentClass = getParentClass();
-  if (parentClass && *parentClass) {
+  CStrRef parentClass = getParentClass();
+  if (!parentClass.empty()) {
     GetClassProperties(props, parentClass);
   }
 }
 
-ClassInfo::PropertyInfo *ClassInfo::getPropertyInfo(const char *name) const {
-  ASSERT(name);
+void ClassInfo::filterProperties(Array &props, Attribute toRemove) const {
+  const PropertyVec &properties = getPropertiesVec();
+  for (unsigned i = 0; i < properties.size(); i++) {
+    if (properties[i]->attribute & toRemove) {
+      props.remove(properties[i]->name, true);
+    }
+  }
+  const ClassInfo *parent = getParentClassInfo();
+  if (parent) {
+    parent->filterProperties(props, toRemove);
+  }
+}
+
+ClassInfo::PropertyInfo *ClassInfo::getPropertyInfo(CStrRef name) const {
+  ASSERT(!name.isNull());
   const PropertyMap &properties = getProperties();
   PropertyMap::const_iterator iter = properties.find(name);
   if (iter != properties.end()) {
@@ -576,14 +586,14 @@ ClassInfo::PropertyInfo *ClassInfo::getPropertyInfo(const char *name) const {
   return NULL;
 }
 
-bool ClassInfo::hasProperty(const char *name) const {
-  ASSERT(name);
+bool ClassInfo::hasProperty(CStrRef name) const {
+  ASSERT(!name.isNull());
   const PropertyMap &properties = getProperties();
   return properties.find(name) != properties.end();
 }
 
-ClassInfo::ConstantInfo *ClassInfo::getConstantInfo(const char *name) const {
-  ASSERT(name);
+ClassInfo::ConstantInfo *ClassInfo::getConstantInfo(CStrRef name) const {
+  ASSERT(!name.isNull());
   const ConstantMap &constants = getConstants();
   ConstantMap::const_iterator iter = constants.find(name);
   if (iter != constants.end()) {
@@ -592,8 +602,8 @@ ClassInfo::ConstantInfo *ClassInfo::getConstantInfo(const char *name) const {
   return NULL;
 }
 
-bool ClassInfo::hasConstant(const char *name) const {
-  ASSERT(name);
+bool ClassInfo::hasConstant(CStrRef name) const {
+  ASSERT(!name.isNull());
   const ConstantMap &constants = getConstants();
   return constants.find(name) != constants.end();
 }
@@ -612,10 +622,26 @@ bool ClassInfo::PropertyInfo::isVisible(const ClassInfo *context) const {
 ///////////////////////////////////////////////////////////////////////////////
 // load functions
 
+static String makeStaticString(const char *s) {
+  if (!s) return null_string;
+  String str(s);
+  if (!str.checkStatic()) {
+    str->setStatic();
+    StaticString::TheStaticStringSet().insert(str.get());
+  }
+  return str;
+}
+
 ClassInfoUnique::ClassInfoUnique(const char **&p) {
   m_attribute = (Attribute)(int64)(*p++);
-  m_name = *p++;
-  m_parent = *p++;
+
+  // ClassInfoUnique is only created by ClassInfo::Load(), which is called
+  // from hphp_process_init() in the thread-neutral initialization phase.
+  // It is OK to create StaticStrings here, and throw the smart ptrs away,
+  // because the underlying static StringData will not be released.
+  m_name = makeStaticString(*p++);
+  m_parent = makeStaticString(*p++);
+
   m_file = *p++;
   m_line1 = (int)(int64)(*p++);
   m_line2 = (int)(int64)(*p++);
@@ -625,17 +651,17 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
   }
 
   while (*p) {
-    const char *name = *p++;
-    ASSERT(m_interfaces.find(name) == m_interfaces.end());
-    m_interfaces.insert(name);
-    m_interfacesVec.push_back(name);
+    String iface_name = makeStaticString(*p++);
+    ASSERT(m_interfaces.find(iface_name) == m_interfaces.end());
+    m_interfaces.insert(iface_name);
+    m_interfacesVec.push_back(iface_name);
   }
   p++;
 
   while (*p) {
     MethodInfo *method = new MethodInfo();
     method->attribute = (Attribute)(int64)(*p++);
-    method->name = *p++;
+    method->name = makeStaticString(*p++);
     method->file = *p++;
     method->line1 = (int)(int64)(*p++);
     method->line2 = (int)(int64)(*p++);
@@ -660,7 +686,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
 
     while (*p) {
       ConstantInfo *staticVariable = new ConstantInfo();
-      staticVariable->name = *p++;
+      staticVariable->name = makeStaticString(*p++);
       staticVariable->valueLen = (int64)(*p++);
       staticVariable->valueText = *p++;
       VariableUnserializer vu(staticVariable->valueText,
@@ -686,7 +712,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
   while (*p) {
     PropertyInfo *property = new PropertyInfo();
     property->attribute = (Attribute)(int64)(*p++);
-    property->name = *p++;
+    property->name = makeStaticString(*p++);
     property->owner = this;
     ASSERT(m_properties.find(property->name) == m_properties.end());
     m_properties[property->name] = property;
@@ -696,7 +722,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
 
   while (*p) {
     ConstantInfo *constant = new ConstantInfo();
-    constant->name = *p++;
+    constant->name = makeStaticString(*p++);
     constant->valueLen = (int64)(*p++);
     constant->valueText = *p++;
 
@@ -711,7 +737,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
       } catch (Exception &e) {
         ASSERT(false);
       }
-    } else if (m_name) {
+    } else if (!m_name.empty()) {
       if (!(m_attribute & IsVolatile) && !(m_attribute & IsLazyInit)) {
         const ObjectStaticCallbacks *cwo = get_object_static_callbacks(m_name);
         if (cwo) {
@@ -731,7 +757,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
 
 ClassInfoRedeclared::ClassInfoRedeclared(const char **&p) {
   m_attribute = (Attribute)(int64)(*p++);
-  m_name = *p++;
+  m_name = makeStaticString(*p++);
   m_redeclaredIdGetter = (int (*)())*p++;
   while (*p) {
     ClassInfo *cls = new ClassInfoUnique(p);
@@ -741,9 +767,7 @@ ClassInfoRedeclared::ClassInfoRedeclared(const char **&p) {
 }
 
 void ClassInfo::Load() {
-  Lock lock(s_mutex);
-  if (s_loaded) return;
-
+  ASSERT(!s_loaded);
   const char **p = g_class_map;
   while (*p) {
     Attribute attribute = (Attribute)(int64)*p;
@@ -751,7 +775,7 @@ void ClassInfo::Load() {
       static_cast<ClassInfo*>(new ClassInfoRedeclared(p)) :
       static_cast<ClassInfo*>(new ClassInfoUnique(p));
 
-    if (info->m_name == NULL) {
+    if (info->m_name.empty()) {
       if (attribute & IsSystem) {
         ASSERT(s_systemFuncs == NULL);
         s_systemFuncs = info;

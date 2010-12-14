@@ -44,8 +44,8 @@ Variant &c_stdClass::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_stdClass
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_stdClass
-void c_stdClass::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_stdClass::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_stdClass
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_stdClass
@@ -134,8 +134,8 @@ Variant &c___PHP_Incomplete_Class::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL___PHP_Incomplete_Class
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY___PHP_Incomplete_Class
-void c___PHP_Incomplete_Class::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c___PHP_Incomplete_Class::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY___PHP_Incomplete_Class
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY___PHP_Incomplete_Class

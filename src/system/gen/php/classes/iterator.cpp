@@ -66,10 +66,10 @@ Variant &c_ArrayIterator::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ArrayIterator
-void c_ArrayIterator::o_getArray(Array &props) const {
-  if (isInitialized(m_arr)) props.add(NAMSTR(s_sys_ssbb861135, "\000ArrayIterator\000arr"), m_arr.isReferenced() ? ref(m_arr) : m_arr, true);
-  if (isInitialized(m_flags)) props.add(NAMSTR(s_sys_ss3e0fa602, "\000ArrayIterator\000flags"), m_flags.isReferenced() ? ref(m_flags) : m_flags, true);
-  c_ObjectData::o_getArray(props);
+void c_ArrayIterator::o_getArray(Array &props, bool pubOnly) const {
+  if (!pubOnly) if (isInitialized(m_arr)) props.add(NAMSTR(s_sys_ssbb861135, "\000ArrayIterator\000arr"), m_arr.isReferenced() ? ref(m_arr) : m_arr, true);
+  if (!pubOnly) if (isInitialized(m_flags)) props.add(NAMSTR(s_sys_ss3e0fa602, "\000ArrayIterator\000flags"), m_flags.isReferenced() ? ref(m_flags) : m_flags, true);
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ArrayIterator
@@ -1531,9 +1531,9 @@ Variant &c_AppendIterator::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_AppendIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_AppendIterator
-void c_AppendIterator::o_getArray(Array &props) const {
-  if (isInitialized(m_iterators)) props.add(NAMSTR(s_sys_ssb3fce46e, "\000AppendIterator\000iterators"), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, true);
-  c_ObjectData::o_getArray(props);
+void c_AppendIterator::o_getArray(Array &props, bool pubOnly) const {
+  if (!pubOnly) if (isInitialized(m_iterators)) props.add(NAMSTR(s_sys_ssb3fce46e, "\000AppendIterator\000iterators"), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, true);
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_AppendIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_AppendIterator
@@ -2375,8 +2375,8 @@ Variant &c_RecursiveDirectoryIterator::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RecursiveDirectoryIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_RecursiveDirectoryIterator
-void c_RecursiveDirectoryIterator::o_getArray(Array &props) const {
-  c_DirectoryIterator::o_getArray(props);
+void c_RecursiveDirectoryIterator::o_getArray(Array &props, bool pubOnly) const {
+  c_DirectoryIterator::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_RecursiveDirectoryIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveDirectoryIterator
@@ -3223,8 +3223,8 @@ Variant &c_DirectoryIterator::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DirectoryIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DirectoryIterator
-void c_DirectoryIterator::o_getArray(Array &props) const {
-  c_SplFileInfo::o_getArray(props);
+void c_DirectoryIterator::o_getArray(Array &props, bool pubOnly) const {
+  c_SplFileInfo::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DirectoryIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DirectoryIterator
@@ -3873,8 +3873,8 @@ Variant &c_RecursiveIteratorIterator::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RecursiveIteratorIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_RecursiveIteratorIterator
-void c_RecursiveIteratorIterator::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_RecursiveIteratorIterator::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_RecursiveIteratorIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveIteratorIterator
@@ -4455,8 +4455,8 @@ Variant &c_FilterIterator::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_FilterIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_FilterIterator
-void c_FilterIterator::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_FilterIterator::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_FilterIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_FilterIterator

@@ -177,9 +177,9 @@ Array f_hphp_get_class_info(CVarRef name) {
     className = name.toString();
   }
 
-  const ClassInfo *cls = ClassInfo::FindClass(className.data());
+  const ClassInfo *cls = ClassInfo::FindClass(className);
   if (cls == NULL) {
-    cls = ClassInfo::FindInterface(className.data());
+    cls = ClassInfo::FindInterface(className);
   }
 
   Array ret;
@@ -339,9 +339,9 @@ void f_hphp_set_static_property(CStrRef cls, CStrRef prop, CVarRef value) {
 }
 
 String f_hphp_get_original_class_name(CStrRef name) {
-  const ClassInfo *cls = ClassInfo::FindClass(name.data());
+  const ClassInfo *cls = ClassInfo::FindClass(name);
   if (cls == NULL) {
-    cls = ClassInfo::FindInterface(name.data());
+    cls = ClassInfo::FindInterface(name);
   }
   return cls->getName();
 }

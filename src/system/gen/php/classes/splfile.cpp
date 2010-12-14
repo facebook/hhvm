@@ -50,8 +50,8 @@ Variant &c_SplFileObject::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileObject
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SplFileObject
-void c_SplFileObject::o_getArray(Array &props) const {
-  c_SplFileInfo::o_getArray(props);
+void c_SplFileObject::o_getArray(Array &props, bool pubOnly) const {
+  c_SplFileInfo::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SplFileObject
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileObject
@@ -1936,8 +1936,8 @@ Variant &c_SplFileInfo::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileInfo
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SplFileInfo
-void c_SplFileInfo::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_SplFileInfo::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SplFileInfo
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileInfo

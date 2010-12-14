@@ -24,6 +24,7 @@
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/eval/runtime/code_coverage.h>
 #include <runtime/ext/ext_process.h>
+#include <runtime/ext/ext_class.h>
 #include <util/logger.h>
 #include <util/util.h>
 #include <util/process.h>
@@ -37,7 +38,6 @@ namespace HPHP {
 // static strings
 
 static StaticString s_offsetExists("offsetExists");
-static StaticString s_class_exists("class_exists");
 static StaticString s___autoload("__autoload");
 static StaticString s_self("self");
 static StaticString s_parent("parent");
@@ -46,8 +46,7 @@ static StaticString s_static("static");
 ///////////////////////////////////////////////////////////////////////////////
 
 bool class_exists(CStrRef class_name, bool autoload /* = true */) {
-  return f_call_user_func_array(s_class_exists,
-      CREATE_VECTOR2(class_name, autoload));
+  return f_class_exists(class_name, autoload);
 }
 
 String get_static_class_name(CVarRef objOrClassName) {
@@ -945,7 +944,7 @@ bool checkInterfaceExists(CStrRef name, const bool *declared,
                           bool autoloadExists, bool nothrow /* = false */) {
   if (*declared) return true;
   if (autoloadExists) {
-    invoke("__autoload", CREATE_VECTOR1(name), -1, true, false);
+    invoke(s___autoload, CREATE_VECTOR1(name), -1, true, false);
   }
   if (!*declared) {
     if (nothrow) return false;

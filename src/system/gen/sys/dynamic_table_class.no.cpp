@@ -529,8 +529,8 @@ Variant &c_PDOException::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOException
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_PDOException
-void c_PDOException::o_getArray(Array &props) const {
-  c_Exception::o_getArray(props);
+void c_PDOException::o_getArray(Array &props, bool pubOnly) const {
+  c_Exception::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_PDOException
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_PDOException
@@ -752,8 +752,8 @@ Variant &c_DOMDocumentFragment::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocumentFragment
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMDocumentFragment
-void c_DOMDocumentFragment::o_getArray(Array &props) const {
-  c_DOMNode::o_getArray(props);
+void c_DOMDocumentFragment::o_getArray(Array &props, bool pubOnly) const {
+  c_DOMNode::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMDocumentFragment
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMDocumentFragment
@@ -1032,8 +1032,8 @@ Variant &c_DOMText::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMText
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMText
-void c_DOMText::o_getArray(Array &props) const {
-  c_DOMCharacterData::o_getArray(props);
+void c_DOMText::o_getArray(Array &props, bool pubOnly) const {
+  c_DOMCharacterData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMText
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMText
@@ -1498,8 +1498,8 @@ Variant &c_DebuggerClient::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DebuggerClient
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DebuggerClient
-void c_DebuggerClient::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_DebuggerClient::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DebuggerClient
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DebuggerClient
@@ -3237,8 +3237,8 @@ Variant &c_DOMCDATASection::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMCDATASection
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMCDATASection
-void c_DOMCDATASection::o_getArray(Array &props) const {
-  c_DOMText::o_getArray(props);
+void c_DOMCDATASection::o_getArray(Array &props, bool pubOnly) const {
+  c_DOMText::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMCDATASection
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMCDATASection
@@ -3483,8 +3483,8 @@ Variant &c_Locale::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Locale
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Locale
-void c_Locale::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_Locale::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Locale
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Locale
@@ -3715,8 +3715,8 @@ Variant &c_DOMDocumentType::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocumentType
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMDocumentType
-void c_DOMDocumentType::o_getArray(Array &props) const {
-  c_DOMNode::o_getArray(props);
+void c_DOMDocumentType::o_getArray(Array &props, bool pubOnly) const {
+  c_DOMNode::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMDocumentType
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMDocumentType
@@ -4049,8 +4049,8 @@ Variant &c_SQLite3Stmt::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3Stmt
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SQLite3Stmt
-void c_SQLite3Stmt::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_SQLite3Stmt::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SQLite3Stmt
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SQLite3Stmt
@@ -4663,8 +4663,8 @@ Variant &c_DOMNodeList::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNodeList
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNodeList
-void c_DOMNodeList::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_DOMNodeList::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNodeList
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNodeList
@@ -5090,8 +5090,8 @@ Variant &c_Normalizer::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Normalizer
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Normalizer
-void c_Normalizer::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_Normalizer::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Normalizer
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Normalizer
@@ -5492,8 +5492,8 @@ Variant &c_DOMCharacterData::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMCharacterData
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMCharacterData
-void c_DOMCharacterData::o_getArray(Array &props) const {
-  c_DOMNode::o_getArray(props);
+void c_DOMCharacterData::o_getArray(Array &props, bool pubOnly) const {
+  c_DOMNode::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMCharacterData
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMCharacterData
@@ -6120,8 +6120,8 @@ Variant &c_DOMEntityReference::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMEntityReference
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMEntityReference
-void c_DOMEntityReference::o_getArray(Array &props) const {
-  c_DOMNode::o_getArray(props);
+void c_DOMEntityReference::o_getArray(Array &props, bool pubOnly) const {
+  c_DOMNode::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMEntityReference
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMEntityReference
@@ -6366,8 +6366,8 @@ Variant &c_SimpleXMLElementIterator::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SimpleXMLElementIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SimpleXMLElementIterator
-void c_SimpleXMLElementIterator::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_SimpleXMLElementIterator::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SimpleXMLElementIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SimpleXMLElementIterator
@@ -6813,8 +6813,8 @@ Variant &c_DateTimeZone::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DateTimeZone
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DateTimeZone
-void c_DateTimeZone::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_DateTimeZone::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DateTimeZone
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DateTimeZone
@@ -7340,8 +7340,8 @@ Variant &c_DOMNodeIterator::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNodeIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNodeIterator
-void c_DOMNodeIterator::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_DOMNodeIterator::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNodeIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNodeIterator
@@ -7787,8 +7787,8 @@ Variant &c_DOMImplementation::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMImplementation
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMImplementation
-void c_DOMImplementation::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_DOMImplementation::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMImplementation
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMImplementation
@@ -8208,8 +8208,8 @@ Variant &c_SoapHeader::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapHeader
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapHeader
-void c_SoapHeader::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_SoapHeader::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapHeader
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapHeader
@@ -8534,8 +8534,8 @@ Variant &c_DOMNotation::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNotation
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNotation
-void c_DOMNotation::o_getArray(Array &props) const {
-  c_DOMNode::o_getArray(props);
+void c_DOMNotation::o_getArray(Array &props, bool pubOnly) const {
+  c_DOMNode::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNotation
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNotation
@@ -8868,8 +8868,8 @@ Variant &c_DebuggerProxy::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DebuggerProxy
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DebuggerProxy
-void c_DebuggerProxy::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_DebuggerProxy::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DebuggerProxy
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DebuggerProxy
@@ -9192,8 +9192,8 @@ Variant &c_Memcached::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Memcached
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Memcached
-void c_Memcached::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_Memcached::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Memcached
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Memcached
@@ -11844,8 +11844,8 @@ Variant &c_DOMComment::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMComment
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMComment
-void c_DOMComment::o_getArray(Array &props) const {
-  c_DOMCharacterData::o_getArray(props);
+void c_DOMComment::o_getArray(Array &props, bool pubOnly) const {
+  c_DOMCharacterData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMComment
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMComment
@@ -12102,8 +12102,8 @@ Variant &c_SQLite3::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SQLite3
-void c_SQLite3::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_SQLite3::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SQLite3
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SQLite3
@@ -13192,8 +13192,8 @@ Variant &c_DOMAttr::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMAttr
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMAttr
-void c_DOMAttr::o_getArray(Array &props) const {
-  c_DOMNode::o_getArray(props);
+void c_DOMAttr::o_getArray(Array &props, bool pubOnly) const {
+  c_DOMNode::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMAttr
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMAttr
@@ -13616,8 +13616,8 @@ Variant &c_SoapVar::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapVar
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapVar
-void c_SoapVar::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_SoapVar::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapVar
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapVar
@@ -13965,8 +13965,8 @@ Variant &c_DOMNamedNodeMap::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNamedNodeMap
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNamedNodeMap
-void c_DOMNamedNodeMap::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_DOMNamedNodeMap::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNamedNodeMap
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNamedNodeMap
@@ -14503,8 +14503,8 @@ Variant &c_SQLite3Result::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SQLite3Result
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SQLite3Result
-void c_SQLite3Result::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_SQLite3Result::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SQLite3Result
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SQLite3Result
@@ -15024,8 +15024,8 @@ Variant &c_SimpleXMLElement::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SimpleXMLElement
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SimpleXMLElement
-void c_SimpleXMLElement::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_SimpleXMLElement::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SimpleXMLElement
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SimpleXMLElement
@@ -16513,8 +16513,8 @@ Variant &c_Memcache::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Memcache
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Memcache
-void c_Memcache::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_Memcache::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Memcache
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Memcache
@@ -18027,8 +18027,8 @@ Variant &c_DOMProcessingInstruction::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMProcessingInstruction
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMProcessingInstruction
-void c_DOMProcessingInstruction::o_getArray(Array &props) const {
-  c_DOMNode::o_getArray(props);
+void c_DOMProcessingInstruction::o_getArray(Array &props, bool pubOnly) const {
+  c_DOMNode::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMProcessingInstruction
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMProcessingInstruction
@@ -18407,8 +18407,8 @@ Variant &c_PDOStatement::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDOStatement
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_PDOStatement
-void c_PDOStatement::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_PDOStatement::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_PDOStatement
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_PDOStatement
@@ -20017,8 +20017,8 @@ Variant &c_SoapClient::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapClient
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapClient
-void c_SoapClient::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_SoapClient::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapClient
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapClient
@@ -20931,8 +20931,8 @@ Variant &c_SoapParam::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapParam
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapParam
-void c_SoapParam::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_SoapParam::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapParam
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapParam
@@ -21188,8 +21188,8 @@ Variant &c_DateTime::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DateTime
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DateTime
-void c_DateTime::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_DateTime::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DateTime
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DateTime
@@ -21939,8 +21939,8 @@ Variant &c_Collator::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Collator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Collator
-void c_Collator::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_Collator::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Collator
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Collator
@@ -22902,8 +22902,8 @@ Variant &c_PDO::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_PDO
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_PDO
-void c_PDO::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_PDO::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_PDO
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_PDO
@@ -24207,8 +24207,8 @@ Variant &c_ImageSprite::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ImageSprite
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ImageSprite
-void c_ImageSprite::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_ImageSprite::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ImageSprite
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ImageSprite
@@ -25031,8 +25031,8 @@ Variant &c_DOMEntity::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMEntity
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMEntity
-void c_DOMEntity::o_getArray(Array &props) const {
-  c_DOMNode::o_getArray(props);
+void c_DOMEntity::o_getArray(Array &props, bool pubOnly) const {
+  c_DOMNode::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMEntity
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMEntity
@@ -25365,8 +25365,8 @@ Variant &c_XMLWriter::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_XMLWriter
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_XMLWriter
-void c_XMLWriter::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_XMLWriter::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_XMLWriter
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_XMLWriter
@@ -27868,8 +27868,8 @@ Variant &c_DOMException::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMException
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMException
-void c_DOMException::o_getArray(Array &props) const {
-  c_Exception::o_getArray(props);
+void c_DOMException::o_getArray(Array &props, bool pubOnly) const {
+  c_Exception::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMException
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMException
@@ -28149,8 +28149,8 @@ Variant &c_DOMXPath::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMXPath
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMXPath
-void c_DOMXPath::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_DOMXPath::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMXPath
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMXPath
@@ -28738,8 +28738,8 @@ Variant &c_SoapServer::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapServer
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapServer
-void c_SoapServer::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_SoapServer::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapServer
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapServer
@@ -29464,8 +29464,8 @@ Variant &c_DOMNode::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMNode
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNode
-void c_DOMNode::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_DOMNode::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMNode
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNode
@@ -30722,8 +30722,8 @@ Variant &c_DOMDocument::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMDocument
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMDocument
-void c_DOMDocument::o_getArray(Array &props) const {
-  c_DOMNode::o_getArray(props);
+void c_DOMDocument::o_getArray(Array &props, bool pubOnly) const {
+  c_DOMNode::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMDocument
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMDocument
@@ -32738,8 +32738,8 @@ Variant &c_LibXMLError::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_LibXMLError
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_LibXMLError
-void c_LibXMLError::o_getArray(Array &props) const {
-  c_ObjectData::o_getArray(props);
+void c_LibXMLError::o_getArray(Array &props, bool pubOnly) const {
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_LibXMLError
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_LibXMLError
@@ -32961,8 +32961,8 @@ Variant &c_SoapFault::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SoapFault
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapFault
-void c_SoapFault::o_getArray(Array &props) const {
-  c_Exception::o_getArray(props);
+void c_SoapFault::o_getArray(Array &props, bool pubOnly) const {
+  c_Exception::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SoapFault
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapFault
@@ -33354,8 +33354,8 @@ Variant &c_DOMElement::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DOMElement
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMElement
-void c_DOMElement::o_getArray(Array &props) const {
-  c_DOMNode::o_getArray(props);
+void c_DOMElement::o_getArray(Array &props, bool pubOnly) const {
+  c_DOMNode::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DOMElement
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMElement

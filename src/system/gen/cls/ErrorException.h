@@ -44,7 +44,7 @@ class c_ErrorException : public c_Exception {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual void o_getArray(Array &props) const;
+  virtual void o_getArray(Array &props, bool pubOnly = false) const;
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_ErrorException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_ErrorException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ErrorException 1

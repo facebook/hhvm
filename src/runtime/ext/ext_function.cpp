@@ -17,6 +17,7 @@
 
 #include <runtime/ext/ext_function.h>
 #include <runtime/ext/ext_json.h>
+#include <runtime/ext/ext_class.h>
 #include <runtime/base/class_info.h>
 #include <runtime/base/fiber_async_func.h>
 #include <runtime/base/util/libevent_http_client.h>
@@ -30,7 +31,6 @@ using namespace boost;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static StaticString s_class_exists("class_exists");
 static StaticString s_parent("parent");
 static StaticString s_self("self");
 
@@ -56,8 +56,7 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
     if (c != 0 && c != String::npos && c + 2 < str.size()) {
       String classname = str.substr(0, c);
       String methodname = str.substr(c + 2);
-      return f_call_user_func_array(s_class_exists,
-                                    Array::Create(classname)) &&
+      return f_class_exists(classname) &&
         ClassInfo::HasAccess(classname, methodname, true, false);
     }
     return f_function_exists(str);
@@ -74,7 +73,7 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
         obj = v0.toObject();
         v0 = obj->o_getClassName();
       } else if (v0.isString()) {
-        if (!f_call_user_func_array(s_class_exists, Array::Create(v0))) {
+        if (!f_class_exists(v0.toString())) {
           return false;
         }
         staticCall = true;

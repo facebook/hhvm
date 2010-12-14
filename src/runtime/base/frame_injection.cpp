@@ -165,17 +165,17 @@ CStrRef FrameInjection::GetClassName(bool skip /* = false */) {
   return empty_string;
 }
 
-const char *FrameInjection::GetParentClassName(bool skip /* = false */) {
+CStrRef FrameInjection::GetParentClassName(bool skip /* = false */) {
   CStrRef cls = GetClassName(skip);
   if (cls.empty()) return cls;
   const ClassInfo *classInfo = ClassInfo::FindClass(cls);
   if (classInfo) {
-    const char *parentClass = classInfo->getParentClass();
-    if (parentClass && parentClass[0]) {
+    CStrRef parentClass = classInfo->getParentClass();
+    if (!parentClass.isNull()) {
       return parentClass;
     }
   }
-  return "";
+  return empty_string;
 }
 
 Object FrameInjection::GetThis(bool skip /* = false */) {

@@ -59,18 +59,18 @@ void ResourceData::serialize(VariableSerializer *serializer) const {
   if (serializer->incNestedLevel((void*)this, true)) {
     serializer->writeOverflow((void*)this, true);
   } else {
-    std::string saveName;
+    String saveName;
     int saveId;
     serializer->getResourceInfo(saveName, saveId);
     serializer->setResourceInfo(o_getResourceName(), o_getResourceId());
     o_toArray().serialize(serializer);
-    serializer->setResourceInfo(saveName.c_str(), saveId);
+    serializer->setResourceInfo(saveName, saveId);
   }
   serializer->decNestedLevel((void*)this);
 }
 
-const char *ResourceData::o_getResourceName() const {
-  return o_getClassName().data();
+CStrRef ResourceData::o_getResourceName() const {
+  return o_getClassName();
 }
 
 Object ResourceData::fiberMarshal(FiberReferenceMap &refMap) const {

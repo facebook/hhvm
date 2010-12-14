@@ -110,10 +110,10 @@ class ClassInfoEvaled : public ClassInfo, public AtomicCountable {
  public:
   ~ClassInfoEvaled();
   void release() { delete this; }
-  virtual const char *getParentClass() const { return m_parentClass; }
+  virtual CStrRef getParentClass() const { return m_parentClass; }
 
   // implementing ClassInfo
-  const InterfaceMap &getInterfaces()    const { return m_interfaces;}
+  const InterfaceSet &getInterfaces()    const { return m_interfaces;}
   const InterfaceVec &getInterfacesVec() const { return m_interfacesVec;}
   const MethodMap    &getMethods()       const { return m_methods;}
   const MethodVec    &getMethodsVec()    const { return m_methodsVec;}
@@ -124,8 +124,8 @@ class ClassInfoEvaled : public ClassInfo, public AtomicCountable {
 
  private:
   friend class ClassStatement;
-  const char* m_parentClass;
-  InterfaceMap m_interfaces;    // all interfaces
+  String       m_parentClass;
+  InterfaceSet m_interfaces;    // all interfaces
   InterfaceVec m_interfacesVec; // all interfaces
   MethodMap    m_methods;       // all methods
   MethodVec    m_methodsVec;    // in source order

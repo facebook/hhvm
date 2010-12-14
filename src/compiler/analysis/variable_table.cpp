@@ -854,7 +854,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   if (cg.getOutput() != CodeGenerator::SystemCPP) {
     // Volatile class declared flags
     ar->outputCPPClassDeclaredFlags(cg, type2names);
-    cg_printf("virtual bool class_exists(const char *name);\n");
+    cg_printf("virtual bool class_exists(CStrRef name);\n");
   }
 
   // Redeclared Functions
@@ -1585,12 +1585,13 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
   }
 
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_GETARRAY_%s", cls);
-  cg_indentBegin("void %s%s::%sgetArray(Array &props) const {\n",
+  cg_indentBegin("void %s%s::%sgetArray(Array &props, bool pubOnly) const {\n",
                  Option::ClassPrefix, cls, Option::ObjectPrefix);
   bool empty = true;
   for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
     const Symbol *sym = m_symbolVec[i];
     bool priv = sym->isPrivate();
+    bool prot = sym->isProtected();
     if (dynamicObject && !priv) continue;
     const char *s = sym->getName().c_str();
     string prop(sym->getName());
@@ -1599,6 +1600,9 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
       if (priv) {
         ClassScope clsScope = dynamic_cast<ClassScope &>(m_blockScope);
         prop = '\0' + clsScope.getOriginalName() + '\0' + prop;
+      }
+      if (prot || priv) {
+        cg_printf("if (!pubOnly) ");
       }
       if (sym->isOverride()) {
         /* The actual property is stored in a base class,
@@ -1622,7 +1626,7 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
       }
     }
   }
-  cg_printf("%s%s::%sgetArray(props);\n", Option::ClassPrefix, parent,
+  cg_printf("%s%s::%sgetArray(props, pubOnly);\n", Option::ClassPrefix, parent,
             Option::ObjectPrefix);
   cg_indentEnd("}\n");
   cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_GETARRAY_%s", cls);

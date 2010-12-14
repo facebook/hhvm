@@ -53,15 +53,15 @@ namespace HPHP {
 class Globals : public LVariableTable {
 public:
   Globals() : FVF(__autoload)(false) {}
-  CVarRef declareConstant(const char *name, Variant &constant, CVarRef value);
+  CVarRef declareConstant(CStrRef name, Variant &constant, CVarRef value);
   void declareFunction(const char *name);
   void declareFunctionLit(CStrRef name);
-  bool defined(const char *name);
-  Variant getConstant(const char *name);
+  bool defined(CStrRef name);
+  Variant getConstant(CStrRef name);
   Array getDynamicConstants() const;
   bool function_exists(CStrRef name);
 
-  virtual bool class_exists(const char *name);
+  virtual bool class_exists(CStrRef name);
 
   virtual Variant getByIdx(ssize_t pos, Variant& k);
   virtual CVarRef getRefByIdx(ssize_t pos, Variant& k);

@@ -420,7 +420,7 @@ typedef __gnu_cxx::hash_map
 <const char *, std::string, __gnu_cxx::hash<const char *>, eqstr>
 HtmlEntityMap;
 
-static bool EntityMapInited = false;
+static volatile bool EntityMapInited = false;
 static Mutex EntityMapMutex;
 static HtmlEntityMap EntityMap[cs_end];
 

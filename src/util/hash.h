@@ -42,7 +42,7 @@ inline long long hash_int64(long long key) {
  */
 
 inline long long hash_string_cs(const char *arKey, int nKeyLength) {
-  const long long m = 0xc6a4a7935bd1e995;
+  const long long m = 0xc6a4a7935bd1e995LL;
   const int r = 47;
 
   register unsigned long long h = 0;
@@ -78,7 +78,7 @@ inline long long hash_string_cs(const char *arKey, int nKeyLength) {
   h *= m;
   h ^= h >> r;
 
-  return h & 0x7fffffffffffffff;
+  return h & 0x7fffffffffffffffLL;
 }
 
 inline long long hash_string_i(const char *arKey, int nKeyLength) {

@@ -256,7 +256,9 @@ public:
     case CURLOPT_NETRC:
     case CURLOPT_PUT:
     case CURLOPT_TIMEOUT:
-      //case CURLOPT_TIMEOUT_MS:
+#if LIBCURL_VERSION_NUM >= 0x071002
+    case CURLOPT_TIMEOUT_MS:
+#endif
     case CURLOPT_FTP_USE_EPSV:
     case CURLOPT_LOW_SPEED_LIMIT:
     case CURLOPT_SSLVERSION:
@@ -273,7 +275,9 @@ public:
     case CURLOPT_FRESH_CONNECT:
     case CURLOPT_FORBID_REUSE:
     case CURLOPT_CONNECTTIMEOUT:
-      //case CURLOPT_CONNECTTIMEOUT_MS:
+#if LIBCURL_VERSION_NUM >= 0x071002
+    case CURLOPT_CONNECTTIMEOUT_MS:
+#endif
     case CURLOPT_SSL_VERIFYHOST:
     case CURLOPT_SSL_VERIFYPEER:
       //case CURLOPT_DNS_USE_GLOBAL_CACHE: not thread-safe when set to true
@@ -1191,5 +1195,14 @@ const int64 k_CURLINFO_LOCAL_PORT = CURLINFO_LOCAL_PORT;
 #else
 const int64 k_CURLINFO_LOCAL_PORT = CURLINFO_NONE;
 #endif
+
+#if LIBCURL_VERSION_NUM >= 0x071002
+const int64 k_CURLOPT_TIMEOUT_MS = CURLOPT_TIMEOUT_MS;
+const int64 k_CURLOPT_CONNECTTIMEOUT_MS = CURLOPT_CONNECTTIMEOUT_MS;
+#else
+const int64 k_CURLOPT_TIMEOUT_MS = CURLOPT_LASTENTRY;
+const int64 k_CURLOPT_CONNECTTIMEOUT_MS = CURLOPT_LASTENTRY;
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 }

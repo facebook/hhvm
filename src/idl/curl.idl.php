@@ -597,6 +597,18 @@ DefineConstant(
     'type'   => Int64,
   ));
 
+DefineConstant(
+  array(
+    'name'   => "CURLOPT_TIMEOUT_MS",
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "CURLOPT_CONNECTTIMEOUT_MS",
+    'type'   => Int64,
+  ));
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

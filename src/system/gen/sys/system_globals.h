@@ -85,6 +85,8 @@ public:
 };
 
 extern const int64 k_CURLINFO_LOCAL_PORT;
+extern const int64 k_CURLOPT_CONNECTTIMEOUT_MS;
+extern const int64 k_CURLOPT_TIMEOUT_MS;
 extern const int64 k_FB_UNSERIALIZE_NONSTRING_VALUE;
 extern const int64 k_FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;
 extern const int64 k_FB_UNSERIALIZE_UNEXPECTED_END;

@@ -4403,6 +4403,7 @@ Variant get_builtin_constant(CStrRef name, bool error) {
       HASH_RETURN(0x12BBFC13ECD92D40LL, k_FT_PEEK, "FT_PEEK");
       break;
     case 3399:
+      HASH_RETURN(0x6442C99D81958D47LL, k_CURLOPT_CONNECTTIMEOUT_MS, "CURLOPT_CONNECTTIMEOUT_MS");
       HASH_RETURN(0x045A3851B7EC4D47LL, k_CURLE_LDAP_INVALID_URL, "CURLE_LDAP_INVALID_URL");
       break;
     case 3402:
@@ -5106,6 +5107,9 @@ Variant get_builtin_constant(CStrRef name, bool error) {
       break;
     case 4327:
       HASH_RETURN(0x61CA6A1041A950E7LL, k_U_INVALID_TABLE_FILE, "U_INVALID_TABLE_FILE");
+      break;
+    case 4337:
+      HASH_RETURN(0x0B1FCD989089B0F1LL, k_CURLOPT_TIMEOUT_MS, "CURLOPT_TIMEOUT_MS");
       break;
     case 4345:
       HASH_RETURN(0x3E3A7A47D81BF0F9LL, k_LOG_INFO, "LOG_INFO");

@@ -108,6 +108,13 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
         m_sym->setUsed();
       }
     }
+  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    if (m_sym && !m_sym->isSystem() &&
+        !(getContext() &
+          (LValue|RefValue|RefParameter|UnsetContext|ExistContext)) &&
+        m_sym->getDeclaration().get() == this) {
+      Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
+    }
   }
 }
 

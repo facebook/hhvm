@@ -136,6 +136,17 @@ bool ArrayElementExpression::appendClass(ExpressionPtr cls) {
 void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_variable->analyzeProgram(ar);
   if (m_offset) m_offset->analyzeProgram(ar);
+  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    if (m_global && !m_dynamicGlobal &&
+        !(getContext() &
+          (LValue|RefValue|RefParameter|UnsetContext|ExistContext))) {
+      VariableTablePtr vars = ar->getVariables();
+      Symbol *sym = vars->getSymbol(m_globalName);
+      if (!sym || sym->getDeclaration().get() == this) {
+        Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
+      }
+    }
+  }
 }
 
 ConstructPtr ArrayElementExpression::getNthKid(int n) const {

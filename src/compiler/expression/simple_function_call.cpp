@@ -257,15 +257,14 @@ void SimpleFunctionCall::setNthKid(int n, ConstructPtr cp) {
 }
 
 void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
+  FunctionCall::analyzeProgram(ar);
   if (m_class) {
-    m_class->analyzeProgram(ar);
     setDynamicByIdentifier(ar, m_name);
   } else {
     addDependencies(ar);
   }
 
   if (m_safeDef) m_safeDef->analyzeProgram(ar);
-  if (m_params) m_params->analyzeProgram(ar);
 
   if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
     onAnalyzeInclude(ar);
@@ -308,9 +307,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         }
       }
     }
-  }
-
-  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
+  } else if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     // Look up the corresponding FunctionScope and ClassScope
     // for this function call
     {
@@ -401,10 +398,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     if (m_type == UnserializeFunction) {
       ar->forceClassVariants(getOriginalScope(), false);
     }
-  }
-
-  if (m_params) {
-    if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
+    if (m_params) {
       markRefParams(m_funcScope, m_name, canInvokeFewArgs());
     }
   }

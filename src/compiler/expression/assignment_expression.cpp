@@ -127,6 +127,8 @@ void AssignmentExpression::analyzeProgram(AnalysisResultPtr ar) {
         getScope()->getConstants()->setDynamic(ar, exp->getName());
       }
     }
+  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    CheckNeeded(ar, m_variable, m_value);
   }
 }
 

@@ -77,6 +77,18 @@ void ListAssignment::analyzeProgram(AnalysisResultPtr ar) {
   if (m_array) m_array->analyzeProgram(ar);
   FunctionScopePtr func = getFunctionScope();
   if (func) func->disableInline();
+  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    if (m_variables) {
+      for (int i = 0; i < m_variables->getCount(); i++) {
+        ExpressionPtr exp = (*m_variables)[i];
+        if (exp) {
+          if (!exp->is(Expression::KindOfListAssignment)) {
+            CheckNeeded(ar, exp, ExpressionPtr());
+          }
+        }
+      }
+    }
+  }
 }
 
 ConstructPtr ListAssignment::getNthKid(int n) const {

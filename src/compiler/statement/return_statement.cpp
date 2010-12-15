@@ -97,13 +97,9 @@ void ReturnStatement::inferTypes(AnalysisResultPtr ar) {
           ret = m_exp->inferAndCheck(ar, Type::Some, false);
         }
       } else {
-        TypePtr expected = Type::Some;
-        if (ar->getPhase() == AnalysisResult::LastInference &&
-            funcScope->getReturnType()) {
-          expected = funcScope->getReturnType();
-        }
-        ret = m_exp->inferAndCheck(ar, expected, false);
+        ret = m_exp->inferAndCheck(ar, Type::Some, false);
         funcScope->setReturnType(ar, ret);
+        funcScope->addRetExprToFix(m_exp);
       }
     } else {
       m_exp->inferAndCheck(ar, Type::Int64, false);

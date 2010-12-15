@@ -59,6 +59,9 @@ TypePtr Symbol::setType(AnalysisResultPtr ar, BlockScopeRawPtr scope,
     int useKind = BlockScope::UseKindNonStaticRef;
     if (isConstant()) {
       useKind = BlockScope::UseKindConstRef;
+      if (m_declaration) {
+        scope = m_declaration->getScope();
+      }
     } else if (isStatic()) {
       useKind = BlockScope::UseKindStaticRef;
     } else if (isParameter()) {
@@ -85,6 +88,9 @@ void Symbol::endLocal(BlockScopeRawPtr scope) {
     int useKind = BlockScope::UseKindNonStaticRef;
     if (isConstant()) {
       useKind = BlockScope::UseKindConstRef;
+      if (m_declaration) {
+        scope = m_declaration->getScope();
+      }
     } else if (isStatic()) {
       useKind = BlockScope::UseKindStaticRef;
     } else if (isParameter()) {

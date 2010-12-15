@@ -60,9 +60,6 @@ public:
 
     // inferTypes
     FirstInference,
-    SecondInference,
-    MoreInference,
-    LastInference,
 
     // post-optimize
     PostOptimize,
@@ -113,9 +110,7 @@ public:
 
   Phase getPhase() const { return m_phase;}
   void setPhase(Phase phase) { m_phase = phase;}
-  bool isAnalyzeInclude() const {
-    return m_phase == AnalyzeInclude;// || m_phase == FirstInference;
-  }
+  bool isAnalyzeInclude() const { return m_phase == AnalyzeInclude; }
 
   int getFunctionCount() const;
   int getClassCount() const;

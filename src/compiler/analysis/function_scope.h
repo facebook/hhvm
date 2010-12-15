@@ -183,6 +183,10 @@ public:
     return m_prevReturn ? m_prevReturn : m_returnType;
   }
   void popReturnType();
+  void addRetExprToFix(ExpressionPtr e);
+  void clearRetExprs();
+  void fixRetExprs();
+
   bool needsTypeCheckWrapper() const;
   const char *getPrefix(ExpressionListPtr params);
 
@@ -421,6 +425,7 @@ private:
   FunctionOptPtr m_optFunction;
   bool outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
       bool ret, bool constructor);
+  ExpressionPtrVec m_retExprsToFix;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

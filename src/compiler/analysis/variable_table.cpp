@@ -372,9 +372,9 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
     } else {
       ar->getVariables()->setType(ar, sym->getName(), type, true);
     }
-  } else if (ar->getPhase() == AnalysisResult::FirstInference &&
-             !sym->isHidden() && isPseudoMainTable()) {
+  } else if (!sym->isHidden() && isPseudoMainTable()) {
     // A variable used in a pseudomain
+    // only need to do this once... should mark the sym.
     ar->getVariables()->add(sym->getName(), type, implicit, ar,
                             construct, modifiers,
                             checkError);
@@ -419,15 +419,10 @@ TypePtr VariableTable::checkVariable(Symbol *sym, TypePtr type,
   properties = 0;
 
   // Variable used in pseudomain
-  if (ar->getPhase() == AnalysisResult::FirstInference) {
-    if (isPseudoMainTable()) {
-      ar->getVariables()->checkVariable(sym->getName(), type,
-                                        coerce, ar, construct, properties);
-    }
-  } else if (!coerce && ar->getPhase() == AnalysisResult::LastInference &&
-             !sym->isSystem() &&
-             sym->getDeclaration() == construct) {
-    Compiler::Error(Compiler::UseUndeclaredVariable, construct);
+  if (!sym->isHidden() && isPseudoMainTable()) {
+    // only need to do this once... should mark the sym.
+    ar->getVariables()->checkVariable(sym->getName(), type,
+                                      coerce, ar, construct, properties);
   }
 
   if (!sym->declarationSet()) {

@@ -471,18 +471,6 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
       param->clearContext(Expression::NoRefWrapper);
     }
     if (i < m_maxParam) {
-      if (m_paramTypeSpecs[i] &&
-          ar->getPhase() == AnalysisResult::LastInference) {
-        if (!Type::Inferred(ar, expType, m_paramTypeSpecs[i])) {
-          string msg;
-          const char *file = m_stmt->getLocation()->file;
-          Util::string_printf
-            (msg, "%s: parameter %d of %s requires %s, called with %s",
-             file, i+1, m_name.c_str(), m_paramTypeSpecs[i]->toString().c_str(),
-             expType->toString().c_str());
-          Compiler::Error(Compiler::BadArgumentType, m_stmt, msg);
-        }
-      }
       if (!Option::HardTypeHints || !m_paramTypeSpecs[i]) {
         TypePtr paramType = getParamType(i);
         if (canSetParamType) {
@@ -596,9 +584,8 @@ void FunctionScope::setReturnType(AnalysisResultPtr ar, TypePtr type) {
 }
 
 void FunctionScope::pushReturnType() {
-  if (m_overriding || m_perfectVirtual || m_pseudoMain) return;
-
   m_prevReturn = m_returnType;
+  if (m_overriding || m_perfectVirtual || m_pseudoMain) return;
   m_returnType.reset();
 }
 
@@ -623,6 +610,22 @@ void FunctionScope::popReturnType() {
 
   m_prevReturn.reset();
   addUpdates(UseKindCaller);
+}
+
+void FunctionScope::addRetExprToFix(ExpressionPtr e) {
+  m_retExprsToFix.push_back(e);
+}
+
+void FunctionScope::clearRetExprs() {
+  m_retExprsToFix.clear();
+}
+
+void FunctionScope::fixRetExprs() {
+  for (ExpressionPtrVec::iterator it = m_retExprsToFix.begin(),
+         end = m_retExprsToFix.end(); it != end; ++it) {
+    (*it)->setExpectedType(m_returnType);
+  }
+  m_retExprsToFix.clear();
 }
 
 void FunctionScope::setOverriding(TypePtr returnType,
@@ -946,8 +949,8 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
     }
     if (extra) {
       bool needRef = param->hasContext(Expression::RefValue) &&
-                     !param->hasContext(Expression::NoRefWrapper) &&
-                     param->isRefable();
+        !param->hasContext(Expression::NoRefWrapper) &&
+        param->isRefable();
       cg_printf("set%s(", needRef ? "Ref" : "");
       if (needRef) {
         // The parameter itself shouldn't be wrapped with ref() any more.

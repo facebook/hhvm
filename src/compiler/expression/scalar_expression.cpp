@@ -192,6 +192,7 @@ TypePtr ScalarExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 TypePtr ScalarExpression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                         bool coerce) {
   if (ar->getPhase() == AnalysisResult::FirstInference &&
+      getScope()->isFirstPass() &&
       isLiteralString() && m_value.find(' ') == string::npos) {
     setDynamicByIdentifier(ar, m_value);
   }

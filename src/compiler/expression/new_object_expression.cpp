@@ -62,25 +62,30 @@ ExpressionPtr NewObjectExpression::clone() {
 // static analysis functions
 
 void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
-  FunctionScopePtr func;
-  if (!m_name.empty()) {
-    addUserClass(ar, m_name);
-    if (ClassScopePtr cls = resolveClass(getScope())) {
-      m_name = m_className;
-      func = cls->findConstructor(ar, true);
-    }
-  }
+  FunctionCall::analyzeProgram(ar);
 
-  m_nameExp->analyzeProgram(ar);
-  if (m_params) {
-    m_params->analyzeProgram(ar);
-    markRefParams(func, "", false);
+  if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
+      ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    FunctionScopePtr func;
+    if (!m_name.empty()) {
+      addUserClass(ar, m_name);
+      if (ClassScopePtr cls = resolveClass(getScope())) {
+        m_name = m_className;
+        func = cls->findConstructor(ar, true);
+      }
+    }
+
+    if (m_params) {
+      markRefParams(func, "", false);
+    }
   }
 }
 
 TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                         bool coerce) {
   reset();
+  m_classScope.reset();
+  m_funcScope.reset();
   ConstructPtr self = shared_from_this();
   if (!m_name.empty()) {
     ClassScopePtr cls = resolveClass(getScope());
@@ -118,7 +123,10 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                          valid);
       m_variableArgument = func->isVariableArgument();
     }
-    if (valid) m_classScope = cls;
+    if (valid) {
+      m_classScope = cls;
+      m_funcScope = func;
+    }
     if (!valid || m_dynamic) {
       m_implementedType = Type::Object;
     } else {
@@ -174,7 +182,6 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
   bool outsideClass = !isPresent();
   if (!m_name.empty() && m_classScope && !m_dynamic) {
     ClassScopePtr cls = m_classScope;
-    ASSERT(cls);
     if (m_receiverTemp.empty()) {
       if (outsideClass) {
         cls->outputVolatileCheckBegin(cg, ar, getScope(), cname);
@@ -186,8 +193,7 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
       cg_printf("(%s->create(", m_receiverTemp.c_str());
     }
 
-    FunctionScopePtr dummy;
-    FunctionScope::OutputCPPArguments(m_params, dummy, cg, ar, m_extraArg,
+    FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, m_extraArg,
                                       m_variableArgument, m_argArrayId,
                                       m_argArrayHash, m_argArrayIndex);
     if (m_receiverTemp.empty()) {
@@ -265,8 +271,8 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf("(cit%d->getMeth())(mcp%d, ", m_ciTemp, m_ciTemp);
     if (m_params && m_params->getOutputCount()) {
       cg.pushCallInfo(m_ciTemp);
-      FunctionScopePtr dummy;
-      FunctionScope::OutputCPPArguments(m_params, dummy, cg, ar, -1, false);
+      FunctionScope::OutputCPPArguments(m_params, m_funcScope,
+                                        cg, ar, -1, false);
       cg.popCallInfo();
     } else {
       cg_printf("Array()");

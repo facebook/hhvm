@@ -61,8 +61,14 @@ TypePtr ConstantTable::add(const std::string &name, TypePtr type,
       if (exp != sym->getValue()) {
         Compiler::Error(Compiler::DeclaredConstantTwice, construct,
                         sym->getDeclaration());
-        sym->setDynamic();
-        m_hasDynamic = true;
+        if (!sym->isDynamic()) {
+          sym->setDynamic();
+          if (sym->getDeclaration()) {
+            sym->getDeclaration()->getScope()->
+              addUpdates(BlockScope::UseKindConstRef);
+          }
+          m_hasDynamic = true;
+        }
         type = Type::Variant;
       }
     } else if (exp) {
@@ -76,9 +82,15 @@ TypePtr ConstantTable::add(const std::string &name, TypePtr type,
 
 void ConstantTable::setDynamic(AnalysisResultPtr ar, const std::string &name) {
   Symbol *sym = genSymbol(name, true);
-  sym->setDynamic();
-  m_hasDynamic = true;
-  setType(ar, sym, Type::Variant, true);
+  if (!sym->isDynamic()) {
+    sym->setDynamic();
+    if (sym->getDeclaration()) {
+      sym->getDeclaration()->getScope()->
+        addUpdates(BlockScope::UseKindConstRef);
+    }
+    m_hasDynamic = true;
+    setType(ar, sym, Type::Variant, true);
+  }
 }
 
 void ConstantTable::setValue(AnalysisResultPtr ar, const std::string &name,

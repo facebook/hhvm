@@ -333,7 +333,7 @@ void MethodStatement::inferFunctionTypes(AnalysisResultPtr ar) {
   FunctionScopeRawPtr funcScope = getFunctionScope();
   bool pseudoMain = funcScope->inPseudoMain();
 
-  if (ar->getPhase() == AnalysisResult::FirstInference && m_stmt) {
+  if (m_stmt && funcScope->isFirstPass()) {
     if (m_stmt->hasRetExp() ||
         pseudoMain ||
         funcScope->getReturnType()) {

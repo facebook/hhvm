@@ -790,7 +790,7 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
       v_name = iter3->first();
       {
         {
-          p_ReflectionParameter tmp4((p_ReflectionParameter((NEWOBJ(c_ReflectionParameter)())->create(null, null))));
+          const p_ReflectionParameter &tmp4((p_ReflectionParameter((NEWOBJ(c_ReflectionParameter)())->create(null, null))));
           v_param = tmp4;
         }
         v_param->m_info = v_info;
@@ -3422,7 +3422,7 @@ void c_ReflectionClass::t___construct(Variant v_name) {
           {
             {
               p_ReflectionException tmp6 = NEWOBJ(c_ReflectionException)();
-              throw_exception((tmp6->create(VarNR(concat3(NAMSTR(s_sys_ssa78ef7eb, "Class "), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))), tmp6));
+              throw_exception((tmp6->create(concat3(NAMSTR(s_sys_ssa78ef7eb, "Class "), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp6));
             }
           }
         }
@@ -3453,7 +3453,7 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
         {
           {
             p_ReflectionException tmp2 = NEWOBJ(c_ReflectionException)();
-            throw_exception((tmp2->create(VarNR(concat3(NAMSTR(s_sys_ssa78ef7eb, "Class "), toString(m_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))), tmp2));
+            throw_exception((tmp2->create(concat3(NAMSTR(s_sys_ssa78ef7eb, "Class "), toString(m_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp2));
           }
         }
       }
@@ -3686,12 +3686,12 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
       }
       {
         p_ReflectionException tmp4 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp4->create(VarNR(concat5(NAMSTR(s_sys_ssdc6e02c2, "Method "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))), tmp4));
+        throw_exception((tmp4->create(concat5(NAMSTR(s_sys_ssdc6e02c2, "Method "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp4));
       }
     }
   }
   {
-    p_ReflectionMethod tmp5((p_ReflectionMethod((NEWOBJ(c_ReflectionMethod)())->create(null, null))));
+    const p_ReflectionMethod &tmp5((p_ReflectionMethod((NEWOBJ(c_ReflectionMethod)())->create(null, null))));
     v_ret = tmp5;
   }
   {
@@ -3786,12 +3786,12 @@ p_ReflectionProperty c_ReflectionClass::t_getproperty(CVarRef v_name) {
       }
       {
         p_ReflectionException tmp3 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp3->create(VarNR(concat5(NAMSTR(s_sys_ss9795dfc8, "Property "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))), tmp3));
+        throw_exception((tmp3->create(concat5(NAMSTR(s_sys_ss9795dfc8, "Property "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp3));
       }
     }
   }
   {
-    p_ReflectionProperty tmp4((p_ReflectionProperty((NEWOBJ(c_ReflectionProperty)())->create(null, null))));
+    const p_ReflectionProperty &tmp4((p_ReflectionProperty((NEWOBJ(c_ReflectionProperty)())->create(null, null))));
     v_ret = tmp4;
   }
   {
@@ -3856,7 +3856,7 @@ Variant c_ReflectionClass::t_getconstant(CVarRef v_name) {
       }
       {
         p_ReflectionException tmp3 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp3->create(VarNR(concat5(NAMSTR(s_sys_ssd816f860, "Class constant "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))), tmp3));
+        throw_exception((tmp3->create(concat5(NAMSTR(s_sys_ssd816f860, "Class constant "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp3));
       }
     }
   }
@@ -4228,7 +4228,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
       {
         {
           p_ReflectionException tmp6 = NEWOBJ(c_ReflectionException)();
-          throw_exception((tmp6->create(VarNR(concat3(NAMSTR(s_sys_ss44fe7272, "Interface "), toString(v_cls), NAMSTR(s_sys_ss4c77dad1, " is a Class")))), tmp6));
+          throw_exception((tmp6->create(concat3(NAMSTR(s_sys_ss44fe7272, "Interface "), toString(v_cls), NAMSTR(s_sys_ss4c77dad1, " is a Class"))), tmp6));
         }
       }
     }
@@ -7929,7 +7929,7 @@ void c_ReflectionFunction::t___construct(Variant v_name) {
     {
       {
         p_ReflectionException tmp2 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp2->create(VarNR(concat3(NAMSTR(s_sys_ss985d885e, "Function "), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist")))), tmp2));
+        throw_exception((tmp2->create(concat3(NAMSTR(s_sys_ss985d885e, "Function "), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp2));
       }
     }
   }

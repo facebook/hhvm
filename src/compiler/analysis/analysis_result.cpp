@@ -916,8 +916,7 @@ int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
   MethodStatementPtr m =
     dynamic_pointer_cast<MethodStatement>(stmt);
   bool pushPrev = m && !scope->isFirstPass() &&
-    !scope->getContainingFunction()->inPseudoMain() &&
-    this->m_data.m_ar->getPhase() != AnalysisResult::LastInference;
+    !scope->getContainingFunction()->inPseudoMain();
   if (m) {
     if (pushPrev) scope->getVariables()->beginLocal();
     scope->getContainingFunction()->pushReturnType();
@@ -927,6 +926,7 @@ int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
   do {
     scope->clearUpdated();
     if (m) {
+      scope->getContainingFunction()->clearRetExprs();
       m->inferFunctionTypes(this->m_data.m_ar);
     } else {
       for (int i = 0, n = stmt->getKidCount(); i < n; i++) {
@@ -948,6 +948,7 @@ int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
       scope->getVariables()->endLocal();
       ret = 0;
     }
+    scope->getContainingFunction()->fixRetExprs();
     ret |= scope->getUpdated();
     scope->clearUpdated();
   }
@@ -977,12 +978,11 @@ void AnalysisResult::inferTypes() {
   }
   dfv.visitDepthFirst(scopes);
 
-  setPhase(LastInference);
   getScopesSet(scopes);
   for (BlockScopeRawPtrQueue::iterator it = scopes.begin(), end = scopes.end();
        it != end; ++it) {
-    dfv.visitScope(*it);
     (*it)->setChangedScopes(0);
+    (*it)->clearUpdated();
   }
 
   methodSlotThread.waitForEnd();

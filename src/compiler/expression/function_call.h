@@ -32,6 +32,8 @@ public:
                const std::string &name, ExpressionListPtr params,
                ExpressionPtr classExp);
 
+  void analyzeProgram(AnalysisResultPtr ar);
+
   // overriding Expression::outputCPP to implement void wrapper
   virtual void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar);
   virtual bool isRefable(bool checkError = false) const { return true;}

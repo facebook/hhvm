@@ -294,13 +294,6 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     m_valid = true;
 
     clearEffect(AccessorEffect);
-
-    if (ar->getPhase() == AnalysisResult::LastInference) {
-      if (!(m_context & ObjectContext)) {
-        m_object->clearContext(Expression::LValue);
-      }
-      setContext(Expression::NoLValueWrapper);
-    }
     return ret;
   } else {
     m_actualType = Type::Variant;

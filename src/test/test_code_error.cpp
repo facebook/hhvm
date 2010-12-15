@@ -48,6 +48,7 @@ bool TestCodeError::Verify(Compiler::ErrorType type, const char *src,
   BuiltinSymbols::Load(ar);
   ar->analyzeProgram();
   ar->inferTypes();
+  ar->analyzeProgramFinal();
   if (Compiler::HasError(type) != exists) {
     ostringstream code;
     ar->outputAllCPP(CodeGenerator::ClusterCPP, 0, NULL);

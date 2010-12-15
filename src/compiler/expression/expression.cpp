@@ -228,10 +228,9 @@ TypePtr Expression::propagateTypes(AnalysisResultPtr ar, TypePtr inType) {
   while (e) {
     TypePtr inferred = Type::Inferred(ar, ret, e->m_actualType);
     if (!inferred) {
-      assert(ar->getPhase() != AnalysisResult::LastInference);
-    } else {
-      ret = inferred;
+      break;
     }
+    ret = inferred;
     e = e->getCanonPtr();
   }
 
@@ -401,15 +400,6 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
         Compiler::Error(Compiler::ReassignThis, variable);
       }
     }
-    if (ar->getPhase() == AnalysisResult::LastInference && value) {
-      if (!value->getExpectedType()) {
-        value->setExpectedType(variable->getActualType());
-      }
-    }
-  }
-
-  if (ar->getPhase() == AnalysisResult::LastInference) {
-    CheckNeeded(ar, variable, value);
   }
 
   m_implementedType.reset();

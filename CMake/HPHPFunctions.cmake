@@ -38,6 +38,13 @@ function(auto_sources RETURN_VALUE PATTERN SOURCE_SUBDIRS)
 	set(${RETURN_VALUE} ${${RETURN_VALUE}} PARENT_SCOPE)
 endfunction(auto_sources)
 
+function(CONTAINS_STRING FILE SEARCH RETURN_VALUE)
+	file(STRINGS ${FILE} FILE_CONTENTS REGEX ".*${SEARCH}.*")
+	if (FILE_CONTENTS)
+		set(${RETURN_VALUE} True PARENT_SCOPE)
+	endif()
+endfunction(CONTAINS_STRING)
+
 macro(MYSQL_SOCKET_SEARCH)
 	foreach (i
 		/var/run/mysqld/mysqld.sock

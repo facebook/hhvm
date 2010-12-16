@@ -86,6 +86,7 @@ struct ProgramOptions {
   StringVec  args;
   string     buildId;
   int        xhprofFlags;
+  string     show;
 
   Eval::DebuggerClientOptions debugger_options;
 };
@@ -606,6 +607,8 @@ static int execute_program_impl(int argc, char **argv) {
      "executing specified file")
     ("lint,l", value<string>(&po.lint),
      "lint specified file")
+    ("show,w", value<string>(&po.show),
+     "output specified file and do nothing else")
     ("temp-file",
      "file specified is temporary and removed after execution")
     ("count", value<int>(&po.count)->default_value(1),
@@ -666,6 +669,14 @@ static int execute_program_impl(int argc, char **argv) {
     return 0;
   }
 #endif
+
+  if (!po.show.empty()) {
+    PlainFile f;
+    f.open(po.show, "r");
+    f.print();
+    f.close();
+    return 0;
+  }
 
   po.isTempFile = vm.count("temp-file");
 

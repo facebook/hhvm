@@ -55,7 +55,7 @@ using std::string;
 ///////////////////////////////////////////////////////////////////////////////
 
 AliasManager::AliasManager(int opt) :
-    m_nextID(1), m_changes(0), m_replaced(0),
+    m_bucketList(0), m_nextID(1), m_changes(0), m_replaced(0),
     m_wildRefs(false), m_nrvoFix(0), m_inlineAsExpr(true),
     m_noAdd(false), m_preOpt(opt<0), m_postOpt(opt>0),
     m_cleared(false), m_inPseudoMain(false) {
@@ -192,9 +192,10 @@ void AliasManager::add(BucketMapEntry &em, ExpressionPtr e) {
 }
 
 ExpressionPtr AliasManager::getCanonical(ExpressionPtr e) {
-  unsigned val = (e->getCanonHash() % MaxBuckets) + 1;
+  unsigned val = (e->getCanonHash() % MaxBuckets);
 
   BucketMapEntry &em = m_bucketMap[val];
+  em.link(m_bucketList);
 
   ExpressionPtr c = em.find(e);
 
@@ -215,12 +216,11 @@ void AliasManager::clearHelper(BucketMap::value_type &it) {
 }
 
 void AliasManager::clear() {
+  m_accessList.clear();
   m_bucketMap.clear();
+  m_bucketList = 0;
   m_stack.resize(0);
   m_cleared = true;
-
-  //  std::for_each(m_bucketMap.begin(), m_bucketMap.end(),
-  //              clearHelper);
 }
 
 void AliasManager::beginScopeHelper(BucketMap::value_type &it) {
@@ -232,17 +232,22 @@ void AliasManager::beginScope() {
   ExpressionPtr e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
                                        Expression::KindOfScalarExpression,
                                        T_STRING, string("begin")));
-  m_bucketMap[0].add(e);
-  m_stack.push_back(m_bucketMap[0].size());
-  std::for_each(m_bucketMap.begin(), m_bucketMap.end(),
-                beginScopeHelper);
+  m_accessList.add(e);
+  m_stack.push_back(m_accessList.size());
+  m_accessList.beginScope();
+  if (BucketMapEntry *tail = m_bucketList) {
+    BucketMapEntry *bm = tail;
+    do {
+      bm->beginScope();
+    } while ((bm = bm->next()) != tail);
+  }
 }
 
 void AliasManager::mergeScope() {
   if (m_noAdd) return;
   if (m_stack.size()) {
     CondStackElem &cs = m_stack.back();
-    BucketMapEntry &bm = m_bucketMap[0];
+    BucketMapEntry &bm = m_accessList;
     bm.stash(cs.m_size, cs.m_exprs);
   } else {
     clear();
@@ -257,12 +262,17 @@ void AliasManager::endScope() {
   if (m_noAdd) return;
   mergeScope();
 
-  std::for_each(m_bucketMap.begin(), m_bucketMap.end(),
-                endScopeHelper);
+  m_accessList.endScope();
+  if (BucketMapEntry *tail = m_bucketList) {
+    BucketMapEntry *bm = tail;
+    do {
+      bm->endScope();
+    } while ((bm = bm->next()) != tail);
+  }
 
   if (m_stack.size()) {
     CondStackElem &cs = m_stack.back();
-    BucketMapEntry &bm = m_bucketMap[0];
+    BucketMapEntry &bm = m_accessList;
     bm.import(cs.m_exprs);
     ExpressionPtr
       e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
@@ -280,12 +290,17 @@ void AliasManager::resetScopeHelper(BucketMap::value_type &it) {
 void AliasManager::resetScope() {
   if (m_noAdd) return;
   mergeScope();
-  std::for_each(m_bucketMap.begin(), m_bucketMap.end(),
-                resetScopeHelper);
+  m_accessList.resetScope();
+  if (BucketMapEntry *tail = m_bucketList) {
+    BucketMapEntry *bm = tail;
+    do {
+      bm->resetScope();
+    } while ((bm = bm->next()) != tail);
+  }
 }
 
 void AliasManager::dumpAccessChain() {
-  BucketMapEntry &lvs = m_bucketMap[0];
+  BucketMapEntry &lvs = m_accessList;
   ExpressionPtrList::reverse_iterator it = lvs.rbegin(), end = lvs.rend();
 
   while (it != end) {
@@ -463,7 +478,7 @@ void AliasManager::cleanInterf(ExpressionPtr load,
       if (a == NotAccess) {
         if (depth < 0) return;
       } else if (!eIsLoad) {
-        m_bucketMap[0].erase(it, end);
+        m_accessList.erase(it, end);
         continue;
       }
     }
@@ -496,7 +511,7 @@ static int getOpForAssignmentOp(int op) {
 }
 
 void AliasManager::killLocals() {
-  BucketMapEntry &lvs = m_bucketMap[0];
+  BucketMapEntry &lvs = m_accessList;
   ExpressionPtrList::reverse_iterator it = lvs.rbegin(), end = lvs.rend();
   int effects = 0;
   int depth = 0;
@@ -649,7 +664,7 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
 
 int AliasManager::findInterf(ExpressionPtr rv, bool isLoad,
                              ExpressionPtr &rep) {
-  BucketMapEntry &lvs = m_bucketMap[0];
+  BucketMapEntry &lvs = m_accessList;
 
   rep.reset();
   ExpressionPtrList::reverse_iterator it = lvs.rbegin(), end = lvs.rend();
@@ -820,11 +835,11 @@ ExpressionPtr AliasManager::canonicalizeNode(
   case Expression::KindOfSimpleFunctionCall:
   case Expression::KindOfNewObjectExpression:
   case Expression::KindOfIncludeExpression:
-    add(m_bucketMap[0], e);
+    add(m_accessList, e);
     break;
 
   case Expression::KindOfListAssignment:
-    add(m_bucketMap[0], e);
+    add(m_accessList, e);
     break;
 
   case Expression::KindOfAssignmentExpression: {
@@ -847,7 +862,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
             break;
           }
           if (!Expression::CheckNeeded(m_arp, a->getVariable(), value) ||
-              m_bucketMap[0].isSubLast(a)) {
+              m_accessList.isSubLast(a)) {
             a->setReplacement(value);
             m_replaced++;
           }
@@ -929,7 +944,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
     } else {
       ae->getVariable()->setCanonID(m_nextID++);
     }
-    add(m_bucketMap[0], e);
+    add(m_accessList, e);
     break;
   }
 
@@ -972,7 +987,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                   break;
                 }
                 if (!Expression::CheckNeeded(m_arp, a->getVariable(), value) ||
-                    m_bucketMap[0].isSubLast(a)) {
+                    m_accessList.isSubLast(a)) {
                   rep->setReplacement(value);
                   m_replaced++;
                 } else {
@@ -1034,7 +1049,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
           }
         }
       }
-      add(m_bucketMap[0], e);
+      add(m_accessList, e);
       break;
     }
     // Fall through
@@ -1061,7 +1076,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                                Expression::UnsetContext)) {
           ExpressionPtr rep;
           int interf = findInterf(e, true, rep);
-          add(m_bucketMap[0], e);
+          add(m_accessList, e);
           if (interf == SameAccess) {
             if (e->getKindOf() == rep->getKindOf()) {
               // e->setCanonID(rep->getCanonID());
@@ -1113,7 +1128,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
               return e->replaceValue(
                 canonicalizeRecurNonNull(e->makeConstant(m_arp, "null")));
             }
-            add(m_bucketMap[0], e);
+            add(m_accessList, e);
             e->setCanonID(rep->getCanonID());
             e->setCanonPtr(rep);
             return ExpressionPtr();
@@ -1152,7 +1167,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
               }
               cur = next;
             }
-            if (ae->isUnused() && m_bucketMap[0].isLast(ae)) {
+            if (ae->isUnused() && m_accessList.isLast(ae)) {
               rep = ae->clone();
               ae->setContext(Expression::DeadStore);
               ae->setNthKid(1, ae->makeConstant(m_arp, "null"));
@@ -1165,7 +1180,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
           }
         }
       }
-      add(m_bucketMap[0], e);
+      add(m_accessList, e);
     }
     break;
 
@@ -1226,7 +1241,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
       } else {
         lhs->setCanonID(m_nextID++);
       }
-      add(m_bucketMap[0], e);
+      add(m_accessList, e);
     } else {
       getCanonical(e);
     }
@@ -1259,7 +1274,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
         } else {
           uop->getExpression()->setCanonID(m_nextID++);
         }
-        add(m_bucketMap[0], e);
+        add(m_accessList, e);
         break;
       }
       default:
@@ -1513,7 +1528,7 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
         ExpressionPtr e(new ScalarExpression(BlockScopePtr(), LocationPtr(),
                                              Expression::KindOfScalarExpression,
                                              T_STRING, string("io")));
-        add(m_bucketMap[0], e);
+        add(m_accessList, e);
       }
       ret = FallThrough;
       start = nkid;

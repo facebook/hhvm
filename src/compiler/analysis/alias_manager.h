@@ -26,7 +26,7 @@ DECLARE_BOOST_TYPES(MethodStatement);
 
 class BucketMapEntry {
  public:
-  BucketMapEntry() : m_num(0) {}
+  BucketMapEntry() : m_num(0), m_next(0) {}
  public:
   ExpressionPtr find(ExpressionPtr e);
   void add(ExpressionPtr e);
@@ -58,10 +58,23 @@ class BucketMapEntry {
     // the next element... no need to return a new iterator.
     m_num--;
   }
+  BucketMapEntry *next() const { return m_next; }
+  void link(BucketMapEntry *&tail) {
+    if (!m_next) {
+      if (tail) {
+        m_next = tail->m_next;
+        tail->m_next = this;
+      } else {
+        m_next = this;
+      }
+      tail = this;
+    }
+  }
  private:
   ExpressionPtrList     m_exprs;
   std::vector<size_t>   m_stack;
   size_t                m_num;
+  BucketMapEntry        *m_next;
 };
 
 class AliasManager {
@@ -107,7 +120,7 @@ class AliasManager {
     StringSet m_excluded;
   };
 
-  typedef std::map<unsigned, BucketMapEntry> BucketMap;
+  typedef hphp_hash_map<unsigned, BucketMapEntry> BucketMap;
   typedef std::vector<CondStackElem> CondStack;
   typedef std::vector<LoopInfo> LoopInfoVec;
 
@@ -148,7 +161,10 @@ class AliasManager {
   void stringOptsRecur(StatementPtr s);
   void stringOptsRecur(ExpressionPtr s, bool ok);
 
+  BucketMapEntry        m_accessList;
   BucketMap             m_bucketMap;
+  BucketMapEntry        *m_bucketList;
+
   CondStack             m_stack;
 
   unsigned              m_nextID;

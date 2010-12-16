@@ -198,7 +198,10 @@ find_package(CClient REQUIRED)
 include_directories(${CCLIENT_INCLUDE_PATH})
 
 CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.h" auth_gss CCLIENT_NEEDS_PAM)
-CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.c" ssl_onceonlyinit CCLIENT_HAS_SSL)
+
+if (EXISTS "${CCLIENT_INCLUDE_PATH}/linkage.c")
+	CONTAINS_STRING("${CCLIENT_INCLUDE_PATH}/linkage.c" ssl_onceonlyinit CCLIENT_HAS_SSL)
+endif()
 
 if (CCLIENT_NEEDS_PAM)
 	find_package(Libpam REQUIRED)

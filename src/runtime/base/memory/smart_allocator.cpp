@@ -39,6 +39,12 @@ static int calculate_item_count(int itemSize) {
   return itemCount;
 }
 
+#ifdef SMART_ALLOCATOR_STACKTRACE
+Mutex SmartAllocatorImpl::s_st_mutex;
+std::map<void*, StackTrace> SmartAllocatorImpl::s_st_allocs;
+std::map<void*, StackTrace> SmartAllocatorImpl::s_st_deallocs;
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
@@ -132,7 +138,13 @@ void *SmartAllocatorImpl::alloc() {
   if (m_stats->usage <= m_stats->peakUsage && m_freelist.size() > 0) {
     // Fast path
 #ifdef SMART_ALLOCATOR_STACKTRACE
-    m_st_allocs.operator[](m_freelist.back());
+    {
+      Lock lock(s_st_mutex);
+      bool enabled = StackTrace::Enabled;
+      StackTrace::Enabled = true;
+      s_st_allocs.operator[](m_freelist.back());
+      StackTrace::Enabled = enabled;
+    }
 #endif
     void *ret = m_freelist.back();
     m_freelist.pop_back();
@@ -172,7 +184,13 @@ void *SmartAllocatorImpl::allocHelper() {
   char *ret = m_blocks[m_row] + m_col;
   m_col += m_itemSize;
 #ifdef SMART_ALLOCATOR_STACKTRACE
-  m_st_allocs.operator[](ret);
+  {
+    Lock lock(s_st_mutex);
+    bool enabled = StackTrace::Enabled;
+    StackTrace::Enabled = true;
+    s_st_allocs.operator[](ret);
+    StackTrace::Enabled = enabled;
+  }
 #endif
   return ret;
 }
@@ -193,10 +211,27 @@ void SmartAllocatorImpl::checkMemUsage() {
 
 void SmartAllocatorImpl::dealloc(void *obj) {
   if (obj) {
+#ifdef SMART_ALLOCATOR_STACKTRACE
+    if (!isValid(obj)) {
+      Lock lock(s_st_mutex);
+      if (s_st_allocs.find(obj) != s_st_allocs.end()) {
+        printf("Object %p was allocated from a different thread: %s\n",
+               obj, s_st_allocs[obj].toString().c_str());
+      } else {
+        printf("Object %p was not smart allocated\n", obj);
+      }
+    }
+#endif
     ASSERT(isValid(obj));
     m_freelist.push_back(obj);
 #ifdef SMART_ALLOCATOR_STACKTRACE
-    m_st_deallocs.operator[](obj);
+    {
+      Lock lock(s_st_mutex);
+      bool enabled = StackTrace::Enabled;
+      StackTrace::Enabled = true;
+      s_st_deallocs.operator[](obj);
+      StackTrace::Enabled = enabled;
+    }
 #endif
 
     ASSERT(m_stats);
@@ -425,7 +460,8 @@ void SmartAllocatorImpl::checkMemory(bool detailed) {
           printf("Double-freed Item %d:\n", ++index);
           dump(p);
 #ifdef SMART_ALLOCATOR_STACKTRACE
-          printf("%s\n", m_st_deallocs[p].toString().c_str());
+          Lock lock(s_st_mutex);
+          printf("%s\n", s_st_deallocs[p].toString().c_str());
 #endif
         }
       } else {
@@ -448,7 +484,8 @@ void SmartAllocatorImpl::checkMemory(bool detailed) {
             printf("Leaked Item at {%d:%d} %d:\n", i, j/m_itemSize, ++index);
             dump(p);
 #ifdef SMART_ALLOCATOR_STACKTRACE
-            printf("%s\n", m_st_allocs[p].toString().c_str());
+            Lock lock(s_st_mutex);
+            printf("%s\n", s_st_allocs[p].toString().c_str());
 #endif
           }
         } else {
@@ -467,8 +504,9 @@ void SmartAllocatorImpl::checkMemory(bool detailed) {
         void *p = *iter;
         printf("Invalid Item %p:\n", p);
 #ifdef SMART_ALLOCATOR_STACKTRACE
-        printf("%s\n", m_st_deallocs[p].toString().c_str());
-        ASSERT(m_st_allocs.find(p) == m_st_allocs.end());
+        Lock lock(s_st_mutex);
+        printf("%s\n", s_st_deallocs[p].toString().c_str());
+        ASSERT(s_st_allocs.find(p) == s_st_allocs.end());
 #endif
       }
     }

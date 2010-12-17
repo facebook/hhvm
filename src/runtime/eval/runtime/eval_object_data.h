@@ -88,7 +88,7 @@ protected:
 private:
   ClassEvalState &m_cls;
   Array m_privates;
-  mutable String m_class_name;
+  String m_class_name;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -37,11 +37,18 @@ EvalObjectData::EvalObjectData(ClassEvalState &cls, const char* pname,
   }
   if (getMethodStatement("__get")) setAttribute(UseGet);
   if (getMethodStatement("__set")) setAttribute(UseSet);
+
+  // an object can never live longer than its class
+  const std::string &clsName = m_cls.getClass()->name();
+  m_class_name.assign(clsName.c_str(), clsName.size(), AttachLiteral);
 }
 
 // Only used for cloning and so should not register object
 EvalObjectData::EvalObjectData(ClassEvalState &cls) :
   DynamicObjectData(NULL, this), m_cls(cls) {
+  // an object can never live longer than its class
+  const std::string &clsName = m_cls.getClass()->name();
+  m_class_name.assign(clsName.c_str(), clsName.size(), AttachLiteral);
 }
 
 void EvalObjectData::init() {
@@ -188,11 +195,6 @@ void EvalObjectData::o_setPrivate(const char *cls, const char *s, int64 hash,
 }
 
 CStrRef EvalObjectData::o_getClassName() const {
-  if (m_class_name.isNull()) {
-    // an object can never live longer than its class
-    const std::string &clsName = m_cls.getClass()->name();
-    m_class_name.assign(clsName.c_str(), clsName.size(), AttachLiteral);
-  }
   return m_class_name;
 }
 

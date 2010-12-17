@@ -21,6 +21,7 @@
 #include <util/thread_local.h>
 #include <util/stack_trace.h>
 #include <util/chunk_list.h>
+#include <util/lock.h>
 #include <runtime/base/memory/linear_allocator.h>
 #include <boost/dynamic_bitset.hpp>
 
@@ -256,8 +257,9 @@ protected:
   bool m_linearized; // No more restore needed for rollback
 
 #ifdef SMART_ALLOCATOR_STACKTRACE
-  std::map<void*, StackTrace> m_st_allocs;
-  std::map<void*, StackTrace> m_st_deallocs;
+  static Mutex s_st_mutex;
+  static std::map<void*, StackTrace> s_st_allocs;
+  static std::map<void*, StackTrace> s_st_deallocs;
 #endif
 
   MemoryUsageStats *m_stats;

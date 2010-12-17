@@ -175,6 +175,7 @@ public:
   Hdf &operator=(int64  value) { set(value); return *this;}
   Hdf &operator=(uint64 value) { set(value); return *this;}
   Hdf &operator=(double value) { set(value); return *this;}
+  Hdf &operator=(const Hdf &hdf);
 
   /**
    * Get this node's fully qualified path or just one-level node name.

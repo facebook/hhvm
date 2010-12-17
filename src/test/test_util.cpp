@@ -43,6 +43,7 @@ bool TestUtil::RunTests(const std::string &which) {
   //RUN_TEST(TestLFUTable);
   RUN_TEST(TestSharedString);
   RUN_TEST(TestCanonicalize);
+  RUN_TEST(TestHDF);
   return ret;
 }
 
@@ -258,5 +259,12 @@ bool TestUtil::TestCanonicalize() {
   VERIFY(Util::canonicalize("../foo") == "../foo");
   VERIFY(Util::canonicalize("foo/../../bar") == "../bar");
   VERIFY(Util::canonicalize("./../../") == "../../");
+  return Count(true);
+}
+
+bool TestUtil::TestHDF() {
+  // This was causing a crash
+  Hdf doc, node;
+  node = doc["Node"];
   return Count(true);
 }

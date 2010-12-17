@@ -31,6 +31,7 @@ class TestUtil : public TestBase {
   bool TestLFUTable();
   bool TestSharedString();
   bool TestCanonicalize();
+  bool TestHDF();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -45,7 +45,7 @@ public:
   int m_count;
 
   void inc() { m_count++;}
-  void dec() { if (--m_count == 0) { delete this;}}
+  void dec() { ASSERT(m_count > 0); if (--m_count == 0) { delete this;}}
 };
 
 Mutex HdfRaw::HdfMutex;
@@ -417,6 +417,30 @@ int Hdf::compare(double v2) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 // sets
+
+Hdf &Hdf::operator=(const Hdf &hdf) {
+  if (&hdf != this) {
+    if (m_rawp != hdf.m_rawp) {
+      if (m_rawp) {
+        m_rawp->dec();
+      }
+      m_rawp = hdf.m_rawp;
+      if (m_rawp) {
+        m_rawp->inc();
+      }
+    }
+
+    m_hdf = hdf.m_hdf;
+    m_path = hdf.m_path;
+    m_name = hdf.m_name;
+
+    if (m_dump) {
+      free(m_dump);
+    }
+    m_dump = NULL;
+  }
+  return *this;
+}
 
 void Hdf::set(const char *value) {
   CheckNeoError(hdf_set_value(getRaw(), NULL, (char*)value));

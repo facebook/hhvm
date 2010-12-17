@@ -311,6 +311,8 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
   m_ciTemp = cg.createNewLocalId(shared_from_this());
 
   cg.wrapExpressionBegin();
+  if (outputLineMap(cg, ar)) cg_printf("0);\n");
+
   bool isThis = m_object->isThis();
   if (!isThis) {
     int s = 0;

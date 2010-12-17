@@ -557,13 +557,55 @@ int execute_program(int argc, char **argv) {
   try {
     return execute_program_impl(argc, argv);
   } catch (const Exception &e) {
-    cerr << "Uncaught exception: " << e.what();
+    Logger::Error("Uncaught exception: %s", e.what());
   } catch (const std::exception &e) {
-    cerr << "Uncaught exception: " << e.what();
+    Logger::Error("Uncaught exception: %s", e.what());
   } catch (...) {
-    cerr << "Uncaught exception: (unknown)\n";
+    Logger::Error("Uncaught exception: (unknown)");
   }
   return -1;
+}
+
+/* -1 - cannot open file
+ * 0  - no need to open file
+ * 1 - fopen
+ * 2 - popen
+ */
+static int open_server_log_file() {
+  if (!RuntimeOption::LogFile.empty()) {
+    if (Logger::UseCronolog) {
+      if (strchr(RuntimeOption::LogFile.c_str(), '%')) {
+        Logger::cronOutput.m_template = RuntimeOption::LogFile;
+        Logger::cronOutput.setPeriodicity();
+        Logger::cronOutput.m_linkName = RuntimeOption::LogFileSymLink;
+        return 0;
+      } else {
+        Logger::Output = fopen(RuntimeOption::LogFile.c_str(), "a");
+        if (Logger::Output) return 1;
+      }
+    } else {
+      if (RuntimeOption::LogFile[0] == '|') {
+        Logger::Output = popen(RuntimeOption::LogFile.substr(1).c_str(), "w");
+        if (Logger::Output) return 2;
+      } else {
+        Logger::Output = fopen(RuntimeOption::LogFile.c_str(), "a");
+        if (Logger::Output) return 1;
+      }
+    }
+    Logger::Error("Cannot open log file: %s", RuntimeOption::LogFile.c_str());
+    return -1;
+  }
+  return 0;
+}
+
+static void close_server_log_file(int kind) {
+  if (kind == 1) {
+    fclose(Logger::Output);
+  } else if (kind == 2) {
+    pclose(Logger::Output);
+  } else {
+    assert(!Logger::Output);
+  }
 }
 
 static int execute_program_impl(int argc, char **argv) {
@@ -637,11 +679,11 @@ static int execute_program_impl(int argc, char **argv) {
     if (po.mode == "s") po.mode = "server";
     if (po.mode == "t") po.mode = "translate";
   } catch (error &e) {
-    cerr << "Error in command line: " << e.what() << "\n\n";
+    Logger::Error("Error in command line: %s\n\n", e.what());
     cout << desc << "\n";
     return -1;
   } catch (...) {
-    cerr << "Error in command line:\n\n";
+    Logger::Error("Error in command line:\n\n");
     cout << desc << "\n";
     return -1;
   }
@@ -684,10 +726,6 @@ static int execute_program_impl(int argc, char **argv) {
 
   po.isTempFile = vm.count("temp-file");
 
-  if (po.mode == "daemon") {
-    Process::Daemonize();
-  }
-
   Hdf config;
   if (!po.config.empty()) {
     config.open(po.config);
@@ -710,23 +748,16 @@ static int execute_program_impl(int argc, char **argv) {
     RuntimeOption::SafeFileAccess = false;
   }
 
-  if (!RuntimeOption::LogFile.empty()) {
-    if (Logger::UseCronolog) {
-      if (strchr(RuntimeOption::LogFile.c_str(), '%')) {
-        Logger::cronOutput.m_template = RuntimeOption::LogFile;
-        Logger::cronOutput.setPeriodicity();
-        Logger::cronOutput.m_linkName = RuntimeOption::LogFileSymLink;
-      } else {
-        Logger::Output = fopen(RuntimeOption::LogFile.c_str(), "w");
-      }
-    } else {
-      if (RuntimeOption::LogFile[0] == '|') {
-        Logger::Output = popen(RuntimeOption::LogFile.substr(1).c_str(), "w");
-      } else {
-        Logger::Output = fopen(RuntimeOption::LogFile.c_str(), "w");
-      }
+  if (po.mode == "daemon") {
+    if (RuntimeOption::LogFile.empty()) {
+      Logger::Error("Log file not specified under daemon mode.\n\n");
     }
+    int ret = open_server_log_file();
+    Process::Daemonize();
+    close_server_log_file(ret);
   }
+
+  open_server_log_file();
 
   // Defer the initialization of light processes until the log file handle
   // is created, so that light processes can log to the right place.

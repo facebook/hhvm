@@ -185,11 +185,11 @@ int main(int argc, char **argv) {
     }
     return ret;
   } catch (Exception &e) {
-    cerr << "Exception: " << e.getMessage() << "\n";
+    Logger::Error("Exception: %s\n", e.getMessage().c_str());
   } catch (std::exception &e) {
-    cerr << "std::exception: " << e.what() << "\n";
+    Logger::Error("std::exception: %s\n", e.what());
   } catch (...) {
-    cerr << "(unknown exception was thrown)\n";
+    Logger::Error("(unknown exception was thrown)\n");
   }
   return -1;
 }
@@ -350,7 +350,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
           vm);
     notify(vm);
   } catch (unknown_option e) {
-    cerr << "Error in command line: " << e.what() << "\n\n";
+    Logger::Error("Error in command line: %s\n\n", e.what());
     cout << desc << "\n";
     return -1;
   }
@@ -502,7 +502,7 @@ int process(const ProgramOptions &po) {
 
   std::string errs;
   if (!AliasManager::parseOptimizations(po.optimizations, errs)) {
-    cerr << errs << "\n";
+    Logger::Error("%s\n", errs.c_str());
     return false;
   }
 

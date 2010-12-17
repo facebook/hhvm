@@ -775,7 +775,13 @@ kill it to avoid extra server cost by turning on KillOnTimeout.
    RecursionLimit = 100000
   }
 
-=  Tier overwrites
+= CLI
+
+  CLI {
+   ExitOnSigPipe = true
+  }
+
+= Tier overwrites
 
   Tiers {
     * {

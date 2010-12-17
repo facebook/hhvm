@@ -338,6 +338,9 @@ public:
   static int PregBacktraceLimit;
   static int PregRecursionLimit;
 
+  // cli mode
+  static bool ExitOnSigPipe;
+
   static bool MethodSlotCalls;
 };
 

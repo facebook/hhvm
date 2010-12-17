@@ -368,10 +368,21 @@ void handle_destructor_exception() {
   }
 }
 
+static void pipe_handler(int sig) {
+  Logger::Error("Broken pipe.");
+  exit(1);
+}
+
 void execute_command_line_begin(int argc, char **argv, int xhprof) {
   hphp_session_init();
   ExecutionContext *context = g_context.get();
   context->obSetImplicitFlush(true);
+
+  if (!strcmp(RuntimeOption::ExecutionMode, "cli")
+   && RuntimeOption::ExitOnSigPipe) {
+    // exit the program when there is a broken pipe
+    signal(SIGPIPE, pipe_handler);
+  }
 
   SystemGlobals *g = (SystemGlobals *)get_global_variables();
 

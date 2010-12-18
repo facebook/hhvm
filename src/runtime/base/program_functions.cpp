@@ -1171,6 +1171,7 @@ void hphp_session_exit() {
 }
 
 void hphp_process_exit() {
+  FiberAsyncFunc::Stop();
   Eval::Debugger::Stop();
   Extension::ShutdownModules();
 }

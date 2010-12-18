@@ -46,6 +46,11 @@ public:
    */
   static void OnRequestExit();
 
+  /**
+   * Stop fiber job dispatcher.
+   */
+  static void Stop();
+
 public:
 
   /**

@@ -115,6 +115,8 @@ void SourceRootInfo::createFromUserConfig() {
       serverVars = sboxConf["ServerVars"];
     }
   } catch (HdfException &e) {
+    Logger::Error("%s ignored: %s", confpath.c_str(),
+                  e.getMessage().c_str());
   }
   if (serverVars.exists()) {
     for (Hdf hdf = serverVars.firstChild(); hdf.exists(); hdf = hdf.next()) {

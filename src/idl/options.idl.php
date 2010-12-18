@@ -7,6 +7,8 @@
  * any changes that are not part of schema. Use "note" field to comment on
  * schema itself, and "note" fields are not used in any code generation but
  * only staying within this file.
+ *
+ * @nolint
  */
 ///////////////////////////////////////////////////////////////////////////////
 // Preamble: C++ code inserted at beginning of ext_{name}.h
@@ -141,7 +143,7 @@ DefineFunction(
         'name'   => "zend_extensions",
         'type'   => Boolean,
         'value'  => "false",
-        'desc'   => "Return zend_extensions or not, defaults to FALSE (do not list zend_extensions).",
+        'desc'   => "Only return Zend extensions, if not then regular extensions, like mysqli are listed. Defaults to FALSE (return regular extensions).",
       ),
     ),
   ));
@@ -261,6 +263,17 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "inclued_get_data",
+    'desc'   => "Get the inclued data.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => VariantVec,
+      'desc'   => "The inclued data.",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "get_magic_quotes_gpc",
     'desc'   => "Returns the current configuration setting of magic_quotes_gpc\n\nKeep in mind that attempting to set magic_quotes_gpc at runtime will not work.\n\nFor more information about magic_quotes, see this security section.",
     'flags'  =>  HasDocComment,
@@ -292,7 +305,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getenv",
-    'desc'   => "Gets the value of an environment variable.\n\nYou can see a list of all the environmental variables by using phpinfo(). You can find out what many of them mean by taking a look at the » CGI specification, specifically the » page on environmental variables.",
+    'desc'   => "Gets the value of an environment variable.\n\nYou can see a list of all the environmental variables by using phpinfo(). Many of these variables are listed within » RFC 3875, specifically section 4.1, \"Request Meta-Variables\".",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,

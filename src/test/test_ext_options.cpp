@@ -35,6 +35,7 @@ bool TestExtOptions::RunTests(const std::string &which) {
   RUN_TEST(test_restore_include_path);
   RUN_TEST(test_set_include_path);
   RUN_TEST(test_get_included_files);
+  RUN_TEST(test_inclued_get_data);
   RUN_TEST(test_get_magic_quotes_gpc);
   RUN_TEST(test_get_magic_quotes_runtime);
   RUN_TEST(test_get_required_files);
@@ -165,6 +166,11 @@ bool TestExtOptions::test_set_include_path() {
 
 bool TestExtOptions::test_get_included_files() {
   VS(f_get_included_files(), Array::Create());
+  return Count(true);
+}
+
+bool TestExtOptions::test_inclued_get_data() {
+  VS(f_inclued_get_data(), Array::Create());
   return Count(true);
 }
 

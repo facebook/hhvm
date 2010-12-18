@@ -776,9 +776,8 @@ String get_source_filename(litstr path) {
   return RuntimeOption::SourceRoot + path;
 }
 
-Variant include_impl_invoke(CStrRef file, bool once,
-                                   LVariableTable* variables,
-                                   const char *currentDir) {
+Variant include_impl_invoke(CStrRef file, bool once, LVariableTable* variables,
+                            const char *currentDir) {
   if (file[0] == '/') {
     if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
       try {

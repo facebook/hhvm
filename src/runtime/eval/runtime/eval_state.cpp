@@ -134,6 +134,7 @@ void RequestEvalState::reset() {
   }
   m_codeContainers.clear();
   m_evaledFiles.clear();
+  m_includes = Array();
 }
 
 void RequestEvalState::DestructObjects() {
@@ -580,6 +581,7 @@ void RequestEvalState::fiberInit(RequestEvalState *res,
   m_functions = res->m_functions;
   // Constants
   m_constants = res->m_constants.fiberMarshal(refMap);
+  m_includes = res->m_includes.fiberMarshal(refMap);
   // Constant Info
   for (map<string, SmartPtr<EvalConstantInfo> >::iterator it =
       res->m_constantInfos.begin(); it != res->m_constantInfos.end(); ++it) {
@@ -665,6 +667,7 @@ void RequestEvalState::fiberExit(RequestEvalState *res,
   }
   // Constants
   refMap.unmarshal(m_constants, res->m_constants, default_strategy);
+  refMap.unmarshal(m_includes, res->m_includes, default_strategy);
   // Constant Info
   for (map<string, SmartPtr<EvalConstantInfo> >::iterator it =
       res->m_constantInfos.begin(); it != res->m_constantInfos.end(); ++it) {

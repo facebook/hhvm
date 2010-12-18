@@ -22084,6 +22084,16 @@ Variant ifa_imap_open(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count == 4) return (f_imap_open(a0, a1, a2, a3));
   return (f_imap_open(a0, a1, a2, a3, a4));
 }
+Variant i_inclued_get_data(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(inclued_get_data);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("inclued_get_data", 0, 1);
+  return (f_inclued_get_data());
+}
+Variant ifa_inclued_get_data(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("inclued_get_data", 0, 1);
+  return (f_inclued_get_data());
+}
 Variant i_clearmagickwand(void *extra, CArrRef params) {
   FUNCTION_INJECTION(clearmagickwand);
   int count __attribute__((__unused__)) = params.size();
@@ -62385,6 +62395,18 @@ Variant ei_imap_open(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   else if (count == 4) return (x_imap_open(a0, a1, a2, a3));
   else return (x_imap_open(a0, a1, a2, a3, a4));
 }
+Variant ei_inclued_get_data(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("inclued_get_data", 0, 1);
+  return (x_inclued_get_data());
+}
 Variant ei_clearmagickwand(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -79634,6 +79656,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1248:
       HASH_INVOKE_FROM_EVAL(0x340A51AE22A924E0LL, reset);
       break;
+    case 1255:
+      HASH_INVOKE_FROM_EVAL(0x4CE852AAFF77E4E7LL, inclued_get_data);
+      break;
     case 1260:
       HASH_INVOKE_FROM_EVAL(0x784F675D436004ECLL, imap_close);
       break;
@@ -85920,6 +85945,7 @@ CallInfo ci_mcrypt_generic_deinit((void*)&i_mcrypt_generic_deinit, (void*)&ifa_m
 CallInfo ci_method_exists((void*)&i_method_exists, (void*)&ifa_method_exists, 2, 0, 0x0000000000000000LL);
 CallInfo ci_money_format((void*)&i_money_format, (void*)&ifa_money_format, 2, 0, 0x0000000000000000LL);
 CallInfo ci_imap_open((void*)&i_imap_open, (void*)&ifa_imap_open, 5, 0, 0x0000000000000000LL);
+CallInfo ci_inclued_get_data((void*)&i_inclued_get_data, (void*)&ifa_inclued_get_data, 0, 0, 0x0000000000000000LL);
 CallInfo ci_clearmagickwand((void*)&i_clearmagickwand, (void*)&ifa_clearmagickwand, 1, 0, 0x0000000000000000LL);
 CallInfo ci_dom_element_remove_attribute_node((void*)&i_dom_element_remove_attribute_node, (void*)&ifa_dom_element_remove_attribute_node, 2, 0, 0x0000000000000000LL);
 CallInfo ci_array_udiff_assoc((void*)&i_array_udiff_assoc, (void*)&ifa_array_udiff_assoc, 3, 1, 0x0000000000000000LL);
@@ -88454,6 +88480,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1248:
       HASH_GUARD(0x340A51AE22A924E0LL, reset) {
         ci = &ci_reset;
+        return true;
+      }
+      break;
+    case 1255:
+      HASH_GUARD(0x4CE852AAFF77E4E7LL, inclued_get_data) {
+        ci = &ci_inclued_get_data;
         return true;
       }
       break;

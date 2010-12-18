@@ -26,6 +26,7 @@
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/zend/zend_string.h>
+#include <runtime/eval/runtime/eval_state.h>
 #include <util/process.h>
 #include <sys/utsname.h>
 #include <pwd.h>
@@ -160,7 +161,11 @@ String f_set_include_path(CStrRef new_include_path) {
 }
 
 Array f_get_included_files() {
-  return Array::Create();
+  return Eval::RequestEvalState::GetIncludes()["included"];
+}
+
+Array f_inclued_get_data() {
+  return Eval::RequestEvalState::GetIncludes()["inclued"];
 }
 
 int f_get_magic_quotes_gpc() {

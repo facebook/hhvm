@@ -37,6 +37,7 @@ String f_get_include_path();
 void f_restore_include_path();
 String f_set_include_path(CStrRef new_include_path);
 Array f_get_included_files();
+Array f_inclued_get_data();
 int f_get_magic_quotes_gpc();
 int f_get_magic_quotes_runtime();
 Array f_get_required_files();

@@ -40,6 +40,7 @@ class TestExtOptions : public TestCppExt {
   bool test_restore_include_path();
   bool test_set_include_path();
   bool test_get_included_files();
+  bool test_inclued_get_data();
   bool test_get_magic_quotes_gpc();
   bool test_get_magic_quotes_runtime();
   bool test_get_required_files();

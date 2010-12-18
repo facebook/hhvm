@@ -90,6 +90,11 @@ inline Array x_get_included_files() {
   return f_get_included_files();
 }
 
+inline Array x_inclued_get_data() {
+  FUNCTION_INJECTION_BUILTIN(inclued_get_data);
+  return f_inclued_get_data();
+}
+
 inline int x_get_magic_quotes_gpc() {
   FUNCTION_INJECTION_BUILTIN(get_magic_quotes_gpc);
   return f_get_magic_quotes_gpc();

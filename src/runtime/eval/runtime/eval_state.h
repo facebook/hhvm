@@ -175,6 +175,7 @@ public:
   static void GetMethodStaticVariables(Array &arr);
   static void GetClassStaticVariables(Array &arr);
   static void GetDynamicConstants(Array &arr);
+  static Array &GetIncludes() { return Get()->m_includes;}
 
   // Misc
   static std::string unique();
@@ -208,6 +209,7 @@ private:
   int64 m_ids;
   VariantStack m_argStack;
   VariantStack m_bytecodeStack;
+  Array m_includes;
   void reset();
   void destructObjects();
 };

@@ -36,7 +36,6 @@ public:
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar, int state);
   bool isTemporary() const { return true; }
 private:
-  bool m_redeclared;
   bool m_dynamic;
   std::string m_receiverTemp;
   int m_objectTemp;

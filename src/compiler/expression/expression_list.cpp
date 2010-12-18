@@ -512,7 +512,7 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     unsigned ix = m_kind == ListKindLeft ? 0 : n - 1;
     for (unsigned int i = 0; i < n; i++) {
       ExpressionPtr e = m_exps[i];
-      e->preOutputCPP(cg, ar, 0);
+      e->preOutputCPP(cg, ar, i == ix ? state : 0);
       if (i != ix) {
         if (e->outputCPPUnneeded(cg, ar)) {
           cg_printf(";\n");

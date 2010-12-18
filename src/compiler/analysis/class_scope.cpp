@@ -188,6 +188,7 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
     } else {
       iterFuncs->second->setVirtual();
       iter->second.back()->setVirtual();
+      iter->second.back()->setHasOverride();
     }
   }
 

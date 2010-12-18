@@ -46,6 +46,7 @@ public:
   virtual ExpressionPtr preOptimize(AnalysisResultPtr ar);
   virtual ExpressionPtr postOptimize(AnalysisResultPtr ar);
 
+  void setNoInline() { m_noInline = true; }
   void setAllowVoidReturn() { m_allowVoidReturn = true;}
   void setFunctionAndClassScope(FunctionScopePtr fsp, ClassScopePtr csp);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
@@ -70,12 +71,13 @@ protected:
 
   bool m_valid;
   int m_extraArg;
-  bool m_variableArgument;
-  bool m_voidReturn;  // no return type
-  bool m_voidWrapper; // void wrapper is needed
-  bool m_allowVoidReturn;
-  bool m_redeclared;
-  bool m_noStatic;
+  unsigned m_variableArgument : 1;
+  unsigned m_voidReturn : 1;  // no return type
+  unsigned m_voidWrapper : 1; // void wrapper is needed
+  unsigned m_allowVoidReturn : 1;
+  unsigned m_redeclared : 1;
+  unsigned m_noStatic : 1;
+  unsigned m_noInline : 1;
 
   // Extra arguments form an array, to which the scalar array optimization
   // should also apply.
@@ -96,6 +98,9 @@ protected:
   TypePtr checkParamsAndReturn(AnalysisResultPtr ar, TypePtr type,
                                bool coerce, FunctionScopePtr func,
                                bool arrayParams);
+
+  ExpressionPtr inliner(AnalysisResultPtr ar,
+                        ExpressionPtr obj, std::string localThis);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

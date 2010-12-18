@@ -42,7 +42,6 @@ public:
   void setValid() { m_valid = true; }
   void setNoPrefix() { m_noPrefix = true; }
   void setArrayParams() { m_arrayParams = true; }
-  void setNoInline() { m_noInline = true; }
 
   virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                 bool coerce);
@@ -105,7 +104,6 @@ protected:
   unsigned m_invokeFewArgsDecision : 1;
   unsigned m_dynamicInvoke : 1;
   unsigned m_arrayParams : 1;
-  unsigned m_noInline : 1;
 
   int m_safe;
   ExpressionPtr m_safeDef;

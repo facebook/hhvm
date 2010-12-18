@@ -141,6 +141,20 @@ void ObjectMethodExpression::setInvokeParams(AnalysisResultPtr ar) {
   m_params->resetOutputCount();
 }
 
+ExpressionPtr ObjectMethodExpression::preOptimize(AnalysisResultPtr ar) {
+  if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
+    return ExpressionPtr();
+  }
+
+  if (m_classScope && m_funcScope &&
+      (!m_funcScope->isVirtual() ||
+       (!ar->isSystem() && !m_funcScope->hasOverride()))) {
+    return inliner(ar, m_object, "");
+  }
+
+  return ExpressionPtr();
+}
+
 TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
                                               TypePtr type, bool coerce) {
   reset();
@@ -222,7 +236,9 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
 
   // invoke() will return Variant
   if (!m_object->getType()->isSpecificObject() ||
-      (func->isVirtual() && !func->isPerfectVirtual())) {
+      (func->isVirtual() &&
+       (ar->isSystem() || func->hasOverride() || func->isAbstract()) &&
+       !func->isPerfectVirtual())) {
     valid = false;
   }
 

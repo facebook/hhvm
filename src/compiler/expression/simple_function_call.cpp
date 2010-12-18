@@ -20,13 +20,8 @@
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/expression/expression_list.h>
-#include <compiler/statement/statement_list.h>
-#include <compiler/statement/exp_statement.h>
-#include <compiler/statement/return_statement.h>
-#include <compiler/statement/method_statement.h>
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/expression/constant_expression.h>
-#include <compiler/expression/parameter_expression.h>
 #include <compiler/expression/assignment_expression.h>
 #include <compiler/expression/array_pair_expression.h>
 #include <compiler/expression/array_element_expression.h>
@@ -37,7 +32,6 @@
 #include <compiler/option.h>
 #include <compiler/expression/simple_variable.h>
 #include <compiler/parser/parser.h>
-#include <util/parser/hphp.tab.hpp>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/execution_context.h>
@@ -101,7 +95,7 @@ SimpleFunctionCall::SimpleFunctionCall
                  ExpressionPtr(), name, params, cls),
     m_type(UnknownType), m_dynamicConstant(false),
     m_builtinFunction(false), m_noPrefix(false), m_invokeFewArgsDecision(true),
-    m_dynamicInvoke(false), m_arrayParams(false), m_noInline(false),
+    m_dynamicInvoke(false), m_arrayParams(false),
     m_safe(0) {
 
   if (!m_class && m_className.empty()) {
@@ -454,141 +448,6 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultPtr ar) {
   }
 }
 
-struct InlineCloneInfo {
-  InlineCloneInfo() : callWithThis(false) {}
-
-  StringToExpressionPtrMap      sepm;
-  ExpressionListPtr             elist;
-  bool                          callWithThis;
-  string                        localThis;
-  string                        staticClass;
-};
-
-//typedef std::map<std::string, ExpressionPtr> StringToExpressionPtrMap;
-
-static ExpressionPtr cloneForInlineRecur(InlineCloneInfo &info,
-                                         ExpressionPtr exp,
-                                         const std::string &prefix,
-                                         AnalysisResultPtr ar,
-                                         FunctionScopePtr scope) {
-  exp->getOriginalScope(); // make sure to cache the original scope
-  exp->setBlockScope(scope);
-  for (int i = 0, n = exp->getKidCount(); i < n; i++) {
-    if (ExpressionPtr k = exp->getNthExpr(i)) {
-      exp->setNthKid(i, cloneForInlineRecur(info, k, prefix, ar, scope));
-    }
-  }
-  StaticClassName *scn = dynamic_cast<StaticClassName*>(exp.get());
-  if (scn && scn->isStatic() && !info.staticClass.empty()) {
-    scn->resolveStatic(info.staticClass);
-  }
-  switch (exp->getKindOf()) {
-  case Expression::KindOfSimpleVariable:
-    {
-      SimpleVariablePtr sv(dynamic_pointer_cast<SimpleVariable>(exp));
-      if (sv->isSuperGlobal()) break;
-      string name;
-      if (sv->isThis()) {
-        if (!info.callWithThis) {
-          if (!sv->hasContext(Expression::ObjectContext)) {
-            exp = sv->makeConstant(ar, "null");
-          } else {
-            // This will produce the wrong error
-            // we really want a "throw_fatal" ast node.
-            exp = sv->makeConstant(ar, "null");
-          }
-          break;
-        }
-        if (info.localThis.empty()) break;
-        name = info.localThis;
-      } else {
-        name = prefix + sv->getName();
-      }
-      SimpleVariablePtr rep(new SimpleVariable(
-                              exp->getScope(), exp->getLocation(),
-                              exp->getKindOf(), name));
-      rep->copyContext(sv);
-      rep->updateSymbol(SimpleVariablePtr());
-      rep->getSymbol()->setHidden();
-      // Conservatively set flags to prevent
-      // the alias manager from getting confused.
-      // On the next pass, it will correct the values,
-      // and optimize appropriately.
-      rep->getSymbol()->setUsed();
-      rep->getSymbol()->setReferenced();
-      if (exp->getContext() & (Expression::LValue|
-                               Expression::RefValue|
-                               Expression::RefParameter)) {
-        info.sepm[name] = rep;
-      }
-      exp = rep;
-    }
-    break;
-  case Expression::KindOfSimpleFunctionCall:
-    {
-      SimpleFunctionCallPtr call(static_pointer_cast<SimpleFunctionCall>(exp));
-      call->addLateDependencies(ar);
-      call->setLocalThis(info.localThis);
-      if (call->getFuncScope() && call->getFuncScope()->isInlining()) {
-        call->setNoInline();
-      }
-    }
-  default:
-    break;
-  }
-  return exp;
-}
-
-static ExpressionPtr cloneForInline(InlineCloneInfo &info,
-                                    ExpressionPtr exp,
-                                    const std::string &prefix,
-                                    AnalysisResultPtr ar,
-                                    FunctionScopePtr scope) {
-  return cloneForInlineRecur(info, exp->clone(), prefix, ar, scope);
-}
-
-static int cloneStmtsForInline(InlineCloneInfo &info, StatementPtr s,
-                               const std::string &prefix,
-                               AnalysisResultPtr ar,
-                               FunctionScopePtr scope) {
-  switch (s->getKindOf()) {
-  case Statement::KindOfStatementList:
-    {
-      for (int i = 0, n = s->getKidCount(); i < n; ++i) {
-        if (int ret = cloneStmtsForInline(info, s->getNthStmt(i),
-                                          prefix, ar, scope)) {
-          return ret;
-        }
-      }
-      return 0;
-    }
-  case Statement::KindOfExpStatement:
-    info.elist->addElement(cloneForInline(
-                             info, dynamic_pointer_cast<ExpStatement>(s)->
-                             getExpression(), prefix, ar, scope));
-    return 0;
-  case Statement::KindOfReturnStatement:
-    {
-      ExpressionPtr exp =
-        dynamic_pointer_cast<ReturnStatement>(s)->getRetExp();
-
-      if (exp) {
-        exp = cloneForInline(info, exp, prefix, ar, scope);
-        if (exp->hasContext(Expression::RefValue)) {
-          exp->clearContext(Expression::RefValue);
-          if (exp->isRefable()) exp->setContext(Expression::LValue);
-        }
-        info.elist->addElement(exp);
-        return 1;
-      }
-      return -1;
-    }
-  default:
-    assert(false);
-  }
-  return 1;
-}
-
 ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
   if (m_class || !m_funcScope ||
       (!m_className.empty() && (!m_classScope || !isPresent()))) {
@@ -777,127 +636,11 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
     }
   }
 
-  FunctionScopePtr fs = getFunctionScope();
-  if (m_noInline || !fs || m_type != UnknownType || m_safe ||
-      m_funcScope->isInlining() ||
-      !m_funcScope->getInlineAsExpr() ||
-      !m_funcScope->getStmt()) {
+  if (m_type != UnknownType || m_safe) {
     return ExpressionPtr();
   }
 
-  if (m_funcScope->getInlineSameContext() &&
-      m_funcScope->getContainingClass() &&
-      m_funcScope->getContainingClass() != getClassScope()) {
-    /*
-      The function contains a context sensitive construct such as
-      call_user_func (context sensitive because it could call
-      array('parent', 'foo')) so its not safe to inline it
-      into a different context.
-    */
-    return ExpressionPtr();
-  }
-
-  MethodStatementPtr m
-    (dynamic_pointer_cast<MethodStatement>(m_funcScope->getStmt()));
-
-  VariableTablePtr vt = fs->getVariables();
-  int nAct = m_params ? m_params->getCount() : 0;
-  int nMax = m_funcScope->getMaxParamCount();
-  if (unsigned(nAct - m_funcScope->getMinParamCount()) > (unsigned)nMax ||
-      !m->getStmts()) {
-    return ExpressionPtr();
-  }
-
-  InlineCloneInfo info;
-  info.elist = ExpressionListPtr(new ExpressionList(
-                                   getScope(), getLocation(),
-                                   KindOfExpressionList,
-                                   ExpressionList::ListKindWrapped));
-  if (m_classScope) {
-    if (!m_funcScope->isStatic()) {
-      ClassScopeRawPtr oCls = getOriginalClass();
-      FunctionScopeRawPtr oFunc = getOriginalFunction();
-      if (oCls && !oFunc->isStatic() &&
-          (oCls == m_classScope ||
-           oCls->derivesFrom(ar, m_className, true, false))) {
-        info.callWithThis = true;
-        info.localThis = m_localThis;
-      }
-    }
-    if (!isSelf() && !isParent() && !isStatic()) {
-      info.staticClass = m_className;
-    }
-  }
-
-  std::ostringstream oss;
-  oss << fs->nextInlineIndex() << "_" << m_name << "_";
-  std::string prefix = oss.str();
-
-  ExpressionListPtr plist = m->getParams();
-
-  int i;
-
-  for (i = 0; i < nMax; i++) {
-    ParameterExpressionPtr param
-      (dynamic_pointer_cast<ParameterExpression>((*plist)[i]));
-    ExpressionPtr arg = i < nAct ? (*m_params)[i] :
-      param->defaultValue()->clone();
-    SimpleVariablePtr var
-      (new SimpleVariable(getScope(),
-                          (i < nAct ? arg.get() : this)->getLocation(),
-                          KindOfSimpleVariable,
-                          prefix + param->getName()));
-    var->updateSymbol(SimpleVariablePtr());
-    var->getSymbol()->setHidden();
-    var->getSymbol()->setUsed();
-    var->getSymbol()->setReferenced();
-    bool ref = m_funcScope->isRefParam(i);
-    AssignmentExpressionPtr ae
-      (new AssignmentExpression(getScope(),
-                                arg->getLocation(), KindOfAssignmentExpression,
-                                var, arg, ref));
-    info.elist->addElement(ae);
-    if (i < nAct && (ref || !arg->isScalar())) {
-      info.sepm[var->getName()] = var;
-    }
-  }
-
-  m_funcScope->setInlining(true);
-  if (cloneStmtsForInline(info, m->getStmts(), prefix, ar,
-                          getFunctionScope()) <= 0) {
-    info.elist->addElement(CONSTANT("null"));
-  }
-  m_funcScope->setInlining(false);
-
-  if (info.sepm.size()) {
-    ExpressionListPtr unset_list
-      (new ExpressionList(getScope(), getLocation(), KindOfExpressionList));
-
-    for (StringToExpressionPtrMap::iterator it = info.sepm.begin(),
-           end = info.sepm.end(); it != end; ++it) {
-      ExpressionPtr var = it->second->clone();
-      var->clearContext((Context)(unsigned)-1);
-      unset_list->addElement(var);
-    }
-
-    ExpressionPtr unset(
-      new UnaryOpExpression(getScope(), getLocation(), KindOfUnaryOpExpression,
-                            unset_list, T_UNSET, true));
-    i = info.elist->getCount();
-    ExpressionPtr ret = (*info.elist)[--i];
-    if (ret->isScalar()) {
-      info.elist->insertElement(unset, i);
-    } else {
-      ExpressionListPtr result_list
-        (new ExpressionList(getScope(), getLocation(), KindOfExpressionList,
-                            ExpressionList::ListKindLeft));
-      result_list->addElement(ret);
-      result_list->addElement(unset);
-      (*info.elist)[i] = result_list;
-    }
-  }
-
-  return replaceValue(info.elist);
+  return inliner(ar, ExpressionPtr(), m_localThis);
 }
 
 ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {

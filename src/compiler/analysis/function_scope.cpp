@@ -50,15 +50,16 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
                              FileScopePtr file,
                              bool inPseudoMain /* = false */)
     : BlockScope(name, docComment, stmt, BlockScope::FunctionScope),
-      m_method(method), m_minParam(minParam), m_maxParam(maxParam),
-      m_attribute(attribute), m_refReturn(reference), m_modifiers(modifiers),
+      m_minParam(minParam), m_maxParam(maxParam), m_attribute(attribute),
+      m_modifiers(modifiers),
+      m_method(method), m_refReturn(reference),
       m_virtual(false), m_perfectVirtual(false), m_overriding(false),
-      m_redeclaring(-1), m_volatile(false), m_pseudoMain(inPseudoMain),
+      m_volatile(false), m_pseudoMain(inPseudoMain),
       m_magicMethod(false), m_system(false), m_inlineable(false), m_sep(false),
       m_containsThis(false), m_nrvoFix(true),
       m_inlineAsExpr(false), m_inlineSameContext(false),
-      m_inlineIndex(0), m_directInvoke(false), m_inlining(false),
-      m_optFunction(0) {
+      m_directInvoke(false), m_inlining(false),
+      m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0) {
   bool canInline = true;
   if (inPseudoMain) {
     canInline = false;
@@ -136,16 +137,16 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
 FunctionScope::FunctionScope(bool method, const std::string &name,
                              bool reference)
     : BlockScope(name, "", StatementPtr(), BlockScope::FunctionScope),
-      m_method(method), m_minParam(0), m_maxParam(0),
-      m_attribute(0), m_refReturn(reference),
+      m_minParam(0), m_maxParam(0), m_attribute(0),
       m_modifiers(ModifierExpressionPtr()),
+      m_method(method), m_refReturn(reference),
       m_virtual(false), m_perfectVirtual(false), m_overriding(false),
-      m_redeclaring(-1), m_volatile(false), m_pseudoMain(false),
+      m_volatile(false), m_pseudoMain(false),
       m_magicMethod(false), m_system(true), m_inlineable(false), m_sep(false),
       m_containsThis(false), m_nrvoFix(true),
       m_inlineAsExpr(false), m_inlineSameContext(false),
-      m_inlineIndex(0), m_directInvoke(false), m_inlining(false),
-      m_optFunction(0) {
+      m_directInvoke(false), m_inlining(false),
+      m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0) {
   m_dynamic = Option::IsDynamicFunction(method, m_name);
   m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
     Option::DynamicInvokeFunctions.end();

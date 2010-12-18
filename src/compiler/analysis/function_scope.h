@@ -207,6 +207,8 @@ public:
    */
   void setVirtual() { m_virtual = true;}
   bool isVirtual() const { return m_virtual;}
+  void setHasOverride() { m_hasOverride = true; }
+  bool hasOverride() const { return m_hasOverride; }
   void setPerfectVirtual();
   bool isPerfectVirtual() const { return m_perfectVirtual;}
   void setOverriding(TypePtr returnType, TypePtr param1 = TypePtr(),
@@ -395,7 +397,6 @@ private:
 
   static StringToRefParamInfoPtrMap s_refParamInfo;
 
-  bool m_method;
   int m_minParam;
   int m_maxParam;
   int m_attribute;
@@ -404,32 +405,34 @@ private:
   TypePtrVec m_paramTypeSpecs;
   std::vector<std::string> m_paramDefaults;
   std::vector<std::string> m_paramDefaultTexts;
-  bool m_refReturn; // whether it's "function &get_reference()"
   std::vector<bool> m_refs;
   TypePtr m_returnType;
   TypePtr m_prevReturn;
   ModifierExpressionPtr m_modifiers;
-  bool m_virtual;
-  bool m_perfectVirtual;
-  bool m_dynamic;
-  bool m_dynamicInvoke;
-  bool m_overriding; // overriding a virtual function
+  unsigned m_method : 1;
+  unsigned m_refReturn : 1; // whether it's "function &get_reference()"
+  unsigned m_virtual : 1;
+  unsigned m_hasOverride : 1;
+  unsigned m_perfectVirtual : 1;
+  unsigned m_dynamic : 1;
+  unsigned m_dynamicInvoke : 1;
+  unsigned m_overriding : 1; // overriding a virtual function
+  unsigned m_volatile : 1; // for function_exists
+  unsigned m_pseudoMain : 1;
+  unsigned m_magicMethod : 1;
+  unsigned m_system : 1;
+  unsigned m_inlineable : 1;
+  unsigned m_sep : 1;
+  unsigned m_containsThis : 1; // contains a usage of $this?
+  unsigned m_nrvoFix : 1;
+  unsigned m_inlineAsExpr : 1;
+  unsigned m_inlineSameContext : 1;
+  unsigned m_contextSensitive : 1;
+  unsigned m_directInvoke : 1;
+  unsigned m_inlining : 1;
   int m_redeclaring; // multiple definition of the same function
-  bool m_volatile; // for function_exists
-  bool m_pseudoMain;
-  bool m_magicMethod;
-  bool m_system;
-  bool m_inlineable;
-  bool m_sep;
-  bool m_containsThis; // contains a usage of $this?
   StatementPtr m_stmtCloned; // cloned method body stmt
-  bool m_nrvoFix;
-  bool m_inlineAsExpr;
-  bool m_inlineSameContext;
-  bool m_contextSensitive;
   int m_inlineIndex;
-  bool m_directInvoke;
-  bool m_inlining;
   FunctionOptPtr m_optFunction;
   bool outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
       bool ret, bool constructor);

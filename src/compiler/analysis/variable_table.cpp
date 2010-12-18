@@ -1421,6 +1421,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
               m_forcedVariants ? "L" : "R");
     for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
       Symbol *sym = m_symbolVec[i];
+      if (sym->isHidden()) continue;
       const string &name = sym->getName();
       const char *prefix = getVariablePrefix(sym);
       string varName;

@@ -32,6 +32,7 @@ public:
                          ExpressionListPtr params);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  ExpressionPtr preOptimize(AnalysisResultPtr ar);
 
   virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                 bool coerce);

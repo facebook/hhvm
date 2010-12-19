@@ -1212,8 +1212,8 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       m_redeclared = true;
       getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
-    }
-    if (!func && !errorFlagged && getScope()->isFirstPass()) {
+    } else if (!m_dynamicInvoke &&
+               !errorFlagged && getScope()->isFirstPass()) {
       Compiler::Error(Compiler::UnknownFunction, self);
     }
     if (m_params) {

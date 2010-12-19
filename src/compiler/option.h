@@ -340,6 +340,7 @@ public:
    * Optimizations
    */
   static int InvokeFewArgsCount;
+  static bool InvokeWithSpecificArgs;
   static bool FlattenInvoke;
   static int InlineFunctionThreshold;
   static bool ControlEvalOrder;

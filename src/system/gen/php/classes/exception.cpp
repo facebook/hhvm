@@ -1295,7 +1295,7 @@ Variant c_Exception::i___construct(MethodCallPackage &mcp, CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     if (count <= 0) return (self->t___construct(), null);
     CVarRef arg0((ad->getValue(pos)));
-    if (count == 1) return (self->t___construct(arg0), null);
+    if (count <= 1) return (self->t___construct(arg0), null);
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (self->t___construct(arg0, arg1), null);
   }
@@ -1404,8 +1404,10 @@ Variant c_Exception::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   }
   if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
   if (count <= 0) return (self->t___construct(), null);
-  if (count == 1) return (self->t___construct(a0), null);
-  return (self->t___construct(a0, a1), null);
+  CVarRef arg0((a0));
+  if (count <= 1) return (self->t___construct(arg0), null);
+  CVarRef arg1((a1));
+  return (self->t___construct(arg0, arg1), null);
 }
 Variant c_Exception::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_Exception *self = NULL;
@@ -1562,7 +1564,7 @@ ObjectData *c_Exception::dynCreate(CArrRef params, bool construct /* = true */) 
         break;
       }
       CVarRef arg0((ad->getValue(pos)));
-      if (count == 1) {
+      if (count <= 1) {
         (t___construct(arg0));
         break;
       }
@@ -1583,7 +1585,7 @@ void c_Exception::dynConstruct(CArrRef params) {
       break;
     }
     CVarRef arg0((ad->getValue(pos)));
-    if (count == 1) {
+    if (count <= 1) {
       (t___construct(arg0));
       break;
     }
@@ -1986,13 +1988,13 @@ Variant c_ErrorException::i___construct(MethodCallPackage &mcp, CArrRef params) 
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     if (count <= 0) return (self->t___construct(), null);
     CVarRef arg0((ad->getValue(pos)));
-    if (count == 1) return (self->t___construct(arg0), null);
+    if (count <= 1) return (self->t___construct(arg0), null);
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count == 2) return (self->t___construct(arg0, arg1), null);
+    if (count <= 2) return (self->t___construct(arg0, arg1), null);
     CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count == 3) return (self->t___construct(arg0, arg1, arg2), null);
+    if (count <= 3) return (self->t___construct(arg0, arg1, arg2), null);
     CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count == 4) return (self->t___construct(arg0, arg1, arg2, arg3), null);
+    if (count <= 4) return (self->t___construct(arg0, arg1, arg2, arg3), null);
     CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
   }
@@ -2019,11 +2021,16 @@ Variant c_ErrorException::ifa___construct(MethodCallPackage &mcp, int count, INV
   }
   if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
   if (count <= 0) return (self->t___construct(), null);
-  if (count == 1) return (self->t___construct(a0), null);
-  if (count == 2) return (self->t___construct(a0, a1), null);
-  if (count == 3) return (self->t___construct(a0, a1, a2), null);
-  if (count == 4) return (self->t___construct(a0, a1, a2, a3), null);
-  return (self->t___construct(a0, a1, a2, a3, a4), null);
+  CVarRef arg0((a0));
+  if (count <= 1) return (self->t___construct(arg0), null);
+  CVarRef arg1((a1));
+  if (count <= 2) return (self->t___construct(arg0, arg1), null);
+  CVarRef arg2((a2));
+  if (count <= 3) return (self->t___construct(arg0, arg1, arg2), null);
+  CVarRef arg3((a3));
+  if (count <= 4) return (self->t___construct(arg0, arg1, arg2, arg3), null);
+  CVarRef arg4((a4));
+  return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
 }
 Variant c_ErrorException::ifa_getseverity(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ErrorException *self = NULL;
@@ -2084,22 +2091,22 @@ ObjectData *c_ErrorException::dynCreate(CArrRef params, bool construct /* = true
         break;
       }
       CVarRef arg0((ad->getValue(pos)));
-      if (count == 1) {
+      if (count <= 1) {
         (t___construct(arg0));
         break;
       }
       CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count == 2) {
+      if (count <= 2) {
         (t___construct(arg0, arg1));
         break;
       }
       CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count == 3) {
+      if (count <= 3) {
         (t___construct(arg0, arg1, arg2));
         break;
       }
       CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count == 4) {
+      if (count <= 4) {
         (t___construct(arg0, arg1, arg2, arg3));
         break;
       }
@@ -2120,22 +2127,22 @@ void c_ErrorException::dynConstruct(CArrRef params) {
       break;
     }
     CVarRef arg0((ad->getValue(pos)));
-    if (count == 1) {
+    if (count <= 1) {
       (t___construct(arg0));
       break;
     }
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count == 2) {
+    if (count <= 2) {
       (t___construct(arg0, arg1));
       break;
     }
     CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count == 3) {
+    if (count <= 3) {
       (t___construct(arg0, arg1, arg2));
       break;
     }
     CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count == 4) {
+    if (count <= 4) {
       (t___construct(arg0, arg1, arg2, arg3));
       break;
     }

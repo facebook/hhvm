@@ -1500,13 +1500,21 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
                                       m_argArrayId,
                                       m_argArrayHash, m_argArrayIndex);
   } else {
+    int pcount = m_params ? m_params->getCount() : 0;
+    bool outputExtraArgs = true;
     if (!m_class && m_className.empty()) {
       if (m_valid) {
         assert(m_arrayParams && m_ciTemp < 0);
         cg_printf("%s%s(NULL, ", Option::InvokePrefix,
                   m_funcScope->getId(cg).c_str());
       } else if (canInvokeFewArgs() && !m_arrayParams) {
-        cg_printf("(cit%d->getFuncFewArgs())(vt%d, ", m_ciTemp, m_ciTemp);
+        if (Option::InvokeWithSpecificArgs) {
+          cg_printf("(cit%d->getFunc%dArgs())(vt%d, ",
+                    m_ciTemp, pcount, m_ciTemp);
+          outputExtraArgs = false;
+        } else {
+          cg_printf("(cit%d->getFuncFewArgs())(vt%d, ", m_ciTemp, m_ciTemp);
+        }
       } else {
         cg_printf("(cit%d->getFunc())(vt%d, ", m_ciTemp, m_ciTemp);
       }
@@ -1522,13 +1530,18 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
                   cg.formatLabel(m_funcScope->getName()).c_str(),
                   m_ciTemp);
       } else if (canInvokeFewArgs() && !m_arrayParams) {
-        cg_printf("(cit%d->getMethFewArgs())(mcp%d, ", m_ciTemp, m_ciTemp);
+        if (Option::InvokeWithSpecificArgs) {
+          cg_printf("(cit%d->getMeth%dArgs())(mcp%d, ",
+                    m_ciTemp, pcount, m_ciTemp);
+          outputExtraArgs = false;
+        } else {
+          cg_printf("(cit%d->getMethFewArgs())(mcp%d, ", m_ciTemp, m_ciTemp);
+        }
       } else {
         cg_printf("(cit%d->getMeth())(mcp%d, ", m_ciTemp, m_ciTemp);
       }
     }
     if (canInvokeFewArgs() && !m_arrayParams) {
-      int pcount = m_params ? m_params->getCount() : 0;
       if (m_params && m_params->getCount()) {
         cg_printf("%d, ", m_params->getCount());
         cg.pushCallInfo(m_ciTemp);
@@ -1538,8 +1551,10 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       } else {
         cg_printf("0");
       }
-      for (int i = pcount; i < Option::InvokeFewArgsCount; i++) {
-        cg_printf(", null");
+      if (outputExtraArgs) {
+        for (int i = pcount; i < Option::InvokeFewArgsCount; i++) {
+          cg_printf(", null_variant");
+        }
       }
     } else {
       if ((!m_params) || (m_params->getCount() == 0)) {

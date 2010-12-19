@@ -408,8 +408,12 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
   } else {
     cg_printf("(mcp%d.bindClass(info)->", m_ciTemp);
     if (fewParams) {
-      cg_printf("getMethFewArgs())(mcp%d, ", m_ciTemp);
       int pcount = m_params ? m_params->getCount() : 0;
+      if (Option::InvokeWithSpecificArgs) {
+        cg_printf("getMeth%dArgs())(mcp%d, ", pcount, m_ciTemp);
+      } else {
+        cg_printf("getMethFewArgs())(mcp%d, ", m_ciTemp);
+      }
       if (pcount) {
         cg_printf("%d, ", pcount);
         cg.pushCallInfo(m_ciTemp);
@@ -423,13 +427,9 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       if (!m_name.empty()) {
         info = FunctionScope::GetRefParamInfo(m_name);
       }
-      for (int i = pcount; i < Option::InvokeFewArgsCount; ++i) {
-        if (info && !info->isRefParam(i)) {
+      if (!Option::InvokeWithSpecificArgs) {
+        for (int i = pcount; i < Option::InvokeFewArgsCount; ++i) {
           cg_printf(", null_variant");
-        } else {
-          // It is not safe to use null_variant here, because
-          // throw_missing_arguments() might not throw at all.
-          cg_printf(", null");
         }
       }
       cg_printf(")");

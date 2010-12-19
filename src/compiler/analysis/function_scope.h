@@ -316,7 +316,8 @@ public:
                               bool ret = true,
                               const char *extraArg = NULL,
                               bool constructor = false,
-                              const char *instance = NULL);
+                              const char *instance = NULL,
+                              const char *class_name = "");
   void outputCPPEvalInvoke(CodeGenerator &cg, AnalysisResultPtr ar,
       const char *funcPrefix, const char *name, const char *extraArg = NULL,
       bool ret = true, bool constructor = false);
@@ -434,8 +435,8 @@ private:
   StatementPtr m_stmtCloned; // cloned method body stmt
   int m_inlineIndex;
   FunctionOptPtr m_optFunction;
-  bool outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
-      bool ret, bool constructor);
+  int outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
+                                    bool ret, bool constructor, int maxCount);
   ExpressionPtrVec m_retExprsToFix;
 };
 

@@ -257,7 +257,8 @@ Variant c_Directory::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
     self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
-  return (self->t___construct(a0), null);
+  CVarRef arg0((a0));
+  return (self->t___construct(arg0), null);
 }
 Variant c_Directory::ifa_close(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_Directory *self = NULL;

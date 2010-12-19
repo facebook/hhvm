@@ -616,17 +616,143 @@ public:
   FuncInvokerFewArgs getFuncFewArgs() const {
     return (FuncInvokerFewArgs)m_invokerFewArgs;
   }
+  typedef Variant (*FuncInvoker0Args)(
+    void*, int);
+  typedef Variant (*FuncInvoker1Args)(
+    void*, int, CVarRef);
+  typedef Variant (*FuncInvoker2Args)(
+    void*, int, CVarRef, CVarRef);
+  typedef Variant (*FuncInvoker3Args)(
+    void*, int, CVarRef, CVarRef, CVarRef);
+  typedef Variant (*FuncInvoker4Args)(
+    void*, int, CVarRef, CVarRef, CVarRef,
+    CVarRef);
+  typedef Variant (*FuncInvoker5Args)(
+    void*, int, CVarRef, CVarRef, CVarRef,
+    CVarRef, CVarRef);
+  typedef Variant (*FuncInvoker6Args)(
+    void*, int, CVarRef, CVarRef, CVarRef,
+    CVarRef, CVarRef, CVarRef);
+  typedef Variant (*FuncInvoker7Args)(
+    void*, int, CVarRef, CVarRef, CVarRef,
+    CVarRef, CVarRef, CVarRef, CVarRef);
+  typedef Variant (*FuncInvoker8Args)(
+    void*, int, CVarRef, CVarRef, CVarRef,
+    CVarRef, CVarRef, CVarRef, CVarRef, CVarRef);
+  typedef Variant (*FuncInvoker9Args)(
+    void*, int, CVarRef, CVarRef, CVarRef,
+    CVarRef, CVarRef, CVarRef, CVarRef, CVarRef, CVarRef);
+  typedef Variant (*FuncInvoker10Args)(
+    void*, int, CVarRef, CVarRef, CVarRef,
+    CVarRef, CVarRef, CVarRef, CVarRef, CVarRef, CVarRef, CVarRef);
+  FuncInvoker0Args getFunc0Args() const {
+    return (FuncInvoker0Args)m_invokerFewArgs;
+  }
+  FuncInvoker1Args getFunc1Args() const {
+    return (FuncInvoker1Args)m_invokerFewArgs;
+  }
+  FuncInvoker2Args getFunc2Args() const {
+    return (FuncInvoker2Args)m_invokerFewArgs;
+  }
+  FuncInvoker3Args getFunc3Args() const {
+    return (FuncInvoker3Args)m_invokerFewArgs;
+  }
+  FuncInvoker4Args getFunc4Args() const {
+    return (FuncInvoker4Args)m_invokerFewArgs;
+  }
+  FuncInvoker5Args getFunc5Args() const {
+    return (FuncInvoker5Args)m_invokerFewArgs;
+  }
+  FuncInvoker6Args getFunc6Args() const {
+    return (FuncInvoker6Args)m_invokerFewArgs;
+  }
+  FuncInvoker7Args getFunc7Args() const {
+    return (FuncInvoker7Args)m_invokerFewArgs;
+  }
+  FuncInvoker8Args getFunc8Args() const {
+    return (FuncInvoker8Args)m_invokerFewArgs;
+  }
+  FuncInvoker9Args getFunc9Args() const {
+    return (FuncInvoker9Args)m_invokerFewArgs;
+  }
+  FuncInvoker10Args getFunc10Args() const {
+    return (FuncInvoker10Args)m_invokerFewArgs;
+  }
   FuncInvokerEval getFuncEval() const {
     return (FuncInvokerEval)m_invokerEval;
   }
+
   typedef Variant (*MethInvoker)(MethodCallPackage &mcp, CArrRef);
-  typedef Variant (*MethInvokerFewArgs)(MethodCallPackage &mcp, int,
-      INVOKE_FEW_ARGS_IMPL_ARGS);
+  typedef Variant (*MethInvokerFewArgs)(
+    MethodCallPackage &mcp, int, INVOKE_FEW_ARGS_IMPL_ARGS);
+
   MethInvoker getMeth() const {
     return (MethInvoker)m_invoker;
   }
   MethInvokerFewArgs getMethFewArgs() const {
     return (MethInvokerFewArgs)m_invokerFewArgs;
+  }
+  typedef Variant (*MethInvoker0Args)(
+    MethodCallPackage &mcp, int);
+  typedef Variant (*MethInvoker1Args)(
+    MethodCallPackage &mcp, int, CVarRef);
+  typedef Variant (*MethInvoker2Args)(
+    MethodCallPackage &mcp, int, CVarRef, CVarRef);
+  typedef Variant (*MethInvoker3Args)(
+    MethodCallPackage &mcp, int, CVarRef, CVarRef, CVarRef);
+  typedef Variant (*MethInvoker4Args)(
+    MethodCallPackage &mcp, int, CVarRef, CVarRef, CVarRef,
+    CVarRef);
+  typedef Variant (*MethInvoker5Args)(
+    MethodCallPackage &mcp, int, CVarRef, CVarRef, CVarRef,
+    CVarRef, CVarRef);
+  typedef Variant (*MethInvoker6Args)(
+    MethodCallPackage &mcp, int, CVarRef, CVarRef, CVarRef,
+    CVarRef, CVarRef, CVarRef);
+  typedef Variant (*MethInvoker7Args)(
+    MethodCallPackage &mcp, int, CVarRef, CVarRef, CVarRef,
+    CVarRef, CVarRef, CVarRef, CVarRef);
+  typedef Variant (*MethInvoker8Args)(
+    MethodCallPackage &mcp, int, CVarRef, CVarRef, CVarRef,
+    CVarRef, CVarRef, CVarRef, CVarRef, CVarRef);
+  typedef Variant (*MethInvoker9Args)(
+    MethodCallPackage &mcp, int, CVarRef, CVarRef, CVarRef,
+    CVarRef, CVarRef, CVarRef, CVarRef, CVarRef, CVarRef);
+  typedef Variant (*MethInvoker10Args)(
+    MethodCallPackage &mcp, int, CVarRef, CVarRef, CVarRef,
+    CVarRef, CVarRef, CVarRef, CVarRef, CVarRef, CVarRef, CVarRef);
+  MethInvoker0Args getMeth0Args() const {
+    return (MethInvoker0Args)m_invokerFewArgs;
+  }
+  MethInvoker1Args getMeth1Args() const {
+    return (MethInvoker1Args)m_invokerFewArgs;
+  }
+  MethInvoker2Args getMeth2Args() const {
+    return (MethInvoker2Args)m_invokerFewArgs;
+  }
+  MethInvoker3Args getMeth3Args() const {
+    return (MethInvoker3Args)m_invokerFewArgs;
+  }
+  MethInvoker4Args getMeth4Args() const {
+    return (MethInvoker4Args)m_invokerFewArgs;
+  }
+  MethInvoker5Args getMeth5Args() const {
+    return (MethInvoker5Args)m_invokerFewArgs;
+  }
+  MethInvoker6Args getMeth6Args() const {
+    return (MethInvoker6Args)m_invokerFewArgs;
+  }
+  MethInvoker7Args getMeth7Args() const {
+    return (MethInvoker7Args)m_invokerFewArgs;
+  }
+  MethInvoker8Args getMeth8Args() const {
+    return (MethInvoker8Args)m_invokerFewArgs;
+  }
+  MethInvoker9Args getMeth9Args() const {
+    return (MethInvoker9Args)m_invokerFewArgs;
+  }
+  MethInvoker10Args getMeth10Args() const {
+    return (MethInvoker10Args)m_invokerFewArgs;
   }
 };
 

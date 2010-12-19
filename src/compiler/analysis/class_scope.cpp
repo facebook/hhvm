@@ -1340,6 +1340,7 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
     }
     cg_printf(") {\n");
     if (!fewArgs) FunctionScope::OutputCPPDynamicInvokeCount(cg);
+    const char *class_name = "";
     if (!func->isStatic()) {
       cg_printf("%s%s *self = NULL;\n", Option::ClassPrefix, id.c_str());
       cg_printf("%s%s pobj;\n", Option::SmartPtrPrefix, id.c_str());
@@ -1355,13 +1356,15 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
     } else {
       // If rootObj is an object, was a static method invoked instance style.
       // Use rootObj's class name as invoking class
-      cg_printf("CStrRef c(mcp.rootObj.is(KindOfObject)"
-                       " ? mcp.rootObj.getObjectData()->o_getClassName()"
-                       " : mcp.rootObj.toString());\n");
+      class_name =
+        "CStrRef c(mcp.rootObj.is(KindOfObject)"
+        " ? mcp.rootObj.getObjectData()->o_getClassName()"
+        " : mcp.rootObj.toString());\n";
     }
     func->outputCPPDynamicInvoke(cg, ar, prefix.c_str(),
-        lname.c_str(), false, fewArgs, true, extra,
-        func->isConstructor(self), instance);
+                                 lname.c_str(), false, fewArgs, true, extra,
+                                 func->isConstructor(self), instance,
+                                 class_name);
     cg_indentEnd("}\n");
   }
 }

@@ -193,7 +193,8 @@ Variant c_XhprofFrame::ifa___construct(MethodCallPackage &mcp, int count, INVOKE
     self = createDummy(pobj);
   }
   if (count != 1) return throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 2);
-  return (self->t___construct(a0), null);
+  CVarRef arg0((a0));
+  return (self->t___construct(arg0), null);
 }
 bool c_XhprofFrame::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (mcp.name);

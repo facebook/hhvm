@@ -196,6 +196,7 @@ int Option::ScannerType = Scanner::AllowShortTags;
 int Option::ParserThreadCount = 0;
 
 int Option::InvokeFewArgsCount = 6;
+bool Option::InvokeWithSpecificArgs = true;
 bool Option::FlattenInvoke = true;
 int Option::InlineFunctionThreshold = -1;
 bool Option::ControlEvalOrder = true;

@@ -963,7 +963,7 @@ void AnalysisResult::genMethodSlots() {
 void AnalysisResult::inferTypes() {
   AsyncFunc<AnalysisResult>
     methodSlotThread(this, &AnalysisResult::genMethodSlots);
-  if (Option::UseMethodIndex) methodSlotThread.start();
+  if (Option::UseMethodIndex || isSystem()) methodSlotThread.start();
 
   setPhase(FirstInference);
   DepthFirstVisitor<InferTypesVisitor> dfv(shared_from_this());

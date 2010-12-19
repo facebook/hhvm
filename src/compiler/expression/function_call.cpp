@@ -177,6 +177,7 @@ void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
               (msg, fmt,
                Util::escapeStringForCPP(
                  m_funcScope->getContainingFile()->getName()).c_str(),
+               i + 1,
                Util::escapeStringForCPP(m_funcScope->getOriginalName()).c_str(),
                specType->toString().c_str(), ptype.c_str());
             Compiler::Error(Compiler::BadArgumentType,

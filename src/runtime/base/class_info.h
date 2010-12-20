@@ -83,10 +83,12 @@ public:
 
     Variant getValue() const;
     void setValue(CVarRef value);
+    void setStaticValue(CVarRef value);
 
   private:
     bool deferred;
     Variant value;
+    std::string svalue; // serialized, only used by eval
   };
 
   struct ParameterInfo {

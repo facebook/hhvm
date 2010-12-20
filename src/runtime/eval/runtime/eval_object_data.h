@@ -78,6 +78,12 @@ public:
   virtual Variant t___clone();
   virtual Variant &___offsetget_lval(Variant v_name);
 
+  /**
+   * Marshaling/Unmarshaling between request thread and fiber thread.
+   */
+  virtual Object fiberMarshal(FiberReferenceMap &refMap) const;
+  virtual Object fiberUnmarshal(FiberReferenceMap &refMap) const;
+
 protected:
   virtual ObjectData* cloneImpl();
 

@@ -3737,7 +3737,7 @@ Variant Variant::fiberMarshal(FiberReferenceMap &refMap) const {
       Variant *pvar = (Variant*)refMap.lookup(mpvar);
       if (pvar == NULL) {
         pvar = NEW(Variant)();
-        refMap.insert(mpvar, pvar); // ahead of deep copy
+        refMap.insert(mpvar, pvar, true); // ahead of deep copy
         *pvar = mpvar->fiberMarshal(refMap);
       }
       pvar->incRefCount();
@@ -3781,7 +3781,7 @@ Variant Variant::fiberUnmarshal(FiberReferenceMap &refMap) const {
         if (pvar == NULL) {
           pvar = NEW(Variant)();
         }
-        refMap.insert(mpvar, pvar); // ahead of deep copy
+        refMap.insert(mpvar, pvar, false); // ahead of deep copy
         *pvar = mpvar->fiberUnmarshal(refMap);
       }
       pvar->incRefCount();

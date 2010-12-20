@@ -21,18 +21,22 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+void FiberReferenceMap::reset() {
+  m_mainRefVariants.reset();
+}
+
 void FiberReferenceMap::insert(ObjectData *src, ObjectData *copy) {
   insert((void*)src, (void*)copy);
 }
 
-void FiberReferenceMap::insert(Variant *src, Variant *copy) {
+void FiberReferenceMap::insert(Variant *src, Variant *copy, bool marshaling) {
   insert((void*)src, (void*)copy);
 
   // We need strongly bound Variants to have ref count > 1, so we will
   // maintain "copy" pointer able to map back to original Variant*.
   copy->incRefCount();
   Variant tmp(copy);
-  m_refVariants.append(ref(tmp));
+  (marshaling ? m_fiberRefVariants : m_mainRefVariants).append(ref(tmp));
 }
 
 void FiberReferenceMap::insert(void *src, void *copy) {

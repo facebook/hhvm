@@ -54,6 +54,7 @@ void FiberAsyncFunc::OnRequestExit() {
 
 class FiberJob : public Synchronizable {
 public:
+  // MAIN THREAD
   FiberJob(FiberAsyncFuncData *thread, CVarRef function, CArrRef params,
            bool async)
       : m_thread(thread), m_context(NULL),
@@ -83,9 +84,11 @@ public:
     }
   }
 
+  // FIBER THREAD
   ~FiberJob() {
   }
 
+  // MAIN THREAD
   void cleanup() {
     if (m_unmarshaled_function) {
       Lock lock(m_thread->m_mutexReqId);
@@ -97,6 +100,8 @@ public:
       }
       // else not safe to touch these members because thread has moved to
       // next request after deleting/collecting all these dangling ones
+
+      m_refMap.reset();
     }
   }
 
@@ -113,6 +118,7 @@ public:
     return m_delete && m_refCount == 1;
   }
 
+  // FIBER THREAD
   void run() {
     // make local copy of m_function and m_params
     if (m_async) {
@@ -179,6 +185,7 @@ public:
     return m_return;
   }
 
+  // MAIN THREAD
   Variant getResults(FiberAsyncFunc::Strategy default_strategy,
                      vector<pair<string, char> > &resolver) {
     if (!m_async) return syncGetResults();
@@ -305,6 +312,7 @@ public:
     hphp_session_exit();
   }
 
+  // FIBER THREAD
   void cleanup() {
     list<FiberJob*>::iterator iter = m_jobs.begin();
     while (iter != m_jobs.end()) {

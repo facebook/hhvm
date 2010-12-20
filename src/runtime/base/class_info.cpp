@@ -18,6 +18,7 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/hphp_system.h>
+#include <runtime/base/variable_serializer.h>
 #include <runtime/base/variable_unserializer.h>
 #include <util/util.h>
 #include <util/lock.h>
@@ -192,11 +193,28 @@ Variant ClassInfo::ConstantInfo::getValue() const {
     }
     return callbacks->os_constant(name);
   }
+  if (!svalue.empty()) {
+    try {
+      VariableUnserializer vu(svalue.data(), svalue.size(),
+                              VariableUnserializer::Serialize);
+      return vu.unserialize();
+    } catch (Exception &e) {
+      ASSERT(false);
+    }
+  }
   return value;
 }
 
-void ClassInfo::ConstantInfo::setValue(CVarRef v) {
+void ClassInfo::ConstantInfo::setValue(CVarRef value) {
+  VariableSerializer vs(VariableSerializer::Serialize);
+  String s = vs.serialize(value, true);
+  svalue = string(s.data(), s.size());
+  deferred = false;
+}
+
+void ClassInfo::ConstantInfo::setStaticValue(CVarRef v) {
   value = v;
+  value.setStatic();
   deferred = false;
 }
 
@@ -693,9 +711,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
                               staticVariable->valueLen,
                               VariableUnserializer::Serialize);
       try {
-        Variant v = vu.unserialize();
-        v.setStatic();
-        staticVariable->setValue(v);
+        staticVariable->setStaticValue(vu.unserialize());
       } catch (Exception &e) {
         ASSERT(false);
       }
@@ -731,9 +747,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
                               constant->valueLen,
                               VariableUnserializer::Serialize);
       try {
-        Variant v = vu.unserialize();
-        v.setStatic();
-        constant->setValue(v);
+        constant->setStaticValue(vu.unserialize());
       } catch (Exception &e) {
         ASSERT(false);
       }

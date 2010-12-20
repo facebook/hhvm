@@ -76,16 +76,29 @@ void ClassEvalState::semanticCheck() {
 void ClassEvalState::fiberInit(ClassEvalState &oces,
                                FiberReferenceMap &refMap) {
   m_class = oces.m_class;
-  m_methodTable = oces.m_methodTable;
-  m_constructor = oces.m_constructor;
-  m_initializedInstance = oces.m_initializedInstance;
-  m_initializedStatics = oces.m_initializedStatics;
-  m_doneSemanticCheck = oces.m_doneSemanticCheck;
+  if (oces.m_constructor) {
+    m_constructor = oces.m_constructor;
+  }
+
+  for (MethodTable::const_iterator it = oces.m_methodTable.begin();
+       it != oces.m_methodTable.end(); ++it) {
+    m_methodTable[it->first] = it->second;
+  }
+  m_initializedStatics |= oces.m_initializedStatics;
+  m_initializedInstance |= oces.m_initializedInstance;
+  m_doneSemanticCheck |= oces.m_doneSemanticCheck;
 }
 void ClassEvalState::fiberInitStatics(ClassEvalState &oces,
                                       FiberReferenceMap &refMap) {
+  /**
+   * Important to do a merge here, as m_statics may already have some states,
+   * if this thread was processing another fiber job that hasn't been called
+   * with FiberJob::getResults().
+   */
   Array sv(oces.m_statics.fiberMarshal(refMap));
-  m_statics.Array::operator=(sv);
+  for (ArrayIter iter(sv); iter; ++iter) {
+    m_statics.set(iter.first(), iter.second());
+  }
 }
 void ClassEvalState::fiberExit(ClassEvalState &oces,
                                FiberReferenceMap &refMap,
@@ -100,6 +113,16 @@ void ClassEvalState::fiberExit(ClassEvalState &oces,
   if (default_strategy != FiberAsyncFunc::GlobalStateIgnore) {
     m_initializedStatics |= oces.m_initializedStatics;
   }
+
+  if (oces.m_constructor) {
+    m_constructor = oces.m_constructor;
+  }
+  for (MethodTable::const_iterator it = oces.m_methodTable.begin();
+       it != oces.m_methodTable.end(); ++it) {
+    m_methodTable[it->first] = it->second;
+  }
+  m_initializedInstance |= oces.m_initializedInstance;
+  m_doneSemanticCheck |= oces.m_doneSemanticCheck;
 }
 void ClassEvalState::fiberExitStatics(ClassEvalState &oces,
                                       FiberReferenceMap &refMap,
@@ -581,10 +604,19 @@ void RequestEvalState::fiberInit(RequestEvalState *res,
     addCodeContainer(*it);
   }
   // Functions
-  m_functions = res->m_functions;
+  for (hphp_const_char_imap<const FunctionStatement*>::iterator it =
+      res->m_functions.begin(); it != res->m_functions.end(); ++it) {
+    m_functions[it->first] = it->second;
+  }
   // Constants
-  m_constants = res->m_constants.fiberMarshal(refMap);
-  m_includes = res->m_includes.fiberMarshal(refMap);
+  Array constants = res->m_constants.fiberMarshal(refMap);
+  for (ArrayIter it(constants); it; ++it) {
+    m_constants.set(it.first(), it.second());
+  }
+  Array includes = res->m_includes.fiberMarshal(refMap);
+  for (ArrayIter it(includes); it; ++it) {
+    m_includes.set(it.first(), it.second());
+  }
   // Constant Info
   for (map<string, SmartPtr<EvalConstantInfo> >::iterator it =
       res->m_constantInfos.begin(); it != res->m_constantInfos.end(); ++it) {

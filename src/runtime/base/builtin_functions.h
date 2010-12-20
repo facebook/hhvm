@@ -593,11 +593,13 @@ public:
     StaticMethod = 0x8,
     CallMagicMethod = 0x10 // Special flag for __call handler
   };
-  CallInfo(void *inv, void *invFa, int ac, int flags, int64 refs)
-    : m_invoker(inv), m_invokerFewArgs(invFa), m_argCount(ac), m_flags(flags),
-    m_refFlags(refs) {}
+  CallInfo(void *inv, void *invFa, int ac, int flags, int64 refs,
+      void *invEv = NULL)
+    : m_invoker(inv), m_invokerFewArgs(invFa), m_invokerEval(invEv),
+      m_argCount(ac), m_flags(flags), m_refFlags(refs) {}
   void *m_invoker;
   void *m_invokerFewArgs; // remove in time
+  void *m_invokerEval;
   int m_argCount;
   int m_flags;
   int64 m_refFlags;
@@ -607,9 +609,14 @@ public:
   typedef Variant (*FuncInvoker)(void*, CArrRef);
   typedef Variant (*FuncInvokerFewArgs)(void*, int,
       INVOKE_FEW_ARGS_IMPL_ARGS);
+  typedef Variant (*FuncInvokerEval)(Eval::VariableEnvironment &,
+      const Eval::FunctionCallExpression *);
   FuncInvoker getFunc() const { return (FuncInvoker)m_invoker; }
   FuncInvokerFewArgs getFuncFewArgs() const {
     return (FuncInvokerFewArgs)m_invokerFewArgs;
+  }
+  FuncInvokerEval getFuncEval() const {
+    return (FuncInvokerEval)m_invokerEval;
   }
   typedef Variant (*MethInvoker)(MethodCallPackage &mcp, CArrRef);
   typedef Variant (*MethInvokerFewArgs)(MethodCallPackage &mcp, int,

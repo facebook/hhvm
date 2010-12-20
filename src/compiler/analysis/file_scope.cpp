@@ -283,6 +283,9 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (Option::GenerateCPPMacros) {
     bool hasRedec;
     outputCPPJumpTableSupport(cg, ar, hasRedec);
+    if (Option::EnableEval >= Option::LimitedEval) {
+      outputCPPJumpTableEvalSupport(cg, ar, hasRedec);
+    }
     outputCPPCallInfoTableSupport(cg, ar, hasRedec);
     for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
          it != m_classes.end(); ++it) {

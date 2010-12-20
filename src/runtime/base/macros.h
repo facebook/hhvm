@@ -352,7 +352,8 @@ do { \
 #define HASH_INVOKE_FROM_EVAL(code, f)                                  \
   if (hash == code && !strcasecmp(s, #f)) return ei_ ## f(env, caller)
 #define HASH_INVOKE_REDECLARED_FROM_EVAL(code, f)                       \
-  if (hash == code && !strcasecmp(s, #f)) return g->ei_ ## f(env_caller)
+  if (hash == code && !strcasecmp(s, #f) && g->GCI(f))                  \
+    return g->GCI(f)->getFuncEval()(env, caller)
 #define HASH_INSTANCEOF(code, str)                                      \
   if ((s.data() == str.data()) ||                                       \
       (hash == code &&                                                  \

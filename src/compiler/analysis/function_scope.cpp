@@ -1664,7 +1664,13 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
               id.c_str(), Option::InvokePrefix, id.c_str());
     cg.printf("(void*)&%s%s", Option::InvokeFewArgsPrefix, id.c_str());
   }
-  cg.printf(", %d, %d, 0x%.16lXLL);\n", m_maxParam, flags, refflags);
+  cg.printf(", %d, %d, 0x%.16lXLL", m_maxParam, flags, refflags);
+  if (m_method || (Option::EnableEval == Option::NoEval &&
+                   cg.getOutput() != CodeGenerator::SystemCPP)) {
+    cg.printf(");\n");
+  } else {
+    cg.printf(", (void*)&%s%s);\n", Option::EvalInvokePrefix, id.c_str());
+  }
 }
 
 FunctionScope::StringToRefParamInfoPtrMap FunctionScope::s_refParamInfo;

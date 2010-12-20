@@ -96,7 +96,8 @@ class LdapResultEntry : public SweepableResourceData {
 public:
   DECLARE_OBJECT_ALLOCATION(LdapResultEntry)
 
-  LdapResultEntry(LDAPMessage *entry) : data(entry), ber(NULL) {}
+  LdapResultEntry(LDAPMessage *entry, ObjectData *res)
+    : data(entry), ber(NULL), result(res) {}
   ~LdapResultEntry() { close();}
 
   void close() {
@@ -113,8 +114,12 @@ public:
 
   LDAPMessage *data;
   BerElement *ber;
+  Object result; // Reference to LdapResult to avoid premature deallocation
 };
-IMPLEMENT_OBJECT_ALLOCATION(LdapResultEntry)
+IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(LdapResultEntry)
+void LdapResultEntry::sweep() {
+  close();
+}
 
 StaticString LdapResultEntry::s_class_name("ldap result entry");
 
@@ -483,7 +488,7 @@ static int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req,
 }
 
 static void get_attributes(Array &ret, LDAP *ldap,
-                           LDAPMessage *ldap_result_entry) {
+                           LDAPMessage *ldap_result_entry, bool to_lower) {
   int num_attrib = 0;
   BerElement *ber;
   char *attribute = ldap_first_attribute(ldap, ldap_result_entry, &ber);
@@ -501,8 +506,9 @@ static void get_attributes(Array &ret, LDAP *ldap,
     }
     ldap_value_free_len(ldap_value);
 
-    ret.set(StringUtil::ToLower(attribute), tmp);
-    ret.set(num_attrib, String(attribute, CopyString));
+    String sAttribute(attribute, CopyString);
+    ret.set(to_lower ? Util::toLower(attribute) : sAttribute, tmp);
+    ret.set(num_attrib, sAttribute);
 
     num_attrib++;
     ldap_memfree(attribute);
@@ -1017,7 +1023,7 @@ Variant f_ldap_get_entries(CObjRef link, CObjRef result) {
   num_entries = 0;
   while (ldap_result_entry != NULL) {
     Array tmp1 = Array::Create();
-    get_attributes(tmp1, ldap, ldap_result_entry);
+    get_attributes(tmp1, ldap, ldap_result_entry, true);
 
     char *dn = ldap_get_dn(ldap, ldap_result_entry);
     tmp1.set("dn", String(dn, CopyString));
@@ -1042,7 +1048,7 @@ Variant f_ldap_first_entry(CObjRef link, CObjRef result) {
     return false;
   }
 
-  return NEW(LdapResultEntry)(entry);
+  return NEW(LdapResultEntry)(entry, res);
 }
 
 Variant f_ldap_next_entry(CObjRef link, CObjRef result_entry) {
@@ -1054,14 +1060,14 @@ Variant f_ldap_next_entry(CObjRef link, CObjRef result_entry) {
     return false;
   }
 
-  return NEW(LdapResultEntry)(msg);
+  return NEW(LdapResultEntry)(msg, entry->result.get());
 }
 
 Array f_ldap_get_attributes(CObjRef link, CObjRef result_entry) {
   LdapLink *ld = link.getTyped<LdapLink>();
   LdapResultEntry *entry = result_entry.getTyped<LdapResultEntry>();
   Array ret = Array::Create();
-  get_attributes(ret, ld->link, entry->data);
+  get_attributes(ret, ld->link, entry->data, false);
   return ret;
 }
 
@@ -1112,7 +1118,7 @@ Variant f_ldap_first_reference(CObjRef link, CObjRef result) {
     return false;
   }
 
-  return NEW(LdapResultEntry)(entry);
+  return NEW(LdapResultEntry)(entry, res);
 }
 
 Variant f_ldap_next_reference(CObjRef link, CObjRef result_entry) {
@@ -1124,7 +1130,7 @@ Variant f_ldap_next_reference(CObjRef link, CObjRef result_entry) {
     return false;
   }
 
-  return NEW(LdapResultEntry)(entry_next);
+  return NEW(LdapResultEntry)(entry_next, entry->result.get());
 }
 
 bool f_ldap_parse_reference(CObjRef link, CObjRef result_entry,

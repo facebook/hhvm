@@ -46,6 +46,7 @@ public:
 
 class AtomicCountable {
 public:
+  AtomicCountable() : m_count(0) { }
   void incRefCount() {
     atomic_inc(m_count);
   }

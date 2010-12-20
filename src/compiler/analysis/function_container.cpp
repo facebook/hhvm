@@ -169,12 +169,15 @@ void FunctionContainer::outputCPPCallInfoTableSupport
 }
 void FunctionContainer::outputCPPJumpTableEvalSupport
 (CodeGenerator &cg, AnalysisResultPtr ar, bool &hasRedeclared,
+ bool implementation /* = true */,
+ const StringToFunctionScopePtrVecMap *in /* = NULL */,
  vector<const char *> *funcs /* = NULL */) {
+  if (!in) in = &m_functions;
   bool systemcpp = cg.getOutput() == CodeGenerator::SystemCPP;
   const char *funcPrefix = Option::FunctionPrefix;
   if (systemcpp) funcPrefix = Option::BuiltinFunctionPrefix;
   // output invoke support methods
-  for (FunctionIterator fit(m_functions, hasRedeclared); fit.ready();
+  for (FunctionIterator fit(*in, hasRedeclared); fit.ready();
       fit.next()) {
     FunctionScopePtr func = fit.get();
     if (func->inPseudoMain() ||
@@ -185,13 +188,19 @@ void FunctionContainer::outputCPPJumpTableEvalSupport
     if (funcs && fit.firstInner()) {
       funcs->push_back(fit.name().c_str());
     }
+    if (!implementation && func->isRedeclaring()) continue;
     string sname = func->getId(cg);
 
-    cg_indentBegin("Variant %s%s(Eval::VariableEnvironment &env, "
-        "const Eval::FunctionCallExpression *caller) {\n",
+    cg_printf("Variant %s%s(Eval::VariableEnvironment &env, "
+        "const Eval::FunctionCallExpression *caller)",
         Option::EvalInvokePrefix, func->getId(cg).c_str());
-    func->outputCPPEvalInvoke(cg, ar, funcPrefix, func->getId(cg).c_str());
-    cg_indentEnd("}\n");
+    if (!implementation) {
+      cg_printf(";\n");
+    } else {
+      cg_indentBegin(" {\n");
+      func->outputCPPEvalInvoke(cg, ar, funcPrefix, func->getId(cg).c_str());
+      cg_indentEnd("}\n");
+    }
 
     if (func->isRedeclaring()) {
       hasRedeclared = true;
@@ -539,12 +548,14 @@ void FunctionContainer::outputCPPHashTableEvalInvoke(
 }
 
 void FunctionContainer::outputCPPEvalInvokeTable(CodeGenerator &cg,
-                                                 AnalysisResultPtr ar) {
+    AnalysisResultPtr ar, const StringToFunctionScopePtrVecMap *functions) {
+  if (!functions) functions = &m_functions;
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
   bool generate = Option::EnableEval >= Option::LimitedEval || system;
   vector<const char *> funcs;
   bool needGlobals = false;
-  if (generate) outputCPPJumpTableEvalSupport(cg, ar, needGlobals, &funcs);
+  if (generate) outputCPPJumpTableEvalSupport(cg, ar, needGlobals, system,
+                                              functions, &funcs);
   if (generate && Option::GenHashTableInvokeFunc && system) {
     outputCPPHashTableEvalInvoke(cg, funcs);
     return;
@@ -559,14 +570,15 @@ void FunctionContainer::outputCPPEvalInvokeTable(CodeGenerator &cg,
          fit.next()) {
       const char *name = fit.key();
       StringToFunctionScopePtrVecMap::const_iterator iterFuncs =
-        m_functions.find(name);
-      ASSERT(iterFuncs != m_functions.end());
-      if (iterFuncs->second[0]->isRedeclaring()) {
+          functions->find(name);
+      ASSERT(iterFuncs != functions->end());
+      FunctionScopePtr func = iterFuncs->second[0];
+      if (func->isRedeclaring()) {
         cg_printf("HASH_INVOKE_REDECLARED_FROM_EVAL(0x%016llXLL, %s);\n",
                   hash_string_i(name), cg.formatLabel(name).c_str());
       } else {
         cg_printf("HASH_INVOKE_FROM_EVAL(0x%016llXLL, %s);\n",
-                  hash_string_i(name), cg.formatLabel(name).c_str());
+                  hash_string_i(name), func->getId(cg).c_str());
       }
     }
   }

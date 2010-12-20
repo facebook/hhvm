@@ -53,7 +53,8 @@ public:
    */
   void outputCPPJumpTableDecl(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPEvalInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputCPPEvalInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
+      const StringToFunctionScopePtrVecMap *functions = NULL);
   const StringToFunctionScopePtrVecMap &getFunctions() const {
     return m_functions;
   }
@@ -69,8 +70,9 @@ protected:
                                  bool &hasRedeclared,
                                  std::vector<const char *> *funcs = NULL);
   void outputCPPJumpTableEvalSupport(CodeGenerator &cg, AnalysisResultPtr ar,
-                                     bool &hasRedeclared,
-                                     std::vector<const char *> *funcs = NULL);
+      bool &hasRedeclared, bool implementation = true,
+      const StringToFunctionScopePtrVecMap *in = NULL,
+      std::vector<const char *> *funcs = NULL);
   void outputCPPCallInfoTableSupport(CodeGenerator &cg, AnalysisResultPtr ar,
       bool &hasRedeclared, std::vector<const char *> *funcs = NULL);
 private:

@@ -1690,6 +1690,11 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
     case Expression::KindOfSimpleFunctionCall:
       spc(SimpleFunctionCall, e)->updateVtFlags();
       break;
+    case Expression::KindOfUnaryOpExpression:
+      if (Option::EnableEval > Option::NoEval && spc(UnaryOpExpression, e)->getOp() == T_EVAL) {
+        m_variables->setAttribute(VariableTable::ContainsLDynamicVariable);
+      }
+      break;
     default:
       break;
     }

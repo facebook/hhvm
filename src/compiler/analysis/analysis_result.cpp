@@ -2381,7 +2381,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       outputCPPEvalInvokeTable(cg, ar);
       outputCPPCodeInfoTable(cg, ar, true);
     } else {
-      outputCPPEvalInvokeTable(cg, ar);
+      outputCPPEvalInvokeTable(cg, ar, &m_functionDecs);
       outputCPPCodeInfoTable(cg, ar, false, &m_functionDecs);
     }
     cg.namespaceEnd();

@@ -184,7 +184,7 @@ void ExecutionContext::write(CStrRef s) {
   /* called by the PHP function echo()
    * main check point for the tainting analysis
    */
-  if(is_tainted_html(s.getTaint())) {
+  if (is_tainted_html(s.getTaint())) {
     std::string meta = s.getTaintedMetadata()->stringOfTaintedMetadata();
     meta = meta + "  the echoed string is : '" + s.data()
            + "'\n\n[end of the echoed string]\n";
@@ -199,14 +199,20 @@ void ExecutionContext::setStdout(PFUNC_STDOUT func, void *data) {
   m_stdoutData = data;
 }
 
+static void safe_stdout(const  void  *ptr,  size_t  size) {
+  if (write(fileno(stdout), ptr, size) < 0) {
+    throw FatalErrorException("unable to write to stdout");
+  }
+}
+
 void ExecutionContext::writeStdout(const char *s, int len) {
   if (m_stdout == NULL) {
     if (Util::s_stdout_color) {
-      fwrite(Util::s_stdout_color, strlen(Util::s_stdout_color), 1, stdout);
-      fwrite(s, len, 1, stdout);
-      fwrite(ANSI_COLOR_END, strlen(ANSI_COLOR_END), 1, stdout);
+      safe_stdout(Util::s_stdout_color, strlen(Util::s_stdout_color));
+      safe_stdout(s, len);
+      safe_stdout(ANSI_COLOR_END, strlen(ANSI_COLOR_END));
     } else {
-      fwrite(s, len, 1, stdout);
+      safe_stdout(s, len);
     }
   } else {
     m_stdout(s, len, m_stdoutData);

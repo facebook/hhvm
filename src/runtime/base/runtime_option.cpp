@@ -322,8 +322,6 @@ std::string RuntimeOption::MailForceExtraParameters;
 int RuntimeOption::PregBacktraceLimit = 100000;
 int RuntimeOption::PregRecursionLimit = 100000;
 
-bool RuntimeOption::ExitOnSigPipe = true;
-
 bool RuntimeOption::EnableHotProfiler = true;
 int RuntimeOption::ProfilerTraceBuffer = 2000000;
 double RuntimeOption::ProfilerTraceExpansion = 1.2;
@@ -968,10 +966,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     Hdf preg = config["Preg"];
     PregBacktraceLimit = preg["BacktraceLimit"].getInt32(100000);
     PregRecursionLimit = preg["RecursionLimit"].getInt32(100000);
-  }
-  {
-    Hdf cli = config["CLI"];
-    ExitOnSigPipe = cli["ExitOnSigPipe"].getBool(true);
   }
 
   Extension::LoadModules(config);

@@ -230,8 +230,8 @@ void PageletServer::Restart() {
   if (RuntimeOption::PageletServerThreadCount > 0) {
     s_dispatcher = new JobQueueDispatcher<PageletTransport*, PageletWorker>
       (RuntimeOption::PageletServerThreadCount,
-       RuntimeOption::ServerThreadRoundRobin,
-       RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
+       RuntimeOption::PageletServerThreadRoundRobin,
+       RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds,
        NULL);
     Logger::Info("pagelet server started");
     s_dispatcher->start();

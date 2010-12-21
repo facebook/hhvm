@@ -84,6 +84,8 @@ public:
   static int ServerThreadDropCacheTimeoutSeconds;
   static bool ServerThreadJobLIFO;
   static int PageletServerThreadCount;
+  static bool PageletServerThreadRoundRobin;
+  static int PageletServerThreadDropCacheTimeoutSeconds;
   static int FiberCount;
   static int RequestTimeoutSeconds;
   static int64 RequestMemoryMaxBytes;

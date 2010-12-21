@@ -1264,9 +1264,7 @@ public:
     m_data = v.m_data;
   }
 
-  // Only used to wrap around null_variant
-  VarNR(CVarRef v) : Variant(KindOfNull) {
-    ASSERT(v.is(KindOfNull));
+  VarNR() : Variant(KindOfNull) {
     m_data.num = 0;
   }
 

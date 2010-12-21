@@ -32,6 +32,7 @@ using namespace std;
 namespace HPHP {
 
 const Variant null_variant = Variant();
+const VarNR null_varNR = VarNR();
 
 IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(Variant);
 
@@ -1671,7 +1672,7 @@ VarNR Variant::toKey() const {
     break;
   }
   throw_bad_type_exception("Invalid type used as key");
-  return null_variant;
+  return null_varNR;
 }
 
 Variant::operator String() const {

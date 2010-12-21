@@ -297,7 +297,7 @@ void VariableSerializer::write(CArrRef v) {
 
 void VariableSerializer::write(CObjRef v) {
   if (!v.isNull() && m_type == JSON) {
-    Array props;
+    Array props(ArrayData::Create());
     v->o_getArray(props, true);
     setObjectInfo(v->o_getClassName(), v->o_getId());
     props.serialize(this);

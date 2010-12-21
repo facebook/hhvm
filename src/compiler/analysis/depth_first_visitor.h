@@ -102,19 +102,10 @@ public:
     if (int useKinds = this->visitScope(scope)) {
       scope->changed(queue, useKinds);
     }
-    if (BlockScopeRawPtrQueue *changed = scope->getChangedScopes()) {
-      for (BlockScopeRawPtrQueue::iterator it = changed->begin(),
-             end = changed->end(); it != end; ) {
-        BlockScopeRawPtr bs = *it;
-        changed->erase(it++);
-        bs->changed(queue, bs->getUpdated());
-        bs->clearUpdated();
-      }
-    }
     scope->setMark(BlockScope::MarkProcessedInQueue);
   }
 
-  void visitDepthFirst(BlockScopeRawPtrQueue scopes) {
+  void visitDepthFirst(BlockScopeRawPtrQueue &scopes) {
     BlockScopeRawPtrQueue::iterator end = scopes.end();
     for (BlockScopeRawPtrQueue::iterator it = scopes.begin(); it != end; ++it) {
       (*it)->setMark(BlockScope::MarkWaitingInQueue);

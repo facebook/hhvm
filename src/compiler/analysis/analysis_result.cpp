@@ -905,9 +905,12 @@ void AnalysisResult::preOptimize() {
 }
 
 struct InferTypesVisitor {
-  InferTypesVisitor(AnalysisResultPtr ar) : m_ar(ar) {}
+  InferTypesVisitor(AnalysisResultPtr ar,
+                    BlockScopeRawPtrQueue *queue) :
+      m_ar(ar), m_queue(queue) {}
 
   AnalysisResultPtr m_ar;
+  BlockScopeRawPtrQueue *m_queue;
 };
 
 template<>
@@ -922,7 +925,9 @@ int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
     scope->getContainingFunction()->pushReturnType();
   }
 
+  BlockScopeRawPtrQueue *changed = scope->getChangedScopes();
   int ret = 0;
+  bool done;
   do {
     scope->clearUpdated();
     if (m) {
@@ -938,9 +943,19 @@ int DepthFirstVisitor<InferTypesVisitor>::visitScope(BlockScopeRawPtr scope) {
       }
     }
 
+    done = !scope->getUpdated();
     ret |= scope->getUpdated();
     scope->incPass();
-  } while (scope->getUpdated());
+
+    for (BlockScopeRawPtrQueue::iterator it = changed->begin(),
+           end = changed->end(); it != end; ) {
+      done = false;
+      BlockScopeRawPtr bs = *it;
+      changed->erase(it++);
+      bs->changed(*this->m_data.m_queue, bs->getUpdated());
+      bs->clearUpdated();
+    }
+  } while (!done);
 
   if (m) {
     scope->getContainingFunction()->popReturnType();
@@ -966,10 +981,12 @@ void AnalysisResult::inferTypes() {
   if (Option::UseMethodIndex || isSystem()) methodSlotThread.start();
 
   setPhase(FirstInference);
-  DepthFirstVisitor<InferTypesVisitor> dfv(shared_from_this());
+  BlockScopeRawPtrQueue scopes;
+
+  DepthFirstVisitor<InferTypesVisitor> dfv(
+    InferTypesVisitor(shared_from_this(), &scopes));
   BlockScopeRawPtrQueue changed;
 
-  BlockScopeRawPtrQueue scopes;
   getScopesSet(scopes);
   for (BlockScopeRawPtrQueue::iterator it = scopes.begin(), end = scopes.end();
        it != end; ++it) {

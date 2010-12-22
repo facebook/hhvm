@@ -68,6 +68,36 @@ inline Variant x_iterator_to_array(CVarRef obj, bool use_keys = true) {
   return f_iterator_to_array(obj, use_keys);
 }
 
+inline void x_spl_autoload_call(CStrRef class_name) {
+  FUNCTION_INJECTION_BUILTIN(spl_autoload_call);
+  f_spl_autoload_call(class_name);
+}
+
+inline String x_spl_autoload_extensions(CStrRef file_extensions = null_string) {
+  FUNCTION_INJECTION_BUILTIN(spl_autoload_extensions);
+  return f_spl_autoload_extensions(file_extensions);
+}
+
+inline Variant x_spl_autoload_functions() {
+  FUNCTION_INJECTION_BUILTIN(spl_autoload_functions);
+  return f_spl_autoload_functions();
+}
+
+inline bool x_spl_autoload_register(CVarRef autoload_function = null_variant, bool throws = true, bool prepend = false) {
+  FUNCTION_INJECTION_BUILTIN(spl_autoload_register);
+  return f_spl_autoload_register(autoload_function, throws, prepend);
+}
+
+inline bool x_spl_autoload_unregister(CVarRef autoload_function) {
+  FUNCTION_INJECTION_BUILTIN(spl_autoload_unregister);
+  return f_spl_autoload_unregister(autoload_function);
+}
+
+inline void x_spl_autoload(CStrRef class_name, CStrRef file_extensions = null_string) {
+  FUNCTION_INJECTION_BUILTIN(spl_autoload);
+  f_spl_autoload(class_name, file_extensions);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

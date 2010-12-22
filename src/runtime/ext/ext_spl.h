@@ -34,6 +34,12 @@ Variant f_class_parents(CVarRef obj, bool autoload = true);
 Variant f_iterator_apply(CVarRef obj, CVarRef func, CArrRef params = null_array);
 Variant f_iterator_count(CVarRef obj);
 Variant f_iterator_to_array(CVarRef obj, bool use_keys = true);
+void f_spl_autoload_call(CStrRef class_name);
+String f_spl_autoload_extensions(CStrRef file_extensions = null_string);
+Variant f_spl_autoload_functions();
+bool f_spl_autoload_register(CVarRef autoload_function = null_variant, bool throws = true, bool prepend = false);
+bool f_spl_autoload_unregister(CVarRef autoload_function);
+void f_spl_autoload(CStrRef class_name, CStrRef file_extensions = null_string);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

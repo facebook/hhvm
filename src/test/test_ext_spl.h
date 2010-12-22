@@ -34,6 +34,12 @@ class TestExtSpl : public TestCppExt {
   bool test_iterator_apply();
   bool test_iterator_count();
   bool test_iterator_to_array();
+  bool test_spl_autoload_call();
+  bool test_spl_autoload_extensions();
+  bool test_spl_autoload_functions();
+  bool test_spl_autoload_register();
+  bool test_spl_autoload_unregister();
+  bool test_spl_autoload();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

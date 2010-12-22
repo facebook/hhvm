@@ -27,6 +27,7 @@
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/variable_unserializer.h>
+#include <runtime/base/util/request_local.h>
 #include <util/case_insensitive.h>
 #ifdef TAINTED
 #include <runtime/base/propagate_tainting.h>
@@ -464,10 +465,12 @@ inline Variant f_unserialize(CStrRef str) {
 class LVariableTable;
 Variant include(CStrRef file, bool once = false,
                 LVariableTable* variables = NULL,
-                const char *currentDir = "");
+                const char *currentDir = "",
+                bool raiseNotice = true);
 Variant require(CStrRef file, bool once = false,
                 LVariableTable* variables = NULL,
-                const char *currentDir = "");
+                const char *currentDir = "",
+                bool raiseNotice = true);
 Variant include_impl_invoke(CStrRef file, bool once = false,
                             LVariableTable* variables = NULL,
                             const char *currentDir = "");
@@ -516,6 +519,28 @@ bool function_exists(CStrRef function_name);
  * For autoload support
  */
 class Globals;
+
+class AutoloadHandler : public RequestEventHandler {
+public:
+  virtual void requestInit();
+  virtual void requestShutdown();
+
+  CArrRef getHandlers() { return m_handlers; }
+  bool addHandler(CVarRef handler, bool prepend);
+  void removeHandler(CVarRef handler);
+  void removeAllHandlers();
+
+  bool invokeHandler(CStrRef className, bool checkDeclared,
+                     const bool *declared = NULL, bool autoloadExists = false);
+
+  DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);
+
+private:
+  static String getSignature(CVarRef handler);
+
+  Array m_handlers;
+};
+
 void checkClassExists(CStrRef name, Globals *g, bool nothrow = false);
 bool checkClassExists(CStrRef name, const bool *declared, bool autoloadExists,
                       bool nothrow = false);

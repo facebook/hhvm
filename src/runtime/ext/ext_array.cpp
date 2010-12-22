@@ -782,6 +782,10 @@ Variant f_array_uintersect_uassoc(int _argc, CVarRef array1, CVarRef array2,
 }
 
 Variant f_array_intersect_key(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
   Array ret = toArray(array1).intersect(toArray(array2), true, false);
   for (ArrayIter iter(_argv); iter; ++iter) {
     ret = ret.intersect(iter.second(), true, false);
@@ -791,6 +795,10 @@ Variant f_array_intersect_key(int _argc, CVarRef array1, CVarRef array2, CArrRef
 
 Variant f_array_intersect_ukey(int _argc, CVarRef array1, CVarRef array2,
                              CVarRef key_compare_func, CArrRef _argv /* = null_array */) {
+  if (!array1.isArray() || !array2.isArray()) {
+    throw_bad_array_exception(__func__);
+    return null;
+  }
   Variant func = key_compare_func;
   Array extra = _argv;
   if (!extra.empty()) {

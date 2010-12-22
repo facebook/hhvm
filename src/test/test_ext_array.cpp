@@ -1607,6 +1607,7 @@ bool TestExtArray::test_array_intersect_key() {
   Array array2 = CREATE_MAP4("green", 5, "blue", 6, "yellow", 7, "cyan", 8);
   VS(f_array_intersect_key(2, array1, array2),
      CREATE_MAP2("blue", 1, "green", 3));
+  VS(f_array_intersect_key(2, null, CREATE_MAP1(1, 1)), null);
   return Count(true);
 }
 

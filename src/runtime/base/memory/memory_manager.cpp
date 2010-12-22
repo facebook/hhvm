@@ -87,20 +87,11 @@ void MemoryManager::resetStats() {
 }
 
 void MemoryManager::refreshStatsHelper() {
-#ifdef USE_JEMALLOC
-  ASSERT(m_stats.usage > m_stats.peakUsage);
-  int64 prevPeakUsage = m_stats.peakUsage;
-  m_stats.peakUsage = m_stats.usage;
-  if (m_stats.maxBytes > 0 && m_stats.peakUsage > m_stats.maxBytes
-      && prevPeakUsage <= m_stats.maxBytes) {
-    RequestInjectionData &data = ThreadInfo::s_threadInfo.get()->
-                                   m_reqInjectionData;
-    data.surpriseMutex.lock();
-    data.memExceeded = true;
-    data.surprised = true;
-    data.surpriseMutex.unlock();
-  }
-#endif
+  RequestInjectionData &data =
+    ThreadInfo::s_threadInfo.get()->m_reqInjectionData;
+  Lock lock(data.surpriseMutex);
+  data.memExceeded = true;
+  data.surprised = true;
 }
 
 void MemoryManager::add(SmartAllocatorImpl *allocator) {

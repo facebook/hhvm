@@ -168,10 +168,59 @@ public:
   /**
    * Allocation/deallocation of object memory.
    */
-  void *alloc();
+  void *alloc() {
+#ifdef SMART_ALLOCATOR_STACKTRACE
+    {
+      Lock lock(s_st_mutex);
+      bool enabled = StackTrace::Enabled;
+      StackTrace::Enabled = true;
+      s_st_allocs.operator[](m_freelist.back());
+      StackTrace::Enabled = enabled;
+    }
+#endif
+    ASSERT(m_stats);
+    // Just update the usage, while the peakUsage is maintained by
+    // FrameInjection.
+    m_stats->usage += m_itemSize;
+    if (m_freelist.size() > 0) {
+      // Fast path
+      void *ret = m_freelist.back();
+      m_freelist.pop_back();
+      return ret;
+    }
+    // Slow path
+    return allocHelper();
+  }
   void *allocHelper() __attribute__((noinline));
-  void checkMemUsage() __attribute__((noinline));
-  void dealloc(void *obj);
+  void dealloc(void *obj) {
+    if (obj) {
+#ifdef SMART_ALLOCATOR_STACKTRACE
+      if (!isValid(obj)) {
+        Lock lock(s_st_mutex);
+        if (s_st_allocs.find(obj) != s_st_allocs.end()) {
+          printf("Object %p was allocated from a different thread: %s\n",
+                 obj, s_st_allocs[obj].toString().c_str());
+        } else {
+          printf("Object %p was not smart allocated\n", obj);
+        }
+      }
+#endif
+      ASSERT(isValid(obj));
+      m_freelist.push_back(obj);
+#ifdef SMART_ALLOCATOR_STACKTRACE
+      {
+        Lock lock(s_st_mutex);
+        bool enabled = StackTrace::Enabled;
+        StackTrace::Enabled = true;
+        s_st_deallocs.operator[](obj);
+        StackTrace::Enabled = enabled;
+      }
+#endif
+
+      ASSERT(m_stats);
+      m_stats->usage -= m_itemSize;
+    }
+  }
   bool isValid(void *obj) const;
 
   /**
@@ -195,13 +244,14 @@ public:
   virtual void sweep(void *p) = 0;
   virtual void dump(void *p) = 0;
 
- private:
+private:
   const char *m_name;
   int m_itemCount;
   int m_itemSize;
   int m_flag;
 
   std::vector<char *> m_blocks;
+  BlockIndexMap m_blockIndex;
   int m_row; // outer index
   int m_col; // inner position
   int m_colMax;
@@ -236,7 +286,6 @@ public:
     int m_itemCount;
     char *m_px;
     bool m_prepared;
-    BlockIndexMap m_blockIndex;
     FreeMap m_freeMap;
 
     int m_curRow;
@@ -265,7 +314,7 @@ protected:
   MemoryUsageStats *m_stats;
 
   friend class PointerIterator;
-  void prepareIterator(BlockIndexMap &indexMap, FreeMap &freeMap);
+  void prepareIterator(FreeMap &freeMap);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

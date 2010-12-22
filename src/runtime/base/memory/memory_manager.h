@@ -151,10 +151,14 @@ public:
     int64 delta = int64(*m_allocated) - int64(*m_deallocated);
     m_stats.usage += delta - m_delta;
     m_delta = delta;
-    if (m_stats.usage > m_stats.peakUsage) {
-      refreshStatsHelper();
-    }
 #endif
+    if (m_stats.usage > m_stats.peakUsage) {
+      if (m_stats.maxBytes > 0 && m_stats.peakUsage <= m_stats.maxBytes &&
+          m_stats.usage > m_stats.maxBytes) {
+        refreshStatsHelper();
+      }
+      m_stats.peakUsage = m_stats.usage;
+    }
   }
 
   class MaskAlloc {

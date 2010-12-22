@@ -39,6 +39,24 @@ static int calculate_item_count(int itemSize) {
   return itemCount;
 }
 
+static int findIndex(const vector<char *> &blocks,
+                     const BlockIndexMap &blockIndex, int64 p, int colMax) {
+  // First try
+  int64 hit = p / colMax;
+  BlockIndexMap::const_iterator it = blockIndex.find(hit);
+  if (it != blockIndex.end()) {
+    int idx = it->second;
+    if ((int64)blocks[idx] <= p) {
+      return idx;
+    }
+  }
+  // Second try, and it must be correct
+  hit--;
+  ASSERT(blockIndex.find(hit) != blockIndex.end() &&
+         (int64)blocks[blockIndex.find(hit)->second] <= p);
+  return blockIndex.find(hit)->second;
+}
+
 #ifdef SMART_ALLOCATOR_STACKTRACE
 Mutex SmartAllocatorImpl::s_st_mutex;
 std::map<void*, StackTrace> SmartAllocatorImpl::s_st_allocs;
@@ -89,7 +107,9 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
   ASSERT(m_stats);
 
   m_colMax = m_itemSize * m_itemCount;
-  m_blocks.push_back((char *)malloc(m_colMax));
+  char *p = (char *)malloc(m_colMax);
+  m_blocks.push_back(p);
+  m_blockIndex[((int64)p) / m_colMax] = 0;
 #ifdef USE_JEMALLOC
   // Cancel out jemalloc's accounting for this slab.
   m_stats->usage -= m_colMax;
@@ -127,53 +147,33 @@ SmartAllocatorImpl::~SmartAllocatorImpl() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// four most important methods
-
-void *SmartAllocatorImpl::alloc() {
-  ASSERT(m_stats);
-  m_stats->usage += m_itemSize;
-  if (m_stats->usage > m_stats->peakUsage) {
-    checkMemUsage();
-  }
-  if (m_stats->usage <= m_stats->peakUsage && m_freelist.size() > 0) {
-    // Fast path
-#ifdef SMART_ALLOCATOR_STACKTRACE
-    {
-      Lock lock(s_st_mutex);
-      bool enabled = StackTrace::Enabled;
-      StackTrace::Enabled = true;
-      s_st_allocs.operator[](m_freelist.back());
-      StackTrace::Enabled = enabled;
-    }
-#endif
-    void *ret = m_freelist.back();
-    m_freelist.pop_back();
-    return ret;
-  }
-  // Slow path
-  return allocHelper();
-}
+// alloc/dealloc helpers
 
 void *SmartAllocatorImpl::allocHelper() {
   if (m_col >= m_colMax) {
     if (m_allocatedBlocks == 0) {
       // used up the last batch
       ASSERT((m_blocks.size() - m_backupBlocks.size()) % m_multiplier == 0);
-      m_blocks.push_back((char *)malloc(m_colMax * m_multiplier));
+      size_t size = m_colMax * m_multiplier;
+      char *p = (char *)malloc(size);
+      m_blocks.push_back(p);
+      m_blockIndex[((int64)p) / m_colMax] = m_blocks.size() - 1;
 #ifdef USE_JEMALLOC
       // Cancel out jemalloc's accounting for this slab.
-      m_stats->usage -= m_colMax * m_multiplier;
+      m_stats->usage -= size;
 #endif
       m_allocatedBlocks = m_multiplier - 1;
+
+      m_stats->alloc += size;
+      if (m_stats->alloc > m_stats->peakAlloc) {
+        m_stats->peakAlloc = m_stats->alloc;
+      }
     } else {
       // still have some blocks left from the last batch
-      m_blocks.push_back(m_blocks.back() + m_colMax);
+      char *p = m_blocks.back() + m_colMax;
+      m_blocks.push_back(p);
+      m_blockIndex[((int64)p) / m_colMax] = m_blocks.size() - 1;
       m_allocatedBlocks--;
-    }
-
-    m_stats->alloc += m_colMax;
-    if (m_stats->alloc > m_stats->peakAlloc) {
-      m_stats->peakAlloc = m_stats->alloc;
     }
 
     m_row++;
@@ -183,60 +183,7 @@ void *SmartAllocatorImpl::allocHelper() {
   }
   char *ret = m_blocks[m_row] + m_col;
   m_col += m_itemSize;
-#ifdef SMART_ALLOCATOR_STACKTRACE
-  {
-    Lock lock(s_st_mutex);
-    bool enabled = StackTrace::Enabled;
-    StackTrace::Enabled = true;
-    s_st_allocs.operator[](ret);
-    StackTrace::Enabled = enabled;
-  }
-#endif
   return ret;
-}
-
-void SmartAllocatorImpl::checkMemUsage() {
-  int64 prevPeakUsage = m_stats->peakUsage;
-  m_stats->peakUsage = m_stats->usage;
-  if (m_stats->maxBytes > 0 && m_stats->peakUsage > m_stats->maxBytes &&
-      prevPeakUsage <= m_stats->maxBytes) {
-    RequestInjectionData &data = ThreadInfo::s_threadInfo.get()->
-                                   m_reqInjectionData;
-    data.surpriseMutex.lock();
-    data.memExceeded = true;
-    data.surprised = true;
-    data.surpriseMutex.unlock();
-  }
-}
-
-void SmartAllocatorImpl::dealloc(void *obj) {
-  if (obj) {
-#ifdef SMART_ALLOCATOR_STACKTRACE
-    if (!isValid(obj)) {
-      Lock lock(s_st_mutex);
-      if (s_st_allocs.find(obj) != s_st_allocs.end()) {
-        printf("Object %p was allocated from a different thread: %s\n",
-               obj, s_st_allocs[obj].toString().c_str());
-      } else {
-        printf("Object %p was not smart allocated\n", obj);
-      }
-    }
-#endif
-    ASSERT(isValid(obj));
-    m_freelist.push_back(obj);
-#ifdef SMART_ALLOCATOR_STACKTRACE
-    {
-      Lock lock(s_st_mutex);
-      bool enabled = StackTrace::Enabled;
-      StackTrace::Enabled = true;
-      s_st_deallocs.operator[](obj);
-      StackTrace::Enabled = enabled;
-    }
-#endif
-
-    ASSERT(m_stats);
-    m_stats->usage -= m_itemSize;
-  }
 }
 
 bool SmartAllocatorImpl::isValid(void *obj) const {
@@ -250,14 +197,10 @@ bool SmartAllocatorImpl::isValid(void *obj) const {
 #endif
 
     // Check obj is indeed from a slab.
-    unsigned int size = m_blocks.size();
-    for (unsigned int i = 0; i < size; i++) {
-      char *block = m_blocks[i];
-      if (obj >= block && obj < block + m_colMax &&
-          (((char*)obj - block) % m_itemSize) == 0) {
-        return true;
-      }
-    }
+    int idx = findIndex(m_blocks, m_blockIndex, (int64)obj, m_colMax);
+    char *block = m_blocks[idx];
+    return obj >= block && obj < block + m_colMax &&
+           (((char*)obj - block) % m_itemSize) == 0;
   }
   return false;
 }
@@ -380,6 +323,7 @@ void SmartAllocatorImpl::rollbackObjects(LinearAllocator &allocator) {
     newMultiplier >>= 1;
   }
 
+  m_blockIndex.clear();
   if (m_backupBlocks.empty()) {
     // this happens when SmartAllocator was created after checkpoint was taken
     ASSERT(m_row == 0);
@@ -391,8 +335,10 @@ void SmartAllocatorImpl::rollbackObjects(LinearAllocator &allocator) {
     }
     m_blocks.resize(1);
     if (m_multiplier != newMultiplier) {
-      m_blocks[0] = (char *)realloc(m_blocks[0], m_colMax * newMultiplier);
+      char *p = (char *)realloc(m_blocks[0], m_colMax * newMultiplier);
+      m_blocks[0] = p;
     }
+    m_blockIndex[((int64)m_blocks[0]) / m_colMax] = 0;
 
     m_multiplier = newMultiplier;
     m_allocatedBlocks = m_multiplier - 1;
@@ -403,6 +349,9 @@ void SmartAllocatorImpl::rollbackObjects(LinearAllocator &allocator) {
     }
     m_blocks.resize(m_backupBlocks.size());
     copyMemoryBlocks(m_blocks, m_backupBlocks, m_colChecked, m_colMax);
+    for (unsigned i = 0; i < m_blocks.size(); i++) {
+      m_blockIndex[((int64)m_blocks[i]) / m_colMax] = i;
+    }
 
     // restore variable sized memory
     if (((m_flag & RestoreDisabled) == 0)) {
@@ -513,35 +462,14 @@ void SmartAllocatorImpl::checkMemory(bool detailed) {
   }
 }
 
-void SmartAllocatorImpl::prepareIterator(BlockIndexMap &blockIndex,
-                                         FreeMap &freeMap) {
-  ASSERT(blockIndex.empty());
+void SmartAllocatorImpl::prepareIterator(FreeMap &freeMap) {
   ASSERT(freeMap.empty());
-
   freeMap.resize(m_blocks.size() * m_itemCount);
-  for (unsigned int i = 0; i < m_blocks.size(); i++) {
-    int64 p = (int64)m_blocks[i];
-    blockIndex[p / m_colMax] = i; // blocks never overlap
-  }
   for (FreeList::iterator it = m_freelist.begin(); it != m_freelist.end();
        ++it) {
     int64 freed = (int64)(*it);
-    int64 firstHit = freed / m_colMax;
-    if (blockIndex.find(firstHit) != blockIndex.end()) {
-      int idx = blockIndex[firstHit];
-      if ((int64)m_blocks[idx] <= freed) {
-        // no double free!
-        ASSERT(!freeMap.test(idx * m_itemCount +
-                             (freed - (int64)m_blocks[idx]) / m_itemSize));
-        freeMap.set(idx * m_itemCount +
-                    (freed - (int64)m_blocks[idx]) / m_itemSize);
-        continue;
-      }
-    }
-    int64 secondHit = firstHit - 1;
-    ASSERT(blockIndex.find(secondHit) != blockIndex.end() &&
-           (int64)m_blocks[blockIndex[secondHit]] <= freed);
-    int idx = blockIndex[secondHit];
+    int idx = findIndex(m_blocks, m_blockIndex, freed, m_colMax);
+
     // no double free!
     ASSERT(!freeMap.test(idx * m_itemCount +
                          (freed - (int64)m_blocks[idx]) / m_itemSize));
@@ -563,7 +491,6 @@ PointerIterator::PointerIterator(SmartAllocatorImpl *allocator)
 }
 
 void SmartAllocatorImpl::PointerIterator::clear() {
-  m_blockIndex.clear();
   m_freeMap.clear();
   m_prepared = false;
   m_px = NULL;
@@ -574,7 +501,7 @@ void SmartAllocatorImpl::PointerIterator::clear() {
 
 void SmartAllocatorImpl::PointerIterator::begin() {
   if (!m_prepared) {
-    m_allocator->prepareIterator(m_blockIndex, m_freeMap);
+    m_allocator->prepareIterator(m_freeMap);
     m_prepared = true;
   }
 

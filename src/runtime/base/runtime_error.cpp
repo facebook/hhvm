@@ -87,7 +87,7 @@ static int64 g_warning_counter = 0;
 
 void raise_warning(const std::string &msg) {
   if (RuntimeOption::WarningFrequency <= 0 ||
-      (++g_warning_counter) % RuntimeOption::WarningFrequency != 0) {
+      (g_warning_counter++) % RuntimeOption::WarningFrequency != 0) {
     return;
   }
   int errnum = ErrorConstants::WARNING;
@@ -103,7 +103,7 @@ void raise_warning(const std::string &msg) {
 void raise_warning(const char *fmt, ...) {
   std::string msg;
   if (RuntimeOption::WarningFrequency <= 0 ||
-      (++g_warning_counter) % RuntimeOption::WarningFrequency != 0) {
+      (g_warning_counter++) % RuntimeOption::WarningFrequency != 0) {
     return;
   }
   int errnum = ErrorConstants::WARNING;
@@ -124,7 +124,7 @@ static int64 g_notice_counter = 0;
 
 void raise_notice(const std::string &msg) {
   if (RuntimeOption::NoticeFrequency <= 0 ||
-      (++g_notice_counter) % RuntimeOption::NoticeFrequency != 0) {
+      (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
     return;
   }
   int errnum = ErrorConstants::NOTICE;
@@ -140,7 +140,7 @@ void raise_notice(const std::string &msg) {
 void raise_notice(const char *fmt, ...) {
   std::string msg;
   if (RuntimeOption::NoticeFrequency <= 0 ||
-      (++g_notice_counter) % RuntimeOption::NoticeFrequency != 0) {
+      (g_notice_counter++) % RuntimeOption::NoticeFrequency != 0) {
     return;
   }
   int errnum = ErrorConstants::NOTICE;

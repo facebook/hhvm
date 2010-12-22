@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 1555 */
+/* SRC: classes/reflection.php line 1563 */
 class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   public:
 

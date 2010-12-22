@@ -1321,7 +1321,11 @@ class ReflectionProperty implements Reflector {
 
   public function __construct($cls, $name) {
     if ($cls && $name) {
-      if (!is_object($cls)) $cls = new ReflectionClass($cls);
+      if (!is_object($cls)) {
+        $cls = new ReflectionClass($cls);
+      } else {
+        $cls = new ReflectionClass(get_class($cls));
+      }
       $prop = $cls->getProperty($name);
       if ($prop) {
         $this->info  = $prop->info;
@@ -1348,7 +1352,11 @@ class ReflectionProperty implements Reflector {
  *                     do the opposite.
  */
   public static function export($cls, $name, $ret) {
-    if (!is_object($cls)) $cls = new ReflectionClass($cls);
+    if (!is_object($cls)) {
+      $cls = new ReflectionClass($cls);
+    } else {
+      $cls = new ReflectionClass(get_class($cls));
+    }
     $obj = $cls->getProperty($name);
     $str = (string)$obj;
     if ($ret) {
@@ -1573,7 +1581,11 @@ implements Reflector {
       }
     }
     if ($cls && $name) {
-      if (!is_object($cls)) $cls = new ReflectionClass($cls);
+      if (!is_object($cls)) {
+        $cls = new ReflectionClass($cls);
+      } else {
+        $cls = new ReflectionClass(get_class($cls));
+      }
       $method = $cls->getMethod($name);
       if ($method) {
         $this->info  = $method->info;
@@ -1605,7 +1617,11 @@ implements Reflector {
  *                     returned.
  */
   public static function export($cls, $name, $ret) {
-    if (!is_object($cls)) $cls = new ReflectionClass($cls);
+    if (!is_object($cls)) {
+      $cls = new ReflectionClass($cls);
+    } else {
+      $cls = new ReflectionClass(get_class($cls));
+    }
     $obj = $cls->getMethod($name);
     $str = (string)$obj;
     if ($ret) {

@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 1809 */
+/* SRC: classes/reflection.php line 1825 */
 class c_ReflectionExtension : public ExtObjectData {
   public:
 

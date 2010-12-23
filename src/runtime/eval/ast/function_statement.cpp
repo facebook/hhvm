@@ -117,6 +117,10 @@ void Parameter::dump(std::ostream &out) const {
   }
 }
 
+std::string Parameter::name() const {
+  return m_name->getStatic().data();
+}
+
 void Parameter::getInfo(ClassInfo::ParameterInfo &info,
                         VariableEnvironment &env) const {
   int attr = 0;
@@ -178,15 +182,26 @@ void FunctionStatement::init(void *parser, bool ref,
   m_hasCallToGetArgs = has_call_to_get_args;
 
   bool seenOptional = false;
+  set<string> names;
   for (unsigned int i = 0; i < m_params.size(); i++) {
+    ParameterPtr param = m_params[i];
+
+    std::string name = param->name();
+    if (names.find(name) != names.end()) {
+      raise_notice("redundant parameter name: $%s", name.c_str());
+    } else {
+      names.insert(name);
+    }
+
     if (!seenOptional) {
-      if (m_params[i]->isOptional()) {
+      if (param->isOptional()) {
         seenOptional = true;
       }
-    } else if (!m_params[i]->isOptional()) {
-      m_params[i]->addNullDefault(parser);
+    } else if (!param->isOptional()) {
+      raise_notice("required after optional parameter: $%s", name.c_str());
+      param->addNullDefault(parser);
     }
-    if (m_params[i]->isRef()) m_callInfo.m_refFlags |= 1 << i;
+    if (param->isRef()) m_callInfo.m_refFlags |= 1 << i;
   }
 }
 

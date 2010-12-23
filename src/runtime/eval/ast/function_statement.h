@@ -50,6 +50,8 @@ public:
   void addNullDefault(void *parser);
   int argNum() const { return m_argNum; }
   const std::string &type() const { return m_type; }
+  std::string name() const;
+
 private:
   std::string m_type;
   NamePtr m_name;

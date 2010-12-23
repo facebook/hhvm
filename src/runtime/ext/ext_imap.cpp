@@ -772,7 +772,22 @@ Variant f_imap_bodystruct(CObjRef imap_stream, int64 msg_number,
 }
 
 Variant f_imap_check(CObjRef imap_stream) {
-  throw NotImplementedException(__func__);
+  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  if (mail_ping(obj->m_stream) == NIL) {
+    return false;
+  }
+  if (obj->m_stream && obj->m_stream->mailbox) {
+    Object ret(NEW(c_stdClass)());
+    char date[100];
+    rfc822_date(date);
+    ret.o_set("Date", String(date, CopyString));
+    ret.o_set("Driver", String(obj->m_stream->dtb->name, CopyString));
+    ret.o_set("Mailbox", String(obj->m_stream->mailbox, CopyString));
+    ret.o_set("Nmsgs", (int64)obj->m_stream->nmsgs);
+    ret.o_set("Recent", (int64)obj->m_stream->recent);
+    return ret;
+  }
+  return false;
 }
 
 bool f_imap_clearflag_full(CObjRef imap_stream, CStrRef sequence, CStrRef flag,

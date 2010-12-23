@@ -371,16 +371,12 @@ StaticString FiberAsyncFuncHandle::s_class_name("FiberAsyncFuncHandle");
 
 static JobQueueDispatcher<FiberJob*, FiberWorker> *s_dispatcher;
 
-void FiberAsyncFunc::Stop() {
+void FiberAsyncFunc::Restart() {
   if (s_dispatcher) {
     s_dispatcher->stop();
     delete s_dispatcher;
     s_dispatcher = NULL;
   }
-}
-
-void FiberAsyncFunc::Restart() {
-  Stop();
   if (RuntimeOption::FiberCount > 0) {
     s_dispatcher = new JobQueueDispatcher<FiberJob*, FiberWorker>
       (RuntimeOption::FiberCount, RuntimeOption::ServerThreadRoundRobin,

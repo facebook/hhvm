@@ -121,7 +121,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
         if (content_length > RuntimeOption::MaxPostSize) {
           // $_POST and $_FILES are empty
           Logger::Warning("POST Content-Length of %d bytes exceeds "
-                          "the limit of %ld bytes",
+                          "the limit of %lld bytes",
                           content_length, RuntimeOption::MaxPostSize);
           needDelete = read_all_post_data(transport, data, size);
         } else {

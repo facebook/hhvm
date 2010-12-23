@@ -107,7 +107,7 @@ public:
   static bool ImplicitFlush;
   static bool EnableEarlyFlush;
   static bool ForceChunkedEncoding;
-  static int MaxPostSize;
+  static int64 MaxPostSize;
   static bool AlwaysPopulateRawPostData;
   static int64 UploadMaxFileSize;
   static std::string UploadTmpDir;

@@ -893,6 +893,11 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
 }
 
 void Parser::onClassStart(int type, Token &name, Token *parent) {
+  if (name.text() == "self" || name.text() == "parent") {
+    raise_error("Cannot use '%s' as class name as it is reserved "
+                "in %s on line %d", name.text().c_str(), file(), line1());
+  }
+
   ClassStatementPtr cs = NEW_STMT(Class, name.text(),
       parent ? parent->text() : "", m_scanner.detachDocComment());
   pushClass(cs);

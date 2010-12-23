@@ -369,6 +369,14 @@ void handle_destructor_exception() {
 }
 
 void execute_command_line_begin(int argc, char **argv, int xhprof) {
+  StackTraceNoHeap::AddExtraLogging("ThreadType", "CLI");
+  string args;
+  for (int i = 0; i < argc; i++) {
+    if (i) args += " ";
+    args += argv[i];
+  }
+  StackTraceNoHeap::AddExtraLogging("Arguments", args.c_str());
+
   hphp_session_init();
   ExecutionContext *context = g_context.get();
   context->obSetImplicitFlush(true);

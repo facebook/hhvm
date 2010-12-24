@@ -472,10 +472,13 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           cg_printf("void");
         }
         string origFuncName = getOriginalFullName();
-        string funcSection = Option::FunctionSections[origFuncName];
-        if (!funcSection.empty()) {
-          cg_printf(" __attribute__ ((section (\".text.%s\")))",
-                    funcSection.c_str());
+        if (Option::FunctionSections.find(origFuncName) !=
+            Option::FunctionSections.end()) {
+          string funcSection = Option::FunctionSections[origFuncName];
+          if (!funcSection.empty()) {
+            cg_printf(" __attribute__ ((section (\".text.%s\")))",
+                      funcSection.c_str());
+          }
         }
 
         if (m_name == "__offsetget_lval") {

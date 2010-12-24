@@ -38,7 +38,7 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
   snprintf(buf, sizeof(buf), "%u", Process::GetThreadPid());
   hdf["tpid"] = string(buf);
 
-  hdf["get"] = (transport->getMethod() == GET);
+  hdf["cmd"] = transport->getMethod();
   hdf["url"] = transport->getUrl();
   hdf["remote_host"] = transport->getRemoteHost();
 
@@ -101,7 +101,7 @@ const void *ReplayTransport::getPostData(int &size) {
 }
 
 Transport::Method ReplayTransport::getMethod() {
-  return m_hdf["get"].getBool() ? GET : POST;
+  return (Transport::Method)m_hdf["cmd"].getInt32();
 }
 
 std::string ReplayTransport::getHeader(const char *name) {

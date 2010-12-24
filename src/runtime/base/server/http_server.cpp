@@ -123,7 +123,7 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
 
   if (!RuntimeOption::StartupDocument.empty()) {
     Hdf hdf;
-    hdf["get"] = 1;
+    hdf["cmd"] = Transport::GET;
     hdf["url"] = RuntimeOption::StartupDocument;
     hdf["remote_host"] = RuntimeOption::ServerIP;
 

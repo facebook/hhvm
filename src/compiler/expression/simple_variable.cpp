@@ -112,7 +112,8 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
     if (m_sym && !m_sym->isSystem() &&
         !(getContext() &
           (LValue|RefValue|RefParameter|UnsetContext|ExistContext)) &&
-        m_sym->getDeclaration().get() == this) {
+        m_sym->getDeclaration().get() == this &&
+        !getScope()->is(BlockScope::ClassScope)) {
       Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
     }
   }

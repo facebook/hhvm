@@ -97,6 +97,8 @@ bool TestCodeError::TestUseUndeclaredConstant() {
 
 bool TestCodeError::TestUnknownClass() {
   VE(UnknownClass, "<?php $a = new T();");
+
+  VEN(UnknownClass, "<?php class A { function foo(self $a) {}}");
   return true;
 }
 
@@ -230,17 +232,17 @@ bool TestCodeError::TestMissingObjectContext() {
   VE(MissingObjectContext,
      "<?php class A { public $a = 123; } print A::$a;");
 
-  VE(MissingObjectContext,
-     "<?php class A { public function a() {} } print A::a();");
-
-  VE(MissingObjectContext,
-     "<?php class A { public function a() {} } "
-     "class B { public function b() { A::a();}}");
-
   // negative case
   VEN(MissingObjectContext,
       "<?php class A { public function a() {} } "
       "class B extends A { public function b() { A::a();}}");
+
+  VEN(MissingObjectContext,
+      "<?php class A { public function a() {} } print A::a();");
+
+  VEN(MissingObjectContext,
+      "<?php class A { public function a() {} } "
+      "class B { public function b() { A::a();}}");
 
   return true;
 }

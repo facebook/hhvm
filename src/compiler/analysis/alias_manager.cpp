@@ -1094,6 +1094,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
           Symbol *s = spc(SimpleVariable, e)->getSymbol();
           if (s && !s->isParameter()) {
             rep = e->makeConstant(m_arp, "null");
+            Compiler::Error(Compiler::UseUndeclaredVariable, e);
             if (m_variables->getAttribute(VariableTable::ContainsCompact)) {
               rep = ExpressionPtr(
                 new UnaryOpExpression(e->getScope(), e->getLocation(),

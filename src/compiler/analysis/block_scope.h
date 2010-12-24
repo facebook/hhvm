@@ -108,12 +108,6 @@ public:
   int getLoopNestedLevel() const { return m_loopNestedLevel;}
 
   /**
-   * Helpers for conditional includes.
-   */
-  void setIncludeLevel(int incLevel) { m_incLevel = incLevel;}
-  int getIncludeLevel() const { return m_incLevel;}
-
-  /**
    * Helpers for parsing class functions and variables.
    */
   ModifierExpressionPtr setModifiers(ModifierExpressionPtr modifiers);
@@ -179,7 +173,6 @@ protected:
   BlockScopeRawPtr m_outerScope;
 
   int m_loopNestedLevel;
-  int m_incLevel;
   ModifierExpressionPtr m_modifiers;
   StatementListPtr m_includes;
   int m_pass;

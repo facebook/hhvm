@@ -899,9 +899,6 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
 
   FunctionScopePtr func;
 
-  // avoid raising both MissingObjectContext and UnknownFunction
-  bool errorFlagged = false;
-
   if (!m_class && m_className.empty()) {
     if (!m_dynamicInvoke) {
       func = ar->findFunction(m_name);
@@ -939,10 +936,6 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
            !clsThis->derivesFrom(ar, m_className, true, false)) ||
           funcThis->isStatic()) {
         func->setDynamic();
-        if (getScope()->isFirstPass()) {
-          Compiler::Error(Compiler::MissingObjectContext, self);
-          errorFlagged = true;
-        }
       }
     }
   }
@@ -957,7 +950,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         setAttribute(VariableTable::NeedGlobalPointer);
     } else if (!m_dynamicInvoke &&
                (!m_classScope || !m_classScope->derivesFromRedeclaring()) &&
-               !errorFlagged && getScope()->isFirstPass()) {
+               getScope()->isFirstPass()) {
       Compiler::Error(Compiler::UnknownFunction, self);
     }
     if (m_params) {

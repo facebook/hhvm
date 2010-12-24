@@ -143,66 +143,6 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultPtr ar,
   }
   setBlockScope(funcScope);
 
-  // TODO: this may have to expand to a concept of "virtual" functions...
-  if (method) {
-    funcScope->disableInline();
-    if (m_name.length() > 2 && m_name.substr(0,2) == "__") {
-      bool magic = true;
-      int paramCount = 0;
-      if (m_name == "__destruct") {
-        funcScope->setOverriding(Type::Variant);
-      } else if (m_name == "__call") {
-        funcScope->setOverriding(Type::Variant, Type::String, Type::Array);
-        paramCount = 2;
-      } else if (m_name == "__set") {
-        funcScope->setOverriding(Type::Variant, Type::String, Type::Variant);
-        paramCount = 2;
-      } else if (m_name == "__get") {
-        funcScope->setOverriding(Type::Variant, Type::String);
-        paramCount = 1;
-      } else if (m_name == "__isset") {
-        funcScope->setOverriding(Type::Boolean, Type::String);
-        paramCount = 1;
-      } else if (m_name == "__unset") {
-        funcScope->setOverriding(Type::Variant, Type::String);
-        paramCount = 1;
-      } else if (m_name == "__sleep") {
-        funcScope->setOverriding(Type::Variant);
-      } else if (m_name == "__wakeup") {
-        funcScope->setOverriding(Type::Variant);
-      } else if (m_name == "__set_state") {
-        funcScope->setOverriding(Type::Variant, Type::Variant);
-        paramCount = 1;
-      } else if (m_name == "__tostring") {
-        funcScope->setOverriding(Type::String);
-      } else if (m_name == "__clone") {
-        funcScope->setOverriding(Type::Variant);
-      } else {
-        paramCount = -1;
-        if (m_name != "__construct") {
-          magic = false;
-        }
-      }
-      if (paramCount >= 0 && paramCount != maxParam) {
-        Compiler::Error(Compiler::InvalidMagicMethod, self);
-        magic = false;
-      }
-      if (magic) funcScope->setMagicMethod();
-    }
-    // ArrayAccess methods
-    else if (m_name.length() > 6 && m_name.substr(0, 6) == "offset") {
-      if (m_name == "offsetexists") {
-        funcScope->setOverriding(Type::Boolean, Type::Variant);
-      } else if (m_name == "offsetget") {
-        funcScope->setOverriding(Type::Variant, Type::Variant);
-      } else if (m_name == "offsetset") {
-        funcScope->setOverriding(Type::Variant, Type::Variant, Type::Variant);
-      } else if (m_name == "offsetunset") {
-        funcScope->setOverriding(Type::Variant, Type::Variant);
-      }
-    }
-  }
-
   return funcScope;
 }
 
@@ -210,7 +150,6 @@ void MethodStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   ClassScopePtr classScope = dynamic_pointer_cast<ClassScope>(scope);
   FunctionScopeRawPtr fs = getFunctionScope();
 
-  fs->setParamCounts(ar, -1, -1);
   classScope->addFunction(ar, fs);
 
   if (m_name == "__construct") {
@@ -267,15 +206,6 @@ void MethodStatement::addParamRTTI(AnalysisResultPtr ar) {
 void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   FunctionScopeRawPtr funcScope = getFunctionScope();
 
-  if (ar->isAnalyzeInclude()) {
-    if (funcScope->isSepExtension() ||
-        BuiltinSymbols::IsDeclaredDynamic(m_name) ||
-        Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
-      funcScope->setDynamic();
-    }
-  }
-
-  funcScope->setIncludeLevel(ar->getIncludeLevel());
   if (m_params) {
     m_params->analyzeProgram(ar);
     if (Option::GenRTTIProfileData &&
@@ -286,6 +216,71 @@ void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   if (m_stmt) m_stmt->analyzeProgram(ar);
 
   if (ar->isAnalyzeInclude()) {
+    funcScope->setParamCounts(ar, -1, -1);
+    if (funcScope->isSepExtension() ||
+        BuiltinSymbols::IsDeclaredDynamic(m_name) ||
+        Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
+      funcScope->setDynamic();
+    }
+    // TODO: this may have to expand to a concept of "virtual" functions...
+    if (m_method) {
+      funcScope->disableInline();
+      if (m_name.length() > 2 && m_name.substr(0,2) == "__") {
+        bool magic = true;
+        int paramCount = 0;
+        if (m_name == "__destruct") {
+          funcScope->setOverriding(Type::Variant);
+        } else if (m_name == "__call") {
+          funcScope->setOverriding(Type::Variant, Type::String, Type::Array);
+          paramCount = 2;
+        } else if (m_name == "__set") {
+          funcScope->setOverriding(Type::Variant, Type::String, Type::Variant);
+          paramCount = 2;
+        } else if (m_name == "__get") {
+          funcScope->setOverriding(Type::Variant, Type::String);
+          paramCount = 1;
+        } else if (m_name == "__isset") {
+          funcScope->setOverriding(Type::Boolean, Type::String);
+          paramCount = 1;
+        } else if (m_name == "__unset") {
+          funcScope->setOverriding(Type::Variant, Type::String);
+          paramCount = 1;
+        } else if (m_name == "__sleep") {
+          funcScope->setOverriding(Type::Variant);
+        } else if (m_name == "__wakeup") {
+          funcScope->setOverriding(Type::Variant);
+        } else if (m_name == "__set_state") {
+          funcScope->setOverriding(Type::Variant, Type::Variant);
+          paramCount = 1;
+        } else if (m_name == "__tostring") {
+          funcScope->setOverriding(Type::String);
+        } else if (m_name == "__clone") {
+          funcScope->setOverriding(Type::Variant);
+        } else {
+          paramCount = -1;
+          if (m_name != "__construct") {
+            magic = false;
+          }
+        }
+        if (paramCount >= 0 && paramCount != funcScope->getMaxParamCount()) {
+          Compiler::Error(Compiler::InvalidMagicMethod, shared_from_this());
+          magic = false;
+        }
+        if (magic) funcScope->setMagicMethod();
+      }
+      // ArrayAccess methods
+      else if (m_name.length() > 6 && m_name.substr(0, 6) == "offset") {
+        if (m_name == "offsetexists") {
+          funcScope->setOverriding(Type::Boolean, Type::Variant);
+        } else if (m_name == "offsetget") {
+          funcScope->setOverriding(Type::Variant, Type::Variant);
+        } else if (m_name == "offsetset") {
+          funcScope->setOverriding(Type::Variant, Type::Variant, Type::Variant);
+        } else if (m_name == "offsetunset") {
+          funcScope->setOverriding(Type::Variant, Type::Variant);
+        }
+      }
+    }
     FunctionScope::RecordRefParamInfo(m_name, funcScope);
   }
 }

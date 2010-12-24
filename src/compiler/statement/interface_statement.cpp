@@ -120,7 +120,6 @@ void InterfaceStatement::checkVolatile(AnalysisResultPtr ar) {
 void InterfaceStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
   if (m_stmt) {
-    classScope->setIncludeLevel(ar->getIncludeLevel());
     m_stmt->analyzeProgram(ar);
   }
   ar->recordClassSource(m_name, m_loc, getFileScope()->getName());

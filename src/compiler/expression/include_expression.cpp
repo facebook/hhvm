@@ -221,7 +221,8 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (!m_include.empty()) {
     if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
       ar->parseOnDemand(m_include);
-    } else if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
+    } else if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
+               ar->getPhase() == AnalysisResult::AnalyzeFinal) {
       analyzeInclude(ar, m_include);
     }
   }

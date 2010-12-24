@@ -63,14 +63,30 @@ void ParameterExpression::defaultToNull(AnalysisResultPtr ar) {
 // static analysis functions
 
 void ParameterExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (!m_type.empty()) addUserClass(ar, m_type);
-
   if (m_defaultValue) m_defaultValue->analyzeProgram(ar);
 
   if (ar->isAnalyzeInclude()) {
-    // Have to use non const ref params for magic methods
+    if (!m_type.empty()) {
+      if (m_type == "self") {
+        ClassScopeRawPtr cls = getClassScope();
+        if (cls) {
+          m_type = cls->getName();
+        }
+      } else if (m_type == "parent") {
+        ClassScopeRawPtr cls = getClassScope();
+        if (cls && !cls->getParent().empty()) {
+          m_type = cls->getParent();
+        }
+      }
+    }
     FunctionScopePtr fs = getFunctionScope();
     fs->getVariables()->addParam(m_name, TypePtr(), ar, ExpressionPtr());
+  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    if (!m_type.empty()) {
+      addUserClass(ar, m_type);
+    }
+    // Have to use non const ref params for magic methods
+    FunctionScopePtr fs = getFunctionScope();
     if (fs->isMagicMethod() || fs->getName() == "offsetget") {
       fs->getVariables()->addLvalParam(m_name);
     }

@@ -66,9 +66,6 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
     m_variables->forceVariants(ar, VariableTable::AnyVars);
     setReturnType(ar, Type::Variant);
   }
-  if (!method) {
-    setParamCounts(ar, -1, -1);
-  }
 
   if (m_refReturn) {
     m_returnType = Type::Variant;

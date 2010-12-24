@@ -21,8 +21,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+FiberReferenceMap::FiberReferenceMap() : m_mainRefVariants(NULL) {
+}
+
 void FiberReferenceMap::reset() {
-  m_mainRefVariants.reset();
+  if (m_mainRefVariants) {
+    DELETE(Array)(m_mainRefVariants);
+    m_mainRefVariants = NULL;
+  }
 }
 
 void FiberReferenceMap::insert(ObjectData *src, ObjectData *copy) {
@@ -36,7 +42,14 @@ void FiberReferenceMap::insert(Variant *src, Variant *copy, bool marshaling) {
   // maintain "copy" pointer able to map back to original Variant*.
   copy->incRefCount();
   Variant tmp(copy);
-  (marshaling ? m_fiberRefVariants : m_mainRefVariants).append(ref(tmp));
+  if (marshaling) {
+    m_fiberRefVariants.append(ref(tmp));
+  } else {
+    if (m_mainRefVariants == NULL) {
+      m_mainRefVariants = NEW(Array)();
+    }
+    m_mainRefVariants->append(ref(tmp));
+  }
 }
 
 void FiberReferenceMap::insert(void *src, void *copy) {
@@ -162,8 +175,10 @@ void FiberReferenceMap::unmarshalDynamicGlobals
       strategy = (FiberAsyncFunc::Strategy)it->second;
     }
 
-    Variant &dval = dest.lvalAt(key.fiberCopy());
-    unmarshal(dval, val, strategy);
+    if (strategy != FiberAsyncFunc::GlobalStateIgnore) {
+      Variant &dval = dest.lvalAt(key.fiberCopy());
+      unmarshal(dval, val, strategy);
+    }
   }
 }
 

@@ -81,8 +81,19 @@ protected:
   friend class FiberReadLock;
   friend class FiberWriteLock;
   int m_fiberCount; // how many fibers are sharing me
-  ReadWriteMutex m_fiberMutex;
+  mutable ReadWriteMutex m_fiberMutex;
 };
+
+#define IMPLEMENT_FIBER_SAFE_COUNTABLE          \
+  public:                                       \
+  void incRefCount() const {                    \
+    FiberLock lock(this);                       \
+    Countable::incRefCount();                   \
+  }                                             \
+  int decRefCount() const {                     \
+    FiberLock lock(this);                       \
+    return Countable::decRefCount();            \
+  }                                             \
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -98,7 +109,7 @@ protected:
  */
 class FiberReadLock {
 public:
-  FiberReadLock(FiberSafe *obj) : m_obj(obj) {
+  FiberReadLock(const FiberSafe *obj) : m_obj(obj) {
     if (m_obj->m_fiberCount) m_obj->m_fiberMutex.acquireRead();
   }
   ~FiberReadLock() {
@@ -106,12 +117,12 @@ public:
   }
 
 private:
-  FiberSafe *m_obj;
+  const FiberSafe *m_obj;
 };
 
 class FiberWriteLock {
 public:
-  FiberWriteLock(FiberSafe *obj) : m_obj(obj) {
+  FiberWriteLock(const FiberSafe *obj) : m_obj(obj) {
     if (m_obj->m_fiberCount) m_obj->m_fiberMutex.acquireWrite();
   }
   ~FiberWriteLock() {
@@ -119,7 +130,7 @@ public:
   }
 
 private:
-  FiberSafe *m_obj;
+  const FiberSafe *m_obj;
 };
 typedef FiberWriteLock FiberLock;
 

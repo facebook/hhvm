@@ -29,11 +29,7 @@ inline int f_pcntl_alarm(int seconds) {
 }
 void f_pcntl_exec(CStrRef path, CArrRef args = null_array, CArrRef envs = null_array);
 
-inline int f_pcntl_fork() {
-  std::cout.flush();
-  std::cerr.flush();
-  return fork();
-}
+int f_pcntl_fork();
 Variant f_pcntl_getpriority(int pid = 0, int process_identifier = 0);
 bool f_pcntl_setpriority(int priority, int pid = 0,
                          int process_identifier = 0);

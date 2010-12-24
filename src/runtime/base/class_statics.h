@@ -32,7 +32,7 @@ class VariableEnvironment;
 class ClassStatics : public Countable {
 public:
   ClassStatics(int redecId);
-  ClassStatics(const std::string& name);
+  ClassStatics(litstr name);
   virtual ~ClassStatics() {}
 
   int getRedeclaringId() const {
@@ -58,8 +58,10 @@ public:
   void destruct() {} // artifact when not deriving from ObjectData
 
 private:
-  String m_msg;
+  const char *m_clsname;
   int m_redecId;
+
+  void throwUnknownClass();
 };
 
 typedef SmartPtr<ClassStatics> ClassStaticsPtr;

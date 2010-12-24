@@ -97,11 +97,10 @@ public:
         DELETE(Variant)(m_unmarshaled_params);
         m_unmarshaled_function = NULL;
         m_unmarshaled_params = NULL;
+        m_refMap.reset();
       }
       // else not safe to touch these members because thread has moved to
       // next request after deleting/collecting all these dangling ones
-
-      m_refMap.reset();
     }
   }
 
@@ -371,12 +370,22 @@ StaticString FiberAsyncFuncHandle::s_class_name("FiberAsyncFuncHandle");
 
 static JobQueueDispatcher<FiberJob*, FiberWorker> *s_dispatcher;
 
-void FiberAsyncFunc::Restart() {
+void FiberAsyncFunc::Disable() {
+  // Intentionally not deleting s_dispatcher. This is a leak, but since we
+  // only do this during forking, it's fine.
+  s_dispatcher = NULL;
+}
+
+void FiberAsyncFunc::Stop() {
   if (s_dispatcher) {
     s_dispatcher->stop();
     delete s_dispatcher;
     s_dispatcher = NULL;
   }
+}
+
+void FiberAsyncFunc::Restart() {
+  Stop();
   if (RuntimeOption::FiberCount > 0) {
     s_dispatcher = new JobQueueDispatcher<FiberJob*, FiberWorker>
       (RuntimeOption::FiberCount, RuntimeOption::ServerThreadRoundRobin,

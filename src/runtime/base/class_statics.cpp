@@ -24,39 +24,46 @@ namespace HPHP {
 IMPLEMENT_OBJECT_ALLOCATION(ClassStatics)
 ///////////////////////////////////////////////////////////////////////////////
 
-ClassStatics::ClassStatics(int redecId) : m_redecId(redecId) {
-  m_msg = "unknown class";
+ClassStatics::ClassStatics(int redecId) : m_clsname(NULL), m_redecId(redecId) {
 }
 
-ClassStatics::ClassStatics(const std::string& name) : m_redecId(-1) {
-  m_msg = "unknown class ";
-  m_msg += name.c_str();
+ClassStatics::ClassStatics(litstr name) : m_clsname(name), m_redecId(-1) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void ClassStatics::throwUnknownClass() {
+  if (m_clsname && *m_clsname) {
+    throw FatalErrorException(0, "unknown class %s", m_clsname);
+  } else {
+    throw FatalErrorException("unknown class ");
+  }
+}
+
 Variant ClassStatics::os_getInit(CStrRef s) {
-  throw FatalErrorException(m_msg);
+  throwUnknownClass();
+  return null;
 }
 
 Variant ClassStatics::os_get(CStrRef s) {
-  throw FatalErrorException(m_msg);
+  throwUnknownClass();
+  return null;
 }
 
 Variant &ClassStatics::os_lval(CStrRef s) {
-  throw FatalErrorException(m_msg);
+  throwUnknownClass();
+  throw 0; // suppress compiler error
 }
 
 Variant ClassStatics::os_invoke(const char *c, const char *s,
                                 CArrRef params, int64 hash /* = -1 */,
                                 bool fatal /* = true */) {
   if (fatal) {
-    throw FatalErrorException(m_msg);
-  } else {
-    raise_warning("call_user_func to non-existent method %s::%s",
-                    c, s);
-    return false;
+    throwUnknownClass();
   }
+
+  raise_warning("call_user_func to non-existent method %s::%s", c, s);
+  return false;
 }
 
 Object ClassStatics::create(CArrRef params, bool init /* = true */,
@@ -73,11 +80,13 @@ Object ClassStatics::create(CArrRef params, bool init /* = true */,
 }
 
 Object ClassStatics::createOnly(ObjectData* root /* = NULL */) {
-  throw FatalErrorException(m_msg);
+  throwUnknownClass();
+  return null_object;
 }
 
 Variant ClassStatics::os_constant(const char *s) {
-  throw FatalErrorException(m_msg);
+  throwUnknownClass();
+  return null;
 }
 
 Variant ClassStatics::os_invoke_from_eval
@@ -85,12 +94,11 @@ Variant ClassStatics::os_invoke_from_eval
  const Eval::FunctionCallExpression *call, int64 hash,
  bool fatal /* = true */) {
   if (fatal) {
-    throw FatalErrorException(m_msg);
-  } else {
-    raise_warning("call_user_func to non-existent method %s::%s",
-                    c, s);
-    return false;
+    throwUnknownClass();
   }
+
+  raise_warning("call_user_func to non-existent method %s::%s", c, s);
+  return false;
 }
 
 bool ClassStatics::os_get_call_info(MethodCallPackage &info,

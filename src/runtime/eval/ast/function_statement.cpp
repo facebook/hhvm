@@ -188,7 +188,8 @@ void FunctionStatement::init(void *parser, bool ref,
 
     std::string name = param->name();
     if (names.find(name) != names.end()) {
-      raise_notice("redundant parameter name: $%s", name.c_str());
+      raise_notice("%s:%d %s() has 2 parameters with the same name: $%s",
+                   m_loc.file, m_loc.line0, m_name.c_str(), name.c_str());
     } else {
       names.insert(name);
     }
@@ -198,7 +199,10 @@ void FunctionStatement::init(void *parser, bool ref,
         seenOptional = true;
       }
     } else if (!param->isOptional()) {
-      raise_notice("required after optional parameter: $%s", name.c_str());
+/*
+      raise_notice("%s:%d %s() has required parameter after optional one: $%s",
+                   m_loc.file, m_loc.line0, m_name.c_str(), name.c_str());
+*/
       param->addNullDefault(parser);
     }
     if (param->isRef()) m_callInfo.m_refFlags |= 1 << i;

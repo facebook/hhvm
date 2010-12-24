@@ -96,6 +96,23 @@ void f_pcntl_exec(CStrRef path, CArrRef args /* = null_array */,
   free(argv);
 }
 
+int f_pcntl_fork() {
+  if (strcmp(RuntimeOption::ExecutionMode, "srv") == 0) {
+    raise_error("forking is disallowed in server mode");
+    return -1;
+  }
+
+  std::cout.flush();
+  std::cerr.flush();
+  pid_t pid = fork();
+  if (pid == 0) {
+    // hzhao: I haven't found a good way to restart fiber threads in a forked
+    // children without causing any problems yet.
+    FiberAsyncFunc::Disable();
+  }
+  return pid;
+}
+
 Variant f_pcntl_getpriority(int pid /* = 0 */,
                             int process_identifier /* = 0 */) {
   if (pid == 0) {

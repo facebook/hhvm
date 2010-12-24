@@ -3404,10 +3404,45 @@ void AnalysisResult::outputCPPFiberGlobalState() {
     for (unsigned int i = 0; i < names.size(); i++) {
       const char *name = names[i].second.c_str();
       switch (type) {
+        case KindOfRedeclaredFunction:
+          cg_printf("if (g2->%s) g1->%s = g2->%s;\n", name, name, name);
+          break;
+        case KindOfRedeclaredClass:
+          if (strncmp(name, "cso_", 4)) {
+            cg_printf("if (g2->%s) g1->%s = g2->%s;\n", name, name, name);
+          } else {
+            cg_printf("if (g2->%s.get()) g1->%s = g2->%s;\n",name, name, name);
+          }
+          break;
+        case KindOfPseudoMain:
+        case KindOfVolatileClass:
+        case KindOfLazyStaticInitializer:
+          cg_printf("if (g2->%s) g1->%s = true;\n", name, name);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  for (int type = 0; type < GlobalSymbolTypeCount; type++) {
+    if (type == KindOfRedeclaredClassId) continue;
+
+    StringPairVec &names = symbols[type];
+    for (unsigned int i = 0; i < names.size(); i++) {
+      const char *name = names[i].second.c_str();
+      switch (type) {
+        case KindOfRedeclaredFunction:
+        case KindOfRedeclaredClass:
+        case KindOfPseudoMain:
+        case KindOfVolatileClass:
+        case KindOfLazyStaticInitializer:
+          break;
         case KindOfMethodStaticVariable:
+          cg_indentBegin("if (toBoolean(g2->inited_%s)) {", name);
           cg_printf("refMap.marshal(g1->inited_%s, g2->inited_%s);\n",
                     name, name);
           cg_printf("refMap.marshal(g1->%s, g2->%s);\n", name, name);
+          cg_indentEnd("}\n");
           break;
         default:
           cg_printf("refMap.marshal(g1->%s, g2->%s);\n", name, name);
@@ -3454,6 +3489,26 @@ void AnalysisResult::outputCPPFiberGlobalState() {
         case KindOfVolatileClass:
         case KindOfLazyStaticInitializer:
           cg_printf("if (g2->%s) g1->%s = true;\n", name, name);
+          break;
+        default:
+          break;
+      }
+      index++;
+    }
+  }
+  index = 0;
+  for (int type = 0; type < GlobalSymbolTypeCount; type++) {
+    if (type == KindOfRedeclaredClassId) continue;
+
+    StringPairVec &names = symbols[type];
+    for (unsigned int i = 0; i < names.size(); i++) {
+      const char *name = names[i].second.c_str();
+      switch (type) {
+        case KindOfRedeclaredFunction:
+        case KindOfRedeclaredClass:
+        case KindOfPseudoMain:
+        case KindOfVolatileClass:
+        case KindOfLazyStaticInitializer:
           break;
         case KindOfMethodStaticVariable:
           cg_indentBegin("if (toBoolean(g2->inited_%s)) {", name);

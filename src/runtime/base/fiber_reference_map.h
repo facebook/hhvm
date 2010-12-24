@@ -29,6 +29,7 @@ namespace HPHP {
  */
 class FiberReferenceMap {
 public:
+  FiberReferenceMap();
   void reset();
 
   void insert(ObjectData *src, ObjectData *copy);
@@ -69,7 +70,7 @@ private:
   PointerMap m_forward_references;
   PointerMap m_reverse_references;
 
-  Array m_mainRefVariants;
+  Array *m_mainRefVariants;
   Array m_fiberRefVariants;
 
   void insert(void *src, void *copy);

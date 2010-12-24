@@ -25,7 +25,9 @@ ThreadLocalManager ThreadLocalManager::s_manager;
 void ThreadLocalManager::OnThreadExit(void * p) {
   while (p != NULL) {
     ThreadLocalNode<void*> * pNode = (ThreadLocalNode<void*>*)p;
-    pNode->m_on_thread_exit_fn(p);
+    if (pNode->m_on_thread_exit_fn) {
+      pNode->m_on_thread_exit_fn(p);
+    }
     p = pNode->m_next;
   }
 }

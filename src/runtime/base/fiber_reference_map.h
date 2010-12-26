@@ -40,30 +40,30 @@ public:
 
   bool empty() const { return m_forward_references.empty();}
 
-  // gets called by generated fiber_marshal_global_state()
-  template<typename T>
-  void marshal(T &dest, T &src) {
-    dest = src;
-  }
-  void marshal(String  &dest, String  &src);
-  void marshal(Array   &dest, Array   &src);
-  void marshal(Object  &dest, Object  &src);
-  void marshal(Variant &dest, Variant &src);
+  void marshal(bool    &dest,    bool src) { dest = src;}
+  void marshal(int64   &dest,   int64 src) { dest = src;}
+  void marshal(double  &dest,  double src) { dest = src;}
+  void marshal(String  &dest, CStrRef src);
+  void marshal(Array   &dest, CArrRef src);
+  void marshal(Object  &dest, CObjRef src);
+  void marshal(Variant &dest, CVarRef src);
 
-  // gets called by generated fiber_unmarshal_global_state()
-  template<typename T>
-  void unmarshal(T &dest, T &src, char strategy) {
-    if (strategy != FiberAsyncFunc::GlobalStateIgnore) {
-      dest = src;
-    }
+  void unmarshal(bool    &dest, bool     src, char strategy) {
+    if (strategy != FiberAsyncFunc::GlobalStateIgnore) dest = src;
   }
-  void unmarshal(String  &dest, String  &src, char strategy);
-  void unmarshal(Array   &dest, Array   &src, char strategy);
-  void unmarshal(Object  &dest, Object  &src, char strategy);
+  void unmarshal(int64   &dest, int64    src, char strategy) {
+    if (strategy != FiberAsyncFunc::GlobalStateIgnore) dest = src;
+  }
+  void unmarshal(double  &dest, double   src, char strategy) {
+    if (strategy != FiberAsyncFunc::GlobalStateIgnore) dest = src;
+  }
+  void unmarshal(String  &dest, CStrRef  src, char strategy);
+  void unmarshal(Array   &dest, CArrRef  src, char strategy);
+  void unmarshal(Object  &dest, CObjRef  src, char strategy);
   void unmarshal(Variant &dest, CVarRef  src, char strategy);
 
   void unmarshalDynamicGlobals
-  (Array &dest, Array &src, char default_strategy,
+  (Array &dest, CArrRef src, char default_strategy,
    const hphp_string_map<char> &additional_strategies);
 
 private:

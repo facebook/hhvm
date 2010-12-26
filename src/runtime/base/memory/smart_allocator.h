@@ -204,6 +204,7 @@ public:
           printf("Object %p was not smart allocated\n", obj);
         }
       }
+      s_st_allocs.erase(obj);
 #endif
       ASSERT(isValid(obj));
       m_freelist.push_back(obj);

@@ -110,8 +110,8 @@ public:
    * Called by AsyncFunc<T> so we can call func(obj) back on thread running.
    */
   AsyncFuncImpl(void *obj, PFN_THREAD_FUNC *func)
-    : m_stopped(false), m_obj(obj), m_func(func), m_threadId(0),
-      m_exceptioned(false) {
+      : m_stopped(false), m_autoDelete(false),
+        m_obj(obj), m_func(func), m_threadId(0), m_exceptioned(false) {
   }
 
   /**
@@ -153,9 +153,18 @@ public:
     waitForEnd();
   }
 
+  /**
+   * So that an async func can instruct inside thread execution that this
+   * object gets deleted when thread finishes.
+   */
+  void setAutoDelete() {
+    m_autoDelete = true;
+  }
+
 private:
   Synchronizable m_stopMonitor;
   bool m_stopped;
+  bool m_autoDelete;
 
   void *m_obj;
   PFN_THREAD_FUNC *m_func;
@@ -183,6 +192,9 @@ private:
       Lock lock(m_stopMonitor.getMutex());
       m_stopped = true;
       m_stopMonitor.notify();
+    }
+    if (m_autoDelete) {
+      delete this;
     }
   }
 };

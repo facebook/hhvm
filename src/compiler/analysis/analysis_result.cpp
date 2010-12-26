@@ -3283,10 +3283,17 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairVecVec &symbols,
   names = &symbols[KindOfRedeclaredFunction];
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
-    const char *name = iter->first.c_str();
-    if (iter->second[0]->isRedeclaring()) {
-      string varname = string("cim_") + name;
-      names->push_back(pair<string, string>(varname, varname));
+    if (iter->second[0]->isVolatile()) {
+      std::string fname = cg.formatLabel(iter->first);
+      const char *name = fname.c_str();
+      if (iter->second[0]->isRedeclaring()) {
+        string varname = string("cim_") + name;
+        names->push_back(pair<string, string>(varname, varname));
+      }
+      if (strcmp(name, "__autoload")) {
+        string varname = string(FVF_PREFIX) + name;
+        names->push_back(pair<string, string>(varname, varname));
+      }
     }
   }
 
@@ -3395,6 +3402,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
   cg_indentBegin("void fiber_marshal_global_state"
                  "(GlobalVariables *g1, GlobalVariables *g2,\n"
                  " FiberReferenceMap &refMap) {\n");
+  cg_printf("g1->fiberMarshal(g2, refMap);\n");
   for (int type = 0; type < GlobalSymbolTypeCount; type++) {
     if (type == KindOfRedeclaredClassId) continue;
 
@@ -3456,6 +3464,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
                  "(GlobalVariables *g1, GlobalVariables *g2,\n"
                  " FiberReferenceMap &refMap, char default_strategy,\n"
                  " const vector<pair<string, char> > &resolver) {\n");
+  cg_printf("g1->fiberUnmarshal(g2, refMap);\n");
   cg_printf("hphp_string_map<char> strategies;\n");
   cg_printf("char r[%d]; memset(r, default_strategy, sizeof(r));\n", index);
   cg_indentBegin("for (unsigned int i = 0; i < resolver.size(); i++) {\n");

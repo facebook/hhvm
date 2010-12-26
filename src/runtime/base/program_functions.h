@@ -64,7 +64,7 @@ time_t start_time();
 class ExecutionContext;
 
 void hphp_process_init();
-void hphp_session_init();
+void hphp_session_init(bool blank_warmup = false);
 
 ExecutionContext *hphp_context_init();
 bool hphp_invoke_simple(const std::string &filename);

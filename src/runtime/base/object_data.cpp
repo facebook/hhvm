@@ -359,7 +359,6 @@ void ObjectData::o_setArray(CArrRef properties) {
       CVarRef secondRef = iter.secondRef();
       o_set(key, secondRef.isReferenced() ? ref(secondRef) : secondRef,
             false, context);
-      continue;
     }
   }
 }

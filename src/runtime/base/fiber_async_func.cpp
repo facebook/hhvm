@@ -39,9 +39,10 @@ namespace HPHP {
  */
 class FiberAsyncFuncData : public Synchronizable {
 public:
-  FiberAsyncFuncData() : m_reqId(0) {}
+  FiberAsyncFuncData() : m_reqId(0), m_fiberThread(false) {}
   Mutex m_mutexReqId;
   int64 m_reqId;
+  bool  m_fiberThread;
 };
 static IMPLEMENT_THREAD_LOCAL(FiberAsyncFuncData, s_fiber_data);
 
@@ -114,7 +115,7 @@ public:
   }
 
   bool canDelete() {
-    return m_delete && m_refCount == 1;
+    return (m_delete && m_refCount == 1) || m_reqId != m_thread->m_reqId;
   }
 
   // FIBER THREAD
@@ -122,6 +123,8 @@ public:
     // make local copy of m_function and m_params
     if (m_async) {
       try {
+        s_fiber_data->m_fiberThread = true;
+
         ExecutionContext *context = g_context.get();
         if (context && m_context) {
           context->fiberInit(m_context, m_refMap);
@@ -230,12 +233,16 @@ public:
       }
     } catch (...) {
       cleanup();
+      Lock lock(this);
       m_delete = true;
+      notify();
       throw;
     }
 
     cleanup();
+    Lock lock(this);
     m_delete = true;
+    notify();
     return unmarshaled_return;
   }
 
@@ -247,6 +254,9 @@ public:
     ASSERT(m_refCount);
     if (atomic_dec(m_refCount) == 0) {
       delete this;
+    } else {
+      Lock lock(this);
+      notify();
     }
   }
 
@@ -285,57 +295,48 @@ private:
 
 class FiberWorker : public JobQueueWorker<FiberJob*> {
 public:
-  FiberWorker() {
-  }
-
-  ~FiberWorker() {
-  }
-
-  virtual void doJob(FiberJob *job) {
-    ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
-    try {
-      job->run();
-      m_jobs.push_back(job);
-      cleanup();
-    } catch (...) {
-      Logger::Error("Internal Fiber Engine Error");
-    }
-  }
-
-  virtual void onThreadEnter() {
-    hphp_session_init();
-  }
-
-  virtual void onThreadExit() {
-    hphp_context_exit(g_context.get(), false, true);
-    hphp_session_exit();
-  }
-
   // FIBER THREAD
-  void cleanup() {
-    list<FiberJob*>::iterator iter = m_jobs.begin();
-    while (iter != m_jobs.end()) {
-      FiberJob *job = *iter;
-      if (job->canDelete()) {
-        job->decRefCount();
-        iter = m_jobs.erase(iter);
-        continue;
-      }
-      ++iter;
-    }
+  virtual void doJob(FiberJob *job);
 
-    // Finally we can take a breath releasing some memory. It's still possible
-    // we're suffocated to death, but in reality, fiber threads should be able
-    // to take breaks from time to time, or the count should be increased.
-    if (m_jobs.empty()) {
-      onThreadExit();
-      onThreadEnter();
-    }
+  virtual void onThreadEnter();
+  virtual void onThreadExit();
+};
+
+static JobQueueDispatcher<FiberJob*, FiberWorker> *s_dispatcher;
+
+void FiberWorker::doJob(FiberJob *job) {
+  ExecutionProfiler ep(ThreadInfo::RuntimeFunctions);
+  try {
+    job->run();
+  } catch (...) {
+    Logger::Error("Internal Fiber Engine Error");
   }
 
-private:
-  list<FiberJob*> m_jobs;
-};
+  if (s_dispatcher) {
+    s_dispatcher->addWorker(); // finishing me and starting a new thread
+  }
+  {
+    Lock lock(job);
+    while (!job->canDelete()) {
+      job->wait(1);
+    }
+  }
+  delete job;
+  m_stopped = true; // one-time job
+}
+
+void FiberWorker::onThreadEnter() {
+  hphp_session_init(true);
+}
+
+void FiberWorker::onThreadExit() {
+  hphp_context_exit(g_context.get(), false, true);
+  hphp_session_exit();
+
+  if (s_dispatcher) {
+    s_dispatcher->removeWorker(this, (AsyncFunc<FiberWorker>*)m_func, true);
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -367,8 +368,6 @@ IMPLEMENT_OBJECT_ALLOCATION(FiberAsyncFuncHandle)
 StaticString FiberAsyncFuncHandle::s_class_name("FiberAsyncFuncHandle");
 
 ///////////////////////////////////////////////////////////////////////////////
-
-static JobQueueDispatcher<FiberJob*, FiberWorker> *s_dispatcher;
 
 void FiberAsyncFunc::Disable() {
   // Intentionally not deleting s_dispatcher. This is a leak, but since we
@@ -410,6 +409,10 @@ Object FiberAsyncFunc::Start(CVarRef function, CArrRef params) {
   }
 
   return ret;
+}
+
+bool FiberAsyncFunc::IsFiberThread() {
+  return s_fiber_data->m_fiberThread;
 }
 
 Array FiberAsyncFunc::Status(CArrRef funcs, int msTimeout) {

@@ -79,29 +79,31 @@ void *FiberReferenceMap::reverseLookup(void *copy) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void FiberReferenceMap::marshal(String &dest, String &src) {
+void FiberReferenceMap::marshal(String &dest, CStrRef src) {
   dest = src.fiberCopy();
 }
 
-void FiberReferenceMap::marshal(Array &dest, Array &src) {
+void FiberReferenceMap::marshal(Array &dest, CArrRef src) {
   dest = src.fiberMarshal(*this);
 }
 
-void FiberReferenceMap::marshal(Object &dest, Object &src) {
+void FiberReferenceMap::marshal(Object &dest, CObjRef src) {
   dest = src.fiberMarshal(*this);
 }
 
-void FiberReferenceMap::marshal(Variant &dest, Variant &src) {
-  dest = src.fiberMarshal(*this);
+void FiberReferenceMap::marshal(Variant &dest, CVarRef src) {
+  if (src.isInitialized()) {
+    dest = src.fiberMarshal(*this);
+  }
 }
 
-void FiberReferenceMap::unmarshal(String &dest, String &src, char strategy) {
+void FiberReferenceMap::unmarshal(String &dest, CStrRef src, char strategy) {
   if (strategy != FiberAsyncFunc::GlobalStateIgnore) {
     dest = src.fiberCopy();
   }
 }
 
-void FiberReferenceMap::unmarshal(Array &dest, Array &src, char strategy) {
+void FiberReferenceMap::unmarshal(Array &dest, CArrRef src, char strategy) {
   switch (strategy) {
     case FiberAsyncFunc::GlobalStateIgnore:
       // do nothing
@@ -124,7 +126,7 @@ void FiberReferenceMap::unmarshal(Array &dest, Array &src, char strategy) {
   }
 }
 
-void FiberReferenceMap::unmarshal(Object &dest, Object &src, char strategy) {
+void FiberReferenceMap::unmarshal(Object &dest, CObjRef src, char strategy) {
   if (strategy != FiberAsyncFunc::GlobalStateIgnore) {
     dest = src.fiberUnmarshal(*this);
   }
@@ -137,7 +139,9 @@ void FiberReferenceMap::unmarshal(Variant &dest, CVarRef src, char strategy) {
         // do nothing
         break;
       case FiberAsyncFunc::GlobalStateOverwrite:
-        dest = src.fiberUnmarshal(*this);
+        if (src.isInitialized()) {
+          dest = src.fiberUnmarshal(*this);
+        }
         break;
       case FiberAsyncFunc::GlobalStateSkip: {
         Array arr = dest.toArray();
@@ -155,12 +159,14 @@ void FiberReferenceMap::unmarshal(Variant &dest, CVarRef src, char strategy) {
         break;
     }
   } else if (strategy != FiberAsyncFunc::GlobalStateIgnore) {
-    dest = src.fiberUnmarshal(*this);
+    if (src.isInitialized()) {
+      dest = src.fiberUnmarshal(*this);
+    }
   }
 }
 
 void FiberReferenceMap::unmarshalDynamicGlobals
-(Array &dest, Array &src, char default_strategy,
+(Array &dest, CArrRef src, char default_strategy,
  const hphp_string_map<char> &additional_strategies) {
   for (ArrayIter iter(src); iter; ++iter) {
     String key = iter.first().toString();

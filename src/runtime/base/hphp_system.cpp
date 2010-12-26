@@ -164,5 +164,29 @@ ssize_t Globals::wrapIter(ssize_t it) const {
   return ArrayData::invalid_index;
 }
 
+void Globals::fiberMarshal(Globals *src, FiberReferenceMap &refMap) {
+  if (src->FVF(__autoload)) FVF(__autoload) = true;
+  Array dynamicConstants(src->m_dynamicConstants.fiberMarshal(refMap));
+  for (ArrayIter iter(dynamicConstants); iter; ++iter) {
+    m_dynamicConstants.set(iter.first(), iter.second());
+  }
+  Array volatileFunctions(src->m_volatileFunctions.fiberMarshal(refMap));
+  for (ArrayIter iter(volatileFunctions); iter; ++iter) {
+    m_volatileFunctions.set(iter.first(), iter.second());
+  }
+}
+
+void Globals::fiberUnmarshal(Globals *src, FiberReferenceMap &refMap) {
+  if (src->FVF(__autoload)) FVF(__autoload) = true;
+  Array dynamicConstants(src->m_dynamicConstants.fiberUnmarshal(refMap));
+  for (ArrayIter iter(dynamicConstants); iter; ++iter) {
+    m_dynamicConstants.set(iter.first(), iter.second());
+  }
+  Array volatileFunctions(src->m_volatileFunctions.fiberUnmarshal(refMap));
+  for (ArrayIter iter(volatileFunctions); iter; ++iter) {
+    m_volatileFunctions.set(iter.first(), iter.second());
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -219,10 +219,11 @@ bool Package::parse() {
   dispatcher.stop();
   m_filesToParse.clear();
 
-  std::vector<ParserWorker> &workers = dispatcher.getWorkers();
+  std::vector<ParserWorker*> workers;
+  dispatcher.getWorkers(workers);
   for (unsigned int i = 0; i < workers.size(); i++) {
-    ParserWorker &worker = workers[i];
-    if (!worker.m_ret) return false;
+    ParserWorker *worker = workers[i];
+    if (!worker->m_ret) return false;
   }
 
   return true;

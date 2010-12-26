@@ -79,10 +79,19 @@ public:
   virtual bool setFullPos(const FullPos &pos);
 
   virtual Array getDefinedVars();
+
+  /**
+   * Marshaling/Unmarshaling between request thread and fiber thread.
+   * Called by generated fiber_un/marshal_global_state().
+   */
+  void fiberMarshal(Globals *src, FiberReferenceMap &refMap);
+  void fiberUnmarshal(Globals *src, FiberReferenceMap &refMap);
+
 public:
   Variant __lvalProxy;
   Variant __realPropProxy;
   bool FVF(__autoload);
+
 private:
   Array m_dynamicConstants;  // declared constants
   Array m_volatileFunctions; // declared functions

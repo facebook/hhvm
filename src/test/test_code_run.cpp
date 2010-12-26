@@ -14596,6 +14596,39 @@ bool TestCodeRun::TestFiber() {
 
         "int(123)\n"
        );
+  MVCRO("<?php "
+        "class A { private $data = 456; "
+        "function foo() { var_dump($this->data);}"
+        "function bar() { $this->data = 123;}}"
+        "function fiber($a) { $a->bar();}"
+        "$obj = new A();"
+        "end_user_func_async(call_user_func_async('fiber', $obj));"
+        "$obj->foo();",
+
+        "int(123)\n"
+       );
+
+  MVCRO("<?php "
+        "class A { private $data = 456; "
+        "function foo() { var_dump($this->data);}"
+        "function bar() { $this->data = 123;}}"
+        "function fiber() { $a = new A(); $a->bar(); return $a;}"
+        "$obj = end_user_func_async(call_user_func_async('fiber'));"
+        "$obj->foo();",
+
+        "int(123)\n"
+       );
+
+  MVCRO("<?php "
+        "class A { "
+        "function foo() { var_dump($this->data);}"
+        "function bar() { $this->data = 123;}}"
+        "function fiber() { $a = new A(); $a->bar(); return $a;}"
+        "$obj = end_user_func_async(call_user_func_async('fiber'));"
+        "$obj->foo();",
+
+        "int(123)\n"
+       );
 
   // test arrays of references and objects
   MVCRO("<?php "

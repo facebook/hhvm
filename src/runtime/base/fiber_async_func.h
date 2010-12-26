@@ -56,6 +56,11 @@ public:
    */
   static void Disable();
 
+  /**
+   * Whether current thread is a fiber.
+   */
+  static bool IsFiberThread();
+
 public:
 
   /**

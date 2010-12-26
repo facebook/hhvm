@@ -228,8 +228,10 @@ public:
 
   void reset() {
     T *& p = getSingleton();
-    T::Delete(p);
-    p = NULL;
+    if (p) {
+      T::Delete(p);
+      p = NULL;
+    }
     pthread_setspecific(m_key, NULL);
   }
 

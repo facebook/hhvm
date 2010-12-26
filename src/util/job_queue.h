@@ -19,6 +19,7 @@
 
 #include "async_func.h"
 #include <vector>
+#include <set>
 #include "synchronizable_multi.h"
 #include "lock.h"
 #include "atomic.h"
@@ -178,7 +179,8 @@ public:
   /**
    * Default constructor.
    */
-  JobQueueWorker() : m_opaque(NULL), m_queue(NULL), m_stopped(false) {
+  JobQueueWorker()
+      : m_func(NULL), m_opaque(NULL), m_stopped(false), m_queue(NULL) {
   }
 
   virtual ~JobQueueWorker() {
@@ -188,10 +190,11 @@ public:
    * Two-phase object creation for easier derivation and for JobQueueDispatcher
    * to easily create a vector of workers.
    */
-  void create(int id, JobQueue<TJob> *queue, void *opaque) {
+  void create(int id, JobQueue<TJob> *queue, void *func, void *opaque) {
     ASSERT(queue);
     m_id = id;
     m_queue = queue;
+    m_func = func;
     m_opaque = opaque;
   }
 
@@ -230,12 +233,13 @@ public:
 
 protected:
   int m_id;
+  void *m_func;
   void *m_opaque;
+  bool m_stopped;
 
 private:
 
   JobQueue<TJob> *m_queue;
-  bool m_stopped;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -251,28 +255,28 @@ public:
    */
   JobQueueDispatcher(int threadCount, bool threadRoundRobin,
                      int dropCacheTimeout, void *opaque, bool lifo = false)
-      : m_stopped(true),
+      : m_stopped(true), m_id(0), m_opaque(opaque),
         m_queue(threadCount, threadRoundRobin, dropCacheTimeout, lifo) {
     ASSERT(threadCount >= 1);
-    m_workers.resize(threadCount);
-    m_funcs.resize(threadCount);
     for (int i = 0; i < threadCount; i++) {
-      TWorker &worker = m_workers[i];
-      worker.create(i, &m_queue, opaque);
-      m_funcs[i] = new AsyncFunc<TWorker>(&worker, &TWorker::start);
+      addWorkerImpl(false);
     }
   }
 
   ~JobQueueDispatcher() {
     stop();
-    for (unsigned int i = 0; i < m_funcs.size(); i++) {
-      delete m_funcs[i];
+    for (typename
+           std::set<AsyncFunc<TWorker>*>::iterator iter = m_funcs.begin();
+         iter != m_funcs.end(); ++iter) {
+      delete *iter;
+    }
+    for (typename
+           std::set<TWorker*>::iterator iter = m_workers.begin();
+         iter != m_workers.end(); ++iter) {
+      delete *iter;
     }
   }
 
-  std::vector<TWorker> &getWorkers() {
-    return m_workers;
-  }
   int getActiveWorker() {
     return m_queue.getActiveWorker();
   }
@@ -284,8 +288,11 @@ public:
    * Creates worker threads and start running them. This is non-blocking.
    */
   void start() {
-    for (unsigned int i = 0; i < m_funcs.size(); i++) {
-      m_funcs[i]->start();
+    Lock lock(m_mutex);
+    for (typename
+           std::set<AsyncFunc<TWorker>*>::iterator iter = m_funcs.begin();
+         iter != m_funcs.end(); ++iter) {
+      (*iter)->start();
     }
     m_stopped = false;
   }
@@ -295,6 +302,43 @@ public:
    */
   void enqueue(TJob job) {
     m_queue.enqueue(job);
+  }
+
+  /**
+   * Add a worker thread on the fly.
+   */
+  void addWorker() {
+    Lock lock(m_mutex);
+    if (!m_stopped) {
+      addWorkerImpl(true);
+    }
+  }
+
+  /**
+   * Remove a worker thread on the fly. Use "defer=true" for removing a worker
+   * thread from within a worker thread itself, as it's still running.
+   * Otherwise, "defer=false" has to be used to properly delete the thread.
+   */
+  void removeWorker(TWorker *worker, AsyncFunc<TWorker> *func, bool defer) {
+    Lock lock(m_mutex);
+    if (!m_stopped) {
+      if (m_funcs.find(func) != m_funcs.end()) {
+        m_funcs.erase(func);
+        if (defer) {
+          func->setAutoDelete();
+        } else {
+          delete func;
+        }
+      }
+      if (m_workers.find(worker) != m_workers.end()) {
+        m_workers.erase(worker);
+        delete worker;
+      }
+    }
+  }
+  void getWorkers(std::vector<TWorker*> &workers) {
+    Lock lock(m_mutex);
+    workers.insert(workers.end(), m_workers.begin(), m_workers.end());
   }
 
   /**
@@ -308,13 +352,26 @@ public:
     m_queue.stop();
     bool exceptioned = false;
     Exception exception;
-    for (unsigned int i = 0; i < m_funcs.size(); i++) {
+
+    while (true) {
+      AsyncFunc<TWorker> *func = NULL;
+      {
+        Lock lock(m_mutex);
+        if (!m_funcs.empty()) {
+          func = *m_funcs.begin();
+          m_funcs.erase(func);
+        }
+      }
+      if (func == NULL) {
+        break;
+      }
       try {
-        m_funcs[i]->waitForEnd();
+        func->waitForEnd();
       } catch (Exception &e) {
         exceptioned = true;
         exception = e;
       }
+      delete func;
     }
     if (exceptioned) {
       throw exception;
@@ -328,9 +385,25 @@ public:
 
 private:
   bool m_stopped;
+  int m_id;
+  void *m_opaque;
   JobQueue<TJob> m_queue;
-  std::vector<TWorker> m_workers;
-  std::vector<AsyncFunc<TWorker> *> m_funcs;
+
+  Mutex m_mutex;
+  std::set<TWorker*> m_workers;
+  std::set<AsyncFunc<TWorker> *> m_funcs;
+
+  void addWorkerImpl(bool start) {
+    TWorker *worker = new TWorker();
+    AsyncFunc<TWorker> *func = new AsyncFunc<TWorker>(worker, &TWorker::start);
+    m_workers.insert(worker);
+    m_funcs.insert(func);
+    worker->create(m_id++, &m_queue, func, m_opaque);
+
+    if (start) {
+      func->start();
+    }
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

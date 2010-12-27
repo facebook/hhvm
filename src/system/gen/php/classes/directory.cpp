@@ -58,10 +58,10 @@ Variant &c_Directory::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Directory
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Directory
-void c_Directory::o_getArray(Array &props) const {
+void c_Directory::o_getArray(Array &props, bool pubOnly) const {
   if (isInitialized(m_path)) props.set(NAMSTR(s_sys_ssf362b3c4, "path"), m_path.isReferenced() ? ref(m_path) : m_path, true);
   if (isInitialized(m_handle)) props.set(NAMSTR(s_sys_ss46eeef5c, "handle"), m_handle.isReferenced() ? ref(m_handle) : m_handle, true);
-  c_ObjectData::o_getArray(props);
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Directory
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Directory

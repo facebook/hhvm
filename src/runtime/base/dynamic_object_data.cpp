@@ -111,11 +111,12 @@ Variant *DynamicObjectData::o_realPropPublic(CStrRef propName,
   }
 }
 
-void DynamicObjectData::o_getArray(Array &props) const {
+void DynamicObjectData::o_getArray(Array &props, bool pubOnly /* = false */)
+const {
   if (!parent.isNull()) {
-    return parent->o_getArray(props);
+    return parent->o_getArray(props, pubOnly);
   } else {
-    return ObjectData::o_getArray(props);
+    return ObjectData::o_getArray(props, pubOnly);
   }
 }
 

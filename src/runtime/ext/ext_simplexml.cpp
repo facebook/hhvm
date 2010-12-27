@@ -216,12 +216,14 @@ static void add_registered_namespaces(Array &out, xmlNodePtr node,
 ///////////////////////////////////////////////////////////////////////////////
 // simplexml
 
+static StaticString s_SimpleXMLElement("SimpleXMLElement");
+
 Variant f_simplexml_load_string(CStrRef data,
                                 CStrRef class_name /* = "SimpleXMLElement" */,
                                 int64 options /* = 0 */,
                                 CStrRef ns /* = "" */,
                                 bool is_prefix /* = false */) {
-  if (strcasecmp(class_name.data(), "SimpleXMLElement")) {
+  if (!class_name->isame(s_SimpleXMLElement.get())) {
     if (class_name.empty()) {
       throw_invalid_argument("class_name: [empty]");
     }
@@ -230,7 +232,7 @@ Variant f_simplexml_load_string(CStrRef data,
       throw_invalid_argument("class not found: %s", class_name.data());
       return null;
     }
-    if (!cls->derivesFrom("simplexmlelement", false)) {
+    if (!cls->derivesFrom(s_SimpleXMLElement, false)) {
       throw_invalid_argument("not subclass of SimpleXMLElement: %s",
                              class_name.data());
       return null;

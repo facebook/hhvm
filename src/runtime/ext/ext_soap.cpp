@@ -2008,7 +2008,7 @@ static bool valid_function(c_SoapServer *server, Object &soap_obj,
     return server->m_soap_functions.ft.exists(StringUtil::ToLower(fn_name));
   }
 
-  const ClassInfo *clsInfo = ClassInfo::FindClass(class_name.data());
+  const ClassInfo *clsInfo = ClassInfo::FindClass(class_name);
   if (clsInfo) {
     ClassInfo::MethodInfo *info = clsInfo->getMethodInfo(fn_name.data());
     if (info && (info->attribute & ClassInfo::IsPublic)) {

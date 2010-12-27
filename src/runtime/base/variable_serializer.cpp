@@ -38,17 +38,17 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
     m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(maxRecur) {
 }
 
-void VariableSerializer::setObjectInfo(const char *objClass, int objId) {
+void VariableSerializer::setObjectInfo(CStrRef objClass, int objId) {
   m_objClass = objClass;
   m_objId = objId;
 }
 
-void VariableSerializer::getResourceInfo(std::string &rsrcName, int &rsrcId) {
+void VariableSerializer::getResourceInfo(String &rsrcName, int &rsrcId) {
   rsrcName = m_rsrcName;
   rsrcId = m_rsrcId;
 }
 
-void VariableSerializer::setResourceInfo(const char *rsrcName, int rsrcId) {
+void VariableSerializer::setResourceInfo(CStrRef rsrcName, int rsrcId) {
   m_rsrcName = rsrcName;
   m_rsrcId = rsrcId;
 }
@@ -297,21 +297,8 @@ void VariableSerializer::write(CArrRef v) {
 
 void VariableSerializer::write(CObjRef v) {
   if (!v.isNull() && m_type == JSON) {
-    Array props = v->o_toArray();
-    ClassInfo::PropertyVec properties;
-    ClassInfo::GetClassProperties(properties, v->o_getClassName());
-    for (ClassInfo::PropertyVec::const_iterator iter = properties.begin();
-         iter != properties.end(); ++iter) {
-      if ((*iter)->attribute & ClassInfo::IsProtected) {
-        props.remove((*iter)->name);
-      }
-    }
-    // Remove private props
-    for (ArrayIter it(props); !it.end(); it.next()) {
-      if (it.first().toString().charAt(0) == '\0') {
-        props.remove(it.first());
-      }
-    }
+    Array props(ArrayData::Create());
+    v->o_getArray(props, true);
     setObjectInfo(v->o_getClassName(), v->o_getId());
     props.serialize(this);
   } else {
@@ -423,7 +410,7 @@ void VariableSerializer::writeRefCount() {
 }
 
 void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
-  m_arrayInfos.resize(m_arrayInfos.size() + 1);
+  m_arrayInfos.push_back(ArrayInfo());
   ArrayInfo &info = m_arrayInfos.back();
   info.first_element = true;
   info.is_vector = m_objClass.empty() && arr->isVectorData();
@@ -536,7 +523,7 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
   // ...so we don't mess up next array output
   if (!m_objClass.empty() || !m_rsrcName.empty()) {
     if (!m_objClass.empty()) {
-      info.class_info = ClassInfo::FindClass(m_objClass.c_str());
+      info.class_info = ClassInfo::FindClass(m_objClass);
     }
     m_objClass.clear();
     info.is_object = true;
@@ -545,12 +532,12 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
   }
 }
 
-void VariableSerializer::writePropertyPrivacy(const char *prop,
+void VariableSerializer::writePropertyPrivacy(CStrRef prop,
                                               const ClassInfo *cls) {
   if (!cls) return;
   const ClassInfo *origCls = cls;
   ClassInfo::PropertyInfo *p = cls->getPropertyInfo(prop);
-  while (!p && cls && cls->getParentClass()) {
+  while (!p && cls) {
     cls = cls->getParentClassInfo();
     if (cls) p = cls->getPropertyInfo(prop);
   }
@@ -568,9 +555,9 @@ void VariableSerializer::writeSerializedProperty(CStrRef prop,
   ASSERT(m_type == Serialize);
   const ClassInfo *origCls = cls;
   if (cls) {
-    ClassInfo::PropertyInfo *p = cls->getPropertyInfo(prop.c_str());
+    ClassInfo::PropertyInfo *p = cls->getPropertyInfo(prop);
     // Try to find defining class
-    while (!p && cls && cls->getParentClass()) {
+    while (!p && cls) {
       cls = cls->getParentClassInfo();
       if (cls) p = cls->getPropertyInfo(prop);
     }
@@ -634,7 +621,7 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
       const char *p = keyStr;
       int len = keyStr.length();
       m_buf->append(p, len);
-      if (info.is_object) writePropertyPrivacy(keyStr.c_str(), cls);
+      if (info.is_object) writePropertyPrivacy(keyStr, cls);
       m_buf->append("] => ");
     break;
   }
@@ -656,7 +643,7 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
       const char *p = keyStr;
       int len = keyStr.length();
       m_buf->append(p, len);
-      if (info.is_object) writePropertyPrivacy(keyStr.c_str(), cls);
+      if (info.is_object) writePropertyPrivacy(keyStr, cls);
       m_buf->append("\"]=>\n");
     }
     break;

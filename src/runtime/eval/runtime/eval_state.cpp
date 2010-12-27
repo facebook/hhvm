@@ -215,7 +215,6 @@ bool RequestEvalState::declareConstant(CStrRef name, CVarRef val) {
   SmartPtr<EvalConstantInfo> &ci = self->m_constantInfos[name.c_str()];
   ci = new EvalConstantInfo();
   // Only need to set value really.
-  ci->name = NULL;
   ci->valueLen = 0;
   ci->valueText = NULL;
   ci->setValue(val);
@@ -461,6 +460,10 @@ findFunctionInfo(const char *name) {
 
 const ClassInfo *RequestEvalState::findClassInfo(const char *name) {
   RequestEvalState *self = s_res.get();
+  if (self->m_classInfos.empty() && self->m_classes.empty()) {
+    // short cut for the compiled version
+    return NULL;
+  }
   map<string, SmartPtr<ClassInfoEvaled> >::const_iterator it =
     self->m_classInfos.find(name);
   if (it == self->m_classInfos.end()) {
@@ -772,16 +775,16 @@ public:
   virtual Array getConstants() const {
     return RequestEvalState::getConstants();
   }
-  virtual const ClassInfo::MethodInfo *findFunction(const char *name) const {
+  virtual const ClassInfo::MethodInfo *findFunction(CStrRef name) const {
     return RequestEvalState::findFunctionInfo(name);
   }
-  virtual const ClassInfo *findClass(const char *name) const {
+  virtual const ClassInfo *findClass(CStrRef name) const {
     return RequestEvalState::findClassInfo(name);
   }
-  virtual const ClassInfo *findInterface(const char *name) const {
+  virtual const ClassInfo *findInterface(CStrRef name) const {
     return RequestEvalState::findInterfaceInfo(name);
   }
-  virtual const ClassInfo::ConstantInfo *findConstant(const char *name) const {
+  virtual const ClassInfo::ConstantInfo *findConstant(CStrRef name) const {
     return RequestEvalState::findConstantInfo(name);
   }
 };

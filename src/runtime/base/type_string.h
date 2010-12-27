@@ -388,6 +388,12 @@ template<typename T>
 class StringIMap :
   public hphp_hash_map<String, T, hphp_string_hash, hphp_string_isame> { };
 
+typedef hphp_hash_set<String, hphp_string_hash, hphp_string_same> StringSet;
+
+template<typename T>
+class StringMap :
+  public hphp_hash_map<String, T, hphp_string_hash, hphp_string_same> { };
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /**

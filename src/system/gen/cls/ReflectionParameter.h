@@ -44,7 +44,7 @@ class c_ReflectionParameter : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual void o_getArray(Array &props) const;
+  virtual void o_getArray(Array &props, bool pubOnly = false) const;
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionParameter 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_ReflectionParameter 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionParameter 1

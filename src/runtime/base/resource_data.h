@@ -39,7 +39,7 @@ public:
   virtual int64 o_toInt64() const { return o_getId();}
   void o_setId(int id); // only for BuiltinFiles
   void serialize(VariableSerializer *serializer) const;
-  virtual const char *o_getResourceName() const;
+  virtual CStrRef o_getResourceName() const;
   virtual int o_getResourceId() const { return o_getId(); }
 
   // implementing UnsafePointer

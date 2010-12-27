@@ -193,10 +193,10 @@ void rename_function(CStrRef old_name, CStrRef new_name) {
   if (iter != funcs.end()) {
     if (!iter->second.empty()) {
       orig_name = iter->second;
-      iter->second.clear();
+      iter->second = empty_string;
     }
   } else {
-    funcs[old_name] = "";
+    funcs[old_name] = empty_string;
   }
 
   funcs[new_name] = orig_name;

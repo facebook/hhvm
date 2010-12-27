@@ -58,9 +58,9 @@ Variant &c_ReflectionFunctionAbstract::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunctionAbstract
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionFunctionAbstract
-void c_ReflectionFunctionAbstract::o_getArray(Array &props) const {
-  if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss33988b3e, "info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
-  c_ObjectData::o_getArray(props);
+void c_ReflectionFunctionAbstract::o_getArray(Array &props, bool pubOnly) const {
+  if (!pubOnly) if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss33988b3e, "info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionFunctionAbstract
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionFunctionAbstract
@@ -868,8 +868,8 @@ Variant &c_ReflectionObject::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionObject
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionObject
-void c_ReflectionObject::o_getArray(Array &props) const {
-  c_ReflectionClass::o_getArray(props);
+void c_ReflectionObject::o_getArray(Array &props, bool pubOnly) const {
+  c_ReflectionClass::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionObject
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionObject
@@ -1075,8 +1075,8 @@ Variant &c_ReflectionException::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionException
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionException
-void c_ReflectionException::o_getArray(Array &props) const {
-  c_Exception::o_getArray(props);
+void c_ReflectionException::o_getArray(Array &props, bool pubOnly) const {
+  c_Exception::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionException
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionException
@@ -1184,10 +1184,10 @@ Variant &c_ReflectionClass::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionClass
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionClass
-void c_ReflectionClass::o_getArray(Array &props) const {
+void c_ReflectionClass::o_getArray(Array &props, bool pubOnly) const {
   if (isInitialized(m_name)) props.set(NAMSTR(s_sys_ssdc3cbddc, "name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
-  if (isInitialized(m_info)) props.add(NAMSTR(s_sys_ss84e1d89d, "\000ReflectionClass\000info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
-  c_ObjectData::o_getArray(props);
+  if (!pubOnly) if (isInitialized(m_info)) props.add(NAMSTR(s_sys_ss84e1d89d, "\000ReflectionClass\000info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionClass
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionClass
@@ -4307,10 +4307,10 @@ Variant &c_ReflectionExtension::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionExtension
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionExtension
-void c_ReflectionExtension::o_getArray(Array &props) const {
-  if (isInitialized(m_name)) props.add(NAMSTR(s_sys_ss8bbc8ede, "\000ReflectionExtension\000name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
-  if (isInitialized(m_info)) props.add(NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
-  c_ObjectData::o_getArray(props);
+void c_ReflectionExtension::o_getArray(Array &props, bool pubOnly) const {
+  if (!pubOnly) if (isInitialized(m_name)) props.add(NAMSTR(s_sys_ss8bbc8ede, "\000ReflectionExtension\000name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
+  if (!pubOnly) if (isInitialized(m_info)) props.add(NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionExtension
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionExtension
@@ -5130,10 +5130,10 @@ Variant &c_ReflectionMethod::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionMethod
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionMethod
-void c_ReflectionMethod::o_getArray(Array &props) const {
+void c_ReflectionMethod::o_getArray(Array &props, bool pubOnly) const {
   if (isInitialized(m_name)) props.set(NAMSTR(s_sys_ssdc3cbddc, "name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
   if (isInitialized(m_class)) props.set(NAMSTR(s_sys_ssc82dbd12, "class"), m_class.isReferenced() ? ref(m_class) : m_class, true);
-  c_ReflectionFunctionAbstract::o_getArray(props);
+  c_ReflectionFunctionAbstract::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionMethod
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionMethod
@@ -6391,11 +6391,11 @@ Variant &c_ReflectionProperty::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionProperty
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionProperty
-void c_ReflectionProperty::o_getArray(Array &props) const {
+void c_ReflectionProperty::o_getArray(Array &props, bool pubOnly) const {
   if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss33988b3e, "info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
   if (isInitialized(m_name)) props.set(NAMSTR(s_sys_ssdc3cbddc, "name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
   if (isInitialized(m_class)) props.set(NAMSTR(s_sys_ssc82dbd12, "class"), m_class.isReferenced() ? ref(m_class) : m_class, true);
-  c_ObjectData::o_getArray(props);
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionProperty
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionProperty
@@ -7541,8 +7541,8 @@ Variant &c_ReflectionFunction::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunction
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionFunction
-void c_ReflectionFunction::o_getArray(Array &props) const {
-  c_ReflectionFunctionAbstract::o_getArray(props);
+void c_ReflectionFunction::o_getArray(Array &props, bool pubOnly) const {
+  c_ReflectionFunctionAbstract::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionFunction
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionFunction
@@ -8063,9 +8063,9 @@ Variant &c_ReflectionParameter::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionParameter
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionParameter
-void c_ReflectionParameter::o_getArray(Array &props) const {
+void c_ReflectionParameter::o_getArray(Array &props, bool pubOnly) const {
   if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss33988b3e, "info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
-  c_ObjectData::o_getArray(props);
+  c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionParameter
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionParameter

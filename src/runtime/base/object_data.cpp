@@ -363,7 +363,7 @@ void ObjectData::o_setArray(CArrRef properties) {
   }
 }
 
-void ObjectData::o_getArray(Array &props) const {
+void ObjectData::o_getArray(Array &props, bool pubOnly /* = false */) const {
   if (o_properties && !o_properties->empty()) {
     for (ArrayIter it(*o_properties); !it.end(); it.next()) {
       Variant key = it.first();
@@ -443,7 +443,7 @@ Array ObjectData::o_toArray(bool warn /* = false */) const {
 
 Array ObjectData::o_toIterArray(CStrRef context,
                                 bool getRef /* = false */) {
-  const char *object_class = o_getClassName();
+  CStrRef object_class = o_getClassName();
   const ClassInfo *classInfo = ClassInfo::FindClass(object_class);
   const ClassInfo *contextClassInfo = NULL;
   int category;
@@ -472,7 +472,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
   } else {
     contextClassInfo = ClassInfo::FindClass(context);
     ASSERT(contextClassInfo);
-    if (strcasecmp(object_class, context.data()) == 0) {
+    if (object_class->isame(context.get())) {
       category = 3;
     } else if (classInfo->derivesFrom(context, false) ||
                contextClassInfo->derivesFrom(object_class, false)) {

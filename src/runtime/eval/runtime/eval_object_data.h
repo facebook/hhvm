@@ -43,7 +43,7 @@ public:
 
   // properties
   virtual Array o_toArray(bool warn = false) const;
-  virtual void o_getArray(Array &props) const;
+  virtual void o_getArray(Array &props, bool pubOnly = false) const;
   virtual void o_setArray(CArrRef props);
   virtual Variant *o_realProp(CStrRef prop, int flags,
                               CStrRef context = null_string) const;

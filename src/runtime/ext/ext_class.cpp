@@ -41,11 +41,16 @@ Array f_get_declared_interfaces() {
 }
 
 bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {
-  const ClassInfo *info = ClassInfo::FindClass(class_name.data());
-  if (info) {
-    if (autoload && (info->getAttribute() & ClassInfo::IsVolatile) != 0) {
-      checkClassExists(class_name, get_globals(), true);
+  const ClassInfo *info = ClassInfo::FindClass(class_name);
+
+  if (autoload && (!info || (info->getAttribute() & ClassInfo::IsVolatile))) {
+    checkClassExists(class_name, get_globals(), true);
+    if (!info) {
+      // interpreter might have added the class info
+      return ClassInfo::FindClass(class_name);
     }
+  }
+  if (info) {
     if (!info->isDeclared()) return false;
     // XXX see the comment in f_interface_exists().
     return !(info->getCurrent()->isClassInfoRedeclared());
@@ -54,25 +59,27 @@ bool f_class_exists(CStrRef class_name, bool autoload /* = true */) {
 }
 
 bool f_interface_exists(CStrRef interface_name, bool autoload /* = true */) {
-  const ClassInfo *info =
-    ClassInfo::FindInterface(interface_name.data());
-  if (info) {
-    if (autoload && (info->getAttribute() & ClassInfo::IsVolatile) != 0) {
-      checkClassExists(interface_name, get_globals(), true);
+  const ClassInfo *info = ClassInfo::FindInterface(interface_name);
+
+  if (autoload && (!info || (info->getAttribute() & ClassInfo::IsVolatile))) {
+    checkClassExists(interface_name, get_globals(), true);
+    if (!info && ClassInfo::FindInterface(interface_name)) {
+      // interpreter might have added the interface
+      return true;
     }
+  }
+
+  if (info) {
     return info->isDeclared();
   }
 
   // look for interfaces redeclared by classes
-  info = ClassInfo::FindClass(interface_name.data());
+  info = ClassInfo::FindClass(interface_name);
   if (info && info->isClassInfoRedeclared()) {
-    if (autoload && (info->getAttribute() & ClassInfo::IsVolatile) != 0) {
-      checkClassExists(interface_name, get_globals(), true);
-    }
+    if (!info->isDeclared()) return false;
     // XXX we currently do not update cso for interfaces, which means that
     // if the name is declared, and getCurrent() is still info itself, it must
     // be an interface.
-    if (!info->isDeclared()) return false;
     return info->getCurrent()->isClassInfoRedeclared();
   }
 
@@ -81,11 +88,11 @@ bool f_interface_exists(CStrRef interface_name, bool autoload /* = true */) {
 
 Array f_get_class_methods(CVarRef class_or_object) {
   ClassInfo::MethodVec methods;
-  const String &class_name = get_classname(class_or_object);
+  CStrRef class_name = get_classname(class_or_object);
   ClassInfo::GetClassMethods(methods, class_name);
-  const char *klass = FrameInjection::GetClassName(true);
+  CStrRef klass = FrameInjection::GetClassName(true);
 
-  bool allowPrivate = klass && *klass && !strcasecmp(class_name->data(), klass);
+  bool allowPrivate = !klass.empty() && klass->isame(class_name.get());
   Array ret = Array::Create();
   for (unsigned int i = 0; i < methods.size(); i++) {
     if ((methods[i]->attribute & ClassInfo::IsPublic) || allowPrivate) {
@@ -98,9 +105,9 @@ Array f_get_class_methods(CVarRef class_or_object) {
 Array f_get_class_vars(CStrRef class_name) {
   ClassInfo::PropertyVec properties;
   ClassInfo::GetClassProperties(properties, class_name);
-  const char *context = FrameInjection::GetClassName(true);
+  CStrRef context = FrameInjection::GetClassName(true);
   const ClassInfo *cls = NULL;
-  if (context && context[0]) {
+  if (!context.empty()) {
     cls = ClassInfo::FindClass(context);
   }
 
@@ -141,8 +148,8 @@ Variant f_get_parent_class(CVarRef object /* = null_variant */) {
   }
   const ClassInfo *classInfo = ClassInfo::FindClass(class_name.toString());
   if (classInfo) {
-    const char *parentClass = classInfo->getParentClass();
-    if (parentClass && parentClass[0]) {
+    CStrRef parentClass = classInfo->getParentClass();
+    if (!parentClass.empty()) {
       return parentClass;
     }
   }
@@ -184,7 +191,6 @@ bool f_property_exists(CVarRef class_or_object, CStrRef property) {
       return true;
     } else {
       classInfo = classInfo->getParentClassInfo();
-//      classInfo = ClassInfo::FindClass(classInfo->getParentClass());
     }
   }
   return false;

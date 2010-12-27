@@ -114,7 +114,7 @@ Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {
     return false;
   }
 
-  const ClassInfo *info = ClassInfo::FindClass(clsname.data());
+  const ClassInfo *info = ClassInfo::FindClass(clsname);
   if (info == NULL) {
     return false;
   }
@@ -139,7 +139,7 @@ Variant f_class_parents(CVarRef obj, bool autoload /* = true */) {
     return false;
   }
 
-  const ClassInfo *info = ClassInfo::FindClass(clsname.data());
+  const ClassInfo *info = ClassInfo::FindClass(clsname);
   if (info == NULL) {
     return false;
   }
@@ -148,8 +148,7 @@ Variant f_class_parents(CVarRef obj, bool autoload /* = true */) {
   ClassInfo::ClassVec parents;
   info->getAllParentsVec(parents);
   for (unsigned int i = 0; i < parents.size(); i++) {
-    const char *parent = parents[i];
-    ret.set(parent, parent);
+    ret.set(parents[i], parents[i]);
   }
 
   return ret;

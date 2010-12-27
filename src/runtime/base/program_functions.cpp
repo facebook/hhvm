@@ -936,6 +936,53 @@ public:
 };
 static IMPLEMENT_THREAD_LOCAL(WarmupState, s_warmup_state);
 
+void hphp_process_init() {
+  ClassInfo::Load();
+  init_static_variables();
+  Process::InitProcessStatics();
+  PageletServer::Restart();
+  XboxServer::Restart();
+  FiberAsyncFunc::Restart();
+  Extension::InitModules();
+  apc_load(RuntimeOption::ApcLoadThread);
+  StaticString::FinishInit();
+}
+
+void hphp_session_init(bool blank_warmup /* = false */) {
+  ThreadInfo::s_threadInfo->onSessionInit();
+  MemoryManager::TheMemoryManager()->resetStats();
+
+  if (!s_warmup_state->done) {
+    free_global_variables(); // just to be safe
+    init_global_variables();
+  }
+
+#ifdef ENABLE_SIMPLE_COUNTER
+  SimpleCounter::Enabled = true;
+  StackTrace::Enabled = true;
+#endif
+
+  if (blank_warmup) {
+    bool error;
+    hphp_warmup(g_context.get(), "", "", "", error);
+  }
+}
+
+bool hphp_is_warmup_enabled() {
+  return s_warmup_state->enabled;
+}
+
+void hphp_set_warmup_enabled() {
+  s_warmup_state->enabled = true;
+}
+
+ExecutionContext *hphp_context_init() {
+  ExecutionContext *context = g_context.get();
+  context->obStart();
+  context->obProtect(true);
+  return context;
+}
+
 static bool hphp_warmup(ExecutionContext *context,
                         const string &warmupDoc,
                         const string &reqInitFunc,
@@ -988,52 +1035,6 @@ static bool hphp_warmup(ExecutionContext *context,
 
   s_warmup_state->atCheckpoint = false;
   return ret;
-}
-
-void hphp_process_init() {
-  init_static_variables();
-  Process::InitProcessStatics();
-  PageletServer::Restart();
-  XboxServer::Restart();
-  FiberAsyncFunc::Restart();
-  Extension::InitModules();
-  apc_load(RuntimeOption::ApcLoadThread);
-  StaticString::FinishInit();
-}
-
-void hphp_session_init(bool blank_warmup /* = false */) {
-  ThreadInfo::s_threadInfo->onSessionInit();
-  MemoryManager::TheMemoryManager()->resetStats();
-
-  if (!s_warmup_state->done) {
-    free_global_variables(); // just to be safe
-    init_global_variables();
-  }
-
-#ifdef ENABLE_SIMPLE_COUNTER
-  SimpleCounter::Enabled = true;
-  StackTrace::Enabled = true;
-#endif
-
-  if (blank_warmup) {
-    bool error;
-    hphp_warmup(g_context.get(), "", "", "", error);
-  }
-}
-
-bool hphp_is_warmup_enabled() {
-  return s_warmup_state->enabled;
-}
-
-void hphp_set_warmup_enabled() {
-  s_warmup_state->enabled = true;
-}
-
-ExecutionContext *hphp_context_init() {
-  ExecutionContext *context = g_context.get();
-  context->obStart();
-  context->obProtect(true);
-  return context;
 }
 
 static void handle_invoke_exception(bool &ret, ExecutionContext *context,

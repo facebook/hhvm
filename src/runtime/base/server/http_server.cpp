@@ -112,6 +112,7 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
   if (RuntimeOption::EnableStaticContentCache) {
     StaticContentCache::TheCache.load();
   }
+  ClassInfo::Load();
   SourceInfo::TheSourceInfo.load();
   RTTIInfo::TheRTTIInfo.init(true);
 

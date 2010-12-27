@@ -105,6 +105,8 @@ EVAL_EXT(CreateFunction);
 EVAL_EXT(Assert);
 EVAL_EXT(GetDefinedVars);
 EVAL_EXT_DYN(HphpGetClassInfo);
+EVAL_EXT_DYN(ClassExists);
+EVAL_EXT_DYN(InterfaceExists);
 #undef EVAL_EXT
 #undef EVAL_EXT_DYN
 
@@ -139,6 +141,8 @@ EvalOverrides::EvalOverrides() {
   m_functions["create_function"] = new EvalCreateFunction();
   m_functions["assert"] = new EvalAssert();
   m_functions["function_exists"] = new EvalFunctionExists();
+  m_functions["class_exists"] = new EvalClassExists();
+  m_functions["interface_exists"] = new EvalInterfaceExists();
   m_functions["get_defined_vars"] = new EvalGetDefinedVars();
   m_functions["hphp_get_class_info"] = new EvalHphpGetClassInfo();
 }
@@ -278,6 +282,32 @@ Variant EvalAssert::InvokeImpl(VariableEnvironment &env,
     return null;
   }
   return f_assert(assertion);
+}
+
+Variant EvalClassExists::Invoke(CArrRef params) {
+  String cname = params.rvalAt(0);
+  if (!f_class_exists(cname, false)) {
+    if ((params.size() == 1 || params.rvalAt(1).toBoolean()) &&
+        !f_interface_exists(cname, false) &&
+        eval_try_autoload(cname.data())) {
+      return f_class_exists(cname, false);
+    }
+    return false;
+  }
+  return true;
+}
+
+Variant EvalInterfaceExists::Invoke(CArrRef params) {
+  String cname = params.rvalAt(0);
+  if (!f_interface_exists(cname, false)) {
+    if ((params.size() == 1 || params.rvalAt(1).toBoolean()) &&
+        !f_class_exists(cname, false) &&
+        eval_try_autoload(cname.data())) {
+      return f_interface_exists(cname, false);
+    }
+    return false;
+  }
+  return true;
 }
 
 Variant EvalGetDefinedVars::InvokeImpl(VariableEnvironment &env,

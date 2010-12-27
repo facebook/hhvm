@@ -159,27 +159,20 @@ Variant EvalObjectData::o_setError(CStrRef prop, CStrRef context) {
   return null;
 }
 
-void EvalObjectData::o_getArray(Array &props, bool pubOnly /* = false */)
-const {
-  if (!pubOnly) {
-    String zero("\0", 1, AttachLiteral);
-    for (ArrayIter it(m_privates); !it.end(); it.next()) {
-      String prefix(zero);
-      prefix += it.first();
-      prefix += zero;
-      for (ArrayIter it2(it.second()); !it2.end(); it2.next()) {
-        CVarRef v = it2.secondRef();
-        if (v.isInitialized()) {
-          props.set(prefix + it2.first(), v.isReferenced() ? ref(v) : v);
-        }
+void EvalObjectData::o_getArray(Array &props) const {
+  String zero("\0", 1, AttachLiteral);
+  for (ArrayIter it(m_privates); !it.end(); it.next()) {
+    String prefix(zero);
+    prefix += it.first();
+    prefix += zero;
+    for (ArrayIter it2(it.second()); !it2.end(); it2.next()) {
+      CVarRef v = it2.secondRef();
+      if (v.isInitialized()) {
+        props.set(prefix + it2.first(), v.isReferenced() ? ref(v) : v);
       }
     }
   }
-  DynamicObjectData::o_getArray(props, pubOnly);
-  if (pubOnly) {
-    const ClassInfo *info = ClassInfo::FindClass(o_getClassName());
-    info->filterProperties(props, ClassInfo::IsProtected);
-  }
+  DynamicObjectData::o_getArray(props);
 }
 
 void EvalObjectData::o_setArray(CArrRef props) {

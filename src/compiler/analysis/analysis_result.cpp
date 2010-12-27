@@ -2611,7 +2611,6 @@ void AnalysisResult::outputCPPClassDeclaredFlags
 }
 
 void AnalysisResult::outputCPPClassDeclaredFlagsLookup(CodeGenerator &cg) {
-  AnalysisResultPtr ar = shared_from_this();
   vector <const char *> classes;
   for (StringToClassScopePtrVecMap::const_iterator it = m_classDecs.begin();
        it != m_classDecs.end(); ++it) {
@@ -2619,12 +2618,11 @@ void AnalysisResult::outputCPPClassDeclaredFlagsLookup(CodeGenerator &cg) {
       classes.push_back(it->first.c_str());
     }
   }
-  cg_indentBegin("bool GlobalVariables::class_exists(CStrRef s) {\n");
-  for (JumpTable jt(cg, classes, true, false, true); jt.ready(); jt.next()) {
+  cg_indentBegin("bool GlobalVariables::class_exists(const char *s) {\n");
+  for (JumpTable jt(cg, classes, true, false, false); jt.ready(); jt.next()) {
     const char *name = jt.key();
-    cg_printf("HASH_GUARD_LITSTR(0x%016llXLL, ", hash_string(name));
-    cg_printString(name, ar, ar);
-    cg_printf(") return CDEC(%s);\n", name);
+    cg_printf("HASH_GUARD(0x%016llXLL, %s) return CDEC(%s);\n",
+              hash_string_i(name), name, name);
   }
   cg_printf("return false;\n");
   cg_indentEnd("}\n");

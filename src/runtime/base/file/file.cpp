@@ -45,7 +45,6 @@ namespace HPHP {
 // statics
 
 StaticString File::s_class_name("File");
-StaticString File::s_resource_name("stream");
 
 String File::TranslatePath(CStrRef filename, bool useFileCache /* = false */) {
   String canonicalized(Util::canonicalize(string(filename.data(),

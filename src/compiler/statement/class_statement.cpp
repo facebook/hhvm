@@ -268,8 +268,7 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   cg_printf("public:\n");
 
   if (variables->hasJumpTable(VariableTable::JumpTableClassGetArray)) {
-    cg_printf("virtual void o_getArray(Array &props, bool pubOnly = false) "
-              "const;\n");
+    cg_printf("virtual void o_getArray(Array &props) const;\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_GETARRAY_%s 1\n", clsName);
   }

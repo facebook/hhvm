@@ -44,8 +44,8 @@ Variant &c_XhprofFrame::os_lval(CStrRef s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_XhprofFrame
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_XhprofFrame
-void c_XhprofFrame::o_getArray(Array &props, bool pubOnly) const {
-  c_ObjectData::o_getArray(props, pubOnly);
+void c_XhprofFrame::o_getArray(Array &props) const {
+  c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_XhprofFrame
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_XhprofFrame

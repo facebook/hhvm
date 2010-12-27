@@ -758,7 +758,7 @@ void f_fb_renamed_functions(CArrRef names) {
 
 bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
   if (orig_func_name.empty() || new_func_name.empty() ||
-      orig_func_name->isame(new_func_name.get())) {
+      strcasecmp(orig_func_name.data(), new_func_name.data()) == 0) {
     throw_invalid_argument("unable to rename %s", orig_func_name.data());
     return false;
   }

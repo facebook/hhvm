@@ -76,7 +76,7 @@ public:
   public:
     ConstantInfo();
 
-    String name;
+    const char *name;
     unsigned int valueLen;
     const char *valueText;
     const ObjectStaticCallbacks *callbacks;
@@ -101,10 +101,10 @@ public:
 
   class MethodInfo {
   public:
-    MethodInfo() : docComment(NULL) {}
+    MethodInfo() : name(NULL), docComment(NULL) {}
     ~MethodInfo();
     Attribute attribute;
-    String name;
+    const char *name;
     Variant (**invokeFn)(const Array& params);
     Variant (*invokeFailedFn)(const Array& params);
 
@@ -119,24 +119,24 @@ public:
 
   class PropertyInfo {
   public:
-    PropertyInfo() : docComment(NULL) {}
+    PropertyInfo() : name(NULL), docComment(NULL) {}
     Attribute attribute;
-    String name;
+    const char *name;
     const char *docComment;
     const ClassInfo *owner;
     bool isVisible(const ClassInfo *context) const;
   };
 
-  typedef StringIMap<ClassInfo *>       ClassMap;
-  typedef std::vector<String>           ClassVec;
-  typedef StringISet                    InterfaceSet;
-  typedef std::vector<String>           InterfaceVec;
-  typedef StringIMap<MethodInfo *>      MethodMap;
-  typedef std::vector<MethodInfo *>     MethodVec;
-  typedef StringMap<PropertyInfo *>     PropertyMap;
-  typedef std::vector<PropertyInfo *>   PropertyVec;
-  typedef StringMap<ConstantInfo *>     ConstantMap;
-  typedef std::vector<ConstantInfo *>   ConstantVec;
+  typedef hphp_const_char_imap<ClassInfo*>    ClassMap;
+  typedef std::vector<const char *>           ClassVec;
+  typedef hphp_const_char_iset                InterfaceMap;
+  typedef std::vector<const char *>           InterfaceVec;
+  typedef hphp_const_char_imap<MethodInfo*>   MethodMap;
+  typedef std::vector<MethodInfo*>            MethodVec;
+  typedef hphp_const_char_map<PropertyInfo *> PropertyMap;
+  typedef std::vector<PropertyInfo *>         PropertyVec;
+  typedef hphp_const_char_map<ConstantInfo*>  ConstantMap;
+  typedef std::vector<ConstantInfo*>          ConstantVec;
 
 public:
   /**
@@ -157,7 +157,7 @@ public:
   /**
    * Locate one function.
    */
-  static const MethodInfo *FindFunction(CStrRef name);
+  static const MethodInfo *FindFunction(const char *name);
 
   /**
    * Return a list of declared classes.
@@ -167,12 +167,12 @@ public:
   /**
    * Whether a class exists, without considering interfaces.
    */
-  static bool HasClass(CStrRef name);
+  static bool HasClass(const char *name);
 
   /**
    * Locate one class.
    */
-  static const ClassInfo *FindClass(CStrRef name);
+  static const ClassInfo *FindClass(const char *name);
 
   /**
    * Return a list of declared interfaces.
@@ -182,17 +182,17 @@ public:
   /**
    * Whether an interface exists.
    */
-  static bool HasInterface(CStrRef name);
+  static bool HasInterface(const char *name);
 
   /**
    * Locate one interface.
    */
-  static const ClassInfo *FindInterface(CStrRef name);
+  static const ClassInfo *FindInterface(const char *name);
 
   /**
    * Locate one constant (excluding dynamic and redeclared constants)
    */
-  static const ConstantInfo *FindConstant(CStrRef name);
+  static const ConstantInfo *FindConstant(const char *name);
 
   /**
    * Get all statically known constants
@@ -204,14 +204,15 @@ public:
    * interfaces.
    *   type: 0: unknown; 1: class; 2: interface
    */
-  static void GetClassMethods(MethodVec &ret, CStrRef classname, int type = 0);
+  static void GetClassMethods(MethodVec &ret, const char *classname,
+                              int type = 0);
 
   /**
    * Return all properties a class has, including the ones on base classes and
    * the ones that were implicitly defined.
    */
-  static void GetClassProperties(PropertyMap &props, CStrRef classname);
-  static void GetClassProperties(PropertyVec &props, CStrRef classname);
+  static void GetClassProperties(PropertyMap &props, const char *classname);
+  static void GetClassProperties(PropertyVec &props, const char *classname);
 
   /**
    * Return lists of names for auto-complete purposes.
@@ -238,7 +239,7 @@ public:
   const char *getFile() const { return getCurrent()->m_file;}
   int getLine1() const { return getCurrent()->m_line1;}
   int getLine2() const { return getCurrent()->m_line2;}
-  virtual CStrRef getName() const { return m_name;}
+  virtual const char *getName() const { return m_name;}
   const char *getDocComment() const { return m_docComment; }
   virtual const ClassInfo *getCurrent() const { return this; }
   virtual bool isClassInfoRedeclared() const { return false; }
@@ -250,16 +251,16 @@ public:
   /**
    * Parents of this class.
    */
-  virtual CStrRef getParentClass() const = 0;
+  virtual const char *getParentClass() const = 0;
   const ClassInfo *getParentClassInfo() const {
     if (m_parentCache) return m_parentCache;
-    CStrRef parentName = getParentClass();
-    if (parentName.empty()) return NULL;
+    const char *parentName = getParentClass();
+    ASSERT(parentName);
     return m_parentCache = FindClass(parentName);
   }
-  virtual const InterfaceSet &getInterfaces() const = 0;
+  virtual const InterfaceMap &getInterfaces() const = 0;
   virtual const InterfaceVec &getInterfacesVec() const = 0;
-  bool derivesFrom(CStrRef name, bool considerInterface) const;
+  bool derivesFrom(const char *name, bool considerInterface) const;
 
   void getAllParentsVec(ClassVec &parents) const; // recursive
   void getAllInterfacesVec(InterfaceVec &interfaces) const; // recursive
@@ -269,8 +270,8 @@ public:
    */
   virtual const MethodMap &getMethods() const = 0;    // non-recursively
   virtual const MethodVec &getMethodsVec() const = 0; // non-recursively
-  MethodInfo *getMethodInfo(CStrRef name) const;
-  MethodInfo *hasMethod(CStrRef name, ClassInfo *&classInfo) const;
+  MethodInfo *getMethodInfo(const char *name) const;
+  MethodInfo *hasMethod(const char *name, ClassInfo *&classInfo) const;
   static bool HasAccess(CStrRef className, CStrRef methodName,
                         bool staticCall, bool hasCallObject);
   static bool IsSubClass(CStrRef className1, CStrRef className2,
@@ -280,24 +281,23 @@ public:
   /**
    * Property functions.
    */
-  virtual const PropertyMap &getProperties() const = 0;    // non-recursively
-  virtual const PropertyVec &getPropertiesVec() const = 0; // non-recursively
-  void getAllProperties(PropertyMap &props) const;         // recursively
-  void getAllProperties(PropertyVec &props) const;         // recursively
-  // Remove properties with the given attribute from the array, recursively.
-  void filterProperties(Array &props, Attribute toRemove) const;
-  PropertyInfo *getPropertyInfo(CStrRef name) const;
-  bool hasProperty(CStrRef name) const;
+  virtual const PropertyMap &getProperties() const = 0;  // non-recursively
+  virtual const PropertyVec &getPropertiesVec() const = 0;  // non-recursively
+  void getAllProperties(PropertyMap &props) const;        // recursively
+  void getAllProperties(PropertyVec &props) const;        // recursively
+  PropertyInfo *getPropertyInfo(const char *name) const;
+  bool hasProperty(const char *name) const;
 
   /**
    * Constant functions.
    */
   virtual const ConstantMap &getConstants() const = 0;
   virtual const ConstantVec &getConstantsVec() const = 0;
-  ConstantInfo *getConstantInfo(CStrRef name) const;
-  bool hasConstant(CStrRef name) const;
+  ConstantInfo *getConstantInfo(const char *name) const;
+  bool hasConstant(const char *name) const;
 
 protected:
+  static Mutex s_mutex;
   static bool s_loaded;            // whether class map is loaded
   static ClassInfo *s_systemFuncs; // all system functions
   static ClassInfo *s_userFuncs;   // all user functions
@@ -307,14 +307,15 @@ protected:
   static ClassInfoHook *s_hook;
 
   Attribute m_attribute;
-  String m_name;
+  const char *m_name;
   const char *m_file;
   int m_line1;
   int m_line2;
   const char *m_docComment;
   mutable const ClassInfo *m_parentCache; // cache the found parent class
 
-  bool derivesFromImpl(CStrRef name, bool considerInterface) const;
+  // name is already lowered
+  bool derivesFromImpl(const char *name, bool considerInterface) const;
   bool checkAccess(ClassInfo *defClass, MethodInfo *methodInfo,
                    bool staticCall, bool hasObject) const;
 };
@@ -331,8 +332,8 @@ public:
   ClassInfoUnique(const char **&p);
 
   // implementing ClassInfo
-  CStrRef getParentClass() const { return m_parent;}
-  const InterfaceSet &getInterfaces() const { return m_interfaces;}
+  const char *getParentClass() const { return m_parent;}
+  const InterfaceMap &getInterfaces() const { return m_interfaces;}
   const InterfaceVec &getInterfacesVec() const { return m_interfacesVec;}
   const MethodMap &getMethods() const { return m_methods;}
   const MethodVec &getMethodsVec() const { return m_methodsVec;}
@@ -342,8 +343,8 @@ public:
   const ConstantVec &getConstantsVec() const { return m_constantsVec;}
 
 private:
-  String m_parent;              // parent class name
-  InterfaceSet m_interfaces;    // all interfaces
+  const char * m_parent;        // parent class name
+  InterfaceMap m_interfaces;    // all interfaces
   InterfaceVec m_interfacesVec; // all interfaces in declaration order
   MethodMap    m_methods;       // all methods
   MethodVec    m_methodsVec;    // all methods in declaration order
@@ -366,10 +367,10 @@ public:
   // implementing ClassInfo
   virtual const ClassInfo *getCurrent() const { return current(); }
   virtual bool isClassInfoRedeclared() const { return true; }
-  virtual CStrRef getName() const { return current()->getName();}
-  CStrRef getParentClass() const { return current()->getParentClass();}
+  const char *getName() const { return current()->getName();}
+  const char *getParentClass() const { return current()->getParentClass();}
 
-  const InterfaceSet &getInterfaces() const {
+  const InterfaceMap &getInterfaces() const {
     return current()->getInterfaces();
   }
   const InterfaceVec &getInterfacesVec() const {
@@ -419,10 +420,11 @@ public:
   virtual Array getClasses() const = 0;
   virtual Array getInterfaces() const = 0;
   virtual Array getConstants() const = 0;
-  virtual const ClassInfo::MethodInfo *findFunction(CStrRef name) const = 0;
-  virtual const ClassInfo *findClass(CStrRef name) const = 0;
-  virtual const ClassInfo *findInterface(CStrRef name) const = 0;
-  virtual const ClassInfo::ConstantInfo *findConstant(CStrRef name) const = 0;
+  virtual const ClassInfo::MethodInfo *findFunction(const char *name) const = 0;
+  virtual const ClassInfo *findClass(const char *name) const = 0;
+  virtual const ClassInfo *findInterface(const char *name) const = 0;
+  virtual const ClassInfo::ConstantInfo *findConstant(const char *name)
+    const = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

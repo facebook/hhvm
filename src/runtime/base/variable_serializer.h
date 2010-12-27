@@ -23,6 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+
 class ClassInfo;
 
 /**
@@ -91,9 +92,9 @@ public:
   void incMaxCount() { m_maxCount++; }
   bool incNestedLevel(void *ptr, bool isObject = false);
   void decNestedLevel(void *ptr);
-  void setObjectInfo(CStrRef objClass, int objId);
-  void setResourceInfo(CStrRef rsrcName, int rsrcId);
-  void getResourceInfo(String &rsrcName, int &rsrcId);
+  void setObjectInfo(const char *objClass, int objId);
+  void setResourceInfo(const char *rsrcName, int rsrcId);
+  void getResourceInfo(std::string &rsrcName, int &rsrcId);
   Type getType() const { return m_type; }
 private:
   Type m_type;
@@ -105,8 +106,8 @@ private:
   int m_valueCount;              // Current ref index
   bool m_referenced;             // mark current array element as reference
   int m_refCount;                // current variable's reference count
-  String m_objClass;             // for object serialization
-  String m_rsrcName;             // for resource serialization
+  std::string m_objClass;        // for object serialization
+  std::string m_rsrcName;        // for resource serialization
   int m_objId;                   // for object serialization
   int m_rsrcId;                  // for resource serialization
   int m_maxCount;                // for max recursive levels
@@ -121,7 +122,7 @@ private:
   };
   std::vector<ArrayInfo> m_arrayInfos;
 
-  void writePropertyPrivacy(CStrRef prop, const ClassInfo *cls);
+  void writePropertyPrivacy(const char *prop, const ClassInfo *cls);
   void writeSerializedProperty(CStrRef prop, const ClassInfo *cls);
 };
 

@@ -1003,8 +1003,8 @@ void ClassStatement::abstractMethodCheck(
               abstracts.find((*mit)->name);
             if (ait != abstracts.end() && ait->second != ici->getName()) {
               raise_error("Can't inherit abstract function %s::%s (previously "
-                  "declared abstract in %s)",
-                  it->c_str(), (*mit)->name.c_str(), ait->second);
+                  "declared abstract in %s)", it->c_str(), (*mit)->name,
+                  ait->second);
             }
             abstracts[(*mit)->name] = ici->getName();
           }

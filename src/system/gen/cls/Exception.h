@@ -47,7 +47,7 @@ class c_Exception : public ExtObjectData {
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  virtual void o_getArray(Array &props, bool pubOnly = false) const;
+  virtual void o_getArray(Array &props) const;
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_Exception 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_Exception 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Exception 1

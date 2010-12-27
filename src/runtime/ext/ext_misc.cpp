@@ -65,7 +65,7 @@ Variant f_constant(CStrRef name) {
         className = this_class;
       }
     } else if (className == "parent") {
-      CStrRef parent_class = FrameInjection::GetParentClassName(true);
+      String parent_class = FrameInjection::GetParentClassName("constant");
       if (parent_class.empty()) {
         throw FatalErrorException("Cannot access parent");
       } else {
@@ -79,7 +79,8 @@ Variant f_constant(CStrRef name) {
       return null;
     }
   } else {
-    const ClassInfo::ConstantInfo *cinfo = ClassInfo::FindConstant(name);
+    const ClassInfo::ConstantInfo *cinfo =
+      ClassInfo::FindConstant(name.data());
     // system/uniquely defined scalar constant (must be valid)
     if (cinfo) return cinfo->getValue();
     // dynamic/redeclared constant
@@ -113,7 +114,7 @@ bool f_defined(CStrRef name) {
         className = this_class;
       }
     } else if (className == "parent") {
-      CStrRef parent_class = FrameInjection::GetParentClassName(true);
+      String parent_class = FrameInjection::GetParentClassName("defined");
       if (parent_class.empty()) {
         throw FatalErrorException("Cannot access parent");
       } else {
@@ -122,8 +123,8 @@ bool f_defined(CStrRef name) {
     }
     if (class_exists(className)) { // taking care of volatile class
       const ClassInfo *info;
-      for (String parentClass = className;
-           !parentClass.empty();
+      for (const char *parentClass = className.data();
+           parentClass && *parentClass;
            parentClass = info->getParentClass()) {
         info = ClassInfo::FindClass(parentClass);
         if (!info) {
@@ -137,9 +138,9 @@ bool f_defined(CStrRef name) {
     }
   } else {
     // system/uniquely defined scalar constant
-    if (ClassInfo::FindConstant(name)) return true;
+    if (ClassInfo::FindConstant(name.data())) return true;
     // dynamic/redeclared constant
-    return ((Globals*)get_global_variables())->defined(name);
+    return ((Globals*)get_global_variables())->defined(name.data());
   }
 }
 

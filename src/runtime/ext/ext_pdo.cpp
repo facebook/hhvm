@@ -571,7 +571,7 @@ static Object pdo_stmt_instantiate(sp_PDOConnection dbh, CStrRef clsname,
 
 static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
                                CStrRef clsname, CVarRef ctor_args) {
-  const ClassInfo *cls = ClassInfo::FindClass(clsname);
+  const ClassInfo *cls = ClassInfo::FindClass(clsname.data());
   if (cls) {
     const char *constructor = cls->getConstructor();
     if (constructor) {
@@ -601,7 +601,7 @@ static bool valid_statement_class(sp_PDOConnection dbh, CVarRef opt,
     PDO_HANDLE_DBH_ERR(dbh);
     return false;
   }
-  const ClassInfo *cls = ClassInfo::FindClass(clsname);
+  const ClassInfo *cls = ClassInfo::FindClass(clsname.data());
   if (cls) {
     ClassInfo::MethodInfo *method = cls->getMethodInfo("__construct");
     if (!method) {
@@ -725,7 +725,7 @@ static bool do_fetch_class_prepare(sp_PDOStatement stmt) {
     stmt->fetch.clsname = "stdclass";
   }
   stmt->fetch.constructor = NULL;
-  const ClassInfo *cls = ClassInfo::FindClass(clsname);
+  const ClassInfo *cls = ClassInfo::FindClass(clsname.data());
   if (cls) {
     const char *constructor = cls->getConstructor();
     if (constructor) {

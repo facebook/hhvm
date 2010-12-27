@@ -33,7 +33,7 @@ public:
   };
 
   static CStrRef GetClassName(bool skip = false);
-  static CStrRef GetParentClassName(bool skip = false);
+  static const char *GetParentClassName(bool skip = false);
   static Object GetThis(bool skip = false);
   static String GetContainingFileName(bool skip = false);
   static Array GetBacktrace(bool skip = false, bool withSelf = false,

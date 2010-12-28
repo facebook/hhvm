@@ -30,7 +30,7 @@ StaticMethodExpression::
 StaticMethodExpression(EXPRESSION_ARGS, const NamePtr &cname,
     const NamePtr &name, const vector<ExpressionPtr> &params) :
   SimpleFunctionCallExpression(EXPRESSION_PASS, name, params), m_cname(cname),
-  m_construct(name->getStatic() == "__construct") {}
+  m_construct(name->get() == "__construct") {}
 
 Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
   SET_LINE;

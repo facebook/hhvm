@@ -44,7 +44,7 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
     return ref(fs->directInvoke(env, this));
   } else {
     return ref(invoke_from_eval(name.data(), env, this,
-                                renamed ? -1 : m_name->hashLwr()));
+                                renamed ? -1 : m_name->hash()));
   }
 }
 
@@ -57,7 +57,7 @@ ExpressionPtr
 SimpleFunctionCallExpression::make(EXPRESSION_ARGS, NamePtr name,
                                    const vector<ExpressionPtr> &params,
                                    const Parser &p) {
-  String sname = name->getStatic();
+  String sname = name->get();
   if (!sname.isNull()) {
     if (strcasecmp(sname.data(), "get_class") == 0 && params.size() == 0) {
       if (p.currentClass()) {

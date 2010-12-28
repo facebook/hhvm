@@ -59,7 +59,7 @@ Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
     return ref(ms->invokeInstanceDirect(toObject(obj), env, this));
   }
   return ref(obj.getObjectData()->o_invoke_from_eval(name.data(), env, this,
-                                                     m_name->hashLwr(), true));
+                                                     m_name->hash(), true));
 }
 
 void ObjectMethodExpression::dump(std::ostream &out) const {

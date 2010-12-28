@@ -71,7 +71,6 @@ void rename_function(CStrRef old_name, CStrRef new_name);
  * Get the actual function to call.
  */
 String get_renamed_function(CStrRef name, bool *renamed = NULL);
-const char *get_renamed_function(const char *name);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

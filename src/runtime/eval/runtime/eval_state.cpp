@@ -187,25 +187,24 @@ void RequestEvalState::addCodeContainer(SmartPtr<CodeContainer> &cc) {
 
 ClassEvalState &RequestEvalState::declareClass(const ClassStatement *cls) {
   RequestEvalState *self = s_res.get();
-  const string &name = cls->name();
-  if (self->m_classes.find(name.c_str()) != self->m_classes.end() ||
-      ClassInfo::FindClass(name.c_str()) ||
-      ClassInfo::FindInterface(name.c_str())) {
+  String name = cls->name();
+  if (self->m_classes.find(name) != self->m_classes.end() ||
+      ClassInfo::FindClass(name) ||
+      ClassInfo::FindInterface(name)) {
     raise_error("Cannot redeclare class %s", name.c_str());
   }
-  ClassEvalState &ce = self->m_classes[name.c_str()];
+  ClassEvalState &ce = self->m_classes[name];
   ce.init(cls);
   return ce;
 }
 void RequestEvalState::declareFunction(const FunctionStatement *fn) {
   RequestEvalState *self = s_res.get();
-  const string &name = fn->name();
-  const char *func = name.c_str();
-  if (self->m_functions.find(func) != self->m_functions.end() ||
-      get_renamed_function(func) != func) {
-    raise_error("Cannot redeclare %s()", func);
+  String name = fn->name();
+  if (self->m_functions.find(name) != self->m_functions.end() ||
+      get_renamed_function(name) != name) {
+    raise_error("Cannot redeclare %s()", name.c_str());
   }
-  self->m_functions[func] = fn;
+  self->m_functions[name] = fn;
 }
 
 bool RequestEvalState::declareConstant(CStrRef name, CVarRef val) {
@@ -242,12 +241,11 @@ ClassInfoEvaled::~ClassInfoEvaled() {
   }
 }
 
-const ClassStatement *RequestEvalState::findClass(const char *name,
+const ClassStatement *RequestEvalState::findClass(CStrRef name,
                                                   bool autoload /* = false */)
 {
   RequestEvalState *self = s_res.get();
-  hphp_const_char_imap<ClassEvalState>::const_iterator it =
-    self->m_classes.find(name);
+  StringIMap<ClassEvalState>::const_iterator it = self->m_classes.find(name);
   if (it != self->m_classes.end()) {
     return it->second.getClass();
   }
@@ -259,11 +257,10 @@ const ClassStatement *RequestEvalState::findClass(const char *name,
   return NULL;
 }
 
-ClassEvalState *RequestEvalState::findClassState(const char *name,
+ClassEvalState *RequestEvalState::findClassState(CStrRef name,
                                                  bool autoload /* = false */) {
   RequestEvalState *self = s_res.get();
-  hphp_const_char_imap<ClassEvalState>::iterator it =
-    self->m_classes.find(name);
+  StringIMap<ClassEvalState>::iterator it = self->m_classes.find(name);
   if (it != self->m_classes.end()) {
     return &it->second;
   }
@@ -386,8 +383,7 @@ getMethodStatics(const MethodStatement* func, const char* cls) {
 
 LVariableTable *RequestEvalState::getClassStatics(const ClassStatement* cls) {
   RequestEvalState *self = s_res.get();
-  hphp_const_char_imap<ClassEvalState>::iterator it =
-    self->m_classes.find(cls->name().c_str());
+  StringIMap<ClassEvalState>::iterator it = self->m_classes.find(cls->name());
   if (it == self->m_classes.end()) return NULL;
   it->second.initializeStatics();
   return &it->second.getStatics();
@@ -414,8 +410,8 @@ Array RequestEvalState::getUserFunctionsInfo() {
 Array RequestEvalState::getClassesInfo() {
   RequestEvalState *self = s_res.get();
   Array ret;
-  for (hphp_const_char_imap<ClassEvalState>::const_iterator it =
-         self->m_classes.begin(); it != self->m_classes.end(); ++it) {
+  for (StringIMap<ClassEvalState>::const_iterator it = self->m_classes.begin();
+       it != self->m_classes.end(); ++it) {
     if (it->second.getClass()->getModifiers() & ClassStatement::Interface)
       continue;
     ret.append(it->first);
@@ -425,8 +421,8 @@ Array RequestEvalState::getClassesInfo() {
 Array RequestEvalState::getInterfacesInfo() {
   RequestEvalState *self = s_res.get();
   Array ret;
-  for (hphp_const_char_imap<ClassEvalState>::const_iterator it =
-         self->m_classes.begin(); it != self->m_classes.end(); ++it) {
+  for (StringIMap<ClassEvalState>::const_iterator it = self->m_classes.begin();
+       it != self->m_classes.end(); ++it) {
     if (it->second.getClass()->getModifiers() & ClassStatement::Interface) {
       ret.append(it->first);
     }
@@ -565,8 +561,8 @@ void RequestEvalState::GetMethodStaticVariables(Array &arr) {
 void RequestEvalState::GetClassStaticVariables(Array &arr) {
   RequestEvalState *self = s_res.get();
   String prefix("s_");
-  for (hphp_const_char_imap<ClassEvalState>::iterator it =
-      self->m_classes.begin(); it != self->m_classes.end(); ++it) {
+  for (StringIMap<ClassEvalState>::iterator it = self->m_classes.begin();
+       it != self->m_classes.end(); ++it) {
     String cprefix(prefix);
     cprefix += it->first;
     cprefix += "$$";
@@ -638,16 +634,16 @@ void RequestEvalState::fiberInit(RequestEvalState *res,
     m_interfaceInfos[it->first] = it->second;
   }
   // Classes
-  for (hphp_const_char_imap<ClassEvalState>::iterator it =
-      res->m_classes.begin(); it != res->m_classes.end(); ++it) {
+  for (StringIMap<ClassEvalState>::iterator it = res->m_classes.begin();
+       it != res->m_classes.end(); ++it) {
     ClassEvalState &ces = m_classes[it->first];
     ClassEvalState &oces = it->second;
     ces.fiberInit(oces, refMap);
   }
 
   // Class Statics
-  for (hphp_const_char_imap<ClassEvalState>::iterator it =
-      res->m_classes.begin(); it != res->m_classes.end(); ++it) {
+  for (StringIMap<ClassEvalState>::iterator it =
+       res->m_classes.begin(); it != res->m_classes.end(); ++it) {
     ClassEvalState &ces = m_classes[it->first];
     ClassEvalState &oces = it->second;
     ces.fiberInitStatics(oces, refMap);
@@ -724,16 +720,16 @@ void RequestEvalState::fiberExit(RequestEvalState *res,
     m_interfaceInfos[it->first] = it->second;
   }
   // Classes
-  for (hphp_const_char_imap<ClassEvalState>::iterator it =
-      res->m_classes.begin(); it != res->m_classes.end(); ++it) {
+  for (StringIMap<ClassEvalState>::iterator it = res->m_classes.begin();
+       it != res->m_classes.end(); ++it) {
     ClassEvalState &ces = m_classes[it->first];
     ClassEvalState &oces = it->second;
     ces.fiberExit(oces, refMap, default_strategy);
   }
 
   // Class Statics
-  for (hphp_const_char_imap<ClassEvalState>::iterator it =
-      res->m_classes.begin(); it != res->m_classes.end(); ++it) {
+  for (StringIMap<ClassEvalState>::iterator it = res->m_classes.begin();
+       it != res->m_classes.end(); ++it) {
     ClassEvalState &ces = m_classes[it->first];
     ClassEvalState &oces = it->second;
     ces.fiberExitStatics(oces, refMap, default_strategy);
@@ -824,8 +820,8 @@ void RequestEvalState::info() {
   cerr << "Eval State Status" << endl;
   cerr << "-----------------" << endl;
   cerr << "Classes:" << endl;
-  for (hphp_const_char_imap<ClassEvalState>::const_iterator it =
-         self->m_classes.begin(); it != self->m_classes.end(); ++it) {
+  for (StringIMap<ClassEvalState>::const_iterator it = self->m_classes.begin();
+       it != self->m_classes.end(); ++it) {
     cerr << " " << it->first << " " << it->second.getClass()->name() << endl;
   }
   cerr << "Functions:" << endl;

@@ -30,6 +30,7 @@ public:
   ScalarExpression(EXPRESSION_ARGS);
   ScalarExpression(EXPRESSION_ARGS, bool b);
   ScalarExpression(EXPRESSION_ARGS, const std::string &s);
+  ScalarExpression(EXPRESSION_ARGS, const char *s);
   ScalarExpression(EXPRESSION_ARGS, int type, const std::string &val,
                    int subtype = 0);
   virtual Variant eval(VariableEnvironment &env) const;

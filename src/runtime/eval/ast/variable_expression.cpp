@@ -42,7 +42,7 @@ Variant &VariableExpression::getRef(VariableEnvironment &env,
    * as undefined local variables are still in the (function) environment */
   if (initNotice && !var->isInitialized()) {
     if (name.empty()) {
-      name = m_name->getStatic();
+      name = m_name->get();
     }
     SET_LINE;
     raise_notice("Undefined variable: %s", name.c_str());
@@ -122,7 +122,7 @@ NamePtr VariableExpression::getName() const {
 }
 
 void VariableExpression::dump(std::ostream &out) const {
-  if (m_name->getStatic().isNull()) {
+  if (m_name->get().isNull()) {
     out << "${";
     m_name->dump(out);
     out << "}";

@@ -34,6 +34,7 @@ class Array;
 class String;
 class TaintedMetadata;
 class VarNR;
+class AtomicString;
 
 /**
  * String type wrapping around StringData to implement copy-on-write and
@@ -64,6 +65,7 @@ public:
     : SmartPtr<StringData>(s ? NEW(StringData)(s, mode) : NULL) { }
   String(const char *s, int length, StringDataMode mode) // binary string
     : SmartPtr<StringData>(s ? NEW(StringData)(s, length, mode) : NULL) { }
+  String(const AtomicString &s);
 
   void assign(const char *data, StringDataMode mode);
   void assign(const char *data, int len, StringDataMode mode);
@@ -153,7 +155,8 @@ public:
   String &operator =  (litstr  v);
   String &operator =  (CStrRef v);
   String &operator =  (CVarRef v);
-  String &operator =  (const std::string & s);
+  String &operator =  (const std::string &s);
+  String &operator =  (const AtomicString &s);
   String  operator +  (litstr  v) const;
   String  operator +  (CStrRef v) const;
   String &operator += (litstr  v);
@@ -446,6 +449,36 @@ public:
   ~StrNR() {
     m_px = NULL;
   }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// AtomicString
+
+class AtomicString {
+public:
+  AtomicString(const char *s, StringDataMode mode = AttachLiteral);
+  AtomicString(const std::string &s);
+  AtomicString(StringData *str);
+  AtomicString(const AtomicString &s);
+  ~AtomicString();
+
+  AtomicString &operator=(const AtomicString &s);
+  AtomicString &operator=(const std::string &s);
+
+  StringData *get() const { return m_px; }
+  StringData *operator->() const {
+    if (!m_px) throw NullPointerException();
+    return m_px;
+  }
+
+  const char *c_str() const {
+    return m_px ? m_px->data() : "";
+  }
+  bool empty() const {
+    return m_px ? m_px->empty() : true;
+  }
+private:
+  StringData *m_px;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

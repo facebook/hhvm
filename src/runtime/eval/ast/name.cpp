@@ -29,14 +29,16 @@ Name::Name(CONSTRUCT_ARGS) : Construct(CONSTRUCT_PASS) {}
 int64 Name::hash() const {
   return -1;
 }
-int64 Name::hashLwr() const {
-  return -1;
-}
 
 bool Name::isSp() const { return false; }
 
 NamePtr Name::fromString(CONSTRUCT_ARGS, const string &name,
-    bool isSp /* = false */) {
+                         bool isSp /* = false */) {
+  return NamePtr(new StringName(CONSTRUCT_PASS, name, isSp));
+}
+
+NamePtr Name::fromString(CONSTRUCT_ARGS, CStrRef name,
+                         bool isSp /* = false */) {
   return NamePtr(new StringName(CONSTRUCT_PASS, name, isSp));
 }
 
@@ -51,31 +53,30 @@ NamePtr Name::LateStatic(CONSTRUCT_ARGS) {
 }
 
 StringName::StringName(CONSTRUCT_ARGS, const string &name,
-    bool isSp /* = false */)
-  : Name(CONSTRUCT_PASS), m_hash(hash_string(name.c_str(), name.size())),
-    m_hashLwr(hash_string_i(name.c_str(), name.size())),
-    m_name(name), m_isSp(isSp) {
+                       bool isSp /* = false */)
+  : Name(CONSTRUCT_PASS), m_name(name), m_isSp(isSp) {
+}
+
+StringName::StringName(CONSTRUCT_ARGS, CStrRef name, bool isSp /* = false */)
+  : Name(CONSTRUCT_PASS), m_name(name.get()), m_isSp(isSp) {
 }
 
 String StringName::get(VariableEnvironment &env) const {
-  return getStatic();
+  return m_name;
 }
 
-String StringName::getStatic() const {
-  return String(m_name.c_str(), m_name.size(), AttachLiteral);
+String StringName::get() const {
+  return m_name;
 }
 
 int64 StringName::hash() const {
-  return m_hash;
-}
-int64 StringName::hashLwr() const {
-  return m_hashLwr;
+  return m_name->hash();
 }
 
 bool StringName::isSp() const { return m_isSp; }
 
 void StringName::dump(std::ostream &out) const {
-  out << m_name;
+  out << m_name.c_str();
 }
 
 ExprName::ExprName(CONSTRUCT_ARGS, ExpressionPtr name)

@@ -216,16 +216,5 @@ String get_renamed_function(CStrRef name, bool *renamed /* = NULL */) {
   return name;
 }
 
-const char *get_renamed_function(const char *name) {
-  if (s_intercept_data->m_has_renamed_functions) {
-    StringIMap<String> &funcs = s_intercept_data->m_renamed_functions;
-    StringIMap<String>::const_iterator iter = funcs.find(name);
-    if (iter != funcs.end()) {
-      return iter->second.data();
-    }
-  }
-  return name;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

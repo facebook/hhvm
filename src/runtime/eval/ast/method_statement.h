@@ -51,8 +51,8 @@ public:
 private:
   const ClassStatement *m_class;
   int m_modifiers;
-  std::string m_fullName;
-  virtual const std::string &fullName() const;
+  AtomicString m_fullName;
+  virtual String fullName() const;
   Variant evalBody(VariableEnvironment &env) const;
   static Variant MethInvoker(MethodCallPackage &mcp, CArrRef params);
   static Variant MethInvokerFewArgs(MethodCallPackage &mcp, int count,

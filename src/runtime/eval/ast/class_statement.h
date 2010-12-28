@@ -42,15 +42,14 @@ public:
   void set(VariableEnvironment &env, EvalObjectData *self) const;
   void setStatic(VariableEnvironment &env, LVariableTable &statics) const;
   virtual void dump(std::ostream &out) const;
-  const std::string &name() const { return m_name; }
+  String name() const { return m_name; }
   void getInfo(ClassInfo::PropertyInfo &info) const;
   int getModifiers() const { return m_modifiers; }
   void eval(VariableEnvironment &env, Variant &res) const;
-  int64 getHash() const { return m_hash; }
+  int64 getHash() const { return m_name->hash(); }
   bool hasInitialValue() const { return m_value; }
 private:
-  std::string m_name;
-  int64 m_hash;
+  AtomicString m_name;
   int m_modifiers;
   ExpressionPtr m_value;
   std::string m_docComment;
@@ -73,9 +72,8 @@ public:
   ClassStatement(STATEMENT_ARGS, const std::string &name,
                  const std::string &parent, const std::string &doc);
   void finish();
-  const std::string &name() const { return m_name; }
-  const std::string &lname() const { return m_lname; }
-  const std::string &parent() const { return m_parent; }
+  String name() const { return m_name; }
+  String parent() const { return m_parent; }
   const ClassStatement *parentStatement() const;
   void loadInterfaceStatements() const;
   void setModifiers(int m) { m_modifiers = m; }
@@ -103,7 +101,7 @@ public:
   const MethodStatement* findMethod(const char* name,
                                     bool recursive = false,
                                     bool interfaces = false) const;
-  const ClassVariable* findVariable(const char* name,
+  const ClassVariable* findVariable(CStrRef name,
                                     bool recursive = false) const;
   bool getConstant(Variant &res, const char *c,
                    bool recursive = false) const;
@@ -125,19 +123,18 @@ public:
   ClassStatementMarkerPtr getMarker() const;
   void delayDeclaration() { m_delayDeclaration = true; }
 protected:
-  std::string m_name;
-  std::string m_lname;
+  AtomicString m_name;
   int m_modifiers;
 
-  std::string m_parent;
-  hphp_const_char_imap<bool> m_bases;
-  std::vector<std::string> m_basesVec;
+  AtomicString m_parent;
+  std::vector<AtomicString> m_bases;
 
-  hphp_const_char_imap<ClassVariablePtr> m_variables;
+  StringMap<ClassVariablePtr> m_variables;
   std::vector<ClassVariablePtr> m_variablesVec;
   hphp_const_char_imap<MethodStatementPtr> m_methods;
   std::vector<MethodStatementPtr> m_methodsVec;
-  std::map<std::string, ExpressionPtr> m_constants;
+  std::vector<AtomicString> m_constantNames;
+  StringMap<ExpressionPtr> m_constants;
 
   std::string m_docComment;
   ClassStatementMarkerPtr m_marker;

@@ -30,8 +30,8 @@ MethodStatement::MethodStatement(STATEMENT_ARGS, const string &name,
                                  const ClassStatement *cls, int modifiers,
                                  const string &doc)
   : FunctionStatement(STATEMENT_PASS, name, doc), m_class(cls),
-    m_modifiers(modifiers) {
-  m_fullName = cls->name() + "::" + name;
+    m_modifiers(modifiers),
+    m_fullName(string(cls->name().c_str()) + "::" + name) {
   if ((m_modifiers & (ClassStatement::Public | ClassStatement::Protected |
                       ClassStatement::Private)) == 0) {
     m_modifiers |= ClassStatement::Public;
@@ -45,7 +45,7 @@ MethodStatement::MethodStatement(STATEMENT_ARGS, const string &name,
   }
 }
 
-const string &MethodStatement::fullName() const {
+String MethodStatement::fullName() const {
   return m_fullName;
 }
 

@@ -47,7 +47,7 @@ public:
   virtual void o_setArray(CArrRef props);
   virtual Variant *o_realProp(CStrRef prop, int flags,
                               CStrRef context = null_string) const;
-  void o_setPrivate(const char *cls, const char *s, int64 hash, CVarRef v);
+  void o_setPrivate(CStrRef cls, CStrRef s, CVarRef v);
 
   virtual Variant o_getError(CStrRef prop, CStrRef context);
   virtual Variant o_setError(CStrRef prop, CStrRef context);

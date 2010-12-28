@@ -1320,10 +1320,10 @@ NamePtr Parser::procStaticClassName(Token &className, bool text) {
 
   } else {
     cname = className->name();
-    if (haveClass() && cname->getStatic()) {
-      if (cname->getStatic() == "self") {
+    if (haveClass() && cname->get()) {
+      if (cname->get() == "self") {
         cname = Name::fromString(this, peekClass()->name(), true);
-      } else if (cname->getStatic() == "parent") {
+      } else if (cname->get() == "parent") {
         cname = Name::fromString(this, peekClass()->parent(), true);
       }
     }

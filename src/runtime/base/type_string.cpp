@@ -84,6 +84,10 @@ String::String(double n) {
   m_px->incRefCount();
 }
 
+String::String(const AtomicString &s) {
+  m_px = s.get();
+}
+
 void String::assign(const char *data, StringDataMode mode) {
   if (data) {
     SmartPtr<StringData>::operator=(NEW(StringData)(data, mode));
@@ -257,6 +261,10 @@ String &String::operator=(CStrRef str) {
 
 String &String::operator=(CVarRef var) {
   return operator=(var.toString());
+}
+
+String &String::operator=(const AtomicString &s) {
+  return operator=(s.get());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -759,6 +767,70 @@ public:
   }
 };
 static StaticStringUninitializer s_static_string_uninitializer;
+
+//////////////////////////////////////////////////////////////////////////////
+// AtomicString
+
+AtomicString::AtomicString(const char *s,
+                           StringDataMode mode /* = AttachLiteral */) {
+  if (s) {
+    m_px = new StringData(s, mode);
+    m_px->setAtomic();
+    m_px->incAtomicCount();
+    return;
+  }
+  m_px = NULL;
+}
+
+AtomicString::AtomicString(const std::string &s) {
+  m_px = new StringData(s.c_str(), s.size(), CopyString);
+  m_px->setAtomic();
+  m_px->incAtomicCount();
+}
+
+AtomicString::AtomicString(StringData *str) {
+  ASSERT(str);
+  if (str->isRefCounted()) {
+    m_px = new StringData(str->data(), str->size(), CopyString);
+    m_px->setAtomic();
+    m_px->incAtomicCount();
+    return;
+  }
+  // atomic or static
+  m_px = str;
+  m_px->incAtomicCount();
+}
+
+AtomicString::AtomicString(const AtomicString &s) {
+  m_px = s.get();
+  if (m_px) m_px->incAtomicCount();
+}
+
+AtomicString::~AtomicString() {
+  ASSERT(!m_px || m_px->isAtomic());
+  if (m_px && m_px->decAtomicCount() == 0) {
+    delete m_px;
+  }
+}
+
+AtomicString &AtomicString::operator=(const AtomicString &s) {
+  if (m_px && m_px->decAtomicCount() == 0) {
+    delete m_px;
+  }
+  m_px = s.get();
+  if (m_px) m_px->incAtomicCount();
+  return *this;
+}
+
+AtomicString &AtomicString::operator=(const std::string &s) {
+  if (m_px && m_px->decAtomicCount() == 0) {
+    delete m_px;
+  }
+  m_px = new StringData(s.c_str(), s.size(), CopyString);
+  m_px->setAtomic();
+  m_px->incAtomicCount();
+  return *this;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 }

@@ -59,11 +59,17 @@ ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS)
     : Expression(EXPRESSION_PASS), m_type(0), m_subtype(0), m_kind(SNull) {}
+
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, bool b)
     : Expression(EXPRESSION_PASS), m_type(0), m_subtype(0), m_kind(SBool) {
   m_num.num = b ? 1 : 0;
 }
+
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, const string &s)
+    : Expression(EXPRESSION_PASS),
+      m_value(s), m_type(0), m_subtype(0), m_kind(SString) {}
+
+ScalarExpression::ScalarExpression(EXPRESSION_ARGS, const char *s)
     : Expression(EXPRESSION_PASS),
       m_value(s), m_type(0), m_subtype(0), m_kind(SString) {}
 

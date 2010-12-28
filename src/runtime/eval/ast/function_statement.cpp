@@ -118,7 +118,7 @@ void Parameter::dump(std::ostream &out) const {
 }
 
 std::string Parameter::name() const {
-  return m_name->getStatic().data();
+  return m_name->get().data();
 }
 
 void Parameter::getInfo(ClassInfo::ParameterInfo &info,
@@ -134,7 +134,7 @@ void Parameter::getInfo(ClassInfo::ParameterInfo &info,
     attr = ClassInfo::IsNothing;
   }
   info.attribute = (ClassInfo::Attribute)attr;
-  info.name = m_name->getStatic().c_str();
+  info.name = m_name->get().c_str();
   info.type = m_type.c_str();
   info.value = NULL;
   info.valueText = NULL; // would be great to have the original PHP code
@@ -164,7 +164,7 @@ void Parameter::addNullDefault(void *parser) {
 FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
                                      const string &doc)
   : Statement(STATEMENT_PASS), m_name(name),
-    m_lname(Util::toLower(m_name)), m_maybeIntercepted(-1), m_docComment(doc),
+    m_maybeIntercepted(-1), m_docComment(doc),
     m_callInfo((void*)Invoker, (void*)InvokerFewArgs, 0, 0, 0) {
 }
 
@@ -209,13 +209,12 @@ void FunctionStatement::init(void *parser, bool ref,
   }
 }
 
-const string &FunctionStatement::fullName() const {
+String FunctionStatement::fullName() const {
   return m_name;
 }
 
 void FunctionStatement::changeName(const std::string &name) {
   m_name = name;
-  m_lname = Util::toLower(name);
 }
 
 const CallInfo *FunctionStatement::getCallInfo() const {
@@ -359,7 +358,7 @@ Variant FunctionStatement::invokeImpl(VariableEnvironment &env,
 }
 
 void FunctionStatement::dump(std::ostream &out) const {
-  out << "function " << (m_ref ? "&" : "") << m_name << "(";
+  out << "function " << (m_ref ? "&" : "") << m_name.c_str() << "(";
   dumpVector(out, m_params);
   out << ")";
   if (m_body) {
@@ -377,7 +376,7 @@ void FunctionStatement::getInfo(ClassInfo::MethodInfo &info) const {
   if (m_hasCallToGetArgs) attr |= ClassInfo::VariableArguments;
   info.attribute = (ClassInfo::Attribute)attr;
 
-  info.name = m_name.c_str();
+  info.name = m_name;
   info.file = m_loc.file;
   info.line1 = m_loc.line0;
   info.line2 = m_loc.line1;
@@ -393,10 +392,10 @@ void FunctionStatement::getInfo(ClassInfo::MethodInfo &info) const {
     (*it)->getInfo(*pi, env);
     info.parameters.push_back(pi);
   }
-  for (map<string, ExpressionPtr>::const_iterator it = m_staticStmts.begin();
+  for (StringMap<ExpressionPtr>::const_iterator it = m_staticStmts.begin();
        it != m_staticStmts.end(); ++it) {
     ClassInfo::ConstantInfo *ci = new ClassInfo::ConstantInfo;
-    ci->name = it->first.c_str();
+    ci->name = it->first;
     ci->valueLen = 12;
     ci->valueText = "unsupported";
     if (it->second) {

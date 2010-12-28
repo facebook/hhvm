@@ -26,7 +26,7 @@ using namespace std;
 
 void VariableIndex::set(CStrRef name, int idx) {
   m_idx = idx;
-  m_hash = hash_string(name.c_str(), name.size());
+  m_hash = name->hash();
   m_sg = isSuperGlobal(name);
 }
 
@@ -71,7 +71,7 @@ Block::~Block() {}
 void Block::declareStaticStatement(StaticStatementPtr stat) {
   for (vector<StaticVariablePtr>::const_iterator it = stat->vars().begin();
        it != stat->vars().end(); ++it) {
-    m_staticStmts[(*it)->name()->getStatic().data()] = (*it)->val();
+    m_staticStmts[(*it)->name()->get()] = (*it)->val();
   }
 }
 
@@ -93,7 +93,7 @@ const Block::VariableIndices &Block::varIndices() const {
 // PHP is insane
 Variant Block::getStaticValue(VariableEnvironment &env,
                               const char *name) const {
-  map<string, ExpressionPtr>::const_iterator it = m_staticStmts.find(name);
+  StringMap<ExpressionPtr>::const_iterator it = m_staticStmts.find(name);
   if (it != m_staticStmts.end() && it->second) {
     return it->second->eval(env);
   }

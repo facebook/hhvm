@@ -71,8 +71,7 @@ public:
   ~FunctionStatement();
   void init(void *parser, bool ref, const std::vector<ParameterPtr> params,
             StatementListStatementPtr body, bool has_call_to_get_args);
-  const std::string &name() const { return m_name; }
-  const std::string &lname() const { return m_lname; }
+  String name() const { return m_name; }
   void changeName(const std::string &name);
   // Eval is called at declaration, not invocation
   virtual void eval(VariableEnvironment &env) const;
@@ -88,12 +87,11 @@ public:
   const std::vector<ParameterPtr>& getParams() const { return m_params; }
   bool hasBody() const { return m_body;}
   virtual const CallInfo *getCallInfo() const;
-  virtual const std::string &fullName() const;
+  virtual String fullName() const;
 
 protected:
   bool m_ref;
-  std::string m_name;
-  std::string m_lname;
+  AtomicString m_name;
   std::vector<ParameterPtr> m_params;
 
   StatementListStatementPtr m_body;

@@ -67,7 +67,7 @@ public:
   int declareVariable(CStrRef var);
   const VariableIndices &varIndices() const;
 protected:
-  std::map<std::string, ExpressionPtr> m_staticStmts;
+  StringMap<ExpressionPtr> m_staticStmts;
   VariableIndices m_variableIndices;
 };
 

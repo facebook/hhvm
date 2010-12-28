@@ -33,11 +33,11 @@ public:
   Name(CONSTRUCT_ARGS);
   virtual String get(VariableEnvironment &env) const = 0;
   virtual int64 hash() const;
-  virtual int64 hashLwr() const;
-  virtual String getStatic() const { return String(); }
+  virtual String get() const { return String(); }
   virtual bool isSp() const;
   static NamePtr fromString(CONSTRUCT_ARGS, const std::string &name,
       bool isSp = false);
+  static NamePtr fromString(CONSTRUCT_ARGS, CStrRef name, bool isSp = false);
   static NamePtr fromExp(CONSTRUCT_ARGS, ExpressionPtr e);
   static NamePtr fromStaticClassExp(CONSTRUCT_ARGS, ExpressionPtr e);
   static NamePtr LateStatic(CONSTRUCT_ARGS);
@@ -46,16 +46,14 @@ public:
 class StringName : public Name {
 public:
   StringName(CONSTRUCT_ARGS, const std::string &name, bool isSp = false);
+  StringName(CONSTRUCT_ARGS, CStrRef name, bool isSp = false);
   virtual String get(VariableEnvironment &env) const;
   virtual int64 hash() const;
-  virtual int64 hashLwr() const;
-  virtual String getStatic() const;
+  virtual String get() const;
   virtual bool isSp() const;
   virtual void dump(std::ostream &out) const;
 private:
-  int64 m_hash;
-  int64 m_hashLwr;
-  std::string m_name;
+  AtomicString m_name;
   bool m_isSp;
 };
 
@@ -63,6 +61,7 @@ class ExprName : public Name {
 public:
   ExprName(CONSTRUCT_ARGS, ExpressionPtr name);
   virtual String get(VariableEnvironment &env) const;
+  virtual String get() const { return Name::get(); }
   virtual void dump(std::ostream &out) const;
 
   ExpressionPtr getExp();
@@ -76,12 +75,14 @@ class StaticClassExprName : public ExprName {
 public:
   StaticClassExprName(CONSTRUCT_ARGS, ExpressionPtr name);
   virtual String get(VariableEnvironment &env) const;
+  virtual String get() const { return ExprName::get(); }
 };
 
 class LateStaticName : public Name {
 public:
   LateStaticName(CONSTRUCT_ARGS);
   virtual String get(VariableEnvironment &env) const;
+  virtual String get() const { return Name::get(); }
   virtual void dump(std::ostream &out) const;
 };
 

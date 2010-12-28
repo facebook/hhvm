@@ -143,10 +143,8 @@ public:
   static ClassEvalState &declareClass(const ClassStatement *cls);
   static void declareFunction(const FunctionStatement *cls);
   static bool declareConstant(CStrRef name, CVarRef value);
-  static const ClassStatement *findClass(const char *name,
-                                         bool autoload = false);
-  static ClassEvalState *findClassState(const char *name,
-                                        bool autoload = false);
+  static const ClassStatement *findClass(CStrRef name, bool autoload = false);
+  static ClassEvalState *findClassState(CStrRef name, bool autoload = false);
   static const MethodStatement *findMethod(const char *cname, const char *name,
                                            bool &foundClass,
                                            bool autoload = false);
@@ -195,7 +193,7 @@ private:
   std::map<std::string, PhpFile*> m_evaledFiles;
   std::list<SmartPtr<CodeContainer> > m_codeContainers;
 
-  hphp_const_char_imap<ClassEvalState> m_classes;
+  StringIMap<ClassEvalState> m_classes;
   hphp_const_char_imap<const FunctionStatement*> m_functions;
   std::map<const FunctionStatement*, LVariableTable> m_functionStatics;
   std::map<const MethodStatement*, std::map<std::string, LVariableTable> >

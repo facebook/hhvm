@@ -36,7 +36,6 @@ using namespace std;
 ClassVariable::ClassVariable(CONSTRUCT_ARGS, const string &name, int modifiers,
     ExpressionPtr value, const string &doc, ClassStatement *cls)
   : Construct(CONSTRUCT_PASS), m_name(name),
-    m_hash(hash_string(name.c_str(), name.size())),
     m_modifiers(modifiers), m_value(value), m_docComment(doc), m_cls(cls) {
 }
 
@@ -44,9 +43,9 @@ void ClassVariable::set(VariableEnvironment &env, EvalObjectData *self) const {
   if (!(m_modifiers & ClassStatement::Static)) {
     Variant val(m_value ? m_value->eval(env) : null_variant);
     if (m_modifiers & ClassStatement::Private) {
-      self->o_setPrivate(m_cls->name().c_str(), m_name.c_str(), m_hash, val);
-    } else if (!self->o_exists(m_name.c_str())) {
-      self->o_set(m_name.c_str(), val, true);
+      self->o_setPrivate(m_cls->name(), m_name, val);
+    } else if (!self->o_exists(m_name)) {
+      self->o_set(m_name, val, true);
     }
   }
 }
@@ -59,7 +58,7 @@ void ClassVariable::setStatic(VariableEnvironment &env, LVariableTable &st)
     } else if (m_modifiers & ClassStatement::Public) {
       const ClassStatement *parent = m_cls->parentStatement();
       if (parent) {
-        const ClassVariable* var = parent->findVariable(m_name.c_str(), true);
+        const ClassVariable* var = parent->findVariable(m_name, true);
         if (var && (var->m_modifiers & ClassStatement::Protected) &&
             (var->m_modifiers & ClassStatement::Static)) {
           // When there is no initial value, and base class's property is
@@ -70,13 +69,13 @@ void ClassVariable::setStatic(VariableEnvironment &env, LVariableTable &st)
         }
       }
     }
-    st.get(m_name.c_str()) = val;
+    st.get(m_name) = val;
   }
 }
 
 void ClassVariable::dump(std::ostream &out) const {
   ClassStatement::dumpModifiers(out, m_modifiers, true);
-  out << "$" << m_name;
+  out << "$" << m_name.c_str();
   if (m_value) {
     out  << " = ";
     m_value->dump(out);
@@ -91,7 +90,7 @@ void ClassVariable::getInfo(ClassInfo::PropertyInfo &info) const {
   if (attr == 0) attr |= ClassInfo::IsPublic;
   if (m_modifiers & ClassStatement::Static) attr |= ClassInfo::IsStatic;
   info.attribute = (ClassInfo::Attribute)attr;
-  info.name = m_name.c_str();
+  info.name = m_name;
   if (!m_docComment.empty()) {
     info.docComment = m_docComment.c_str();
   }
@@ -104,7 +103,6 @@ void ClassVariable::eval(VariableEnvironment &env, Variant &res) const {
 ClassStatement::ClassStatement(STATEMENT_ARGS, const string &name,
                                const string &parent, const string &doc)
   : Statement(STATEMENT_PASS), m_name(name),
-    m_lname(Util::toLower(m_name)),
     m_modifiers(0), m_parent(parent), m_docComment(doc),
     m_marker(new ClassStatementMarker(STATEMENT_PASS, this)),
     m_delayDeclaration(false) { }
@@ -114,19 +112,18 @@ void ClassStatement::finish() {
 
 const ClassStatement *ClassStatement::parentStatement() const {
   if (!m_parent.empty()) {
-    return RequestEvalState::findClass(m_parent.c_str(), true);
+    return RequestEvalState::findClass(m_parent, true);
   }
   return NULL;
 }
 
 void ClassStatement::loadInterfaceStatements() const {
-  for (unsigned int i = 0; i < m_basesVec.size(); ++i) {
-    RequestEvalState::findClass(m_basesVec[i].c_str(), true);
+  for (unsigned int i = 0; i < m_bases.size(); ++i) {
+    RequestEvalState::findClass(m_bases[i].c_str(), true);
   }
 }
 
-void ClassStatement::
-loadMethodTable(ClassEvalState &ce) const {
+void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
   ClassEvalState::MethodTable &mtable = ce.getMethodTable();
   if (!m_parent.empty()) {
     const ClassStatement* parent_cls = parentStatement();
@@ -208,8 +205,8 @@ void ClassStatement::eval(VariableEnvironment &env) const {
     if (!m_parent.empty() && !f_class_exists(m_parent.c_str(), false)) {
       return;
     }
-    for (uint i = 0; i < m_basesVec.size(); ++i) {
-      if (!f_interface_exists(m_basesVec[i].c_str())) return;
+    for (uint i = 0; i < m_bases.size(); ++i) {
+      if (!f_interface_exists(m_bases[i])) return;
     }
   }
   evalImpl(env);
@@ -222,7 +219,7 @@ void ClassStatement::evalImpl(VariableEnvironment &env) const {
   const ClassStatement* parent_cls;
   if (!m_marker) {
     // Not a top level, immediately do semantic check
-    ClassEvalState *ce = RequestEvalState::findClassState(name().c_str());
+    ClassEvalState *ce = RequestEvalState::findClassState(name());
     ASSERT(ce);
     ce->semanticCheck();
   }
@@ -313,8 +310,7 @@ Object ClassStatement::create(ClassEvalState &ce, CArrRef params,
 
 void ClassStatement::initializeObject(EvalObjectData *obj) const {
   DummyVariableEnvironment env;
-  for (vector<ClassVariablePtr>::const_iterator it =
-         m_variablesVec.begin();
+  for (vector<ClassVariablePtr>::const_iterator it = m_variablesVec.begin();
        it != m_variablesVec.end(); ++it) {
     (*it)->set(env, obj);
   }
@@ -326,19 +322,15 @@ void ClassStatement::initializeObject(EvalObjectData *obj) const {
 
 void ClassStatement::initializeStatics(LVariableTable &statics) const {
   DummyVariableEnvironment env;
-  for (vector<ClassVariablePtr>::const_iterator it =
-         m_variablesVec.begin();
+  for (vector<ClassVariablePtr>::const_iterator it = m_variablesVec.begin();
        it != m_variablesVec.end(); ++it) {
     (*it)->setStatic(env, statics);
   }
 }
 
 void ClassStatement::addBases(const std::vector<String> &bases) {
-  for (std::vector<String>::const_iterator it = bases.begin();
-       it != bases.end(); ++it) {
-    string s(it->data(), it->size());
-    m_basesVec.push_back(s);
-    m_bases[m_basesVec.back().c_str()] = true;
+  for (unsigned i = 0; i < bases.size(); i++) {
+    m_bases.push_back(AtomicString(bases[i].get()));
   }
 }
 
@@ -349,12 +341,12 @@ void ClassStatement::addVariable(ClassVariablePtr v) {
                               v->name().c_str());
   }
 
-  m_variables[v->name().c_str()] = v;
+  m_variables[v->name()] = v;
   m_variablesVec.push_back(v);
 }
 
 void ClassStatement::addMethod(MethodStatementPtr m) {
-  if (m_methods.find(m->lname().c_str()) != m_methods.end()) {
+  if (m_methods.find(m->name().c_str()) != m_methods.end()) {
     raise_error("Cannot redeclare %s::%s() in %s on line %d",
                 m_name.c_str(), m->name().c_str(),
                 m->loc()->file, m->loc()->line1);
@@ -386,7 +378,7 @@ void ClassStatement::addMethod(MethodStatementPtr m) {
     }
   }
 
-  m_methods[m->lname().c_str()] = m;
+  m_methods[m->name().c_str()] = m;
   m_methodsVec.push_back(m);
 }
 void ClassStatement::addConstant(const string &name, ExpressionPtr v) {
@@ -395,15 +387,17 @@ void ClassStatement::addConstant(const string &name, ExpressionPtr v) {
     raise_error("Arrays are not allowed in class constants on %s:%d",
                 v->loc()->file, v->loc()->line1);
   }
-  m_constants[name] = v;
+  m_constantNames.push_back(AtomicString(name));
+  m_constants[m_constantNames.back()] = v;
 }
 
 bool ClassStatement::instanceOf(const char *c) const {
-  if (strcasecmp(m_name.c_str(), c) == 0 ||
-      m_bases.find(c) != m_bases.end()) return true;
-  for (vector<std::string>::const_iterator it = m_basesVec.begin();
-       it != m_basesVec.end(); ++it) {
-    const ClassStatement *iface = RequestEvalState::findClass(it->c_str());
+  if (strcasecmp(m_name.c_str(), c) == 0) return true;
+  for (unsigned i = 0; i < m_bases.size(); i++) {
+    if (strcasecmp(m_bases[i].c_str(), c) == 0) return true;
+  }
+  for (unsigned i = 0; i < m_bases.size(); i++) {
+    const ClassStatement *iface = RequestEvalState::findClass(m_bases[i]);
     if (iface) {
       if (iface->instanceOf(c)) {
         return true;
@@ -413,7 +407,7 @@ bool ClassStatement::instanceOf(const char *c) const {
       // the static ClassInfo data, in which case RequestEvalState::findClass()
       // ignores interfaces.
       const ClassInfo *ci;
-      if ((ci = ClassInfo::FindInterface(it->c_str()))
+      if ((ci = ClassInfo::FindInterface(m_bases[i]))
           && ci->derivesFrom(c, true)) {
         return true;
       }
@@ -445,11 +439,10 @@ const MethodStatement* ClassStatement::findMethod(const char* name,
   }
 }
 
-const ClassVariable* ClassStatement::findVariable(const char* name,
+const ClassVariable* ClassStatement::findVariable(CStrRef name,
                                                   bool recursive /* = false */)
   const {
-  hphp_const_char_imap<ClassVariablePtr>::const_iterator it =
-    m_variables.find(name);
+  StringMap<ClassVariablePtr>::const_iterator it = m_variables.find(name);
   if (it != m_variables.end()) {
     return it->second.get();
   } else {
@@ -465,7 +458,7 @@ const ClassVariable* ClassStatement::findVariable(const char* name,
 
 bool ClassStatement::getConstant(Variant &res, const char *c,
                                  bool recursive /* = false */) const {
-  map<string, ExpressionPtr>::const_iterator it = m_constants.find(c);
+  StringMap<ExpressionPtr>::const_iterator it = m_constants.find(c);
   if (it != m_constants.end()) {
     DummyVariableEnvironment env;
     res = it->second->eval(env);
@@ -474,10 +467,9 @@ bool ClassStatement::getConstant(Variant &res, const char *c,
   if (recursive) {
     const ClassStatement *p = parentStatement();
     if (p && p->getConstant(res, c, true)) return true;
-    for (vector<string>::const_iterator it = m_basesVec.begin();
-         it != m_basesVec.end(); ++it) {
+    for (unsigned i = 0; i < m_bases.size(); i++) {
       const ClassStatement *b =
-        RequestEvalState::findClass(it->c_str(), true);
+        RequestEvalState::findClass(m_bases[i], true);
       if (b && b->getConstant(res, c, true)) return true;
     }
   }
@@ -496,26 +488,26 @@ void ClassStatement::dump(std::ostream &out) const {
   } else {
     out << "class ";
   }
-  out << m_name;
+  out << m_name.c_str();
   if (!m_parent.empty()) {
-    out << " extends " << m_parent;
+    out << " extends " << m_parent.c_str();
   }
-  if (!m_basesVec.empty()) {
+  if (!m_bases.empty()) {
     if (m_modifiers & Interface) {
       out << " extends ";
     } else {
       out << " implements ";
     }
-    for (unsigned int i = 0; i < m_basesVec.size(); i++) {
+    for (unsigned int i = 0; i < m_bases.size(); i++) {
       if (i > 0) out << ", ";
-      out << m_basesVec[i];
+      out << m_bases[i].c_str();
     }
   }
   out << " {\n";
   if (!m_constants.empty()) {
     out << "const ";
     bool first = true;
-    for (map<string, ExpressionPtr>::const_iterator iter = m_constants.begin();
+    for (StringMap<ExpressionPtr>::const_iterator iter = m_constants.begin();
          iter != m_constants.end(); ++iter) {
       if (first) {
         first = false;
@@ -551,8 +543,7 @@ void ClassStatement::dumpModifiers(std::ostream &out, int m, bool variable) {
 }
 
 void ClassStatement::getPropertyInfo(ClassInfoEvaled &owner)  const {
-  for (vector<ClassVariablePtr>::const_iterator it =
-         m_variablesVec.begin();
+  for (vector<ClassVariablePtr>::const_iterator it = m_variablesVec.begin();
        it != m_variablesVec.end(); ++it) {
     ClassInfo::PropertyInfo *p = new ClassInfo::PropertyInfo;
     (*it)->getInfo(*p);
@@ -570,25 +561,24 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
   if (attr == 0) attr = ClassInfo::IsNothing;
 
   info.m_attribute = (ClassInfo::Attribute)attr;
-  info.m_name = m_name.c_str();
+  info.m_name = m_name;
   info.m_file = m_loc.file;
   info.m_line1 = m_loc.line0;
   info.m_line2 = m_loc.line1;
-  info.m_parentClass = m_parent.c_str();
+  info.m_parentClass = m_parent;
   if (!m_docComment.empty()) {
     info.m_docComment = m_docComment.c_str();
   }
-  for (vector<string>::const_iterator it = m_basesVec.begin();
-       it != m_basesVec.end(); ++it) {
-    info.m_interfacesVec.push_back(it->c_str());
-    info.m_interfaces.insert(it->c_str());
+  for (unsigned i = 0; i < m_bases.size(); i++) {
+    info.m_interfacesVec.push_back(m_bases[i]);
+    info.m_interfaces.insert(m_bases[i]);
   }
   getPropertyInfo(info);
   DummyVariableEnvironment dv;
-  for (map<string, ExpressionPtr>::const_iterator it = m_constants.begin();
+  for (StringMap<ExpressionPtr>::const_iterator it = m_constants.begin();
        it != m_constants.end(); ++it) {
     ClassInfo::ConstantInfo *c = new ClassInfo::ConstantInfo;
-    c->name = it->first.c_str();
+    c->name = it->first;
     c->setValue(it->second->eval(dv));
     String sv = c->getValue().toString();
     char* buf = new char[sv.size()+1];
@@ -603,7 +593,7 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
        it != m_methodsVec.end(); ++it) {
     ClassInfo::MethodInfo *m = new ClassInfo::MethodInfo;
     (*it)->getInfo(*m);
-    info.m_methods[(*it)->lname().c_str()] = m;
+    info.m_methods[(*it)->name()] = m;
     info.m_methodsVec.push_back(m);
   }
 }
@@ -626,11 +616,10 @@ bool ClassStatement::hasAccess(const char *context, Modifier level) const {
   }
 }
 
-bool ClassStatement::attemptPropertyAccess( CStrRef prop, const char *context,
-    int &mods, bool rec /* = false */) const {
-
-  hphp_const_char_imap<ClassVariablePtr>::const_iterator it =
-    m_variables.find(prop);
+bool ClassStatement::attemptPropertyAccess(CStrRef prop, const char *context,
+                                           int &mods,
+                                           bool rec /* = false */) const {
+  StringMap<ClassVariablePtr>::const_iterator it = m_variables.find(prop);
   if (it == m_variables.end()) {
     const ClassStatement *par = parentStatement();
     if (par) {
@@ -781,8 +770,8 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
     // Property check
     for (vector<ClassVariablePtr>::const_iterator it = m_variablesVec.begin();
         it != m_variablesVec.end(); ++it) {
-      hphp_const_char_imap<ClassVariablePtr>::const_iterator vit =
-        cls->m_variables.find((*it)->name().c_str());
+      StringMap<ClassVariablePtr>::const_iterator vit =
+        cls->m_variables.find((*it)->name());
       if (vit != m_variables.end()) {
         int m1 = (*it)->getModifiers();
         int m2 = vit->second->getModifiers();
@@ -812,11 +801,11 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
           if (m1 & Static && !(m2 & Static)) {
             raise_error("Cannot redeclare static %s::%s as non-static %s::%s",
                 name().c_str(), (*it)->name().c_str(), cls->name().c_str(),
-                vit->first);
+                vit->first.c_str());
           } else if (!(m1 & Static) && m2 & Static) {
             raise_error("Cannot redeclare non-static %s::%s as static %s::%s",
                 name().c_str(), (*it)->name().c_str(), cls->name().c_str(),
-                vit->first);
+                vit->first.c_str());
           }
         }
       }
@@ -844,7 +833,7 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
       recursiveParentCheck(seen);
     }
     // checking against parent methods
-    if (parent || !m_basesVec.empty()) {
+    if (parent || !m_bases.empty()) {
       bool iface = getModifiers() & Interface;
       for (vector<MethodStatementPtr>::const_iterator it =
           m_methodsVec.begin(); it != m_methodsVec.end(); ++it) {
@@ -924,9 +913,8 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
   } else if (!m_parent.empty() && !f_class_exists(m_parent.c_str(), false)) {
     raise_error("Class '%s' does not exist.", m_parent.c_str());
   }
-  for (vector<string>::const_iterator it = m_basesVec.begin();
-       it != m_basesVec.end(); ++it) {
-    const ClassStatement *iface = RequestEvalState::findClass(it->c_str());
+  for (unsigned i = 0; i < m_bases.size(); i++) {
+    const ClassStatement *iface = RequestEvalState::findClass(m_bases[i]);
     if (iface) {
       if ((iface->getModifiers() & Interface) == 0) {
         raise_error("%s cannot implement %s - it is not an interface",
@@ -935,8 +923,8 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
       if ((cls->getModifiers() & (Interface|Abstract)) == 0) {
         iface->semanticCheck(cls);
       }
-    } else if (!f_interface_exists(it->c_str(), false)) {
-      raise_error("Interface '%s' does not exist.", it->c_str());
+    } else if (!f_interface_exists(m_bases[i], false)) {
+      raise_error("Interface '%s' does not exist.", m_bases[i].c_str());
     }
   }
 }
@@ -949,9 +937,8 @@ const MethodStatement* ClassStatement::findParentMethod(const char* name,
     if (m) return m;
   }
   if (interface) {
-    for (vector<string>::const_iterator it = m_basesVec.begin();
-        it != m_basesVec.end(); ++it) {
-      const ClassStatement *iface = RequestEvalState::findClass(it->c_str());
+    for (unsigned i = 0; i < m_bases.size(); i++) {
+      const ClassStatement *iface = RequestEvalState::findClass(m_bases[i]);
       if (iface) {
         const MethodStatement *m = iface->findMethod(name, true, true);
         if (m) return m;
@@ -987,14 +974,13 @@ void ClassStatement::abstractMethodCheck(
     parent->abstractMethodCheck(abstracts, false);
   }
   if (ifaces) {
-    for (vector<string>::const_iterator it = m_basesVec.begin();
-        it != m_basesVec.end(); ++it) {
-      const ClassStatement *iface = RequestEvalState::findClass(it->c_str());
+    for (unsigned i = 0; i < m_bases.size(); i++) {
+      const ClassStatement *iface = RequestEvalState::findClass(m_bases[i]);
       if (iface) {
         iface->abstractMethodCheck(abstracts, false);
       } else {
         // may be built in
-        const ClassInfo *ici = ClassInfo::FindInterface(it->c_str());
+        const ClassInfo *ici = ClassInfo::FindInterface(m_bases[i]);
         if (ici) {
           const ClassInfo::MethodVec &meths = ici->getMethodsVec();
           for (ClassInfo::MethodVec::const_iterator mit = meths.begin();
@@ -1003,8 +989,9 @@ void ClassStatement::abstractMethodCheck(
               abstracts.find((*mit)->name);
             if (ait != abstracts.end() && ait->second != ici->getName()) {
               raise_error("Can't inherit abstract function %s::%s (previously "
-                  "declared abstract in %s)",
-                  it->c_str(), (*mit)->name.c_str(), ait->second);
+                          "declared abstract in %s)",
+                          m_bases[i].c_str(), (*mit)->name.c_str(),
+                          ait->second);
             }
             abstracts[(*mit)->name] = ici->getName();
           }
@@ -1043,12 +1030,11 @@ ClassStatementMarker::ClassStatementMarker(STATEMENT_ARGS,
 }
 
 void ClassStatementMarker::eval(VariableEnvironment &env) const {
-  ClassEvalState *ce = RequestEvalState::findClassState(m_class->
-                                                        name().c_str());
+  ClassEvalState *ce = RequestEvalState::findClassState(m_class->name());
   if (!ce || ce->getClass() != m_class) {
     // Delayed due to volatility
     m_class->evalImpl(env);
-    ce = RequestEvalState::findClassState(m_class->name().c_str());
+    ce = RequestEvalState::findClassState(m_class->name());
   }
   ASSERT(ce);
   ce->semanticCheck();

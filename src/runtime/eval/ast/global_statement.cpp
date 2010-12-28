@@ -41,7 +41,7 @@ void GlobalStatement::dump(std::ostream &out) const {
 
   for (uint i = 0; i < m_vars.size(); i++) {
     if (i > 0) out << ", ";
-    if (m_vars[i]->getStatic().isNull()) {
+    if (m_vars[i]->get().isNull()) {
       out << "${";
       m_vars[i]->dump(out);
       out << "}";

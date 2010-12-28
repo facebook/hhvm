@@ -18,30 +18,54 @@
 #define __HPHP_COUNTABLE_H__
 
 #include <util/base.h>
+#include <util/atomic.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * If a Countable object may be shared by multiple threads, and cannot be set
+ * static, we need to create it with the C++ new operator, i.e., not through
+ * the SmartAllocator, and call setAtomic() on it.
+ * It is possible to wrap an atomic Countable with a SmartPtr, but
+ * incRefCount() and decRefCount() are no-ops. Instead, incAtomicCount() and
+ * decAtomicCount() are used to maintain its (atomic) reference count.
+ */
+#define IMPLEMENT_ATOMIC_COUNTABLE_METHODS                              \
+  bool isRefCounted() const { return _count < Countable::ATOMIC_FLAG; } \
+  void setAtomic() const { _count = Countable::ATOMIC_FLAG; }           \
+  bool isAtomic() const { return _count & Countable::ATOMIC_FLAG; }     \
+  void incAtomicCount() const {                                         \
+    ASSERT(!isRefCounted());                                            \
+    if (isAtomic()) atomic_inc(_count);                                 \
+  }                                                                     \
+  int decAtomicCount() const {                                          \
+    ASSERT(_count > Countable::ATOMIC_FLAG);                            \
+    return isAtomic() ? atomic_dec(_count) - Countable::ATOMIC_FLAG     \
+                      : _count;                                         \
+  }                                                                     \
 
 /**
  * StringData and Variant do not formally derived from Countable, but they
  * have a _count field and define all of the methods from Countable. These
  * macros are provided to avoid code duplication.
  */
-#define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                        \
-  void incRefCount() const { if (!isStatic()) ++_count; }            \
-  int decRefCount() const {                                          \
-    ASSERT(_count > 0);                                              \
-    return isStatic() ? _count : --_count;                           \
-  }                                                                  \
-  int getCount() const { return _count; }                            \
+#define IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                           \
+  void incRefCount() const { if (isRefCounted()) ++_count; }            \
+  int decRefCount() const {                                             \
+    ASSERT(_count > 0);                                                 \
+    return isRefCounted() ? --_count : _count;                          \
+  }                                                                     \
+  int getCount() const { return _count; }                               \
+  IMPLEMENT_ATOMIC_COUNTABLE_METHODS                                    \
 
-#define IMPLEMENT_COUNTABLE_METHODS                                  \
-  /* setStatic() is used by StaticString and StaticArray to make  */ \
-  /* sure ref count is "never" going to reach 0, even if multiple */ \
-  /* threads modify it in a non-thread-safe fashion.              */ \
-  void setStatic() const { _count = (1 << 30); }                     \
-  bool isStatic() const { return _count == (1 << 30); }              \
-  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                              \
+#define IMPLEMENT_COUNTABLE_METHODS                                     \
+  /* setStatic() is used by StaticString and StaticArray to make  */    \
+  /* sure ref count is "never" going to reach 0, even if multiple */    \
+  /* threads modify it in a non-thread-safe fashion.              */    \
+  void setStatic() const { _count = Countable::STATIC_FLAG; }           \
+  bool isStatic() const { return _count == STATIC_FLAG; }               \
+  IMPLEMENT_COUNTABLE_METHODS_NO_STATIC                                 \
 
 /**
  * Implements reference counting. We could have used boost::shared_ptr<T> for
@@ -54,6 +78,9 @@ namespace HPHP {
 
 class Countable {
  public:
+  static const int STATIC_FLAG = (1 << 30);
+  static const int ATOMIC_FLAG = (1 << 29);
+
   Countable() : _count(0) {}
   IMPLEMENT_COUNTABLE_METHODS
  protected:

@@ -476,8 +476,11 @@ static void pagein_self(void) {
         continue;
       }
 
-      if (mlock((void *)begin, end - begin) == 0)
-        munlock((void *)begin, end - begin);
+      if (mlock((void *)begin, end - begin) == 0) {
+        if (!RuntimeOption::LockCodeMemory) {
+          munlock((void *)begin, end - begin);
+        }
+      }
     }
     fclose(fp);
   }

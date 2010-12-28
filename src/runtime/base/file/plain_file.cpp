@@ -30,13 +30,13 @@ StaticString PlainFile::s_class_name("PlainFile");
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
-PlainFile::PlainFile(FILE *stream, bool pipe)
-  : File(pipe), m_stream(stream), m_eof(false) {
+PlainFile::PlainFile(FILE *stream, bool nonblocking)
+  : File(nonblocking), m_stream(stream), m_eof(false) {
   if (stream) m_fd = fileno(stream);
 }
 
-PlainFile::PlainFile(int fd, bool pipe)
-  : File(pipe), m_stream(NULL), m_eof(false) {
+PlainFile::PlainFile(int fd, bool nonblocking)
+  : File(nonblocking), m_stream(NULL), m_eof(false) {
   m_fd = fd;
 }
 

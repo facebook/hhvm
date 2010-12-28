@@ -30,8 +30,8 @@ class PlainFile : public File {
 public:
   DECLARE_OBJECT_ALLOCATION(PlainFile);
 
-  PlainFile(FILE *stream = NULL, bool pipe = false);
-  PlainFile(int fd, bool pipe = false);
+  PlainFile(FILE *stream = NULL, bool nonblocking = false);
+  PlainFile(int fd, bool nonblocking = false);
   virtual ~PlainFile();
 
   static StaticString s_class_name;
@@ -71,7 +71,7 @@ protected:
  */
 class BuiltinFile : public PlainFile {
 public:
-  BuiltinFile(FILE *stream) : PlainFile(stream) {}
+  BuiltinFile(FILE *stream) : PlainFile(stream, true) {}
   virtual ~BuiltinFile();
   virtual bool close();
 };

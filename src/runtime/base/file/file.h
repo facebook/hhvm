@@ -41,7 +41,7 @@ public:
   static bool IsPlainFilePath(CStrRef filename);
 
 public:
-  File(bool pipe = false);
+  File(bool nonblocking = true);
   virtual ~File();
 
   static StaticString s_class_name;
@@ -137,7 +137,7 @@ public:
 protected:
   int m_fd;      // file descriptor
   bool m_closed; // whether close() was called
-  bool m_pipe;
+  bool m_nonblocking;
 
   // fields only useful for buffered reads
   int64 m_writepos; // where we have read from lower level

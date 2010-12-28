@@ -133,13 +133,13 @@ Object File::OpenImpl(CStrRef filename, CStrRef mode, CArrRef options) {
 
   if (!strncasecmp(filename.c_str(), "php://", 6)) {
     if (!strcasecmp(filename.c_str(), "php://stdin")) {
-      return Object(NEW(PlainFile)(dup(STDIN_FILENO)));
+      return Object(NEW(PlainFile)(dup(STDIN_FILENO), true));
     }
     if (!strcasecmp(filename.c_str(), "php://stdout")) {
-      return Object(NEW(PlainFile)(dup(STDOUT_FILENO)));
+      return Object(NEW(PlainFile)(dup(STDOUT_FILENO), true));
     }
     if (!strcasecmp(filename.c_str(), "php://stderr")) {
-      return Object(NEW(PlainFile)(dup(STDERR_FILENO)));
+      return Object(NEW(PlainFile)(dup(STDERR_FILENO), true));
     }
 
     if (!strncasecmp(filename.c_str(), "php://temp", 10) ||
@@ -257,8 +257,8 @@ Object File::OpenImpl(CStrRef filename, CStrRef mode, CArrRef options) {
 ///////////////////////////////////////////////////////////////////////////////
 // constructor and destructor
 
-File::File(bool pipe)
-  : m_fd(-1), m_closed(false), m_pipe(pipe), m_writepos(0),
+File::File(bool nonblocking)
+  : m_fd(-1), m_closed(false), m_nonblocking(nonblocking), m_writepos(0),
     m_readpos(0), m_position(0), m_buffer(NULL) {
 }
 
@@ -316,7 +316,7 @@ String File::read(int64 length) {
     m_readpos = 0;
     avail = m_writepos - m_readpos;
 
-    if (avail == 0 || m_pipe) {
+    if (avail == 0 || m_nonblocking) {
       // For nonblocking mode, temporary out of data.
       break;
     }

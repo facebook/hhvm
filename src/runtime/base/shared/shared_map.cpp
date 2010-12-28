@@ -31,29 +31,26 @@ SharedMap::SharedMap(SharedVariant* source) : m_arr(source) {
 
 Variant SharedMap::getValue(ssize_t pos) const {
   SharedVariant *sv = m_arr->getValue(pos);
-  if (!sv->shouldCache()) return sv->toLocal();
+  DataType t = sv->getType();
+  if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
   Variant *pv = m_localCache.lvalPtr(pos, false, false);
   if (pv) return *pv;
-  Variant v = sv->toLocal();
-  m_localCache.add((int64)pos, v);
-  return v;
+  return sv->toLocal();
 }
 
 CVarRef SharedMap::getValueRef(ssize_t pos) const {
-  throw FatalErrorException("taking reference from an r-value");
-}
-
-CVarRef SharedMap::getValueRef(ssize_t pos, Variant &holder) const {
   SharedVariant *sv = m_arr->getValue(pos);
-  if (!sv->shouldCache()) {
-    holder = sv->toLocal();
-    return holder;
-  }
+  DataType t = sv->getType();
+  if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
   Variant *pv = m_localCache.lvalPtr(pos, false, false);
   if (pv) return *pv;
   Variant &r = m_localCache.addLval((int64)pos);
   r = sv->toLocal();
   return r;
+}
+
+CVarRef SharedMap::getValueRef(ssize_t pos, Variant &holder) const {
+  return getValueRef(pos);
 }
 
 bool SharedMap::exists(CVarRef k) const {
@@ -82,48 +79,48 @@ ssize_t SharedMap::getIndex(CVarRef k) const {
   return m_arr->getIndex(k);
 }
 
-Variant SharedMap::get(CVarRef k, bool error /* = false */) const {
+CVarRef SharedMap::get(CVarRef k, bool error /* = false */) const {
   int index = m_arr->getIndex(k);
   if (index == -1) {
     if (error) {
       raise_notice("Undefined index: %s", k.toString().data());
     }
-    return null;
+    return null_variant;
   }
-  return getValue(index);
+  return getValueRef(index);
 }
 
-Variant SharedMap::get(CStrRef k, bool error /* = false */) const {
+CVarRef SharedMap::get(CStrRef k, bool error /* = false */) const {
   int index = m_arr->getIndex(k);
   if (index == -1) {
     if (error) {
       raise_notice("Undefined index: %s", k.data());
     }
-    return null;
+    return null_variant;
   }
-  return getValue(index);
+  return getValueRef(index);
 }
 
-Variant SharedMap::get(litstr k, bool error /* = false */) const {
+CVarRef SharedMap::get(litstr k, bool error /* = false */) const {
   int index = m_arr->getIndex(k);
   if (index == -1) {
     if (error) {
       raise_notice("Undefined index: %s", k);
     }
-    return null;
+    return null_variant;
   }
-  return getValue(index);
+  return getValueRef(index);
 }
 
-Variant SharedMap::get(int64 k, bool error /* = false */) const {
+CVarRef SharedMap::get(int64 k, bool error /* = false */) const {
   int index = m_arr->getIndex(k);
   if (index == -1) {
     if (error) {
       raise_notice("Undefined index: %ld", k);
     }
-    return null;
+    return null_variant;
   }
-  return getValue(index);
+  return getValueRef(index);
 }
 
 ArrayData *SharedMap::lval(int64 k, Variant *&ret, bool copy,

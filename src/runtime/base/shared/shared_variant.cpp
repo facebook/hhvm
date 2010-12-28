@@ -27,7 +27,7 @@ int SharedVariant::countReachable() {
   markReachable();
 #endif
   int count = 1;
-  if (m_type == KindOfArray) {
+  if (getType() == KindOfArray) {
     int size = arrSize();
     count += size; // key count
     for (int i = 0; i < size; i++) {

@@ -37,12 +37,11 @@ class SharedVariant
 #endif
 {
 public:
-  SharedVariant() : m_ref(1), m_flags(0) {}
+  SharedVariant() {}
   virtual ~SharedVariant() {}
 
-  bool is(DataType d) const {
-    return m_type == d;
-  }
+  virtual DataType getType() const = 0;
+  virtual CVarRef asCVarRef() const = 0;
 
   /**
    * Reference counting. Needs to release memory when count == 0 in decRef().
@@ -52,8 +51,6 @@ public:
 
   virtual Variant toLocal() = 0;
   virtual bool operator<(const SharedVariant& other) const { return false; }
-
-  virtual int64 intData() const = 0;
 
   virtual const char* stringData() const = 0;
   virtual size_t stringLength() const = 0;
@@ -78,30 +75,21 @@ public:
   int countReachable();
 
   // recursively get stats from the SharedVariant
-  virtual void getStats(SharedVariantStats *stat) = 0;
+  virtual void getStats(SharedVariantStats *stat) { /* Default is nothing */ }
   virtual int32 getSpaceUsage() { return 0; }
 
   // whether it is an object, or an array that recursively contains an object
   // or an array with circular reference
-  bool shouldCache() { return getShouldCache(); }
+  virtual bool shouldCache() const = 0;
 
   virtual SharedVariant *convertObj(CVarRef var) { return NULL; }
   virtual bool isUnserializedObj() { return false; }
 
  protected:
-  const static uint16 SerializedArray = (1<<15);
-  const static uint16 ShouldCache = (1<<14);
-  int m_ref;
-  uint16 m_flags;
-  uint8 m_type;
-
-  bool getSerializedArray() const { return (bool)(m_flags & SerializedArray);}
-  void setSerializedArray() { m_flags |= SerializedArray;}
-  void clearSerializedArray() { m_flags &= ~SerializedArray;}
-
-  bool getShouldCache() const { return (bool)(m_flags & ShouldCache);}
-  void setShouldCache() { m_flags |= ShouldCache;}
-  void clearShouldCache() { m_flags &= ~ShouldCache;}
+  const static uint8 SerializedArray = (1<<0);
+  const static uint8 IsVector = (1<<1);
+  const static uint8 IsObj = (1<<2);
+  const static uint8 ObjAttempted = (1<<3);
 
   // only for countReachable() return NULL if it is vector and key is not
   // SharedVariant

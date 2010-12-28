@@ -23,6 +23,16 @@
 #include <runtime/base/memory/unsafe_pointer.h>
 #include <runtime/base/shared/shared_variant.h>
 
+#if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
+# if defined(__LITTLE_ENDIAN__)
+#  undef WORDS_BIGENDIAN
+# else
+#  if defined(__BIG_ENDIAN__)
+#   define WORDS_BIGENDIAN
+#  endif
+# endif
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -66,43 +76,48 @@ class ProcessSharedVariant : public SharedVariant {
   ProcessSharedVariant(SharedMemoryString& source);
   virtual ~ProcessSharedVariant();
 
+  bool is(DataType d) const { return m_type == d; }
+  virtual DataType getType() const { return (DataType)m_type;}
+  virtual CVarRef asCVarRef() const {
+    // Must be non-refcounted types
+    ASSERT(m_shouldCache == false);
+    ASSERT(m_flags == 0);
+    ASSERT(!IS_REFCOUNTED_TYPE(m_tv.m_type));
+    return tvAsCVarRef(&m_tv);
+  }
+
   virtual void incRef();
   virtual void decRef();
 
-  Variant toLocal();
-  bool operator<(const SharedVariant& svother) const;
+  virtual Variant toLocal();
+  virtual bool operator<(const SharedVariant& svother) const;
 
-  virtual int64 intData() const {
-    ASSERT(is(KindOfInt64));
-    return m_data.num;
-  }
-
-  const char* stringData() const {
+  virtual const char* stringData() const {
     ASSERT(is(KindOfString));
     return getString()->c_str();
   }
-  size_t stringLength() const {
+  virtual size_t stringLength() const {
     ASSERT(is(KindOfString));
     return getString()->size();
   }
 
-  size_t arrSize() const {
+  virtual size_t arrSize() const {
     return map().size();
   }
 
-  int getIndex(CVarRef key);
-  int getIndex(CStrRef key) {
+  virtual int getIndex(CVarRef key);
+  virtual int getIndex(CStrRef key) {
     return getIndex(Variant(key));
   }
-  int getIndex(litstr key) {
+  virtual int getIndex(litstr key) {
     return getIndex(Variant(key));
   }
-  int getIndex(int64 key) {
+  virtual int getIndex(int64 key) {
     return getIndex(Variant(key));
   }
 
-  void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
-                 bool keepRef = false);
+  virtual void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
+                         bool keepRef = false);
 
   virtual Variant getKey(ssize_t pos) const;
   virtual SharedVariant* getValue(ssize_t pos) const;
@@ -113,18 +128,63 @@ class ProcessSharedVariant : public SharedVariant {
 
   // implementing LeakDetectable
   virtual void dump(std::string &out);
-  virtual void getStats(SharedVariantStats* stats) {
-    // Not implement this because this class is not being used currently
-  }
+
+  virtual bool shouldCache() const { return m_shouldCache; }
 
  protected:
+
+  /* See comments in thread_shared_variant.h */
+#ifdef WORDS_BIGENDIAN
+ #define SharedVarData \
+  union {\
+    int64 num;\
+    double dbl;\
+    SharedMemoryString* str;\
+    ProcessSharedVariantMapData* map;\
+  } m_data;\
+  int m_count;\
+  bool m_shouldCache;\
+  uint8 m_flags;\
+  uint16 m_type
+
+#else
+ #define SharedVarData \
+  union {\
+    int64 num;\
+    double dbl;\
+    SharedMemoryString* str;\
+    ProcessSharedVariantMapData* map;\
+  } m_data;\
+  int m_count;\
+  uint16 m_type;\
+  bool m_shouldCache;\
+  uint8 m_flags
+
+#endif
+
+  struct SharedVar {
+    SharedVarData;
+  };
+
   union {
-    int64 num;
-    double dbl;
-    SharedMemoryString* str;
-    ProcessSharedVariantMapData* map;
-  } m_data;
+    struct {
+      SharedVarData;
+    };
+    TypedValue m_tv;
+  };
+#undef SharedVarData
+
   ProcessSharedVariantLock* m_lock;
+
+  static void compileTimeAssertions() {
+    CT_ASSERT(offsetof(SharedVar, m_data) == offsetof(TypedValue, m_data));
+    CT_ASSERT(offsetof(SharedVar, m_count) == offsetof(TypedValue, _count));
+    CT_ASSERT(offsetof(SharedVar, m_type) == offsetof(TypedValue, m_type));
+  }
+
+  bool getSerializedArray() const { return (bool)(m_flags & SerializedArray);}
+  void setSerializedArray() { m_flags |= SerializedArray;}
+  void clearSerializedArray() { m_flags &= ~SerializedArray;}
 
   template<class T>
   T getPtr(T p) const {

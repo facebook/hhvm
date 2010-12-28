@@ -43,16 +43,12 @@ public:
   int indexOf(int64 key);
 
   ThreadSharedVariant* getKeyIndex(int index) {
-    if (index >= size()) {
-      return NULL;
-    }
+    ASSERT(index < size());
     return m_buckets[index].key;
   }
 
   ThreadSharedVariant* getValIndex(int index) {
-    if (index >= size()) {
-      return NULL;
-    }
+    ASSERT(index < size());
     return m_buckets[index].val;
   }
 

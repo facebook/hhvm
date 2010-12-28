@@ -61,26 +61,26 @@ bool GlobalArrayWrapper::idxExists(ssize_t idx) const {
   return idx < size();
 }
 
-Variant GlobalArrayWrapper::get(int64   k, bool error /* = false */) const {
+CVarRef GlobalArrayWrapper::get(int64   k, bool error /* = false */) const {
   return get(Variant(k));
 }
-Variant GlobalArrayWrapper::get(litstr  k, bool error /* = false */) const {
+CVarRef GlobalArrayWrapper::get(litstr  k, bool error /* = false */) const {
   if (exists(k)) {
     return m_globals->get(k);
   }
-  return Variant();
+  return null_variant;
 }
-Variant GlobalArrayWrapper::get(CStrRef k, bool error /* = false */) const {
+CVarRef GlobalArrayWrapper::get(CStrRef k, bool error /* = false */) const {
   if (exists(k)) {
     return m_globals->get(k);
   }
-  return Variant();
+  return null_variant;
 }
-Variant GlobalArrayWrapper::get(CVarRef k, bool error /* = false */) const {
+CVarRef GlobalArrayWrapper::get(CVarRef k, bool error /* = false */) const {
   if (exists(k)) {
     return m_globals->get(k);
   }
-  return Variant();
+  return null_variant;
 }
 
 void GlobalArrayWrapper::load(CVarRef k, Variant &v) const {

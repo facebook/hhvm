@@ -24,7 +24,8 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-ProcessSharedVariant::ProcessSharedVariant(SharedMemoryString& source) {
+ProcessSharedVariant::ProcessSharedVariant(SharedMemoryString& source)
+  : m_count(1), m_shouldCache(0), m_flags(0) {
   m_lock = putPtr((ProcessSharedVariantLock*)NULL);
   m_type = KindOfString;
   m_data.str = putPtr(&source);
@@ -32,7 +33,7 @@ ProcessSharedVariant::ProcessSharedVariant(SharedMemoryString& source) {
 
 ProcessSharedVariant::ProcessSharedVariant(CVarRef source,
                                            ProcessSharedVariantLock* lock)
-  : m_lock(putPtr(lock)) {
+  : m_count(1), m_shouldCache(0), m_flags(0), m_lock(putPtr(lock)) {
   switch (source.getType()) {
   case KindOfBoolean:
     {
@@ -81,7 +82,7 @@ ProcessSharedVariant::ProcessSharedVariant(CVarRef source,
       PointerSet seen;
       if (arr->hasInternalReference(seen)) {
         setSerializedArray();
-        setShouldCache();
+        m_shouldCache = true;
         String s = f_serialize(source);
         m_data.str = putPtr(SharedMemoryManager::GetSegment()
                             ->construct<SharedMemoryString>
@@ -118,7 +119,7 @@ ProcessSharedVariant::ProcessSharedVariant(CVarRef source,
           ->construct<ProcessSharedVariant>
           (boost::interprocess::anonymous_instance)
           (it->second(), getLock());
-        if (val->shouldCache()) setShouldCache();
+        if (val->m_shouldCache) m_shouldCache = true;
         (*map)[key] = i++;
         keys->push_back(putPtr(key));
         vals->push_back(putPtr(val));
@@ -128,7 +129,7 @@ ProcessSharedVariant::ProcessSharedVariant(CVarRef source,
   default:
     {
       m_type = KindOfObject;
-      setShouldCache();
+      m_shouldCache = true;
       String s = f_serialize(source);
       m_data.str = putPtr(SharedMemoryManager::GetSegment()
                           ->construct<SharedMemoryString>
@@ -177,7 +178,7 @@ Variant ProcessSharedVariant::toLocal() {
 
 void ProcessSharedVariant::dump(std::string &out) {
   out += "ref(";
-  out += boost::lexical_cast<string>(m_ref);
+  out += boost::lexical_cast<string>(m_count);
   out += ") ";
   switch (m_type) {
   case KindOfBoolean:
@@ -285,15 +286,15 @@ ProcessSharedVariant::lookup(CVarRef key) {
 
 void ProcessSharedVariant::incRef() {
   getLock()->lock();
-  ++m_ref;
+  ++m_count;
   getLock()->unlock();
 }
 
 void ProcessSharedVariant::decRef() {
-  ASSERT(m_ref);
+  ASSERT(m_count);
   getLock()->lock();
-  --m_ref;
-  if (m_ref == 0) {
+  --m_count;
+  if (m_count == 0) {
     getLock()->unlock();
     SharedMemoryManager::GetSegment()->destroy_ptr(this);
   } else {

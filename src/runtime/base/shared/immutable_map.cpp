@@ -55,7 +55,7 @@ void ImmutableMap::add(ThreadSharedVariant *key, ThreadSharedVariant *val) {
     m_buckets[pos].next = m_hash[hash_pos];
     m_hash[hash_pos] = pos;
   } else {
-    ASSERT(key->is(KindOfString));
+    ASSERT(key->is(KindOfString) || key->is(KindOfStaticString));
     size_t hash_pos = key->getStringData()->hash() & (int64)m_capacity_mask;
     m_buckets[pos].next = m_hash[hash_pos];
     m_hash[hash_pos] = pos;
@@ -67,7 +67,8 @@ int ImmutableMap::indexOf(StringData* key) {
   size_t hash_pos = hash & (int64)m_capacity_mask;
   for (int bucket = m_hash[hash_pos]; bucket != -1;
        bucket = m_buckets[bucket].next) {
-    if (m_buckets[bucket].key->is(KindOfString) &&
+    if ((m_buckets[bucket].key->is(KindOfString) ||
+         m_buckets[bucket].key->is(KindOfStaticString)) &&
         key->same(m_buckets[bucket].key->getStringData())) {
       return bucket;
     }

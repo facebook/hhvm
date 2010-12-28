@@ -715,7 +715,7 @@ bool HphpArray::idxExists(ssize_t idx) const {
   return (idx != ArrayData::invalid_index);
 }
 
-Variant HphpArray::get(int64 k, bool error /* = false */) const {
+CVarRef HphpArray::get(int64 k, bool error /* = false */) const {
   ElmInd pos = find(k);
   if (pos != ElmIndEmpty) {
     Elm* elms = data2Elms(m_data);
@@ -727,10 +727,10 @@ Variant HphpArray::get(int64 k, bool error /* = false */) const {
   if (error) {
     raise_notice("Undefined index: %lld", k);
   }
-  return null;
+  return null_variant;
 }
 
-Variant HphpArray::get(litstr k, bool error /* = false */) const {
+CVarRef HphpArray::get(litstr k, bool error /* = false */) const {
   int len = strlen(k);
   ElmInd pos = find(k, len, hash_string(k, len));
   if (pos != ElmIndEmpty) {
@@ -751,10 +751,10 @@ undefined_index:
   if (error) {
     raise_notice("Undefined index: %s", k);
   }
-  return null;
+  return null_variant;
 }
 
-Variant HphpArray::get(CStrRef k, bool error /* = false */) const {
+CVarRef HphpArray::get(CStrRef k, bool error /* = false */) const {
   StringData* key = k.get();
   int64 prehash = key->hash();
   ElmInd pos = find(key->data(), key->size(), prehash);
@@ -776,10 +776,10 @@ undefined_index:
   if (error) {
     raise_notice("Undefined index: %s", k.data());
   }
-  return null;
+  return null_variant;
 }
 
-Variant HphpArray::get(CVarRef k, bool error /* = false */) const {
+CVarRef HphpArray::get(CVarRef k, bool error /* = false */) const {
   ElmInd pos;
   if (isIntegerKey(k)) {
     pos = find(k.toInt64());
@@ -813,7 +813,7 @@ undefined_index:
   if (error) {
     raise_notice("Undefined index: %s", k.toString().data());
   }
-  return null;
+  return null_variant;
 }
 
 Variant HphpArray::fetch(CStrRef k) const {

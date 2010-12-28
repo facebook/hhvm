@@ -26,6 +26,16 @@
 #include <runtime/base/shared/immutable_map.h>
 #include <runtime/base/shared/immutable_obj.h>
 
+#if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
+# if defined(__LITTLE_ENDIAN__)
+#  undef WORDS_BIGENDIAN
+# else
+#  if defined(__BIG_ENDIAN__)
+#   define WORDS_BIGENDIAN
+#  endif
+# endif
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -48,57 +58,53 @@ public:
                                      bool inner = false,
                                      bool unserializeObj = false);
 
+  bool is(DataType d) const { return m_type == d; }
+  virtual DataType getType() const { return (DataType)m_type; }
+  virtual CVarRef asCVarRef() const {
+    // Must be non-refcounted types
+    ASSERT(m_shouldCache == false);
+    ASSERT(m_flags == 0);
+    ASSERT(!IS_REFCOUNTED_TYPE(m_tv.m_type));
+    return tvAsCVarRef(&m_tv);
+  }
+
   virtual void incRef() {
-    atomic_inc(m_ref);
+    atomic_inc(m_count);
   }
 
   virtual void decRef() {
-    ASSERT(m_ref);
-    if (atomic_dec(m_ref) == 0) {
+    ASSERT(m_count);
+    if (atomic_dec(m_count) == 0) {
       delete this;
     }
   }
 
-  Variant toLocal();
+  virtual Variant toLocal();
 
-  virtual int64 intData() const {
+  int64 intData() const {
     ASSERT(is(KindOfInt64));
     return m_data.num;
   }
 
-  const char* stringData() const;
-  size_t stringLength() const;
+  virtual const char* stringData() const;
+  virtual size_t stringLength() const;
   virtual int64 stringHash() const {
-    ASSERT(is(KindOfString));
+    ASSERT(is(KindOfString) || is(KindOfStaticString));
     return m_data.str->hash();
   }
 
-  size_t arrSize() const;
-  int getIndex(CVarRef key);
-  int getIndex(CStrRef key);
-  int getIndex(litstr key);
-  int getIndex(int64 key);
+  virtual size_t arrSize() const;
+  virtual int getIndex(CVarRef key);
+  virtual int getIndex(CStrRef key);
+  virtual int getIndex(litstr key);
+  virtual int getIndex(int64 key);
 
-  void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
-                 bool keepRef = false);
+  virtual void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
+                         bool keepRef = false);
 
-  virtual Variant getKey(ssize_t pos) const {
-    ASSERT(is(KindOfArray));
-    if (getIsVector()) {
-      ASSERT(pos < (ssize_t) m_data.vec->size);
-      return pos;
-    }
-    return m_data.map->getKeyIndex(pos)->toLocal();
-  }
+  virtual Variant getKey(ssize_t pos) const;
 
-  virtual SharedVariant* getValue(ssize_t pos) const {
-    ASSERT(is(KindOfArray));
-    if (getIsVector()) {
-      ASSERT(pos < (ssize_t) m_data.vec->size);
-      return m_data.vec->vals[pos];
-    }
-    return m_data.map->getValIndex(pos);
-  }
+  virtual SharedVariant* getValue(ssize_t pos) const;
 
   // implementing LeakDetectable
   virtual void dump(std::string &out);
@@ -107,12 +113,14 @@ public:
   virtual int32 getSpaceUsage();
 
   StringData *getStringData() const {
-    ASSERT(is(KindOfString));
+    ASSERT(is(KindOfString) || is(KindOfStaticString));
     return m_data.str;
   }
 
   virtual SharedVariant *convertObj(CVarRef var);
   virtual bool isUnserializedObj() { return getIsObj(); }
+
+  virtual bool shouldCache() const { return m_shouldCache; }
 
 protected:
   virtual SharedVariant* getKeySV(ssize_t pos) const {
@@ -122,11 +130,6 @@ protected:
   }
 
 private:
-  const static uint16 IsVector = (1<<13);
-  const static uint16 Owner = (1<<12);
-  const static uint16 IsObj = (1<<11);
-  const static uint16 ObjAttempted = (1<<10);
-
   class VectorData {
   public:
     size_t size;
@@ -173,30 +176,77 @@ private:
         if (!intMap) intMap = new Int64ToIntMap(size);
         (*intMap)[key->m_data.num] = p;
       } else {
-        ASSERT(key->is(KindOfString));
+        ASSERT(key->is(KindOfString) || key->is(KindOfStaticString));
         if (!strMap) strMap = new StringDataToIntMap(size);
         (*strMap)[key->m_data.str] = p;
       }
     }
   };
 
+  /* This macro is to help making the object layout binary compatible with
+   * Variant for primitive types. We want to have compile time assertion to
+   * guard it but still want to have anonymous struct. For non-refcounted
+   * types, m_shouldCache and m_flags are guaranteed to be 0, and other parts
+   * of runtime code will not touch the count.*/
+#ifdef WORDS_BIGENDIAN
+ #define SharedVarData \
+  union {\
+    int64 num;\
+    double dbl;\
+    StringData *str;\
+    ImmutableMap* map;\
+    VectorData* vec;\
+    MapData *gnuMap;\
+    ImmutableObj* obj;\
+  } m_data;\
+  int m_count;\
+  bool m_shouldCache;\
+  uint8 m_flags;\
+  uint16 m_type
+
+#else
+ #define SharedVarData \
+  union {\
+    int64 num;\
+    double dbl;\
+    StringData *str;\
+    ImmutableMap* map;\
+    VectorData* vec;\
+    MapData *gnuMap;\
+    ImmutableObj* obj;\
+  } m_data;\
+  int m_count;\
+  uint16 m_type;\
+  bool m_shouldCache;\
+  uint8 m_flags
+
+#endif
+
+  struct SharedVar {
+    SharedVarData;
+  };
+
   union {
-    int64 num;
-    double dbl;
-    StringData *str;
-    ImmutableMap* map;
-    VectorData* vec;
-    MapData *gnuMap;
-    ImmutableObj* obj;
-  } m_data;
+    struct {
+      SharedVarData;
+    };
+    TypedValue m_tv;
+  };
+#undef SharedVarData
+
+  static void compileTimeAssertions() {
+    CT_ASSERT(offsetof(SharedVar, m_data) == offsetof(TypedValue, m_data));
+    CT_ASSERT(offsetof(SharedVar, m_count) == offsetof(TypedValue, _count));
+    CT_ASSERT(offsetof(SharedVar, m_type) == offsetof(TypedValue, m_type));
+  }
+
+  bool getSerializedArray() const { return (bool)(m_flags & SerializedArray);}
+  void setSerializedArray() { m_flags |= SerializedArray;}
+  void clearSerializedArray() { m_flags &= ~SerializedArray;}
 
   bool getIsVector() const { return (bool)(m_flags & IsVector);}
   void setIsVector() { m_flags |= IsVector;}
   void clearIsVector() { m_flags &= ~IsVector;}
-
-  bool getOwner() const { return (bool)(m_flags & Owner);}
-  void setOwner() { m_flags |= Owner;}
-  void clearOwner() { m_flags &= ~Owner;}
 
   bool getIsObj() const { return (bool)(m_flags & IsObj);}
   void setIsObj() { m_flags |= IsObj;}

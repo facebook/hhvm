@@ -142,10 +142,10 @@ class ArrayData : public Countable {
   /**
    * Getting value at specified key.
    */
-  virtual Variant get(int64   k, bool error = false) const = 0;
-  virtual Variant get(litstr  k, bool error = false) const = 0;
-  virtual Variant get(CStrRef k, bool error = false) const = 0;
-  virtual Variant get(CVarRef k, bool error = false) const = 0;
+  virtual CVarRef get(int64   k, bool error = false) const = 0;
+  virtual CVarRef get(litstr  k, bool error = false) const = 0;
+  virtual CVarRef get(CStrRef k, bool error = false) const = 0;
+  virtual CVarRef get(CVarRef k, bool error = false) const = 0;
 
   /**
    * Loading value at specified key to a variable, preserving reference,

@@ -74,10 +74,14 @@ public:
 
   virtual bool idxExists(ssize_t idx) const;
 
-  virtual Variant get(int64   k, bool error=false) const __attribute__((flatten));
-  virtual Variant get(litstr  k, bool error=false) const __attribute__((flatten));
-  virtual Variant get(CStrRef k, bool error=false) const __attribute__((flatten));
-  virtual Variant get(CVarRef k, bool error=false) const __attribute__((flatten));
+  virtual CVarRef get(int64   k, bool error=false) const
+    __attribute__((flatten));
+  virtual CVarRef get(litstr  k, bool error=false) const
+    __attribute__((flatten));
+  virtual CVarRef get(CStrRef k, bool error=false) const
+    __attribute__((flatten));
+  virtual CVarRef get(CVarRef k, bool error=false) const
+    __attribute__((flatten));
 
   virtual void load(CVarRef k, Variant& v) const;
 

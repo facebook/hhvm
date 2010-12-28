@@ -72,10 +72,10 @@ public:
 
   virtual bool idxExists(ssize_t idx) const;
 
-  virtual Variant get(int64   k, bool error = false) const;
-  virtual Variant get(litstr  k, bool error = false) const;
-  virtual Variant get(CStrRef k, bool error = false) const;
-  virtual Variant get(CVarRef k, bool error = false) const;
+  virtual CVarRef get(int64   k, bool error = false) const;
+  virtual CVarRef get(litstr  k, bool error = false) const;
+  virtual CVarRef get(CStrRef k, bool error = false) const;
+  virtual CVarRef get(CVarRef k, bool error = false) const;
 
   virtual void load(CVarRef k, Variant &v) const;
 

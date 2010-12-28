@@ -372,7 +372,7 @@ bool SmallArray::idxExists(ssize_t idx) const {
   return (idx >= 0 && m_arBuckets[idx].kind != Empty);
 }
 
-Variant SmallArray::get(int64 k, bool error /* = false */) const {
+CVarRef SmallArray::get(int64 k, bool error /* = false */) const {
   int p = find(k);
   const Bucket &b = m_arBuckets[p];
   if (b.kind != Empty) {
@@ -381,10 +381,10 @@ Variant SmallArray::get(int64 k, bool error /* = false */) const {
   if (error) {
     raise_notice("Undefined index: %lld", k);
   }
-  return null;
+  return null_variant;
 }
 
-Variant SmallArray::get(litstr k, bool error /* = false */) const {
+CVarRef SmallArray::get(litstr k, bool error /* = false */) const {
   int len = strlen(k);
   int64 hash = hash_string(k, len);
   int p = find(k, len, hash);
@@ -395,10 +395,10 @@ Variant SmallArray::get(litstr k, bool error /* = false */) const {
   if (error) {
     raise_notice("Undefined index: %s", k);
   }
-  return null;
+  return null_variant;
 }
 
-Variant SmallArray::get(CStrRef k, bool error /* = false */) const {
+CVarRef SmallArray::get(CStrRef k, bool error /* = false */) const {
   int p = find(k.data(), k.size(), k->hash());
   const Bucket &b = m_arBuckets[p];
   if (b.kind != Empty) {
@@ -407,10 +407,10 @@ Variant SmallArray::get(CStrRef k, bool error /* = false */) const {
   if (error) {
     raise_notice("Undefined index: %s", k.data());
   }
-  return null;
+  return null_variant;
 }
 
-Variant SmallArray::get(CVarRef k, bool error /* = false */) const {
+CVarRef SmallArray::get(CVarRef k, bool error /* = false */) const {
   int p;
   if (k.isNumeric()) {
     p = find(k.toInt64());
@@ -425,7 +425,7 @@ Variant SmallArray::get(CVarRef k, bool error /* = false */) const {
   if (error) {
     raise_notice("Undefined index: %s", k.toString().data());
   }
-  return null;
+  return null_variant;
 }
 
 void SmallArray::load(CVarRef k, Variant &v) const {

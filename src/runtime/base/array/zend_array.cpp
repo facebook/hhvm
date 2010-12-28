@@ -419,7 +419,7 @@ bool ZendArray::idxExists(ssize_t idx) const {
   return (idx && idx != ArrayData::invalid_index);
 }
 
-Variant ZendArray::get(int64 k, bool error /* = false */) const {
+CVarRef ZendArray::get(int64 k, bool error /* = false */) const {
   Bucket *p = find(k);
   if (p) {
     return p->data;
@@ -427,10 +427,10 @@ Variant ZendArray::get(int64 k, bool error /* = false */) const {
   if (error) {
     raise_notice("Undefined index: %lld", k);
   }
-  return null;
+  return null_variant;
 }
 
-Variant ZendArray::get(litstr k, bool error /* = false */) const {
+CVarRef ZendArray::get(litstr k, bool error /* = false */) const {
   int len = strlen(k);
   Bucket *p = find(k, len, hash_string(k, len));
   if (p) {
@@ -439,10 +439,10 @@ Variant ZendArray::get(litstr k, bool error /* = false */) const {
   if (error) {
     raise_notice("Undefined index: %s", k);
   }
-  return null;
+  return null_variant;
 }
 
-Variant ZendArray::get(CStrRef k, bool error /* = false */) const {
+CVarRef ZendArray::get(CStrRef k, bool error /* = false */) const {
   StringData *key = k.get();
   int64 prehash = key->hash();
   Bucket *p = find(key->data(), key->size(), prehash);
@@ -452,10 +452,10 @@ Variant ZendArray::get(CStrRef k, bool error /* = false */) const {
   if (error) {
     raise_notice("Undefined index: %s", k.data());
   }
-  return null;
+  return null_variant;
 }
 
-Variant ZendArray::get(CVarRef k, bool error /* = false */) const {
+CVarRef ZendArray::get(CVarRef k, bool error /* = false */) const {
   Bucket *p;
   if (k.isNumeric()) {
     p = find(k.toInt64());
@@ -471,7 +471,7 @@ Variant ZendArray::get(CVarRef k, bool error /* = false */) const {
   if (error) {
     raise_notice("Undefined index: %s", k.toString().data());
   }
-  return null;
+  return null_variant;
 }
 
 void ZendArray::load(CVarRef k, Variant &v) const {

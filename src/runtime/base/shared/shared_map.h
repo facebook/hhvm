@@ -65,10 +65,10 @@ public:
     return idx < size();
   }
 
-  Variant get(int64 k, bool error = false) const;
-  Variant get(litstr k, bool error = false) const;
-  Variant get(CStrRef k, bool error = false) const;
-  Variant get(CVarRef k, bool error = false) const;
+  CVarRef get(int64 k, bool error = false) const;
+  CVarRef get(litstr k, bool error = false) const;
+  CVarRef get(CStrRef k, bool error = false) const;
+  CVarRef get(CVarRef k, bool error = false) const;
 
   ssize_t getIndex(int64 k) const;
   ssize_t getIndex(litstr k) const;

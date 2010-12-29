@@ -110,10 +110,10 @@ protected:
 class FiberReadLock {
 public:
   FiberReadLock(const FiberSafe *obj) : m_obj(obj) {
-    if (m_obj->m_fiberCount) m_obj->m_fiberMutex.acquireRead();
+    if (m_obj && m_obj->m_fiberCount) m_obj->m_fiberMutex.acquireRead();
   }
   ~FiberReadLock() {
-    if (m_obj->m_fiberCount) m_obj->m_fiberMutex.release();
+    if (m_obj && m_obj->m_fiberCount) m_obj->m_fiberMutex.release();
   }
 
 private:
@@ -123,10 +123,10 @@ private:
 class FiberWriteLock {
 public:
   FiberWriteLock(const FiberSafe *obj) : m_obj(obj) {
-    if (m_obj->m_fiberCount) m_obj->m_fiberMutex.acquireWrite();
+    if (m_obj && m_obj->m_fiberCount) m_obj->m_fiberMutex.acquireWrite();
   }
   ~FiberWriteLock() {
-    if (m_obj->m_fiberCount) m_obj->m_fiberMutex.release();
+    if (m_obj && m_obj->m_fiberCount) m_obj->m_fiberMutex.release();
   }
 
 private:

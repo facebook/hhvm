@@ -852,6 +852,518 @@ void apc_load_impl_compressed
 
 ///////////////////////////////////////////////////////////////////////////////
 
+
+// =============================   Temporary   ==============================
+
+void const_load_impl(const char **int_keys, int64 *int_values,
+                     const char **char_keys, char *char_values,
+                     const char **strings, const char **objects,
+                     const char **thrifts, const char **others) {
+  {
+    int count = count_items(int_keys, 2);
+    if (count) {
+      const char **k = int_keys;
+      int64 *v = int_values;
+      for (int i = 0; i < count; i++, k += 2) {
+        String key(*k, (int)(int64)*(k+1), CopyString);
+        int64 value = *v++;
+        const_load_set(key, value);
+      }
+    }
+  }
+  {
+    int count = count_items(char_keys, 2);
+    if (count) {
+      const char **k = char_keys;
+      char *v = char_values;
+      for (int i = 0; i < count; i++, k += 2) {
+        String key(*k, (int)(int64)*(k+1), CopyString);
+        Variant value;
+        switch (*v++) {
+        case 0: value = false; break;
+        case 1: value = true; break;
+        case 2: value = null; break;
+        default:
+          throw Exception("bad apc archive, unknown char type");
+        }
+        const_load_set(key, value);
+      }
+    }
+  }
+  {
+    int count = count_items(strings, 4);
+    if (count) {
+      const char **p = strings;
+      for (int i = 0; i < count; i++, p += 4) {
+        String key(*p, (int)(int64)*(p+1), CopyString);
+        String value(*(p+2), (int)(int64)*(p+3), CopyString);
+        const_load_set(key, value);
+      }
+    }
+  }
+  // f_unserialize object is extreamly slow here;
+  // currently turned off: no objects in haste_maps.
+  if (false) {
+    int count = count_items(objects, 4);
+    if (count) {
+      const char **p = objects;
+      for (int i = 0; i < count; i++, p += 4) {
+        String key(*p, (int)(int64)*(p+1), CopyString);
+        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        const_load_set(key, f_unserialize(value));
+      }
+    }
+  }
+  {
+    int count = count_items(thrifts, 4);
+    if (count) {
+      vector<SharedStore::KeyValuePair> vars(count);
+      const char **p = thrifts;
+      for (int i = 0; i < count; i++, p += 4) {
+        String key(*p, (int)(int64)*(p+1), CopyString);
+        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        Variant success;
+        Variant v = f_fb_thrift_unserialize(value, ref(success));
+        if (same(success, false)) {
+          throw Exception("bad apc archive, f_fb_thrift_unserialize failed");
+        }
+        const_load_set(key, v);
+      }
+    }
+  }
+  {//Would we use others[]?
+    int count = count_items(others, 4);
+    if (count) {
+      const char **p = others;
+      for (int i = 0; i < count; i++, p += 4) {
+        String key(*p, (int)(int64)*(p+1), CopyString);
+        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        Variant v = f_unserialize(value);
+        if (same(v, false)) {
+          throw Exception("bad apc archive, f_unserialize failed");
+        }
+        const_load_set(key, v);
+      }
+    }
+  }
+}
+
+void apc_load_impl(const char **int_keys, int64 *int_values,
+                   const char **char_keys, char *char_values,
+                   const char **strings, const char **objects,
+                   const char **thrifts, const char **others) {
+  SharedStore &s = s_apc_store[0];
+  {
+    int count = count_items(int_keys, 2);
+    if (count) {
+      vector<SharedStore::KeyValuePair> vars(count);
+      const char **k = int_keys;
+      int64 *v = int_values;
+      for (int i = 0; i < count; i++, k += 2) {
+        SharedStore::KeyValuePair &item = vars[i];
+        item.key = *k;
+        item.len = (int)(int64)*(k+1);
+        item.value = s.construct(item.key, item.len, *v++);
+      }
+      s.prime(vars);
+    }
+  }
+  {
+    int count = count_items(char_keys, 2);
+    if (count) {
+      vector<SharedStore::KeyValuePair> vars(count);
+      const char **k = char_keys;
+      char *v = char_values;
+      for (int i = 0; i < count; i++, k += 2) {
+        SharedStore::KeyValuePair &item = vars[i];
+        item.key = *k;
+        item.len = (int)(int64)*(k+1);
+        switch (*v++) {
+        case 0: item.value = s.construct(item.key, item.len, false); break;
+        case 1: item.value = s.construct(item.key, item.len, true ); break;
+        case 2: item.value = s.construct(item.key, item.len, null ); break;
+        default:
+          throw Exception("bad apc archive, unknown char type");
+        }
+      }
+      s.prime(vars);
+    }
+  }
+  {
+    int count = count_items(strings, 4);
+    if (count) {
+      vector<SharedStore::KeyValuePair> vars(count);
+      const char **p = strings;
+      for (int i = 0; i < count; i++, p += 4) {
+        SharedStore::KeyValuePair &item = vars[i];
+        item.key = *p;
+        item.len = (int)(int64)*(p+1);
+        // Strings would be copied into APC anyway.
+        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        value.checkStatic();
+        item.value = s.construct(item.key, item.len, value, false);
+      }
+      s.prime(vars);
+    }
+  }
+  {
+    int count = count_items(objects, 4);
+    if (count) {
+      vector<SharedStore::KeyValuePair> vars(count);
+      const char **p = objects;
+      for (int i = 0; i < count; i++, p += 4) {
+        SharedStore::KeyValuePair &item = vars[i];
+        item.key = *p;
+        item.len = (int)(int64)*(p+1);
+        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        item.value = s.construct(item.key, item.len, value, true);
+      }
+      s.prime(vars);
+    }
+  }
+  {
+    int count = count_items(thrifts, 4);
+    if (count) {
+      vector<SharedStore::KeyValuePair> vars(count);
+      const char **p = thrifts;
+      for (int i = 0; i < count; i++, p += 4) {
+        SharedStore::KeyValuePair &item = vars[i];
+        item.key = *p;
+        item.len = (int)(int64)*(p+1);
+        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        Variant success;
+        Variant v = f_fb_thrift_unserialize(value, ref(success));
+        if (same(success, false)) {
+          throw Exception("bad apc archive, f_fb_thrift_unserialize failed");
+        }
+        item.value = s.construct(item.key, item.len, v);
+      }
+      s.prime(vars);
+    }
+  }
+  {
+    int count = count_items(others, 4);
+    if (count) {
+      vector<SharedStore::KeyValuePair> vars(count);
+      const char **p = others;
+      for (int i = 0; i < count; i++, p += 4) {
+        SharedStore::KeyValuePair &item = vars[i];
+        item.key = *p;
+        item.len = (int)(int64)*(p+1);
+
+        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        Variant v = f_unserialize(value);
+        if (same(v, false)) {
+          // we can't possibly get here if it was a boolean "false" that's
+          // supposed to be serialized as a char
+          throw Exception("bad apc archive, f_unserialize failed");
+        }
+        item.value = s.construct(item.key, item.len, v);
+      }
+      s.prime(vars);
+    }
+  }
+}
+
+void const_load_impl_compressed
+    (int *int_lens, const char *int_keys, int64 *int_values,
+     int *char_lens, const char *char_keys, char *char_values,
+     int *string_lens, const char *strings,
+     int *object_lens, const char *objects,
+     int *thrift_lens, const char *thrifts,
+     int *other_lens, const char *others) {
+  {
+    int count = int_lens[0];
+    int len = int_lens[1];
+    if (count) {
+      char *keys = gzdecode(int_keys, len);
+      if (keys == NULL) throw Exception("bad compressed const archive.");
+      String holder(keys, len, AttachString);
+      const char *k = keys;
+      int64 *v = int_values;
+      for (int i = 0; i < count; i++) {
+        String key(k, int_lens[i + 2], CopyString);
+        int64 value = *v++;
+        const_load_set(key, value);
+        k += int_lens[i + 2] + 1;
+      }
+      ASSERT((k - keys) == len);
+    }
+  }
+  {
+    int count = char_lens[0];
+    int len = char_lens[1];
+    if (count) {
+      char *keys = gzdecode(char_keys, len);
+      if (keys == NULL) throw Exception("bad compressed const archive.");
+      String holder(keys, len, AttachString);
+      const char *k = keys;
+      char *v = char_values;
+      for (int i = 0; i < count; i++) {
+        String key(k, char_lens[i + 2], CopyString);
+        Variant value;
+        switch (*v++) {
+        case 0: value = false; break;
+        case 1: value = true; break;
+        case 2: value = null; break;
+        default:
+          throw Exception("bad const archive, unknown char type");
+        }
+        const_load_set(key, value);
+        k += char_lens[i + 2] + 1;
+      }
+      ASSERT((k - keys) == len);
+    }
+  }
+  {
+    int count = string_lens[0] / 2;
+    int len = string_lens[1];
+    if (count) {
+      char *decoded = gzdecode(strings, len);
+      if (decoded == NULL) throw Exception("bad compressed const archive.");
+      String holder(decoded, len, AttachString);
+      const char *p = decoded;
+      for (int i = 0; i < count; i++) {
+        String key(p, string_lens[i + i + 2], CopyString);
+        p += string_lens[i + i + 2] + 1;
+        String value(p, string_lens[i + i + 3], CopyString);
+        const_load_set(key, value);
+        p += string_lens[i + i + 3] + 1;
+      }
+      ASSERT((p - decoded) == len);
+    }
+  }
+  // f_unserialize object is extreamly slow here;
+  // currently turned off: no objects in haste_maps.
+  if (false) {
+    int count = object_lens[0] / 2;
+    int len = object_lens[1];
+    if (count) {
+      char *decoded = gzdecode(objects, len);
+      if (decoded == NULL) throw Exception("bad compressed const archive.");
+      String holder(decoded, len, AttachString);
+      const char *p = decoded;
+      for (int i = 0; i < count; i++) {
+        String key(p, object_lens[i + i + 2], CopyString);
+        p += object_lens[i + i + 2] + 1;
+        String value(p, object_lens[i + i + 3], AttachLiteral);
+        const_load_set(key, f_unserialize(value));
+        p += object_lens[i + i + 3] + 1;
+      }
+      ASSERT((p - decoded) == len);
+    }
+  }
+  {
+    int count = thrift_lens[0] / 2;
+    int len = thrift_lens[1];
+    if (count) {
+      char *decoded = gzdecode(thrifts, len);
+      if (decoded == NULL) throw Exception("bad compressed const archive.");
+      String holder(decoded, len, AttachString);
+      const char *p = decoded;
+      for (int i = 0; i < count; i++) {
+        String key(p, thrift_lens[i + i + 2], CopyString);
+        p += thrift_lens[i + i + 2] + 1;
+        String value(p, thrift_lens[i + i + 3], AttachLiteral);
+        Variant success;
+        Variant v = f_fb_thrift_unserialize(value, ref(success));
+        if (same(success, false)) {
+          throw Exception("bad apc archive, f_fb_thrift_unserialize failed");
+        }
+        const_load_set(key, v);
+        p += thrift_lens[i + i + 3] + 1;
+      }
+      ASSERT((p - decoded) == len);
+    }
+  }
+  {//Would we use others[]?
+    int count = other_lens[0] / 2;
+    int len = other_lens[1];
+    if (count) {
+      char *decoded = gzdecode(others, len);
+      if (decoded == NULL) throw Exception("bad compressed const archive.");
+      String holder(decoded, len, AttachString);
+      const char *p = decoded;
+      for (int i = 0; i < count; i++) {
+        String key(p, other_lens[i + i + 2], CopyString);
+        p += other_lens[i + i + 2] + 1;
+        String value(p, other_lens[i + i + 3], AttachLiteral);
+        Variant v = f_unserialize(value);
+        if (same(v, false)) {
+          throw Exception("bad apc archive, f_unserialize failed");
+        }
+        const_load_set(key, v);
+        p += other_lens[i + i + 3] + 1;
+      }
+      ASSERT((p - decoded) == len);
+    }
+  }
+}
+
+void apc_load_impl_compressed
+    (int *int_lens, const char *int_keys, int64 *int_values,
+     int *char_lens, const char *char_keys, char *char_values,
+     int *string_lens, const char *strings,
+     int *object_lens, const char *objects,
+     int *thrift_lens, const char *thrifts,
+     int *other_lens, const char *others) {
+  SharedStore &s = s_apc_store[0];
+  {
+    int count = int_lens[0];
+    int len = int_lens[1];
+    if (count) {
+      vector<SharedStore::KeyValuePair> vars(count);
+      char *keys = gzdecode(int_keys, len);
+      if (keys == NULL) throw Exception("bad compressed apc archive.");
+      String holder(keys, len, AttachString);
+      const char *k = keys;
+      int64 *v = int_values;
+      for (int i = 0; i < count; i++) {
+        SharedStore::KeyValuePair &item = vars[i];
+        item.key = k;
+        item.len = int_lens[i + 2];
+        item.value = s.construct(item.key, item.len, *v++);
+        k += int_lens[i + 2] + 1; // skip \0
+      }
+      s.prime(vars);
+      ASSERT((k - keys) == len);
+    }
+  }
+  {
+    int count = char_lens[0];
+    int len = char_lens[1];
+    if (count) {
+      vector<SharedStore::KeyValuePair> vars(count);
+      char *keys = gzdecode(char_keys, len);
+      if (keys == NULL) throw Exception("bad compressed apc archive.");
+      String holder(keys, len, AttachString);
+      const char *k = keys;
+      char *v = char_values;
+      for (int i = 0; i < count; i++) {
+        SharedStore::KeyValuePair &item = vars[i];
+        item.key = k;
+        item.len = char_lens[i + 2];
+        switch (*v++) {
+        case 0: item.value = s.construct(item.key, item.len, false); break;
+        case 1: item.value = s.construct(item.key, item.len, true ); break;
+        case 2: item.value = s.construct(item.key, item.len, null ); break;
+        default:
+          throw Exception("bad apc archive, unknown char type");
+        }
+        k += char_lens[i + 2] + 1; // skip \0
+      }
+      s.prime(vars);
+      ASSERT((k - keys) == len);
+    }
+  }
+  {
+    int count = string_lens[0] / 2;
+    int len = string_lens[1];
+    if (count) {
+      vector<SharedStore::KeyValuePair> vars(count);
+      char *decoded = gzdecode(strings, len);
+      if (decoded == NULL) throw Exception("bad compressed apc archive.");
+      String holder(decoded, len, AttachString);
+      const char *p = decoded;
+      for (int i = 0; i < count; i++) {
+        SharedStore::KeyValuePair &item = vars[i];
+        item.key = p;
+        item.len = string_lens[i + i + 2];
+        p += string_lens[i + i + 2] + 1; // skip \0
+        // Strings would be copied into APC anyway.
+        String value(p, string_lens[i + i + 3], AttachLiteral);
+        value.checkStatic();
+        item.value = s.construct(item.key, item.len, value, false);
+        p += string_lens[i + i + 3] + 1; // skip \0
+      }
+      s.prime(vars);
+      ASSERT((p - decoded) == len);
+    }
+  }
+  {
+    int count = object_lens[0] / 2;
+    int len = object_lens[1];
+    if (count) {
+      vector<SharedStore::KeyValuePair> vars(count);
+      char *decoded = gzdecode(objects, len);
+      if (decoded == NULL) throw Exception("bad compressed APC archive.");
+      String holder(decoded, len, AttachString);
+      const char *p = decoded;
+      for (int i = 0; i < count; i++) {
+        SharedStore::KeyValuePair &item = vars[i];
+        item.key = p;
+        item.len = object_lens[i + i + 2];
+        p += object_lens[i + i + 2] + 1; // skip \0
+        String value(p, object_lens[i + i + 3], AttachLiteral);
+        item.value = s.construct(item.key, item.len, value, true);
+        p += object_lens[i + i + 3] + 1; // skip \0
+      }
+      s.prime(vars);
+      ASSERT((p - decoded) == len);
+    }
+  }
+  {
+    int count = thrift_lens[0] / 2;
+    int len = thrift_lens[1];
+    if (count) {
+      vector<SharedStore::KeyValuePair> vars(count);
+      char *decoded = gzdecode(thrifts, len);
+      if (decoded == NULL) throw Exception("bad compressed apc archive.");
+      String holder(decoded, len, AttachString);
+      const char *p = decoded;
+      for (int i = 0; i < count; i++) {
+        SharedStore::KeyValuePair &item = vars[i];
+        item.key = p;
+        item.len = thrift_lens[i + i + 2];
+        p += thrift_lens[i + i + 2] + 1; // skip \0
+        String value(p, thrift_lens[i + i + 3], AttachLiteral);
+        Variant success;
+        Variant v = f_fb_thrift_unserialize(value, ref(success));
+        if (same(success, false)) {
+          throw Exception("bad apc archive, f_fb_thrift_unserialize failed");
+        }
+        item.value = s.construct(item.key, item.len, v);
+        p += thrift_lens[i + i + 3] + 1; // skip \0
+      }
+      s.prime(vars);
+      ASSERT((p - decoded) == len);
+    }
+  }
+  {
+    int count = other_lens[0] / 2;
+    int len = other_lens[1];
+    if (count) {
+      vector<SharedStore::KeyValuePair> vars(count);
+      char *decoded = gzdecode(others, len);
+      if (decoded == NULL) throw Exception("bad compressed apc archive.");
+      String holder(decoded, len, AttachString);
+      const char *p = decoded;
+      for (int i = 0; i < count; i++) {
+        SharedStore::KeyValuePair &item = vars[i];
+        item.key = p;
+        item.len = other_lens[i + i + 2];
+        p += other_lens[i + i + 2] + 1; // skip \0
+        String value(p, other_lens[i + i + 3], AttachLiteral);
+        Variant v = f_unserialize(value);
+        if (same(v, false)) {
+          // we can't possibly get here if it was a boolean "false" that's
+          // supposed to be serialized as a char
+          throw Exception("bad apc archive, f_unserialize failed");
+        }
+        item.value = s.construct(item.key, item.len, v);
+        p += other_lens[i + i + 3] + 1; // skip \0
+      }
+      s.prime(vars);
+      ASSERT((p - decoded) == len);
+    }
+  }
+}
+
+// ================================   End   ================================
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 static double my_time() {
   struct timeval a;
   double t;

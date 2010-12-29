@@ -349,6 +349,7 @@ public:
         m_to_free->str.push_back(copystr);
         m_error_no = curl_easy_setopt(m_cp, (CURLoption)option, copystr);
 #endif
+        if (option == CURLOPT_URL) m_url = value;
       }
       break;
     case CURLOPT_FILE:

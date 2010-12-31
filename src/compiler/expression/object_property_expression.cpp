@@ -448,7 +448,7 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
       }
     }
     ok = ok || !t;
-    if (!ok) cg_printf("VarNR(");
+    if (!ok) cg_printf("Variant(");
     m_object->outputCPP(cg, ar);
     if (!ok) cg_printf(")");
     cg_printf(".");

@@ -284,7 +284,7 @@ void ObjectMethodExpression::outputCPPObject(CodeGenerator &cg,
   if (!isThis) {
     TypePtr t = m_object->getType();
     bool ok = !t || t->is(Type::KindOfObject) || t->is(Type::KindOfVariant);
-    if (!ok) cg_printf("VarNR(");
+    if (!ok) cg_printf("Variant(");
     m_object->outputCPP(cg, ar);
     if (!ok) cg_printf(")");
     if (!ok || !t || !t->is(Type::KindOfObject)) {

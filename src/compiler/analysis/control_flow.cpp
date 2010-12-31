@@ -222,6 +222,8 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
           case Statement::KindOfStatementList:
           case Statement::KindOfBlockStatement:
           case Statement::KindOfTryStatement:
+          case Statement::KindOfGotoStatement:
+          case Statement::KindOfLabelStatement:
             break;
 
           case Statement::KindOfIfStatement:

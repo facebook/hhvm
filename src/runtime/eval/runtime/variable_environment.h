@@ -28,6 +28,7 @@ namespace Eval {
 class FunctionStatement;
 class Block;
 class ClassStatement;
+class GotoException {};
 
 class VariableEnvironment : public LVariableTable {
 public:
@@ -76,6 +77,10 @@ public:
   }
   bool isEscaping() const { return isBreaking() || m_returning; }
 
+  bool isGotoing() const { return !m_label.empty();}
+  void setGoto(const std::string &label) { m_label = label;}
+  const std::string &getGoto() const { return m_label;}
+
   /**
    * Storing temporary variables for TempExpressionList.
    */
@@ -88,6 +93,7 @@ protected:
   const char* m_currentClass;
   int m_breakLevel;
   bool m_returning;
+  std::string m_label;
   Variant m_ret;
 
   std::list<std::vector<Variant> > m_tempStack;

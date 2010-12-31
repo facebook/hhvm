@@ -197,6 +197,7 @@ void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
 }
 
 void ClassStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   if (m_delayDeclaration) return;
   if (!isBaseClass() && !m_marker) {
     // Class might not be valid to declare yet. If the parent and bases

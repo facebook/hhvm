@@ -74,6 +74,8 @@ public:
     KindOfCatchStatement,
     KindOfTryStatement,
     KindOfThrowStatement,
+    KindOfGotoStatement,
+    KindOfLabelStatement,
     /* KindOfCount = 27 */
   };
 

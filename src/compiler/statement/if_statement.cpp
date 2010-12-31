@@ -93,6 +93,12 @@ StatementPtr IfStatement::preOptimize(AnalysisResultPtr ar) {
     return StatementPtr();
   }
 
+  // we cannot optimize away the code inside if statement, because
+  // there may be a goto that goes into if statement.
+  if (hasLabel()) {
+    return StatementPtr();
+  }
+
   bool changed = false;
   int i;
   int j;
@@ -160,6 +166,12 @@ StatementPtr IfStatement::preOptimize(AnalysisResultPtr ar) {
 }
 
 StatementPtr IfStatement::postOptimize(AnalysisResultPtr ar) {
+  // we cannot optimize away the code inside if statement, because
+  // there may be a goto that goes into if statement.
+  if (hasLabel()) {
+    return StatementPtr();
+  }
+
   bool changed = false;
   for (int i = 0; i < m_stmts->getCount(); i++) {
     IfBranchStatementPtr branch =

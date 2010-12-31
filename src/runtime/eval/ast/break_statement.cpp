@@ -27,6 +27,7 @@ BreakStatement::BreakStatement(STATEMENT_ARGS, ExpressionPtr level,
   : Statement(STATEMENT_PASS), m_level(level), m_isBreak(isBreak) {}
 
 void BreakStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   ENTER_STMT;
   int64 level = m_level ? m_level->eval(env).toInt64() : 1;
   if (level > 0) {

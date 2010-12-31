@@ -14,34 +14,28 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/expr_statement.h>
-#include <runtime/eval/ast/expression.h>
-#include <runtime/eval/runtime/variable_environment.h>
+#ifndef __EVAL_LABEL_STATEMENT_H__
+#define __EVAL_LABEL_STATEMENT_H__
+
+#include <runtime/eval/ast/statement.h>
 
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-ExprStatement::ExprStatement(STATEMENT_ARGS, ExpressionPtr exp)
-  : Statement(STATEMENT_PASS), m_exp(exp) {}
+DECLARE_AST_PTR(LabelStatement);
 
-void ExprStatement::eval(VariableEnvironment &env) const {
-  if (env.isGotoing()) return;
-  m_exp->eval(env);
-
-  // if m_exp hasn't set the line yet, set it, otherwise, we can skip
-  // so to avoid annoying double-stay with debugger's "step" command.
-  if (loc()->line1 != ThreadInfo::s_threadInfo->m_top->getLine()) {
-    ENTER_STMT;
-  }
-}
-
-void ExprStatement::dump(std::ostream &out) const {
-  m_exp->dump(out);
-  out << ";\n";
-}
+class LabelStatement : public Statement {
+public:
+  LabelStatement(STATEMENT_ARGS, const std::string &label);
+  virtual void eval(VariableEnvironment &env) const;
+  virtual void dump(std::ostream &out) const;
+private:
+  std::string m_label;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
 
+#endif /* __EVAL_LABEL_STATEMENT_H__ */

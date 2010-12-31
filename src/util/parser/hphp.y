@@ -569,7 +569,8 @@ static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
 %%
 
 start:
-    top_statement_list                 { _p->saveParseTree($$);}
+    top_statement_list                 { _p->popLabelInfo();
+                                         _p->saveParseTree($$);}
 ;
 
 top_statement_list:
@@ -633,7 +634,8 @@ inner_statement:
 statement:
    expr ';'                            { _p->onExpStatement($$, $1);}
  | statement_without_expr              { $$ = $1;}
- | T_STRING ':'                        { _p->onLabel($$, $1);}
+ | T_STRING ':'                        { _p->addLabel($1.text());
+                                         _p->onLabel($$, $1);}
 ;
 statement_without_expr:
     '{' inner_statement_list '}'       { _p->onBlock($$, $2);}
@@ -649,18 +651,22 @@ statement_without_expr:
     new_else_single
     T_ENDIF ';'                        { _p->onIf($$,$3,$6,$7,$8);}
 
-  | T_WHILE '(' expr ')'
-    while_statement                    { _p->onWhile($$,$3,$5);}
+  | T_WHILE '(' expr ')'               { _p->pushLabelScope();}
+    while_statement                    { _p->popLabelScope();
+                                         _p->onWhile($$,$3,$6);}
 
-  | T_DO statement
-    T_WHILE '(' expr ')' ';'           { _p->onDo($$,$2,$5);}
+  | T_DO                               { _p->pushLabelScope();}
+    statement T_WHILE '(' expr ')' ';' { _p->popLabelScope();
+                                         _p->onDo($$,$3,$6);}
 
   | T_FOR '(' for_expr ';'
-    for_expr ';' for_expr ')'
-    for_statement                      { _p->onFor($$,$3,$5,$7,$9);}
+    for_expr ';' for_expr ')'          { _p->pushLabelScope();}
+    for_statement                      { _p->popLabelScope();
+                                         _p->onFor($$,$3,$5,$7,$10);}
 
-  | T_SWITCH '(' expr ')'
-    switch_case_list                   { _p->onSwitch($$,$3,$5);}
+  | T_SWITCH '(' expr ')'              { _p->pushLabelScope();}
+    switch_case_list                   { _p->popLabelScope();
+                                         _p->onSwitch($$,$3,$6);}
 
   | T_BREAK ';'                        { _p->onBreak($$, NULL);}
   | T_BREAK expr ';'                   { _p->onBreak($$, &$2);}
@@ -688,26 +694,31 @@ statement_without_expr:
 
   | T_FOREACH '(' variable
     T_AS foreach_variable
-    foreach_optional_arg ')'
-    foreach_statement                  { _p->onForEach($$,$3,$5,$6,$8);}
+    foreach_optional_arg ')'           { _p->pushLabelScope();}
+    foreach_statement                  { _p->popLabelScope();
+                                         _p->onForEach($$,$3,$5,$6,$9);}
 
   | T_FOREACH '(' expr_without_variable
     T_AS variable
-    foreach_optional_arg ')'
-    foreach_statement                  { _p->onForEach($$,$3,$5,$6,$8);}
+    foreach_optional_arg ')'           { _p->pushLabelScope();}
+    foreach_statement                  { _p->popLabelScope();
+                                         _p->onForEach($$,$3,$5,$6,$9);}
 
   | T_DECLARE '(' declare_list ')'
     declare_statement                  { _p->onBlock($$, $5);}
 
-  | T_TRY '{' inner_statement_list '}'
+  | T_TRY '{'                          { _p->pushLabelScope();}
+    inner_statement_list '}'           { _p->popLabelScope();}
     T_CATCH '('
     fully_qualified_class_name
-    T_VARIABLE ')'
-    '{' inner_statement_list '}'
-    additional_catches                 { _p->onTry($$,$3,$7,$8,$11,$13);}
+    T_VARIABLE ')' '{'                 { _p->pushLabelScope();}
+    inner_statement_list '}'           { _p->popLabelScope();}
+    additional_catches                 { _p->onTry($$,$4,$9,$10,$14,$17);}
 
   | T_THROW expr ';'                   { _p->onThrow($$, $2);}
-  | T_GOTO T_STRING ';'                { _p->onGoto($$, $2);}
+  | T_GOTO T_STRING ';'                { _p->addGoto($2.text(),
+                                                     _p->getLocation());
+                                         _p->onGoto($$, $2);}
 ;
 
 additional_catches:
@@ -737,9 +748,11 @@ function_loc:
 ;
 function_declaration_statement:
     type_decl function_loc
-    is_reference T_STRING              { _p->onFunctionStart($4);}
+    is_reference T_STRING              { _p->onFunctionStart($4);
+                                         _p->pushLabelInfo();}
     '(' parameter_list ')'
-    '{' inner_statement_list '}'       { _p->onFunction($$,$1,$3,$4,$7,$10);}
+    '{' inner_statement_list '}'       { _p->popLabelInfo();
+                                         _p->onFunction($$,$1,$3,$4,$7,$10);}
 ;
 
 class_declaration_statement:
@@ -956,8 +969,10 @@ class_statement:
                                          ($$,NULL,$1,NULL);}
   | method_modifiers
     type_decl function_loc
-    is_reference T_STRING '('          { _p->onMethodStart($5, $1);}
-    parameter_list ')' method_body     { _p->onMethod($$,$1,$2,$4,$5,$8,$10);}
+    is_reference T_STRING '('          { _p->onMethodStart($5, $1);
+                                         _p->pushLabelInfo();}
+    parameter_list ')' method_body     { _p->popLabelInfo();
+                                         _p->onMethod($$,$1,$2,$4,$5,$8,$10);}
   | T_XHP_ATTRIBUTE                    { _p->scanner().xhpAttributeDecl();}
     xhp_attribute_stmt ';'             { _p->xhpSetAttributes($3);}
   | T_XHP_CATEGORY

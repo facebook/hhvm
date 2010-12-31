@@ -39,6 +39,7 @@ UnsetStatement::UnsetStatement(STATEMENT_ARGS,
 }
 
 void UnsetStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   ENTER_STMT;
   for (std::vector<LvalExpressionPtr>::const_iterator it = m_vals.begin();
        it != m_vals.end(); ++it) {

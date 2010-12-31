@@ -53,6 +53,7 @@ bool TestParserStmt::RunTests(const std::string &which) {
   RUN_TEST(TestCatchStatement);
   RUN_TEST(TestTryStatement);
   RUN_TEST(TestThrowStatement);
+  RUN_TEST(TestGotoStatement);
   return ret;
 }
 
@@ -647,3 +648,11 @@ bool TestParserStmt::TestThrowStatement() {
 
   return true;
 }
+
+bool TestParserStmt::TestGotoStatement() {
+  V("<?php goto a; echo 'Foo'; a: echo 'Bar';",
+    "goto a;\necho 'Foo';\na:\necho 'Bar';\n");
+
+  return true;
+}
+

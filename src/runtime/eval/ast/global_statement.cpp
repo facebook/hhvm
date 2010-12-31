@@ -28,6 +28,7 @@ GlobalStatement::GlobalStatement(STATEMENT_ARGS,
 GlobalStatement::GlobalStatement(STATEMENT_ARGS) : Statement(STATEMENT_PASS) {}
 
 void GlobalStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   ENTER_STMT;
   for (std::vector<NamePtr>::const_iterator it = m_vars.begin();
        it != m_vars.end(); ++it) {

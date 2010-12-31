@@ -14,31 +14,25 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/expr_statement.h>
-#include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/goto_statement.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-ExprStatement::ExprStatement(STATEMENT_ARGS, ExpressionPtr exp)
-  : Statement(STATEMENT_PASS), m_exp(exp) {}
+GotoStatement::GotoStatement(STATEMENT_ARGS, const std::string &label)
+  : Statement(STATEMENT_PASS), m_label(label) {}
 
-void ExprStatement::eval(VariableEnvironment &env) const {
+void GotoStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;
-  m_exp->eval(env);
-
-  // if m_exp hasn't set the line yet, set it, otherwise, we can skip
-  // so to avoid annoying double-stay with debugger's "step" command.
-  if (loc()->line1 != ThreadInfo::s_threadInfo->m_top->getLine()) {
-    ENTER_STMT;
-  }
+  ENTER_STMT;
+  env.setGoto(m_label);
+  throw GotoException();
 }
 
-void ExprStatement::dump(std::ostream &out) const {
-  m_exp->dump(out);
-  out << ";\n";
+void GotoStatement::dump(std::ostream &out) const {
+  out << "goto " << m_label << ";\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

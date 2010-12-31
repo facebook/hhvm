@@ -56,17 +56,30 @@ IfStatement::IfStatement(STATEMENT_ARGS,
   : Statement(STATEMENT_PASS), m_branches(branches), m_else(els) {}
 
 void IfStatement::eval(VariableEnvironment &env) const {
-  ENTER_STMT;
-  for (vector<IfBranchPtr>::const_iterator it = m_branches.begin();
-       it != m_branches.end(); ++it) {
-    if ((*it)->evalCond(env)) {
+  if (env.isGotoing()) {
+    for (vector<IfBranchPtr>::const_iterator it = m_branches.begin();
+         it != m_branches.end(); ++it) {
       if ((*it)->body()) {
         EVAL_STMT((*it)->body(), env);
+        if (!env.isGotoing()) {
+          return;
+        }
       }
-      return;
     }
+    if (m_else) EVAL_STMT(m_else, env);
+  } else {
+    ENTER_STMT;
+    for (vector<IfBranchPtr>::const_iterator it = m_branches.begin();
+         it != m_branches.end(); ++it) {
+      if ((*it)->evalCond(env)) {
+        if ((*it)->body()) {
+          EVAL_STMT((*it)->body(), env);
+        }
+        return;
+      }
+    }
+    if (m_else) EVAL_STMT(m_else, env);
   }
-  if (m_else) EVAL_STMT(m_else, env);
 }
 
 void IfStatement::dump(std::ostream &out) const {

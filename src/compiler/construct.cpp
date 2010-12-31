@@ -73,6 +73,14 @@ int Construct::getChildrenEffects() const {
   return childrenEffects;
 }
 
+bool Construct::hasLabel() const {
+  for (int i = getKidCount(); i--; ) {
+    ConstructPtr child = getNthKid(i);
+    if (child && child->hasLabel()) return true;
+  }
+  return false;
+}
+
 int Construct::getContainedEffects() const {
   if (m_effectsTag != s_effectsTag) {
     m_effectsTag = s_effectsTag;
@@ -237,6 +245,12 @@ void Construct::dumpNode(int spc, AnalysisResultPtr ar) {
       break;
     case Statement::KindOfThrowStatement:
       name="ThrowStatement";
+      break;
+    case Statement::KindOfGotoStatement:
+      name="GotoStatement";
+      break;
+    case Statement::KindOfLabelStatement:
+      name="LabelStatement";
       break;
     }
     type = (int)stype;

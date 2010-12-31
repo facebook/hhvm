@@ -54,16 +54,21 @@ TryStatement::TryStatement(STATEMENT_ARGS, StatementPtr body,
   : Statement(STATEMENT_PASS), m_catches(catches), m_body(body) {}
 
 void TryStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   ENTER_STMT;
   try {
+    EVAL_STMT_HANDLE_GOTO_BEGIN(restart1);
     m_body->eval(env);
+    EVAL_STMT_HANDLE_GOTO_END(restart1);
   } catch (Object e) {
     for (vector<CatchBlockPtr>::const_iterator it = m_catches.begin();
          it != m_catches.end(); ++it) {
       if ((*it)->match(e)) {
         if ((*it)->body()) {
           env.get(String((*it)->vname())) = e;
+          EVAL_STMT_HANDLE_GOTO_BEGIN(restart2);
           EVAL_STMT((*it)->body(), env);
+          EVAL_STMT_HANDLE_GOTO_END(restart2);
         }
         return;
       }

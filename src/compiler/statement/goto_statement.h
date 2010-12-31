@@ -14,34 +14,25 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/eval/ast/expr_statement.h>
-#include <runtime/eval/ast/expression.h>
-#include <runtime/eval/runtime/variable_environment.h>
+#ifndef __GOTO_STATEMENT_H__
+#define __GOTO_STATEMENT_H__
+
+#include <compiler/statement/statement.h>
 
 namespace HPHP {
-namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-ExprStatement::ExprStatement(STATEMENT_ARGS, ExpressionPtr exp)
-  : Statement(STATEMENT_PASS), m_exp(exp) {}
+DECLARE_BOOST_TYPES(GotoStatement);
 
-void ExprStatement::eval(VariableEnvironment &env) const {
-  if (env.isGotoing()) return;
-  m_exp->eval(env);
+class GotoStatement : public Statement {
+public:
+  GotoStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label);
 
-  // if m_exp hasn't set the line yet, set it, otherwise, we can skip
-  // so to avoid annoying double-stay with debugger's "step" command.
-  if (loc()->line1 != ThreadInfo::s_threadInfo->m_top->getLine()) {
-    ENTER_STMT;
-  }
-}
-
-void ExprStatement::dump(std::ostream &out) const {
-  m_exp->dump(out);
-  out << ";\n";
-}
+  DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
+private:
+  std::string m_label;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-}
-
+#endif // __GOTO_STATEMENT_H__

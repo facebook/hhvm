@@ -499,6 +499,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestCallStatic);
   RUN_TEST(TestNowDoc);
   RUN_TEST(TestTernaryShortcut);
+  RUN_TEST(TestGoto);
 
   RUN_TEST(TestAdHoc);
   return ret;
@@ -15566,6 +15567,29 @@ bool TestCodeRun::TestTernaryShortcut() {
         "string(5) \"hello\"\n"
         "int(789)\n"
        );
+
+  return true;
+}
+
+bool TestCodeRun::TestGoto() {
+  MVCRO("<?php goto a; echo 'Foo'; a: echo 'Bar';",
+        "Bar");
+
+  MVCRO("<?php function foo() { goto a; echo 'Foo'; a: echo 'Bar';} foo();",
+        "Bar");
+
+  MVCRO("<?php function foo() { "
+        "goto a; b: echo 'Foo'; return;a: echo 'Bar'; goto b;} foo();",
+        "BarFoo");
+
+  MVCRO("<?php for($i=0,$j=50; $i<100; $i++) { "
+        " while($j--) { if($j==17) goto end; }"
+        "} "
+        "echo 'no'; end: echo 'yes';",
+        "yes");
+
+  MVCRO("<?php goto a; if (false) { a: print 'here';} ",
+        "here");
 
   return true;
 }

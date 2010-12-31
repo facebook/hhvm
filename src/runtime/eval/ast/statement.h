@@ -57,6 +57,18 @@ public:
     if (hb == 2 || hb == 3) break;                                            \
   }
 
+#define EVAL_STMT_HANDLE_GOTO_BEGIN(label)      \
+  label:                                        \
+  try {                                         \
+
+#define EVAL_STMT_HANDLE_GOTO_END(label)        \
+  } catch (GotoException &e) {                  \
+    goto label;                                 \
+  }                                             \
+  if (env.isGotoing()) {                        \
+    throw GotoException();                      \
+  }                                             \
+
 #define ENTER_STMT \
   SET_LINE_VOID
 

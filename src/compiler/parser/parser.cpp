@@ -70,6 +70,8 @@
 #include <compiler/statement/catch_statement.h>
 #include <compiler/statement/try_statement.h>
 #include <compiler/statement/throw_statement.h>
+#include <compiler/statement/goto_statement.h>
+#include <compiler/statement/label_statement.h>
 
 #include <compiler/analysis/function_scope.h>
 
@@ -142,6 +144,16 @@ Parser::Parser(Scanner &scanner, const char *fileName,
 
   Lock lock(m_ar->getMutex());
   m_ar->addFileScope(m_file);
+}
+
+void Parser::error(const char* fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  string msg;
+  Util::string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
+
+  Logger::Error("%s", msg.c_str());
 }
 
 bool Parser::enableXHP() {
@@ -1027,9 +1039,11 @@ void Parser::onClosureParam(Token &out, Token *params, Token &param,
 }
 
 void Parser::onLabel(Token &out, Token &label) {
+  out->stmt = NEW_STMT(LabelStatement, label.text());
 }
 
 void Parser::onGoto(Token &out, Token &label) {
+  out->stmt = NEW_STMT(GotoStatement, label.text());
 }
 
 void Parser::onTypeDecl(Token &out, Token &type, Token &decl) {

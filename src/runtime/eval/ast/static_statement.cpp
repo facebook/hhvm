@@ -52,6 +52,7 @@ StaticStatement::StaticStatement(STATEMENT_ARGS,
 
 
 void StaticStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   ENTER_STMT;
   for (std::vector<StaticVariablePtr>::const_iterator it = m_vars.begin();
        it != m_vars.end(); ++it) {

@@ -16,6 +16,7 @@
 
 #include <runtime/eval/ast/throw_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
 namespace Eval {
@@ -25,6 +26,7 @@ ThrowStatement::ThrowStatement(STATEMENT_ARGS, ExpressionPtr value)
   : Statement(STATEMENT_PASS), m_value(value) {}
 
 void ThrowStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   ENTER_STMT;
   throw_exception(m_value->eval(env));
 }

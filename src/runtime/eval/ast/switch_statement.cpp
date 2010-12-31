@@ -35,6 +35,7 @@ bool CaseStatement::match(VariableEnvironment &env, CVarRef value) const {
 }
 
 void CaseStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   if (m_body) m_body->eval(env);
 }
 
@@ -58,6 +59,7 @@ SwitchStatement::SwitchStatement(STATEMENT_ARGS, ExpressionPtr source,
   : Statement(STATEMENT_PASS), m_source(source), m_cases(cases) {}
 
 void SwitchStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   ENTER_STMT;
   Variant source(m_source->eval(env));
   bool matched = false;
@@ -70,7 +72,9 @@ void SwitchStatement::eval(VariableEnvironment &env) const {
       matched = true;
     }
     if (matched) {
+      EVAL_STMT_HANDLE_GOTO_BEGIN(restart);
       EVAL_STMT_HANDLE_BREAK_CONT(*iter, env);
+      EVAL_STMT_HANDLE_GOTO_END(restart);
     }
   }
   if (!matched && defaultPos != m_cases.end()) {

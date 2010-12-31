@@ -16,6 +16,7 @@
 
 #include <runtime/eval/ast/echo_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/runtime/variable_environment.h>
 
 using namespace std;
 
@@ -28,6 +29,7 @@ EchoStatement::EchoStatement(STATEMENT_ARGS,
   : Statement(STATEMENT_PASS), m_args(args) {}
 
 void EchoStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   ENTER_STMT;
   for (vector<ExpressionPtr>::const_iterator it = m_args.begin();
        it != m_args.end(); ++it) {

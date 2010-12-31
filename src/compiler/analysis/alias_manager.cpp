@@ -1474,6 +1474,7 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
     break;
 
   case Statement::KindOfCaseStatement:
+  case Statement::KindOfLabelStatement:
     clear();
     break;
 
@@ -1489,6 +1490,7 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
 
   case Statement::KindOfBreakStatement:
   case Statement::KindOfContinueStatement:
+  case Statement::KindOfGotoStatement:
     ret = Branch;
     break;
 

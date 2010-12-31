@@ -30,6 +30,7 @@ ForEachStatement::ForEachStatement(STATEMENT_ARGS, ExpressionPtr source,
      m_body(body) {}
 
 void ForEachStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   ENTER_STMT;
   DECLARE_THREAD_INFO;
   LOOP_COUNTER(1);
@@ -48,7 +49,9 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
           texp->setImpl(env, key);
         }
         if (!m_body) continue;
+        EVAL_STMT_HANDLE_GOTO_BEGIN(restart1);
         EVAL_STMT_HANDLE_BREAK(m_body, env);
+        EVAL_STMT_HANDLE_GOTO_END(restart1);
       }
     } else {
       for (ArrayIterPtr iter = map.begin(env.currentContext(), true);
@@ -59,7 +62,9 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
         m_value->set(env, value);
         m_key->set(env, key);
         if (!m_body) continue;
+        EVAL_STMT_HANDLE_GOTO_BEGIN(restart2);
         EVAL_STMT_HANDLE_BREAK(m_body, env);
+        EVAL_STMT_HANDLE_GOTO_END(restart2);
       }
     }
   } else {
@@ -68,7 +73,9 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
       LOOP_COUNTER_CHECK(1);
       m_value->set(env, iter->second());
       if (!m_body) continue;
+      EVAL_STMT_HANDLE_GOTO_BEGIN(restart3);
       EVAL_STMT_HANDLE_BREAK(m_body, env);
+      EVAL_STMT_HANDLE_GOTO_END(restart3);
     }
   }
 }

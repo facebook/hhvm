@@ -27,6 +27,7 @@ YieldStatement::YieldStatement(STATEMENT_ARGS, ExpressionPtr value)
   : Statement(STATEMENT_PASS), m_value(value) {}
 
 void YieldStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   ENTER_STMT;
   if (m_value) {
     if (env.refReturn()) {

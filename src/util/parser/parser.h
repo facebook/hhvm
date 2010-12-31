@@ -61,6 +61,11 @@ public:
   virtual bool parse() = 0;
 
   /**
+   * Raise a parser error.
+   */
+  virtual void error(const char* fmt, ...) = 0;
+
+  /**
    * How to decide whether to turn on XHP.
    */
   virtual bool enableXHP() = 0;
@@ -70,6 +75,7 @@ public:
    */
   const char *file() const { return m_fileName;}
   std::string getMessage(bool filename = false) const;
+  std::string getMessage(Location *loc, bool filename = false) const;
   LocationPtr getLocation() const;
   void getLocation(Location &loc) const {
     loc = *m_loc;
@@ -93,12 +99,38 @@ public:
   void pushFuncLocation();
   LocationPtr popFuncLocation();
 
+  // for goto syntax checking
+  void pushLabelInfo();
+  void pushLabelScope();
+  void popLabelScope();
+  void addLabel(const std::string &label);
+  void addGoto(const std::string &label, LocationPtr loc);
+  void popLabelInfo();
+
 protected:
   Scanner &m_scanner;
   const char *m_fileName;
 
   Location *m_loc;
   LocationPtrVec m_funcLocs;
+
+  // for goto syntax checking
+  typedef std::vector<int> LabelScopes;
+  typedef std::map<std::string, int> LabelMap; // name => scopeId
+  struct GotoInfo {
+    std::string label;
+    LabelScopes scopes;
+    LocationPtr loc;
+  };
+  class LabelInfo {
+  public:
+    LabelInfo() : scopeId(0) {}
+    int scopeId;
+    LabelScopes scopes;
+    LabelMap labels;
+    std::vector<GotoInfo> gotos;
+  };
+  std::vector<LabelInfo> m_labelInfos; // stack by function
 };
 
 ///////////////////////////////////////////////////////////////////////////////

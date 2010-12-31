@@ -225,6 +225,7 @@ const CallInfo *FunctionStatement::getCallInfo() const {
 }
 
 void FunctionStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   ENTER_STMT;
   // register with function_exists, invoke, etc.
   RequestEvalState::declareFunction(this);
@@ -294,7 +295,14 @@ Variant FunctionStatement::evalBody(VariableEnvironment &env) const {
   }
 
   if (m_body) {
-    m_body->eval(env);
+    try {
+      EVAL_STMT_HANDLE_GOTO_BEGIN(restart);
+      m_body->eval(env);
+      EVAL_STMT_HANDLE_GOTO_END(restart);
+    } catch (GotoException &e) {
+      throw FatalErrorException(0, "Unable to reach goto label %s",
+                                env.getGoto().c_str());
+    }
     if (env.isReturning()) {
       if (m_ref) {
         ret.setContagious();

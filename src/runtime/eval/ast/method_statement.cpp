@@ -50,6 +50,7 @@ String MethodStatement::fullName() const {
 }
 
 void MethodStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   ENTER_STMT;
   // register with reflection, invoke, etc.
 }

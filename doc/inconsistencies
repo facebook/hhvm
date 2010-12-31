@@ -223,3 +223,8 @@ In PHP, XMLWriter class and its functions returned different types of objects,
   foo($obj2);
 
 In HipHop, they are the same.
+
+(5) GOTO statement
+
+In PHP, jumping to a GOTO label across try/catch blocks is allowed. In HipHop,
+it isn't.

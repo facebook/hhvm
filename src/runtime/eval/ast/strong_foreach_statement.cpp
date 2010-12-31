@@ -32,6 +32,8 @@ StrongForEachStatement(STATEMENT_ARGS, ExpressionPtr source,
 {}
 
 void StrongForEachStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
+
   ENTER_STMT;
   LvalExpression* lvalSource = m_source->cast<LvalExpression>();
   Variant source(lvalSource ? ref(lvalSource->lval(env)) :
@@ -46,14 +48,18 @@ void StrongForEachStatement::eval(VariableEnvironment &env) const {
       m_key->set(env, kTemp);
       m_value->set(env, ref(vTemp));
       if (!m_body) continue;
+      EVAL_STMT_HANDLE_GOTO_BEGIN(restart1);
       EVAL_STMT_HANDLE_BREAK(m_body, env);
+      EVAL_STMT_HANDLE_GOTO_END(restart1);
     }
   } else {
     for (MutableArrayIterPtr iter = source.begin(NULL, vTemp);
          iter->advance();) {
       m_value->set(env, ref(vTemp));
       if (!m_body) continue;
+      EVAL_STMT_HANDLE_GOTO_BEGIN(restart2);
       EVAL_STMT_HANDLE_BREAK(m_body, env);
+      EVAL_STMT_HANDLE_GOTO_END(restart2);
     }
   }
 }

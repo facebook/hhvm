@@ -31,6 +31,7 @@ ForStatement::ForStatement(STATEMENT_ARGS,
     m_body(body) {}
 
 void ForStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   ENTER_STMT;
   DECLARE_THREAD_INFO;
   LOOP_COUNTER(1);
@@ -39,7 +40,9 @@ void ForStatement::eval(VariableEnvironment &env) const {
        Expression::evalVector(m_next, env)) {
     LOOP_COUNTER_CHECK(1);
     if (m_body) {
+      EVAL_STMT_HANDLE_GOTO_BEGIN(restart);
       EVAL_STMT_HANDLE_BREAK(m_body, env);
+      EVAL_STMT_HANDLE_GOTO_END(restart);
     }
   }
 }

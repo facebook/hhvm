@@ -36,6 +36,7 @@ public:
   ExpressionPtr getEffectiveImpl(AnalysisResultPtr ar) const;
   virtual bool hasBody() const;
   virtual bool hasRetExp() const;
+
   virtual void addElement(StatementPtr stmt);
   virtual void insertElement(StatementPtr stmt, int index = 0);
   virtual int getRecursiveCount() const {

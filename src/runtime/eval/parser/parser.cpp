@@ -66,6 +66,8 @@
 #include <runtime/eval/ast/try_statement.h>
 #include <runtime/eval/ast/unset_statement.h>
 #include <runtime/eval/ast/while_statement.h>
+#include <runtime/eval/ast/goto_statement.h>
+#include <runtime/eval/ast/label_statement.h>
 #include <runtime/eval/ast/name.h>
 
 #include <util/preprocess.h>
@@ -205,6 +207,16 @@ StatementPtr Parser::ParseFile(const char *fileName,
 Parser::Parser(Scanner &scanner, const char *fileName,
                vector<StaticStatementPtr> &statics)
     : ParserBase(scanner, fileName), m_staticStatements(statics) {
+}
+
+void Parser::error(const char* fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  string msg;
+  Util::string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
+
+  raise_error("%s", msg.c_str());
 }
 
 bool Parser::enableXHP() {
@@ -1333,9 +1345,13 @@ void Parser::onClosureParam(Token &out, Token *params, Token &param,
 }
 
 void Parser::onLabel(Token &out, Token &label) {
+  out.reset();
+  out->stmt() = NEW_STMT(Label, label.text());
 }
 
 void Parser::onGoto(Token &out, Token &label) {
+  out.reset();
+  out->stmt() = NEW_STMT(Goto, label.text());
 }
 
 void Parser::onTypeDecl(Token &out, Token &type, Token &decl) {

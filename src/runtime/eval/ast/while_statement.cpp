@@ -27,13 +27,16 @@ WhileStatement::WhileStatement(STATEMENT_ARGS, ExpressionPtr cond,
   : Statement(STATEMENT_PASS), m_cond(cond), m_body(body) {}
 
 void WhileStatement::eval(VariableEnvironment &env) const {
+  if (env.isGotoing()) return;
   ENTER_STMT;
   DECLARE_THREAD_INFO;
   LOOP_COUNTER(1);
   while (m_cond->eval(env)) {
     LOOP_COUNTER_CHECK(1);
     if (!m_body) continue;
+    EVAL_STMT_HANDLE_GOTO_BEGIN(restart);
     EVAL_STMT_HANDLE_BREAK(m_body, env);
+    EVAL_STMT_HANDLE_GOTO_END(restart);
   }
 }
 

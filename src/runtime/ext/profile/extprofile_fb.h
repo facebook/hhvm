@@ -188,6 +188,11 @@ inline Array x_fb_get_flush_stat() {
   return f_fb_get_flush_stat();
 }
 
+inline String x_fb_urandom(int bytes) {
+  FUNCTION_INJECTION_BUILTIN(fb_urandom);
+  return f_fb_urandom(bytes);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

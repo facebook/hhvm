@@ -58,6 +58,7 @@ Variant f_fb_const_fetch(CVarRef key);
 bool f_fb_output_compression(bool new_value);
 void f_fb_set_exit_callback(CVarRef function);
 Array f_fb_get_flush_stat();
+String f_fb_urandom(int bytes);
 extern const int64 k_FB_UNSERIALIZE_NONSTRING_VALUE;
 extern const int64 k_FB_UNSERIALIZE_UNEXPECTED_END;
 extern const int64 k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;

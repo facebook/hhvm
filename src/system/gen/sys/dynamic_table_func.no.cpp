@@ -19815,6 +19815,21 @@ Variant ifa_wandgetexception(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
   if (count != 1) return throw_wrong_arguments("wandgetexception", count, 1, 1, 1);
   return (f_wandgetexception(a0));
 }
+Variant i_fb_urandom(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(fb_urandom);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("fb_urandom", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_fb_urandom(arg0));
+  }
+}
+Variant ifa_fb_urandom(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("fb_urandom", count, 1, 1, 1);
+  return (f_fb_urandom(a0));
+}
 Variant i_fsockopen(void *extra, CArrRef params) {
   FUNCTION_INJECTION(fsockopen);
   int count __attribute__((__unused__)) = params.size();
@@ -59575,6 +59590,22 @@ Variant ei_wandgetexception(Eval::VariableEnvironment &env, const Eval::Function
   if (count != 1) return throw_wrong_arguments("wandgetexception", count, 1, 1, 1);
   return (x_wandgetexception(a0));
 }
+Variant ei_fb_urandom(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("fb_urandom", count, 1, 1, 1);
+  return (x_fb_urandom(a0));
+}
 Variant ei_fsockopen(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -83888,6 +83919,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 7128:
       HASH_INVOKE_FROM_EVAL(0x21E44C7C7A911BD8LL, phpinfo);
       break;
+    case 7133:
+      HASH_INVOKE_FROM_EVAL(0x77AA72D21EE17BDDLL, fb_urandom);
+      break;
     case 7134:
       HASH_INVOKE_FROM_EVAL(0x58D0D9B66F045BDELL, strpos);
       break;
@@ -85809,6 +85843,7 @@ CallInfo ci_mcrypt_module_is_block_algorithm((void*)&i_mcrypt_module_is_block_al
 CallInfo ci_imap_unsubscribe((void*)&i_imap_unsubscribe, (void*)&ifa_imap_unsubscribe, 2, 0, 0x0000000000000000LL, (void*)&ei_imap_unsubscribe);
 CallInfo ci_imap_lsub((void*)&i_imap_lsub, (void*)&ifa_imap_lsub, 3, 0, 0x0000000000000000LL, (void*)&ei_imap_lsub);
 CallInfo ci_wandgetexception((void*)&i_wandgetexception, (void*)&ifa_wandgetexception, 1, 0, 0x0000000000000000LL, (void*)&ei_wandgetexception);
+CallInfo ci_fb_urandom((void*)&i_fb_urandom, (void*)&ifa_fb_urandom, 1, 0, 0x0000000000000000LL, (void*)&ei_fb_urandom);
 CallInfo ci_fsockopen((void*)&i_fsockopen, (void*)&ifa_fsockopen, 5, 0, 0x000000000000000CLL, (void*)&ei_fsockopen);
 CallInfo ci_usort((void*)&i_usort, (void*)&ifa_usort, 2, 0, 0x0000000000000001LL, (void*)&ei_usort);
 CallInfo ci_pixelsetiteratorrow((void*)&i_pixelsetiteratorrow, (void*)&ifa_pixelsetiteratorrow, 2, 0, 0x0000000000000000LL, (void*)&ei_pixelsetiteratorrow);
@@ -97296,6 +97331,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 7128:
       HASH_GUARD(0x21E44C7C7A911BD8LL, phpinfo) {
         ci = &ci_phpinfo;
+        return true;
+      }
+      break;
+    case 7133:
+      HASH_GUARD(0x77AA72D21EE17BDDLL, fb_urandom) {
+        ci = &ci_fb_urandom;
         return true;
       }
       break;

@@ -31,6 +31,7 @@ public:
   ScalarExpression(EXPRESSION_ARGS, bool b);
   ScalarExpression(EXPRESSION_ARGS, const std::string &s);
   ScalarExpression(EXPRESSION_ARGS, const char *s);
+  ScalarExpression(EXPRESSION_ARGS, CStrRef s);
   ScalarExpression(EXPRESSION_ARGS, int type, const std::string &val,
                    int subtype = 0);
   virtual Variant eval(VariableEnvironment &env) const;
@@ -44,7 +45,7 @@ private:
     SDouble,
     SString
   };
-  std::string m_value;
+  AtomicString m_value;
   union {
     int64 num;
     double dbl;

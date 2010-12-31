@@ -47,7 +47,7 @@ Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
     m_ref(ref), m_nullDefault(false) {
   if (!type.empty()) {
     if (parser->haveFunc()) {
-      m_fnName = parser->peekFunc()->fullName() + "()";
+      m_fnName = parser->peekFunc()->fullName();
     }
 
     const TypePtrMap &types = GetTypeHintTypes();
@@ -92,7 +92,7 @@ void Parameter::bind(VariableEnvironment &env, CVarRef val,
           (m_kind != KindOfObject ||
            m_kind == KindOfObject &&
            val.toObject().instanceof(m_type.c_str())))) {
-      throw_unexpected_argument_type(m_argNum, m_fnName.c_str(),
+      throw_unexpected_argument_type(m_argNum, (m_fnName + "()").c_str(),
                                      m_type.c_str(), val);
     }
   }

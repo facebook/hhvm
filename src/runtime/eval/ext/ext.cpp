@@ -267,7 +267,7 @@ Variant EvalCreateFunction::InvokeImpl(VariableEnvironment &env,
   SmartPtr<CodeContainer> cc(new StringCodeContainer(bodyAst));
   RequestEvalState::addCodeContainer(cc);
   f->eval(env);
-  return String(f->name().c_str(), f->name().size(), AttachLiteral);
+  return f->name();
 }
 
 Variant EvalAssert::InvokeImpl(VariableEnvironment &env,

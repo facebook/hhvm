@@ -434,22 +434,19 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 // AtomicString
 
-class AtomicString {
+class AtomicString : public AtomicSmartPtr<StringData> {
 public:
-  AtomicString(const char *s, StringDataMode mode = AttachLiteral);
-  AtomicString(const std::string &s);
+  AtomicString() { }
+  AtomicString(const char *s, StringDataMode mode = AttachLiteral)
+    : AtomicSmartPtr<StringData>(s ? new StringData(s, mode) : NULL) { }
+  AtomicString(const std::string &s)
+    : AtomicSmartPtr<StringData>(new StringData(s.data(), s.size(),
+                                                CopyString)) { }
   AtomicString(StringData *str);
-  AtomicString(const AtomicString &s);
-  ~AtomicString();
+  AtomicString(const AtomicString &s) : AtomicSmartPtr<StringData>(s.m_px) { }
 
   AtomicString &operator=(const AtomicString &s);
   AtomicString &operator=(const std::string &s);
-
-  StringData *get() const { return m_px; }
-  StringData *operator->() const {
-    if (!m_px) throw NullPointerException();
-    return m_px;
-  }
 
   const char *c_str() const {
     return m_px ? m_px->data() : "";
@@ -457,8 +454,9 @@ public:
   bool empty() const {
     return m_px ? m_px->empty() : true;
   }
-private:
-  StringData *m_px;
+  int size() const {
+    return m_px ? m_px->size() : 0;
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

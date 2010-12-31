@@ -50,7 +50,7 @@ ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
   }
   case T_STRING :
     m_kind = SString;
-    m_binary = m_value.find('\0') != string::npos;
+    m_binary = String(m_value).find('\0') != String::npos;
     break;
   default:
     ASSERT(false);
@@ -71,7 +71,11 @@ ScalarExpression::ScalarExpression(EXPRESSION_ARGS, const string &s)
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, const char *s)
     : Expression(EXPRESSION_PASS),
-      m_value(s), m_type(0), m_subtype(0), m_kind(SString) {}
+      m_value(s, CopyString), m_type(0), m_subtype(0), m_kind(SString) {}
+
+ScalarExpression::ScalarExpression(EXPRESSION_ARGS, CStrRef s)
+    : Expression(EXPRESSION_PASS),
+      m_value(s.get()), m_type(0), m_subtype(0), m_kind(SString) {}
 
 Variant ScalarExpression::eval(VariableEnvironment &env) const {
   return getValue();
@@ -84,11 +88,7 @@ Variant ScalarExpression::getValue() const {
   case SBool:
     return (bool)m_num.num;
   case SString:
-    if (!m_binary) {
-      return m_value.c_str();
-    } else {
-      return String(m_value.c_str(), m_value.size(), AttachLiteral);
-    }
+    return String(m_value);
   case SInt:
     return m_num.num;
   case SDouble:
@@ -117,14 +117,14 @@ void ScalarExpression::dump(std::ostream &out) const {
       break;
     case SString:
       if (m_type == T_NUM_STRING) {
-        out << m_value;
+        out << string(m_value.c_str(), m_value.size());
       } else {
-        out << Util::escapeStringForPHP(m_value);
+        out << Util::escapeStringForPHP(m_value.c_str(), m_value.size());
       }
       break;
     case SInt:
     case SDouble:
-      out << m_value;
+      out << string(m_value.c_str(), m_value.size());
       break;
     default:
       ASSERT(false);

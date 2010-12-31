@@ -61,7 +61,7 @@ private:
   std::string m_type;
   NamePtr m_name;
   ExpressionPtr m_defVal;
-  std::string m_fnName;
+  String m_fnName;
   int m_idx;
   DataType m_kind;
   int m_argNum;

@@ -456,10 +456,9 @@ Array RequestEvalState::getConstants() {
   return self->m_constants;
 }
 
-const ClassInfo::MethodInfo *RequestEvalState::
-findFunctionInfo(const char *name) {
+const ClassInfo::MethodInfo *RequestEvalState::findFunctionInfo(CStrRef name) {
   RequestEvalState *self = s_res.get();
-  map<string, SmartPtr<EvalMethodInfo> >::iterator it =
+  StringIMap<SmartPtr<EvalMethodInfo> >::iterator it =
     self->m_methodInfos.find(name);
   if (it == self->m_methodInfos.end()) {
     const FunctionStatement *fs = findUserFunction(name);
@@ -639,8 +638,8 @@ void RequestEvalState::fiberInit(RequestEvalState *res,
     m_constantInfos[it->first] = it->second;
   }
   // Method Info
-  for (map<string, SmartPtr<EvalMethodInfo> >::iterator it =
-      res->m_methodInfos.begin(); it != res->m_methodInfos.end(); ++it) {
+  for (StringIMap<SmartPtr<EvalMethodInfo> >::iterator it =
+       res->m_methodInfos.begin(); it != res->m_methodInfos.end(); ++it) {
     m_methodInfos[it->first] = it->second;
   }
   // Class Infos
@@ -724,8 +723,8 @@ void RequestEvalState::fiberExit(RequestEvalState *res,
     m_constantInfos[it->first] = it->second;
   }
   // Method Info
-  for (map<string, SmartPtr<EvalMethodInfo> >::iterator it =
-      res->m_methodInfos.begin(); it != res->m_methodInfos.end(); ++it) {
+  for (StringIMap<SmartPtr<EvalMethodInfo> >::iterator it =
+       res->m_methodInfos.begin(); it != res->m_methodInfos.end(); ++it) {
     m_methodInfos[it->first] = it->second;
   }
   // Class Infos

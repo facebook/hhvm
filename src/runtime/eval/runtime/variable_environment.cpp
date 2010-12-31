@@ -188,7 +188,7 @@ void FuncScopeVariableEnvironment::flagStatic(CStrRef name, int64 hash) {
     m_staticEnv = m_func->getStaticVars(*this);
   }
   if (!m_staticEnv->exists(name.data())) {
-    m_staticEnv->get(name) = m_func->getStaticValue(*this, name.c_str());
+    m_staticEnv->get(name) = m_func->getStaticValue(*this, name);
   }
   get(name) = ref(m_staticEnv->get(name));
 }

@@ -731,64 +731,23 @@ static StaticStringUninitializer s_static_string_uninitializer;
 //////////////////////////////////////////////////////////////////////////////
 // AtomicString
 
-AtomicString::AtomicString(const char *s,
-                           StringDataMode mode /* = AttachLiteral */) {
-  if (s) {
-    m_px = new StringData(s, mode);
-    m_px->setAtomic();
-    m_px->incAtomicCount();
-    return;
-  }
-  m_px = NULL;
-}
-
-AtomicString::AtomicString(const std::string &s) {
-  m_px = new StringData(s.c_str(), s.size(), CopyString);
-  m_px->setAtomic();
-  m_px->incAtomicCount();
-}
-
 AtomicString::AtomicString(StringData *str) {
-  ASSERT(str);
-  if (str->isRefCounted()) {
-    m_px = new StringData(str->data(), str->size(), CopyString);
-    m_px->setAtomic();
-    m_px->incAtomicCount();
-    return;
-  }
-  // atomic or static
-  m_px = str;
-  m_px->incAtomicCount();
-}
-
-AtomicString::AtomicString(const AtomicString &s) {
-  m_px = s.get();
-  if (m_px) m_px->incAtomicCount();
-}
-
-AtomicString::~AtomicString() {
-  ASSERT(!m_px || m_px->isAtomic());
-  if (m_px && m_px->decAtomicCount() == 0) {
-    delete m_px;
+  if (str) {
+    if (str->isRefCounted()) {
+      str = new StringData(str->data(), str->size(), CopyString);
+    }
+    AtomicSmartPtr<StringData>::operator=(str);
   }
 }
 
 AtomicString &AtomicString::operator=(const AtomicString &s) {
-  if (m_px && m_px->decAtomicCount() == 0) {
-    delete m_px;
-  }
-  m_px = s.get();
-  if (m_px) m_px->incAtomicCount();
+  AtomicSmartPtr<StringData>::operator=(s);
   return *this;
 }
 
 AtomicString &AtomicString::operator=(const std::string &s) {
-  if (m_px && m_px->decAtomicCount() == 0) {
-    delete m_px;
-  }
-  m_px = new StringData(s.c_str(), s.size(), CopyString);
-  m_px->setAtomic();
-  m_px->incAtomicCount();
+  AtomicSmartPtr<StringData>::operator=(new StringData(s.c_str(), s.size(),
+                                                       CopyString));
   return *this;
 }
 

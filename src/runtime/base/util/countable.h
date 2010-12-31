@@ -33,7 +33,9 @@ namespace HPHP {
  */
 #define IMPLEMENT_ATOMIC_COUNTABLE_METHODS                              \
   bool isRefCounted() const { return _count < Countable::ATOMIC_FLAG; } \
-  void setAtomic() const { _count = Countable::ATOMIC_FLAG; }           \
+  void setAtomic() const {                                              \
+    if (!isAtomic()) _count = Countable::ATOMIC_FLAG;                   \
+  }                                                                     \
   bool isAtomic() const { return _count & Countable::ATOMIC_FLAG; }     \
   void incAtomicCount() const {                                         \
     ASSERT(!isRefCounted());                                            \

@@ -55,7 +55,7 @@ public:
     operator=(src.m_px);
   }
   template<class Y>
-    SmartPtr(const SmartPtr<Y> &src) : m_px(NULL) {
+  SmartPtr(const SmartPtr<Y> &src) : m_px(NULL) {
     operator=(src.get());
   }
 
@@ -80,11 +80,12 @@ public:
   }
   template<class Y>
   SmartPtr &operator=(Y *px) {
-    if (m_px != px) {
+    T *npx = dynamic_cast<T *>(px);
+    if (m_px != npx) {
       if (m_px && m_px->decRefCount() == 0) {
         m_px->release();
       }
-      m_px = dynamic_cast<T *>(px);
+      m_px = npx;
       if (m_px) m_px->incRefCount();
     }
     return *this;
@@ -112,8 +113,115 @@ public:
     operator=((T*)NULL);
   }
 
- protected:
+protected:
   T *m_px;  // raw pointer
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// AtomicSmartPtr
+
+/**
+ * Thread-safe ref-counting smart pointer.
+ */
+template<typename T>
+class AtomicSmartPtr {
+public:
+  AtomicSmartPtr() : m_px(NULL) {}
+
+  AtomicSmartPtr(T *px) : m_px(px) {
+    if (m_px) {
+      m_px->setAtomic();
+      m_px->incAtomicCount();
+    }
+  }
+  template<class Y>
+  AtomicSmartPtr(Y *px) : m_px(px) {
+    if (m_px) {
+      m_px->setAtomic();
+      m_px->incAtomicCount();
+    }
+  }
+
+  /**
+   * Copy constructors.
+   */
+  AtomicSmartPtr(const AtomicSmartPtr<T> &src) : m_px(NULL) {
+    operator=(src.m_px);
+  }
+  template<class Y>
+  AtomicSmartPtr(const AtomicSmartPtr<Y> &src) : m_px(NULL) {
+    operator=(src.get());
+  }
+
+  ~AtomicSmartPtr() {
+    if (m_px && m_px->decAtomicCount() == 0) {
+      delete m_px;
+    }
+  }
+
+  /**
+   * Assignments.
+   */
+  AtomicSmartPtr &operator=(const AtomicSmartPtr<T> &src) {
+    return operator=(src.m_px);
+  }
+  template<class Y>
+  AtomicSmartPtr &operator=(const AtomicSmartPtr<Y> &src) {
+    return operator=(src.get());
+  }
+  AtomicSmartPtr &operator=(T *px) {
+    if (m_px != px) {
+      if (m_px && m_px->decAtomicCount() == 0) {
+        delete m_px;
+      }
+      m_px = px;
+      if (m_px) {
+        m_px->setAtomic();
+        m_px->incAtomicCount();
+      }
+    }
+    return *this;
+  }
+  template<class Y>
+  AtomicSmartPtr &operator=(Y *px) {
+    T *npx = dynamic_cast<T *>(px);
+    if (m_px != npx) {
+      if (m_px && m_px->decAtomicCount() == 0) {
+        delete m_px;
+      }
+      m_px = npx;
+      if (m_px) {
+        m_px->setAtomic();
+        m_px->incAtomicCount();
+      }
+    }
+    return *this;
+  }
+
+  /**
+   * Magic delegation.
+   */
+  T *operator->() const {
+    if (!m_px) throw NullPointerException();
+    return m_px;
+  }
+
+  /**
+   * Get the raw pointer.
+   */
+  T *get() const {
+    return m_px;
+  }
+
+  /**
+   * Reset the raw pointer.
+   */
+  void reset() {
+    operator=((T*)NULL);
+  }
+
+protected:
+  T *m_px; // raw pointer
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -119,7 +119,7 @@ const ClassStatement *ClassStatement::parentStatement() const {
 
 void ClassStatement::loadInterfaceStatements() const {
   for (unsigned int i = 0; i < m_bases.size(); ++i) {
-    RequestEvalState::findClass(m_bases[i].c_str(), true);
+    RequestEvalState::findClass(m_bases[i], true);
   }
 }
 
@@ -132,7 +132,7 @@ void ClassStatement::loadMethodTable(ClassEvalState &ce) const {
     } else {
       // Built in
       ClassInfo::MethodVec meths;
-      ClassInfo::GetClassMethods(meths, m_parent.c_str(), 1);
+      ClassInfo::GetClassMethods(meths, m_parent, 1);
       for (ClassInfo::MethodVec::const_iterator it = meths.begin();
            it != meths.end(); ++it) {
         int mods = 0;
@@ -203,7 +203,7 @@ void ClassStatement::eval(VariableEnvironment &env) const {
     // Class might not be valid to declare yet. If the parent and bases
     // have not been defined then don't declare until execution hits the
     // marker.
-    if (!m_parent.empty() && !f_class_exists(m_parent.c_str(), false)) {
+    if (!m_parent.empty() && !f_class_exists(m_parent, false)) {
       return;
     }
     for (uint i = 0; i < m_bases.size(); ++i) {
@@ -232,13 +232,13 @@ void ClassStatement::evalImpl(VariableEnvironment &env) const {
 
       const ClassStatement* cs = this;
       while ((cs = cs->parentStatement())) {
-        if (cs->findMethod(child_method->name().c_str())) {
+        if (cs->findMethod(child_method->name())) {
           break;
         }
       }
       if (cs) {
         const MethodStatement*   parent_method =
-          cs->findMethod(child_method->name().c_str());
+          cs->findMethod(child_method->name());
 
         ASSERT(parent_method);
 

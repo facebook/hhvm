@@ -53,15 +53,14 @@ private:
 
 class Block {
 public:
-  // Varname -> (idx, hash)
+  // Varname -> idx
   typedef std::map<std::string, VariableIndex> VariableIndices;
 
   Block();
   ~Block();
   Block(const std::vector<StaticStatementPtr> &stat);
   void declareStaticStatement(StaticStatementPtr stat);
-  Variant getStaticValue(VariableEnvironment &env, const char *name)
-    const;
+  Variant getStaticValue(VariableEnvironment &env, CStrRef name) const;
   int declareVariable(CStrRef var);
   const VariableIndices &varIndices() const;
   const std::vector<std::string> &variables() const { return m_variables;}

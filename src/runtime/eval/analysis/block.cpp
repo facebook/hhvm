@@ -91,8 +91,7 @@ const Block::VariableIndices &Block::varIndices() const {
 }
 
 // PHP is insane
-Variant Block::getStaticValue(VariableEnvironment &env,
-                              const char *name) const {
+Variant Block::getStaticValue(VariableEnvironment &env, CStrRef name) const {
   StringMap<ExpressionPtr>::const_iterator it = m_staticStmts.find(name);
   if (it != m_staticStmts.end() && it->second) {
     return it->second->eval(env);

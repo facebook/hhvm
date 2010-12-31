@@ -164,7 +164,7 @@ public:
   static Array getClassesInfo();
   static Array getInterfacesInfo();
   static Array getConstants();
-  static const ClassInfo::MethodInfo *findFunctionInfo(const char *name);
+  static const ClassInfo::MethodInfo *findFunctionInfo(CStrRef name);
   static const ClassInfo *findClassInfo(const char *name);
   static const ClassInfo *findInterfaceInfo(const char *name);
   static const ClassInfo::ConstantInfo *findConstantInfo(const char *name);
@@ -201,7 +201,7 @@ private:
   MethodStatics m_methodStatics;
   Array m_constants;
   std::map<std::string, SmartPtr<EvalConstantInfo> > m_constantInfos;
-  std::map<std::string, SmartPtr<EvalMethodInfo> > m_methodInfos;
+  StringIMap<SmartPtr<EvalMethodInfo> > m_methodInfos;
   std::map<std::string, SmartPtr<ClassInfoEvaled> > m_classInfos;
   std::map<std::string, SmartPtr<ClassInfoEvaled> > m_interfaceInfos;
   std::set<EvalObjectData*> m_livingObjects;

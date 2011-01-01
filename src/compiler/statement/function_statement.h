@@ -45,6 +45,9 @@ public:
   virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
   bool ignored() const { return m_ignored;}
 
+  void outputPHPHeader(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputPHPBody(CodeGenerator &cg, AnalysisResultPtr ar);
+
 private:
   bool m_ignored;
 };

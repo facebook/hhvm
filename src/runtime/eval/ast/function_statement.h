@@ -41,6 +41,10 @@ class Parameter : public Construct {
 public:
   Parameter(CONSTRUCT_ARGS, const std::string &type, const std::string &name,
             int idx, bool ref, ExpressionPtr defVal, int argNum);
+  void clearIdx() { m_idx = -1;}
+  int getIdx() const { return m_idx;}
+  void setIdx(int idx) { m_idx = idx;}
+
   bool isRef() const { return m_ref; }
   void bind(VariableEnvironment &env, CVarRef val, bool ref = false) const;
   void bindDefault(VariableEnvironment &env) const;
@@ -51,6 +55,7 @@ public:
   int argNum() const { return m_argNum; }
   const std::string &type() const { return m_type; }
   std::string name() const;
+  String getName() const;
 
 private:
   std::string m_type;
@@ -69,7 +74,7 @@ public:
   FunctionStatement(STATEMENT_ARGS, const std::string &name,
                     const std::string &doc);
   ~FunctionStatement();
-  void init(void *parser, bool ref, const std::vector<ParameterPtr> params,
+  void init(void *parser, bool ref, const std::vector<ParameterPtr> &params,
             StatementListStatementPtr body, bool has_call_to_get_args);
   String name() const { return m_name; }
   void changeName(const std::string &name);
@@ -79,6 +84,8 @@ public:
   // Direct invoke is faster and gives access to the caller and its env
   Variant directInvoke(VariableEnvironment &env,
                        const FunctionCallExpression *caller) const;
+  Variant invokeClosure(CObjRef closure, VariableEnvironment &env,
+                        const FunctionCallExpression *caller) const;
   Variant invokeImpl(VariableEnvironment &env, CArrRef params) const;
   virtual LVariableTable *getStaticVars(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
@@ -89,6 +96,17 @@ public:
   virtual const CallInfo *getCallInfo() const;
   virtual String fullName() const;
 
+  void dumpHeader(std::ostream &out) const;
+  void dumpBody(std::ostream &out) const;
+
+  bool hasReturn() const { return m_yieldCount == -1;}
+  bool hasYield() const { return m_yieldCount > 0;}
+  void setHasReturn() { m_yieldCount = -1;}
+  int addYield() { ASSERT(m_yieldCount >= 0); return ++m_yieldCount;}
+  int getYieldCount() const { return m_yieldCount;}
+
+  void setName(const std::string &name) { m_name = AtomicString(name);}
+
 protected:
   bool m_ref;
   AtomicString m_name;
@@ -97,6 +115,7 @@ protected:
   StatementListStatementPtr m_body;
   bool m_hasCallToGetArgs;
   mutable char m_maybeIntercepted;
+  int m_yieldCount;
 
   std::string m_docComment;
 

@@ -90,6 +90,19 @@ void ClassStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
 
   if (m_stmt) {
     bool seenConstruct = false;
+
+    // flatten continuation StatementList into MethodStatements
+    for (int i = 0; i < m_stmt->getCount(); i++) {
+      StatementListPtr stmts =
+        dynamic_pointer_cast<StatementList>((*m_stmt)[i]);
+      if (stmts) {
+        m_stmt->removeElement(i);
+        for (int j = 0; j < stmts->getCount(); j++) {
+          m_stmt->insertElement((*stmts)[j], i + j);
+        }
+      }
+    }
+
     for (int i = 0; i < m_stmt->getCount(); i++) {
       MethodStatementPtr meth =
         dynamic_pointer_cast<MethodStatement>((*m_stmt)[i]);

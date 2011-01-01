@@ -25,3 +25,7 @@ VirtualHost {
 Fiber {
   ThreadCount = 5
 }
+
+Eval {
+  EnableHipHopSyntax = true
+}

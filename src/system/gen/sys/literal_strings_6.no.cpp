@@ -22,6 +22,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss163bad01("addServer");
+StaticString s_sys_ss164363b4("getPathname");
+StaticString s_sys_ss172df677("deleteByKey");
+StaticString s_sys_ss17c3d085("fullEndElement");
 StaticString s_sys_ss17f0e883("exec");
 StaticString s_sys_ss1863b3c7("getGroup");
 StaticString s_sys_ss18bebdc2("replaceByKey");
@@ -42,6 +46,7 @@ StaticString s_sys_ss20098bac("asXML");
 StaticString s_sys_ss2145036e("final");
 StaticString s_sys_ss225c5a00("endPI");
 StaticString s_sys_ss22bfe43e("Traversable");
+StaticString s_sys_ss23afce76("setVars");
 StaticString s_sys_ss24749844("getParentClass");
 StaticString s_sys_ss2559ca9a("startDTD");
 StaticString s_sys_ss26e41480("fscanf");
@@ -61,6 +66,7 @@ StaticString s_sys_ss2d350426("finalize");
 StaticString s_sys_ss2d431bd1("writeDTDEntity");
 StaticString s_sys_ss2d5cec41("__getlastrequest");
 StaticString s_sys_ss2da130db("prepend");
+StaticString s_sys_ss2dd6aec3("Closure");
 StaticString s_sys_ss2f8e5140("setOption");
 StaticString s_sys_ss2fd353cc("iterator");
 StaticString s_sys_ss30120c29("__setcookie");
@@ -77,11 +83,6 @@ StaticString s_sys_ss33988b3e("info");
 StaticString s_sys_ss3403085f("getstats");
 StaticString s_sys_ss343a37dc("geterrormessage");
 StaticString s_sys_ss344c5db6("hasAttributes");
-StaticString s_sys_ss37217e60("hasConstant");
-StaticString s_sys_ss372c9151("ksort");
-StaticString s_sys_ss37eff1c8("getInnerIterator");
-StaticString s_sys_ss38d893f5("addCompletion");
-StaticString s_sys_ss3983a61c("createElementNS");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

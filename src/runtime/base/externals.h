@@ -111,7 +111,7 @@ extern const char *g_paramrtti_map[];
  * Dynamically create an object.
  */
 Object create_object(const char *s, const Array &params,
-    bool init = true, ObjectData *root = NULL);
+                     bool init = true, ObjectData *root = NULL);
 extern Object create_object_only(const char *s, ObjectData *root = NULL);
 /**
  * Dynamically create a system object.

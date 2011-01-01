@@ -28,6 +28,7 @@ StaticString s_sys_ss819481f3("::");
 StaticString s_sys_ss81e8363a("getServerList");
 StaticString s_sys_ss82b3b83c("clear");
 StaticString s_sys_ss832ee0e0("getNamedItemNS");
+StaticString s_sys_ss837e9a25("\000Continuation\000done", 18);
 StaticString s_sys_ss8389f3e4("compare");
 StaticString s_sys_ss84e1d89d("\000ReflectionClass\000info", 21);
 StaticString s_sys_ss855b229d("createAttributens");

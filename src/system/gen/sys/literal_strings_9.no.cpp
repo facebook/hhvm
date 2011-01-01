@@ -22,6 +22,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss68bc25e3("__dorequest");
+StaticString s_sys_ss68d731f7("getChildren");
+StaticString s_sys_ss690e46e7("saveHTML");
+StaticString s_sys_ss6974a1cc("__toString");
+StaticString s_sys_ss69f4b5d8("escapestring");
+StaticString s_sys_ss6a9626a3("seek");
 StaticString s_sys_ss6aa5ef61("helpBody");
 StaticString s_sys_ss6ae7fa54("addByKey");
 StaticString s_sys_ss6b51d6cb("getcolumnmeta");
@@ -53,6 +59,7 @@ StaticString s_sys_ss7257a6f2("setpersistence");
 StaticString s_sys_ss7358e00d("setISODate");
 StaticString s_sys_ss73e73811("writeDTDAttlist");
 StaticString s_sys_ss7416f7f1("sort");
+StaticString s_sys_ss74691b30("done");
 StaticString s_sys_ss750cda3b("access");
 StaticString s_sys_ss75ec94fd("endDTDAttlist");
 StaticString s_sys_ss764ad06c("fpassthru");

@@ -80,6 +80,35 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "hphp_object_pointer",
+    'desc'   => "This function returns low level raw pointer the object. Used by closure and internal purposes.",
+    'flags'  =>  HasDocComment | NoInjection,
+    'return' => array(
+      'type'   => Int64,
+      'desc'   => "Low level ObjectData pointer.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "obj",
+        'type'   => Object,
+        'desc'   => "Any object.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "hphp_get_this",
+    'desc'   => "This function returns this object if present, or NULL.",
+    'flags'  =>  HasDocComment | NoInjection,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "This object.",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "class_implements",
     'desc'   => "This function returns an array with the names of the interfaces that the given class and its parents implement.",
     'flags'  =>  HasDocComment,

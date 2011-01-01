@@ -45,6 +45,10 @@ MethodStatement::MethodStatement(STATEMENT_ARGS, const string &name,
   }
 }
 
+void MethodStatement::setPublic() {
+  m_modifiers = ClassStatement::Public;
+}
+
 String MethodStatement::fullName() const {
   return m_fullName;
 }

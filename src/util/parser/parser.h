@@ -18,6 +18,7 @@
 #define __HPHP_UTIL_PARSER_PARSER_H__
 
 #include <util/parser/scanner.h>
+#include <util/lock.h>
 
 #define IMPLEMENT_XHP_ATTRIBUTES                \
   Token m_xhpAttributes;                        \
@@ -35,6 +36,10 @@
     m_xhpAttributes.reset();                    \
   }                                             \
 
+// NOTE: system/classes/closure.php may have reference to these strings:
+#define CONTINUATION_OBJECT_NAME "__cont__"
+#define YIELD_LABEL_PREFIX "__yield__"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -47,6 +52,11 @@ public:
     StaticClassExprName,
     StaticName
   };
+
+  /**
+   * Reset parser static variables. Good for unit tests.
+   */
+  static void Reset();
 
 public:
   ParserBase(Scanner &scanner, const char *fileName);
@@ -98,6 +108,7 @@ public:
 
   void pushFuncLocation();
   LocationPtr popFuncLocation();
+  std::string getClosureName();
 
   // for goto syntax checking
   void pushLabelInfo();
@@ -131,6 +142,10 @@ protected:
     std::vector<GotoInfo> gotos;
   };
   std::vector<LabelInfo> m_labelInfos; // stack by function
+
+  // for closure hidden name
+  static Mutex s_mutex;
+  static std::map<int64, int> s_closureIds;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

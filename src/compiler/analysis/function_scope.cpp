@@ -735,6 +735,26 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (inTypedWrapper <= 0) {
     BlockScope::outputCPP(cg, ar);
   }
+
+  if (m_closureVars) {
+    cg_printf("c_Closure *closure __attribute__((__unused__)) = "
+              "(c_Closure*)extra;\n");
+    VariableTablePtr variables = getVariables();
+    for (int i = 0; i < m_closureVars->getCount(); i++) {
+      ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*m_closureVars)[i]);
+      string name = param->getName();
+      if (variables->isPresent(name)) {
+        if (param->isRef()) {
+          cg_printf("%s%s = ref(closure->m_vars.lvalAt(\"%s\"));\n",
+                    Option::VariablePrefix, name.c_str(), name.c_str());
+        } else {
+          cg_printf("%s%s = closure->m_vars[\"%s\"];\n",
+                    Option::VariablePrefix, name.c_str(), name.c_str());
+        }
+      }
+    }
+  }
 }
 
 void FunctionScope::outputCPPParamsDecl(CodeGenerator &cg,
@@ -742,6 +762,9 @@ void FunctionScope::outputCPPParamsDecl(CodeGenerator &cg,
                                         ExpressionListPtr params,
                                         bool showDefault) {
   if (isVariableArgument()) {
+    if (m_name[0] == '0' && !m_method) {
+      cg_printf("void *extra, ");
+    }
     cg_printf("int num_args, ");
     if (params) {
       cg.setInExpression(true);
@@ -764,9 +787,14 @@ void FunctionScope::outputCPPParamsDecl(CodeGenerator &cg,
                 "Globals *globals /* = get_globals() */");
     }
   } else if (params) {
+    if (m_name[0] == '0' && !m_method) {
+      cg_printf("void *extra, ");
+    }
     cg.setInExpression(true);
     params->outputCPP(cg, ar);
     cg.setInExpression(false);
+  } else if (m_name[0] == '0' && !m_method) {
+    cg_printf("void *extra");
   }
 }
 
@@ -1222,12 +1250,22 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
       cg_printf("%s%s::", Option::ClassPrefix, cls->getId(cg).c_str());
     }
     cg_printf("%s%s(", funcPrefix, name);
-    if (extraArg) {
-      cg_printf("%s%s", extraArg, variable ? "," : "");
-    }
-    if (variable) cg_printf("count");
-    bool preArgs = variable || extraArg;
 
+    bool preArgs = false;
+    if (name[0] == '0' && !m_method) {
+      cg_printf("extra"); // closure
+      preArgs = true;
+    }
+    if (extraArg) {
+      if (preArgs) cg_printf(", ");
+      cg_printf("%s", extraArg);
+      preArgs = true;
+    }
+    if (variable) {
+      if (preArgs) cg_printf(", ");
+      cg_printf("count");
+      preArgs = true;
+    }
     for (int j = 0; j < i; j++) {
       if (j >= m_minParam && j >= maxCount) break;
       if (preArgs || j > 0) cg_printf(", ");

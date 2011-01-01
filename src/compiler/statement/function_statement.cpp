@@ -90,19 +90,33 @@ void FunctionStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void FunctionStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  FunctionScopeRawPtr funcScope = getFunctionScope();
-  if (!funcScope->isUserFunction()) return;
-
+void FunctionStatement::outputPHPHeader(CodeGenerator &cg,
+                                        AnalysisResultPtr ar) {
   cg_printf("function ");
   if (m_ref) cg_printf("&");
-  cg_printf("%s(", m_name.c_str());
+  if (m_name[0] != '0') {
+    cg_printf("%s", m_name.c_str());
+  }
+  cg_printf("(");
   if (m_params) m_params->outputPHP(cg, ar);
-  cg_indentBegin(") {\n");
+  cg_printf(")");
+}
 
+void FunctionStatement::outputPHPBody(CodeGenerator &cg,
+                                      AnalysisResultPtr ar) {
+  FunctionScopeRawPtr funcScope = getFunctionScope();
+  cg_indentBegin(" {\n");
   funcScope->outputPHP(cg, ar);
   if (m_stmt) m_stmt->outputPHP(cg, ar);
   cg_indentEnd("}\n");
+}
+
+void FunctionStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
+  FunctionScopeRawPtr funcScope = getFunctionScope();
+  if (funcScope->isUserFunction()) {
+    outputPHPHeader(cg, ar);
+    outputPHPBody(cg, ar);
+  }
 }
 
 bool FunctionStatement::hasImpl() const {

@@ -22,6 +22,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss500f232f("lasterrormsg");
+StaticString s_sys_ss504bc94d("isInternal");
+StaticString s_sys_ss50652d33("next");
+StaticString s_sys_ss508b1d41("addfunction");
+StaticString s_sys_ss5097084d("setByKey");
+StaticString s_sys_ss50ad79e8("registerXPathNamespace");
 StaticString s_sys_ss52403931("function");
 StaticString s_sys_ss52fe5cd5("getLineNo");
 StaticString s_sys_ss53950219("setTimezone");
@@ -64,6 +70,7 @@ StaticString s_sys_ss61782b95("setTime");
 StaticString s_sys_ss61f821f0("sortwithsortkeys");
 StaticString s_sys_ss623ae369("constants");
 StaticString s_sys_ss625d0a69("setAttribute");
+StaticString s_sys_ss63639ccf("getVars");
 StaticString s_sys_ss63eef794("__getfunctions");
 StaticString s_sys_ss6412883b("c14n");
 StaticString s_sys_ss6415a5db("__get");
@@ -76,12 +83,6 @@ StaticString s_sys_ss672a5730("css");
 StaticString s_sys_ss6775c5a7("__getlastrequestheaders");
 StaticString s_sys_ss679e8b98("normalize");
 StaticString s_sys_ss6863d210("schemaValidateSource");
-StaticString s_sys_ss68bc25e3("__dorequest");
-StaticString s_sys_ss68d731f7("getChildren");
-StaticString s_sys_ss690e46e7("saveHTML");
-StaticString s_sys_ss6974a1cc("__toString");
-StaticString s_sys_ss69f4b5d8("escapestring");
-StaticString s_sys_ss6a9626a3("seek");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

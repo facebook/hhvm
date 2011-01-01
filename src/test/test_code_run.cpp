@@ -500,6 +500,8 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestNowDoc);
   RUN_TEST(TestTernaryShortcut);
   RUN_TEST(TestGoto);
+  RUN_TEST(TestClosure);
+  RUN_TEST(TestYield);
 
   RUN_TEST(TestAdHoc);
   return ret;
@@ -15594,6 +15596,155 @@ bool TestCodeRun::TestGoto() {
 
   MVCRO("<?php goto a; if (false) { a: print 'here';} ",
         "here");
+
+  return true;
+}
+
+bool TestCodeRun::TestClosure() {
+  MVCRO("<?php $a = function ($a) { return $a;}; var_dump($a(123));",
+        "int(123)\n");
+
+  MVCRO("<?php $abc = 123; $a = function () use ($abc) { var_dump($abc);}; "
+        "$a();",
+        "int(123)\n");
+
+  MVCRO("<?php\n"
+        "function foo() {\n"
+        "  $var = 123;\n"
+        "  $ref = 456;\n"
+        "  $abc = 789;\n"
+        "  $a = function () use ($var, &$ref) {\n"
+        "    var_dump($abc, $var, $ref);\n"
+        "    $abc = $var = $ref = 333;\n"
+        "  };\n"
+        "  var_dump($a());\n"
+        "  var_dump($abc, $var, $ref);\n"
+        "}\n"
+        "foo();\n",
+
+        "NULL\n"
+        "int(123)\n"
+        "int(456)\n"
+        "NULL\n"
+        "int(789)\n"
+        "int(123)\n"
+        "int(333)\n");
+
+  MVCRO("<?php\n"
+        "class Foo {\n"
+        "  function bar() {\n"
+        "    $abc = 123;\n"
+        "    $a = function ($abc) use ($abc) {\n"
+        "      var_dump($abc);\n"
+        "    };\n"
+        "    return $a;\n"
+        "  }\n"
+        "}\n"
+        "$a = Foo::bar();\n"
+        "$a(456);\n",
+
+        "int(123)\n");
+
+  MVCRO("<?php\n"
+        "class Foo {\n"
+        "  function bar() {\n"
+        "    $abc = 123;\n"
+        "    $a = function ($abc) use ($abc, $abc) {\n"
+        "      var_dump($abc);\n"
+        "    };\n"
+        "    return $a;\n"
+        "  }\n"
+        "}\n"
+        "$a = Foo::bar();\n"
+        "$a(456);\n",
+
+        "int(123)\n");
+
+  MVCRO("<?php\n"
+        "class Foo {\n"
+        "  function bar() {\n"
+        "    $abc = 123;\n"
+        "    $a = function ($abc) use (&$abc, &$abc) {\n"
+        "      var_dump($abc);\n"
+        "    };\n"
+        "    return $a;\n"
+        "  }\n"
+        "}\n"
+        "$a = Foo::bar();\n"
+        "$a(456);\n",
+
+        "int(123)\n");
+
+  MVCRO("<?php\n"
+        "class Foo {\n"
+        "  function bar() {\n"
+        "    $abc = 123;\n"
+        "    $a = function ($x) use ($abc) {\n"
+        "      $n = func_num_args();\n"
+        "      $args = func_get_args();\n"
+        "      var_dump($n, $args);\n"
+        "    };\n"
+        "    return $a;\n"
+        "  }\n"
+        "\n"
+        "  function baz($obj) {\n"
+        "    $abc = 456;\n"
+        "    $obj(789);\n"
+        "  }\n"
+        "}\n"
+        "$a = Foo::bar();\n"
+        "Foo::baz($a);\n",
+
+        "int(1)\n"
+        "array(1) {\n"
+        "  [0]=>\n"
+        "  int(789)\n"
+        "}\n");
+
+  MVCRO("<?php\n"
+        "class Foo {\n"
+        "  function bar() {\n"
+        "    $a = function () { var_dump(__CLASS__, __FUNCTION__);};\n"
+        "    $a();\n"
+        "  }\n"
+        "}\n"
+        "Foo::bar();\n",
+
+        "string(3) \"Foo\"\n"
+        "string(9) \"{closure}\"\n");
+
+  return true;
+}
+
+bool TestCodeRun::TestYield() {
+  Option::EnableHipHopSyntax = true;
+
+  MVCRO("<?php function fruit() { yield 'apple'; yield 'banana';} "
+        "foreach (fruit() as $fruit) { var_dump($fruit);} ",
+
+        "string(5) \"apple\"\n"
+        "string(6) \"banana\"\n"
+       );
+
+  MVCRO("<?php class F { function fruit() { yield 'apple'; yield 'banana';} }"
+        "foreach (F::fruit() as $fruit) { var_dump($fruit);} ",
+
+        "string(5) \"apple\"\n"
+        "string(6) \"banana\"\n"
+       );
+
+  MVCRO("<?php function fruit() { $a = 123; yield $a; yield ++$a;} "
+        "foreach (fruit() as $fruit) { var_dump($fruit);} ",
+
+        "int(123)\n"
+        "int(124)\n"
+       );
+
+  MVCRO("<?php function fruit() { $a = 123; yield $a; yield; yield ++$a;} "
+        "foreach (fruit() as $fruit) { var_dump($fruit);} ",
+
+        "int(123)\n"
+       );
 
   return true;
 }

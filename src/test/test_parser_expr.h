@@ -48,6 +48,7 @@ class TestParserExpr : public TestParser {
   bool TestModifierExpression();
   bool TestConstant();
   bool TestEncapsListExpression();
+  bool TestClosure();
 
   bool TestXHP();
 };

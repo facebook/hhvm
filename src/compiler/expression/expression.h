@@ -71,7 +71,8 @@ public:
     KindOfModifierExpression,
     KindOfConstantExpression,
     KindOfEncapsListExpression,
-    /* KindOfCount = 22 */
+    KindOfClosureExpression,
+    /* KindOfCount = 23 */
   };
 
   enum Context {

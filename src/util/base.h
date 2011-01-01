@@ -65,6 +65,21 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// debugging
+
+#include <assert.h>
+
+#ifdef RELEASE
+#ifndef ALWAYS_ASSERT
+#define ASSERT(x)
+#else
+#define ASSERT(x) assert(x)
+#endif
+#else
+#define ASSERT(x) assert(x)
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
 // system includes
 
 #if __WORDSIZE == 64
@@ -183,7 +198,7 @@ public:
       boost::shared_ptr<S>();
   }
 
-  T *operator->() const { return ptr; }
+  T *operator->() const { ASSERT(ptr); return ptr; }
   T *get() const { return ptr; }
   operator bool() const { return !expired(); }
   void reset() { ptr = 0; }
@@ -264,21 +279,6 @@ struct file_closer {
 #define ATTRIBUTE_COLD __attribute__((cold))
 #else
 #define ATTRIBUTE_COLD
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
-// debugging
-
-#include <assert.h>
-
-#ifdef RELEASE
-#ifndef ALWAYS_ASSERT
-#define ASSERT(x)
-#else
-#define ASSERT(x) assert(x)
-#endif
-#else
-#define ASSERT(x) assert(x)
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////

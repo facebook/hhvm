@@ -22,11 +22,14 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_sse3f54806("query");
+StaticString s_sys_sse41ca304("addString");
 StaticString s_sys_sse48e511b("setattribute");
 StaticString s_sys_sse4a1cad7("getVersion");
 StaticString s_sys_sse5340a31("mapping");
 StaticString s_sys_sse590286e("offsetUnset");
 StaticString s_sys_sse5c78f27("begintransaction");
+StaticString s_sys_sse63d8c2d("func");
 StaticString s_sys_sse68e7bf5("getArrayCopy");
 StaticString s_sys_sse73b3a2c("eof");
 StaticString s_sys_sse781f7da("private");
@@ -80,8 +83,6 @@ StaticString s_sys_ssf99443fd("openFile");
 StaticString s_sys_ssfab32402(" {main}");
 StaticString s_sys_ssfb10fd8c("parent");
 StaticString s_sys_ssfb433b54("nextrowset");
-StaticString s_sys_ssfb6412d4("): failed to open dir");
-StaticString s_sys_ssfbb3eb52("addUrl");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

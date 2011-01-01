@@ -41,6 +41,7 @@
 #include <compiler/expression/modifier_expression.h>
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/encaps_list_expression.h>
+#include <compiler/expression/closure_expression.h>
 
 #include <compiler/statement/function_statement.h>
 #include <compiler/statement/class_statement.h>
@@ -60,7 +61,6 @@
 #include <compiler/statement/break_statement.h>
 #include <compiler/statement/continue_statement.h>
 #include <compiler/statement/return_statement.h>
-#include <compiler/statement/yield_statement.h>
 #include <compiler/statement/global_statement.h>
 #include <compiler/statement/static_statement.h>
 #include <compiler/statement/echo_statement.h>
@@ -101,6 +101,15 @@ using namespace boost;
   cls##Ptr(new cls(BlockScopePtr(), getLocation(), Statement::KindOf##cls))
 #define NEW_STMT(cls, e...)                                     \
   cls##Ptr(new cls(BlockScopePtr(), getLocation(), Statement::KindOf##cls, ##e))
+
+using namespace HPHP::Compiler;
+
+extern void prepare_generator(Parser *_p, Token &stmt, Token &params,
+                              int count);
+extern void create_generator(Parser *_p, Token &out, Token &params,
+                             Token &name, const std::string &closureName,
+                             const char *clsname, Token *modifiers);
+extern void transform_yield(Parser *_p, Token &stmts, int index, Token *expr);
 
 namespace HPHP {
 
@@ -453,10 +462,12 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
   case T_LNUMBER:
   case T_DNUMBER:
   case T_LINE:
-  case T_CLASS_C:
   case T_METHOD_C:
   case T_FUNC_C:
     exp = NEW_EXP(ScalarExpression, type, scalar->text());
+    break;
+  case T_CLASS_C:
+    exp = NEW_EXP(ScalarExpression, type, m_clsName);
     break;
   case T_CONSTANT_ENCAPSED_STRING:
     exp = NEW_EXP(ScalarExpression, type, scalar->text(), true);
@@ -592,6 +603,7 @@ void Parser::onFunctionStart(Token &name) {
   m_file->pushAttribute();
   pushComment();
   newScope();
+  m_generators.push_back(0);
 }
 
 void Parser::onMethodStart(Token &name, Token &mods) {
@@ -603,21 +615,57 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
   if (!stmt->stmt) {
     stmt->stmt = NEW_STMT0(StatementList);
   }
-  FunctionStatementPtr func = NEW_STMT
-    (FunctionStatement, ref->num(), name->text(),
-     dynamic_pointer_cast<ExpressionList>(params->exp),
-     dynamic_pointer_cast<StatementList>(stmt->stmt),
-     m_file->popAttribute(),
-     popComment());
-  func->setLocation(popFuncLocation());
-  out->stmt = func;
-  {
-    Lock lock(m_ar->getMutex());
-    func->onParse(m_ar, m_file);
-  }
-  completeScope(func->getFunctionScope());
-  if (func->ignored()) {
-    out->stmt = NEW_STMT0(StatementList);
+
+  ExpressionListPtr old_params =
+    dynamic_pointer_cast<ExpressionList>(params->exp);
+  int attribute = m_file->popAttribute();
+  string comment = popComment();
+  LocationPtr loc = popFuncLocation();
+
+  int yieldCount = m_generators.back();
+  m_generators.pop_back();
+
+  FunctionStatementPtr func;
+  if (yieldCount > 0) {
+    string closureName = getClosureName();
+    Token new_params;
+    prepare_generator(this, stmt, new_params, yieldCount);
+    func = NEW_STMT(FunctionStatement, ref->num(), closureName,
+                    dynamic_pointer_cast<ExpressionList>(new_params->exp),
+                    dynamic_pointer_cast<StatementList>(stmt->stmt),
+                    attribute, comment);
+    out->stmt = func;
+    func->setLocation(loc);
+    {
+      Lock lock(m_ar->getMutex());
+      func->onParse(m_ar, m_file);
+    }
+    completeScope(func->getFunctionScope());
+    if (func->ignored()) {
+      out->stmt = NEW_STMT0(StatementList);
+    } else {
+      create_generator(this, out, params, name, closureName, NULL, NULL);
+    }
+
+  } else {
+    string funcName = name->text();
+    if (funcName.empty()) {
+      funcName = getClosureName();
+    }
+    func = NEW_STMT(FunctionStatement, ref->num(), funcName,
+                    old_params, dynamic_pointer_cast<StatementList>(stmt->stmt),
+                    attribute, comment);
+    out->stmt = func;
+
+    {
+      Lock lock(m_ar->getMutex());
+      func->onParse(m_ar, m_file);
+    }
+    completeScope(func->getFunctionScope());
+    func->setLocation(loc);
+    if (func->ignored()) {
+      out->stmt = NEW_STMT0(StatementList);
+    }
   }
 
   if (hasType(ret)) {
@@ -649,6 +697,7 @@ void Parser::onClassStart(int type, Token &name, Token *parent) {
 
   pushComment();
   newScope();
+  m_clsName = name.text();
 }
 
 void Parser::onClass(Token &out, Token &type, Token &name, Token &base,
@@ -671,6 +720,7 @@ void Parser::onClass(Token &out, Token &type, Token &name, Token &base,
   if (cls->ignored()) {
     out->stmt = NEW_STMT0(StatementList);
   }
+  m_clsName.clear();
 }
 
 void Parser::onInterface(Token &out, Token &name, Token &base, Token &stmt) {
@@ -734,18 +784,46 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     stmts = dynamic_pointer_cast<StatementList>(stmt->stmt);
   }
 
-  MethodStatementPtr mth = NEW_STMT
-    (MethodStatement, exp, ref->num(), name->text(),
-     dynamic_pointer_cast<ExpressionList>(params->exp), stmts,
-     m_file->popAttribute(),
-     popComment());
-  if (reloc) {
-    mth->setLocation(popFuncLocation());
-  }
+  ExpressionListPtr old_params =
+    dynamic_pointer_cast<ExpressionList>(params->exp);
+  int attribute = m_file->popAttribute();
+  string comment = popComment();
+  LocationPtr loc = popFuncLocation();
 
-  Lock lock(m_ar->getMutex());
-  completeScope(mth->onInitialParse(m_ar, m_file, true));
-  out->stmt = mth;
+  int yieldCount = m_generators.back();
+  m_generators.pop_back();
+
+  MethodStatementPtr mth;
+  if (yieldCount > 0) {
+    string closureName = getClosureName();
+    Token new_params;
+    prepare_generator(this, stmt, new_params, yieldCount);
+    ModifierExpressionPtr exp = NEW_EXP0(ModifierExpression); // public
+    mth = NEW_STMT(MethodStatement, exp, ref->num(), closureName,
+                   dynamic_pointer_cast<ExpressionList>(new_params->exp),
+                   dynamic_pointer_cast<StatementList>(stmt->stmt),
+                   attribute, comment);
+    out->stmt = mth;
+    if (reloc) {
+      mth->setLocation(loc);
+    }
+    {
+      Lock lock(m_ar->getMutex());
+      completeScope(mth->onInitialParse(m_ar, m_file, true));
+    }
+    create_generator(this, out, params, name, closureName, m_clsName.c_str(),
+                     &modifiers);
+
+  } else {
+    mth = NEW_STMT(MethodStatement, exp, ref->num(), name->text(),
+                   old_params, stmts, attribute, comment);
+    out->stmt = mth;
+    if (reloc) {
+      mth->setLocation(loc);
+    }
+    Lock lock(m_ar->getMutex());
+    completeScope(mth->onInitialParse(m_ar, m_file, true));
+  }
 
   if (hasType(ret)) {
     // TODO
@@ -899,8 +977,16 @@ void Parser::onContinue(Token &out, Token *expr) {
   out->stmt = NEW_STMT(ContinueStatement, expr ? expr->exp : ExpressionPtr());
 }
 
-void Parser::onReturn(Token &out, Token *expr) {
+void Parser::onReturn(Token &out, Token *expr, bool checkYield /* = true */) {
   out->stmt = NEW_STMT(ReturnStatement, expr ? expr->exp : ExpressionPtr());
+  if (checkYield && !m_generators.empty()) {
+    if (m_generators.back() > 0) {
+      Logger::Error("Cannot mix 'return' and 'yield' in the same function: %s",
+                    getMessage().c_str());
+    } else {
+      m_generators.back() = -1;
+    }
+  }
 }
 
 void Parser::onYield(Token &out, Token *expr) {
@@ -908,7 +994,24 @@ void Parser::onYield(Token &out, Token *expr) {
     Logger::Error("Yield is not enabled: %s", getMessage().c_str());
     return;
   }
-  out->stmt = NEW_STMT(YieldStatement, expr ? expr->exp : ExpressionPtr());
+  if (m_generators.empty()) {
+    Logger::Error("Yield cannot only be used inside a function: %s",
+                  getMessage().c_str());
+    return;
+  }
+
+  if (m_generators.back() == -1) {
+    Logger::Error("Cannot mix 'return' and 'yield' in the same function: %s",
+                  getMessage().c_str());
+    return;
+  }
+  int index = ++m_generators.back();
+
+  Token stmts;
+  transform_yield(this, stmts, index, expr);
+
+  out.reset();
+  out->stmt = stmts->stmt;
 }
 
 void Parser::onGlobal(Token &out, Token &expr) {
@@ -1028,14 +1131,26 @@ void Parser::onConstant(Token &out, Token *exprs, Token &var, Token &value) {
 
 void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params,
                        Token &cparams, Token &stmts) {
-  popFuncLocation();
-  if (hasType(ret)) {
-    // TODO
-  }
+  Token func, name;
+  onFunction(func, ret, ret, name, params, stmts);
+
+  out.reset();
+  out->exp = NEW_EXP(ClosureExpression,
+                     dynamic_pointer_cast<FunctionStatement>(func->stmt),
+                     dynamic_pointer_cast<ExpressionList>(cparams->exp));
 }
 
 void Parser::onClosureParam(Token &out, Token *params, Token &param,
                             bool ref) {
+  ExpressionPtr expList;
+  if (params) {
+    expList = params->exp;
+  } else {
+    expList = NEW_EXP0(ExpressionList);
+  }
+  expList->addElement(NEW_EXP(ParameterExpression, "", param->text(), ref,
+                              ExpressionPtr()));
+  out->exp = expList;
 }
 
 void Parser::onLabel(Token &out, Token &label) {

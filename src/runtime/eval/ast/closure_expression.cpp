@@ -14,29 +14,46 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EVAL_YIELD_STATEMENT_H__
-#define __EVAL_YIELD_STATEMENT_H__
-
-#include <runtime/eval/ast/statement.h>
+#include <runtime/eval/ast/closure_expression.h>
+#include <runtime/eval/ast/function_statement.h>
+#include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
 namespace Eval {
+using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_AST_PTR(YieldStatement);
-DECLARE_AST_PTR(Expression);
+ClosureExpression::ClosureExpression(EXPRESSION_ARGS,
+                                     FunctionStatementPtr func,
+                                     const vector<ParameterPtr> &vars)
+    : Expression(EXPRESSION_PASS), m_func(func), m_vars(vars) {}
 
-class YieldStatement : public Statement {
-public:
-  YieldStatement(STATEMENT_ARGS, ExpressionPtr value);
-  virtual void eval(VariableEnvironment &env) const;
-  virtual void dump(std::ostream &out) const;
-private:
-  ExpressionPtr m_value;
-};
+Variant ClosureExpression::eval(VariableEnvironment &env) const {
+  m_func->eval(env);
+  Array vars;
+  for (unsigned int i = 0; i < m_vars.size(); i++) {
+    ParameterPtr param = m_vars[i];
+    String name = param->getName();
+    if (param->isRef()) {
+      vars.lvalAt(name) = ref(env.get(name));
+    } else {
+      vars.set(name, env.get(name));
+    }
+  }
+  return create_object("Closure", CREATE_VECTOR2(m_func->name(), vars));
+}
+
+void ClosureExpression::dump(std::ostream &out) const {
+  m_func->dumpHeader(out);
+  if (!m_vars.empty()) {
+    out << " use (";
+    dumpVector(out, m_vars);
+    out << ")";
+  }
+  m_func->dumpBody(out);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
 
-#endif /* __EVAL_YIELD_STATEMENT_H__ */

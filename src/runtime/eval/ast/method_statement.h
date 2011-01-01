@@ -31,6 +31,8 @@ public:
   MethodStatement(STATEMENT_ARGS, const std::string &name,
                   const ClassStatement *cls, int modifiers,
                   const std::string &doc);
+  void setPublic();
+
   // Eval is called at declaration, not invocation
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;

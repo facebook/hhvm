@@ -100,11 +100,7 @@
 using namespace HPHP::HPHP_PARSER_NS;
 
 ///////////////////////////////////////////////////////////////////////////////
-
-/**
- * XHP functions: They are defined here, so different parsers don't have to
- * handle XHP rules at all.
- */
+// helpers
 
 static void no_gap(Parser *_p) {
   if (_p->scanner().hasGap()) {
@@ -128,6 +124,216 @@ static void scalar_null(Parser *_p, Token &out) {
   Token tnull; tnull.setText("null");
   _p->onConstantValue(out, tnull);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// continuation transformations
+
+void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
+  // 1. add prologue and epilogue to original body and store it back to "stmt"
+  {
+    Token scall;
+    {
+      Token name;    name.setText(CONTINUATION_OBJECT_NAME);
+      Token var;     _p->onSimpleVariable(var, name);
+      Token pn;      pn.setText("getVars");
+      Token pname;   _p->onName(pname, pn, Parser::VarName);
+      Token mcall;   _p->pushObject(var); _p->appendProperty(pname);
+      Token empty;   empty = 1; _p->appendMethodParams(empty);
+                     _p->popObject(mcall);
+
+      Token cname;   cname.setText("extract");
+      Token param;   _p->onCallParam(param, NULL, mcall, 0);
+      Token call;    _p->onCall(call, 0, cname, param, NULL);
+      _p->onExpStatement(scall, call);
+    }
+    Token sswitch;
+    {
+      Token name;    name.setText(CONTINUATION_OBJECT_NAME);
+      Token var;     _p->onSimpleVariable(var, name);
+      Token pn;      pn.setText("label");
+      Token pname;   _p->onName(pname, pn, Parser::VarName);
+      Token prop;    _p->pushObject(var); _p->appendProperty(pname);
+                     _p->popObject(prop);
+
+      Token cases;
+      for (int i = count; i > 0; i--) {
+        std::string si = boost::lexical_cast<std::string>(i);
+
+        Token label;   label.setText(YIELD_LABEL_PREFIX + si);
+        Token sgoto;   _p->onGoto(sgoto, label);
+        Token stmts0;  _p->onStatementListStart(stmts0);
+        Token stmts1;  _p->addStatement(stmts1, stmts0, sgoto);
+        Token stmts;   _p->finishStatement(stmts, stmts1); stmts = 1;
+
+        Token snum;    snum.setText(si);
+        Token num;     _p->onScalar(num, T_LNUMBER, snum);
+        Token scase;   _p->onCase(scase, cases, &num, stmts);
+        cases = scase;
+      }
+      _p->pushLabelScope();
+      _p->onSwitch(sswitch, prop, cases);
+      _p->popLabelScope();
+    }
+    Token sdone;
+    {
+      Token name;    name.setText(CONTINUATION_OBJECT_NAME);
+      Token var;     _p->onSimpleVariable(var, name);
+      Token pn;      pn.setText("done");
+      Token pname;   _p->onName(pname, pn, Parser::VarName);
+      Token mcall;   _p->pushObject(var); _p->appendProperty(pname);
+      Token empty;   empty = 1; _p->appendMethodParams(empty);
+                     _p->popObject(mcall);
+      _p->onExpStatement(sdone, mcall);
+    }
+    {
+      Token stmts0;  _p->onStatementListStart(stmts0);
+      Token stmts1;  _p->addStatement(stmts1, stmts0, scall);
+      Token stmts2;  _p->addStatement(stmts2, stmts1, sswitch);
+      Token stmts3;  _p->addStatement(stmts3, stmts2, stmt);
+      Token stmts4;  _p->addStatement(stmts4, stmts3, sdone);
+
+      stmt.reset();
+      _p->finishStatement(stmt, stmts4); stmt = 1;
+    }
+  }
+
+  // 2. prepare a single continuation parameter list and store it in "params"
+  {
+    Token type;    type.setText("Continuation");
+    Token var;     var.setText(CONTINUATION_OBJECT_NAME);
+    params.reset();
+    _p->onParam(params, NULL, type, var, false, NULL);
+  }
+}
+
+// create a generator function with original name and parameters
+void create_generator(Parser *_p, Token &out, Token &params,
+                      Token &name, const std::string &closureName,
+                      const char *clsname, Token *modifiers) {
+  _p->pushFuncLocation();
+  if (clsname) {
+    _p->onMethodStart(name, *modifiers);
+  } else {
+    _p->onFunctionStart(name);
+  }
+  Token scont;
+  {
+    Token fn;      fn.setText(closureName);
+    if (clsname) {
+      fn.setText(std::string(clsname) + "::" + closureName);
+    }
+    Token fname;   _p->onScalar(fname, T_CONSTANT_ENCAPSED_STRING, fn);
+    Token param1;  _p->onCallParam(param1, NULL, fname, 0);
+
+    Token cname;   cname.setText("get_defined_vars");
+    Token empty;
+    Token call;    _p->onCall(call, 0, cname, empty, NULL);
+    Token param2;  _p->onCallParam(param2, &param1, call, 0);
+
+    Token params;
+    if (clsname) {
+      Token cname;   cname.setText("hphp_get_this");
+      Token empty;
+      Token call;    _p->onCall(call, 0, cname, empty, NULL);
+      Token param3;  _p->onCallParam(param3, &param2, call, 0);
+      params = param3;
+    } else {
+      params = param2;
+    }
+
+    Token clsname; clsname.setText("Continuation");
+    Token cls;     _p->onName(cls, clsname, Parser::StringName);
+    Token newobj;  _p->onNewObject(newobj, cls, params);
+    Token ret;     _p->onReturn(ret, &newobj);
+
+    Token stmts0;  _p->onStatementListStart(stmts0);
+    Token stmts1;  _p->addStatement(stmts1, stmts0, ret);
+    _p->finishStatement(scont, stmts1); scont = 1;
+  }
+
+  Token closure, ret, ref;
+  ret.setText("Continuation");
+  if (clsname) {
+    _p->onMethod(closure, *modifiers, ret, ref, name, params, scont);
+  } else {
+    _p->onFunction(closure, ret, ref, name, params, scont);
+  }
+
+  Token stmts0;  _p->onStatementListStart(stmts0);
+  Token stmts1;  _p->addStatement(stmts1, stmts0, closure);
+  Token stmts2;  _p->addStatement(stmts2, stmts1, out);
+  _p->finishStatement(out, stmts2); out = 1;
+}
+
+void transform_yield(Parser *_p, Token &stmts, int index, Token *expr) {
+  Token stmt0;
+  {
+    Token name;    name.setText(CONTINUATION_OBJECT_NAME);
+    Token var;     _p->onSimpleVariable(var, name);
+    Token pn;      pn.setText("label");
+    Token pname;   _p->onName(pname, pn, Parser::VarName);
+    Token prop;    _p->pushObject(var); _p->appendProperty(pname);
+                   _p->popObject(prop);
+    Token snum;    snum.setText(boost::lexical_cast<std::string>(index));
+    Token num;     _p->onScalar(num, T_LNUMBER, snum);
+    Token assign;  _p->onAssign(assign, prop, num, 0);
+    _p->onExpStatement(stmt0, assign);
+  }
+
+  Token ret;     _p->onReturn(ret, expr, false);
+
+  Token setvars;
+  {
+    Token name;    name.setText(CONTINUATION_OBJECT_NAME);
+    Token var;     _p->onSimpleVariable(var, name);
+    Token pn;      pn.setText("setVars");
+    Token pname;   _p->onName(pname, pn, Parser::VarName);
+    Token mcall;   _p->pushObject(var); _p->appendProperty(pname);
+
+    Token cname;   cname.setText("get_defined_vars");
+    Token empty;
+    Token call;    _p->onCall(call, 0, cname, empty, NULL);
+    Token param;   _p->onCallParam(param, NULL, call, 0);
+                   param = 1; _p->appendMethodParams(param);
+
+    _p->popObject(mcall);
+    _p->onExpStatement(setvars, mcall);
+  }
+
+  Token lname;   lname.setText(YIELD_LABEL_PREFIX +
+                               boost::lexical_cast<std::string>(index));
+  Token label;   _p->onLabel(label, lname);
+
+  Token stmts0;  _p->onStatementListStart(stmts0);
+  Token stmts1;  _p->addStatement(stmts1, stmts0, stmt0);
+
+  if (!expr) {
+    Token name;    name.setText(CONTINUATION_OBJECT_NAME);
+    Token var;     _p->onSimpleVariable(var, name);
+    Token pn;      pn.setText("done");
+    Token pname;   _p->onName(pname, pn, Parser::VarName);
+    Token mcall;   _p->pushObject(var); _p->appendProperty(pname);
+    Token empty;   empty = 1; _p->appendMethodParams(empty);
+                   _p->popObject(mcall);
+    Token sdone;   _p->onExpStatement(sdone, mcall);
+
+    Token tmp;     _p->addStatement(tmp, stmts1, sdone);
+    stmts1 = tmp;
+  }
+
+  Token stmts2;  _p->addStatement(stmts2, stmts1, setvars);
+  Token stmts3;  _p->addStatement(stmts3, stmts2, ret);
+  Token stmts4;  _p->addStatement(stmts4, stmts3, label);
+
+  _p->finishStatement(stmts, stmts4); stmts = 1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * XHP functions: They are defined here, so different parsers don't have to
+ * handle XHP rules at all.
+ */
 
 static void xhp_tag(Parser *_p, Token &out, Token &label, Token &body) {
   if (!_p->enableXHP()) {
@@ -208,6 +414,7 @@ static void xhp_attribute_stmt(Parser *_p, Token &out, Token &attributes) {
     Token m1; m1.setNum(T_PROTECTED); _p->onMemberModifier(m, NULL, m1);
     Token m2; m2.setNum(T_STATIC);    _p->onMemberModifier(modifiers, &m, m2);
   }
+  _p->pushFuncLocation();
   _p->onMethodStart(fname, modifiers);
 
   std::vector<std::string> classes;
@@ -309,6 +516,7 @@ static void xhp_category_stmt(Parser *_p, Token &out, Token &categories) {
   Token fname;     fname.setText("__xhpCategoryDeclaration");
   Token m1;        m1.setNum(T_PROTECTED);
   Token modifiers; _p->onMemberModifier(modifiers, 0, m1);
+  _p->pushFuncLocation();
   _p->onMethodStart(fname, modifiers);
 
   Token stmts0;
@@ -394,6 +602,7 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
   Token fname;     fname.setText("__xhpChildrenDeclaration");
   Token m1;        m1.setNum(T_PROTECTED);
   Token modifiers; _p->onMemberModifier(modifiers, 0, m1);
+  _p->pushFuncLocation();
   _p->onMethodStart(fname, modifiers);
 
   Token stmts0;
@@ -1202,9 +1411,11 @@ expr_without_variable:
   | '`' encaps_list '`'                { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
   | type_decl function_loc
-    is_reference '('
+    is_reference '('                   { Token t; _p->onFunctionStart(t);
+                                         _p->pushLabelInfo();}
     parameter_list ')' lexical_vars
-    '{' inner_statement_list '}'       { _p->onClosure($$,$1,$3,$5,$7,$9);}
+    '{' inner_statement_list '}'       { _p->popLabelInfo();
+                                         _p->onClosure($$,$1,$3,$6,$8,$10);}
   | expr '[' dim_offset ']'            { xhp_idx(_p, $$, $1, $3);}
   | xhp_tag                            { $$ = $1;}
 ;

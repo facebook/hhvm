@@ -15,11 +15,22 @@
 */
 
 #include "parser.h"
+#include <util/hash.h>
 
 using namespace std;
 using namespace boost;
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+Mutex ParserBase::s_mutex;
+std::map<int64, int> ParserBase::s_closureIds;
+
+void ParserBase::Reset() {
+  Lock lock(s_mutex);
+  s_closureIds.clear();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 ParserBase::ParserBase(Scanner &scanner, const char *fileName)
@@ -68,7 +79,7 @@ LocationPtr ParserBase::getLocation() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// correctly set T_FUNCTION source locations
+// T_FUNCTION related functions
 
 void ParserBase::pushFuncLocation() {
   m_funcLocs.push_back(getLocation());
@@ -79,6 +90,23 @@ LocationPtr ParserBase::popFuncLocation() {
   LocationPtr loc = m_funcLocs.back();
   m_funcLocs.pop_back();
   return loc;
+}
+
+std::string ParserBase::getClosureName() {
+  int64 h = hash_string_cs(m_fileName, strlen(m_fileName));
+  int closureId;
+  {
+    Lock lock(s_mutex);
+    int &id = s_closureIds[h];
+    closureId = ++id;
+  }
+
+  string ret;
+  ret = "0";
+  ret += lexical_cast<string>(h);
+  ret += "_";
+  ret += lexical_cast<string>(closureId);
+  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -142,8 +170,13 @@ void ParserBase::popLabelInfo() {
       }
     }
     if (!found) {
-      error("'goto' into loop or switch statement or try/catch block "
-            "is disallowed: %s", getMessage(gotoInfo.loc.get()).c_str());
+      if (gotoInfo.label.find(YIELD_LABEL_PREFIX) == 0) {
+        error("'yield' in loop or switch statement or try/catch block "
+              "is disallowed: %s", getMessage(gotoInfo.loc.get()).c_str());
+      } else {
+        error("'goto' into loop or switch statement or try/catch block "
+              "is disallowed: %s", getMessage(gotoInfo.loc.get()).c_str());
+      }
       return;
     }
   }

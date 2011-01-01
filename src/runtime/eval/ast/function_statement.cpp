@@ -31,6 +31,7 @@
 #include <runtime/eval/strict_mode.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/intercept.h>
+#include <system/gen/php/classes/closure.h>
 
 namespace HPHP {
 namespace Eval {
@@ -45,7 +46,9 @@ Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
     m_idx(idx), m_kind(KindOfNull), m_argNum(argNum),
     m_ref(ref), m_nullDefault(false) {
   if (!type.empty()) {
-    m_fnName = parser->peekFunc()->fullName() + "()";
+    if (parser->haveFunc()) {
+      m_fnName = parser->peekFunc()->fullName() + "()";
+    }
 
     const TypePtrMap &types = GetTypeHintTypes();
     TypePtrMap::const_iterator iter;
@@ -124,6 +127,10 @@ std::string Parameter::name() const {
   return m_name->get().data();
 }
 
+String Parameter::getName() const {
+  return m_name->get();
+}
+
 void Parameter::getInfo(ClassInfo::ParameterInfo &info,
                         VariableEnvironment &env) const {
   int attr = 0;
@@ -167,7 +174,7 @@ void Parameter::addNullDefault(void *parser) {
 FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
                                      const string &doc)
   : Statement(STATEMENT_PASS), m_name(name),
-    m_maybeIntercepted(-1), m_docComment(doc),
+    m_maybeIntercepted(-1), m_yieldCount(0), m_docComment(doc),
     m_callInfo((void*)Invoker, (void*)InvokerFewArgs, 0, 0, 0) {
 }
 
@@ -176,7 +183,7 @@ FunctionStatement::~FunctionStatement() {
 }
 
 void FunctionStatement::init(void *parser, bool ref,
-                             const vector<ParameterPtr> params,
+                             const vector<ParameterPtr> &params,
                              StatementListStatementPtr body,
                              bool has_call_to_get_args) {
   m_ref = ref;
@@ -209,6 +216,10 @@ void FunctionStatement::init(void *parser, bool ref,
       param->addNullDefault(parser);
     }
     if (param->isRef()) m_callInfo.m_refFlags |= 1 << i;
+
+    if (param->getIdx() == -1) {
+      param->setIdx(declareVariable(name));
+    }
   }
 }
 
@@ -330,6 +341,28 @@ Variant FunctionStatement::directInvoke(VariableEnvironment &env,
   }
 }
 
+// env is caller's env
+Variant FunctionStatement::invokeClosure(CObjRef closure,
+                                         VariableEnvironment &env,
+                                         const FunctionCallExpression *caller)
+  const {
+  DECLARE_THREAD_INFO_NOINIT
+  FuncScopeVariableEnvironment fenv(this, 0);
+  directBind(env, caller, fenv);
+
+  p_Closure c = closure.getTyped<c_Closure>();
+  for (ArrayIter iter(c->m_vars); iter; ++iter) {
+    fenv.get(iter.first()).setWithRef(iter.secondRef());
+  }
+
+  EvalFrameInjection fi(empty_string, "{closure}", fenv, loc()->file);
+  if (m_ref) {
+    return ref(evalBody(fenv));
+  } else {
+    return evalBody(fenv);
+  }
+}
+
 LVariableTable *FunctionStatement::getStaticVars(VariableEnvironment &env)
   const {
   return &RequestEvalState::getFunctionStatics(this);
@@ -368,10 +401,17 @@ Variant FunctionStatement::invokeImpl(VariableEnvironment &env,
   }
 }
 
-void FunctionStatement::dump(std::ostream &out) const {
-  out << "function " << (m_ref ? "&" : "") << m_name.c_str() << "(";
+void FunctionStatement::dumpHeader(std::ostream &out) const {
+  out << "function " << (m_ref ? "&" : "");
+  if (name()[0] != '0') {
+    out << m_name.c_str();
+  }
+  out << "(";
   dumpVector(out, m_params);
   out << ")";
+}
+
+void FunctionStatement::dumpBody(std::ostream &out) const {
   if (m_body) {
     out << " {\n";
     m_body->dump(out);
@@ -380,6 +420,11 @@ void FunctionStatement::dump(std::ostream &out) const {
     out << ";";
   }
   out << "\n";
+}
+
+void FunctionStatement::dump(std::ostream &out) const {
+  dumpHeader(out);
+  dumpBody(out);
 }
 
 void FunctionStatement::getInfo(ClassInfo::MethodInfo &info) const {

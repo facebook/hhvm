@@ -117,7 +117,9 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
       }
       break;
     case T_CLASS_C:
-      if (getClassScope()) {
+      if (!m_value.empty()) {
+        m_translated = m_value;
+      } else if (getClassScope()) {
         m_translated = getClassScope()->getOriginalName();
       }
       break;
@@ -136,6 +138,9 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
     case T_FUNC_C:
       if (getFunctionScope()) {
         m_translated = getFunctionScope()->getOriginalName();
+        if (m_translated[0] == '0') {
+          m_translated = "{closure}";
+        }
       }
       break;
     default:
@@ -336,8 +341,10 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_DNUMBER:
     cg_printf("%s", m_originalValue.c_str());
     break;
-  case T_LINE:
   case T_CLASS_C:
+    cg_printf("__CLASS__");
+    break;
+  case T_LINE:
   case T_METHOD_C:
   case T_FUNC_C:
     if (cg.translatePredefined()) {

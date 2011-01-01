@@ -54,6 +54,7 @@ bool TestParserStmt::RunTests(const std::string &which) {
   RUN_TEST(TestTryStatement);
   RUN_TEST(TestThrowStatement);
   RUN_TEST(TestGotoStatement);
+  RUN_TEST(TestYieldStatement);
   return ret;
 }
 
@@ -656,3 +657,75 @@ bool TestParserStmt::TestGotoStatement() {
   return true;
 }
 
+bool TestParserStmt::TestYieldStatement() {
+  RuntimeOption::EnableHipHopSyntax = true;
+  Option::EnableHipHopSyntax = true;
+
+  V("<?php function foo() { yield;}",
+    "function foo() {\n"
+    "return new Continuation('02316968161694270338_1', get_defined_vars());\n"
+    "}\n"
+    "function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
+    "extract($" CONTINUATION_OBJECT_NAME "->getVars());\n"
+    "switch ($" CONTINUATION_OBJECT_NAME "->label) {\n"
+    "case 1:\n"
+    "goto " YIELD_LABEL_PREFIX "1;\n"
+    "}\n"
+    "$" CONTINUATION_OBJECT_NAME "->label = 1;\n"
+    "$" CONTINUATION_OBJECT_NAME "->done();\n"
+    "$" CONTINUATION_OBJECT_NAME "->setVars(get_defined_vars());\n"
+    "return;\n"
+    YIELD_LABEL_PREFIX "1:\n"
+    "$" CONTINUATION_OBJECT_NAME "->done();\n"
+    "}\n"
+   );
+
+  V("<?php function foo() { yield 123;}",
+
+    "function foo() {\n"
+    "return new Continuation('02316968161694270338_1', get_defined_vars());\n"
+    "}\n"
+    "function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
+    "extract($" CONTINUATION_OBJECT_NAME "->getVars());\n"
+    "switch ($" CONTINUATION_OBJECT_NAME "->label) {\n"
+    "case 1:\n"
+    "goto " YIELD_LABEL_PREFIX "1;\n"
+    "}\n"
+    "$" CONTINUATION_OBJECT_NAME "->label = 1;\n"
+    "$" CONTINUATION_OBJECT_NAME "->setVars(get_defined_vars());\n"
+    "return 123;\n"
+    YIELD_LABEL_PREFIX "1:\n"
+    "$" CONTINUATION_OBJECT_NAME "->done();\n"
+    "}\n"
+   );
+
+  V("<?php class foo { function foo() { yield 123; yield 456;} }",
+    "class foo {\n"
+    "public function foo() {\n"
+    "return new Continuation('foo::02316968161694270338_1', "
+    "get_defined_vars(), hphp_get_this());\n"
+    "}\n"
+    "public function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
+    "extract($" CONTINUATION_OBJECT_NAME "->getVars());\n"
+    "switch ($" CONTINUATION_OBJECT_NAME "->label) {\n"
+    "case 2:\n"
+    "goto " YIELD_LABEL_PREFIX "2;\n"
+    "\n"
+    "case 1:\n"
+    "goto " YIELD_LABEL_PREFIX "1;\n"
+    "}\n"
+    "$" CONTINUATION_OBJECT_NAME "->label = 1;\n"
+    "$" CONTINUATION_OBJECT_NAME "->setVars(get_defined_vars());\n"
+    "return 123;\n"
+    YIELD_LABEL_PREFIX "1:\n"
+    "$" CONTINUATION_OBJECT_NAME "->label = 2;\n"
+    "$" CONTINUATION_OBJECT_NAME "->setVars(get_defined_vars());\n"
+    "return 456;\n"
+    YIELD_LABEL_PREFIX "2:\n"
+    "$" CONTINUATION_OBJECT_NAME "->done();\n"
+    "}\n"
+    "}\n"
+   );
+
+  return true;
+}

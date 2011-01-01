@@ -153,18 +153,16 @@ Variant invoke(CStrRef function, CArrRef params, int64 hash /* = -1 */,
 }
 
 Variant invoke(const char *function, CArrRef params, int64 hash /* = -1*/,
-                      bool tryInterp /* = true */, bool fatal /* = true */) {
+               bool tryInterp /* = true */, bool fatal /* = true */) {
   const CallInfo *ci;
   void *extra;
   if (get_call_info(ci, extra, function, hash)) {
     return (ci->getFunc())(extra, params);
-  } else {
-    return invoke_failed(function, params, hash, fatal);
   }
+  return invoke_failed(function, params, hash, fatal);
 }
 
-Variant invoke_builtin(const char *s, const Array &params, int64 hash,
-                              bool fatal) {
+Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
   const CallInfo *ci;
   void *extra;
   if (get_call_info_builtin(ci, extra, s, hash)) {
@@ -174,8 +172,8 @@ Variant invoke_builtin(const char *s, const Array &params, int64 hash,
   }
 }
 
-Variant invoke_static_method(CStrRef s, CStrRef method,
-                             const Array &params, bool fatal /* = true */) {
+Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
+                             bool fatal /* = true */) {
   MethodCallPackage mcp;
   if (!fatal) mcp.noFatal();
   mcp.dynamicNamedCall(s, method, -1);
@@ -332,8 +330,8 @@ void throw_instance_method_fatal(const char *name) {
   }
 }
 
-Object create_object(const char *s, const Array &params,
-    bool init /* = true */, ObjectData *root /* = NULL */) {
+Object create_object(const char *s, CArrRef params, bool init /* = true */,
+                     ObjectData *root /* = NULL */) {
   Object o(create_object_only(s, root));
   if (init) {
     MethodCallPackage mcp;

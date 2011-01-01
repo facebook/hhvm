@@ -45,6 +45,7 @@ bool TestParserExpr::RunTests(const std::string &which) {
   RUN_TEST(TestModifierExpression);
   RUN_TEST(TestConstant);
   RUN_TEST(TestEncapsListExpression);
+  RUN_TEST(TestClosure);
 
   RUN_TEST(TestXHP);
 
@@ -376,6 +377,16 @@ bool TestParserExpr::TestEncapsListExpression() {
   V("<?php \"\\\"$a\";",          "'\"' . $a;\n");
   V("<?php \"\\$a\";",            "'$a';\n");
   V("<?php \"${a}\";",            "$a;\n");
+  return true;
+}
+
+bool TestParserExpr::TestClosure() {
+  V("<?php $a = function ($a) { return $a;};",
+    "$a = function ($a) {\nreturn $a;\n}\n;\n");
+
+  V("<?php $a = function ($a) use ($var) { return $var + $a;};",
+    "$a = function ($a) use ($var) {\nreturn $var + $a;\n}\n;\n");
+
   return true;
 }
 

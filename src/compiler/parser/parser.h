@@ -176,7 +176,7 @@ public:
   void onCase(Token &out, Token &cases, Token *cond, Token &stmt);
   void onBreak(Token &out, Token *expr);
   void onContinue(Token &out, Token *expr);
-  void onReturn(Token &out, Token *expr);
+  void onReturn(Token &out, Token *expr, bool checkYield = true);
   void onYield(Token &out, Token *expr);
   void onGlobal(Token &out, Token &expr);
   void onGlobalVar(Token &out, Token *exprs, Token &expr);
@@ -213,6 +213,8 @@ private:
   ExpressionPtrVec m_objects; // for parsing object property/method calls
   std::vector<std::string> m_comments; // for docComment stack
   std::vector<BlockScopePtrVec> m_scopes;
+  std::vector<int> m_generators;
+  std::string m_clsName; // for T_CLASS_C inside a closure
 
   // parser output
   StatementListPtr m_tree;

@@ -45,7 +45,8 @@ MethodStatement::MethodStatement
  ExpressionListPtr params, StatementListPtr stmt, int attr,
  const string &docComment, bool method /* = true */)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
-    m_method(method), m_modifiers(modifiers), m_ref(ref), m_originalName(name),
+    m_method(method), m_modifiers(modifiers),
+    m_ref(ref), m_originalName(name),
     m_params(params), m_stmt(stmt), m_attribute(attr),
     m_docComment(docComment) {
   m_name = Util::toLower(name);
@@ -367,7 +368,10 @@ void MethodStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   m_modifiers->outputPHP(cg, ar);
   cg_printf(" function ");
   if (m_ref) cg_printf("&");
-  cg_printf("%s(", m_originalName.c_str());
+  if (m_name[0] != '0') {
+    cg_printf("%s", m_originalName.c_str());
+  }
+  cg_printf("(");
   if (m_params) m_params->outputPHP(cg, ar);
   if (m_stmt) {
     cg_indentBegin(") {\n");

@@ -64,7 +64,6 @@ public:
     KindOfBreakStatement,
     KindOfContinueStatement,
     KindOfReturnStatement,
-    KindOfYieldStatement,
     KindOfGlobalStatement,
     KindOfStaticStatement,
     KindOfEchoStatement,
@@ -76,7 +75,7 @@ public:
     KindOfThrowStatement,
     KindOfGotoStatement,
     KindOfLabelStatement,
-    /* KindOfCount = 27 */
+    /* KindOfCount = 29 */
   };
 
 public:

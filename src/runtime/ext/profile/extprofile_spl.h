@@ -35,6 +35,14 @@ inline String x_spl_object_hash(CObjRef obj) {
   return f_spl_object_hash(obj);
 }
 
+inline int64 x_hphp_object_pointer(CObjRef obj) {
+  return f_hphp_object_pointer(obj);
+}
+
+inline Variant x_hphp_get_this() {
+  return f_hphp_get_this();
+}
+
 inline Variant x_class_implements(CVarRef obj, bool autoload = true) {
   FUNCTION_INJECTION_BUILTIN(class_implements);
   return f_class_implements(obj, autoload);

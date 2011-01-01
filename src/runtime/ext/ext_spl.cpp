@@ -104,6 +104,14 @@ String f_spl_object_hash(CObjRef obj) {
   return String(buf, CopyString);
 }
 
+Variant f_hphp_get_this() {
+  Object obj = FrameInjection::GetThis();
+  if (obj.get() && obj->o_getId()) {
+    return obj;
+  }
+  return null;
+}
+
 Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {
   String clsname;
   if (obj.isString()) {

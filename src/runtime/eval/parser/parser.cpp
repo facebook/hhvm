@@ -44,6 +44,7 @@
 #include <runtime/eval/ast/unary_op_expression.h>
 #include <runtime/eval/ast/temp_expression_list.h>
 #include <runtime/eval/ast/temp_expression.h>
+#include <runtime/eval/ast/closure_expression.h>
 
 #include <runtime/eval/ast/break_statement.h>
 #include <runtime/eval/ast/class_statement.h>
@@ -57,7 +58,6 @@
 #include <runtime/eval/ast/if_statement.h>
 #include <runtime/eval/ast/method_statement.h>
 #include <runtime/eval/ast/return_statement.h>
-#include <runtime/eval/ast/yield_statement.h>
 #include <runtime/eval/ast/statement_list_statement.h>
 #include <runtime/eval/ast/static_statement.h>
 #include <runtime/eval/ast/strong_foreach_statement.h>
@@ -88,6 +88,13 @@ using namespace boost;
   cls##StatementPtr(new cls##Statement(this))
 #define NEW_STMT(cls, e...)                                     \
   cls##StatementPtr(new cls##Statement(this, e))
+
+extern void prepare_generator(Parser *_p, Token &stmt, Token &params,
+                              int count);
+extern void create_generator(Parser *_p, Token &out, Token &params,
+                             Token &name, const std::string &closureName,
+                             const char *clsname, Token *modifiers);
+extern void transform_yield(Parser *_p, Token &stmts, int index, Token *expr);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -178,7 +185,7 @@ StatementPtr Parser::ParseString(const char *input,
   ASSERT(input);
   int len = strlen(input);
   Scanner scanner(input, len, RuntimeOption::ScannerType);
-  Parser parser(scanner, "eval()'d code", statics);
+  Parser parser(scanner, "string", statics);
   if (parser.parse()) {
     return parser.getTree();
   }
@@ -458,7 +465,7 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
     if((s == "func_num_args") ||
        (s == "func_get_args") ||
        (s == "func_get_arg")) {
-      m_hasCallToGetArgs = true;
+      m_hasCallToGetArgs.back() = true;
     }
   }
   if (className) {
@@ -645,6 +652,9 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
     if (type == T_FUNC_C) subtype = T_FUNC_C;
     type = T_STRING;
     stext = haveFunc() ? peekFunc()->name() : "";
+    if (stext[0] == '0') {
+      stext = "{closure}";
+    }
   }
   switch (type) {
   case T_STRING:
@@ -882,22 +892,44 @@ void Parser::onClassConst(Token &out, Token &className, Token &name,
 // function/method declaration
 
 void Parser::onFunctionStart(Token &name) {
-  FunctionStatementPtr func = NEW_STMT(Function, name.text(),
+  string funcName = name.text();
+  if (funcName.empty()) {
+    funcName = getClosureName();
+  }
+  FunctionStatementPtr func = NEW_STMT(Function, funcName,
                                        m_scanner.detachDocComment());
-  m_hasCallToGetArgs = false;
+  m_hasCallToGetArgs.push_back(false);
   pushFunc(func);
 }
 
 void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
                         Token &params, Token &stmt) {
-  out.reset();
   FunctionStatementPtr func = peekFunc();
   ASSERT(func);
-  func->setLoc(popFuncLocation().get());
-  StatementListStatementPtr body = stmt->getStmtList();
-  func->init(this, ref.num(), params->params(), body, m_hasCallToGetArgs);
-  out->stmt() = func;
   popFunc();
+  func->setLoc(popFuncLocation().get());
+  bool hasCallToGetArgs = m_hasCallToGetArgs.back();
+  m_hasCallToGetArgs.pop_back();
+
+  if (func->hasYield()) {
+    string closureName = getClosureName();
+    func->setName(closureName);
+
+    Token new_params;
+    prepare_generator(this, stmt, new_params, func->getYieldCount());
+    StatementListStatementPtr body = stmt->getStmtList();
+    func->init(this, ref.num(), new_params->params(), body, hasCallToGetArgs);
+
+    out.reset();
+    out->stmt() = func;
+    create_generator(this, out, params, name, closureName, NULL, NULL);
+
+  } else {
+    StatementListStatementPtr body = stmt->getStmtList();
+    func->init(this, ref.num(), params->params(), body, hasCallToGetArgs);
+    out.reset();
+    out->stmt() = func;
+  }
 }
 
 void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
@@ -907,13 +939,8 @@ void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
   } else {
     out.reset();
   }
-  int idx = -1;
-  if (haveFunc()) {
-    FunctionStatementPtr func = peekFunc();
-    idx = func->declareVariable(var.text());
-  }
   ParameterPtr p(new Parameter(this, type.text(), var.text(),
-                               idx, ref, defValue ? (*defValue)->exp()
+                               -1, ref, defValue ? (*defValue)->exp()
                                : ExpressionPtr(), out->params().size() + 1));
   out->params().push_back(p);
 }
@@ -999,7 +1026,7 @@ void Parser::onMethodStart(Token &name, Token &modifiers) {
   FunctionStatementPtr func = NEW_STMT(Method, name.text(), cs.get(),
                                        modifiers.num(),
                                        m_scanner.detachDocComment());
-  m_hasCallToGetArgs = false;
+  m_hasCallToGetArgs.push_back(false);
   pushFunc(func);
 }
 
@@ -1009,14 +1036,33 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   ClassStatementPtr cs = peekClass();
   MethodStatementPtr ms = peekFunc()->unsafe_cast<MethodStatement>();
   ASSERT(ms);
+  popFunc();
   if (reloc) {
     ms->setLoc(popFuncLocation().get());
   }
-  popFunc();
-  StatementListStatementPtr stmts = stmt->getStmtList();
   ms->resetLoc(this);
-  if (stmts) stmts->resetLoc(this);
-  ms->init(this, ref.num(), params->params(), stmts, m_hasCallToGetArgs);
+  bool hasCallToGetArgs = m_hasCallToGetArgs.back();
+  m_hasCallToGetArgs.pop_back();
+
+  if (ms->hasYield()) {
+    string closureName = getClosureName();
+    ms->setName(closureName);
+    ms->setPublic();
+
+    Token new_params;
+    prepare_generator(this, stmt, new_params, ms->getYieldCount());
+    StatementListStatementPtr stmts = stmt->getStmtList();
+    if (stmts) stmts->resetLoc(this);
+    ms->init(this, ref.num(), new_params->params(), stmts, hasCallToGetArgs);
+
+    String clsname = cs->name();
+    create_generator(this, out, params, name, closureName, clsname.data(),
+                     &modifiers);
+  } else {
+    StatementListStatementPtr stmts = stmt->getStmtList();
+    if (stmts) stmts->resetLoc(this);
+    ms->init(this, ref.num(), params->params(), stmts, hasCallToGetArgs);
+  }
   cs->addMethod(ms);
 }
 
@@ -1193,10 +1239,18 @@ void Parser::onContinue(Token &out, Token *expr) {
                          expr ? (*expr)->exp() : ExpressionPtr(), false);
 }
 
-void Parser::onReturn(Token &out, Token *expr) {
+void Parser::onReturn(Token &out, Token *expr, bool checkYield /* = true */) {
   out.reset();
   out->stmt() = NEW_STMT(Return, expr ?
                          (*expr)->exp() : ExpressionPtr());
+  if (checkYield && haveFunc()) {
+    FunctionStatementPtr func = peekFunc();
+    if (func->hasYield()) {
+      raise_error("Cannot mix 'return' and 'yield' in the same function: %s",
+                  getMessage().c_str());
+    }
+    func->setHasReturn();
+  }
 }
 
 void Parser::onYield(Token &out, Token *expr) {
@@ -1204,9 +1258,25 @@ void Parser::onYield(Token &out, Token *expr) {
     raise_error("Yield is not enabled: %s", getMessage().c_str());
     return;
   }
+  if (!haveFunc()) {
+    raise_error("Yield cannot only be used inside a function: %s",
+                getMessage().c_str());
+    return;
+  }
+
+  FunctionStatementPtr func = peekFunc();
+  if (func->hasReturn()) {
+    raise_error("Cannot mix 'return' and 'yield' in the same function: %s",
+                getMessage().c_str());
+    return;
+  }
+  int index = func->addYield();
+
+  Token stmts;
+  transform_yield(this, stmts, index, expr);
+
   out.reset();
-  out->stmt() = NEW_STMT(Yield, expr ?
-                         (*expr)->exp() : ExpressionPtr());
+  out->stmt() = stmts->getStmtList();
 }
 
 void Parser::onGlobal(Token &out, Token &expr) {
@@ -1337,11 +1407,24 @@ void Parser::onConstant(Token &out, Token *exprs, Token &var, Token &value) {
 
 void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params,
                        Token &cparams, Token &stmts) {
-  popFuncLocation();
+  Token func, name;
+  onFunction(func, ret, ref, name, params, stmts);
+
+  out.reset();
+  out->exp() = NEW_EXP(Closure, func->stmt()->unsafe_cast<FunctionStatement>(),
+                       cparams->params());
 }
 
 void Parser::onClosureParam(Token &out, Token *params, Token &param,
                             bool ref) {
+  if (params) {
+    out = *params;
+  } else {
+    out.reset();
+  }
+  ParameterPtr p(new Parameter(this, "", param.text(), 0, ref,
+                               ExpressionPtr(), 0));
+  out->params().push_back(p);
 }
 
 void Parser::onLabel(Token &out, Token &label) {

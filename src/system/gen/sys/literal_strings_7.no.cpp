@@ -22,6 +22,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss37217e60("hasConstant");
+StaticString s_sys_ss372c9151("ksort");
+StaticString s_sys_ss37eff1c8("getInnerIterator");
+StaticString s_sys_ss38d893f5("addCompletion");
+StaticString s_sys_ss3983a61c("createElementNS");
 StaticString s_sys_ss3a783e44("getFileName");
 StaticString s_sys_ss3bb8fb3e("createTextNode");
 StaticString s_sys_ss3bd544b6("casByKey");
@@ -52,6 +57,7 @@ StaticString s_sys_ss46e7e29a("fetchcolumn");
 StaticString s_sys_ss46e9d423("schemaValidate");
 StaticString s_sys_ss46eeef5c("handle");
 StaticString s_sys_ss4723e39a("getCurrentLocation");
+StaticString s_sys_ss474ef858("Continuation");
 StaticString s_sys_ss47724c46("setclass");
 StaticString s_sys_ss48139170("addAttribute");
 StaticString s_sys_ss48724660("prepare");
@@ -73,15 +79,10 @@ StaticString s_sys_ss4db221b9("setInfoClass");
 StaticString s_sys_ss4dd3a743("text");
 StaticString s_sys_ss4e21b0f1("rollback");
 StaticString s_sys_ss4e3b07b3("detach");
+StaticString s_sys_ss4e65aff3("\000Continuation\000value", 19);
 StaticString s_sys_ss4efec04e("getResultCode");
 StaticString s_sys_ss4f2f48c7("getMessage");
 StaticString s_sys_ss4fa2c4dd("helpTitle");
-StaticString s_sys_ss500f232f("lasterrormsg");
-StaticString s_sys_ss504bc94d("isInternal");
-StaticString s_sys_ss50652d33("next");
-StaticString s_sys_ss508b1d41("addfunction");
-StaticString s_sys_ss5097084d("setByKey");
-StaticString s_sys_ss50ad79e8("registerXPathNamespace");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

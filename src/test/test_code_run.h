@@ -180,6 +180,8 @@ class TestCodeRun : public TestBase {
   bool TestNowDoc();
   bool TestTernaryShortcut();
   bool TestGoto();
+  bool TestClosure();
+  bool TestYield();
 
   // debugging purpose
   bool TestAdHoc();

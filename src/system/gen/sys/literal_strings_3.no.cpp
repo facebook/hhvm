@@ -22,6 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_sscdbb2d67("getMethod");
 StaticString s_sys_ssce568670("appendByKey");
 StaticString s_sys_ssce80f767("isProtected");
 StaticString s_sys_ssced27431("increment");
@@ -58,6 +59,7 @@ StaticString s_sys_ssd8580167("writeCData");
 StaticString s_sys_ssd8c10a25("__PHP_Incomplete_Class");
 StaticString s_sys_ssd8c7abd7("newInstanceArgs");
 StaticString s_sys_ssd9632345("geterrorcode");
+StaticString s_sys_ssdb381ae8(":");
 StaticString s_sys_ssdc3cbddc("name");
 StaticString s_sys_ssdc6e02c2("Method ");
 StaticString s_sys_ssdc71ce35("fault");
@@ -75,13 +77,12 @@ StaticString s_sys_ssdef8398d("replaceData");
 StaticString s_sys_ssdf34c0b4("isAbstract");
 StaticString s_sys_sse051f235("helpCmds");
 StaticString s_sys_sse09ed13c("createfunction");
+StaticString s_sys_sse0c88471("value");
 StaticString s_sys_sse1ffa7cf("hasMethod");
 StaticString s_sys_sse26c5698("addFile");
 StaticString s_sys_sse27b119d("fgetc");
 StaticString s_sys_sse2be8bf1("endComment");
 StaticString s_sys_sse3783d41("getSubPath");
-StaticString s_sys_sse3f54806("query");
-StaticString s_sys_sse41ca304("addString");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

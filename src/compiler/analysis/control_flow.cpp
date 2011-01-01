@@ -300,7 +300,6 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
             break;
 
           case Statement::KindOfReturnStatement:
-          case Statement::KindOfYieldStatement:
             addEdge(s, AfterConstruct, root(), AfterConstruct);
             break;
 

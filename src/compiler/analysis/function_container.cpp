@@ -254,9 +254,17 @@ void FunctionContainer::outputGetCallInfoHeader(CodeGenerator &cg,
     cg_printf("const char *ss = get_renamed_function(s);\n");
     cg_printf("if (ss != s) { s = ss; hash = -1;};\n");
   }
+  if (!system) {
+    cg_printf("std::string name; const char *id;\n"
+              "if (s[0] == '0' && (id = strchr(s, ':'))) {\n"
+              "  name = string(s, id - s); s = name.c_str(); hash = -1;\n"
+              "  extra = (void*)String(id + 1).toInt64();\n"
+              "}\n"
+             );
+  }
   if (!system && Option::EnableEval == Option::FullEval) {
     cg_printf("if (eval_get_call_info_hook(ci, extra, s, hash)) "
-        "return true;\n");
+              "return true;\n");
   }
 }
 

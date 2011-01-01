@@ -14,27 +14,35 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __YIELD_STATEMENT_H__
-#define __YIELD_STATEMENT_H__
+#ifndef __CLOSURE_EXPRESSION_H__
+#define __CLOSURE_EXPRESSION_H__
 
-#include <compiler/statement/statement.h>
+#include <compiler/expression/expression.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(YieldStatement);
+DECLARE_BOOST_TYPES(ClosureExpression);
+DECLARE_BOOST_TYPES(FunctionStatement);
+DECLARE_BOOST_TYPES(ExpressionList);
 
-class YieldStatement : public Statement {
+class ClosureExpression : public Expression {
 public:
-  YieldStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
+  ClosureExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
+                    FunctionStatementPtr func, ExpressionListPtr vars);
 
-  DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  virtual bool hasRetExp() const { return m_exp; }
-  ExpressionPtr getRetExp() const { return m_exp; }
+  DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
+
+  virtual ConstructPtr getNthKid(int n) const;
+  virtual void setNthKid(int n, ConstructPtr cp);
+  virtual int getKidCount() const;
+
 private:
-  ExpressionPtr m_exp;
+  FunctionStatementPtr m_func;
+  ExpressionListPtr m_vars;
+  ExpressionListPtr m_values;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __YIELD_STATEMENT_H__
+#endif // __CLOSURE_EXPRESSION_H__

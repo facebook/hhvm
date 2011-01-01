@@ -6037,6 +6037,16 @@ Variant ifa_hphp_splfileinfo_isfile(void *extra, int count, INVOKE_FEW_ARGS_IMPL
   CVarRef arg0((a0));
   return (f_hphp_splfileinfo_isfile(arg0));
 }
+Variant i_hphp_get_this(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(hphp_get_this);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("hphp_get_this", 0, 1);
+  return (f_hphp_get_this());
+}
+Variant ifa_hphp_get_this(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("hphp_get_this", 0, 1);
+  return (f_hphp_get_this());
+}
 Variant i_openssl_csr_sign(void *extra, CArrRef params) {
   FUNCTION_INJECTION(openssl_csr_sign);
   int count __attribute__((__unused__)) = params.size();
@@ -16882,6 +16892,22 @@ Variant ifa_openssl_pkcs7_decrypt(void *extra, int count, INVOKE_FEW_ARGS_IMPL_A
   if (count <= 3) return (f_openssl_pkcs7_decrypt(arg0, arg1, arg2));
   CVarRef arg3((a3));
   return (f_openssl_pkcs7_decrypt(arg0, arg1, arg2, arg3));
+}
+Variant i_hphp_object_pointer(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(hphp_object_pointer);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("hphp_object_pointer", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_hphp_object_pointer(arg0));
+  }
+}
+Variant ifa_hphp_object_pointer(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("hphp_object_pointer", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (f_hphp_object_pointer(arg0));
 }
 Variant i_pagelet_server_task_result(void *extra, CArrRef params) {
   FUNCTION_INJECTION(pagelet_server_task_result);
@@ -46008,6 +46034,18 @@ Variant ei_hphp_splfileinfo_isfile(Eval::VariableEnvironment &env, const Eval::F
   if (count != 1) return throw_wrong_arguments("hphp_splfileinfo_isfile", count, 1, 1, 1);
   return (x_hphp_splfileinfo_isfile(a0));
 }
+Variant ei_hphp_get_this(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("hphp_get_this", 0, 1);
+  return (x_hphp_get_this());
+}
 Variant ei_openssl_csr_sign(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -57929,6 +57967,22 @@ Variant ei_openssl_pkcs7_decrypt(Eval::VariableEnvironment &env, const Eval::Fun
   if (count < 3 || count > 4) return throw_wrong_arguments("openssl_pkcs7_decrypt", count, 3, 4, 1);
   if (count <= 3) return (x_openssl_pkcs7_decrypt(a0, a1, a2));
   else return (x_openssl_pkcs7_decrypt(a0, a1, a2, a3));
+}
+Variant ei_hphp_object_pointer(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("hphp_object_pointer", count, 1, 1, 1);
+  return (x_hphp_object_pointer(a0));
 }
 Variant ei_pagelet_server_task_result(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -85198,6 +85252,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3272:
       HASH_INVOKE_FROM_EVAL(0x4CF625DF902F8CC8LL, imap_get_quotaroot);
       break;
+    case 3277:
+      HASH_INVOKE_FROM_EVAL(0x14C550B86A16ACCDLL, hphp_get_this);
+      break;
     case 3282:
       HASH_INVOKE_FROM_EVAL(0x1FD3FB2AB0F48CD2LL, magickgetimagesignature);
       break;
@@ -85260,6 +85317,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3345:
       HASH_INVOKE_FROM_EVAL(0x2D484921B5400D11LL, magickradialblurimage);
+      break;
+    case 3349:
+      HASH_INVOKE_FROM_EVAL(0x1C8D554F57DCAD15LL, hphp_object_pointer);
       break;
     case 3351:
       HASH_INVOKE_FROM_EVAL(0x12BB5E00E714ED17LL, magickgetimagecompose);
@@ -89038,6 +89098,7 @@ CallInfo ci_memcache_add((void*)&i_memcache_add, (void*)&ifa_memcache_add, 5, 0,
 CallInfo ci_magickstereoimage((void*)&i_magickstereoimage, (void*)&ifa_magickstereoimage, 2, 0, 0x0000000000000000LL, (void*)&ei_magickstereoimage);
 CallInfo ci_magickgetimagescene((void*)&i_magickgetimagescene, (void*)&ifa_magickgetimagescene, 1, 0, 0x0000000000000000LL, (void*)&ei_magickgetimagescene);
 CallInfo ci_hphp_splfileinfo_isfile((void*)&i_hphp_splfileinfo_isfile, (void*)&ifa_hphp_splfileinfo_isfile, 1, 0, 0x0000000000000000LL, (void*)&ei_hphp_splfileinfo_isfile);
+CallInfo ci_hphp_get_this((void*)&i_hphp_get_this, (void*)&ifa_hphp_get_this, 0, 0, 0x0000000000000000LL, (void*)&ei_hphp_get_this);
 CallInfo ci_openssl_csr_sign((void*)&i_openssl_csr_sign, (void*)&ifa_openssl_csr_sign, 6, 0, 0x0000000000000000LL, (void*)&ei_openssl_csr_sign);
 CallInfo ci_openssl_pkcs12_export((void*)&i_openssl_pkcs12_export, (void*)&ifa_openssl_pkcs12_export, 5, 0, 0x0000000000000002LL, (void*)&ei_openssl_pkcs12_export);
 CallInfo ci_magickgetquantumdepth((void*)&i_magickgetquantumdepth, (void*)&ifa_magickgetquantumdepth, 0, 0, 0x0000000000000000LL, (void*)&ei_magickgetquantumdepth);
@@ -89613,6 +89674,7 @@ CallInfo ci_ignore_user_abort((void*)&i_ignore_user_abort, (void*)&ifa_ignore_us
 CallInfo ci_imagesetthickness((void*)&i_imagesetthickness, (void*)&ifa_imagesetthickness, 2, 0, 0x0000000000000000LL, (void*)&ei_imagesetthickness);
 CallInfo ci_str_pad((void*)&i_str_pad, (void*)&ifa_str_pad, 4, 0, 0x0000000000000000LL, (void*)&ei_str_pad);
 CallInfo ci_openssl_pkcs7_decrypt((void*)&i_openssl_pkcs7_decrypt, (void*)&ifa_openssl_pkcs7_decrypt, 4, 0, 0x0000000000000000LL, (void*)&ei_openssl_pkcs7_decrypt);
+CallInfo ci_hphp_object_pointer((void*)&i_hphp_object_pointer, (void*)&ifa_hphp_object_pointer, 1, 0, 0x0000000000000000LL, (void*)&ei_hphp_object_pointer);
 CallInfo ci_pagelet_server_task_result((void*)&i_pagelet_server_task_result, (void*)&ifa_pagelet_server_task_result, 3, 0, 0x0000000000000006LL, (void*)&ei_pagelet_server_task_result);
 CallInfo ci_asinh((void*)&i_asinh, (void*)&ifa_asinh, 1, 0, 0x0000000000000000LL, (void*)&ei_asinh);
 CallInfo ci_mailparse_msg_extract_part((void*)&i_mailparse_msg_extract_part, (void*)&ifa_mailparse_msg_extract_part, 3, 0, 0x0000000000000000LL, (void*)&ei_mailparse_msg_extract_part);
@@ -95623,6 +95685,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 3277:
+      HASH_GUARD(0x14C550B86A16ACCDLL, hphp_get_this) {
+        ci = &ci_hphp_get_this;
+        return true;
+      }
+      break;
     case 3282:
       HASH_GUARD(0x1FD3FB2AB0F48CD2LL, magickgetimagesignature) {
         ci = &ci_magickgetimagesignature;
@@ -95752,6 +95820,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3345:
       HASH_GUARD(0x2D484921B5400D11LL, magickradialblurimage) {
         ci = &ci_magickradialblurimage;
+        return true;
+      }
+      break;
+    case 3349:
+      HASH_GUARD(0x1C8D554F57DCAD15LL, hphp_object_pointer) {
+        ci = &ci_hphp_object_pointer;
         return true;
       }
       break;

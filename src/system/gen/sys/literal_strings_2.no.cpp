@@ -71,17 +71,18 @@ StaticString s_sys_ssc8ce68a6("print");
 StaticString s_sys_ssc8d87985("getElementById");
 StaticString s_sys_ssc90e239b("invoke");
 StaticString s_sys_ssc95caa7e("getNamespaces");
+StaticString s_sys_ssc9ae0c06("\000Continuation\000obj", 17);
 StaticString s_sys_ssca0f1ff4("startDTDEntity");
 StaticString s_sys_sscaf1930c("__getlastresponseheaders");
 StaticString s_sys_sscafbef71("getversion");
 StaticString s_sys_sscb20b361("setAttributeNodeNS");
 StaticString s_sys_sscb2328b2("cloneNode");
 StaticString s_sys_sscb34fe23("isnormalized");
+StaticString s_sys_sscbecc3ad("\000Continuation\000index", 19);
 StaticString s_sys_sscca6e52d("getByKey");
 StaticString s_sys_ssccbba71e("getTrace");
 StaticString s_sys_sscd0bfaee("getExtension");
 StaticString s_sys_sscd5dc41e("ReflectionParameter");
-StaticString s_sys_sscdbb2d67("getMethod");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

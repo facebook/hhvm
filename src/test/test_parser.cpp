@@ -60,6 +60,7 @@ bool TestParser::VerifyParser(const char *input, const char *output,
   bool ret = true;
   {
     AnalysisResultPtr ar(new AnalysisResult());
+    Compiler::Parser::Reset();
     StatementListPtr tree = Compiler::Parser::ParseString(input, ar);
     ostringstream code;
     CodeGenerator cg(&code);
@@ -77,6 +78,7 @@ bool TestParser::VerifyParser(const char *input, const char *output,
   }
   {
     std::vector<Eval::StaticStatementPtr> statics;
+    Eval::Parser::Reset();
     Eval::StatementPtr tree = Eval::Parser::ParseString(input, statics);
     ostringstream code;
     tree->dump(code);

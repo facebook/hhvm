@@ -22,6 +22,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ssfb6412d4("): failed to open dir");
+StaticString s_sys_ssfbb3eb52("addUrl");
 StaticString s_sys_ssfc2d4779("getType");
 StaticString s_sys_ssfc63c2bb("ReflectionClass");
 StaticString s_sys_ssfdbe04fa("set");
@@ -58,6 +60,8 @@ StaticString s_sys_ss0e0c542f("appendChild");
 StaticString s_sys_ss0e5b3f43("writeComment");
 StaticString s_sys_ss0eb9302b("addserver");
 StaticString s_sys_ss0ec14ee2("SplObjectStorage");
+StaticString s_sys_ss0f30800a("vars");
+StaticString s_sys_ss0f61bd03("obj");
 StaticString s_sys_ss0f90caf6("getConstant");
 StaticString s_sys_ss0fad9ac4("AppendIterator");
 StaticString s_sys_ss0fc37e03("attributes");
@@ -75,13 +79,10 @@ StaticString s_sys_ss135934b0("getPathInfo");
 StaticString s_sys_ss135b2bb6("lookupPrefix");
 StaticString s_sys_ss13622d08("removeChild");
 StaticString s_sys_ss143f106a("getFrame");
+StaticString s_sys_ss1491baad("label");
 StaticString s_sys_ss14eade34("hasChildNodes");
 StaticString s_sys_ss155366df("message");
 StaticString s_sys_ss15a9d310("fgetcsv");
-StaticString s_sys_ss163bad01("addServer");
-StaticString s_sys_ss164363b4("getPathname");
-StaticString s_sys_ss172df677("deleteByKey");
-StaticString s_sys_ss17c3d085("fullEndElement");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

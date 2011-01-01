@@ -249,7 +249,7 @@ public:
   void onCase(Token &out, Token &cases, Token *cond, Token &stmt);
   void onBreak(Token &out, Token *expr);
   void onContinue(Token &out, Token *expr);
-  void onReturn(Token &out, Token *expr);
+  void onReturn(Token &out, Token *expr, bool checkYield = true);
   void onYield(Token &out, Token *expr);
   void onGlobal(Token &out, Token &expr);
   void onGlobalVar(Token &out, Token *exprs, Token &expr);
@@ -301,7 +301,7 @@ private:
 
   void pushFunc(FunctionStatementPtr fs);
   void popFunc();
-  bool m_hasCallToGetArgs;
+  std::vector<bool> m_hasCallToGetArgs;
 
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);

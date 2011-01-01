@@ -69,6 +69,7 @@ StaticString s_sys_ssac0b0f60("ErrorException");
 StaticString s_sys_ssac2b8cd6("fgets");
 StaticString s_sys_ssac3b59a3("registerPHPFunctions");
 StaticString s_sys_ssac67a3b5("connect");
+StaticString s_sys_ssacf726a1("__cont__");
 StaticString s_sys_ssad18c6ae("create");
 StaticString s_sys_ssad33d956("startElement");
 StaticString s_sys_ssada05422("startPI");

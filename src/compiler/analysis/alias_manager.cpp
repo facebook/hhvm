@@ -30,6 +30,7 @@
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/expression.h>
 #include <compiler/expression/include_expression.h>
+#include <compiler/expression/closure_expression.h>
 #include <compiler/statement/statement.h>
 #include <compiler/statement/statement_list.h>
 #include <compiler/statement/catch_statement.h>
@@ -1092,7 +1093,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
             e->is(Expression::KindOfSimpleVariable) &&
             !e->isThis()) {
           Symbol *s = spc(SimpleVariable, e)->getSymbol();
-          if (s && !s->isParameter()) {
+          if (s && !s->isParameter() && !s->isClosureVar()) {
             rep = e->makeConstant(m_arp, "null");
             Compiler::Error(Compiler::UseUndeclaredVariable, e);
             if (m_variables->getAttribute(VariableTable::ContainsCompact)) {
@@ -1480,7 +1481,6 @@ StatementPtr AliasManager::canonicalizeRecur(StatementPtr s, int &ret) {
     break;
 
   case Statement::KindOfReturnStatement:
-  case Statement::KindOfYieldStatement:
   {
     canonicalizeKid(s, spc(Expression,s->getNthKid(0)), 0);
     killLocals();
@@ -1633,7 +1633,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         SimpleVariablePtr sv(spc(SimpleVariable, e));
         if (Symbol *sym = sv->getSymbol()) {
           if (sv->isThis()) sv->getFunctionScope()->setContainsThis();
-          if (context & Expression::RefValue) {
+          if ((context & Expression::RefValue) || sym->isRefClosureVar()) {
             sym->setReferenced();
           }
           if (!(context & (Expression::AssignmentLHS |
@@ -1695,7 +1695,8 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       spc(SimpleFunctionCall, e)->updateVtFlags();
       break;
     case Expression::KindOfUnaryOpExpression:
-      if (Option::EnableEval > Option::NoEval && spc(UnaryOpExpression, e)->getOp() == T_EVAL) {
+      if (Option::EnableEval > Option::NoEval && spc(UnaryOpExpression, e)->
+          getOp() == T_EVAL) {
         m_variables->setAttribute(VariableTable::ContainsLDynamicVariable);
       }
       break;

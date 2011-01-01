@@ -20,8 +20,9 @@
 
 namespace HPHP {
 
-class MethodSet : public std::set<unsigned int> { };
-class MethodSlot{
+typedef std::set<unsigned int> MethodSet;
+
+class MethodSlot {
   std::string m_name;
   unsigned int m_serialNum; // unique for each method, 0 == error
   unsigned int m_callIndex; // used in calls
@@ -33,8 +34,9 @@ class MethodSlot{
 
   public:
   MethodSlot(const std::string & name, unsigned int serialNum)
-    : m_name(name), m_serialNum(serialNum), m_callIndex(0), m_overloadIndex(0)
-    { }
+      : m_name(name), m_serialNum(serialNum), m_callIndex(0),
+        m_overloadIndex(0), m_coalesces(0) {
+  }
 
   std::string getName() const { return m_name; }
   unsigned int getCallIndex() const { return m_callIndex; }
@@ -43,8 +45,8 @@ class MethodSlot{
   bool isFail() const { return m_callIndex== 0 || m_overloadIndex == 0; }
   std::string runObj() const; // e.g. MethodIndex(2, 3)
   std::string runObjParam() const; // e.g. "MethodIndex(2, 3) /* getId */, "
-  bool operator>(const MethodSlot *y) const {
-     return m_coalesces > y->m_coalesces;
+  bool operator>(const MethodSlot &y) const {
+    return m_coalesces > y.m_coalesces;
   }
 
   static void genMethodSlot(AnalysisResultPtr) ;

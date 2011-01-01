@@ -360,6 +360,10 @@ public:
     m_stmtCloned = stmt;
   }
 
+  void setClosureVars(ExpressionListPtr closureVars) {
+    m_closureVars = closureVars;
+  }
+
   void addCaller(BlockScopePtr caller);
 
   DECLARE_BOOST_TYPES(RefParamInfo);
@@ -438,6 +442,7 @@ private:
   int outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
                                     bool ret, bool constructor, int maxCount);
   ExpressionPtrVec m_retExprsToFix;
+  ExpressionListPtr m_closureVars;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

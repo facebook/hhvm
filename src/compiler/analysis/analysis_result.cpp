@@ -4286,7 +4286,7 @@ ostream& operator<<(ostream & cout, const CallIndexVectSet & civs) {
 
 struct CoalesceOrder {
   bool operator()(const MethodSlot *x, const MethodSlot *y) const {
-    return *x > y;
+    return *x > *y;
   }
 };
 

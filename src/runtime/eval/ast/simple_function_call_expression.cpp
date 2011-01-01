@@ -36,7 +36,29 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   SET_LINE;
   String name(m_name->get(env));
   bool renamed = false;
-  name = get_renamed_function(name, &renamed);
+
+  // handling closure
+  ObjectData *closure = NULL;
+  if (name[0] == '0') {
+    char *id = strchr(name.data(), ':');
+    ASSERT(id);
+    if (id) {
+      int pos = id - name.data();
+      String sid = name.substr(pos + 1);
+      name = name.substr(0, pos);
+      const Function *fs = RequestEvalState::findFunction(name.data());
+      if (fs) {
+        const FunctionStatement *fstmt =
+          dynamic_cast<const FunctionStatement *>(fs);
+        if (fstmt) {
+          closure = (ObjectData*)sid.toInt64();
+          return ref(fstmt->invokeClosure(Object(closure), env, this));
+        }
+      }
+    }
+  } else {
+    name = get_renamed_function(name, &renamed);
+  }
 
   // fast path for interpreted fn
   const Function *fs = RequestEvalState::findFunction(name.data());

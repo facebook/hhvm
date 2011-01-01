@@ -2360,6 +2360,7 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
   int tableSize = Util::roundUpToPowerOfTwo(entries.size() * 2);
   cg_printf(text1, tableSize, entries.size());
   BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
+    if (!f->getPseudoMain()) continue;
     cg_printf("      (const char *)\"%s\", (const char *)&%s%s,\n",
               f->getName().c_str(),
               Option::PseudoMainPrefix,
@@ -2557,6 +2558,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
     cg.printSection("File Invoke Table");
     vector<const char*> entries;
     BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
+      if (!f->getPseudoMain()) continue;
       entries.push_back(f->getName().c_str());
       cg_printf("Variant %s%s(bool incOnce = false, "
                 "LVariableTable* variables = NULL, "
@@ -3276,6 +3278,7 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairVecVec &symbols,
   // pseudomain variables
   names = &symbols[KindOfPseudoMain];
   BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
+    if (!f->getPseudoMain()) continue;
     string name = string("run_") + Option::PseudoMainPrefix +
       f->pseudoMainName();
     names->push_back(pair<string, string>(name, name));

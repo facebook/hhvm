@@ -255,7 +255,7 @@ ExpressionPtr IncludeExpression::postOptimize(AnalysisResultPtr ar) {
       m_depsSet = true;
     }
     FileScopePtr fs = ar->findFileScope(m_include);
-    if (fs) {
+    if (fs && fs->getPseudoMain()) {
       if (!Option::KeepStatementsWithNoEffect) {
         if (ExpressionPtr rep = fs->getEffectiveImpl(ar)) {
           recomputeEffects();
@@ -263,6 +263,8 @@ ExpressionPtr IncludeExpression::postOptimize(AnalysisResultPtr ar) {
         }
       }
       m_exp.reset();
+    } else {
+      m_include = "";
     }
   }
   return ExpressionPtr();

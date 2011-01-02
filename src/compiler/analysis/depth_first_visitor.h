@@ -90,9 +90,8 @@ public:
                          BlockScopeRawPtrQueue &queue) {
     scope->setMark(BlockScope::MarkProcessingDeps);
     const BlockScopeRawPtrVec &deps = scope->getDeps();
-    for (BlockScopeRawPtrVec::const_iterator it = deps.begin(),
-           end = deps.end(); it != end; ++it) {
-      BlockScopeRawPtr dep = *it;
+    for (size_t i = 0; i < deps.size(); i++) {
+      BlockScopeRawPtr dep = deps[i];
       if (dep->getMark() == BlockScope::MarkWaitingInQueue) {
         this->visitDependencies(dep, queue);
       }

@@ -30,10 +30,10 @@ NewObjectExpression::NewObjectExpression(EXPRESSION_ARGS, NamePtr name,
   : FunctionCallExpression(EXPRESSION_PASS, params), m_name(name) {}
 
 Variant NewObjectExpression::eval(VariableEnvironment &env) const {
-  SET_LINE;
   String name(m_name->get(env));
   Object o(create_object(name.data(), Array(), false));
   o->init();
+  SET_LINE;
   o->dynConstructFromEval(env, this);
   return o;
 }

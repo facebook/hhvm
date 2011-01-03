@@ -849,23 +849,6 @@ DefineFunction(
     ),
   ));
 
-DefineFunction(
-  array(
-    'name'   => "fb_urandom",
-    'desc'   => "Return a random string using /dev/urandom.",
-    'flags'  =>  HasDocComment | HipHopSpecific,
-    'return' => array(
-      'type'   => String,
-      'desc'   => "a random string.",
-    ),
-    'args'   => array(
-      array(
-        'name'   => "bytes",
-        'type'   => Int32,
-        'desc'   => "length of the random string to be returned.",
-      ),
-    ),
-  ));
 
 
 ///////////////////////////////////////////////////////////////////////////////

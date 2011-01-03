@@ -903,22 +903,6 @@ Array f_fb_get_flush_stat() {
   return false;
 }
 
-String f_fb_urandom(int bytes) {
-  const char *persistentKey = "urandom";
-  ResourceData *res = g_persistentObjects->get("fb::persistent", persistentKey);
-  File *fh = dynamic_cast<File*>(res);
-  if (!fh) {
-    PlainFile *file = new PlainFile();
-    bool ret = file->open("/dev/urandom", "r");
-    Object obj;
-    if (ret) obj = file;
-    fh = obj.getTyped<File>();
-    if (fh) g_persistentObjects->set("fb::persistent", persistentKey, fh);
-  }
-  if (fh) return fh->read(bytes);
-  return String();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // const index functions
 

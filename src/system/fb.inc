@@ -35,7 +35,6 @@
 "fb_output_compression", T(Boolean), S(0), "new_value", T(Boolean), NULL, NULL, S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Toggles the compression status of HipHop output, if headers have\n * already been sent this may be ignored.\n *\n * @new_value  bool    The new value for the compression state.\n *\n * @return     bool    The old value.\n */", 
 "fb_set_exit_callback", T(Void), S(0), "function", T(Variant), NULL, NULL, S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Set a callback function that is called when php tries to exit.\n *\n * @function   mixed   The callback to invoke. An exception object will be\n *                     passed to the function\n */", 
 "fb_get_flush_stat", T(Array), S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Get stats on flushing the data from server.\n *\n * @return     map     Query result in a format of array('total' => {number\n *                     of total bytes to flush}, 'sent' => {number of bytes\n *                     sent out}, 'time' => {time for flushing in us}).\n */", 
-"fb_urandom", T(String), S(0), "bytes", T(Int32), NULL, NULL, S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Return a random string using /dev/urandom.\n *\n * @bytes      int     length of the random string to be returned.\n *\n * @return     string  a random string.\n */", 
 
 #elif EXT_TYPE == 1
 "FB_UNSERIALIZE_NONSTRING_VALUE", T(Int64),

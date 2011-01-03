@@ -9931,6 +9931,16 @@ bool TestCodeRun::TestRedeclaredClasses() {
        "$x->foo = 2;"
        "var_dump($x);");
 
+  MVCR("<?php "
+       "class A { function fun() { return 'A'; } }"
+       "if (true) { class B {}} else { class B {} }"
+       "class C extends B {"
+       "  public function foo() { $this->out(A::fun()); }"
+       "  public function out($arg) { var_dump($arg); }"
+       "}"
+       "$c = new C();"
+       "$c->foo();");
+
   return true;
 }
 

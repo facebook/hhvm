@@ -836,6 +836,7 @@ TypePtr SimpleFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
 TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                           bool coerce) {
   reset();
+  m_implementedType.reset();
 
   if (m_class) {
     m_class->inferAndCheck(ar, Type::Any, false);
@@ -1004,6 +1005,15 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
     rtype = checkTypesImpl(ar, type, atype, coerce);
     m_voidReturn = m_voidWrapper = false;
+  }
+
+  if (m_valid && !m_className.empty() &&
+      (!m_funcScope || !m_funcScope->isStatic())) {
+    int objCall = checkObjCall(ar);
+
+    if (objCall < 0 || (objCall > 0 && !m_localThis.empty())) {
+      m_implementedType = Type::Variant;
+    }
   }
 
   return rtype;

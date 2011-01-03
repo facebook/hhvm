@@ -531,8 +531,7 @@ void RequestEvalState::GetMethodStaticVariables(Array &arr) {
     }
   }
 
-  for (map<const MethodStatement*, map<string, LVariableTable> >::
-      iterator it = self->m_methodStatics.begin();
+  for (MethodStatics::iterator it = self->m_methodStatics.begin();
       it != self->m_methodStatics.end(); ++it) {
     String mprefix(prefix);
     mprefix += it->first->getClass()->name().c_str();
@@ -656,8 +655,7 @@ void RequestEvalState::fiberInit(RequestEvalState *res,
       Array::operator=(it->second.fiberMarshal(refMap));
   }
   // Method statics
-  for (map<const MethodStatement*, map<string, LVariableTable> >::
-        const_iterator it = res->m_methodStatics.begin();
+  for (MethodStatics::const_iterator it = res->m_methodStatics.begin();
       it != res->m_methodStatics.end(); ++it) {
     for (map<string, LVariableTable>::const_iterator it2 = it->second.begin();
         it2 != it->second.end(); ++it2) {
@@ -742,8 +740,7 @@ void RequestEvalState::fiberExit(RequestEvalState *res,
                      default_strategy);
   }
   // Method statics
-  for (map<const MethodStatement*, map<string, LVariableTable> >::
-        const_iterator it = res->m_methodStatics.begin();
+  for (MethodStatics::const_iterator it = res->m_methodStatics.begin();
       it != res->m_methodStatics.end(); ++it) {
     for (map<string, LVariableTable>::const_iterator it2 = it->second.begin();
         it2 != it->second.end(); ++it2) {

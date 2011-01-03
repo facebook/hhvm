@@ -196,8 +196,9 @@ private:
   StringIMap<ClassEvalState> m_classes;
   hphp_const_char_imap<const FunctionStatement*> m_functions;
   std::map<const FunctionStatement*, LVariableTable> m_functionStatics;
-  std::map<const MethodStatement*, std::map<std::string, LVariableTable> >
-    m_methodStatics;
+  typedef std::map<const MethodStatement*,
+    std::map<std::string, LVariableTable, string_lessi> > MethodStatics;
+  MethodStatics m_methodStatics;
   Array m_constants;
   std::map<std::string, SmartPtr<EvalConstantInfo> > m_constantInfos;
   std::map<std::string, SmartPtr<EvalMethodInfo> > m_methodInfos;

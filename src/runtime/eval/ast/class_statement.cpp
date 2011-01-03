@@ -508,8 +508,9 @@ void ClassStatement::dump(std::ostream &out) const {
   if (!m_constants.empty()) {
     out << "const ";
     bool first = true;
-    for (StringMap<ExpressionPtr>::const_iterator iter = m_constants.begin();
-         iter != m_constants.end(); ++iter) {
+    for (unsigned i = 0; i < m_constantNames.size(); i++) {
+      StringMap<ExpressionPtr>::const_iterator iter =
+        m_constants.find(m_constantNames[i]);
       if (first) {
         first = false;
       } else {

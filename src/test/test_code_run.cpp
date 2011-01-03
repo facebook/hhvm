@@ -13130,6 +13130,10 @@ bool TestCodeRun::TestFile() {
       "fseek($output, 0);"
       "$bytes = fread($output, 1024);"
       "print \"From file, using Maxlen -1: <\".serialize($bytes).\">.\\n\";");
+  MVCR("<?php "
+      "mkdir('test/tmp_dir');"
+      "print_r(glob('test/tmp_dir/*'));"
+      "rmdir('test/tmp_dir');");
   return true;
 }
 

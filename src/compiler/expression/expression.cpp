@@ -992,8 +992,9 @@ void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (ref) cg_printf(")");
   } else {
     bool linemap = outputLineMap(cg, ar);
+    if (linemap) cg_printf("(");
     outputCPPInternal(cg, ar);
-    if (linemap) cg_printf(")");
+    if (linemap) cg_printf("))");
   }
 
   m_implementedType = it;

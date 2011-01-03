@@ -74,4 +74,30 @@ int Statement::getSilencerCount() {
   return m_silencerCountMax;
 }
 
+bool Statement::hasReachableLabel() const {
+  switch (getKindOf()) {
+    case KindOfMethodStatement:
+    case KindOfFunctionStatement:
+    case KindOfClassStatement:
+    case KindOfInterfaceStatement:
+      // dont recur into declarations
+      return false;
+    case KindOfForStatement:
+    case KindOfForEachStatement:
+    case KindOfWhileStatement:
+    case KindOfDoStatement:
+      // a label inside a loop cant be reached from outside the loop
+      return false;
+    case KindOfLabelStatement:
+      return true;
+    default:
+      break;
+  }
+  for (int i = getKidCount(); i--; ) {
+    StatementPtr child(getNthStmt(i));
+    if (child && child->hasReachableLabel()) return true;
+  }
+  return false;
+}
+
 

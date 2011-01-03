@@ -64,6 +64,17 @@ int Construct::getChildrenEffects() const {
   for (int i = getKidCount(); i--; ) {
     ConstructPtr child = getNthKid(i);
     if (child) {
+      if (StatementPtr s = dynamic_pointer_cast<Statement>(child)) {
+        switch (s->getKindOf()) {
+          case Statement::KindOfMethodStatement:
+          case Statement::KindOfFunctionStatement:
+          case Statement::KindOfClassStatement:
+          case Statement::KindOfInterfaceStatement:
+            continue;
+          default:
+            break;
+        }
+      }
       childrenEffects |= child->getContainedEffects();
       if ((childrenEffects & UnknownEffect) == UnknownEffect) {
         break;
@@ -71,14 +82,6 @@ int Construct::getChildrenEffects() const {
     }
   }
   return childrenEffects;
-}
-
-bool Construct::hasLabel() const {
-  for (int i = getKidCount(); i--; ) {
-    ConstructPtr child = getNthKid(i);
-    if (child && child->hasLabel()) return true;
-  }
-  return false;
 }
 
 int Construct::getContainedEffects() const {

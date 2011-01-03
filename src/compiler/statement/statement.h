@@ -99,8 +99,8 @@ public:
    */
   virtual std::string getName() const { return "";}
 
-  StatementPtr getNthStmt(int n) {
-    return boost::static_pointer_cast<Statement>(getNthKid(n));
+  StatementPtr getNthStmt(int n) const {
+    return boost::dynamic_pointer_cast<Statement>(getNthKid(n));
   }
 
   virtual void analyzeProgram(AnalysisResultPtr ar);
@@ -127,6 +127,8 @@ public:
    * Called when types need to be inferred inside this statement.
    */
   virtual void inferTypes(AnalysisResultPtr ar) = 0;
+
+  bool hasReachableLabel() const;
 
   virtual bool hasDecl() const { return false; }
   virtual bool hasImpl() const { return hasEffect(); }

@@ -353,7 +353,7 @@ StatementPtr StatementList::preOptimize(AnalysisResultPtr ar) {
             removeElement(i--);
             changed = true;
           }
-        } else if (s->hasLabel()) {
+        } else if (s->hasReachableLabel()) {
           del = false;
         }
       }

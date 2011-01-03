@@ -30,8 +30,6 @@ public:
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
-  virtual bool hasLabel() const { return true;}
-
 private:
   std::string m_label;
 };

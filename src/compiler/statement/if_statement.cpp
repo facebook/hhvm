@@ -95,7 +95,7 @@ StatementPtr IfStatement::preOptimize(AnalysisResultPtr ar) {
 
   // we cannot optimize away the code inside if statement, because
   // there may be a goto that goes into if statement.
-  if (hasLabel()) {
+  if (hasReachableLabel()) {
     return StatementPtr();
   }
 
@@ -168,7 +168,7 @@ StatementPtr IfStatement::preOptimize(AnalysisResultPtr ar) {
 StatementPtr IfStatement::postOptimize(AnalysisResultPtr ar) {
   // we cannot optimize away the code inside if statement, because
   // there may be a goto that goes into if statement.
-  if (hasLabel()) {
+  if (hasReachableLabel()) {
     return StatementPtr();
   }
 

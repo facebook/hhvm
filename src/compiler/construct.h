@@ -108,8 +108,6 @@ public:
   bool hasEffect() const { return getContainedEffects() != NoEffect;}
   virtual bool kidUnused(int i) const { return false; }
 
-  virtual bool hasLabel() const;
-
   template<typename T>
   static boost::shared_ptr<T> Clone(boost::shared_ptr<T> constr) {
     if (constr) {

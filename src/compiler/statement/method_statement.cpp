@@ -280,7 +280,19 @@ void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
           funcScope->setOverriding(Type::Variant, Type::Variant);
         }
       }
+		}
+    
+		if (!funcScope->isStatic() && getClassScope() &&
+        funcScope->getVariables()->
+        getAttribute(VariableTable::ContainsDynamicVariable)) {
+      // Add this to variable table if we'll need it in a lookup table
+      // Use object because there's no point to specializing, just makes
+      // code gen harder when dealing with redeclared classes.
+      TypePtr tp(Type::Object);
+      funcScope->getVariables()->add("this", tp, true, ar, shared_from_this(),
+                                     ModifierExpressionPtr());
     }
+
     FunctionScope::RecordRefParamInfo(m_name, funcScope);
   }
 }

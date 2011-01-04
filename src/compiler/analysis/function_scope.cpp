@@ -58,6 +58,7 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
       m_magicMethod(false), m_system(false), m_inlineable(false), m_sep(false),
       m_containsThis(false), m_nrvoFix(true),
       m_inlineAsExpr(false), m_inlineSameContext(false),
+      m_contextSensitive(false),
       m_directInvoke(false), m_inlining(false),
       m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0) {
   bool canInline = true;
@@ -142,6 +143,7 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
       m_magicMethod(false), m_system(true), m_inlineable(false), m_sep(false),
       m_containsThis(false), m_nrvoFix(true),
       m_inlineAsExpr(false), m_inlineSameContext(false),
+      m_contextSensitive(false),
       m_directInvoke(false), m_inlining(false),
       m_redeclaring(-1), m_inlineIndex(0), m_optFunction(0) {
   m_dynamic = Option::IsDynamicFunction(method, m_name);

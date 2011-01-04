@@ -39,8 +39,8 @@ ArrayIter::ArrayIter(CArrRef array)
 }
 
 ArrayIter::~ArrayIter() {
-  if (m_data) {
-    m_data->decRefCount();
+  if (m_data && m_data->decRefCount() == 0) {
+    const_cast<ArrayData*>(m_data)->release();
   }
 }
 
@@ -121,7 +121,9 @@ MutableArrayIter::~MutableArrayIter() {
     ASSERT(m_fp.container == NULL);
   }
   // unprotect the data
-  if (m_data && m_data->decRefCount() == 0) m_data->release();
+  if (m_data && m_data->decRefCount() == 0) {
+    m_data->release();
+  }
 }
 
 bool MutableArrayIter::advance() {

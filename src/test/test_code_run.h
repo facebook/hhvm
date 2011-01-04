@@ -181,6 +181,9 @@ class TestCodeRun : public TestBase {
   bool TestTernaryShortcut();
   bool TestGoto();
   bool TestClosure();
+  bool TestNamespace();
+
+  // HipHop specific
   bool TestYield();
 
   // debugging purpose

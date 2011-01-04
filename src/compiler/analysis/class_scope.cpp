@@ -522,7 +522,8 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
   cg_printf("(const char *)0x%04X, \"%s\", \"%s\", \"%s\", (const char *)%d, "
             "(const char *)%d,\n", attribute,
-            getOriginalName().c_str(), parent.c_str(),
+            cg.escapeLabel(getOriginalName()).c_str(),
+            cg.escapeLabel(parent).c_str(),
             m_stmt ? m_stmt->getLocation()->file : "",
             m_stmt ? m_stmt->getLocation()->line0 : 0,
             m_stmt ? m_stmt->getLocation()->line1 : 0);
@@ -542,7 +543,7 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
     } else {
       base = m_bases[i];
     }
-    cg_printf("\"%s\", ", base.c_str());
+    cg_printf("\"%s\", ", cg.escapeLabel(base).c_str());
   }
   cg_printf("NULL,\n");
 

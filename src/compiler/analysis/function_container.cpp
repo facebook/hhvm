@@ -440,7 +440,7 @@ void FunctionContainer::outputCPPCodeInfoTable(CodeGenerator &cg,
       functions->find(name);
     ASSERT(iterFuncs != functions->end());
     cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
-                hash_string_i(name), name);
+                   hash_string_i(name), cg.escapeLabel(name).c_str());
     if (iterFuncs->second[0]->isRedeclaring()) {
       string lname(cg.formatLabel(name));
       cg_printf("ci = g->GCI(%s);\n", lname.c_str());

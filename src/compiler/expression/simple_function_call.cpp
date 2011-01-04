@@ -204,7 +204,16 @@ void SimpleFunctionCall::setupScopes(AnalysisResultPtr ar) {
   FunctionScopePtr func;
   if (!m_class && m_className.empty()) {
     if (!m_dynamicInvoke) {
+      bool namespaced = (m_name[0] == '\\');
+      if (namespaced) {
+        m_name = m_name.substr(1);
+      }
       func = ar->findFunction(m_name);
+      if (!func && namespaced) {
+        int pos = m_name.rfind('\\');
+        m_name = m_name.substr(pos + 1);
+        func = ar->findFunction(m_name);
+      }
     }
   } else {
     ClassScopePtr cls = resolveClass();

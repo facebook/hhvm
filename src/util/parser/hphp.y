@@ -126,6 +126,27 @@ static void scalar_null(Parser *_p, Token &out) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// converting constant declartion to "define(name, value);"
+
+static void on_constant(Parser *_p, Token &out, Token *stmts,
+                        Token &name, Token &value) {
+  Token sname;   _p->onScalar(sname, T_CONSTANT_ENCAPSED_STRING, name);
+
+  Token fname;   fname.setText("define");
+  Token params1; _p->onCallParam(params1, NULL, sname, 0);
+  Token params2; _p->onCallParam(params2, &params1, value, 0);
+  Token call;    _p->onCall(call, 0, fname, params2, 0);
+  Token scall;   _p->onExpStatement(scall, call);
+
+  Token stmts0;
+  if (!stmts) {
+    _p->onStatementListStart(stmts0);
+    stmts = &stmts0;
+  }
+  _p->addStatement(out, *stmts, scall);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // continuation transformations
 
 void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
@@ -788,30 +809,33 @@ top_statement_list:
   |                                    { _p->onStatementListStart($$);}
 ;
 top_statement:
-    statement                          { $$ = $1;}
-  | function_declaration_statement     { $$ = $1;}
-  | class_declaration_statement        { $$ = $1;}
+    statement                          { _p->nns($1.num() == T_DECLARE);
+                                         $$ = $1;}
+  | function_declaration_statement     { _p->nns(); $$ = $1;}
+  | class_declaration_statement        { _p->nns(); $$ = $1;}
   | T_HALT_COMPILER '(' ')' ';'        { $$.reset();}
-  | T_NAMESPACE namespace_name ';'     { _p->onNamespaceStart($$, $2);}
-  | T_NAMESPACE namespace_name '{'
-    top_statement_list '}'             { _p->onNamespace($$,&$2,$4);}
-  | T_NAMESPACE '{'
-    top_statement_list '}'             { _p->onNamespace($$,  0,$3);}
-  | T_USE use_declarations ';'         { $$ = $2;}
-  | constant_declaration ';'           { $$ = $1;}
+  | T_NAMESPACE namespace_name ';'     { _p->onNamespaceStart($2.text());
+                                         $$.reset();}
+  | T_NAMESPACE namespace_name '{'     { _p->onNamespaceStart($2.text());}
+    top_statement_list '}'             { _p->onNamespaceEnd(); $$ = $5;}
+  | T_NAMESPACE '{'                    { _p->onNamespaceStart("");}
+    top_statement_list '}'             { _p->onNamespaceEnd(); $$ = $4;}
+  | T_USE use_declarations ';'         { _p->nns(); $$.reset();}
+  | constant_declaration ';'           { _p->nns();
+                                         _p->finishStatement($$, $1); $$ = 1;}
 ;
 
 use_declarations:
     use_declarations ','
-    use_declaration                    { _p->onUseNamespaces($$,&$1,$3);}
-  | use_declaration                    { _p->onUseNamespaces($$,  0,$1);}
+    use_declaration                    { }
+  | use_declaration                    { }
 ;
 use_declaration:
-    namespace_name                     { _p->onUseNamespace($$,$1,  0,0);}
-  | namespace_name T_AS T_STRING       { _p->onUseNamespace($$,$1,&$3,0);}
-  | T_NS_SEPARATOR namespace_name      { _p->onUseNamespace($$,$1,  0,1);}
+    namespace_name                     { _p->onUse($1.text(),"");}
+  | T_NS_SEPARATOR namespace_name      { _p->onUse($1.text(),"");}
+  | namespace_name T_AS T_STRING       { _p->onUse($1.text(),$3.text());}
   | T_NS_SEPARATOR namespace_name
-    T_AS T_STRING                      { _p->onUseNamespace($$,$1,&$3,1);}
+    T_AS T_STRING                      { _p->onUse($1.text(),$3.text());}
 ;
 namespace_name:
     T_STRING                           { $$ = $1;}
@@ -819,15 +843,25 @@ namespace_name:
     T_STRING                           { $$ = $1 + $2 + $3;}
 ;
 namespace_string:
-    namespace_name                     { $$ = $1;}
-  | T_NS_SEPARATOR namespace_name      { $$ = $1 + $2;}
+    namespace_name                     { $$ = $1;
+                                         $$.setText(_p->resolve($$.text(),0));}
+  | T_NS_SEPARATOR namespace_name      { $$ = $2;}
   | T_NAMESPACE T_NS_SEPARATOR
-    namespace_name                     { $$ = $2 + $3;}
+    namespace_name                     { $$.setText(_p->nsDecl($3.text()));}
+;
+class_namespace_string:
+    namespace_name                     { $$ = $1;
+                                         $$.setText(_p->resolve($$.text(),1));}
+  | T_NS_SEPARATOR namespace_name      { $$ = $2;}
+  | T_NAMESPACE T_NS_SEPARATOR
+    namespace_name                     { $$.setText(_p->nsDecl($3.text()));}
 ;
 constant_declaration:
     constant_declaration ','
-    T_STRING '=' static_scalar         { _p->onConstant($$,&$1,$3,$5);}
-  | T_CONST T_STRING '=' static_scalar { _p->onConstant($$,  0,$2,$4);}
+    T_STRING '=' static_scalar         { $3.setText(_p->nsDecl($3.text()));
+                                         on_constant(_p,$$,&$1,$3,$5);}
+  | T_CONST T_STRING '=' static_scalar { $2.setText(_p->nsDecl($2.text()));
+                                         on_constant(_p,$$,  0,$2,$4);}
 ;
 
 inner_statement_list:
@@ -914,7 +948,7 @@ statement_without_expr:
                                          _p->onForEach($$,$3,$5,$6,$9);}
 
   | T_DECLARE '(' declare_list ')'
-    declare_statement                  { _p->onBlock($$, $5);}
+    declare_statement                  { _p->onBlock($$, $5); $$ = T_DECLARE;}
 
   | T_TRY '{'                          { _p->pushLabelScope();}
     inner_statement_list '}'           { _p->popLabelScope();}
@@ -957,7 +991,8 @@ function_loc:
 ;
 function_declaration_statement:
     type_decl function_loc
-    is_reference T_STRING              { _p->onFunctionStart($4);
+    is_reference T_STRING              { $4.setText(_p->nsDecl($4.text()));
+                                         _p->onFunctionStart($4);
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
     '{' inner_statement_list '}'       { _p->popLabelInfo();
@@ -966,12 +1001,14 @@ function_declaration_statement:
 
 class_declaration_statement:
     class_entry_type T_STRING
-    extends_from                       { _p->onClassStart($1.num(), $2, &$3);}
+    extends_from                       { $2.setText(_p->nsDecl($2.text()));
+                                         _p->onClassStart($1.num(), $2, &$3);}
     implements_list '{'
     class_statement_list '}'           { _p->onClass($$,$1,$2,$3,$5,$7);}
 
   | class_entry_type T_XHP_LABEL
     extends_from                       { $2.xhpLabel();
+                                         $2.setText(_p->nsDecl($2.text()));
                                          _p->onClassStart($1.num(), $2, &$3);}
     implements_list '{'                { _p->scanner().xhpStatement();}
     xhp_class_statement_list '}'       { xhp_collect_attributes(_p, $9, $8);
@@ -979,7 +1016,8 @@ class_declaration_statement:
                                          _p->xhpResetAttributes();
                                          _p->scanner().xhpReset();}
 
-  | T_INTERFACE T_STRING               { _p->onClassStart(T_INTERFACE, $2, 0);}
+  | T_INTERFACE T_STRING               { $2.setText(_p->nsDecl($2.text()));
+                                         _p->onClassStart(T_INTERFACE, $2, 0);}
     interface_extends_list '{'
     class_statement_list '}'           { _p->onInterface($$,$2,$4,$6);}
 ;
@@ -1599,11 +1637,11 @@ static_class_name:
                                          Parser::StaticClassExprName);}
 ;
 fully_qualified_class_name:
-    namespace_string                   { $$ = $1;}
+    class_namespace_string             { $$ = $1;}
   | T_XHP_LABEL                        { $1.xhpLabel(); $$ = $1;}
 ;
 class_name_reference:
-    T_STRING                           { _p->onName($$,$1,Parser::StringName);}
+    class_namespace_string             { _p->onName($$,$1,Parser::StringName);}
   | T_XHP_LABEL                        { $1.xhpLabel();
                                          _p->onName($$,$1,Parser::StringName);}
   | dynamic_class_name_reference       { _p->onName($$,$1,Parser::ExprName);}
@@ -1645,6 +1683,7 @@ common_scalar:
   | T_CLASS_C                          { _p->onScalar($$, T_CLASS_C,  $1);}
   | T_METHOD_C                         { _p->onScalar($$, T_METHOD_C, $1);}
   | T_FUNC_C                           { _p->onScalar($$, T_FUNC_C,   $1);}
+  | T_NS_C                             { _p->onScalar($$, T_NS_C,  $1);}
 ;
 static_scalar:
     common_scalar                      { $$ = $1;}

@@ -265,12 +265,6 @@ public:
                Token &stmt);
   void onThrow(Token &out, Token &expr);
 
-  void onNamespaceStart(Token &out, Token &ns);
-  void onNamespace(Token &out, Token *ns, Token &stmts);
-  void onUseNamespaces(Token &out, Token *uses, Token &use);
-  void onUseNamespace(Token &out, Token &ns, Token *as, bool absolute);
-  void onConstant(Token &out, Token *exprs, Token &var, Token &value);
-
   void onClosure(Token &out, Token &ret, Token &ref, Token &params,
                  Token &cparams, Token &stmts);
   void onClosureParam(Token &out, Token *params, Token &param, bool ref);

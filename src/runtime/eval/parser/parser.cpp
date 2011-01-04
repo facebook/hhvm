@@ -640,6 +640,11 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
     type = T_STRING;
     stext = haveClass() ? peekClass()->name() : "";
     break;
+  case T_NS_C:
+    subtype = type;
+    type = T_STRING;
+    stext = m_namespace;
+    break;
   case T_METHOD_C:
     subtype = type;
     type = T_STRING;
@@ -1388,21 +1393,6 @@ void Parser::onCatch(Token &out, Token &catches, Token &className, Token &var,
 void Parser::onThrow(Token &out, Token &expr) {
   out.reset();
   out->stmt() = NEW_STMT(Throw, expr->exp());
-}
-
-void Parser::onNamespaceStart(Token &out, Token &ns) {
-}
-
-void Parser::onNamespace(Token &out, Token *ns, Token &stmts) {
-}
-
-void Parser::onUseNamespaces(Token &out, Token *uses, Token &use) {
-}
-
-void Parser::onUseNamespace(Token &out, Token &ns, Token *as, bool absolute) {
-}
-
-void Parser::onConstant(Token &out, Token *exprs, Token &var, Token &value) {
 }
 
 void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params,

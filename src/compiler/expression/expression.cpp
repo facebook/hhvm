@@ -203,6 +203,9 @@ bool Expression::IsIdentifier(const string &value) {
     unsigned char ch = value[i];
     if (((ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') &&
          (ch < '0' || ch > '9') && ch < '\x7f' && ch != '_')) {
+      if (ch == '\\' && i < value.size() - 1 && value[i+1] != '\\') {
+        continue;
+      }
       return false;
     }
   }

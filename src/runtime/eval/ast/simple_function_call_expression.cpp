@@ -35,6 +35,7 @@ SimpleFunctionCallExpression::SimpleFunctionCallExpression
 Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   SET_LINE;
   String name(m_name->get(env));
+  String originalName = name;
   bool renamed = false;
 
   // handling closure
@@ -58,16 +59,30 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
     }
   } else {
     name = get_renamed_function(name, &renamed);
+    if (name[0] == '\\') {
+      name = name.substr(1); // try namespaced function first
+      renamed = true;
+    }
   }
 
   // fast path for interpreted fn
   const Function *fs = RequestEvalState::findFunction(name.data());
   if (fs) {
     return ref(fs->directInvoke(env, this));
-  } else {
-    return ref(invoke_from_eval(name.data(), env, this,
-                                renamed ? -1 : m_name->hash()));
   }
+
+  if (originalName[0] == '\\') {
+    name = originalName.lastToken('\\');
+    name = get_renamed_function(name, &renamed);
+    renamed = true;
+    fs = RequestEvalState::findFunction(name.data());
+    if (fs) {
+      return ref(fs->directInvoke(env, this));
+    }
+  }
+
+  return ref(invoke_from_eval(name.data(), env, this,
+                              renamed ? -1 : m_name->hash()));
 }
 
 void SimpleFunctionCallExpression::dump(std::ostream &out) const {

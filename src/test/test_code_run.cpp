@@ -501,6 +501,9 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestTernaryShortcut);
   RUN_TEST(TestGoto);
   RUN_TEST(TestClosure);
+  RUN_TEST(TestNamespace);
+
+  // HipHop features
   RUN_TEST(TestYield);
 
   RUN_TEST(TestAdHoc);
@@ -15722,6 +15725,149 @@ bool TestCodeRun::TestClosure() {
 
         "string(3) \"Foo\"\n"
         "string(9) \"{closure}\"\n");
+
+  return true;
+}
+
+bool TestCodeRun::TestNamespace() {
+  MVCRO("<?php\n"
+        "namespace my\\name;\n"
+        "class MyClass {}\n"
+        "function myfunction() {}\n"
+        "const MYCONST = 123;\n"
+        "\n"
+        "$a = new MyClass; var_dump(get_class($a));\n"
+        "$c = new \\my\\name\\MyClass; var_dump(get_class($a));\n"
+        "$a = strlen('hi'); var_dump($a);\n"
+        "$d = namespace\\MYCONST; var_dump($d);\n"
+        "$d = __NAMESPACE__ . '\\MYCONST'; var_dump(constant($d));\n"
+        "var_dump(defined('MYCONST'));\n",
+
+        "string(15) \"my\\name\\MyClass\"\n"
+        "string(15) \"my\\name\\MyClass\"\n"
+        "int(2)\n"
+        "int(123)\n"
+        "int(123)\n"
+        "bool(false)\n"
+       );
+
+  MVCRO("<?php\n"
+        "namespace foo\\baz {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace bar\\baz {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace {\n"
+        "  use foo\\baz as baz;\n"
+        "  baz\\foo();\n"
+        "}\n",
+
+        "string(7) \"foo\\baz\"\n");
+
+  MVCRO("<?php\n"
+        "namespace foo\\baz {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace bar\\baz {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace bar {\n"
+        "  use foo\\baz as baz;\n"
+        "  baz\\foo();\n"
+        "}\n",
+
+        "string(7) \"foo\\baz\"\n");
+
+  MVCRO("<?php\n"
+        "  namespace foo\\baz {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace bar\\baz {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}}\n"
+        "namespace bar {\n"
+        "  baz\\foo();\n"
+        "}\n",
+
+        "string(7) \"bar\\baz\"\n");
+
+  MVCRO("<?php\n"
+        "namespace {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace B {\n"
+        "}\n"
+        "namespace B {\n"
+        "  foo();\n"
+        "}\n",
+
+        "string(0) \"\"\n");
+
+  MVCRO("<?php\n"
+        "namespace {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace B {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace B {\n"
+        "  foo();\n"
+        "}\n",
+
+        "string(1) \"B\"\n");
+
+  MVCRO("<?php\n"
+        "namespace {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace B {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace B {\n"
+        "  \\B\\foo();\n"
+        "}\n",
+
+        "string(1) \"B\"\n");
+
+  MVCRO("<?php\n"
+        "namespace {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace B {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace B {\n"
+        "  \\foo();\n"
+        "}\n",
+
+        "string(0) \"\"\n");
+
+  MVCRO("<?php\n"
+        "namespace {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace B {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace B {\n"
+        "  $a = 'foo';\n"
+        "  $a();\n"
+        "}\n",
+
+        "string(0) \"\"\n");
+
+  MVCRO("<?php\n"
+        "namespace {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace B {\n"
+        "  function foo() { var_dump(__NAMESPACE__);}\n"
+        "}\n"
+        "namespace B {\n"
+        "  call_user_func('foo');\n"
+        "}\n",
+
+        "string(0) \"\"\n");
 
   return true;
 }

@@ -246,10 +246,11 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   // Now we start to break down DECLARE_CLASS into lines of code that could
   // be generated differently...
 
-  cg_printf("DECLARE_CLASS_COMMON(%s, %s)\n", clsName, originalName);
+  cg_printf("DECLARE_CLASS_COMMON(%s, %s)\n", clsName,
+            cg.escapeLabel(originalName).c_str());
   cg_printf("DECLARE_INVOKE_EX%s(%s, %s, %s)\n",
-      Option::UseMethodIndex ? "WITH_INDEX" : "", clsName, originalName,
-      parent);
+      Option::UseMethodIndex ? "WITH_INDEX" : "", clsName,
+            cg.escapeLabel(originalName).c_str(), parent);
 
   cg.printSection("DECLARE_STATIC_PROP_OPS");
   cg_printf("public:\n");

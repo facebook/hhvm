@@ -123,6 +123,11 @@ public:
                 bool nullable = false) const;
 
   /**
+   * Returns the last token if string is delimited by the specified.
+   */
+  String lastToken(char delimiter);
+
+  /**
    * Find a character or a substring and return its position. "pos" has to be
    * within current string and it's the start point for searching.
    */

@@ -147,7 +147,7 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
 }
 
 <ST_IN_SCRIPTING>"::"                { STEPPOS;return T_PAAMAYIM_NEKUDOTAYIM;}
-<ST_IN_SCRIPTING>"\\"                { STEPPOS;return T_NS_SEPARATOR;}
+<ST_IN_SCRIPTING>"\\"                { SETTOKEN;return T_NS_SEPARATOR;}
 <ST_IN_SCRIPTING>"new"               { SETTOKEN;return T_NEW;}
 <ST_IN_SCRIPTING>"clone"             { SETTOKEN;return T_CLONE;}
 <ST_IN_SCRIPTING>"var"               { SETTOKEN;return T_VAR;}

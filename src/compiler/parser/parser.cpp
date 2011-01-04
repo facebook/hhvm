@@ -469,6 +469,9 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
   case T_CLASS_C:
     exp = NEW_EXP(ScalarExpression, type, m_clsName);
     break;
+  case T_NS_C:
+    exp = NEW_EXP(ScalarExpression, type, m_namespace);
+    break;
   case T_CONSTANT_ENCAPSED_STRING:
     exp = NEW_EXP(ScalarExpression, type, scalar->text(), true);
     break;
@@ -1112,21 +1115,6 @@ void Parser::onCatch(Token &out, Token &catches, Token &className, Token &var,
 
 void Parser::onThrow(Token &out, Token &expr) {
   out->stmt = NEW_STMT(ThrowStatement, expr->exp);
-}
-
-void Parser::onNamespaceStart(Token &out, Token &ns) {
-}
-
-void Parser::onNamespace(Token &out, Token *ns, Token &stmts) {
-}
-
-void Parser::onUseNamespaces(Token &out, Token *uses, Token &use) {
-}
-
-void Parser::onUseNamespace(Token &out, Token &ns, Token *as, bool absolute) {
-}
-
-void Parser::onConstant(Token &out, Token *exprs, Token &var, Token &value) {
 }
 
 void Parser::onClosure(Token &out, Token &ret, Token &ref, Token &params,

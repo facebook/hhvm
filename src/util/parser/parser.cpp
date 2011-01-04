@@ -34,7 +34,7 @@ void ParserBase::Reset() {
 ///////////////////////////////////////////////////////////////////////////////
 
 ParserBase::ParserBase(Scanner &scanner, const char *fileName)
-    : m_scanner(scanner), m_fileName(fileName) {
+    : m_scanner(scanner), m_fileName(fileName), m_nsState(SeenNothing) {
   if (m_fileName == NULL) m_fileName = "";
 
   // global scope
@@ -133,7 +133,8 @@ void ParserBase::addLabel(const std::string &label) {
   ASSERT(!m_labelInfos.empty());
   LabelInfo &info = m_labelInfos.back();
   if (info.labels.find(label) != info.labels.end()) {
-    error("Label '%s' already defined", label.c_str());
+    error("Label '%s' already defined: %s", label.c_str(),
+          getMessage().c_str());
     return;
   }
   ASSERT(!info.scopes.empty());
@@ -181,6 +182,95 @@ void ParserBase::popLabelInfo() {
     }
   }
   m_labelInfos.pop_back();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// namespace support
+
+void ParserBase::nns(bool declare /* = false */) {
+  if (m_nsState == SeenNamespaceStatement) {
+    error("No code may exist outside of namespace {}: %s",
+          getMessage().c_str());
+    return;
+  }
+  if (m_nsState == SeenNothing && !declare) {
+    m_nsState = SeenNonNamespaceStatement;
+  }
+}
+
+void ParserBase::onNamespaceStart(const std::string &ns) {
+  if (m_nsState == SeenNonNamespaceStatement) {
+    error("Namespace declaration statement has to be the very first "
+          "statement in the script: %s", getMessage().c_str());
+    return;
+  }
+  m_nsState = InsideNamespace;
+
+  m_namespace = ns;
+}
+
+void ParserBase::onNamespaceEnd() {
+  m_nsState = SeenNamespaceStatement;
+}
+
+void ParserBase::onUse(const std::string &ns, const std::string &as) {
+  if (m_aliases.find(as) != m_aliases.end()) {
+    error("Cannot use %s as %s because the name is already in use: %s",
+          ns.c_str(), as.c_str(), getMessage().c_str());
+    return;
+  }
+  string key = as;
+  if (key.empty()) {
+    size_t pos = ns.rfind(NAMESPACE_SEP);
+    if (pos == string::npos) {
+      key = ns;
+    } else {
+      key = ns.substr(pos + 1);
+    }
+  }
+  m_aliases[key] = ns;
+}
+
+std::string ParserBase::nsDecl(const std::string &name) {
+  if (m_namespace.empty()) {
+    return name;
+  }
+  return m_namespace + NAMESPACE_SEP + name;
+}
+
+std::string ParserBase::resolve(const std::string &ns, bool cls) {
+  // try import rules first
+  string alias = ns;
+  size_t pos = ns.find(NAMESPACE_SEP);
+  if (pos != string::npos) {
+    alias = ns.substr(0, pos);
+  }
+  hphp_string_imap<std::string>::const_iterator iter = m_aliases.find(alias);
+  if (iter != m_aliases.end()) {
+    if (pos != string::npos) {
+      return iter->second + ns.substr(pos);
+    }
+    return iter->second;
+  }
+
+  // if qualified name, prepend current namespace
+  if (pos != string::npos) {
+    return nsDecl(ns);
+  }
+
+  // unqualified name in global namespace
+  if (m_namespace.empty()) {
+    return ns;
+  }
+
+  // unqualified class name always prefixed with NAMESPACE_SEP
+  if (cls) {
+    return m_namespace + NAMESPACE_SEP + ns;
+  }
+
+  // unqualified function name needs leading NAMESPACE_SEP to indicate this
+  // needs runtime resolution
+  return string("") + NAMESPACE_SEP + m_namespace + NAMESPACE_SEP + ns;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

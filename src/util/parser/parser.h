@@ -19,6 +19,7 @@
 
 #include <util/parser/scanner.h>
 #include <util/lock.h>
+#include <util/case_insensitive.h>
 
 #define IMPLEMENT_XHP_ATTRIBUTES                \
   Token m_xhpAttributes;                        \
@@ -39,6 +40,7 @@
 // NOTE: system/classes/closure.php may have reference to these strings:
 #define CONTINUATION_OBJECT_NAME "__cont__"
 #define YIELD_LABEL_PREFIX "__yield__"
+#define NAMESPACE_SEP '\\'
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -118,6 +120,14 @@ public:
   void addGoto(const std::string &label, LocationPtr loc);
   void popLabelInfo();
 
+  // for namespace support
+  void onNamespaceStart(const std::string &ns);
+  void onNamespaceEnd();
+  void onUse(const std::string &ns, const std::string &as);
+  void nns(bool declare = false);
+  std::string nsDecl(const std::string &name);
+  std::string resolve(const std::string &ns, bool cls);
+
 protected:
   Scanner &m_scanner;
   const char *m_fileName;
@@ -142,6 +152,17 @@ protected:
     std::vector<GotoInfo> gotos;
   };
   std::vector<LabelInfo> m_labelInfos; // stack by function
+
+  // for namespace support
+  enum NamespaceState {
+    SeenNothing,
+    SeenNonNamespaceStatement,
+    SeenNamespaceStatement,
+    InsideNamespace,
+  };
+  NamespaceState m_nsState;
+  std::string m_namespace; // current namespace
+  hphp_string_imap<std::string> m_aliases;
 
   // for closure hidden name
   static Mutex s_mutex;

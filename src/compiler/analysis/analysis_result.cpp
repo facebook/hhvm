@@ -1936,7 +1936,8 @@ void AnalysisResult::outputCPPNameMaps() {
     for (set<pair<string, int> >::const_iterator iterInner =
            iter->second.begin();
          iterInner != iter->second.end(); ++iterInner) {
-      cg_printf("\"%s\", \"%s\", (const char *)%d,\n", iter->first.c_str(),
+      cg_printf("\"%s\", \"%s\", (const char *)%d,\n",
+                cg.escapeLabel(iter->first).c_str(),
                 iterInner->first.c_str(), iterInner->second);
     }
   }
@@ -1951,7 +1952,8 @@ void AnalysisResult::outputCPPNameMaps() {
     for (set<pair<string, int> >::const_iterator iterInner =
            iter->second.begin();
          iterInner != iter->second.end(); ++iterInner) {
-      cg_printf("\"%s\", \"%s\", (const char *)%d,\n", iter->first.c_str(),
+      cg_printf("\"%s\", \"%s\", (const char *)%d,\n",
+                cg.escapeLabel(iter->first).c_str(),
                 iterInner->first.c_str(), iterInner->second);
     }
   }

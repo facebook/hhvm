@@ -123,6 +123,9 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
         m_translated = getClassScope()->getOriginalName();
       }
       break;
+    case T_NS_C:
+      m_translated = m_value;
+      break;
     case T_METHOD_C:
       if (getFunctionScope()) {
         m_translated.clear();
@@ -222,6 +225,7 @@ TypePtr ScalarExpression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
   case T_CONSTANT_ENCAPSED_STRING:
   case T_ENCAPSED_AND_WHITESPACE:
   case T_CLASS_C:
+  case T_NS_C:
   case T_METHOD_C:
   case T_FUNC_C:
     actualType = Type::String;
@@ -270,6 +274,7 @@ bool ScalarExpression::isLiteralString() const {
   case T_ENCAPSED_AND_WHITESPACE:
     ASSERT(m_quoted); // fall through
   case T_CLASS_C:
+  case T_NS_C:
   case T_METHOD_C:
   case T_FUNC_C:
     return true;
@@ -294,7 +299,8 @@ std::string ScalarExpression::getLiteralString() const {
     return output;
   }
 
-  if (m_type == T_CLASS_C || m_type == T_METHOD_C || m_type == T_FUNC_C) {
+  if (m_type == T_CLASS_C || m_type == T_NS_C || m_type == T_METHOD_C ||
+      m_type == T_FUNC_C) {
     return m_translated;
   }
 
@@ -344,6 +350,9 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_CLASS_C:
     cg_printf("__CLASS__");
     break;
+  case T_NS_C:
+    cg_printf("__NAMESPACE__");
+    break;
   case T_LINE:
   case T_METHOD_C:
   case T_FUNC_C:
@@ -371,6 +380,7 @@ std::string ScalarExpression::getCPPLiteralString(CodeGenerator &cg,
     break;
   }
   case T_CLASS_C:
+  case T_NS_C:
   case T_METHOD_C:
   case T_FUNC_C:
     output = "\"";
@@ -402,6 +412,7 @@ void ScalarExpression::outputCPPString(CodeGenerator &cg,
     break;
   }
   case T_CLASS_C:
+  case T_NS_C:
   case T_METHOD_C:
   case T_FUNC_C:
     cg_printString(m_translated, ar, shared_from_this());
@@ -417,6 +428,7 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_ENCAPSED_AND_WHITESPACE:
   case T_STRING:
   case T_CLASS_C:
+  case T_NS_C:
   case T_METHOD_C:
   case T_FUNC_C: {
     outputCPPString(cg, ar);
@@ -511,6 +523,7 @@ Variant ScalarExpression::getVariant() {
     case T_LINE:
       return String(m_translated).toInt64();
     case T_CLASS_C:
+    case T_NS_C:
     case T_METHOD_C:
     case T_FUNC_C:
       return String(m_translated);

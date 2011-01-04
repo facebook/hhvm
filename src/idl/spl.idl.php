@@ -7,6 +7,8 @@
  * any changes that are not part of schema. Use "note" field to comment on
  * schema itself, and "note" fields are not used in any code generation but
  * only staying within this file.
+ *
+ * @nolint
  */
 ///////////////////////////////////////////////////////////////////////////////
 // Preamble: C++ code inserted at beginning of ext_{name}.h
@@ -222,6 +224,126 @@ DefineFunction(
         'type'   => Boolean,
         'value'  => "true",
         'desc'   => "Whether to use the iterator element keys as index.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "spl_autoload_call",
+    'desc'   => "This function can be used to manually search for a class or interface using the registered __autoload functions.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => null,
+      'desc'   => "No value is returned.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "class_name",
+        'type'   => String,
+        'desc'   => "The class name being searched.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "spl_autoload_extensions",
+    'desc'   => "This function can modify and check the file extensions that the built in __autoload() fallback function spl_autoload() will be using.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "A comma delimited list of default file extensions for spl_autoload().",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "file_extensions",
+        'type'   => String,
+        'value'  => "null_string",
+        'desc'   => "When calling without an argument, it simply returns the current list of extensions each separated by comma. To modify the list of file extensions, simply invoke the functions with the new list of file extensions to use in a single string with each extensions separated by comma.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "spl_autoload_functions",
+    'desc'   => "Get all registered __autoload() functions.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "An array of all registered __autoload functions. If the autoload stack is not activated then the return value is FALSE. If no function is registered the return value will be an empty array.",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "spl_autoload_register",
+    'desc'   => "Register a function with the spl provided __autoload stack. If the stack is not yet activated it will be activated.\n\nIf your code has an existing __autoload function then this function must be explicitly registered on the __autoload stack. This is because spl_autoload_register() will effectively replace the engine cache for the __autoload function by either spl_autoload() or spl_autoload_call().\n\nIf there must be multiple autoload functions, spl_autoload_register() allows for this. It effectively creates a queue of autoload functions, and runs through each of them in the order they are defined. By contrast, __autoload() may only be defined once.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "Returns TRUE on success or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "autoload_function",
+        'type'   => Variant,
+        'value'  => "null_variant",
+        'desc'   => "The autoload function being registered. If no parameter is provided, then the default implementation of spl_autoload() will be registered.",
+      ),
+      array(
+        'name'   => "throws",
+        'type'   => Boolean,
+        'value'  => "true",
+        'desc'   => "This parameter specifies whether spl_autoload_register() should throw exceptions on error.",
+      ),
+      array(
+        'name'   => "prepend",
+        'type'   => Boolean,
+        'value'  => "false",
+        'desc'   => "If true, spl_autoload_register() will prepend the autoloader on the autoload stack instead of appending it.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "spl_autoload_unregister",
+    'desc'   => "Unregister a function from the spl provided __autoload stack. If the stack is activated and empty after unregistering the given function then it will be deactivated.\n\nWhen this function results in the autoload stack being deactivated, any __autoload function that previously existed will not be reactivated.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "Returns TRUE on success or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "autoload_function",
+        'type'   => Variant,
+        'desc'   => "The autoload function being unregistered.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "spl_autoload",
+    'desc'   => "This function is intended to be used as a default implementation for __autoload(). If nothing else is specified and spl_autoload_register() is called without any parameters then this functions will be used for any later call to __autoload().",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => null,
+      'desc'   => "No value is returned.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "class_name",
+        'type'   => String,
+      ),
+      array(
+        'name'   => "file_extensions",
+        'type'   => String,
+        'value'  => "null_string",
+        'desc'   => "By default it checks all include paths to contain filenames built up by the lowercase class name appended by the filename extensions .inc and .php.",
       ),
     ),
   ));

@@ -48,7 +48,7 @@ bool f_function_exists(CStrRef function_name) {
 bool f_is_callable(CVarRef v, bool syntax /* = false */,
                    Variant name /* = null */) {
   if (v.isString()) {
-    if (!name.isNull()) name = v;
+    if (name.isReferenced()) name = v;
     if (syntax) return true;
 
     String str = v.toString();
@@ -94,7 +94,7 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
         }
       }
       if (v0.isString() && v1.isString()) {
-        if (!name.isNull()) {
+        if (name.isReferenced()) {
           name = v0.toString() + "::" + v1.toString();
         }
         if (same(v0, s_self) || same(v0, s_parent)) {
@@ -105,7 +105,7 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
     }
   }
 
-  if (!name.isNull()) {
+  if (name.isReferenced()) {
     name = v.toString();
   }
   return false;

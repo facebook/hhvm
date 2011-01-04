@@ -652,7 +652,7 @@ void Variant::prepend(CVarRef v) {
 Variant Variant::array_iter_reset() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1) {
+    if (arr->getCount() > 1 && !arr->isHead()) {
       arr = arr->copy();
       set(arr);
       ASSERT(arr == getArrayData());
@@ -666,7 +666,7 @@ Variant Variant::array_iter_reset() {
 Variant Variant::array_iter_prev() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1) {
+    if (arr->getCount() > 1 && !arr->isInvalid()) {
       arr = arr->copy();
       set(arr);
       ASSERT(arr == getArrayData());
@@ -688,7 +688,7 @@ Variant Variant::array_iter_current() const {
 Variant Variant::array_iter_next() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1) {
+    if (arr->getCount() > 1 && !arr->isInvalid()) {
       arr = arr->copy();
       set(arr);
       ASSERT(arr == getArrayData());
@@ -702,7 +702,7 @@ Variant Variant::array_iter_next() {
 Variant Variant::array_iter_end() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1) {
+    if (arr->getCount() > 1 && !arr->isTail()) {
       arr = arr->copy();
       set(arr);
       ASSERT(arr == getArrayData());

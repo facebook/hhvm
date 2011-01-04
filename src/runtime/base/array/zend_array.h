@@ -61,6 +61,10 @@ public:
   virtual Variant value(ssize_t &pos) const;
   virtual Variant each();
 
+  virtual bool isHead() const { return m_pos == (ssize_t)m_pListHead; }
+  virtual bool isTail() const { return m_pos == (ssize_t)m_pListTail; }
+  virtual bool isInvalid() const { return !m_pos; }
+
   virtual bool exists(int64   k) const;
   virtual bool exists(litstr  k) const;
   virtual bool exists(CStrRef k) const;

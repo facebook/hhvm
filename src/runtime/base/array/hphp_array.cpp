@@ -547,6 +547,16 @@ Variant HphpArray::each() {
   return false;
 }
 
+bool HphpArray::isHead() const {
+  Elm* elms = data2Elms(m_data);
+  return m_pos == ssize_t(nextElm(elms, ElmIndEmpty));
+}
+
+bool HphpArray::isTail() const {
+  Elm* elms = data2Elms(m_data);
+  return m_pos == prevElm(elms, (ssize_t)(m_lastE+1));
+}
+
 //=============================================================================
 // Lookup.
 

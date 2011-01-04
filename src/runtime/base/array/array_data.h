@@ -125,6 +125,10 @@ class ArrayData : public Countable {
   virtual Variant value(ssize_t &pos) const;
   virtual Variant each();
 
+  virtual bool isHead() const { return m_pos == 0; }
+  virtual bool isTail() const { return m_pos == size() - 1; }
+  virtual bool isInvalid() const { return m_pos == invalid_index; }
+
   /**
    * Testing whether a key exists.
    */

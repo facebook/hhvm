@@ -393,6 +393,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
 
   Variant &server = g->GV(_SERVER);
   process_env_variables(server);
+  server.set("REQUEST_TIME", time(NULL));
   server.set("DOCUMENT_ROOT", "");
   server.set("SCRIPT_FILENAME", argv[0]);
   server.set("SCRIPT_NAME", argv[0]);

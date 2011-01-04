@@ -643,6 +643,7 @@ Variant f_strtr(CStrRef str, CVarRef from, CVarRef to /* = null_variant */) {
 }
 
 void f_parse_str(CStrRef str, Variant arr /* = null */) {
+  arr = Array::Create();
   HttpProtocol::DecodeParameters(arr, str.data(), str.size());
 }
 

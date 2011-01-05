@@ -41,7 +41,7 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   // handling closure
   ObjectData *closure = NULL;
   if (name[0] == '0') {
-    char *id = strchr(name.data(), ':');
+    const char *id = strchr(name.data(), ':');
     ASSERT(id);
     if (id) {
       int pos = id - name.data();

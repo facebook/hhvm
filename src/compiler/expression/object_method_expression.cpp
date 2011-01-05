@@ -235,7 +235,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
   }
 
   // invoke() will return Variant
-  if (!m_object->getType()->isSpecificObject() ||
+  if (cls->isInterface() ||
       (func->isVirtual() &&
        (ar->isSystem() || func->hasOverride() || func->isAbstract()) &&
        !func->isPerfectVirtual())) {

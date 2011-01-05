@@ -700,17 +700,17 @@ void ArrayUtil::Walk(Variant input, PFUNC_WALK walk_function,
   for (MutableArrayIterPtr iter = input.begin(&k, v); iter->advance(); ) {
     if (recursive && v.is(KindOfArray)) {
       ASSERT(seen);
-      Array arr = v.toArray();
+      ArrayData *arr = v.getArrayData();
 
       if (v.isReferenced()) {
-        if (seen->find((void*)arr.get()) != seen->end()) {
+        if (seen->find((void*)arr) != seen->end()) {
           raise_warning("array_walk_recursive(): recursion detected");
           return;
         }
-        seen->insert((void*)arr.get());
+        seen->insert((void*)arr);
       }
 
-      Walk(arr, walk_function, data, recursive, seen, userdata);
+      Walk(ref(v), walk_function, data, recursive, seen, userdata);
     } else {
       walk_function(ref(v), k, userdata, data);
     }

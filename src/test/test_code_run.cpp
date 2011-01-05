@@ -13646,6 +13646,11 @@ bool TestCodeRun::TestExtArray() {
       "}\n"
       "array_walk($arr,'f');\n"
       "var_dump($arr);\n");
+  MVCR("<?php\n"
+      "$a = array('foo'=>array('bar'=>1));\n"
+      "function fix(&$v, $k) { $v *= 2; }\n"
+      "array_walk_recursive($a, 'fix');\n"
+      "var_dump($a['foo']);\n");
 
   return true;
 }

@@ -115,6 +115,10 @@ Array Array::intersect(CArrRef array, bool by_key, bool by_value,
                   value_cmp_function, value_data);
 }
 
+int Array::CompareAsStrings(CVarRef v1, CVarRef v2, const void *data) {
+  return equalAsStr(v1, v2) ? 0 : -1;
+}
+
 Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
                       PFUNC_CMP key_cmp_function,
                       const void *key_data,
@@ -123,9 +127,10 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
   ASSERT(by_key || by_value);
   ASSERT(by_key || key_cmp_function == NULL);
   ASSERT(by_value || value_cmp_function == NULL);
-
+  PFUNC_CMP value_cmp_as_string_function = value_cmp_function;
   if (!value_cmp_function) {
     value_cmp_function = SortStringAscending;
+    value_cmp_as_string_function = CompareAsStrings;
   }
 
   Array ret = Array::Create();
@@ -137,8 +142,9 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
       bool found = false;
       if (array->exists(key)) {
         if (by_value) {
-          found = value_cmp_function(value, array.rvalAt(key, false, true),
-                                     value_data) == 0;
+          found = value_cmp_as_string_function(value,
+                                               array.rvalAt(key, false, true),
+                                               value_data) == 0;
         } else {
           found = true;
         }
@@ -207,8 +213,8 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
           if (key_cmp_function(target, array->getKey(pos), key_data) != 0) {
             break;
           }
-          if (value_cmp_function(val, array->getValueRef(pos, tmp),
-                                 value_data) == 0) {
+          if (value_cmp_as_string_function(val, array->getValueRef(pos, tmp),
+                                           value_data) == 0) {
             found = true;
             break;
           }
@@ -219,8 +225,8 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
             if (key_cmp_function(target, array->getKey(pos), key_data) != 0) {
               break;
             }
-            if (value_cmp_function(val, array->getValueRef(pos, tmp),
-                                   value_data) == 0) {
+            if (value_cmp_as_string_function(val, array->getValueRef(pos, tmp),
+                                             value_data) == 0) {
               found = true;
               break;
             }

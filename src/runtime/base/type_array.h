@@ -523,6 +523,7 @@ class Array : public SmartPtr<ArrayData> {
  private:
   // helpers
   bool compare(CArrRef v2) const;
+  static int CompareAsStrings(CVarRef v1, CVarRef v2, const void *data);
   Array &mergeImpl(ArrayData *data, ArrayData::ArrayOp op);
   Array diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
                  PFUNC_CMP key_cmp_function, const void *key_data,

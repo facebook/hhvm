@@ -48,13 +48,9 @@ extern const int64 k_UCOL_STRENGTH;
 extern const int64 k_UCOL_HIRAGANA_QUATERNARY_MODE;
 extern const int64 k_UCOL_NUMERIC_COLLATION;
 
-inline void throw_bad_array_exception(const char *func) {
-  throw_bad_type_exception("%s expects array(s)", func + 2);
-}
-
 inline Variant f_array_change_key_case(CVarRef input, bool upper = false) {
   if (!input.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   return ArrayUtil::ChangeKeyCase(toArray(input), !upper);
@@ -62,14 +58,14 @@ inline Variant f_array_change_key_case(CVarRef input, bool upper = false) {
 inline Variant f_array_chunk(CVarRef input, int size,
                              bool preserve_keys = false) {
   if (!input.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   return ArrayUtil::Chunk(toArray(input), size, preserve_keys);
 }
 inline Variant f_array_combine(CVarRef keys, CVarRef values) {
   if (!keys.isArray() || !values.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   Array arr_keys = toArray(keys);
@@ -78,14 +74,14 @@ inline Variant f_array_combine(CVarRef keys, CVarRef values) {
 }
 inline Variant f_array_count_values(CVarRef input) {
   if (!input.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   return ArrayUtil::CountValues(toArray(input));
 }
 inline Variant f_array_fill_keys(CVarRef keys, CVarRef value) {
   if (!keys.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   return ArrayUtil::CreateArray(toArray(keys), value);
@@ -98,7 +94,7 @@ Variant f_array_filter(CVarRef input, CVarRef callback = null_variant);
 
 inline Variant f_array_flip(CVarRef trans) {
   if (!trans.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   return ArrayUtil::Flip(toArray(trans));
@@ -112,7 +108,7 @@ inline bool f_key_exists(CVarRef key, CVarRef search) {
 inline Variant f_array_keys(CVarRef input, CVarRef search_value = null_variant,
                             bool strict = false) {
   if (!input.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   return toArray(input).keys(search_value, strict);
@@ -130,7 +126,7 @@ Variant f_array_replace(int _argc, CVarRef array1, CArrRef _argv = null_array);
 
 inline Variant f_array_pad(CVarRef input, int pad_size, CVarRef pad_value) {
   if (!input.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   if (pad_size > 0) {
@@ -144,7 +140,7 @@ inline Variant f_array_pop(Variant array) {
 }
 inline Variant f_array_product(CVarRef array) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   Array arr = array.toArray();
@@ -164,7 +160,7 @@ Variant f_array_push(int _argc, Variant array, CVarRef var, CArrRef _argv = null
 
 inline Variant f_array_rand(CVarRef input, int num_req = 1) {
   if (!input.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   return ArrayUtil::RandomKeys(toArray(input), num_req);
@@ -175,7 +171,7 @@ Variant f_array_reduce(CVarRef input, CVarRef callback,
 
 inline Variant f_array_reverse(CVarRef array, bool preserve_keys = false) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   return ArrayUtil::Reverse(toArray(array), preserve_keys);
@@ -183,7 +179,7 @@ inline Variant f_array_reverse(CVarRef array, bool preserve_keys = false) {
 inline Variant f_array_search(CVarRef needle, CVarRef haystack,
                               bool strict = false) {
   if (!haystack.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   return toArray(haystack).key(needle, strict);
@@ -195,7 +191,7 @@ inline Variant f_array_slice(CVarRef array, int offset,
                              CVarRef length = null_variant,
                              bool preserve_keys = false) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   int64 len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
@@ -205,7 +201,7 @@ inline Variant f_array_splice(Variant input, int offset,
                             CVarRef length = null_variant,
                             CVarRef replacement = null_variant) {
   if (!input.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   Array ret(Array::Create());
@@ -215,7 +211,7 @@ inline Variant f_array_splice(Variant input, int offset,
 }
 inline Variant f_array_sum(CVarRef array) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   int64 i;
@@ -233,7 +229,7 @@ int f_array_unshift(int _argc, Variant array, CVarRef var, CArrRef _argv = null_
 
 inline Variant f_array_values(CVarRef input) {
   if (!input.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   return toArray(input).values();
@@ -256,7 +252,7 @@ Array compact(LVariableTable *variables, int _argc, CVarRef varname,
 
 inline bool f_shuffle(Variant array) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   array = ArrayUtil::Shuffle(array);
@@ -297,7 +293,7 @@ inline Variant f_end(Variant array) {
 }
 inline bool f_in_array(CVarRef needle, CVarRef haystack, bool strict = false) {
   if (!haystack.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   return toArray(haystack).valueExists(needle, strict);

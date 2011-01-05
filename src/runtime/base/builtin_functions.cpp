@@ -442,6 +442,12 @@ void throw_bad_type_exception(const char *fmt, ...) {
   raise_warning("Invalid operand type was used: %s", msg.c_str());
 }
 
+void throw_bad_array_exception() {
+  FrameInjection *fi = FrameInjection::GetStackFrame(0);
+  throw_bad_type_exception("%s expects array(s)",
+                           fi ? fi->getFunction() : "(unknown)");
+}
+
 void throw_invalid_argument(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);

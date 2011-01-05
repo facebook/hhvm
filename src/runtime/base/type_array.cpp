@@ -97,21 +97,31 @@ Array &Array::operator+=(CArrRef arr) {
   return mergeImpl(arr.m_px, ArrayData::Plus);
 }
 
-Array Array::diff(CArrRef array, bool by_key, bool by_value,
+Array Array::diff(CVarRef array, bool by_key, bool by_value,
                   PFUNC_CMP key_cmp_function /* = NULL */,
                   const void *key_data /* = NULL */,
                   PFUNC_CMP value_cmp_function /* = NULL */,
                   const void *value_data /* = NULL */) const {
-  return diffImpl(array, by_key, by_value, false, key_cmp_function, key_data,
+  if (!array.isArray()) {
+    throw_bad_array_exception();
+    return Array();
+  }
+  return diffImpl(array.getArrayData(), by_key, by_value, false,
+                  key_cmp_function, key_data,
                   value_cmp_function, value_data);
 }
 
-Array Array::intersect(CArrRef array, bool by_key, bool by_value,
+Array Array::intersect(CVarRef array, bool by_key, bool by_value,
                        PFUNC_CMP key_cmp_function /* = NULL */,
                        const void *key_data /* = NULL */,
                        PFUNC_CMP value_cmp_function /* = NULL */,
                        const void *value_data /* = NULL */) const {
-  return diffImpl(array, by_key, by_value, true, key_cmp_function, key_data,
+  if (!array.isArray()) {
+    throw_bad_array_exception();
+    return Array();
+  }
+  return diffImpl(array.getArrayData(), by_key, by_value, true,
+                  key_cmp_function, key_data,
                   value_cmp_function, value_data);
 }
 

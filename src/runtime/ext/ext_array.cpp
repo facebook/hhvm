@@ -67,7 +67,7 @@ static bool filter_func(CVarRef value, const void *data) {
 }
 Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
   if (!input.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   if (callback.isNull()) {
@@ -114,7 +114,7 @@ static Variant map_func(CArrRef params, const void *data) {
 Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* = null_array */) {
   Array inputs;
   if (!arr1.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   inputs.append(arr1);
@@ -164,7 +164,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
 
 Variant f_array_merge(int _argc, CVarRef arr1, CArrRef args) {
   if (!arr1.isArray()) {
-    throw_bad_array_exception("f_array_merge");
+    throw_bad_array_exception();
     return null;
   }
   Array ret = Array::Create();
@@ -172,7 +172,7 @@ Variant f_array_merge(int _argc, CVarRef arr1, CArrRef args) {
   for (ArrayIter iter(args); iter; ++iter) {
     Variant v = iter.second();
     if (!v.isArray()) {
-      throw_bad_array_exception("f_array_merge");
+      throw_bad_array_exception();
       return null;
     }
     php_array_merge(ret, v.toArray());
@@ -182,7 +182,7 @@ Variant f_array_merge(int _argc, CVarRef arr1, CArrRef args) {
 
 Variant f_array_merge_recursive(int _argc, CVarRef arr1, CArrRef args) {
   if (!arr1.isArray()) {
-    throw_bad_array_exception("f_array_merge_recursive");
+    throw_bad_array_exception();
     return null;
   }
   Array ret = Array::Create();
@@ -192,7 +192,7 @@ Variant f_array_merge_recursive(int _argc, CVarRef arr1, CArrRef args) {
   for (ArrayIter iter(args); iter; ++iter) {
     Variant v = iter.second();
     if (!v.isArray()) {
-      throw_bad_array_exception("f_array_merge_recursive");
+      throw_bad_array_exception();
       return null;
     }
     php_array_merge_recursive(seen, false, ret, v.toArray());
@@ -245,7 +245,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
 Variant f_array_replace(int _argc, CVarRef array1,
                         CArrRef _argv /* = null_array */) {
   if (!array1.isArray()) {
-    throw_bad_array_exception("f_array_replace");
+    throw_bad_array_exception();
     return null;
   }
   Array ret = Array::Create();
@@ -253,7 +253,7 @@ Variant f_array_replace(int _argc, CVarRef array1,
   for (ArrayIter iter(_argv); iter; ++iter) {
     CVarRef v = iter.secondRef();
     if (!v.isArray()) {
-      throw_bad_array_exception("f_array_replace");
+      throw_bad_array_exception();
       return null;
     }
     php_array_replace(ret, v.toArray());
@@ -264,7 +264,7 @@ Variant f_array_replace(int _argc, CVarRef array1,
 Variant f_array_replace_recursive(int _argc, CVarRef array1,
                                   CArrRef _argv /* = null_array */) {
   if (!array1.isArray()) {
-    throw_bad_array_exception("f_array_replace_recursive");
+    throw_bad_array_exception();
     return null;
   }
   Array ret = Array::Create();
@@ -274,7 +274,7 @@ Variant f_array_replace_recursive(int _argc, CVarRef array1,
   for (ArrayIter iter(_argv); iter; ++iter) {
     CVarRef v = iter.secondRef();
     if (!v.isArray()) {
-      throw_bad_array_exception("f_array_replace_recursive");
+      throw_bad_array_exception();
       return null;
     }
     php_array_replace_recursive(seen, false, ret, v.toArray());
@@ -285,7 +285,7 @@ Variant f_array_replace_recursive(int _argc, CVarRef array1,
 
 Variant f_array_push(int _argc, Variant array, CVarRef var, CArrRef _argv /* = null_array */) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   array.append(var);
@@ -302,7 +302,7 @@ static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
 Variant f_array_reduce(CVarRef input, CVarRef callback,
                        CVarRef initial /* = null_variant */) {
   if (!input.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   return ArrayUtil::Reduce(toArray(input), reduce_func, &callback, initial);
@@ -355,7 +355,7 @@ static void walk_func(Variant value, CVarRef key, CVarRef userdata,
 bool f_array_walk_recursive(Variant input, CVarRef funcname,
                             CVarRef userdata /* = null_variant */) {
   if (!input.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   PointerSet seen;
@@ -365,7 +365,7 @@ bool f_array_walk_recursive(Variant input, CVarRef funcname,
 bool f_array_walk(Variant input, CVarRef funcname,
                   CVarRef userdata /* = null_variant */) {
   if (!input.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   ArrayUtil::Walk(ref(input), walk_func, &funcname, false, NULL, userdata);
@@ -499,163 +499,116 @@ Variant f_range(CVarRef low, CVarRef high, CVarRef step /* = 1 */) {
   int64 lstep = (int64) dstep;
   return ArrayUtil::Range(low.toDouble(), high.toDouble(), lstep);
 }
-
 ///////////////////////////////////////////////////////////////////////////////
-// diff functions
+// diff/intersect helpers
 
 static int cmp_func(CVarRef v1, CVarRef v2, const void *data) {
   Variant *callback = (Variant *)data;
   return f_call_user_func_array(*callback, CREATE_VECTOR2(v1, v2));
 }
 
+#define COMMA ,
+#define diff_intersect_body(type,intersect_params,user_setup)   \
+  if (!array1.isArray()) {                                      \
+    throw_bad_array_exception();                                \
+    return null;                                                \
+  }                                                             \
+  Array ret = array1.getArrayData();                            \
+  if (ret.size()) {                                             \
+    user_setup                                                  \
+    ret = ret.type(array2, intersect_params);                   \
+    if (ret.size()) {                                           \
+      for (ArrayIter iter(_argv); iter; ++iter) {               \
+        ret = ret.type(iter.second(), intersect_params);        \
+        if (!ret.size()) break;                                 \
+      }                                                         \
+    }                                                           \
+  }                                                             \
+  return ret;
+
+///////////////////////////////////////////////////////////////////////////////
+// diff functions
+
 Variant f_array_diff(int _argc, CVarRef array1, CVarRef array2,
                    CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Array ret = toArray(array1).diff(toArray(array2), false, true);
-  for (ArrayIter iter(_argv); iter; ++iter) {
-    ret = ret.diff(iter.second(), false, true);
-  }
-  return ret;
+  diff_intersect_body(diff, false COMMA true,);
 }
+
 Variant f_array_udiff(int _argc, CVarRef array1, CVarRef array2,
                       CVarRef data_compare_func,
                       CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Variant func = data_compare_func;
-  Array extra = _argv;
-  if (!extra.empty()) {
-    extra.prepend(func);
-    func = extra.pop();
-  }
-  Array ret =
-    toArray(array1).diff(toArray(array2), false, true, NULL, NULL, cmp_func,
-                         &func);
-  for (ArrayIter iter(extra); iter; ++iter) {
-    ret = ret.diff(iter.second(), false, true, NULL, NULL, cmp_func, &func);
-  }
-  return ret;
+  diff_intersect_body(diff, false COMMA true COMMA NULL COMMA NULL
+                      COMMA cmp_func COMMA &func,
+                      Variant func = data_compare_func;
+                      Array extra = _argv;
+                      if (!extra.empty()) {
+                        extra.prepend(func);
+                        func = extra.pop();
+                      });
 }
 
 Variant f_array_diff_assoc(int _argc, CVarRef array1, CVarRef array2,
                            CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Array ret = toArray(array1).diff(toArray(array2), true, true);
-  for (ArrayIter iter(_argv); iter; ++iter) {
-    ret = ret.diff(iter.second(), true, true);
-  }
-  return ret;
+  diff_intersect_body(diff, true COMMA true,);
 }
 
 Variant f_array_diff_uassoc(int _argc, CVarRef array1, CVarRef array2,
                             CVarRef key_compare_func,
                             CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Variant func = key_compare_func;
-  Array extra = _argv;
-  if (!extra.empty()) {
-    extra.prepend(func);
-    func = extra.pop();
-  }
-  Array ret =
-    toArray(array1).diff(toArray(array2), true, true, cmp_func, &func);
-  for (ArrayIter iter(extra); iter; ++iter) {
-    ret = ret.diff(iter.second(), true, true, cmp_func, &func);
-  }
-  return ret;
+  diff_intersect_body(diff, true COMMA true COMMA cmp_func COMMA &func,
+                      Variant func = key_compare_func;
+                      Array extra = _argv;
+                      if (!extra.empty()) {
+                        extra.prepend(func);
+                        func = extra.pop();
+                      });
 }
 
 Variant f_array_udiff_assoc(int _argc, CVarRef array1, CVarRef array2,
                             CVarRef data_compare_func,
                             CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Variant func = data_compare_func;
-  Array extra = _argv;
-  if (!extra.empty()) {
-    extra.prepend(func);
-    func = extra.pop();
-  }
-  Array ret = toArray(array1).diff(toArray(array2), true, true, NULL, NULL,
-                                   cmp_func, &func);
-  for (ArrayIter iter(extra); iter; ++iter) {
-    ret = ret.diff(iter.second(), true, true, NULL, NULL, cmp_func, &func);
-  }
-  return ret;
+  diff_intersect_body(diff, true COMMA true COMMA NULL COMMA NULL
+                      COMMA cmp_func COMMA &func,
+                      Variant func = data_compare_func;
+                      Array extra = _argv;
+                      if (!extra.empty()) {
+                        extra.prepend(func);
+                        func = extra.pop();
+                      });
 }
 
 Variant f_array_udiff_uassoc(int _argc, CVarRef array1, CVarRef array2,
                              CVarRef data_compare_func,
                              CVarRef key_compare_func,
                              CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Variant data_func = data_compare_func;
-  Variant key_func = key_compare_func;
-  Array extra = _argv;
-  if (!extra.empty()) {
-    extra.prepend(key_func);
-    extra.prepend(data_func);
-    key_func = extra.pop();
-    data_func = extra.pop();
-  }
-  Array ret =
-    toArray(array1).diff(toArray(array2), true, true, cmp_func, &key_func,
-                         cmp_func, &data_func);
-  for (ArrayIter iter(extra); iter; ++iter) {
-    ret = ret.diff(iter.second(), true, true, cmp_func, &key_func,
-                   cmp_func, &data_func);
-  }
-  return ret;
+  diff_intersect_body(diff, true COMMA true COMMA cmp_func COMMA &key_func
+                      COMMA cmp_func COMMA &data_func,
+                      Variant data_func = data_compare_func;
+                      Variant key_func = key_compare_func;
+                      Array extra = _argv;
+                      if (!extra.empty()) {
+                        extra.prepend(key_func);
+                        extra.prepend(data_func);
+                        key_func = extra.pop();
+                        data_func = extra.pop();
+                      });
 }
 
 Variant f_array_diff_key(int _argc, CVarRef array1, CVarRef array2,
                          CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Array ret = toArray(array1).diff(toArray(array2), true, false);
-  for (ArrayIter iter(_argv); iter; ++iter) {
-    ret = ret.diff(iter.second(), true, false);
-  }
-  return ret;
+  diff_intersect_body(diff, true COMMA false,);
 }
 
 Variant f_array_diff_ukey(int _argc, CVarRef array1, CVarRef array2,
                           CVarRef key_compare_func,
                           CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Variant func = key_compare_func;
-  Array extra = _argv;
-  if (!extra.empty()) {
-    extra.prepend(func);
-    func = extra.pop();
-  }
-  Array ret =
-    toArray(array1).diff(toArray(array2), true, false, cmp_func, &func);
-  for (ArrayIter iter(extra); iter; ++iter) {
-    ret = ret.diff(iter.second(), true, false, cmp_func, &func);
-  }
-  return ret;
+  diff_intersect_body(diff, true COMMA false COMMA cmp_func COMMA &func,
+                      Variant func = key_compare_func;
+                      Array extra = _argv;
+                      if (!extra.empty()) {
+                        extra.prepend(func);
+                        func = extra.pop();
+                      });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -663,154 +616,84 @@ Variant f_array_diff_ukey(int _argc, CVarRef array1, CVarRef array2,
 
 Variant f_array_intersect(int _argc, CVarRef array1, CVarRef array2,
                           CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Array ret = toArray(array1).intersect(toArray(array2), false, true);
-  for (ArrayIter iter(_argv); iter; ++iter) {
-    ret = ret.intersect(iter.second(), false, true);
-  }
-  return ret;
+  diff_intersect_body(intersect, false COMMA true,);
 }
 
 Variant f_array_uintersect(int _argc, CVarRef array1, CVarRef array2,
                            CVarRef data_compare_func,
                            CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Variant func = data_compare_func;
-  Array extra = _argv;
-  if (!extra.empty()) {
-    extra.prepend(func);
-    func = extra.pop();
-  }
-  Array ret =
-    toArray(array1).intersect(toArray(array2), false, true, NULL, NULL,
-                              cmp_func, &func);
-  for (ArrayIter iter(extra); iter; ++iter) {
-    ret = ret.intersect(iter.second(), false, true, NULL, NULL,
-                        cmp_func, &func);
-  }
+  diff_intersect_body(intersect, false COMMA true COMMA NULL COMMA NULL
+                      COMMA cmp_func COMMA &func,
+                      Variant func = data_compare_func;
+                      Array extra = _argv;
+                      if (!extra.empty()) {
+                        extra.prepend(func);
+                        func = extra.pop();
+                      });
+
   return ret;
 }
 
 Variant f_array_intersect_assoc(int _argc, CVarRef array1, CVarRef array2,
                                 CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Array ret = toArray(array1).intersect(toArray(array2), true, true);
-  for (ArrayIter iter(_argv); iter; ++iter) {
-    ret = ret.intersect(iter.second(), true, true);
-  }
-  return ret;
+  diff_intersect_body(intersect, true COMMA true,);
 }
 
 Variant f_array_intersect_uassoc(int _argc, CVarRef array1, CVarRef array2,
                                  CVarRef key_compare_func,
                                  CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Variant func = key_compare_func;
-  Array extra = _argv;
-  if (!extra.empty()) {
-    extra.prepend(func);
-    func = extra.pop();
-  }
-  Array ret =
-    toArray(array1).intersect(toArray(array2), true, true, cmp_func, &func);
-  for (ArrayIter iter(extra); iter; ++iter) {
-    ret = ret.intersect(iter.second(), true, true, cmp_func, &func);
-  }
-  return ret;
+  diff_intersect_body(intersect, true COMMA true COMMA cmp_func COMMA &func,
+                      Variant func = key_compare_func;
+                      Array extra = _argv;
+                      if (!extra.empty()) {
+                        extra.prepend(func);
+                        func = extra.pop();
+                      });
 }
 
 Variant f_array_uintersect_assoc(int _argc, CVarRef array1, CVarRef array2,
                                  CVarRef data_compare_func,
                                  CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Variant func = data_compare_func;
-  Array extra = _argv;
-  if (!extra.empty()) {
-    extra.prepend(func);
-    func = extra.pop();
-  }
-  Array ret =
-    toArray(array1).intersect(toArray(array2), true, true, NULL, NULL,
-                              cmp_func, &func);
-  for (ArrayIter iter(extra); iter; ++iter) {
-    ret = ret.intersect(iter.second(), true, true, NULL, NULL,
-                        cmp_func, &func);
-  }
-  return ret;
+  diff_intersect_body(intersect, true COMMA true COMMA NULL COMMA NULL
+                      COMMA cmp_func COMMA &func,
+                      Variant func = data_compare_func;
+                      Array extra = _argv;
+                      if (!extra.empty()) {
+                        extra.prepend(func);
+                        func = extra.pop();
+                      });
 }
 
 Variant f_array_uintersect_uassoc(int _argc, CVarRef array1, CVarRef array2,
                                   CVarRef data_compare_func,
                                   CVarRef key_compare_func,
                                   CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Variant data_func = data_compare_func;
-  Variant key_func = key_compare_func;
-  Array extra = _argv;
-  if (!extra.empty()) {
-    extra.prepend(key_func);
-    extra.prepend(data_func);
-    key_func = extra.pop();
-    data_func = extra.pop();
-  }
-  Array ret =
-    toArray(array1).intersect(toArray(array2), true, true, cmp_func, &key_func,
-                              cmp_func, &data_func);
-  for (ArrayIter iter(extra); iter; ++iter) {
-    ret = ret.intersect(iter.second(), true, true, cmp_func, &key_func,
-                        cmp_func, &data_func);
-  }
-  return ret;
+  diff_intersect_body(intersect, true COMMA true COMMA cmp_func COMMA &key_func
+                      COMMA cmp_func COMMA &data_func,
+                      Variant data_func = data_compare_func;
+                      Variant key_func = key_compare_func;
+                      Array extra = _argv;
+                      if (!extra.empty()) {
+                        extra.prepend(key_func);
+                        extra.prepend(data_func);
+                        key_func = extra.pop();
+                        data_func = extra.pop();
+                      });
 }
 
 Variant f_array_intersect_key(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || (!array2.isArray() && f_count(array1))) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Array ret = toArray(array1).intersect(toArray(array2), true, false);
-  for (ArrayIter iter(_argv); iter; ++iter) {
-    ret = ret.intersect(iter.second(), true, false);
-  }
-  return ret;
+  diff_intersect_body(intersect, true COMMA false,);
 }
 
 Variant f_array_intersect_ukey(int _argc, CVarRef array1, CVarRef array2,
                              CVarRef key_compare_func, CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
-    throw_bad_array_exception(__func__);
-    return null;
-  }
-  Variant func = key_compare_func;
-  Array extra = _argv;
-  if (!extra.empty()) {
-    extra.prepend(func);
-    func = extra.pop();
-  }
-  Array ret =
-    toArray(array1).intersect(toArray(array2), true, false, cmp_func, &func);
-  for (ArrayIter iter(extra); iter; ++iter) {
-    ret = ret.intersect(iter.second(), true, false, cmp_func, &func);
-  }
-  return ret;
+  diff_intersect_body(intersect, true COMMA false COMMA cmp_func COMMA &func,
+                      Variant func = key_compare_func;
+                      Array extra = _argv;
+                      if (!extra.empty()) {
+                        extra.prepend(func);
+                        func = extra.pop();
+                      });
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -926,7 +809,7 @@ static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
 bool f_sort(Variant array, int sort_flags /* = 0 */,
             bool use_collator /* = false */) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   if (use_collator && sort_flags != SORT_LOCALE_STRING) {
@@ -945,7 +828,7 @@ bool f_sort(Variant array, int sort_flags /* = 0 */,
 bool f_rsort(Variant array, int sort_flags /* = 0 */,
              bool use_collator /* = false */) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   if (use_collator && sort_flags != SORT_LOCALE_STRING) {
@@ -964,7 +847,7 @@ bool f_rsort(Variant array, int sort_flags /* = 0 */,
 bool f_asort(Variant array, int sort_flags /* = 0 */,
              bool use_collator /* = false */) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   if (use_collator && sort_flags != SORT_LOCALE_STRING) {
@@ -983,7 +866,7 @@ bool f_asort(Variant array, int sort_flags /* = 0 */,
 bool f_arsort(Variant array, int sort_flags /* = 0 */,
               bool use_collator /* = false */) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   if (use_collator && sort_flags != SORT_LOCALE_STRING) {
@@ -1001,7 +884,7 @@ bool f_arsort(Variant array, int sort_flags /* = 0 */,
 
 bool f_ksort(Variant array, int sort_flags /* = 0 */) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   Array temp = array.toArray();
@@ -1012,7 +895,7 @@ bool f_ksort(Variant array, int sort_flags /* = 0 */) {
 
 bool f_krsort(Variant array, int sort_flags /* = 0 */) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   Array temp = array.toArray();
@@ -1023,7 +906,7 @@ bool f_krsort(Variant array, int sort_flags /* = 0 */) {
 
 bool f_usort(Variant array, CVarRef cmp_function) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   Array temp = array.toArray();
@@ -1034,7 +917,7 @@ bool f_usort(Variant array, CVarRef cmp_function) {
 
 bool f_uasort(Variant array, CVarRef cmp_function) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   Array temp = array.toArray();
@@ -1045,7 +928,7 @@ bool f_uasort(Variant array, CVarRef cmp_function) {
 
 bool f_uksort(Variant array, CVarRef cmp_function) {
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   Array temp = array.toArray();
@@ -1058,7 +941,7 @@ Variant f_natsort(Variant array) {
   // NOTE, PHP natsort accepts ArrayAccess objects as well,
   // which does not make much sense, and which is not supported here.
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   Array temp = array.toArray();
@@ -1071,7 +954,7 @@ Variant f_natcasesort(Variant array) {
   // NOTE, PHP natcasesort accepts ArrayAccess objects as well,
   // which does not make much sense, and which is not supported here.
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return null;
   }
   Array temp = array.toArray();
@@ -1083,7 +966,7 @@ Variant f_natcasesort(Variant array) {
 bool f_array_multisort(int _argc, Variant ar1,
                        CArrRef _argv /* = null_array */) {
   if (!ar1.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   std::vector<Array::SortData> data;
@@ -1132,7 +1015,7 @@ Variant f_array_unique(CVarRef array, int sort_flags /* = 2 */) {
   // NOTE, PHP array_unique accepts ArrayAccess objects as well,
   // which is not supported here.
   if (!array.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   Array input = toArray(array);

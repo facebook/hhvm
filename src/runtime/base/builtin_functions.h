@@ -422,6 +422,7 @@ void handle_destructor_exception();
  * warning and swallow the error.
  */
 void throw_bad_type_exception(const char *fmt, ...);
+void throw_bad_array_exception();
 
 /**
  * If RuntimeOption::ThrowInvalidArguments is on, we are running in

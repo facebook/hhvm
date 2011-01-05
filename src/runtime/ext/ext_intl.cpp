@@ -138,7 +138,7 @@ bool c_Collator::t_asort(Variant arr,
                          int64 sort_flag /* = q_Collator_SORT_REGULAR */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::asort);
   if (!arr.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   if (!m_ucoll) {
@@ -445,7 +445,7 @@ bool c_Collator::t_sort(Variant arr,
                         int64 sort_flag /* = q_Collator_SORT_REGULAR */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::sort);
   if (!arr.isArray()) {
-    throw_bad_array_exception(__func__);
+    throw_bad_array_exception();
     return false;
   }
   if (!m_ucoll) {

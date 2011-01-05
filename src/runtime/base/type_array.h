@@ -112,7 +112,7 @@ class Array : public SmartPtr<ArrayData> {
    * excluded.
    */
   typedef int (*PFUNC_CMP)(CVarRef v1, CVarRef v2, const void *data);
-  Array diff(CArrRef array, bool by_key, bool by_value,
+  Array diff(CVarRef array, bool by_key, bool by_value,
              PFUNC_CMP key_cmp_function = NULL,
              const void *key_data = NULL,
              PFUNC_CMP value_cmp_function = NULL,
@@ -126,7 +126,7 @@ class Array : public SmartPtr<ArrayData> {
    * both by_key and by_value, both keys and values have to match to be
    * included.
    */
-  Array intersect(CArrRef array, bool by_key, bool by_value,
+  Array intersect(CVarRef array, bool by_key, bool by_value,
                   PFUNC_CMP key_cmp_function = NULL,
                   const void *key_data = NULL,
                   PFUNC_CMP value_cmp_function = NULL,

@@ -688,25 +688,6 @@ class Variant {
   const Variant operator[](CObjRef key) const { return rvalAt(key);}
   const Variant operator[](CVarRef key) const { return rvalAt(key);}
 
-  /**
-   * Called from VariantOffset for taking lval().
-   */
-  Variant &lval() {
-    if (m_type == KindOfVariant) {
-      return m_data.pvar->lval();
-    }
-
-    ASSERT(m_type == KindOfArray);
-    Variant *ret = NULL;
-    ArrayData *arr = m_data.parr;
-    ArrayData *escalated = arr->lval(ret, arr->getCount() > 1);
-    if (escalated) {
-      set(escalated);
-    }
-    ASSERT(ret);
-    return *ret;
-  }
-
   template<typename T>
   Variant &lval(const T &key) {
     if (m_type == KindOfVariant) {

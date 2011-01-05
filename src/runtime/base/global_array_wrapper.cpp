@@ -113,10 +113,6 @@ ssize_t GlobalArrayWrapper::getIndex(CVarRef k) const {
   return m_globals->getIndex(s.data(), s->hash());
 }
 
-ArrayData *GlobalArrayWrapper::lval(Variant *&ret, bool copy) {
-  ret = &m_globals->lval();
-  return NULL;
-}
 ArrayData *GlobalArrayWrapper::lval(int64   k, Variant *&ret, bool copy,
     bool checkExist /* = false */) {
   return lval(Variant(k), ret, copy);

@@ -55,7 +55,6 @@ public:
   virtual ssize_t getIndex(CStrRef k) const;
   virtual ssize_t getIndex(CVarRef k) const;
 
-  virtual ArrayData *lval(Variant *&ret, bool copy);
   virtual ArrayData *lval(int64   k, Variant *&ret, bool copy,
                           bool checkExist = false);
   virtual ArrayData *lval(litstr  k, Variant *&ret, bool copy,

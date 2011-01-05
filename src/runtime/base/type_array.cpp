@@ -778,26 +778,24 @@ Variant Array::appendOpEqual(int op, CVarRef v) {
   if (!m_px) {
     SmartPtr<ArrayData>::operator=(ArrayData::Create());
   }
-  ArrayData *escalated =
-    m_px->append(null_variant, (m_px->getCount() > 1));
+  Variant *cv = NULL;
+  ArrayData *escalated = m_px->lvalNew(cv, m_px->getCount() > 1);
   if (escalated) {
     SmartPtr<ArrayData>::operator=(escalated);
   }
-  Variant *cv = NULL;
-  m_px->lval(cv, (m_px->getCount() > 1));
   ASSERT(cv);
   switch (op) {
   case T_CONCAT_EQUAL: return concat_assign((*cv), v);
-  case T_PLUS_EQUAL:  return ((*cv) += v);
-  case T_MINUS_EQUAL: return ((*cv) -= v);
-  case T_MUL_EQUAL:   return ((*cv) *= v);
-  case T_DIV_EQUAL:   return ((*cv) /= v);
-  case T_MOD_EQUAL:   return ((*cv) %= v);
-  case T_AND_EQUAL:   return ((*cv) &= v);
-  case T_OR_EQUAL:    return ((*cv) |= v);
-  case T_XOR_EQUAL:   return ((*cv) ^= v);
-  case T_SL_EQUAL:    return ((*cv) <<= v);
-  case T_SR_EQUAL:    return ((*cv) >>= v);
+  case T_PLUS_EQUAL:   return ((*cv) += v);
+  case T_MINUS_EQUAL:  return ((*cv) -= v);
+  case T_MUL_EQUAL:    return ((*cv) *= v);
+  case T_DIV_EQUAL:    return ((*cv) /= v);
+  case T_MOD_EQUAL:    return ((*cv) %= v);
+  case T_AND_EQUAL:    return ((*cv) &= v);
+  case T_OR_EQUAL:     return ((*cv) |= v);
+  case T_XOR_EQUAL:    return ((*cv) ^= v);
+  case T_SL_EQUAL:     return ((*cv) <<= v);
+  case T_SR_EQUAL:     return ((*cv) >>= v);
   default:
     throw FatalErrorException(0, "invalid operator %d", op);
   }

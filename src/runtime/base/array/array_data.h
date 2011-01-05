@@ -162,7 +162,6 @@ class ArrayData : public Countable {
    * Getting l-value (that Variant pointer) at specified key. Return NULL if
    * escalation is not needed, or an escalated array data.
    */
-  virtual ArrayData *lval(Variant *&ret, bool copy) = 0;
   virtual ArrayData *lval(int64   k, Variant *&ret, bool copy,
                           bool checkExist = false) = 0;
   virtual ArrayData *lval(litstr  k, Variant *&ret, bool copy,

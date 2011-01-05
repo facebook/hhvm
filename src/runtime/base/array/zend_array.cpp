@@ -758,18 +758,6 @@ bool ZendArray::update(StringData *key, CVarRef data) {
   return true;
 }
 
-ArrayData *ZendArray::lval(Variant *&ret, bool copy) {
-  if (copy) {
-    ZendArray *a = copyImpl();
-    ASSERT(a->m_pListTail);
-    ret = &a->m_pListTail->data;
-    return a;
-  }
-  ASSERT(m_pListTail);
-  ret = &m_pListTail->data;
-  return NULL;
-}
-
 ArrayData *ZendArray::lval(int64 k, Variant *&ret, bool copy,
                            bool checkExist /* = false */) {
   if (!copy) {

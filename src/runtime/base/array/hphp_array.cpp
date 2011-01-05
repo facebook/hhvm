@@ -1700,30 +1700,6 @@ bool HphpArray::update(StringData* key, CVarRef data) {
   return true;
 }
 
-ArrayData* HphpArray::lval(Variant*& ret, bool copy) {
-  if (copy) {
-    HphpArray* a = copyImpl();
-    ASSERT(a->m_lastE != ElmIndEmpty);
-    ssize_t lastE = (ssize_t)a->m_lastE;
-    Elm* aElms = data2Elms(a->m_data);
-    if (LIKELY(aElms[lastE].data.m_type != KindOfIndirect)) {
-      ret = &tvAsVariant(&aElms[lastE].data);
-    } else {
-      ret = &tvAsVariant(aElms[lastE].data.m_data.ptv);
-    }
-    return a;
-  }
-  ASSERT(m_lastE != ElmIndEmpty);
-  ssize_t lastE = (ssize_t)m_lastE;
-  Elm* elms = data2Elms(m_data);
-  if (LIKELY(elms[lastE].data.m_type != KindOfIndirect)) {
-    ret = &(tvAsVariant(&elms[lastE].data));
-  } else {
-    ret = &(tvAsVariant(elms[lastE].data.m_data.ptv));
-  }
-  return NULL;
-}
-
 ArrayData* HphpArray::lval(int64 k, Variant*& ret, bool copy,
                            bool checkExist /* = false */) {
   if (!copy) {

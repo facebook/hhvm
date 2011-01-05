@@ -578,20 +578,6 @@ ArrayData *SmallArray::lvalNew(Variant *&ret, bool copy) {
   return NULL;
 }
 
-ArrayData *SmallArray::lval(Variant *&ret, bool copy) {
-  if (copy) {
-    SmallArray *a = copyImpl();
-    int p = a->m_nListTail;
-    ASSERT(p >= 0 && p < SARR_TABLE_SIZE && m_arBuckets[p].kind != Empty);
-    ret = &a->m_arBuckets[p].data;
-    return a;
-  }
-  int p = m_nListTail;
-  ASSERT(p >= 0 && p < SARR_TABLE_SIZE && m_arBuckets[p].kind != Empty);
-  ret = &m_arBuckets[p].data;
-  return NULL;
-}
-
 ArrayData *SmallArray::lval(int64 k, Variant *&ret, bool copy,
                             bool checkExist /* = false */) {
   int p = find(k);

@@ -126,15 +126,6 @@ Variant SharedMap::get(int64 k, bool error /* = false */) const {
   return getValue(index);
 }
 
-ArrayData *SharedMap::lval(Variant *&ret, bool copy) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->lval(ret, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
-}
 ArrayData *SharedMap::lval(int64 k, Variant *&ret, bool copy,
                            bool checkExist /* = false */) {
   ArrayData *escalated = escalate();

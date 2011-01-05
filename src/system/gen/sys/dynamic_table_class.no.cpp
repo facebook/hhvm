@@ -35,129 +35,129 @@ namespace HPHP {
 const unsigned g_methodIndexHMapSizeSys = 930;
 extern const MethodIndexHMap g_methodIndexHMapSys [];
 const MethodIndexHMap g_methodIndexHMapSys [g_methodIndexHMapSizeSys] = {
-Z, Z, H(newInstanceArgs,293,1), 
-H(createComment,102,1), H(addserver,213,1), Z, 
+Z, Z, H(newInstanceArgs,294,1), 
+H(createComment,103,1), H(addserver,214,1), Z, 
 Z, Z, Z, 
-Z, Z, H(implementsInterface,305,1), 
-Z, Z, H(newInstance,290,1), 
+Z, Z, H(implementsInterface,306,1), 
+Z, Z, H(newInstance,291,1), 
 Z, Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
-Z, Z, H(createAttribute,97,1), 
-H(isArray,346,1), Z, H(printFrame,156,1), 
-H(reset,370,1), H(key,2,1), H(getVars,33,1), 
-H(getProperties,300,1), H(getSize,191,1), Z, 
-H(getDefaultValue,348,1), Z, Z, 
-Z, H(connect,227,1), Z, 
-H(isLink,190,1), Z, H(cloneNode,55,1), 
+Z, Z, H(createAttribute,98,1), 
+H(isArray,347,1), Z, H(printFrame,157,1), 
+H(reset,371,1), H(key,2,1), H(getVars,33,1), 
+H(getProperties,301,1), H(getSize,192,1), Z, 
+H(getDefaultValue,349,1), Z, Z, 
+Z, H(connect,228,1), Z, 
+H(isLink,191,1), Z, H(cloneNode,55,1), 
 Z, Z, Z, 
-Z, H(getserverstatus,219,1), Z, 
-Z, Z, H(getMulti,231,1), 
-Z, H(saveXML,84,1), H(endDTD,459,1), 
-H(argCount,143,1), H(__call,8,1), H(quote,264,1), 
-H(invokeArgs,331,1), H(load,87,1), H(querysingle,365,1), 
+Z, H(getserverstatus,220,1), Z, 
+Z, Z, H(getMulti,232,1), 
+Z, H(saveXML,85,1), H(endDTD,459,1), 
+H(argCount,144,1), H(__call,8,1), H(quote,265,1), 
+H(invokeArgs,332,1), H(load,88,1), H(querysingle,366,1), 
 Z, Z, Z, 
-H(isLocal,173,1), Z, Z, 
+H(isLocal,174,1), Z, Z, 
 Z, Z, Z, 
-Z, H(cas,254,1), H(natsort,16,1), 
-H(natcasesort,19,1), H(geterrorcode,39,1), H(setAttributeNS,111,1), 
+Z, H(cas,255,1), H(natsort,16,1), 
+H(natcasesort,19,1), H(geterrorcode,39,1), H(setAttributeNS,112,1), 
 Z, Z, Z, 
-H(setserverparams,215,1), Z, Z, 
-H(getOwner,194,1), H(paramcount,372,1), H(getlocale,44,1), 
-H(appendXML,105,1), H(getMethod,302,1), H(getOption,245,1), 
+H(setserverparams,216,1), Z, Z, 
+H(getOwner,195,1), H(paramcount,373,1), H(getlocale,44,1), 
+H(appendXML,106,1), H(getMethod,303,1), H(getOption,246,1), 
 H(openURI,461,1), H(__destruct,37,1), H(outputMemory,428,1), 
-Z, H(isIterateable,287,1), H(prepend,238,1), 
-H(xinclude,98,1), Z, Z, 
-H(getCommand,150,1), H(css,207,1), Z, 
+Z, H(isIterateable,288,1), H(prepend,239,1), 
+H(xinclude,99,1), Z, Z, 
+H(getCommand,151,1), H(css,208,1), Z, 
 Z, H(__set,54,1), Z, 
 Z, Z, Z, 
-H(item,124,1), Z, Z, 
-Z, Z, H(test,314,1), 
+H(item,125,1), Z, Z, 
+Z, Z, H(test,315,1), 
 Z, Z, H(compare,46,1), 
-Z, H(execute,278,1), H(getSubPathname,282,1), 
+Z, H(execute,279,1), H(getSubPathname,283,1), 
 H(__getlastresponse,395,1), Z, H(getstrength,40,1), 
-Z, Z, H(bindvalue,280,1), 
-Z, H(__setlocation,391,1), H(rollback,261,1), 
-Z, Z, H(xpath,376,1), 
+Z, Z, H(bindvalue,281,1), 
+Z, H(__setlocation,391,1), H(rollback,262,1), 
+Z, Z, H(xpath,377,1), 
 Z, Z, Z, 
-H(getNamedItemNS,126,1), H(ksort,23,1), H(isWhitespaceInElementContent,73,1), 
-H(argValue,152,1), H(getFile,30,1), H(getTraceAsString,31,1), 
-H(deleteData,72,1), H(deleteByKey,244,1), Z, 
-Z, H(splitText,74,1), H(asort,20,1), 
-H(getAttributeNS,112,1), H(writeDTD,435,1), H(setMulti,242,1), 
-H(getGroup,180,1), H(getExtensionName,303,1), H(getCurrentLocation,167,1), 
+H(getNamedItemNS,127,1), H(ksort,23,1), H(isWhitespaceInElementContent,74,1), 
+H(argValue,153,1), H(getFile,30,1), H(getTraceAsString,31,1), 
+H(deleteData,73,1), H(deleteByKey,245,1), Z, 
+Z, H(splitText,75,1), H(asort,20,1), 
+H(getAttributeNS,113,1), H(writeDTD,435,1), H(setMulti,243,1), 
+H(getGroup,181,1), H(getExtensionName,304,1), H(getCurrentLocation,168,1), 
 Z, H(setVars,34,1), Z, 
 H(startCData,457,1), Z, Z, 
-Z, H(setIDAttributeNode,116,1), Z, 
-Z, H(getByKey,243,1), Z, 
+Z, H(setIDAttributeNode,117,1), Z, 
+Z, H(getByKey,244,1), Z, 
 H(startComment,465,1), Z, Z, 
-H(addString,204,1), Z, H(hasMethod,295,1), 
-H(isDestructor,341,1), H(errorinfo,267,1), H(begintransaction,265,1), 
-H(setcompressthreshold,221,1), Z, Z, 
-H(setoptimeout,220,1), H(getBasename,178,1), H(registerNodeClass,86,1), 
-Z, H(columncount,274,1), H(getElementsByTagName,75,1), 
+H(addString,205,1), Z, H(hasMethod,296,1), 
+H(isDestructor,342,1), H(errorinfo,268,1), H(begintransaction,266,1), 
+H(setcompressthreshold,222,1), Z, Z, 
+H(setoptimeout,221,1), H(getBasename,179,1), H(registerNodeClass,87,1), 
+Z, H(columncount,275,1), H(getElementsByTagName,76,1), 
 Z, Z, Z, 
-H(startDocument,429,1), Z, H(debugdumpparams,281,1), 
-H(seek,21,1), H(getRealPath,185,1), Z, 
-Z, H(allowsNull,344,1), Z, 
-Z, H(setIndent,454,1), H(isPrivate,335,1), 
-H(appendByKey,235,1), H(errorcode,257,1), H(isDot,201,1), 
+H(startDocument,429,1), Z, H(debugdumpparams,282,1), 
+H(seek,21,1), H(getRealPath,186,1), Z, 
+Z, H(allowsNull,345,1), Z, 
+Z, H(setIndent,454,1), H(isPrivate,336,1), 
+H(appendByKey,236,1), H(errorcode,258,1), H(isDot,202,1), 
 Z, Z, Z, 
-H(getFlags,22,1), H(query,127,1), H(getInode,189,1), 
-Z, H(normalizeDocument,103,1), Z, 
-Z, Z, H(getAttributeNodeNS,107,1), 
-H(setattribute,43,1), H(replaceChild,56,1), H(fetcharray,369,1), 
-H(setIDAttribute,115,1), H(setValue,353,1), H(writeElementNS,425,1), 
-H(getCTime,187,1), H(createEntityReference,82,1), Z, 
-H(openblob,363,1), H(isDefaultNamespace,50,1), H(setTime,134,1), 
-H(addFile,212,1), H(open,361,1), Z, 
-Z, H(isPassedByReference,349,1), Z, 
+H(getFlags,22,1), H(query,128,1), H(getInode,190,1), 
+Z, H(normalizeDocument,104,1), Z, 
+Z, Z, H(getAttributeNodeNS,108,1), 
+H(setattribute,43,1), H(replaceChild,56,1), H(fetcharray,370,1), 
+H(setIDAttribute,116,1), H(setValue,354,1), H(writeElementNS,425,1), 
+H(getCTime,188,1), H(createEntityReference,83,1), Z, 
+H(openblob,364,1), H(isDefaultNamespace,50,1), H(setTime,135,1), 
+H(addFile,213,1), H(open,362,1), Z, 
+Z, H(isPassedByReference,350,1), Z, 
 Z, Z, Z, 
-Z, Z, H(exec,258,1), 
+Z, Z, H(exec,259,1), 
 H(flock,418,1), H(isId,51,1), H(endAttribute,462,1), 
 Z, Z, Z, 
-H(fetchAll,249,1), Z, Z, 
-Z, Z, H(ask,146,1), 
+H(fetchAll,250,1), Z, Z, 
+Z, Z, H(ask,147,1), 
 H(isSameNode,63,1), Z, H(writeDTDAttlist,458,1), 
 H(attach,422,1), Z, Z, 
-Z, H(setAccessible,352,1), Z, 
-Z, H(isOptional,347,1), Z, 
-H(getcolumnmeta,270,1), H(getMethods,286,1), Z, 
+Z, H(setAccessible,353,1), Z, 
+Z, H(isOptional,348,1), Z, 
+H(getcolumnmeta,271,1), H(getMethods,287,1), Z, 
 Z, Z, H(fgetss,406,1), 
-H(set,214,1), Z, H(setobject,401,1), 
+H(set,215,1), Z, H(setobject,401,1), 
 Z, Z, Z, 
 Z, Z, Z, 
-Z, H(hasAttributeNS,109,1), Z, 
+Z, H(hasAttributeNS,110,1), Z, 
 H(endComment,434,1), Z, H(detach,423,1), 
 Z, Z, Z, 
 H(setstrength,41,1), Z, Z, 
-H(send,169,1), Z, Z, 
-Z, Z, H(format,131,1), 
-H(loadextension,355,1), H(fault,402,1), H(lastinsertid,259,1), 
+H(send,170,1), Z, Z, 
+Z, Z, H(format,132,1), 
+H(loadextension,356,1), H(fault,402,1), H(lastinsertid,260,1), 
 Z, Z, Z, 
-H(nextrowset,271,1), Z, Z, 
-H(hasChildren,284,1), H(startDTDAttlist,456,1), H(onServer,172,1), 
-H(setAttributeNode,119,1), H(isDefault,351,1), H(endDocument,442,1), 
+H(nextrowset,272,1), Z, Z, 
+H(hasChildren,285,1), H(startDTDAttlist,456,1), H(onServer,173,1), 
+H(setAttributeNode,120,1), H(isDefault,352,1), H(endDocument,442,1), 
 Z, Z, Z, 
-Z, H(loadHTMLFile,99,1), H(bindparam,275,1), 
+Z, H(loadHTMLFile,100,1), H(bindparam,276,1), 
 H(endElement,449,1), H(done,47,1), H(setFlags,17,1), 
-H(flush,229,1), H(addfunction,397,1), Z, 
-H(appendChild,53,1), H(isDefaultValueAvailable,342,1), H(finalize,371,1), 
-H(returnsReference,332,1), Z, Z, 
-H(getResultCode,233,1), Z, Z, 
+H(flush,230,1), H(addfunction,397,1), Z, 
+H(appendChild,53,1), H(isDefaultValueAvailable,343,1), H(finalize,372,1), 
+H(returnsReference,333,1), Z, Z, 
+H(getResultCode,234,1), Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
-Z, H(getStackTrace,154,1), Z, 
-Z, H(pconnect,223,1), H(helpSection,159,1), 
-Z, Z, H(columnname,366,1), 
-H(getNodePath,61,1), H(numcolumns,368,1), Z, 
+Z, H(getStackTrace,155,1), Z, 
+Z, H(pconnect,224,1), H(helpSection,160,1), 
+Z, Z, H(columnname,367,1), 
+H(getNodePath,61,1), H(numcolumns,369,1), Z, 
 Z, Z, Z, 
-Z, H(fgets,417,1), H(hasChildNodes,67,1), 
-H(getNumberOfRequiredParameters,327,1), H(setStaticPropertyValue,317,1), H(args,164,1), 
-H(getConstant,308,1), H(getClosure,334,1), H(startPI,463,1), 
-Z, Z, H(getStartLine,307,1), 
-H(clear,209,1), H(version,354,1), H(escapestring,359,1), 
-H(arg,144,1), Z, H(setISODate,136,1), 
+Z, H(fgets,417,1), H(hasChildNodes,68,1), 
+H(getNumberOfRequiredParameters,328,1), H(setStaticPropertyValue,318,1), H(args,165,1), 
+H(getConstant,309,1), H(getClosure,335,1), H(startPI,463,1), 
+Z, Z, H(getStartLine,308,1), 
+H(clear,210,1), H(version,355,1), H(escapestring,360,1), 
+H(arg,145,1), Z, H(setISODate,137,1), 
 Z, Z, H(__get,65,1), 
 Z, H(endDTDElement,455,1), Z, 
 Z, Z, Z, 
@@ -165,186 +165,186 @@ Z, Z, H(offsetGet,11,1),
 Z, Z, Z, 
 Z, Z, Z, 
 Z, Z, H(startDTD,453,1), 
-H(writeElement,448,1), H(getPerms,176,1), H(validate,77,1), 
-H(getErrors,210,1), H(appendData,70,1), H(startAttribute,447,1), 
-Z, Z, H(xend,148,1), 
-H(offsetSet,13,1), H(addAttribute,375,1), H(hasAttribute,108,1), 
-H(getTransitions,139,1), H(error,147,1), H(isConstructor,339,1), 
+H(writeElement,448,1), H(getPerms,177,1), H(validate,78,1), 
+H(getErrors,211,1), H(appendData,71,1), H(startAttribute,447,1), 
+Z, Z, H(xend,149,1), 
+H(offsetSet,13,1), H(addAttribute,376,1), H(hasAttribute,109,1), 
+H(getTransitions,140,1), H(error,148,1), H(isConstructor,340,1), 
 Z, Z, Z, 
-Z, H(addsoapheader,398,1), H(loadXML,95,1), 
-H(writeComment,432,1), H(getInterfaceNames,306,1), H(isInternal,321,1), 
-H(lastinsertrowid,357,1), Z, Z, 
+Z, H(addsoapheader,398,1), H(loadXML,96,1), 
+H(writeComment,432,1), H(getInterfaceNames,307,1), H(isInternal,322,1), 
+H(lastinsertrowid,358,1), Z, Z, 
 Z, Z, Z, 
-Z, Z, H(__isset,384,1), 
-H(substringData,68,1), H(writeDTDElement,443,1), H(helpTitle,149,1), 
-H(getFrame,162,1), Z, Z, 
-Z, Z, H(increment,216,1), 
-Z, Z, H(listAbbreviations,141,1), 
-H(create,42,1), H(isAbstract,320,1), H(createfunction,356,1), 
+Z, Z, H(__isset,67,1), 
+H(substringData,69,1), H(writeDTDElement,443,1), H(helpTitle,150,1), 
+H(getFrame,163,1), Z, Z, 
+Z, Z, H(increment,217,1), 
+Z, Z, H(listAbbreviations,142,1), 
+H(create,42,1), H(isAbstract,321,1), H(createfunction,357,1), 
 H(startDTDElement,440,1), Z, H(endDTDEntity,436,1), 
-Z, H(getStaticVariables,329,1), H(writeAttribute,433,1), 
-H(openMemory,460,1), Z, H(getEndLine,294,1), 
-H(insertData,69,1), Z, H(getFunctions,323,1), 
-H(setByKey,234,1), Z, H(getDelayed,236,1), 
-H(isnormalized,256,1), Z, H(ftell,419,1), 
-H(replace,228,1), H(print,157,1), H(help,163,1), 
+Z, H(getStaticVariables,330,1), H(writeAttribute,433,1), 
+H(openMemory,460,1), Z, H(getEndLine,295,1), 
+H(insertData,70,1), Z, H(getFunctions,324,1), 
+H(setByKey,235,1), Z, H(getDelayed,237,1), 
+H(isnormalized,257,1), Z, H(ftell,419,1), 
+H(replace,229,1), H(print,158,1), H(help,164,1), 
 H(lookupPrefix,59,1), Z, Z, 
-Z, H(__sleep,268,1), Z, 
-H(unserialize,373,1), Z, Z, 
-Z, H(replaceByKey,240,1), H(isFile,193,1), 
-H(getFileInfo,197,1), H(__soapcall,390,1), H(importNode,91,1), 
-H(save,96,1), H(prepare,266,1), H(isInterface,311,1), 
-H(getClasses,326,1), H(commit,262,1), H(getPosition,345,1), 
-H(saveHTML,94,1), H(helpCmds,145,1), H(rowcount,277,1), 
+Z, H(__sleep,269,1), Z, 
+H(unserialize,374,1), Z, Z, 
+Z, H(replaceByKey,241,1), H(isFile,194,1), 
+H(getFileInfo,198,1), H(__soapcall,390,1), H(importNode,92,1), 
+H(save,97,1), H(prepare,267,1), H(isInterface,312,1), 
+H(getClasses,327,1), H(commit,263,1), H(getPosition,346,1), 
+H(saveHTML,95,1), H(helpCmds,146,1), H(rowcount,278,1), 
 Z, Z, Z, 
 Z, Z, Z, 
 H(endPI,452,1), Z, Z, 
-Z, Z, H(getNamespaces,378,1), 
+Z, Z, H(getNamespaces,379,1), 
 Z, Z, Z, 
 Z, Z, Z, 
 Z, H(uasort,24,1), Z, 
-Z, H(serialize,374,1), H(startElement,438,1), 
+Z, H(serialize,375,1), H(startElement,438,1), 
 Z, H(count,15,1), Z, 
 Z, Z, Z, 
-H(getDefaultProperties,316,1), H(current,7,1), Z, 
-H(getClassNames,325,1), H(getParameters,330,1), H(getValue,350,1), 
-H(startDTDEntity,430,1), Z, H(getExtension,291,1), 
-H(fpassthru,416,1), H(schemaValidateSource,79,1), H(getattribute,35,1), 
+H(getDefaultProperties,317,1), H(current,7,1), Z, 
+H(getClassNames,326,1), H(getParameters,331,1), H(getValue,351,1), 
+H(startDTDEntity,430,1), Z, H(getExtension,292,1), 
+H(fpassthru,416,1), H(schemaValidateSource,80,1), H(getattribute,35,1), 
 Z, Z, Z, 
 Z, Z, Z, 
 Z, Z, H(sortwithsortkeys,36,1), 
-Z, Z, H(createElementNS,90,1), 
-H(getConstants,309,1), Z, Z, 
-Z, H(loadImages,208,1), H(setpersistence,399,1), 
-H(getProperty,322,1), H(onAutoComplete,170,1), H(openFile,200,1), 
+Z, Z, H(createElementNS,91,1), 
+H(getConstants,310,1), Z, Z, 
+Z, H(loadImages,209,1), H(setpersistence,399,1), 
+H(getProperty,323,1), H(onAutoComplete,171,1), H(openFile,201,1), 
 Z, Z, H(fullEndElement,426,1), 
-H(code,158,1), Z, Z, 
+H(code,159,1), Z, Z, 
 Z, Z, Z, 
-Z, H(attributes,385,1), H(addByKey,248,1), 
+Z, H(attributes,385,1), H(addByKey,249,1), 
 Z, Z, H(getInnerIterator,4,1), 
 Z, Z, H(removeChild,64,1), 
-H(getMTime,195,1), H(getDelayedByKey,241,1), Z, 
-Z, Z, H(fetchobject,279,1), 
+H(getMTime,196,1), H(getDelayedByKey,242,1), Z, 
+Z, Z, H(fetchobject,280,1), 
 Z, Z, Z, 
-H(createCDATASection,76,1), H(isDir,196,1), Z, 
-Z, H(getSeverity,203,1), Z, 
-Z, Z, H(getElementById,101,1), 
-Z, Z, H(getModifiers,298,1), 
-Z, Z, H(addUrl,211,1), 
-Z, H(setMultiByKey,250,1), H(writeDTDEntity,451,1), 
+H(createCDATASection,77,1), H(isDir,197,1), Z, 
+Z, H(getSeverity,204,1), Z, 
+Z, Z, H(getElementById,102,1), 
+Z, Z, H(getModifiers,299,1), 
+Z, Z, H(addUrl,212,1), 
+Z, H(setMultiByKey,251,1), H(writeDTDEntity,451,1), 
 Z, Z, Z, 
-H(insertBefore,49,1), H(setInfoClass,182,1), H(valid,3,1), 
+H(insertBefore,49,1), H(setInfoClass,183,1), H(valid,3,1), 
 H(geterrormessage,45,1), H(fstat,421,1), H(getArrayCopy,14,1), 
-Z, H(isWritable,177,1), Z, 
-H(getCsvControl,409,1), H(endCData,431,1), H(getPathInfo,186,1), 
-Z, Z, H(createDocument,120,1), 
-Z, H(lasterrormsg,358,1), Z, 
-H(setfetchmode,273,1), H(hasAttributes,57,1), Z, 
-H(setFileClass,181,1), H(isStatic,337,1), H(createDocumentFragment,104,1), 
-H(getNumberOfParameters,328,1), H(getMaxLineLen,411,1), H(saveHTMLFile,100,1), 
-H(setOption,237,1), H(setTimezone,137,1), H(getIterator,125,1), 
-Z, H(removeAttribute,118,1), Z, 
-Z, H(prependByKey,255,1), H(setMaxLineLen,410,1), 
-H(getStaticPropertyValue,288,1), Z, H(getStaticProperties,315,1), 
-H(eof,413,1), Z, H(getName,142,1), 
-H(getOffset,133,1), H(getDocNamespaces,381,1), Z, 
-Z, H(getParentClass,304,1), Z, 
-H(getversion,225,1), Z, Z, 
+Z, H(isWritable,178,1), Z, 
+H(getCsvControl,409,1), H(endCData,431,1), H(getPathInfo,187,1), 
+Z, Z, H(createDocument,121,1), 
+Z, H(lasterrormsg,359,1), Z, 
+H(setfetchmode,274,1), H(hasAttributes,57,1), Z, 
+H(setFileClass,182,1), H(isStatic,338,1), H(createDocumentFragment,105,1), 
+H(getNumberOfParameters,329,1), H(getMaxLineLen,411,1), H(saveHTMLFile,101,1), 
+H(setOption,238,1), H(setTimezone,138,1), H(getIterator,126,1), 
+Z, H(removeAttribute,119,1), Z, 
+Z, H(prependByKey,256,1), H(setMaxLineLen,410,1), 
+H(getStaticPropertyValue,289,1), Z, H(getStaticProperties,316,1), 
+H(eof,413,1), Z, H(getName,143,1), 
+H(getOffset,134,1), H(getDocNamespaces,382,1), Z, 
+Z, H(getParentClass,305,1), Z, 
+H(getversion,226,1), Z, Z, 
 H(startAttributens,437,1), Z, Z, 
-H(invoke,333,1), H(listIdentifiers,140,1), H(append,5,1), 
-H(__setcookie,389,1), H(lasterrorcode,364,1), H(setIDAttributeNS,106,1), 
+H(invoke,334,1), H(listIdentifiers,141,1), H(append,5,1), 
+H(__setcookie,389,1), H(lasterrorcode,365,1), H(setIDAttributeNS,107,1), 
 Z, Z, Z, 
-H(children,382,1), Z, Z, 
+H(children,383,1), Z, Z, 
 Z, Z, Z, 
-Z, H(getConstructor,292,1), H(wrap,168,1), 
+Z, H(getConstructor,293,1), H(wrap,169,1), 
 Z, Z, Z, 
-H(createaggregate,360,1), Z, Z, 
+H(createaggregate,361,1), Z, Z, 
 H(writePI,445,1), Z, Z, 
-Z, Z, H(hasFeature,122,1), 
-Z, H(hasProperty,313,1), H(getINIEntries,324,1), 
-H(createAttributens,88,1), H(getServerByKey,246,1), H(fseek,405,1), 
-H(fetchcolumn,269,1), H(hasConstant,301,1), Z, 
+Z, Z, H(hasFeature,123,1), 
+Z, H(hasProperty,314,1), H(getINIEntries,325,1), 
+H(createAttributens,89,1), H(getServerByKey,247,1), H(fseek,405,1), 
+H(fetchcolumn,270,1), H(hasConstant,302,1), Z, 
 Z, Z, Z, 
-Z, H(getPath,188,1), H(getType,202,1), 
+Z, H(getPath,189,1), H(getType,203,1), 
 H(fscanf,404,1), Z, Z, 
-Z, Z, H(loadHTML,81,1), 
-H(getSubPath,283,1), Z, Z, 
-H(writeCData,441,1), Z, H(__unset,379,1), 
-H(handle,400,1), H(relaxNGValidateSource,92,1), H(sort,38,1), 
+Z, Z, H(loadHTML,82,1), 
+H(getSubPath,284,1), Z, Z, 
+H(writeCData,441,1), Z, H(__unset,380,1), 
+H(handle,400,1), H(relaxNGValidateSource,93,1), H(sort,38,1), 
 H(fgetcsv,407,1), Z, Z, 
-H(read,175,1), H(getLineNo,48,1), Z, 
-Z, H(close,174,1), H(loadDims,205,1), 
-Z, Z, H(evaluate,128,1), 
+H(read,176,1), H(getLineNo,48,1), Z, 
+Z, H(close,175,1), H(loadDims,206,1), 
+Z, Z, H(evaluate,129,1), 
 Z, H(endDTDAttlist,427,1), Z, 
 Z, H(__getlastrequest,387,1), Z, 
-H(relaxNGValidate,80,1), Z, Z, 
+H(relaxNGValidate,81,1), Z, Z, 
 Z, Z, Z, 
 H(lookupNamespaceUri,52,1), H(__gettypes,396,1), H(fgetc,415,1), 
 Z, Z, Z, 
 H(offsetUnset,12,1), Z, Z, 
-H(__setsoapheaders,388,1), Z, H(setDate,132,1), 
-Z, Z, H(getATime,198,1), 
-H(columntype,367,1), H(c14n,58,1), H(getDeclaringClass,338,1), 
-H(removeAttributeNode,117,1), Z, H(isUserDefined,289,1), 
-H(getLinkTarget,183,1), Z, Z, 
-H(getavailabledrivers,263,1), H(setAttributeNodeNS,110,1), Z, 
-H(getChildren,285,1), H(removeAttributeNS,113,1), Z, 
-Z, H(setIndentString,446,1), H(export,299,1), 
-Z, H(getPathname,179,1), H(__getfunctions,393,1), 
-H(add,224,1), H(fwrite,420,1), Z, 
+H(__setsoapheaders,388,1), Z, H(setDate,133,1), 
+Z, Z, H(getATime,199,1), 
+H(columntype,368,1), H(c14n,58,1), H(getDeclaringClass,339,1), 
+H(removeAttributeNode,118,1), Z, H(isUserDefined,290,1), 
+H(getLinkTarget,184,1), Z, Z, 
+H(getavailabledrivers,264,1), H(setAttributeNodeNS,111,1), Z, 
+H(getChildren,286,1), H(removeAttributeNS,114,1), Z, 
+Z, H(setIndentString,446,1), H(export,300,1), 
+Z, H(getPathname,180,1), H(__getfunctions,393,1), 
+H(add,225,1), H(fwrite,420,1), Z, 
 Z, Z, Z, 
-Z, H(modify,138,1), H(addChild,383,1), 
-H(output,153,1), Z, Z, 
-H(getElementsByTagNameNS,78,1), H(fetch,252,1), Z, 
+Z, H(modify,139,1), H(addChild,384,1), 
+H(output,154,1), Z, Z, 
+H(getElementsByTagNameNS,79,1), H(fetch,253,1), Z, 
 Z, Z, Z, 
-H(isProtected,336,1), H(getDocComment,310,1), H(offsetExists,10,1), 
+H(isProtected,337,1), H(getDocComment,311,1), H(offsetExists,10,1), 
 Z, Z, Z, 
-Z, H(argRest,166,1), H(setclass,403,1), 
+Z, H(argRest,167,1), H(setclass,403,1), 
 H(writeAttributeNS,444,1), H(getTrace,32,1), Z, 
-Z, H(changes,362,1), Z, 
+Z, H(changes,363,1), Z, 
 Z, Z, Z, 
-H(replaceData,71,1), H(closecursor,276,1), H(isPublic,340,1), 
-H(registerXPathNamespace,377,1), H(__construct,6,1), H(__dorequest,386,1), 
+H(replaceData,72,1), H(closecursor,277,1), H(isPublic,341,1), 
+H(registerXPathNamespace,378,1), H(__construct,6,1), H(__dorequest,386,1), 
 H(getLine,28,1), H(getCode,27,1), Z, 
-H(writeRaw,450,1), Z, H(createTextNode,93,1), 
-H(tutorial,151,1), H(fflush,414,1), H(createElement,89,1), 
+H(writeRaw,450,1), Z, H(createTextNode,94,1), 
+H(tutorial,152,1), H(fflush,414,1), H(createElement,90,1), 
 Z, Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
 H(startElementNS,439,1), Z, Z, 
-Z, H(mapping,206,1), Z, 
-H(getextendedstats,230,1), Z, Z, 
-Z, H(createDocumentType,121,1), Z, 
-H(getInterfaces,319,1), H(next,1,1), H(normalize,60,1), 
-H(isFinal,297,1), H(getClass,343,1), Z, 
-H(getServerList,247,1), Z, Z, 
+Z, H(mapping,207,1), Z, 
+H(getextendedstats,231,1), Z, Z, 
+Z, H(createDocumentType,122,1), Z, 
+H(getInterfaces,320,1), H(next,1,1), H(normalize,60,1), 
+H(isFinal,298,1), H(getClass,344,1), Z, 
+H(getServerList,248,1), Z, Z, 
 H(getMessage,25,1), Z, Z, 
-H(bindcolumn,272,1), H(rewind,9,1), H(getMultiByKey,251,1), 
-H(getTimezone,135,1), Z, H(contains,424,1), 
-Z, H(c14nfile,62,1), H(addServers,253,1), 
-H(isInstance,296,1), H(ftruncate,412,1), H(decrement,217,1), 
-H(createProcessingInstruction,85,1), H(get,222,1), H(isReadable,184,1), 
+H(bindcolumn,273,1), H(rewind,9,1), H(getMultiByKey,252,1), 
+H(getTimezone,136,1), Z, H(contains,424,1), 
+Z, H(c14nfile,62,1), H(addServers,254,1), 
+H(isInstance,297,1), H(ftruncate,412,1), H(decrement,218,1), 
+H(createProcessingInstruction,86,1), H(get,223,1), H(isReadable,185,1), 
 H(isSupported,66,1), Z, Z, 
-Z, H(registerPHPFunctions,129,1), H(casByKey,239,1), 
-Z, H(helpBody,161,1), Z, 
-H(uksort,18,1), H(isSubclassOf,312,1), H(text,464,1), 
-H(quit,160,1), Z, H(registerNamespace,130,1), 
-H(info,155,1), Z, Z, 
+Z, H(registerPHPFunctions,130,1), H(casByKey,240,1), 
+Z, H(helpBody,162,1), Z, 
+H(uksort,18,1), H(isSubclassOf,313,1), H(text,464,1), 
+H(quit,161,1), Z, H(registerNamespace,131,1), 
+H(info,156,1), Z, Z, 
 H(__getlastresponseheaders,394,1), Z, Z, 
-H(onClient,171,1), H(getResultMessage,232,1), Z, 
-H(getAttributeNode,114,1), Z, H(schemaValidate,83,1), 
+H(onClient,172,1), H(getResultMessage,233,1), Z, 
+H(getAttributeNode,115,1), Z, H(schemaValidate,84,1), 
 Z, Z, Z, 
-Z, Z, H(asXML,380,1), 
-H(getstats,218,1), Z, H(__toString,26,1), 
-H(__wakeup,260,1), H(delete,226,1), Z, 
-Z, H(isInstantiable,318,1), Z, 
+Z, Z, H(asXML,381,1), 
+H(getstats,219,1), Z, H(__toString,26,1), 
+H(__wakeup,261,1), H(delete,227,1), Z, 
+Z, H(isInstantiable,319,1), Z, 
 Z, Z, H(setCsvControl,408,1), 
 Z, H(__init__,29,1), Z, 
 Z, Z, H(__getlastrequestheaders,392,1), 
 Z, Z, Z, 
-H(isExecutable,199,1), Z, H(getNamedItem,123,1), 
-Z, H(addCompletion,165,1), H(getFilename,192,1)
+H(isExecutable,200,1), Z, H(getNamedItem,124,1), 
+Z, H(addCompletion,166,1), H(getFilename,193,1)
 };
 #undef M
 #undef H
@@ -390,70 +390,70 @@ const char * g_methodIndexReverseIndexSys[] = {
 "isId", "lookupNamespaceUri", "appendChild", "__set", "cloneNode", 
 "replaceChild", "hasAttributes", "c14n", "lookupPrefix", "normalize", 
 "getNodePath", "c14nfile", "isSameNode", "removeChild", "__get", 
-"isSupported", "hasChildNodes", "substringData", "insertData", "appendData", 
-"replaceData", "deleteData", "isWhitespaceInElementContent", "splitText", "getElementsByTagName", 
-"createCDATASection", "validate", "getElementsByTagNameNS", "schemaValidateSource", "relaxNGValidate", 
-"loadHTML", "createEntityReference", "schemaValidate", "saveXML", "createProcessingInstruction", 
-"registerNodeClass", "load", "createAttributens", "createElement", "createElementNS", 
-"importNode", "relaxNGValidateSource", "createTextNode", "saveHTML", "loadXML", 
-"save", "createAttribute", "xinclude", "loadHTMLFile", "saveHTMLFile", 
-"getElementById", "createComment", "normalizeDocument", "createDocumentFragment", "appendXML", 
-"setIDAttributeNS", "getAttributeNodeNS", "hasAttribute", "hasAttributeNS", "setAttributeNodeNS", 
-"setAttributeNS", "getAttributeNS", "removeAttributeNS", "getAttributeNode", "setIDAttribute", 
-"setIDAttributeNode", "removeAttributeNode", "removeAttribute", "setAttributeNode", "createDocument", 
-"createDocumentType", "hasFeature", "getNamedItem", "item", "getIterator", 
-"getNamedItemNS", "query", "evaluate", "registerPHPFunctions", "registerNamespace", 
-"format", "setDate", "getOffset", "setTime", "getTimezone", 
-"setISODate", "setTimezone", "modify", "getTransitions", "listIdentifiers", 
-"listAbbreviations", "getName", "argCount", "arg", "helpCmds", 
-"ask", "error", "xend", "helpTitle", "getCommand", 
-"tutorial", "argValue", "output", "getStackTrace", "info", 
-"printFrame", "print", "code", "helpSection", "quit", 
-"helpBody", "getFrame", "help", "args", "addCompletion", 
-"argRest", "getCurrentLocation", "wrap", "send", "onAutoComplete", 
-"onClient", "onServer", "isLocal", "close", "read", 
-"getPerms", "isWritable", "getBasename", "getPathname", "getGroup", 
-"setFileClass", "setInfoClass", "getLinkTarget", "isReadable", "getRealPath", 
-"getPathInfo", "getCTime", "getPath", "getInode", "isLink", 
-"getSize", "getFilename", "isFile", "getOwner", "getMTime", 
-"isDir", "getFileInfo", "getATime", "isExecutable", "openFile", 
-"isDot", "getType", "getSeverity", "addString", "loadDims", 
-"mapping", "css", "loadImages", "clear", "getErrors", 
-"addUrl", "addFile", "addserver", "set", "setserverparams", 
-"increment", "decrement", "getstats", "getserverstatus", "setoptimeout", 
-"setcompressthreshold", "get", "pconnect", "add", "getversion", 
-"delete", "connect", "replace", "flush", "getextendedstats", 
-"getMulti", "getResultMessage", "getResultCode", "setByKey", "appendByKey", 
-"getDelayed", "setOption", "prepend", "casByKey", "replaceByKey", 
-"getDelayedByKey", "setMulti", "getByKey", "deleteByKey", "getOption", 
-"getServerByKey", "getServerList", "addByKey", "fetchAll", "setMultiByKey", 
-"getMultiByKey", "fetch", "addServers", "cas", "prependByKey", 
-"isnormalized", "errorcode", "exec", "lastinsertid", "__wakeup", 
-"rollback", "commit", "getavailabledrivers", "quote", "begintransaction", 
-"prepare", "errorinfo", "__sleep", "fetchcolumn", "getcolumnmeta", 
-"nextrowset", "bindcolumn", "setfetchmode", "columncount", "bindparam", 
-"closecursor", "rowcount", "execute", "fetchobject", "bindvalue", 
-"debugdumpparams", "getSubPathname", "getSubPath", "hasChildren", "getChildren", 
-"getMethods", "isIterateable", "getStaticPropertyValue", "isUserDefined", "newInstance", 
-"getExtension", "getConstructor", "newInstanceArgs", "getEndLine", "hasMethod", 
-"isInstance", "isFinal", "getModifiers", "export", "getProperties", 
-"hasConstant", "getMethod", "getExtensionName", "getParentClass", "implementsInterface", 
-"getInterfaceNames", "getStartLine", "getConstant", "getConstants", "getDocComment", 
-"isInterface", "isSubclassOf", "hasProperty", "test", "getStaticProperties", 
-"getDefaultProperties", "setStaticPropertyValue", "isInstantiable", "getInterfaces", "isAbstract", 
-"isInternal", "getProperty", "getFunctions", "getINIEntries", "getClassNames", 
-"getClasses", "getNumberOfRequiredParameters", "getNumberOfParameters", "getStaticVariables", "getParameters", 
-"invokeArgs", "returnsReference", "invoke", "getClosure", "isPrivate", 
-"isProtected", "isStatic", "getDeclaringClass", "isConstructor", "isPublic", 
-"isDestructor", "isDefaultValueAvailable", "getClass", "allowsNull", "getPosition", 
-"isArray", "isOptional", "getDefaultValue", "isPassedByReference", "getValue", 
-"isDefault", "setAccessible", "setValue", "version", "loadextension", 
-"createfunction", "lastinsertrowid", "lasterrormsg", "escapestring", "createaggregate", 
-"open", "changes", "openblob", "lasterrorcode", "querysingle", 
-"columnname", "columntype", "numcolumns", "fetcharray", "reset", 
-"finalize", "paramcount", "unserialize", "serialize", "addAttribute", 
-"xpath", "registerXPathNamespace", "getNamespaces", "__unset", "asXML", 
-"getDocNamespaces", "children", "addChild", "__isset", "attributes", 
+"isSupported", "__isset", "hasChildNodes", "substringData", "insertData", 
+"appendData", "replaceData", "deleteData", "isWhitespaceInElementContent", "splitText", 
+"getElementsByTagName", "createCDATASection", "validate", "getElementsByTagNameNS", "schemaValidateSource", 
+"relaxNGValidate", "loadHTML", "createEntityReference", "schemaValidate", "saveXML", 
+"createProcessingInstruction", "registerNodeClass", "load", "createAttributens", "createElement", 
+"createElementNS", "importNode", "relaxNGValidateSource", "createTextNode", "saveHTML", 
+"loadXML", "save", "createAttribute", "xinclude", "loadHTMLFile", 
+"saveHTMLFile", "getElementById", "createComment", "normalizeDocument", "createDocumentFragment", 
+"appendXML", "setIDAttributeNS", "getAttributeNodeNS", "hasAttribute", "hasAttributeNS", 
+"setAttributeNodeNS", "setAttributeNS", "getAttributeNS", "removeAttributeNS", "getAttributeNode", 
+"setIDAttribute", "setIDAttributeNode", "removeAttributeNode", "removeAttribute", "setAttributeNode", 
+"createDocument", "createDocumentType", "hasFeature", "getNamedItem", "item", 
+"getIterator", "getNamedItemNS", "query", "evaluate", "registerPHPFunctions", 
+"registerNamespace", "format", "setDate", "getOffset", "setTime", 
+"getTimezone", "setISODate", "setTimezone", "modify", "getTransitions", 
+"listIdentifiers", "listAbbreviations", "getName", "argCount", "arg", 
+"helpCmds", "ask", "error", "xend", "helpTitle", 
+"getCommand", "tutorial", "argValue", "output", "getStackTrace", 
+"info", "printFrame", "print", "code", "helpSection", 
+"quit", "helpBody", "getFrame", "help", "args", 
+"addCompletion", "argRest", "getCurrentLocation", "wrap", "send", 
+"onAutoComplete", "onClient", "onServer", "isLocal", "close", 
+"read", "getPerms", "isWritable", "getBasename", "getPathname", 
+"getGroup", "setFileClass", "setInfoClass", "getLinkTarget", "isReadable", 
+"getRealPath", "getPathInfo", "getCTime", "getPath", "getInode", 
+"isLink", "getSize", "getFilename", "isFile", "getOwner", 
+"getMTime", "isDir", "getFileInfo", "getATime", "isExecutable", 
+"openFile", "isDot", "getType", "getSeverity", "addString", 
+"loadDims", "mapping", "css", "loadImages", "clear", 
+"getErrors", "addUrl", "addFile", "addserver", "set", 
+"setserverparams", "increment", "decrement", "getstats", "getserverstatus", 
+"setoptimeout", "setcompressthreshold", "get", "pconnect", "add", 
+"getversion", "delete", "connect", "replace", "flush", 
+"getextendedstats", "getMulti", "getResultMessage", "getResultCode", "setByKey", 
+"appendByKey", "getDelayed", "setOption", "prepend", "casByKey", 
+"replaceByKey", "getDelayedByKey", "setMulti", "getByKey", "deleteByKey", 
+"getOption", "getServerByKey", "getServerList", "addByKey", "fetchAll", 
+"setMultiByKey", "getMultiByKey", "fetch", "addServers", "cas", 
+"prependByKey", "isnormalized", "errorcode", "exec", "lastinsertid", 
+"__wakeup", "rollback", "commit", "getavailabledrivers", "quote", 
+"begintransaction", "prepare", "errorinfo", "__sleep", "fetchcolumn", 
+"getcolumnmeta", "nextrowset", "bindcolumn", "setfetchmode", "columncount", 
+"bindparam", "closecursor", "rowcount", "execute", "fetchobject", 
+"bindvalue", "debugdumpparams", "getSubPathname", "getSubPath", "hasChildren", 
+"getChildren", "getMethods", "isIterateable", "getStaticPropertyValue", "isUserDefined", 
+"newInstance", "getExtension", "getConstructor", "newInstanceArgs", "getEndLine", 
+"hasMethod", "isInstance", "isFinal", "getModifiers", "export", 
+"getProperties", "hasConstant", "getMethod", "getExtensionName", "getParentClass", 
+"implementsInterface", "getInterfaceNames", "getStartLine", "getConstant", "getConstants", 
+"getDocComment", "isInterface", "isSubclassOf", "hasProperty", "test", 
+"getStaticProperties", "getDefaultProperties", "setStaticPropertyValue", "isInstantiable", "getInterfaces", 
+"isAbstract", "isInternal", "getProperty", "getFunctions", "getINIEntries", 
+"getClassNames", "getClasses", "getNumberOfRequiredParameters", "getNumberOfParameters", "getStaticVariables", 
+"getParameters", "invokeArgs", "returnsReference", "invoke", "getClosure", 
+"isPrivate", "isProtected", "isStatic", "getDeclaringClass", "isConstructor", 
+"isPublic", "isDestructor", "isDefaultValueAvailable", "getClass", "allowsNull", 
+"getPosition", "isArray", "isOptional", "getDefaultValue", "isPassedByReference", 
+"getValue", "isDefault", "setAccessible", "setValue", "version", 
+"loadextension", "createfunction", "lastinsertrowid", "lasterrormsg", "escapestring", 
+"createaggregate", "open", "changes", "openblob", "lasterrorcode", 
+"querysingle", "columnname", "columntype", "numcolumns", "fetcharray", 
+"reset", "finalize", "paramcount", "unserialize", "serialize", 
+"addAttribute", "xpath", "registerXPathNamespace", "getNamespaces", "__unset", 
+"asXML", "getDocNamespaces", "children", "addChild", "attributes", 
 "__dorequest", "__getlastrequest", "__setsoapheaders", "__setcookie", "__soapcall", 
 "__setlocation", "__getlastrequestheaders", "__getfunctions", "__getlastresponseheaders", "__getlastresponse", 
 "__gettypes", "addfunction", "addsoapheader", "setpersistence", "handle", 
@@ -1155,6 +1155,24 @@ Variant c_DOMText::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         return (t_iswhitespaceinelementcontent());
       }
       break;
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(a0));
+      }
+      break;
     case 15:
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         Variant a0;
@@ -1204,6 +1222,7 @@ CallInfo c_DOMText::ci___construct((void*)&c_DOMText::i___construct, (void*)&c_D
 CallInfo c_DOMText::ci___get((void*)&c_DOMText::i___get, (void*)&c_DOMText::ifa___get, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMText::ci_iswhitespaceinelementcontent((void*)&c_DOMText::i_iswhitespaceinelementcontent, (void*)&c_DOMText::ifa_iswhitespaceinelementcontent, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMText::ci_splittext((void*)&c_DOMText::i_splittext, (void*)&c_DOMText::ifa_splittext, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMText::ci___isset((void*)&c_DOMText::i___isset, (void*)&c_DOMText::ifa___isset, 1, 4, 0x0000000000000000LL);
 Variant c_DOMText::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMText *self = NULL;
@@ -1298,6 +1317,23 @@ Variant c_DOMText::i_splittext(MethodCallPackage &mcp, CArrRef params) {
     return (self->t_splittext(arg0));
   }
 }
+Variant c_DOMText::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_DOMText *self = NULL;
+  p_DOMText pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMText*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___isset(arg0));
+  }
+}
 Variant c_DOMText::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DOMText *self = NULL;
   p_DOMText pobj;
@@ -1370,6 +1406,18 @@ Variant c_DOMText::ifa_splittext(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   CVarRef arg0((a0));
   return (self->t_splittext(arg0));
 }
+Variant c_DOMText::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_DOMText *self = NULL;
+  p_DOMText pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMText*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t___isset(arg0));
+}
 bool c_DOMText::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (mcp.name);
   if (hash < 0) hash = s->hash();
@@ -1395,6 +1443,12 @@ bool c_DOMText::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
     case 13:
       HASH_GUARD_LITSTR(0x28FBAB4F0F6C02DDLL, NAMSTR(s_sys_ssf4c6e0f5, "isWhitespaceInElementContent")) {
         mcp.ci = &c_DOMText::ci_iswhitespaceinelementcontent;
+        return true;
+      }
+      break;
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        mcp.ci = &c_DOMText::ci___isset;
         return true;
       }
       break;
@@ -3793,7 +3847,7 @@ void c_DOMDocumentType::cloneSet(c_DOMDocumentType *clone) {
 }
 Variant c_DOMDocumentType::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 3:
       HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -3830,7 +3884,25 @@ Variant c_DOMDocumentType::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         return (t___set(a0, a1));
       }
       break;
-    case 7:
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(a0));
+      }
+      break;
+    case 15:
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -3872,6 +3944,7 @@ CallInfo c_DOMDocumentType::ci___destruct((void*)&c_DOMDocumentType::i___destruc
 CallInfo c_DOMDocumentType::ci___set((void*)&c_DOMDocumentType::i___set, (void*)&c_DOMDocumentType::ifa___set, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMDocumentType::ci___construct((void*)&c_DOMDocumentType::i___construct, (void*)&c_DOMDocumentType::ifa___construct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMDocumentType::ci___get((void*)&c_DOMDocumentType::i___get, (void*)&c_DOMDocumentType::ifa___get, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocumentType::ci___isset((void*)&c_DOMDocumentType::i___isset, (void*)&c_DOMDocumentType::ifa___isset, 1, 4, 0x0000000000000000LL);
 Variant c_DOMDocumentType::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMDocumentType *self = NULL;
@@ -3931,6 +4004,23 @@ Variant c_DOMDocumentType::i___get(MethodCallPackage &mcp, CArrRef params) {
     return (self->t___get(arg0));
   }
 }
+Variant c_DOMDocumentType::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_DOMDocumentType *self = NULL;
+  p_DOMDocumentType pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMDocumentType*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___isset(arg0));
+  }
+}
 Variant c_DOMDocumentType::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DOMDocumentType *self = NULL;
   p_DOMDocumentType pobj;
@@ -3978,10 +4068,22 @@ Variant c_DOMDocumentType::ifa___get(MethodCallPackage &mcp, int count, INVOKE_F
   CVarRef arg0((a0));
   return (self->t___get(arg0));
 }
+Variant c_DOMDocumentType::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_DOMDocumentType *self = NULL;
+  p_DOMDocumentType pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMDocumentType*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t___isset(arg0));
+}
 bool c_DOMDocumentType::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (mcp.name);
   if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 3:
       HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
         mcp.ci = &c_DOMDocumentType::ci___destruct;
@@ -3994,7 +4096,13 @@ bool c_DOMDocumentType::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
         return true;
       }
       break;
-    case 7:
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        mcp.ci = &c_DOMDocumentType::ci___isset;
+        return true;
+      }
+      break;
+    case 15:
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         mcp.ci = &c_DOMDocumentType::ci___construct;
         return true;
@@ -4819,6 +4927,24 @@ Variant c_DOMNodeList::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         return (t_item(a0));
       }
       break;
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(a0));
+      }
+      break;
     case 15:
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4863,6 +4989,7 @@ CallInfo c_DOMNodeList::ci___set((void*)&c_DOMNodeList::i___set, (void*)&c_DOMNo
 CallInfo c_DOMNodeList::ci___construct((void*)&c_DOMNodeList::i___construct, (void*)&c_DOMNodeList::ifa___construct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMNodeList::ci_getiterator((void*)&c_DOMNodeList::i_getiterator, (void*)&c_DOMNodeList::ifa_getiterator, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMNodeList::ci___get((void*)&c_DOMNodeList::i___get, (void*)&c_DOMNodeList::ifa___get, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMNodeList::ci___isset((void*)&c_DOMNodeList::i___isset, (void*)&c_DOMNodeList::ifa___isset, 1, 4, 0x0000000000000000LL);
 Variant c_DOMNodeList::i_item(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMNodeList *self = NULL;
@@ -4951,6 +5078,23 @@ Variant c_DOMNodeList::i___get(MethodCallPackage &mcp, CArrRef params) {
     return (self->t___get(arg0));
   }
 }
+Variant c_DOMNodeList::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_DOMNodeList *self = NULL;
+  p_DOMNodeList pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMNodeList*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___isset(arg0));
+  }
+}
 Variant c_DOMNodeList::ifa_item(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DOMNodeList *self = NULL;
   p_DOMNodeList pobj;
@@ -5021,6 +5165,18 @@ Variant c_DOMNodeList::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   CVarRef arg0((a0));
   return (self->t___get(arg0));
 }
+Variant c_DOMNodeList::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_DOMNodeList *self = NULL;
+  p_DOMNodeList pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMNodeList*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t___isset(arg0));
+}
 bool c_DOMNodeList::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (mcp.name);
   if (hash < 0) hash = s->hash();
@@ -5044,6 +5200,12 @@ bool c_DOMNodeList::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
     case 6:
       HASH_GUARD_LITSTR(0x0A41DBE0830902C6LL, NAMSTR(s_sys_ss1247a693, "item")) {
         mcp.ci = &c_DOMNodeList::ci_item;
+        return true;
+      }
+      break;
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        mcp.ci = &c_DOMNodeList::ci___isset;
         return true;
       }
       break;
@@ -5608,6 +5770,24 @@ Variant c_DOMCharacterData::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         return (t_appenddata(a0));
       }
       break;
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(a0));
+      }
+      break;
     case 15:
       HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         Variant a0;
@@ -5785,6 +5965,7 @@ CallInfo c_DOMCharacterData::ci_appenddata((void*)&c_DOMCharacterData::i_appendd
 CallInfo c_DOMCharacterData::ci___get((void*)&c_DOMCharacterData::i___get, (void*)&c_DOMCharacterData::ifa___get, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMCharacterData::ci_replacedata((void*)&c_DOMCharacterData::i_replacedata, (void*)&c_DOMCharacterData::ifa_replacedata, 3, 4, 0x0000000000000000LL);
 CallInfo c_DOMCharacterData::ci_deletedata((void*)&c_DOMCharacterData::i_deletedata, (void*)&c_DOMCharacterData::ifa_deletedata, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMCharacterData::ci___isset((void*)&c_DOMCharacterData::i___isset, (void*)&c_DOMCharacterData::ifa___isset, 1, 4, 0x0000000000000000LL);
 Variant c_DOMCharacterData::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMCharacterData *self = NULL;
@@ -5934,6 +6115,23 @@ Variant c_DOMCharacterData::i_deletedata(MethodCallPackage &mcp, CArrRef params)
     return (self->t_deletedata(arg0, arg1));
   }
 }
+Variant c_DOMCharacterData::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_DOMCharacterData *self = NULL;
+  p_DOMCharacterData pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMCharacterData*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___isset(arg0));
+  }
+}
 Variant c_DOMCharacterData::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DOMCharacterData *self = NULL;
   p_DOMCharacterData pobj;
@@ -6046,6 +6244,18 @@ Variant c_DOMCharacterData::ifa_deletedata(MethodCallPackage &mcp, int count, IN
   CVarRef arg1((a1));
   return (self->t_deletedata(arg0, arg1));
 }
+Variant c_DOMCharacterData::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_DOMCharacterData *self = NULL;
+  p_DOMCharacterData pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMCharacterData*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t___isset(arg0));
+}
 bool c_DOMCharacterData::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (mcp.name);
   if (hash < 0) hash = s->hash();
@@ -6053,6 +6263,12 @@ bool c_DOMCharacterData::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
     case 13:
       HASH_GUARD_LITSTR(0x3DAC04A51FD2D92DLL, NAMSTR(s_sys_ssc103992f, "appendData")) {
         mcp.ci = &c_DOMCharacterData::ci_appenddata;
+        return true;
+      }
+      break;
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        mcp.ci = &c_DOMCharacterData::ci___isset;
         return true;
       }
       break;
@@ -8660,7 +8876,7 @@ void c_DOMNotation::cloneSet(c_DOMNotation *clone) {
 }
 Variant c_DOMNotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 3:
       HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -8697,7 +8913,25 @@ Variant c_DOMNotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         return (t___set(a0, a1));
       }
       break;
-    case 7:
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(a0));
+      }
+      break;
+    case 15:
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -8739,6 +8973,7 @@ CallInfo c_DOMNotation::ci___destruct((void*)&c_DOMNotation::i___destruct, (void
 CallInfo c_DOMNotation::ci___set((void*)&c_DOMNotation::i___set, (void*)&c_DOMNotation::ifa___set, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMNotation::ci___construct((void*)&c_DOMNotation::i___construct, (void*)&c_DOMNotation::ifa___construct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMNotation::ci___get((void*)&c_DOMNotation::i___get, (void*)&c_DOMNotation::ifa___get, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMNotation::ci___isset((void*)&c_DOMNotation::i___isset, (void*)&c_DOMNotation::ifa___isset, 1, 4, 0x0000000000000000LL);
 Variant c_DOMNotation::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMNotation *self = NULL;
@@ -8798,6 +9033,23 @@ Variant c_DOMNotation::i___get(MethodCallPackage &mcp, CArrRef params) {
     return (self->t___get(arg0));
   }
 }
+Variant c_DOMNotation::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_DOMNotation *self = NULL;
+  p_DOMNotation pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMNotation*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___isset(arg0));
+  }
+}
 Variant c_DOMNotation::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DOMNotation *self = NULL;
   p_DOMNotation pobj;
@@ -8845,10 +9097,22 @@ Variant c_DOMNotation::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   CVarRef arg0((a0));
   return (self->t___get(arg0));
 }
+Variant c_DOMNotation::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_DOMNotation *self = NULL;
+  p_DOMNotation pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMNotation*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t___isset(arg0));
+}
 bool c_DOMNotation::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (mcp.name);
   if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 3:
       HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
         mcp.ci = &c_DOMNotation::ci___destruct;
@@ -8861,7 +9125,13 @@ bool c_DOMNotation::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
         return true;
       }
       break;
-    case 7:
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        mcp.ci = &c_DOMNotation::ci___isset;
+        return true;
+      }
+      break;
+    case 15:
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         mcp.ci = &c_DOMNotation::ci___construct;
         return true;
@@ -13480,6 +13750,24 @@ Variant c_DOMAttr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         return (t___set(a0, a1));
       }
       break;
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(a0));
+      }
+      break;
     case 15:
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         Variant a0;
@@ -13532,6 +13820,7 @@ CallInfo c_DOMAttr::ci___destruct((void*)&c_DOMAttr::i___destruct, (void*)&c_DOM
 CallInfo c_DOMAttr::ci___set((void*)&c_DOMAttr::i___set, (void*)&c_DOMAttr::ifa___set, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMAttr::ci___construct((void*)&c_DOMAttr::i___construct, (void*)&c_DOMAttr::ifa___construct, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMAttr::ci___get((void*)&c_DOMAttr::i___get, (void*)&c_DOMAttr::ifa___get, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMAttr::ci___isset((void*)&c_DOMAttr::i___isset, (void*)&c_DOMAttr::ifa___isset, 1, 4, 0x0000000000000000LL);
 Variant c_DOMAttr::i_isid(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMAttr *self = NULL;
@@ -13610,6 +13899,23 @@ Variant c_DOMAttr::i___get(MethodCallPackage &mcp, CArrRef params) {
     return (self->t___get(arg0));
   }
 }
+Variant c_DOMAttr::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_DOMAttr *self = NULL;
+  p_DOMAttr pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMAttr*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___isset(arg0));
+  }
+}
 Variant c_DOMAttr::ifa_isid(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DOMAttr *self = NULL;
   p_DOMAttr pobj;
@@ -13671,6 +13977,18 @@ Variant c_DOMAttr::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_
   CVarRef arg0((a0));
   return (self->t___get(arg0));
 }
+Variant c_DOMAttr::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_DOMAttr *self = NULL;
+  p_DOMAttr pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMAttr*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t___isset(arg0));
+}
 bool c_DOMAttr::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (mcp.name);
   if (hash < 0) hash = s->hash();
@@ -13690,6 +14008,12 @@ bool c_DOMAttr::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
     case 5:
       HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_sse867e166, "__set")) {
         mcp.ci = &c_DOMAttr::ci___set;
+        return true;
+      }
+      break;
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        mcp.ci = &c_DOMAttr::ci___isset;
         return true;
       }
       break;
@@ -14213,20 +14537,8 @@ void c_DOMNamedNodeMap::cloneSet(c_DOMNamedNodeMap *clone) {
 }
 Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
-  switch (hash & 15) {
+  switch (hash & 31) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
-        return (t___destruct());
-      }
       HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ssfe98adf4, "getIterator")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -14240,7 +14552,75 @@ Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         return (t_getiterator());
       }
       break;
-    case 5:
+    case 6:
+      HASH_GUARD_LITSTR(0x0A41DBE0830902C6LL, NAMSTR(s_sys_ss1247a693, "item")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
+        return (t_item(a0));
+      }
+      break;
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(a0));
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
+        return (t___get(a0));
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      break;
+    case 21:
       HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_sse867e166, "__set")) {
         Variant a0;
         Variant a1;
@@ -14262,25 +14642,7 @@ Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         return (t___set(a0, a1));
       }
       break;
-    case 6:
-      HASH_GUARD_LITSTR(0x0A41DBE0830902C6LL, NAMSTR(s_sys_ss1247a693, "item")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
-        return (t_item(a0));
-      }
-      break;
-    case 10:
+    case 26:
       HASH_GUARD_LITSTR(0x5D3CEC627F9ADC3ALL, NAMSTR(s_sys_ssdec966e8, "getNamedItem")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -14298,7 +14660,7 @@ Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         return (t_getnameditem(a0));
       }
       break;
-    case 11:
+    case 27:
       HASH_GUARD_LITSTR(0x53B4D840FF4F0F1BLL, NAMSTR(s_sys_ss832ee0e0, "getNamedItemNS")) {
         Variant a0;
         Variant a1;
@@ -14320,7 +14682,7 @@ Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         return (t_getnameditemns(a0, a1));
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -14332,22 +14694,6 @@ Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
-      }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
-        return (t___get(a0));
       }
       break;
     default:
@@ -14366,6 +14712,7 @@ CallInfo c_DOMNamedNodeMap::ci___construct((void*)&c_DOMNamedNodeMap::i___constr
 CallInfo c_DOMNamedNodeMap::ci_getiterator((void*)&c_DOMNamedNodeMap::i_getiterator, (void*)&c_DOMNamedNodeMap::ifa_getiterator, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMNamedNodeMap::ci___get((void*)&c_DOMNamedNodeMap::i___get, (void*)&c_DOMNamedNodeMap::ifa___get, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMNamedNodeMap::ci_getnameditemns((void*)&c_DOMNamedNodeMap::i_getnameditemns, (void*)&c_DOMNamedNodeMap::ifa_getnameditemns, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMNamedNodeMap::ci___isset((void*)&c_DOMNamedNodeMap::i___isset, (void*)&c_DOMNamedNodeMap::ifa___isset, 1, 4, 0x0000000000000000LL);
 Variant c_DOMNamedNodeMap::i_item(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMNamedNodeMap *self = NULL;
@@ -14489,6 +14836,23 @@ Variant c_DOMNamedNodeMap::i_getnameditemns(MethodCallPackage &mcp, CArrRef para
     return (self->t_getnameditemns(arg0, arg1));
   }
 }
+Variant c_DOMNamedNodeMap::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_DOMNamedNodeMap *self = NULL;
+  p_DOMNamedNodeMap pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___isset(arg0));
+  }
+}
 Variant c_DOMNamedNodeMap::ifa_item(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DOMNamedNodeMap *self = NULL;
   p_DOMNamedNodeMap pobj;
@@ -14584,23 +14948,25 @@ Variant c_DOMNamedNodeMap::ifa_getnameditemns(MethodCallPackage &mcp, int count,
   CVarRef arg1((a1));
   return (self->t_getnameditemns(arg0, arg1));
 }
+Variant c_DOMNamedNodeMap::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_DOMNamedNodeMap *self = NULL;
+  p_DOMNamedNodeMap pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMNamedNodeMap*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t___isset(arg0));
+}
 bool c_DOMNamedNodeMap::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (mcp.name);
   if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
+  switch (hash & 31) {
     case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
-        mcp.ci = &c_DOMNamedNodeMap::ci___destruct;
-        return true;
-      }
       HASH_GUARD_LITSTR(0x570B2E1232A12503LL, NAMSTR(s_sys_ssfe98adf4, "getIterator")) {
         mcp.ci = &c_DOMNamedNodeMap::ci_getiterator;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_sse867e166, "__set")) {
-        mcp.ci = &c_DOMNamedNodeMap::ci___set;
         return true;
       }
       break;
@@ -14610,25 +14976,45 @@ bool c_DOMNamedNodeMap::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
         return true;
       }
       break;
-    case 10:
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        mcp.ci = &c_DOMNamedNodeMap::ci___isset;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
+        mcp.ci = &c_DOMNamedNodeMap::ci___get;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
+        mcp.ci = &c_DOMNamedNodeMap::ci___destruct;
+        return true;
+      }
+      break;
+    case 21:
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_sse867e166, "__set")) {
+        mcp.ci = &c_DOMNamedNodeMap::ci___set;
+        return true;
+      }
+      break;
+    case 26:
       HASH_GUARD_LITSTR(0x5D3CEC627F9ADC3ALL, NAMSTR(s_sys_ssdec966e8, "getNamedItem")) {
         mcp.ci = &c_DOMNamedNodeMap::ci_getnameditem;
         return true;
       }
       break;
-    case 11:
+    case 27:
       HASH_GUARD_LITSTR(0x53B4D840FF4F0F1BLL, NAMSTR(s_sys_ss832ee0e0, "getNamedItemNS")) {
         mcp.ci = &c_DOMNamedNodeMap::ci_getnameditemns;
         return true;
       }
       break;
-    case 15:
+    case 31:
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         mcp.ci = &c_DOMNamedNodeMap::ci___construct;
-        return true;
-      }
-      HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
-        mcp.ci = &c_DOMNamedNodeMap::ci___get;
         return true;
       }
       break;
@@ -18368,7 +18754,7 @@ void c_DOMProcessingInstruction::cloneSet(c_DOMProcessingInstruction *clone) {
 }
 Variant c_DOMProcessingInstruction::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 3:
       HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -18405,7 +18791,25 @@ Variant c_DOMProcessingInstruction::o_invoke_from_eval(const char *s, Eval::Vari
         return (t___set(a0, a1));
       }
       break;
-    case 7:
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(a0));
+      }
+      break;
+    case 15:
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         Variant a0;
         Variant a1;
@@ -18456,6 +18860,7 @@ CallInfo c_DOMProcessingInstruction::ci___destruct((void*)&c_DOMProcessingInstru
 CallInfo c_DOMProcessingInstruction::ci___set((void*)&c_DOMProcessingInstruction::i___set, (void*)&c_DOMProcessingInstruction::ifa___set, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMProcessingInstruction::ci___construct((void*)&c_DOMProcessingInstruction::i___construct, (void*)&c_DOMProcessingInstruction::ifa___construct, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMProcessingInstruction::ci___get((void*)&c_DOMProcessingInstruction::i___get, (void*)&c_DOMProcessingInstruction::ifa___get, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMProcessingInstruction::ci___isset((void*)&c_DOMProcessingInstruction::i___isset, (void*)&c_DOMProcessingInstruction::ifa___isset, 1, 4, 0x0000000000000000LL);
 Variant c_DOMProcessingInstruction::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMProcessingInstruction *self = NULL;
@@ -18522,6 +18927,23 @@ Variant c_DOMProcessingInstruction::i___get(MethodCallPackage &mcp, CArrRef para
     return (self->t___get(arg0));
   }
 }
+Variant c_DOMProcessingInstruction::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_DOMProcessingInstruction *self = NULL;
+  p_DOMProcessingInstruction pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMProcessingInstruction*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___isset(arg0));
+  }
+}
 Variant c_DOMProcessingInstruction::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DOMProcessingInstruction *self = NULL;
   p_DOMProcessingInstruction pobj;
@@ -18572,10 +18994,22 @@ Variant c_DOMProcessingInstruction::ifa___get(MethodCallPackage &mcp, int count,
   CVarRef arg0((a0));
   return (self->t___get(arg0));
 }
+Variant c_DOMProcessingInstruction::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_DOMProcessingInstruction *self = NULL;
+  p_DOMProcessingInstruction pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMProcessingInstruction*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t___isset(arg0));
+}
 bool c_DOMProcessingInstruction::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (mcp.name);
   if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 3:
       HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
         mcp.ci = &c_DOMProcessingInstruction::ci___destruct;
@@ -18588,7 +19022,13 @@ bool c_DOMProcessingInstruction::os_get_call_info(MethodCallPackage &mcp, int64 
         return true;
       }
       break;
-    case 7:
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        mcp.ci = &c_DOMProcessingInstruction::ci___isset;
+        return true;
+      }
+      break;
+    case 15:
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         mcp.ci = &c_DOMProcessingInstruction::ci___construct;
         return true;
@@ -25484,7 +25924,7 @@ void c_DOMEntity::cloneSet(c_DOMEntity *clone) {
 }
 Variant c_DOMEntity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 3:
       HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -25521,7 +25961,25 @@ Variant c_DOMEntity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t___set(a0, a1));
       }
       break;
-    case 7:
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(a0));
+      }
+      break;
+    case 15:
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -25563,6 +26021,7 @@ CallInfo c_DOMEntity::ci___destruct((void*)&c_DOMEntity::i___destruct, (void*)&c
 CallInfo c_DOMEntity::ci___set((void*)&c_DOMEntity::i___set, (void*)&c_DOMEntity::ifa___set, 2, 4, 0x0000000000000000LL);
 CallInfo c_DOMEntity::ci___construct((void*)&c_DOMEntity::i___construct, (void*)&c_DOMEntity::ifa___construct, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMEntity::ci___get((void*)&c_DOMEntity::i___get, (void*)&c_DOMEntity::ifa___get, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMEntity::ci___isset((void*)&c_DOMEntity::i___isset, (void*)&c_DOMEntity::ifa___isset, 1, 4, 0x0000000000000000LL);
 Variant c_DOMEntity::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMEntity *self = NULL;
@@ -25622,6 +26081,23 @@ Variant c_DOMEntity::i___get(MethodCallPackage &mcp, CArrRef params) {
     return (self->t___get(arg0));
   }
 }
+Variant c_DOMEntity::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_DOMEntity *self = NULL;
+  p_DOMEntity pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMEntity*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___isset(arg0));
+  }
+}
 Variant c_DOMEntity::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DOMEntity *self = NULL;
   p_DOMEntity pobj;
@@ -25669,10 +26145,22 @@ Variant c_DOMEntity::ifa___get(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   CVarRef arg0((a0));
   return (self->t___get(arg0));
 }
+Variant c_DOMEntity::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_DOMEntity *self = NULL;
+  p_DOMEntity pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMEntity*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t___isset(arg0));
+}
 bool c_DOMEntity::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (mcp.name);
   if (hash < 0) hash = s->hash();
-  switch (hash & 7) {
+  switch (hash & 15) {
     case 3:
       HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
         mcp.ci = &c_DOMEntity::ci___destruct;
@@ -25685,7 +26173,13 @@ bool c_DOMEntity::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
         return true;
       }
       break;
-    case 7:
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        mcp.ci = &c_DOMEntity::ci___isset;
+        return true;
+      }
+      break;
+    case 15:
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         mcp.ci = &c_DOMEntity::ci___construct;
         return true;
@@ -28663,7 +29157,7 @@ void c_DOMXPath::cloneSet(c_DOMXPath *clone) {
 }
 Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
-  switch (hash & 15) {
+  switch (hash & 31) {
     case 2:
       HASH_GUARD_LITSTR(0x144FADF6B374AB82LL, NAMSTR(s_sys_ssac3b59a3, "registerPHPFunctions")) {
         Variant a0;
@@ -28681,65 +29175,6 @@ Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         if (count > 1) return throw_toomany_arguments("registerphpfunctions", 1, 1);
         if (count <= 0) return (t_registerphpfunctions());
         else return (t_registerphpfunctions(a0));
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
-        return (t___destruct());
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_sse867e166, "__set")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
-        return (t___set(a0, a1));
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_sse3f54806, "query")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 2) return throw_wrong_arguments("query", count, 1, 2, 1);
-        if (count <= 1) return (t_query(a0));
-        else return (t_query(a0, a1));
       }
       break;
     case 8:
@@ -28764,8 +29199,8 @@ Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         return (t_registernamespace(a0, a1));
       }
       break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
@@ -28778,9 +29213,11 @@ Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
           (*it)->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
-        return (t___construct(a0), null);
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(a0));
       }
+      break;
+    case 15:
       HASH_GUARD_LITSTR(0x2443593B6F3C912FLL, NAMSTR(s_sys_ssf4426a16, "evaluate")) {
         Variant a0;
         Variant a1;
@@ -28819,6 +29256,83 @@ Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         return (t___get(a0));
       }
       break;
+    case 19:
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
+        return (t___destruct());
+      }
+      break;
+    case 21:
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_sse867e166, "__set")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
+        return (t___set(a0, a1));
+      }
+      break;
+    case 23:
+      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_sse3f54806, "query")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("query", count, 1, 2, 1);
+        if (count <= 1) return (t_query(a0));
+        else return (t_query(a0, a1));
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
+        return (t___construct(a0), null);
+      }
+      break;
     default:
       break;
   }
@@ -28835,6 +29349,7 @@ CallInfo c_DOMXPath::ci_evaluate((void*)&c_DOMXPath::i_evaluate, (void*)&c_DOMXP
 CallInfo c_DOMXPath::ci_registerphpfunctions((void*)&c_DOMXPath::i_registerphpfunctions, (void*)&c_DOMXPath::ifa_registerphpfunctions, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMXPath::ci___get((void*)&c_DOMXPath::i___get, (void*)&c_DOMXPath::ifa___get, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMXPath::ci_registernamespace((void*)&c_DOMXPath::i_registernamespace, (void*)&c_DOMXPath::ifa_registernamespace, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMXPath::ci___isset((void*)&c_DOMXPath::i___isset, (void*)&c_DOMXPath::ifa___isset, 1, 4, 0x0000000000000000LL);
 Variant c_DOMXPath::i___destruct(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMXPath *self = NULL;
@@ -28973,6 +29488,23 @@ Variant c_DOMXPath::i_registernamespace(MethodCallPackage &mcp, CArrRef params) 
     return (self->t_registernamespace(arg0, arg1));
   }
 }
+Variant c_DOMXPath::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_DOMXPath *self = NULL;
+  p_DOMXPath pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMXPath*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___isset(arg0));
+  }
+}
 Variant c_DOMXPath::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DOMXPath *self = NULL;
   p_DOMXPath pobj;
@@ -29075,31 +29607,25 @@ Variant c_DOMXPath::ifa_registernamespace(MethodCallPackage &mcp, int count, INV
   CVarRef arg1((a1));
   return (self->t_registernamespace(arg0, arg1));
 }
+Variant c_DOMXPath::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_DOMXPath *self = NULL;
+  p_DOMXPath pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMXPath*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t___isset(arg0));
+}
 bool c_DOMXPath::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (mcp.name);
   if (hash < 0) hash = s->hash();
-  switch (hash & 15) {
+  switch (hash & 31) {
     case 2:
       HASH_GUARD_LITSTR(0x144FADF6B374AB82LL, NAMSTR(s_sys_ssac3b59a3, "registerPHPFunctions")) {
         mcp.ci = &c_DOMXPath::ci_registerphpfunctions;
-        return true;
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
-        mcp.ci = &c_DOMXPath::ci___destruct;
-        return true;
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_sse867e166, "__set")) {
-        mcp.ci = &c_DOMXPath::ci___set;
-        return true;
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_sse3f54806, "query")) {
-        mcp.ci = &c_DOMXPath::ci_query;
         return true;
       }
       break;
@@ -29109,17 +29635,43 @@ bool c_DOMXPath::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
         return true;
       }
       break;
-    case 15:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
-        mcp.ci = &c_DOMXPath::ci___construct;
+    case 14:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        mcp.ci = &c_DOMXPath::ci___isset;
         return true;
       }
+      break;
+    case 15:
       HASH_GUARD_LITSTR(0x2443593B6F3C912FLL, NAMSTR(s_sys_ssf4426a16, "evaluate")) {
         mcp.ci = &c_DOMXPath::ci_evaluate;
         return true;
       }
       HASH_GUARD_LITSTR(0x26B6E00C74FA338FLL, NAMSTR(s_sys_ss6415a5db, "__get")) {
         mcp.ci = &c_DOMXPath::ci___get;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
+        mcp.ci = &c_DOMXPath::ci___destruct;
+        return true;
+      }
+      break;
+    case 21:
+      HASH_GUARD_LITSTR(0x52F3DAD783340395LL, NAMSTR(s_sys_sse867e166, "__set")) {
+        mcp.ci = &c_DOMXPath::ci___set;
+        return true;
+      }
+      break;
+    case 23:
+      HASH_GUARD_LITSTR(0x356758D4414DA377LL, NAMSTR(s_sys_sse3f54806, "query")) {
+        mcp.ci = &c_DOMXPath::ci_query;
+        return true;
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
+        mcp.ci = &c_DOMXPath::ci___construct;
         return true;
       }
       break;
@@ -30259,6 +30811,24 @@ Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         return (t_isdefaultnamespace(a0));
       }
       break;
+    case 46:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(a0));
+      }
+      break;
     case 47:
       HASH_GUARD_LITSTR(0x102549E9CA2EC6EFLL, NAMSTR(s_sys_ss4431a364, "isSameNode")) {
         Variant a0;
@@ -30426,6 +30996,7 @@ CallInfo c_DOMNode::ci_issamenode((void*)&c_DOMNode::i_issamenode, (void*)&c_DOM
 CallInfo c_DOMNode::ci_removechild((void*)&c_DOMNode::i_removechild, (void*)&c_DOMNode::ifa_removechild, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMNode::ci___get((void*)&c_DOMNode::i___get, (void*)&c_DOMNode::ifa___get, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMNode::ci_issupported((void*)&c_DOMNode::i_issupported, (void*)&c_DOMNode::ifa_issupported, 2, 4, 0x0000000000000000LL);
+CallInfo c_DOMNode::ci___isset((void*)&c_DOMNode::i___isset, (void*)&c_DOMNode::ifa___isset, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMNode::ci_haschildnodes((void*)&c_DOMNode::i_haschildnodes, (void*)&c_DOMNode::ifa_haschildnodes, 0, 4, 0x0000000000000000LL);
 Variant c_DOMNode::i_getlineno(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -30758,6 +31329,23 @@ Variant c_DOMNode::i_issupported(MethodCallPackage &mcp, CArrRef params) {
     return (self->t_issupported(arg0, arg1));
   }
 }
+Variant c_DOMNode::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_DOMNode *self = NULL;
+  p_DOMNode pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMNode*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___isset(arg0));
+  }
+}
 Variant c_DOMNode::i_haschildnodes(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMNode *self = NULL;
@@ -31025,6 +31613,18 @@ Variant c_DOMNode::ifa_issupported(MethodCallPackage &mcp, int count, INVOKE_FEW
   CVarRef arg1((a1));
   return (self->t_issupported(arg0, arg1));
 }
+Variant c_DOMNode::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_DOMNode *self = NULL;
+  p_DOMNode pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMNode*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t___isset(arg0));
+}
 Variant c_DOMNode::ifa_haschildnodes(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DOMNode *self = NULL;
   p_DOMNode pobj;
@@ -31117,6 +31717,12 @@ bool c_DOMNode::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
     case 36:
       HASH_GUARD_LITSTR(0x643EFC8E9378F664LL, NAMSTR(s_sys_ss8af5b950, "isDefaultNamespace")) {
         mcp.ci = &c_DOMNode::ci_isdefaultnamespace;
+        return true;
+      }
+      break;
+    case 46:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        mcp.ci = &c_DOMNode::ci___isset;
         return true;
       }
       break;
@@ -31865,6 +32471,24 @@ Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         else return (t_createprocessinginstruction(a0, a1));
       }
       break;
+    case 110:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(a0));
+      }
+      break;
     case 115:
       HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -31972,6 +32596,7 @@ CallInfo c_DOMDocument::ci___get((void*)&c_DOMDocument::i___get, (void*)&c_DOMDo
 CallInfo c_DOMDocument::ci_loadhtmlfile((void*)&c_DOMDocument::i_loadhtmlfile, (void*)&c_DOMDocument::ifa_loadhtmlfile, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMDocument::ci_savehtmlfile((void*)&c_DOMDocument::i_savehtmlfile, (void*)&c_DOMDocument::ifa_savehtmlfile, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMDocument::ci_getelementbyid((void*)&c_DOMDocument::i_getelementbyid, (void*)&c_DOMDocument::ifa_getelementbyid, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMDocument::ci___isset((void*)&c_DOMDocument::i___isset, (void*)&c_DOMDocument::ifa___isset, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMDocument::ci_createcomment((void*)&c_DOMDocument::i_createcomment, (void*)&c_DOMDocument::ifa_createcomment, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMDocument::ci_normalizedocument((void*)&c_DOMDocument::i_normalizedocument, (void*)&c_DOMDocument::ifa_normalizedocument, 0, 4, 0x0000000000000000LL);
 CallInfo c_DOMDocument::ci_createdocumentfragment((void*)&c_DOMDocument::i_createdocumentfragment, (void*)&c_DOMDocument::ifa_createdocumentfragment, 0, 4, 0x0000000000000000LL);
@@ -32513,6 +33138,23 @@ Variant c_DOMDocument::i_getelementbyid(MethodCallPackage &mcp, CArrRef params) 
     return (self->t_getelementbyid(arg0));
   }
 }
+Variant c_DOMDocument::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_DOMDocument *self = NULL;
+  p_DOMDocument pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMDocument*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___isset(arg0));
+  }
+}
 Variant c_DOMDocument::i_createcomment(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMDocument *self = NULL;
@@ -32949,6 +33591,18 @@ Variant c_DOMDocument::ifa_getelementbyid(MethodCallPackage &mcp, int count, INV
   CVarRef arg0((a0));
   return (self->t_getelementbyid(arg0));
 }
+Variant c_DOMDocument::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_DOMDocument *self = NULL;
+  p_DOMDocument pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMDocument*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t___isset(arg0));
+}
 Variant c_DOMDocument::ifa_createcomment(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DOMDocument *self = NULL;
   p_DOMDocument pobj;
@@ -33152,6 +33806,12 @@ bool c_DOMDocument::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
     case 109:
       HASH_GUARD_LITSTR(0x2A99431FC6E7BA6DLL, NAMSTR(s_sys_ss8c4b949d, "createProcessingInstruction")) {
         mcp.ci = &c_DOMDocument::ci_createprocessinginstruction;
+        return true;
+      }
+      break;
+    case 110:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        mcp.ci = &c_DOMDocument::ci___isset;
         return true;
       }
       break;
@@ -34360,6 +35020,24 @@ Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
         return (t_hasattribute(a0));
       }
       break;
+    case 46:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+        return (t___isset(a0));
+      }
+      break;
     case 47:
       HASH_GUARD_LITSTR(0x47B96C0FC62E1E2FLL, NAMSTR(s_sys_ss5ef57bc3, "removeAttribute")) {
         Variant a0;
@@ -34439,6 +35117,7 @@ CallInfo c_DOMElement::ci_setattribute((void*)&c_DOMElement::i_setattribute, (vo
 CallInfo c_DOMElement::ci_removeattributenode((void*)&c_DOMElement::i_removeattributenode, (void*)&c_DOMElement::ifa_removeattributenode, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMElement::ci___get((void*)&c_DOMElement::i___get, (void*)&c_DOMElement::ifa___get, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMElement::ci_removeattribute((void*)&c_DOMElement::i_removeattribute, (void*)&c_DOMElement::ifa_removeattribute, 1, 4, 0x0000000000000000LL);
+CallInfo c_DOMElement::ci___isset((void*)&c_DOMElement::i___isset, (void*)&c_DOMElement::ifa___isset, 1, 4, 0x0000000000000000LL);
 CallInfo c_DOMElement::ci_setattributenode((void*)&c_DOMElement::i_setattributenode, (void*)&c_DOMElement::ifa_setattributenode, 1, 4, 0x0000000000000000LL);
 Variant c_DOMElement::i_getelementsbytagname(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -34809,6 +35488,23 @@ Variant c_DOMElement::i_removeattribute(MethodCallPackage &mcp, CArrRef params) 
     return (self->t_removeattribute(arg0));
   }
 }
+Variant c_DOMElement::i___isset(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_DOMElement *self = NULL;
+  p_DOMElement pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMElement*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___isset(arg0));
+  }
+}
 Variant c_DOMElement::i_setattributenode(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_DOMElement *self = NULL;
@@ -35094,6 +35790,18 @@ Variant c_DOMElement::ifa_removeattribute(MethodCallPackage &mcp, int count, INV
   CVarRef arg0((a0));
   return (self->t_removeattribute(arg0));
 }
+Variant c_DOMElement::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_DOMElement *self = NULL;
+  p_DOMElement pobj;
+  if (mcp.obj) {
+    self = static_cast<c_DOMElement*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (self->t___isset(arg0));
+}
 Variant c_DOMElement::ifa_setattributenode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_DOMElement *self = NULL;
   p_DOMElement pobj;
@@ -35211,6 +35919,12 @@ bool c_DOMElement::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
     case 44:
       HASH_GUARD_LITSTR(0x6471DF8BB944FFECLL, NAMSTR(s_sys_ssd766aa9d, "hasAttribute")) {
         mcp.ci = &c_DOMElement::ci_hasattribute;
+        return true;
+      }
+      break;
+    case 46:
+      HASH_GUARD_LITSTR(0x4FE08FDDAE2178EELL, NAMSTR(s_sys_ssb303f411, "__isset")) {
+        mcp.ci = &c_DOMElement::ci___isset;
         return true;
       }
       break;

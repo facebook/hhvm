@@ -1970,6 +1970,21 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "__destruct",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2050,6 +2065,21 @@ DefineFunction(
       ),
       array(
         'name'   => "value",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
         'type'   => Variant,
       ),
     ),
@@ -2237,6 +2267,21 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "__destruct",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -2369,6 +2414,21 @@ DefineFunction(
       ),
       array(
         'name'   => "value",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
         'type'   => Variant,
       ),
     ),
@@ -3088,6 +3148,21 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "__destruct",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3195,6 +3270,21 @@ DefineFunction(
       ),
       array(
         'name'   => "value",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
         'type'   => Variant,
       ),
     ),
@@ -3667,6 +3757,21 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "__destruct",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3725,6 +3830,21 @@ DefineFunction(
       ),
       array(
         'name'   => "value",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
         'type'   => Variant,
       ),
     ),
@@ -3834,6 +3954,21 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "__destruct",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -3903,6 +4038,21 @@ DefineFunction(
       ),
       array(
         'name'   => "value",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
         'type'   => Variant,
       ),
     ),
@@ -4123,6 +4273,21 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "getIterator",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -4209,6 +4374,21 @@ DefineFunction(
       ),
       array(
         'name'   => "value",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
         'type'   => Variant,
       ),
     ),
@@ -4547,6 +4727,21 @@ DefineFunction(
       ),
       array(
         'name'   => "value",
+        'type'   => Variant,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__isset",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
         'type'   => Variant,
       ),
     ),

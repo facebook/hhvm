@@ -153,6 +153,8 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSe
   DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
   DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
@@ -195,6 +197,8 @@ class c_DOMAttr : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
   DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
@@ -240,6 +244,8 @@ class c_DOMCharacterData : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
   DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
@@ -310,6 +316,8 @@ class c_DOMText : public c_DOMCharacterData {
   DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
   DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
@@ -436,6 +444,8 @@ class c_DOMDocument : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
   DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
@@ -516,6 +526,8 @@ class c_DOMDocumentType : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
   DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
@@ -587,6 +599,8 @@ class c_DOMElement : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
   DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
@@ -622,6 +636,8 @@ class c_DOMEntity : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
   DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
@@ -688,6 +704,8 @@ class c_DOMNotation : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
   DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
@@ -723,6 +741,8 @@ class c_DOMProcessingInstruction : public c_DOMNode {
   DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
   DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
@@ -812,6 +832,8 @@ class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectDat
   DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
   DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t_getiterator();
   DECLARE_METHOD_INVOKE_HELPERS(getiterator);
   public: Variant t___destruct();
@@ -851,6 +873,8 @@ class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::U
   DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
   DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t_getiterator();
   DECLARE_METHOD_INVOKE_HELPERS(getiterator);
   public: Variant t___destruct();
@@ -962,6 +986,8 @@ class c_DOMXPath : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseS
   DECLARE_METHOD_INVOKE_HELPERS(__get);
   public: Variant t___set(Variant name, Variant value);
   DECLARE_METHOD_INVOKE_HELPERS(__set);
+  public: bool t___isset(Variant name);
+  DECLARE_METHOD_INVOKE_HELPERS(__isset);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 

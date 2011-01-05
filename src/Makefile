@@ -12,7 +12,7 @@ EXCLUDED_CXX_SOURCES := \
 
 RECURSIVE_SOURCE_SUBDIRS := runtime/base runtime/ext system/gen util $(EVAL_DIR)
 REC_SOURCES := $(filter-out $(EXCLUDED_CXX_SOURCES), \
-	$(shell find $(RECURSIVE_SOURCE_SUBDIRS) -name "*.cpp" -o -name "*.c"))
+	$(shell find $(RECURSIVE_SOURCE_SUBDIRS) -name "*.cpp" -o -name "*.c" -o -name "*.S"))
 CXX_NOOPT_SOURCES := $(filter %.no.cpp, $(REC_SOURCES))
 
 PROGRAMS = test hphp hphpi compiler tools
@@ -22,6 +22,9 @@ C_SOURCES := $(filter-out $(GENERATED_CPP_SOURCES) $(GENERATED_C_SOURCES),\
 	$(filter %.c, $(REC_SOURCES)))
 CXX_SOURCES := $(filter-out $(GENERATED_CXX_SOURCES) $(CXX_NOOPT_SOURCES),\
 	$(filter %.cpp,$(REC_SOURCES)))
+ASM_SOURCES := $(filter %.S, $(REC_SOURCES))
+
+ASM_SOURCES += $(wildcard $(ABS_PROJECT_ROOT)/facebook/src/util/*.S)
 
 include $(PROJECT_ROOT)/src/rules.mk
 

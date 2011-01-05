@@ -292,6 +292,7 @@ bool RuntimeOption::EnableHipHopExperimentalSyntax = false;
 bool RuntimeOption::EnableShortTags = true;
 bool RuntimeOption::EnableAspTags = false;
 bool RuntimeOption::EnableXHP = true;
+bool RuntimeOption::EnableLivingObjects = false;
 bool RuntimeOption::NativeXHP = true;
 int RuntimeOption::ScannerType = 0;
 
@@ -936,6 +937,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     else ScannerType &= ~Scanner::AllowAspTags;
 
     EnableXHP = eval["EnableXHP"].getBool(true);
+    EnableLivingObjects = eval["EnableLivingObjects"].getBool(false);
     NativeXHP = eval["NativeXHP"].getBool(true);
     if (EnableXHP && !NativeXHP) ScannerType |= Scanner::PreprocessXHP;
     else ScannerType &= ~Scanner::PreprocessXHP;

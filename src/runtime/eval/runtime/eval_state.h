@@ -211,6 +211,8 @@ private:
   Array m_includes;
   void reset();
   void destructObjects();
+  void destructObject(EvalObjectData *eo);
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////

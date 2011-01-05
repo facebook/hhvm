@@ -304,6 +304,7 @@ public:
   static bool EnableShortTags;
   static bool EnableAspTags;
   static bool EnableXHP;
+  static bool EnableLivingObjects;
   static bool NativeXHP;
   static int ScannerType;
 

@@ -194,7 +194,7 @@ namespace HPHP {
 
 #define CLASS_CHECK(exp) (checkClassExists(s, g), (exp))
 
-#define IMPLEMENT_CLASS(cls)                                            \
+#define IMPLEMENT_CLASS_COMMON(cls)                                     \
   StaticString c_##cls::s_class_name(c_##cls::GetClassName());          \
   c_##cls *c_##cls::createDummy(p_##cls &pobj) {                        \
     pobj = NEW(c_##cls)();                                              \
@@ -202,7 +202,14 @@ namespace HPHP {
     pobj->setDummy();                                                   \
     return pobj.get();                                                  \
   }                                                                     \
+
+#define IMPLEMENT_CLASS(cls)                                            \
+  IMPLEMENT_CLASS_COMMON(cls)                                           \
   IMPLEMENT_OBJECT_ALLOCATION(c_##cls)                                  \
+
+#define IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(cls)                           \
+  IMPLEMENT_CLASS_COMMON(cls)                                           \
+  IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(c_##cls)                 \
 
 #define DECLARE_METHOD_INVOKE_HELPERS(methname)                         \
   static CallInfo ci_##methname;                                        \

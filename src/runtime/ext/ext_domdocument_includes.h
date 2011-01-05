@@ -45,6 +45,8 @@ namespace HPHP {
 // so every dom node holds a document object to avoid its early deletion
 FORWARD_DECLARE_CLASS(DOMDocument);
 
+typedef hphp_hash_set<xmlNodePtr, pointer_hash<xmlNode> > XmlNodeSet;
+
 // base class of DOMNodeList and DOMNamedNodeMap
 class dom_iterable {
 public:

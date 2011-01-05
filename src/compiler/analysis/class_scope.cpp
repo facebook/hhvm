@@ -1368,7 +1368,11 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
       cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_CONSTANT_%s", clsName);
     }
 
-    cg_printf("IMPLEMENT_CLASS(%s)\n", clsName);
+    if (m_attributeClassInfo & ClassInfo::NoDefaultSweep) {
+      cg_printf("IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(%s)\n", clsName);
+    } else {
+      cg_printf("IMPLEMENT_CLASS(%s)\n", clsName);
+    }
   }
 
   if (Option::GenerateCPPMacros) {

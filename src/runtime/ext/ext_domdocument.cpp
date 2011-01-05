@@ -1124,17 +1124,17 @@ static xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
   return ret;
 }
 
-static void appendOrphan(Array &orphans, xmlNodePtr node) {
+static void appendOrphan(XmlNodeSet &orphans, xmlNodePtr node) {
   if (node) {
-    ASSERT(!orphans.exists((int64)node));
-    orphans.set((int64)node, true);
+    ASSERT(orphans.find(node) == orphans.end());
+    orphans.insert(node);
   }
 }
 
-static void removeOrphan(Array &orphans, xmlNodePtr node) {
+static void removeOrphan(XmlNodeSet &orphans, xmlNodePtr node) {
   if (node) {
-    ASSERT(orphans.exists((int64)node));
-    orphans.remove((int64)node);
+    ASSERT(orphans.find(node) != orphans.end());
+    orphans.erase(node);
   }
 }
 
@@ -1171,7 +1171,7 @@ static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
   nodeobj->m_doc = doc;
   nodeobj->m_node = obj;
   if (owner && doc.get()) {
-    appendOrphan(doc->m_orphans, obj);
+    appendOrphan(*doc->m_orphans, obj);
   }
   return wrapper;
 }
@@ -1969,7 +1969,7 @@ Variant c_DOMNode::t_appendchild(CObjRef newnode) {
     }
   }
   if (newdomnode->doc().get()) {
-    removeOrphan(newdomnode->doc()->m_orphans, newdomnode->m_node);
+    removeOrphan(*newdomnode->doc()->m_orphans, newdomnode->m_node);
   }
   dom_reconcile_ns(nodep->doc, new_child);
   return create_node_object(new_child, doc(), false);
@@ -2167,7 +2167,7 @@ Variant c_DOMNode::t_insertbefore(CObjRef newnode,
     return false;
   }
   if (domchildnode->doc().get()) {
-    removeOrphan(domchildnode->doc()->m_orphans, domchildnode->m_node);
+    removeOrphan(*domchildnode->doc()->m_orphans, domchildnode->m_node);
   }
   dom_reconcile_ns(parentp->doc, new_child);
   return create_node_object(new_child, doc(), false);
@@ -2841,7 +2841,7 @@ Variant c_DOMText::t_splittext(int64 offset) {
   c_DOMText *ret = NEW(c_DOMText)();
   ret->m_doc = doc();
   ret->m_node = nnode;
-  appendOrphan(doc()->m_orphans, nnode);
+  appendOrphan(*doc()->m_orphans, nnode);
   return ret;
 }
 
@@ -3051,15 +3051,22 @@ c_DOMDocument::c_DOMDocument() :
   m_substituteentities(false),
   m_stricterror(true),
   m_recover(false),
+  m_orphans(new XmlNodeSet),
   m_owner(false) {
 }
 
 c_DOMDocument::~c_DOMDocument() {
-  for (ArrayIter iter(m_orphans); iter; ++iter) {
-    xmlNodePtr node = (xmlNodePtr)iter.first().toInt64();
+  sweep();
+}
+
+void c_DOMDocument::sweep() {
+  for (XmlNodeSet::iterator iter = m_orphans->begin();
+       iter != m_orphans->end(); ++iter) {
+    xmlNodePtr node = *iter;
     xmlUnlinkNode(node);
     php_libxml_node_free(node);
   }
+  m_orphans.reset();
 
   if (m_owner && m_node) {
     xmlDocPtr doc = (xmlDocPtr)m_node;
@@ -3121,7 +3128,7 @@ Variant c_DOMDocument::t_createattribute(CStrRef name) {
   c_DOMAttr *ret = NEW(c_DOMAttr)();
   ret->m_doc = this;
   ret->m_node = (xmlNodePtr)node;
-  appendOrphan(m_orphans, (xmlNodePtr)node);
+  appendOrphan(*m_orphans, (xmlNodePtr)node);
   return ret;
 }
 
@@ -3175,7 +3182,7 @@ Variant c_DOMDocument::t_createattributens(CStrRef namespaceuri,
   c_DOMAttr *ret = NEW(c_DOMAttr)();
   ret->m_doc = this;
   ret->m_node = nodep;
-  appendOrphan(m_orphans, nodep);
+  appendOrphan(*m_orphans, nodep);
   return ret;
 }
 
@@ -3189,7 +3196,7 @@ Variant c_DOMDocument::t_createcdatasection(CStrRef data) {
   c_DOMCDATASection *ret = NEW(c_DOMCDATASection)();
   ret->m_doc = this;
   ret->m_node = node;
-  appendOrphan(m_orphans, node);
+  appendOrphan(*m_orphans, node);
   return ret;
 }
 
@@ -3203,7 +3210,7 @@ Variant c_DOMDocument::t_createcomment(CStrRef data) {
   c_DOMComment *ret = NEW(c_DOMComment)();
   ret->m_doc = this;
   ret->m_node = node;
-  appendOrphan(m_orphans, node);
+  appendOrphan(*m_orphans, node);
   return ret;
 }
 
@@ -3217,7 +3224,7 @@ Variant c_DOMDocument::t_createdocumentfragment() {
   c_DOMDocumentFragment *ret = NEW(c_DOMDocumentFragment)();
   ret->m_doc = this;
   ret->m_node = node;
-  appendOrphan(m_orphans, node);
+  appendOrphan(*m_orphans, node);
   return ret;
 }
 
@@ -3237,7 +3244,7 @@ Variant c_DOMDocument::t_createelement(CStrRef name,
   c_DOMElement *ret = NEW(c_DOMElement)();
   ret->m_doc = this;
   ret->m_node = node;
-  appendOrphan(m_orphans, node);
+  appendOrphan(*m_orphans, node);
   return ret;
 }
 
@@ -3287,7 +3294,7 @@ Variant c_DOMDocument::t_createelementns(CStrRef namespaceuri,
   c_DOMElement *ret = NEW(c_DOMElement)();
   ret->m_doc = this;
   ret->m_node = nodep;
-  appendOrphan(m_orphans, nodep);
+  appendOrphan(*m_orphans, nodep);
   return ret;
 }
 
@@ -3305,7 +3312,7 @@ Variant c_DOMDocument::t_createentityreference(CStrRef name) {
   c_DOMEntity *ret = NEW(c_DOMEntity)();
   ret->m_doc = this;
   ret->m_node = node;
-  appendOrphan(m_orphans, node);
+  appendOrphan(*m_orphans, node);
   return ret;
 }
 
@@ -3327,7 +3334,7 @@ Variant c_DOMDocument::t_createprocessinginstruction(CStrRef target,
   c_DOMProcessingInstruction *ret = NEW(c_DOMProcessingInstruction)();
   ret->m_doc = this;
   ret->m_node = node;
-  appendOrphan(m_orphans, node);
+  appendOrphan(*m_orphans, node);
   return ret;
 }
 
@@ -3341,7 +3348,7 @@ Variant c_DOMDocument::t_createtextnode(CStrRef data) {
   c_DOMText *ret = NEW(c_DOMText)();
   ret->m_doc = this;
   ret->m_node = node;
-  appendOrphan(m_orphans, node);
+  appendOrphan(*m_orphans, node);
   return ret;
 }
 
@@ -3981,7 +3988,7 @@ Variant c_DOMElement::t_getattributenode(CStrRef name) {
   ret->m_doc = doc();
   ret->m_node = (xmlNodePtr)attrp;
   if (owner) {
-    appendOrphan(doc()->m_orphans, (xmlNodePtr)attrp);
+    appendOrphan(*doc()->m_orphans, (xmlNodePtr)attrp);
   }
   return ret;
 }
@@ -4118,7 +4125,7 @@ Variant c_DOMElement::t_removeattributenode(CObjRef oldattr) {
   c_DOMAttr *ret = NEW(c_DOMAttr)();
   ret->m_doc = doc();
   ret->m_node = (xmlNodePtr)attrp;
-  appendOrphan(doc()->m_orphans, (xmlNodePtr)attrp);
+  appendOrphan(*doc()->m_orphans, (xmlNodePtr)attrp);
   return ret;
 }
 
@@ -5358,6 +5365,10 @@ c_DOMXPath::c_DOMXPath() : m_node(NULL), m_registerPhpFunctions(0) {
 }
 
 c_DOMXPath::~c_DOMXPath() {
+  sweep();
+}
+
+void c_DOMXPath::sweep() {
   if (m_node) {
     xmlXPathFreeContext((xmlXPathContextPtr)m_node);
     m_node = NULL;
@@ -5454,6 +5465,10 @@ c_DOMNodeIterator::c_DOMNodeIterator()
 }
 
 c_DOMNodeIterator::~c_DOMNodeIterator() {
+  sweep();
+}
+
+void c_DOMNodeIterator::sweep() {
   delete m_iter;
 }
 

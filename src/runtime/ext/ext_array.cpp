@@ -782,7 +782,7 @@ Variant f_array_uintersect_uassoc(int _argc, CVarRef array1, CVarRef array2,
 }
 
 Variant f_array_intersect_key(int _argc, CVarRef array1, CVarRef array2, CArrRef _argv /* = null_array */) {
-  if (!array1.isArray() || !array2.isArray()) {
+  if (!array1.isArray() || (!array2.isArray() && f_count(array1))) {
     throw_bad_array_exception(__func__);
     return null;
   }

@@ -449,9 +449,7 @@ void Parser::onRefDim(Token &out, Token &var, Token &offset) {
   ASSERT(var->exp());
 
   out.reset();
-  LvalExpressionPtr lv = get_lval_expr(var->exp());
-  ASSERT(lv);
-  out->exp() = NEW_EXP(ArrayElement, lv,
+  out->exp() = NEW_EXP(ArrayElement, get_var_expr(var->exp()),
                        createOffset(var->exp(), offset->exp()));
   setOffset(out->exp(), var->exp(), offset->exp());
 }
@@ -1317,6 +1315,18 @@ void Parser::onYield(Token &out, Token *expr) {
     raise_error("Cannot mix 'return' and 'yield' in the same function: %s",
                 getMessage().c_str());
     return;
+  }
+  if (haveClass()) {
+    if (strcasecmp(func->name().data(), peekClass()->name().data()) == 0) {
+      raise_error("'yield' is not allowed in potential constructors: %s",
+                  getMessage().c_str());
+      return;
+    }
+    if (func->name().substr(0, 2) == "__") {
+      raise_error("'yield' is not allowed in constructor, destructor, or "
+                  "magic methods: %s", getMessage().c_str());
+      return;
+    }
   }
   int index = func->addYield();
 

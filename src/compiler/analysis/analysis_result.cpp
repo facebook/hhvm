@@ -979,6 +979,10 @@ void AnalysisResult::inferTypes() {
   AsyncFunc<AnalysisResult>
     methodSlotThread(this, &AnalysisResult::genMethodSlots);
   if (Option::UseMethodIndex || isSystem()) methodSlotThread.start();
+  if (isSystem()) {
+    forceClassVariants(ClassScopePtr(), true);
+    forceClassVariants(ClassScopePtr(), false);
+  }
 
   setPhase(FirstInference);
   BlockScopeRawPtrQueue scopes;

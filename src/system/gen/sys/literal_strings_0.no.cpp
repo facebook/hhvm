@@ -83,6 +83,7 @@ StaticString s_sys_ss95d17b71("loadXML");
 StaticString s_sys_ss961c2365("getDelayedByKey");
 StaticString s_sys_ss9631f2ea("isDestructor");
 StaticString s_sys_ss963681e7("__setsoapheaders");
+StaticString s_sys_ss969a2913("getClass");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

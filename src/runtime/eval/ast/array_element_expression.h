@@ -28,7 +28,7 @@ DECLARE_AST_PTR(Name);
 
 class ArrayElementExpression : public LvalExpression {
 public:
-  ArrayElementExpression(EXPRESSION_ARGS, LvalExpressionPtr arr,
+  ArrayElementExpression(EXPRESSION_ARGS, ExpressionPtr arr,
                          ExpressionPtr idx);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual Variant evalExist(VariableEnvironment &env) const;
@@ -40,11 +40,11 @@ public:
     const;
   virtual Variant set(VariableEnvironment &env, CVarRef val) const;
   void sinkStaticMember(Parser *parser, const NamePtr &className);
-  LvalExpressionPtr getArr() const { return m_arr; }
+  ExpressionPtr getArr() const { return m_arr; }
   ExpressionPtr getIdx() const { return m_idx; }
   virtual void dump(std::ostream &out) const;
 private:
-  LvalExpressionPtr m_arr;
+  ExpressionPtr m_arr;
   ExpressionPtr m_idx;
   bool m_reverseOrder;
 };

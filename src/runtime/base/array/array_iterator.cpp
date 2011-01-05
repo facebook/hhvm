@@ -178,6 +178,8 @@ ObjectArrayIter::ObjectArrayIter(ObjectData *obj,
     m_iterator = new Variant();
     *m_iterator = *iterator;
     // m_iterator from IteratorAggregate only, no need to rewind
+  } else if (m_obj->o_instanceof("continuation")) {
+    m_obj->o_invoke(s_next, Array(), -1);
   } else {
     m_obj->o_invoke(s_rewind, Array(), -1);
   }

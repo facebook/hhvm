@@ -209,6 +209,7 @@ private:
   std::vector<BlockScopePtrVec> m_scopes;
   std::vector<int> m_generators;
   std::string m_clsName; // for T_CLASS_C inside a closure
+  std::string m_funcName;
 
   // parser output
   StatementListPtr m_tree;

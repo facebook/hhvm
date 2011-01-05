@@ -39,6 +39,7 @@ FORWARD_DECLARE_CLASS(Continuation);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+#include <php/classes/exception.fw.h>
 #include <php/classes/iterator.fw.h>
 
 #endif // __GENERATED_php_classes_closure_fw_h8df1dc07__

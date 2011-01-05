@@ -605,6 +605,7 @@ void Parser::onFunctionStart(Token &name) {
   pushComment();
   newScope();
   m_generators.push_back(0);
+  m_funcName = name.text();
 }
 
 void Parser::onMethodStart(Token &name, Token &mods) {
@@ -1005,6 +1006,18 @@ void Parser::onYield(Token &out, Token *expr) {
     Logger::Error("Cannot mix 'return' and 'yield' in the same function: %s",
                   getMessage().c_str());
     return;
+  }
+  if (!m_clsName.empty()) {
+    if (strcasecmp(m_funcName.c_str(), m_clsName.c_str()) == 0) {
+      Logger::Error("'yield' is not allowed in potential constructors: %s",
+                    getMessage().c_str());
+      return;
+    }
+    if (m_funcName[0] == '_' && m_funcName[1] == '_') {
+      Logger::Error("'yield' is not allowed in constructor, destructor, or "
+                    "magic methods: %s", getMessage().c_str());
+      return;
+    }
   }
   int index = ++m_generators.back();
 

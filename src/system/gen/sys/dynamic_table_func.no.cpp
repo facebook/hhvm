@@ -2503,24 +2503,6 @@ Variant ifa_openssl_sign(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg3((a3));
   return (f_openssl_sign(arg0, arg1, arg2, arg3));
 }
-Variant i___xhp_idx(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(__xhp_idx);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("__xhp_idx", count, 2, 2, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (f___xhp_idx(arg0, arg1));
-  }
-}
-Variant ifa___xhp_idx(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 2) return throw_wrong_arguments("__xhp_idx", count, 2, 2, 1);
-  CVarRef arg0((a0));
-  CVarRef arg1((a1));
-  return (f___xhp_idx(arg0, arg1));
-}
 Variant i_version_compare(void *extra, CArrRef params) {
   FUNCTION_INJECTION(version_compare);
   int count __attribute__((__unused__)) = params.size();
@@ -42173,26 +42155,6 @@ Variant ei_openssl_sign(Eval::VariableEnvironment &env, const Eval::FunctionCall
   if (count < 3 || count > 4) return throw_wrong_arguments("openssl_sign", count, 3, 4, 1);
   if (count <= 3) return (x_openssl_sign(a0, ref(a1), a2));
   else return (x_openssl_sign(a0, ref(a1), a2, a3));
-}
-Variant ei___xhp_idx(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("__xhp_idx", count, 2, 2, 1);
-  return (x___xhp_idx(a0, a1));
 }
 Variant ei_version_compare(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -88181,7 +88143,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x66273C5932B1FCCELL, clock_gettime);
       break;
     case 7375:
-      HASH_INVOKE_FROM_EVAL(0x433542DBE67C5CCFLL, __xhp_idx);
       HASH_INVOKE_FROM_EVAL(0x407B1F3AFEC43CCFLL, pixelgetblue);
       break;
     case 7377:
@@ -88909,7 +88870,6 @@ CallInfo ci_magickgetcharheight((void*)&i_magickgetcharheight, (void*)&ifa_magic
 CallInfo ci_imagerotate((void*)&i_imagerotate, (void*)&ifa_imagerotate, 4, 0, 0x0000000000000000LL, (void*)&ei_imagerotate);
 CallInfo ci_magickcompositeimage((void*)&i_magickcompositeimage, (void*)&ifa_magickcompositeimage, 5, 0, 0x0000000000000000LL, (void*)&ei_magickcompositeimage);
 CallInfo ci_openssl_sign((void*)&i_openssl_sign, (void*)&ifa_openssl_sign, 4, 0, 0x0000000000000002LL, (void*)&ei_openssl_sign);
-CallInfo ci___xhp_idx((void*)&i___xhp_idx, (void*)&ifa___xhp_idx, 2, 0, 0x0000000000000000LL, (void*)&ei___xhp_idx);
 CallInfo ci_version_compare((void*)&i_version_compare, (void*)&ifa_version_compare, 3, 0, 0x0000000000000000LL, (void*)&ei_version_compare);
 CallInfo ci_timezone_name_get((void*)&i_timezone_name_get, (void*)&ifa_timezone_name_get, 1, 0, 0x0000000000000000LL, (void*)&ei_timezone_name_get);
 CallInfo ci_posix_getpgid((void*)&i_posix_getpgid, (void*)&ifa_posix_getpgid, 1, 0, 0x0000000000000000LL, (void*)&ei_posix_getpgid);
@@ -101776,10 +101736,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 7375:
-      HASH_GUARD(0x433542DBE67C5CCFLL, __xhp_idx) {
-        ci = &ci___xhp_idx;
-        return true;
-      }
       HASH_GUARD(0x407B1F3AFEC43CCFLL, pixelgetblue) {
         ci = &ci_pixelgetblue;
         return true;

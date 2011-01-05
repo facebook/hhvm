@@ -599,9 +599,5 @@ bool TestParserExpr::TestXHP() {
     "}\n"
     "}\n");
 
-  // idx
-  V("<?php foo()[bar()];",
-    "__xhp_idx(foo(), bar());\n");
-
   return true;
 }

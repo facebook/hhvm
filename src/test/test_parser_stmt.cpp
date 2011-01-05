@@ -661,7 +661,7 @@ bool TestParserStmt::TestYieldStatement() {
   RuntimeOption::EnableHipHopSyntax = true;
   Option::EnableHipHopSyntax = true;
 
-  V("<?php function foo() { yield;}",
+  V("<?php function foo() { yield break;}",
     "function foo() {\n"
     "return new Continuation('02316968161694270338_1', get_defined_vars());\n"
     "}\n"

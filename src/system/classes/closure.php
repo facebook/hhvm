@@ -32,7 +32,7 @@ class Continuation extends Closure implements Iterator {
   private $obj;
   public $label = 0;
   private $done = false;
-  private $index = 0;
+  private $index = -1;
   private $value;
 
   public function __construct($func, $vars, $obj = null) {
@@ -44,24 +44,33 @@ class Continuation extends Closure implements Iterator {
   }
 
   public function current() {
+    if ($this->index < 0) {
+      throw new Exception('Need to call next() first');
+    }
     return $this->value;
   }
   public function key() {
+    if ($this->index < 0) {
+      throw new Exception('Need to call next() first');
+    }
     return $this->index;
   }
   public function next() {
+    if ($this->done) {
+      throw new Exception('Continuation is already finished');
+    }
+
     ++$this->index;
     if ($this->obj) {
-      $func = $this->func;
+      $tokens = explode('::', $this->func);
+      $func = $tokens[1];
       $this->value = $this->obj->$func($this);
     } else {
       $this->value = call_user_func($this->func, $this);
     }
   }
   public function rewind() {
-    $this->label = '';
-    $this->index = -1;
-    $this->next();
+    throw new Exception('Cannot rewind on a Continuation object');
   }
   public function valid() {
     return !$this->done;

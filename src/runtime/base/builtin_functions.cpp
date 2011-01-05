@@ -79,7 +79,7 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
   bound = true;
 #endif
 
-  if (function.isString()) {
+  if (function.isString() || function.instanceof("closure")) {
     String sfunction = function.toString();
     int c = sfunction.find("::");
     if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {

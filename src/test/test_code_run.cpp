@@ -492,6 +492,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestFiber);
   RUN_TEST(TestAPC);
   RUN_TEST(TestInlining);
+  RUN_TEST(TestParser);
 
   // PHP 5.3 features
   RUN_TEST(TestVariableClassName);
@@ -15620,6 +15621,10 @@ bool TestCodeRun::TestGoto() {
 }
 
 bool TestCodeRun::TestClosure() {
+  MVCRO("<?php $a = function ($v) { return $v > 2; }; echo $a(4).\"\n\";"
+        " echo call_user_func_array($a, array(4));",
+        "1\n1");
+
   MVCRO("<?php $a = function ($a) { return $a;}; var_dump($a(123));",
         "int(123)\n");
 
@@ -15895,6 +15900,13 @@ bool TestCodeRun::TestYield() {
         "string(6) \"banana\"\n"
        );
 
+  MVCRO("<?php class F { function fruit() { yield 'apple'; yield 'banana';} }"
+        "$f = new F; foreach ($f->fruit() as $fruit) { var_dump($fruit);} ",
+
+        "string(5) \"apple\"\n"
+        "string(6) \"banana\"\n"
+       );
+
   MVCRO("<?php function fruit() { $a = 123; yield $a; yield ++$a;} "
         "foreach (fruit() as $fruit) { var_dump($fruit);} ",
 
@@ -15902,11 +15914,18 @@ bool TestCodeRun::TestYield() {
         "int(124)\n"
        );
 
-  MVCRO("<?php function fruit() { $a = 123; yield $a; yield; yield ++$a;} "
+  MVCRO("<?php function fruit() { $a = 123; yield $a;yield break;yield ++$a;} "
         "foreach (fruit() as $fruit) { var_dump($fruit);} ",
 
         "int(123)\n"
        );
+
+  return true;
+}
+
+bool TestCodeRun::TestParser() {
+  MVCRO("<?php function foo() { return array(1, 2, 3);} var_dump(foo()[2]);",
+        "int(3)\n");
 
   return true;
 }

@@ -22,13 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ss68bc25e3("__dorequest");
-StaticString s_sys_ss68d731f7("getChildren");
-StaticString s_sys_ss690e46e7("saveHTML");
-StaticString s_sys_ss6974a1cc("__toString");
-StaticString s_sys_ss69f4b5d8("escapestring");
-StaticString s_sys_ss6a9626a3("seek");
-StaticString s_sys_ss6aa5ef61("helpBody");
 StaticString s_sys_ss6ae7fa54("addByKey");
 StaticString s_sys_ss6b51d6cb("getcolumnmeta");
 StaticString s_sys_ss6b750a79("endElement");
@@ -66,6 +59,7 @@ StaticString s_sys_ss764ad06c("fpassthru");
 StaticString s_sys_ss7732a9a6("hphp_get_class_info");
 StaticString s_sys_ss7854bd7b("getTraceAsString");
 StaticString s_sys_ss78cb1b27("\000SplObjectStorage\000storage", 25);
+StaticString s_sys_ss791c5872("Need to call next() first");
 StaticString s_sys_ss79892305("getStackTrace");
 StaticString s_sys_ss7a0832b7("writePI");
 StaticString s_sys_ss7a1c6fcd("createDocumentType");

@@ -24,6 +24,7 @@
 // Declarations
 #include <cls/Closure.h>
 #include <cls/Continuation.h>
+#include <php/classes/exception.h>
 #include <php/classes/iterator.h>
 
 namespace HPHP {

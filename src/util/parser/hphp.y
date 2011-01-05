@@ -181,7 +181,8 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
         std::string si = boost::lexical_cast<std::string>(i);
 
         Token label;   label.setText(YIELD_LABEL_PREFIX + si);
-        Token sgoto;   _p->onGoto(sgoto, label);
+        Token sgoto;   _p->addGoto(label.text(), _p->getLocation());
+                       _p->onGoto(sgoto, label);
         Token stmts0;  _p->onStatementListStart(stmts0);
         Token stmts1;  _p->addStatement(stmts1, stmts0, sgoto);
         Token stmts;   _p->finishStatement(stmts, stmts1); stmts = 1;
@@ -323,7 +324,7 @@ void transform_yield(Parser *_p, Token &stmts, int index, Token *expr) {
 
   Token lname;   lname.setText(YIELD_LABEL_PREFIX +
                                boost::lexical_cast<std::string>(index));
-  Token label;   _p->onLabel(label, lname);
+  Token label;   _p->addLabel(lname.text()); _p->onLabel(label, lname);
 
   Token stmts0;  _p->onStatementListStart(stmts0);
   Token stmts1;  _p->addStatement(stmts1, stmts0, stmt0);
@@ -666,13 +667,6 @@ static void xhp_children_stmt(Parser *_p, Token &out, Token &children) {
   }
 }
 
-static void xhp_idx(Parser *_p, Token &out, Token &arr, Token &offset) {
-  Token fname;   fname.setText("__xhp_idx");
-  Token params1; _p->onCallParam(params1, NULL, arr, 0);
-  Token params2; _p->onCallParam(params2, &params1, offset, 0);
-  _p->onCall(out, 0, fname, params2, 0);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
@@ -921,7 +915,7 @@ statement_without_expr:
   | T_RETURN expr_without_variable ';' { _p->onReturn($$, &$2);}
   | T_RETURN variable ';'              { _p->onReturn($$, &$2);}
 
-  | T_YIELD ';'                        { _p->onYield($$, NULL);}
+  | T_YIELD T_BREAK ';'                { _p->onYield($$, NULL);}
   | T_YIELD expr_without_variable ';'  { _p->onYield($$, &$2);}
   | T_YIELD variable ';'               { _p->onYield($$, &$2);}
 
@@ -995,8 +989,8 @@ function_declaration_statement:
                                          _p->onFunctionStart($4);
                                          _p->pushLabelInfo();}
     '(' parameter_list ')'
-    '{' inner_statement_list '}'       { _p->popLabelInfo();
-                                         _p->onFunction($$,$1,$3,$4,$7,$10);}
+    '{' inner_statement_list '}'       { _p->onFunction($$,$1,$3,$4,$7,$10);
+                                         _p->popLabelInfo();}
 ;
 
 class_declaration_statement:
@@ -1218,8 +1212,8 @@ class_statement:
     type_decl function_loc
     is_reference T_STRING '('          { _p->onMethodStart($5, $1);
                                          _p->pushLabelInfo();}
-    parameter_list ')' method_body     { _p->popLabelInfo();
-                                         _p->onMethod($$,$1,$2,$4,$5,$8,$10);}
+    parameter_list ')' method_body     { _p->onMethod($$,$1,$2,$4,$5,$8,$10);
+                                         _p->popLabelInfo();}
   | T_XHP_ATTRIBUTE                    { _p->scanner().xhpAttributeDecl();}
     xhp_attribute_stmt ';'             { _p->xhpSetAttributes($3);}
   | T_XHP_CATEGORY
@@ -1454,7 +1448,7 @@ expr_without_variable:
     parameter_list ')' lexical_vars
     '{' inner_statement_list '}'       { _p->popLabelInfo();
                                          _p->onClosure($$,$1,$3,$6,$8,$10);}
-  | expr '[' dim_offset ']'            { xhp_idx(_p, $$, $1, $3);}
+  | expr '[' dim_offset ']'            { _p->onRefDim($$, $1, $3);}
   | xhp_tag                            { $$ = $1;}
 ;
 

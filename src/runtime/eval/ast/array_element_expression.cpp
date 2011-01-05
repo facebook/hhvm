@@ -27,7 +27,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 ArrayElementExpression::ArrayElementExpression(EXPRESSION_ARGS,
-                                               LvalExpressionPtr arr,
+                                               ExpressionPtr arr,
                                                ExpressionPtr idx)
   : LvalExpression(EXPRESSION_PASS), m_arr(arr), m_idx(idx) {
   m_reverseOrder = m_idx && m_arr->is<VariableExpression>();
@@ -89,7 +89,12 @@ bool ArrayElementExpression::exist(VariableEnvironment &env, int op) const {
 }
 
 Variant &ArrayElementExpression::lval(VariableEnvironment &env) const {
-  Variant &arr = m_arr->lval(env);
+  const LvalExpression *larr = m_arr->toLval();
+  ASSERT(larr);
+  if (!larr) {
+    throw InvalidOperandException("Cannot take l-value with function return");
+  }
+  Variant &arr = larr->lval(env);
   if (m_idx) {
     Variant idx(m_idx->eval(env));
     SET_LINE;
@@ -106,8 +111,12 @@ bool ArrayElementExpression::weakLval(VariableEnvironment &env,
     SET_LINE;
     throw InvalidOperandException("Cannot unset array append");
   }
+  const LvalExpression *larr = m_arr->toLval();
+  if (!larr) {
+    throw InvalidOperandException("Cannot take l-value with function return");
+  }
   Variant *arr;
-  bool ok = m_arr->weakLval(env, arr);
+  bool ok = larr->weakLval(env, arr);
   Variant idx(m_idx->eval(env));
   if (!ok || !arr->is(KindOfArray)) {
     return false;
@@ -135,7 +144,11 @@ Variant ArrayElementExpression::refval(VariableEnvironment &env,
 
 Variant ArrayElementExpression::set(VariableEnvironment &env, CVarRef val)
   const {
-  Variant &arr = m_arr->lval(env);
+  const LvalExpression *larr = m_arr->toLval();
+  if (!larr) {
+    throw InvalidOperandException("Cannot take l-value with function return");
+  }
+  Variant &arr = larr->lval(env);
   if (m_idx) {
     Variant idx(m_idx->eval(env));
     SET_LINE;
@@ -150,8 +163,12 @@ void ArrayElementExpression::unset(VariableEnvironment &env) const {
   if (!m_idx) {
     throw InvalidOperandException("Cannot unset array append");
   }
+  const LvalExpression *larr = m_arr->toLval();
+  if (!larr) {
+    throw InvalidOperandException("Cannot take l-value with function return");
+  }
   Variant *arr;
-  if (m_arr->weakLval(env, arr)) {
+  if (larr->weakLval(env, arr)) {
     Variant idx(m_idx->eval(env));
     SET_LINE_VOID;
     arr->weakRemove(idx);

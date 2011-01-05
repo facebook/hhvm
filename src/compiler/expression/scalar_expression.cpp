@@ -109,45 +109,47 @@ void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
     string id = Util::toLower(getIdentifier());
 
     switch (m_type) {
-    case T_LINE:
-      if (getLocation()) {
-        m_translated = lexical_cast<string>(getLocation()->line1);
-      } else {
-        m_translated = "0";
-      }
-      break;
-    case T_CLASS_C:
-      if (!m_value.empty()) {
+      case T_LINE:
+        if (getLocation()) {
+          m_translated = lexical_cast<string>(getLocation()->line1);
+        } else {
+          m_translated = "0";
+        }
+        break;
+      case T_NS_C:
         m_translated = m_value;
-      } else if (getClassScope()) {
-        m_translated = getClassScope()->getOriginalName();
-      }
-      break;
-    case T_NS_C:
-      m_translated = m_value;
-      break;
-    case T_METHOD_C:
-      if (getFunctionScope()) {
+        break;
+      case T_CLASS_C:
+      case T_METHOD_C: {
+        BlockScopeRawPtr b = getScope();
+        while (b && b->is(BlockScope::FunctionScope)) {
+          b = b->getOuterScope();
+        }
         m_translated.clear();
-        FunctionScopePtr func = getFunctionScope();
-        ClassScopePtr cls = getClassScope();
-        if (cls) {
-          m_translated = cls->getOriginalName();
-          m_translated += "::";
+        if (b && b->is(BlockScope::ClassScope)) {
+          m_translated =
+            dynamic_pointer_cast<ClassScope>(b)->getOriginalName();
         }
-        m_translated += func->getOriginalName();
-      }
-      break;
-    case T_FUNC_C:
-      if (getFunctionScope()) {
-        m_translated = getFunctionScope()->getOriginalName();
-        if (m_translated[0] == '0') {
-          m_translated = "{closure}";
+        if (m_type == T_METHOD_C) {
+          if (FunctionScopePtr func = getFunctionScope()) {
+            if (b && b->is(BlockScope::ClassScope)) {
+              m_translated += "::";
+            }
+            m_translated += func->getOriginalName();
+          }
         }
+        break;
       }
-      break;
-    default:
-      break;
+      case T_FUNC_C:
+        if (getFunctionScope()) {
+          m_translated = getFunctionScope()->getOriginalName();
+          if (m_translated[0] == '0') {
+            m_translated = "{closure}";
+          }
+        }
+        break;
+      default:
+        break;
     }
   }
 }
@@ -347,13 +349,15 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   case T_DNUMBER:
     cg_printf("%s", m_originalValue.c_str());
     break;
-  case T_CLASS_C:
-    cg_printf("__CLASS__");
-    break;
   case T_NS_C:
-    cg_printf("__NAMESPACE__");
+    if (cg.translatePredefined()) {
+      cg_printf("%s", m_translated.c_str());
+    } else {
+      cg_printf("__NAMESPACE__");
+    }
     break;
   case T_LINE:
+  case T_CLASS_C:
   case T_METHOD_C:
   case T_FUNC_C:
     if (cg.translatePredefined()) {

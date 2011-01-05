@@ -458,25 +458,23 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
 
   ScalarExpressionPtr exp;
   switch (type) {
-  case T_STRING:
-  case T_LNUMBER:
-  case T_DNUMBER:
-  case T_LINE:
-  case T_METHOD_C:
-  case T_FUNC_C:
-    exp = NEW_EXP(ScalarExpression, type, scalar->text());
-    break;
-  case T_CLASS_C:
-    exp = NEW_EXP(ScalarExpression, type, m_clsName);
-    break;
-  case T_NS_C:
-    exp = NEW_EXP(ScalarExpression, type, m_namespace);
-    break;
-  case T_CONSTANT_ENCAPSED_STRING:
-    exp = NEW_EXP(ScalarExpression, type, scalar->text(), true);
-    break;
-  default:
-    ASSERT(false);
+    case T_STRING:
+    case T_LNUMBER:
+    case T_DNUMBER:
+    case T_LINE:
+    case T_METHOD_C:
+    case T_FUNC_C:
+    case T_CLASS_C:
+      exp = NEW_EXP(ScalarExpression, type, scalar->text());
+      break;
+    case T_NS_C:
+      exp = NEW_EXP(ScalarExpression, type, m_namespace);
+      break;
+    case T_CONSTANT_ENCAPSED_STRING:
+      exp = NEW_EXP(ScalarExpression, type, scalar->text(), true);
+      break;
+    default:
+      ASSERT(false);
   }
   out->exp = exp;
 }

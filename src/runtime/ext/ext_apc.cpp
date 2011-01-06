@@ -435,7 +435,9 @@ void apc_load_impl(struct cache_info *info,
                    const char **char_keys, char *char_values,
                    const char **strings, const char **objects,
                    const char **thrifts, const char **others) {
-  if (RuntimeOption::EnableConstLoad && info && info->use_const) return;
+  if (!RuntimeOption::ForceConstLoadToAPC) {
+    if (RuntimeOption::EnableConstLoad && info && info->use_const) return;
+  }
   SharedStore &s = s_apc_store[0];
   {
     int count = count_items(int_keys, 2);
@@ -697,7 +699,9 @@ void apc_load_impl_compressed
      int *object_lens, const char *objects,
      int *thrift_lens, const char *thrifts,
      int *other_lens, const char *others) {
-  if (RuntimeOption::EnableConstLoad && info && info->use_const) return;
+  if (!RuntimeOption::ForceConstLoadToAPC) {
+    if (RuntimeOption::EnableConstLoad && info && info->use_const) return;
+  }
   SharedStore &s = s_apc_store[0];
   {
     int count = int_lens[0];

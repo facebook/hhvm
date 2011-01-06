@@ -122,7 +122,7 @@ PhpFile *FileRepository::checkoutFile(const std::string &rname,
 
 bool FileRepository::findFile(std::string &path, struct stat &s,
                               const char *currentDir) {
-  return fileStat(path, s);
+  return fileStat(path, s) && !S_ISDIR(s.st_mode);
 }
 
 PhpFile *FileRepository::readFile(const std::string &name,
@@ -138,10 +138,7 @@ PhpFile *FileRepository::readFile(const std::string &name,
 }
 
 bool FileRepository::fileStat(const std::string &name, struct stat &s) {
-  if (stat(name.c_str(), &s) == 0) {
-    return true;
-  }
-  return false;
+  return stat(name.c_str(), &s) == 0;
 }
 
 const char* FileRepository::canonicalize(const std::string &name) {

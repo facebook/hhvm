@@ -241,15 +241,53 @@ StatementPtr Parser::getTree() const {
   return m_tree;
 }
 
-void Parser::pushClass(ClassStatementPtr cl) { m_classes.push(cl); }
-bool Parser::haveClass() const { return !m_classes.empty(); }
-ClassStatementPtr Parser::peekClass() const { return m_classes.top(); }
-void Parser::popClass() { m_classes.pop(); }
-
-void Parser::pushFunc(FunctionStatementPtr fs) { m_funcs.push(fs); }
-bool Parser::haveFunc() const { return !m_funcs.empty(); }
-FunctionStatementPtr Parser::peekFunc() const { return m_funcs.top(); }
-void Parser::popFunc() { m_funcs.pop(); }
+void Parser::pushClass(ClassStatementPtr cl) {
+  m_scopes.push_back(ScopePtrPair(cl, FunctionStatementPtr()));
+}
+bool Parser::haveClass() const {
+  int size = m_scopes.size();
+  return
+    (size > 0 && m_scopes[size - 1].first) ||
+    (size > 1 && m_scopes[size - 2].first);
+}
+ClassStatementPtr Parser::peekClass() const {
+  ASSERT(haveClass());
+  int size = m_scopes.size();
+  ClassStatementPtr ret;
+  if (size > 0 && (ret = m_scopes[size - 1].first)) {
+    return ret;
+  }
+  if (size > 1 && (ret = m_scopes[size - 2].first)) {
+    return ret;
+  }
+  return ClassStatementPtr();
+}
+std::string Parser::getCurrentClass() {
+  for (int i = m_scopes.size() - 1; i >= 0; i--) {
+    if (m_scopes[i].first) {
+      return m_scopes[i].first->name().data();
+    }
+  }
+  return "";
+}
+void Parser::popClass() {
+  ASSERT(!m_scopes.empty() && m_scopes.back().first);
+  m_scopes.pop_back();
+}
+void Parser::pushFunc(FunctionStatementPtr fs) {
+  m_scopes.push_back(ScopePtrPair(ClassStatementPtr(), fs));
+}
+bool Parser::haveFunc() const {
+  return !m_scopes.empty() && m_scopes.back().second;
+}
+FunctionStatementPtr Parser::peekFunc() const {
+  ASSERT(haveFunc());
+  return m_scopes.back().second;
+}
+void Parser::popFunc() {
+  ASSERT(haveFunc());
+  m_scopes.pop_back();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // names
@@ -594,7 +632,7 @@ void Parser::encapRefDim(Token &out, Token &var, Token &offset) {
 void Parser::encapObjProp(Token &out, Token &var, Token &name) {
   out.reset();
   ExpressionPtr obj;
-  if (var.text() == "this") {
+  if (var.text() == "this" && haveClass()) {
     obj = NEW_EXP0(This);
   } else {
     obj = NEW_EXP(Variable, Name::fromString(this, var.text()));
@@ -638,7 +676,7 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
   case T_CLASS_C:
     subtype = type;
     type = T_STRING;
-    stext = haveClass() ? peekClass()->name() : "";
+    stext = getCurrentClass();
     break;
   case T_NS_C:
     subtype = type;
@@ -648,8 +686,12 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
   case T_METHOD_C:
     subtype = type;
     type = T_STRING;
-    if (haveClass() && haveFunc()) {
-      stext = peekClass()->name() + "::" + peekFunc()->name();
+    if (haveClass()) {
+      stext = getCurrentClass();
+      if (haveFunc()) {
+        stext += "::";
+        stext += peekFunc()->name();
+      }
       break;
     }
     // Fall through
@@ -660,6 +702,7 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
     if (stext[0] == '0') {
       stext = "{closure}";
     }
+    break;
   }
   switch (type) {
   case T_STRING:
@@ -1441,11 +1484,12 @@ void Parser::onTypedVariable(Token &out, Token *exprs, Token &var,
 ///////////////////////////////////////////////////////////////////////////////
 
 NamePtr Parser::procStaticClassName(Token &className, bool text) {
+  bool cls = haveClass();
   NamePtr cname;
   if (text) {
-    if (className.text() == "self") {
+    if (cls && className.text() == "self") {
       cname = Name::fromString(this, peekClass()->name(), true);
-    } else if (className.text() == "parent") {
+    } else if (cls && className.text() == "parent") {
       cname = Name::fromString(this, peekClass()->parent(), true);
     } else {
       cname = Name::fromString(this, className.text());
@@ -1454,7 +1498,7 @@ NamePtr Parser::procStaticClassName(Token &className, bool text) {
 
   } else {
     cname = className->name();
-    if (haveClass() && cname->get()) {
+    if (cls && cname->get()) {
       if (cname->get() == "self") {
         cname = Name::fromString(this, peekClass()->name(), true);
         cname->setOriginalText("self");

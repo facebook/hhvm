@@ -991,12 +991,13 @@ bool TestCodeRun::TestExceptions() {
 bool TestCodeRun::TestPredefined() {
   MVCR("<?php \n\n\nvar_dump(/*__FILE__, */__LINE__);");
   MVCR("<?php function Test() { var_dump(__FUNCTION__);} "
-      "var_dump(__FUNCTION__); test();");
+       "var_dump(__FUNCTION__); test();");
   MVCR("<?php class A { "
-      "function TestR() { var_dump(__CLASS__, __METHOD__);} "
-      "static function Testm() { var_dump(__CLASS__, __METHOD__);}} "
-      "function Testf() { var_dump(__CLASS__, __METHOD__);} "
-      "testf(); A::testm(); $obj = new A(); $obj->testr();");
+       "function TestR() { var_dump(__CLASS__, __METHOD__);} "
+       "static function Testm() { var_dump(__CLASS__, __METHOD__);}} "
+       "function Testf() { var_dump(__CLASS__, __METHOD__);} "
+       "testf(); A::testm(); $obj = new A(); $obj->testr();");
+  MVCR("<?php class A { const Foo = __METHOD__;} var_dump(A::Foo);");
   return true;
 }
 

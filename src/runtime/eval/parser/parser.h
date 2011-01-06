@@ -282,8 +282,8 @@ public:
   FunctionStatementPtr peekFunc() const;
 private:
   std::vector<ExpressionPtr> m_objects; // for parsing obj prop/method calls
-  std::stack<ClassStatementPtr> m_classes;
-  std::stack<FunctionStatementPtr> m_funcs;
+  typedef std::pair<ClassStatementPtr, FunctionStatementPtr> ScopePtrPair;
+  std::vector<ScopePtrPair> m_scopes;
   std::vector<StaticStatementPtr> &m_staticStatements;
   int m_classVarMods;
 
@@ -292,6 +292,7 @@ private:
 
   void pushClass(ClassStatementPtr cl);
   void popClass();
+  std::string getCurrentClass(); // lexical scope
 
   void pushFunc(FunctionStatementPtr fs);
   void popFunc();

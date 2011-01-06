@@ -1229,7 +1229,29 @@ bool f_imap_renamemailbox(CObjRef imap_stream, CStrRef old_mbox,
 
 bool f_imap_reopen(CObjRef imap_stream, CStrRef mailbox,
                    int64 options /* = 0 */, int64 retries /* = 0 */) {
-  throw NotImplementedException(__func__);
+  ImapStream *obj = imap_stream.getTyped<ImapStream>();
+  long flags = NIL;
+  long cl_flags = NIL;
+  if (options) {
+    flags = options;
+    if (flags & PHP_EXPUNGE) {
+      cl_flags = CL_EXPUNGE;
+      flags ^= PHP_EXPUNGE;
+    }
+    obj->m_flag = cl_flags;
+  }
+
+  if (retries) {
+    mail_parameters(NIL, SET_MAXLOGINTRIALS, (void *) retries);
+  }
+
+  MAILSTREAM *stream = mail_open(obj->m_stream, (char*)mailbox.data(), flags);
+  if (stream == NIL) {
+    raise_warning("Couldn't re-open stream");
+    return false;
+  }
+  obj->m_stream = stream;
+  return true;
 }
 
 Variant f_imap_rfc822_parse_adrlist(CStrRef address, CStrRef default_host) {

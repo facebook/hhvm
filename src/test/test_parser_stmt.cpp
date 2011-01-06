@@ -666,7 +666,7 @@ bool TestParserStmt::TestYieldStatement() {
     "return new Continuation('02316968161694270338_1', get_defined_vars());\n"
     "}\n"
     "function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
-    "extract($" CONTINUATION_OBJECT_NAME "->getVars());\n"
+    "extract($" CONTINUATION_OBJECT_NAME "->getVars(), EXTR_REFS);\n"
     "switch ($" CONTINUATION_OBJECT_NAME "->label) {\n"
     "case 1:\n"
     "goto " YIELD_LABEL_PREFIX "1;\n"
@@ -686,7 +686,7 @@ bool TestParserStmt::TestYieldStatement() {
     "return new Continuation('02316968161694270338_1', get_defined_vars());\n"
     "}\n"
     "function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
-    "extract($" CONTINUATION_OBJECT_NAME "->getVars());\n"
+    "extract($" CONTINUATION_OBJECT_NAME "->getVars(), EXTR_REFS);\n"
     "switch ($" CONTINUATION_OBJECT_NAME "->label) {\n"
     "case 1:\n"
     "goto " YIELD_LABEL_PREFIX "1;\n"
@@ -699,14 +699,14 @@ bool TestParserStmt::TestYieldStatement() {
     "}\n"
    );
 
-  V("<?php class foo { function foo() { yield 123; yield 456;} }",
-    "class foo {\n"
+  V("<?php class bar { function foo() { yield 123; yield 456;} }",
+    "class bar {\n"
     "public function foo() {\n"
-    "return new Continuation('foo::02316968161694270338_1', "
+    "return new Continuation('bar::02316968161694270338_1', "
     "get_defined_vars(), hphp_get_this());\n"
     "}\n"
     "public function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
-    "extract($" CONTINUATION_OBJECT_NAME "->getVars());\n"
+    "extract($" CONTINUATION_OBJECT_NAME "->getVars(), EXTR_REFS);\n"
     "switch ($" CONTINUATION_OBJECT_NAME "->label) {\n"
     "case 2:\n"
     "goto " YIELD_LABEL_PREFIX "2;\n"

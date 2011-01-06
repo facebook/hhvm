@@ -5953,6 +5953,26 @@ bool TestCodeRun::TestDynamicVariables() {
       "}\n"
       "f();\n");
 
+  MVCR("<?php\n"
+       "$a = 123;\n"
+       "$b = 456;\n"
+       "function foo() {\n"
+       "  global $a;\n"
+       "  $b = &$GLOBALS['b'];\n"
+       "  $d = 789; $e = 111;\n"
+       "  $c = &$d;\n"
+       "  $arr = get_defined_vars(); var_dump($arr); return $arr;\n"
+       "}\n"
+       "function bar($arr) {\n"
+       "  extract($arr, EXTR_REFS);\n"
+       "  var_dump($a, $b, $c, $d, $e);\n"
+       "  $a = 'aaa'; $b = 'bbb'; $c = 'ccc';\n"
+       "  var_dump($d);\n"
+       "}"
+       "bar(foo());\n"
+       "var_dump($a, $b);\n"
+      );
+
   // compact
   MVCR("<?php function test() { $a = 10; $b = 'test'; "
       "  var_dump(compact('ab')); "

@@ -902,7 +902,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       if (getScope()->isFirstPass()) {
         Compiler::Error(Compiler::BadDefine, self);
       }
-    } else if (m_type == ExtractFunction) {
+    } else if (m_type == ExtractFunction || m_type == GetDefinedVarsFunction) {
       getScope()->getVariables()->forceVariants(ar, VariableTable::AnyVars);
     }
   }

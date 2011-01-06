@@ -1430,7 +1430,8 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
       } else {
         varName = string(prefix) + cg.formatLabel(name);
       }
-      cg_printf("ret.set(\"%s\", %s);\n", cg.escapeLabel(name).c_str(),
+      cg_printf("if (%s.isInitialized()) ret.lval(\"%s\").setWithRef(%s);\n",
+                varName.c_str(), cg.escapeLabel(name).c_str(),
                 varName.c_str());
     }
     cg_printf("return ret;\n");

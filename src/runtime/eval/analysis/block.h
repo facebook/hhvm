@@ -66,9 +66,11 @@ public:
     const;
   int declareVariable(CStrRef var);
   const VariableIndices &varIndices() const;
+  const std::vector<std::string> &variables() const { return m_variables;}
 protected:
   StringMap<ExpressionPtr> m_staticStmts;
   VariableIndices m_variableIndices;
+  std::vector<std::string> m_variables; // in declaration order
 };
 
 ///////////////////////////////////////////////////////////////////////////////

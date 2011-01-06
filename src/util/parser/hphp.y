@@ -163,8 +163,11 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
                      _p->popObject(mcall);
 
       Token cname;   cname.setText("extract");
-      Token param;   _p->onCallParam(param, NULL, mcall, 0);
-      Token call;    _p->onCall(call, 0, cname, param, NULL);
+      Token param1;  _p->onCallParam(param1, NULL, mcall, 0);
+      Token refs;    refs.setText("EXTR_REFS");
+      Token crefs;   _p->onConstantValue(crefs, refs);
+      Token param2;  _p->onCallParam(param2, &param1, crefs, 0);
+      Token call;    _p->onCall(call, 0, cname, param2, NULL);
       _p->onExpStatement(scall, call);
     }
     Token sswitch;

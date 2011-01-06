@@ -245,7 +245,9 @@ class Array : public SmartPtr<ArrayData> {
   const Variant operator[](CVarRef key) const;
 
   Variant &lval(int64 key) {
-    ASSERT(m_px);
+    if (!m_px) {
+      SmartPtr<ArrayData>::operator=(ArrayData::Create());
+    }
     Variant *ret = NULL;
     ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
     if (escalated) {
@@ -256,7 +258,9 @@ class Array : public SmartPtr<ArrayData> {
   }
 
   Variant &lval(CStrRef key) {
-    ASSERT(m_px);
+    if (!m_px) {
+      SmartPtr<ArrayData>::operator=(ArrayData::Create());
+    }
     Variant *ret = NULL;
     ArrayData *escalated = m_px->lval(key, ret, m_px->getCount() > 1);
     if (escalated) {

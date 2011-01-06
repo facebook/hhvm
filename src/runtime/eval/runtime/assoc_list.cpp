@@ -68,8 +68,8 @@ bool AssocList::exists(CStrRef name, bool checkInit /* = false */) const {
 Array AssocList::toArray() const {
   Array res = Array::Create();
   for (VarAssocPair *vp = m_list; vp; vp = vp->next()) {
-    if (vp->var().isInitialized()) {
-      res.set(vp->name(), vp->var());
+    if (vp->var().isInitialized() && vp->name() != "GLOBALS") {
+      res.lval(vp->name()).setWithRef(vp->var());
     }
   }
   return res;

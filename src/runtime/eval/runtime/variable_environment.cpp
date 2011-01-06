@@ -158,22 +158,25 @@ FuncScopeVariableEnvironment(const FunctionStatement *func, int argc)
     m_argStart(RequestEvalState::argStack().pos()) {
 
   const Block::VariableIndices &vi = func->varIndices();
+  const vector<string> &vars = func->variables();
   m_byIdx.resize(vi.size());
   Globals *g = NULL;
-  for (Block::VariableIndices::const_iterator it = vi.begin();
-       it != vi.end(); ++it) {
+  for (int i = vars.size() - 1; i >= 0; i--) {
+    const string &name = vars[i];
+    Block::VariableIndices::const_iterator it = vi.find(name);
+    ASSERT(it != vi.end());
+    if (it == vi.end()) continue;
+
     const VariableIndex &v = it->second;
+    String sname(name.c_str(), name.size(), AttachLiteral);
     if (v.superGlobal() != VariableIndex::Normal &&
         v.superGlobal() != VariableIndex::Globals) {
       if (!g) g = get_globals();
       // This is safe because superglobals are real members of the globals
       // and do not live in an array
-      m_byIdx[v.idx()] = &g->get(String(it->first.c_str(), it->first.size(),
-            AttachLiteral));
+      m_byIdx[v.idx()] = &g->get(sname);
     } else {
-      Variant &val = m_alist.prepend(String(it->first.c_str(),
-            it->first.size(),
-            AttachLiteral));
+      Variant &val = m_alist.prepend(sname);
       m_byIdx[v.idx()] = &val;
       if (v.superGlobal() == VariableIndex::Globals) {
         val = get_global_array_wrapper();

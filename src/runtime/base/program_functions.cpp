@@ -1127,9 +1127,7 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
       Eval::Debugger::InterruptPSPEnded(program);
     } catch (const Eval::DebuggerException &e) {}
   }
-  if (RuntimeOption::EnableLivingObjects) {
-    Eval::RequestEvalState::DestructObjects();
-  }
+  Eval::RequestEvalState::DestructObjects();
   if (shutdown) {
     context->onRequestShutdown();
   }

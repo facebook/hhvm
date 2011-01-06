@@ -64,7 +64,7 @@ static FILE *new_log_file(const char *fileTemplate, const char *linkname,
   log_fd = open(pfilename, O_WRONLY|O_CREAT|O_APPEND, FILE_MODE);
 
 #ifndef DONT_CREATE_SUBDIRS
-  if ((log_fd == 0) && (errno == ENOENT)) {
+  if ((log_fd < 0) && (errno == ENOENT)) {
     create_subdirs(pfilename);
     log_fd = open(pfilename, O_WRONLY|O_CREAT|O_APPEND, FILE_MODE);
   }

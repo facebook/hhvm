@@ -62,8 +62,6 @@ class StringData {
    */
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
-  void incRefCountNoCheck() const { ++_count; }
-
   /* Only call setStatic() in a thread-neutral context! */
   void setStatic() const;
   bool isStatic() const { return _count == (1 << 30); }

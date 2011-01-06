@@ -64,7 +64,7 @@ static VarNR ToKey(CVarRef v) { return v.toKey(); }
 
 Variant::Variant(litstr  v) : _count(0), m_type(KindOfString) {
   m_data.pstr = NEW(StringData)(v);
-  m_data.pstr->incRefCountNoCheck();
+  m_data.pstr->incRefCount();
 }
 
 Variant::Variant(CStrRef v) : _count(0), m_type(KindOfString) {
@@ -74,7 +74,7 @@ Variant::Variant(CStrRef v) : _count(0), m_type(KindOfString) {
     if (s->isStatic()) {
       m_type = KindOfStaticString;
     } else {
-      s->incRefCountNoCheck();
+      s->incRefCount();
     }
   } else {
     m_data.num = 0;
@@ -86,7 +86,7 @@ Variant::Variant(const std::string & v) : _count(0), m_type(KindOfString) {
   StringData *s = NEW(StringData)(v.c_str(), v.size(), CopyString);
   ASSERT(s);
   m_data.pstr = s;
-  s->incRefCountNoCheck();
+  s->incRefCount();
 }
 
 Variant::Variant(CArrRef v) : _count(0), m_type(KindOfArray) {
@@ -117,7 +117,7 @@ Variant::Variant(StringData *v) : _count(0), m_type(KindOfString) {
     if (v->isStatic()) {
       m_type = KindOfStaticString;
     } else {
-      v->incRefCountNoCheck();
+      v->incRefCount();
     }
   } else {
     m_data.num = 0;
@@ -401,7 +401,7 @@ CVarRef Variant::set(litstr v) {
   }
   m_type = KindOfString;
   m_data.pstr = NEW(StringData)(v);
-  m_data.pstr->incRefCountNoCheck();
+  m_data.pstr->incRefCount();
   return *this;
 }
 
@@ -420,7 +420,7 @@ CVarRef Variant::set(StringData *v) {
       m_type = KindOfStaticString;
     } else {
       m_type = KindOfString;
-      v->incRefCountNoCheck();
+      v->incRefCount();
     }
   } else {
     m_data.num = 0;

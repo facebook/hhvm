@@ -34,11 +34,11 @@ StaticString MemFile::s_class_name("MemFile");
 ///////////////////////////////////////////////////////////////////////////////
 
 MemFile::MemFile()
-  : m_data(NULL), m_len(-1), m_cursor(0), m_malloced(false) {
+  : File(false), m_data(NULL), m_len(-1), m_cursor(0), m_malloced(false) {
 }
 
 MemFile::MemFile(const char *data, int64 len)
-  : m_data(NULL), m_len(len), m_cursor(0), m_malloced(true) {
+  : File(false), m_data(NULL), m_len(len), m_cursor(0), m_malloced(true) {
   m_data = (char*)malloc(len + 1);
   if (m_data && len) {
     memcpy(m_data, data, len);

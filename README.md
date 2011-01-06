@@ -59,6 +59,11 @@ Once this is done you can generate the build file. This will return you to the s
 
     make
 
+## Contributing to HipHop
+HipHop is licensed under the PHP and Zend licenses respectively.
+
+Before changes can be accepted a [Contributors Licensing Agreement](http://developers.facebook.com/opensource/cla) must be signed and returned.
+
 ## Running HipHop
 
 Please see [the wiki page](http://wiki.github.com/facebook/hiphop-php/running-hiphop)

@@ -92,11 +92,24 @@ public:
   ssize_t iter_advance(ssize_t prev) const;
   ssize_t iter_rewind(ssize_t prev) const;
 
+  virtual Variant reset();
+  virtual Variant prev();
+  virtual Variant current() const;
   virtual Variant next();
+  virtual Variant end();
+  virtual Variant key() const;
+  virtual Variant value(ssize_t &pos) const;
+  virtual Variant each();
+
+  virtual bool isHead() const;
+  virtual bool isTail() const;
+  virtual bool isInvalid() const;
 
   virtual void getFullPos(FullPos &fp);
-
   virtual bool setFullPos(const FullPos &fp);
+
+  virtual CVarRef currentRef();
+  virtual CVarRef endRef();
 
 private:
   Globals* m_globals;

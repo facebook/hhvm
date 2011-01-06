@@ -136,6 +136,27 @@ ssize_t Globals::iter_rewind(ssize_t prev) const {
   return next;
 }
 
+bool Globals::isHead(ssize_t pos) const {
+  if (staticSize() > 0) return pos == 0;
+  if (pos < -1) {
+    ArrayData *arr = Array::get();
+    ASSERT(arr);
+    return !arr->empty() && wrapIter(pos) == arr->iter_begin();
+  }
+  return false;
+}
+
+bool Globals::isTail(ssize_t pos) const {
+  ArrayData *arr = Array::get();
+  if (!arr || arr->empty()) {
+    return staticSize() > 0 && pos == staticSize() - 1;
+  }
+  if (pos < -1) {
+    return wrapIter(pos) == arr->iter_end();
+  }
+  return false;
+}
+
 void Globals::getFullPos(FullPos &pos) {
   ArrayData *arr = Array::get();
   arr->getFullPos(pos);

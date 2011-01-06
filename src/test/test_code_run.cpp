@@ -7827,6 +7827,24 @@ bool TestCodeRun::TestSuperGlobals() {
        "$GLOBALS['X::test'] = 'this_is_method_test::x';"
        "var_dump(X::test());");
 
+  MVCR("<?php\n"
+       "$a = 100;\n"
+       "function f() {\n"
+       "  foreach ($GLOBALS as $k => &$v) {\n"
+       "    if ($k == 'a') { $v = -1; }\n"
+       "  }\n"
+       "  global $a;\n"
+       "  var_dump($a);\n"
+       "  $b = $GLOBALS;\n"
+       "  $b['a'] = 0;\n"
+       "  var_dump($GLOBALS['a']);\n"
+       "  var_dump(end($GLOBALS));\n"
+       "  reset($GLOBALS);\n"
+       "  end($b);\n"
+       "  var_dump(current($GLOBALS));\n"
+       "}\n"
+       "f();\n");
+
   return true;
 }
 

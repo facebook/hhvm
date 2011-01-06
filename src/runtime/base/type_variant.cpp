@@ -652,7 +652,8 @@ void Variant::prepend(CVarRef v) {
 Variant Variant::array_iter_reset() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1 && !arr->isHead()) {
+    if (arr->getCount() > 1 && !arr->isHead()
+     && !arr->isGlobalArrayWrapper()) {
       arr = arr->copy();
       set(arr);
       ASSERT(arr == getArrayData());
@@ -666,7 +667,8 @@ Variant Variant::array_iter_reset() {
 Variant Variant::array_iter_prev() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1 && !arr->isInvalid()) {
+    if (arr->getCount() > 1 && !arr->isInvalid()
+     && !arr->isGlobalArrayWrapper()) {
       arr = arr->copy();
       set(arr);
       ASSERT(arr == getArrayData());
@@ -688,7 +690,8 @@ Variant Variant::array_iter_current() const {
 Variant Variant::array_iter_next() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1 && !arr->isInvalid()) {
+    if (arr->getCount() > 1 && !arr->isInvalid()
+     && !arr->isGlobalArrayWrapper()) {
       arr = arr->copy();
       set(arr);
       ASSERT(arr == getArrayData());
@@ -702,7 +705,8 @@ Variant Variant::array_iter_next() {
 Variant Variant::array_iter_end() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1 && !arr->isTail()) {
+    if (arr->getCount() > 1 && !arr->isTail()
+     && !arr->isGlobalArrayWrapper()) {
       arr = arr->copy();
       set(arr);
       ASSERT(arr == getArrayData());
@@ -724,7 +728,8 @@ Variant Variant::array_iter_key() const {
 Variant Variant::array_iter_each() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1) {
+    if (arr->getCount() > 1 && !arr->isInvalid()
+     && !arr->isGlobalArrayWrapper()) {
       arr = arr->copy();
       set(arr);
       ASSERT(arr == getArrayData());
@@ -1514,7 +1519,7 @@ MutableArrayIterPtr Variant::begin(Variant *key, Variant &val,
   if (is(KindOfArray)) {
     if (setIterDirty) array_iter_dirty_set();
     ArrayData *arr = getArrayData();
-    if (arr->getCount() > 1) {
+    if (arr->getCount() > 1 && !arr->isGlobalArrayWrapper()) {
       set(arr->copy());
     }
   }

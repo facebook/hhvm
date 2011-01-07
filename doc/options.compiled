@@ -190,6 +190,10 @@ flood error logs.
       * = somedoc.php
       * = another.php
     }
+    ThreadLoopDocuments {
+      * = somedoc.php
+      * = another.php
+    }
     ErrorDocument404 = 404.php
     ErrorDocument500 = 500.php
     FatalErrorMessage = some string

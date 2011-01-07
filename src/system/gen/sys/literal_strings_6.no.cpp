@@ -22,6 +22,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss163bad01("addServer");
+StaticString s_sys_ss164363b4("getPathname");
+StaticString s_sys_ss172df677("deleteByKey");
+StaticString s_sys_ss17c3d085("fullEndElement");
 StaticString s_sys_ss17f0e883("exec");
 StaticString s_sys_ss1863b3c7("getGroup");
 StaticString s_sys_ss18bebdc2("replaceByKey");
@@ -80,10 +84,6 @@ StaticString s_sys_ss3403085f("getstats");
 StaticString s_sys_ss343a37dc("geterrormessage");
 StaticString s_sys_ss344c5db6("hasAttributes");
 StaticString s_sys_ss37217e60("hasConstant");
-StaticString s_sys_ss372c9151("ksort");
-StaticString s_sys_ss37eff1c8("getInnerIterator");
-StaticString s_sys_ss38d893f5("addCompletion");
-StaticString s_sys_ss3983a61c("createElementNS");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

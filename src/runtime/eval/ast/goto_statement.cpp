@@ -21,14 +21,19 @@ namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-GotoStatement::GotoStatement(STATEMENT_ARGS, const std::string &label)
-  : Statement(STATEMENT_PASS), m_label(label) {}
+GotoStatement::GotoStatement(STATEMENT_ARGS, const std::string &label,
+                             bool limited)
+    : Statement(STATEMENT_PASS), m_label(label), m_limited(limited) {}
 
 void GotoStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;
   ENTER_STMT;
-  env.setGoto(m_label);
-  throw GotoException();
+  env.setGoto(m_label, m_limited);
+  if (m_limited) {
+    throw GotoException(); // for current loop to catch
+  } else {
+    throw UnlimitedGotoException(); // for function to catch
+  }
 }
 
 void GotoStatement::dump(std::ostream &out) const {

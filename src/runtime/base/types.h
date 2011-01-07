@@ -255,6 +255,8 @@ inline void check_request_timeout(ThreadInfo *info) {
   if (info->m_reqInjectionData.surprised) check_request_surprise(info);
 }
 
+void check_request_timeout_ex(ThreadInfo *info, int lc);
+
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p, const char *symbol);
 extern void end_profiler_frame(Profiler *p);

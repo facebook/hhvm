@@ -49,7 +49,7 @@ public:
   static bool CallUserHandlerOnFatals;
   static int RuntimeErrorReportingLevel;
 
-  static bool NoInfiniteLoopDetection;
+  static int  MaxLoopCount;
   static bool NoInfiniteRecursionDetection;
   static bool ThrowBadTypeExceptions;
   static bool ThrowTooManyArguments;

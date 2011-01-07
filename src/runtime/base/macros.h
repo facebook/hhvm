@@ -374,19 +374,18 @@ do { \
 
 #define DECLARE_THREAD_INFO                      \
   ThreadInfo *info __attribute__((__unused__)) = \
-    ThreadInfo::s_threadInfo.get();
+    ThreadInfo::s_threadInfo.get();              \
+  int lc __attribute__((__unused__)) = 0;        \
 
 #define DECLARE_THREAD_INFO_NOINIT               \
-  ThreadInfo *info __attribute__((__unused__));
-
-#define MAX_LOOP_COUNT 1000000
+  ThreadInfo *info __attribute__((__unused__));  \
+  int lc __attribute__((__unused__)) = 0;        \
 
 #ifdef INFINITE_LOOP_DETECTION
-#define LOOP_COUNTER(n) int lc##n = 0;
+#define LOOP_COUNTER(n)
 #define LOOP_COUNTER_CHECK(n)                                           \
-  if ((++lc##n & 1023) == 0) {                                          \
-    check_request_timeout(info);                                        \
-    if (lc##n > MAX_LOOP_COUNT) throw_infinite_loop_exception();        \
+  if ((++lc & 1023) == 0) {                                             \
+    check_request_timeout_ex(info, lc);                                 \
   }
 
 #else

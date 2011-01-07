@@ -162,6 +162,10 @@ void ParserBase::popLabelInfo() {
             gotoInfo.label.c_str(), getMessage(gotoInfo.loc.get()).c_str());
       return;
     }
+    // "yield" generates unlimited goto, so no need to check scoping
+    if (gotoInfo.label.find(YIELD_LABEL_PREFIX) == 0) {
+      continue;
+    }
     int labelScopeId = iter->second;
     bool found = false;
     for (int j = gotoInfo.scopes.size() - 1; j >= 0; j--) {
@@ -171,13 +175,8 @@ void ParserBase::popLabelInfo() {
       }
     }
     if (!found) {
-      if (gotoInfo.label.find(YIELD_LABEL_PREFIX) == 0) {
-        error("'yield' in loop or switch statement or try/catch block "
-              "is disallowed: %s", getMessage(gotoInfo.loc.get()).c_str());
-      } else {
-        error("'goto' into loop or switch statement or try/catch block "
-              "is disallowed: %s", getMessage(gotoInfo.loc.get()).c_str());
-      }
+      error("'goto' into loop or switch statement or try/catch block "
+            "is disallowed: %s", getMessage(gotoInfo.loc.get()).c_str());
       return;
     }
   }

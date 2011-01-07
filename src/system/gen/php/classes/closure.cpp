@@ -462,6 +462,8 @@ Variant c_Continuation::os_getInit(CStrRef s) {
     case 0:
       HASH_RETURN_NAMSTR(0x3BA4EC7C8E83E5E0LL, NAMSTR(s_sys_ss1491baad, "label"),
                          0LL, 5);
+      HASH_RETURN_NAMSTR(0x3640AC1AE9A5E090LL, NAMSTR(s_sys_ss14e5c43c, "running"),
+                         false, 7);
       break;
     case 3:
       HASH_RETURN_NAMSTR(0x245E74B9CC12BFC3LL, NAMSTR(s_sys_ss0f61bd03, "obj"),
@@ -502,6 +504,7 @@ void c_Continuation::o_getArray(Array &props, bool pubOnly) const {
   if (!pubOnly) props.add(NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"), m_done, true);
   if (!pubOnly) props.add(NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"), m_index, true);
   if (!pubOnly) if (isInitialized(m_value)) props.add(NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value"), m_value.isReferenced() ? ref(m_value) : m_value, true);
+  if (!pubOnly) props.add(NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running"), m_running, true);
   c_Closure::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Continuation
@@ -511,6 +514,7 @@ void c_Continuation::o_setArray(CArrRef props) {
   if (props->exists(NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"))) m_done = props->get(NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"));
   if (props->exists(NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"))) m_index = props->get(NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"));
   props->load(NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value"), m_value);
+  if (props->exists(NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running"))) m_running = props->get(NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running"));
   c_Closure::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Continuation
@@ -545,18 +549,21 @@ Variant * c_Continuation::o_realPropPublic(CStrRef s, int flags) const {
 Variant * c_Continuation::o_realPropPrivate(CStrRef s, int flags) const {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = s->hash();
-  switch (hash & 7) {
-    case 1:
-      HASH_REALPROP_TYPED_STRING(0x5B300BEBB6379169LL, "done", 4, done);
+  switch (hash & 15) {
+    case 0:
+      HASH_REALPROP_TYPED_STRING(0x3640AC1AE9A5E090LL, "running", 7, running);
       break;
     case 3:
       HASH_REALPROP_STRING(0x245E74B9CC12BFC3LL, "obj", 3, obj);
       break;
-    case 6:
-      HASH_REALPROP_TYPED_STRING(0x4B27521443880CAELL, "index", 5, index);
-      break;
     case 7:
       HASH_REALPROP_STRING(0x021A52B45A788597LL, "value", 5, value);
+      break;
+    case 9:
+      HASH_REALPROP_TYPED_STRING(0x5B300BEBB6379169LL, "done", 4, done);
+      break;
+    case 14:
+      HASH_REALPROP_TYPED_STRING(0x4B27521443880CAELL, "index", 5, index);
       break;
     default:
       break;
@@ -601,11 +608,38 @@ void c_Continuation::cloneSet(c_Continuation *clone) {
   clone->m_done = m_done;
   clone->m_index = m_index;
   clone->m_value = m_value.isReferenced() ? ref(m_value) : m_value;
+  clone->m_running = m_running;
   c_Closure::cloneSet(clone);
 }
 Variant c_Continuation::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
+    case 0:
+      HASH_GUARD_LITSTR(0x1402C6C4A8D472A0LL, NAMSTR(s_sys_ssf2460018, "update")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("Continuation::update", count, 3, 3, 1);
+        return (t_update(a0, a1, a2), null);
+      }
+      break;
     case 1:
       HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -732,6 +766,7 @@ CallInfo c_Continuation::ci___construct((void*)&c_Continuation::i___construct, (
 CallInfo c_Continuation::ci_done((void*)&c_Continuation::i_done, (void*)&c_Continuation::ifa_done, 0, 4, 0x0000000000000000LL);
 CallInfo c_Continuation::ci_current((void*)&c_Continuation::i_current, (void*)&c_Continuation::ifa_current, 0, 4, 0x0000000000000000LL);
 CallInfo c_Continuation::ci_rewind((void*)&c_Continuation::i_rewind, (void*)&c_Continuation::ifa_rewind, 0, 4, 0x0000000000000000LL);
+CallInfo c_Continuation::ci_update((void*)&c_Continuation::i_update, (void*)&c_Continuation::ifa_update, 3, 4, 0x0000000000000000LL);
 Variant c_Continuation::i_next(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   c_Continuation *self = NULL;
@@ -824,6 +859,25 @@ Variant c_Continuation::i_rewind(MethodCallPackage &mcp, CArrRef params) {
   if (count > 0) return throw_toomany_arguments("Continuation::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
+Variant c_Continuation::i_update(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Continuation *self = NULL;
+  p_Continuation pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Continuation*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 3) return throw_wrong_arguments("Continuation::update", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_update(arg0, arg1, arg2), null);
+  }
+}
 Variant c_Continuation::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_Continuation *self = NULL;
   p_Continuation pobj;
@@ -905,10 +959,30 @@ Variant c_Continuation::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW
   if (count > 0) return throw_toomany_arguments("Continuation::rewind", 0, 1);
   return (self->t_rewind(), null);
 }
+Variant c_Continuation::ifa_update(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Continuation *self = NULL;
+  p_Continuation pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Continuation*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count != 3) return throw_wrong_arguments("Continuation::update", count, 3, 3, 1);
+  CVarRef arg0((a0));
+  CVarRef arg1((a1));
+  CVarRef arg2((a2));
+  return (self->t_update(arg0, arg1, arg2), null);
+}
 bool c_Continuation::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
+    case 0:
+      HASH_GUARD_LITSTR(0x1402C6C4A8D472A0LL, NAMSTR(s_sys_ssf2460018, "update")) {
+        mcp.ci = &c_Continuation::ci_update;
+        return true;
+      }
+      break;
     case 1:
       HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss12e90587, "key")) {
         mcp.ci = &c_Continuation::ci_key;
@@ -1048,8 +1122,9 @@ void c_Continuation::init() {
   m_done = false;
   m_index = -1LL;
   m_value = null;
+  m_running = false;
 }
-/* SRC: classes/closure.php line 38 */
+/* SRC: classes/closure.php line 39 */
 void c_Continuation::t___construct(Variant v_func, Variant v_vars, Variant v_obj //  = null
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::__construct);
@@ -1059,13 +1134,21 @@ void c_Continuation::t___construct(Variant v_func, Variant v_vars, Variant v_obj
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/closure.php line 42 */
+/* SRC: classes/closure.php line 43 */
+void c_Continuation::t_update(CVarRef v_label, CVarRef v_value, CVarRef v_vars) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::update);
+  m_label = v_label;
+  m_value = v_value;
+  c_Closure::t_setvars(v_vars);
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/closure.php line 48 */
 void c_Continuation::t_done() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::done);
   m_done = true;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/closure.php line 46 */
+/* SRC: classes/closure.php line 52 */
 Variant c_Continuation::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::current);
   if (less(m_index, 0LL)) {
@@ -1076,7 +1159,7 @@ Variant c_Continuation::t_current() {
   return m_value;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/closure.php line 52 */
+/* SRC: classes/closure.php line 58 */
 int64 c_Continuation::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::key);
   if (less(m_index, 0LL)) {
@@ -1087,54 +1170,69 @@ int64 c_Continuation::t_key() {
   return m_index;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/closure.php line 58 */
+/* SRC: classes/closure.php line 64 */
 void c_Continuation::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::next);
   Variant v_tokens;
   Variant v_func;
+  Object v_e;
 
   if (m_done) {
     {
       throw_exception(p_Exception((NEWOBJ(c_Exception)())->create(NAMSTR(s_sys_ssd222d509, "Continuation is already finished"))));
     }
   }
+  if (m_running) {
+    {
+      throw_exception(p_Exception((NEWOBJ(c_Exception)())->create(NAMSTR(s_sys_ssee112c62, "Continuation is already running"))));
+    }
+  }
+  m_running = true;
   ++m_index;
-  if (toBoolean(m_obj)) {
-    {
+  try {
+    if (toBoolean(m_obj)) {
       {
-        const Variant &tmp1((x_explode(NAMSTR(s_sys_ss819481f3, "::"), toString(m_func))));
-        v_tokens = tmp1;
-      }
-      {
-        Variant tmp2((v_tokens.rvalAt(1LL, true)));
-        v_func = tmp2;
-      }
-      {
-        MethodCallPackage mcp3;
-        mcp3.methodCall((m_obj.objectForCall()), toString(v_func), -1);
-        const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
-        Variant tmp4(((mcp3.bindClass(info)->getMeth1Args())(mcp3, 1, ((p_Continuation&)GET_THIS()))));
-        m_value = tmp4;
-      }
-    }
-  }
-  else {
-    {
-      {
-        const Variant &tmp5((x_call_user_func(2, m_func, Array(ArrayInit(1, true).setRef(Variant(GET_THIS())).create()))));
-        m_value = tmp5;
+        {
+          const Variant &tmp1((x_explode(NAMSTR(s_sys_ss819481f3, "::"), toString(m_func))));
+          v_tokens = tmp1;
+        }
+        {
+          Variant tmp2((v_tokens.rvalAt(1LL, true)));
+          v_func = tmp2;
+        }
+        {
+          MethodCallPackage mcp3;
+          mcp3.methodCall((m_obj.objectForCall()), toString(v_func), -1);
+          const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
+          (mcp3.bindClass(info)->getMeth1Args())(mcp3, 1, ((p_Continuation&)GET_THIS()));
+        }
       }
     }
+    else {
+      {
+        x_call_user_func(2, m_func, Array(ArrayInit(1, true).setRef(Variant(GET_THIS())).create()));
+      }
+    }
+  } catch (Object e) {
+    if (e.instanceof(NAMSTR(s_sys_ssae8717ad, "exception"))) {
+      v_e = e;
+      m_running = false;
+      m_done = true;
+      throw_exception(v_e);
+    } else {
+      throw;
+    }
   }
+  m_running = false;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/closure.php line 72 */
+/* SRC: classes/closure.php line 90 */
 void c_Continuation::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::rewind);
   throw_exception(p_Exception((NEWOBJ(c_Exception)())->create(NAMSTR(s_sys_ssfb726449, "Cannot rewind on a Continuation object"))));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/closure.php line 75 */
+/* SRC: classes/closure.php line 93 */
 bool c_Continuation::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::valid);
   return !(m_done);

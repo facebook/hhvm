@@ -49,6 +49,13 @@ public:
     if (hb == 1 || env.isReturning()) return;                                 \
     if (hb == 2) break;                                                       \
   }
+#define EVAL_STMT_HANDLE_GOTO(stmt, env)                                      \
+  {                                                                           \
+    (stmt)->eval(env);                                                        \
+    int hb = env.handleBreak();                                               \
+    if (hb == 1 || env.isReturning()) return;                                 \
+    if (hb == 2) goto end;                                                    \
+  }
 #define EVAL_STMT_HANDLE_BREAK_CONT(stmt, env)                                \
   {                                                                           \
     (stmt)->eval(env);                                                        \
@@ -66,7 +73,10 @@ public:
     goto label;                                 \
   }                                             \
   if (env.isGotoing()) {                        \
-    throw GotoException();                      \
+    if (env.isLimitedGoto()) {                  \
+      throw GotoException();                    \
+    }                                           \
+    return;                                     \
   }                                             \
 
 #define ENTER_STMT \

@@ -185,7 +185,7 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
 
         Token label;   label.setText(YIELD_LABEL_PREFIX + si);
         Token sgoto;   _p->addGoto(label.text(), _p->getLocation());
-                       _p->onGoto(sgoto, label);
+                       _p->onGoto(sgoto, label, false);
         Token stmts0;  _p->onStatementListStart(stmts0);
         Token stmts1;  _p->addStatement(stmts1, stmts0, sgoto);
         Token stmts;   _p->finishStatement(stmts, stmts1); stmts = 1;
@@ -291,38 +291,35 @@ void create_generator(Parser *_p, Token &out, Token &params,
 }
 
 void transform_yield(Parser *_p, Token &stmts, int index, Token *expr) {
-  Token stmt0;
+  Token update;
   {
     Token name;    name.setText(CONTINUATION_OBJECT_NAME);
     Token var;     _p->onSimpleVariable(var, name);
-    Token pn;      pn.setText("label");
-    Token pname;   _p->onName(pname, pn, Parser::VarName);
-    Token prop;    _p->pushObject(var); _p->appendProperty(pname);
-                   _p->popObject(prop);
-    Token snum;    snum.setText(boost::lexical_cast<std::string>(index));
-    Token num;     _p->onScalar(num, T_LNUMBER, snum);
-    Token assign;  _p->onAssign(assign, prop, num, 0);
-    _p->onExpStatement(stmt0, assign);
-  }
-
-  Token ret;     _p->onReturn(ret, expr, false);
-
-  Token setvars;
-  {
-    Token name;    name.setText(CONTINUATION_OBJECT_NAME);
-    Token var;     _p->onSimpleVariable(var, name);
-    Token pn;      pn.setText("setVars");
+    Token pn;      pn.setText("update");
     Token pname;   _p->onName(pname, pn, Parser::VarName);
     Token mcall;   _p->pushObject(var); _p->appendProperty(pname);
+
+    Token snum;    snum.setText(boost::lexical_cast<std::string>(index));
+    Token num;     _p->onScalar(num, T_LNUMBER, snum);
+    Token param1;  _p->onCallParam(param1, NULL, num, 0);
+
+    Token param2;
+    if (expr) {
+      _p->onCallParam(param2, &param1, *expr, 0);
+    } else {
+      Token tnull; scalar_null(_p, tnull);
+      _p->onCallParam(param2, &param1, tnull, 0);
+    }
 
     Token cname;   cname.setText("get_defined_vars");
     Token empty;
     Token call;    _p->onCall(call, 0, cname, empty, NULL);
-    Token param;   _p->onCallParam(param, NULL, call, 0);
+
+    Token param;   _p->onCallParam(param, &param2, call, 0);
                    param = 1; _p->appendMethodParams(param);
 
     _p->popObject(mcall);
-    _p->onExpStatement(setvars, mcall);
+    _p->onExpStatement(update, mcall);
   }
 
   Token lname;   lname.setText(YIELD_LABEL_PREFIX +
@@ -330,7 +327,6 @@ void transform_yield(Parser *_p, Token &stmts, int index, Token *expr) {
   Token label;   _p->addLabel(lname.text()); _p->onLabel(label, lname);
 
   Token stmts0;  _p->onStatementListStart(stmts0);
-  Token stmts1;  _p->addStatement(stmts1, stmts0, stmt0);
 
   if (!expr) {
     Token name;    name.setText(CONTINUATION_OBJECT_NAME);
@@ -342,15 +338,16 @@ void transform_yield(Parser *_p, Token &stmts, int index, Token *expr) {
                    _p->popObject(mcall);
     Token sdone;   _p->onExpStatement(sdone, mcall);
 
-    Token tmp;     _p->addStatement(tmp, stmts1, sdone);
-    stmts1 = tmp;
+    Token tmp;     _p->addStatement(tmp, stmts0, sdone);
+    stmts0 = tmp;
   }
 
-  Token stmts2;  _p->addStatement(stmts2, stmts1, setvars);
-  Token stmts3;  _p->addStatement(stmts3, stmts2, ret);
-  Token stmts4;  _p->addStatement(stmts4, stmts3, label);
+  Token ret;     _p->onReturn(ret, NULL, false);
+  Token stmts1;  _p->addStatement(stmts1, stmts0, update);
+  Token stmts2;  _p->addStatement(stmts2, stmts1, ret);
+  Token stmts3;  _p->addStatement(stmts3, stmts2, label);
 
-  _p->finishStatement(stmts, stmts4); stmts = 1;
+  _p->finishStatement(stmts, stmts3); stmts = 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -958,7 +955,7 @@ statement_without_expr:
   | T_THROW expr ';'                   { _p->onThrow($$, $2);}
   | T_GOTO T_STRING ';'                { _p->addGoto($2.text(),
                                                      _p->getLocation());
-                                         _p->onGoto($$, $2);}
+                                         _p->onGoto($$, $2, true);}
 ;
 
 additional_catches:

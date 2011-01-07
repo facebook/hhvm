@@ -31,20 +31,30 @@ ForStatement::ForStatement(STATEMENT_ARGS,
     m_body(body) {}
 
 void ForStatement::eval(VariableEnvironment &env) const {
-  if (env.isGotoing()) return;
-  ENTER_STMT;
   DECLARE_THREAD_INFO;
-  LOOP_COUNTER(1);
-  for (Expression::evalVector(m_init, env);
-       m_cond.empty() ? true : (bool)Expression::evalVector(m_cond, env);
-       Expression::evalVector(m_next, env)) {
-    LOOP_COUNTER_CHECK(1);
-    if (m_body) {
-      EVAL_STMT_HANDLE_GOTO_BEGIN(restart);
-      EVAL_STMT_HANDLE_BREAK(m_body, env);
-      EVAL_STMT_HANDLE_GOTO_END(restart);
-    }
+
+  if (env.isGotoing()) {
+    if (env.isLimitedGoto()) return;
+    goto body;
   }
+  ENTER_STMT;
+  LOOP_COUNTER(1);
+  Expression::evalVector(m_init, env);
+
+  begin:
+  if (!m_cond.empty() && !Expression::evalVector(m_cond, env)) {
+    goto end;
+  }
+
+  body:
+  LOOP_COUNTER_CHECK(1);
+  EVAL_STMT_HANDLE_GOTO_BEGIN(restart);
+  if (m_body) EVAL_STMT_HANDLE_GOTO(m_body, env);
+  EVAL_STMT_HANDLE_GOTO_END(restart);
+
+  Expression::evalVector(m_next, env);
+  goto begin;
+  end:;
 }
 
 void ForStatement::dump(std::ostream &out) const {

@@ -430,7 +430,6 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop);
 /**
  * Exceptions injected code throws
  */
-void throw_infinite_loop_exception() ATTRIBUTE_COLD;
 void throw_infinite_recursion_exception() ATTRIBUTE_COLD;
 void throw_request_timeout_exception() ATTRIBUTE_COLD;
 void throw_memory_exceeded_exception() ATTRIBUTE_COLD __attribute__((noreturn));

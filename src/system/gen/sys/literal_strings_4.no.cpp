@@ -22,6 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_sse48e511b("setattribute");
 StaticString s_sys_sse4a1cad7("getVersion");
 StaticString s_sys_sse5340a31("mapping");
 StaticString s_sys_sse590286e("offsetUnset");
@@ -42,6 +43,7 @@ StaticString s_sys_ssec6b7b45("isLocal");
 StaticString s_sys_ssec8fccc4("ReflectionProperty");
 StaticString s_sys_ssedd47a43("nullable");
 StaticString s_sys_ssee030a49("replaceChild");
+StaticString s_sys_ssee112c62("Continuation is already running");
 StaticString s_sys_ssee3325ed("writeRaw");
 StaticString s_sys_ssef33be8d("\000SplObjectStorage\000index", 23);
 StaticString s_sys_ssef52e4e1("implementsInterface");
@@ -54,6 +56,7 @@ StaticString s_sys_ssf0ea8ac1("RecursiveDirectoryIterator::__construct(");
 StaticString s_sys_ssf1bd1a9d("getPosition");
 StaticString s_sys_ssf1d09588("bindvalue");
 StaticString s_sys_ssf220c3cc("ask");
+StaticString s_sys_ssf2460018("update");
 StaticString s_sys_ssf362b3c4("path");
 StaticString s_sys_ssf38cf473("wrap");
 StaticString s_sys_ssf3f5d744("hasProperty");
@@ -81,9 +84,6 @@ StaticString s_sys_ssfab32402(" {main}");
 StaticString s_sys_ssfb10fd8c("parent");
 StaticString s_sys_ssfb433b54("nextrowset");
 StaticString s_sys_ssfb6412d4("): failed to open dir");
-StaticString s_sys_ssfb726449("Cannot rewind on a Continuation object");
-StaticString s_sys_ssfbb3eb52("addUrl");
-StaticString s_sys_ssfc2d4779("getType");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

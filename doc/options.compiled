@@ -84,7 +84,7 @@ flood error logs.
 
   ErrorHandling {
     CallUserHandlerOnFatals = true
-    NoInfiniteLoopDetection = false
+    MaxLoopCount = 0
     NoInfiniteRecursionDetection = false
     MaxStackDepth = 1000
     ThrowBadTypeExceptions = false

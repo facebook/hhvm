@@ -53,7 +53,7 @@ bool RuntimeOption::EnableApplicationLog = true;
 bool RuntimeOption::CallUserHandlerOnFatals = true;
 int RuntimeOption::RuntimeErrorReportingLevel = ErrorConstants::HPHP_ALL;
 
-bool RuntimeOption::NoInfiniteLoopDetection = false;
+int RuntimeOption::MaxLoopCount = 0;
 bool RuntimeOption::NoInfiniteRecursionDetection = false;
 bool RuntimeOption::ThrowBadTypeExceptions = false;
 bool RuntimeOption::ThrowTooManyArguments = false;
@@ -505,7 +505,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
   {
     Hdf error = config["ErrorHandling"];
     CallUserHandlerOnFatals = error["CallUserHandlerOnFatals"].getBool(true);
-    NoInfiniteLoopDetection = error["NoInfiniteLoopDetection"].getBool();
+    MaxLoopCount = error["MaxLoopCount"].getInt32(0);
     NoInfiniteRecursionDetection =
       error["NoInfiniteRecursionDetection"].getBool();
     ThrowBadTypeExceptions = error["ThrowBadTypeExceptions"].getBool();

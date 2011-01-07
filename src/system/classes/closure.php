@@ -34,10 +34,16 @@ class Continuation extends Closure implements Iterator {
   private $done = false;
   private $index = -1;
   private $value;
+  private $running = false;
 
   public function __construct($func, $vars, $obj = null) {
     parent::__construct($func, $vars);
     $this->obj = $obj;
+  }
+  public function update($label, $value, $vars) {
+    $this->label = $label;
+    $this->value = $value;
+    parent::setVars($vars);
   }
   public function done() {
     $this->done = true;
@@ -59,15 +65,27 @@ class Continuation extends Closure implements Iterator {
     if ($this->done) {
       throw new Exception('Continuation is already finished');
     }
+    if ($this->running) {
+      throw new Exception('Continuation is already running');
+    }
+    $this->running = true;
 
     ++$this->index;
-    if ($this->obj) {
-      $tokens = explode('::', $this->func);
-      $func = $tokens[1];
-      $this->value = $this->obj->$func($this);
-    } else {
-      $this->value = call_user_func($this->func, $this);
+    try {
+      if ($this->obj) {
+        $tokens = explode('::', $this->func);
+        $func = $tokens[1];
+        $this->obj->$func($this);
+      } else {
+        call_user_func($this->func, $this);
+      }
+    } catch (Exception $e) {
+      $this->running = false;
+      $this->done = true;
+      throw $e;
     }
+
+    $this->running = false;
   }
   public function rewind() {
     throw new Exception('Cannot rewind on a Continuation object');

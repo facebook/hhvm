@@ -28,7 +28,9 @@ namespace Eval {
 class FunctionStatement;
 class Block;
 class ClassStatement;
+
 class GotoException {};
+class UnlimitedGotoException {};
 
 class VariableEnvironment : public LVariableTable {
 public:
@@ -78,7 +80,12 @@ public:
   bool isEscaping() const { return isBreaking() || m_returning; }
 
   bool isGotoing() const { return !m_label.empty();}
-  void setGoto(const std::string &label) { m_label = label;}
+  bool isLimitedGoto() const { ASSERT(isGotoing()); return m_limitedGoto;}
+  void setGoto(const std::string &label, bool limited) {
+    m_label = label;
+    m_limitedGoto = limited;
+  }
+  void resetGoto() { m_label.clear();}
   const std::string &getGoto() const { return m_label;}
 
   /**
@@ -94,6 +101,7 @@ protected:
   int m_breakLevel;
   bool m_returning;
   std::string m_label;
+  bool m_limitedGoto;
   Variant m_ret;
 
   std::list<std::vector<Variant> > m_tempStack;

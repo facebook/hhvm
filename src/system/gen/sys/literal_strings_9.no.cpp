@@ -22,6 +22,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss6974a1cc("__toString");
+StaticString s_sys_ss69f4b5d8("escapestring");
+StaticString s_sys_ss6a9626a3("seek");
+StaticString s_sys_ss6aa5ef61("helpBody");
 StaticString s_sys_ss6ae7fa54("addByKey");
 StaticString s_sys_ss6b51d6cb("getcolumnmeta");
 StaticString s_sys_ss6b750a79("endElement");

@@ -35,7 +35,7 @@ bool CaseStatement::match(VariableEnvironment &env, CVarRef value) const {
 }
 
 void CaseStatement::eval(VariableEnvironment &env) const {
-  if (env.isGotoing()) return;
+  if (env.isGotoing() && env.isLimitedGoto()) return;
   if (m_body) m_body->eval(env);
 }
 
@@ -59,29 +59,40 @@ SwitchStatement::SwitchStatement(STATEMENT_ARGS, ExpressionPtr source,
   : Statement(STATEMENT_PASS), m_source(source), m_cases(cases) {}
 
 void SwitchStatement::eval(VariableEnvironment &env) const {
-  if (env.isGotoing()) return;
+  bool gotoing = false;
+  if (env.isGotoing()) {
+    if (env.isLimitedGoto()) return;
+    gotoing = true;
+  }
+
   ENTER_STMT;
-  Variant source(m_source->eval(env));
+  Variant source;
+  if (!gotoing) {
+    source = m_source->eval(env);
+  }
   bool matched = false;
   vector<CaseStatementPtr>::const_iterator defaultPos = m_cases.end();
+
+  EVAL_STMT_HANDLE_GOTO_BEGIN(restart);
   for (vector<CaseStatementPtr>::const_iterator iter = m_cases.begin();
        iter != m_cases.end(); ++iter) {
-    if ((*iter)->isDefault()) {
-      defaultPos = iter;
-    } else if (!matched && (*iter)->match(env, source)) {
-      matched = true;
+    if (!gotoing) {
+      if ((*iter)->isDefault()) {
+        defaultPos = iter;
+      } else if (!matched && (*iter)->match(env, source)) {
+        matched = true;
+      }
     }
-    if (matched) {
-      EVAL_STMT_HANDLE_GOTO_BEGIN(restart);
+    if (gotoing || matched) {
       EVAL_STMT_HANDLE_BREAK_CONT(*iter, env);
-      EVAL_STMT_HANDLE_GOTO_END(restart);
     }
   }
-  if (!matched && defaultPos != m_cases.end()) {
+  if (!gotoing && !matched && defaultPos != m_cases.end()) {
     for (; defaultPos != m_cases.end(); ++defaultPos) {
       EVAL_STMT_HANDLE_BREAK_CONT(*defaultPos, env);
     }
   }
+  EVAL_STMT_HANDLE_GOTO_END(restart);
 }
 
 void SwitchStatement::dump(std::ostream &out) const {

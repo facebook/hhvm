@@ -196,7 +196,7 @@ public:
                  Token &cparams, Token &stmts);
   void onClosureParam(Token &out, Token *params, Token &param, bool ref);
   void onLabel(Token &out, Token &label);
-  void onGoto(Token &out, Token &label);
+  void onGoto(Token &out, Token &label, bool limited);
 
   void onTypeDecl(Token &out, Token &type, Token &decl);
   void onTypedVariable(Token &out, Token *exprs, Token &var, Token *value);

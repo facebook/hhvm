@@ -15959,6 +15959,40 @@ bool TestCodeRun::TestYield() {
         "int(123)\n"
        );
 
+  MVCRO("<?php function nums() { for ($i = 0; $i < 3; $i++) yield $i;} "
+        "foreach (nums() as $num) { var_dump($num);} ",
+
+        "int(0)\n"
+        "int(1)\n"
+        "int(2)\n"
+       );
+
+  MVCRO("<?php function nums() { $i = 0; while ($i < 3) yield $i++;} "
+        "foreach (nums() as $num) { var_dump($num);} ",
+
+        "int(0)\n"
+        "int(1)\n"
+        "int(2)\n"
+       );
+
+  MVCRO("<?php function nums() { $i = 0; do yield $i++; while ($i < 3);} "
+        "foreach (nums() as $num) { var_dump($num);} ",
+
+        "int(0)\n"
+        "int(1)\n"
+        "int(2)\n"
+       );
+
+  MVCRO("<?php function nums() { $i = 0; foo: switch ($i) { "
+        "case 0: yield $i; $i = 1; case 999: yield $i; break; $i = -1; "
+        "case 1: $i = 2; yield $i; yield break;} goto foo;} "
+        "foreach (nums() as $num) { var_dump($num);} ",
+
+        "int(0)\n"
+        "int(1)\n"
+        "int(2)\n"
+       );
+
   return true;
 }
 

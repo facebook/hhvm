@@ -467,11 +467,14 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop) {
   return null;
 }
 
-void throw_infinite_loop_exception() {
-  if (!RuntimeOption::NoInfiniteLoopDetection) {
-    throw FatalErrorException(0, "loop iterated over %d times", MAX_LOOP_COUNT);
+void check_request_timeout_ex(ThreadInfo *info, int lc) {
+  check_request_timeout(info);
+  if (RuntimeOption::MaxLoopCount > 0 && lc > RuntimeOption::MaxLoopCount) {
+    throw FatalErrorException(0, "loop iterated over %d times",
+                              RuntimeOption::MaxLoopCount);
   }
 }
+
 void throw_infinite_recursion_exception() {
   if (!RuntimeOption::NoInfiniteRecursionDetection) {
     // Reset profiler otherwise it might recurse further causing segfault

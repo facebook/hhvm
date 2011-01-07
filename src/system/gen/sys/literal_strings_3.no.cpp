@@ -66,6 +66,7 @@ StaticString s_sys_ssdd233bb0("DirectoryIterator::__construct(");
 StaticString s_sys_ssdd355b2b("isSubclassOf");
 StaticString s_sys_ssddf8728c("line");
 StaticString s_sys_ssde0994ef("insertData");
+StaticString s_sys_ssde0dbfb2("\000Continuation\000running", 21);
 StaticString s_sys_ssde22f98d("fetchAll");
 StaticString s_sys_ssdec3c0f0("isPublic");
 StaticString s_sys_ssdec966e8("getNamedItem");
@@ -83,7 +84,6 @@ StaticString s_sys_sse2be8bf1("endComment");
 StaticString s_sys_sse3783d41("getSubPath");
 StaticString s_sys_sse3f54806("query");
 StaticString s_sys_sse41ca304("addString");
-StaticString s_sys_sse48e511b("setattribute");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

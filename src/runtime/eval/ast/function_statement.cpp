@@ -306,11 +306,15 @@ Variant FunctionStatement::evalBody(VariableEnvironment &env) const {
   }
 
   if (m_body) {
+    restart:
     try {
-      EVAL_STMT_HANDLE_GOTO_BEGIN(restart);
       m_body->eval(env);
-      EVAL_STMT_HANDLE_GOTO_END(restart);
     } catch (GotoException &e) {
+      goto restart;
+    } catch (UnlimitedGotoException &e) {
+      goto restart;
+    }
+    if (env.isGotoing()) {
       throw FatalErrorException(0, "Unable to reach goto label %s",
                                 env.getGoto().c_str());
     }

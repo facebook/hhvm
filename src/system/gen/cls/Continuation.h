@@ -34,6 +34,7 @@ class c_Continuation : public c_Closure {
   bool m_done;
   int64 m_index;
   Variant m_value;
+  bool m_running;
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
@@ -73,6 +74,7 @@ class c_Continuation : public c_Closure {
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
+  public: void t_update(CVarRef v_label, CVarRef v_value, CVarRef v_vars);
   public: void t_done();
   public: Variant t_current();
   public: int64 t_key();
@@ -86,6 +88,7 @@ class c_Continuation : public c_Closure {
   DECLARE_METHOD_INVOKE_HELPERS(done);
   DECLARE_METHOD_INVOKE_HELPERS(current);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
+  DECLARE_METHOD_INVOKE_HELPERS(update);
 };
 extern struct ObjectStaticCallbacks cw_Continuation;
 

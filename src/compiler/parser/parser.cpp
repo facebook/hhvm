@@ -1156,7 +1156,7 @@ void Parser::onLabel(Token &out, Token &label) {
   out->stmt = NEW_STMT(LabelStatement, label.text());
 }
 
-void Parser::onGoto(Token &out, Token &label) {
+void Parser::onGoto(Token &out, Token &label, bool limited) {
   out->stmt = NEW_STMT(GotoStatement, label.text());
 }
 

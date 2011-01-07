@@ -27,11 +27,12 @@ DECLARE_AST_PTR(GotoStatement);
 
 class GotoStatement : public Statement {
 public:
-  GotoStatement(STATEMENT_ARGS, const std::string &label);
+  GotoStatement(STATEMENT_ARGS, const std::string &label, bool limited);
   virtual void eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
 private:
   std::string m_label;
+  bool m_limited;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

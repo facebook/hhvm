@@ -27,7 +27,7 @@ LabelStatement::LabelStatement(STATEMENT_ARGS, const std::string &label)
 void LabelStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
   if (env.getGoto() == m_label) {
-    env.setGoto("");
+    env.resetGoto();
   }
 }
 

@@ -1318,32 +1318,31 @@ void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
   }
   cg_printf("const std::vector<Eval::ExpressionPtr> &params = "
             "caller->params();\n");
-  cg_printf("std::vector<Eval::ExpressionPtr>::const_iterator it = "
-            "params.begin();\n");
+  cg_printf("unsigned int i = 0;\n");
   cg_indentBegin("do {\n");
   for (int i = 0; i < m_maxParam; i++) {
-    cg_printf("if (it == params.end()) break;\n");
+    cg_printf("if (i == params.size()) break;\n");
     if (i < m_minParam && (preArgs || i > 0)) {
       callss << ", ";
     }
     if (isRefParam(i)) {
       if (i < m_minParam) callss << "ref(a" << i << ")";
-      cg_printf("a%d = ref((*it)->refval(env));\n", i);
+      cg_printf("a%d = ref(params[i]->refval(env));\n", i);
     } else {
       if (i < m_minParam) callss << "a" << i;
-      cg_printf("a%d = (*it)->eval(env);\n", i);
+      cg_printf("a%d = params[i]->eval(env);\n", i);
     }
-    cg_printf("it++;\n");
+    cg_printf("i++;\n");
   }
   cg_indentEnd("} while(false);\n");
   // Put extra args into vargs or just eval them
   if (variable) {
     cg_printf("Array vargs;\n");
   }
-  cg_indentBegin("for (; it != params.end(); ++it) {\n");
-  const char *paramEval = "(*it)->eval(env)";
+  cg_indentBegin("for (; i != params.size(); ++i) {\n");
+  const char *paramEval = "params[i]->eval(env)";
   if (isReferenceVariableArgument()) {
-    paramEval = "ref((*it)->refval(env, false))";
+    paramEval = "ref(params[i]->refval(env, false))";
   }
   if (variable) cg_printf("vargs.append(");
   cg_printf(paramEval);

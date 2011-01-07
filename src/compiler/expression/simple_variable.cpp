@@ -35,7 +35,8 @@ SimpleVariable::SimpleVariable
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
     m_name(name), m_sym(NULL),
     m_this(false), m_globals(false),
-    m_superGlobal(false), m_alwaysStash(false) {
+    m_superGlobal(false), m_alwaysStash(false),
+    m_guardedThis(false) {
   setContext(Expression::NoLValueWrapper);
 }
 
@@ -104,7 +105,8 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
                          getScope()->getModifiers());
         }
       }
-      if (m_sym && !(m_context & AssignmentLHS)) {
+      if (m_sym && !(m_context & AssignmentLHS) &&
+          !((m_context & UnsetContext) && (m_context & LValue))) {
         m_sym->setUsed();
       }
     }

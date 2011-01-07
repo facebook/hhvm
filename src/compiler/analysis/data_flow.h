@@ -14,27 +14,35 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __LABEL_STATEMENT_H__
-#define __LABEL_STATEMENT_H__
+#ifndef __DATA_FLOW_H__
+#define __DATA_FLOW_H__
 
-#include <compiler/statement/statement.h>
+#include <compiler/analysis/bit_set_vec.h>
+#include <compiler/analysis/control_flow.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(LabelStatement);
-
-class LabelStatement : public Statement {
+class DataFlow {
 public:
-  LabelStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label);
+  enum {
+    Available,
+    Anticipated,
+    Altered,
+    AvailIn,
+    AvailOut,
+    AntIn,
+    AntOut,
+  };
 
-  DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
+  typedef ControlFlowGraph::vertex_descriptor vertex_descriptor;
+  typedef ControlFlowGraph::out_edge_iterator out_edge_iterator;
+  typedef ControlFlowGraph::in_edge_iterator in_edge_iterator;
 
-  const std::string &label() { return m_label; }
-private:
-  std::string m_label;
+  static void ComputeAvailable(const ControlFlowGraph &g);
+  static void ComputeAnticipated(const ControlFlowGraph &g);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-#endif // __LABEL_STATEMENT_H__
+#endif // __DATA_FLOW_H__

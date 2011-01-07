@@ -286,6 +286,10 @@ HPHP::hphp_raw_ptr<T> dynamic_pointer_cast(HPHP::hphp_raw_ptr<U> p) {
   return HPHP::hphp_raw_ptr<T>(dynamic_cast<T*>(p.get()));
 }
 
+template <typename T, typename U>
+HPHP::hphp_raw_ptr<T> static_pointer_cast(HPHP::hphp_raw_ptr<U> p) {
+  return HPHP::hphp_raw_ptr<T>(static_cast<T*>(p.get()));
+}
 }
 
 #endif // __BASE_H__

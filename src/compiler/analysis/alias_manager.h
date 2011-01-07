@@ -23,6 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(MethodStatement);
+class ControlFlowGraph;
 
 class BucketMapEntry {
  public:
@@ -80,14 +81,18 @@ class BucketMapEntry {
 class AliasManager {
  public:
   AliasManager(int opt);
- public:
+  ~AliasManager();
+
   void clear();
   void beginScope();
   void endScope();
   void resetScope();
   ExpressionPtr getCanonical(ExpressionPtr e);
 
+  void gatherInfo(AnalysisResultPtr ar, MethodStatementPtr m);
   int optimize(AnalysisResultPtr ar, MethodStatementPtr s);
+  void finalSetup(AnalysisResultPtr ar, MethodStatementPtr m);
+
   void setChanged() {
     if (!m_noAdd) {
       m_changes++;
@@ -98,6 +103,7 @@ class AliasManager {
   static bool parseOptimizations(const std::string &optimizations,
                                  std::string &errs);
  private:
+  void doFinal(MethodStatementPtr m);
   enum { MaxBuckets = 0x10000 };
   enum { FallThrough, CondBranch, Branch, Converge };
   enum { SameAccess, InterfAccess, DisjointAccess, NotAccess };
@@ -188,6 +194,9 @@ class AliasManager {
   bool                  m_cleared;
   bool                  m_inPseudoMain;
   BlockScopeRawPtr      m_scope;
+
+  ControlFlowGraph      *m_graph;
+  std::map<std::string,int> m_gidMap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

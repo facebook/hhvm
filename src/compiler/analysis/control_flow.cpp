@@ -17,6 +17,8 @@
 #include "compiler/analysis/ast_walker.h"
 #include "compiler/analysis/control_flow.h"
 #include "compiler/expression/expression.h"
+#include "compiler/expression/binary_op_expression.h"
+#include "compiler/expression/qop_expression.h"
 #include "compiler/statement/statement.h"
 #include "compiler/statement/method_statement.h"
 #include "compiler/statement/statement_list.h"
@@ -28,6 +30,8 @@
 #include "compiler/statement/switch_statement.h"
 #include "compiler/statement/break_statement.h"
 #include "compiler/statement/try_statement.h"
+#include "compiler/statement/label_statement.h"
+#include "compiler/statement/goto_statement.h"
 
 #include <boost/graph/depth_first_search.hpp>
 
@@ -38,10 +42,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 enum ConstructLocation { BeforeConstruct, AfterConstruct,
-                         HoldingBlock, EpilogBlock };
+                         HoldingBlock };
 
-typedef hphp_hash_map<ConstructPtr, ConstructLocation,
-                      smart_pointer_hash<ConstructPtr> > ConstructPtrLocMap;
+typedef hphp_hash_map<ConstructRawPtr, ConstructLocation,
+                      smart_pointer_hash<ConstructRawPtr> > ConstructPtrLocMap;
 
 class ControlFlowInfo {
 public:
@@ -50,46 +54,52 @@ public:
   bool                  m_noFallThrough;
 };
 
-typedef hphp_hash_map<ConstructPtr, ControlFlowInfo,
-                      smart_pointer_hash<ConstructPtr> > ConstructCFIMap;
+typedef hphp_hash_map<ConstructRawPtr, ControlFlowInfo,
+                      smart_pointer_hash<ConstructRawPtr> > ConstructCFIMap;
 
-typedef hphp_hash_map<ConstructPtr, ControlBlockPtr,
-                      smart_pointer_hash<ConstructPtr>
+typedef hphp_hash_map<ConstructRawPtr, ControlBlock*,
+                      smart_pointer_hash<ConstructRawPtr>
                       > ConstructControlBlockPtrMap;
 
 class ControlFlowBuilder : public FunctionWalker {
 public:
   ControlFlowBuilder(ControlFlowGraph *g) :
-      m_graph(g), m_pass(0) {}
+      m_graph(g), m_pass(0), m_cur(0), m_head(0) {}
 
   int before(ConstructRawPtr cp);
   int after(ConstructRawPtr cp);
-
+  int afterEach(ConstructRawPtr cp, int ix, ConstructRawPtr kid);
   void run(StatementPtr s) {
-/*
-    m_state = AstWalkerStateVec(s);
-    m_pass = 0;
-    AstWalker::walk(*this, this->m_state, ConstructPtr(), ConstructPtr());
-*/
     m_state = AstWalkerStateVec(s);
     m_pass = 1;
-    m_cur.reset();
+    m_cur = 0;
     newBlock();
     m_head = m_cur;
-    AstWalker::walk(*this, this->m_state, ConstructPtr(), ConstructPtr());
+    AstWalker::walk(*this, this->m_state, ConstructRawPtr(), ConstructRawPtr());
+    for (LabelInfoMap::iterator it = m_labelInfoMap.begin(),
+           end = m_labelInfoMap.end(); it != end; ++it) {
+      LabelInfo &li = it->second;
+      if (li.first && li.second.size()) {
+        for (GotoStatementPtrVec::iterator ii = li.second.begin(),
+               ee = li.second.end(); ii != ee; ++ii) {
+          addEdge(*ii, AfterConstruct, li.first, BeforeConstruct);
+        }
+      }
+    }
+    newBlock();
 
     m_state = AstWalkerStateVec(s);
     m_pass = 2;
     m_cur = m_head;
-    AstWalker::walk(*this, this->m_state, ConstructPtr(), ConstructPtr());
+    AstWalker::walk(*this, this->m_state, ConstructRawPtr(), ConstructRawPtr());
   }
 
-  ControlBlockPtr       head() const { return m_head; }
+  ControlBlock          *head() const { return m_head; }
 private:
   typedef ControlFlowGraph::vertex_descriptor   vertex_descriptor;
 
-  void                  addEdge(ConstructPtr cp_from, ConstructLocation l_from,
-                                ConstructPtr cp_to, ConstructLocation l_to) {
+  void addEdge(ConstructRawPtr cp_from, ConstructLocation l_from,
+               ConstructRawPtr cp_to, ConstructLocation l_to) {
     assert(cp_from);
     assert(cp_to);
     assert(l_from < 2);
@@ -100,56 +110,57 @@ private:
     from.m_targets[l_from][cp_to] = l_to;
     to.m_isTarget[l_to] = true;
   }
-  void                  noFallThrough(ConstructPtr cp) {
+  void                  noFallThrough(ConstructRawPtr cp) {
     cfi(cp).m_noFallThrough = true;
   }
 
-  ControlFlowInfo       *get(ConstructPtr cp) {
+  ControlFlowInfo       *get(ConstructRawPtr cp) {
     ConstructCFIMap::iterator it = m_ccfiMap.find(cp);
     return it == m_ccfiMap.end() ? NULL : &it->second;
   }
 
-  ControlFlowInfo       &cfi(ConstructPtr cp) {
+  ControlFlowInfo       &cfi(ConstructRawPtr cp) {
     return m_ccfiMap[cp];
   }
 
   size_t                depth() const { return m_state.size(); }
-  ConstructPtr          top(size_t n = 0) {
+  ConstructRawPtr       top(size_t n = 0) {
     size_t ix = m_state.size();
     assert(ix > n);
     ix -= n + 1;
     return m_state[ix].cp;
   }
-  ConstructPtr          root() { return m_state[0].cp; }
+  ConstructRawPtr       root() { return m_state[0].cp; }
 
-  void newBlock(ConstructPtr cp = ConstructPtr(),
+  void newBlock(ConstructRawPtr cp = ConstructPtr(),
                 ConstructLocation l = BeforeConstruct);
-  void endBlock(ConstructPtr cp, ConstructLocation l);
+  void endBlock(ConstructRawPtr cp, ConstructLocation l);
 
-  void addCFEdge(ControlBlockPtr b1, ControlBlockPtr b2);
-  void addCFEdge(ControlBlockPtr b1, ConstructPtr c2, ConstructLocation l2);
+  void addCFEdge(ControlBlock *b1, ControlBlock *b2);
+  void addCFEdge(ControlBlock *b1, ConstructRawPtr c2, ConstructLocation l2);
 
   ConstructCFIMap                m_ccfiMap;
   ConstructControlBlockPtrMap    m_ccbpMap[4];
-  ControlFlowGraph              *m_graph;
+  ControlFlowGraph               *m_graph;
   AstWalkerStateVec              m_state;
   int                            m_pass;
 
-  ControlBlockPtr                m_cur;
-  ControlBlockPtr                m_head;
+  ControlBlock                   *m_cur;
+  ControlBlock                   *m_head;
+
+  class LabelInfo : public std::pair<LabelStatementPtr, GotoStatementPtrVec> {};
+  class LabelInfoMap : public std::map<std::string,LabelInfo> {};
+  LabelInfoMap                   m_labelInfoMap;
 };
 
 class dfn_assign : public boost::default_dfs_visitor {
 public:
-  dfn_assign(int &dfn) : m_dfn(dfn) {}
+  dfn_assign() {}
 
   void discover_vertex(ControlFlowGraph::vertex_descriptor u,
                        const ControlFlowGraph &g) {
-    ControlBlockPtr cb = get(control_block, g, u);
-    cb->setDfn(m_dfn++);
+    const_cast<ControlFlowGraph&>(g).dfnAdd(u);
   }
-private:
-  int   &m_dfn;
 };
 
 class dfs_dump : public boost::default_dfs_visitor {
@@ -158,8 +169,7 @@ public:
 
   void discover_vertex(ControlFlowGraph::vertex_descriptor u,
                        const ControlFlowGraph &g) {
-    ControlBlockPtr cb = get(control_block, g, u);
-    cb->dump(0, m_ar, &g);
+    u->dump(0, m_ar, &g);
   }
 private:
   AnalysisResultPtr m_ar;
@@ -170,26 +180,45 @@ private:
 
 using namespace HPHP;
 
-ControlBlock::ControlBlock(const AstWalkerStateVec &s) : m_dfn(0), m_start(s) {
+//ControlBlock::ControlBlock() : m_dfn(0), m_color() {}
 
+ControlBlock::ControlBlock(const AstWalkerStateVec &s, ControlBlock *prev) :
+    m_dfn(0), m_start(s), m_color(), m_next(0) {
+  if (prev) prev->m_next = this;
 }
 
-void ControlFlowBuilder::newBlock(ConstructPtr cp, ConstructLocation l) {
+ControlEdge *ControlBlock::find_to(ControlBlock *to) {
+  graph_traits::out_edge_iterator it = m_succs.begin(), end = m_succs.end();
+  while (it != end) {
+    if ((*it)->second == to) return *it;
+    ++it;
+  }
+  return 0;
+}
+
+void ControlBlock::add_edge(ControlEdge *e) {
+  if (e->first->next() == e->second) {
+    e->first->m_succs.push_front(e);
+    e->second->m_preds.push_front(e);
+  } else {
+    e->first->m_succs.push_back(e);
+    e->second->m_preds.push_back(e);
+  }
+}
+
+void ControlFlowBuilder::newBlock(ConstructRawPtr cp, ConstructLocation l) {
   endBlock(cp, l);
-  ControlBlockPtr cb(new ControlBlock(m_state));
-  vertex_descriptor v = add_vertex(cb, *m_graph);
-  cb->setVertex(v);
-  m_cur = cb;
+  m_cur = m_graph->add_vertex(m_state);
 }
 
-void ControlFlowBuilder::endBlock(ConstructPtr cp, ConstructLocation l) {
+void ControlFlowBuilder::endBlock(ConstructRawPtr cp, ConstructLocation l) {
   if (m_cur) {
     if (l == BeforeConstruct) {
       m_cur->setEndBefore(cp);
     } else {
       m_cur->setEndAfter(cp);
     }
-    m_cur.reset();
+    m_cur = 0;
   }
 }
 
@@ -222,8 +251,6 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
           case Statement::KindOfStatementList:
           case Statement::KindOfBlockStatement:
           case Statement::KindOfTryStatement:
-          case Statement::KindOfGotoStatement:
-          case Statement::KindOfLabelStatement:
             break;
 
           case Statement::KindOfIfStatement:
@@ -247,20 +274,20 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
           }
 
           case Statement::KindOfForStatement: {
-            ConstructPtr cond(s->getNthKid(ForStatement::CondExpr));
-            ConstructPtr body(s->getNthKid(ForStatement::BodyStmt));
-            ConstructPtr incr(s->getNthKid(ForStatement::IncExpr));
+            ConstructRawPtr cond(s->getNthKid(ForStatement::CondExpr));
+            ConstructRawPtr body(s->getNthKid(ForStatement::BodyStmt));
+            ConstructRawPtr incr(s->getNthKid(ForStatement::IncExpr));
             if (cond) addEdge(cond, AfterConstruct, s, AfterConstruct);
-            ConstructPtr end = incr ? incr : body ? body : cond;
-            ConstructPtr start = cond ? cond : body ? body : incr;
+            ConstructRawPtr end = incr ? incr : body ? body : cond;
+            ConstructRawPtr start = cond ? cond : body ? body : incr;
             if (end) addEdge(end, AfterConstruct, start, BeforeConstruct);
             noFallThrough(s);
             break;
           }
 
           case Statement::KindOfWhileStatement: {
-            ConstructPtr cond(s->getNthKid(WhileStatement::CondExpr));
-            ConstructPtr body(s->getNthKid(WhileStatement::BodyStmt));
+            ConstructRawPtr cond(s->getNthKid(WhileStatement::CondExpr));
+            ConstructRawPtr body(s->getNthKid(WhileStatement::BodyStmt));
             addEdge(cond, AfterConstruct, s, AfterConstruct);
             addEdge(body ? body : cond, AfterConstruct, cond, BeforeConstruct);
             noFallThrough(s);
@@ -268,17 +295,17 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
           }
 
           case Statement::KindOfDoStatement: {
-            ConstructPtr cond(s->getNthKid(DoStatement::CondExpr));
+            ConstructRawPtr cond(s->getNthKid(DoStatement::CondExpr));
             addEdge(cond, AfterConstruct, s, BeforeConstruct);
             break;
           }
 
           case Statement::KindOfForEachStatement: {
-            ConstructPtr body(s->getNthKid(ForEachStatement::BodyStmt));
-            ConstructPtr name(s->getNthKid(ForEachStatement::NameExpr));
-            ConstructPtr value(s->getNthKid(ForEachStatement::ValueExpr));
-            ConstructPtr begin = name ? name : value;
-            ConstructPtr end = body ? body : value;
+            ConstructRawPtr body(s->getNthKid(ForEachStatement::BodyStmt));
+            ConstructRawPtr name(s->getNthKid(ForEachStatement::NameExpr));
+            ConstructRawPtr value(s->getNthKid(ForEachStatement::ValueExpr));
+            ConstructRawPtr begin = name ? name : value;
+            ConstructRawPtr end = body ? body : value;
             addEdge(end, AfterConstruct, begin, BeforeConstruct);
             addEdge(begin, BeforeConstruct, s, AfterConstruct);
             break;
@@ -287,6 +314,7 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
           case Statement::KindOfSwitchStatement: {
             SwitchStatementPtr sw(static_pointer_cast<SwitchStatement>(s));
             ExpressionPtr exp = sw->getExp();
+            noFallThrough(exp);
             if (StatementListPtr cases = sw->getCases()) {
               addEdge(exp, AfterConstruct, s, AfterConstruct);
               for (int n = cases->getCount(), i = 0; i < n; ++i) {
@@ -297,24 +325,41 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
           }
 
           case Statement::KindOfCaseStatement:
+            // already handled by switch
             break;
+
+          case Statement::KindOfLabelStatement: {
+            LabelStatementPtr l(static_pointer_cast<LabelStatement>(s));
+            m_labelInfoMap[l->label()].first = l;
+            cfi(l).m_isTarget[AfterConstruct] = true;
+            break;
+          }
+
+          case Statement::KindOfGotoStatement: {
+            GotoStatementPtr g(static_pointer_cast<GotoStatement>(s));
+            m_labelInfoMap[g->label()].second.push_back(g);
+            noFallThrough(s);
+            break;
+          }
 
           case Statement::KindOfReturnStatement:
             addEdge(s, AfterConstruct, root(), AfterConstruct);
+            noFallThrough(s);
             break;
 
           case Statement::KindOfBreakStatement:
           case Statement::KindOfContinueStatement: {
+            noFallThrough(s);
             int val = dynamic_pointer_cast<BreakStatement>(s)->getDepth();
             size_t d = depth();
             for (size_t i = 1; i < d; i++) {
-              ConstructPtr c = top(i);
+              ConstructRawPtr c = top(i);
               if (LoopStatementPtr l = dynamic_pointer_cast<LoopStatement>(c)) {
                 if (val <= 1) {
                   if (stype == Statement::KindOfBreakStatement) {
                     addEdge(s, AfterConstruct, l, AfterConstruct);
                   } else {
-                    ConstructPtr kid;
+                    ConstructRawPtr kid;
                     switch (l->getKindOf()) {
                       case Statement::KindOfForEachStatement:
                         kid = l->getNthKid(ForEachStatement::NameExpr);
@@ -371,8 +416,26 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
           case Statement::KindOfEchoStatement:
             break;
         }
+      } else {
+        ExpressionPtr e(dynamic_pointer_cast<Expression>(cp));
+        switch (e->getKindOf()) {
+          case Expression::KindOfBinaryOpExpression:
+            if (dynamic_pointer_cast<BinaryOpExpression>(e)->
+                isShortCircuitOperator()) {
+              addEdge(e->getNthExpr(0), AfterConstruct, e, AfterConstruct);
+            }
+            break;
+          case Expression::KindOfQOpExpression:
+            addEdge(e->getNthExpr(0), AfterConstruct,
+                    e->getNthExpr(2), BeforeConstruct);
+            addEdge(e->getNthExpr(1), AfterConstruct,
+                    e->getNthExpr(2), AfterConstruct);
+            noFallThrough(e->getNthExpr(1));
+            break;
+          default:
+            break;
+        }
       }
-
 
       if (ControlFlowInfo *c = get(cp)) {
         if (c->m_targets[BeforeConstruct].size()) {
@@ -386,7 +449,7 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
       if (!m_cur) newBlock();
       m_ccbpMap[BeforeConstruct][cp] = m_cur;
     } else if (m_pass == 2) {
-      ControlBlockPtr bb = m_ccbpMap[BeforeConstruct][cp];
+      ControlBlock *bb = m_ccbpMap[BeforeConstruct][cp];
       assert(bb);
       if (bb != m_cur) {
         if (m_cur) {
@@ -398,7 +461,7 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
         ConstructPtrLocMap &beforeTargets =
           c->m_targets[BeforeConstruct];
         if (beforeTargets.size()) {
-          ControlBlockPtr hb = m_ccbpMap[HoldingBlock][cp];
+          ControlBlock *hb = m_ccbpMap[HoldingBlock][cp];
           assert(hb);
           addCFEdge(hb, bb);
           ConstructPtrLocMap::iterator it =
@@ -414,16 +477,17 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
   return ret;
 }
 
-void ControlFlowBuilder::addCFEdge(ControlBlockPtr b1, ControlBlockPtr b2) {
-  if (!edge(b1->getVertex(), b2->getVertex(), *m_graph).second) {
-    add_edge(b1->getVertex(), b2->getVertex(), *m_graph);
+void ControlFlowBuilder::addCFEdge(ControlBlock *b1, ControlBlock *b2) {
+  if (!edge(b1, b2, *m_graph).second) {
+    add_edge(b1, b2, *m_graph);
   }
 }
 
-void ControlFlowBuilder::addCFEdge(ControlBlockPtr b1,
-                                   ConstructPtr c2, ConstructLocation l2) {
-  ControlBlockPtr b2 = m_ccbpMap[l2][c2];
+void ControlFlowBuilder::addCFEdge(ControlBlock *b1,
+                                   ConstructRawPtr c2, ConstructLocation l2) {
+  ControlBlock *b2 = m_ccbpMap[l2][c2];
   assert(b2);
+  if (l2 == AfterConstruct) b2 = b2->next();
   addCFEdge(b1, b2);
 }
 
@@ -438,18 +502,13 @@ int ControlFlowBuilder::after(ConstructRawPtr cp) {
       if (c->m_noFallThrough || c->m_targets[AfterConstruct].size()) {
         endBlock(cp, AfterConstruct);
       }
-
-      if (c->m_isTarget[AfterConstruct]) {
-        newBlock(cp, AfterConstruct);
-        m_ccbpMap[EpilogBlock][cp] = m_cur;
-      }
     } else {
       m_ccbpMap[AfterConstruct][cp] = m_cur;
     }
     return ret;
   }
   if (m_pass == 2) {
-    ControlBlockPtr ab = m_ccbpMap[AfterConstruct][cp];
+    ControlBlock *ab = m_ccbpMap[AfterConstruct][cp];
     assert(ab);
     if (ab != m_cur) {
       if (m_cur) {
@@ -458,11 +517,6 @@ int ControlFlowBuilder::after(ConstructRawPtr cp) {
       m_cur = ab;
     }
     if (ControlFlowInfo *c = get(cp)) {
-      if (!c->m_noFallThrough &&
-          c->m_isTarget[AfterConstruct]) {
-        addCFEdge(m_cur, m_ccbpMap[EpilogBlock][cp]);
-      }
-
       ConstructPtrLocMap &afterTargets =
         c->m_targets[AfterConstruct];
       if (afterTargets.size()) {
@@ -474,7 +528,7 @@ int ControlFlowBuilder::after(ConstructRawPtr cp) {
         }
       }
 
-      if (c->m_noFallThrough && !c->m_isTarget[AfterConstruct]) m_cur.reset();
+      if (c->m_noFallThrough && !c->m_isTarget[AfterConstruct]) m_cur = 0;
     }
     return ret;
   }
@@ -482,27 +536,38 @@ int ControlFlowBuilder::after(ConstructRawPtr cp) {
   return ret;
 }
 
+int ControlFlowBuilder::afterEach(ConstructRawPtr cp, int ix,
+                                  ConstructRawPtr kid) {
+  if (m_pass == 1) {
+    if (ControlFlowInfo *c = get(kid)) {
+      if (c->m_isTarget[AfterConstruct]) {
+        newBlock(kid, AfterConstruct);
+      }
+    }
+  }
+
+  return WalkContinue;
+}
+
 void ControlBlock::dump(int spc, AnalysisResultPtr ar,
                         const ControlFlowGraph *graph) {
   printf("%08llx (%d)\n  InDegree: %d\n  OutDegree: %d\n",
          (unsigned long long)this, m_dfn,
-         (int)in_degree(m_vertex, *graph),
-         (int)out_degree(m_vertex, *graph));
+         (int)in_degree(this, *graph),
+         (int)out_degree(this, *graph));
 
   {
     ControlFlowGraph::graph_traits::in_edge_iterator i, end;
-    for (tie(i, end) = in_edges(m_vertex, *graph); i != end; ++i) {
-      vertex_descriptor v = source(*i, *graph);
-      ControlBlockPtr t = get(control_block, *graph, v);
-      printf("    <- %08llx\n", (unsigned long long)t.get());
+    for (tie(i, end) = in_edges(this, *graph); i != end; ++i) {
+      ControlBlock *t = source(*i, *graph);
+      printf("    <- %08llx\n", (unsigned long long)t);
     }
   }
   {
     ControlFlowGraph::graph_traits::out_edge_iterator i, end;
-    for (tie(i, end) = out_edges(m_vertex, *graph); i != end; ++i) {
-      vertex_descriptor v = target(*i, *graph);
-      ControlBlockPtr t = get(control_block, *graph, v);
-      printf("    -> %08llx\n", (unsigned long long)t.get());
+    for (tie(i, end) = out_edges(this, *graph); i != end; ++i) {
+      ControlBlock *t = target(*i, *graph);
+      printf("    -> %08llx\n", (unsigned long long)t);
     }
   }
   Construct::dump(m_start.size() * 2, ar, true, m_start,
@@ -512,16 +577,56 @@ void ControlBlock::dump(int spc, AnalysisResultPtr ar,
 ControlFlowGraph *ControlFlowGraph::buildControlFlow(MethodStatementPtr m) {
   ControlFlowGraph *graph = new ControlFlowGraph;
 
+  graph->m_stmt = m;
   ControlFlowBuilder cfb(graph);
   cfb.run(m->getStmts());
-  int dfn = 1;
-  depth_first_visit(*graph, cfb.head()->getVertex(),
-                    dfn_assign(dfn), get(vertex_color, *graph));
-
+  graph->m_nextDfn = 1;
+  depth_first_visit(*graph, cfb.head(),
+                    dfn_assign(), get(vertex_color, *graph));
   return graph;
 }
 
+ControlFlowGraph::~ControlFlowGraph() {
+  for (edge_iterator it = ebegin(), end = eend();
+       it != end; ++it) {
+    delete *it;
+  }
+  for (vertex_iterator it = vbegin(), end = vend();
+       it != end; ++it) {
+    delete *it;
+  }
+}
+
+ControlBlock *ControlFlowGraph::add_vertex(AstWalkerStateVec &s) {
+  ControlBlock *cb =
+    new ControlBlock(s, m_blocks.size() ? m_blocks.back() : 0);
+
+  m_blocks.push_back(cb);
+  return cb;
+}
+
+ControlEdge *ControlFlowGraph::add_edge(ControlBlock *from, ControlBlock *to) {
+  ControlEdge *e = new ControlEdge(from, to);
+  m_edges.push_back(e);
+  ControlBlock::add_edge(e);
+  return e;
+}
+
+void ControlFlowGraph::dfnAdd(ControlBlock *cb) {
+  m_depthFirstBlocks.push_back(cb);
+  cb->setDfn(m_nextDfn++);
+}
+
+void ControlFlowGraph::allocateDataFlow(size_t width, int rows, int *rowIds) {
+  m_bitSetVec.alloc(m_nextDfn, width, rows, rowIds);
+  graph_traits::vertex_iterator i,e;
+  for (tie(i, e) = vertices(*this); i != e; ++i) {
+    ControlBlock *cb = *i;
+    cb->setBlock(m_bitSetVec.getBlock(cb->getDfn()));
+  }
+}
+
 void ControlFlowGraph::dump(AnalysisResultPtr ar) {
-  printf("Dumping control flow:\n");
+  printf("Dumping control flow: %s\n", m_stmt->getName().c_str());
   depth_first_search(*this, dfs_dump(ar), get(vertex_color, *this));
 }

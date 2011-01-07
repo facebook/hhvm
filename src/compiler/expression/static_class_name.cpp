@@ -30,7 +30,8 @@ namespace HPHP {
 StaticClassName::StaticClassName(ExpressionPtr classExp)
     : m_class(classExp),
       m_self(false), m_parent(false), m_static(false),
-      m_redeclared(false), m_present(false), m_unknown(true) {
+      m_redeclared(false), m_present(false), m_forcePresent(false),
+      m_unknown(true) {
   updateClassName();
   if (m_origClassName == "parent") {
     m_parent = true;
@@ -52,6 +53,8 @@ void StaticClassName::updateClassName() {
     m_className = Util::toLower(className);
     m_origClassName = className;
     m_class.reset();
+  } else {
+    m_className = "";
   }
 }
 

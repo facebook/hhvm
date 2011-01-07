@@ -840,6 +840,7 @@ void AnalysisResult::getScopesSet(BlockScopeRawPtrQueue &v) {
 // optimization functions
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
 struct PreOptVisitor {
   PreOptVisitor(AnalysisResultPtr ar) : m_ar(ar) {}
@@ -1022,17 +1023,15 @@ int DepthFirstVisitor<PostOptVisitor>::visit(BlockScopeRawPtr scope) {
   bool done = false;
   if (MethodStatementPtr m =
       dynamic_pointer_cast<MethodStatement>(stmt)) {
-    bool aliasOpts = Option::LocalCopyProp || Option::EliminateDeadCode;
-    if (aliasOpts || Option::StringLoopOpts) {
-      AliasManager am(1);
 
-      int flag = am.optimize(this->m_data.m_ar, m);
-      if (aliasOpts) {
-        done = true;
-        if (flag) {
-          scope->addUpdates(BlockScope::UseKindCaller);
-        }
+    AliasManager am(1);
+    if (Option::LocalCopyProp || Option::EliminateDeadCode) {
+      done = true;
+      if (am.optimize(this->m_data.m_ar, m)) {
+        scope->addUpdates(BlockScope::UseKindCaller);
       }
+    } else {
+      am.optimize(this->m_data.m_ar, m);
     }
   }
 
@@ -1059,10 +1058,25 @@ void AnalysisResult::postOptimize() {
   DepthFirstVisitor<PostOptVisitor> dfv(shared_from_this());
   BlockScopeRawPtrQueue scopes;
   getScopesSet(scopes);
-  dfv.visitDepthFirst(scopes);
+  if (Option::ControlFlow) {
+    BlockScopeRawPtrQueue saved = scopes;
+    dfv.visitDepthFirst(scopes);
+    for (BlockScopeRawPtrQueue::iterator it = saved.begin(),
+           end = saved.end(); it != end; ++it) {
+      BlockScopeRawPtr scope = *it;
+      if (MethodStatementPtr m =
+          dynamic_pointer_cast<MethodStatement>(scope->getStmt())) {
+        AliasManager am(1);
+        am.finalSetup(shared_from_this(), m);
+      }
+    }
+  } else {
+    dfv.visitDepthFirst(scopes);
+  }
 }
 
-}
+///////////////////////////////////////////////////////////////////////////////
+} // namespace HPHP
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions

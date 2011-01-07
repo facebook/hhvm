@@ -349,7 +349,12 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
     cg_printf("mcp%d.methodCall((", m_ciTemp);
   }
   if (isThis) {
-    cg_printf("GET_THIS_VALID()");
+    if (!getClassScope() || getClassScope()->derivedByDynamic() ||
+        !static_pointer_cast<SimpleVariable>(m_object)->isGuardedThis()) {
+      cg_printf("GET_THIS_VALID()");
+    } else {
+      cg_printf("this");
+    }
   } else {
     outputCPPObject(cg, ar);
   }

@@ -414,7 +414,10 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
       }
     }
     if (!m_valid) {
-      cg_printf("GET_THIS_ARROW()");
+      if (!getClassScope() || getClassScope()->derivedByDynamic() ||
+          !static_pointer_cast<SimpleVariable>(m_object)->isGuardedThis()) {
+        cg_printf("GET_THIS_ARROW()");
+      }
     }
   } else if (m_valid) {
     TypePtr act;

@@ -30,12 +30,16 @@ public:
   bool isParent() const { return m_parent; }
   bool isStatic() const { return m_static; }
   bool isRedeclared() const { return m_redeclared; }
-  bool isPresent() const { return m_present; }
+  bool isPresent() const { return m_present || m_forcePresent; }
   bool isUnknown() const { return m_unknown; }
+
+  void setPresent() { m_present = m_forcePresent = true; }
 
   void setRedeclared() { m_redeclared = true; }
 
   void resolveStatic(const std::string &name);
+
+  const std::string &getName() { return m_className; }
 
   ClassScopePtr resolveClass();
   bool checkPresent();
@@ -53,6 +57,7 @@ private:
   unsigned m_static : 1;
   unsigned m_redeclared : 1;
   unsigned m_present : 1;
+  unsigned m_forcePresent : 1;
   unsigned m_unknown : 1;
 };
 

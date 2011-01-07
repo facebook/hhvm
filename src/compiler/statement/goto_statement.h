@@ -29,6 +29,8 @@ public:
   GotoStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, const std::string &label);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
+
+  const std::string &label() { return m_label; }
 private:
   std::string m_label;
 };

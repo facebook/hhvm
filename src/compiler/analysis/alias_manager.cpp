@@ -43,6 +43,8 @@
 #include <compiler/analysis/alias_manager.h>
 #include <compiler/analysis/control_flow.h>
 #include <compiler/analysis/variable_table.h>
+#include <compiler/analysis/data_flow.h>
+
 #include <util/parser/hphp.tab.hpp>
 #include <util/util.h>
 
@@ -58,7 +60,11 @@ AliasManager::AliasManager(int opt) :
     m_bucketList(0), m_nextID(1), m_changes(0), m_replaced(0),
     m_wildRefs(false), m_nrvoFix(0), m_inlineAsExpr(true),
     m_noAdd(false), m_preOpt(opt<0), m_postOpt(opt>0),
-    m_cleared(false), m_inPseudoMain(false) {
+    m_cleared(false), m_inPseudoMain(false), m_graph(0) {
+}
+
+AliasManager::~AliasManager() {
+  delete m_graph;
 }
 
 bool AliasManager::parseOptimizations(const std::string &optimizations,
@@ -1573,7 +1579,8 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
 
   cs->clearVisited();
 
-  if (StatementPtr s = dpc(Statement, cs)) {
+  StatementPtr s = dpc(Statement, cs);
+  if (s) {
     switch (s->getKindOf()) {
       case Statement::KindOfFunctionStatement:
       case Statement::KindOfMethodStatement:
@@ -1595,7 +1602,68 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
     }
   }
 
-  if (ExpressionPtr e = dpc(Expression, cs)) {
+  if (s) {
+    bool inlineOk = false;
+    Statement::KindOf skind = s->getKindOf();
+    switch (skind) {
+      case Statement::KindOfGlobalStatement:
+      case Statement::KindOfStaticStatement:
+      {
+        ExpressionListPtr vars = dpc(ExpressionList, s->getNthKid(0));
+        for (int i = 0, n = vars->getCount(); i < n; i++) {
+          ExpressionPtr e = (*vars)[i];
+          if (AssignmentExpressionPtr ae = dpc(AssignmentExpression, e)) {
+            e = ae->getVariable();
+          }
+          if (SimpleVariablePtr sv = dpc(SimpleVariable, e)) {
+            if (Symbol *sym = sv->getSymbol()) {
+              sym->setReferenced();
+              if (skind == Statement::KindOfGlobalStatement) {
+                sym->setGlobal();
+              } else if (!m_variables->isPseudoMainTable()) {
+                m_variables->addStaticVariable(sym, m_arp);
+              }
+            }
+          }
+        }
+        break;
+      }
+      case Statement::KindOfExpStatement:
+      case Statement::KindOfStatementList:
+        inlineOk = true;
+        break;
+      case Statement::KindOfCatchStatement:
+      {
+        const std::string &name = spc(CatchStatement, s)->getVariable();
+        m_variables->addUsed(name);
+        break;
+      }
+      case Statement::KindOfReturnStatement:
+        inlineOk = true;
+        if (m_nrvoFix >= 0) {
+          ExpressionPtr e = spc(ReturnStatement, s)->getRetExp();
+          if (!e || !e->is(Expression::KindOfSimpleVariable)) {
+            m_nrvoFix = -1;
+          } else {
+            SimpleVariablePtr sv = spc(SimpleVariable, e);
+            const std::string &n = sv->getName();
+            if (!m_nrvoFix) {
+              m_returnVar = n;
+              m_nrvoFix = 1;
+            } else if (m_returnVar != n) {
+              m_nrvoFix = -1;
+            }
+          }
+        }
+      default:
+        break;
+    }
+    if (!inlineOk) {
+      m_inlineAsExpr = false;
+    }
+  } else {
+    ExpressionPtr e = spc(Expression, cs);
+    e->setCanonID(0);
     if (!kidCost) {
       if (!nkid && !e->isScalar()) {
         if (e->is(Expression::KindOfSimpleVariable)) {
@@ -1647,7 +1715,14 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       {
         SimpleVariablePtr sv(spc(SimpleVariable, e));
         if (Symbol *sym = sv->getSymbol()) {
-          if (sv->isThis()) sv->getFunctionScope()->setContainsThis();
+          if (sv->isThis()) {
+            sv->getFunctionScope()->setContainsThis();
+            if (m_graph && e->hasContext(Expression::ObjectContext)) {
+              int &id = m_gidMap["v:this"];
+              if (!id) id = m_gidMap.size();
+              e->setCanonID(id);
+            }
+          }
           if ((context & Expression::RefValue) || sym->isRefClosureVar()) {
             sym->setReferenced();
           }
@@ -1708,7 +1783,22 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       break;
     case Expression::KindOfSimpleFunctionCall:
       spc(SimpleFunctionCall, e)->updateVtFlags();
+    case Expression::KindOfDynamicFunctionCall:
+    case Expression::KindOfClassConstantExpression:
+    case Expression::KindOfStaticMemberExpression:
+    case Expression::KindOfNewObjectExpression:
+      if (m_graph) {
+        StaticClassName *p = dynamic_cast<StaticClassName*>(e.get());
+        assert(p);
+        const std::string &name = p->getName();
+        if (!name.empty()) {
+          int &id = m_gidMap[name];
+          if (!id) id = m_gidMap.size();
+          e->setCanonID(id);
+        }
+      }
       break;
+
     case Expression::KindOfUnaryOpExpression:
       if (Option::EnableEval > Option::NoEval && spc(UnaryOpExpression, e)->
           getOp() == T_EVAL) {
@@ -1718,80 +1808,13 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
     default:
       break;
     }
-  } else {
-    StatementPtr s = spc(Statement, cs);
-    bool inlineOk = false;
-    Statement::KindOf skind = s->getKindOf();
-    switch (skind) {
-    case Statement::KindOfGlobalStatement:
-    case Statement::KindOfStaticStatement:
-      {
-        ExpressionListPtr vars = dpc(ExpressionList, s->getNthKid(0));
-        for (int i = 0, n = vars->getCount(); i < n; i++) {
-          ExpressionPtr e = (*vars)[i];
-          if (AssignmentExpressionPtr ae = dpc(AssignmentExpression, e)) {
-            e = ae->getVariable();
-          }
-          if (SimpleVariablePtr sv = dpc(SimpleVariable, e)) {
-            if (Symbol *sym = sv->getSymbol()) {
-              sym->setReferenced();
-              if (skind == Statement::KindOfGlobalStatement) {
-                sym->setGlobal();
-              } else if (!m_variables->isPseudoMainTable()) {
-                m_variables->addStaticVariable(sym, m_arp);
-              }
-            }
-          }
-        }
-        break;
-      }
-    case Statement::KindOfExpStatement:
-    case Statement::KindOfStatementList:
-      inlineOk = true;
-      break;
-    case Statement::KindOfCatchStatement:
-      {
-        const std::string &name = spc(CatchStatement, s)->getVariable();
-        m_variables->addUsed(name);
-        break;
-      }
-    case Statement::KindOfReturnStatement:
-      inlineOk = true;
-      if (m_nrvoFix >= 0) {
-        ExpressionPtr e = spc(ReturnStatement, s)->getRetExp();
-        if (!e || !e->is(Expression::KindOfSimpleVariable)) {
-          m_nrvoFix = -1;
-        } else {
-          SimpleVariablePtr sv = spc(SimpleVariable, e);
-          const std::string &n = sv->getName();
-          if (!m_nrvoFix) {
-            m_returnVar = n;
-            m_nrvoFix = 1;
-          } else if (m_returnVar != n) {
-            m_nrvoFix = -1;
-          }
-        }
-      }
-    default:
-      break;
-    }
-    if (!inlineOk) {
-      m_inlineAsExpr = false;
-    }
   }
   return kidCost;
 }
 
-int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
+void AliasManager::gatherInfo(AnalysisResultPtr ar, MethodStatementPtr m) {
   m_arp = ar;
-
-  ControlFlowGraph *g = 0;
-  if (Option::ControlFlow) {
-    g = ControlFlowGraph::buildControlFlow(m);
-    if (Option::DumpAst) g->dump(ar);
-  }
-
-  FunctionScopePtr func = m->getFunctionScope();
+  FunctionScopeRawPtr func = m->getFunctionScope();
   m_scope = func;
   m_variables = func->getVariables();
   m_variables->clearUsed();
@@ -1842,9 +1865,106 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
     }
   }
   func->setInlineAsExpr(m_inlineAsExpr);
+}
+
+class ConstructTagger;
+
+class ControlFlowGraphWalker : public FunctionWalker {
+public:
+  ControlFlowGraphWalker(ControlFlowGraph *g) : m_block(0), m_graph(*g) {}
+  template <class T>
+  void walk(T &t) {
+    std::pair<ControlFlowGraph::vertex_iterator,
+      ControlFlowGraph::vertex_iterator> v(boost::vertices(m_graph));
+    while (v.first != v.second) {
+      ControlBlock *b = *v.first;
+      m_block = b;
+      AstWalkerStateVec s = b->getStartState();
+      AstWalker::walk(t, s, b->getEndBefore(), b->getEndAfter());
+      ++v.first;
+    }
+  }
+protected:
+  ControlBlock *m_block;
+  ControlFlowGraph &m_graph;
+};
+
+static void markAvailable(ExpressionRawPtr e) {
+  if (e->isThis()) {
+    SimpleVariableRawPtr sv(dpc(SimpleVariable,e));
+    assert(sv);
+    sv->setGuardedThis();
+  } else {
+    StaticClassName *scn = dynamic_cast<StaticClassName*>(e.get());
+    assert(scn);
+    scn->setPresent();
+  }
+}
+
+class ConstructTagger : public ControlFlowGraphWalker {
+public:
+  ConstructTagger(ControlFlowGraph *g) : ControlFlowGraphWalker(g) {}
+
+  void walk() { ControlFlowGraphWalker::walk(*this); }
+  int after(ConstructRawPtr cp) {
+    if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(cp)) {
+      if (int id = e->getCanonID()) {
+        if (m_block->getBit(DataFlow::Available, id)) {
+          markAvailable(e);
+        } else {
+          m_block->setBit(DataFlow::Available, id);
+        }
+      }
+    }
+    return WalkContinue;
+  }
+};
+
+class ConstructMarker : public ControlFlowGraphWalker {
+public:
+  ConstructMarker(ControlFlowGraph *g) : ControlFlowGraphWalker(g) {}
+
+  void walk() { ControlFlowGraphWalker::walk(*this); }
+  int after(ConstructRawPtr cp) {
+    if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(cp)) {
+      if (int id = e->getCanonID()) {
+        if (m_block->getBit(DataFlow::AvailIn, id)) {
+          markAvailable(e);
+        }
+      }
+    }
+    return WalkContinue;
+  }
+};
+
+void AliasManager::doFinal(MethodStatementPtr m) {
+  FunctionScopeRawPtr func = m->getFunctionScope();
+  if (func->isRefReturn()) {
+    m_nrvoFix = -1;
+  } else if (m_nrvoFix > 0) {
+    Symbol *sym = m_variables->getSymbol(m_returnVar);
+    if (sym && !sym->isParameter() &&
+        (m_wildRefs || sym->isReferenced() ||
+         ((sym->isGlobal() || sym->isStatic()) &&
+          m_variables->needLocalCopy(sym)))) {
+      // do nothing
+    } else {
+      m_nrvoFix = -1;
+    }
+  }
+
+  func->setNRVOFix(m_nrvoFix > 0);
+
+  if (Option::StringLoopOpts && !m_wildRefs) {
+    stringOptsRecur(m->getStmts());
+  }
+}
+
+int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
+  gatherInfo(ar, m);
 
   if (Option::LocalCopyProp || Option::EliminateDeadCode) {
-    for (i = 0; i < nkid; i++) {
+    for (int i = 0, nkid = m->getKidCount(); i < nkid; i++) {
       if (i) {
         clear();
         m_cleared = false;
@@ -1855,34 +1975,38 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
     killLocals();
   }
 
-  if (!m_replaced) {
-    if (ar->getPhase() == AnalysisResult::PostOptimize) {
-      if (func) {
-        if (func->isRefReturn()) {
-          m_nrvoFix = -1;
-        } else if (m_nrvoFix > 0) {
-          Symbol *sym = m_variables->getSymbol(m_returnVar);
-          if (sym && !sym->isParameter() &&
-              (m_wildRefs || sym->isReferenced() ||
-               ((sym->isGlobal() || sym->isStatic()) &&
-                m_variables->needLocalCopy(sym)))) {
-            // do nothing
-          } else {
-            m_nrvoFix = -1;
-          }
-        }
-
-        func->setNRVOFix(m_nrvoFix > 0);
-      }
-
-      if (!m_changes && Option::StringLoopOpts && !m_wildRefs) {
-        stringOptsRecur(m->getStmts());
-      }
-    }
+  if (!m_replaced && !m_changes && m_postOpt && !Option::ControlFlow) {
+    doFinal(m);
   }
 
-  delete g;
   return m_replaced ? -1 : m_changes ? 1 : 0;
+}
+
+void AliasManager::finalSetup(AnalysisResultPtr ar, MethodStatementPtr m) {
+  static int rows[] =
+    { DataFlow::Available, DataFlow::AvailIn, DataFlow::AvailOut };
+
+  if (Option::ControlFlow) {
+    m_graph = ControlFlowGraph::buildControlFlow(m);
+    if (Option::DumpAst) m_graph->dump(ar);
+  }
+
+  gatherInfo(ar, m);
+  if (m_graph) {
+    m_graph->allocateDataFlow(m_gidMap.size()+1,
+                              sizeof(rows)/sizeof(rows[0]), rows);
+    ConstructTagger ct(m_graph);
+    ct.walk();
+
+    DataFlow::ComputeAvailable(*m_graph);
+
+    ConstructMarker cm(m_graph);
+    cm.walk();
+    delete m_graph;
+    m_graph = 0;
+  }
+
+  doFinal(m);
 }
 
 AliasManager::LoopInfo::LoopInfo(StatementPtr s) :

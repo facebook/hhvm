@@ -164,6 +164,7 @@ void Construct::dumpNode(int spc, AnalysisResultPtr ar) {
 
   if (Statement *s = dynamic_cast<Statement*>(this)) {
     Statement::KindOf stype = s->getKindOf();
+    value = s->getName();
     switch (stype) {
     case Statement::KindOfFunctionStatement:
       name="FunctionStatement";
@@ -466,7 +467,7 @@ void Construct::dumpNode(int spc, AnalysisResultPtr ar) {
 class ConstructDumper : public FunctionWalker {
 public:
   ConstructDumper(int spc, AnalysisResultPtr ar, bool functionOnly = false) :
-      m_spc(spc), m_ar(ar), m_functionOnly(functionOnly) {}
+      m_spc(spc), m_ar(ar), m_functionOnly(functionOnly), m_showEnds(true) {}
 
   void walk(AstWalkerStateVec state,
             ConstructRawPtr endBefore, ConstructRawPtr endAfter) {
@@ -476,9 +477,20 @@ public:
     int ret = m_functionOnly ? FunctionWalker::before(cp) : WalkContinue;
     cp->dumpNode(m_spc, m_ar);
     m_spc += 2;
+    m_showEnds = false;
     return ret;
   }
   int after(ConstructRawPtr cp) {
+    if (m_showEnds) {
+      int s = m_spc;
+      while (s > 0) {
+        int n = s > 10 ? 10 : s;
+        std::cout << ("          "+10-n);
+        s -= n;
+      }
+      std::cout << "<<";
+      cp->dumpNode(0, m_ar);
+    }
     m_spc -= 2;
     return WalkContinue;
   }
@@ -486,6 +498,7 @@ private:
   int m_spc;
   AnalysisResultPtr m_ar;
   bool m_functionOnly;
+  bool m_showEnds;
 };
 
 void Construct::dump(int spc, AnalysisResultPtr ar) {

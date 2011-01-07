@@ -62,6 +62,7 @@ class AstWalker {
                    ConstructRawPtr endBefore, ConstructRawPtr endAfter) {
     int size = state.size();
     if (!size) return;
+    int flag;
 
     AstWalkerState *cfs = &state.back();
     while (true) {
@@ -69,37 +70,40 @@ class AstWalker {
       int ix = cfs->index;
       if (!ix) {
         if (cur == endBefore) break;
-        int flag = functor.before(cur);
+        flag = functor.before(cur);
         if (flag == WalkStop) break;
         if (flag == WalkSkip) {
           state.pop_back();
           if (!--size) break;
           cfs = &state.back();
-          functor.afterEach(cfs->cp, cfs->index, cur);
-          cfs->index++;
-          continue;
         }
+        cfs->index++;
+        continue;
       }
-      if (ix < cur->getKidCount()) {
-        if (ConstructRawPtr kid = cur->getNthKid(ix)) {
-          int flag = functor.beforeEach(cur, ix, kid);
-          if (flag == WalkStop) break;
-          if (flag != WalkSkip) {
-            state.push_back(AstWalkerState(kid));
-            size++;
-            cfs = &state.back();
-            continue;
+      int ii = (ix - 1) >> 1;
+      if (ii < cur->getKidCount()) {
+        if (ConstructRawPtr kid = cur->getNthKid(ii)) {
+          if (ix & 1) {
+            flag = functor.beforeEach(cur, ii, kid);
+            if (flag == WalkStop) break;
+            if (flag != WalkSkip) {
+              state.push_back(AstWalkerState(kid));
+              size++;
+              cfs = &state.back();
+              continue;
+            }
+          } else {
+            flag = functor.afterEach(cur, ii, kid);
+            if (flag == WalkStop) break;
           }
-        } else {
-          cfs->index++;
-          continue;
         }
+        cfs->index++;
+        continue;
       }
       if (functor.after(cur) == WalkStop || cur == endAfter) break;
       state.pop_back();
       if (!--size) break;
       cfs = &state.back();
-      functor.afterEach(cfs->cp, cfs->index, cur);
       cfs->index++;
     }
   }

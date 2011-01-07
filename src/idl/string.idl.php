@@ -1265,41 +1265,6 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "echo",
-    'flags'  =>  HasDocComment | VariableArguments,
-    'return' => array(
-      'type'   => null,
-      'desc'   => "No value is returned.",
-    ),
-    'args'   => array(
-      array(
-        'name'   => "arg",
-        'type'   => String,
-        'desc'   => "The parameter to output.",
-      ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "print",
-    'desc'   => "Outputs arg.\n\nprint() is not actually a real function (it is a language construct) so you are not required to use parentheses with its argument list.",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Int32,
-      'desc'   => "Returns 1, always.",
-    ),
-    'args'   => array(
-      array(
-        'name'   => "arg",
-        'type'   => String,
-        'desc'   => "The input data.",
-      ),
-    ),
-  ));
-
-DefineFunction(
-  array(
     'name'   => "printf",
     'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(

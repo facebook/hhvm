@@ -337,18 +337,6 @@ inline String x_nl_langinfo(int item) {
   return f_nl_langinfo(item);
 }
 
-inline void x_echo(int _argc, CStrRef arg, CArrRef _argv = null_array) {
-  FUNCTION_INJECTION_BUILTIN(echo);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  f_echo(_argc, arg, _argv);
-}
-
-inline int x_print(CStrRef arg) {
-  FUNCTION_INJECTION_BUILTIN(print);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  return f_print(arg);
-}
-
 inline Variant x_printf(int _argc, CStrRef format, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(printf);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);

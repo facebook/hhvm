@@ -216,13 +216,6 @@ inline String f_nl_langinfo(int item) {
 ///////////////////////////////////////////////////////////////////////////////
 // input/output
 
-inline void f_echo(int _argc, CStrRef arg, CArrRef _argv = null_array) {
-  echo(arg);
-  for (int i = 0; i < _argv.size(); i++) echo(_argv[i]);
-}
-inline int f_print(CStrRef arg) {
-  return print(arg);
-}
 inline Variant f_printf(int _argc, CStrRef format, CArrRef _argv = null_array) {
   int len = 0; char *output = string_printf(format.data(), format.size(),
                                             _argv, &len);

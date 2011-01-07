@@ -231,8 +231,8 @@ Variant invokeImpl(void *extra, CArrRef params) {
 
   // for TestExtCurl::test_curl_exec
   if (strcasecmp(function, "curl_write_func") == 0) {
-    f_print("curl_write_func called with ");
-    f_print(params[1]);
+    print("curl_write_func called with ");
+    print(params[1]);
     return params[1].toString().size();
   }
 

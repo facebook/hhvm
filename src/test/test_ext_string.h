@@ -79,8 +79,6 @@ class TestExtString : public TestCppExt {
   bool test_setlocale();
   bool test_localeconv();
   bool test_nl_langinfo();
-  bool test_echo();
-  bool test_print();
   bool test_printf();
   bool test_vprintf();
   bool test_sprintf();

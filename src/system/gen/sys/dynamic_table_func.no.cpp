@@ -4738,29 +4738,6 @@ Variant ifa_imap_createmailbox(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS
   CVarRef arg1((a1));
   return (f_imap_createmailbox(arg0, arg1));
 }
-Variant i_echo(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(echo);
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1) return throw_missing_arguments("echo", count+1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    const Array &p(count > 1 ? params.slice(1, count - 1, false) : Array());
-    return (f_echo(count, arg0, p), null);
-  }
-}
-Variant ifa_echo(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count < 1) return throw_missing_arguments("echo", count+1, 1);
-  CVarRef arg0((a0));
-  Array p;
-  if (count >= 2) p.append(a1);
-  if (count >= 3) p.append(a2);
-  if (count >= 4) p.append(a3);
-  if (count >= 5) p.append(a4);
-  if (count >= 6) p.append(a5);
-  return (f_echo(count, arg0, p), null);
-}
 Variant i_ldap_parse_reference(void *extra, CArrRef params) {
   FUNCTION_INJECTION(ldap_parse_reference);
   int count __attribute__((__unused__)) = params.size();
@@ -17344,22 +17321,6 @@ Variant ifa_pixelgetbluequantum(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARG
   if (count != 1) return throw_wrong_arguments("pixelgetbluequantum", count, 1, 1, 1);
   CVarRef arg0((a0));
   return (f_pixelgetbluequantum(arg0));
-}
-Variant i_print(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(print);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("print", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_print(arg0));
-  }
-}
-Variant ifa_print(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 1) return throw_wrong_arguments("print", count, 1, 1, 1);
-  CVarRef arg0((a0));
-  return (f_print(arg0));
 }
 Variant i_mysql_unbuffered_query(void *extra, CArrRef params) {
   FUNCTION_INJECTION(mysql_unbuffered_query);
@@ -44577,24 +44538,6 @@ Variant ei_imap_createmailbox(Eval::VariableEnvironment &env, const Eval::Functi
   if (count != 2) return throw_wrong_arguments("imap_createmailbox", count, 2, 2, 1);
   return (x_imap_createmailbox(a0, a1));
 }
-Variant ei_echo(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  Array vargs;
-  for (; it != params.end(); ++it) {
-    vargs.append((*it)->eval(env));
-  }
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1) return throw_missing_arguments("echo", count+1, 1);
-  if (count <= 1) return (x_echo(count, a0), null);
-  return (x_echo(count, a0,vargs), null);
-}
 Variant ei_ldap_parse_reference(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -58450,22 +58393,6 @@ Variant ei_pixelgetbluequantum(Eval::VariableEnvironment &env, const Eval::Funct
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) return throw_wrong_arguments("pixelgetbluequantum", count, 1, 1, 1);
   return (x_pixelgetbluequantum(a0));
-}
-Variant ei_print(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("print", count, 1, 1, 1);
-  return (x_print(a0));
 }
 Variant ei_mysql_unbuffered_query(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -84863,9 +84790,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2776:
       HASH_INVOKE_FROM_EVAL(0x52401023E146AAD8LL, xmlwriter_end_dtd);
       break;
-    case 2779:
-      HASH_INVOKE_FROM_EVAL(0x24771ED112008ADBLL, echo);
-      break;
     case 2780:
       HASH_INVOKE_FROM_EVAL(0x547E7EE64761AADCLL, imagecreatefromxbm);
       break;
@@ -87460,9 +87384,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 6326:
       HASH_INVOKE_FROM_EVAL(0x5866C5DF3A1AD8B6LL, dom_element_get_attribute_node);
       break;
-    case 6353:
-      HASH_INVOKE_FROM_EVAL(0x1015EB3F52B098D1LL, print);
-      break;
     case 6363:
       HASH_INVOKE_FROM_EVAL(0x4052842EC87038DBLL, magickcropimage);
       break;
@@ -88991,7 +88912,6 @@ CallInfo ci_imap_mail_move((void*)&i_imap_mail_move, (void*)&ifa_imap_mail_move,
 CallInfo ci_hphp_recursivedirectoryiterator_rewind((void*)&i_hphp_recursivedirectoryiterator_rewind, (void*)&ifa_hphp_recursivedirectoryiterator_rewind, 1, 0, 0x0000000000000000LL, (void*)&ei_hphp_recursivedirectoryiterator_rewind);
 CallInfo ci_magickgetstringwidth((void*)&i_magickgetstringwidth, (void*)&ifa_magickgetstringwidth, 4, 0, 0x0000000000000000LL, (void*)&ei_magickgetstringwidth);
 CallInfo ci_imap_createmailbox((void*)&i_imap_createmailbox, (void*)&ifa_imap_createmailbox, 2, 0, 0x0000000000000000LL, (void*)&ei_imap_createmailbox);
-CallInfo ci_echo((void*)&i_echo, (void*)&ifa_echo, 1, 1, 0x0000000000000000LL, (void*)&ei_echo);
 CallInfo ci_ldap_parse_reference((void*)&i_ldap_parse_reference, (void*)&ifa_ldap_parse_reference, 3, 0, 0x0000000000000004LL, (void*)&ei_ldap_parse_reference);
 CallInfo ci_ctype_xdigit((void*)&i_ctype_xdigit, (void*)&ifa_ctype_xdigit, 1, 0, 0x0000000000000000LL, (void*)&ei_ctype_xdigit);
 CallInfo ci_gmstrftime((void*)&i_gmstrftime, (void*)&ifa_gmstrftime, 2, 0, 0x0000000000000000LL, (void*)&ei_gmstrftime);
@@ -89658,7 +89578,6 @@ CallInfo ci_dom_namednodemap_get_named_item_ns((void*)&i_dom_namednodemap_get_na
 CallInfo ci_ftruncate((void*)&i_ftruncate, (void*)&ifa_ftruncate, 2, 0, 0x0000000000000000LL, (void*)&ei_ftruncate);
 CallInfo ci_curl_version((void*)&i_curl_version, (void*)&ifa_curl_version, 1, 0, 0x0000000000000000LL, (void*)&ei_curl_version);
 CallInfo ci_pixelgetbluequantum((void*)&i_pixelgetbluequantum, (void*)&ifa_pixelgetbluequantum, 1, 0, 0x0000000000000000LL, (void*)&ei_pixelgetbluequantum);
-CallInfo ci_print((void*)&i_print, (void*)&ifa_print, 1, 0, 0x0000000000000000LL, (void*)&ei_print);
 CallInfo ci_mysql_unbuffered_query((void*)&i_mysql_unbuffered_query, (void*)&ifa_mysql_unbuffered_query, 2, 0, 0x0000000000000000LL, (void*)&ei_mysql_unbuffered_query);
 CallInfo ci_dom_characterdata_delete_data((void*)&i_dom_characterdata_delete_data, (void*)&ifa_dom_characterdata_delete_data, 3, 0, 0x0000000000000000LL, (void*)&ei_dom_characterdata_delete_data);
 CallInfo ci_hphp_recursiveiteratoriterator___construct((void*)&i_hphp_recursiveiteratoriterator___construct, (void*)&ifa_hphp_recursiveiteratoriterator___construct, 4, 0, 0x0000000000000000LL, (void*)&ei_hphp_recursiveiteratoriterator___construct);
@@ -94904,12 +94823,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2776:
       HASH_GUARD(0x52401023E146AAD8LL, xmlwriter_end_dtd) {
         ci = &ci_xmlwriter_end_dtd;
-        return true;
-      }
-      break;
-    case 2779:
-      HASH_GUARD(0x24771ED112008ADBLL, echo) {
-        ci = &ci_echo;
         return true;
       }
       break;
@@ -100324,12 +100237,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 6326:
       HASH_GUARD(0x5866C5DF3A1AD8B6LL, dom_element_get_attribute_node) {
         ci = &ci_dom_element_get_attribute_node;
-        return true;
-      }
-      break;
-    case 6353:
-      HASH_GUARD(0x1015EB3F52B098D1LL, print) {
-        ci = &ci_print;
         return true;
       }
       break;

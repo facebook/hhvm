@@ -74,8 +74,6 @@ bool TestExtString::RunTests(const std::string &which) {
   RUN_TEST(test_setlocale);
   RUN_TEST(test_localeconv);
   RUN_TEST(test_nl_langinfo);
-  RUN_TEST(test_echo);
-  RUN_TEST(test_print);
   RUN_TEST(test_printf);
   RUN_TEST(test_vprintf);
   RUN_TEST(test_sprintf);
@@ -582,24 +580,6 @@ bool TestExtString::test_localeconv() {
 
 bool TestExtString::test_nl_langinfo() {
   VS(f_nl_langinfo(k_AM_STR), "AM");
-  return Count(true);
-}
-
-bool TestExtString::test_echo() {
-  g_context->obStart();
-  f_echo(0, "test");
-  String output = g_context->obCopyContents();
-  g_context->obEnd();
-  VS(output, "test");
-  return Count(true);
-}
-
-bool TestExtString::test_print() {
-  g_context->obStart();
-  f_print("test");
-  String output = g_context->obCopyContents();
-  g_context->obEnd();
-  VS(output, "test");
   return Count(true);
 }
 

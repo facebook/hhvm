@@ -180,6 +180,7 @@ std::string RuntimeOption::WarmupDocument;
 std::string RuntimeOption::RequestInitFunction;
 std::string RuntimeOption::RequestInitDocument;
 std::vector<std::string> RuntimeOption::ThreadDocuments;
+std::vector<std::string> RuntimeOption::ThreadLoopDocuments;
 
 bool RuntimeOption::SafeFileAccess = false;
 std::vector<std::string> RuntimeOption::AllowedDirectories;
@@ -652,6 +653,10 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     server["ThreadDocuments"].get(ThreadDocuments);
     for (unsigned int i = 0; i < ThreadDocuments.size(); i++) {
       normalizePath(ThreadDocuments[i]);
+    }
+    server["ThreadLoopDocuments"].get(ThreadLoopDocuments);
+    for (unsigned int i = 0; i < ThreadLoopDocuments.size(); i++) {
+      normalizePath(ThreadLoopDocuments[i]);
     }
 
     SafeFileAccess = server["SafeFileAccess"].getBool();

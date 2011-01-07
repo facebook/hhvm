@@ -66,6 +66,12 @@ request is handled. Even if a service thread doesn't have any work to do
 before HTTP requests, hphp_service_thread_started() is still needed for engine
 to proceed without infinite waiting for service threads to start.
 
+There is also another variant of these threads, called ThreadLoopDocuments, that
+differs from normal ThreadDocuments in that it executes the document in an
+infinite loop, and doesn't have any requirements of hphp_service_thread_started
+being called. It can be useful to recover memory after different execution of
+the document.
+
 3. WarmupDocument
 
 A warmup document is executed during a worker thread's startup time, and it's

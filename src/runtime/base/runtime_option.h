@@ -175,6 +175,7 @@ public:
   static std::string RequestInitFunction;
   static std::string RequestInitDocument;
   static std::vector<std::string> ThreadDocuments;
+  static std::vector<std::string> ThreadLoopDocuments;
 
   static bool SafeFileAccess;
   static std::vector<std::string> AllowedDirectories;

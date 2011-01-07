@@ -20,6 +20,7 @@
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/zend/zend_math.h>
 #include <runtime/base/server/server_stats.h>
+#include <runtime/base/ini_setting.h>
 #include <util/alloc.h>
 
 #ifdef __FreeBSD__
@@ -1003,6 +1004,8 @@ public:
   static int s_n_backing;
   int nTrace;
   bool full;
+  int64 maxTraceBuffer;
+  int64 overflowCalls;
 
   bool trace_space_available() {
     // the two slots are reserved for internal use
@@ -1012,16 +1015,17 @@ public:
   bool trace_get_space() {
     bool track_realloc = FALSE;
     if (full) {
+      overflowCalls++;
       return false;
     }
     if (s_n_backing == 0) {
       s_n_backing = RuntimeOption::ProfilerTraceBuffer;
     } else {
       int new_array_size = s_n_backing * RuntimeOption::ProfilerTraceExpansion;
-      if (RuntimeOption::ProfilerMaxTraceBuffer != 0
-          && new_array_size > RuntimeOption::ProfilerMaxTraceBuffer)
+      if (maxTraceBuffer != 0 && new_array_size > maxTraceBuffer)
       {
-        new_array_size = RuntimeOption::ProfilerMaxTraceBuffer;
+        new_array_size = maxTraceBuffer > s_n_backing
+                                ? maxTraceBuffer : s_n_backing;
       }
       if (new_array_size - nTrace <= 5) {
         // for this operation to succeed, we need room for the entry we're
@@ -1061,7 +1065,13 @@ public:
                              full(false), m_flags(flags) {
     if (pthread_mutex_trylock(&s_in_use)) {
       m_successful = false;
+    } else {
+      char buf[20];
+      sprintf(buf, "%d", RuntimeOption::ProfilerMaxTraceBuffer);
+      IniSetting::Bind("profiler.max_trace_buffer", buf,
+                       ini_on_update_long, &maxTraceBuffer);
     }
+    overflowCalls = 0;
     nTrace = 0;
   }
 
@@ -1072,6 +1082,7 @@ public:
       s_trace = NULL;
       s_n_backing = 0;
       pthread_mutex_unlock(&s_in_use);
+      IniSetting::Unbind("profiler.max_trace_buffer");
     }
   }
 
@@ -1135,6 +1146,9 @@ public:
     TraceData my_begin;
     collectStats(my_begin);
     walkTrace(s_trace, s_trace + nTrace, m_stats, fmap);
+    if (overflowCalls) {
+      m_stats["(trace buffer terminated)"].count += overflowCalls/2;
+    }
     extractStats(ret, m_stats, m_flags, m_MHz);
     if (m_flags & GetTrace) {
       String traceData;

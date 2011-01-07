@@ -201,6 +201,11 @@ void IniSetting::Bind(const char *name, const char *value,
   (*callback)(value, p);
 }
 
+void IniSetting::Unbind(const char *name) {
+  ASSERT(name && *name);
+  s_callbacks->erase(name);
+}
+
 bool IniSetting::Get(CStrRef name, String &value) {
   if (name == "error_reporting") {
     value = String((int64)g_context->getErrorReportingLevel());

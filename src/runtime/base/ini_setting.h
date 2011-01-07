@@ -49,6 +49,7 @@ public:
 
   static void Bind(const char *name, const char *value,
                    PFN_UPDATE_CALLBACK callback, void *p = NULL);
+  static void Unbind(const char *name);
 
   static void SetGlobalDefault(const char *name, const char *value);
 

@@ -21,6 +21,7 @@
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/array/array_iterator.h>
+#include <runtime/base/runtime_option.h>
 #include <runtime/eval/ext/ext.h>
 #include <util/util.h>
 #include <runtime/base/source_info.h>
@@ -164,19 +165,39 @@ void RequestEvalState::DestructObjects() {
   s_res->destructObjects();
 }
 
+void RequestEvalState::destructObject(EvalObjectData *eo) {
+  m_livingObjects.erase(eo);
+  const MethodStatement *des = eo->getMethodStatement("__destruct");
+  if (des && RuntimeOption::EnableObjDestructCall) {
+    try {
+      des->invokeInstance(Object(eo), Array());
+    } catch (...) {
+      handle_destructor_exception();
+    }
+  }
+  eo->setInDtor();
+}
+
 void RequestEvalState::destructObjects() {
-  while (!m_livingObjects.empty()) {
-    EvalObjectData *eo = *m_livingObjects.begin();
-    m_livingObjects.erase(eo);
-    const MethodStatement *des = eo->getMethodStatement("__destruct");
-    if (des) {
-      try {
-        des->invokeInstance(Object(eo), Array());
-      } catch (...) {
-        handle_destructor_exception();
+  // scan the global array in reverse order for objects and destruct it if
+  // refcount is 1.
+  Array g = get_global_array_wrapper();
+  if (!g.empty()) {
+    for (ssize_t iter = g->iter_end();
+         iter != ArrayData::invalid_index;
+         iter = g->iter_rewind(iter)) {
+      CVarRef value = g->getValueRef(iter);
+      if (value.isObject()) {
+        EvalObjectData *eo =
+          dynamic_cast<EvalObjectData*>(value.getObjectData());
+        if (eo && eo->getCount() == 1) destructObject(eo);
       }
     }
-    eo->setInDtor();
+  }
+  // destruct the remaining objects
+  while (!m_livingObjects.empty()) {
+    EvalObjectData *eo = *m_livingObjects.begin();
+    destructObject(eo);
   }
 }
 

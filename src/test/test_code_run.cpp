@@ -247,6 +247,7 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
       const char *argv[] = {"", filearg.c_str(),
                             "--config=test/config.hdf",
                             "-v Fiber.ThreadCount=5",
+                            "-v Eval.EnableObjDestructCall=true",
                             NULL};
       Process::Exec("hphpi/hphpi", argv, NULL, actual, &err);
     }

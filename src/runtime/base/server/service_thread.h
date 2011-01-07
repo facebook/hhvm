@@ -28,7 +28,7 @@ public:
   static ServiceThread *GetThisThread();
 
 public:
-  ServiceThread(const std::string &url);
+  ServiceThread(const std::string &url, bool loop = false);
 
   void threadRun();
   void waitForStarted();
@@ -37,6 +37,7 @@ public:
   void notifyStopped();
 
 private:
+  bool m_loop;
   bool m_started;
   bool m_stopped;
   std::string m_url;

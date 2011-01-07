@@ -148,6 +148,12 @@ HttpServer::HttpServer(void *sslCTX /* = NULL */)
       (new ServiceThread(RuntimeOption::ThreadDocuments[i]));
     m_serviceThreads.push_back(thread);
   }
+
+  for (unsigned int i = 0; i < RuntimeOption::ThreadLoopDocuments.size(); i++) {
+    ServiceThreadPtr thread
+      (new ServiceThread(RuntimeOption::ThreadLoopDocuments[i], true));
+    m_serviceThreads.push_back(thread);
+  }
 }
 
 void HttpServer::onServerShutdown() {

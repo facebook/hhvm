@@ -209,6 +209,9 @@ inline int print(const char *s) {
   return 1;
 }
 inline int print(CStrRef s) {
+  // print is not a real function. x_print exists, but this function gets called
+  // directly. We therefore need to setup the TaintObserver.
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   g_context->write(s);
   return 1;
 }
@@ -216,6 +219,9 @@ inline void echo(const char *s) {
   g_context->write(s);
 }
 inline void echo(CStrRef s) {
+  // echo is not a real function. x_echo exists, but this function gets called
+  // directly. We therefore need to setup the TaintObserver.
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   g_context->write(s);
 }
 

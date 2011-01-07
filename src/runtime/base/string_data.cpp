@@ -500,6 +500,10 @@ int64 StringData::hashHelper() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool StringData::calculate(int &totalSize) {
+#ifdef TAINTED
+  m_taint_data.clearMetadata();
+#endif
+
   if (m_data && !isLiteral()) {
     totalSize += (size() + 1); // ending NULL
     return true;
@@ -517,6 +521,9 @@ void StringData::restore(const char *&data) {
   m_len &= LenMask;
   m_len |= IsLinear;
   m_hash = hash_string(m_data, size());
+#ifdef TAINTED
+  ASSERT(m_taint_data.getOriginalStr() == NULL);
+#endif
 }
 
 void StringData::sweep() {

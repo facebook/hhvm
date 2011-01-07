@@ -47,7 +47,9 @@ void TaintObserver::RegisterAccessed(const StringData* string_data) {
   TaintObserver *tc = *instance;
   *instance = NULL;
 
-  tc->m_current_taint.setTaint(string_data->getTaintDataRef().getTaint());
+  tc->m_current_taint.setTaint(
+    string_data->getTaintDataRef().getTaint(),
+    string_data->getTaintDataRef().getOriginalStr());
 
   *instance = tc;
 }
@@ -63,7 +65,9 @@ void TaintObserver::RegisterAccessed(const StringBuffer *string_buffer) {
   TaintObserver *tc = *instance;
   *instance = NULL;
 
-  tc->m_current_taint.setTaint(string_buffer->getTaintDataRef().getTaint());
+  tc->m_current_taint.setTaint(
+    string_buffer->getTaintDataRef().getTaint(),
+    string_buffer->getTaintDataRef().getOriginalStr());
 
   *instance = tc;
 }
@@ -82,7 +86,9 @@ void TaintObserver::RegisterMutated(StringData* string_data) {
   bitstring t = tc->m_current_taint.getTaint();
   bitstring result_mask = tc->m_set_mask | (~tc->m_clear_mask & t);
 
-  string_data->getTaintData()->setTaint(result_mask);
+  string_data->getTaintData()->setTaint(
+    result_mask,
+    tc->m_current_taint.getOriginalStr());
 
   *instance = tc;
 }
@@ -99,7 +105,9 @@ void TaintObserver::RegisterMutated(StringBuffer* string_buffer) {
   bitstring t = tc->m_current_taint.getTaint();
   bitstring result_mask = tc->m_set_mask | (~tc->m_clear_mask & t);
 
-  string_buffer->getTaintData()->setTaint(result_mask);
+  string_buffer->getTaintData()->setTaint(
+    result_mask,
+    tc->m_current_taint.getOriginalStr());
 
   *instance = tc;
 }

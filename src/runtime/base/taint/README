@@ -148,10 +148,12 @@ need to expose a fb_unset_taint method.
 5.2. LinearAllocator
 ====================
 
-The code currently does not deal with the LinearAllocator. If a string is
-backed up to the LinearAllocator, it's taint state will be lost. Intuitively,
-this should not impact taint analysis, because strings being saved in the
-LinearAllocator should not be user supplied strings.
+The code partially deals with the LinearAllocator. When a tainted string is
+backed up and restored, the taint bits are restored. However, to avoid a
+dangling pointer, we set the metadata to NULL.
+
+It is still unclear why we ever backup and restore user data, so this is an area
+which needs to be looked into.
 
 5.3. Thread local TaintObserver
 ===============================

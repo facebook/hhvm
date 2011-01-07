@@ -14,17 +14,31 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_TAINT_HELPER_H__
-#define __HPHP_TAINT_HELPER_H__
-
 #ifdef TAINTED
 
+#include <runtime/base/taint/taint_metadata.h>
+#include <runtime/base/frame_injection.h>
+#include <runtime/base/util/extended_logger.h>
+
 namespace HPHP {
-void taint_warn_if_tainted(CStrRef s, const bitstring bit);
-void taint_array_variant(Variant& v, const std::string original_str);
+
+TaintMetadata::TaintMetadata(const char* original_str) {
+  int l = strlen(original_str);
+  m_original_str = (char*)malloc(l+1);
+  strncpy(m_original_str, original_str, l);
+  m_original_str[l] = 0;
+}
+
+const char* TaintMetadata::getOriginalStr() const {
+  return m_original_str;
+}
+
+void TaintMetadata::release() {
+  free(m_original_str);
+  m_original_str = NULL;
+  delete this;
+}
+
 }
 
 #endif // TAINTED
-
-#endif // __HPHP_TAINT_HELPER_H__
-

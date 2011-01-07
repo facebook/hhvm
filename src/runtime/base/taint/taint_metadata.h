@@ -14,17 +14,33 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_TAINT_HELPER_H__
-#define __HPHP_TAINT_HELPER_H__
+#ifndef __HPHP_TAINT_METADATA_H__
+#define __HPHP_TAINT_METADATA_H__
 
 #ifdef TAINTED
 
+#include <runtime/base/util/countable.h>
+#include <runtime/base/util/smart_ptr.h>
+
 namespace HPHP {
-void taint_warn_if_tainted(CStrRef s, const bitstring bit);
-void taint_array_variant(Variant& v, const std::string original_str);
+
+class TaintMetadata : public Countable {
+public:
+  TaintMetadata(const char* original_str);
+  const char* getOriginalStr() const;
+  void release();
+private:
+  char* m_original_str;
+};
+
+class TaintMetadataPtr : public SmartPtr<TaintMetadata> {
+public:
+  TaintMetadataPtr() {}
+  TaintMetadataPtr(TaintMetadata *px) : SmartPtr<TaintMetadata>(px) {}
+};
+
 }
 
 #endif // TAINTED
 
-#endif // __HPHP_TAINT_HELPER_H__
-
+#endif // __HPHP_TAINT_DATA_H__

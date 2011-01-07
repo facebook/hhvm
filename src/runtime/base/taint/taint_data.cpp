@@ -17,7 +17,6 @@
 #ifdef TAINTED
 
 #include <runtime/base/taint/taint_data.h>
-#include <stdio.h>
 
 namespace HPHP {
 
@@ -29,20 +28,48 @@ bitstring TaintData::getTaint() const {
   return m_taint_bits;
 }
 
-void TaintData::setTaint(bitstring bits) {
+void TaintData::setTaint(bitstring bits, const char* original_str) {
   m_taint_bits = m_taint_bits | bits;
+
+  if ((bits & TAINT_BIT_HTML) && !m_metadata.get()) {
+    // Set the metadata if TAINT_BIT_HTML is being set
+    // Because we don't backup strings, we can end up in situtations where
+    // a string for not have any metadata. That is fine for now.
+    if (original_str) {
+      m_metadata = TaintMetadataPtr(new TaintMetadata(original_str));
+    }
+  }
 }
 
 void TaintData::unsetTaint(bitstring bits) {
   m_taint_bits = m_taint_bits & (~bits);
+
+  if ((bits & TAINT_BIT_HTML) && m_metadata.get()) {
+    // Remove the metadata if TAINT_BIT_HTML is being unset
+    m_metadata.reset();
+  }
 }
 
-bitstring* TaintData::getTaintBitsPtr() {
-  return &m_taint_bits;
+const char* TaintData::getOriginalStr() const {
+  if (m_metadata.get()) {
+    return m_metadata->getOriginalStr();
+  } else {
+    return NULL;
+  }
+}
+
+void TaintData::clearMetadata() {
+  m_metadata.reset();
 }
 
 void TaintData::dump() const {
-  printf("Taint: %x", m_taint_bits);
+  printf("Taint: %x\n", m_taint_bits);
+  if (m_metadata.get()) {
+    printf("Original string: %s\n", m_metadata.get()->getOriginalStr());
+    printf("Count: %d", m_metadata.get()->getCount());
+  } else {
+    printf("Original string: n/a");
+  }
 }
 
 }

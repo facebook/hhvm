@@ -34,7 +34,8 @@ namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
-    : m_stopped(false), m_local(local), m_threadMode(Normal), m_thread(0),
+    : m_stopped(false), m_local(local), m_hasBreakPoints(false),
+      m_threadMode(Normal), m_thread(0),
       m_signalThread(this, &DebuggerProxy::pollSignal),
       m_signum(CmdSignal::SignalNone) {
   m_thrift.create(socket);
@@ -88,6 +89,7 @@ void DebuggerProxy::updateSandbox(DSandboxInfoPtr sandbox) {
 void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
   Lock lock(m_mutex);
   m_breakpoints = breakpoints;
+  m_hasBreakPoints = !m_breakpoints.empty();
 }
 
 bool DebuggerProxy::checkBreakPoints(CmdInterrupt &cmd) {
@@ -177,6 +179,10 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // main functions
+
+bool DebuggerProxy::needInterrupt() {
+  return m_hasBreakPoints || m_signum != CmdSignal::SignalNone;
+}
 
 void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
   if (!blockUntilOwn(cmd, true)) {

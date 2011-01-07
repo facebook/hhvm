@@ -65,6 +65,30 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class SpinLock {
+public:
+  SpinLock() {
+    pthread_spin_init(&m_spinlock, 0);
+  }
+  ~SpinLock() {
+    pthread_spin_destroy(&m_spinlock);
+  }
+
+  void lock() {
+    pthread_spin_lock(&m_spinlock);
+  }
+  void unlock() {
+    pthread_spin_unlock(&m_spinlock);
+  }
+
+  pthread_spinlock_t &getRaw() { return m_spinlock;}
+
+private:
+  pthread_spinlock_t m_spinlock;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 /**
  * Read-write mutex for read-write locks.
  */

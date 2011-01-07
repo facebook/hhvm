@@ -136,16 +136,25 @@ void Debugger::Interrupt(int type, const char *program,
                          const char *error /* = NULL */) {
   ASSERT(RuntimeOption::EnableDebugger);
 
+  RequestInjectionData &rjdata = ThreadInfo::s_threadInfo->m_reqInjectionData;
+  if (rjdata.debuggerIdle > 0 && type == BreakPointReached) {
+    --rjdata.debuggerIdle;
+    return;
+  }
+
   DebuggerProxyPtr proxy = GetProxy();
   if (proxy) {
-    // Interrupts may execute some PHP code, causing another interruption.
-    void *&tint = ThreadInfo::s_threadInfo->m_reqInjectionData.interrupt;
-    if (!tint) {
-      CmdInterrupt cmd((InterruptType)type, program, site, error);
-      tint = &cmd;
-      proxy->interrupt(cmd);
-      tint = NULL;
+    if (proxy->needInterrupt() || type != BreakPointReached) {
+      // Interrupts may execute some PHP code, causing another interruption.
+      void *&tint = rjdata.interrupt;
+      if (!tint) {
+        CmdInterrupt cmd((InterruptType)type, program, site, error);
+        tint = &cmd;
+        proxy->interrupt(cmd);
+        tint = NULL;
+      }
     }
+    rjdata.debuggerIdle = proxy->needInterrupt() ? 0 : 1000;
   } else {
     // debugger clients are disconnected abnormally
     if (type == SessionStarted || type == SessionEnded) {

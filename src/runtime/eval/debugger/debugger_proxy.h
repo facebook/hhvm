@@ -64,6 +64,7 @@ public:
   void switchThreadMode(ThreadMode mode, int64 threadId = 0);
   void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
 
+  bool needInterrupt();
   void interrupt(CmdInterrupt &cmd);
   bool send(DebuggerCommand *cmd);
 
@@ -78,6 +79,7 @@ private:
   DummySandboxPtr m_dummySandbox;
 
   mutable Mutex m_mutex;
+  bool m_hasBreakPoints;
   BreakPointInfoPtrVec m_breakpoints;
   DSandboxInfo m_sandbox;
 

@@ -162,7 +162,8 @@ class RequestInjectionData {
 public:
   RequestInjectionData()
     : started(0), timeoutSeconds(-1), memExceeded(false), timedout(false),
-      signaled(false), surprised(false), debugger(false), interrupt(NULL) {
+      signaled(false), surprised(false), debugger(false), debuggerIdle(0),
+      interrupt(NULL) {
   }
 
   time_t started;      // when a request was started
@@ -176,6 +177,7 @@ public:
   Mutex surpriseMutex; // mutex protecting per-request data
 
   bool debugger;       // whether there is a DebuggerProxy attached to me
+  int  debuggerIdle;   // skipping this many interrupts while proxy is idle
   void *interrupt;     // current CmdInterrupt this thread's handling
 
   void reset();

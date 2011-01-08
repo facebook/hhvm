@@ -10,23 +10,23 @@ $emails = array();
 $reporting = array(
   'BadPHPIncludeFile',
   'PHPIncludeFileNotFound',
-  //'UseEvaluation',
+  'UseEvaluation',
   //'UseUndeclaredVariable',
   'UseUndeclaredConstant',
-  //'UnknownClass',
+  'UnknownClass',
   'UnknownBaseClass',
   //'UnknownObjectMethod',
   'InvalidMagicMethod',
   'UnknownFunction',
   'BadConstructorCall',
   'DeclaredVariableTwice',
-  //'DeclaredConstantTwice',
+  'DeclaredConstantTwice',
   'BadDefine',
   'RequiredAfterOptionalParam',
   'RedundantParameter',
   'TooFewArgument',
   'TooManyArgument',
-  //'BadArgumentType',
+  'BadArgumentType',
   'StatementHasNoEffect',
   'UseVoidReturn',
   'MissingObjectContext',
@@ -37,6 +37,7 @@ $reporting = array(
   'MissingAbstractMethodImpl',
   'BadPassByReference',
 );
+
 $count = 0;
 foreach ($reporting as $type) {
   if (!isset($errors[1][$type])) continue;
@@ -71,8 +72,9 @@ foreach ($emails as $blame => $body) {
   echo "sending mail to $blame...\n";
   $blame .= '@'.$EmailDomain;
   mail($blame, "[nemo] A bug's life ends here",
-       "Hi, there\n\n".
-       "HipHop compiler might have found some bugs with PHP code you were working on. Would you take a quick look to see if they are real problems?\n".$body);
+       "Hi, there,\n\n".
+       "HipHop compiler might have found some bugs with PHP code you were working on. Would you take a quick look to see if they are real problems? Please do not ask me to review your change. Ask someone who's familiar with the code :-) If it is not your bug, please try to find the right person/group to fix the problem. Thanks!\n".$body,
+       "From: ".posix_getlogin()."@$EmailDomain");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

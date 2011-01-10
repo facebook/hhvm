@@ -727,8 +727,8 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
                         incompatible = true;
                       }
                     } else if ((!p1[i]->isRef() !=
-                          !p2[i]->attribute & ClassInfo::IsReference) ||
-                        !p1[i]->isOptional() != !p2[i]->value) {
+                          !(p2[i]->attribute & ClassInfo::IsReference)) ||
+                          (p1[i]->isOptional() && !(p2[i]->value))) {
                       incompatible = true;
                     }  else if (p1[i]->type() != p2[i]->type) {
                       incompatible = true;
@@ -761,7 +761,7 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
                     incompatible = true;
                   }
                 } else if (p1[i]->isRef() != p2[i]->isRef() ||
-                    p1[i]->isOptional() != p2[i]->isOptional()) {
+                    p1[i]->isOptional() && !p2[i]->isOptional()) {
                   incompatible = true;
                 } else if (p1[i]->type() != p2[i]->type()) {
                   incompatible = true;

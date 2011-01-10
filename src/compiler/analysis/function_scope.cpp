@@ -1125,7 +1125,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
   const char *retrn = ret ? "return " : "";
   bool variable = isVariableArgument();
   int maxCount = fewArgs ? Option::InvokeFewArgsCount : INT_MAX;
-  bool useDefaults = ar->isSystem();
+  bool useDefaults = !m_stmt || ar->isSystem();
 
   ASSERT(m_minParam >= 0);
 

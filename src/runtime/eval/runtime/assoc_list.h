@@ -27,7 +27,8 @@ public:
   Variant &var() { return m_var; }
   CStrRef name() const { return m_name; }
   void dump() const {}
-  VarAssocPair *next() const { return m_next; }
+  friend class AssocList;
+
 private:
   String m_name;
   Variant m_var;

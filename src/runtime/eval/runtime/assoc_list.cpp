@@ -27,9 +27,17 @@ VarAssocPair::VarAssocPair(CStrRef s, VarAssocPair *next /* = NULL */)
 
 AssocList::AssocList() : m_list(NULL) {}
 AssocList::~AssocList() {
+  VarAssocPair *reverse = NULL;
   VarAssocPair *vp = m_list;
   while (vp) {
-    VarAssocPair *tp = vp->next();
+    VarAssocPair *tp = vp->m_next;
+    vp->m_next = reverse;
+    reverse = vp;
+    vp = tp;
+  }
+  vp = reverse;
+  while (vp) {
+    VarAssocPair *tp = vp->m_next;
     DELETE(VarAssocPair)(vp);
     vp = tp;
   }
@@ -47,7 +55,7 @@ Variant &AssocList::get(CStrRef name) {
 }
 
 Variant *AssocList::getPtr(CStrRef name) {
-  for (VarAssocPair *vp = m_list; vp; vp = vp->next()) {
+  for (VarAssocPair *vp = m_list; vp; vp = vp->m_next) {
     if (name.same(vp->name())) {
       return &vp->var();
     }
@@ -56,7 +64,7 @@ Variant *AssocList::getPtr(CStrRef name) {
 }
 
 bool AssocList::exists(CStrRef name, bool checkInit /* = false */) const {
-  for (VarAssocPair *vp = m_list; vp; vp = vp->next()) {
+  for (VarAssocPair *vp = m_list; vp; vp = vp->m_next) {
     if (name.same(vp->name())) {
       if (checkInit && !vp->var().isInitialized()) return false;
       return true;
@@ -67,7 +75,7 @@ bool AssocList::exists(CStrRef name, bool checkInit /* = false */) const {
 
 Array AssocList::toArray() const {
   Array res = Array::Create();
-  for (VarAssocPair *vp = m_list; vp; vp = vp->next()) {
+  for (VarAssocPair *vp = m_list; vp; vp = vp->m_next) {
     if (vp->var().isInitialized() && vp->name() != "GLOBALS") {
       res.lval(vp->name()).setWithRef(vp->var());
     }

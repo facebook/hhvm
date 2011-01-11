@@ -285,6 +285,9 @@ void HttpServer::run() {
   for (unsigned int i = 0; i < m_serviceThreads.size(); i++) {
     m_serviceThreads[i]->notifyStopped();
   }
+  for (unsigned int i = 0; i < m_serviceThreads.size(); i++) {
+    m_serviceThreads[i]->waitForEnd();
+  }
 
   hphp_process_exit();
   m_watchDog.waitForEnd();

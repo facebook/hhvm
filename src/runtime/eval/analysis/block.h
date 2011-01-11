@@ -44,12 +44,10 @@ public:
   };
   void set(CStrRef name, int idx);
   int idx() const { return m_idx; }
-  int64 hash() const { return m_hash; }
   SuperGlobal superGlobal() const { return m_sg; }
   static SuperGlobal isSuperGlobal(CStrRef name);
 private:
   int m_idx;
-  int64 m_hash;
   SuperGlobal m_sg;
 };
 

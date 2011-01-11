@@ -26,7 +26,6 @@ using namespace std;
 
 void VariableIndex::set(CStrRef name, int idx) {
   m_idx = idx;
-  m_hash = name->hash();
   m_sg = isSuperGlobal(name);
 }
 

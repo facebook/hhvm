@@ -125,13 +125,6 @@ public:
   void initGlobals(VariableEnvironment &env) const {
     env.get(s_names[s_num-1]) = get_global_array_wrapper();
   }
-  void initAL(AssocList &al) const {
-    Globals *g = get_globals();
-    for (int i = 0; i < s_num-1; i++) {
-      al.prepend(s_names[i]) = ref(g->get(s_names[i]));
-    }
-    al.prepend("GLOBALS") = get_global_array_wrapper();
-  }
 private:
   static const int s_num;
   static const StaticString s_names[];

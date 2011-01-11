@@ -340,6 +340,12 @@ bool LightProcess::initShadow(const std::string &prefix, int id) {
     int fd2 = p2.detachIn();
     p1.close();
     p2.close();
+
+    // don't hold on to previous light processes' pipes
+    for (int i = 0; i < id; i++) {
+      g_procs[i].closeFiles();
+    }
+
     runShadow(fd1, fd2);
   } else if (child < 0) {
     // failed
@@ -389,6 +395,11 @@ void LightProcess::closeShadow() {
     m_afdt_fd = -1;
   }
   m_shadowProcess = 0;
+}
+
+void LightProcess::closeFiles() {
+  fclose(m_fin);
+  fclose(m_fout);
 }
 
 bool LightProcess::Available() {

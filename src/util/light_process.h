@@ -70,6 +70,11 @@ private:
   void runShadow(int fdin, int fdout);
   void closeShadow();
 
+  /**
+   * For later light processes to close their pipes to previous ones.
+   */
+  void closeFiles();
+
   static FILE *LightPopenImpl(const char *cmd, const char *type,
                               const char *cwd);
   static FILE *HeavyPopenImpl(const char *cmd, const char *type,

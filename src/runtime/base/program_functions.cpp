@@ -1178,6 +1178,7 @@ void hphp_process_exit() {
   FiberAsyncFunc::Stop();
   Eval::Debugger::Stop();
   Extension::ShutdownModules();
+  LightProcess::Close();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

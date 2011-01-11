@@ -1460,6 +1460,7 @@ struct PropertyAccessor {
   const char * name;
   Variant (*getter)(CObjRef);
   void (*setter)(CObjRef,CVarRef);
+  bool test_isset;
 };
 
 class PropertyAccessorMap : private hphp_const_char_imap<PropertyAccessor*> {
@@ -1494,8 +1495,11 @@ public:
     return dummy_setter;
   }
 
-  bool isset(CStrRef name) {
-    return find(name.data()) != end();
+  bool isset(ObjectData *obj, CStrRef name) {
+    const_iterator iter = find(name.data());
+    if (iter == end()) return false;
+    return !iter->second->test_isset ||
+      HPHP::isset(iter->second->getter(obj));
   }
 };
 
@@ -1846,17 +1850,17 @@ static PropertyAccessor domnode_properties[] = {
   { "nodeName",        domnode_nodename_read,      NULL },
   { "nodeValue",       domnode_nodevalue_read,     domnode_nodevalue_write },
   { "nodeType",        domnode_nodetype_read,      NULL },
-  { "parentNode",      domnode_parentnode_read,    NULL },
-  { "childNodes",      domnode_childnodes_read,    NULL },
-  { "firstChild",      domnode_firstchild_read,    NULL },
-  { "lastChild",       domnode_lastchild_read,     NULL },
-  { "previousSibling", domnode_previoussibling_read, NULL },
-  { "nextSibling",     domnode_nextsibling_read,   NULL },
-  { "attributes",      domnode_attributes_read,    NULL },
-  { "ownerDocument",   domnode_ownerdocument_read, NULL },
-  { "namespaceURI",    domnode_namespaceuri_read,  NULL },
+  { "parentNode",      domnode_parentnode_read,    NULL , true},
+  { "childNodes",      domnode_childnodes_read,    NULL , true},
+  { "firstChild",      domnode_firstchild_read,    NULL , true},
+  { "lastChild",       domnode_lastchild_read,     NULL , true},
+  { "previousSibling", domnode_previoussibling_read, NULL , true},
+  { "nextSibling",     domnode_nextsibling_read,   NULL , true},
+  { "attributes",      domnode_attributes_read,    NULL , true},
+  { "ownerDocument",   domnode_ownerdocument_read, NULL , true},
+  { "namespaceURI",    domnode_namespaceuri_read,  NULL , true},
   { "prefix",          domnode_prefix_read,        domnode_prefix_write },
-  { "localName",       domnode_localname_read,     NULL },
+  { "localName",       domnode_localname_read,     NULL , true},
   { "baseURI",         domnode_baseuri_read,       NULL },
   { "textContent",     domnode_textcontent_read,   domnode_textcontent_write },
   { NULL, NULL, NULL}
@@ -1893,7 +1897,7 @@ Variant c_DOMNode::t___set(Variant name, Variant value) {
 
 bool c_DOMNode::t___isset(Variant name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::__isset);
-  return domnode_properties_map.isset(name);
+  return domnode_properties_map.isset(this, name);
 }
 
 Variant c_DOMNode::t_appendchild(CObjRef newnode) {
@@ -2488,7 +2492,7 @@ Variant c_DOMAttr::t___set(Variant name, Variant value) {
 
 bool c_DOMAttr::t___isset(Variant name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMAttr, DOMAttr::__isset);
-  return domattr_properties_map.isset(name);
+  return domattr_properties_map.isset(this, name);
 }
 
 bool c_DOMAttr::t_isid() {
@@ -2564,7 +2568,7 @@ Variant c_DOMCharacterData::t___set(Variant name, Variant value) {
 
 bool c_DOMCharacterData::t___isset(Variant name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMCharacterData, DOMCharacterData::__isset);
-  return domcharacterdata_properties_map.isset(name);
+  return domcharacterdata_properties_map.isset(this, name);
 }
 
 bool c_DOMCharacterData::t_appenddata(CStrRef arg) {
@@ -2794,7 +2798,7 @@ Variant c_DOMText::t___set(Variant name, Variant value) {
 
 bool c_DOMText::t___isset(Variant name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMText, DOMText::__isset);
-  return domtext_properties_map.isset(name);
+  return domtext_properties_map.isset(this, name);
 }
 
 bool c_DOMText::t_iswhitespaceinelementcontent() {
@@ -3100,7 +3104,7 @@ Variant c_DOMDocument::t___set(Variant name, Variant value) {
 
 bool c_DOMDocument::t___isset(Variant name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::__isset);
-  return domdocument_properties_map.isset(name);
+  return domdocument_properties_map.isset(this, name);
 }
 
 Variant c_DOMDocument::t_createattribute(CStrRef name) {
@@ -3796,7 +3800,7 @@ Variant c_DOMDocumentType::t___set(Variant name, Variant value) {
 
 bool c_DOMDocumentType::t___isset(Variant name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocumentType, DOMDocumentType::__isset);
-  return domdocumenttype_properties_map.isset(name);
+  return domdocumenttype_properties_map.isset(this, name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3916,7 +3920,7 @@ Variant c_DOMElement::t___set(Variant name, Variant value) {
 
 bool c_DOMElement::t___isset(Variant name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::__isset);
-  return domelement_properties_map.isset(name);
+  return domelement_properties_map.isset(this, name);
 }
 
 String c_DOMElement::t_getattribute(CStrRef name) {
@@ -4537,7 +4541,7 @@ Variant c_DOMEntity::t___set(Variant name, Variant value) {
 
 bool c_DOMEntity::t___isset(Variant name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMEntity, DOMEntity::__isset);
-  return domentity_properties_map.isset(name);
+  return domentity_properties_map.isset(this, name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4633,7 +4637,7 @@ Variant c_DOMNotation::t___set(Variant name, Variant value) {
 
 bool c_DOMNotation::t___isset(Variant name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMNotation, DOMNotation::__isset);
-  return domnotation_properties_map.isset(name);
+  return domnotation_properties_map.isset(this, name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4712,7 +4716,7 @@ Variant c_DOMProcessingInstruction::t___set(Variant name, Variant value) {
 
 bool c_DOMProcessingInstruction::t___isset(Variant name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMProcessingInstruction, DOMProcessingInstruction::__isset);
-  return domprocessinginstruction_properties_map.isset(name);
+  return domprocessinginstruction_properties_map.isset(this, name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -4894,7 +4898,7 @@ Variant c_DOMNamedNodeMap::t___set(Variant name, Variant value) {
 
 bool c_DOMNamedNodeMap::t___isset(Variant name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMNamedNodeMap, DOMNamedNodeMap::__isset);
-  return domnamednodemap_properties_map.isset(name);
+  return domnamednodemap_properties_map.isset(this, name);
 }
 
 Variant c_DOMNamedNodeMap::t_getiterator() {
@@ -4981,7 +4985,7 @@ Variant c_DOMNodeList::t___set(Variant name, Variant value) {
 
 bool c_DOMNodeList::t___isset(Variant name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMNodeList, DOMNodeList::__isset);
-  return domnodelist_properties_map.isset(name);
+  return domnodelist_properties_map.isset(this, name);
 }
 
 Variant c_DOMNodeList::t_item(int64 index) {
@@ -5398,7 +5402,7 @@ Variant c_DOMXPath::t___set(Variant name, Variant value) {
 
 bool c_DOMXPath::t___isset(Variant name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMXPath, DOMXPath::__isset);
-  return domxpath_properties_map.isset(name);
+  return domxpath_properties_map.isset(this, name);
 }
 
 Variant c_DOMXPath::t_evaluate(CStrRef expr,

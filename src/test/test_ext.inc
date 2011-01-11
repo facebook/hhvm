@@ -20,6 +20,7 @@ RUN_TESTSUITE(TestExtFunction);
 RUN_TESTSUITE(TestExtHash);
 RUN_TESTSUITE(TestExtIconv);
 RUN_TESTSUITE(TestExtIcu);
+RUN_TESTSUITE(TestExtIcu_uspoof);
 RUN_TESTSUITE(TestExtImage);
 RUN_TESTSUITE(TestExtImagesprite);
 RUN_TESTSUITE(TestExtImap);

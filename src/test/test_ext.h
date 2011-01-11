@@ -35,6 +35,7 @@
 #include <test/test_ext_hash.h>
 #include <test/test_ext_iconv.h>
 #include <test/test_ext_icu.h>
+#include <test/test_ext_icu_uspoof.h>
 #include <test/test_ext_image.h>
 #include <test/test_ext_imagesprite.h>
 #include <test/test_ext_imap.h>

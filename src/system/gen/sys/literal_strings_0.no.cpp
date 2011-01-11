@@ -38,6 +38,7 @@ StaticString s_sys_ss86c01a16("addChild");
 StaticString s_sys_ss877efb6f("isId");
 StaticString s_sys_ss87916992("createaggregate");
 StaticString s_sys_ss87abd438("outputMemory");
+StaticString s_sys_ss87c6ff76("setAllowedLocales");
 StaticString s_sys_ss88a8c728("getNumberOfParameters");
 StaticString s_sys_ss88e41acd("getClosure");
 StaticString s_sys_ss88f38233("writeAttribute");
@@ -65,6 +66,7 @@ StaticString s_sys_ss8f9bd044("isIterateable");
 StaticString s_sys_ss8fed3624("getNumberOfRequiredParameters");
 StaticString s_sys_ss90269404("properties");
 StaticString s_sys_ss90393941("getfunctions");
+StaticString s_sys_ss907b3ce6("isSuspicious");
 StaticString s_sys_ss90a52af9("saveXML");
 StaticString s_sys_ss90d9de57("isConstructor");
 StaticString s_sys_ss90f68f81("getLinkTarget");
@@ -82,8 +84,6 @@ StaticString s_sys_ss95821704("isDir");
 StaticString s_sys_ss95d17b71("loadXML");
 StaticString s_sys_ss961c2365("getDelayedByKey");
 StaticString s_sys_ss9631f2ea("isDestructor");
-StaticString s_sys_ss963681e7("__setsoapheaders");
-StaticString s_sys_ss969a2913("getClass");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

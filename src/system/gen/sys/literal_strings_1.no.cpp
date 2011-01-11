@@ -22,6 +22,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss963681e7("__setsoapheaders");
+StaticString s_sys_ss969a2913("getClass");
 StaticString s_sys_ss96f7c57c("fflush");
 StaticString s_sys_ss9795dfc8("Property ");
 StaticString s_sys_ss97b15062("getModifiers");
@@ -71,6 +73,7 @@ StaticString s_sys_ssac67a3b5("connect");
 StaticString s_sys_ssacf726a1("__cont__");
 StaticString s_sys_ssad18c6ae("create");
 StaticString s_sys_ssad33d956("startElement");
+StaticString s_sys_ssad6f5b8c("setChecks");
 StaticString s_sys_ssada05422("startPI");
 StaticString s_sys_ssadd5fee2("LengthException");
 StaticString s_sys_ssae8717ad("exception");
@@ -81,9 +84,6 @@ StaticString s_sys_ssb17013df("openURI");
 StaticString s_sys_ssb1c4aa6f("getATime");
 StaticString s_sys_ssb303f411("__isset");
 StaticString s_sys_ssb30ca8a5("setMaxLineLen");
-StaticString s_sys_ssb3a5c1b3("current");
-StaticString s_sys_ssb3fce46e("\000AppendIterator\000iterators", 25);
-StaticString s_sys_ssb5a1e6bc("ReflectionObject");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -22,6 +22,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ssb3a5c1b3("current");
+StaticString s_sys_ssb3fce46e("\000AppendIterator\000iterators", 25);
+StaticString s_sys_ssb5a1e6bc("ReflectionObject");
 StaticString s_sys_ssb6132cef("setoptimeout");
 StaticString s_sys_ssb65737a4("DomainException");
 StaticString s_sys_ssb69f1960("getTransitions");
@@ -81,9 +84,6 @@ StaticString s_sys_sscca6e52d("getByKey");
 StaticString s_sys_ssccbba71e("getTrace");
 StaticString s_sys_sscd0bfaee("getExtension");
 StaticString s_sys_sscd5dc41e("ReflectionParameter");
-StaticString s_sys_sscdbb2d67("getMethod");
-StaticString s_sys_ssce568670("appendByKey");
-StaticString s_sys_ssce80f767("isProtected");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

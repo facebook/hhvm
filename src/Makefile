@@ -24,7 +24,7 @@ CXX_SOURCES := $(filter-out $(GENERATED_CXX_SOURCES) $(CXX_NOOPT_SOURCES),\
 	$(filter %.cpp,$(REC_SOURCES)))
 ASM_SOURCES := $(filter %.S, $(REC_SOURCES))
 
-ASM_SOURCES += $(wildcard $(ABS_PROJECT_ROOT)/facebook/src/util/*.S)
+ASM_SOURCES += $(wildcard $(PROJECT_ROOT)/facebook/src/util/*.S)
 
 include $(PROJECT_ROOT)/src/rules.mk
 

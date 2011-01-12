@@ -91,8 +91,13 @@ bool eval_create_object_only_hook(Variant &res, const char *s,
   return false;
 }
 bool eval_try_autoload(const char *s) {
-  return AutoloadHandler::s_instance->invokeHandler(String(s, CopyString),
-                                                    true);
+  const Eval::Function *fn =
+    Eval::RequestEvalState::findFunction("__autoload");
+  if (fn) {
+    fn->invoke(CREATE_VECTOR1(String(s, AttachLiteral)));
+    return true;
+  }
+  return false;
 }
 bool eval_invoke_static_method_hook(Variant &res, const char *s,
                                     const char* method, CArrRef params,

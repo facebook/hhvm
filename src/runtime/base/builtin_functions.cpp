@@ -25,7 +25,6 @@
 #include <runtime/eval/runtime/code_coverage.h>
 #include <runtime/ext/ext_process.h>
 #include <runtime/ext/ext_class.h>
-#include <runtime/ext/ext_function.h>
 #include <util/logger.h>
 #include <util/util.h>
 #include <util/process.h>
@@ -794,8 +793,7 @@ Variant include_impl_invoke(CStrRef file, bool once, LVariableTable* variables,
 
 static Variant include_impl(CStrRef file, bool once,
                             LVariableTable* variables,
-                            const char *currentDir, bool required,
-                            bool raiseNotice) {
+                            const char *currentDir, bool required) {
 
   const char* c_file = file->data();
 
@@ -869,9 +867,7 @@ static Variant include_impl(CStrRef file, bool once,
   }
 
   // Failure
-  if (raiseNotice) {
-    raise_notice("Tried to invoke %s but file not found.", file->data());
-  }
+  raise_notice("Tried to invoke %s but file not found.", file->data());
   if (required) {
     String ms = "Required file that does not exist: ";
     ms += file;
@@ -882,110 +878,18 @@ static Variant include_impl(CStrRef file, bool once,
 
 Variant include(CStrRef file, bool once /* = false */,
                 LVariableTable* variables /* = NULL */,
-                const char *currentDir /* = NULL */,
-                bool raiseNotice /*= true*/) {
-  return include_impl(file, once, variables, currentDir, false, raiseNotice);
+                const char *currentDir /* = NULL */) {
+  return include_impl(file, once, variables, currentDir, false);
 }
 
 Variant require(CStrRef file, bool once /* = false */,
                 LVariableTable* variables /* = NULL */,
-                const char *currentDir /* = NULL */,
-                bool raiseNotice /*= true*/) {
-  return include_impl(file, once, variables, currentDir, true, raiseNotice);
+                const char *currentDir /* = NULL */) {
+  return include_impl(file, once, variables, currentDir, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Limits
-
-IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
-
-void AutoloadHandler::requestInit() {
-  m_running = false;
-  m_handlers.clear();
-}
-
-void AutoloadHandler::requestShutdown() {
-  m_handlers.reset();
-}
-
-bool AutoloadHandler::invokeHandler(CStrRef className, bool checkDeclared,
-                                    const bool *declared /*= NULL*/,
-                                    bool autoloadExists /*= false*/) {
-  Array params(ArrayInit(1, true).set(className).create());
-  bool l_running = m_running;
-  m_running = true;
-  if (m_handlers.empty()) {
-
-    if (checkDeclared) {
-      autoloadExists = function_exists(s___autoload);
-    }
-    if (autoloadExists) {
-      invoke(s___autoload, params, -1, true, false);
-      m_running = l_running;
-      return true;
-    }
-    m_running = l_running;
-    return false;
-  } else {
-    for (ArrayIter iter(m_handlers); iter; ++iter) {
-      f_call_user_func_array(iter.second(), params);
-      if (checkDeclared) {
-        if (f_class_exists(className, false)) {
-          break;
-        }
-      } else if (declared && *declared) {
-        break;
-      }
-    }
-    m_running = l_running;
-    return true;
-  }
-}
-
-bool AutoloadHandler::addHandler(CVarRef handler, bool prepend) {
-  String name = getSignature(handler);
-  if (name.isNull()) return false;
-  if (!prepend) {
-    // The following ensures that the handler is added at the end
-    m_handlers.remove(name, true);
-    m_handlers.add(name, handler, true);
-  } else {
-    // This adds the handler at the beginning
-    m_handlers = CREATE_MAP1(name, handler) + m_handlers;
-  }
-  return true;
-}
-
-bool AutoloadHandler::isRunning() {
-  return m_running;
-}
-
-void AutoloadHandler::removeHandler(CVarRef handler) {
-  String name = getSignature(handler);
-  if (name.isNull()) return;
-  m_handlers.remove(name, true);
-}
-
-void AutoloadHandler::removeAllHandlers() {
-  m_handlers.clear();
-}
-
-String AutoloadHandler::getSignature(CVarRef handler) {
-  Variant name;
-  if (!f_is_callable(handler, false, ref(name))) {
-    return null_string;
-  }
-  String lName = StringUtil::ToLower(name);
-  if (handler.isArray()) {
-    Variant first = handler.getArrayData()->get(0LL);
-    if (first.isObject()) {
-      // Add the object address as part of the signature
-      int64 data = (int64)first.getObjectData();
-      lName += String((const char *)&data, sizeof(data), CopyString);
-    }
-  }
-  return lName;
-}
 
 bool function_exists(CStrRef function_name) {
   String name = get_renamed_function(function_name);
@@ -1004,7 +908,9 @@ bool function_exists(CStrRef function_name) {
 
 void checkClassExists(CStrRef name, Globals *g, bool nothrow /* = false */) {
   if (g->class_exists(name)) return;
-  AutoloadHandler::s_instance->invokeHandler(name, true);
+  if (function_exists(s___autoload)) {
+    invoke(s___autoload, CREATE_VECTOR1(name), -1, true, false);
+  }
   if (nothrow) return;
   if (!g->class_exists(name)) {
     string msg = "unknown class ";
@@ -1016,8 +922,9 @@ void checkClassExists(CStrRef name, Globals *g, bool nothrow /* = false */) {
 bool checkClassExists(CStrRef name, const bool *declared, bool autoloadExists,
                       bool nothrow /* = false */) {
   if (declared && *declared) return true;
-  AutoloadHandler::s_instance->invokeHandler(name, false, declared,
-                                             autoloadExists);
+  if (autoloadExists) {
+    invoke(s___autoload, CREATE_VECTOR1(name), -1, true, false);
+  }
   if (declared && *declared) return true;
   if (nothrow) return false;
   string msg = "unknown class ";
@@ -1029,8 +936,9 @@ bool checkClassExists(CStrRef name, const bool *declared, bool autoloadExists,
 bool checkInterfaceExists(CStrRef name, const bool *declared,
                           bool autoloadExists, bool nothrow /* = false */) {
   if (*declared) return true;
-  AutoloadHandler::s_instance->invokeHandler(name, false, declared,
-                                             autoloadExists);
+  if (autoloadExists) {
+    invoke(s___autoload, CREATE_VECTOR1(name), -1, true, false);
+  }
   if (!*declared) {
     if (nothrow) return false;
     string msg = "unknown interface ";

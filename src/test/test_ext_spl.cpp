@@ -30,12 +30,6 @@ bool TestExtSpl::RunTests(const std::string &which) {
   RUN_TEST(test_iterator_apply);
   RUN_TEST(test_iterator_count);
   RUN_TEST(test_iterator_to_array);
-  RUN_TEST(test_spl_autoload_call);
-  RUN_TEST(test_spl_autoload_extensions);
-  RUN_TEST(test_spl_autoload_functions);
-  RUN_TEST(test_spl_autoload_register);
-  RUN_TEST(test_spl_autoload_unregister);
-  RUN_TEST(test_spl_autoload);
 
   return ret;
 }
@@ -67,29 +61,5 @@ bool TestExtSpl::test_iterator_count() {
 }
 
 bool TestExtSpl::test_iterator_to_array() {
-  return Count(true);
-}
-
-bool TestExtSpl::test_spl_autoload_call() {
-  return Count(true);
-}
-
-bool TestExtSpl::test_spl_autoload_extensions() {
-  return Count(true);
-}
-
-bool TestExtSpl::test_spl_autoload_functions() {
-  return Count(true);
-}
-
-bool TestExtSpl::test_spl_autoload_register() {
-  return Count(true);
-}
-
-bool TestExtSpl::test_spl_autoload_unregister() {
-  return Count(true);
-}
-
-bool TestExtSpl::test_spl_autoload() {
   return Count(true);
 }

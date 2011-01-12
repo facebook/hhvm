@@ -17,14 +17,9 @@
 
 #include <runtime/ext/ext_spl.h>
 #include <runtime/ext/ext_math.h>
-#include <runtime/ext/ext_class.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-static StaticString s_spl_autoload("spl_autoload");
-static StaticString s_spl_autoload_call("spl_autoload_call");
-static StaticString s_default_extensions(".inc,.php");
 
 #define SPL_ADD_CLASS(cls) ret.set(#cls, #cls)
 
@@ -85,16 +80,6 @@ Array f_spl_classes() {
   SPL_ADD_CLASS(UnderflowException);
   SPL_ADD_CLASS(UnexpectedValueException);
   return ret;
-}
-
-void throw_spl_exception(const char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  std::string msg;
-  Util::string_vsnprintf(msg, fmt, ap);
-  va_end(ap);
-
-  throw (Object)p_Exception(NEW(c_Exception)())->create(Variant(msg));
 }
 
 static bool s_inited = false;
@@ -229,93 +214,6 @@ Variant f_iterator_to_array(CVarRef obj, bool use_keys /* = true */) {
   return ret;
 }
 
-
-bool f_spl_autoload_register(CVarRef autoload_function /* = null_variant */,
-                             bool throws /* = true */,
-                             bool prepend /* = false */) {
-  if (autoload_function.same(s_spl_autoload_call)) {
-    if (throws) {
-      throw_spl_exception("Function spl_autoload_call()"
-                      "cannot be registered");
-    }
-    return false;
-  }
-  CVarRef func = autoload_function.isNull() ?
-                 s_spl_autoload : autoload_function;
-  bool res = AutoloadHandler::s_instance->addHandler(func, prepend);
-  if (!res && throws) {
-    throw_spl_exception("Invalid autoload_function specified");
-  }
-  return res;
-}
-
-bool f_spl_autoload_unregister(CVarRef autoload_function) {
-  if (autoload_function.same(s_spl_autoload_call)) {
-    AutoloadHandler::s_instance->removeAllHandlers();
-  } else {
-    AutoloadHandler::s_instance->removeHandler(autoload_function);
-  }
-  return true;
-}
-
-Variant f_spl_autoload_functions() {
-  CArrRef handlers = AutoloadHandler::s_instance->getHandlers();
-  if (handlers.empty())
-    return false;
-  else
-    return handlers.values();
-}
-
-void f_spl_autoload_call(CStrRef class_name) {
-  AutoloadHandler::s_instance->invokeHandler(class_name, true);
-}
-
-namespace {
-class ExtensionList : public RequestEventHandler {
-public:
-  virtual void requestInit() {
-    extensions = CREATE_VECTOR2(String(".inc"), String(".php"));
-  }
-  virtual void requestShutdown() {
-    extensions.reset();
-  }
-
-  Array extensions;
-};
-
-IMPLEMENT_STATIC_REQUEST_LOCAL(ExtensionList, s_extension_list);
-}
-
-String f_spl_autoload_extensions(CStrRef file_extensions /* = null_string */) {
-  if (!file_extensions.isNull()) {
-    s_extension_list->extensions = StringUtil::Explode(file_extensions, ",")
-                                   .toArray();
-    return file_extensions;
-  }
-  return StringUtil::Implode(s_extension_list->extensions, ",");
-}
-
-void f_spl_autoload(CStrRef class_name,
-                    CStrRef file_extensions /* = null_string */) {
-  Array ext = file_extensions.isNull()
-              ? s_extension_list->extensions
-              : StringUtil::Explode(file_extensions, ",").toArray();
-  String lClass = StringUtil::ToLower(class_name);
-  Globals *g = get_globals();
-  bool found = false;
-  for (ArrayIter iter(ext); iter; ++iter) {
-    String fileName = lClass + iter.second();
-    include(fileName, true, g, "", false);
-    if (f_class_exists(class_name, false)) {
-      found = true;
-      break;
-    }
-  }
-
-  if (!found && !AutoloadHandler::s_instance->isRunning()) {
-    throw_spl_exception("Class %s could not be loaded", class_name.c_str());
-  }
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

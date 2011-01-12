@@ -696,23 +696,7 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       dynamic_pointer_cast<ParameterExpression>((*params)[i]);
 
     /* Insert runtime checks. */
-    if (specType->is(Type::KindOfArray)) {
-      cg_printf("if(");
-      if (!m_paramDefaults[i].empty()) {
-        cg_printf("!f_is_null(%s%s) && ",
-                   Option::VariablePrefix, param->getName().c_str());
-      }
-      cg_indentBegin("!%s%s.isArray()) {\n",
-                     Option::VariablePrefix, param->getName().c_str());
-      cg_printf("throw_unexpected_argument_type"
-                "(%d,\"%s\",\"array\",%s%s);\n",
-                i + 1, funcName.c_str(),
-                Option::VariablePrefix, param->getName().c_str());
-      if (Option::HardTypeHints) {
-        cg_printf("return%s;\n", getReturnType() ? " null" : "");
-      }
-      cg_indentEnd("}\n");
-    } else if (specType->is(Type::KindOfObject)) {
+    if (specType->is(Type::KindOfObject)) {
       cg_printf("if(");
       if (!m_paramDefaults[i].empty()) {
         cg_printf("!f_is_null(%s%s) && ",
@@ -730,7 +714,30 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
       cg_indentEnd("}\n");
     } else {
-      ASSERT(false);
+      cg_printf("if(");
+      if (!m_paramDefaults[i].empty()) {
+        cg_printf("!f_is_null(%s%s) && ",
+                  Option::VariablePrefix, param->getName().c_str());
+      }
+      const char *p = 0;
+      switch (specType->getKindOf()) {
+        case Type::KindOfArray: p = "Array"; break;
+        case Type::KindOfBoolean: p = "Boolean"; break;
+        case Type::KindOfInt64: p = "Integer"; break;
+        case Type::KindOfDouble: p = "Double"; break;
+        case Type::KindOfString: p = "String"; break;
+        default: assert(false);
+      }
+      cg_indentBegin("!%s%s.is%s()) {\n",
+                     Option::VariablePrefix, param->getName().c_str(), p);
+      cg_printf("throw_unexpected_argument_type"
+                "(%d,\"%s\",\"%s\",%s%s);\n",
+                i + 1, funcName.c_str(), p,
+                Option::VariablePrefix, param->getName().c_str());
+      if (Option::HardTypeHints) {
+        cg_printf("return%s;\n", getReturnType() ? " null" : "");
+      }
+      cg_indentEnd("}\n");
     }
   }
 

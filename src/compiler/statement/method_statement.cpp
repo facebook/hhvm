@@ -744,10 +744,16 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
       if (Type::SameType(spec, funcScope->getParamType(i))) {
         if (spec->is(Type::KindOfArray)) {
           cg_printf(".getArrayData()");
-        } else {
+        } else if (spec->is(Type::KindOfString)) {
+          cg_printf(".getStringData()");
+        } else if (spec->isSpecificObject()) {
           ClassScopePtr cls = ar->findClass(spec->getName());
           assert(cls && !cls->isRedeclaring());
           cg_printf(".getObjectData()");
+        } else if (spec->isExactType()) {
+          cg_printf(".");
+          spec->outputCPPCast(cg, ar, funcScope);
+          cg_printf("()");
         }
       }
     }

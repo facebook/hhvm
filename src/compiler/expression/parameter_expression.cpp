@@ -163,9 +163,7 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   if (getFunctionScope()->isDynamic() ||
       getFunctionScope()->isRedeclaring() ||
       getFunctionScope()->isVirtual()) {
-    if (Option::HardTypeHints &&
-        (ret->is(Type::KindOfArray) || ret->is(Type::KindOfObject))) {
-    } else {
+    if (!Option::HardTypeHints || !ret->isExactType()) {
       variables->forceVariant(ar, m_name, VariableTable::AnyVars);
       ret = Type::Variant;
     }

@@ -742,10 +742,6 @@ Variant c_Normalizer::ti_normalize(const char* cls , CStrRef input,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// NOTE: We rely on "runtime/ext/ext_array.cpp" to call u_init() to
-// initialize the ICU library for us during startup. For more info
-// see the ICUInitializer class.
-
 enum {
   INTL_IDN_TO_ASCII = 0,
   INTL_IDN_TO_UTF8

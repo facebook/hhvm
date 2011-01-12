@@ -1104,6 +1104,32 @@ Variant ifa_openlog(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg2((a2));
   return (f_openlog(arg0, arg1, arg2));
 }
+Variant i_spl_autoload_register(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(spl_autoload_register);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 3) return throw_toomany_arguments("spl_autoload_register", 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (f_spl_autoload_register());
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_spl_autoload_register(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_spl_autoload_register(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_spl_autoload_register(arg0, arg1, arg2));
+  }
+}
+Variant ifa_spl_autoload_register(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 3) return throw_toomany_arguments("spl_autoload_register", 3, 1);
+  if (count <= 0) return (f_spl_autoload_register());
+  CVarRef arg0((a0));
+  if (count <= 1) return (f_spl_autoload_register(arg0));
+  CVarRef arg1((a1));
+  if (count <= 2) return (f_spl_autoload_register(arg0, arg1));
+  CVarRef arg2((a2));
+  return (f_spl_autoload_register(arg0, arg1, arg2));
+}
 Variant i_get_include_path(void *extra, CArrRef params) {
   FUNCTION_INJECTION(get_include_path);
   int count __attribute__((__unused__)) = params.size();
@@ -12471,6 +12497,24 @@ Variant ifa_drawpushclippath(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
   CVarRef arg1((a1));
   return (f_drawpushclippath(arg0, arg1), null);
 }
+Variant i_spl_autoload_extensions(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(spl_autoload_extensions);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) return throw_toomany_arguments("spl_autoload_extensions", 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (f_spl_autoload_extensions());
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_spl_autoload_extensions(arg0));
+  }
+}
+Variant ifa_spl_autoload_extensions(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 1) return throw_toomany_arguments("spl_autoload_extensions", 1, 1);
+  if (count <= 0) return (f_spl_autoload_extensions());
+  CVarRef arg0((a0));
+  return (f_spl_autoload_extensions(arg0));
+}
 Variant i_drawpopclippath(void *extra, CArrRef params) {
   FUNCTION_INJECTION(drawpopclippath);
   int count __attribute__((__unused__)) = params.size();
@@ -13697,6 +13741,22 @@ Variant ifa_mailparse_uudecode_all(void *extra, int count, INVOKE_FEW_ARGS_IMPL_
   if (count != 1) return throw_wrong_arguments("mailparse_uudecode_all", count, 1, 1, 1);
   CVarRef arg0((a0));
   return (f_mailparse_uudecode_all(arg0));
+}
+Variant i_spl_autoload_call(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(spl_autoload_call);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("spl_autoload_call", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_spl_autoload_call(arg0), null);
+  }
+}
+Variant ifa_spl_autoload_call(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("spl_autoload_call", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (f_spl_autoload_call(arg0), null);
 }
 Variant i_drawsetvectorgraphics(void *extra, CArrRef params) {
   FUNCTION_INJECTION(drawsetvectorgraphics);
@@ -23515,6 +23575,22 @@ Variant ifa_magickscaleimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
   CVarRef arg2((a2));
   return (f_magickscaleimage(arg0, arg1, arg2));
 }
+Variant i_spl_autoload_unregister(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(spl_autoload_unregister);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("spl_autoload_unregister", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_spl_autoload_unregister(arg0));
+  }
+}
+Variant ifa_spl_autoload_unregister(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("spl_autoload_unregister", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (f_spl_autoload_unregister(arg0));
+}
 Variant i_pixelgetblackquantum(void *extra, CArrRef params) {
   FUNCTION_INJECTION(pixelgetblackquantum);
   int count __attribute__((__unused__)) = params.size();
@@ -27325,6 +27401,26 @@ Variant ifa_xml_get_error_code(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS
   CVarRef arg0((a0));
   return (f_xml_get_error_code(arg0));
 }
+Variant i_spl_autoload(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(spl_autoload);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("spl_autoload", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_spl_autoload(arg0), null);
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_spl_autoload(arg0, arg1), null);
+  }
+}
+Variant ifa_spl_autoload(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 1 || count > 2) return throw_wrong_arguments("spl_autoload", count, 1, 2, 1);
+  CVarRef arg0((a0));
+  if (count <= 1) return (f_spl_autoload(arg0), null);
+  CVarRef arg1((a1));
+  return (f_spl_autoload(arg0, arg1), null);
+}
 Variant i_pcntl_alarm(void *extra, CArrRef params) {
   FUNCTION_INJECTION(pcntl_alarm);
   int count __attribute__((__unused__)) = params.size();
@@ -27936,22 +28032,6 @@ Variant ifa_drawpathmovetoabsolute(void *extra, int count, INVOKE_FEW_ARGS_IMPL_
   CVarRef arg2((a2));
   return (f_drawpathmovetoabsolute(arg0, arg1, arg2), null);
 }
-Variant i_quotemeta(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(quotemeta);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("quotemeta", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_quotemeta(arg0));
-  }
-}
-Variant ifa_quotemeta(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 1) return throw_wrong_arguments("quotemeta", count, 1, 1, 1);
-  CVarRef arg0((a0));
-  return (f_quotemeta(arg0));
-}
 Variant i_parse_ini_string(void *extra, CArrRef params) {
   FUNCTION_INJECTION(parse_ini_string);
   int count __attribute__((__unused__)) = params.size();
@@ -27975,6 +28055,22 @@ Variant ifa_parse_ini_string(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
   if (count <= 2) return (f_parse_ini_string(arg0, arg1));
   CVarRef arg2((a2));
   return (f_parse_ini_string(arg0, arg1, arg2));
+}
+Variant i_quotemeta(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(quotemeta);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("quotemeta", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_quotemeta(arg0));
+  }
+}
+Variant ifa_quotemeta(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("quotemeta", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (f_quotemeta(arg0));
 }
 Variant i_imagefilltoborder(void *extra, CArrRef params) {
   FUNCTION_INJECTION(imagefilltoborder);
@@ -38738,6 +38834,16 @@ Variant ifa_shell_exec(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg0((a0));
   return (f_shell_exec(arg0));
 }
+Variant i_spl_autoload_functions(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(spl_autoload_functions);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("spl_autoload_functions", 0, 1);
+  return (f_spl_autoload_functions());
+}
+Variant ifa_spl_autoload_functions(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("spl_autoload_functions", 0, 1);
+  return (f_spl_autoload_functions());
+}
 Variant i_curl_multi_exec(void *extra, CArrRef params) {
   FUNCTION_INJECTION(curl_multi_exec);
   int count __attribute__((__unused__)) = params.size();
@@ -40558,6 +40664,33 @@ Variant ei_openlog(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   int count __attribute__((__unused__)) = params.size();
   if (count != 3) return throw_wrong_arguments("openlog", count, 3, 3, 1);
   return (x_openlog(a0, a1, a2));
+}
+Variant ei_spl_autoload_register(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 3) return throw_toomany_arguments("spl_autoload_register", 3, 1);
+  if (count <= 0) return (x_spl_autoload_register());
+  else if (count == 1) return (x_spl_autoload_register(a0));
+  else if (count == 2) return (x_spl_autoload_register(a0, a1));
+  else return (x_spl_autoload_register(a0, a1, a2));
 }
 Variant ei_get_include_path(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -53003,6 +53136,23 @@ Variant ei_drawpushclippath(Eval::VariableEnvironment &env, const Eval::Function
   if (count != 2) return throw_wrong_arguments("drawpushclippath", count, 2, 2, 1);
   return (x_drawpushclippath(a0, a1), null);
 }
+Variant ei_spl_autoload_extensions(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) return throw_toomany_arguments("spl_autoload_extensions", 1, 1);
+  if (count <= 0) return (x_spl_autoload_extensions());
+  else return (x_spl_autoload_extensions(a0));
+}
 Variant ei_drawpopclippath(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -54330,6 +54480,22 @@ Variant ei_mailparse_uudecode_all(Eval::VariableEnvironment &env, const Eval::Fu
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) return throw_wrong_arguments("mailparse_uudecode_all", count, 1, 1, 1);
   return (x_mailparse_uudecode_all(a0));
+}
+Variant ei_spl_autoload_call(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("spl_autoload_call", count, 1, 1, 1);
+  return (x_spl_autoload_call(a0), null);
 }
 Variant ei_drawsetvectorgraphics(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -65186,6 +65352,22 @@ Variant ei_magickscaleimage(Eval::VariableEnvironment &env, const Eval::Function
   if (count != 3) return throw_wrong_arguments("magickscaleimage", count, 3, 3, 1);
   return (x_magickscaleimage(a0, a1, a2));
 }
+Variant ei_spl_autoload_unregister(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("spl_autoload_unregister", count, 1, 1, 1);
+  return (x_spl_autoload_unregister(a0));
+}
 Variant ei_pixelgetblackquantum(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -69382,6 +69564,27 @@ Variant ei_xml_get_error_code(Eval::VariableEnvironment &env, const Eval::Functi
   if (count != 1) return throw_wrong_arguments("xml_get_error_code", count, 1, 1, 1);
   return (x_xml_get_error_code(a0));
 }
+Variant ei_spl_autoload(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("spl_autoload", count, 1, 2, 1);
+  if (count <= 1) return (x_spl_autoload(a0), null);
+  else return (x_spl_autoload(a0, a1), null);
+}
 Variant ei_pcntl_alarm(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -70085,22 +70288,6 @@ Variant ei_drawpathmovetoabsolute(Eval::VariableEnvironment &env, const Eval::Fu
   if (count != 3) return throw_wrong_arguments("drawpathmovetoabsolute", count, 3, 3, 1);
   return (x_drawpathmovetoabsolute(a0, a1, a2), null);
 }
-Variant ei_quotemeta(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("quotemeta", count, 1, 1, 1);
-  return (x_quotemeta(a0));
-}
 Variant ei_parse_ini_string(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -70126,6 +70313,22 @@ Variant ei_parse_ini_string(Eval::VariableEnvironment &env, const Eval::Function
   if (count <= 1) return (x_parse_ini_string(a0));
   else if (count == 2) return (x_parse_ini_string(a0, a1));
   else return (x_parse_ini_string(a0, a1, a2));
+}
+Variant ei_quotemeta(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("quotemeta", count, 1, 1, 1);
+  return (x_quotemeta(a0));
 }
 Variant ei_imagefilltoborder(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -82100,6 +82303,18 @@ Variant ei_shell_exec(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
   if (count != 1) return throw_wrong_arguments("shell_exec", count, 1, 1, 1);
   return (x_shell_exec(a0));
 }
+Variant ei_spl_autoload_functions(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("spl_autoload_functions", 0, 1);
+  return (x_spl_autoload_functions());
+}
 Variant ei_curl_multi_exec(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -83020,6 +83235,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x1F61AFCDC510413BLL, imagefilter);
       break;
     case 321:
+      HASH_INVOKE_FROM_EVAL(0x43EA586FBFC6A141LL, spl_autoload_unregister);
       HASH_INVOKE_FROM_EVAL(0x6B03203C8A01C141LL, imap_timeout);
       break;
     case 323:
@@ -85736,6 +85952,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 4020:
       HASH_INVOKE_FROM_EVAL(0x3900FDF1C97BEFB4LL, drawrotate);
       break;
+    case 4021:
+      HASH_INVOKE_FROM_EVAL(0x79D3B90DEF10AFB5LL, spl_autoload_extensions);
+      break;
     case 4022:
       HASH_INVOKE_FROM_EVAL(0x56C0CCB57BB6EFB6LL, magicksetimageunits);
       HASH_INVOKE_FROM_EVAL(0x2B451EF5D52C4FB6LL, array_diff);
@@ -87343,6 +87562,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x011B54958C597878LL, get_called_class);
       HASH_INVOKE_FROM_EVAL(0x00F8C6758B50B878LL, drawpathcurvetoquadraticbezierabsolute);
       break;
+    case 6267:
+      HASH_INVOKE_FROM_EVAL(0x3B8E5E63B5E0F87BLL, spl_autoload_call);
+      break;
     case 6268:
       HASH_INVOKE_FROM_EVAL(0x11DFC3C9D916387CLL, hphp_splfileobject_ftruncate);
       HASH_INVOKE_FROM_EVAL(0x6451BCB825D1787CLL, chroot);
@@ -87361,6 +87583,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 6305:
       HASH_INVOKE_FROM_EVAL(0x1756D4437A4098A1LL, date_modify);
+      HASH_INVOKE_FROM_EVAL(0x71B0B871CB62B8A1LL, spl_autoload);
       break;
     case 6311:
       HASH_INVOKE_FROM_EVAL(0x57105D4E43B078A7LL, magicksetformat);
@@ -87816,6 +88039,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 7005:
       HASH_INVOKE_FROM_EVAL(0x4888951358F53B5DLL, dom_document_get_elements_by_tag_name_ns);
+      break;
+    case 7007:
+      HASH_INVOKE_FROM_EVAL(0x48E30DE7A228BB5FLL, spl_autoload_register);
       break;
     case 7009:
       HASH_INVOKE_FROM_EVAL(0x7636825871399B61LL, highlight_file);
@@ -88279,6 +88505,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 7639:
       HASH_INVOKE_FROM_EVAL(0x638690DF6D06FDD7LL, imageconvolution);
       break;
+    case 7647:
+      HASH_INVOKE_FROM_EVAL(0x044D7013BDB33DDFLL, spl_autoload_functions);
+      break;
     case 7660:
       HASH_INVOKE_FROM_EVAL(0x5B51DD18C3E13DECLL, openssl_x509_parse);
       HASH_INVOKE_FROM_EVAL(0x5ABB7486CE861DECLL, array_merge_recursive);
@@ -88716,6 +88945,7 @@ CallInfo ci_hphp_recursivedirectoryiterator_valid((void*)&i_hphp_recursivedirect
 CallInfo ci_bcmul((void*)&i_bcmul, (void*)&ifa_bcmul, 3, 0, 0x0000000000000000LL, (void*)&ei_bcmul);
 CallInfo ci_imap_header((void*)&i_imap_header, (void*)&ifa_imap_header, 5, 0, 0x0000000000000000LL, (void*)&ei_imap_header);
 CallInfo ci_openlog((void*)&i_openlog, (void*)&ifa_openlog, 3, 0, 0x0000000000000000LL, (void*)&ei_openlog);
+CallInfo ci_spl_autoload_register((void*)&i_spl_autoload_register, (void*)&ifa_spl_autoload_register, 3, 0, 0x0000000000000000LL, (void*)&ei_spl_autoload_register);
 CallInfo ci_get_include_path((void*)&i_get_include_path, (void*)&ifa_get_include_path, 0, 0, 0x0000000000000000LL, (void*)&ei_get_include_path);
 CallInfo ci_socket_select((void*)&i_socket_select, (void*)&ifa_socket_select, 5, 0, 0x0000000000000007LL, (void*)&ei_socket_select);
 CallInfo ci_magickraiseimage((void*)&i_magickraiseimage, (void*)&ifa_magickraiseimage, 6, 0, 0x0000000000000000LL, (void*)&ei_magickraiseimage);
@@ -89322,6 +89552,7 @@ CallInfo ci_magicksetimagescene((void*)&i_magicksetimagescene, (void*)&ifa_magic
 CallInfo ci_magickgetimagerenderingintent((void*)&i_magickgetimagerenderingintent, (void*)&ifa_magickgetimagerenderingintent, 1, 0, 0x0000000000000000LL, (void*)&ei_magickgetimagerenderingintent);
 CallInfo ci_setlocale((void*)&i_setlocale, (void*)&ifa_setlocale, 2, 1, 0x0000000000000000LL, (void*)&ei_setlocale);
 CallInfo ci_drawpushclippath((void*)&i_drawpushclippath, (void*)&ifa_drawpushclippath, 2, 0, 0x0000000000000000LL, (void*)&ei_drawpushclippath);
+CallInfo ci_spl_autoload_extensions((void*)&i_spl_autoload_extensions, (void*)&ifa_spl_autoload_extensions, 1, 0, 0x0000000000000000LL, (void*)&ei_spl_autoload_extensions);
 CallInfo ci_drawpopclippath((void*)&i_drawpopclippath, (void*)&ifa_drawpopclippath, 1, 0, 0x0000000000000000LL, (void*)&ei_drawpopclippath);
 CallInfo ci_nl2br((void*)&i_nl2br, (void*)&ifa_nl2br, 1, 0, 0x0000000000000000LL, (void*)&ei_nl2br);
 CallInfo ci_hphp_splfileinfo_getperms((void*)&i_hphp_splfileinfo_getperms, (void*)&ifa_hphp_splfileinfo_getperms, 1, 0, 0x0000000000000000LL, (void*)&ei_hphp_splfileinfo_getperms);
@@ -89390,6 +89621,7 @@ CallInfo ci_override_function((void*)&i_override_function, (void*)&ifa_override_
 CallInfo ci_is_long((void*)&i_is_long, (void*)&ifa_is_long, 1, 0, 0x0000000000000000LL, (void*)&ei_is_long);
 CallInfo ci_pixelsetred((void*)&i_pixelsetred, (void*)&ifa_pixelsetred, 2, 0, 0x0000000000000000LL, (void*)&ei_pixelsetred);
 CallInfo ci_mailparse_uudecode_all((void*)&i_mailparse_uudecode_all, (void*)&ifa_mailparse_uudecode_all, 1, 0, 0x0000000000000000LL, (void*)&ei_mailparse_uudecode_all);
+CallInfo ci_spl_autoload_call((void*)&i_spl_autoload_call, (void*)&ifa_spl_autoload_call, 1, 0, 0x0000000000000000LL, (void*)&ei_spl_autoload_call);
 CallInfo ci_drawsetvectorgraphics((void*)&i_drawsetvectorgraphics, (void*)&ifa_drawsetvectorgraphics, 2, 0, 0x0000000000000000LL, (void*)&ei_drawsetvectorgraphics);
 CallInfo ci_ctype_upper((void*)&i_ctype_upper, (void*)&ifa_ctype_upper, 1, 0, 0x0000000000000000LL, (void*)&ei_ctype_upper);
 CallInfo ci_get_declared_classes((void*)&i_get_declared_classes, (void*)&ifa_get_declared_classes, 0, 0, 0x0000000000000000LL, (void*)&ei_get_declared_classes);
@@ -89905,6 +90137,7 @@ CallInfo ci_rmdir((void*)&i_rmdir, (void*)&ifa_rmdir, 2, 0, 0x0000000000000000LL
 CallInfo ci_drawgetstrokelinecap((void*)&i_drawgetstrokelinecap, (void*)&ifa_drawgetstrokelinecap, 1, 0, 0x0000000000000000LL, (void*)&ei_drawgetstrokelinecap);
 CallInfo ci_hphp_clear_unflushed((void*)&i_hphp_clear_unflushed, (void*)&ifa_hphp_clear_unflushed, 0, 0, 0x0000000000000000LL, (void*)&ei_hphp_clear_unflushed);
 CallInfo ci_magickscaleimage((void*)&i_magickscaleimage, (void*)&ifa_magickscaleimage, 3, 0, 0x0000000000000000LL, (void*)&ei_magickscaleimage);
+CallInfo ci_spl_autoload_unregister((void*)&i_spl_autoload_unregister, (void*)&ifa_spl_autoload_unregister, 1, 0, 0x0000000000000000LL, (void*)&ei_spl_autoload_unregister);
 CallInfo ci_pixelgetblackquantum((void*)&i_pixelgetblackquantum, (void*)&ifa_pixelgetblackquantum, 1, 0, 0x0000000000000000LL, (void*)&ei_pixelgetblackquantum);
 CallInfo ci_magicknewimage((void*)&i_magicknewimage, (void*)&ifa_magicknewimage, 4, 0, 0x0000000000000000LL, (void*)&ei_magicknewimage);
 CallInfo ci_destroypixelwands((void*)&i_destroypixelwands, (void*)&ifa_destroypixelwands, 1, 0, 0x0000000000000000LL, (void*)&ei_destroypixelwands);
@@ -90110,6 +90343,7 @@ CallInfo ci_ini_get((void*)&i_ini_get, (void*)&ifa_ini_get, 1, 0, 0x000000000000
 CallInfo ci_mb_ereg_search_setpos((void*)&i_mb_ereg_search_setpos, (void*)&ifa_mb_ereg_search_setpos, 1, 0, 0x0000000000000000LL, (void*)&ei_mb_ereg_search_setpos);
 CallInfo ci_stream_copy_to_stream((void*)&i_stream_copy_to_stream, (void*)&ifa_stream_copy_to_stream, 4, 0, 0x0000000000000000LL, (void*)&ei_stream_copy_to_stream);
 CallInfo ci_xml_get_error_code((void*)&i_xml_get_error_code, (void*)&ifa_xml_get_error_code, 1, 0, 0x0000000000000000LL, (void*)&ei_xml_get_error_code);
+CallInfo ci_spl_autoload((void*)&i_spl_autoload, (void*)&ifa_spl_autoload, 2, 0, 0x0000000000000000LL, (void*)&ei_spl_autoload);
 CallInfo ci_pcntl_alarm((void*)&i_pcntl_alarm, (void*)&ifa_pcntl_alarm, 1, 0, 0x0000000000000000LL, (void*)&ei_pcntl_alarm);
 CallInfo ci_drawpolygon((void*)&i_drawpolygon, (void*)&ifa_drawpolygon, 2, 0, 0x0000000000000000LL, (void*)&ei_drawpolygon);
 CallInfo ci_mysql_connect((void*)&i_mysql_connect, (void*)&ifa_mysql_connect, 7, 0, 0x0000000000000000LL, (void*)&ei_mysql_connect);
@@ -90140,8 +90374,8 @@ CallInfo ci_magickwriteimages((void*)&i_magickwriteimages, (void*)&ifa_magickwri
 CallInfo ci_pixelsetalpha((void*)&i_pixelsetalpha, (void*)&ifa_pixelsetalpha, 2, 0, 0x0000000000000000LL, (void*)&ei_pixelsetalpha);
 CallInfo ci_magicksetimageiterations((void*)&i_magicksetimageiterations, (void*)&ifa_magicksetimageiterations, 2, 0, 0x0000000000000000LL, (void*)&ei_magicksetimageiterations);
 CallInfo ci_drawpathmovetoabsolute((void*)&i_drawpathmovetoabsolute, (void*)&ifa_drawpathmovetoabsolute, 3, 0, 0x0000000000000000LL, (void*)&ei_drawpathmovetoabsolute);
-CallInfo ci_quotemeta((void*)&i_quotemeta, (void*)&ifa_quotemeta, 1, 0, 0x0000000000000000LL, (void*)&ei_quotemeta);
 CallInfo ci_parse_ini_string((void*)&i_parse_ini_string, (void*)&ifa_parse_ini_string, 3, 0, 0x0000000000000000LL, (void*)&ei_parse_ini_string);
+CallInfo ci_quotemeta((void*)&i_quotemeta, (void*)&ifa_quotemeta, 1, 0, 0x0000000000000000LL, (void*)&ei_quotemeta);
 CallInfo ci_imagefilltoborder((void*)&i_imagefilltoborder, (void*)&ifa_imagefilltoborder, 5, 0, 0x0000000000000000LL, (void*)&ei_imagefilltoborder);
 CallInfo ci_xhprof_frame_end((void*)&i_xhprof_frame_end, (void*)&ifa_xhprof_frame_end, 0, 0, 0x0000000000000000LL, (void*)&ei_xhprof_frame_end);
 CallInfo ci_xml_set_notation_decl_handler((void*)&i_xml_set_notation_decl_handler, (void*)&ifa_xml_set_notation_decl_handler, 2, 0, 0x0000000000000000LL, (void*)&ei_xml_set_notation_decl_handler);
@@ -90718,6 +90952,7 @@ CallInfo ci_openssl_pkey_export((void*)&i_openssl_pkey_export, (void*)&ifa_opens
 CallInfo ci_abs((void*)&i_abs, (void*)&ifa_abs, 1, 0, 0x0000000000000000LL, (void*)&ei_abs);
 CallInfo ci_restore_exception_handler((void*)&i_restore_exception_handler, (void*)&ifa_restore_exception_handler, 0, 0, 0x0000000000000000LL, (void*)&ei_restore_exception_handler);
 CallInfo ci_shell_exec((void*)&i_shell_exec, (void*)&ifa_shell_exec, 1, 0, 0x0000000000000000LL, (void*)&ei_shell_exec);
+CallInfo ci_spl_autoload_functions((void*)&i_spl_autoload_functions, (void*)&ifa_spl_autoload_functions, 0, 0, 0x0000000000000000LL, (void*)&ei_spl_autoload_functions);
 CallInfo ci_curl_multi_exec((void*)&i_curl_multi_exec, (void*)&ifa_curl_multi_exec, 2, 0, 0x0000000000000002LL, (void*)&ei_curl_multi_exec);
 CallInfo ci_htmlspecialchars((void*)&i_htmlspecialchars, (void*)&ifa_htmlspecialchars, 4, 0, 0x0000000000000000LL, (void*)&ei_htmlspecialchars);
 CallInfo ci_imagexbm((void*)&i_imagexbm, (void*)&ifa_imagexbm, 3, 0, 0x0000000000000000LL, (void*)&ei_imagexbm);
@@ -91139,6 +91374,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 321:
+      HASH_GUARD(0x43EA586FBFC6A141LL, spl_autoload_unregister) {
+        ci = &ci_spl_autoload_unregister;
+        return true;
+      }
       HASH_GUARD(0x6B03203C8A01C141LL, imap_timeout) {
         ci = &ci_imap_timeout;
         return true;
@@ -96810,6 +97049,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 4021:
+      HASH_GUARD(0x79D3B90DEF10AFB5LL, spl_autoload_extensions) {
+        ci = &ci_spl_autoload_extensions;
+        return true;
+      }
+      break;
     case 4022:
       HASH_GUARD(0x56C0CCB57BB6EFB6LL, magicksetimageunits) {
         ci = &ci_magicksetimageunits;
@@ -100154,6 +100399,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 6267:
+      HASH_GUARD(0x3B8E5E63B5E0F87BLL, spl_autoload_call) {
+        ci = &ci_spl_autoload_call;
+        return true;
+      }
+      break;
     case 6268:
       HASH_GUARD(0x11DFC3C9D916387CLL, hphp_splfileobject_ftruncate) {
         ci = &ci_hphp_splfileobject_ftruncate;
@@ -100191,6 +100442,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 6305:
       HASH_GUARD(0x1756D4437A4098A1LL, date_modify) {
         ci = &ci_date_modify;
+        return true;
+      }
+      HASH_GUARD(0x71B0B871CB62B8A1LL, spl_autoload) {
+        ci = &ci_spl_autoload;
         return true;
       }
       break;
@@ -101129,6 +101384,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 7005:
       HASH_GUARD(0x4888951358F53B5DLL, dom_document_get_elements_by_tag_name_ns) {
         ci = &ci_dom_document_get_elements_by_tag_name_ns;
+        return true;
+      }
+      break;
+    case 7007:
+      HASH_GUARD(0x48E30DE7A228BB5FLL, spl_autoload_register) {
+        ci = &ci_spl_autoload_register;
         return true;
       }
       break;
@@ -102089,6 +102350,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 7639:
       HASH_GUARD(0x638690DF6D06FDD7LL, imageconvolution) {
         ci = &ci_imageconvolution;
+        return true;
+      }
+      break;
+    case 7647:
+      HASH_GUARD(0x044D7013BDB33DDFLL, spl_autoload_functions) {
+        ci = &ci_spl_autoload_functions;
         return true;
       }
       break;

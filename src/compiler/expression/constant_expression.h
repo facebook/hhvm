@@ -37,7 +37,7 @@ public:
   virtual int getLocalEffects() const { return NoEffect; }
   virtual bool getScalarValue(Variant &value);
   virtual bool containsDynamicConstant(AnalysisResultPtr ar) const {
-    return m_dynamic;
+    return !m_valid || m_dynamic;
   }
 
   virtual unsigned getCanonHash() const;

@@ -504,6 +504,10 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
   }
   {
     Hdf error = config["ErrorHandling"];
+
+    /* Remove this, once its removed from production configs */
+    (void)error["NoInfiniteLoopDetection"].getBool();
+
     CallUserHandlerOnFatals = error["CallUserHandlerOnFatals"].getBool(true);
     MaxLoopCount = error["MaxLoopCount"].getInt32(0);
     NoInfiniteRecursionDetection =

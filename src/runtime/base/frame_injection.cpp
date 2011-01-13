@@ -220,7 +220,8 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
       bt.append(frame);
     }
   }
-  while (t) {
+  while (t && (RuntimeOption::InjectedStackTraceLimit < 0
+            || bt.size() < RuntimeOption::InjectedStackTraceLimit)) {
     Array frame = Array::Create();
 
     if (t->m_prev) {

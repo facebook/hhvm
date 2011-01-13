@@ -48,6 +48,7 @@ std::string RuntimeOption::LogAggregatorDatabase;
 int RuntimeOption::LogAggregatorSleepSeconds = 10;
 bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
 bool RuntimeOption::InjectedStackTrace = true;
+int RuntimeOption::InjectedStackTraceLimit = -1;
 bool RuntimeOption::NoSilencer = false;
 bool RuntimeOption::EnableApplicationLog = true;
 bool RuntimeOption::CallUserHandlerOnFatals = true;
@@ -733,6 +734,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     LightProcessCount = server["LightProcessCount"].getInt32(0);
 
     InjectedStackTrace = server["InjectedStackTrace"].getBool(true);
+    InjectedStackTraceLimit = server["InjectedStackTraceLimit"].getInt32(-1);
 
     ForceServerNameToHeader = server["ForceServerNameToHeader"].getBool();
   }

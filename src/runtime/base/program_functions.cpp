@@ -51,6 +51,7 @@
 #include <runtime/eval/debugger/debugger_client.h>
 #include <runtime/base/fiber_async_func.h>
 #include <runtime/base/util/simple_counter.h>
+#include <runtime/base/util/extended_logger.h>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
@@ -264,6 +265,10 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
   } catch (const UncatchableException &e) {
     if (RuntimeOption::ServerStackTrace) {
       errorMsg = e.what();
+    } else if (RuntimeOption::InjectedStackTrace) {
+      errorMsg = e.getMessage();
+      errorMsg += "\n";
+      errorMsg += ExtendedLogger::StringOfStackTrace(*e.getBackTrace());
     } else {
       errorMsg = e.getStackTrace().hexEncode();
       errorMsg += " ";

@@ -91,6 +91,7 @@ public:
   void setInlining(bool f) { m_inlining = f; }
   void setDirectInvoke() { m_directInvoke = true; }
   bool hasDirectInvoke() const { return m_directInvoke; }
+  bool isGenerator() const;
 
   void setInlineSameContext(bool f) { m_inlineSameContext = f; }
   bool getInlineSameContext() const { return m_inlineSameContext; }

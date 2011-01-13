@@ -22,9 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_sse3783d41("getSubPath");
-StaticString s_sys_sse3f54806("query");
-StaticString s_sys_sse41ca304("addString");
 StaticString s_sys_sse48e511b("setattribute");
 StaticString s_sys_sse4a1cad7("getVersion");
 StaticString s_sys_sse5340a31("mapping");
@@ -84,6 +81,10 @@ StaticString s_sys_ssf88f9505("errorinfo");
 StaticString s_sys_ssf976719e("args");
 StaticString s_sys_ssf99443fd("openFile");
 StaticString s_sys_ssfab32402(" {main}");
+StaticString s_sys_ssfb10fd8c("parent");
+StaticString s_sys_ssfb433b54("nextrowset");
+StaticString s_sys_ssfb6412d4("): failed to open dir");
+StaticString s_sys_ssfb726449("Cannot rewind on a Continuation object");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

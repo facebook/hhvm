@@ -234,7 +234,7 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
 // create a generator function with original name and parameters
 void create_generator(Parser *_p, Token &out, Token &params,
                       Token &name, const std::string &closureName,
-                      const char *clsname, Token *modifiers) {
+                      const char *clsname, Token *modifiers, bool getArgs) {
   _p->pushFuncLocation();
   if (clsname) {
     _p->onMethodStart(name, *modifiers);
@@ -256,12 +256,21 @@ void create_generator(Parser *_p, Token &out, Token &params,
     Token param2;  _p->onCallParam(param2, &param1, call, 0);
 
     Token params;
-    if (clsname) {
+    if (clsname || getArgs) {
       Token cname;   cname.setText("hphp_get_this");
       Token empty;
       Token call;    _p->onCall(call, 0, cname, empty, NULL);
       Token param3;  _p->onCallParam(param3, &param2, call, 0);
-      params = param3;
+
+      if (getArgs) {
+        Token cname;   cname.setText("func_get_args");
+        Token empty;
+        Token call;    _p->onCall(call, 0, cname, empty, NULL);
+        Token param4;  _p->onCallParam(param4, &param3, call, 0);
+        params = param4;
+      } else {
+        params = param3;
+      }
     } else {
       params = param2;
     }

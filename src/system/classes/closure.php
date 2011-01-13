@@ -30,15 +30,17 @@ class Closure {
  */
 class Continuation extends Closure implements Iterator {
   private $obj;
+  private $args;
   public $label = 0;
   private $done = false;
   private $index = -1;
   private $value;
   private $running = false;
 
-  public function __construct($func, $vars, $obj = null) {
+  public function __construct($func, $vars, $obj = null, $args = array()) {
     parent::__construct($func, $vars);
     $this->obj = $obj;
+    $this->args = $args;
   }
   public function update($label, $value, $vars) {
     $this->label = $label;
@@ -47,6 +49,19 @@ class Continuation extends Closure implements Iterator {
   }
   public function done() {
     $this->done = true;
+  }
+
+  public function num_args() {
+    return count($this->args);
+  }
+  public function get_args() {
+    return $this->args;
+  }
+  public function get_arg($id) {
+    if ($id < 0 || $id >= count($this->args)) {
+      return false;
+    }
+    return $this->args[$id];
   }
 
   public function current() {

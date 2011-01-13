@@ -22,10 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ssfb10fd8c("parent");
-StaticString s_sys_ssfb433b54("nextrowset");
-StaticString s_sys_ssfb6412d4("): failed to open dir");
-StaticString s_sys_ssfb726449("Cannot rewind on a Continuation object");
 StaticString s_sys_ssfbb3eb52("addUrl");
 StaticString s_sys_ssfc2d4779("getType");
 StaticString s_sys_ssfc63c2bb("ReflectionClass");
@@ -44,6 +40,7 @@ StaticString s_sys_ss05c2645c("substringData");
 StaticString s_sys_ss0626a7ce("uasort");
 StaticString s_sys_ss06d80b5c("returnsReference");
 StaticString s_sys_ss0723515e("__wakeup");
+StaticString s_sys_ss07445cb3("num_args");
 StaticString s_sys_ss077ab997("getFilename");
 StaticString s_sys_ss079dd82d("InvalidArgumentException");
 StaticString s_sys_ss0915cca1("registerNodeClass");
@@ -71,6 +68,7 @@ StaticString s_sys_ss0fc37e03("attributes");
 StaticString s_sys_ss0fe15fdf("getServerByKey");
 StaticString s_sys_ss102b70c6("setIDAttribute");
 StaticString s_sys_ss106b4dd7("prependByKey");
+StaticString s_sys_ss11603299("get_arg");
 StaticString s_sys_ss11bc49d2("isReadable");
 StaticString s_sys_ss11e815e7("xinclude");
 StaticString s_sys_ss1247a693("item");
@@ -84,6 +82,9 @@ StaticString s_sys_ss13622d08("removeChild");
 StaticString s_sys_ss143f106a("getFrame");
 StaticString s_sys_ss1491baad("label");
 StaticString s_sys_ss14e5c43c("running");
+StaticString s_sys_ss14eade34("hasChildNodes");
+StaticString s_sys_ss155366df("message");
+StaticString s_sys_ss15921d14("areConfusable");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -49,6 +49,12 @@ public:
   virtual bool refReturn() const { return false; }
   virtual Array getDefinedVariables() const;
 
+  /**
+   * Return the continuation object if it is in a generator function,
+   * NULL otherwise.
+   */
+  virtual ObjectData *getContinuation() const { return NULL; }
+
   void setBreak(int n) { m_breakLevel = n; }
   void decBreak() {
     if (m_breakLevel > 0) {
@@ -136,6 +142,7 @@ public:
   virtual Variant &getImpl(CStrRef s);
   void incArgc() { m_argc++; }
   virtual Array getDefinedVariables() const;
+  virtual ObjectData *getContinuation() const;
 private:
   Array m_statics;
   const FunctionStatement *m_func;

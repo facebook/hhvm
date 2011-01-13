@@ -30,6 +30,7 @@ namespace HPHP {
 // 1. Static Strings
 
 // 2. Static Arrays
+extern StaticArray s_sys_sa00000000;
 
 // 3. Constants
 

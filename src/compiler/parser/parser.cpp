@@ -108,7 +108,8 @@ extern void prepare_generator(Parser *_p, Token &stmt, Token &params,
                               int count);
 extern void create_generator(Parser *_p, Token &out, Token &params,
                              Token &name, const std::string &closureName,
-                             const char *clsname, Token *modifiers);
+                             const char *clsname, Token *modifiers,
+                             bool getArgs);
 extern void transform_yield(Parser *_p, Token &stmts, int index, Token *expr);
 
 namespace HPHP {
@@ -326,6 +327,11 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
                        dynamic_pointer_cast<ExpressionList>(params->exp),
                        clsExp);
   } else {
+    const string &s = name.text();
+    if (s == "func_num_args" || s == "func_get_args" || s == "func_get_arg") {
+      m_hasCallToGetArgs.back() = true;
+    }
+
     SimpleFunctionCallPtr call
       (new RealSimpleFunctionCall
        (BlockScopePtr(), getLocation(),
@@ -606,6 +612,7 @@ void Parser::onFunctionStart(Token &name) {
   newScope();
   m_generators.push_back(0);
   m_funcName = name.text();
+  m_hasCallToGetArgs.push_back(false);
 }
 
 void Parser::onMethodStart(Token &name, Token &mods) {
@@ -627,6 +634,9 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
   int yieldCount = m_generators.back();
   m_generators.pop_back();
 
+  bool hasCallToGetArgs = m_hasCallToGetArgs.back();
+  m_hasCallToGetArgs.pop_back();
+
   FunctionStatementPtr func;
   if (yieldCount > 0) {
     string closureName = getClosureName();
@@ -646,7 +656,8 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
     if (func->ignored()) {
       out->stmt = NEW_STMT0(StatementList);
     } else {
-      create_generator(this, out, params, name, closureName, NULL, NULL);
+      create_generator(this, out, params, name, closureName, NULL, NULL,
+                       hasCallToGetArgs);
     }
 
   } else {
@@ -795,6 +806,9 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   int yieldCount = m_generators.back();
   m_generators.pop_back();
 
+  bool hasCallToGetArgs = m_hasCallToGetArgs.back();
+  m_hasCallToGetArgs.pop_back();
+
   MethodStatementPtr mth;
   if (yieldCount > 0) {
     string closureName = getClosureName();
@@ -814,7 +828,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
       completeScope(mth->onInitialParse(m_ar, m_file, true));
     }
     create_generator(this, out, params, name, closureName, m_clsName.c_str(),
-                     &modifiers);
+                     &modifiers, hasCallToGetArgs);
 
   } else {
     mth = NEW_STMT(MethodStatement, exp, ref->num(), name->text(),

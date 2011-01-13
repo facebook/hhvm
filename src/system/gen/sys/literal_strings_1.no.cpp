@@ -84,6 +84,7 @@ StaticString s_sys_ssb17013df("openURI");
 StaticString s_sys_ssb1c4aa6f("getATime");
 StaticString s_sys_ssb303f411("__isset");
 StaticString s_sys_ssb30ca8a5("setMaxLineLen");
+StaticString s_sys_ssb3a5c1b3("current");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

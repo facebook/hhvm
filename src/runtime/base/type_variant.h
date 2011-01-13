@@ -281,7 +281,7 @@ class Variant {
   DataType toNumeric(int64 &ival, double &dval, bool checkString = false)
     const;
   bool isScalar() const;
-  bool isObject () const {
+  bool isObject() const {
     return getType() == KindOfObject;
   }
   bool isIntVal() const {

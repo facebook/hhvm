@@ -214,6 +214,8 @@ private:
   // parser output
   StatementListPtr m_tree;
 
+  std::vector<bool> m_hasCallToGetArgs;
+
   void pushComment();
   std::string popComment();
 

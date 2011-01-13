@@ -22,8 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_sscdbb2d67("getMethod");
-StaticString s_sys_ssce568670("appendByKey");
 StaticString s_sys_ssce80f767("isProtected");
 StaticString s_sys_ssced27431("increment");
 StaticString s_sys_sscedef5dc("ini");
@@ -84,6 +82,9 @@ StaticString s_sys_sse1ffa7cf("hasMethod");
 StaticString s_sys_sse26c5698("addFile");
 StaticString s_sys_sse27b119d("fgetc");
 StaticString s_sys_sse2be8bf1("endComment");
+StaticString s_sys_sse3783d41("getSubPath");
+StaticString s_sys_sse3f54806("query");
+StaticString s_sys_sse41ca304("addString");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

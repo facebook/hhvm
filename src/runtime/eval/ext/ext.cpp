@@ -208,6 +208,9 @@ Variant EvalFuncGetArg::InvokeImpl(VariableEnvironment &env,
   switch (size) {
   case 1: {
     int n = params.rvalAt(0);
+    if (ObjectData *cont = env.getContinuation()) {
+      return cont->o_invoke("get_arg", CREATE_VECTOR1(n));
+    }
     if (n >= 0 && n < env.getParams().size()) {
       return env.getParams().rvalAt(n);
     }
@@ -222,6 +225,9 @@ Variant EvalFuncGetArgs::InvokeImpl(VariableEnvironment &env,
   int size = params.size();
   switch (size) {
   case 0: {
+    if (ObjectData *cont = env.getContinuation()) {
+      return cont->o_invoke("get_args", Array::Create());
+    }
     Array res = Array::Create();
     for (ArrayIter iter(env.getParams()); !iter.end(); iter.next()) {
       res.append(iter.second());
@@ -234,6 +240,9 @@ Variant EvalFuncGetArgs::InvokeImpl(VariableEnvironment &env,
 
 Variant EvalFuncNumArgs::InvokeImpl(VariableEnvironment &env,
                                     CArrRef params) {
+  if (ObjectData *cont = env.getContinuation()) {
+    return cont->o_invoke("num_args", Array::Create());
+  }
   return env.getParams().size();
 }
 

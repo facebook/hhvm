@@ -21,6 +21,7 @@
 #include <runtime/eval/ast/method_statement.h>
 #include <runtime/eval/ast/class_statement.h>
 #include <runtime/eval/runtime/eval_state.h>
+#include <util/parser/parser.h>
 
 namespace HPHP {
 namespace Eval {
@@ -228,6 +229,18 @@ Variant &FuncScopeVariableEnvironment::getImpl(CStrRef s) {
 
 Array FuncScopeVariableEnvironment::getDefinedVariables() const {
   return m_alist.toArray();
+}
+
+ObjectData *FuncScopeVariableEnvironment::getContinuation() const {
+  const vector<ParameterPtr> &params = m_func->getParams();
+  if (m_func->name().find('0') == 0 && params.size() == 1
+   && params[0]->getName().find(CONTINUATION_OBJECT_NAME) == 0) {
+    Array args = getParams();
+    ASSERT(args.size() == 1);
+    ObjectData *obj = args[0].getObjectData();
+    if (obj->o_instanceof("Continuation")) return obj;
+  }
+  return NULL;
 }
 
 MethScopeVariableEnvironment::

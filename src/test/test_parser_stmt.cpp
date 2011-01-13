@@ -663,7 +663,8 @@ bool TestParserStmt::TestYieldStatement() {
 
   V("<?php function foo() { yield break;}",
     "function foo() {\n"
-    "return new Continuation('02316968161694270338_1', get_defined_vars());\n"
+    "return new Continuation('02316968161694270338_1', "
+                            "get_defined_vars());\n"
     "}\n"
     "function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
     "extract($" CONTINUATION_OBJECT_NAME "->getVars(), EXTR_REFS);\n"
@@ -682,7 +683,8 @@ bool TestParserStmt::TestYieldStatement() {
   V("<?php function foo() { yield 123;}",
 
     "function foo() {\n"
-    "return new Continuation('02316968161694270338_1', get_defined_vars());\n"
+    "return new Continuation('02316968161694270338_1', "
+                            "get_defined_vars());\n"
     "}\n"
     "function (Continuation $" CONTINUATION_OBJECT_NAME ") {\n"
     "extract($" CONTINUATION_OBJECT_NAME "->getVars(), EXTR_REFS);\n"

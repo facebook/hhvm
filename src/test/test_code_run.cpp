@@ -15993,6 +15993,14 @@ bool TestCodeRun::TestYield() {
         "int(2)\n"
        );
 
+  MVCRO("<?php\n"
+        "function f() { yield func_num_args(); yield func_get_arg(1); }\n"
+        "foreach (f(1, 2, 3) as $v) { var_dump($v); }\n",
+
+        "int(3)\n"
+        "int(2)\n"
+       );
+
   return true;
 }
 

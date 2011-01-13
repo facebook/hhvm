@@ -225,6 +225,11 @@ bool FunctionScope::isReferenceVariableArgument() const {
   return m_attribute & FileScope::ReferenceVariableArgument;
 }
 
+bool FunctionScope::isGenerator() const {
+  return name()[0] == '0' && m_paramNames.size() == 1
+      && m_paramNames[0] == CONTINUATION_OBJECT_NAME;
+}
+
 void FunctionScope::setVariableArgument(int reference) {
   m_attribute |= FileScope::VariableArgument;
   if (reference) {

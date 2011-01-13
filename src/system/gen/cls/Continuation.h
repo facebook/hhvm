@@ -30,6 +30,7 @@ class c_Continuation : public c_Closure {
 
   // Properties
   Variant m_obj;
+  Variant m_args;
   Variant m_label;
   bool m_done;
   int64 m_index;
@@ -68,14 +69,17 @@ class c_Continuation : public c_Closure {
   public:
   DECLARE_INVOKES_FROM_EVAL
   void init();
-  public: void t___construct(Variant v_func, Variant v_vars, Variant v_obj = null);
-  public: c_Continuation *create(Variant v_func, Variant v_vars, Variant v_obj = null);
+  public: void t___construct(Variant v_func, Variant v_vars, Variant v_obj = null, Variant v_args = s_sys_sa00000000);
+  public: c_Continuation *create(Variant v_func, Variant v_vars, Variant v_obj = null, Variant v_args = s_sys_sa00000000);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: void t_update(CVarRef v_label, CVarRef v_value, CVarRef v_vars);
   public: void t_done();
+  public: int t_num_args();
+  public: Variant t_get_args();
+  public: Variant t_get_arg(CVarRef v_id);
   public: Variant t_current();
   public: int64 t_key();
   public: void t_next();
@@ -84,8 +88,11 @@ class c_Continuation : public c_Closure {
   DECLARE_METHOD_INVOKE_HELPERS(next);
   DECLARE_METHOD_INVOKE_HELPERS(key);
   DECLARE_METHOD_INVOKE_HELPERS(valid);
+  DECLARE_METHOD_INVOKE_HELPERS(get_args);
+  DECLARE_METHOD_INVOKE_HELPERS(get_arg);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(done);
+  DECLARE_METHOD_INVOKE_HELPERS(num_args);
   DECLARE_METHOD_INVOKE_HELPERS(current);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
   DECLARE_METHOD_INVOKE_HELPERS(update);

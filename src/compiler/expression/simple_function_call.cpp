@@ -1686,6 +1686,12 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
     }
     if (m_name == "func_num_args") {
       FunctionScopePtr func = getFunctionScope();
+      if (func && func->isGenerator()) {
+        cg_printf("%s%s.%sinvoke(\"num_args\", Array::Create())",
+                  Option::VariablePrefix, CONTINUATION_OBJECT_NAME,
+                  Option::ObjectPrefix);
+        return;
+      }
       if (!func || func->isVariableArgument()) {
         cg_printf("num_args");
       } else {
@@ -1699,10 +1705,27 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
       {
         FunctionScopePtr func = getFunctionScope();
         if (func) {
+          if (func->isGenerator()) {
+            cg_printf("%s%s.%sinvoke(\"%s\", ",
+                      Option::VariablePrefix, CONTINUATION_OBJECT_NAME,
+                      Option::ObjectPrefix,
+                      m_name == "func_get_args" ? "get_args" : "get_arg");
+            cg_printf("Array(ArrayInit(%d, true)",
+                      m_params ? m_params->getCount() : 0);
+            if (m_params) {
+              for (int i = 0; i < m_params->getCount(); i++) {
+                cg_printf(".set(");
+                (*m_params)[i]->outputCPP(cg, ar);
+                cg_printf(")");
+              }
+            }
+            cg_printf(".create()))");
+            return;
+          }
           cg_printf("%s(", m_name.c_str());
           func->outputCPPParamsCall(cg, ar, true);
           if (m_params) {
-            cg_printf(",");
+            cg_printf(", ");
             m_params->outputCPP(cg, ar);
           }
           cg_printf(")");

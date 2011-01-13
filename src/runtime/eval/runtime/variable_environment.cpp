@@ -275,7 +275,12 @@ bool NestedVariableEnvironment::exists(CStrRef s) const {
 }
 
 Variant &NestedVariableEnvironment::getImpl(CStrRef s) {
-  return m_ext->get(s);
+  VariableIndex::SuperGlobal sg = VariableIndex::isSuperGlobal(s);
+  if (sg != VariableIndex::Normal && sg != VariableIndex::Globals) {
+    return get_globals()->get(s);
+  } else {
+    return m_ext->get(s);
+  }
 }
 
 Array NestedVariableEnvironment::getParams() const {

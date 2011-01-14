@@ -702,6 +702,11 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
           break;
         }
         case DefinedFunction: {
+          if (symbol == "false" ||
+              symbol == "true" ||
+              symbol == "null") {
+            return CONSTANT("true");
+          }
           ConstantTablePtr constants = ar->getConstants();
           // system constant
           if (constants->isPresent(symbol) && !constants->isDynamic(symbol)) {

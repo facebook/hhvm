@@ -3603,6 +3603,17 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
   cg_printf("NULL,\n"); // methods
   cg_printf("NULL,\n"); // properties
   // system constants
+  int len;
+  string output = SymbolTable::getEscapedText(false, len);
+  cg_printf("\"false\", (const char *)%d, \"%s\",\n",
+            len, output.c_str());
+  output = SymbolTable::getEscapedText(true, len);
+  cg_printf("\"true\", (const char *)%d, \"%s\",\n",
+            len, output.c_str());
+  output = SymbolTable::getEscapedText(null, len);
+  cg_printf("\"null\", (const char *)%d, \"%s\",\n",
+            len, output.c_str());
+
   m_constants->outputCPPClassMap(cg, ar);
 
   // user functions

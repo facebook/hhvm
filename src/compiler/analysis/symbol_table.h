@@ -285,6 +285,7 @@ public:
   FunctionScopeRawPtr getFunctionScope();
   ClassScopeRawPtr getClassScope();
   FileScopeRawPtr getFileScope();
+  static std::string getEscapedText(Variant v, int &len);
 protected:
   Symbol *genSymbol(const std::string &name, bool konst);
   typedef std::map<std::string,Symbol> StringToSymbolMap;
@@ -294,7 +295,6 @@ protected:
   StringToSymbolMap     m_symbolMap;
 
   void countTypes(std::map<std::string, int> &counts);
-  std::string getEscapedText(Variant v, int &len);
 private:
   bool m_const;
 };

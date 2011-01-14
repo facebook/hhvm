@@ -25,26 +25,26 @@ IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(VarAssocPair);
 VarAssocPair::VarAssocPair(CStrRef s, VarAssocPair *next /* = NULL */)
   : m_name(s), m_next(next) {}
 
-AssocList::AssocList() : m_list(NULL) {}
+AssocList::AssocList() : m_list(NULL), m_count(0) {}
 AssocList::~AssocList() {
-  VarAssocPair *reverse = NULL;
-  VarAssocPair *vp = m_list;
-  while (vp) {
-    VarAssocPair *tp = vp->m_next;
-    vp->m_next = reverse;
-    reverse = vp;
-    vp = tp;
-  }
-  vp = reverse;
-  while (vp) {
-    VarAssocPair *tp = vp->m_next;
+  if (m_list == 0) return;
+  int start = rand() % m_count;
+  VarAssocPair *vp;
+  int i = 0;
+  for (vp = m_list; vp && i < start; vp = vp->m_next) i++;
+  VarAssocPair *startvp = vp;
+  assert(startvp);
+  for (; vp; vp = vp->m_next) {
     DELETE(VarAssocPair)(vp);
-    vp = tp;
+  }
+  for (vp = m_list; vp != startvp; vp = vp->m_next) {
+    DELETE(VarAssocPair)(vp);
   }
 }
 
 Variant &AssocList::prepend(CStrRef name) {
   m_list = NEW(VarAssocPair)(name, m_list);
+  m_count++;
   return m_list->var();
 }
 

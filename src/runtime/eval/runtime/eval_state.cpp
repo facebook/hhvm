@@ -179,21 +179,6 @@ void RequestEvalState::destructObject(EvalObjectData *eo) {
 }
 
 void RequestEvalState::destructObjects() {
-  // scan the global array in reverse order for objects and destruct it if
-  // refcount is 1.
-  Array g = get_global_array_wrapper();
-  if (!g.empty()) {
-    for (ssize_t iter = g->iter_end();
-         iter != ArrayData::invalid_index;
-         iter = g->iter_rewind(iter)) {
-      CVarRef value = g->getValueRef(iter);
-      if (value.isObject()) {
-        EvalObjectData *eo =
-          dynamic_cast<EvalObjectData*>(value.getObjectData());
-        if (eo && eo->getCount() == 1) destructObject(eo);
-      }
-    }
-  }
   // destruct the remaining objects
   while (!m_livingObjects.empty()) {
     EvalObjectData *eo = *m_livingObjects.begin();

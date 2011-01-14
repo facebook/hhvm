@@ -880,6 +880,7 @@ class Variant {
   Variant array_iter_reset();
   Variant array_iter_prev();
   Variant array_iter_current() const;
+  Variant array_iter_current_ref();
   Variant array_iter_next();
   Variant array_iter_end();
   Variant array_iter_key() const;

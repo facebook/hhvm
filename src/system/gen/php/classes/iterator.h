@@ -35,6 +35,7 @@
 #include <cls/DirectoryIterator.h>
 #include <cls/IteratorAggregate.h>
 #include <cls/RecursiveIteratorIterator.h>
+#include <cls/MutableArrayIterator.h>
 #include <cls/FilterIterator.h>
 #include <php/classes/arrayaccess.h>
 #include <php/classes/splfile.h>
@@ -59,6 +60,8 @@ Object co_DirectoryIterator(CArrRef params, bool init = true);
 Object coo_DirectoryIterator();
 Object co_RecursiveIteratorIterator(CArrRef params, bool init = true);
 Object coo_RecursiveIteratorIterator();
+Object co_MutableArrayIterator(CArrRef params, bool init = true);
+Object coo_MutableArrayIterator();
 Object co_FilterIterator(CArrRef params, bool init = true);
 Object coo_FilterIterator();
 

@@ -324,8 +324,8 @@ interface Iterator extends Traversable {
  *
  */
 class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
-  private $arr;
-  private $flags;
+  protected $arr;
+  protected $flags;
 
   public function __construct($array, $flags = 0) {
     $this->arr = $array;
@@ -631,6 +631,17 @@ class ArrayIterator implements ArrayAccess, SeekableIterator, Countable {
  */
   public function valid() {
     return current($this->arr) !== false;
+  }
+}
+
+class MutableArrayIterator extends ArrayIterator {
+  public function __construct(&$array, $flags = 0) {
+    $this->arr = &$array;
+    $this->flags = $flags;
+  }
+
+  public function &currentRef() {
+    return hphp_current_ref($this->arr);
   }
 }
 

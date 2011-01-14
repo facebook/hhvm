@@ -272,6 +272,13 @@ inline Variant f_current(Variant array) {
   array.array_iter_dirty_check();
   return array.array_iter_current();
 }
+inline Variant f_hphp_current_ref(Variant array) {
+  if (!array.isArray()) {
+    throw_bad_array_exception();
+    return false;
+  }
+  return ref(array.array_iter_current_ref());
+}
 inline Variant f_next(Variant array) {
   array.array_iter_dirty_check();
   return array.array_iter_next();

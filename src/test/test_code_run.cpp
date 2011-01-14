@@ -2279,6 +2279,51 @@ bool TestCodeRun::TestArrayIterator() {
       "function bar() { var_dump(__FUNCTION__); }\n"
       "reset($arr);\n"
       "while ($func = each($arr)) { $f = $func[1]; $f(); }\n");
+  MVCR("<?php "
+       "function test($a) {"
+       "  $it = new ArrayIterator($a);"
+       "  while ($it->valid()) {"
+       "    var_dump($it->key());"
+       "    var_dump($it->current());"
+       "    $it->next();"
+       "  }"
+       "}"
+       "test(array('a' => 'x',"
+       "           false => 'y',"
+       "           '1' => false,"
+       "           null => 'z',"
+       "           'c' => 'w'));");
+
+  // MutableArrayIterator
+  MVCRO("<?php\n"
+        "$a = array(1, 2, 3);\n"
+        "foreach ($a as $k1 => &$v1) { $v1 += $k1; }\n"
+        "var_dump($a);\n"
+        "$a = array(1, 2, 3);\n"
+        "for ($o = new MutableArrayIterator($a); $o->valid(); $o->next()) {\n"
+        "  $k2 = $o->key();\n"
+        "  $v2 = &$o->currentRef();\n"
+        "  $v2 += $k2;\n"
+        "}\n"
+        "var_dump($a);\n",
+
+        "array(3) {\n"
+        "  [0]=>\n"
+        "  int(1)\n"
+        "  [1]=>\n"
+        "  int(3)\n"
+        "  [2]=>\n"
+        "  &int(5)\n"
+        "}\n"
+        "array(3) {\n"
+        "  [0]=>\n"
+        "  int(1)\n"
+        "  [1]=>\n"
+        "  int(3)\n"
+        "  [2]=>\n"
+        "  &int(5)\n"
+        "}\n");
+
   return true;
 }
 

@@ -1086,6 +1086,24 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "hphp_current_ref",
+    'desc'   => "Similar to current(), but hphp_current_ref() returns a reference to the current value in the array.",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Variant | Reference,
+      'desc'   => "Reference to the current value in the array.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "array",
+        'type'   => Variant | Reference,
+        'desc'   => "The array.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "next",
     'desc'   => "next() behaves like current(), with one difference. It advances the internal array pointer one place forward before returning the element value. That means it returns the next array value and advances the internal array pointer by one.",
     'flags'  =>  HasDocComment,

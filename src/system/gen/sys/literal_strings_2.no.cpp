@@ -36,7 +36,6 @@ StaticString s_sys_ssb8f33aef("writeElementNS");
 StaticString s_sys_ssba65d5ee("append");
 StaticString s_sys_ssbac40e3d("fseek");
 StaticString s_sys_ssbad150b1("pconnect");
-StaticString s_sys_ssbb861135("\000ArrayIterator\000arr", 18);
 StaticString s_sys_ssbc297b7f("OverflowException");
 StaticString s_sys_ssbc590ceb("isArray");
 StaticString s_sys_ssbd66b015("fetcharray");
@@ -85,6 +84,7 @@ StaticString s_sys_sscd0bfaee("getExtension");
 StaticString s_sys_sscd5dc41e("ReflectionParameter");
 StaticString s_sys_sscdbb2d67("getMethod");
 StaticString s_sys_ssce568670("appendByKey");
+StaticString s_sys_ssce80f767("isProtected");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

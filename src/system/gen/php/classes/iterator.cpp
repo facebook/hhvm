@@ -67,39 +67,23 @@ Variant &c_ArrayIterator::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ArrayIterator
 void c_ArrayIterator::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_arr)) props.add(NAMSTR(s_sys_ssbb861135, "\000ArrayIterator\000arr"), m_arr.isReferenced() ? ref(m_arr) : m_arr, true);
-  if (!pubOnly) if (isInitialized(m_flags)) props.add(NAMSTR(s_sys_ss3e0fa602, "\000ArrayIterator\000flags"), m_flags.isReferenced() ? ref(m_flags) : m_flags, true);
+  if (!pubOnly) if (isInitialized(m_arr)) props.set(NAMSTR(s_sys_ss7cb08d68, "arr"), m_arr.isReferenced() ? ref(m_arr) : m_arr, true);
+  if (!pubOnly) if (isInitialized(m_flags)) props.set(NAMSTR(s_sys_ss28fae70d, "flags"), m_flags.isReferenced() ? ref(m_flags) : m_flags, true);
   c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ArrayIterator
 void c_ArrayIterator::o_setArray(CArrRef props) {
-  props->load(NAMSTR(s_sys_ssbb861135, "\000ArrayIterator\000arr"), m_arr);
-  props->load(NAMSTR(s_sys_ss3e0fa602, "\000ArrayIterator\000flags"), m_flags);
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ArrayIterator
 Variant * c_ArrayIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x3D5870E53BF89873LL, ArrayIterator) { return o_realPropPrivate(prop, flags); }
-      break;
-    default:
-      break;
-  }
   return o_realPropPublic(prop, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_ArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ArrayIterator
 Variant * c_ArrayIterator::o_realPropPublic(CStrRef s, int flags) const {
-  return c_ObjectData::o_realPropPublic(s, flags);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ArrayIterator
-Variant * c_ArrayIterator::o_realPropPrivate(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
@@ -111,6 +95,11 @@ Variant * c_ArrayIterator::o_realPropPrivate(CStrRef s, int flags) const {
     default:
       break;
   }
+  return c_ObjectData::o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ArrayIterator
+Variant * c_ArrayIterator::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ArrayIterator
@@ -1516,7 +1505,7 @@ bool c_ArrayIterator::t_valid() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 923 */
+/* SRC: classes/iterator.php line 934 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_AppendIterator
 Variant c_AppendIterator::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
@@ -2117,7 +2106,7 @@ struct ObjectStaticCallbacks cw_AppendIterator = {
 void c_AppendIterator::init() {
   m_iterators = null;
 }
-/* SRC: classes/iterator.php line 926 */
+/* SRC: classes/iterator.php line 937 */
 void c_AppendIterator::t___construct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__construct);
   bool oldInCtor = gasInCtor(true);
@@ -2128,7 +2117,7 @@ void c_AppendIterator::t___construct() {
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 941 */
+/* SRC: classes/iterator.php line 952 */
 void c_AppendIterator::t_append(CVarRef v_it) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::append);
   if(!v_it.instanceof(NAMSTR(s_sys_ss2fd353cc, "iterator"))) {
@@ -2143,7 +2132,7 @@ void c_AppendIterator::t_append(CVarRef v_it) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 955 */
+/* SRC: classes/iterator.php line 966 */
 Variant c_AppendIterator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::getInnerIterator);
   {
@@ -2154,7 +2143,7 @@ Variant c_AppendIterator::t_getinneriterator() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 969 */
+/* SRC: classes/iterator.php line 980 */
 void c_AppendIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::rewind);
   {
@@ -2187,7 +2176,7 @@ void c_AppendIterator::t_rewind() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 985 */
+/* SRC: classes/iterator.php line 996 */
 bool c_AppendIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::valid);
   {
@@ -2208,7 +2197,7 @@ bool c_AppendIterator::t_valid() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 998 */
+/* SRC: classes/iterator.php line 1009 */
 Variant c_AppendIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::current);
   {
@@ -2231,7 +2220,7 @@ Variant c_AppendIterator::t_current() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 1016 */
+/* SRC: classes/iterator.php line 1027 */
 Variant c_AppendIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::key);
   {
@@ -2254,7 +2243,7 @@ Variant c_AppendIterator::t_key() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 1030 */
+/* SRC: classes/iterator.php line 1041 */
 void c_AppendIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::next);
   {
@@ -2351,7 +2340,7 @@ void c_AppendIterator::t_next() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 1048 */
+/* SRC: classes/iterator.php line 1059 */
 Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__call);
   {
@@ -2367,7 +2356,7 @@ Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 755 */
+/* SRC: classes/iterator.php line 766 */
 const int64 q_RecursiveDirectoryIterator_CURRENT_AS_SELF = 0LL;
 const int64 q_RecursiveDirectoryIterator_CURRENT_AS_FILEINFO = 16LL;
 const int64 q_RecursiveDirectoryIterator_CURRENT_AS_PATHNAME = 32LL;
@@ -3135,7 +3124,7 @@ struct ObjectStaticCallbacks cw_RecursiveDirectoryIterator = {
 void c_RecursiveDirectoryIterator::init() {
   c_DirectoryIterator::init();
 }
-/* SRC: classes/iterator.php line 764 */
+/* SRC: classes/iterator.php line 775 */
 void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags //  = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::__construct);
@@ -3158,73 +3147,73 @@ void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 772 */
+/* SRC: classes/iterator.php line 783 */
 Variant c_RecursiveDirectoryIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::current);
   return x_hphp_recursivedirectoryiterator_current(((p_RecursiveDirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 784 */
+/* SRC: classes/iterator.php line 795 */
 Variant c_RecursiveDirectoryIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::key);
   return x_hphp_recursivedirectoryiterator_key(((p_RecursiveDirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 796 */
+/* SRC: classes/iterator.php line 807 */
 void c_RecursiveDirectoryIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::next);
   x_hphp_recursivedirectoryiterator_next(((p_RecursiveDirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 808 */
+/* SRC: classes/iterator.php line 819 */
 void c_RecursiveDirectoryIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::rewind);
   x_hphp_recursivedirectoryiterator_rewind(((p_RecursiveDirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 812 */
+/* SRC: classes/iterator.php line 823 */
 void c_RecursiveDirectoryIterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::seek);
   x_hphp_recursivedirectoryiterator_seek(((p_RecursiveDirectoryIterator&)GET_THIS()), toInt64(v_position));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 816 */
+/* SRC: classes/iterator.php line 827 */
 String c_RecursiveDirectoryIterator::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::__toString);
   return x_hphp_recursivedirectoryiterator___tostring(((p_RecursiveDirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 820 */
+/* SRC: classes/iterator.php line 831 */
 bool c_RecursiveDirectoryIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::valid);
   return x_hphp_recursivedirectoryiterator_valid(((p_RecursiveDirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 833 */
+/* SRC: classes/iterator.php line 844 */
 bool c_RecursiveDirectoryIterator::t_haschildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::hasChildren);
   return x_hphp_recursivedirectoryiterator_haschildren(((p_RecursiveDirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 846 */
+/* SRC: classes/iterator.php line 857 */
 Object c_RecursiveDirectoryIterator::t_getchildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getChildren);
   return x_hphp_recursivedirectoryiterator_getchildren(((p_RecursiveDirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 860 */
+/* SRC: classes/iterator.php line 871 */
 String c_RecursiveDirectoryIterator::t_getsubpath() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getSubPath);
   return x_hphp_recursivedirectoryiterator_getsubpath(((p_RecursiveDirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 874 */
+/* SRC: classes/iterator.php line 885 */
 String c_RecursiveDirectoryIterator::t_getsubpathname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getSubPathname);
   return x_hphp_recursivedirectoryiterator_getsubpathname(((p_RecursiveDirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 645 */
+/* SRC: classes/iterator.php line 656 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DirectoryIterator
 Variant c_DirectoryIterator::os_getInit(CStrRef s) {
   return c_SplFileInfo::os_getInit(s);
@@ -3802,7 +3791,7 @@ struct ObjectStaticCallbacks cw_DirectoryIterator = {
 void c_DirectoryIterator::init() {
   c_SplFileInfo::init();
 }
-/* SRC: classes/iterator.php line 647 */
+/* SRC: classes/iterator.php line 658 */
 void c_DirectoryIterator::t___construct(Variant v_path) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::__construct);
   bool oldInCtor = gasInCtor(true);
@@ -3824,49 +3813,49 @@ void c_DirectoryIterator::t___construct(Variant v_path) {
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 662 */
+/* SRC: classes/iterator.php line 673 */
 Variant c_DirectoryIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::current);
   return x_hphp_directoryiterator_current(((p_DirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 674 */
+/* SRC: classes/iterator.php line 685 */
 Variant c_DirectoryIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::key);
   return x_hphp_directoryiterator_key(((p_DirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 686 */
+/* SRC: classes/iterator.php line 697 */
 void c_DirectoryIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::next);
   x_hphp_directoryiterator_next(((p_DirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 698 */
+/* SRC: classes/iterator.php line 709 */
 void c_DirectoryIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::rewind);
   x_hphp_directoryiterator_rewind(((p_DirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 712 */
+/* SRC: classes/iterator.php line 723 */
 void c_DirectoryIterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::seek);
   x_hphp_directoryiterator_seek(((p_DirectoryIterator&)GET_THIS()), toInt64(v_position));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 716 */
+/* SRC: classes/iterator.php line 727 */
 String c_DirectoryIterator::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::__toString);
   return x_hphp_directoryiterator___tostring(((p_DirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 729 */
+/* SRC: classes/iterator.php line 740 */
 bool c_DirectoryIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::valid);
   return x_hphp_directoryiterator_valid(((p_DirectoryIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 742 */
+/* SRC: classes/iterator.php line 753 */
 bool c_DirectoryIterator::t_isdot() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::isDot);
   return x_hphp_directoryiterator_isdot(((p_DirectoryIterator&)GET_THIS()));
@@ -4461,7 +4450,311 @@ bool c_RecursiveIteratorIterator::t_valid() {
   return x_hphp_recursiveiteratoriterator_valid(((p_RecursiveIteratorIterator&)GET_THIS()));
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/iterator.php line 888 */
+/* SRC: classes/iterator.php line 637 */
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_MutableArrayIterator
+Variant c_MutableArrayIterator::os_getInit(CStrRef s) {
+  return c_ArrayIterator::os_getInit(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_MutableArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_MutableArrayIterator
+Variant c_MutableArrayIterator::os_get(CStrRef s) {
+  return c_ArrayIterator::os_get(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_MutableArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_MutableArrayIterator
+Variant &c_MutableArrayIterator::os_lval(CStrRef s) {
+  return c_ArrayIterator::os_lval(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_MutableArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_MutableArrayIterator
+void c_MutableArrayIterator::o_getArray(Array &props, bool pubOnly) const {
+  c_ArrayIterator::o_getArray(props, pubOnly);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_MutableArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_MutableArrayIterator
+void c_MutableArrayIterator::o_setArray(CArrRef props) {
+  c_ArrayIterator::o_setArray(props);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_MutableArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_MutableArrayIterator
+Variant * c_MutableArrayIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_MutableArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_MutableArrayIterator
+Variant * c_MutableArrayIterator::o_realPropPublic(CStrRef s, int flags) const {
+  return c_ArrayIterator::o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_MutableArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_MutableArrayIterator
+Variant * c_MutableArrayIterator::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_MutableArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_MutableArrayIterator
+Variant c_MutableArrayIterator::os_constant(const char *s) {
+  return c_ArrayIterator::os_constant(s);
+}
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_MutableArrayIterator
+IMPLEMENT_CLASS(MutableArrayIterator)
+bool c_MutableArrayIterator::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 15) {
+    case 1:
+      HASH_INSTANCEOF(0x795F86375EE263D1LL, NAMSTR(s_sys_ss5b753b53, "Countable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss22bfe43e, "Traversable"));
+      break;
+    case 3:
+      HASH_INSTANCEOF(0x3D5870E53BF89873LL, NAMSTR(s_sys_ss993f2e69, "ArrayIterator"));
+      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ssc1c38583, "SeekableIterator"));
+      break;
+    case 11:
+      HASH_INSTANCEOF(0x3BDD11EABFCD6F0BLL, NAMSTR(s_sys_ss92306c9b, "ArrayAccess"));
+      break;
+    case 14:
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ssc64ebfff, "Iterator"));
+      break;
+    case 15:
+      HASH_INSTANCEOF(0x5A1D16E68CA95F2FLL, NAMSTR(s_sys_ss337f2a0c, "MutableArrayIterator"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
+ObjectData *c_MutableArrayIterator::cloneImpl() {
+  c_MutableArrayIterator *obj = NEW(c_MutableArrayIterator)();
+  cloneSet(obj);
+  return obj;
+}
+void c_MutableArrayIterator::cloneSet(c_MutableArrayIterator *clone) {
+  c_ArrayIterator::cloneSet(clone);
+}
+Variant c_MutableArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 3) {
+    case 3:
+      HASH_GUARD_LITSTR(0x06F242EC64EB2993LL, NAMSTR(s_sys_ss406322f2, "currentRef")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("MutableArrayIterator::currentRef", 0, 1);
+        return ref(t_currentref());
+      }
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = ref((*it)->refval(env));
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("MutableArrayIterator::__construct", count, 1, 2, 2);
+        if (count <= 1) return (t___construct(ref(a0)), null);
+        else return (t___construct(ref(a0), a1), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ArrayIterator::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_MutableArrayIterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  return c_ArrayIterator::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+CallInfo c_MutableArrayIterator::ci_currentref((void*)&c_MutableArrayIterator::i_currentref, (void*)&c_MutableArrayIterator::ifa_currentref, 0, 4, 0x0000000000000000LL);
+CallInfo c_MutableArrayIterator::ci___construct((void*)&c_MutableArrayIterator::i___construct, (void*)&c_MutableArrayIterator::ifa___construct, 2, 4, 0x0000000000000001LL);
+Variant c_MutableArrayIterator::i_currentref(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_MutableArrayIterator *self = NULL;
+  p_MutableArrayIterator pobj;
+  if (mcp.obj) {
+    self = static_cast<c_MutableArrayIterator*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("MutableArrayIterator::currentRef", 0, 1);
+  return ref(self->t_currentref());
+}
+Variant c_MutableArrayIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_MutableArrayIterator *self = NULL;
+  p_MutableArrayIterator pobj;
+  if (mcp.obj) {
+    self = static_cast<c_MutableArrayIterator*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 2) return throw_wrong_arguments("MutableArrayIterator::__construct", count, 1, 2, 2);
+  const_cast<Array&>(params).escalate(true);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    if (count <= 1) return (self->t___construct(arg0), null);
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t___construct(arg0, arg1), null);
+  }
+}
+Variant c_MutableArrayIterator::ifa_currentref(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_MutableArrayIterator *self = NULL;
+  p_MutableArrayIterator pobj;
+  if (mcp.obj) {
+    self = static_cast<c_MutableArrayIterator*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("MutableArrayIterator::currentRef", 0, 1);
+  return ref(self->t_currentref());
+}
+Variant c_MutableArrayIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_MutableArrayIterator *self = NULL;
+  p_MutableArrayIterator pobj;
+  if (mcp.obj) {
+    self = static_cast<c_MutableArrayIterator*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count < 1 || count > 2) return throw_wrong_arguments("MutableArrayIterator::__construct", count, 1, 2, 2);
+  CVarRef arg0(ref(a0));
+  if (count <= 1) return (self->t___construct(arg0), null);
+  CVarRef arg1((a1));
+  return (self->t___construct(arg0, arg1), null);
+}
+bool c_MutableArrayIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 3) {
+    case 3:
+      HASH_GUARD_LITSTR(0x06F242EC64EB2993LL, NAMSTR(s_sys_ss406322f2, "currentRef")) {
+        mcp.ci = &c_MutableArrayIterator::ci_currentref;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
+        mcp.ci = &c_MutableArrayIterator::ci___construct;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ArrayIterator::os_get_call_info(mcp, hash);
+}
+bool c_MutableArrayIterator::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  mcp.obj = this;
+  return os_get_call_info(mcp, hash);
+}
+c_MutableArrayIterator *c_MutableArrayIterator::create(Variant v_array, Variant v_flags //  = 0LL
+) {
+  CountableHelper h(this);
+  init();
+  t___construct(ref(v_array), v_flags);
+  return this;
+}
+ObjectData *c_MutableArrayIterator::dynCreate(CArrRef params, bool construct /* = true */) {
+  init();
+  if (construct) {
+    CountableHelper h(this);
+    int count __attribute__((__unused__)) = params.size();
+    if (count < 1 || count > 2) throw_wrong_arguments("MutableArrayIterator::__construct", count, 1, 2, 2);
+    const_cast<Array&>(params).escalate(true);
+    do {
+      ArrayData *ad(params.get());
+      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+      CVarRef arg0(ref(ad->getValueRef(pos)));
+      if (count <= 1) {
+        (t___construct(arg0));
+        break;
+      }
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+      (t___construct(arg0, arg1));
+    } while (false);
+  }
+  return this;
+}
+void c_MutableArrayIterator::dynConstruct(CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) throw_wrong_arguments("MutableArrayIterator::__construct", count, 1, 2, 2);
+  const_cast<Array&>(params).escalate(true);
+  do {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    if (count <= 1) {
+      (t___construct(arg0));
+      break;
+    }
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    (t___construct(arg0, arg1));
+  } while (false);
+}
+void c_MutableArrayIterator::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_MutableArrayIterator::ci___construct;
+  mcp.obj = this;
+}
+void c_MutableArrayIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = ref((*it)->refval(env));
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) throw_wrong_arguments("MutableArrayIterator::__construct", count, 1, 2, 1);
+  if (count <= 1) (t___construct(ref(a0)), null);
+  else (t___construct(ref(a0), a1), null);
+}
+struct ObjectStaticCallbacks cw_MutableArrayIterator = {
+  c_MutableArrayIterator::os_getInit,
+  c_MutableArrayIterator::os_get,
+  c_MutableArrayIterator::os_lval,
+  c_MutableArrayIterator::os_invoke,
+  c_MutableArrayIterator::os_constant,
+  c_MutableArrayIterator::os_get_call_info
+};
+void c_MutableArrayIterator::init() {
+  c_ArrayIterator::init();
+}
+/* SRC: classes/iterator.php line 638 */
+void c_MutableArrayIterator::t___construct(Variant v_array, Variant v_flags //  = 0LL
+) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::__construct);
+  bool oldInCtor = gasInCtor(true);
+  m_arr = ref(v_array);
+  m_flags = v_flags;
+  gasInCtor(oldInCtor);
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 643 */
+Variant c_MutableArrayIterator::t_currentref() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::currentRef);
+  return ref(x_hphp_current_ref(ref(m_arr)));
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/iterator.php line 899 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_FilterIterator
 Variant c_FilterIterator::os_getInit(CStrRef s) {
   return c_ObjectData::os_getInit(s);
@@ -4595,6 +4888,14 @@ Object co_RecursiveIteratorIterator(CArrRef params, bool init /* = true */) {
 }
 Object coo_RecursiveIteratorIterator() {
   Object r(NEW(c_RecursiveIteratorIterator)());
+  r->init();
+  return r;
+}
+Object co_MutableArrayIterator(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_MutableArrayIterator)())->dynCreate(params, init));
+}
+Object coo_MutableArrayIterator() {
+  Object r(NEW(c_MutableArrayIterator)());
   r->init();
   return r;
 }

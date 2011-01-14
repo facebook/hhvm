@@ -22,7 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ss15a9d310("fgetcsv");
 StaticString s_sys_ss163bad01("addServer");
 StaticString s_sys_ss164363b4("getPathname");
 StaticString s_sys_ss172df677("deleteByKey");
@@ -78,6 +77,7 @@ StaticString s_sys_ss31ec77af("insertBefore");
 StaticString s_sys_ss325815c1("setValue");
 StaticString s_sys_ss32d46a21("__unset");
 StaticString s_sys_ss331d21f7("createAttribute");
+StaticString s_sys_ss337f2a0c("MutableArrayIterator");
 StaticString s_sys_ss3382a209("contains");
 StaticString s_sys_ss33872dc4("getStaticVariables");
 StaticString s_sys_ss33896428("writeElement");

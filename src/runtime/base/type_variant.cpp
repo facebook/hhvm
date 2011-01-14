@@ -687,6 +687,21 @@ Variant Variant::array_iter_current() const {
   return false;
 }
 
+Variant Variant::array_iter_current_ref() {
+  if (is(KindOfArray)) {
+    escalate(true);
+    ArrayData *arr = getArrayData();
+    if (arr->getCount() > 1 && !arr->isGlobalArrayWrapper()) {
+      arr = arr->copy();
+      set(arr);
+      ASSERT(arr == getArrayData());
+    }
+    return ref(arr->currentRef());
+  }
+  throw_bad_type_exception("expecting an array");
+  return false;
+}
+
 Variant Variant::array_iter_next() {
   if (is(KindOfArray)) {
     ArrayData *arr = getArrayData();

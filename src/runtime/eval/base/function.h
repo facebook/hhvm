@@ -35,19 +35,6 @@ public:
   virtual const CallInfo *getCallInfo() const = 0;
 };
 
-extern Variant invoke_from_eval(const char *function,
-                                VariableEnvironment &env,
-                                const FunctionCallExpression *caller,
-                                int64 hash = -1,
-                                bool fatal = true);
-
-extern Variant invoke_from_eval_builtin(const char *function,
-                                        VariableEnvironment &env,
-                                        const FunctionCallExpression *caller,
-                                        int64 hash = -1,
-                                        bool fatal = true);
-
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

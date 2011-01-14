@@ -54,8 +54,6 @@ public:
    */
   void outputCPPJumpTableDecl(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPPEvalInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
-      const StringToFunctionScopePtrVecMap *functions = NULL);
   const StringToFunctionScopePtrVecMap &getFunctions() const {
     return m_functions;
   }
@@ -80,12 +78,8 @@ private:
   void outputGetCallInfoHeader(CodeGenerator &cg, bool system,
                                bool needGlobals);
   void outputGetCallInfoTail(CodeGenerator &cg, bool system);
-  void outputCPPEvalInvokeHeader(CodeGenerator &cg, bool system);
-  void outputCPPEvalInvokeTail(CodeGenerator &cg, bool system);
   void outputCPPHashTableGetCallInfo(CodeGenerator &cg, bool system,
        const StringToFunctionScopePtrVecMap *functions,
-       const std::vector<const char *> &funcs);
-  void outputCPPHashTableEvalInvoke(CodeGenerator &cg,
        const std::vector<const char *> &funcs);
 };
 

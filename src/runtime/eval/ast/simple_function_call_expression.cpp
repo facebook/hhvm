@@ -81,8 +81,20 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
     }
   }
 
-  return ref(invoke_from_eval(name.data(), env, this,
-                              renamed ? -1 : m_name->hash()));
+  const CallInfo *cit1;
+  void *vt1;
+  get_call_info_or_fail(cit1, vt1, name);
+  ArrayInit ai(m_params.size(), true);
+  for (unsigned int i = 0; i < m_params.size(); ++i) {
+    if (cit1->mustBeRef(i)) {
+      ai.setRef(m_params[i]->refval(env));
+    } else if (cit1->isRef(i)) {
+      ai.setRef(m_params[i]->refval(env, 0));
+    } else {
+      ai.set(m_params[i]->eval(env));
+    }
+  }
+  return (cit1->getFunc())(vt1, Array(ai.create()));
 }
 
 void SimpleFunctionCallExpression::dump(std::ostream &out) const {

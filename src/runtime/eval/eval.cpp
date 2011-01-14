@@ -162,16 +162,6 @@ void eval_get_dynamic_constants(Array &arr) {
   Eval::RequestEvalState::GetDynamicConstants(arr);
 }
 
-Array Eval::eval_get_params(VariableEnvironment &env,
-                            const FunctionCallExpression *caller) {
-  Array ret;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  for (unsigned int i = 0; i < params.size(); i++) {
-    ret.append(params[i]->eval(env));
-  }
-  return ret;
-}
-
 bool eval_get_call_info_hook(const CallInfo *&ci, void *&extra, const char *s,
                              int64 hash /* = -1 */) {
   const Eval::Function *fs = Eval::RequestEvalState::findFunction(s);

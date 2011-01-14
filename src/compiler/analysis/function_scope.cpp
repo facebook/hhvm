@@ -230,11 +230,25 @@ bool FunctionScope::isFinal() const {
 }
 
 bool FunctionScope::isVariableArgument() const {
-  return m_attribute & FileScope::VariableArgument && !m_overriding;
+  bool res = (m_attribute & FileScope::VariableArgument) && !m_overriding;
+  return res;
 }
 
 bool FunctionScope::isReferenceVariableArgument() const {
-  return m_attribute & FileScope::ReferenceVariableArgument;
+  bool res = (m_attribute & FileScope::ReferenceVariableArgument) &&
+             !m_overriding;
+  // If this method returns true, then isVariableArgument() must also
+  // return true.
+  ASSERT(!res || isVariableArgument());
+  return res;
+}
+
+bool FunctionScope::isMixedVariableArgument() const {
+  bool res = (m_attribute & FileScope::MixedVariableArgument) && !m_overriding;
+  // If this method returns true, then isReferenceVariableArgument()
+  // must also return true.
+  ASSERT(!res || isReferenceVariableArgument());
+  return res;
 }
 
 bool FunctionScope::isGenerator() const {
@@ -250,10 +264,6 @@ void FunctionScope::setVariableArgument(int reference) {
       m_attribute |= FileScope::MixedVariableArgument;
     }
   }
-}
-
-bool FunctionScope::isMixedVariableArgument() const {
-  return m_attribute & FileScope::MixedVariableArgument;
 }
 
 bool FunctionScope::hasEffect() const {
@@ -1375,8 +1385,10 @@ void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
   }
   cg_indentBegin("for (; it != params.end(); ++it) {\n");
   const char *paramEval = "(*it)->eval(env)";
-  if (isReferenceVariableArgument()) {
-    paramEval = "ref((*it)->refval(env, false))";
+  if (isMixedVariableArgument()) {
+    paramEval = "ref((*it)->refval(env, 0))";
+  } else if (isReferenceVariableArgument()) {
+    paramEval = "ref((*it)->refval(env))";
   }
   if (variable) cg_printf("vargs.append(");
   cg_printf(paramEval);
@@ -1693,7 +1705,9 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
     }
   }
   int flags = 0;
-  if (isReferenceVariableArgument()) {
+  if (isMixedVariableArgument()) {
+    flags |= CallInfo::MixedVarArgs;
+  } else if (isReferenceVariableArgument()) {
     flags |= CallInfo::RefVarArgs;
   } else if (isVariableArgument()) {
     flags |= CallInfo::VarArgs;
@@ -1716,13 +1730,7 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
               id.c_str(), Option::InvokePrefix, id.c_str());
     cg.printf("(void*)&%s%s", Option::InvokeFewArgsPrefix, id.c_str());
   }
-  cg.printf(", %d, %d, 0x%.16lXLL", m_maxParam, flags, refflags);
-  if (m_method || (Option::EnableEval == Option::NoEval &&
-                   cg.getOutput() != CodeGenerator::SystemCPP)) {
-    cg.printf(");\n");
-  } else {
-    cg.printf(", (void*)&%s%s);\n", Option::EvalInvokePrefix, id.c_str());
-  }
+  cg.printf(", %d, %d, 0x%.16lXLL);\n", m_maxParam, flags, refflags);
 }
 
 FunctionScope::StringToRefParamInfoPtrMap FunctionScope::s_refParamInfo;

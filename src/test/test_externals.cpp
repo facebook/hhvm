@@ -365,14 +365,6 @@ bool get_call_info_static_method_with_index(MethodCallPackage &info,
   return false;
 }
 
-namespace Eval {
-Variant invoke_from_eval(const char *function, VariableEnvironment &env,
-                         const FunctionCallExpression *caller,
-                         int64 hash /* = -1 */, bool fatal /* = true */) {
-  return Variant();
-}
-}
-
 const ObjectStaticCallbacks * get_object_static_callbacks(const char *s) {
   return NULL;
 }

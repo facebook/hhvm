@@ -2726,10 +2726,8 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
     if (system) {
       bool needGlobals;
       outputCPPJumpTableSupport(cg, ar, needGlobals);
-      outputCPPEvalInvokeTable(cg, ar);
       outputCPPCodeInfoTable(cg, ar, true);
     } else {
-      outputCPPEvalInvokeTable(cg, ar, &m_functionDecs);
       outputCPPCodeInfoTable(cg, ar, false, &m_functionDecs);
     }
     cg.namespaceEnd();

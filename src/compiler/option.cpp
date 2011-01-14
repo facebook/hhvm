@@ -127,7 +127,6 @@ const char *Option::ClassConstantPrefix = "q_";
 const char *Option::ExceptionPrefix = "e_";
 const char *Option::TempVariablePrefix = "r_";
 const char *Option::EvalOrderTempPrefix = "eo_";
-const char *Option::EvalInvokePrefix = "ei_";
 const char *Option::CallInfoPrefix = "ci_";
 const char *Option::SilencerPrefix = "sil_";
 
@@ -325,7 +324,6 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(TempVariablePrefix);
     READ_CG_OPTION(EvalOrderTempPrefix);
     READ_CG_OPTION(SilencerPrefix);
-    READ_CG_OPTION(EvalInvokePrefix);
     READ_CG_OPTION(TempPrefix);
     READ_CG_OPTION(MapPrefix);
     READ_CG_OPTION(IterPrefix);

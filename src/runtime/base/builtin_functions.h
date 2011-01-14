@@ -615,7 +615,8 @@ public:
     RefVarArgs = 0x2,
     Method = 0x4,
     StaticMethod = 0x8,
-    CallMagicMethod = 0x10 // Special flag for __call handler
+    CallMagicMethod = 0x10, // Special flag for __call handler
+    MixedVarArgs = 0x20
   };
   CallInfo(void *inv, void *invFa, int ac, int flags, int64 refs,
       void *invEv = NULL)
@@ -627,8 +628,26 @@ public:
   int m_argCount;
   int m_flags;
   int64 m_refFlags;
+  // isRef() returns true if parameter n should be passed by reference.
   bool isRef(int n) const {
-    return n < m_argCount ? (m_refFlags & (1 << n)) : (m_flags & RefVarArgs);
+    // The RefVarArgs and MixedVarArgs flags cannot both be set
+    ASSERT(!(m_flags & RefVarArgs) || !(m_flags & MixedVarArgs));
+    bool res = (n < m_argCount ? (m_refFlags & (1 << n)) :
+                                 (m_flags & (RefVarArgs | MixedVarArgs)));
+    return res;
+  }
+  // mustBeRef() returns true if parameter n should MUST be passed by
+  // reference. If a non-refable expression is supplied for parameter
+  // then a fatal error should be raised.
+  bool mustBeRef(int n) const {
+    // The RefVarArgs and MixedVarArgs flags cannot both be set
+    ASSERT(!(m_flags & RefVarArgs) || !(m_flags & MixedVarArgs));
+    bool res = (n < m_argCount ? (m_refFlags & (1 << n)) :
+                                 (m_flags & RefVarArgs));
+    // If this function returns true for a given parameter, than isRef() must
+    // also return true for this parameter.
+    ASSERT(!res || isRef(n));
+    return res;
   }
   typedef Variant (*FuncInvoker)(void*, CArrRef);
   typedef Variant (*FuncInvokerFewArgs)(void*, int,

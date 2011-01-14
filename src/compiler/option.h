@@ -244,7 +244,6 @@ public:
   static const char *TempVariablePrefix;
   static const char *EvalOrderTempPrefix;
   static const char *SilencerPrefix;
-  static const char *EvalInvokePrefix;
   static const char *CallInfoPrefix;
 
   static const char *TempPrefix;

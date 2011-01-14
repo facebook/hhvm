@@ -274,8 +274,16 @@ bool DebuggerClient::IsValidNumber(const std::string &arg) {
 String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */) {
   String value;
   if (maxlen <= 0) {
-    VariableSerializer vs(VariableSerializer::VarExport, 0, 2);
-    value = vs.serialize(v, true).toString();
+    try {
+      VariableSerializer vs(VariableSerializer::VarExport, 0, 2);
+      value = vs.serialize(v, true).toString();
+    } catch (NestingLevelTooDeepException &e) {
+      VariableSerializer vs(VariableSerializer::VarDump, 0, 2);
+      value = vs.serialize(v, true).toString();
+    } catch (...) {
+      ASSERT(false);
+      throw;
+    }
   } else {
     VariableSerializer vs(VariableSerializer::DebuggerDump, 0, 2);
     value = vs.serialize(v, true).toString();

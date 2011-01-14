@@ -207,7 +207,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ArrayIterator::uksort", count, 1, 1, 1);
-        return (t_uksort(a0));
+        return (t_uksort(a0), null);
       }
       break;
     case 6:
@@ -221,7 +221,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ArrayIterator::natcasesort", 0, 1);
-        return (t_natcasesort());
+        return (t_natcasesort(), null);
       }
       break;
     case 10:
@@ -297,7 +297,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ArrayIterator::ksort", 0, 1);
-        return (t_ksort());
+        return (t_ksort(), null);
       }
       break;
     case 28:
@@ -352,7 +352,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ArrayIterator::uasort", count, 1, 1, 1);
-        return (t_uasort(a0));
+        return (t_uasort(a0), null);
       }
       break;
     case 33:
@@ -410,7 +410,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ArrayIterator::rewind", 0, 1);
-        return (t_rewind());
+        return (t_rewind(), null);
       }
       break;
     case 46:
@@ -424,7 +424,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ArrayIterator::asort", 0, 1);
-        return (t_asort());
+        return (t_asort(), null);
       }
       break;
     case 51:
@@ -438,7 +438,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ArrayIterator::natsort", 0, 1);
-        return (t_natsort());
+        return (t_natsort(), null);
       }
       break;
     case 56:
@@ -452,7 +452,7 @@ Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ArrayIterator::next", 0, 1);
-        return (t_next());
+        return (t_next(), null);
       }
       HASH_GUARD_LITSTR(0x0957F693A48AF738LL, NAMSTR(s_sys_ssbe2ba1ac, "offsetSet")) {
         Variant a0;
@@ -545,7 +545,7 @@ Variant c_ArrayIterator::i_next(MethodCallPackage &mcp, CArrRef params) {
     self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::next", 0, 1);
-  return (self->t_next());
+  return (self->t_next(), null);
 }
 Variant c_ArrayIterator::i_count(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -569,7 +569,7 @@ Variant c_ArrayIterator::i_natsort(MethodCallPackage &mcp, CArrRef params) {
     self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::natsort", 0, 1);
-  return (self->t_natsort());
+  return (self->t_natsort(), null);
 }
 Variant c_ArrayIterator::i_key(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -679,7 +679,7 @@ Variant c_ArrayIterator::i_uksort(MethodCallPackage &mcp, CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    return (self->t_uksort(arg0));
+    return (self->t_uksort(arg0), null);
   }
 }
 Variant c_ArrayIterator::i_offsetget(MethodCallPackage &mcp, CArrRef params) {
@@ -709,7 +709,7 @@ Variant c_ArrayIterator::i_natcasesort(MethodCallPackage &mcp, CArrRef params) {
     self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::natcasesort", 0, 1);
-  return (self->t_natcasesort());
+  return (self->t_natcasesort(), null);
 }
 Variant c_ArrayIterator::i_asort(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -721,7 +721,7 @@ Variant c_ArrayIterator::i_asort(MethodCallPackage &mcp, CArrRef params) {
     self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::asort", 0, 1);
-  return (self->t_asort());
+  return (self->t_asort(), null);
 }
 Variant c_ArrayIterator::i_offsetunset(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -791,7 +791,7 @@ Variant c_ArrayIterator::i_ksort(MethodCallPackage &mcp, CArrRef params) {
     self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::ksort", 0, 1);
-  return (self->t_ksort());
+  return (self->t_ksort(), null);
 }
 Variant c_ArrayIterator::i_uasort(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -807,7 +807,7 @@ Variant c_ArrayIterator::i_uasort(MethodCallPackage &mcp, CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    return (self->t_uasort(arg0));
+    return (self->t_uasort(arg0), null);
   }
 }
 Variant c_ArrayIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
@@ -820,7 +820,7 @@ Variant c_ArrayIterator::i_rewind(MethodCallPackage &mcp, CArrRef params) {
     self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::rewind", 0, 1);
-  return (self->t_rewind());
+  return (self->t_rewind(), null);
 }
 Variant c_ArrayIterator::i_offsetset(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -860,7 +860,7 @@ Variant c_ArrayIterator::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_
     self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::next", 0, 1);
-  return (self->t_next());
+  return (self->t_next(), null);
 }
 Variant c_ArrayIterator::ifa_count(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ArrayIterator *self = NULL;
@@ -882,7 +882,7 @@ Variant c_ArrayIterator::ifa_natsort(MethodCallPackage &mcp, int count, INVOKE_F
     self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::natsort", 0, 1);
-  return (self->t_natsort());
+  return (self->t_natsort(), null);
 }
 Variant c_ArrayIterator::ifa_key(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ArrayIterator *self = NULL;
@@ -966,7 +966,7 @@ Variant c_ArrayIterator::ifa_uksort(MethodCallPackage &mcp, int count, INVOKE_FE
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::uksort", count, 1, 1, 1);
   CVarRef arg0((a0));
-  return (self->t_uksort(arg0));
+  return (self->t_uksort(arg0), null);
 }
 Variant c_ArrayIterator::ifa_offsetget(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ArrayIterator *self = NULL;
@@ -989,7 +989,7 @@ Variant c_ArrayIterator::ifa_natcasesort(MethodCallPackage &mcp, int count, INVO
     self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::natcasesort", 0, 1);
-  return (self->t_natcasesort());
+  return (self->t_natcasesort(), null);
 }
 Variant c_ArrayIterator::ifa_asort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ArrayIterator *self = NULL;
@@ -1000,7 +1000,7 @@ Variant c_ArrayIterator::ifa_asort(MethodCallPackage &mcp, int count, INVOKE_FEW
     self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::asort", 0, 1);
-  return (self->t_asort());
+  return (self->t_asort(), null);
 }
 Variant c_ArrayIterator::ifa_offsetunset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ArrayIterator *self = NULL;
@@ -1057,7 +1057,7 @@ Variant c_ArrayIterator::ifa_ksort(MethodCallPackage &mcp, int count, INVOKE_FEW
     self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::ksort", 0, 1);
-  return (self->t_ksort());
+  return (self->t_ksort(), null);
 }
 Variant c_ArrayIterator::ifa_uasort(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ArrayIterator *self = NULL;
@@ -1069,7 +1069,7 @@ Variant c_ArrayIterator::ifa_uasort(MethodCallPackage &mcp, int count, INVOKE_FE
   }
   if (count != 1) return throw_wrong_arguments("ArrayIterator::uasort", count, 1, 1, 1);
   CVarRef arg0((a0));
-  return (self->t_uasort(arg0));
+  return (self->t_uasort(arg0), null);
 }
 Variant c_ArrayIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ArrayIterator *self = NULL;
@@ -1080,7 +1080,7 @@ Variant c_ArrayIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FE
     self = createDummy(pobj);
   }
   if (count > 0) return throw_toomany_arguments("ArrayIterator::rewind", 0, 1);
-  return (self->t_rewind());
+  return (self->t_rewind(), null);
 }
 Variant c_ArrayIterator::ifa_offsetset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_ArrayIterator *self = NULL;
@@ -1331,12 +1331,12 @@ void c_ArrayIterator::t_append(CVarRef v_value) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 359 */
-bool c_ArrayIterator::t_asort() {
+void c_ArrayIterator::t_asort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::asort);
   {
     const Variant &tmp1((m_arr));
     Variant &tmp1_lv = const_cast<Variant&>(tmp1);
-    return x_asort(ref(tmp1_lv), toInt32(m_flags));
+    x_asort(ref(tmp1_lv), toInt32(m_flags));
   }
 }
 namespace hphp_impl_splitter {}
@@ -1349,7 +1349,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 385 */
 Variant c_ArrayIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::current);
-  return x_current(ref(m_arr));
+  return x_current(m_arr);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 399 */
@@ -1371,31 +1371,31 @@ Variant c_ArrayIterator::t_key() {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 437 */
-bool c_ArrayIterator::t_ksort() {
+void c_ArrayIterator::t_ksort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::ksort);
   {
     const Variant &tmp1((m_arr));
     Variant &tmp1_lv = const_cast<Variant&>(tmp1);
-    return x_ksort(ref(tmp1_lv), toInt32(m_flags));
+    x_ksort(ref(tmp1_lv), toInt32(m_flags));
   }
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 451 */
-Variant c_ArrayIterator::t_natcasesort() {
+void c_ArrayIterator::t_natcasesort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::natcasesort);
-  return x_natcasesort(ref(m_arr));
+  x_natcasesort(ref(m_arr));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 465 */
-Variant c_ArrayIterator::t_natsort() {
+void c_ArrayIterator::t_natsort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::natsort);
-  return x_natsort(ref(m_arr));
+  x_natsort(ref(m_arr));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 477 */
-Variant c_ArrayIterator::t_next() {
+void c_ArrayIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::next);
-  return x_next(ref(m_arr));
+  x_next(ref(m_arr));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 492 */
@@ -1436,9 +1436,9 @@ Variant c_ArrayIterator::t_offsetunset(CVarRef v_index) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 550 */
-Variant c_ArrayIterator::t_rewind() {
+void c_ArrayIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::rewind);
-  return x_reset(ref(m_arr));
+  x_reset(ref(m_arr));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 563 */
@@ -1476,22 +1476,22 @@ void c_ArrayIterator::t_setflags(CVarRef v_flags) {
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 603 */
-bool c_ArrayIterator::t_uasort(CVarRef v_cmp_function) {
+void c_ArrayIterator::t_uasort(CVarRef v_cmp_function) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::uasort);
   {
     const Variant &tmp1((m_arr));
     Variant &tmp1_lv = const_cast<Variant&>(tmp1);
-    return x_uasort(ref(tmp1_lv), v_cmp_function);
+    x_uasort(ref(tmp1_lv), v_cmp_function);
   }
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 620 */
-bool c_ArrayIterator::t_uksort(CVarRef v_cmp_function) {
+void c_ArrayIterator::t_uksort(CVarRef v_cmp_function) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::uksort);
   {
     const Variant &tmp1((m_arr));
     Variant &tmp1_lv = const_cast<Variant&>(tmp1);
-    return x_uksort(ref(tmp1_lv), v_cmp_function);
+    x_uksort(ref(tmp1_lv), v_cmp_function);
   }
 }
 namespace hphp_impl_splitter {}

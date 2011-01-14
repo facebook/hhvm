@@ -2293,6 +2293,16 @@ bool TestCodeRun::TestArrayIterator() {
        "           '1' => false,"
        "           null => 'z',"
        "           'c' => 'w'));");
+  MVCR("<?php\n"
+       "$a = array(1, 2, 3);\n"
+       "$o = new ArrayIterator($a);\n"
+       "var_dump($o->next());\n"
+       "var_dump($o->rewind());\n"
+       "var_dump($o->seek());\n"
+       "var_dump($o->asort());\n"
+       "var_dump($o->ksort());\n"
+       "var_dump($o->natsort());\n"
+       "var_dump($o->natcasesort());\n");
 
   // MutableArrayIterator
   MVCRO("<?php\n"

@@ -37728,17 +37728,16 @@ Variant i_current(void *extra, CArrRef params) {
   FUNCTION_INJECTION(current);
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) return throw_wrong_arguments("current", count, 1, 1, 1);
-  const_cast<Array&>(params).escalate(true);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg0((ad->getValue(pos)));
     return (f_current(arg0));
   }
 }
 Variant ifa_current(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("current", count, 1, 1, 1);
-  CVarRef arg0(ref(a0));
+  CVarRef arg0((a0));
   return (f_current(arg0));
 }
 Variant i_stream_register_wrapper(void *extra, CArrRef params) {
@@ -81117,7 +81116,7 @@ Variant ei_current(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
-    a0 = ref((*it)->refval(env));
+    a0 = (*it)->eval(env);
     it++;
   } while(false);
   for (; it != params.end(); ++it) {
@@ -81125,7 +81124,7 @@ Variant ei_current(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   }
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) return throw_wrong_arguments("current", count, 1, 1, 1);
-  return (x_current(ref(a0)));
+  return (x_current(a0));
 }
 Variant ei_stream_register_wrapper(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -90930,7 +90929,7 @@ CallInfo ci_magickdeconstructimages((void*)&i_magickdeconstructimages, (void*)&i
 CallInfo ci_xbox_task_status((void*)&i_xbox_task_status, (void*)&ifa_xbox_task_status, 1, 0, 0x0000000000000000LL, (void*)&ei_xbox_task_status);
 CallInfo ci_openssl_open((void*)&i_openssl_open, (void*)&ifa_openssl_open, 4, 0, 0x0000000000000002LL, (void*)&ei_openssl_open);
 CallInfo ci_apc_bin_load((void*)&i_apc_bin_load, (void*)&ifa_apc_bin_load, 3, 0, 0x0000000000000000LL, (void*)&ei_apc_bin_load);
-CallInfo ci_current((void*)&i_current, (void*)&ifa_current, 1, 0, 0x0000000000000001LL, (void*)&ei_current);
+CallInfo ci_current((void*)&i_current, (void*)&ifa_current, 1, 0, 0x0000000000000000LL, (void*)&ei_current);
 CallInfo ci_stream_register_wrapper((void*)&i_stream_register_wrapper, (void*)&ifa_stream_register_wrapper, 2, 0, 0x0000000000000000LL, (void*)&ei_stream_register_wrapper);
 CallInfo ci_hphp_stats((void*)&i_hphp_stats, (void*)&ifa_hphp_stats, 2, 0, 0x0000000000000000LL, (void*)&ei_hphp_stats);
 CallInfo ci_imap_savebody((void*)&i_imap_savebody, (void*)&ifa_imap_savebody, 5, 0, 0x0000000000000000LL, (void*)&ei_imap_savebody);

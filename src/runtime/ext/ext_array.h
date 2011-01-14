@@ -268,7 +268,7 @@ inline Variant f_each(Variant array) {
   array.array_iter_dirty_check();
   return array.array_iter_each();
 }
-inline Variant f_current(Variant array) {
+inline Variant f_current(CVarRef array) {
   array.array_iter_dirty_check();
   return array.array_iter_current();
 }

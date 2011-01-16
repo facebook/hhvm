@@ -516,7 +516,7 @@ bool ClassInfo::HasAccess(CStrRef className, CStrRef methodName,
   if (methodInfo->attribute & ClassInfo::IsPublic) return true;
   const ClassInfo *ctxClass =
     ClassInfo::FindClass(FrameInjection::GetClassName(true));
-  bool hasObject = hasCallObject || !FrameInjection::GetThis(true).isNull();
+  bool hasObject = hasCallObject || FrameInjection::GetThis(true);
   if (ctxClass) {
     return ctxClass->checkAccess(defClass, methodInfo, staticCall, hasObject);
   }

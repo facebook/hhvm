@@ -373,8 +373,8 @@ void ObjectData::o_getArray(Array &props, bool pubOnly /* = false */) const {
   }
 }
 
-Variant ObjectData::o_argval(bool byRef, CStrRef s, int64 hash,
-    bool error /* = true */, const char *context /* = NULL */) {
+Variant ObjectData::o_argval(bool byRef, CStrRef s,
+    bool error /* = true */, CStrRef context /* = null_string */) {
   if (byRef) {
     return ref(o_lval(s, context));
   } else {

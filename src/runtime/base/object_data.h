@@ -186,13 +186,17 @@ class ObjectData : public Countable {
                 CStrRef context = null_string);
   Variant o_setPublic(CStrRef s, CVarRef v, bool forInit = false);
   Variant &o_lval(CStrRef s, CVarRef tmpForGet, CStrRef context = null_string);
+  Variant &o_unsetLval(CStrRef s, CVarRef tmpForGet,
+                       CStrRef context = null_string) {
+    return o_lval(s, tmpForGet, context);
+  }
   Variant *o_weakLval(CStrRef s, CStrRef context = null_string);
 
   virtual void o_setArray(CArrRef properties);
   virtual void o_getArray(Array &props, bool pubOnly = false) const;
   void o_set(const Array properties);
-  Variant o_argval(bool byRef, CStrRef s, int64 hash, bool error = true,
-      const char *context = NULL);
+  Variant o_argval(bool byRef, CStrRef s, bool error = true,
+      CStrRef context = null_string);
 
   virtual Variant o_getError(CStrRef prop, CStrRef context);
   virtual Variant o_setError(CStrRef prop, CStrRef context);

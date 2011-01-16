@@ -713,7 +713,7 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
                 m_storage.weakRemove(v_idx);
                 {
                   MethodCallPackage mcp4;
-                  mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
+                  mcp4.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
                   const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
                   (mcp4.bindClass(info)->getMeth0Args())(mcp4, 0);
                 }

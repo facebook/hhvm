@@ -178,15 +178,15 @@ CStrRef FrameInjection::GetParentClassName(bool skip /* = false */) {
   return empty_string;
 }
 
-Object FrameInjection::GetThis(bool skip /* = false */) {
+ObjectData *FrameInjection::GetThis(bool skip /* = false */) {
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {
     t = t->m_prev;
   }
   if (t) {
-    return t->m_object;
+    return t->m_object.get();
   }
-  return Object();
+  return NULL;
 }
 
 String FrameInjection::GetContainingFileName(bool skip /* = false */) {
@@ -361,20 +361,18 @@ Array FrameInjection::getArgs() {
   return Array();
 }
 
-Object &FrameInjection::getThis() {
-  if (m_object.get() && m_object->o_getId()) {
-    return m_object;
+ObjectData *FrameInjection::getThis() {
+  ObjectData *ret = m_object.get();
+  if (ret && !ret->o_getId()) {
+    ret = NULL;
   }
-
-  static Object s_black_hole_object;
-  ASSERT(s_black_hole_object.isNull()); // in case callers modified me
-  s_black_hole_object.reset();
-  return s_black_hole_object;
+  return ret;
 }
 
-Object &FrameInjection::getThisForArrow() {
-  if (m_object.get() && m_object->o_getId()) {
-    return m_object;
+ObjectData *FrameInjection::getThisForArrow() {
+  ObjectData *ret = m_object.get();
+  if (ret && ret->o_getId()) {
+    return ret;
   }
   throw FatalErrorException("Using $this when not in object context");
 }

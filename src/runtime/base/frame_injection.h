@@ -34,7 +34,7 @@ public:
 
   static CStrRef GetClassName(bool skip = false);
   static CStrRef GetParentClassName(bool skip = false);
-  static Object GetThis(bool skip = false);
+  static ObjectData *GetThis(bool skip = false);
   static String GetContainingFileName(bool skip = false);
   static Array GetBacktrace(bool skip = false, bool withSelf = false,
                             bool withThis = true);
@@ -106,7 +106,7 @@ public:
    * This function checks object ID to make sure it's not 0. If it's 0, it
    * returns a null object. Otherwise, it returns "this";
    */
-  Object &getThis();
+  ObjectData *getThis();
 
   /**
    * This function checks object ID to make sure it's not 0. If it's 0, it
@@ -114,7 +114,7 @@ public:
    * of ClassName::MethodName(). Then it will throw a "using this in non-
    * object context" fatal.
    */
-  Object &getThisForArrow();
+  ObjectData *getThisForArrow();
 
 public:
   class StaticClassNameHelper {

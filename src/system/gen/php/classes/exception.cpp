@@ -1806,7 +1806,7 @@ String c_Exception::t___tostring() {
   {
     StringBuffer tmp1_buf;
     tmp1_buf.append("exception '", 11);
-    tmp1_buf.append(toString(x_get_class(VarNR(((p_Exception&)GET_THIS())))));
+    tmp1_buf.append(toString(x_get_class(VarNR(GET_THIS_TYPED(Exception)))));
     tmp1_buf.append("' with message '", 16);
     tmp1_buf.append(toString(t_getmessage()));
     tmp1_buf.append("' in ", 5);

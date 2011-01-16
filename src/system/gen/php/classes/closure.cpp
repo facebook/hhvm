@@ -435,7 +435,7 @@ String c_Closure::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__toString);
   {
     const String &tmp1((toString(m_func)));
-    const String &tmp2((toString(x_hphp_object_pointer(((p_Closure&)GET_THIS())))));
+    const String &tmp2((toString(x_hphp_object_pointer(GET_THIS_TYPED(Closure)))));
     return concat3(tmp1, NAMSTR(s_sys_ssdb381ae8, ":"), tmp2);
   }
 }
@@ -1410,7 +1410,7 @@ void c_Continuation::t_next() {
           MethodCallPackage mcp3;
           mcp3.methodCall((m_obj.objectForCall()), toString(v_func), -1);
           const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
-          (mcp3.bindClass(info)->getMeth1Args())(mcp3, 1, ((p_Continuation&)GET_THIS()));
+          (mcp3.bindClass(info)->getMeth1Args())(mcp3, 1, GET_THIS_TYPED(Continuation));
         }
       }
     }

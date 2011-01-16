@@ -414,7 +414,7 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
       }
     }
     if (!m_valid) {
-      cg_printf("GET_THIS_DOT()");
+      cg_printf("GET_THIS_ARROW()");
     }
   } else if (m_valid) {
     TypePtr act;

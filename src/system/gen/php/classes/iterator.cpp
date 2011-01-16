@@ -2164,7 +2164,7 @@ void c_AppendIterator::t_rewind() {
       {
         {
           MethodCallPackage mcp5;
-          mcp5.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
+          mcp5.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
           const CallInfo *cit5  __attribute__((__unused__)) = mcp5.ci;
           MethodCallPackage mcp4;
           mcp4.methodCall(((mcp5.bindClass(info)->getMeth0Args())(mcp5, 0).objectForCall()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
@@ -2186,7 +2186,7 @@ bool c_AppendIterator::t_valid() {
     bool tmp2 = (toBoolean((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0)));
     if (tmp2) {
       MethodCallPackage mcp4;
-      mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
+      mcp4.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
       const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
       MethodCallPackage mcp3;
       mcp3.methodCall(((mcp4.bindClass(info)->getMeth0Args())(mcp4, 0).objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
@@ -2207,7 +2207,7 @@ Variant c_AppendIterator::t_current() {
     Variant tmp2;
     if (toBoolean((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0))) {
       MethodCallPackage mcp4;
-      mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
+      mcp4.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
       const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
       MethodCallPackage mcp3;
       mcp3.methodCall(((mcp4.bindClass(info)->getMeth0Args())(mcp4, 0).objectForCall()), NAMSTR(s_sys_ssb3a5c1b3, "current"), 0x5B3A4A72846B21DCLL);
@@ -2230,7 +2230,7 @@ Variant c_AppendIterator::t_key() {
     Variant tmp2;
     if (toBoolean((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0))) {
       MethodCallPackage mcp4;
-      mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
+      mcp4.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
       const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
       MethodCallPackage mcp3;
       mcp3.methodCall(((mcp4.bindClass(info)->getMeth0Args())(mcp4, 0).objectForCall()), NAMSTR(s_sys_ss12e90587, "key"), 0x56EDB60C824E8C51LL);
@@ -2262,7 +2262,7 @@ void c_AppendIterator::t_next() {
   }
   {
     MethodCallPackage mcp4;
-    mcp4.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
+    mcp4.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
     const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
     MethodCallPackage mcp3;
     mcp3.methodCall(((mcp4.bindClass(info)->getMeth0Args())(mcp4, 0).objectForCall()), NAMSTR(s_sys_ss50652d33, "next"), 0x3C6D50F3BB8102B8LL);
@@ -2273,7 +2273,7 @@ void c_AppendIterator::t_next() {
     bool tmp5;
     {
       MethodCallPackage mcp7;
-      mcp7.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
+      mcp7.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
       const CallInfo *cit7  __attribute__((__unused__)) = mcp7.ci;
       MethodCallPackage mcp6;
       mcp6.methodCall(((mcp7.bindClass(info)->getMeth0Args())(mcp7, 0).objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
@@ -2305,7 +2305,7 @@ void c_AppendIterator::t_next() {
       {
         {
           MethodCallPackage mcp12;
-          mcp12.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
+          mcp12.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
           const CallInfo *cit12  __attribute__((__unused__)) = mcp12.ci;
           MethodCallPackage mcp11;
           mcp11.methodCall(((mcp12.bindClass(info)->getMeth0Args())(mcp12, 0).objectForCall()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
@@ -2316,7 +2316,7 @@ void c_AppendIterator::t_next() {
           bool tmp13;
           {
             MethodCallPackage mcp15;
-            mcp15.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
+            mcp15.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
             const CallInfo *cit15  __attribute__((__unused__)) = mcp15.ci;
             MethodCallPackage mcp14;
             mcp14.methodCall(((mcp15.bindClass(info)->getMeth0Args())(mcp15, 0).objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
@@ -2346,7 +2346,7 @@ Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
   {
     ArrayInit tmp1(2, true);
     MethodCallPackage mcp2;
-    mcp2.methodCall((GET_THIS()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
+    mcp2.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
     const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
     const Variant &tmp3(((mcp2.bindClass(info)->getMeth0Args())(mcp2, 0)));
     tmp1.set(tmp3);
@@ -3132,7 +3132,7 @@ void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags
   {
     bool tmp1;
     {
-      bool tmp2((x_hphp_recursivedirectoryiterator___construct(((p_RecursiveDirectoryIterator&)GET_THIS()), toString(v_path), toInt64(v_flags))));
+      bool tmp2((x_hphp_recursivedirectoryiterator___construct(GET_THIS_TYPED(RecursiveDirectoryIterator), toString(v_path), toInt64(v_flags))));
       tmp1 = (!(tmp2));
     }
     if (tmp1) {
@@ -3150,67 +3150,67 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 783 */
 Variant c_RecursiveDirectoryIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::current);
-  return x_hphp_recursivedirectoryiterator_current(((p_RecursiveDirectoryIterator&)GET_THIS()));
+  return x_hphp_recursivedirectoryiterator_current(GET_THIS_TYPED(RecursiveDirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 795 */
 Variant c_RecursiveDirectoryIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::key);
-  return x_hphp_recursivedirectoryiterator_key(((p_RecursiveDirectoryIterator&)GET_THIS()));
+  return x_hphp_recursivedirectoryiterator_key(GET_THIS_TYPED(RecursiveDirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 807 */
 void c_RecursiveDirectoryIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::next);
-  x_hphp_recursivedirectoryiterator_next(((p_RecursiveDirectoryIterator&)GET_THIS()));
+  x_hphp_recursivedirectoryiterator_next(GET_THIS_TYPED(RecursiveDirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 819 */
 void c_RecursiveDirectoryIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::rewind);
-  x_hphp_recursivedirectoryiterator_rewind(((p_RecursiveDirectoryIterator&)GET_THIS()));
+  x_hphp_recursivedirectoryiterator_rewind(GET_THIS_TYPED(RecursiveDirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 823 */
 void c_RecursiveDirectoryIterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::seek);
-  x_hphp_recursivedirectoryiterator_seek(((p_RecursiveDirectoryIterator&)GET_THIS()), toInt64(v_position));
+  x_hphp_recursivedirectoryiterator_seek(GET_THIS_TYPED(RecursiveDirectoryIterator), toInt64(v_position));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 827 */
 String c_RecursiveDirectoryIterator::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::__toString);
-  return x_hphp_recursivedirectoryiterator___tostring(((p_RecursiveDirectoryIterator&)GET_THIS()));
+  return x_hphp_recursivedirectoryiterator___tostring(GET_THIS_TYPED(RecursiveDirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 831 */
 bool c_RecursiveDirectoryIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::valid);
-  return x_hphp_recursivedirectoryiterator_valid(((p_RecursiveDirectoryIterator&)GET_THIS()));
+  return x_hphp_recursivedirectoryiterator_valid(GET_THIS_TYPED(RecursiveDirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 844 */
 bool c_RecursiveDirectoryIterator::t_haschildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::hasChildren);
-  return x_hphp_recursivedirectoryiterator_haschildren(((p_RecursiveDirectoryIterator&)GET_THIS()));
+  return x_hphp_recursivedirectoryiterator_haschildren(GET_THIS_TYPED(RecursiveDirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 857 */
 Object c_RecursiveDirectoryIterator::t_getchildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getChildren);
-  return x_hphp_recursivedirectoryiterator_getchildren(((p_RecursiveDirectoryIterator&)GET_THIS()));
+  return x_hphp_recursivedirectoryiterator_getchildren(GET_THIS_TYPED(RecursiveDirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 871 */
 String c_RecursiveDirectoryIterator::t_getsubpath() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getSubPath);
-  return x_hphp_recursivedirectoryiterator_getsubpath(((p_RecursiveDirectoryIterator&)GET_THIS()));
+  return x_hphp_recursivedirectoryiterator_getsubpath(GET_THIS_TYPED(RecursiveDirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 885 */
 String c_RecursiveDirectoryIterator::t_getsubpathname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getSubPathname);
-  return x_hphp_recursivedirectoryiterator_getsubpathname(((p_RecursiveDirectoryIterator&)GET_THIS()));
+  return x_hphp_recursivedirectoryiterator_getsubpathname(GET_THIS_TYPED(RecursiveDirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 656 */
@@ -3798,7 +3798,7 @@ void c_DirectoryIterator::t___construct(Variant v_path) {
   {
     bool tmp1;
     {
-      bool tmp2((x_hphp_directoryiterator___construct(((p_DirectoryIterator&)GET_THIS()), toString(v_path))));
+      bool tmp2((x_hphp_directoryiterator___construct(GET_THIS_TYPED(DirectoryIterator), toString(v_path))));
       tmp1 = (!(tmp2));
     }
     if (tmp1) {
@@ -3816,49 +3816,49 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 673 */
 Variant c_DirectoryIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::current);
-  return x_hphp_directoryiterator_current(((p_DirectoryIterator&)GET_THIS()));
+  return x_hphp_directoryiterator_current(GET_THIS_TYPED(DirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 685 */
 Variant c_DirectoryIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::key);
-  return x_hphp_directoryiterator_key(((p_DirectoryIterator&)GET_THIS()));
+  return x_hphp_directoryiterator_key(GET_THIS_TYPED(DirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 697 */
 void c_DirectoryIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::next);
-  x_hphp_directoryiterator_next(((p_DirectoryIterator&)GET_THIS()));
+  x_hphp_directoryiterator_next(GET_THIS_TYPED(DirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 709 */
 void c_DirectoryIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::rewind);
-  x_hphp_directoryiterator_rewind(((p_DirectoryIterator&)GET_THIS()));
+  x_hphp_directoryiterator_rewind(GET_THIS_TYPED(DirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 723 */
 void c_DirectoryIterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::seek);
-  x_hphp_directoryiterator_seek(((p_DirectoryIterator&)GET_THIS()), toInt64(v_position));
+  x_hphp_directoryiterator_seek(GET_THIS_TYPED(DirectoryIterator), toInt64(v_position));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 727 */
 String c_DirectoryIterator::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::__toString);
-  return x_hphp_directoryiterator___tostring(((p_DirectoryIterator&)GET_THIS()));
+  return x_hphp_directoryiterator___tostring(GET_THIS_TYPED(DirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 740 */
 bool c_DirectoryIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::valid);
-  return x_hphp_directoryiterator_valid(((p_DirectoryIterator&)GET_THIS()));
+  return x_hphp_directoryiterator_valid(GET_THIS_TYPED(DirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 753 */
 bool c_DirectoryIterator::t_isdot() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::isDot);
-  return x_hphp_directoryiterator_isdot(((p_DirectoryIterator&)GET_THIS()));
+  return x_hphp_directoryiterator_isdot(GET_THIS_TYPED(DirectoryIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 164 */
@@ -4410,44 +4410,44 @@ void c_RecursiveIteratorIterator::t___construct(Variant v_iterator, Variant v_mo
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::__construct);
   bool oldInCtor = gasInCtor(true);
-  x_hphp_recursiveiteratoriterator___construct(((p_RecursiveIteratorIterator&)GET_THIS()), toObject(v_iterator), toInt64(v_mode), toInt64(v_flags));
+  x_hphp_recursiveiteratoriterator___construct(GET_THIS_TYPED(RecursiveIteratorIterator), toObject(v_iterator), toInt64(v_mode), toInt64(v_flags));
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 186 */
 Object c_RecursiveIteratorIterator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::getInnerIterator);
-  return x_hphp_recursiveiteratoriterator_getinneriterator(((p_RecursiveIteratorIterator&)GET_THIS()));
+  return x_hphp_recursiveiteratoriterator_getinneriterator(GET_THIS_TYPED(RecursiveIteratorIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 197 */
 Variant c_RecursiveIteratorIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::current);
-  return x_hphp_recursiveiteratoriterator_current(((p_RecursiveIteratorIterator&)GET_THIS()));
+  return x_hphp_recursiveiteratoriterator_current(GET_THIS_TYPED(RecursiveIteratorIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 208 */
 Variant c_RecursiveIteratorIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::key);
-  return x_hphp_recursiveiteratoriterator_key(((p_RecursiveIteratorIterator&)GET_THIS()));
+  return x_hphp_recursiveiteratoriterator_key(GET_THIS_TYPED(RecursiveIteratorIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 219 */
 void c_RecursiveIteratorIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::next);
-  x_hphp_recursiveiteratoriterator_next(((p_RecursiveIteratorIterator&)GET_THIS()));
+  x_hphp_recursiveiteratoriterator_next(GET_THIS_TYPED(RecursiveIteratorIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 230 */
 void c_RecursiveIteratorIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::rewind);
-  x_hphp_recursiveiteratoriterator_rewind(((p_RecursiveIteratorIterator&)GET_THIS()));
+  x_hphp_recursiveiteratoriterator_rewind(GET_THIS_TYPED(RecursiveIteratorIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 242 */
 bool c_RecursiveIteratorIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::valid);
-  return x_hphp_recursiveiteratoriterator_valid(((p_RecursiveIteratorIterator&)GET_THIS()));
+  return x_hphp_recursiveiteratoriterator_valid(GET_THIS_TYPED(RecursiveIteratorIterator));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 637 */

@@ -233,10 +233,9 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     } else {
       ClassScopePtr cls = getOriginalClass();
       if (cls->derivedByDynamic()) {
-        cg_printf("GET_THIS()");
+        cg_printf("Object(GET_THIS())");
       } else {
-        cg_printf("((%s%s&)GET_THIS())",
-                  Option::SmartPtrPrefix, cls->getId(cg).c_str());
+        cg_printf("GET_THIS_TYPED(%s)", cls->getId(cg).c_str());
       }
     }
   } else if (m_superGlobal) {

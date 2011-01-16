@@ -298,16 +298,19 @@ inline Variant f_reset(Variant array) {
 inline Variant f_end(Variant array) {
   return array.array_iter_end();
 }
+inline Variant f_key(Variant array) {
+  array.array_iter_dirty_check();
+  return array.array_iter_key();
+}
+
+Variant f_hphp_get_iterator(Variant iterable, bool isMutable);
+
 inline bool f_in_array(CVarRef needle, CVarRef haystack, bool strict = false) {
   if (!haystack.isArray()) {
     throw_bad_array_exception();
     return false;
   }
   return toArray(haystack).valueExists(needle, strict);
-}
-inline Variant f_key(Variant array) {
-  array.array_iter_dirty_check();
-  return array.array_iter_key();
 }
 
 Variant f_range(CVarRef low, CVarRef high, CVarRef step = 1);

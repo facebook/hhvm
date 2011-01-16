@@ -301,16 +301,22 @@ inline Variant x_end(CVarRef array) {
   return f_end(array);
 }
 
-inline bool x_in_array(CVarRef needle, CVarRef haystack, bool strict = false) {
-  FUNCTION_INJECTION_BUILTIN(in_array);
-  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  return f_in_array(needle, haystack, strict);
-}
-
 inline Variant x_key(CVarRef array) {
   FUNCTION_INJECTION_BUILTIN(key);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_key(array);
+}
+
+inline Variant x_hphp_get_iterator(CVarRef iterable, bool isMutable) {
+  FUNCTION_INJECTION_BUILTIN(hphp_get_iterator);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_hphp_get_iterator(iterable, isMutable);
+}
+
+inline bool x_in_array(CVarRef needle, CVarRef haystack, bool strict = false) {
+  FUNCTION_INJECTION_BUILTIN(in_array);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_in_array(needle, haystack, strict);
 }
 
 inline Variant x_range(CVarRef low, CVarRef high, CVarRef step = 1) {

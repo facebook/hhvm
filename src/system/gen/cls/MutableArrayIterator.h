@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 637 */
+/* SRC: classes/iterator.php line 638 */
 class c_MutableArrayIterator : public c_ArrayIterator {
   public:
 

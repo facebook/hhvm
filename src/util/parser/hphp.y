@@ -359,6 +359,113 @@ void transform_yield(Parser *_p, Token &stmts, int index, Token *expr) {
   _p->finishStatement(stmts, stmts3); stmts = 1;
 }
 
+// convert a foreach (by ref or not) to a normal for statement with
+// an iterator object.
+void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
+                       Token &value, Token &stmt, int count,
+                       bool hasValue, bool byRef) {
+  out.reset();
+
+  std::string loopvar = FOREACH_VAR_PREFIX;
+  loopvar += boost::lexical_cast<std::string>(count);
+
+  Token init;
+  {
+    Token cname;    cname.setText("hphp_get_iterator");
+    Token param1;   _p->onCallParam(param1, NULL, arr, 0);
+    Token mutConst; mutConst.setText(byRef ? "true" : "false");
+    Token mut;      _p->onConstantValue(mut, mutConst);
+    Token param2;   _p->onCallParam(param2, &param1, mut, 0);
+    Token call;     _p->onCall(call, 0, cname, param2, NULL);
+    Token lname;    lname.setText(loopvar);
+    Token var;      _p->onSimpleVariable(var, lname);
+    Token assign;   _p->onAssign(assign, var, call, false);
+    _p->onExprListElem(init, NULL, assign);
+  }
+
+  Token cond;
+  {
+    Token lname;    lname.setText(loopvar);
+    Token var;      _p->onSimpleVariable(var, lname);
+    Token pn;       pn.setText("valid");
+    Token pname;    _p->onName(pname, pn, Parser::VarName);
+    Token empty;    empty = 1;
+    Token valid;    _p->pushObject(var); _p->appendProperty(pname);
+                    _p->appendMethodParams(empty); _p->popObject(valid);
+    _p->onExprListElem(cond, NULL, valid);
+  }
+
+  Token step;
+  {
+    Token lname;    lname.setText(loopvar);
+    Token var;      _p->onSimpleVariable(var, lname);
+    Token pn;       pn.setText("next");
+    Token pname;    _p->onName(pname, pn, Parser::VarName);
+    Token empty;    empty = 1;
+    Token next;     _p->pushObject(var); _p->appendProperty(pname);
+                    _p->appendMethodParams(empty); _p->popObject(next);
+    _p->onExprListElem(step, NULL, next);
+  }
+
+  {
+    Token stmts0;   _p->onStatementListStart(stmts0);
+
+    if (hasValue) {
+      Token skset;
+      {
+        Token lname;  lname.setText(loopvar);
+        Token var;    _p->onSimpleVariable(var, lname);
+        Token pn;     pn->setText("key");
+        Token pname;  _p->onName(pname, pn, Parser::VarName);
+        Token empty;  empty = 1;
+        Token call;   _p->pushObject(var); _p->appendProperty(pname);
+                      _p->appendMethodParams(empty); _p->popObject(call);
+        Token kset;   _p->onAssign(kset, name, call, false);
+        _p->onExpStatement(skset, kset);
+      }
+      Token stmts1; _p->addStatement(stmts1, stmts0, skset);
+
+      Token svset;
+      {
+        Token lname;  lname.setText(loopvar);
+        Token var;    _p->onSimpleVariable(var, lname);
+        Token pn;     pn.setText(byRef ? "currentRef" : "current");
+        Token pname;  _p->onName(pname, pn, Parser::VarName);
+        Token empty;  empty = 1;
+        Token call;   _p->pushObject(var); _p->appendProperty(pname);
+                      _p->appendMethodParams(empty); _p->popObject(call);
+        Token vset;   _p->onAssign(vset, value, call, byRef);
+        _p->onExpStatement(svset, vset);
+      }
+      Token stmts2; _p->addStatement(stmts2, stmts1, svset);
+
+      Token stmts3; _p->addStatement(stmts3, stmts2, stmt);
+      stmt.reset();
+      _p->finishStatement(stmt, stmts3); stmt = 1;
+    } else {
+      Token svset;
+      {
+        Token lname;  lname.setText(loopvar);
+        Token var;    _p->onSimpleVariable(var, lname);
+        Token pn;     pn.setText(byRef ? "currentRef" : "current");
+        Token pname;  _p->onName(pname, pn, Parser::VarName);
+        Token empty;  empty = 1;
+        Token call;   _p->pushObject(var); _p->appendProperty(pname);
+                      _p->appendMethodParams(empty); _p->popObject(call);
+        Token vset;   _p->onAssign(vset, name, call, byRef);
+        _p->onExpStatement(svset, vset);
+      }
+      Token stmts1; _p->addStatement(stmts1, stmts0, svset);
+
+      Token stmts2; _p->addStatement(stmts2, stmts1, stmt);
+      stmt.reset();
+      _p->finishStatement(stmt, stmts2); stmt = 1;
+    }
+  }
+
+  _p->onFor(out, init, cond, step, stmt);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /**

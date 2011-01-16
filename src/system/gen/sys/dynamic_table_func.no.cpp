@@ -27005,6 +27005,25 @@ Variant ifa_date_isodate_set(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
   CVarRef arg3((a3));
   return (f_date_isodate_set(arg0, arg1, arg2, arg3), null);
 }
+Variant i_hphp_get_iterator(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(hphp_get_iterator);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("hphp_get_iterator", count, 2, 2, 1);
+  const_cast<Array&>(params).escalate(true);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_hphp_get_iterator(arg0, arg1));
+  }
+}
+Variant ifa_hphp_get_iterator(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("hphp_get_iterator", count, 2, 2, 1);
+  CVarRef arg0(ref(a0));
+  CVarRef arg1((a1));
+  return (f_hphp_get_iterator(arg0, arg1));
+}
 Variant i_magickpaintopaqueimage(void *extra, CArrRef params) {
   FUNCTION_INJECTION(magickpaintopaqueimage);
   int count __attribute__((__unused__)) = params.size();
@@ -69145,6 +69164,26 @@ Variant ei_date_isodate_set(Eval::VariableEnvironment &env, const Eval::Function
   if (count <= 3) return (x_date_isodate_set(a0, a1, a2), null);
   else return (x_date_isodate_set(a0, a1, a2, a3), null);
 }
+Variant ei_hphp_get_iterator(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = ref((*it)->refval(env));
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("hphp_get_iterator", count, 2, 2, 1);
+  return (x_hphp_get_iterator(ref(a0), a1));
+}
 Variant ei_magickpaintopaqueimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -87034,6 +87073,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 5426:
       HASH_INVOKE_FROM_EVAL(0x6193A26936F4D532LL, disk_total_space);
+      HASH_INVOKE_FROM_EVAL(0x684966A7B9C15532LL, hphp_get_iterator);
       break;
     case 5429:
       HASH_INVOKE_FROM_EVAL(0x6C87406DDC0AB535LL, mcrypt_ecb);
@@ -90358,6 +90398,7 @@ CallInfo ci_sha1((void*)&i_sha1, (void*)&ifa_sha1, 2, 0, 0x0000000000000000LL, (
 CallInfo ci_collator_set_strength((void*)&i_collator_set_strength, (void*)&ifa_collator_set_strength, 2, 0, 0x0000000000000000LL, (void*)&ei_collator_set_strength);
 CallInfo ci_implode((void*)&i_implode, (void*)&ifa_implode, 2, 0, 0x0000000000000000LL, (void*)&ei_implode);
 CallInfo ci_date_isodate_set((void*)&i_date_isodate_set, (void*)&ifa_date_isodate_set, 4, 0, 0x0000000000000000LL, (void*)&ei_date_isodate_set);
+CallInfo ci_hphp_get_iterator((void*)&i_hphp_get_iterator, (void*)&ifa_hphp_get_iterator, 2, 0, 0x0000000000000001LL, (void*)&ei_hphp_get_iterator);
 CallInfo ci_magickpaintopaqueimage((void*)&i_magickpaintopaqueimage, (void*)&ifa_magickpaintopaqueimage, 4, 0, 0x0000000000000000LL, (void*)&ei_magickpaintopaqueimage);
 CallInfo ci_mb_strimwidth((void*)&i_mb_strimwidth, (void*)&ifa_mb_strimwidth, 5, 0, 0x0000000000000000LL, (void*)&ei_mb_strimwidth);
 CallInfo ci_drawsetfont((void*)&i_drawsetfont, (void*)&ifa_drawsetfont, 2, 0, 0x0000000000000000LL, (void*)&ei_drawsetfont);
@@ -99276,6 +99317,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 5426:
       HASH_GUARD(0x6193A26936F4D532LL, disk_total_space) {
         ci = &ci_disk_total_space;
+        return true;
+      }
+      HASH_GUARD(0x684966A7B9C15532LL, hphp_get_iterator) {
+        ci = &ci_hphp_get_iterator;
         return true;
       }
       break;

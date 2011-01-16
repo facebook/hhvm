@@ -111,6 +111,9 @@ extern void create_generator(Parser *_p, Token &out, Token &params,
                              const char *clsname, Token *modifiers,
                              bool getArgs);
 extern void transform_yield(Parser *_p, Token &stmts, int index, Token *expr);
+extern void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
+                              Token &value, Token &stmt, int count,
+                              bool hasValue, bool byRef);
 
 namespace HPHP {
 
@@ -611,6 +614,7 @@ void Parser::onFunctionStart(Token &name) {
   pushComment();
   newScope();
   m_generators.push_back(0);
+  m_foreaches.push_back(0);
   m_funcName = name.text();
   m_hasCallToGetArgs.push_back(false);
 }
@@ -633,6 +637,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
 
   int yieldCount = m_generators.back();
   m_generators.pop_back();
+  m_foreaches.pop_back();
 
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
@@ -805,6 +810,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
 
   int yieldCount = m_generators.back();
   m_generators.pop_back();
+  m_foreaches.pop_back();
 
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
@@ -1103,6 +1109,13 @@ void Parser::onExpStatement(Token &out, Token &expr) {
 
 void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
                        Token &stmt) {
+  if (!m_generators.empty() && m_generators.back() > 0) {
+    int cnt = ++m_foreaches.back();
+    // TODO only transform foreach with yield in its body.
+    transform_foreach(this, out, arr, name, value, stmt, cnt, value->exp,
+                      value->exp ? value->num() == 1 : name->num() == 1);
+    return;
+  }
   if (stmt->stmt && stmt->stmt->is(Statement::KindOfStatementList)) {
     stmt->stmt = NEW_STMT(BlockStatement,
                           dynamic_pointer_cast<StatementList>(stmt->stmt));

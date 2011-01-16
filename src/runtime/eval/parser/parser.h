@@ -287,6 +287,8 @@ private:
   std::vector<StaticStatementPtr> &m_staticStatements;
   int m_classVarMods;
 
+  std::vector<int> m_foreaches;
+
   // parser output
   StatementPtr m_tree;
 

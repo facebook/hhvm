@@ -1191,6 +1191,47 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "key",
+    'desc'   => "key() returns the index element of the current array position.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "The key() function simply returns the key of the array element that's currently being pointed to by the internal pointer. It does not move the pointer in any way. If the internal pointer points beyond the end of the elements list or the array is empty, key() returns NULL.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "array",
+        'type'   => Variant | Reference,
+        'desc'   => "The array.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "hphp_get_iterator",
+    'desc'   => "hphp_get_iterator() returns an iterator object for an array or an object.",
+    'flags'  => HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "The hphp_get_iterator() function returns an iterator object for an array or an object. It could be mutable, but only for arrays and objects that are not instances of Iterator or IteratorAggregate.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "iterable",
+        'type'   => Variant | Reference,
+        'desc'   => "The array or object to iterate on.",
+      ),
+      array(
+        'name'   => "isMutable",
+        'type'   => Boolean,
+        'desc'   => "Whether it is a mutable iterator.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "in_array",
     'desc'   => "Searches haystack for needle.",
     'flags'  =>  HasDocComment | FunctionIsFoldable,
@@ -1214,24 +1255,6 @@ DefineFunction(
         'type'   => Boolean,
         'value'  => "false",
         'desc'   => "If the third parameter strict is set to TRUE then the in_array() function will also check the types of the needle in the haystack.",
-      ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "key",
-    'desc'   => "key() returns the index element of the current array position.",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Variant,
-      'desc'   => "The key() function simply returns the key of the array element that's currently being pointed to by the internal pointer. It does not move the pointer in any way. If the internal pointer points beyond the end of the elements list or the array is empty, key() returns NULL.",
-    ),
-    'args'   => array(
-      array(
-        'name'   => "array",
-        'type'   => Variant | Reference,
-        'desc'   => "The array.",
       ),
     ),
   ));

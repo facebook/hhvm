@@ -96,6 +96,9 @@ extern void create_generator(Parser *_p, Token &out, Token &params,
                              const char *clsname, Token *modifiers,
                              bool getArgs);
 extern void transform_yield(Parser *_p, Token &stmts, int index, Token *expr);
+extern void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
+                              Token &value, Token &stmt, int count,
+                              bool hasValue, bool byRef);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -946,6 +949,7 @@ void Parser::onFunctionStart(Token &name) {
   FunctionStatementPtr func = NEW_STMT(Function, funcName,
                                        m_scanner.detachDocComment());
   m_hasCallToGetArgs.push_back(false);
+  m_foreaches.push_back(0);
   pushFunc(func);
 }
 
@@ -957,6 +961,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
   func->setLoc(popFuncLocation().get());
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
+  m_foreaches.pop_back();
 
   if (func->hasYield()) {
     string closureName = getClosureName();
@@ -1075,6 +1080,7 @@ void Parser::onMethodStart(Token &name, Token &modifiers) {
                                        modifiers.num(),
                                        m_scanner.detachDocComment());
   m_hasCallToGetArgs.push_back(false);
+  m_foreaches.push_back(0);
   pushFunc(func);
 }
 
@@ -1091,6 +1097,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   ms->resetLoc(this);
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
+  m_foreaches.pop_back();
 
   if (ms->hasYield()) {
     string closureName = getClosureName();
@@ -1404,6 +1411,13 @@ void Parser::onExpStatement(Token &out, Token &expr) {
 
 void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
                        Token &stmt) {
+  if (haveFunc() && peekFunc()->hasYield()) {
+    int cnt = ++m_foreaches.back();
+    // TODO only transform foreach with yield in its body.
+    transform_foreach(this, out, arr, name, value, stmt, cnt, value->exp(),
+                      value->exp() ? value.num() : name.num());
+    return;
+  }
   out.reset();
   if (value->exp()) {
     if (value.num() == 0) {
@@ -1418,10 +1432,10 @@ void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
   } else {
     if (name.num() == 0) {
       out->stmt() = NEW_STMT(ForEach, arr->exp(), LvalExpressionPtr(),
-                           name->getExp<LvalExpression>(), stmt->stmt());
+                             name->getExp<LvalExpression>(), stmt->stmt());
     } else {
       out->stmt() = NEW_STMT(StrongForEach, arr->exp(), LvalExpressionPtr(),
-                           name->getExp<LvalExpression>(), stmt->stmt());
+                             name->getExp<LvalExpression>(), stmt->stmt());
     }
   }
 }

@@ -443,6 +443,49 @@ int f_count(CVarRef var, bool recursive /* = false */) {
   return 1;
 }
 
+Variant f_hphp_get_iterator(Variant iterable, bool isMutable) {
+  if (iterable.isArray()) {
+    if (isMutable) {
+      return create_object("MutableArrayIterator",
+                           CREATE_VECTOR1(ref(iterable)));
+    }
+    return create_object("ArrayIterator", CREATE_VECTOR1(iterable));
+  }
+  if (iterable.isObject()) {
+    CStrRef context = FrameInjection::GetClassName(true);
+
+    ObjectData *obj = iterable.getObjectData();
+    if (isMutable) {
+      while (obj->o_instanceof("IteratorAggregate")) {
+        Variant iterator = obj->o_invoke("getiterator", Array());
+        if (!iterator.isObject()) break;
+        obj = iterator.getObjectData();
+      }
+      if (obj->o_instanceof("Iterator")) {
+        throw FatalErrorException("An iterator cannot be used for "
+                                  "iteration by reference");
+      }
+      Array properties = obj->o_toIterArray(context, true);
+      return create_object("MutableArrayIterator",
+                           CREATE_VECTOR1(ref(properties)));
+    }
+
+    while (obj->o_instanceof("IteratorAggregate")) {
+      Variant iterator = obj->o_invoke("getiterator", Array());
+      if (!iterator.isObject()) break;
+      obj = iterator.getObjectData();
+    }
+    if (obj->o_instanceof("Iterator")) {
+      return obj;
+    }
+
+    return create_object("ArrayIterator",
+                         CREATE_VECTOR1(obj->o_toIterArray(context)));
+  }
+  raise_warning("Invalid argument supplied for iteration");
+  return null;
+}
+
 Variant f_range(CVarRef low, CVarRef high, CVarRef step /* = 1 */) {
   bool is_step_double = false;
   double dstep = 1.0;

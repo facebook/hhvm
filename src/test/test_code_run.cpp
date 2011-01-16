@@ -16074,6 +16074,26 @@ bool TestCodeRun::TestYield() {
         "int(2)\n"
        );
 
+  MVCRO("<?php\n"
+        "function f($a1, &$a2) {\n"
+        "  foreach ($a1 as $k1 => $v1) {\n"
+        "    foreach ($a2 as $k2 => &$v2) {\n"
+        "      $v2 += $v1; yield $v2;\n"
+        "    }\n"
+        "  }\n"
+        "}\n"
+        "$a1 = array(1, 2);\n"
+        "$a2 = array(1, 2);\n"
+        "foreach (f($a1, $a2) as $v) { var_dump($v); }\n"
+        "var_dump($a2[0], $a2[1]);\n",
+
+        "int(2)\n"
+        "int(3)\n"
+        "int(4)\n"
+        "int(5)\n"
+        "int(4)\n"
+        "int(5)\n");
+
   return true;
 }
 

@@ -61,7 +61,8 @@ class c_AppendIterator : public ExtObjectData {
 
   public:
   DECLARE_INVOKES_FROM_EVAL
-  c_AppendIterator(ObjectData* r = NULL) {setAttribute(HasCall);
+  c_AppendIterator(ObjectData* r = NULL) {
+    setAttribute(HasCall);
   }
   void init();
   Variant doCall(Variant v_name, Variant v_arguments, bool fatal);

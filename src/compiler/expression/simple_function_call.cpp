@@ -964,7 +964,12 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       getScope()->getVariables()->
         setAttribute(VariableTable::NeedGlobalPointer);
     } else if (!m_dynamicInvoke &&
-               (!m_classScope || !m_classScope->derivesFromRedeclaring()) &&
+               (!m_classScope ||
+                (!m_classScope->derivesFromRedeclaring() &&
+                 !m_classScope->getAttribute(
+                   ClassScope::HasUnknownStaticMethodHandler) &&
+                 !m_classScope->getAttribute(
+                   ClassScope::InheritsUnknownStaticMethodHandler))) &&
                getScope()->isFirstPass()) {
       Compiler::Error(Compiler::UnknownFunction, self);
     }

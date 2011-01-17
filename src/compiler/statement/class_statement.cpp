@@ -514,7 +514,8 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                          Option::ClassPrefix, clsName,
                          hasParam ? "ObjectData* r = NULL" : "",
                          conInit.c_str(),
-                         hasGet || hasSet ? "\n" : "");
+                         hasGet || hasSet || hasCall || hasCallStatic ?
+                         "\n" : "");
           if (hasGet) cg_printf("setAttribute(UseGet);\n");
           if (hasSet) cg_printf("setAttribute(UseSet);\n");
           if (hasCall) cg_printf("setAttribute(HasCall);\n");

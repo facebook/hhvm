@@ -113,6 +113,7 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
         !(getContext() &
           (LValue|RefValue|RefParameter|UnsetContext|ExistContext)) &&
         m_sym->getDeclaration().get() == this &&
+        !variables->getAttribute(VariableTable::ContainsLDynamicVariable) &&
         !getScope()->is(BlockScope::ClassScope)) {
       Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
     }

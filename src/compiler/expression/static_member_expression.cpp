@@ -107,6 +107,10 @@ void StaticMemberExpression::analyzeProgram(AnalysisResultPtr ar) {
     if (findMember(ar, name, sym)) {
       if (m_resolvedClass) {
         m_resolvedClass->addUse(getScope(), BlockScope::UseKindStaticRef);
+        if (!sym && !m_dynamicClass && !name.empty() &&
+            ar->getPhase() == AnalysisResult::AnalyzeAll) {
+          Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
+        }
       }
     }
     addUserClass(ar, m_className);
@@ -253,7 +257,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
       tp = Type::Variant;
     }
     if (!found && getScope()->isFirstPass()) {
-      Compiler::Error(Compiler::MissingObjectContext, self);
+      Compiler::Error(Compiler::UseUndeclaredVariable, self);
     }
     m_valid = found || isRedeclared() || m_dynamicClass;
     m_implementedType.reset();

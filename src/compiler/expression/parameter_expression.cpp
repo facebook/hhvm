@@ -243,7 +243,7 @@ void ParameterExpression::outputCPPImpl(CodeGenerator &cg,
   }
 
   cg_printf(" %s%s", Option::VariablePrefix, m_name.c_str());
-  if (m_defaultValue) {
+  if (m_defaultValue && sym->getParameterIndex() >= func->getMinParamCount()) {
     bool comment = context == CodeGenerator::CppTypedParamsWrapperImpl ||
       context == CodeGenerator::CppImplementation ||
       (context == CodeGenerator::CppDeclaration && func->isInlined());

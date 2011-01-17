@@ -96,20 +96,14 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultPtr ar,
     set<string> names;
     int i = 0;
     maxParam = m_params->getCount();
-    for (; i < maxParam; i++) {
-      ParameterExpressionPtr param =
-        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
-      if (param->isRef()) hasRef = true;
-      if (param->isOptional()) break;
-      minParam++;
-    }
-    for (i++; i < maxParam; i++) {
+    for (i = maxParam; i--; ) {
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
       if (param->isRef()) hasRef = true;
       if (!param->isOptional()) {
+        if (!minParam) minParam = i + 1;
+      } else if (minParam && !param->hasTypeHint()) {
         Compiler::Error(Compiler::RequiredAfterOptionalParam, param);
-        param->defaultToNull(ar);
       }
     }
 

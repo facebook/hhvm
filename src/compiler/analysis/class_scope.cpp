@@ -106,7 +106,7 @@ std::string ClassScope::getId(CodeGenerator &cg) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ClassScope::updateMagicMethods(ClassScopePtr super) {
+void ClassScope::derivedMagicMethods(ClassScopePtr super) {
   if (m_attribute & (HasUnknownPropGetter|MayHaveUnknownPropGetter)) {
     super->setAttribute(MayHaveUnknownPropGetter);
   }
@@ -119,28 +119,65 @@ void ClassScope::updateMagicMethods(ClassScopePtr super) {
   if (m_attribute & (HasPropUnsetter|MayHavePropUnsetter)) {
     super->setAttribute(MayHavePropUnsetter);
   }
-  if (m_attribute & MayBeArrayAccess) {
-    super->setAttribute(MayBeArrayAccess);
+  if (m_attribute & (HasUnknownMethodHandler|MayHaveUnknownMethodHandler)) {
+    super->setAttribute(MayHaveUnknownMethodHandler);
+  }
+  if (m_attribute &
+      (HasUnknownStaticMethodHandler|MayHaveUnknownStaticMethodHandler)) {
+    super->setAttribute(MayHaveUnknownStaticMethodHandler);
+  }
+  if (m_attribute & (HasArrayAccess|MayHaveArrayAccess)) {
+    super->setAttribute(MayHaveArrayAccess);
+  }
+}
+
+void ClassScope::inheritedMagicMethods(ClassScopePtr super) {
+  if (super->m_attribute &
+      (HasUnknownPropGetter|InheritsUnknownPropGetter)) {
+    setAttribute(InheritsUnknownPropGetter);
+  }
+  if (super->m_attribute & (HasUnknownPropSetter|InheritsUnknownPropSetter)) {
+    setAttribute(InheritsUnknownPropSetter);
+  }
+  if (super->m_attribute & (HasUnknownPropTester|InheritsUnknownPropTester)) {
+    setAttribute(InheritsUnknownPropTester);
+  }
+  if (super->m_attribute & (HasPropUnsetter|InheritsPropUnsetter)) {
+    setAttribute(InheritsPropUnsetter);
+  }
+  if (super->m_attribute &
+      (HasUnknownMethodHandler|InheritsUnknownMethodHandler)) {
+    setAttribute(InheritsUnknownMethodHandler);
+  }
+  if (super->m_attribute &
+      (HasUnknownStaticMethodHandler|InheritsUnknownStaticMethodHandler)) {
+    setAttribute(InheritsUnknownStaticMethodHandler);
+  }
+  if (super->m_attribute & (HasArrayAccess|InheritsArrayAccess)) {
+    setAttribute(InheritsArrayAccess);
   }
 }
 
 bool ClassScope::implementsArrayAccess(AnalysisResultPtr ar) {
-  return getAttribute(MayBeArrayAccess);
+  return
+    getAttribute(MayHaveArrayAccess) |
+    getAttribute(HasArrayAccess) |
+    getAttribute(InheritsArrayAccess);
 }
 
 bool ClassScope::implementsAccessor(AnalysisResultPtr ar, int prop) {
   if (m_attribute & prop) return true;
   if (prop & MayHaveUnknownPropGetter) {
-    prop |= HasUnknownPropGetter;
+    prop |= HasUnknownPropGetter | InheritsUnknownPropGetter;
   }
   if (prop & MayHaveUnknownPropSetter) {
-    prop |= HasUnknownPropSetter;
+    prop |= HasUnknownPropSetter | InheritsUnknownPropSetter;
   }
   if (prop & MayHaveUnknownPropTester) {
-    prop |= HasUnknownPropTester;
+    prop |= HasUnknownPropTester | InheritsUnknownPropTester;
   }
   if (prop & MayHavePropUnsetter) {
-    prop |= HasPropUnsetter;
+    prop |= HasPropUnsetter | InheritsPropUnsetter;
   }
   return m_attribute & prop;
 }
@@ -219,11 +256,9 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
           BOOST_FOREACH(ClassScopePtr cls, classes) {
             cls->m_derivedByDynamic = true;
             StringToFunctionScopePtrMap cur(pristine);
-            updateMagicMethods(cls);
+            inheritedMagicMethods(cls);
             cls->collectMethods(ar, cur, false, forInvoke);
-            if (cls->getAttribute(MayBeArrayAccess)) {
-              setAttribute(MayBeArrayAccess);
-            }
+            derivedMagicMethods(cls);
             funcs.insert(cur.begin(), cur.end());
           }
           m_derivesFromRedeclaring = DirectFromRedeclared;
@@ -234,11 +269,9 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
         }
         setVolatile();
       } else {
-        updateMagicMethods(super);
+        inheritedMagicMethods(super);
         super->collectMethods(ar, funcs, false, forInvoke);
-        if (super->getAttribute(MayBeArrayAccess)) {
-          setAttribute(MayBeArrayAccess);
-        }
+        derivedMagicMethods(super);
         if (super->derivesFromRedeclaring()) {
           if (base == m_parent) {
             m_derivesFromRedeclaring = IndirectFromRedeclared;
@@ -479,18 +512,6 @@ void ClassScope::setSystem() {
 bool ClassScope::needLazyStaticInitializer() {
   return getVariables()->getAttribute(VariableTable::ContainsDynamicStatic) ||
     getConstants()->hasDynamic();
-}
-
-bool ClassScope::hasAttribute(ClassScope::Attribute attr,
-                              AnalysisResultPtr ar) const {
-  if (getAttribute(attr)) return true;
-
-  if (!m_parent.empty()) {
-    ClassScopePtr super = ar->findClass(m_parent);
-    if (super) return super->hasAttribute(attr, ar);
-  }
-
-  return false;
 }
 
 void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {

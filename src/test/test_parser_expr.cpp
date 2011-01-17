@@ -321,7 +321,9 @@ bool TestParserExpr::TestClassConstantExpression() {
 }
 
 bool TestParserExpr::TestParameterExpression() {
-  V("<?php function a($a=1,$b) {}",  "function a($a = 1, $b = null) {\n}\n");
+  V2("<?php function a($a=1,$b) {}",
+     "function a($a = 1, $b) {\n}\n",
+     "function a($a = 1, $b = null) {\n}\n");
 
   V("<?php function a() {}",         "function a() {\n}\n");
   V("<?php function a($a) {}",       "function a($a) {\n}\n");

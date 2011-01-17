@@ -44,6 +44,7 @@ public:
   void rename(const std::string &name) { m_name = name;}
   ExpressionPtr defaultValue() { return m_defaultValue; }
   TypePtr getTypeSpec(AnalysisResultPtr ar, bool forInference);
+  bool hasTypeHint() const { return !m_type.empty(); }
 private:
   std::string m_type;
   std::string m_originalType;

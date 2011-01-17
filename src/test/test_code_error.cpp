@@ -83,9 +83,16 @@ bool TestCodeError::TestUseEvaluation() {
 bool TestCodeError::TestUseUndeclaredVariable() {
   VE(UseUndeclaredVariable, "<?php print $a;");
   VE(UseUndeclaredVariable, "<?php $a = 1; function t() { print $a;}");
+/*
+  Removing for now. We dont warn about non-static properties.
+
   VE(UseUndeclaredVariable,
      "<?php class T {} function t() { $a = new T(); print $a->a; }");
+*/
   VE(UseUndeclaredVariable, "<?php print $GLOBALS['a'];");
+  VE(UseUndeclaredVariable,
+     "<?php class A { public $a = 123; } print A::$a;");
+
   return true;
 }
 
@@ -108,7 +115,9 @@ bool TestCodeError::TestUnknownBaseClass() {
 }
 
 bool TestCodeError::TestUnknownObjectMethod() {
-  VE(UnknownObjectMethod, "<?php class T {} $a = new T(); print $a->a();");
+  VE(UnknownObjectMethod,
+     "<?php class T {} "
+     "function test() { $a = new T(); print $a->a(); }");
 
   // negatve cases
   VEN(UnknownObjectMethod,
@@ -228,9 +237,6 @@ bool TestCodeError::TestMissingObjectContext() {
   VE(MissingObjectContext,
      "<?php class A { public function a() { } "
      "public static function test() { $this->a();}} A::test();");
-
-  VE(MissingObjectContext,
-     "<?php class A { public $a = 123; } print A::$a;");
 
   // negative case
   VEN(MissingObjectContext,

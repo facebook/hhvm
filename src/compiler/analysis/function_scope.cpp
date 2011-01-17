@@ -1076,17 +1076,19 @@ int FunctionScope::outputCPPInvokeArgCountCheck(
     bool fullGuard = ret && (system || Option::HardTypeHints);
     for (int i = 0; i < m_minParam; i++) {
       if (TypePtr t = m_paramTypeSpecs[i]) {
-        if (i < maxCount) cg_printf("if (count < %d) ", i + 1);
-        cg_printf("%sthrow_missing_typed_argument(\"%s\", ",
-                  fullGuard ? "return " : "", fullname.c_str());
-        cg_printf(t->is(Type::KindOfArray) ?
-                  "0" : "\"%s\"", cg.escapeLabel(t->getName()).c_str());
-        cg_printf(", %d);\n", i + 1);
-        if (fullGuard) {
-          if (i >= maxCount) return m_minParam;
-          if (guarded <= i) guarded = i + 1;
-          if (i + 1 == m_minParam) {
-            checkMissing = false;
+        if (m_paramDefaults[i].empty()) {
+          if (i < maxCount) cg_printf("if (count < %d) ", i + 1);
+          cg_printf("%sthrow_missing_typed_argument(\"%s\", ",
+                    fullGuard ? "return " : "", fullname.c_str());
+          cg_printf(t->is(Type::KindOfArray) ?
+                    "0" : "\"%s\"", cg.escapeLabel(t->getName()).c_str());
+          cg_printf(", %d);\n", i + 1);
+          if (fullGuard) {
+            if (i >= maxCount) return m_minParam;
+            if (guarded <= i) guarded = i + 1;
+            if (i + 1 == m_minParam) {
+              checkMissing = false;
+            }
           }
         }
       }
@@ -1169,7 +1171,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
     if (i >= 0 && i < m_maxParam) {
       int defIndex = -1;
       bool defNull = false;
-      if (i >= m_minParam && !useDefaults) {
+      if (!m_paramDefaults[i].empty() && !useDefaults) {
         if (fewArgs ? i < maxCount : isRefParam(i)) {
           Variant tmp;
           MethodStatementPtr m(dynamic_pointer_cast<MethodStatement>(m_stmt));
@@ -1187,14 +1189,20 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
         }
       }
       cg_printf("CVarRef arg%d(", i);
-      if (i < m_minParam) {
+      if (m_paramDefaults[i].empty()) {
         if (i >= guarded) {
           if (i < maxCount) cg_printf("count <= %d ? ", i);
           cg_printf("null_variant");
           if (i < maxCount) cg_printf(" : ");
         }
       } else if (!useDefaults) {
-        if (i < maxCount) cg_printf("count <= %d ? ", i);
+        bool close = false;
+        if (i < maxCount) {
+          cg_printf("count <= %d ? ", i);
+        } else if (!defNull && defIndex < 0) {
+          cg_printf("(");
+          close = true;
+        }
         if (defNull) {
           cg_printf("null_variant");
         } else {
@@ -1217,6 +1225,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           cg.setContext(context);
           cg_printf(")");
         }
+        if (close) cg_printf(")");
         if (i < maxCount) cg_printf(" : ");
       }
       if (fewArgs) {

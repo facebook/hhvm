@@ -49,6 +49,15 @@ public:
     KindOfInterface,
   };
 
+#define DECLARE_MAGIC(prefix, prev)                                     \
+  prefix ## UnknownPropGetter          = prev << 1, /* __get */         \
+  prefix ## UnknownPropSetter          = prev << 2, /* __set */         \
+  prefix ## UnknownPropTester          = prev << 3, /* __isset */       \
+  prefix ## PropUnsetter               = prev << 4, /* __unset */       \
+  prefix ## UnknownMethodHandler       = prev << 5, /* __call */        \
+  prefix ## UnknownStaticMethodHandler = prev << 6, /* __callStatic */  \
+  prefix ## ArrayAccess                = prev << 7  /* Implements ArrayAccess */
+
   enum Attribute {
     System                        = 0x001,
     Extension                     = 0x002,
@@ -59,17 +68,9 @@ public:
     HasConstructor                = 0x0004,
     ClassNameConstructor          = 0x0008,
     HasDestructor                 = 0x0010,
-    HasUnknownPropGetter          = 0x0020, // __get
-    HasUnknownPropSetter          = 0x0040, // __set
-    HasUnknownPropTester          = 0x0080, // __isset
-    HasPropUnsetter               = 0x0100, // __unset
-    HasUnknownMethodHandler       = 0x0200, // __call
-    HasUnknownStaticMethodHandler = 0x0400, // __callStatic
-    MayHaveUnknownPropGetter      = 0x0800, // a derived class defines
-    MayHaveUnknownPropSetter      = 0x1000, // the specified magic
-    MayHaveUnknownPropTester      = 0x2000, // method
-    MayHavePropUnsetter           = 0x4000,
-    MayBeArrayAccess              = 0x8000, // implements ArrayAccess
+    DECLARE_MAGIC(Has, HasDestructor),
+    DECLARE_MAGIC(MayHave, HasArrayAccess),
+    DECLARE_MAGIC(Inherits, MayHaveArrayAccess)
   };
   enum Modifier {
     Public = 1,
@@ -176,8 +177,6 @@ public:
   bool getAttribute(Attribute attr) const {
     return m_attribute & attr;
   }
-  bool hasAttribute(Attribute attr,
-                    AnalysisResultPtr ar) const; // recursive
 
   void addMissingMethod(const std::string &name) {
     m_missingMethods.insert(name);
@@ -325,7 +324,8 @@ public:
   void outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar);
 
-  void updateMagicMethods(ClassScopePtr super);
+  void inheritedMagicMethods(ClassScopePtr super);
+  void derivedMagicMethods(ClassScopePtr super);
   /* true if it might, false if it doesnt */
   bool implementsArrayAccess(AnalysisResultPtr ar);
   /* true if it might, false if it doesnt */

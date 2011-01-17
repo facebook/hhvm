@@ -672,7 +672,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
             cls->findFunction(ar, func->getName(), true, true);
           if (!tmpFunc || !tmpFunc->hasImpl()) {
             Compiler::Error(Compiler::MissingAbstractMethodImpl,
-                            cls->getStmt(), func->getStmt());
+                            func->getStmt(), cls->getStmt());
           }
         }
         m_methodToClassDecs[iterMethod->first].push_back(cls);

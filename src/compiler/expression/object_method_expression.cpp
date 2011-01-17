@@ -182,12 +182,6 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
   }
 
   if (!cls) {
-    if (getScope()->isFirstPass()) {
-      if (!ar->classMemberExists(m_name, AnalysisResult::MethodName)) {
-        Compiler::Error(Compiler::UnknownObjectMethod, self);
-      }
-    }
-
     m_classScope.reset();
     m_funcScope.reset();
 
@@ -204,7 +198,9 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
   if (!func) {
     func = cls->findFunction(ar, m_name, true, true);
     if (!func) {
-      if (!cls->hasAttribute(ClassScope::HasUnknownMethodHandler, ar)) {
+      if (!cls->getAttribute(ClassScope::MayHaveUnknownMethodHandler) &&
+          !cls->getAttribute(ClassScope::HasUnknownMethodHandler) &&
+          !cls->getAttribute(ClassScope::InheritsUnknownMethodHandler)) {
         if (ar->classMemberExists(m_name, AnalysisResult::MethodName)) {
           setDynamicByIdentifier(ar, m_name);
         } else {

@@ -468,9 +468,6 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
 
     if (!cls) {
       sym = addSymbol(name);
-      if (m_blockScope.is(BlockScope::ClassScope)) {
-        Compiler::Error(Compiler::UseUndeclaredVariable, construct);
-      }
     }
   }
 

@@ -44,7 +44,7 @@ public:
   Variant &currentObject() { return m_currentObject; }
   virtual const char* currentClass() const;
   virtual const ClassStatement *currentClassStatement() const;
-  virtual const char* currentContext() const;
+  virtual String currentContext() const;
   virtual Array getParams() const = 0;
   virtual bool refReturn() const { return false; }
   virtual Array getDefinedVariables() const;
@@ -156,7 +156,7 @@ private:
 class MethScopeVariableEnvironment : public FuncScopeVariableEnvironment {
 public:
   MethScopeVariableEnvironment(const MethodStatement *meth, int argc);
-  virtual const char* currentContext() const;
+  virtual String currentContext() const;
   const ClassStatement *currentClassStatement() const;
 private:
   const ClassStatement *m_cls;

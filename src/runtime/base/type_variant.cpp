@@ -1525,9 +1525,10 @@ ArrayIterPtr Variant::begin(CStrRef context /* = null_string */,
 }
 
 MutableArrayIterPtr Variant::begin(Variant *key, Variant &val,
+                                   CStrRef context /* = null_string */,
                                    bool setIterDirty /* = false */) {
   if (is(KindOfObject)) {
-    return getObjectData()->begin(key, val);
+    return getObjectData()->begin(key, val, context);
   }
   // we are about to modify an array that has other weak references, so
   // we have to make a copy to preserve other instances

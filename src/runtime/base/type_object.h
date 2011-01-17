@@ -80,6 +80,7 @@ class Object : public SmartPtr<ObjectData> {
                      bool setIterDirty = false) const;
 
   MutableArrayIterPtr begin(Variant *key, Variant &val,
+                            CStrRef context = null_string,
                             bool setIterDirty = false) const;
 
   /**

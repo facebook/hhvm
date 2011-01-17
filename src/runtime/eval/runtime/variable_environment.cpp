@@ -58,7 +58,7 @@ const char* VariableEnvironment::currentClass() const {
 const ClassStatement *VariableEnvironment::currentClassStatement() const {
   return NULL;
 }
-const char* VariableEnvironment::currentContext() const {
+String VariableEnvironment::currentContext() const {
   return m_currentClass ? m_currentClass : "";
 }
 
@@ -247,8 +247,8 @@ MethScopeVariableEnvironment::
 MethScopeVariableEnvironment(const MethodStatement *meth, int argc)
   : FuncScopeVariableEnvironment(meth, argc), m_cls(meth->getClass()) {}
 
-const char* MethScopeVariableEnvironment::currentContext() const {
-  return m_cls->name().c_str();
+String MethScopeVariableEnvironment::currentContext() const {
+  return m_cls->name();
 }
 
 const ClassStatement* MethScopeVariableEnvironment::currentClassStatement()

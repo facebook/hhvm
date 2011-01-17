@@ -239,6 +239,12 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     } else {
       m_value->outputCPP(cg, ar);
     }
+    ClassScopePtr cls = getClassScope();
+    if (cls) {
+      cg_printf(", %sclass_name", Option::StaticPropertyPrefix);
+    } else {
+      cg_printf(", null_string");
+    }
     cg_printf(", true); %s%d->advance();", Option::IterPrefix, iterId);
   } else {
     if (passTemp) {

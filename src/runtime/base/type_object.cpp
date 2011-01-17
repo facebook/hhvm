@@ -33,9 +33,10 @@ ArrayIterPtr Object::begin(CStrRef context /* = null_string */,
 }
 
 MutableArrayIterPtr Object::begin(Variant *key, Variant &val,
+                                  CStrRef context /* = null_string */,
                                   bool setIterDirty /* = false */) const {
   if (!m_px) throw NullPointerException();
-  return m_px->begin(key, val);
+  return m_px->begin(key, val, context);
 }
 
 Array Object::toArray() const {

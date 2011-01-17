@@ -100,7 +100,8 @@ class ObjectData : public Countable {
   }
 
   ArrayIterPtr begin(CStrRef context = null_string);
-  MutableArrayIterPtr begin(Variant *key, Variant &val);
+  MutableArrayIterPtr begin(Variant *key, Variant &val,
+                            CStrRef context = null_string);
 
   /**
    * o_instanceof() can be used for both classes and interfaces. Note

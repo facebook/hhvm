@@ -461,6 +461,7 @@ class Variant {
                      bool setIterDirty = false) const;
   // used by generated code
   MutableArrayIterPtr begin(Variant *key, Variant &val,
+                            CStrRef context = null_string,
                             bool setIterDirty = false);
 
   // Mutable iteration requires the most escalation.

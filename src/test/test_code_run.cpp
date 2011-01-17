@@ -3951,6 +3951,24 @@ bool TestCodeRun::TestObjectProperty() {
        "}"
        "var_dump(get_class_vars('X'));");
 
+  // Mutable object foreach needs to respect the context.
+  MVCR("<?php\n"
+       "class A { public $a = 1; protected $b = 2; private $c = 3; }\n"
+       "class B extends A {\n"
+       "  function f() {\n"
+       "    foreach ($this as $k => &$v) { var_dump($k); $v = 100; }\n"
+       "    var_dump($this);\n"
+       "  }\n"
+       "}\n"
+       "$b = new B();\n"
+       "$b->f();\n"
+       "function f() {\n"
+       "  $o = new B();\n"
+       "  foreach ($o as $k => &$v) { var_dump($k); $v = 100; }\n"
+       "  var_dump($o);\n"
+       "}\n"
+       "f();\n");
+
   return true;
 }
 

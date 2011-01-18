@@ -50,6 +50,8 @@ public:
   static bool CallUserHandlerOnFatals;
   static int RuntimeErrorReportingLevel;
 
+  static std::string ServerUser; // run server under this user account
+
   static int  MaxLoopCount;
   static bool NoInfiniteRecursionDetection;
   static bool ThrowBadTypeExceptions;

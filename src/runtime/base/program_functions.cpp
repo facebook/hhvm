@@ -881,7 +881,8 @@ static int execute_program_impl(int argc, char **argv) {
   }
 
   if (po.mode == "daemon" || po.mode == "server") {
-    return start_server(po.user);
+    if (!po.user.empty()) RuntimeOption::ServerUser = po.user;
+    return start_server(RuntimeOption::ServerUser);
   }
 
   if (po.mode == "replay" && !po.args.empty()) {

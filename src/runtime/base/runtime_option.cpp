@@ -54,6 +54,8 @@ bool RuntimeOption::EnableApplicationLog = true;
 bool RuntimeOption::CallUserHandlerOnFatals = true;
 int RuntimeOption::RuntimeErrorReportingLevel = ErrorConstants::HPHP_ALL;
 
+std::string RuntimeOption::ServerUser;
+
 int RuntimeOption::MaxLoopCount = 0;
 bool RuntimeOption::NoInfiniteRecursionDetection = false;
 bool RuntimeOption::ThrowBadTypeExceptions = false;
@@ -737,6 +739,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     InjectedStackTraceLimit = server["InjectedStackTraceLimit"].getInt32(-1);
 
     ForceServerNameToHeader = server["ForceServerNameToHeader"].getBool();
+
+    ServerUser = server["User"].getString("");
   }
   {
     Hdf hosts = config["VirtualHost"];

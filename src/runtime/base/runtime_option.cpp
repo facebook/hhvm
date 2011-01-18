@@ -399,8 +399,6 @@ static bool matchHdfPattern(const std::string &value, Hdf hdfPattern) {
 }
 
 void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
-  PidFile = config["PidFile"].getString("www.pid");
-
   // Machine metrics
   string hostname, tier, cpu;
   {
@@ -440,6 +438,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
       config.fromString(overwrites->at(i).c_str());
     }
   }
+
+  PidFile = config["PidFile"].getString("www.pid");
 
   {
     Hdf logger = config["Log"];

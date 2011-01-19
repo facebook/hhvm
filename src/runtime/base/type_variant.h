@@ -531,16 +531,13 @@ class Variant {
    * one gets out-of-scope.
    */
   StrNR toStrNR () const {
-    ASSERT(m_type == KindOfString);
-    return m_data.pstr;
+    return getStringData();
   }
   ArrNR toArrNR () const {
-    ASSERT(m_type == KindOfArray);
-    return m_data.parr;
+    return getArrayData();
   }
   ObjNR toObjNR() const {
-    ASSERT(m_type == KindOfObject);
-    return m_data.pobj;
+    return getObjectData();
   }
 
   /**

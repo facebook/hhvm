@@ -57,7 +57,7 @@ ArrayData::~ArrayData() {
 }
 
 void ArrayData::fetchValue(ssize_t pos, Variant & v) const {
-  v = getValue(pos);
+  v = getValueRef(pos);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

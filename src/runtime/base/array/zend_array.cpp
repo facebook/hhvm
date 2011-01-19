@@ -230,12 +230,6 @@ CVarRef ZendArray::getValueRef(ssize_t pos) const {
   return p->data;
 }
 
-CVarRef ZendArray::getValueRef(ssize_t pos, Variant &holder) const {
-  ASSERT(pos && pos != ArrayData::invalid_index);
-  Bucket *p = reinterpret_cast<Bucket *>(pos);
-  return p->data;
-}
-
 bool ZendArray::isVectorData() const {
   int64 index = 0;
   for (Bucket *p = m_pListHead; p; p = p->pListNext) {

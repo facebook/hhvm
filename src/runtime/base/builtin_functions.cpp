@@ -685,25 +685,27 @@ bool empty(CVarRef v, litstr offset, bool isString /* = false */) {
   if (!v.isArray()) {
     return empty(v, Variant(offset));
   }
-  return !toBoolean(v.rvalAt(offset, false, isString));
+  return !toBoolean(v.toArrNR().rvalAtRef(offset, false, isString));
 }
 
 bool empty(CVarRef v, CStrRef offset, bool isString /* = false */) {
   if (!v.isArray()) {
     return empty(v, Variant(offset));
   }
-  return !toBoolean(v.rvalAt(offset, false, isString));
+  return !toBoolean(v.toArrNR().rvalAtRef(offset, false, isString));
 }
 
 bool empty(CVarRef v, CVarRef offset) {
-  if (v.is(KindOfObject)) {
+  if (v.isArray()) {
+    return !toBoolean(v.toArrNR().rvalAtRef(offset));
+  } else if (v.is(KindOfObject)) {
     if (!v.getArrayAccess()->o_invoke(s_offsetExists, Array::Create(offset))) {
       return true;
     }
     // fall through to check for 'empty'ness of the value.
   } else if (v.isString()) {
     int pos = offset.toInt32();
-    if (pos < 0 || pos >= v.toString().size()) {
+    if (pos < 0 || pos >= v.getStringData()->size()) {
       return true;
     }
   }
@@ -736,29 +738,38 @@ bool isset(CVarRef v, CObjRef offset) {
 }
 
 bool isset(CVarRef v, CVarRef offset) {
-  if (v.is(KindOfObject)) {
+  if (v.isArray()) {
+    return isset(v.toArrNR().rvalAtRef(offset));
+  }
+  if (v.isObject()) {
     return v.getArrayAccess()->o_invoke(s_offsetExists,
                                         Array::Create(offset), -1);
   }
   if (v.isString()) {
     int pos = offset.toInt32();
-    return pos >= 0 && pos < v.toString().size();
+    return pos >= 0 && pos < v.getStringData()->size();
   }
-  return isset(v.rvalAt(offset));
+  return false;
 }
 
 bool isset(CVarRef v, litstr offset, bool isString /* = false */) {
-  if (v.is(KindOfObject) || v.isString()) {
+  if (v.isArray()) {
+    return isset(v.toArrNR().rvalAtRef(offset, false, isString));
+  }
+  if (v.isObject() || v.isString()) {
     return isset(v, Variant(offset));
   }
-  return isset(v.rvalAt(offset, false, isString));
+  return false;
 }
 
 bool isset(CVarRef v, CStrRef offset, bool isString /* = false */) {
-  if (v.is(KindOfObject) || v.isString()) {
+  if (v.isArray()) {
+    return isset(v.toArrNR().rvalAtRef(offset, false, isString));
+  }
+  if (v.isObject() || v.isString()) {
     return isset(v, Variant(offset));
   }
-  return isset(v.rvalAt(offset, false, isString));
+  return false;
 }
 
 String get_source_filename(litstr path) {

@@ -70,10 +70,11 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
     throw_bad_array_exception();
     return null;
   }
+  CArrRef arr_input = input.toArrNR();
   if (callback.isNull()) {
-    return ArrayUtil::Filter(toArray(input));
+    return ArrayUtil::Filter(arr_input);
   }
-  return ArrayUtil::Filter(toArray(input), filter_func, &callback);
+  return ArrayUtil::Filter(arr_input, filter_func, &callback);
 }
 
 bool f_array_key_exists(CVarRef key, CVarRef search) {
@@ -85,7 +86,7 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
 
   if (key.isString()) {
     int64 n = 0;
-    String k = key.toString();
+    CStrRef k = key.toStrNR();
     if (k->isStrictlyInteger(n)) {
       return toArray(search).exists(n);
     }
@@ -167,15 +168,17 @@ Variant f_array_merge(int _argc, CVarRef arr1, CArrRef args) {
     throw_bad_array_exception();
     return null;
   }
+  CArrRef arr_arr1 = arr1.toArrNR();
   Array ret = Array::Create();
-  php_array_merge(ret, arr1.toArray());
+  php_array_merge(ret, arr_arr1);
   for (ArrayIter iter(args); iter; ++iter) {
     Variant v = iter.second();
     if (!v.isArray()) {
       throw_bad_array_exception();
       return null;
     }
-    php_array_merge(ret, v.toArray());
+    CArrRef arr_v = v.toArrNR();
+    php_array_merge(ret, arr_v);
   }
   return ret;
 }
@@ -185,9 +188,10 @@ Variant f_array_merge_recursive(int _argc, CVarRef arr1, CArrRef args) {
     throw_bad_array_exception();
     return null;
   }
+  CArrRef arr_arr1 = arr1.toArrNR();
   Array ret = Array::Create();
   PointerSet seen;
-  php_array_merge_recursive(seen, false, ret, arr1.toArray());
+  php_array_merge_recursive(seen, false, ret, arr_arr1);
   ASSERT(seen.empty());
   for (ArrayIter iter(args); iter; ++iter) {
     Variant v = iter.second();
@@ -195,7 +199,8 @@ Variant f_array_merge_recursive(int _argc, CVarRef arr1, CArrRef args) {
       throw_bad_array_exception();
       return null;
     }
-    php_array_merge_recursive(seen, false, ret, v.toArray());
+    CArrRef arr_v = v.toArrNR();
+    php_array_merge_recursive(seen, false, ret, arr_v);
     ASSERT(seen.empty());
   }
   return ret;
@@ -226,8 +231,9 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
       Variant &v = arr1.lvalAt(key, false, true);
       if (v.isArray()) {
         Array subarr1 = v.toArray();
+        CArrRef arr_value = value.toArrNR();
         php_array_replace_recursive(seen, v.isReferenced(), subarr1,
-                                    value.toArray());
+                                    arr_value);
         v = subarr1;
       } else {
         arr1.set(key, value, true);
@@ -248,15 +254,17 @@ Variant f_array_replace(int _argc, CVarRef array1,
     throw_bad_array_exception();
     return null;
   }
+  CArrRef arr_array1 = array1.toArrNR();
   Array ret = Array::Create();
-  php_array_replace(ret, array1);
+  php_array_replace(ret, arr_array1);
   for (ArrayIter iter(_argv); iter; ++iter) {
     CVarRef v = iter.secondRef();
     if (!v.isArray()) {
       throw_bad_array_exception();
       return null;
     }
-    php_array_replace(ret, v.toArray());
+    CArrRef arr_v = v.toArrNR();
+    php_array_replace(ret, arr_v);
   }
   return ret;
 }
@@ -267,9 +275,10 @@ Variant f_array_replace_recursive(int _argc, CVarRef array1,
     throw_bad_array_exception();
     return null;
   }
+  CArrRef arr_array1 = array1.toArrNR();
   Array ret = Array::Create();
   PointerSet seen;
-  php_array_replace_recursive(seen, false, ret, array1);
+  php_array_replace_recursive(seen, false, ret, arr_array1);
   ASSERT(seen.empty());
   for (ArrayIter iter(_argv); iter; ++iter) {
     CVarRef v = iter.secondRef();
@@ -277,7 +286,8 @@ Variant f_array_replace_recursive(int _argc, CVarRef array1,
       throw_bad_array_exception();
       return null;
     }
-    php_array_replace_recursive(seen, false, ret, v.toArray());
+    CArrRef arr_v = v.toArrNR();
+    php_array_replace_recursive(seen, false, ret, arr_v);
     ASSERT(seen.empty());
   }
   return ret;
@@ -288,11 +298,12 @@ Variant f_array_push(int _argc, Variant array, CVarRef var, CArrRef _argv /* = n
     throw_bad_array_exception();
     return false;
   }
+  CArrRef arr = array.toArrNR();
   array.append(var);
   for (ArrayIter iter(_argv); iter; ++iter) {
     array.append(iter.second());
   }
-  return array.toArray().size();
+  return arr.size();
 }
 
 static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
@@ -305,7 +316,8 @@ Variant f_array_reduce(CVarRef input, CVarRef callback,
     throw_bad_array_exception();
     return null;
   }
-  return ArrayUtil::Reduce(toArray(input), reduce_func, &callback, initial);
+  CArrRef arr_input = input.toArrNR();
+  return ArrayUtil::Reduce(arr_input, reduce_func, &callback, initial);
 }
 
 int f_array_unshift(int _argc, Variant array, CVarRef var, CArrRef _argv /* = null_array */) {
@@ -313,7 +325,7 @@ int f_array_unshift(int _argc, Variant array, CVarRef var, CArrRef _argv /* = nu
     if (!_argv.empty()) {
       for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
         pos = _argv->iter_rewind(pos)) {
-        array.prepend(_argv->getValue(pos));
+        array.prepend(_argv->getValueRef(pos));
       }
     }
     array.prepend(var);
@@ -325,7 +337,7 @@ int f_array_unshift(int _argc, Variant array, CVarRef var, CArrRef _argv /* = nu
         for (ssize_t pos = _argv->iter_begin();
              pos != ArrayData::invalid_index;
              pos = _argv->iter_advance(pos)) {
-          newArray.append(_argv->getValue(pos));
+          newArray.append(_argv->getValueRef(pos));
         }
       }
       for (ArrayIter iter(array); iter; ++iter) {
@@ -379,12 +391,12 @@ Array f_compact(int _argc, CVarRef varname, CArrRef _argv /* = null_array */) {
 template<typename T>
 static void compact(T *variables, Array &ret, CVarRef var) {
   if (var.isArray()) {
-    Array vars = var.toArray();
+    CArrRef vars = var.toArrNR();
     for (ArrayIter iter(vars); iter; ++iter) {
       compact(variables, ret, iter.second());
     }
   } else {
-    String varname = var.toString();
+    StrNR varname = var.toStrNR();
     if (!varname.empty() && variables->exists(varname)) {
       ret.set(varname, variables->get(varname));
     }
@@ -414,7 +426,8 @@ static int php_count_recursive(CArrRef array) {
   for (ArrayIter iter(array); iter; ++iter) {
     Variant value = iter.second();
     if (value.isArray()) {
-      cnt += php_count_recursive(value.toArray());
+      CArrRef arr_value = value.toArrNR();
+      cnt += php_count_recursive(arr_value);
     }
   }
   return cnt;
@@ -434,7 +447,8 @@ int f_count(CVarRef var, bool recursive /* = false */) {
     break;
   case KindOfArray:
     if (recursive) {
-      return php_count_recursive(var.toArray());
+      CArrRef arr_var = var.toArrNR();
+      return php_count_recursive(arr_var);
     }
     return var.getArrayData()->size();
   default:
@@ -1061,7 +1075,7 @@ Variant f_array_unique(CVarRef array, int sort_flags /* = 2 */) {
     throw_bad_array_exception();
     return false;
   }
-  Array input = toArray(array);
+  CArrRef input = array.toArrNR();
   switch (sort_flags) {
   case SORT_STRING:
   case SORT_LOCALE_STRING:

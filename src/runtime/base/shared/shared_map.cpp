@@ -49,10 +49,6 @@ CVarRef SharedMap::getValueRef(ssize_t pos) const {
   return r;
 }
 
-CVarRef SharedMap::getValueRef(ssize_t pos, Variant &holder) const {
-  return getValueRef(pos);
-}
-
 bool SharedMap::exists(CVarRef k) const {
   return m_arr->getIndex(k) != -1;
 }

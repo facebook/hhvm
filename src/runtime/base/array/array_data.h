@@ -93,11 +93,8 @@ class ArrayData : public Countable {
   virtual void fetchValue(ssize_t pos, Variant &v) const;
   /**
    * getValueRef() gets a reference to value at position "pos".
-   * We might use the holder if the array is a SharedMap and the value is not
-   * cached.
    */
   virtual CVarRef getValueRef(ssize_t pos) const = 0;
-  virtual CVarRef getValueRef(ssize_t pos, Variant &holder) const = 0;
 
   virtual bool isVectorData() const;
   virtual bool isGlobalArrayWrapper() const;

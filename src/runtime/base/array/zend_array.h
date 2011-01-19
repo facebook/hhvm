@@ -40,7 +40,6 @@ public:
   virtual Variant getValue(ssize_t pos) const;
   virtual void fetchValue(ssize_t pos, Variant &v) const;
   virtual CVarRef getValueRef(ssize_t pos) const;
-  virtual CVarRef getValueRef(ssize_t pos, Variant &holder) const;
   virtual bool isVectorData() const;
 
   virtual ssize_t iter_begin() const;

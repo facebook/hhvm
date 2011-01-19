@@ -34,7 +34,6 @@ public:
   virtual Variant getKey(ssize_t pos) const;
   virtual Variant getValue(ssize_t pos) const;
   virtual CVarRef getValueRef(ssize_t pos) const;
-  virtual CVarRef getValueRef(ssize_t pos, Variant &holder) const;
   virtual bool isGlobalArrayWrapper() const;
 
   virtual bool exists(int64   k) const;

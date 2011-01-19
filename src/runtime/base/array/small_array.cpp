@@ -116,11 +116,6 @@ CVarRef SmallArray::getValueRef(ssize_t pos) const {
   return m_arBuckets[pos].data;
 }
 
-CVarRef SmallArray::getValueRef(ssize_t pos, Variant &holder) const {
-  ASSERT(pos >= 0 && pos < SARR_TABLE_SIZE && m_arBuckets[pos].kind != Empty);
-  return m_arBuckets[pos].data;
-}
-
 bool SmallArray::isVectorData() const {
   int64 index = 0;
   for (int i = m_nListHead; i >= 0; ) {

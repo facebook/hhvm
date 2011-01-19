@@ -54,7 +54,6 @@ public:
 
   Variant getValue(ssize_t pos) const;
   CVarRef getValueRef(ssize_t pos) const;
-  CVarRef getValueRef(ssize_t pos, Variant &holder) const;
 
   bool exists(int64 k) const;
   bool exists(litstr k) const;

@@ -39,10 +39,6 @@ CVarRef GlobalArrayWrapper::getValueRef(ssize_t pos) const {
   Variant k;
   return m_globals->getRefByIdx(pos, k);
 }
-CVarRef GlobalArrayWrapper::getValueRef(ssize_t pos, Variant &holder) const {
-  Variant k;
-  return m_globals->getRefByIdx(pos, k);
-}
 bool GlobalArrayWrapper::isGlobalArrayWrapper() const { return true; }
 
 bool GlobalArrayWrapper::exists(int64   k) const {
@@ -86,8 +82,7 @@ CVarRef GlobalArrayWrapper::get(CVarRef k, bool error /* = false */) const {
 void GlobalArrayWrapper::load(CVarRef k, Variant &v) const {
   ssize_t idx = getIndex(k);
   if (idx >= 0) {
-    Variant tmp;
-    CVarRef r = getValueRef(idx, tmp);
+    CVarRef r = getValueRef(idx);
     v.setWithRef(r);
   }
 }

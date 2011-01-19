@@ -84,7 +84,7 @@ void ArrayIter::second(Variant & v) {
 CVarRef ArrayIter::secondRef() {
   ASSERT(m_data);
   ASSERT(m_pos != ArrayData::invalid_index);
-  return m_data->getValueRef(m_pos, m_holder);
+  return m_data->getValueRef(m_pos);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

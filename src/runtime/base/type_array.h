@@ -233,6 +233,13 @@ class Array : public SmartPtr<ArrayData> {
   Variant rvalAt(CStrRef key, bool error = false, bool isKey = false) const;
   Variant rvalAt(CVarRef key, bool error = false, bool isKey = false) const;
 
+  /**
+   * To get offset for temporary usage
+   */
+  CVarRef rvalAtRef(litstr key, bool error = false, bool isKey = false) const;
+  CVarRef rvalAtRef(CVarRef key, bool error = false, bool isKey = false) const;
+  CVarRef rvalAtRef(CStrRef key, bool error = false, bool isKey = false) const;
+
   const Variant operator[](bool    key) const;
   const Variant operator[](char    key) const;
   const Variant operator[](short   key) const;

@@ -185,7 +185,6 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
   }
   SortImpl(perm1, array, opaque1, cmp, by_key, cmp_data);
 
-  Variant tmp;
   for (ArrayIter iter(*this); iter; ++iter) {
     Variant target;
     if (by_key) {
@@ -202,7 +201,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
       ssize_t pos = opaque1.positions[perm1[mid]];
       int cmp_res =  cmp(target,
                          by_key ? array->getKey(pos)
-                                : array->getValueRef(pos, tmp),
+                                : array->getValueRef(pos),
                          cmp_data);
       if (cmp_res > 0) { // outer is bigger
         min = mid + 1;
@@ -223,7 +222,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
           if (key_cmp_function(target, array->getKey(pos), key_data) != 0) {
             break;
           }
-          if (value_cmp_as_string_function(val, array->getValueRef(pos, tmp),
+          if (value_cmp_as_string_function(val, array->getValueRef(pos),
                                            value_data) == 0) {
             found = true;
             break;
@@ -235,7 +234,7 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
             if (key_cmp_function(target, array->getKey(pos), key_data) != 0) {
               break;
             }
-            if (value_cmp_as_string_function(val, array->getValueRef(pos, tmp),
+            if (value_cmp_as_string_function(val, array->getValueRef(pos),
                                              value_data) == 0) {
               found = true;
               break;
@@ -424,8 +423,8 @@ Variant Array::rvalAt(double key, bool error /* = false */) const {
   return null_variant;
 }
 
-Variant Array::rvalAt(litstr key, bool error /* = false */,
-                      bool isKey /* = false */) const {
+CVarRef Array::rvalAtRef(litstr key, bool error /* = false */,
+                         bool isKey /* = false */) const {
   if (m_px) {
     if (isKey) return m_px->get(key, error);
     int64 n;
@@ -439,8 +438,13 @@ Variant Array::rvalAt(litstr key, bool error /* = false */,
   return null_variant;
 }
 
-Variant Array::rvalAt(CStrRef key, bool error /* = false */,
+Variant Array::rvalAt(litstr key, bool error /* = false */,
                       bool isKey /* = false */) const {
+  return Array::rvalAtRef(key, error, isKey);
+}
+
+CVarRef Array::rvalAtRef(CStrRef key, bool error /* = false */,
+                         bool isKey /* = false */) const {
   if (m_px) {
     if (isKey) return m_px->get(key, error);
     if (key.isNull()) return m_px->get(empty_string, error);
@@ -454,8 +458,13 @@ Variant Array::rvalAt(CStrRef key, bool error /* = false */,
   return null_variant;
 }
 
-Variant Array::rvalAt(CVarRef key, bool error /* = false */,
+Variant Array::rvalAt(CStrRef key, bool error /* = false */,
                       bool isKey /* = false */) const {
+  return Array::rvalAtRef(key, error, isKey);
+}
+
+CVarRef Array::rvalAtRef(CVarRef key, bool error /* = false */,
+                         bool isKey /* = false */) const {
   if (!m_px) return null_variant;
   switch (key.m_type) {
   case KindOfNull:
@@ -487,12 +496,17 @@ Variant Array::rvalAt(CVarRef key, bool error /* = false */,
     throw_bad_type_exception("Invalid type used as key");
     break;
   case KindOfVariant:
-    return rvalAt(*(key.m_data.pvar), error, isKey);
+    return rvalAtRef(*(key.m_data.pvar), error, isKey);
   default:
     ASSERT(false);
     break;
   }
   return null_variant;
+}
+
+Variant Array::rvalAt(CVarRef key, bool error /* = false */,
+                      bool isKey /* = false */) const {
+  return Array::rvalAtRef(key, error, isKey);
 }
 
 Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
@@ -943,8 +957,8 @@ static int array_compare_func(const void *n1, const void *n2, const void *op) {
                             (*opaque->array)->getKey(pos2),
                             opaque->data);
   }
-  return opaque->cmp_func((*opaque->array)->getValue(pos1),
-                          (*opaque->array)->getValue(pos2),
+  return opaque->cmp_func((*opaque->array)->getValueRef(pos1),
+                          (*opaque->array)->getValueRef(pos2),
                           opaque->data);
 }
 
@@ -963,8 +977,8 @@ static int multi_compare_func(const void *n1, const void *n2, const void *op) {
                                 (*opaque->array)->getKey(pos2),
                                 opaque->data);
     } else {
-      result = opaque->cmp_func((*opaque->array)->getValue(pos1),
-                                (*opaque->array)->getValue(pos2),
+      result = opaque->cmp_func((*opaque->array)->getValueRef(pos1),
+                                (*opaque->array)->getValueRef(pos2),
                                 opaque->data);
     }
     if (result != 0) return result;
@@ -1008,9 +1022,9 @@ void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
   for (int i = 0; i < count; i++) {
     ssize_t pos = opaque.positions[indices[i]];
     if (renumber) {
-      sorted.append(m_px->getValue(pos));
+      sorted.append(m_px->getValueRef(pos));
     } else {
-      sorted.set(m_px->getKey(pos), m_px->getValue(pos));
+      sorted.set(m_px->getKey(pos), m_px->getValueRef(pos));
     }
   }
   operator=(sorted);
@@ -1062,9 +1076,9 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
       ssize_t pos = opaque.positions[indices[i]];
       Variant k(arr->getKey(pos));
       if (renumber && k.isInteger()) {
-        sorted.append(arr->getValue(pos));
+        sorted.append(arr->getValueRef(pos));
       } else {
-        sorted.set(k, arr->getValue(pos));
+        sorted.set(k, arr->getValueRef(pos));
       }
     }
     *opaque.original = sorted;

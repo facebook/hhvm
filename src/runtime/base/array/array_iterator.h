@@ -75,7 +75,6 @@ public:
 private:
   const ArrayData *m_data;
   ssize_t m_pos;
-  Variant m_holder;
 
   void create();
 };

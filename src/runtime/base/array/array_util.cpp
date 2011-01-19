@@ -31,7 +31,7 @@ namespace HPHP {
 Variant ArrayUtil::CreateArray(CArrRef keys, CVarRef value) {
   Array ret = Array::Create();
   for (ArrayIter iter(keys); iter; ++iter) {
-    ret.set(iter.second(), value);
+    ret.set(iter.secondRef(), value);
   }
   return ret;
 }
@@ -63,7 +63,7 @@ Variant ArrayUtil::Combine(CArrRef keys, CArrRef values) {
   Array ret = Array::Create();
   for (ArrayIter iter1(keys), iter2(values); iter1; ++iter1, ++iter2) {
     CVarRef v(iter2.secondRef());
-    ret.lvalAt(iter1.second()).setWithRef(v);
+    ret.lvalAt(iter1.secondRef()).setWithRef(v);
   }
   return ret;
 }
@@ -337,15 +337,15 @@ Variant ArrayUtil::FromHdf(const Hdf &hdf) {
 
 void ArrayUtil::ToHdf(const Array &arr, Hdf &hdf) {
   for (ArrayIter iter(arr); iter; ++iter) {
-    Variant value(iter.second());
+    CVarRef value(iter.secondRef());
     if (value.isArray()) {
       Hdf child = hdf[iter.first().toString().data()];
-      ToHdf(iter.second().toArray(), child);
+      ToHdf(iter.secondRef().toArray(), child);
     } else if (value.isBoolean()) {
       hdf[iter.first().toString().data()] =
-        iter.second().toBoolean() ? "true" : "false";
+        iter.secondRef().toBoolean() ? "true" : "false";
     } else {
-      hdf[iter.first().toString().data()] = iter.second().toString().data();
+      hdf[iter.first().toString().data()] = iter.secondRef().toString().data();
     }
   }
 }
@@ -357,7 +357,7 @@ DataType ArrayUtil::Sum(CArrRef input, int64 *isum, double *dsum) {
   int64 i = 0;
   ArrayIter iter(input);
   for (; iter; ++iter) {
-    Variant entry(iter.second());
+    CVarRef entry(iter.secondRef());
     switch (entry.getType()) {
     case KindOfDouble: {
       goto DOUBLE;
@@ -403,7 +403,7 @@ DataType ArrayUtil::Product(CArrRef input, int64 *iprod, double *dprod) {
   int64 i = 1;
   ArrayIter iter(input);
   for (; iter; ++iter) {
-    Variant entry(iter.second());
+    CVarRef entry(iter.secondRef());
     switch (entry.getType()) {
     case KindOfDouble: {
       goto DOUBLE;
@@ -471,12 +471,12 @@ Variant ArrayUtil::ChangeKeyCase(CArrRef input, bool lower) {
     Variant key(iter.first());
     if (key.isString()) {
       if (lower) {
-        ret.set(StringUtil::ToLower(key.toString()), iter.second());
+        ret.set(StringUtil::ToLower(key.toString()), iter.secondRef());
       } else {
-        ret.set(StringUtil::ToUpper(key.toString()), iter.second());
+        ret.set(StringUtil::ToUpper(key.toString()), iter.secondRef());
       }
     } else {
-      ret.set(key, iter.second());
+      ret.set(key, iter.secondRef());
     }
   }
   return ret;
@@ -500,15 +500,14 @@ Variant ArrayUtil::Reverse(CArrRef input, bool preserve_keys /* = false */) {
     return input;
   }
 
-  Variant tmp;
   Array ret = Array::Create();
   for (ssize_t pos = input->iter_end(); pos != ArrayData::invalid_index;
        pos = input->iter_rewind(pos)) {
     Variant key(input->getKey(pos));
     if (preserve_keys || key.isString()) {
-      ret.addLval(key, true).setWithRef(input->getValueRef(pos, tmp));
+      ret.addLval(key, true).setWithRef(input->getValueRef(pos));
     } else {
-      ret.appendWithRef(input->getValueRef(pos, tmp));
+      ret.appendWithRef(input->getValueRef(pos));
     }
   }
   return ret;
@@ -543,11 +542,10 @@ Variant ArrayUtil::Shuffle(CArrRef input) {
   }
   php_array_data_shuffle(indices);
 
-  Variant tmp;
   Array ret = Array::Create();
   for (int i = 0; i < count; i++) {
     ssize_t pos = indices[i];
-    ret.appendWithRef(input->getValueRef(pos, tmp));
+    ret.appendWithRef(input->getValueRef(pos));
   }
   return ret;
 }
@@ -601,7 +599,7 @@ Variant ArrayUtil::RandomValues(CArrRef input, int num_req /* = 1 */) {
   Array ret = Array::Create();
   for (int i = 0; i < num_req; i++) {
     ssize_t pos = indices[i];
-    ret.append(input->getValue(pos));
+    ret.append(input->getValueRef(pos));
   }
   return ret;
 }
@@ -610,7 +608,7 @@ Variant ArrayUtil::Filter(CArrRef input, PFUNC_FILTER filter /* = NULL */,
                           const void *data /* = NULL */) {
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    Variant value(iter.second());
+    CVarRef value(iter.secondRef());
     if ((filter && filter(value, data)) || (!filter && value.toBoolean())) {
       ret.addLval(iter.first(), true).setWithRef(iter.secondRef());
     }
@@ -622,7 +620,7 @@ Variant ArrayUtil::StringUnique(CArrRef input) {
   Array seenValues;
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    Variant entry(iter.second());
+    CVarRef entry(iter.secondRef());
     String str(entry.toString());
     if (!seenValues.exists(str)) {
       seenValues.set(str, 1);
@@ -636,7 +634,7 @@ Variant ArrayUtil::NumericUnique(CArrRef input) {
   set<double> seenValues;
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
-    Variant entry(iter.second());
+    CVarRef entry(iter.secondRef());
     double value = entry.toDouble();
     pair<set<double>::iterator, bool> res = seenValues.insert(value);
     if (res.second) { // it was inserted
@@ -680,7 +678,7 @@ Variant ArrayUtil::RegularSortUnique(CArrRef input) {
   Array ret = Array::Create();
   int i = 0;
   for (ArrayIter iter(input); iter; ++iter, ++i) {
-    if (!duplicates[i]) ret.set(iter.first(), iter.second());
+    if (!duplicates[i]) ret.set(iter.first(), iter.secondRef());
   }
   return ret;
 }
@@ -722,12 +720,12 @@ Variant ArrayUtil::Map(CArrRef inputs, PFUNC_MAP map_function,
   Array ret = Array::Create();
 
   if (inputs.size() == 1) {
-    Array arr = inputs.begin().second().toArray();
+    Array arr = inputs.begin().secondRef().toArray();
     if (!arr.empty()) {
       for (ssize_t k = arr->iter_begin(); k != ArrayData::invalid_index;
            k = arr->iter_advance(k)) {
         Array params;
-        params.append(arr->getValue(k));
+        params.append(arr->getValueRef(k));
         Variant result;
         if (map_function) {
           result = map_function(params, data);
@@ -743,7 +741,7 @@ Variant ArrayUtil::Map(CArrRef inputs, PFUNC_MAP map_function,
     positions.resize(inputs.size());
     int i = 0;
     for (ArrayIter iter(inputs); iter; ++iter, ++i) {
-      Array arr = iter.second().toArray();
+      Array arr = iter.secondRef().toArray();
       int count = arr.size();
       if (count > maxlen) maxlen = count;
 
@@ -760,9 +758,9 @@ Variant ArrayUtil::Map(CArrRef inputs, PFUNC_MAP map_function,
       Array params;
       int i = 0;
       for (ArrayIter iter(inputs); iter; ++iter, ++i) {
-        Array arr = iter.second().toArray();
+        Array arr = iter.secondRef().toArray();
         if (k < arr.size()) {
-          params.append(arr->getValue(positions[i][k]));
+          params.append(arr->getValueRef(positions[i][k]));
         } else {
           params.append(null);
         }
@@ -792,7 +790,7 @@ Variant ArrayUtil::Reduce(CArrRef input, PFUNC_REDUCE reduce_function,
   ArrayIter iter(input);
   Variant result;
   if (initial.isNull()) {
-    result = iter.second();
+    result = iter.secondRef();
   } else {
     result = initial;
   }

@@ -88,7 +88,7 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
         m_data.vec = new VectorData(size);
         uint i = 0;
         for (ArrayIter it(arr); !it.end(); it.next(), i++) {
-          ThreadSharedVariant* val = Create(it.second(), false, true,
+          ThreadSharedVariant* val = Create(it.secondRef(), false, true,
                                             unserializeObj);
           if (val->m_shouldCache) m_shouldCache = true;
           m_data.vec->vals[i] = val;
@@ -100,7 +100,7 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
         for (ArrayIter it(arr); !it.end(); it.next(), i++) {
           ThreadSharedVariant* key = Create(it.first(), false, true,
                                             unserializeObj);
-          ThreadSharedVariant* val = Create(it.second(), false, true,
+          ThreadSharedVariant* val = Create(it.secondRef(), false, true,
                                             unserializeObj);
           if (val->m_shouldCache) m_shouldCache = true;
           m_data.gnuMap->set(i, key, val);
@@ -110,7 +110,7 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
         for (ArrayIter it(arr); !it.end(); it.next()) {
           ThreadSharedVariant* key = Create(it.first(), false, true,
                                             unserializeObj);
-          ThreadSharedVariant* val = Create(it.second(), false, true,
+          ThreadSharedVariant* val = Create(it.secondRef(), false, true,
                                             unserializeObj);
           if (val->m_shouldCache) m_shouldCache = true;
           m_data.map->add(key, val);
@@ -390,12 +390,13 @@ void ThreadSharedVariant::loadElems(ArrayData *&elems,
   ArrayInit ai(count, getIsVector(), keepRef);
   for (uint i = 0; i < count; i++) {
     if (getIsVector()) {
-      ai.add((int64)i, sharedMap.getValue(i), true);
+      ai.add((int64)i, sharedMap.getValueRef(i), true);
     } else {
       if (RuntimeOption::ApcUseGnuMap) {
-        ai.add(m_data.gnuMap->keys[i]->toLocal(), sharedMap.getValue(i), true);
+        ai.add(m_data.gnuMap->keys[i]->toLocal(), sharedMap.getValueRef(i),
+               true);
       } else {
-        ai.add(m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValue(i),
+        ai.add(m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValueRef(i),
                true);
       }
     }

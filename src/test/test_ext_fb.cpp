@@ -16,6 +16,8 @@
 
 #include <test/test_ext_fb.h>
 #include <runtime/ext/ext_fb.h>
+#include <runtime/base/runtime_option.h>
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -62,20 +64,53 @@ bool TestExtFb::test_fb_rename_function() {
 }
 
 bool TestExtFb::test_fb_utf8ize() {
-  {
-    Variant s = "hon\xE7k";
-    VERIFY(f_fb_utf8ize(ref(s)));
-    VS(s, "honk");
-  }
-  {
-    Variant s = "test\xE0\xB0\xB1\xE0";
-    VERIFY(f_fb_utf8ize(ref(s)));
-    VS(s, "test\xE0\xB0\xB1");
-  }
-  {
-    Variant s = "test\xE0\xB0\xB1\xE0\xE0";
-    VERIFY(f_fb_utf8ize(ref(s)));
-    VS(s, "test\xE0\xB0\xB1");
+  for (int i = 0; i < 2; i++) {
+    RuntimeOption::Utf8izeReplace = (i == 0);
+    {
+      Variant s = "hon\xE7k";
+      VERIFY(f_fb_utf8ize(ref(s)));
+      if (RuntimeOption::Utf8izeReplace) {
+        VS(s, "hon\xef\xbf\xbdk");
+      } else {
+        VS(s, "honk");
+      }
+    }
+    {
+      Variant s = "test\xE0\xB0\xB1\xE0";
+      VERIFY(f_fb_utf8ize(ref(s)));
+      if (RuntimeOption::Utf8izeReplace) {
+        VS(s, "test\xE0\xB0\xB1\xef\xbf\xbd");
+      } else {
+        VS(s, "test\xE0\xB0\xB1");
+      }
+    }
+    {
+      Variant s = "test\xE0\xB0\xB1\xE0\xE0";
+      VERIFY(f_fb_utf8ize(ref(s)));
+      if (RuntimeOption::Utf8izeReplace) {
+        VS(s, "test\xE0\xB0\xB1\xef\xbf\xbd\xef\xbf\xbd");
+      } else {
+        VS(s, "test\xE0\xB0\xB1");
+      }
+    }
+    {
+      Variant s = "\xfc";
+      VERIFY(f_fb_utf8ize(ref(s)));
+      if (RuntimeOption::Utf8izeReplace) {
+        VS(s, "\xef\xbf\xbd");
+      } else {
+        VS(s, "");
+      }
+    }
+    {
+      Variant s = "\xfc\xfc";
+      VERIFY(f_fb_utf8ize(ref(s)));
+      if (RuntimeOption::Utf8izeReplace) {
+        VS(s, "\xef\xbf\xbd\xef\xbf\xbd");
+      } else {
+        VS(s, "");
+      }
+    }
   }
   return Count(true);
 }

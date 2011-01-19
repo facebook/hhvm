@@ -164,6 +164,7 @@ public:
 
   static std::string RTTIDirectory;
   static bool EnableCliRTTI;
+  static bool Utf8izeReplace;
 
   static std::string StartupDocument;
   static std::string WarmupDocument;

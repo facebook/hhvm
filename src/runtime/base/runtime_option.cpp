@@ -168,6 +168,7 @@ bool RuntimeOption::EnableStaticContentMMap = true;
 
 std::string RuntimeOption::RTTIDirectory;
 bool RuntimeOption::EnableCliRTTI = false;
+bool RuntimeOption::Utf8izeReplace = true;
 
 std::string RuntimeOption::StartupDocument;
 std::string RuntimeOption::WarmupDocument;
@@ -632,6 +633,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     RTTIDirectory =
       Util::normalizeDir(server["RTTIDirectory"].getString("/tmp/"));
     EnableCliRTTI = server["EnableCliRTTI"].getBool();
+    Utf8izeReplace = server["Utf8izeReplace"].getBool(true);
 
     StartupDocument = server["StartupDocument"].getString();
     normalizePath(StartupDocument);

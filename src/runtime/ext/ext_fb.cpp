@@ -656,9 +656,13 @@ bool f_fb_utf8ize(Variant input) {
 
     for (jj = 0; jj < expect; ++jj) {
       if (++idx == len) {
-        len -= (jj + 1);
-        idx = len;
-        input = s.substr(0, len);
+        if (RuntimeOption::Utf8izeReplace) {
+          idx -= (jj + 1);
+        } else {
+          len -= (jj + 1);
+          idx = len;
+          input = s.substr(0, len);
+        }
         break;
       } else if (str[idx] < 0x80 || str[idx] > 0xBF) {
         idx -= (jj + 1);
@@ -678,11 +682,14 @@ bool f_fb_utf8ize(Variant input) {
   }
 
   //  We hit an invalid character sequence and need to remove invalid byte
-  //  sequences from the string. We keep two pointers into the string, and
-  //  copy from `src' to `dst'. `src' skips invalid subsequences while `dst'
-  //  advacnes only on copy.
+  //  sequences from the string. We use a pointer `src' into the string, and
+  //  copy from `src' to `sb'. `src' skips/replaces invalid subsequences
+  //  while `sb' advances only on copy/replace.
+  //  The basic algorithm is to delete the first byte (or translate it to
+  //  a replacement character) and continue parsing with the next byte.
   unsigned char *src = str + idx;
-  StringBuffer sb(len + 1);
+  StringBuffer sb(RuntimeOption::Utf8izeReplace ? (3 * len + 1) : (len + 1));
+  char repl[] = { 0xef, 0xbf, 0xbd, }; // utf8 replacement character
   if (idx) {
     sb.append((char*)str, idx);
   }
@@ -698,15 +705,27 @@ bool f_fb_utf8ize(Variant input) {
     } else if (c > 0xEF && c < 0xF5) {
       expect = 3;
     } else {
+      if (RuntimeOption::Utf8izeReplace) {
+        sb.append(repl, 3);
+      }
       continue;
     }
 
     for (jj = 0; jj < expect; ++jj) {
       if (++src - str == len) {
-        input = sb.detach();
-        return true;
+        if (RuntimeOption::Utf8izeReplace) {
+          src -= (jj + 1);
+          sb.append(repl, 3);
+          break;
+        } else {
+          input = sb.detach();
+          return true;
+        }
       } else if (*src < 0x80 || *src > 0xBF) {
         src -= (jj + 1);
+        if (RuntimeOption::Utf8izeReplace) {
+          sb.append(repl, 3);
+        }
         break;
       }
     }

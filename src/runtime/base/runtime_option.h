@@ -242,6 +242,7 @@ public:
   static std::vector<std::string> APCSizePrefixReplace;
   static std::vector<std::string> APCSizeSpecialMiddle;
   static std::vector<std::string> APCSizeMiddleReplace;
+  static std::vector<std::string> APCSizeSkipPrefix;
   static bool EnableAPCSizeDetail;
   static bool EnableAPCFetchStats;
   static bool APCSizeCountPrime;

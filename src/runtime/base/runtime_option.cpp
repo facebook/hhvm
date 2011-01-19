@@ -246,6 +246,7 @@ std::vector<std::string> RuntimeOption::APCSizeSpecialPrefix;
 std::vector<std::string> RuntimeOption::APCSizePrefixReplace;
 std::vector<std::string> RuntimeOption::APCSizeSpecialMiddle;
 std::vector<std::string> RuntimeOption::APCSizeMiddleReplace;
+std::vector<std::string> RuntimeOption::APCSizeSkipPrefix;
 bool RuntimeOption::EnableAPCSizeDetail = false;
 bool RuntimeOption::EnableAPCFetchStats = false;
 bool RuntimeOption::APCSizeCountPrime = false;
@@ -921,6 +922,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
         string middleReplace = "{A}" + middle + "{A}";
         APCSizeMiddleReplace.push_back(middleReplace);
       }
+      apcSize["SkipPrefix"].get(APCSizeSkipPrefix);
       EnableAPCSizeDetail = apcSize["Individual"].getBool();
       EnableAPCFetchStats = apcSize["FetchStats"].getBool();
       if (EnableAPCFetchStats) EnableAPCSizeDetail = true;

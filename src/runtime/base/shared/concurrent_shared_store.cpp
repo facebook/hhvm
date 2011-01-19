@@ -269,6 +269,18 @@ bool ConcurrentTableSharedStore::exists(CStrRef key) {
  return true;
 }
 
+static bool check_skip(const char *key) {
+  for (unsigned int i = 0; i < RuntimeOption::APCSizeSkipPrefix.size(); ++i) {
+    const char *prefix = RuntimeOption::APCSizeSkipPrefix[i].c_str();
+    int len = RuntimeOption::APCSizeSkipPrefix[i].size();
+    if (memcmp(key, prefix, len) == 0) {
+      // Skip the size calculation.
+      return true;
+    }
+  }
+  return false;
+}
+
 bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
                                        bool overwrite /* = true */) {
   bool stats = RuntimeOption::EnableStats && RuntimeOption::EnableAPCStats;
@@ -292,7 +304,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
           SharedStoreStats::onDelete(key.get(), sval->var, true);
         }
         sval->var->decRef();
-        if (RuntimeOption::EnableAPCSizeStats) {
+        if (RuntimeOption::EnableAPCSizeStats && !check_skip(key.data())) {
           int32 size = var->getSpaceUsage();
           SharedStoreStats::updateDirect(sval->size, size);
           sval->size = size;

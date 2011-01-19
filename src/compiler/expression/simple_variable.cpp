@@ -133,7 +133,7 @@ TypePtr SimpleVariable::inferTypes(AnalysisResultPtr ar, TypePtr type,
   return TypePtr();
 }
 
-bool SimpleVariable::checkUnused(AnalysisResultPtr ar) const {
+bool SimpleVariable::checkUnused() const {
   return !m_superGlobal && !m_globals &&
     getScope()->getVariables()->checkUnused(m_sym);
 }

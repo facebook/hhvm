@@ -31,11 +31,11 @@ public:
                 ExpressionPtr expNo);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultPtr ar);
-  ExpressionPtr postOptimize(AnalysisResultPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
   virtual int getLocalEffects() const { return NoEffect; }
 
-  virtual ExpressionPtr unneededHelper(AnalysisResultPtr ar);
+  virtual ExpressionPtr unneededHelper();
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                     int state);
   bool outputCPPUnneeded(CodeGenerator &cg, AnalysisResultPtr ar);

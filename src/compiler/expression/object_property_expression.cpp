@@ -241,7 +241,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     hasContext(ExistContext) ? ClassScope::MayHaveUnknownPropTester :
     hasContext(UnsetContext) && hasContext(LValue) ?
     ClassScope::MayHavePropUnsetter : ClassScope::MayHaveUnknownPropGetter;
-  if (!cls->implementsAccessor(ar, prop)) clearEffect(AccessorEffect);
+  if (!cls->implementsAccessor(prop)) clearEffect(AccessorEffect);
 
   // resolved to this class
   if (m_context & RefValue) {

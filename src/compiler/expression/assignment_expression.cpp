@@ -128,7 +128,7 @@ void AssignmentExpression::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
   } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    CheckNeeded(ar, m_variable, m_value);
+    CheckNeeded(m_variable, m_value);
   }
 }
 
@@ -163,12 +163,12 @@ void AssignmentExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr AssignmentExpression::optimize(AnalysisResultPtr ar) {
+ExpressionPtr AssignmentExpression::optimize(AnalysisResultConstPtr ar) {
   if (m_variable->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr var =
       dynamic_pointer_cast<SimpleVariable>(m_variable);
-    if (var->checkUnused(ar) &&
-        !CheckNeeded(ar, var, m_value)) {
+    if (var->checkUnused() &&
+        !CheckNeeded(var, m_value)) {
       if (m_value->getContainedEffects() != getContainedEffects()) {
         s_effectsTag++;
       }
@@ -178,7 +178,7 @@ ExpressionPtr AssignmentExpression::optimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultPtr ar) {
+ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (Option::EliminateDeadCode &&
       ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
     // otherwise used & needed flags may not be up to date yet
@@ -261,7 +261,7 @@ ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr AssignmentExpression::postOptimize(AnalysisResultPtr ar) {
+ExpressionPtr AssignmentExpression::postOptimize(AnalysisResultConstPtr ar) {
   return optimize(ar);
 }
 

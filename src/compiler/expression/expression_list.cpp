@@ -330,7 +330,7 @@ ExpressionPtr ExpressionList::listValue() const {
   return ExpressionPtr();
 }
 
-void ExpressionList::optimize(AnalysisResultPtr ar) {
+void ExpressionList::optimize(AnalysisResultConstPtr ar) {
   bool changed = false;
   size_t i = m_exps.size();
   if (m_kind != ListKindParam) {
@@ -349,7 +349,7 @@ void ExpressionList::optimize(AnalysisResultPtr ar) {
           }
           changed = true;
         } else if (e->getLocalEffects() == NoEffect) {
-          e = e->unneeded(ar);
+          e = e->unneeded();
           // changed already handled by unneeded
         }
       }
@@ -369,7 +369,7 @@ void ExpressionList::optimize(AnalysisResultPtr ar) {
         ExpressionPtr &e = m_exps[i];
         if (e->is(Expression::KindOfSimpleVariable)) {
           SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(e);
-          if (var->checkUnused(ar)) {
+          if (var->checkUnused()) {
             const std::string &name = var->getName();
             VariableTablePtr variables = getScope()->getVariables();
             if (!variables->isNeeded(name)) {
@@ -386,12 +386,12 @@ void ExpressionList::optimize(AnalysisResultPtr ar) {
   }
 }
 
-ExpressionPtr ExpressionList::preOptimize(AnalysisResultPtr ar) {
+ExpressionPtr ExpressionList::preOptimize(AnalysisResultConstPtr ar) {
   optimize(ar);
   return ExpressionPtr();
 }
 
-ExpressionPtr ExpressionList::postOptimize(AnalysisResultPtr ar) {
+ExpressionPtr ExpressionList::postOptimize(AnalysisResultConstPtr ar) {
   optimize(ar);
   return ExpressionPtr();
 }

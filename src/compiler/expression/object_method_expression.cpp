@@ -141,7 +141,7 @@ void ObjectMethodExpression::setInvokeParams(AnalysisResultPtr ar) {
   m_params->resetOutputCount();
 }
 
-ExpressionPtr ObjectMethodExpression::preOptimize(AnalysisResultPtr ar) {
+ExpressionPtr ObjectMethodExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
     return ExpressionPtr();
   }

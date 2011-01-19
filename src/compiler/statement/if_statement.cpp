@@ -88,7 +88,7 @@ void IfStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr IfStatement::preOptimize(AnalysisResultPtr ar) {
+StatementPtr IfStatement::preOptimize(AnalysisResultConstPtr ar) {
   if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
     return StatementPtr();
   }
@@ -165,7 +165,7 @@ StatementPtr IfStatement::preOptimize(AnalysisResultPtr ar) {
   }
 }
 
-StatementPtr IfStatement::postOptimize(AnalysisResultPtr ar) {
+StatementPtr IfStatement::postOptimize(AnalysisResultConstPtr ar) {
   // we cannot optimize away the code inside if statement, because
   // there may be a goto that goes into if statement.
   if (hasReachableLabel()) {

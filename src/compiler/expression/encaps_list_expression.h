@@ -32,7 +32,7 @@ public:
                        int type, ExpressionListPtr expList);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
 
   virtual int getLocalEffects() const { return m_type == '`' ? UnknownEffect : NoEffect; }
   virtual bool canonCompare(ExpressionPtr e) const;

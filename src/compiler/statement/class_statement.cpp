@@ -170,7 +170,7 @@ void ClassStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void ClassStatement::getAllParents(AnalysisResultPtr ar,
+void ClassStatement::getAllParents(AnalysisResultConstPtr ar,
                                    std::vector<std::string> &names) {
   if (!m_parent.empty()) {
     ClassScopePtr cls = ar->findClass(m_parent);
@@ -403,7 +403,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg.printDocComment(classScope->getDocComment());
       }
       cg_printf("class %s%s", Option::ClassPrefix, clsName);
-      if (!m_parent.empty() && classScope->derivesDirectlyFrom(ar, m_parent)) {
+      if (!m_parent.empty() && classScope->derivesDirectlyFrom(m_parent)) {
         if (!parCls) {
           cg_printf(" : public DynamicObjectData");
         } else {
@@ -426,7 +426,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           const char *intf = exp->getString().c_str();
           ClassScopePtr intfClassScope = ar->findClass(intf);
           if (intfClassScope && !intfClassScope->isRedeclaring() &&
-              classScope->derivesDirectlyFrom(ar, intf) &&
+              classScope->derivesDirectlyFrom(intf) &&
               (!parCls || !parCls->derivesFrom(ar, intf, true, false))) {
             string id = intfClassScope->getId(cg);
             cg_printf(", public %s%s", Option::ClassPrefix, id.c_str());
@@ -748,7 +748,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
       ClassScopePtr parCls;
       if (!m_parent.empty()) parCls = ar->findClass(m_parent);
-      if (!m_parent.empty() && classScope->derivesDirectlyFrom(ar, m_parent)
+      if (!m_parent.empty() && classScope->derivesDirectlyFrom(m_parent)
           && parCls && parCls->isUserClass() && !parCls->isRedeclaring()) {
         // system classes are not supported in static FFI translation
         // they shouldn't appear as superclasses as well

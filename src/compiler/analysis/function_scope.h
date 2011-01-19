@@ -37,7 +37,7 @@ DECLARE_BOOST_TYPES(ClassScope);
 class CodeGenerator;
 
 typedef ExpressionPtr (*FunctionOptPtr)(CodeGenerator *cg,
-                                        AnalysisResultPtr ar,
+                                        AnalysisResultConstPtr ar,
                                         SimpleFunctionCallPtr, int);
 
 /**
@@ -253,7 +253,7 @@ public:
    */
   int inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
                       ExpressionListPtr params, bool &valid);
-  TypePtr setParamType(AnalysisResultPtr ar, int index, TypePtr type);
+  TypePtr setParamType(AnalysisResultConstPtr ar, int index, TypePtr type);
   TypePtr getParamType(int index);
   TypePtr getParamTypeSpec(int index) { return m_paramTypeSpecs[index]; }
 

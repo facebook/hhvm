@@ -150,12 +150,12 @@ void StaticMemberExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultPtr ar) {
+ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (m_class) updateClassName();
   return ExpressionPtr();
 }
 
-ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultPtr ar) {
+ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultConstPtr ar) {
   Symbol *sym = NULL;
   if (m_class) updateClassName();
   if (!m_class && m_resolvedClass && m_valid &&

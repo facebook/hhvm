@@ -173,7 +173,8 @@ void NewObjectExpression::preOutputStash(CodeGenerator &cg,
       return;
     }
   }
-  Expression::preOutputStash(cg, ar, state);
+  optimizeArgArray(ar);
+  FunctionCall::preOutputStash(cg, ar, state);
 }
 
 void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
@@ -259,7 +260,7 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     }
     cg_printf(");\n");
     cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp,
-        m_objectTemp);
+              m_objectTemp);
     cg_printf("mcp%d.construct(obj%d);\n", m_ciTemp, m_objectTemp);
     cg_printf("const CallInfo *cit%d = mcp%d.ci;\n", m_ciTemp, m_ciTemp);
 

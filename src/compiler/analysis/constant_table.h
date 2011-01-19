@@ -52,25 +52,25 @@ public:
   /**
    * Explicitly setting a constant to be dynamic, mainly for "Dynamic" note.
    */
-  void setDynamic(AnalysisResultPtr ar, const std::string &name);
+  void setDynamic(AnalysisResultConstPtr ar, const std::string &name);
 
   /**
    * Called when a constant is declared (l-value).
    */
   TypePtr add(const std::string &name, TypePtr type, ExpressionPtr exp,
-              AnalysisResultPtr ar, ConstructPtr construct);
+              AnalysisResultConstPtr ar, ConstructPtr construct);
 
   /**
    * Called after a constant is type-inferred
    */
-  void setValue(AnalysisResultPtr ar, const std::string &name,
+  void setValue(AnalysisResultConstPtr ar, const std::string &name,
                 ExpressionPtr value);
 
   /**
    * Called when a constant is used or being evaluated (r-value).
    */
   TypePtr check(const std::string &name, TypePtr type, bool coerce,
-                AnalysisResultPtr ar, ConstructPtr construct,
+                AnalysisResultConstPtr ar, ConstructPtr construct,
                 const std::vector<std::string> &bases,
                 BlockScope *&defScope);
 
@@ -103,10 +103,11 @@ public:
    */
   bool hasJumpTable() const { return !m_emptyJumpTable;}
 
-  bool isRecursivelyDeclared(AnalysisResultPtr ar, const std::string &name);
-  ConstructPtr getValueRecur(AnalysisResultPtr ar, const std::string &name,
+  bool isRecursivelyDeclared(AnalysisResultConstPtr ar,
+                             const std::string &name);
+  ConstructPtr getValueRecur(AnalysisResultConstPtr ar, const std::string &name,
                              ClassScopePtr &defClass);
-  ConstructPtr getDeclarationRecur(AnalysisResultPtr ar,
+  ConstructPtr getDeclarationRecur(AnalysisResultConstPtr ar,
                                    const std::string &name,
                                    ClassScopePtr &defClass);
 
@@ -114,12 +115,12 @@ private:
   bool m_emptyJumpTable;
   bool m_hasDynamic;
 
-  ClassScopePtr findParent(AnalysisResultPtr ar, const std::string &name);
+  ClassScopePtr findParent(AnalysisResultConstPtr ar, const std::string &name);
   void outputCPPConstantSymbol(CodeGenerator &cg, AnalysisResultPtr ar,
                                Symbol *sym);
 
   TypePtr checkBases(const std::string &name, TypePtr type,
-                     bool coerce, AnalysisResultPtr ar,
+                     bool coerce, AnalysisResultConstPtr ar,
                      ConstructPtr construct,
                      const std::vector<std::string> &bases,
                      BlockScope *&defScope);

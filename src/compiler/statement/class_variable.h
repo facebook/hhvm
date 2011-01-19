@@ -33,7 +33,7 @@ public:
                 ExpressionListPtr declaration);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultPtr ar);
+  StatementPtr preOptimize(AnalysisResultConstPtr ar);
 
   // implementing IParseHandler
   virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);

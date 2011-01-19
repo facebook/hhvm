@@ -158,14 +158,14 @@ void ClassScope::inheritedMagicMethods(ClassScopePtr super) {
   }
 }
 
-bool ClassScope::implementsArrayAccess(AnalysisResultPtr ar) {
+bool ClassScope::implementsArrayAccess() {
   return
     getAttribute(MayHaveArrayAccess) |
     getAttribute(HasArrayAccess) |
     getAttribute(InheritsArrayAccess);
 }
 
-bool ClassScope::implementsAccessor(AnalysisResultPtr ar, int prop) {
+bool ClassScope::implementsAccessor(int prop) {
   if (m_attribute & prop) return true;
   if (prop & MayHaveUnknownPropGetter) {
     prop |= HasUnknownPropGetter | InheritsUnknownPropGetter;
@@ -302,7 +302,7 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
   }
 }
 
-bool ClassScope::needsInvokeParent(AnalysisResultPtr ar,
+bool ClassScope::needsInvokeParent(AnalysisResultConstPtr ar,
                                    bool considerSelf /* = true */) {
   // check all functions this class has
   if (considerSelf) {
@@ -320,19 +320,18 @@ bool ClassScope::needsInvokeParent(AnalysisResultPtr ar,
   return false;
 }
 
-bool ClassScope::derivesDirectlyFrom(AnalysisResultPtr ar,
-                                     const std::string &base) const {
+bool ClassScope::derivesDirectlyFrom(const std::string &base) const {
   BOOST_FOREACH(std::string base_i, m_bases) {
     if (base_i == base) return true;
   }
   return false;
 }
 
-bool ClassScope::derivesFrom(AnalysisResultPtr ar,
+bool ClassScope::derivesFrom(AnalysisResultConstPtr ar,
                              const std::string &base,
                              bool strict, bool def) const {
 
-  if (derivesDirectlyFrom(ar, base)) return true;
+  if (derivesDirectlyFrom(base)) return true;
 
   BOOST_FOREACH(std::string base_i, m_bases) {
     ClassScopePtr cl = ar->findClass(base_i);
@@ -347,7 +346,7 @@ bool ClassScope::derivesFrom(AnalysisResultPtr ar,
   return false;
 }
 
-std::string ClassScope::findCommonParent(AnalysisResultPtr ar,
+std::string ClassScope::findCommonParent(AnalysisResultConstPtr ar,
                                          const std::string cn1,
                                          const std::string cn2) {
 
@@ -385,7 +384,7 @@ void ClassScope::setVolatile() {
   }
 }
 
-FunctionScopePtr ClassScope::findFunction(AnalysisResultPtr ar,
+FunctionScopePtr ClassScope::findFunction(AnalysisResultConstPtr ar,
                                           const std::string &name,
                                           bool recursive,
                                           bool exclIntfBase /*= false */) {
@@ -424,7 +423,7 @@ FunctionScopePtr ClassScope::findFunction(AnalysisResultPtr ar,
   return FunctionScopePtr();
 }
 
-FunctionScopePtr ClassScope::findConstructor(AnalysisResultPtr ar,
+FunctionScopePtr ClassScope::findConstructor(AnalysisResultConstPtr ar,
                                              bool recursive) {
   StringToFunctionScopePtrVecMap::const_iterator iter;
   string name;
@@ -456,7 +455,7 @@ FunctionScopePtr ClassScope::findConstructor(AnalysisResultPtr ar,
   return FunctionScopePtr();
 }
 
-void ClassScope::setStaticDynamic(AnalysisResultPtr ar) {
+void ClassScope::setStaticDynamic(AnalysisResultConstPtr ar) {
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functions.begin(); iter != m_functions.end(); ++iter) {
     BOOST_FOREACH(FunctionScopePtr fs, iter->second) {
@@ -478,7 +477,8 @@ void ClassScope::setStaticDynamic(AnalysisResultPtr ar) {
   }
 }
 
-void ClassScope::setDynamic(AnalysisResultPtr ar, const std::string &name) {
+void ClassScope::setDynamic(AnalysisResultConstPtr ar,
+                            const std::string &name) {
   StringToFunctionScopePtrVecMap::const_iterator iter =
     m_functions.find(name);
   if (iter != m_functions.end()) {
@@ -585,17 +585,18 @@ bool ClassScope::hasConst(const string &name) {
 
 Symbol *ClassScope::findProperty(ClassScopePtr &cls,
                                  const string &name,
-                                 AnalysisResultPtr ar, ConstructPtr construct) {
+                                 AnalysisResultConstPtr ar,
+                                 ConstructPtr construct) {
   return getVariables()->findProperty(cls, name, ar, construct);
 }
 
 TypePtr ClassScope::checkProperty(Symbol *sym, TypePtr type,
-                                  bool coerce, AnalysisResultPtr ar) {
+                                  bool coerce, AnalysisResultConstPtr ar) {
   return getVariables()->checkProperty(sym, type, coerce, ar);
 }
 
 TypePtr ClassScope::checkConst(const std::string &name, TypePtr type,
-                               bool coerce, AnalysisResultPtr ar,
+                               bool coerce, AnalysisResultConstPtr ar,
                                ConstructPtr construct,
                                const std::vector<std::string> &bases,
                                BlockScope *&defScope) {
@@ -606,7 +607,7 @@ TypePtr ClassScope::checkConst(const std::string &name, TypePtr type,
   return t;
 }
 
-ClassScopePtr ClassScope::getParentScope(AnalysisResultPtr ar) {
+ClassScopePtr ClassScope::getParentScope(AnalysisResultConstPtr ar) {
   if (m_parent.empty()) return ClassScopePtr();
   return ar->findClass(m_parent);
 }
@@ -978,7 +979,7 @@ bool ClassScope::hasProperty(const string &name) {
   return m_variables->isPresent(name);
 }
 
-void ClassScope::setRedeclaring(AnalysisResultPtr ar, int redecId) {
+void ClassScope::setRedeclaring(AnalysisResultConstPtr ar, int redecId) {
   m_redeclaring = redecId;
   setVolatile(); // redeclared class is also volatile
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
@@ -990,7 +991,7 @@ void ClassScope::setRedeclaring(AnalysisResultPtr ar, int redecId) {
   m_variables->forceVariants(ar, VariableTable::AnyNonPrivateVars);
 }
 
-ClassScopePtr ClassScope::getRootParent(AnalysisResultPtr ar,
+ClassScopePtr ClassScope::getRootParent(AnalysisResultConstPtr ar,
                                         const std::string &methodName) {
   ClassScopePtr root = dynamic_pointer_cast<ClassScope>(shared_from_this());
   for (ClassScopePtr cls = getParentScope(ar); cls;
@@ -1003,7 +1004,7 @@ ClassScopePtr ClassScope::getRootParent(AnalysisResultPtr ar,
   return root;
 }
 
-void ClassScope::getRootParents(AnalysisResultPtr ar,
+void ClassScope::getRootParents(AnalysisResultConstPtr ar,
                                 const std::string &methodName,
                                 ClassScopePtrVec &roots,
                                 ClassScopePtr curClass) {
@@ -1292,8 +1293,7 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
   cg_indentEnd("};\n");
 }
 
-bool ClassScope::addFunction(AnalysisResultPtr ar,
-                             FunctionScopePtr funcScope) {
+bool ClassScope::addFunction(AnalysisResultPtr ar, FunctionScopePtr funcScope) {
   FunctionScopePtrVec &funcs = m_functions[funcScope->getName()];
   if (funcs.size() == 1) {
     funcs[0]->setRedeclaring(0);

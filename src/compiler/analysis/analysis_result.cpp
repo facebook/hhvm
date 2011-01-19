@@ -118,7 +118,7 @@ void AnalysisResult::parseOnDemand(const std::string &name) {
   }
 }
 
-FileScopePtr AnalysisResult::findFileScope(const std::string &name) {
+FileScopePtr AnalysisResult::findFileScope(const std::string &name) const {
   StringToFileScopePtrMap::const_iterator iter = m_files.find(name);
   if (iter != m_files.end()) {
     return iter->second;
@@ -157,7 +157,8 @@ StatementPtr AnalysisResult::getStatementForSilencer() const {
   return m_stmt;
 }
 
-FunctionScopePtr AnalysisResult::findFunction(const std::string &funcName) {
+FunctionScopePtr AnalysisResult::findFunction(
+  const std::string &funcName) const {
   StringToFunctionScopePtrVecMap::const_iterator bit =
     m_functions.find(funcName);
   if (bit != m_functions.end()) {
@@ -172,7 +173,7 @@ FunctionScopePtr AnalysisResult::findFunction(const std::string &funcName) {
 }
 
 FunctionScopePtr AnalysisResult::findHelperFunction(const std::string &
-                                                    funcName) {
+                                                    funcName) const {
   StringToFunctionScopePtrVecMap::const_iterator bit =
     m_helperFunctions.find(funcName);
   if (bit != m_helperFunctions.end()) {
@@ -181,15 +182,30 @@ FunctionScopePtr AnalysisResult::findHelperFunction(const std::string &
   return FunctionScopePtr();
 }
 
-BlockScopePtr AnalysisResult::findConstantDeclarer(const std::string &name) {
+BlockScopeConstPtr AnalysisResult::findConstantDeclarer(
+  const std::string &name) const {
   if (getConstants()->isPresent(name)) return shared_from_this();
   StringToFileScopePtrMap::const_iterator iter = m_constDecs.find(name);
   if (iter != m_constDecs.end()) return iter->second;
   return BlockScopePtr();
 }
 
+ClassScopePtr AnalysisResult::findClass(const std::string &name) const {
+  AnalysisResultConstPtr ar = shared_from_this();
+  string lname = Util::toLower(name);
+  StringToClassScopePtrMap::const_iterator sysIter =
+    m_systemClasses.find(lname);
+  if (sysIter != m_systemClasses.end()) return sysIter->second;
+
+  StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.find(lname);
+  if (iter != m_classDecs.end() && iter->second.size()) {
+    return iter->second.back();
+  }
+  return ClassScopePtr();
+}
+
 ClassScopePtr AnalysisResult::findClass(const std::string &name,
-                                        FindClassBy by /* = ClassName */) {
+                                        FindClassBy by) {
   AnalysisResultPtr ar = shared_from_this();
   if (by == PropertyName) return ClassScopePtr();
 
@@ -216,20 +232,13 @@ ClassScopePtr AnalysisResult::findClass(const std::string &name,
       }
     }
   } else {
-    StringToClassScopePtrMap::const_iterator sysIter =
-      m_systemClasses.find(lname);
-    if (sysIter != m_systemClasses.end()) return sysIter->second;
-
-    StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.find(lname);
-    if (iter != m_classDecs.end() && iter->second.size()) {
-      return iter->second.back();
-    }
+    return findClass(name);
   }
   return ClassScopePtr();
 }
 
 const ClassScopePtrVec &AnalysisResult::findRedeclaredClasses
-(const std::string &name) {
+(const std::string &name) const {
   ASSERT(name == Util::toLower(name));
 
   StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.find(name);
@@ -241,7 +250,7 @@ const ClassScopePtrVec &AnalysisResult::findRedeclaredClasses
   return iter->second;
 }
 
-ClassScopePtrVec AnalysisResult::findClasses(const std::string &name) {
+ClassScopePtrVec AnalysisResult::findClasses(const std::string &name) const {
   ASSERT(name == Util::toLower(name));
 
   StringToClassScopePtrMap::const_iterator sysIter =
@@ -254,7 +263,7 @@ ClassScopePtrVec AnalysisResult::findClasses(const std::string &name) {
 }
 
 bool AnalysisResult::classMemberExists(const std::string &name,
-                                       FindClassBy by) {
+                                       FindClassBy by) const {
   if (by == MethodName) {
     return m_methodToClassDecs.find(name) != m_methodToClassDecs.end();
   }
@@ -262,7 +271,7 @@ bool AnalysisResult::classMemberExists(const std::string &name,
 }
 
 ClassScopePtr AnalysisResult::findExactClass(ConstructPtr cs,
-                                             const std::string &name) {
+                                             const std::string &name) const {
   ClassScopePtr cls = findClass(name);
   if (!cls || !cls->isRedeclaring()) return cls;
   std::string lowerName = Util::toLower(name);
@@ -288,7 +297,7 @@ ClassScopePtr AnalysisResult::findExactClass(ConstructPtr cs,
 }
 
 bool AnalysisResult::checkClassPresent(ConstructPtr cs,
-                                       const std::string &name) {
+                                       const std::string &name) const {
   if (name == "self" || name == "parent") return true;
   std::string lowerName = Util::toLower(name);
   if (ClassScopePtr currentCls = cs->getClassScope()) {
@@ -347,11 +356,12 @@ void AnalysisResult::addNonFinal(const std::string &className) {
   m_nonFinalClasses.insert(className);
 }
 
-bool AnalysisResult::isNonFinalClass(const std::string &className) {
+bool AnalysisResult::isNonFinalClass(const std::string &className) const {
   return m_nonFinalClasses.find(className) != m_nonFinalClasses.end();
 }
 
-bool AnalysisResult::needStaticArray(ClassScopePtr cls, FunctionScopePtr func) {
+bool AnalysisResult::needStaticArray(ClassScopePtr cls,
+                                     FunctionScopePtr func) const {
   return cls && isNonFinalClass(cls->getName()) && !func->isPrivate();
 }
 
@@ -511,7 +521,7 @@ bool AnalysisResult::addConstantDependency(FileScopePtr usingFile,
   return true;
 }
 
-bool AnalysisResult::isConstantDeclared(const std::string &constName) {
+bool AnalysisResult::isConstantDeclared(const std::string &constName) const {
   if (m_constants->isPresent(constName)) return true;
   StringToFileScopePtrMap::const_iterator iter = m_constDecs.find(constName);
   if (iter == m_constDecs.end()) return false;
@@ -522,15 +532,15 @@ bool AnalysisResult::isConstantDeclared(const std::string &constName) {
   return false;
 }
 
-bool AnalysisResult::isBaseSysRsrcClass(const std::string &className) {
+bool AnalysisResult::isBaseSysRsrcClass(const std::string &className) const {
   return m_baseSysRsrcClasses.find(className) != m_baseSysRsrcClasses.end();
 }
 
-bool AnalysisResult::isConstantRedeclared(const std::string &constName) {
+bool AnalysisResult::isConstantRedeclared(const std::string &constName) const {
   return m_constRedeclared.find(constName) != m_constRedeclared.end();
 }
 
-bool AnalysisResult::isSystemConstant(const std::string &constName) {
+bool AnalysisResult::isSystemConstant(const std::string &constName) const {
   return m_constants->isSystem(constName);
 }
 

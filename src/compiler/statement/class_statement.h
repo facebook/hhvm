@@ -42,7 +42,7 @@ public:
   bool ignored() const { return m_ignored;}
 
   virtual std::string getName() const;
-  virtual void getAllParents(AnalysisResultPtr ar,
+  virtual void getAllParents(AnalysisResultConstPtr ar,
                              std::vector<std::string> &names);
 private:
   int m_type;

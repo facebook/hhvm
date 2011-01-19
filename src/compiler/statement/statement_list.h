@@ -29,11 +29,11 @@ public:
   StatementList(STATEMENT_CONSTRUCTOR_PARAMETERS);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultPtr ar);
-  StatementPtr postOptimize(AnalysisResultPtr ar);
+  StatementPtr preOptimize(AnalysisResultConstPtr ar);
+  StatementPtr postOptimize(AnalysisResultConstPtr ar);
   virtual bool hasDecl() const;
   virtual bool hasImpl() const;
-  ExpressionPtr getEffectiveImpl(AnalysisResultPtr ar) const;
+  ExpressionPtr getEffectiveImpl(AnalysisResultConstPtr ar) const;
   virtual bool hasBody() const;
   virtual bool hasRetExp() const;
 
@@ -58,7 +58,7 @@ public:
   void shift(int from, int to);
 
 private:
-  bool mergeConcatAssign(AnalysisResultPtr ar);
+  bool mergeConcatAssign();
 
   StatementPtrVec m_stmts;
   bool m_included; // whether includes have been inlined

@@ -195,7 +195,7 @@ public:
    * Parser creates a FileScope upon parsing a new file.
    */
   void parseOnDemand(const std::string &name);
-  FileScopePtr findFileScope(const std::string &name);
+  FileScopePtr findFileScope(const std::string &name) const;
   const StringToFileScopePtrMap &getAllFiles() { return m_files;}
   const std::vector<FileScopePtr> &getAllFilesVector() {
     return m_fileScopes;
@@ -232,30 +232,32 @@ public:
   bool addConstantDependency(FileScopePtr usingFile,
                              const std::string &constantName);
 
+  ClassScopePtr findClass(const std::string &className) const;
   ClassScopePtr findClass(const std::string &className,
-                          FindClassBy by = ClassName);
+                          FindClassBy by);
   /**
    * Find all the redeclared classes by the name, excluding system classes.
    * Note that system classes cannot be redeclared.
    */
-  const ClassScopePtrVec &findRedeclaredClasses(const std::string &className);
+  const ClassScopePtrVec &findRedeclaredClasses(
+    const std::string &className) const;
   /**
    * Find all the classes by the name, including system classes.
    */
-  ClassScopePtrVec findClasses(const std::string &className);
-  bool classMemberExists(const std::string &name, FindClassBy by);
-  ClassScopePtr findExactClass(ConstructPtr cs, const std::string &name);
-  bool checkClassPresent(ConstructPtr cs, const std::string &name);
-  FunctionScopePtr findFunction(const std::string &funcName);
-  FunctionScopePtr findHelperFunction(const std::string &funcName);
-  BlockScopePtr findConstantDeclarer(const std::string &constName);
-  bool isConstantDeclared(const std::string &constName);
-  bool isConstantRedeclared(const std::string &constName);
-  bool isSystemConstant(const std::string &constName);
-  bool isBaseSysRsrcClass(const std::string &className);
+  ClassScopePtrVec findClasses(const std::string &className) const;
+  bool classMemberExists(const std::string &name, FindClassBy by) const;
+  ClassScopePtr findExactClass(ConstructPtr cs, const std::string &name) const;
+  bool checkClassPresent(ConstructPtr cs, const std::string &name) const;
+  FunctionScopePtr findFunction(const std::string &funcName) const ;
+  FunctionScopePtr findHelperFunction(const std::string &funcName) const;
+  BlockScopeConstPtr findConstantDeclarer(const std::string &constName) const;
+  bool isConstantDeclared(const std::string &constName) const;
+  bool isConstantRedeclared(const std::string &constName) const;
+  bool isSystemConstant(const std::string &constName) const;
+  bool isBaseSysRsrcClass(const std::string &className) const;
   void addNonFinal(const std::string &className);
-  bool isNonFinalClass(const std::string &className);
-  bool needStaticArray(ClassScopePtr cls, FunctionScopePtr func);
+  bool isNonFinalClass(const std::string &className) const;
+  bool needStaticArray(ClassScopePtr cls, FunctionScopePtr func) const;
 
   /**
    * For function declaration parsing.
@@ -389,6 +391,11 @@ public:
 
   AnalysisResultPtr shared_from_this() {
     return boost::static_pointer_cast<AnalysisResult>
+      (BlockScope::shared_from_this());
+  }
+
+  AnalysisResultConstPtr shared_from_this() const {
+    return boost::static_pointer_cast<const AnalysisResult>
       (BlockScope::shared_from_this());
   }
 

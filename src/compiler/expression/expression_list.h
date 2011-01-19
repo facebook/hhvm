@@ -40,8 +40,8 @@ public:
   void toLower();
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultPtr ar);
-  ExpressionPtr postOptimize(AnalysisResultPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
 
   virtual void setContext(Context context);
   void setListKind(ListKind kind) { m_kind = kind; }
@@ -100,7 +100,7 @@ public:
   bool flattenLiteralStrings(std::vector<ExpressionPtr> &literals) const;
 
 private:
-  void optimize(AnalysisResultPtr ar);
+  void optimize(AnalysisResultConstPtr ar);
   unsigned int checkLitstrKeys() const;
   unsigned int checkIntegerKeys(int64 &max) const;
   bool outputCPPArrayCreate(CodeGenerator &cg, AnalysisResultPtr ar,

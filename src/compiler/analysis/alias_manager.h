@@ -89,9 +89,9 @@ class AliasManager {
   void resetScope();
   ExpressionPtr getCanonical(ExpressionPtr e);
 
-  void gatherInfo(AnalysisResultPtr ar, MethodStatementPtr m);
-  int optimize(AnalysisResultPtr ar, MethodStatementPtr s);
-  void finalSetup(AnalysisResultPtr ar, MethodStatementPtr m);
+  void gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m);
+  int optimize(AnalysisResultConstPtr ar, MethodStatementPtr s);
+  void finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m);
 
   void setChanged() {
     if (!m_noAdd) {
@@ -167,35 +167,35 @@ class AliasManager {
   void stringOptsRecur(StatementPtr s);
   void stringOptsRecur(ExpressionPtr s, bool ok);
 
-  BucketMapEntry        m_accessList;
-  BucketMap             m_bucketMap;
-  BucketMapEntry        *m_bucketList;
+  BucketMapEntry            m_accessList;
+  BucketMap                 m_bucketMap;
+  BucketMapEntry            *m_bucketList;
 
-  CondStack             m_stack;
+  CondStack                 m_stack;
 
-  unsigned              m_nextID;
+  unsigned                  m_nextID;
 
-  int                   m_changes;
-  int                   m_replaced;
-  bool                  m_wildRefs;
+  int                       m_changes;
+  int                       m_replaced;
+  bool                      m_wildRefs;
 
-  AnalysisResultPtr     m_arp;
-  VariableTablePtr      m_variables;
+  AnalysisResultConstPtr    m_arp;
+  VariableTablePtr          m_variables;
 
-  LoopInfoVec           m_loopInfo;
+  LoopInfoVec               m_loopInfo;
 
-  std::string           m_returnVar;
-  int                   m_nrvoFix;
+  std::string               m_returnVar;
+  int                       m_nrvoFix;
 
-  bool                  m_inlineAsExpr;
-  bool                  m_noAdd;
-  bool                  m_preOpt;
-  bool                  m_postOpt;
-  bool                  m_cleared;
-  bool                  m_inPseudoMain;
-  BlockScopeRawPtr      m_scope;
+  bool                      m_inlineAsExpr;
+  bool                      m_noAdd;
+  bool                      m_preOpt;
+  bool                      m_postOpt;
+  bool                      m_cleared;
+  bool                      m_inPseudoMain;
+  BlockScopeRawPtr          m_scope;
 
-  ControlFlowGraph      *m_graph;
+  ControlFlowGraph          *m_graph;
   std::map<std::string,int> m_gidMap;
 };
 

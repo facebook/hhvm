@@ -102,7 +102,8 @@ TypePtr Type::GetType(KindOf kindOf) {
   return TypePtr();
 }
 
-TypePtr Type::Intersection(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
+TypePtr Type::Intersection(AnalysisResultConstPtr ar,
+                           TypePtr from, TypePtr to) {
   // Special case: if we're casting to Some or Any, return the "from" type;
   // if we're casting to Variant, return Variant.
   if (to->m_kindOf == KindOfSome || to->m_kindOf == KindOfAny) {
@@ -167,7 +168,7 @@ TypePtr Type::Intersection(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
   return res;
 }
 
-bool Type::IsCastNeeded(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
+bool Type::IsCastNeeded(AnalysisResultConstPtr ar, TypePtr from, TypePtr to) {
   if (SameType(from, to)) return false;
   if (!from->m_kindOf) return true;
   if (!to->m_kindOf) return true;
@@ -201,7 +202,7 @@ bool Type::IsCastNeeded(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
   }
 }
 
-bool Type::IsCoercionNeeded(AnalysisResultPtr ar, TypePtr t1, TypePtr t2) {
+bool Type::IsCoercionNeeded(AnalysisResultConstPtr ar, TypePtr t1, TypePtr t2) {
   if (t1->m_kindOf == KindOfSome ||
       t1->m_kindOf == KindOfAny ||
       t2->m_kindOf == KindOfSome ||
@@ -217,7 +218,7 @@ bool Type::IsCoercionNeeded(AnalysisResultPtr ar, TypePtr t1, TypePtr t2) {
   return !Type::IsLegalCast(ar, t1, t2);
 }
 
-TypePtr Type::Coerce(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
+TypePtr Type::Coerce(AnalysisResultConstPtr ar, TypePtr type1, TypePtr type2) {
   if (SameType(type1, type2)) return type1;
   if (type1->m_kindOf == KindOfVariant ||
       type2->m_kindOf == KindOfVariant) return Type::Variant;
@@ -274,7 +275,7 @@ TypePtr Type::Coerce(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
   return Type::Variant;
 }
 
-TypePtr Type::Union(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
+TypePtr Type::Union(AnalysisResultConstPtr ar, TypePtr type1, TypePtr type2) {
   if (SameType(type1, type2)) {
     return type1;
   }
@@ -328,7 +329,7 @@ bool Type::IsExactType(KindOf kindOf) {
  *   Boolean -> PlusOperand
  */
 
-bool Type::IsLegalCast(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
+bool Type::IsLegalCast(AnalysisResultConstPtr ar, TypePtr from, TypePtr to) {
   if (!from->m_kindOf) return true;
 
   // since both 'from' and 'to' represent sets of types, we do
@@ -448,7 +449,8 @@ TypePtr Type::combinedArithmeticType(TypePtr t1, TypePtr t2) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ClassScopePtr Type::getClass(AnalysisResultPtr ar, BlockScopeRawPtr scope) {
+ClassScopePtr Type::getClass(AnalysisResultConstPtr ar,
+                             BlockScopeRawPtr scope) {
   if (m_name.empty()) return ClassScopePtr();
   ClassScopePtr cls = ar->findClass(m_name);
   if (cls->isRedeclaring()) {
@@ -461,7 +463,7 @@ ClassScopePtr Type::getClass(AnalysisResultPtr ar, BlockScopeRawPtr scope) {
   return cls;
 }
 
-string Type::getCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar,
+string Type::getCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
                         BlockScopeRawPtr scope) {
   switch (m_kindOf) {
   case KindOfBoolean:     return "bool";
@@ -486,12 +488,12 @@ string Type::getCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 }
 
-void Type::outputCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar,
+void Type::outputCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
                          BlockScopeRawPtr scope) {
   cg_printf(getCPPDecl(cg, ar, scope).c_str());
 }
 
-void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultPtr ar,
+void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultConstPtr ar,
                          BlockScopeRawPtr scope) {
   switch (m_kindOf) {
     case KindOfBoolean:     cg_printf("toBoolean");   break;
@@ -608,7 +610,8 @@ void Type::count(std::map<std::string, int> &counts) {
    an integer, for example), and return the combined type. If they
    are not compatible, return a null pointer.
  */
-TypePtr Type::Inferred(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
+TypePtr Type::Inferred(AnalysisResultConstPtr ar,
+                       TypePtr type1, TypePtr type2) {
   if (!type1) return type2;
   if (!type2) return type1;
   KindOf k1 = type1->m_kindOf;

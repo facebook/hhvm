@@ -90,7 +90,7 @@ void QOpExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr QOpExpression::preOptimize(AnalysisResultPtr ar) {
+ExpressionPtr QOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   Variant value;
   if (m_condition->getScalarValue(value)) {
     if (value.toBoolean()) {
@@ -105,7 +105,7 @@ ExpressionPtr QOpExpression::preOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr QOpExpression::postOptimize(AnalysisResultPtr ar) {
+ExpressionPtr QOpExpression::postOptimize(AnalysisResultConstPtr ar) {
   if (getActualType() && getActualType()->is(Type::KindOfString) &&
       m_expYes && m_expYes->isLiteralString() != m_expNo->isLiteralString()) {
     setActualType(Type::Variant);
@@ -146,7 +146,7 @@ TypePtr QOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   return Type::Variant;
 }
 
-ExpressionPtr QOpExpression::unneededHelper(AnalysisResultPtr ar) {
+ExpressionPtr QOpExpression::unneededHelper() {
   bool yesEffect = false;
   if (m_expYes) {
     yesEffect = m_expYes->getContainedEffects();
@@ -154,12 +154,12 @@ ExpressionPtr QOpExpression::unneededHelper(AnalysisResultPtr ar) {
   bool noEffect = m_expNo->getContainedEffects();
 
   if (!yesEffect && !noEffect) {
-    return Expression::unneededHelper(ar);
+    return Expression::unneededHelper();
   }
 
-  m_expNo = m_expNo->unneeded(ar);
+  m_expNo = m_expNo->unneeded();
   if (m_expYes) {
-    m_expYes = m_expYes->unneeded(ar);
+    m_expYes = m_expYes->unneeded();
   }
   return static_pointer_cast<Expression>(shared_from_this());
 }

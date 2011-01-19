@@ -32,7 +32,7 @@ public:
                      const std::string &name);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
   virtual bool isScalar() const;
   virtual int getLocalEffects() const { return NoEffect; }
   virtual bool getScalarValue(Variant &value);

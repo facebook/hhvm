@@ -30,8 +30,8 @@ public:
                      ExpressionPtr exp1, ExpressionPtr exp2, int op);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultPtr ar);
-  ExpressionPtr postOptimize(AnalysisResultPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
   virtual bool isTemporary() const;
   virtual int getLocalEffects() const;
   virtual bool isLiteralString() const;
@@ -43,10 +43,10 @@ public:
   ExpressionPtr getExp2() { return m_exp2;}
   int getOp() const { return m_op;}
 
-  ExpressionPtr foldConst(AnalysisResultPtr ar);
-  ExpressionPtr foldConstRightAssoc(AnalysisResultPtr ar);
+  ExpressionPtr foldConst(AnalysisResultConstPtr ar);
+  ExpressionPtr foldConstRightAssoc(AnalysisResultConstPtr ar);
 
-  virtual ExpressionPtr unneededHelper(AnalysisResultPtr ar);
+  virtual ExpressionPtr unneededHelper();
   virtual bool canonCompare(ExpressionPtr e) const;
 
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
@@ -60,8 +60,8 @@ public:
                            bool &hasVoid);
 
 private:
-  ExpressionPtr simplifyLogical(AnalysisResultPtr ar);
-  ExpressionPtr simplifyArithmetic(AnalysisResultPtr ar);
+  ExpressionPtr simplifyLogical(AnalysisResultConstPtr ar);
+  ExpressionPtr simplifyArithmetic(AnalysisResultConstPtr ar);
   bool isOpEqual();
   ExpressionPtr m_exp1;
   ExpressionPtr m_exp2;

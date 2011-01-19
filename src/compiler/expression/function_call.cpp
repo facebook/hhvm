@@ -214,7 +214,7 @@ struct InlineCloneInfo {
 static ExpressionPtr cloneForInlineRecur(InlineCloneInfo &info,
                                          ExpressionPtr exp,
                                          const std::string &prefix,
-                                         AnalysisResultPtr ar,
+                                         AnalysisResultConstPtr ar,
                                          FunctionScopePtr scope) {
   exp->getOriginalScope(); // make sure to cache the original scope
   exp->setBlockScope(scope);
@@ -296,14 +296,14 @@ static ExpressionPtr cloneForInlineRecur(InlineCloneInfo &info,
 static ExpressionPtr cloneForInline(InlineCloneInfo &info,
                                     ExpressionPtr exp,
                                     const std::string &prefix,
-                                    AnalysisResultPtr ar,
+                                    AnalysisResultConstPtr ar,
                                     FunctionScopePtr scope) {
   return cloneForInlineRecur(info, exp->clone(), prefix, ar, scope);
 }
 
 static int cloneStmtsForInline(InlineCloneInfo &info, StatementPtr s,
                                const std::string &prefix,
-                               AnalysisResultPtr ar,
+                               AnalysisResultConstPtr ar,
                                FunctionScopePtr scope) {
   switch (s->getKindOf()) {
   case Statement::KindOfStatementList:
@@ -343,7 +343,7 @@ static int cloneStmtsForInline(InlineCloneInfo &info, StatementPtr s,
   return 1;
 }
 
-ExpressionPtr FunctionCall::inliner(AnalysisResultPtr ar,
+ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
                                     ExpressionPtr obj, std::string localThis) {
   FunctionScopePtr fs = getFunctionScope();
   if (m_noInline || !fs ||
@@ -492,14 +492,13 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultPtr ar,
   return replaceValue(info.elist);
 }
 
-ExpressionPtr FunctionCall::preOptimize(AnalysisResultPtr ar) {
+ExpressionPtr FunctionCall::preOptimize(AnalysisResultConstPtr ar) {
   if (m_class) updateClassName();
   return ExpressionPtr();
 }
 
-ExpressionPtr FunctionCall::postOptimize(AnalysisResultPtr ar) {
+ExpressionPtr FunctionCall::postOptimize(AnalysisResultConstPtr ar) {
   if (m_class) updateClassName();
-  optimizeArgArray(ar);
   return ExpressionPtr();
 }
 
@@ -543,6 +542,7 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
 
 bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                 int state) {
+  optimizeArgArray(ar);
   if (m_noStatic || isUnused() || m_className.empty() ||
       isSelf() || isParent()) {
     return Expression::preOutputCPP(cg, ar, state);
@@ -579,6 +579,7 @@ bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 }
 
 void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
+  optimizeArgArray(ar);
   bool staticClassName = false;
   if (!m_noStatic && !m_className.empty() && m_cppTemp.empty() &&
       !isSelf() && !isParent() && !isStatic()) {
@@ -622,7 +623,7 @@ void FunctionCall::setFunctionAndClassScope(FunctionScopePtr fsp,
 }
 
 void FunctionCall::optimizeArgArray(AnalysisResultPtr ar) {
-  if (m_extraArg <= 0) return;
+  if (m_extraArg <= 0 || m_argArrayId >= 0) return;
   int paramCount = m_params->getOutputCount();
   int iMax = paramCount - m_extraArg;
   bool isScalar = true;

@@ -867,7 +867,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
           if (value->getContext() & Expression::RefValue) {
             break;
           }
-          if (!Expression::CheckNeeded(m_arp, a->getVariable(), value) ||
+          if (!Expression::CheckNeeded(a->getVariable(), value) ||
               m_accessList.isSubLast(a)) {
             a->setReplacement(value);
             m_replaced++;
@@ -992,7 +992,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                 if (value->getContext() & Expression::RefValue) {
                   break;
                 }
-                if (!Expression::CheckNeeded(m_arp, a->getVariable(), value) ||
+                if (!Expression::CheckNeeded(a->getVariable(), value) ||
                     m_accessList.isSubLast(a)) {
                   rep->setReplacement(value);
                   m_replaced++;
@@ -1691,7 +1691,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
               sym->setUsed();
             }
           } else {
-            Expression::CheckNeeded(m_arp, var, val);
+            Expression::CheckNeeded(var, val);
           }
         }
       }
@@ -1812,7 +1812,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
   return kidCost;
 }
 
-void AliasManager::gatherInfo(AnalysisResultPtr ar, MethodStatementPtr m) {
+void AliasManager::gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m) {
   m_arp = ar;
   FunctionScopeRawPtr func = m->getFunctionScope();
   m_scope = func;
@@ -1960,7 +1960,7 @@ void AliasManager::doFinal(MethodStatementPtr m) {
   }
 }
 
-int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
+int AliasManager::optimize(AnalysisResultConstPtr ar, MethodStatementPtr m) {
   gatherInfo(ar, m);
 
   if (Option::LocalCopyProp || Option::EliminateDeadCode) {
@@ -1982,7 +1982,7 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
   return m_replaced ? -1 : m_changes ? 1 : 0;
 }
 
-void AliasManager::finalSetup(AnalysisResultPtr ar, MethodStatementPtr m) {
+void AliasManager::finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m) {
   static int rows[] =
     { DataFlow::Available, DataFlow::AvailIn, DataFlow::AvailOut };
 

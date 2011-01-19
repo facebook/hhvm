@@ -31,8 +31,8 @@ public:
                     ExpressionPtr exp, int op, bool front);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultPtr ar);
-  ExpressionPtr postOptimize(AnalysisResultPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
   virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
   virtual int getLocalEffects() const;
   virtual bool isTemporary() const;
@@ -47,7 +47,7 @@ public:
   bool getFront() const { return m_front; }
 
   virtual bool canonCompare(ExpressionPtr e) const;
-  virtual ExpressionPtr unneededHelper(AnalysisResultPtr ar);
+  virtual ExpressionPtr unneededHelper();
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                       int state);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,

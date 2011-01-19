@@ -121,7 +121,7 @@ void StaticStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr StaticStatement::preOptimize(AnalysisResultPtr ar) {
+StatementPtr StaticStatement::preOptimize(AnalysisResultConstPtr ar) {
   BlockScopePtr scope = getScope();
   for (int i = 0; i < m_exp->getCount(); i++) {
     ExpressionPtr exp = (*m_exp)[i];

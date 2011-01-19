@@ -89,7 +89,7 @@ public:
    * have CPP implementation.
    */
   bool hasImpl(AnalysisResultPtr ar) const;
-  ExpressionPtr getEffectiveImpl(AnalysisResultPtr ar) const;
+  ExpressionPtr getEffectiveImpl(AnalysisResultConstPtr ar) const;
 
   /**
    * Parser functions. Parser only deals with a FileScope object, and these
@@ -154,7 +154,7 @@ public:
   void outputFileCPP(AnalysisResultPtr ar, CodeGenerator &cg);
   bool load();
 
-  std::string outputFilebase();
+  std::string outputFilebase() const;
 
   void addPseudoMainVariable(const std::string &name) {
     m_pseudoMainVariables.insert(name);

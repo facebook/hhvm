@@ -146,9 +146,9 @@ public:
    */
   virtual int getKidCount() const = 0;
 
-  void dump(int spc, AnalysisResultPtr ar);
-  void dumpNode(int spc, AnalysisResultPtr ar);
-  static void dump(int spc, AnalysisResultPtr ar, bool functionOnly,
+  void dump(int spc, AnalysisResultConstPtr ar);
+  void dumpNode(int spc, AnalysisResultConstPtr ar);
+  static void dump(int spc, AnalysisResultConstPtr ar, bool functionOnly,
                    const AstWalkerStateVec &start,
                    ConstructPtr endBefore, ConstructPtr endAfter);
 
@@ -166,18 +166,19 @@ public:
   /**
    * Get canonicalized PHP source code for this construct.
    */
-  std::string getText(bool useCache = false, bool translate = false,
+  std::string getText(bool useCache, bool translate = false,
                       AnalysisResultPtr ar = AnalysisResultPtr());
 
+  std::string getText() { return getText(false); }
   static void recomputeEffects() { s_effectsTag++; }
 
   /**
    * Write where this construct was in PHP files.
    */
   void printSource(CodeGenerator &cg);
-  ExpressionPtr makeConstant(AnalysisResultPtr ar,
+  ExpressionPtr makeConstant(AnalysisResultConstPtr ar,
                              const std::string &value) const;
-  ExpressionPtr makeScalarExpression(AnalysisResultPtr ar,
+  ExpressionPtr makeScalarExpression(AnalysisResultConstPtr ar,
                                      const Variant &value) const;
 private:
   std::string m_text;

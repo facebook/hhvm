@@ -99,7 +99,7 @@ bool StatementList::hasImpl() const {
   return false;
 }
 
-ExpressionPtr StatementList::getEffectiveImpl(AnalysisResultPtr ar) const {
+ExpressionPtr StatementList::getEffectiveImpl(AnalysisResultConstPtr ar) const {
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     StatementPtr s = m_stmts[i];
     if (s->is(KindOfReturnStatement)) {
@@ -161,7 +161,7 @@ void StatementList::analyzeProgramImpl(AnalysisResultPtr ar) {
   }
 }
 
-bool StatementList::mergeConcatAssign(AnalysisResultPtr ar) {
+bool StatementList::mergeConcatAssign() {
   if (Option::LocalCopyProp) {
     return false;
   } else {
@@ -303,7 +303,7 @@ void StatementList::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr StatementList::preOptimize(AnalysisResultPtr ar) {
+StatementPtr StatementList::preOptimize(AnalysisResultConstPtr ar) {
   bool del = false;
   bool changed = false;
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
@@ -360,12 +360,12 @@ StatementPtr StatementList::preOptimize(AnalysisResultPtr ar) {
     }
   }
 
-  if (mergeConcatAssign(ar)) changed = true;
+  if (mergeConcatAssign()) changed = true;
   return changed ? static_pointer_cast<Statement>(shared_from_this())
                  : StatementPtr();
 }
 
-StatementPtr StatementList::postOptimize(AnalysisResultPtr ar) {
+StatementPtr StatementList::postOptimize(AnalysisResultConstPtr ar) {
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     StatementPtr &s = m_stmts[i];
     if (s->is(KindOfExpStatement) && !s->hasEffect()) {

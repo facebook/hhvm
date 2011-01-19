@@ -29,7 +29,7 @@ public:
   BreakStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultPtr ar);
+  StatementPtr preOptimize(AnalysisResultConstPtr ar);
   int64 getDepth();
 protected:
   const char *m_name;

@@ -121,9 +121,9 @@ public:
   /**
    * Returns topmost parent class that has the method.
    */
-  ClassScopePtr getRootParent(AnalysisResultPtr ar,
+  ClassScopePtr getRootParent(AnalysisResultConstPtr ar,
                               const std::string &methodName = "");
-  void getRootParents(AnalysisResultPtr ar, const std::string &methodName,
+  void getRootParents(AnalysisResultConstPtr ar, const std::string &methodName,
                       ClassScopePtrVec &roots, ClassScopePtr curClass);
 
   /**
@@ -137,12 +137,12 @@ public:
   /**
    * Whether this class name was declared twice or more.
    */
-  void setRedeclaring(AnalysisResultPtr ar, int redecId);
+  void setRedeclaring(AnalysisResultConstPtr ar, int redecId);
   bool isRedeclaring() const { return m_redeclaring >= 0;}
   int getRedeclaringId() { return m_redeclaring; }
 
-  void setStaticDynamic(AnalysisResultPtr ar);
-  void setDynamic(AnalysisResultPtr ar, const std::string &name);
+  void setStaticDynamic(AnalysisResultConstPtr ar);
+  void setDynamic(AnalysisResultConstPtr ar, const std::string &name);
 
   void addReferer(BlockScopePtr ref, int useKinds);
 
@@ -196,7 +196,7 @@ public:
    * may be redeclared or may have private methods that need to check class
    * context.
    */
-  bool needsInvokeParent(AnalysisResultPtr ar, bool considerSelf = true);
+  bool needsInvokeParent(AnalysisResultConstPtr ar, bool considerSelf = true);
 
   /*
     void collectProperties(AnalysisResultPtr ar,
@@ -207,22 +207,21 @@ public:
   /**
    * Testing whether this class derives from another.
    */
-  bool derivesDirectlyFrom(AnalysisResultPtr ar,
-                           const std::string &base) const;
-  bool derivesFrom(AnalysisResultPtr ar, const std::string &base,
+  bool derivesDirectlyFrom(const std::string &base) const;
+  bool derivesFrom(AnalysisResultConstPtr ar, const std::string &base,
                    bool strict, bool def) const;
 
  /**
   * Find a common parent of two classes; returns "" if there is no such.
   */
-  static std::string findCommonParent(AnalysisResultPtr ar,
+  static std::string findCommonParent(AnalysisResultConstPtr ar,
                                       const std::string cn1,
                                       const std::string cn2);
 
   /**
    * Look up function by name.
    */
-  FunctionScopePtr findFunction(AnalysisResultPtr ar,
+  FunctionScopePtr findFunction(AnalysisResultConstPtr ar,
                                 const std::string &name,
                                 bool recursive,
                                 bool exclIntfBase = false);
@@ -230,15 +229,15 @@ public:
   /**
    * Look up constructor, both __construct and class-name constructor.
    */
-  FunctionScopePtr findConstructor(AnalysisResultPtr ar,
+  FunctionScopePtr findConstructor(AnalysisResultConstPtr ar,
                                    bool recursive);
 
   Symbol *findProperty(ClassScopePtr &cls, const std::string &name,
-                       AnalysisResultPtr ar, ConstructPtr construct);
+                       AnalysisResultConstPtr ar, ConstructPtr construct);
   TypePtr checkProperty(Symbol *sym, TypePtr type,
-                        bool coerce, AnalysisResultPtr ar);
+                        bool coerce, AnalysisResultConstPtr ar);
   TypePtr checkConst(const std::string &name, TypePtr type,
-                     bool coerce, AnalysisResultPtr ar,
+                     bool coerce, AnalysisResultConstPtr ar,
                      ConstructPtr construct,
                      const std::vector<std::string> &bases,
                      BlockScope *&defScope);
@@ -246,7 +245,7 @@ public:
   /**
    * Collect parent class names.
    */
-  void getAllParents(AnalysisResultPtr ar,
+  void getAllParents(AnalysisResultConstPtr ar,
                      std::vector<std::string> &names) {
     if (m_stmt) {
       if (isInterface()) {
@@ -261,7 +260,7 @@ public:
 
   std::vector<std::string> &getBases() { return m_bases;}
 
-  ClassScopePtr getParentScope(AnalysisResultPtr ar);
+  ClassScopePtr getParentScope(AnalysisResultConstPtr ar);
 
   /**
    * Output class meta info for g_class_map.
@@ -327,9 +326,9 @@ public:
   void inheritedMagicMethods(ClassScopePtr super);
   void derivedMagicMethods(ClassScopePtr super);
   /* true if it might, false if it doesnt */
-  bool implementsArrayAccess(AnalysisResultPtr ar);
+  bool implementsArrayAccess();
   /* true if it might, false if it doesnt */
-  bool implementsAccessor(AnalysisResultPtr ar, int prop);
+  bool implementsAccessor(int prop);
 
   void clearBases() {
     m_bases.clear();

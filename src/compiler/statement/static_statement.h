@@ -31,7 +31,7 @@ public:
   StaticStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultPtr ar);
+  StatementPtr preOptimize(AnalysisResultConstPtr ar);
 
 private:
   ExpressionListPtr m_exp;

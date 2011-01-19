@@ -199,7 +199,7 @@ void IncludeExpression::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-void IncludeExpression::analyzeInclude(AnalysisResultPtr ar,
+bool IncludeExpression::analyzeInclude(AnalysisResultConstPtr ar,
                                        const std::string &include) {
   ConstructPtr self = shared_from_this();
   FileScopePtr file = ar->findFileScope(include);
@@ -207,14 +207,13 @@ void IncludeExpression::analyzeInclude(AnalysisResultPtr ar,
     if (!include.empty() && include.find(' ') == string::npos) {
       Compiler::Error(Compiler::PHPIncludeFileNotFound, self);
     }
-    return;
+    return false;
   }
   FunctionScopePtr func = getFunctionScope();
-  getFileScope()->addIncludeDependency(ar, m_include,
-                                       func && func->isInlined());
   if (func && file->getPseudoMain()) {
     file->getPseudoMain()->addUse(func, BlockScope::UseKindInclude);
   }
+  return true;
 }
 
 void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
@@ -223,7 +222,11 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
       ar->parseOnDemand(m_include);
     } else if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
                ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-      analyzeInclude(ar, m_include);
+      if (analyzeInclude(ar, m_include)) {
+        FunctionScopePtr func = getFunctionScope();
+        getFileScope()->addIncludeDependency(ar, m_include,
+                                             func && func->isInlined());
+      }
     }
   }
   if (!getScope()->inPseudoMain() && !m_privateScope) {
@@ -235,7 +238,7 @@ void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
   UnaryOpExpression::analyzeProgram(ar);
 }
 
-ExpressionPtr IncludeExpression::preOptimize(AnalysisResultPtr ar) {
+ExpressionPtr IncludeExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
     if (m_include.empty()) {
       m_include = CheckInclude(shared_from_this(), m_exp, m_documentRoot);
@@ -249,7 +252,7 @@ ExpressionPtr IncludeExpression::preOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr IncludeExpression::postOptimize(AnalysisResultPtr ar) {
+ExpressionPtr IncludeExpression::postOptimize(AnalysisResultConstPtr ar) {
   if (!m_include.empty()) {
     if (!m_depsSet) {
       analyzeInclude(ar, m_include);

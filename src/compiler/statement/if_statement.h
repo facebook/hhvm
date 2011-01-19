@@ -30,8 +30,8 @@ public:
   IfStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, StatementListPtr stmts);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultPtr ar);
-  StatementPtr postOptimize(AnalysisResultPtr ar);
+  StatementPtr preOptimize(AnalysisResultConstPtr ar);
+  StatementPtr postOptimize(AnalysisResultConstPtr ar);
   virtual bool hasDecl() const;
   virtual bool hasRetExp() const;
   virtual int getRecursiveCount() const;

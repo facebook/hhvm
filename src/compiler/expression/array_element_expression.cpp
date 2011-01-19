@@ -198,7 +198,7 @@ void ArrayElementExpression::clearEffect(Effect effect) {
   }
 }
 
-ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultPtr ar) {
+ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (!(m_context & (RefValue|LValue|UnsetContext|OprLValue|
                      InvokeArgument|DeepReference|DeepOprLValue))) {
     if (m_offset && m_variable->isScalar() && m_offset->isScalar()) {

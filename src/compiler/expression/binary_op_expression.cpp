@@ -128,12 +128,12 @@ bool BinaryOpExpression::isShortCircuitOperator() const {
   return false;
 }
 
-ExpressionPtr BinaryOpExpression::unneededHelper(AnalysisResultPtr ar) {
+ExpressionPtr BinaryOpExpression::unneededHelper() {
   if (!isShortCircuitOperator() || !m_exp2->getContainedEffects()) {
-    return Expression::unneededHelper(ar);
+    return Expression::unneededHelper();
   }
 
-  m_exp2 = m_exp2->unneeded(ar);
+  m_exp2 = m_exp2->unneeded();
   m_exp2->setExpectedType(Type::Boolean);
   return static_pointer_cast<Expression>(shared_from_this());
 }
@@ -171,7 +171,7 @@ void BinaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_exp2->analyzeProgram(ar);
 }
 
-ExpressionPtr BinaryOpExpression::simplifyLogical(AnalysisResultPtr ar) {
+ExpressionPtr BinaryOpExpression::simplifyLogical(AnalysisResultConstPtr ar) {
   if (m_exp1->is(Expression::KindOfConstantExpression)) {
     ConstantExpressionPtr con =
       dynamic_pointer_cast<ConstantExpression>(m_exp1);
@@ -265,7 +265,7 @@ bool BinaryOpExpression::canonCompare(ExpressionPtr e) const {
     getOp() == static_cast<BinaryOpExpression*>(e.get())->getOp();
 }
 
-ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultPtr ar) {
+ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (!m_exp2->isScalar()) {
     if (!m_exp1->isScalar()) return ExpressionPtr();
   }
@@ -282,7 +282,8 @@ ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultPtr ar) {
   return optExp;
 }
 
-ExpressionPtr BinaryOpExpression::simplifyArithmetic(AnalysisResultPtr ar) {
+ExpressionPtr BinaryOpExpression::simplifyArithmetic(
+  AnalysisResultConstPtr ar) {
   Variant v1;
   Variant v2;
   if (m_exp1->getScalarValue(v1)) {
@@ -344,7 +345,7 @@ ExpressionPtr BinaryOpExpression::simplifyArithmetic(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr BinaryOpExpression::postOptimize(AnalysisResultPtr ar) {
+ExpressionPtr BinaryOpExpression::postOptimize(AnalysisResultConstPtr ar) {
   ExpressionPtr optExp = simplifyArithmetic(ar);
   if (!optExp) {
     if (isShortCircuitOperator()) optExp = simplifyLogical(ar);
@@ -353,7 +354,7 @@ ExpressionPtr BinaryOpExpression::postOptimize(AnalysisResultPtr ar) {
   return optExp;
 }
 
-static ExpressionPtr makeIsNull(AnalysisResultPtr ar,
+static ExpressionPtr makeIsNull(AnalysisResultConstPtr ar,
                                 LocationPtr loc, ExpressionPtr exp,
                                 bool invert) {
   /* Replace "$x === null" with an is_null call; this requires slightly
@@ -383,7 +384,7 @@ static ExpressionPtr makeIsNull(AnalysisResultPtr ar,
   return result;
 }
 
-ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultPtr ar) {
+ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
   ExpressionPtr optExp;
   Variant v1;
   Variant v2;
@@ -504,7 +505,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr
-BinaryOpExpression::foldConstRightAssoc(AnalysisResultPtr ar) {
+BinaryOpExpression::foldConstRightAssoc(AnalysisResultConstPtr ar) {
   ExpressionPtr optExp1;
   switch (m_op) {
   case '.':

@@ -34,7 +34,7 @@ public:
                      const std::string &docComment, StatementListPtr stmt);
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  StatementPtr preOptimize(AnalysisResultPtr ar);
+  StatementPtr preOptimize(AnalysisResultConstPtr ar);
   virtual bool hasDecl() const { return true; }
   virtual bool hasImpl() const;
   virtual int getRecursiveCount() const;
@@ -43,7 +43,7 @@ public:
 
   virtual std::string getName() const;
   const std::string &getOriginalName() const { return m_originalName;}
-  virtual void getAllParents(AnalysisResultPtr ar,
+  virtual void getAllParents(AnalysisResultConstPtr ar,
                              std::vector<std::string> &names);
   ClassScopeRawPtr getClassScope() const {
     BlockScopeRawPtr b = getScope();
@@ -56,9 +56,9 @@ protected:
   ExpressionListPtr m_base;
   std::string m_docComment;
   StatementListPtr m_stmt;
-  void checkVolatile(AnalysisResultPtr ar);
+  void checkVolatile(AnalysisResultConstPtr ar);
 private:
-  bool checkVolatileBases(AnalysisResultPtr ar);
+  bool checkVolatileBases(AnalysisResultConstPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

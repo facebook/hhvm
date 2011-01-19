@@ -83,7 +83,7 @@ void ListAssignment::analyzeProgram(AnalysisResultPtr ar) {
         ExpressionPtr exp = (*m_variables)[i];
         if (exp) {
           if (!exp->is(Expression::KindOfListAssignment)) {
-            CheckNeeded(ar, exp, ExpressionPtr());
+            CheckNeeded(exp, ExpressionPtr());
           }
         }
       }

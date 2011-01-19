@@ -34,8 +34,8 @@ public:
                     ExpressionPtr exp, int op);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultPtr ar);
-  ExpressionPtr postOptimize(AnalysisResultPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
 
   // implementing IParseHandler
   virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
@@ -58,7 +58,7 @@ private:
   bool m_depsSet;
   std::string m_include;
 
-  void analyzeInclude(AnalysisResultPtr ar, const std::string &include);
+  bool analyzeInclude(AnalysisResultConstPtr ar, const std::string &include);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

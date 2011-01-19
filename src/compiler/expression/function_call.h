@@ -43,8 +43,8 @@ public:
   virtual void setNthKid(int n, ConstructPtr cp);
   virtual int getKidCount() const;
 
-  virtual ExpressionPtr preOptimize(AnalysisResultPtr ar);
-  virtual ExpressionPtr postOptimize(AnalysisResultPtr ar);
+  virtual ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  virtual ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
 
   void setNoInline() { m_noInline = true; }
   void setAllowVoidReturn() { m_allowVoidReturn = true;}
@@ -99,7 +99,7 @@ protected:
                                bool coerce, FunctionScopePtr func,
                                bool arrayParams);
 
-  ExpressionPtr inliner(AnalysisResultPtr ar,
+  ExpressionPtr inliner(AnalysisResultConstPtr ar,
                         ExpressionPtr obj, std::string localThis);
 };
 

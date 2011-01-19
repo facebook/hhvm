@@ -31,8 +31,8 @@ public:
                        bool ref);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultPtr ar);
-  ExpressionPtr postOptimize(AnalysisResultPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
 
   // implementing IParseHandler
   virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
@@ -55,7 +55,7 @@ public:
                                 const char *rvalStr, bool ref);
 
 private:
-  ExpressionPtr optimize(AnalysisResultPtr ar);
+  ExpressionPtr optimize(AnalysisResultConstPtr ar);
 
   ExpressionPtr m_variable;
   ExpressionPtr m_value;

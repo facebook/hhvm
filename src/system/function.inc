@@ -33,7 +33,7 @@
 #elif EXT_TYPE == 3
 
 #elif EXT_TYPE == 4
-extern ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg, AnalysisResultPtr ar, SimpleFunctionCallPtr call, int mode);
-extern ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg, AnalysisResultPtr ar, SimpleFunctionCallPtr call, int mode);
+extern ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg, AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, int mode);
+extern ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg, AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, int mode);
 
 #endif

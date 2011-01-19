@@ -92,12 +92,12 @@ int Construct::getContainedEffects() const {
   return m_containedEffects;
 }
 
-ExpressionPtr Construct::makeConstant(AnalysisResultPtr ar,
+ExpressionPtr Construct::makeConstant(AnalysisResultConstPtr ar,
                                       const std::string &value) const {
   return Expression::MakeConstant(ar, getScope(), getLocation(), value);
 }
 
-ExpressionPtr Construct::makeScalarExpression(AnalysisResultPtr ar,
+ExpressionPtr Construct::makeScalarExpression(AnalysisResultConstPtr ar,
                                                const Variant &value) const {
   return Expression::MakeScalarExpression(ar, getScope(), getLocation(), value);
 }
@@ -151,7 +151,7 @@ void Construct::printSource(CodeGenerator &cg) {
   }
 }
 
-void Construct::dumpNode(int spc, AnalysisResultPtr ar) {
+void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
   int nkid = getKidCount();
   std::string name;
   int type = 0;
@@ -466,7 +466,8 @@ void Construct::dumpNode(int spc, AnalysisResultPtr ar) {
 
 class ConstructDumper : public FunctionWalker {
 public:
-  ConstructDumper(int spc, AnalysisResultPtr ar, bool functionOnly = false) :
+  ConstructDumper(int spc, AnalysisResultConstPtr ar,
+                  bool functionOnly = false) :
       m_spc(spc), m_ar(ar), m_functionOnly(functionOnly), m_showEnds(true) {}
 
   void walk(AstWalkerStateVec state,
@@ -496,17 +497,17 @@ public:
   }
 private:
   int m_spc;
-  AnalysisResultPtr m_ar;
+  AnalysisResultConstPtr m_ar;
   bool m_functionOnly;
   bool m_showEnds;
 };
 
-void Construct::dump(int spc, AnalysisResultPtr ar) {
+void Construct::dump(int spc, AnalysisResultConstPtr ar) {
   ConstructDumper cd(spc, ar);
   cd.walk(ConstructRawPtr(this), ConstructRawPtr(), ConstructRawPtr());
 }
 
-void Construct::dump(int spc, AnalysisResultPtr ar, bool functionOnly,
+void Construct::dump(int spc, AnalysisResultConstPtr ar, bool functionOnly,
                      const AstWalkerStateVec &state,
                      ConstructPtr endBefore, ConstructPtr endAfter) {
   ConstructDumper cd(spc, ar, functionOnly);

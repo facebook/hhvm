@@ -83,7 +83,7 @@ void EncapsListExpression::stripConcat() {
   m_exps->stripConcat();
 }
 
-ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultPtr ar) {
+ExpressionPtr EncapsListExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (m_type != '`' && m_type != '\'' && m_exps) {
     int count = m_exps->getCount();
     // turn into cascaded concat

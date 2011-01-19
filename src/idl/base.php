@@ -453,7 +453,7 @@ function generateFuncCPPInclude($func, $f, $newline = true) {
 function generateFuncOptDecls($func, $f) {
   if ($func['opt']) {
     fprintf($f, "extern ExpressionPtr ".
-            "%s(CodeGenerator *cg, AnalysisResultPtr ar, ".
+            "%s(CodeGenerator *cg, AnalysisResultConstPtr ar, ".
             "SimpleFunctionCallPtr call, int mode);\n",
             $func['opt']);
   }

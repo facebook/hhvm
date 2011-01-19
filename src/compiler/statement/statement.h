@@ -111,14 +111,14 @@ public:
  /**
    * Called before type inference.
    */
-  virtual StatementPtr preOptimize(AnalysisResultPtr ar) {
+  virtual StatementPtr preOptimize(AnalysisResultConstPtr ar) {
     return StatementPtr();
   }
 
   /**
    * Called after type inference.
    */
-  virtual StatementPtr postOptimize(AnalysisResultPtr ar) {
+  virtual StatementPtr postOptimize(AnalysisResultConstPtr ar) {
     return StatementPtr();
   }
 

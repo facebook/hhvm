@@ -97,7 +97,7 @@ void ClassConstant::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ClassConstant::preOptimize(AnalysisResultPtr ar) {
+StatementPtr ClassConstant::preOptimize(AnalysisResultConstPtr ar) {
   for (int i = 0; i < m_exp->getCount(); i++) {
     AssignmentExpressionPtr assignment =
       dynamic_pointer_cast<AssignmentExpression>((*m_exp)[i]);

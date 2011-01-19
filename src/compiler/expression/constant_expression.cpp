@@ -107,7 +107,7 @@ void ConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
     if (!m_dynamic) {
       ConstantTablePtr constants = ar->getConstants();
       if (!constants->getValue(m_name)) {
-        BlockScopePtr block = ar->findConstantDeclarer(m_name);
+        BlockScopeConstPtr block = ar->findConstantDeclarer(m_name);
         if (block) {
           Symbol *sym = block->getConstants()->getSymbol(m_name);
           assert(sym);
@@ -126,7 +126,7 @@ void ConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-ExpressionPtr ConstantExpression::preOptimize(AnalysisResultPtr ar) {
+ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
     return ExpressionPtr();
   }
@@ -136,7 +136,7 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultPtr ar) {
     bool system = true;
     if (!sym || !sym->getValue()) {
       system = false;
-      BlockScopePtr block = ar->findConstantDeclarer(m_name);
+      BlockScopeConstPtr block = ar->findConstantDeclarer(m_name);
       if (block) {
         sym = block->getConstants()->getSymbol(m_name);
         if (sym && sym->isDynamic()) {
@@ -195,7 +195,7 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     actualType = Type::Variant;
     m_valid = true;
   } else {
-    BlockScopePtr scope = ar->findConstantDeclarer(m_name);
+    BlockScopeConstPtr scope = ar->findConstantDeclarer(m_name);
     if (!scope) {
       scope = getFileScope();
       getFileScope()->declareConstant(ar, m_name);

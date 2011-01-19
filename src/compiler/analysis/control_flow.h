@@ -92,7 +92,7 @@ public:
   static ControlFlowGraph *buildControlFlow(MethodStatementPtr m);
   ~ControlFlowGraph();
 
-  void                  dump(AnalysisResultPtr ar);
+  void                  dump(AnalysisResultConstPtr ar);
   void                  allocateDataFlow(size_t width, int rows, int *rowIds);
   ControlBlock          *getDfBlock(int dfn) const {
     return m_depthFirstBlocks.at(dfn - 1);
@@ -152,7 +152,7 @@ public:
   AstWalkerStateVec     getStartState() const { return m_start; }
   ConstructRawPtr       getEndBefore() const { return m_endBefore; }
   ConstructRawPtr       getEndAfter() const { return m_endAfter; }
-  void                  dump(int spc, AnalysisResultPtr ar,
+  void                  dump(int spc, AnalysisResultConstPtr ar,
                              const ControlFlowGraph *graph);
 
   graph_traits::in_edge_iterator ibegin() const { return m_preds.begin(); }

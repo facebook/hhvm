@@ -41,7 +41,7 @@ ConstantTable::ConstantTable(BlockScope &blockScope)
 ///////////////////////////////////////////////////////////////////////////////
 
 TypePtr ConstantTable::add(const std::string &name, TypePtr type,
-                           ExpressionPtr exp, AnalysisResultPtr ar,
+                           ExpressionPtr exp, AnalysisResultConstPtr ar,
                            ConstructPtr construct) {
 
   if (name == "true" || name == "false") {
@@ -80,7 +80,8 @@ TypePtr ConstantTable::add(const std::string &name, TypePtr type,
   return type;
 }
 
-void ConstantTable::setDynamic(AnalysisResultPtr ar, const std::string &name) {
+void ConstantTable::setDynamic(AnalysisResultConstPtr ar,
+                               const std::string &name) {
   Symbol *sym = genSymbol(name, true);
   if (!sym->isDynamic()) {
     sym->setDynamic();
@@ -93,12 +94,12 @@ void ConstantTable::setDynamic(AnalysisResultPtr ar, const std::string &name) {
   }
 }
 
-void ConstantTable::setValue(AnalysisResultPtr ar, const std::string &name,
+void ConstantTable::setValue(AnalysisResultConstPtr ar, const std::string &name,
                              ExpressionPtr value) {
   genSymbol(name, true)->setValue(value);
 }
 
-bool ConstantTable::isRecursivelyDeclared(AnalysisResultPtr ar,
+bool ConstantTable::isRecursivelyDeclared(AnalysisResultConstPtr ar,
                                           const std::string &name) {
   if (Symbol *sym = getSymbol(name)) {
     if (sym->valueSet()) return true;
@@ -110,7 +111,7 @@ bool ConstantTable::isRecursivelyDeclared(AnalysisResultPtr ar,
   return false;
 }
 
-ConstructPtr ConstantTable::getValueRecur(AnalysisResultPtr ar,
+ConstructPtr ConstantTable::getValueRecur(AnalysisResultConstPtr ar,
                                           const std::string &name,
                                           ClassScopePtr &defClass) {
   if (Symbol *sym = getSymbol(name)) {
@@ -124,7 +125,7 @@ ConstructPtr ConstantTable::getValueRecur(AnalysisResultPtr ar,
   return ConstructPtr();
 }
 
-ConstructPtr ConstantTable::getDeclarationRecur(AnalysisResultPtr ar,
+ConstructPtr ConstantTable::getDeclarationRecur(AnalysisResultConstPtr ar,
                                                 const std::string &name,
                                                 ClassScopePtr &defClass) {
   if (Symbol *sym = getSymbol(name)) {
@@ -139,7 +140,7 @@ ConstructPtr ConstantTable::getDeclarationRecur(AnalysisResultPtr ar,
 }
 
 TypePtr ConstantTable::checkBases(const std::string &name, TypePtr type,
-                                  bool coerce, AnalysisResultPtr ar,
+                                  bool coerce, AnalysisResultConstPtr ar,
                                   ConstructPtr construct,
                                   const std::vector<std::string> &bases,
                                   BlockScope *&defScope) {
@@ -163,7 +164,7 @@ TypePtr ConstantTable::checkBases(const std::string &name, TypePtr type,
 }
 
 TypePtr ConstantTable::check(const std::string &name, TypePtr type,
-                             bool coerce, AnalysisResultPtr ar,
+                             bool coerce, AnalysisResultConstPtr ar,
                              ConstructPtr construct,
                              const std::vector<std::string> &bases,
                              BlockScope *&defScope) {
@@ -209,7 +210,7 @@ TypePtr ConstantTable::check(const std::string &name, TypePtr type,
   return actualType;
 }
 
-ClassScopePtr ConstantTable::findParent(AnalysisResultPtr ar,
+ClassScopePtr ConstantTable::findParent(AnalysisResultConstPtr ar,
                                         const std::string &name) {
   for (ClassScopePtr parent = m_blockScope.getParentScope(ar);
        parent && !parent->isRedeclaring();

@@ -200,7 +200,7 @@ void SimpleFunctionCall::addDependencies(AnalysisResultPtr ar) {
   }
 }
 
-void SimpleFunctionCall::setupScopes(AnalysisResultPtr ar) {
+void SimpleFunctionCall::setupScopes(AnalysisResultConstPtr ar) {
   FunctionScopePtr func;
   if (!m_class && m_className.empty()) {
     if (!m_dynamicInvoke) {
@@ -235,11 +235,7 @@ void SimpleFunctionCall::setupScopes(AnalysisResultPtr ar) {
   }
 }
 
-void SimpleFunctionCall::addLateDependencies(AnalysisResultPtr ar) {
-  AnalysisResult::Phase phase = ar->getPhase();
-  ar->setPhase(AnalysisResult::AnalyzeAll);
-  addDependencies(ar);
-  ar->setPhase(phase);
+void SimpleFunctionCall::addLateDependencies(AnalysisResultConstPtr ar) {
   m_funcScope.reset();
   m_classScope.reset();
   setupScopes(ar);
@@ -262,7 +258,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   FunctionCall::analyzeProgram(ar);
   if (m_class) {
     setDynamicByIdentifier(ar, m_name);
-  } else {
+  } else if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
     addDependencies(ar);
   }
 
@@ -298,7 +294,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
           // handling define("CONSTANT", ...);
           ExpressionPtr value = (*m_params)[1];
-          BlockScopePtr block = ar->findConstantDeclarer(varName);
+          BlockScopeConstPtr block = ar->findConstantDeclarer(varName);
           ConstantTablePtr constants = block->getConstants();
           if (constants != ar->getConstants()) {
             constants->add(varName, Type::Some, value, ar, self);
@@ -330,7 +326,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
             ConstantTablePtr constants = ar->getConstants();
             if (!constants->isPresent(symbol)) {
               // user constant
-              BlockScopePtr block = ar->findConstantDeclarer(symbol);
+              BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
               if (block) { // found the constant
                 constants = block->getConstants();
                 // set to be dynamic
@@ -439,7 +435,7 @@ void SimpleFunctionCall::updateVtFlags() {
   }
 }
 
-bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultPtr ar) {
+bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
   if (m_class || !m_className.empty()) return false;
   if (m_type == DefineFunction && m_params &&
       unsigned(m_params->getCount() - 2) <= 1u) {
@@ -457,7 +453,7 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultPtr ar) {
   }
 }
 
-ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
+ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
   if (m_class || !m_funcScope ||
       (!m_className.empty() && (!m_classScope || !isPresent()))) {
     return ExpressionPtr();
@@ -652,7 +648,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultPtr ar) {
   return inliner(ar, ExpressionPtr(), m_localThis);
 }
 
-ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
+ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
   if (m_class) updateClassName();
 
   if (ar->getPhase() < AnalysisResult::FirstPreOptimize) {
@@ -689,7 +685,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
             break;
           }
           // user constant
-          BlockScopePtr block = ar->findConstantDeclarer(symbol);
+          BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
           // not found (i.e., undefined)
           if (!block) break;
           constants = block->getConstants();
@@ -713,7 +709,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
             return CONSTANT("true");
           }
           // user constant
-          BlockScopePtr block = ar->findConstantDeclarer(symbol);
+          BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
           // not found (i.e., undefined)
           if (!block) {
             if (symbol.find("::") == std::string::npos) {
@@ -795,7 +791,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr SimpleFunctionCall::postOptimize(AnalysisResultPtr ar) {
+ExpressionPtr SimpleFunctionCall::postOptimize(AnalysisResultConstPtr ar) {
   if (!Option::KeepStatementsWithNoEffect && isDefineWithoutImpl(ar)) {
     Construct::recomputeEffects();
     return CONSTANT("true");
@@ -878,7 +874,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         if (!varName.empty()) {
           ExpressionPtr value = (*m_params)[1];
           TypePtr varType = value->inferAndCheck(ar, Type::Some, false);
-          BlockScopePtr block = ar->findConstantDeclarer(varName);
+          BlockScopeConstPtr block = ar->findConstantDeclarer(varName);
           if (!block) {
             getFileScope()->declareConstant(ar, varName);
             block = ar->findConstantDeclarer(varName);
@@ -1862,7 +1858,7 @@ bool SimpleFunctionCall::canInvokeFewArgs() {
 }
 
 SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
-  AnalysisResultPtr ar, SimpleFunctionCallPtr call, bool testOnly,
+  AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, bool testOnly,
   int firstParam, bool &error) {
   error = false;
   ExpressionListPtr params = call->getParams();
@@ -2002,7 +1998,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
 namespace HPHP {
 
 ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg,
-                                      AnalysisResultPtr ar,
+                                      AnalysisResultConstPtr ar,
                                       SimpleFunctionCallPtr call, int mode) {
   bool error = false;
   if (!cg && !mode && !ar->isSystem()) {
@@ -2026,7 +2022,7 @@ ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg,
 }
 
 ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
-                                         AnalysisResultPtr ar,
+                                         AnalysisResultConstPtr ar,
                                          SimpleFunctionCallPtr call, int mode) {
   bool error = false;
   if (!cg && !mode && !ar->isSystem()) {
@@ -2062,7 +2058,7 @@ ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
 }
 
 ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg,
-                                   AnalysisResultPtr ar,
+                                   AnalysisResultConstPtr ar,
                                    SimpleFunctionCallPtr call, int mode) {
   if (!cg && !mode && !ar->isSystem()) {
     bool error = false;

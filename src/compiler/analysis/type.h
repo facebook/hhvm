@@ -114,37 +114,41 @@ public:
   /**
    * Whether a type can be used as another type.
    */
-  static bool IsLegalCast(AnalysisResultPtr ar, TypePtr from, TypePtr to);
+  static bool IsLegalCast(AnalysisResultConstPtr ar, TypePtr from, TypePtr to);
 
   /**
    * Find the intersection between two sets of types.
    */
-  static TypePtr Intersection(AnalysisResultPtr ar, TypePtr from, TypePtr to);
+  static TypePtr Intersection(AnalysisResultConstPtr ar,
+                              TypePtr from, TypePtr to);
 
   /**
    * Whether or not a cast is needed during code generation.
    */
-  static bool IsCastNeeded(AnalysisResultPtr ar, TypePtr from, TypePtr to);
+  static bool IsCastNeeded(AnalysisResultConstPtr ar, TypePtr from, TypePtr to);
 
   /**
    * When a variable's type is t1, and it's used as t2, do we need to
    * coerce variable's type? Normally, if t2 can be legally casted to t1,
    * this returns false.
    */
-  static bool IsCoercionNeeded(AnalysisResultPtr ar, TypePtr t1, TypePtr t2);
+  static bool IsCoercionNeeded(AnalysisResultConstPtr ar,
+                               TypePtr t1, TypePtr t2);
 
   /**
    * When a variable is assigned with two types, what type a variable
    * should be?
    */
-  static TypePtr Coerce(AnalysisResultPtr ar, TypePtr type1, TypePtr type2);
-  static TypePtr Union(AnalysisResultPtr ar, TypePtr type1, TypePtr type2);
+  static TypePtr Coerce(AnalysisResultConstPtr ar,
+                        TypePtr type1, TypePtr type2);
+  static TypePtr Union(AnalysisResultConstPtr ar, TypePtr type1, TypePtr type2);
 
   /**
    * When two types have been inferred for an expression, what type
    * should it be?
    */
-  static TypePtr Inferred(AnalysisResultPtr ar, TypePtr type1, TypePtr type2);
+  static TypePtr Inferred(AnalysisResultConstPtr ar,
+                          TypePtr type1, TypePtr type2);
 
   /**
    * Whether or not two types are the same.
@@ -182,20 +186,20 @@ public:
   const std::string &getName() const { return m_name;}
   static TypePtr combinedArithmeticType(TypePtr t1, TypePtr t2);
 
-  ClassScopePtr getClass(AnalysisResultPtr ar, BlockScopeRawPtr scope);
+  ClassScopePtr getClass(AnalysisResultConstPtr ar, BlockScopeRawPtr scope);
 
   /**
    * Generate type specifier in C++.
    */
-  std::string getCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar,
+  std::string getCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
                          BlockScopeRawPtr scope);
-  void outputCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar,
+  void outputCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
                      BlockScopeRawPtr scope);
 
   /**
    * Generate type conversion in C++.
    */
-  void outputCPPCast(CodeGenerator &cg, AnalysisResultPtr ar,
+  void outputCPPCast(CodeGenerator &cg, AnalysisResultConstPtr ar,
                      BlockScopeRawPtr scope);
 
   /**

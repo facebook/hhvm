@@ -130,15 +130,15 @@ void ExpStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr ExpStatement::preOptimize(AnalysisResultPtr ar) {
+StatementPtr ExpStatement::preOptimize(AnalysisResultConstPtr ar) {
   if (ar->getPhase() != AnalysisResult::AnalyzeInclude) {
-    m_exp = m_exp->unneeded(ar);
+    m_exp = m_exp->unneeded();
   }
   return StatementPtr();
 }
 
-StatementPtr ExpStatement::postOptimize(AnalysisResultPtr ar) {
-  m_exp = m_exp->unneeded(ar);
+StatementPtr ExpStatement::postOptimize(AnalysisResultConstPtr ar) {
+  m_exp = m_exp->unneeded();
   return StatementPtr();
 }
 

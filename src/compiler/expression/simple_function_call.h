@@ -34,11 +34,11 @@ public:
                      ExpressionPtr cls);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  ExpressionPtr preOptimize(AnalysisResultPtr ar);
-  ExpressionPtr postOptimize(AnalysisResultPtr ar);
+  ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
+  ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
   void deepCopy(SimpleFunctionCallPtr exp);
 
-  bool isDefineWithoutImpl(AnalysisResultPtr ar);
+  bool isDefineWithoutImpl(AnalysisResultConstPtr ar);
   void setValid() { m_valid = true; }
   void setNoPrefix() { m_noPrefix = true; }
   void setArrayParams() { m_arrayParams = true; }
@@ -53,13 +53,13 @@ public:
 
   // extensible analysis by defining a subclass to be RealSimpleFunctionCall
   virtual void onAnalyzeInclude(AnalysisResultPtr ar) {}
-  virtual ExpressionPtr onPreOptimize(AnalysisResultPtr ar) {
+  virtual ExpressionPtr onPreOptimize(AnalysisResultConstPtr ar) {
     return ExpressionPtr();
   }
   virtual void beforeCheck(AnalysisResultPtr ar) {}
 
   void addDependencies(AnalysisResultPtr ar);
-  void addLateDependencies(AnalysisResultPtr ar);
+  void addLateDependencies(AnalysisResultConstPtr ar);
   const std::string &getName() const { return m_name;}
   ExpressionListPtr getParams() const { return m_params; }
   void setSafeCall(int flag) { m_safe = flag; }
@@ -67,10 +67,10 @@ public:
   virtual ConstructPtr getNthKid(int n) const;
   virtual void setNthKid(int n, ConstructPtr cp);
   static SimpleFunctionCallPtr GetFunctionCallForCallUserFunc(
-    AnalysisResultPtr ar, SimpleFunctionCallPtr call, bool testOnly,
+    AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, bool testOnly,
     int firstParam, bool &error);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
-  void setupScopes(AnalysisResultPtr ar);
+  void setupScopes(AnalysisResultConstPtr ar);
   bool readsLocals() const;
   bool writesLocals() const;
   void updateVtFlags();
@@ -112,7 +112,7 @@ protected:
   // only used for redeclared functions
   bool canInvokeFewArgs();
   void outputCPPParamOrderControlled(CodeGenerator &cg, AnalysisResultPtr ar);
-  ExpressionPtr optimize(AnalysisResultPtr ar);
+  ExpressionPtr optimize(AnalysisResultConstPtr ar);
 private:
   int checkObjCall(AnalysisResultPtr ar);
   std::string getThisString(bool withArrow);

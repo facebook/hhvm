@@ -261,7 +261,7 @@ bool UnaryOpExpression::canonCompare(ExpressionPtr e) const {
     m_silencer == u->m_silencer;
 }
 
-ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
+ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   Variant value;
   Variant result;
 
@@ -303,7 +303,7 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultPtr ar) {
+ExpressionPtr UnaryOpExpression::postOptimize(AnalysisResultConstPtr ar) {
   if (m_op == T_PRINT && m_exp->is(KindOfEncapsListExpression) &&
       !m_exp->hasEffect()) {
     EncapsListExpressionPtr e = static_pointer_cast<EncapsListExpression>
@@ -427,14 +427,14 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   return rt;
 }
 
-ExpressionPtr UnaryOpExpression::unneededHelper(AnalysisResultPtr ar) {
+ExpressionPtr UnaryOpExpression::unneededHelper() {
   if ((m_op != '@' && m_op != T_ISSET && m_op != T_EMPTY) ||
       !m_exp->getContainedEffects()) {
-    return Expression::unneededHelper(ar);
+    return Expression::unneededHelper();
   }
 
   if (m_op == '@') {
-    m_exp = m_exp->unneeded(ar);
+    m_exp = m_exp->unneeded();
   }
 
   return static_pointer_cast<Expression>(shared_from_this());

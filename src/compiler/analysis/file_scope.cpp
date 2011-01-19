@@ -123,7 +123,7 @@ int FileScope::getGlobalAttribute() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultPtr ar) const {
+ExpressionPtr FileScope::getEffectiveImpl(AnalysisResultConstPtr ar) const {
   if (m_tree) return m_tree->getEffectiveImpl(ar);
   return ExpressionPtr();
 }
@@ -143,8 +143,7 @@ void FileScope::declareConstant(AnalysisResultPtr ar, const string &name) {
 void FileScope::addConstant(const string &name, TypePtr type,
                             ExpressionPtr value,
                             AnalysisResultPtr ar, ConstructPtr con) {
-  BlockScopePtr f = ar->findConstantDeclarer(name);
-  cout << "Add constant " << name << " in " << f->getName() << endl;
+  BlockScopeConstPtr f = ar->findConstantDeclarer(name);
   f->getConstants()->add(name, type, value, ar, con);
 }
 
@@ -223,7 +222,7 @@ FunctionScopePtr FileScope::createPseudoMain(AnalysisResultPtr ar) {
   return pseudoMain;
 }
 
-string FileScope::outputFilebase() {
+string FileScope::outputFilebase() const {
   string file = m_fileName;
   string out;
   if (file.size() > 4 && file.substr(file.length() - 4) == ".php") {
@@ -311,7 +310,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   string name;
   ClassScopePtr cls;
 
-  map<string, FileScopePtr> extraIncs;
+  map<string, FileScopeConstPtr> extraIncs;
   BOOST_FOREACH(name, m_usedClasses) {
     cls = ar->findClass(name, AnalysisResult::ClassName);
     if (cls && cls->isUserClass()) {
@@ -322,9 +321,9 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
     }
   }
   BOOST_FOREACH(name, m_usedConsts) {
-    BlockScopePtr block = ar->findConstantDeclarer(name);
+    BlockScopeConstPtr block = ar->findConstantDeclarer(name);
     if (block && block->is(BlockScope::FileScope)) {
-      FileScopePtr fs = dynamic_pointer_cast<FileScope>(block);
+      FileScopeConstPtr fs = dynamic_pointer_cast<const FileScope>(block);
       extraIncs[fs->getName()] = fs;
     }
   }
@@ -366,9 +365,9 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
 
   cg.namespaceEnd();
   // Includes must come after classes and constants
-  for (map<string, FileScopePtr>::const_iterator iter = extraIncs.begin();
+  for (map<string, FileScopeConstPtr>::const_iterator iter = extraIncs.begin();
        iter != extraIncs.end(); ++iter) {
-    FileScopePtr fs = iter->second;
+    FileScopeConstPtr fs = iter->second;
     if (fs != shared_from_this()) {
       cg_printInclude(fs->outputFilebase() + ".fw.h");
     }

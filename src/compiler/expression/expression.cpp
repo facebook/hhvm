@@ -138,7 +138,7 @@ void Expression::insertElement(ExpressionPtr exp, int index /* = 0 */) {
   ASSERT(false);
 }
 
-ExpressionPtr Expression::unneededHelper(AnalysisResultPtr ar) {
+ExpressionPtr Expression::unneededHelper() {
   ExpressionListPtr elist = ExpressionListPtr
     (new ExpressionList(getScope(), getLocation(),
                         Expression::KindOfExpressionList,
@@ -148,7 +148,7 @@ ExpressionPtr Expression::unneededHelper(AnalysisResultPtr ar) {
   for (int i=0, n = getKidCount(); i < n; i++) {
     ExpressionPtr kid = getNthExpr(i);
     if (kid && kid->getContainedEffects()) {
-      ExpressionPtr rep = kid->unneeded(ar);
+      ExpressionPtr rep = kid->unneeded();
       if (rep != kid) change = true;
       if (rep->is(Expression::KindOfExpressionList)) {
         for (int j=0, m = rep->getKidCount(); j < m; j++) {
@@ -173,7 +173,7 @@ ExpressionPtr Expression::unneededHelper(AnalysisResultPtr ar) {
   }
 }
 
-ExpressionPtr Expression::unneeded(AnalysisResultPtr ar) {
+ExpressionPtr Expression::unneeded() {
   if (getLocalEffects() || is(KindOfScalarExpression)) {
     return static_pointer_cast<Expression>(shared_from_this());
   }
@@ -185,7 +185,7 @@ ExpressionPtr Expression::unneeded(AnalysisResultPtr ar) {
                             T_LNUMBER, string("0")));
   }
 
-  return unneededHelper(ar);
+  return unneededHelper();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -352,8 +352,7 @@ void Expression::setDynamicByIdentifier(AnalysisResultPtr ar,
   }
 }
 
-bool Expression::CheckNeeded(AnalysisResultPtr ar,
-                             ExpressionPtr variable, ExpressionPtr value) {
+bool Expression::CheckNeeded(ExpressionPtr variable, ExpressionPtr value) {
   // if the value may involve object, consider the variable as "needed"
   // so that objects are not destructed prematurely.
   bool needed = true;
@@ -432,7 +431,7 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
   return ret;
 }
 
-ExpressionPtr Expression::MakeConstant(AnalysisResultPtr ar,
+ExpressionPtr Expression::MakeConstant(AnalysisResultConstPtr ar,
                                        BlockScopePtr scope,
                                        LocationPtr loc,
                                        const std::string &value) {
@@ -519,7 +518,7 @@ bool Expression::isUnquotedScalar() const {
   return !((ScalarExpression*)this)->isQuoted();
 }
 
-ExpressionPtr Expression::MakeScalarExpression(AnalysisResultPtr ar,
+ExpressionPtr Expression::MakeScalarExpression(AnalysisResultConstPtr ar,
                                                BlockScopePtr scope,
                                                LocationPtr loc,
                                                CVarRef value) {

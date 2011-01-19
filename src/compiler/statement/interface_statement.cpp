@@ -90,7 +90,7 @@ std::string InterfaceStatement::getName() const {
   return string("Interface ") + getScope()->getName();
 }
 
-bool InterfaceStatement::checkVolatileBases(AnalysisResultPtr ar) {
+bool InterfaceStatement::checkVolatileBases(AnalysisResultConstPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
   ASSERT(!classScope->isVolatile());
   const vector<string> &bases = classScope->getBases();
@@ -102,7 +102,7 @@ bool InterfaceStatement::checkVolatileBases(AnalysisResultPtr ar) {
   return false;
 }
 
-void InterfaceStatement::checkVolatile(AnalysisResultPtr ar) {
+void InterfaceStatement::checkVolatile(AnalysisResultConstPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
   // redeclared classes/interfaces are automatically volatile
   if (!classScope->isVolatile()) {
@@ -175,7 +175,7 @@ void InterfaceStatement::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-StatementPtr InterfaceStatement::preOptimize(AnalysisResultPtr ar) {
+StatementPtr InterfaceStatement::preOptimize(AnalysisResultConstPtr ar) {
   if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
     checkVolatile(ar);
   }
@@ -188,7 +188,7 @@ void InterfaceStatement::inferTypes(AnalysisResultPtr ar) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-void InterfaceStatement::getAllParents(AnalysisResultPtr ar,
+void InterfaceStatement::getAllParents(AnalysisResultConstPtr ar,
                                        std::vector<std::string> &names) {
   vector<string> bases;
   if (m_base) {
@@ -224,7 +224,8 @@ void InterfaceStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_indentEnd("}\n");
 }
 
-void InterfaceStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
+void InterfaceStatement::outputCPPImpl(CodeGenerator &cg,
+                                       AnalysisResultPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
   if (cg.getContext() == CodeGenerator::NoContext) {
     if (classScope->isVolatile()) {
@@ -260,7 +261,7 @@ void InterfaceStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) 
           const char *intf = exp->getString().c_str();
           ClassScopePtr intfClassScope = ar->findClass(intf);
           if (intfClassScope && !intfClassScope->isRedeclaring() &&
-              classScope->derivesDirectlyFrom(ar, intf)) {
+              classScope->derivesDirectlyFrom(intf)) {
             string id = intfClassScope->getId(cg);
             cg_printf("%s public %s%s", sep, Option::ClassPrefix, id.c_str());
             sep = ",";

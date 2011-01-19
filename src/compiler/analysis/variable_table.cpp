@@ -192,7 +192,7 @@ bool VariableTable::isInherited(const string &name) const {
     (!sym->isGlobal() && !sym->isSystem() && !sym->getDeclaration());
 }
 
-bool VariableTable::definedByParent(AnalysisResultPtr ar,
+bool VariableTable::definedByParent(AnalysisResultConstPtr ar,
                                     const string &name) {
   if (isPrivate(name)) return false;
   ClassScopePtr cls = findParent(ar, name);
@@ -229,7 +229,8 @@ const char *VariableTable::getVariablePrefix(const Symbol *sym) const {
   return Option::VariablePrefix;
 }
 
-string VariableTable::getVariableName(CodeGenerator &cg, AnalysisResultPtr ar,
+string VariableTable::getVariableName(CodeGenerator &cg,
+                                      AnalysisResultConstPtr ar,
                                       const string &name) const {
   Symbol *sym = getSymbol(name);
   if (sym && sym->isStatic()) {
@@ -254,7 +255,8 @@ string VariableTable::getVariableName(CodeGenerator &cg, AnalysisResultPtr ar,
 }
 
 string
-VariableTable::getGlobalVariableName(CodeGenerator &cg, AnalysisResultPtr ar,
+VariableTable::getGlobalVariableName(CodeGenerator &cg,
+                                     AnalysisResultConstPtr ar,
                                      const string &name) const {
   return string("GV(") + cg.formatLabel(name) + ")";
 }
@@ -291,7 +293,8 @@ bool VariableTable::setClassInitVal(string varName, ConstructPtr value) {
 ///////////////////////////////////////////////////////////////////////////////
 
 TypePtr VariableTable::addParam(const string &name, TypePtr type,
-                                AnalysisResultPtr ar, ConstructPtr construct) {
+                                AnalysisResultConstPtr ar,
+                                ConstructPtr construct) {
   Symbol *sym = addSymbol(name);
   if (!sym->isParameter()) {
     sym->setParameterIndex(m_nextParam++);
@@ -301,7 +304,7 @@ TypePtr VariableTable::addParam(const string &name, TypePtr type,
 }
 
 void VariableTable::addStaticVariable(Symbol *sym,
-                                      AnalysisResultPtr ar,
+                                      AnalysisResultConstPtr ar,
                                       bool member /* = false */) {
   if (isGlobalTable(ar) ||
       sym->isStatic()) {
@@ -321,7 +324,8 @@ void VariableTable::addStaticVariable(Symbol *sym,
   globalVariables->m_staticGlobalsVec.push_back(sgi);
 }
 
-void VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
+void VariableTable::markOverride(AnalysisResultConstPtr ar,
+                                 const string &name) {
   Symbol *sym = getSymbol(name);
   assert(sym && sym->isPresent());
   if (!sym->isStatic() ||
@@ -340,7 +344,7 @@ void VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
 }
 
 TypePtr VariableTable::add(const string &name, TypePtr type,
-                           bool implicit, AnalysisResultPtr ar,
+                           bool implicit, AnalysisResultConstPtr ar,
                            ConstructPtr construct,
                            ModifierExpressionPtr modifiers,
                            bool checkError /* = true */) {
@@ -349,7 +353,7 @@ TypePtr VariableTable::add(const string &name, TypePtr type,
 }
 
 TypePtr VariableTable::add(Symbol *sym, TypePtr type,
-                           bool implicit, AnalysisResultPtr ar,
+                           bool implicit, AnalysisResultConstPtr ar,
                            ConstructPtr construct,
                            ModifierExpressionPtr modifiers,
                            bool checkError /* = true */) {
@@ -407,14 +411,14 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
 }
 
 TypePtr VariableTable::checkVariable(const string &name, TypePtr type,
-                                     bool coerce, AnalysisResultPtr ar,
+                                     bool coerce, AnalysisResultConstPtr ar,
                                      ConstructPtr construct, int &properties) {
   return checkVariable(addSymbol(name), type,
                        coerce, ar, construct, properties);
 }
 
 TypePtr VariableTable::checkVariable(Symbol *sym, TypePtr type,
-                                     bool coerce, AnalysisResultPtr ar,
+                                     bool coerce, AnalysisResultConstPtr ar,
                                      ConstructPtr construct, int &properties) {
   properties = 0;
 
@@ -447,7 +451,8 @@ TypePtr VariableTable::checkVariable(Symbol *sym, TypePtr type,
 }
 
 Symbol *VariableTable::findProperty(ClassScopePtr &cls,
-                                    const string &name, AnalysisResultPtr ar,
+                                    const string &name,
+                                    AnalysisResultConstPtr ar,
                                     ConstructPtr construct) {
   Symbol *sym = getSymbol(name);
   if (sym && sym->declarationSet()) {
@@ -475,7 +480,7 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
 }
 
 TypePtr VariableTable::checkProperty(Symbol *sym, TypePtr type,
-                                     bool coerce, AnalysisResultPtr ar) {
+                                     bool coerce, AnalysisResultConstPtr ar) {
   if (sym->isOverride()) {
     ClassScopePtr parent = findParent(ar, sym->getName());
     assert(parent);
@@ -557,7 +562,7 @@ void VariableTable::clearUsed() {
   }
 }
 
-void VariableTable::forceVariants(AnalysisResultPtr ar, int varClass) {
+void VariableTable::forceVariants(AnalysisResultConstPtr ar, int varClass) {
   int mask = varClass & ~m_forcedVariants;
   if (mask) {
     if (!m_hasPrivate) mask &= ~AnyPrivateVars;
@@ -582,7 +587,7 @@ void VariableTable::forceVariants(AnalysisResultPtr ar, int varClass) {
   }
 }
 
-void VariableTable::forceVariant(AnalysisResultPtr ar,
+void VariableTable::forceVariant(AnalysisResultConstPtr ar,
                                  const string &name, int varClass) {
   int mask = varClass & ~m_forcedVariants;
   if (!mask) return;
@@ -598,12 +603,13 @@ void VariableTable::forceVariant(AnalysisResultPtr ar,
   }
 }
 
-TypePtr VariableTable::setType(AnalysisResultPtr ar, const std::string &name,
+TypePtr VariableTable::setType(AnalysisResultConstPtr ar,
+                               const std::string &name,
                                TypePtr type, bool coerce) {
   return setType(ar, addSymbol(name), type, coerce);
 }
 
-TypePtr VariableTable::setType(AnalysisResultPtr ar, Symbol *sym,
+TypePtr VariableTable::setType(AnalysisResultConstPtr ar, Symbol *sym,
                                TypePtr type, bool coerce) {
   bool force_coerce = coerce;
   int mask = GetVarClassMask(sym->isPrivate(), sym->isStatic());
@@ -648,7 +654,7 @@ bool VariableTable::isConvertibleSuperGlobal(const string &name) const {
   return !getAttribute(ContainsDynamicVariable) && isSuperGlobal(name);
 }
 
-ClassScopePtr VariableTable::findParent(AnalysisResultPtr ar,
+ClassScopePtr VariableTable::findParent(AnalysisResultConstPtr ar,
                                         const string &name) {
   for (ClassScopePtr parent = m_blockScope.getParentScope(ar);
        parent && !parent->isRedeclaring();
@@ -660,7 +666,7 @@ ClassScopePtr VariableTable::findParent(AnalysisResultPtr ar,
   return ClassScopePtr();
 }
 
-bool VariableTable::isGlobalTable(AnalysisResultPtr ar) const {
+bool VariableTable::isGlobalTable(AnalysisResultConstPtr ar) const {
   return ar->getVariables().get() == this;
 }
 

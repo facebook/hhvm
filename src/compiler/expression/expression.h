@@ -216,8 +216,8 @@ public:
     return false;
   }
   void deepCopy(ExpressionPtr exp);
-  ExpressionPtr unneeded(AnalysisResultPtr ar);
-  virtual ExpressionPtr unneededHelper(AnalysisResultPtr ar);
+  ExpressionPtr unneeded();
+  virtual ExpressionPtr unneededHelper();
 
   /**
    * This is to avoid dynamic casting to ExpressionList in Parser.
@@ -230,14 +230,14 @@ public:
   /**
    * Called before type inference.
    */
-  virtual ExpressionPtr preOptimize(AnalysisResultPtr ar) {
+  virtual ExpressionPtr preOptimize(AnalysisResultConstPtr ar) {
     return ExpressionPtr();
   }
 
   /**
    * Called after type inference.
    */
-  virtual ExpressionPtr postOptimize(AnalysisResultPtr ar) {
+  virtual ExpressionPtr postOptimize(AnalysisResultConstPtr ar) {
     return ExpressionPtr();
   }
 
@@ -304,19 +304,18 @@ public:
   TypePtr getType();
   TypePtr getCPPType();
 
-  static ExpressionPtr MakeConstant(AnalysisResultPtr ar,
+  static ExpressionPtr MakeConstant(AnalysisResultConstPtr ar,
                                     BlockScopePtr scope,
                                     LocationPtr loc,
                                     const std::string &value);
-  static ExpressionPtr MakeScalarExpression(AnalysisResultPtr ar,
+  static ExpressionPtr MakeScalarExpression(AnalysisResultConstPtr ar,
                                             BlockScopePtr scope,
                                             LocationPtr loc,
                                             const Variant &value);
   static void CheckPassByReference(AnalysisResultPtr ar,
                                    ExpressionPtr param);
 
-  static bool CheckNeeded(AnalysisResultPtr ar, ExpressionPtr variable,
-                          ExpressionPtr value);
+  static bool CheckNeeded(ExpressionPtr variable, ExpressionPtr value);
 
   bool isUnused() const { return m_unused; }
   void setUnused(bool u) { m_unused = u; }

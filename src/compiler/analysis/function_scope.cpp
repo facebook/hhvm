@@ -503,7 +503,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
   return ret;
 }
 
-TypePtr FunctionScope::setParamType(AnalysisResultPtr ar, int index,
+TypePtr FunctionScope::setParamType(AnalysisResultConstPtr ar, int index,
                                     TypePtr type) {
   ASSERT(index >= 0 && index < (int)m_paramTypes.size());
   TypePtr paramType = m_paramTypes[index];

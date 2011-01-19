@@ -36,7 +36,7 @@ TypePtr Symbol::getFinalType() const {
   return Type::Variant;
 }
 
-TypePtr Symbol::CoerceTo(AnalysisResultPtr ar,
+TypePtr Symbol::CoerceTo(AnalysisResultConstPtr ar,
                          TypePtr &curType, TypePtr type) {
   if (!curType) {
     curType = type;
@@ -47,7 +47,7 @@ TypePtr Symbol::CoerceTo(AnalysisResultPtr ar,
   return curType;
 }
 
-TypePtr Symbol::setType(AnalysisResultPtr ar, BlockScopeRawPtr scope,
+TypePtr Symbol::setType(AnalysisResultConstPtr ar, BlockScopeRawPtr scope,
                         TypePtr type, bool coerced) {
   if (!type) return type;
   TypePtr oldType = m_coerced;
@@ -264,12 +264,12 @@ bool SymbolTable::isSepExtension(const std::string &name) const {
   return false;
 }
 
-TypePtr SymbolTable::setType(AnalysisResultPtr ar, const std::string &name,
+TypePtr SymbolTable::setType(AnalysisResultConstPtr ar, const std::string &name,
                              TypePtr type, bool coerced) {
   return setType(ar, genSymbol(name, m_const), type, coerced);
 }
 
-TypePtr SymbolTable::setType(AnalysisResultPtr ar, Symbol *sym,
+TypePtr SymbolTable::setType(AnalysisResultConstPtr ar, Symbol *sym,
                              TypePtr type, bool coerced) {
   if (!sym->declarationSet()) {
     m_symbolVec.push_back(sym);

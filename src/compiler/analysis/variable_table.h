@@ -152,9 +152,10 @@ public:
 
   const char *getVariablePrefix(const std::string &name) const;
   const char *getVariablePrefix(const Symbol *sym) const;
-  std::string getVariableName(CodeGenerator &cg, AnalysisResultPtr ar,
+  std::string getVariableName(CodeGenerator &cg, AnalysisResultConstPtr ar,
                               const std::string &name) const;
-  std::string getGlobalVariableName(CodeGenerator &cg, AnalysisResultPtr ar,
+  std::string getGlobalVariableName(CodeGenerator &cg,
+                                    AnalysisResultConstPtr ar,
                                     const std::string &name) const;
 
   /**
@@ -171,45 +172,45 @@ public:
    * Add a function's parameter to this table.
    */
   TypePtr addParam(const std::string &name, TypePtr type,
-                   AnalysisResultPtr ar, ConstructPtr construct);
+                   AnalysisResultConstPtr ar, ConstructPtr construct);
 
   /**
    * Called when a variable is declared or being assigned (l-value).
    */
   TypePtr add(const std::string &name, TypePtr type, bool implicit,
-              AnalysisResultPtr ar, ConstructPtr construct,
+              AnalysisResultConstPtr ar, ConstructPtr construct,
               ModifierExpressionPtr modifiers, bool checkError = true);
   TypePtr add(Symbol *sym, TypePtr type, bool implicit,
-              AnalysisResultPtr ar, ConstructPtr construct,
+              AnalysisResultConstPtr ar, ConstructPtr construct,
               ModifierExpressionPtr modifiers, bool checkError = true);
 
   /**
    * Called to note whether a class variable overrides
    * a definition in a base class.
    */
-  void markOverride(AnalysisResultPtr ar, const std::string &name);
+  void markOverride(AnalysisResultConstPtr ar, const std::string &name);
 
   /**
    * Called when a variable is used or being evaluated (r-value).
    */
   TypePtr checkVariable(const std::string &name, TypePtr type, bool coerce,
-                        AnalysisResultPtr ar, ConstructPtr construct,
+                        AnalysisResultConstPtr ar, ConstructPtr construct,
                         int &properties);
   TypePtr checkVariable(Symbol *sym, TypePtr type, bool coerce,
-                        AnalysisResultPtr ar, ConstructPtr construct,
+                        AnalysisResultConstPtr ar, ConstructPtr construct,
                         int &properties);
   /**
    * Find the class which contains the property, and return
    * its Symbol
    */
   Symbol *findProperty(ClassScopePtr &cls, const std::string &name,
-                       AnalysisResultPtr ar, ConstructPtr construct);
+                       AnalysisResultConstPtr ar, ConstructPtr construct);
   TypePtr checkProperty(Symbol *sym, TypePtr type,
-                        bool coerce, AnalysisResultPtr ar);
+                        bool coerce, AnalysisResultConstPtr ar);
   /**
    * Walk up to find first parent that has the specified symbol.
    */
-  ClassScopePtr findParent(AnalysisResultPtr ar, const std::string &name);
+  ClassScopePtr findParent(AnalysisResultConstPtr ar, const std::string &name);
 
   /**
    * Called when analyze global and static statement.
@@ -238,19 +239,19 @@ public:
   bool checkUnused(Symbol *sym);
   void addNeeded(const std::string &name);
   void clearUsed();
-  void addStaticVariable(Symbol *sym, AnalysisResultPtr ar,
+  void addStaticVariable(Symbol *sym, AnalysisResultConstPtr ar,
                          bool member = false);
 
 
   /**
    * Set all matching variables to variants, since l-dynamic value was used.
    */
-  void forceVariants(AnalysisResultPtr ar, int varClass);
+  void forceVariants(AnalysisResultConstPtr ar, int varClass);
 
   /**
    * Set one matching variable to be Type::Variant.
    */
-  void forceVariant(AnalysisResultPtr ar, const std::string &name,
+  void forceVariant(AnalysisResultConstPtr ar, const std::string &name,
                     int varClass);
 
   /**
@@ -348,15 +349,15 @@ private:
   StaticGlobalInfoPtrVec m_staticGlobalsVec;
   StringToStaticGlobalInfoPtrMap m_staticGlobals;
 
-  bool isGlobalTable(AnalysisResultPtr ar) const;
+  bool isGlobalTable(AnalysisResultConstPtr ar) const;
 
-  virtual TypePtr setType(AnalysisResultPtr ar, const std::string &name,
+  virtual TypePtr setType(AnalysisResultConstPtr ar, const std::string &name,
                           TypePtr type, bool coerce);
-  virtual TypePtr setType(AnalysisResultPtr ar, Symbol *sym,
+  virtual TypePtr setType(AnalysisResultConstPtr ar, Symbol *sym,
                           TypePtr type, bool coerce);
   virtual void dumpStats(std::map<std::string, int> &typeCounts);
 
-  bool definedByParent(AnalysisResultPtr ar, const std::string &name);
+  bool definedByParent(AnalysisResultConstPtr ar, const std::string &name);
 
   void outputCPPGlobalVariablesHeader(CodeGenerator &cg,
                                       AnalysisResultPtr ar);

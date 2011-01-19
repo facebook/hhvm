@@ -54,7 +54,7 @@ public:
 
   TypePtr getType() const { return m_coerced; }
   TypePtr getFinalType() const;
-  TypePtr setType(AnalysisResultPtr ar, BlockScopeRawPtr scope,
+  TypePtr setType(AnalysisResultConstPtr ar, BlockScopeRawPtr scope,
                   TypePtr type, bool coerced);
 
   bool isPresent() const { return m_flags.m_declaration_set; }
@@ -197,7 +197,7 @@ private:
   int                 m_parameter;
   ConstructPtr        m_initVal;
 
-  static TypePtr CoerceTo(AnalysisResultPtr ar,
+  static TypePtr CoerceTo(AnalysisResultConstPtr ar,
                           TypePtr &curType, TypePtr type);
 };
 
@@ -276,9 +276,9 @@ public:
   void getSymbols(std::vector<std::string> &syms) const;
   void getCoerced(StringToTypePtrMap &coerced) const;
 
-  virtual TypePtr setType(AnalysisResultPtr ar, const std::string &name,
+  virtual TypePtr setType(AnalysisResultConstPtr ar, const std::string &name,
                           TypePtr type, bool coerced);
-  virtual TypePtr setType(AnalysisResultPtr ar, Symbol *sym,
+  virtual TypePtr setType(AnalysisResultConstPtr ar, Symbol *sym,
                           TypePtr type, bool coerced);
   Symbol *getSymbol(const std::string &name) const;
 

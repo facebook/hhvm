@@ -165,14 +165,14 @@ public:
 
 class dfs_dump : public boost::default_dfs_visitor {
 public:
-  dfs_dump(AnalysisResultPtr ar) : m_ar(ar) {}
+  dfs_dump(AnalysisResultConstPtr ar) : m_ar(ar) {}
 
   void discover_vertex(ControlFlowGraph::vertex_descriptor u,
                        const ControlFlowGraph &g) {
     u->dump(0, m_ar, &g);
   }
 private:
-  AnalysisResultPtr m_ar;
+  AnalysisResultConstPtr m_ar;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -549,7 +549,7 @@ int ControlFlowBuilder::afterEach(ConstructRawPtr cp, int ix,
   return WalkContinue;
 }
 
-void ControlBlock::dump(int spc, AnalysisResultPtr ar,
+void ControlBlock::dump(int spc, AnalysisResultConstPtr ar,
                         const ControlFlowGraph *graph) {
   printf("%08llx (%d)\n  InDegree: %d\n  OutDegree: %d\n",
          (unsigned long long)this, m_dfn,
@@ -626,7 +626,7 @@ void ControlFlowGraph::allocateDataFlow(size_t width, int rows, int *rowIds) {
   }
 }
 
-void ControlFlowGraph::dump(AnalysisResultPtr ar) {
+void ControlFlowGraph::dump(AnalysisResultConstPtr ar) {
   printf("Dumping control flow: %s\n", m_stmt->getName().c_str());
   depth_first_search(*this, dfs_dump(ar), get(vertex_color, *this));
 }

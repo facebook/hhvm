@@ -46,7 +46,7 @@ public:
 
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                       int state);
-  bool checkUnused(AnalysisResultPtr) const;
+  bool checkUnused() const;
   bool getAlwaysStash() const { return m_alwaysStash; }
   void setAlwaysStash() { m_alwaysStash = true; }
   void updateSymbol(SimpleVariablePtr src);

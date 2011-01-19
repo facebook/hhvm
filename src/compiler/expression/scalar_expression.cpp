@@ -173,7 +173,7 @@ bool ScalarExpression::canonCompare(ExpressionPtr e) const {
     m_quoted == s->m_quoted;
 }
 
-ExpressionPtr ScalarExpression::postOptimize(AnalysisResultPtr ar) {
+ExpressionPtr ScalarExpression::postOptimize(AnalysisResultConstPtr ar) {
   switch (m_type) {
   case T_LINE:
   case T_LNUMBER:

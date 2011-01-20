@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id: timelib.h 293036 2010-01-03 09:23:27Z sebastian $ */
+/* $Id: timelib.h 302887 2010-08-30 15:32:09Z derick $ */
 
 #ifndef __TIMELIB_H__
 #define __TIMELIB_H__
@@ -30,7 +30,9 @@
 #define TIMELIB_OVERRIDE_TIME    0x01
 #define TIMELIB_NO_CLONE         0x02
 
-#define TIMELIB_SPECIAL_WEEKDAY  0x01
+#define TIMELIB_SPECIAL_WEEKDAY                   0x01
+#define TIMELIB_SPECIAL_DAY_OF_WEEK_IN_MONTH      0x02
+#define TIMELIB_SPECIAL_LAST_DAY_OF_WEEK_IN_MONTH 0x03
 
 #ifndef LONG_MAX
 #define LONG_MAX 2147483647L
@@ -55,15 +57,26 @@ timelib_sll timelib_day_of_year(timelib_sll y, timelib_sll m, timelib_sll d);
 timelib_sll timelib_daynr_from_weeknr(timelib_sll y, timelib_sll w, timelib_sll d);
 timelib_sll timelib_days_in_month(timelib_sll y, timelib_sll m);
 void timelib_isoweek_from_date(timelib_sll y, timelib_sll m, timelib_sll d, timelib_sll *iw, timelib_sll *iy);
+int timelib_valid_time(timelib_sll h, timelib_sll i, timelib_sll s);
+int timelib_valid_date(timelib_sll y, timelib_sll m, timelib_sll d);
 
 /* From parse_date.re */
 timelib_time *timelib_strtotime(char *s, int len, timelib_error_container **errors, const timelib_tzdb *tzdb);
+timelib_time *timelib_parse_from_format(char *format, char *s, int len, timelib_error_container **errors, const timelib_tzdb *tzdb);
 void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
 char *timelib_timezone_id_from_abbr(const char *abbr, long gmtoffset, int isdst);
 const timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void);
 
+/* From parse_iso_intervals.re */
+void timelib_strtointerval(char *s, int len, 
+                           timelib_time **begin, timelib_time **end, 
+						   timelib_rel_time **period, int *recurrences, 
+						   struct timelib_error_container **errors);
+
+
 /* From tm2unixtime.c */
 void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi);
+void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt);
 
 /* From unixtime2tm.c */
 int timelib_apply_localtime(timelib_time *t, unsigned int localtime);
@@ -89,9 +102,14 @@ void timelib_time_tz_name_update(timelib_time* tm, char* tz_name);
 void timelib_tzinfo_dtor(timelib_tzinfo *tz);
 timelib_tzinfo* timelib_tzinfo_clone(timelib_tzinfo *tz);
 
+timelib_rel_time* timelib_rel_time_ctor(void);
+void timelib_rel_time_dtor(timelib_rel_time* t);
+timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *tz);
+
 timelib_time* timelib_time_ctor(void);
 void timelib_time_set_option(timelib_time* tm, int option, void* option_value);
 void timelib_time_dtor(timelib_time* t);
+timelib_time* timelib_time_clone(timelib_time* orig);
 
 timelib_time_offset* timelib_time_offset_ctor(void);
 void timelib_time_offset_dtor(timelib_time_offset* t);
@@ -100,11 +118,15 @@ void timelib_error_container_dtor(timelib_error_container *errors);
 
 signed long timelib_date_to_int(timelib_time *d, int *error);
 void timelib_dump_date(timelib_time *d, int options);
+void timelib_dump_rel_time(timelib_rel_time *d);
 
 void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec);
 
 /* from astro.c */
 double timelib_ts_to_juliandate(timelib_sll ts);
 int timelib_astro_rise_set_altitude(timelib_time *time, double lon, double lat, double altit, int upper_limb, double *h_rise, double *h_set, timelib_sll *ts_rise, timelib_sll *ts_set, timelib_sll *ts_transit);
+
+/* from interval.c */
+timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two);
 
 #endif

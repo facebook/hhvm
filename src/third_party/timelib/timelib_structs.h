@@ -33,19 +33,25 @@
 #include <stdint.h>
 #endif
 
-#ifndef HAVE_INT32_T
-# if SIZEOF_INT == 4
+#ifdef PHP_WIN32
+/* TODO: Remove these hacks/defs once we have the int definitions in main/ 
+	 rathen than in each 2nd extension and win32/ */
+# include "win32/php_stdint.h"
+#else
+# ifndef HAVE_INT32_T
+#  if SIZEOF_INT == 4
 typedef int int32_t;
-# elif SIZEOF_LONG == 4
+#  elif SIZEOF_LONG == 4
 typedef long int int32_t;
+#  endif
 # endif
-#endif
 
-#ifndef HAVE_UINT32_T
-# if SIZEOF_INT == 4
+# ifndef HAVE_UINT32_T
+#  if SIZEOF_INT == 4
 typedef unsigned int uint32_t;
-# elif SIZEOF_LONG == 4
+#  elif SIZEOF_LONG == 4
 typedef unsigned long int uint32_t;
+#  endif
 # endif
 #endif
 
@@ -62,24 +68,14 @@ typedef unsigned long int uint32_t;
 #endif
 
 #if defined(_MSC_VER)
-typedef unsigned __int64 timelib_ull;
-typedef __int64 timelib_sll;
+typedef uint64_t timelib_ull;
+typedef int64_t timelib_sll;
+# define TIMELIB_LL_CONST(n) n ## i64
 #else
 typedef unsigned long long timelib_ull;
 typedef signed long long timelib_sll;
+# define TIMELIB_LL_CONST(n) n ## ll
 #endif
-
-#if defined(_MSC_VER)
-#define int32_t __int32
-#define uint32_t unsigned __int32
-#endif
-
-#if defined(_MSC_VER)
-#define TIMELIB_LL_CONST(n) n ## i64
-#else
-#define TIMELIB_LL_CONST(n) n ## ll
-#endif
-
 
 typedef struct ttinfo
 {
@@ -96,6 +92,14 @@ typedef struct tlinfo
 	int32_t  trans;
 	int32_t  offset;
 } tlinfo;
+
+typedef struct tlocinfo
+{
+	char country_code[3];
+	double latitude;
+	double longitude;
+	char *comments;
+} tlocinfo;
 
 typedef struct timelib_tzinfo
 {
@@ -114,7 +118,14 @@ typedef struct timelib_tzinfo
 	char    *timezone_abbr;
 
 	tlinfo  *leap_times;
+	unsigned char bc;
+	tlocinfo location;
 } timelib_tzinfo;
+
+typedef struct timelib_special {
+	unsigned int type;
+	timelib_sll amount;
+} timelib_special;
 
 typedef struct timelib_rel_time {
 	timelib_sll y, m, d; /* Years, Months and Days */
@@ -122,6 +133,13 @@ typedef struct timelib_rel_time {
 
 	int weekday; /* Stores the day in 'next monday' */
 	int weekday_behavior; /* 0: the current day should *not* be counted when advancing forwards; 1: the current day *should* be counted */
+
+	int first_last_day_of;
+	int invert; /* Whether the difference should be inverted */
+	timelib_sll days; /* Contains the number of *days*, instead of Y-M-D differences */
+
+	timelib_special  special;
+	unsigned int   have_weekday_relative, have_special_relative;
 } timelib_rel_time;
 
 typedef struct timelib_time_offset {
@@ -132,11 +150,6 @@ typedef struct timelib_time_offset {
 	timelib_sll  transistion_time;
 } timelib_time_offset;
 
-typedef struct timelib_special {
-	unsigned int type;
-	timelib_sll amount;
-} timelib_special;
-
 typedef struct timelib_time {
 	timelib_sll      y, m, d;     /* Year, Month, Day */
 	timelib_sll      h, i, s;     /* Hour, mInute, Second */
@@ -146,11 +159,10 @@ typedef struct timelib_time {
 	timelib_tzinfo  *tz_info;     /* Timezone structure */
 	signed int       dst;         /* Flag if we were parsing a DST zone */
 	timelib_rel_time relative;
-	timelib_special  special;
 
 	timelib_sll      sse;         /* Seconds since epoch */
 
-	unsigned int   have_time, have_date, have_zone, have_relative, have_weekday_relative, have_special_relative, have_weeknr_day;
+	unsigned int   have_time, have_date, have_zone, have_relative, have_weeknr_day;
 
 	unsigned int   sse_uptodate; /* !0 if the sse member is up to date with the date/time members */
 	unsigned int   tim_uptodate; /* !0 if the date/time members are up to date with the sse member */
@@ -176,7 +188,7 @@ typedef struct timelib_error_container {
 typedef struct _timelib_tz_lookup_table {
 	char       *name;
 	int         type;
-	int         gmtoffset;
+	float       gmtoffset;
 	char       *full_tz_name;
 } timelib_tz_lookup_table;
 

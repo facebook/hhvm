@@ -70,7 +70,7 @@ bool TestExtFb::test_fb_utf8ize() {
       Variant s = "hon\xE7k";
       VERIFY(f_fb_utf8ize(ref(s)));
       if (RuntimeOption::Utf8izeReplace) {
-        VS(s, "hon\xef\xbf\xbdk");
+        VS(s, "hon\uFFFDk");
       } else {
         VS(s, "honk");
       }
@@ -79,7 +79,7 @@ bool TestExtFb::test_fb_utf8ize() {
       Variant s = "test\xE0\xB0\xB1\xE0";
       VERIFY(f_fb_utf8ize(ref(s)));
       if (RuntimeOption::Utf8izeReplace) {
-        VS(s, "test\xE0\xB0\xB1\xef\xbf\xbd");
+        VS(s, "test\xE0\xB0\xB1\uFFFD");
       } else {
         VS(s, "test\xE0\xB0\xB1");
       }
@@ -88,7 +88,7 @@ bool TestExtFb::test_fb_utf8ize() {
       Variant s = "test\xE0\xB0\xB1\xE0\xE0";
       VERIFY(f_fb_utf8ize(ref(s)));
       if (RuntimeOption::Utf8izeReplace) {
-        VS(s, "test\xE0\xB0\xB1\xef\xbf\xbd\xef\xbf\xbd");
+        VS(s, "test\xE0\xB0\xB1\uFFFD\uFFFD");
       } else {
         VS(s, "test\xE0\xB0\xB1");
       }
@@ -97,7 +97,7 @@ bool TestExtFb::test_fb_utf8ize() {
       Variant s = "\xfc";
       VERIFY(f_fb_utf8ize(ref(s)));
       if (RuntimeOption::Utf8izeReplace) {
-        VS(s, "\xef\xbf\xbd");
+        VS(s, "\uFFFD");
       } else {
         VS(s, "");
       }
@@ -106,7 +106,7 @@ bool TestExtFb::test_fb_utf8ize() {
       Variant s = "\xfc\xfc";
       VERIFY(f_fb_utf8ize(ref(s)));
       if (RuntimeOption::Utf8izeReplace) {
-        VS(s, "\xef\xbf\xbd\xef\xbf\xbd");
+        VS(s, "\uFFFD\uFFFD");
       } else {
         VS(s, "");
       }

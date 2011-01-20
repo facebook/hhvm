@@ -689,7 +689,8 @@ bool f_fb_utf8ize(Variant input) {
   //  a replacement character) and continue parsing with the next byte.
   unsigned char *src = str + idx;
   StringBuffer sb(RuntimeOption::Utf8izeReplace ? (3 * len + 1) : (len + 1));
-  char repl[] = { 0xef, 0xbf, 0xbd, }; // utf8 replacement character
+  const char repl[] = "\uFFFD"; // utf8 replacement character
+  int replSize = sizeof(repl) - 1;
   if (idx) {
     sb.append((char*)str, idx);
   }
@@ -706,7 +707,7 @@ bool f_fb_utf8ize(Variant input) {
       expect = 3;
     } else {
       if (RuntimeOption::Utf8izeReplace) {
-        sb.append(repl, 3);
+        sb.append(repl, replSize);
       }
       continue;
     }
@@ -715,7 +716,7 @@ bool f_fb_utf8ize(Variant input) {
       if (++src - str == len) {
         if (RuntimeOption::Utf8izeReplace) {
           src -= (jj + 1);
-          sb.append(repl, 3);
+          sb.append(repl, replSize);
           break;
         } else {
           input = sb.detach();
@@ -724,7 +725,7 @@ bool f_fb_utf8ize(Variant input) {
       } else if (*src < 0x80 || *src > 0xBF) {
         src -= (jj + 1);
         if (RuntimeOption::Utf8izeReplace) {
-          sb.append(repl, 3);
+          sb.append(repl, replSize);
         }
         break;
       }

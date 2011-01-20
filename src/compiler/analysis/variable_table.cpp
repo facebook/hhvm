@@ -304,7 +304,7 @@ TypePtr VariableTable::addParam(const string &name, TypePtr type,
 }
 
 void VariableTable::addStaticVariable(Symbol *sym,
-                                      AnalysisResultConstPtr ar,
+                                      AnalysisResultPtr ar,
                                       bool member /* = false */) {
   if (isGlobalTable(ar) ||
       sym->isStatic()) {
@@ -324,8 +324,18 @@ void VariableTable::addStaticVariable(Symbol *sym,
   globalVariables->m_staticGlobalsVec.push_back(sgi);
 }
 
-void VariableTable::markOverride(AnalysisResultConstPtr ar,
-                                 const string &name) {
+void VariableTable::addStaticVariable(Symbol *sym,
+                                      AnalysisResultConstPtr ar,
+                                      bool member /* = false */) {
+  if (isGlobalTable(ar) ||
+      sym->isStatic()) {
+    return; // a static variable at global scope is the same as non-static
+  }
+
+  addStaticVariable(sym, ar->lock().get(), member);
+}
+
+void VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
   Symbol *sym = getSymbol(name);
   assert(sym && sym->isPresent());
   if (!sym->isStatic() ||
@@ -359,29 +369,29 @@ TypePtr VariableTable::add(Symbol *sym, TypePtr type,
                            bool checkError /* = true */) {
   if (getAttribute(InsideStaticStatement)) {
     addStaticVariable(sym, ar);
-    if (ar->needStaticArray(getClassScope(), getFunctionScope())) {
+    if (ClassScope::NeedStaticArray(getClassScope(), getFunctionScope())) {
       forceVariant(ar, sym->getName(), AnyVars);
     }
   } else if (getAttribute(InsideGlobalStatement)) {
     sym->setGlobal();
     m_hasGlobal = true;
+    AnalysisResult::Locker lock(ar);
     if (!isGlobalTable(ar)) {
-      ar->getVariables()->add(sym->getName(), type, implicit,
-                              ar, construct, modifiers, false);
+      lock->getVariables()->add(sym->getName(), type, implicit,
+                                ar, construct, modifiers, false);
     }
     ASSERT(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
     TypePtr varType = ar->getVariables()->getFinalType(sym->getName());
     if (varType) {
       type = varType;
     } else {
-      ar->getVariables()->setType(ar, sym->getName(), type, true);
+      lock->getVariables()->setType(ar, sym->getName(), type, true);
     }
   } else if (!sym->isHidden() && isPseudoMainTable()) {
     // A variable used in a pseudomain
     // only need to do this once... should mark the sym.
-    ar->getVariables()->add(sym->getName(), type, implicit, ar,
-                            construct, modifiers,
-                            checkError);
+    ar->lock()->getVariables()->add(sym->getName(), type, implicit, ar,
+                                    construct, modifiers, checkError);
   }
 
   if (modifiers) {
@@ -425,8 +435,9 @@ TypePtr VariableTable::checkVariable(Symbol *sym, TypePtr type,
   // Variable used in pseudomain
   if (!sym->isHidden() && isPseudoMainTable()) {
     // only need to do this once... should mark the sym.
-    ar->getVariables()->checkVariable(sym->getName(), type,
-                                      coerce, ar, construct, properties);
+    ar->lock()->getVariables()->checkVariable(sym->getName(), type,
+                                              coerce, ar, construct,
+                                              properties);
   }
 
   if (!sym->declarationSet()) {
@@ -621,7 +632,7 @@ TypePtr VariableTable::setType(AnalysisResultConstPtr ar, Symbol *sym,
   if (!ret) return ret;
 
   if (sym->isGlobal() && !isGlobalTable(ar)) {
-    ar->getVariables()->setType(ar, sym->getName(), type, coerce);
+    ar->lock()->getVariables()->setType(ar, sym->getName(), type, coerce);
   }
 
   if (coerce) {
@@ -826,7 +837,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     if (sgi->func) {
       string name = string(Option::InitPrefix) +
         Option::StaticVariablePrefix + id;
-      if (ar->needStaticArray(sgi->cls, sgi->func)) {
+      if (ClassScope::NeedStaticArray(sgi->cls, sgi->func)) {
         variants.push_back(name);
       } else {
         bools.push_back(name);
@@ -1241,7 +1252,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
       TypePtr type = sym->getFinalType();
       type->outputCPPDecl(cg, ar, getBlockScope());
-      if (ar->needStaticArray(getClassScope(), getFunctionScope())) {
+      if (ClassScope::NeedStaticArray(getClassScope(), getFunctionScope())) {
         const char *cname = getFunctionScope()->isStatic() ? "cls" :
           "this->o_getClassName()";
         cg_printf(" &%s%s __attribute__((__unused__)) = "

@@ -43,7 +43,7 @@ public:
   virtual bool hasImpl() const { return false; }
   virtual int getRecursiveCount() const;
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
+  virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope);
 
   const std::string &getOriginalName() const { return m_originalName;}
   std::string getName() const { return m_name;}
@@ -65,8 +65,7 @@ public:
                                  AnalysisResultPtr ar);
   bool hasRefParam();
   void outputParamArrayCreate(CodeGenerator &cg, bool checkRef);
-  FunctionScopePtr onInitialParse(AnalysisResultPtr ar, FileScopePtr fs,
-                                  bool method);
+  FunctionScopePtr onInitialParse(AnalysisResultConstPtr ar, FileScopePtr fs);
 
   FunctionScopeRawPtr getFunctionScope() const {
     BlockScopeRawPtr b = getScope();

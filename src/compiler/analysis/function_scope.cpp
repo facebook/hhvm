@@ -42,7 +42,7 @@ using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
+FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
                              const std::string &name, StatementPtr stmt,
                              bool reference, int minParam, int maxParam,
                              ModifierExpressionPtr modifiers,
@@ -577,16 +577,12 @@ void FunctionScope::addModifier(int mod) {
   m_modifiers->add(mod);
 }
 
-void FunctionScope::setReturnType(AnalysisResultPtr ar, TypePtr type) {
+void FunctionScope::setReturnType(AnalysisResultConstPtr ar, TypePtr type) {
   // no change can be made to virtual function's prototype
   if (m_overriding) return;
 
   if (m_returnType) {
     type = Type::Coerce(ar, m_returnType, type);
-  }
-  if (!type->getName().empty() && !Type::SameType(type, m_returnType)) {
-    FileScopePtr fs = getContainingFile();
-    if (fs) fs->addClassDependency(ar, type->getName());
   }
   m_returnType = type;
 }

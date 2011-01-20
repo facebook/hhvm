@@ -245,7 +245,7 @@ public:
    * Find other types that have been inferred for this expression,
    * and combine them with inType to form a new, tighter type.
    */
-  TypePtr propagateTypes(AnalysisResultPtr ar, TypePtr inType);
+  TypePtr propagateTypes(AnalysisResultConstPtr ar, TypePtr inType);
 
   /**
    * Called when types need to be inferred inside this expression.
@@ -286,7 +286,7 @@ public:
    * Check to make sure return type is convertible to specified type.
    * If not, raise a CodeError.
    */
-  TypePtr checkTypesImpl(AnalysisResultPtr ar, TypePtr expectedType,
+  TypePtr checkTypesImpl(AnalysisResultConstPtr ar, TypePtr expectedType,
                          TypePtr actualType, bool coerce);
 
   TypePtr getActualType() { return m_actualType;}

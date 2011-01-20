@@ -71,11 +71,13 @@ ExpressionPtr AssignmentExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void AssignmentExpression::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
+void AssignmentExpression::onParseRecur(AnalysisResultConstPtr ar,
+                                        ClassScopePtr scope) {
   // This is that much we can do during parse phase.
   TypePtr type;
   if (m_value->is(Expression::KindOfScalarExpression)) {
-    type = m_value->inferAndCheck(ar, Type::Some, false);
+    type = static_pointer_cast<ScalarExpression>(m_value)->inferenceImpl(
+      ar, Type::Some, false);
   } else if (m_value->is(Expression::KindOfUnaryOpExpression)) {
     UnaryOpExpressionPtr uexp =
       dynamic_pointer_cast<UnaryOpExpression>(m_value);

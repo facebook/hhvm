@@ -95,8 +95,8 @@ public:
    * Parser functions. Parser only deals with a FileScope object, and these
    * are the only functions a parser calls upon analysis results.
    */
-  FunctionScopePtr setTree(AnalysisResultPtr ar, StatementListPtr tree);
-  bool addClass(AnalysisResultPtr ar, ClassScopePtr classScope);
+  FunctionScopePtr setTree(AnalysisResultConstPtr ar, StatementListPtr tree);
+  bool addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope);
 
   void addDeclare(std::string d) { m_declares.push_back(d); }
 
@@ -233,7 +233,7 @@ private:
 
   std::vector<lambda> m_lambdas;
 
-  FunctionScopePtr createPseudoMain(AnalysisResultPtr ar);
+  FunctionScopePtr createPseudoMain(AnalysisResultConstPtr ar);
   void outputCPPHelper(CodeGenerator &cg, AnalysisResultPtr ar,
                        bool classes = true);
 };

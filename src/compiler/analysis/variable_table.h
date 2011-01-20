@@ -188,7 +188,7 @@ public:
    * Called to note whether a class variable overrides
    * a definition in a base class.
    */
-  void markOverride(AnalysisResultConstPtr ar, const std::string &name);
+  void markOverride(AnalysisResultPtr ar, const std::string &name);
 
   /**
    * Called when a variable is used or being evaluated (r-value).
@@ -240,6 +240,8 @@ public:
   void addNeeded(const std::string &name);
   void clearUsed();
   void addStaticVariable(Symbol *sym, AnalysisResultConstPtr ar,
+                         bool member = false);
+  void addStaticVariable(Symbol *sym, AnalysisResultPtr ar,
                          bool member = false);
 
 

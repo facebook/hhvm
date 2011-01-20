@@ -154,12 +154,11 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void UnaryOpExpression::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
+void UnaryOpExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   if (m_op == T_EVAL) {
     ConstructPtr self = shared_from_this();
     Compiler::Error(Compiler::UseEvaluation, self);
-    dynamic_pointer_cast<FileScope>(scope)->
-      setAttribute(FileScope::ContainsLDynamicVariable);
+    scope->setAttribute(FileScope::ContainsLDynamicVariable);
   }
 }
 

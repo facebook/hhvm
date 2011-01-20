@@ -35,7 +35,7 @@ public:
   ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
 
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
+  virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope);
 
   virtual bool isRefable(bool checkError = false) const {
     if (checkError) return true;

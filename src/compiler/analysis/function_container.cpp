@@ -36,7 +36,7 @@ FunctionContainer::FunctionContainer() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-bool FunctionContainer::addFunction(AnalysisResultPtr ar,
+bool FunctionContainer::addFunction(AnalysisResultConstPtr ar,
                                     FunctionScopePtr funcScope) {
   if (ar->declareFunction(funcScope)) {
     m_functions[funcScope->getName()].push_back(funcScope);

@@ -85,9 +85,8 @@ int MethodStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultPtr ar,
-                                                 FileScopePtr fs,
-                                                 bool method) {
+FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
+                                                 FileScopePtr fs) {
   int minParam, maxParam;
   ConstructPtr self = shared_from_this();
   minParam = maxParam = 0;
@@ -141,8 +140,8 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultPtr ar,
   return funcScope;
 }
 
-void MethodStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
-  ClassScopePtr classScope = dynamic_pointer_cast<ClassScope>(scope);
+void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
+                                   ClassScopePtr classScope) {
   FunctionScopeRawPtr fs = getFunctionScope();
 
   classScope->addFunction(ar, fs);
@@ -277,6 +276,12 @@ void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
       }
     }
     FunctionScope::RecordRefParamInfo(m_name, funcScope);
+  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    TypePtr ret = funcScope->getReturnType();
+    if (ret && ret->isSpecificObject()) {
+      FileScopePtr fs = getFileScope();
+      if (fs) fs->addClassDependency(ar, ret->getName());
+    }
   }
 }
 

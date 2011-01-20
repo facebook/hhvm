@@ -199,14 +199,8 @@ TypePtr ScalarExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   return TypePtr();
 }
 
-TypePtr ScalarExpression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
+TypePtr ScalarExpression::inferenceImpl(AnalysisResultConstPtr ar, TypePtr type,
                                         bool coerce) {
-  if (ar->getPhase() == AnalysisResult::FirstInference &&
-      getScope()->isFirstPass() &&
-      isLiteralString() && m_value.find(' ') == string::npos) {
-    setDynamicByIdentifier(ar, m_value);
-  }
-
   TypePtr actualType;
   switch (m_type) {
   case T_STRING:
@@ -239,6 +233,17 @@ TypePtr ScalarExpression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
   }
 
   return checkTypesImpl(ar, type, actualType, coerce);
+}
+
+TypePtr ScalarExpression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
+                                        bool coerce) {
+  if (ar->getPhase() == AnalysisResult::FirstInference &&
+      getScope()->isFirstPass() &&
+      isLiteralString() && m_value.find(' ') == string::npos) {
+    setDynamicByIdentifier(ar, m_value);
+  }
+
+  return inferenceImpl(ar, type, coerce);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

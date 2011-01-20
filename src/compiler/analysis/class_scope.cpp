@@ -104,9 +104,14 @@ std::string ClassScope::getId(CodeGenerator &cg) const {
     boost::lexical_cast<std::string>(m_redeclaring);
 }
 
+bool ClassScope::NeedStaticArray(ClassScopePtr cls, FunctionScopePtr func) {
+  return cls && cls->getAttribute(NotFinal) && !func->isPrivate();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void ClassScope::derivedMagicMethods(ClassScopePtr super) {
+  super->setAttribute(NotFinal);
   if (m_attribute & (HasUnknownPropGetter|MayHaveUnknownPropGetter)) {
     super->setAttribute(MayHaveUnknownPropGetter);
   }
@@ -1293,7 +1298,8 @@ void ClassScope::outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
   cg_indentEnd("};\n");
 }
 
-bool ClassScope::addFunction(AnalysisResultPtr ar, FunctionScopePtr funcScope) {
+bool ClassScope::addFunction(AnalysisResultConstPtr ar,
+                             FunctionScopePtr funcScope) {
   FunctionScopePtrVec &funcs = m_functions[funcScope->getName()];
   if (funcs.size() == 1) {
     funcs[0]->setRedeclaring(0);

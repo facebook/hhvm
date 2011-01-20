@@ -89,10 +89,39 @@ public:
     GlobalSymbolTypeCount
   };
 
+  class Locker {
+  public:
+    Locker(const AnalysisResult *ar) :
+        m_ar(const_cast<AnalysisResult*>(ar)),
+        m_mutex(m_ar->getMutex()) {
+      m_mutex.lock();
+    }
+    Locker(AnalysisResultConstPtr ar) :
+        m_ar(const_cast<AnalysisResult*>(ar.get())),
+        m_mutex(m_ar->getMutex()) {
+      m_mutex.lock();
+    }
+    Locker(const Locker &l) : m_ar(l.m_ar), m_mutex(l.m_mutex) {
+      const_cast<Locker&>(l).m_ar = 0;
+    }
+    ~Locker() {
+      if (m_ar) m_mutex.unlock();
+    }
+    AnalysisResultPtr get() const {
+      return m_ar->shared_from_this();
+    }
+    AnalysisResult *operator->() const {
+      return m_ar;
+    }
+  private:
+    AnalysisResult *m_ar;
+    Mutex &m_mutex;
+  };
+
 public:
   AnalysisResult();
   Mutex &getMutex() { return m_mutex;}
-
+  Locker lock() const { return Locker(this); }
   void setPackage(Package *package) { m_package = package;}
   void setParseOnDemand(bool v) { m_parseOnDemand = v;}
   bool isParseOnDemand() { return m_package && m_parseOnDemand;}
@@ -107,6 +136,7 @@ public:
    * extra file appended to parsed code.
    */
   void appendExtraCode(const std::string &key, const std::string &code);
+  void appendExtraCode(const std::string &key, const std::string &code) const;
 
   Phase getPhase() const { return m_phase;}
   void setPhase(Phase phase) { m_phase = phase;}
@@ -215,8 +245,8 @@ public:
   /**
    * Declarations
    */
-  bool declareFunction(FunctionScopePtr funcScope);
-  bool declareClass(ClassScopePtr classScope);
+  bool declareFunction(FunctionScopePtr funcScope) const;
+  bool declareClass(ClassScopePtr classScope) const;
   void declareUnknownClass(const std::string &name);
   bool declareConst(FileScopePtr fs, const std::string &name);
 
@@ -250,14 +280,15 @@ public:
   bool checkClassPresent(ConstructPtr cs, const std::string &name) const;
   FunctionScopePtr findFunction(const std::string &funcName) const ;
   FunctionScopePtr findHelperFunction(const std::string &funcName) const;
-  BlockScopeConstPtr findConstantDeclarer(const std::string &constName) const;
+  BlockScopeConstPtr findConstantDeclarer(const std::string &constName) const {
+    return const_cast<AnalysisResult*>(this)->findConstantDeclarer(constName);
+  }
+  BlockScopePtr findConstantDeclarer(const std::string &constName);
+
   bool isConstantDeclared(const std::string &constName) const;
   bool isConstantRedeclared(const std::string &constName) const;
   bool isSystemConstant(const std::string &constName) const;
   bool isBaseSysRsrcClass(const std::string &className) const;
-  void addNonFinal(const std::string &className);
-  bool isNonFinalClass(const std::string &className) const;
-  bool needStaticArray(ClassScopePtr cls, FunctionScopePtr func) const;
 
   /**
    * For function declaration parsing.
@@ -339,7 +370,6 @@ private:
   StringToFileScopePtrMap m_constDecs;
   std::set<std::string> m_constRedeclared;
   std::set<std::string> m_baseSysRsrcClasses;
-  std::set<std::string> m_nonFinalClasses;
 
   bool m_dynamicClass;
   bool m_dynamicFunction;

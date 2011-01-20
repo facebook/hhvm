@@ -208,7 +208,7 @@ class SymbolTable : public boost::enable_shared_from_this<SymbolTable>,
                     public JSON::ISerializable {
 public:
   static Mutex AllSymbolTablesMutex;
-  static SymbolTablePtrVec AllSymbolTables; // for stats purpose
+  static SymbolTablePtrList AllSymbolTables; // for stats purpose
   static void CountTypes(std::map<std::string, int> &counts);
   BlockScope *getScopePtr() const { return &m_blockScope; }
   BlockScopeRawPtr getBlockScope() { return BlockScopeRawPtr(&m_blockScope); }
@@ -252,14 +252,14 @@ public:
    * Find a symbol's inferred type.
    */
   TypePtr getType(const std::string &name);
-  TypePtr getFinalType(const std::string &name);
+  TypePtr getFinalType(const std::string &name) const;
 
   /**
    * Find declaration construct.
    */
   bool isExplicitlyDeclared(const std::string &name) const;
-  ConstructPtr getDeclaration(const std::string &name);
-  ConstructPtr getValue(const std::string &name);
+  ConstructPtr getDeclaration(const std::string &name) const;
+  ConstructPtr getValue(const std::string &name) const;
 
   /* Whether this constant is brought in by a separable extension */
   void setSepExtension(const std::string &name);

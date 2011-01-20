@@ -38,7 +38,7 @@ public:
   ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
 
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
+  virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
 
   void setDocumentRoot() { m_documentRoot = true;}
   bool isDocumentRoot() { return m_documentRoot;}

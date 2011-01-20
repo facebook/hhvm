@@ -33,7 +33,7 @@ public:
   StatementPtr preOptimize(AnalysisResultConstPtr ar);
 
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
+  virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope);
 
 private:
   ExpressionListPtr m_exp;

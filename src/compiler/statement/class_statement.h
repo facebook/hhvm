@@ -38,7 +38,7 @@ public:
   virtual bool hasImpl() const;
 
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
+  virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
   bool ignored() const { return m_ignored;}
 
   virtual std::string getName() const;

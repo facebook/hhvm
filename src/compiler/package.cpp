@@ -177,6 +177,22 @@ FileCachePtr Package::getFileCache() {
       m_fileCache->write(file, fullpath.c_str());
     }
   }
+
+  for (map<string,string>::const_iterator
+         iter = m_discoveredStaticFiles.begin();
+       iter != m_discoveredStaticFiles.end(); ++iter) {
+    const char *file = iter->first.c_str();
+    if (!m_fileCache->fileExists(file)) {
+      const char *fullpath = iter->second.c_str();
+      Logger::Verbose("saving %s", fullpath[0] ? fullpath : file);
+      if (fullpath[0]) {
+        m_fileCache->write(file, fullpath);
+      } else {
+        m_fileCache->write(file);
+      }
+    }
+  }
+
   return m_fileCache;
 }
 
@@ -272,18 +288,18 @@ bool Package::parseImpl(const char *fileName) {
     return false;
   }
 
-  Lock lock(m_mutex);
   m_lineCount += lines;
   struct stat fst;
   stat(fullPath.c_str(), &fst);
   m_charCount += fst.st_size;
 
-  if (!m_fileCache->fileExists(fileName) &&
-      m_extraStaticFiles.find(fileName) == m_extraStaticFiles.end()) {
+  Lock lock(m_mutex);
+  if (m_extraStaticFiles.find(fileName) == m_extraStaticFiles.end() &&
+      m_discoveredStaticFiles.find(fileName) == m_discoveredStaticFiles.end()) {
     if (Option::CachePHPFile) {
-      m_fileCache->write(fileName, fullPath.c_str()); // name + content
+      m_discoveredStaticFiles[fileName] = fullPath;
     } else {
-      m_fileCache->write(fileName); // just name, without content
+      m_discoveredStaticFiles[fileName] = "";
     }
   }
   return true;

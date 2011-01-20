@@ -47,7 +47,7 @@ FileScope::FileScope(const string &fileName, int fileSize)
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-FunctionScopePtr FileScope::setTree(AnalysisResultPtr ar,
+FunctionScopePtr FileScope::setTree(AnalysisResultConstPtr ar,
                                     StatementListPtr tree) {
   m_tree = tree;
 
@@ -63,7 +63,7 @@ FunctionScopePtr FileScope::setTree(AnalysisResultPtr ar,
   return createPseudoMain(ar);
 }
 
-bool FileScope::addClass(AnalysisResultPtr ar, ClassScopePtr classScope) {
+bool FileScope::addClass(AnalysisResultConstPtr ar, ClassScopePtr classScope) {
   if (ar->declareClass(classScope)) {
     m_classes[classScope->getName()].push_back(classScope);
     return true;
@@ -143,7 +143,7 @@ void FileScope::declareConstant(AnalysisResultPtr ar, const string &name) {
 void FileScope::addConstant(const string &name, TypePtr type,
                             ExpressionPtr value,
                             AnalysisResultPtr ar, ConstructPtr con) {
-  BlockScopeConstPtr f = ar->findConstantDeclarer(name);
+  BlockScopePtr f = ar->findConstantDeclarer(name);
   f->getConstants()->add(name, type, value, ar, con);
 }
 
@@ -200,7 +200,7 @@ const string &FileScope::pseudoMainName() {
   return m_pseudoMainName;
 }
 
-FunctionScopePtr FileScope::createPseudoMain(AnalysisResultPtr ar) {
+FunctionScopePtr FileScope::createPseudoMain(AnalysisResultConstPtr ar) {
   StatementListPtr st = m_tree;
   FunctionStatementPtr f
     (new FunctionStatement(BlockScopePtr(), LocationPtr(),

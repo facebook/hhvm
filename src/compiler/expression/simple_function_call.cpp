@@ -123,11 +123,8 @@ void SimpleFunctionCall::deepCopy(SimpleFunctionCallPtr exp) {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void SimpleFunctionCall::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
+void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   if (m_class) return;
-
-  FileScopePtr fs = dynamic_pointer_cast<FileScope>(scope);
-  assert(fs);
 
   ConstructPtr self = shared_from_this();
   if (m_className.empty()) {
@@ -294,7 +291,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
           // handling define("CONSTANT", ...);
           ExpressionPtr value = (*m_params)[1];
-          BlockScopeConstPtr block = ar->findConstantDeclarer(varName);
+          BlockScopePtr block = ar->findConstantDeclarer(varName);
           ConstantTablePtr constants = block->getConstants();
           if (constants != ar->getConstants()) {
             constants->add(varName, Type::Some, value, ar, self);
@@ -326,7 +323,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
             ConstantTablePtr constants = ar->getConstants();
             if (!constants->isPresent(symbol)) {
               // user constant
-              BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
+              BlockScopePtr block = ar->findConstantDeclarer(symbol);
               if (block) { // found the constant
                 constants = block->getConstants();
                 // set to be dynamic
@@ -679,7 +676,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
         string symbol = name->getLiteralString();
         switch (m_type) {
         case DefineFunction: {
-          ConstantTablePtr constants = ar->getConstants();
+          ConstantTableConstPtr constants = ar->getConstants();
           // system constant
           if (constants->isPresent(symbol)) {
             break;
@@ -703,7 +700,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
               symbol == "null") {
             return CONSTANT("true");
           }
-          ConstantTablePtr constants = ar->getConstants();
+          ConstantTableConstPtr constants = ar->getConstants();
           // system constant
           if (constants->isPresent(symbol) && !constants->isDynamic(symbol)) {
             return CONSTANT("true");
@@ -874,7 +871,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         if (!varName.empty()) {
           ExpressionPtr value = (*m_params)[1];
           TypePtr varType = value->inferAndCheck(ar, Type::Some, false);
-          BlockScopeConstPtr block = ar->findConstantDeclarer(varName);
+          BlockScopePtr block = ar->findConstantDeclarer(varName);
           if (!block) {
             getFileScope()->declareConstant(ar, varName);
             block = ar->findConstantDeclarer(varName);

@@ -192,7 +192,7 @@ string IncludeExpression::CheckInclude(ConstructPtr includeExp,
   return included;
 }
 
-void IncludeExpression::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
+void IncludeExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   m_include = CheckInclude(shared_from_this(), m_exp, m_documentRoot);
 }
 

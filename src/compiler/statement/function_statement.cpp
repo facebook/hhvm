@@ -55,16 +55,14 @@ StatementPtr FunctionStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void FunctionStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
-  // note it's important to add to file scope, not a pushed FunctionContainer,
+void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+  // note it's important to add to scope, not a pushed FunctionContainer,
   // as a function may be declared inside a class's method, yet this function
   // is a global function, not a class method.
-  FileScopePtr fileScope = dynamic_pointer_cast<FileScope>(scope);
-  if (!fileScope->addFunction(ar, onInitialParse(ar, fileScope, false))) {
+  if (!scope->addFunction(ar, onInitialParse(ar, scope))) {
     m_ignored = true;
     return;
   }
-  ar->recordFunctionSource(m_name, m_loc, fileScope->getName());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,6 +78,9 @@ void FunctionStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   // redeclared functions are automatically volatile
   if (func && fs->isVolatile()) {
     func->getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
+  }
+  if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
+    ar->recordFunctionSource(m_name, m_loc, getFileScope()->getName());
   }
   MethodStatement::analyzeProgramImpl(ar);
 }

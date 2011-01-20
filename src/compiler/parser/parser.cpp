@@ -342,7 +342,6 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
         dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
     out->exp = call;
 
-    Lock lock(m_ar->getMutex());
     call->onParse(m_ar, m_file);
   }
 }
@@ -548,8 +547,6 @@ void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
     {
       IncludeExpressionPtr exp = NEW_EXP(IncludeExpression, operand->exp, op);
       out->exp = exp;
-
-      Lock lock(m_ar->getMutex());
       exp->onParse(m_ar, m_file);
     }
     break;
@@ -558,8 +555,6 @@ void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
       UnaryOpExpressionPtr exp = NEW_EXP(UnaryOpExpression, operand->exp, op,
                                          front);
       out->exp = exp;
-
-      Lock lock(m_ar->getMutex());
       exp->onParse(m_ar, m_file);
     }
     break;
@@ -654,7 +649,6 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
     out->stmt = func;
     func->setLocation(loc);
     {
-      Lock lock(m_ar->getMutex());
       func->onParse(m_ar, m_file);
     }
     completeScope(func->getFunctionScope());
@@ -676,7 +670,6 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
     out->stmt = func;
 
     {
-      Lock lock(m_ar->getMutex());
       func->onParse(m_ar, m_file);
     }
     completeScope(func->getFunctionScope());
@@ -731,7 +724,6 @@ void Parser::onClass(Token &out, Token &type, Token &name, Token &base,
      popComment(), stmtList);
   out->stmt = cls;
   {
-    Lock lock(m_ar->getMutex());
     cls->onParse(m_ar, m_file);
   }
   completeScope(cls->getClassScope());
@@ -752,7 +744,6 @@ void Parser::onInterface(Token &out, Token &name, Token &base, Token &stmt) {
      dynamic_pointer_cast<ExpressionList>(base->exp), popComment(), stmtList);
   out->stmt = intf;
   {
-    Lock lock(m_ar->getMutex());
     intf->onParse(m_ar, m_file);
   }
   completeScope(intf->getClassScope());
@@ -830,8 +821,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
       mth->setLocation(loc);
     }
     {
-      Lock lock(m_ar->getMutex());
-      completeScope(mth->onInitialParse(m_ar, m_file, true));
+      completeScope(mth->onInitialParse(m_ar, m_file));
     }
     create_generator(this, out, params, name, closureName, m_clsName.c_str(),
                      &modifiers, hasCallToGetArgs);
@@ -843,8 +833,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
     if (reloc) {
       mth->setLocation(loc);
     }
-    Lock lock(m_ar->getMutex());
-    completeScope(mth->onInitialParse(m_ar, m_file, true));
+    completeScope(mth->onInitialParse(m_ar, m_file));
   }
 
   if (hasType(ret)) {
@@ -873,7 +862,6 @@ void Parser::saveParseTree(Token &tree) {
     m_tree = NEW_STMT0(StatementList);
   }
 
-  Lock lock(m_ar->getMutex());
   FunctionScopePtr pseudoMain = m_file->setTree(m_ar, m_tree);
   completeScope(pseudoMain);
   pseudoMain->setOuterScope(m_file);

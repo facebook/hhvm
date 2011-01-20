@@ -85,8 +85,10 @@ public:
   void setName(const std::string name) { m_name = name;}
   virtual std::string getId(CodeGenerator &cg) const;
   StatementPtr getStmt() const { return m_stmt;}
-  VariableTablePtr getVariables() const { return m_variables;}
-  ConstantTablePtr getConstants() const { return m_constants;}
+  VariableTableConstPtr getVariables() const { return m_variables;}
+  ConstantTableConstPtr getConstants() const { return m_constants;}
+  VariableTablePtr getVariables() { return m_variables;}
+  ConstantTablePtr getConstants() { return m_constants;}
   ClassScopeRawPtr getContainingClass();
   FunctionScopeRawPtr getContainingFunction() const {
     return FunctionScopeRawPtr(is(FunctionScope) ?

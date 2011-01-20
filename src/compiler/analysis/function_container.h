@@ -46,7 +46,7 @@ public:
   /**
    * Called by parser to add a new function.
    */
-  virtual bool addFunction(AnalysisResultPtr ar,
+  virtual bool addFunction(AnalysisResultConstPtr ar,
                            FunctionScopePtr funcScope);
 
   /**

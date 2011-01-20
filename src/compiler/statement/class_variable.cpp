@@ -49,7 +49,8 @@ StatementPtr ClassVariable::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ClassVariable::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
+void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
+                                 ClassScopePtr scope) {
   ModifierExpressionPtr modifiers =
     scope->setModifiers(m_modifiers);
 
@@ -66,7 +67,7 @@ void ClassVariable::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
         Compiler::Error(Compiler::DeclaredVariableTwice, exp);
         m_declaration->removeElement(i--);
       } else {
-        assignment->onParse(ar, scope);
+        assignment->onParseRecur(ar, scope);
       }
     } else {
       const std::string &name =

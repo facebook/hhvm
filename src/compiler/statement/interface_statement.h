@@ -39,7 +39,7 @@ public:
   virtual bool hasImpl() const;
   virtual int getRecursiveCount() const;
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
+  virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
 
   virtual std::string getName() const;
   const std::string &getOriginalName() const { return m_originalName;}

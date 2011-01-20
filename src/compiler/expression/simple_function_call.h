@@ -49,7 +49,7 @@ public:
   virtual int getLocalEffects() const;
 
   // implementing IParseHandler
-  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope);
+  virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr fs);
 
   // extensible analysis by defining a subclass to be RealSimpleFunctionCall
   virtual void onAnalyzeInclude(AnalysisResultPtr ar) {}

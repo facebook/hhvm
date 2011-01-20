@@ -63,7 +63,8 @@ int InterfaceStatement::getRecursiveCount() const {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void InterfaceStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
+void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
+                                 FileScopePtr scope) {
   vector<string> bases;
   if (m_base) m_base->getStrings(bases);
 
@@ -78,7 +79,7 @@ void InterfaceStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
   if (m_stmt) {
     for (int i = 0; i < m_stmt->getCount(); i++) {
       IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>((*m_stmt)[i]);
-      ph->onParse(ar, classScope);
+      ph->onParseRecur(ar, classScope);
     }
   }
 }

@@ -394,7 +394,7 @@ void Option::Load(Hdf &config) {
 
   ParserThreadCount = config["ParserThreadCount"].getInt32(0);
   if (ParserThreadCount <= 0) {
-    ParserThreadCount = Process::GetCPUCount() * 2;
+    ParserThreadCount = Process::GetCPUCount();
   }
 
   RTTIOutputFile = config["RTTIOutputFile"].getString();

@@ -68,7 +68,8 @@ public:
     HasConstructor                = 0x0004,
     ClassNameConstructor          = 0x0008,
     HasDestructor                 = 0x0010,
-    DECLARE_MAGIC(Has, HasDestructor),
+    NotFinal                      = 0x0020,
+    DECLARE_MAGIC(Has, NotFinal),
     DECLARE_MAGIC(MayHave, HasArrayAccess),
     DECLARE_MAGIC(Inherits, MayHaveArrayAccess)
   };
@@ -323,6 +324,7 @@ public:
   void outputCPPGlobalTableWrappersImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar);
 
+  static bool NeedStaticArray(ClassScopePtr cls, FunctionScopePtr func);
   void inheritedMagicMethods(ClassScopePtr super);
   void derivedMagicMethods(ClassScopePtr super);
   /* true if it might, false if it doesnt */
@@ -341,7 +343,8 @@ public:
   /**
    * Override function container
    */
-  virtual bool addFunction(AnalysisResultPtr ar, FunctionScopePtr funcScope);
+  virtual bool addFunction(AnalysisResultConstPtr ar,
+                           FunctionScopePtr funcScope);
 
   enum TableType {
     Invoke,

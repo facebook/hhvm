@@ -60,7 +60,7 @@ StatementPtr ClassStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ClassStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
+void ClassStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   ClassScope::KindOf kindOf = ClassScope::KindOfObjectClass;
   switch (m_type) {
   case T_CLASS:     kindOf = ClassScope::KindOfObjectClass;   break;
@@ -70,11 +70,9 @@ void ClassStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
     ASSERT(false);
   }
 
-  FileScopePtr fs = dynamic_pointer_cast<FileScope>(scope);
   vector<string> bases;
   if (!m_parent.empty()) {
     bases.push_back(m_parent);
-    ar->addNonFinal(m_parent);
   }
   if (m_base) m_base->getStrings(bases);
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
@@ -86,7 +84,6 @@ void ClassStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
     m_ignored = true;
     return;
   }
-  ar->recordClassSource(m_name, m_loc, fs->getName());
 
   if (m_stmt) {
     bool seenConstruct = false;
@@ -122,7 +119,7 @@ void ClassStatement::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
         }
       }
       IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>((*m_stmt)[i]);
-      ph->onParse(ar, classScope);
+      ph->onParseRecur(ar, classScope);
     }
   }
 }
@@ -144,6 +141,10 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   }
 
   checkVolatile(ar);
+
+  if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
+    ar->recordClassSource(m_name, m_loc, getFileScope()->getName());
+  }
 
   if (m_stmt) {
     m_stmt->analyzeProgram(ar);

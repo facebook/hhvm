@@ -83,6 +83,7 @@ private:
   std::set<std::string> m_directories;
   std::set<std::string> m_staticDirectories;
   std::set<std::string> m_extraStaticFiles;
+  std::map<std::string,std::string> m_discoveredStaticFiles;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -45,7 +45,8 @@ StatementPtr ClassConstant::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ClassConstant::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
+void ClassConstant::onParseRecur(AnalysisResultConstPtr ar,
+                                 ClassScopePtr scope) {
   ConstantTablePtr constants = scope->getConstants();
 
   for (int i = 0; i < m_exp->getCount(); i++) {
@@ -59,7 +60,7 @@ void ClassConstant::onParse(AnalysisResultPtr ar, BlockScopePtr scope) {
       Compiler::Error(Compiler::DeclaredConstantTwice, assignment);
       m_exp->removeElement(i--);
     } else {
-      assignment->onParse(ar, scope);
+      assignment->onParseRecur(ar, scope);
     }
   }
 }

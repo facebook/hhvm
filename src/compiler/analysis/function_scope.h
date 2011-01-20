@@ -50,7 +50,7 @@ public:
   /**
    * User defined functions.
    */
-  FunctionScope(AnalysisResultPtr ar, bool method,
+  FunctionScope(AnalysisResultConstPtr ar, bool method,
                 const std::string &name, StatementPtr stmt,
                 bool reference, int minParam, int maxParam,
                 ModifierExpressionPtr modifiers, int attribute,
@@ -184,7 +184,7 @@ public:
    * What is the inferred type of this function's return.
    */
   void pushReturnType();
-  void setReturnType(AnalysisResultPtr ar, TypePtr type);
+  void setReturnType(AnalysisResultConstPtr ar, TypePtr type);
   TypePtr getReturnType() const {
     return m_prevReturn ? m_prevReturn : m_returnType;
   }

@@ -224,7 +224,7 @@ TypePtr Expression::getCPPType() {
   return Type::Variant;
 }
 
-TypePtr Expression::propagateTypes(AnalysisResultPtr ar, TypePtr inType) {
+TypePtr Expression::propagateTypes(AnalysisResultConstPtr ar, TypePtr inType) {
   ExpressionPtr e = this->getCanonPtr();
   TypePtr ret = inType;
 
@@ -288,7 +288,8 @@ TypePtr Expression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
   return checkTypesImpl(ar, type, actualType, coerce);
 }
 
-TypePtr Expression::checkTypesImpl(AnalysisResultPtr ar, TypePtr expectedType,
+TypePtr Expression::checkTypesImpl(AnalysisResultConstPtr ar,
+                                   TypePtr expectedType,
                                    TypePtr actualType, bool coerce) {
   TypePtr ret;
   actualType = propagateTypes(ar, actualType);

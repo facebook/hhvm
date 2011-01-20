@@ -195,7 +195,7 @@ TypePtr ConstantExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     actualType = Type::Variant;
     m_valid = true;
   } else {
-    BlockScopeConstPtr scope = ar->findConstantDeclarer(m_name);
+    BlockScopePtr scope = ar->findConstantDeclarer(m_name);
     if (!scope) {
       scope = getFileScope();
       getFileScope()->declareConstant(ar, m_name);

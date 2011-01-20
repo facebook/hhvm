@@ -127,11 +127,12 @@ void Symbol::import(BlockScopeRawPtr scope, const Symbol &src_sym) {
 // statics
 
 Mutex SymbolTable::AllSymbolTablesMutex;
-SymbolTablePtrVec SymbolTable::AllSymbolTables;
+SymbolTablePtrList SymbolTable::AllSymbolTables;
 
 void SymbolTable::CountTypes(std::map<std::string, int> &counts) {
-  for (unsigned int i = 0; i < AllSymbolTables.size(); i++) {
-    AllSymbolTables[i]->countTypes(counts);
+  for (SymbolTablePtrList::iterator it = AllSymbolTables.begin(),
+         end = AllSymbolTables.end(); it != end; ++it) {
+    (*it)->countTypes(counts);
   }
 }
 
@@ -225,7 +226,7 @@ TypePtr SymbolTable::getType(const std::string &name) {
   return TypePtr();
 }
 
-TypePtr SymbolTable::getFinalType(const std::string &name) {
+TypePtr SymbolTable::getFinalType(const std::string &name) const {
   if (Symbol *sym = getSymbol(name)) {
     return sym->getFinalType();
   }
@@ -239,14 +240,14 @@ bool SymbolTable::isExplicitlyDeclared(const std::string &name) const {
   return false;
 }
 
-ConstructPtr SymbolTable::getDeclaration(const std::string &name) {
+ConstructPtr SymbolTable::getDeclaration(const std::string &name) const {
   if (Symbol *sym = getSymbol(name)) {
     return sym->getDeclaration();
   }
   return ConstructPtr();
 }
 
-ConstructPtr SymbolTable::getValue(const std::string &name) {
+ConstructPtr SymbolTable::getValue(const std::string &name) const {
   if (Symbol *sym = getSymbol(name)) {
     return sym->getValue();
   }

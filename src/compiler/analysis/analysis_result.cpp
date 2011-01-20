@@ -71,10 +71,16 @@ AnalysisResult::AnalysisResult()
 void AnalysisResult::appendExtraCode(const std::string &key,
                                      const std::string &code) {
   string &extraCode = m_extraCodes[key];
+
   if (extraCode.empty()) {
     extraCode = "<?php\n";
   }
   extraCode += code + "\n";
+}
+
+void AnalysisResult::appendExtraCode(const std::string &key,
+                                     const std::string &code) const {
+  lock()->appendExtraCode(key, code);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -182,8 +188,8 @@ FunctionScopePtr AnalysisResult::findHelperFunction(const std::string &
   return FunctionScopePtr();
 }
 
-BlockScopeConstPtr AnalysisResult::findConstantDeclarer(
-  const std::string &name) const {
+BlockScopePtr AnalysisResult::findConstantDeclarer(
+  const std::string &name) {
   if (getConstants()->isPresent(name)) return shared_from_this();
   StringToFileScopePtrMap::const_iterator iter = m_constDecs.find(name);
   if (iter != m_constDecs.end()) return iter->second;
@@ -352,23 +358,10 @@ void AnalysisResult::countReturnTypes(std::map<std::string, int> &counts) {
   }
 }
 
-void AnalysisResult::addNonFinal(const std::string &className) {
-  m_nonFinalClasses.insert(className);
-}
-
-bool AnalysisResult::isNonFinalClass(const std::string &className) const {
-  return m_nonFinalClasses.find(className) != m_nonFinalClasses.end();
-}
-
-bool AnalysisResult::needStaticArray(ClassScopePtr cls,
-                                     FunctionScopePtr func) const {
-  return cls && isNonFinalClass(cls->getName()) && !func->isPrivate();
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
-bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) {
+bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) const {
   ASSERT(m_phase <= AnalyzeInclude);
 
   string fname = funcScope->getName();
@@ -380,7 +373,7 @@ bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) {
   return true;
 }
 
-bool AnalysisResult::declareClass(ClassScopePtr classScope) {
+bool AnalysisResult::declareClass(ClassScopePtr classScope) const {
   ASSERT(m_phase <= AnalyzeInclude);
 
   string cname = classScope->getName();
@@ -389,12 +382,12 @@ bool AnalysisResult::declareClass(ClassScopePtr classScope) {
     return false;
   }
 
-  AnalysisResultPtr ar = shared_from_this();
   int mask =
     (m_classForcedVariants[0] ? VariableTable::NonPrivateNonStaticVars : 0) |
     (m_classForcedVariants[1] ? VariableTable::NonPrivateStaticVars : 0);
 
   if (mask) {
+    AnalysisResultConstPtr ar = shared_from_this();
     classScope->getVariables()->forceVariants(ar, mask);
   }
   return true;

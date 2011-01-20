@@ -41,6 +41,8 @@ public:
   virtual bool isScalar() const { return true;}
   virtual bool isLiteralString() const;
   virtual std::string getLiteralString() const;
+  TypePtr inferenceImpl(AnalysisResultConstPtr ar, TypePtr type,
+                        bool coerce);
   virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                 bool coerce);
   virtual bool getScalarValue(Variant &value) {

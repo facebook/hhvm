@@ -38,14 +38,30 @@ DECLARE_BOOST_TYPES(FileScope);
 class AstWalkerStateVec;
 
 class IParseHandler {
-public:
-  virtual ~IParseHandler() {}
-
   /**
    * To avoid iteration of parse tree, we move any work that can be done
    * in parse phase into this function, so to speed up static analysis.
    */
-  virtual void onParse(AnalysisResultPtr ar, BlockScopePtr scope) = 0;
+public:
+  virtual ~IParseHandler() {}
+
+  /**
+   * onParse is called by the parser when the construct has just been parsed
+   * to allow it to do any necessary work
+   */
+  virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
+    assert(0);
+  }
+  /**
+   * onParseRecur is called by a parent construct (ultimately a class or
+   * interface).
+   * This is done because at the time that onParse would be called for
+   * (eg) a method, the ClassScope doesnt exist. So we wait until onParse
+   * is called for the class, and it calls onParseRecur for its children.
+   */
+  virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope) {
+    assert(0);
+  }
 };
 
 /**

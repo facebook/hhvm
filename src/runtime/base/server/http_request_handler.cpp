@@ -152,7 +152,10 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   const char *data; int len;
   size_t pos = path.rfind('.');
-  const char *ext = (pos != string::npos) ? (path.c_str() + pos + 1) : NULL;
+  const char *ext =
+    (pos != string::npos) &&
+    path.find('/', pos) == string::npos // no extention in ./foo or ../bar
+      ? (path.c_str() + pos + 1) : NULL;
   bool cachableDynamicContent =
     (!RuntimeOption::StaticFileGenerators.empty() &&
      RuntimeOption::StaticFileGenerators.find(path) !=

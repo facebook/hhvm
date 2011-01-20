@@ -324,7 +324,12 @@ bool RequestEvalState::includeFile(Variant &res, CStrRef path, bool once,
                                    LVariableTable* variables,
                                    const char *currentDir) {
   RequestEvalState *self = s_res.get();
-  string spath(path.data());
+
+  // canonicalize the path and also check whether it is in an allowed
+  // directory.
+  String translated = File::TranslatePath(path, false);
+
+  string spath(translated.data());
   struct stat s;
   if (!FileRepository::findFile(spath, s, currentDir)) return false;
   map<string, PhpFile*>::const_iterator it = self->m_evaledFiles.find(spath);

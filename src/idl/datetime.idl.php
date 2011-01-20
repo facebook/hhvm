@@ -7,6 +7,8 @@
  * any changes that are not part of schema. Use "note" field to comment on
  * schema itself, and "note" fields are not used in any code generation but
  * only staying within this file.
+ *
+ * @nolint
  */
 ///////////////////////////////////////////////////////////////////////////////
 // Preamble: C++ code inserted at beginning of ext_{name}.h
@@ -47,6 +49,11 @@ CPP
 //        'value' => default value of the argument
 //        'desc'  => description of the argument
 //      )
+//   'taint_observer' => taint propagation information
+//     array (
+//       'set_mask' => which bits to set automatically
+//       'clear_mask' => which bits to clear automatically
+//     )
 // )
 
 DefineFunction(
@@ -73,6 +80,49 @@ DefineFunction(
         'name'   => "year",
         'type'   => Int32,
         'desc'   => "The year is between 1 and 32767 inclusive.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_add",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "object",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "interval",
+        'type'   => Object,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_create_from_format",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "format",
+        'type'   => String,
+      ),
+      array(
+        'name'   => "time",
+        'type'   => String,
+      ),
+      array(
+        'name'   => "timezone",
+        'type'   => Object,
+        'value'  => "null_object",
       ),
     ),
   ));
@@ -156,7 +206,74 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "date_diff",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "datetime1",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "datetime2",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "absolute",
+        'type'   => Boolean,
+        'value'  => "false",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "date_format",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => String,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "object",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "format",
+        'type'   => String,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_get_last_errors",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_interval_create_from_date_string",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "time",
+        'type'   => String,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_interval_format",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
@@ -237,6 +354,29 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "date_parse_from_format",
+    'desc'   => "Returns associative array with detailed info about given date.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => VariantVec,
+      'desc'   => "Returns associative array with detailed info about given date.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "format",
+        'type'   => String,
+        'desc'   => "Format accepted by DateTime::createFromFormat().",
+      ),
+      array(
+        'name'   => "date",
+        'type'   => String,
+        'desc'   => "String representing the date.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "date_parse",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -248,6 +388,25 @@ DefineFunction(
         'name'   => "date",
         'type'   => String,
         'desc'   => "Date in format accepted by strtotime().",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_sub",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "object",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "interval",
+        'type'   => Object,
       ),
     ),
   ));
@@ -399,6 +558,40 @@ DefineFunction(
         'name'   => "second",
         'type'   => Int32,
         'value'  => "0",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_timestamp_get",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "object",
+        'type'   => Object,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "date_timestamp_set",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Object,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "object",
+        'type'   => Object,
+      ),
+      array(
+        'name'   => "unixtimestamp",
+        'type'   => Int64,
       ),
     ),
   ));
@@ -711,7 +904,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strftime",
-    'desc'   => "Format the time and/or date according to locale settings. Month and weekday names and other language-dependent strings respect the current locale set with setlocale().\n\nNot all conversion specifiers may be supported by your C library, in which case they will not be supported by PHP's strftime(). Additionally, not all platforms support negative timestamps, so your date range may be limited to no earlier than the Unix epoch. This means that %e, %T, %R and, %D (and possibly others) - as well as dates prior to Jan 1, 1970 - will not work on Windows, some Linux distributions, and a few other operating systems. For Windows systems, a complete overview of supported conversion specifiers can be found at » MSDN.",
+    'desc'   => "Format the time and/or date according to locale settings. Month and weekday names and other language-dependent strings respect the current locale set with setlocale().\n\nNot all conversion specifiers may be supported by your C library, in which case they will not be supported by PHP's strftime(). Additionally, not all platforms support negative timestamps, so your date range may be limited to no earlier than the Unix epoch. This means that %e, %T, %R and, %D (and possibly others) - as well as dates prior to Jan 1, 1970 - will not work on Windows, some Linux distributions, and a few other operating systems. For Windows systems, a complete overview of supported conversion specifiers can be found at Â» MSDN.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
@@ -801,6 +994,33 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "what",
+        'type'   => Int64,
+        'value'  => "2047",
+      ),
+      array(
+        'name'   => "country",
+        'type'   => String,
+        'value'  => "null_string",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "timezone_location_get",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => VariantMap,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "object",
+        'type'   => Object,
+      ),
     ),
   ));
 
@@ -893,6 +1113,16 @@ DefineFunction(
       array(
         'name'   => "object",
         'type'   => Object,
+      ),
+      array(
+        'name'   => "timestamp_begin",
+        'type'   => Int64,
+        'value'  => "LLONG_MIN",
+      ),
+      array(
+        'name'   => "timestamp_end",
+        'type'   => Int64,
+        'value'  => "LLONG_MAX",
       ),
     ),
   ));
@@ -1038,6 +1268,77 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "createFromFormat",
+    'desc'   => "Procedural style DateTime date_create_from_format ( string \$format , string \$time [, DateTimeZone \$timezone ] ) Returns new DateTime object formatted according to the specified format.",
+    'flags'  =>  IsStatic | HasDocComment,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "Returns a new DateTime instance or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "format",
+        'type'   => String,
+        'desc'   => "The format that the passed in string should be in. See the formatting options below. In most cases, the same letters as for the date() can be used.\n\nThe following characters are recognized in the format parameter string format character Description Example parsable values Day --- --- d and j Day of the month, 2 digits with or without leading zeros 01 to 31 or 1 to 31 D and l A textual representation of a day Mon through Sun or Sunday through Saturday S English ordinal suffix for the day of the month, 2 characters. It's ignored while processing. st, nd, rd or th. z The day of the year (starting from 0) 0 through 365 Month --- --- F and M A textual representation of a month, such as January or Sept January through December or Jan through Dec m and n Numeric representation of a month, with or without leading zeros 01 through 12 or 1 through 12 Year --- --- Y A full numeric representation of a year, 4 digits Examples: 1999 or 2003 y A two digit representation of a year Examples: 99 or 03 Time --- --- a and A Ante meridiem and Post meridiem am or pm g and h 12-hour format of an hour with or without leading zero 1 through 12 or 01 through 12 G and H 24-hour format of an hour with or without leading zeros 0 through 23 or 00 through 23 i Minutes with leading zeros 00 to 59 s Seconds, with leading zeros 00 through 59 u Microseconds (up to six digits) Example: 45, 654321 Timezone --- --- e, O, P and T Timezone identifier, or difference to UTC in hours, or difference to UTC with colon between hours and minutes, or timezone abbreviation Examples: UTC, GMT, Atlantic/Azores or +0200 or +02:00 or EST, MDT Full Date/Time --- --- U Seconds since the Unix Epoch (January 1 1970 00:00:00 GMT) Example: 1292177455 Whitespace and Separators --- --- (space) One space or one tab Example: # One of the following separation symbol: ;, :, /, ., ,, -, ( or ) Example: / ;, :, /, ., ,, -, ( or ) The specified character. Example: - ? A random byte Example: ^ (Be aware that for UTF-8 characracters you might need more than one ?. In this case, using * is probably what you want instead) * Random bytes until the next separator or digit Example: * in Y-*-d with the string 2009-aWord-08 will match aWord ! Resets all fields (year, month, day, hour, minute, second, fraction and timzone information) to the Unix Epoch Without !, all fields will be set to the current date and time. | Resets all fields (year, month, day, hour, minute, second, fraction and timzone information) to the Unix Epoch if they have not been parsed yet Y-m-d| will set the year, month and day to the information found in the string to parse, and sets the hour, minute and second to 0. + If this format specifier is present, trailing data in the string will not cause an error, but a warning instead Use DateTime::getLastErrors() to find out whether trailing data was present.\n\nUnrecognized characters in the format string will cause the parsing to fail and an error message is appended to the returned structure. You can query error messages with DateTime::getLastErrors().\n\nIf format does not contain the character ! then portions of the generated time which are not specified in format will be set to the current system time.\n\nIf format contains the character !, then portions of the generated time not provided in format, as well as values to the left-hand side of the !, will be set to corresponding values from the Unix epoch.\n\nThe Unix epoch is 1970-01-01 00:00:00 UTC.",
+      ),
+      array(
+        'name'   => "time",
+        'type'   => String,
+        'desc'   => "String representing the time.",
+      ),
+      array(
+        'name'   => "timezone",
+        'type'   => Object,
+        'value'  => "null_object",
+        'desc'   => "A DateTimeZone object representing the desired time zone.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "add",
+    'desc'   => "Procedural style DateTime date_add ( DateTime \$object , DateInterval \$interval ) Adds the specified DateInterval object to the specified DateTime object.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "Returns the DateTime object for method chaining or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "interval",
+        'type'   => Object,
+        'desc'   => "DateTime object returned by date_create(). The function modifies this object.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "diff",
+    'desc'   => "Procedural style DateInterval date_diff ( DateTime \$datetime1 , DateTime \$datetime2 [, bool \$absolute = false ] ) Returns the difference between two DateTime objects.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "The DateInterval object representing the difference between the two dates or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "datetime2",
+        'type'   => Object,
+        'desc'   => "The date to compare to.",
+      ),
+      array(
+        'name'   => "absolute",
+        'type'   => Boolean,
+        'value'  => "false",
+        'desc'   => "Whether to return absolute difference.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "format",
     'desc'   => "Procedural style string date_format ( DateTime \$object , string \$format ) Returns date formatted according to given format.",
     'flags'  =>  HasDocComment,
@@ -1051,6 +1352,17 @@ DefineFunction(
         'type'   => String,
         'desc'   => "DateTime object returned by date_create()",
       ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "getLastErrors",
+    'desc'   => "Procedural style array date_get_last_errors ( void ) Returns an array of warnings and errors found while parsing a date/time string.",
+    'flags'  =>  IsStatic | HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns array containing info about warnings and errors.",
     ),
   ));
 
@@ -1182,6 +1494,35 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "getTimestamp",
+    'desc'   => "Procedural style int date_timestamp_get ( DateTime \$object ) Gets the Unix timestamp.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns the Unix timestamp representing the date.",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "setTimestamp",
+    'desc'   => "Procedural style DateTime date_timestamp_set ( DateTime \$object , int \$unixtimestamp ) Sets the date and time based on an Unix timestamp.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "Returns the DateTime object for method chaining or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "unixtimestamp",
+        'type'   => Int64,
+        'desc'   => "DateTime object returned by date_create(). The function modifies this object.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "setTimezone",
     'desc'   => "Procedural style DateTime date_timezone_set ( DateTime \$object , DateTimeZone \$timezone )",
     'flags'  =>  HasDocComment,
@@ -1192,6 +1533,24 @@ DefineFunction(
     'args'   => array(
       array(
         'name'   => "timezone",
+        'type'   => Object,
+        'desc'   => "DateTime object returned by date_create(). The function modifies this object.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "sub",
+    'desc'   => "Procedural style DateTime date_sub ( DateTime \$object , DateInterval \$interval ) Subtracts the specified DateInterval object from the specified DateTime object.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "Returns the DateTime object for method chaining or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "interval",
         'type'   => Object,
         'desc'   => "DateTime object returned by date_create(). The function modifies this object.",
       ),
@@ -1328,6 +1687,17 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "getLocation",
+    'desc'   => "Procedural style array timezone_location_get ( void ) Returns location information for a timezone, including country code, latitude/longitude and comments.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => VariantMap,
+      'desc'   => "Array containing location information about timezone.",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "getName",
     'desc'   => "Procedural style string timezone_name_get ( void ) Returns the name of the timezone.",
     'flags'  =>  HasDocComment,
@@ -1364,6 +1734,18 @@ DefineFunction(
       'type'   => VariantMap,
       'desc'   => "Returns numerically indexed array containing associative array with all transitions on success or FALSE on failure.",
     ),
+    'args'   => array(
+      array(
+        'name'   => "timestamp_begin",
+        'type'   => Int64,
+        'value'  => "LLONG_MIN",
+      ),
+      array(
+        'name'   => "timestamp_end",
+        'type'   => Int64,
+        'value'  => "LLONG_MAX",
+      ),
+    ),
   ));
 
 DefineFunction(
@@ -1386,6 +1768,18 @@ DefineFunction(
       'type'   => VariantMap,
       'desc'   => "Returns array on success or FALSE on failure.",
     ),
+    'args'   => array(
+      array(
+        'name'   => "what",
+        'type'   => Int64,
+        'value'  => "2047",
+      ),
+      array(
+        'name'   => "country",
+        'type'   => String,
+        'value'  => "null_string",
+      ),
+    ),
   ));
 
 DefineFunction(
@@ -1395,6 +1789,142 @@ DefineFunction(
     'return' => array(
       'type'   => Variant,
     ),
+  ));
+
+EndClass(
+);
+
+///////////////////////////////////////////////////////////////////////////////
+
+BeginClass(
+  array(
+    'name'   => "DateInterval",
+    'desc'   => "Representation of date interval. A date interval stores either a fixed amount of time (in years, months, days, hours etc) or a relative time string in the format that DateTime's constructor supports.",
+    'flags'  =>  HasDocComment,
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__construct",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => null,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "interval_spec",
+        'type'   => String,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "createFromDateString",
+    'desc'   => "Uses the normal date parsers and sets up a DateInterval from the relative parts of the parsed string.",
+    'flags'  =>  IsStatic | HasDocComment,
+    'return' => array(
+      'type'   => Object,
+      'desc'   => "Returns new DateInterval instance if success.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "time",
+        'type'   => String,
+        'desc'   => "Date with relative parts.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "format",
+    'desc'   => "Formats the interval.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "Returns the formatted interval.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "format",
+        'type'   => String,
+        'desc'   => "The following characters are recognized in the format parameter string. Each format character must be prefixed by a percent sign (%). format character Description Example values % Literal % % Y Years, numeric, at least 2 digits with leading 0 01, 03 y Years, numeric 1, 3 M Months, numeric, at least 2 digits with leading 0 01, 03, 12 m Months, numeric 1, 3, 12 D Days, numeric, at least 2 digits with leading 0 01, 03, 31 d Days, numeric 1, 3, 31 a Total amount of days 4, 18, 8123 H Hours, numeric, at least 2 digits with leading 0 01, 03, 23 h Hours, numeric 1, 3, 23 I Minutes, numeric, at least 2 digits with leading 0 01, 03, 59 i Minutes, numeric 1, 3, 59 S Seconds, numeric, at least 2 digits with leading 0 01, 03, 57 s Seconds, numeric 1, 3, 57 R Sign \"-\" when negative, \"+\" when positive -, + r Sign \"-\" when negative, empty when positive -,",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+    ),
+  ));
+
+DefineProperty(
+  array(
+    'name'   => "y",
+    'type'   => Int64,
+    'flags'  =>  HasDocComment,
+    'desc'   => "Number of years.",
+  ));
+
+DefineProperty(
+  array(
+    'name'   => "m",
+    'type'   => Int64,
+    'flags'  =>  HasDocComment,
+    'desc'   => "Number of months.",
+  ));
+
+DefineProperty(
+  array(
+    'name'   => "d",
+    'type'   => Int64,
+    'flags'  =>  HasDocComment,
+    'desc'   => "Number of days.",
+  ));
+
+DefineProperty(
+  array(
+    'name'   => "h",
+    'type'   => Int64,
+    'flags'  =>  HasDocComment,
+    'desc'   => "Number of hours.",
+  ));
+
+DefineProperty(
+  array(
+    'name'   => "i",
+    'type'   => Int64,
+    'flags'  =>  HasDocComment,
+    'desc'   => "Number of minutes.",
+  ));
+
+DefineProperty(
+  array(
+    'name'   => "s",
+    'type'   => Int64,
+    'flags'  =>  HasDocComment,
+    'desc'   => "Number of seconds.",
+  ));
+
+DefineProperty(
+  array(
+    'name'   => "invert",
+    'type'   => Int32,
+    'flags'  =>  HasDocComment,
+    'desc'   => "Is 1 if the interval is inverted and 0 otherwise. See DateInterval::format().",
+  ));
+
+DefineProperty(
+  array(
+    'name'   => "days",
+    'type'   => Variant,
+    'flags'  =>  HasDocComment,
+    'desc'   => "Total number of days the interval spans. If this is unknown, days will be FALSE.",
   ));
 
 EndClass(

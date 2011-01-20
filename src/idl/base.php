@@ -404,7 +404,7 @@ function get_serialized_default($s) {
 
   if (preg_match('/^".*"$/', $s) ||
       preg_match('/^[\-0-9.]+$/', $s) ||
-      preg_match('/^0x[0-9a-fA-F]+$/', $s) ||
+      preg_match('/^-?0x[0-9a-fA-F]+$/', $s) ||
       preg_match('/^(true|false|null)$/', $s)
      ) {
     return serialize(eval("return $s;"));
@@ -424,8 +424,19 @@ function get_serialized_default($s) {
   if ($s == 'RAND_MAX') {
     return serialize(getrandmax());
   }
+  // Use literal values below to avoid possible overflows to floating point
+  // when doing calculations
+  if ($s == 'INT_MIN') {
+    return serialize(-0x80000000);
+  }
   if ($s == 'INT_MAX') {
-    return serialize((1 << 31) - 1);
+    return serialize(0x7FFFFFFF);
+  }
+  if ($s == 'LLONG_MIN') {
+    return serialize(-0x8000000000000000);
+  }
+  if ($s == 'LLONG_MAX') {
+    return serialize(0x7FFFFFFFFFFFFFFF);
   }
   throw new Exception("Unable to serialize default value: [$s]");
 }

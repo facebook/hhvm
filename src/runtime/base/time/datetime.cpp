@@ -29,6 +29,8 @@ IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(DateTime);
 
 StaticString DateTime::s_class_name("DateTime");
 
+IMPLEMENT_REQUEST_LOCAL(DateTime::LastErrors, DateTime::s_last_errors);
+
 const char *DateTime::DateFormatRFC822     = "D, d M y H:i:s O";
 const char *DateTime::DateFormatRFC850     = "l, d-M-y H:i:s T";
 const char *DateTime::DateFormatRFC1036    = "D, d M y H:i:s O";
@@ -114,7 +116,19 @@ Array DateTime::Parse(CStrRef datetime) {
   timelib_time *parsed_time =
     timelib_strtotime((char*)datetime.data(), datetime.size(), &error,
                       TimeZone::GetDatabase());
+  return createParsedTimeArray(parsed_time, error);
+}
 
+Array DateTime::Parse(CStrRef datetime, CStrRef format) {
+  struct timelib_error_container *error;
+  timelib_time *parsed_time =
+    timelib_parse_from_format((char*)format.data(), (char*)datetime.data(),
+                              datetime.size(), &error, TimeZone::GetDatabase());
+  return createParsedTimeArray(parsed_time, error);
+}
+
+Array DateTime::createParsedTimeArray(timelib_time *parsed_time,
+                                      timelib_error_container *error) {
   Array ret;
   PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(year,      y);
   PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(month,     m);
@@ -129,24 +143,7 @@ Array DateTime::Parse(CStrRef datetime) {
     ret.set("fraction", parsed_time->f);
   }
 
-  {
-    ret.set("warning_count", error->warning_count);
-    Array element;
-    for (int i = 0; i < error->warning_count; i++) {
-      element.set(error->warning_messages[i].position,
-                  String(error->warning_messages[i].message, CopyString));
-    }
-    ret.set("warnings", element);
-  }
-  {
-    ret.set("error_count", error->error_count);
-    Array element;
-    for (int i = 0; i < error->error_count; i++) {
-      element.set(error->error_messages[i].position,
-                  String(error->error_messages[i].message, CopyString));
-    }
-    ret.set("errors", element);
-  }
+  addErrors(ret, error);
   timelib_error_container_dtor(error);
 
   ret.set("is_localtime", (bool)parsed_time->is_localtime);
@@ -196,7 +193,28 @@ Array DateTime::Parse(CStrRef datetime) {
   return ret;
 }
 
-Array DateTime::Parse(CStrRef ts, CStrRef format) {
+void DateTime::addErrors(Array &array, timelib_error_container *error) {
+  {
+    array.set("warning_count", error->warning_count);
+    Array element;
+    for (int i = 0; i < error->warning_count; i++) {
+      element.set(error->warning_messages[i].position,
+                  String(error->warning_messages[i].message, CopyString));
+    }
+    array.set("warnings", element);
+  }
+  {
+    array.set("error_count", error->error_count);
+    Array element;
+    for (int i = 0; i < error->error_count; i++) {
+      element.set(error->error_messages[i].position,
+                  String(error->error_messages[i].message, CopyString));
+    }
+    array.set("errors", element);
+  }
+}
+
+Array DateTime::ParseCLib(CStrRef ts, CStrRef format) {
   struct tm parsed_time;
   memset(&parsed_time, 0, sizeof(parsed_time));
   char *unparsed_part = strptime(ts.data(), format.data(), &parsed_time);
@@ -390,18 +408,36 @@ void DateTime::setTimezone(SmartObject<TimeZone> timezone) {
 void DateTime::modify(CStrRef diff) {
   timelib_time *tmp_time = timelib_strtotime((char*)diff.data(), diff.size(),
                                              NULL, TimeZone::GetDatabase());
-  m_time->relative.y = tmp_time->relative.y;
-  m_time->relative.m = tmp_time->relative.m;
-  m_time->relative.d = tmp_time->relative.d;
-  m_time->relative.h = tmp_time->relative.h;
-  m_time->relative.i = tmp_time->relative.i;
-  m_time->relative.s = tmp_time->relative.s;
   m_time->relative.weekday = tmp_time->relative.weekday;
   m_time->have_relative = tmp_time->have_relative;
   m_time->relative.have_weekday_relative
       = tmp_time->relative.have_weekday_relative;
-  m_time->sse_uptodate = 0;
+  internalModify(tmp_time->relative, 1);
   timelib_time_dtor(tmp_time);
+}
+
+void DateTime::add(timelib_rel_time &relTime) {
+  m_time->relative.weekday = 0;
+  m_time->relative.have_weekday_relative = 0;
+  m_time->have_relative = 1;
+  internalModify(relTime, relTime.invert ? -1 : 1);
+}
+
+void DateTime::sub(timelib_rel_time &relTime) {
+  m_time->relative.weekday = 0;
+  m_time->relative.have_weekday_relative = 0;
+  m_time->have_relative = 1;
+  internalModify(relTime, relTime.invert ? 1 : -1);
+}
+
+void DateTime::internalModify(timelib_rel_time &relTime, int bias) {
+  m_time->relative.y = bias * relTime.y;
+  m_time->relative.m = bias * relTime.m;
+  m_time->relative.d = bias * relTime.d;
+  m_time->relative.h = bias * relTime.h;
+  m_time->relative.i = bias * relTime.i;
+  m_time->relative.s = bias * relTime.s;
+  m_time->sse_uptodate = 0;
   update();
   timelib_update_from_sse(m_time.get());
 }
@@ -683,12 +719,20 @@ Array DateTime::toArray(ArrayFormat format) const {
   return ret;
 }
 
-bool DateTime::fromString(CStrRef input, SmartObject<TimeZone> tz) {
+bool DateTime::fromString(CStrRef input, SmartObject<TimeZone> tz,
+                          const char *format /*= NULL*/) {
   struct timelib_error_container *error;
-  timelib_time *t = timelib_strtotime((char*)input.data(), input.size(),
-                                      &error, TimeZone::GetDatabase());
+  timelib_time *t;
+  if (format) {
+    t = timelib_parse_from_format((char*)format, (char*)input.data(),
+                                input.size(), &error, TimeZone::GetDatabase());
+  } else {
+    t = timelib_strtotime((char*)input.data(), input.size(),
+                           &error, TimeZone::GetDatabase());
+  }
+
+  s_last_errors->set(error);
   int error1 = error->error_count;
-  timelib_error_container_dtor(error);
 
   if (m_timestamp == -1) {
     fromTimeStamp(0);

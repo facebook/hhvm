@@ -31,6 +31,18 @@ inline bool x_checkdate(int month, int day, int year) {
   return f_checkdate(month, day, year);
 }
 
+inline Object x_date_add(CObjRef object, CObjRef interval) {
+  FUNCTION_INJECTION_BUILTIN(date_add);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_date_add(object, interval);
+}
+
+inline Object x_date_create_from_format(CStrRef format, CStrRef time, CObjRef timezone = null_object) {
+  FUNCTION_INJECTION_BUILTIN(date_create_from_format);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_date_create_from_format(format, time, timezone);
+}
+
 inline Object x_date_create(CStrRef time = null_string, CObjRef timezone = null_object) {
   FUNCTION_INJECTION_BUILTIN(date_create);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
@@ -55,10 +67,34 @@ inline bool x_date_default_timezone_set(CStrRef name) {
   return f_date_default_timezone_set(name);
 }
 
+inline Object x_date_diff(CObjRef datetime1, CObjRef datetime2, bool absolute = false) {
+  FUNCTION_INJECTION_BUILTIN(date_diff);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_date_diff(datetime1, datetime2, absolute);
+}
+
 inline String x_date_format(CObjRef object, CStrRef format) {
   FUNCTION_INJECTION_BUILTIN(date_format);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_date_format(object, format);
+}
+
+inline Variant x_date_get_last_errors() {
+  FUNCTION_INJECTION_BUILTIN(date_get_last_errors);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_date_get_last_errors();
+}
+
+inline Object x_date_interval_create_from_date_string(CStrRef time) {
+  FUNCTION_INJECTION_BUILTIN(date_interval_create_from_date_string);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_date_interval_create_from_date_string(time);
+}
+
+inline String x_date_interval_format(CObjRef object, CStrRef format) {
+  FUNCTION_INJECTION_BUILTIN(date_interval_format);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_date_interval_format(object, format);
 }
 
 inline void x_date_isodate_set(CObjRef object, int year, int week, int day = 1) {
@@ -79,10 +115,22 @@ inline int x_date_offset_get(CObjRef object) {
   return f_date_offset_get(object);
 }
 
+inline Array x_date_parse_from_format(CStrRef format, CStrRef date) {
+  FUNCTION_INJECTION_BUILTIN(date_parse_from_format);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_date_parse_from_format(format, date);
+}
+
 inline Variant x_date_parse(CStrRef date) {
   FUNCTION_INJECTION_BUILTIN(date_parse);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_date_parse(date);
+}
+
+inline Object x_date_sub(CObjRef object, CObjRef interval) {
+  FUNCTION_INJECTION_BUILTIN(date_sub);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_date_sub(object, interval);
 }
 
 inline Array x_date_sun_info(int64 ts, double latitude, double longitude) {
@@ -107,6 +155,18 @@ inline void x_date_time_set(CObjRef object, int hour, int minute, int second = 0
   FUNCTION_INJECTION_BUILTIN(date_time_set);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   f_date_time_set(object, hour, minute, second);
+}
+
+inline Variant x_date_timestamp_get(CObjRef object) {
+  FUNCTION_INJECTION_BUILTIN(date_timestamp_get);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_date_timestamp_get(object);
+}
+
+inline Object x_date_timestamp_set(CObjRef object, int64 unixtimestamp) {
+  FUNCTION_INJECTION_BUILTIN(date_timestamp_set);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_date_timestamp_set(object, unixtimestamp);
 }
 
 inline Variant x_date_timezone_get(CObjRef object) {
@@ -211,10 +271,16 @@ inline Array x_timezone_abbreviations_list() {
   return f_timezone_abbreviations_list();
 }
 
-inline Array x_timezone_identifiers_list() {
+inline Array x_timezone_identifiers_list(int64 what = 2047, CStrRef country = null_string) {
   FUNCTION_INJECTION_BUILTIN(timezone_identifiers_list);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  return f_timezone_identifiers_list();
+  return f_timezone_identifiers_list(what, country);
+}
+
+inline Array x_timezone_location_get(CObjRef object) {
+  FUNCTION_INJECTION_BUILTIN(timezone_location_get);
+  TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
+  return f_timezone_location_get(object);
 }
 
 inline Variant x_timezone_name_from_abbr(CStrRef abbr, int gmtoffset = -1, bool isdst = true) {
@@ -241,10 +307,10 @@ inline Object x_timezone_open(CStrRef timezone) {
   return f_timezone_open(timezone);
 }
 
-inline Array x_timezone_transitions_get(CObjRef object) {
+inline Array x_timezone_transitions_get(CObjRef object, int64 timestamp_begin = LLONG_MIN, int64 timestamp_end = LLONG_MAX) {
   FUNCTION_INJECTION_BUILTIN(timezone_transitions_get);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  return f_timezone_transitions_get(object);
+  return f_timezone_transitions_get(object, timestamp_begin, timestamp_end);
 }
 
 

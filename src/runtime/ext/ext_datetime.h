@@ -52,8 +52,25 @@ class c_DateTime : public ExtObjectData {
   public: void t___construct(CStrRef time = "now",
                              CObjRef timezone = null_object);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  public: static Object ti_createfromformat(const char* cls , CStrRef format,
+                                            CStrRef time,
+                                            CObjRef timezone = null_object);
+  public: static Object t_createfromformat(CStrRef format, CStrRef time,
+                                           CObjRef timezone = null_object) {
+    return ti_createfromformat("datetime", format, time, timezone);
+  }
+  DECLARE_METHOD_INVOKE_HELPERS(createfromformat);
+  public: Object t_add(CObjRef interval);
+  DECLARE_METHOD_INVOKE_HELPERS(add);
+  public: Object t_diff(CObjRef datetime2, bool absolute = false);
+  DECLARE_METHOD_INVOKE_HELPERS(diff);
   public: String t_format(CStrRef format);
   DECLARE_METHOD_INVOKE_HELPERS(format);
+  public: static Variant ti_getlasterrors(const char* cls );
+  public: static Variant t_getlasterrors() {
+    return ti_getlasterrors("datetime");
+  }
+  DECLARE_METHOD_INVOKE_HELPERS(getlasterrors);
   public: int64 t_getoffset();
   DECLARE_METHOD_INVOKE_HELPERS(getoffset);
   public: Variant t_gettimezone();
@@ -66,8 +83,14 @@ class c_DateTime : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(setisodate);
   public: Object t_settime(int64 hour, int64 minute, int64 second = 0);
   DECLARE_METHOD_INVOKE_HELPERS(settime);
+  public: Variant t_gettimestamp();
+  DECLARE_METHOD_INVOKE_HELPERS(gettimestamp);
+  public: Object t_settimestamp(int64 unixtimestamp);
+  DECLARE_METHOD_INVOKE_HELPERS(settimestamp);
   public: Object t_settimezone(CObjRef timezone);
   DECLARE_METHOD_INVOKE_HELPERS(settimezone);
+  public: Object t_sub(CObjRef interval);
+  DECLARE_METHOD_INVOKE_HELPERS(sub);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
@@ -130,20 +153,25 @@ class c_DateTimeZone : public ExtObjectData {
   public: ~c_DateTimeZone();
   public: void t___construct(CStrRef timezone);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  public: Array t_getlocation();
+  DECLARE_METHOD_INVOKE_HELPERS(getlocation);
   public: String t_getname();
   DECLARE_METHOD_INVOKE_HELPERS(getname);
   public: int64 t_getoffset(CObjRef datetime);
   DECLARE_METHOD_INVOKE_HELPERS(getoffset);
-  public: Array t_gettransitions();
+  public: Array t_gettransitions(int64 timestamp_begin = LLONG_MIN,
+                                 int64 timestamp_end = LLONG_MAX);
   DECLARE_METHOD_INVOKE_HELPERS(gettransitions);
   public: static Array ti_listabbreviations(const char* cls );
   public: static Array t_listabbreviations() {
     return ti_listabbreviations("datetimezone");
   }
   DECLARE_METHOD_INVOKE_HELPERS(listabbreviations);
-  public: static Array ti_listidentifiers(const char* cls );
-  public: static Array t_listidentifiers() {
-    return ti_listidentifiers("datetimezone");
+  public: static Array ti_listidentifiers(const char* cls, int64 what = 2047,
+                                          CStrRef country = null_string);
+  public: static Array t_listidentifiers(int64 what = 2047,
+                                         CStrRef country = null_string) {
+    return ti_listidentifiers("datetimezone", what, country);
   }
   DECLARE_METHOD_INVOKE_HELPERS(listidentifiers);
   public: Variant t___destruct();
@@ -175,6 +203,48 @@ class c_DateTimeZone : public ExtObjectData {
   SmartObject<TimeZone> m_tz;
  public:
   virtual ObjectData *clone();
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// class DateInterval
+
+FORWARD_DECLARE_CLASS_BUILTIN(DateInterval);
+class c_DateInterval : public ExtObjectData {
+ public:
+  BEGIN_CLASS_MAP(DateInterval)
+  END_CLASS_MAP(DateInterval)
+  DECLARE_CLASS(DateInterval, DateInterval, ObjectData)
+
+  // properties
+  public: int64 m_y;
+  public: int64 m_m;
+  public: int64 m_d;
+  public: int64 m_h;
+  public: int64 m_i;
+  public: int64 m_s;
+  public: int m_invert;
+  public: Variant m_days;
+
+  // need to implement
+  public: c_DateInterval();
+  public: ~c_DateInterval();
+  public: void t___construct(CStrRef interval_spec);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  public: static Object ti_createfromdatestring(const char* cls , CStrRef time);
+  public: static Object t_createfromdatestring(CStrRef time) {
+    return ti_createfromdatestring("dateinterval", time);
+  }
+  DECLARE_METHOD_INVOKE_HELPERS(createfromdatestring);
+  public: String t_format(CStrRef format);
+  DECLARE_METHOD_INVOKE_HELPERS(format);
+  public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
+
+  // implemented by HPHP
+  public: c_DateInterval *create(String interval_spec);
+  public: void dynConstruct(CArrRef Params);
+  public: void getConstructor(MethodCallPackage &mcp);
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -269,7 +339,7 @@ inline Array f_localtime(int64 timestamp = TimeStamp::Current(),
 }
 
 inline Variant f_strptime(CStrRef date, CStrRef format) {
-  Array ret = DateTime::Parse(date, format);
+  Array ret = DateTime::ParseCLib(date, format);
   if (ret.empty()) {
     return false;
   }
@@ -301,12 +371,17 @@ inline bool f_date_default_timezone_set(CStrRef name) {
   return TimeZone::SetCurrent(name);
 }
 
-inline Array f_timezone_identifiers_list() {
-  return c_DateTimeZone::t_listidentifiers();
+inline Array f_timezone_identifiers_list(int64 what = 2047,
+                                         CStrRef country = null_string) {
+  return c_DateTimeZone::t_listidentifiers(what, country);
 }
 
 inline Array f_timezone_abbreviations_list() {
   return c_DateTimeZone::t_listabbreviations();
+}
+
+inline Array f_timezone_location_get(CObjRef object) {
+  return object.getTyped<c_DateTimeZone>()->t_getlocation();
 }
 
 inline Variant f_timezone_name_from_abbr(CStrRef abbr, int gmtoffset = -1,
@@ -333,8 +408,10 @@ inline int f_timezone_offset_get(CObjRef object, CObjRef dt) {
   return object.getTyped<c_DateTimeZone>()->t_getoffset(dt);
 }
 
-inline Array f_timezone_transitions_get(CObjRef object) {
-  return object.getTyped<c_DateTimeZone>()->t_gettransitions();
+inline Array f_timezone_transitions_get(CObjRef object,
+    int64 timestamp_begin = LLONG_MIN, int64 timestamp_end = LLONG_MAX) {
+  return object.getTyped<c_DateTimeZone>()->t_gettransitions(timestamp_begin,
+                                                             timestamp_end);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -342,6 +419,15 @@ inline Array f_timezone_transitions_get(CObjRef object) {
 
 inline bool f_checkdate(int month, int day, int year) {
   return DateTime::IsValid(year, month, day);
+}
+
+inline Object f_date_add(CObjRef object, CObjRef interval) {
+  return object.getTyped<c_DateTime>()->t_add(interval);
+}
+
+inline Object f_date_create_from_format(CStrRef format, CStrRef time,
+                                        CObjRef timezone = null_object) {
+  return c_DateTime::t_createfromformat(format, time, timezone);
 }
 
 inline Object f_date_create(CStrRef time = null_string,
@@ -361,8 +447,25 @@ inline void f_date_isodate_set(CObjRef object, int year, int week,
   object.getTyped<c_DateTime>()->t_setisodate(year, week, day);
 }
 
+inline Object f_date_diff(CObjRef datetime1, CObjRef datetime2,
+                          bool absolute = false) {
+  return datetime1.getTyped<c_DateTime>()->t_diff(datetime2, absolute);
+}
+
 inline String f_date_format(CObjRef object, CStrRef format) {
   return object.getTyped<c_DateTime>()->t_format(format);
+}
+
+inline Variant f_date_get_last_errors() {
+  return c_DateTime::t_getlasterrors();
+}
+
+inline Object f_date_interval_create_from_date_string(CStrRef time) {
+  return c_DateInterval::t_createfromdatestring(time);
+}
+
+inline String f_date_interval_format(CObjRef object, CStrRef format) {
+  return object.getTyped<c_DateInterval>()->t_format(format);
 }
 
 inline void f_date_modify(CObjRef object, CStrRef modify) {
@@ -373,13 +476,30 @@ inline int f_date_offset_get(CObjRef object) {
   return object.getTyped<c_DateTime>()->t_getoffset();
 }
 
+inline Array f_date_parse_from_format(CStrRef format, CStrRef date) {
+  return DateTime::Parse(date, format);
+}
+
 inline Variant f_date_parse(CStrRef date) {
   return DateTime::Parse(date);
+}
+
+inline Object f_date_sub(CObjRef object, CObjRef interval) {
+  return object.getTyped<c_DateTime>()->t_sub(interval);
 }
 
 inline void f_date_time_set(CObjRef object, int hour, int minute,
                             int second = 0) {
   object.getTyped<c_DateTime>()->t_settime(hour, minute, second);
+}
+
+inline Variant f_date_timestamp_get(CObjRef object) {
+  return object.getTyped<c_DateTime>()->t_gettimestamp();
+}
+
+inline Object f_date_timestamp_set(CObjRef object, int64 unixtimestamp) {
+  object.getTyped<c_DateTime>()->t_settimestamp(unixtimestamp);
+  return object;
 }
 
 inline Variant f_date_timezone_get(CObjRef object) {

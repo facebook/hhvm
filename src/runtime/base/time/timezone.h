@@ -39,6 +39,21 @@ class TimeZone : public SweepableResourceData {
 public:
   DECLARE_OBJECT_ALLOCATION(TimeZone);
 
+  static const int64 AFRICA      = 0x0001;
+  static const int64 AMERICA     = 0x0002;
+  static const int64 ANTARCTICA  = 0x0004;
+  static const int64 ARCTIC      = 0x0008;
+  static const int64 ASIA        = 0x0010;
+  static const int64 ATLANTIC    = 0x0020;
+  static const int64 AUSTRALIA   = 0x0040;
+  static const int64 EUROPE      = 0x0080;
+  static const int64 INDIAN      = 0x0100;
+  static const int64 PACIFIC     = 0x0200;
+  static const int64 UTC         = 0x0400;
+  static const int64 ALL         = 0x07FF;
+  static const int64 ALL_WITH_BC = 0x0FFF;
+  static const int64 PER_COUNTRY = 0x1000;
+
   /**
    * Get/set current timezone that controls how local time is interpreted.
    */
@@ -50,7 +65,7 @@ public:
    * TimeZone database queries.
    */
   static bool IsValid(CStrRef name);
-  static Array GetNames();
+  static Array GetNames(int64 what, CStrRef country);
   static Array GetAbbreviations();
   static String AbbreviationToName(String abbr, int utcoffset = -1,
                                    bool isdst = true);
@@ -91,12 +106,17 @@ public:
   /**
    * Query transition times for DST.
    */
-  Array transitions() const;
+  Array transitions(int64 timestamp_begin, int64 timestamp_end) const;
 
   /**
    * Make a copy of this timezone object, so it can be changed independently.
    */
   SmartObject<TimeZone> cloneTimeZone() const;
+
+  /**
+   * Returns location information for a timezone.
+   */
+  Array getLocation() const;
 
 protected:
   friend class DateTime;
@@ -122,6 +142,10 @@ private:
    * Look up cache and if found return it, otherwise, read it from database.
    */
   static TimeZoneInfo GetTimeZoneInfo(CStrRef name);
+
+  static bool checkIdAllowed(char *id, int64 what);
+
+  void addTransition(Array &array, int i, int64 timestamp) const;
 
   TimeZoneInfo m_tzi; // raw pointer
 };

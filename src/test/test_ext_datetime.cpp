@@ -24,19 +24,29 @@ bool TestExtDatetime::RunTests(const std::string &which) {
   bool ret = true;
 
   RUN_TEST(test_checkdate);
+  RUN_TEST(test_date_add);
+  RUN_TEST(test_date_create_from_format);
   RUN_TEST(test_date_create);
   RUN_TEST(test_date_date_set);
   RUN_TEST(test_date_default_timezone_get);
   RUN_TEST(test_date_default_timezone_set);
+  RUN_TEST(test_date_diff);
   RUN_TEST(test_date_format);
+  RUN_TEST(test_date_get_last_errors);
+  RUN_TEST(test_date_interval_create_from_date_string);
+  RUN_TEST(test_date_interval_format);
   RUN_TEST(test_date_isodate_set);
   RUN_TEST(test_date_modify);
   RUN_TEST(test_date_offset_get);
+  RUN_TEST(test_date_parse_from_format);
   RUN_TEST(test_date_parse);
+  RUN_TEST(test_date_sub);
   RUN_TEST(test_date_sun_info);
   RUN_TEST(test_date_sunrise);
   RUN_TEST(test_date_sunset);
   RUN_TEST(test_date_time_set);
+  RUN_TEST(test_date_timestamp_get);
+  RUN_TEST(test_date_timestamp_set);
   RUN_TEST(test_date_timezone_get);
   RUN_TEST(test_date_timezone_set);
   RUN_TEST(test_date);
@@ -55,22 +65,72 @@ bool TestExtDatetime::RunTests(const std::string &which) {
   RUN_TEST(test_time);
   RUN_TEST(test_timezone_abbreviations_list);
   RUN_TEST(test_timezone_identifiers_list);
+  RUN_TEST(test_timezone_location_get);
   RUN_TEST(test_timezone_name_from_abbr);
   RUN_TEST(test_timezone_name_get);
   RUN_TEST(test_timezone_offset_get);
   RUN_TEST(test_timezone_open);
   RUN_TEST(test_timezone_transitions_get);
+  RUN_TEST(test_DateTime);
+  RUN_TEST(test_DateTimeZone);
+  RUN_TEST(test_DateInterval);
 
   return ret;
 }
 
 #define VDT(dt, s) VS(f_date_format(dt, "Y-m-d H:i:s"), s)
+#define VDI(di, s) VS(f_date_interval_format(di, "%r%Y-%M-%D %H:%I:%S"), s)
 
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtDatetime::test_checkdate() {
   VERIFY(f_checkdate(12, 31, 2000));
   VERIFY(!f_checkdate(2, 29, 2001));
+  return Count(true);
+}
+
+bool TestExtDatetime::test_date_add() {
+  {
+    Object dt = f_date_create("2000-01-01");
+    Object in(p_DateInterval(NEWOBJ(c_DateInterval))->create("P10D"));
+    VDT(f_date_add(dt, in), "2000-01-11 00:00:00");
+  }
+  {
+    Object dt = f_date_create("2000-01-01");
+    Object in = f_date_interval_create_from_date_string("10 days");
+    VDT(f_date_add(dt, in), "2000-01-11 00:00:00");
+  }
+  {
+    Object dt = f_date_create("2000-01-01");
+    Object in(p_DateInterval(NEWOBJ(c_DateInterval))->create("PT10H30S"));
+    VDT(f_date_add(dt, in), "2000-01-01 10:00:30");
+  }
+  {
+    Object dt = f_date_create("2000-01-01");
+    Object in(p_DateInterval(NEWOBJ(c_DateInterval))->create("P7Y5M4DT4H3M2S"));
+    VDT(f_date_add(dt, in), "2007-06-05 04:03:02");
+  }
+  {
+    Object dt = f_date_create("2000-12-31");
+    Object in(p_DateInterval(NEWOBJ(c_DateInterval))->create("P1M"));
+    VDT(f_date_add(dt, in), "2001-01-31 00:00:00");
+    VDT(f_date_add(dt, in), "2001-03-03 00:00:00");
+  }
+  return Count(true);
+}
+
+bool TestExtDatetime::test_date_create_from_format() {
+  Object tz = f_timezone_open("Etc/UTC");
+  VDT(f_date_create_from_format("j-M-Y", "15-Feb-2009", tz),
+                                "2009-02-15 00:00:00");
+  VDT(f_date_create_from_format("Y-m-d", "2009-02-15", tz),
+                                "2009-02-15 00:00:00");
+  VDT(f_date_create_from_format("Y-m-d H:i:s", "2009-02-15 15:16:17", tz),
+                                "2009-02-15 15:16:17");
+  VDT(f_date_create_from_format("Y-m-!d H:i:s", "2009-02-15 15:16:17", tz),
+                                "1970-01-15 15:16:17");
+  VDT(f_date_create_from_format("!d", "15", tz),
+                                "1970-01-15 00:00:00");
   return Count(true);
 }
 
@@ -92,6 +152,12 @@ bool TestExtDatetime::test_date_default_timezone_get() {
   return Count(true);
 }
 
+bool TestExtDatetime::test_date_diff() {
+  VDI(f_date_diff(f_date_create("2009-10-11"), f_date_create("2009-10-13")),
+      "00-00-02 00:00:00");
+  return Count(true);
+}
+
 bool TestExtDatetime::test_date_default_timezone_set() {
   VERIFY(f_date_default_timezone_set("Asia/Shanghai"));
   VS(f_date_default_timezone_get(), "Asia/Shanghai");
@@ -106,6 +172,52 @@ bool TestExtDatetime::test_date_format() {
   VS(f_date_format(dt, "Y-m-d H:i:sZ"), "2007-02-01 00:00:01-28800");
   VS(DateTime(1255494072, true).toString(DateTime::Cookie),
      "Wed, 14-Oct-2009 04:21:12 GMT");
+  return Count(true);
+}
+
+bool TestExtDatetime::test_date_get_last_errors() {
+  f_date_create("asdfasdf");
+  VS(f_print_r(f_date_get_last_errors(), true),
+     "Array\n"
+     "(\n"
+     "    [warning_count] => 1\n"
+     "    [warnings] => Array\n"
+     "        (\n"
+     "            [6] => Double timezone specification\n"
+     "        )\n"
+     "\n"
+     "    [error_count] => 1\n"
+     "    [errors] => Array\n"
+     "        (\n"
+     "            [0] => The timezone could not be found in the database\n"
+     "        )\n"
+     "\n"
+     ")\n");
+  return Count(true);
+}
+
+bool TestExtDatetime::test_date_interval_create_from_date_string() {
+  VDI(f_date_interval_create_from_date_string("1 month"),
+      "00-01-00 00:00:00");
+  return Count(true);
+}
+
+bool TestExtDatetime::test_date_interval_format() {
+  {
+    Object in(p_DateInterval(NEWOBJ(c_DateInterval))->create("P2Y4DT6H8M"));
+    VS(f_date_interval_format(in, "%d days"), "4 days");
+  }
+  {
+    Object in(p_DateInterval(NEWOBJ(c_DateInterval))->create("P32D"));
+    VS(f_date_interval_format(in, "%d days"), "32 days");
+  }
+  {
+    Object d1 = f_date_create("2010-01-01");
+    Object d2 = f_date_create("2010-02-01");
+    Object in = f_date_diff(d2, d1);
+    VS(f_date_interval_format(in, "%a total days"), "31 total days");
+    VS(f_date_interval_format(in, "%m month, %d days"), "1 month, 0 days");
+  }
   return Count(true);
 }
 
@@ -129,6 +241,30 @@ bool TestExtDatetime::test_date_offset_get() {
   return Count(true);
 }
 
+bool TestExtDatetime::test_date_parse_from_format() {
+  VS(f_print_r(f_date_parse_from_format("j.n.Y H:iP", "6.1.2009 13:00+01:00"),
+     true),
+     "Array\n"
+     "(\n"
+     "    [year] => 2009\n"
+     "    [month] => 1\n"
+     "    [day] => 6\n"
+     "    [hour] => 13\n"
+     "    [minute] => 0\n"
+     "    [second] => 0\n"
+     "    [fraction] => \n"
+     "    [warning_count] => 0\n"
+     "    [warnings] => \n"
+     "    [error_count] => 0\n"
+     "    [errors] => \n"
+     "    [is_localtime] => 1\n"
+     "    [zone_type] => 1\n"
+     "    [zone] => -60\n"
+     "    [is_dst] => \n"
+     ")\n");
+  return Count(true);
+}
+
 bool TestExtDatetime::test_date_parse() {
   VS(f_print_r(f_date_parse("2006-12-12 10:00:00.5"), true),
      "Array\n"
@@ -146,6 +282,36 @@ bool TestExtDatetime::test_date_parse() {
      "    [errors] => \n"
      "    [is_localtime] => \n"
      ")\n");
+  return Count(true);
+}
+
+bool TestExtDatetime::test_date_sub() {
+  {
+    Object dt = f_date_create("2000-01-20");
+    Object in(p_DateInterval(NEWOBJ(c_DateInterval))->create("P10D"));
+    VDT(f_date_sub(dt, in), "2000-01-10 00:00:00");
+  }
+  {
+    Object dt = f_date_create("2000-01-20");
+    Object in = f_date_interval_create_from_date_string("10 days");
+    VDT(f_date_sub(dt, in), "2000-01-10 00:00:00");
+  }
+  {
+    Object dt = f_date_create("2000-01-20");
+    Object in(p_DateInterval(NEWOBJ(c_DateInterval))->create("PT10H30S"));
+    VDT(f_date_sub(dt, in), "2000-01-19 13:59:30");
+  }
+  {
+    Object dt = f_date_create("2000-01-20");
+    Object in(p_DateInterval(NEWOBJ(c_DateInterval))->create("P7Y5M4DT4H3M2S"));
+    VDT(f_date_sub(dt, in), "1992-08-15 19:56:58");
+  }
+  {
+    Object dt = f_date_create("2001-04-30");
+    Object in(p_DateInterval(NEWOBJ(c_DateInterval))->create("P1M"));
+    VDT(f_date_sub(dt, in), "2001-03-30 00:00:00");
+    VDT(f_date_sub(dt, in), "2001-03-02 00:00:00");
+  }
   return Count(true);
 }
 
@@ -197,6 +363,20 @@ bool TestExtDatetime::test_date_time_set() {
   Object dt = f_date_create("2006-12-12 12:34:56");
   f_date_time_set(dt, 23, 45, 12);
   VDT(dt, "2006-12-12 23:45:12");
+  return Count(true);
+}
+
+bool TestExtDatetime::test_date_timestamp_get() {
+  Object tz = f_timezone_open("Etc/UTC");
+  Object dt = f_date_create("2006-12-12 00:00:00", tz);
+  VS(f_date_timestamp_get(dt), 1165881600);
+  return Count(true);
+}
+
+bool TestExtDatetime::test_date_timestamp_set() {
+  Object dt = f_date_create();
+  f_date_timestamp_set(dt, 1171502725);
+  VDT(dt, "2007-02-14 17:25:25");
   return Count(true);
 }
 
@@ -520,7 +700,11 @@ bool TestExtDatetime::test_timezone_abbreviations_list() {
 
 bool TestExtDatetime::test_timezone_identifiers_list() {
   //f_var_dump(TimeZone::GetNames());
-  VERIFY(!TimeZone::GetNames().empty());
+  VERIFY(!f_timezone_identifiers_list().empty());
+  return Count(true);
+}
+
+bool TestExtDatetime::test_timezone_location_get() {
   return Count(true);
 }
 
@@ -562,9 +746,21 @@ bool TestExtDatetime::test_timezone_open() {
 bool TestExtDatetime::test_timezone_transitions_get() {
   Object timezone = f_timezone_open("CET");
   Array transitions = f_timezone_transitions_get(timezone);
-  VS(transitions[0]["ts"], -1693706400);
-  VS(transitions[0]["offset"], 7200);
-  VS(transitions[0]["isdst"], true);
-  VS(transitions[0]["abbr"], "CEST");
+  VS(transitions[1]["ts"], -1693706400);
+  VS(transitions[1]["offset"], 7200);
+  VS(transitions[1]["isdst"], true);
+  VS(transitions[1]["abbr"], "CEST");
+  return Count(true);
+}
+
+bool TestExtDatetime::test_DateTime() {
+  return Count(true);
+}
+
+bool TestExtDatetime::test_DateTimeZone() {
+  return Count(true);
+}
+
+bool TestExtDatetime::test_DateInterval() {
   return Count(true);
 }

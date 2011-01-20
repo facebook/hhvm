@@ -19,6 +19,7 @@
 
 #include <runtime/base/types.h>
 #include <runtime/base/time/timezone.h>
+#include <runtime/base/util/request_local.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -216,7 +217,8 @@ public:
    * for details.
    */
   static Array Parse(CStrRef datetime);
-  static Array Parse(CStrRef ts, CStrRef format);
+  static Array Parse(CStrRef datetime, CStrRef format);
+  static Array ParseCLib(CStrRef ts, CStrRef format);
 
 public:
   // constructor
@@ -259,6 +261,8 @@ public:
   void setTime(int hour, int minute, int second = 0);
   void setTimezone(SmartObject<TimeZone> tz);
   void modify(CStrRef diff); // PHP's date_modify() function, very powerful
+  void add(timelib_rel_time &relTime);
+  void sub(timelib_rel_time &relTime);
 
   // conversions
   void toTm(struct tm &ta) const;
@@ -268,7 +272,8 @@ public:
   String toString(DateFormat format) const;
   Array toArray(ArrayFormat format) const;
   void fromTimeStamp(int64 timestamp, bool utc = false);
-  bool fromString(CStrRef input, SmartObject<TimeZone> tz);
+  bool fromString(CStrRef input, SmartObject<TimeZone> tz,
+                  const char *format = NULL);
 
   // cloning
   SmartObject<DateTime> cloneDateTime() const;
@@ -279,7 +284,52 @@ public:
                      double latitude, double longitude,
                      double zenith, double utc_offset, bool calc_sunset) const;
 
+  timelib_rel_time *diff(DateTime &other) {
+    return timelib_diff(m_time.get(), other.m_time.get());
+  }
+
+  timelib_rel_time *getRelTime() {
+    return &m_time->relative;
+  }
+
+  class LastErrors : public RequestEventHandler {
+    public:
+      virtual void requestInit() {
+        m_errors = NULL;
+      }
+
+      virtual void requestShutdown() {
+        if (m_errors) {
+          timelib_error_container_dtor(m_errors);
+          m_errors = NULL;
+        }
+      }
+
+      void set(timelib_error_container *errors) {
+        if (m_errors) {
+          timelib_error_container_dtor(m_errors);
+        }
+        m_errors = errors;
+      }
+
+      Variant get() {
+        if (m_errors) {
+          Array ret; addErrors(ret, m_errors);
+          return ret;
+        }
+        return false;
+      }
+
+    private:
+      timelib_error_container *m_errors;
+    };
+    DECLARE_STATIC_REQUEST_LOCAL(LastErrors, s_last_errors);
+
 private:
+  static Array createParsedTimeArray(timelib_time *parsed_time,
+                                     timelib_error_container *error);
+  static void addErrors(Array &array, timelib_error_container *error);
+
   struct time_deleter {
     void operator()(timelib_time *t) {
       timelib_time_dtor(t);
@@ -296,6 +346,7 @@ private:
   void update();
   String rfcFormat(CStrRef format) const;
   String stdcFormat(CStrRef format) const;
+  void internalModify(timelib_rel_time &relTime, int bias);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

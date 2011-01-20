@@ -28,7 +28,7 @@ namespace HPHP {
  * piece. This allows us to backup and restore runtime object's states quickly.
  * Combined with fixed size SmartAllocator, we can then do generational
  * sweeping to solve circular reference problem of reference counting, we
- * can do checkpoints of the entire user memory space, and we can initializes
+ * can do checkpoints of the entire user memory space, and we can initialize
  * static arrays a lot faster.
  */
 class LinearAllocator {
@@ -44,6 +44,7 @@ public:
   void backup(void *p);
   void backup(int size);
   void backup(const char *data, int size);
+  const char* frontier() const { return &m_blob[m_pos]; }
   void endBackup();
 
   /**

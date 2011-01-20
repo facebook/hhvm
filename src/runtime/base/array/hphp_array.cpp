@@ -2486,7 +2486,6 @@ CVarRef HphpArray::endRef() {
 // Memory allocator methods.
 
 bool HphpArray::calculate(int& size) {
-  size += sizeof(void*); // Pointer to aligned data (starts out NULL).
   size += computeMaxElms(m_tableMask) * sizeof(Elm); // Array elements.
   size += computeTableSize(m_tableMask) * sizeof(ElmInd); // Hash table.
   size += ElmAlignment; // Padding to allow for alignment in restore().
@@ -2494,9 +2493,19 @@ bool HphpArray::calculate(int& size) {
 }
 
 void HphpArray::backup(LinearAllocator& allocator) {
+  // Pad to an alignment boundary, if necessary.
+  const char* frontier = allocator.frontier();
+  size_t padRem;
+  if (uintptr_t(frontier) & ElmAlignmentMask) {
+    char pad[ElmAlignment - (uintptr_t(frontier) & ElmAlignmentMask)];
+    memset(pad, 0, sizeof(pad));
+    allocator.backup(pad, sizeof(pad));
+    padRem = ElmAlignment - sizeof(pad);
+  } else {
+    padRem = ElmAlignment;
+  }
+
   Elm* elms = data2Elms(m_data);
-  void* alignedData = NULL;
-  allocator.backup((const char*)&alignedData, sizeof(void*));
   if (m_nIndirectElms == 0) {
     allocator.backup((const char*)elms,
                      computeMaxElms(m_tableMask) * sizeof(Elm));
@@ -2533,38 +2542,30 @@ void HphpArray::backup(LinearAllocator& allocator) {
     }
     // Back up the rest of the element slots after m_lastE
     allocator.backup((const char*)elms + ((m_lastE+1) * sizeof(Elm)),
-                  (computeMaxElms(m_tableMask) - (m_lastE+1)) * sizeof(Elm));
+                     (computeMaxElms(m_tableMask) - (m_lastE+1)) * sizeof(Elm));
   }
   allocator.backup((const char*)m_hash,
                    computeTableSize(m_tableMask) * sizeof(ElmInd));
-  Elm pad;
-  memset((void*)&pad, 0, sizeof(Elm));
-  allocator.backup((const char*)&pad, sizeof(Elm));
   ASSERT(m_strongIterators.empty());
+  // Trailing pad space is [1..ElmAlignment] bytes.
+  char pad[padRem];
+  memset(pad, 0, sizeof(pad));
+  allocator.backup(pad, sizeof(pad));
 }
 
 void HphpArray::restore(const char*& buffer) {
   size_t maxElms = computeMaxElms(m_tableMask);
   size_t tableSize = computeTableSize(m_tableMask);
-  void** alignedData = (void**)buffer;
-  buffer += sizeof(void*);
 
-  if (*alignedData == NULL) {
-    m_data = block2Data((void*)buffer);
-    if (m_data != buffer) {
-      // XXX This needs to be carefully reviewed to ensure thread-safety
-      // Move data in order to guarantee proper alignment.  This only happens
-      // (at most) the first time restore() is called for this linearized array.
-      memmove(m_data, buffer,
-              (maxElms * sizeof(Elm)) + (tableSize * sizeof(ElmInd)));
-    }
-    *alignedData = m_data;
-    m_dataPad = 0;
+  // m_data is at an alignment boundary.
+  if (uintptr_t(buffer) & ElmAlignmentMask) {
+    size_t pad = ElmAlignment - (uintptr_t(buffer) & ElmAlignmentMask);
+    m_data = (void*)(buffer + pad);
   } else {
-    m_data = (void*)block2Data(*alignedData);
-    m_dataPad = (char)(uintptr_t(m_data) - uintptr_t(*alignedData));
+    m_data = (void*)buffer;
   }
 
+  m_dataPad = 0;
   Elm* elms = data2Elms(m_data);
   m_hash = elms2Hash(elms, maxElms);
 

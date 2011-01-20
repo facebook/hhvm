@@ -51,7 +51,7 @@ void LinearAllocator::beginBackup(int size, int count) {
     m_blob = (char*)malloc(size);
   } else {
     ASSERT(size == 0);
-    ASSERT(count >= 0); // count can be non-zero for NULL terminiations
+    ASSERT(count >= 0); // count can be non-zero for NULL terminations
   }
   m_size = size;
   m_pos = 0;

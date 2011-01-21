@@ -139,8 +139,6 @@ void ObjectPropertyExpression::clearContext(Context context) {
 }
 
 void ObjectPropertyExpression::analyzeProgram(AnalysisResultPtr ar) {
-  Expression::analyzeProgram(ar);
-
   m_object->analyzeProgram(ar);
   m_property->analyzeProgram(ar);
 }

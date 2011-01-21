@@ -63,10 +63,6 @@ TypePtr ConstantTable::add(const std::string &name, TypePtr type,
                         sym->getDeclaration());
         if (!sym->isDynamic()) {
           sym->setDynamic();
-          if (sym->getDeclaration()) {
-            sym->getDeclaration()->getScope()->
-              addUpdates(BlockScope::UseKindConstRef);
-          }
           m_hasDynamic = true;
         }
         type = Type::Variant;
@@ -253,9 +249,7 @@ void ConstantTable::outputCPPDynamicDecl(CodeGenerator &cg,
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
 
   SymbolList &symbols = type2names["Variant"];
-  for (StringToSymbolMap::iterator iter = m_symbolMap.begin(),
-         end = m_symbolMap.end(); iter != end; ++iter) {
-    Symbol *sym = &iter->second;
+  BOOST_FOREACH(Symbol *sym, m_symbolVec) {
     if (sym->declarationSet() && sym->isDynamic() &&
         system == sym->isSystem()) {
       symbols.push_back(string(prefix) + classId + fmt +
@@ -266,9 +260,7 @@ void ConstantTable::outputCPPDynamicDecl(CodeGenerator &cg,
 
 void ConstantTable::outputCPPDynamicImpl(CodeGenerator &cg,
                                          AnalysisResultPtr ar) {
-  for (StringToSymbolMap::iterator iter = m_symbolMap.begin(),
-         end = m_symbolMap.end(); iter != end; ++iter) {
-    Symbol *sym = &iter->second;
+  BOOST_FOREACH(Symbol *sym, m_symbolVec) {
     if (sym->declarationSet() && sym->isDynamic()) {
       cg_printf("%s%s = \"%s\";\n", Option::ConstantPrefix,
                 cg.formatLabel(sym->getName()).c_str(),
@@ -280,9 +272,7 @@ void ConstantTable::outputCPPDynamicImpl(CodeGenerator &cg,
 void ConstantTable::collectCPPGlobalSymbols(StringPairVec &symbols,
                                             CodeGenerator &cg,
                                             AnalysisResultPtr ar) {
-  for (StringToSymbolMap::iterator iter = m_symbolMap.begin(),
-         end = m_symbolMap.end(); iter != end; ++iter) {
-    Symbol *sym = &iter->second;
+  BOOST_FOREACH(Symbol *sym, m_symbolVec) {
     if (sym->declarationSet() && sym->isDynamic()) {
       string varname = Option::ConstantPrefix + cg.formatLabel(sym->getName());
       symbols.push_back(pair<string, string>(varname, varname));
@@ -293,9 +283,7 @@ void ConstantTable::collectCPPGlobalSymbols(StringPairVec &symbols,
 void ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                               bool newline /* = true */) const {
   bool printed = false;
-  for (StringToSymbolMap::const_iterator iter = m_symbolMap.begin(),
-         end = m_symbolMap.end(); iter != end; ++iter) {
-    const Symbol *sym = &iter->second;
+  BOOST_FOREACH(Symbol *sym, m_symbolVec) {
     if (outputCPP(cg, ar, sym)) printed = true;
   }
   if (newline && printed) {

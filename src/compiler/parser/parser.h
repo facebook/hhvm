@@ -144,6 +144,7 @@ public:
   void onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                    bool ref);
   void onClassConst(Token &out, Token &cls, Token &name, bool text);
+  void fixStaticVars();
   void onFunctionStart(Token &name);
   void onFunction(Token &out, Token &ret, Token &ref, Token &name,
                   Token &params, Token &stmt);
@@ -216,7 +217,7 @@ private:
   StatementListPtr m_tree;
 
   std::vector<bool> m_hasCallToGetArgs;
-
+  std::vector<StringToExpressionPtrVecMap> m_staticVars;
   void pushComment();
   std::string popComment();
 

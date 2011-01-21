@@ -105,7 +105,7 @@ void ScalarExpression::toLower(bool funcCall /* = false */) {
 // static analysis functions
 
 void ScalarExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (ar->isAnalyzeInclude()) {
+  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     string id = Util::toLower(getIdentifier());
 
     switch (m_type) {

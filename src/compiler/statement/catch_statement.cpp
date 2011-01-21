@@ -56,9 +56,7 @@ StatementPtr CatchStatement::clone() {
 
 void CatchStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   addUserClass(ar, m_className);
-  if (ar->isAnalyzeInclude()) {
-    getScope()->getVariables()->addUsed(m_variable);
-  }
+  getScope()->getVariables()->addUsed(m_variable);
   if (m_stmt) m_stmt->analyzeProgram(ar);
 }
 

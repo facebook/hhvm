@@ -137,6 +137,8 @@ FunctionScopePtr MethodStatement::onInitialParse(AnalysisResultConstPtr ar,
   }
   setBlockScope(funcScope);
 
+  funcScope->setParamCounts(ar, -1, -1);
+
   return funcScope;
 }
 
@@ -166,6 +168,14 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
 
   m_className = classScope->getName();
   m_originalClassName = classScope->getOriginalName();
+  if (m_params) {
+    for (int i = 0; i < m_params->getCount(); i++) {
+      ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+      param->parseHandler(ar, fs, classScope);
+    }
+  }
+  FunctionScope::RecordRefParamInfo(m_name, fs);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -209,8 +219,8 @@ void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   }
   if (m_stmt) m_stmt->analyzeProgram(ar);
 
-  if (ar->isAnalyzeInclude()) {
-    funcScope->setParamCounts(ar, -1, -1);
+  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
+    funcScope->setParamSpecs(ar);
     if (funcScope->isSepExtension() ||
         BuiltinSymbols::IsDeclaredDynamic(m_name) ||
         Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
@@ -275,7 +285,6 @@ void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
         }
       }
     }
-    FunctionScope::RecordRefParamInfo(m_name, funcScope);
   } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     TypePtr ret = funcScope->getReturnType();
     if (ret && ret->isSpecificObject()) {

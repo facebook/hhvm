@@ -137,6 +137,9 @@ public:
    */
   void appendExtraCode(const std::string &key, const std::string &code);
   void appendExtraCode(const std::string &key, const std::string &code) const;
+  void parseExtraCodes(int &round,
+                       std::map<std::string, std::string> &extraCodes);
+  bool getExtraCodes(std::map<std::string, std::string> &extraCodes);
 
   Phase getPhase() const { return m_phase;}
   void setPhase(Phase phase) { m_phase = phase;}
@@ -224,7 +227,7 @@ public:
   /**
    * Parser creates a FileScope upon parsing a new file.
    */
-  void parseOnDemand(const std::string &name);
+  void parseOnDemand(const std::string &name) const;
   FileScopePtr findFileScope(const std::string &name) const;
   const StringToFileScopePtrMap &getAllFiles() { return m_files;}
   const std::vector<FileScopePtr> &getAllFilesVector() {
@@ -468,7 +471,7 @@ private:
   /**
    * Checks whether the file is in one of the on-demand parsing directories.
    */
-  bool inParseOnDemandDirs(const std::string &filename);
+  bool inParseOnDemandDirs(const std::string &filename) const;
 
   void collectFunctionsAndClasses(FileScopePtr fs);
 

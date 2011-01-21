@@ -78,6 +78,24 @@ void AnalysisResult::appendExtraCode(const std::string &key,
   extraCode += code + "\n";
 }
 
+bool AnalysisResult::getExtraCodes(std::map<std::string, std::string> &codes) {
+  codes.clear();
+  codes.swap(m_extraCodes);
+  return !codes.empty();
+}
+
+void AnalysisResult::parseExtraCodes(int &round, map<string, string> &codes) {
+  round++;
+  AnalysisResultPtr ar = shared_from_this();
+  for (map<string, string>::const_iterator iter = codes.begin();
+       iter != codes.end(); ++iter) {
+    string sfilename = iter->first + Option::LambdaPrefix + "lambda" +
+      lexical_cast<string>(round);
+    const char *filename = m_extraCodeFileNames.add(sfilename.c_str());
+    Compiler::Parser::ParseString(iter->second.c_str(), ar, filename);
+  }
+}
+
 void AnalysisResult::appendExtraCode(const std::string &key,
                                      const std::string &code) const {
   lock()->appendExtraCode(key, code);
@@ -88,26 +106,23 @@ void AnalysisResult::appendExtraCode(const std::string &key,
 
 void AnalysisResult::addFileScope(FileScopePtr fileScope) {
   ASSERT(fileScope);
-
-  std::pair<StringToFileScopePtrMap::const_iterator,bool> res =
-    m_files.insert(StringToFileScopePtrMap::value_type(
-                     fileScope->getName(), fileScope));
-
-  ASSERT(res.second);
+  FileScopePtr &res = m_files[fileScope->getName()];
+  ASSERT(!res);
+  res = fileScope;
   vertex_descriptor vertex = add_vertex(m_depGraph);
   fileScope->setVertex(vertex);
   m_fileVertMap[vertex] = fileScope;
   m_fileScopes.push_back(fileScope);
 }
 
-bool AnalysisResult::inParseOnDemandDirs(const string &filename) {
+bool AnalysisResult::inParseOnDemandDirs(const string &filename) const {
   for (size_t i = 0; i < m_parseOnDemandDirs.size(); i++) {
     if (filename.find(m_parseOnDemandDirs[i]) == 0) return true;
   }
   return false;
 }
 
-void AnalysisResult::parseOnDemand(const std::string &name) {
+void AnalysisResult::parseOnDemand(const std::string &name) const {
   if (m_package) {
     const std::string &root = m_package->getRoot();
     string rname = name;
@@ -119,7 +134,7 @@ void AnalysisResult::parseOnDemand(const std::string &name) {
         Option::PackageExcludeFiles.find(rname) ==
         Option::PackageExcludeFiles.end() &&
         !Option::IsFileExcluded(rname, Option::PackageExcludePatterns)) {
-      m_package->addSourceFile(rname.c_str());
+      lock()->m_package->addSourceFile(rname.c_str());
     }
   }
 }
@@ -433,6 +448,7 @@ void AnalysisResult::canonicalizeSymbolOrder() {
     if (funcs.size() > 1 ||
         Option::DynamicInvokeFunctions.find(fname) !=
         Option::DynamicInvokeFunctions.end()) {
+      sort(funcs.begin(), funcs.end(), by_source);
       for (unsigned int i = 0; i < funcs.size(); i++) {
         funcs[i]->setRedeclaring(i);
       }
@@ -444,6 +460,7 @@ void AnalysisResult::canonicalizeSymbolOrder() {
        iter != m_classDecs.end(); ++iter) {
     ClassScopePtrVec &classes = iter->second;
     if (classes.size() > 1) {
+      sort(classes.begin(), classes.end(), by_source);
       for (unsigned int i = 0; i < classes.size(); i++) {
         classes[i]->setRedeclaring(ar, i);
       }
@@ -606,29 +623,9 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   Logger::Verbose("Analyzing Includes");
   setPhase(AnalysisResult::AnalyzeInclude);
   sort(m_fileScopes.begin(), m_fileScopes.end(), by_filename); // fixed order
-  unsigned int i = 0; int round = 0;
-  while (i < m_fileScopes.size() || !m_extraCodes.empty()) {
-    for (; i < m_fileScopes.size(); i++) {
-      collectFunctionsAndClasses(m_fileScopes[i]);
-      m_fileScopes[i]->analyzeProgram(ar);
-    }
-    for (; !m_extraCodes.empty(); round++) {
-      map<string, string> codes = m_extraCodes;
-      m_extraCodes.clear();
-      for (map<string, string>::const_iterator iter = codes.begin();
-           iter != codes.end(); ++iter) {
-        string sfilename = iter->first + Option::LambdaPrefix + "lambda" +
-          lexical_cast<string>(round);
-        const char *filename = m_extraCodeFileNames.add(sfilename.c_str());
-        Compiler::Parser::ParseString(iter->second.c_str(), ar, filename);
-      }
-    }
-    if (m_package) {
-      m_package->parse();
-      if (i < m_fileScopes.size()) {
-        sort(m_fileScopes.begin() + i, m_fileScopes.end(), by_filename);
-      }
-    }
+  unsigned int i = 0;
+  for (i = 0; i < m_fileScopes.size(); i++) {
+    collectFunctionsAndClasses(m_fileScopes[i]);
   }
 
   // Keep generated code identical without randomness

@@ -151,7 +151,7 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
     Option::DynamicInvokeFunctions.end();
 }
 
-void FunctionScope::setParamCounts(AnalysisResultPtr ar, int minParam,
+void FunctionScope::setParamCounts(AnalysisResultConstPtr ar, int minParam,
                                    int maxParam) {
   if (minParam >= 0) {
     m_minParam = minParam;
@@ -178,16 +178,28 @@ void FunctionScope::setParamCounts(AnalysisResultPtr ar, int minParam,
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*params)[i]);
         m_paramNames[i] = param->getName();
-        TypePtr specType = param->getTypeSpec(ar, false);
-        if (specType &&
-            !specType->is(Type::KindOfSome) &&
-            !specType->is(Type::KindOfVariant)) {
-          m_paramTypeSpecs[i] = specType;
-        }
-        ExpressionPtr exp = param->defaultValue();
-        if (exp) {
-          m_paramDefaults[i] = exp->getText(false, false, ar);
-        }
+      }
+    }
+  }
+}
+
+void FunctionScope::setParamSpecs(AnalysisResultPtr ar) {
+  if (m_maxParam > 0 && m_stmt) {
+    MethodStatementPtr stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
+    ExpressionListPtr params = stmt->getParams();
+
+    for (int i = 0; i < m_maxParam; i++) {
+      ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*params)[i]);
+      TypePtr specType = param->getTypeSpec(ar, false);
+      if (specType &&
+          !specType->is(Type::KindOfSome) &&
+          !specType->is(Type::KindOfVariant)) {
+        m_paramTypeSpecs[i] = specType;
+      }
+      ExpressionPtr exp = param->defaultValue();
+      if (exp) {
+        m_paramDefaults[i] = exp->getText(false, false, ar);
       }
     }
   }
@@ -1710,8 +1722,10 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
 }
 
 FunctionScope::StringToRefParamInfoPtrMap FunctionScope::s_refParamInfo;
+static Mutex s_refParamInfoLock;
 
 void FunctionScope::RecordRefParamInfo(string fname, FunctionScopePtr func) {
+  Lock lock(s_refParamInfoLock);
   RefParamInfoPtr info = s_refParamInfo[fname];
   if (!info) {
     info = RefParamInfoPtr(new RefParamInfo());

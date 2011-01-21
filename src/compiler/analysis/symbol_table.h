@@ -282,7 +282,10 @@ public:
                           TypePtr type, bool coerced);
   virtual TypePtr setType(AnalysisResultConstPtr ar, Symbol *sym,
                           TypePtr type, bool coerced);
-  Symbol *getSymbol(const std::string &name) const;
+  Symbol *getSymbol(const std::string &name);
+  const Symbol *getSymbol(const std::string &name) const {
+    return const_cast<SymbolTable*>(this)->getSymbol(name);
+  }
 
   FunctionScopeRawPtr getFunctionScope();
   ClassScopeRawPtr getClassScope();

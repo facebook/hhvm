@@ -142,14 +142,11 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
 
   checkVolatile(ar);
 
-  if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
-    ar->recordClassSource(m_name, m_loc, getFileScope()->getName());
-  }
-
   if (m_stmt) {
     m_stmt->analyzeProgram(ar);
   }
   if (ar->getPhase() != AnalysisResult::AnalyzeAll) return;
+  ar->recordClassSource(m_name, m_loc, getFileScope()->getName());
   for (unsigned int i = 0; i < bases.size(); i++) {
     ClassScopePtr cls = ar->findClass(bases[i]);
     if (cls) {

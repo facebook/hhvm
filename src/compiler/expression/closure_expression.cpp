@@ -102,7 +102,7 @@ void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_vars) {
     m_values->analyzeProgram(ar);
 
-    if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
+    if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
       m_func->getFunctionScope()->setClosureVars(m_vars);
 
       // closure function's variable table (not containing function's)

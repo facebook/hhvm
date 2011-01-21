@@ -65,7 +65,7 @@ bool ClassConstantExpression::containsDynamicConstant(AnalysisResultPtr ar)
 void ClassConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_class) {
     m_class->analyzeProgram(ar);
-  } else {
+  } else if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
     if (ClassScopePtr cls = resolveClass()) {
       ConstructPtr decl = cls->getConstants()->
         getValueRecur(ar, m_varName, cls);

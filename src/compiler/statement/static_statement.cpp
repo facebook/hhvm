@@ -51,12 +51,12 @@ StatementPtr StaticStatement::clone() {
 
 void StaticStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   m_exp->analyzeProgram(ar);
-  BlockScopePtr scope = getScope();
-  for (int i = 0; i < m_exp->getCount(); i++) {
-    ExpressionPtr exp = (*m_exp)[i];
-    ExpressionPtr variable;
-    ExpressionPtr value;
-    if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
+  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
+    BlockScopePtr scope = getScope();
+    for (int i = 0; i < m_exp->getCount(); i++) {
+      ExpressionPtr exp = (*m_exp)[i];
+      ExpressionPtr variable;
+      ExpressionPtr value;
       // turn static $a; into static $a = null;
       if (exp->is(Expression::KindOfSimpleVariable)) {
         variable = dynamic_pointer_cast<SimpleVariable>(exp);
@@ -68,29 +68,14 @@ void StaticStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
                                     false));
         (*m_exp)[i] = exp;
       }
-    }
-    if (exp->is(Expression::KindOfAssignmentExpression)) {
+      assert(exp->is(Expression::KindOfAssignmentExpression));
       AssignmentExpressionPtr assignment_exp =
         dynamic_pointer_cast<AssignmentExpression>(exp);
       variable = assignment_exp->getVariable();
       value = assignment_exp->getValue();
-    } else {
-      ASSERT(false);
-    }
-    SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
-    if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
-      scope->getVariables()->setStaticInitVal(var->getName(), value);
-    } else if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-      // update initial value
-      const string &name = var->getName();
-      ExpressionPtr initValue =
-        (dynamic_pointer_cast<Expression>
-          (scope->getVariables()->getStaticInitVal(name)))->clone();
-      exp = AssignmentExpressionPtr
-        (new AssignmentExpression(exp->getScope(), exp->getLocation(),
-                                  Expression::KindOfAssignmentExpression,
-                                  variable, initValue, false));
-      (*m_exp)[i] = exp;
+      SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
+      Symbol *sym = var->getSymbol();
+      sym->setStaticInitVal(value);
     }
   }
 }
@@ -130,7 +115,8 @@ StatementPtr StaticStatement::preOptimize(AnalysisResultConstPtr ar) {
     ExpressionPtr variable = assignment_exp->getVariable();
     ExpressionPtr value = assignment_exp->getValue();
     SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
-    scope->getVariables()->setStaticInitVal(var->getName(), value);
+    Symbol *sym = var->getSymbol();
+    sym->setStaticInitVal(value);
   }
   return StatementPtr();
 }

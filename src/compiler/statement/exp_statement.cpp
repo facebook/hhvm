@@ -46,7 +46,7 @@ StatementPtr ExpStatement::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-void ExpStatement::analyzeAutoload(AnalysisResultPtr ar) {
+void ExpStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   if (!m_exp->is(Expression::KindOfAssignmentExpression)) return;
 
   AssignmentExpressionPtr assign =
@@ -81,7 +81,7 @@ void ExpStatement::analyzeAutoload(AnalysisResultPtr ar) {
                            Expression::KindOfIncludeExpression,
                            exp, T_INCLUDE_ONCE));
   include->setDocumentRoot(); // autoload always starts from document root
-  include->onParse(ar, getFileScope());
+  include->onParse(ar, scope);
   m_exp = include;
 }
 
@@ -131,9 +131,8 @@ void ExpStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 StatementPtr ExpStatement::preOptimize(AnalysisResultConstPtr ar) {
-  if (ar->getPhase() != AnalysisResult::AnalyzeInclude) {
-    m_exp = m_exp->unneeded();
-  }
+  assert (ar->getPhase() > AnalysisResult::AnalyzeAll);
+  m_exp = m_exp->unneeded();
   return StatementPtr();
 }
 

@@ -52,11 +52,13 @@ ExpressionPtr DynamicFunctionCall::clone() {
 
 void DynamicFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   FunctionCall::analyzeProgram(ar);
-  if (!m_class) {
-    addUserClass(ar, m_className);
-  }
-  if (m_params) {
-    m_params->markParams(false);
+  if (ar->getPhase() >= AnalysisResult::AnalyzeAll) {
+    if (!m_class) {
+      addUserClass(ar, m_className);
+    }
+    if (m_params) {
+      m_params->markParams(false);
+    }
   }
 }
 

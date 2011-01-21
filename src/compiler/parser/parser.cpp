@@ -154,6 +154,7 @@ Parser::Parser(Scanner &scanner, const char *fileName,
   m_file = FileScopePtr(new FileScope(m_fileName, fileSize));
 
   newScope();
+  m_staticVars.push_back(StringToExpressionPtrVecMap());
 
   Lock lock(m_ar->getMutex());
   m_ar->addFileScope(m_file);
@@ -221,6 +222,10 @@ void Parser::onName(Token &out, Token &name, NameKind kind) {
 void Parser::onStaticVariable(Token &out, Token *exprs, Token &var,
                               Token *value) {
   onVariable(out, exprs, var, value);
+  if (m_staticVars.size()) {
+    StringToExpressionPtrVecMap &m = m_staticVars.back();
+    m[var->text()].push_back(out->exp);
+  }
 }
 
 void Parser::onClassVariable(Token &out, Token *exprs, Token &var,
@@ -612,10 +617,40 @@ void Parser::onFunctionStart(Token &name) {
   m_foreaches.push_back(0);
   m_funcName = name.text();
   m_hasCallToGetArgs.push_back(false);
+  m_staticVars.push_back(StringToExpressionPtrVecMap());
 }
 
 void Parser::onMethodStart(Token &name, Token &mods) {
   onFunctionStart(name);
+}
+
+void Parser::fixStaticVars() {
+  StringToExpressionPtrVecMap &m = m_staticVars.back();
+  for (StringToExpressionPtrVecMap::iterator it = m.begin(), end = m.end();
+       it != end; ++it) {
+    const ExpressionPtrVec &v = it->second;
+    if (v.size() > 1) {
+      ExpressionPtr last;
+      for (int i = v.size(); i--; ) {
+        ExpressionListPtr el(dynamic_pointer_cast<ExpressionList>(v[i]));
+        for (int j = el->getCount(); j--; ) {
+          ExpressionPtr s = (*el)[j];
+          SimpleVariablePtr v = dynamic_pointer_cast<SimpleVariable>(
+            s->is(Expression::KindOfAssignmentExpression) ?
+            static_pointer_cast<AssignmentExpression>(s)->getVariable() : s);
+          if (v->getName() == it->first) {
+            if (!last) {
+              last = s;
+            } else {
+              el->removeElement(j);
+              el->insertElement(last->clone(), j);
+            }
+          }
+        }
+      }
+    }
+  }
+  m_staticVars.pop_back();
 }
 
 void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
@@ -636,6 +671,8 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
 
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
+
+  fixStaticVars();
 
   FunctionStatementPtr func;
   if (yieldCount > 0) {
@@ -806,6 +843,8 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
 
+  fixStaticVars();
+
   MethodStatementPtr mth;
   if (yieldCount > 0) {
     string closureName = getClosureName();
@@ -862,6 +901,7 @@ void Parser::saveParseTree(Token &tree) {
     m_tree = NEW_STMT0(StatementList);
   }
 
+  if (m_staticVars.size()) fixStaticVars();
   FunctionScopePtr pseudoMain = m_file->setTree(m_ar, m_tree);
   completeScope(pseudoMain);
   pseudoMain->setOuterScope(m_file);
@@ -1092,7 +1132,9 @@ void Parser::onUnset(Token &out, Token &expr) {
 }
 
 void Parser::onExpStatement(Token &out, Token &expr) {
-  out->stmt = NEW_STMT(ExpStatement, expr->exp);
+  ExpStatementPtr exp(NEW_STMT(ExpStatement, expr->exp));
+  out->stmt = exp;
+  exp->onParse(m_ar, m_file);
 }
 
 void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,

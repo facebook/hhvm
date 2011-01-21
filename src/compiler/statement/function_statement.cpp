@@ -59,7 +59,16 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   // note it's important to add to scope, not a pushed FunctionContainer,
   // as a function may be declared inside a class's method, yet this function
   // is a global function, not a class method.
-  if (!scope->addFunction(ar, onInitialParse(ar, scope))) {
+  FunctionScopePtr fs = onInitialParse(ar, scope);
+  if (m_params) {
+    for (int i = 0; i < m_params->getCount(); i++) {
+      ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+      param->parseHandler(ar, fs, ClassScopePtr());
+    }
+  }
+  FunctionScope::RecordRefParamInfo(m_name, fs);
+  if (!scope->addFunction(ar, fs)) {
     m_ignored = true;
     return;
   }
@@ -79,7 +88,7 @@ void FunctionStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   if (func && fs->isVolatile()) {
     func->getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
   }
-  if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
+  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     ar->recordFunctionSource(m_name, m_loc, getFileScope()->getName());
   }
   MethodStatement::analyzeProgramImpl(ar);

@@ -24,7 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ExpStatement);
 
-class ExpStatement : public Statement {
+class ExpStatement : public Statement, public IParseHandler {
 public:
   ExpStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp);
 
@@ -35,10 +35,7 @@ public:
 
   ExpressionPtr getExpression() { return m_exp;}
 
-  /**
-   * Change autoload configuration statement to includes.
-   */
-  void analyzeAutoload(AnalysisResultPtr ar);
+  void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
 
   /**
    * Allow 2nd expression to use void returns.

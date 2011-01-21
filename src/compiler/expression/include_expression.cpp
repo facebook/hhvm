@@ -194,6 +194,7 @@ string IncludeExpression::CheckInclude(ConstructPtr includeExp,
 
 void IncludeExpression::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
   m_include = CheckInclude(shared_from_this(), m_exp, m_documentRoot);
+  if (!m_include.empty()) ar->parseOnDemand(m_include);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -218,10 +219,8 @@ bool IncludeExpression::analyzeInclude(AnalysisResultConstPtr ar,
 
 void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (!m_include.empty()) {
-    if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
-      ar->parseOnDemand(m_include);
-    } else if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
-               ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    if (ar->getPhase() == AnalysisResult::AnalyzeAll ||
+        ar->getPhase() == AnalysisResult::AnalyzeFinal) {
       if (analyzeInclude(ar, m_include)) {
         FunctionScopePtr func = getFunctionScope();
         getFileScope()->addIncludeDependency(ar, m_include,

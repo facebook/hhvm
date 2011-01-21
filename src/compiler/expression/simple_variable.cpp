@@ -78,7 +78,6 @@ bool SimpleVariable::canKill(bool isref) const {
 }
 
 void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
-  Expression::analyzeProgram(ar);
   m_superGlobal = BuiltinSymbols::IsSuperGlobal(m_name);
   m_superGlobalType = BuiltinSymbols::GetSuperGlobalType(m_name);
 

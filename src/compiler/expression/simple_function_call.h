@@ -52,7 +52,6 @@ public:
   virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr fs);
 
   // extensible analysis by defining a subclass to be RealSimpleFunctionCall
-  virtual void onAnalyzeInclude(AnalysisResultPtr ar) {}
   virtual ExpressionPtr onPreOptimize(AnalysisResultConstPtr ar) {
     return ExpressionPtr();
   }

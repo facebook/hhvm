@@ -56,7 +56,8 @@ TypePtr Symbol::setType(AnalysisResultConstPtr ar, BlockScopeRawPtr scope,
   if (!coerced) return oldType;
 
   type = CoerceTo(ar, m_coerced, type);
-  if (!Type::SameType(oldType, type)) {
+  if (ar->getPhase() >= AnalysisResult::AnalyzeAll &&
+      !Type::SameType(oldType, type)) {
     int useKind = BlockScope::UseKindNonStaticRef;
     if (isConstant()) {
       useKind = BlockScope::UseKindConstRef;
@@ -184,14 +185,14 @@ ClassScopeRawPtr SymbolTable::getClassScope() {
 }
 
 bool SymbolTable::isPresent(const std::string &name) const {
-  if (Symbol *sym = getSymbol(name)) {
+  if (const Symbol *sym = getSymbol(name)) {
     return sym->isPresent();
   }
   return false;
 }
 
 bool SymbolTable::isSystem(const std::string &name) const {
-  if (Symbol *sym = getSymbol(name)) {
+  if (const Symbol *sym = getSymbol(name)) {
     return sym->isSystem();
   }
   return false;
@@ -199,10 +200,10 @@ bool SymbolTable::isSystem(const std::string &name) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Symbol *SymbolTable::getSymbol(const std::string &name) const {
-  std::map<std::string,Symbol>::const_iterator it = m_symbolMap.find(name);
+Symbol *SymbolTable::getSymbol(const std::string &name) {
+  std::map<std::string,Symbol>::iterator it = m_symbolMap.find(name);
   if (it != m_symbolMap.end()) {
-    return const_cast<Symbol*>(&it->second);
+    return &it->second;
   }
   return NULL;
 }
@@ -228,28 +229,28 @@ TypePtr SymbolTable::getType(const std::string &name) {
 }
 
 TypePtr SymbolTable::getFinalType(const std::string &name) const {
-  if (Symbol *sym = getSymbol(name)) {
+  if (const Symbol *sym = getSymbol(name)) {
     return sym->getFinalType();
   }
   return Type::Variant;
 }
 
 bool SymbolTable::isExplicitlyDeclared(const std::string &name) const {
-  if (Symbol *sym = getSymbol(name)) {
+  if (const Symbol *sym = getSymbol(name)) {
     return sym->valueSet();
   }
   return false;
 }
 
 ConstructPtr SymbolTable::getDeclaration(const std::string &name) const {
-  if (Symbol *sym = getSymbol(name)) {
+  if (const Symbol *sym = getSymbol(name)) {
     return sym->getDeclaration();
   }
   return ConstructPtr();
 }
 
 ConstructPtr SymbolTable::getValue(const std::string &name) const {
-  if (Symbol *sym = getSymbol(name)) {
+  if (const Symbol *sym = getSymbol(name)) {
     return sym->getValue();
   }
   return ConstructPtr();
@@ -260,7 +261,7 @@ void SymbolTable::setSepExtension(const std::string &name) {
 }
 
 bool SymbolTable::isSepExtension(const std::string &name) const {
-  if (Symbol *sym = getSymbol(name)) {
+  if (const Symbol *sym = getSymbol(name)) {
     return sym->isSep();
   }
   return false;

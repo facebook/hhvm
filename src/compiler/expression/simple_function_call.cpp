@@ -129,57 +129,90 @@ void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
   ConstructPtr self = shared_from_this();
   if (m_className.empty()) {
     switch (m_type) {
-    case CreateFunction:
-      if (m_params->getCount() == 2 &&
-          (*m_params)[0]->isLiteralString() &&
-          (*m_params)[1]->isLiteralString()) {
-        string params = (*m_params)[0]->getLiteralString();
-        string body = (*m_params)[1]->getLiteralString();
-        m_lambda = CodeGenerator::GetNewLambda();
-        string code = "function " + m_lambda + "(" + params + ") "
-          "{" + body + "}";
-        ar->appendExtraCode(fs->getName(), code);
-      }
-      break;
-    case VariableArgumentFunction:
-      /*
-        Note:
-        At this point, we dont have a function scope, so we set
-        the flags on the FileScope.
-        The FileScope maintains a stack of attributes, so that
-        it correctly handles each function.
-        But note that later phases should set/get the attribute
-        directly on the FunctionScope, rather than on the FileScope
-      */
-      fs->setAttribute(FileScope::VariableArgument);
-      break;
-    case ExtractFunction:
-      fs->setAttribute(FileScope::ContainsLDynamicVariable);
-      fs->setAttribute(FileScope::ContainsExtract);
-      break;
-    case CompactFunction: {
-      // If all the parameters in the compact() call are statically known,
-      // there is no need to create a variable table.
-      vector<ExpressionPtr> literals;
-      if (m_params->flattenLiteralStrings(literals)) {
-        m_type = StaticCompactFunction;
-        m_params->clearElements();
-        for (unsigned i = 0; i < literals.size(); i++) {
-          m_params->addElement(literals[i]);
+      case DefineFunction:
+        if (m_params && unsigned(m_params->getCount() - 2) <= 1u) {
+          // need to register the constant before AnalyzeAll, so that
+          // DefinedFunction can mark this volatile
+          ExpressionPtr ename = (*m_params)[0];
+          if (ConstantExpressionPtr cname =
+              dynamic_pointer_cast<ConstantExpression>(ename)) {
+            /*
+              Hack: If the name of the constant being defined is itself
+              a constant expression, assume that its not yet defined.
+              So define(FOO, 'bar') is equivalent to define('FOO', 'bar').
+            */
+            ename = makeScalarExpression(ar, cname->getName());
+            m_params->removeElement(0);
+            m_params->insertElement(ename);
+          }
+          ScalarExpressionPtr name =
+            dynamic_pointer_cast<ScalarExpression>(ename);
+          if (name) {
+            string varName = name->getIdentifier();
+            if (varName.empty()) break;
+            AnalysisResult::Locker lock(ar);
+            fs->declareConstant(lock.get(), varName);
+            // handling define("CONSTANT", ...);
+            ExpressionPtr value = (*m_params)[1];
+            BlockScopePtr block = lock->findConstantDeclarer(varName);
+            ConstantTablePtr constants = block->getConstants();
+            if (constants != ar->getConstants()) {
+              constants->add(varName, Type::Some, value, ar, self);
+            }
+          }
         }
-      } else {
-        fs->setAttribute(FileScope::ContainsDynamicVariable);
+        break;
+      case CreateFunction:
+        if (m_params->getCount() == 2 &&
+            (*m_params)[0]->isLiteralString() &&
+            (*m_params)[1]->isLiteralString()) {
+          string params = (*m_params)[0]->getLiteralString();
+          string body = (*m_params)[1]->getLiteralString();
+          m_lambda = CodeGenerator::GetNewLambda();
+          string code = "function " + m_lambda + "(" + params + ") "
+            "{" + body + "}";
+          ar->appendExtraCode(fs->getName(), code);
+        }
+        break;
+      case VariableArgumentFunction:
+        /*
+          Note:
+          At this point, we dont have a function scope, so we set
+          the flags on the FileScope.
+          The FileScope maintains a stack of attributes, so that
+          it correctly handles each function.
+          But note that later phases should set/get the attribute
+          directly on the FunctionScope, rather than on the FileScope
+        */
+        fs->setAttribute(FileScope::VariableArgument);
+        break;
+      case ExtractFunction:
+        fs->setAttribute(FileScope::ContainsLDynamicVariable);
+        fs->setAttribute(FileScope::ContainsExtract);
+        break;
+      case CompactFunction: {
+        // If all the parameters in the compact() call are statically known,
+        // there is no need to create a variable table.
+        vector<ExpressionPtr> literals;
+        if (m_params->flattenLiteralStrings(literals)) {
+          m_type = StaticCompactFunction;
+          m_params->clearElements();
+          for (unsigned i = 0; i < literals.size(); i++) {
+            m_params->addElement(literals[i]);
+          }
+        } else {
+          fs->setAttribute(FileScope::ContainsDynamicVariable);
+        }
+        fs->setAttribute(FileScope::ContainsCompact);
+        break;
       }
-      fs->setAttribute(FileScope::ContainsCompact);
-      break;
-    }
-    case GetDefinedVarsFunction:
-      fs->setAttribute(FileScope::ContainsDynamicVariable);
-      fs->setAttribute(FileScope::ContainsGetDefinedVars);
-      fs->setAttribute(FileScope::ContainsCompact);
-      break;
-    default:
-      break;
+      case GetDefinedVarsFunction:
+        fs->setAttribute(FileScope::ContainsDynamicVariable);
+        fs->setAttribute(FileScope::ContainsGetDefinedVars);
+        fs->setAttribute(FileScope::ContainsCompact);
+        break;
+      default:
+        break;
     }
   }
 }
@@ -191,7 +224,8 @@ void SimpleFunctionCall::addDependencies(AnalysisResultPtr ar) {
   if (!m_class) {
     if (m_className.empty()) {
       addUserFunction(ar, m_name);
-    } else if (!isParent() && !isSelf()) {
+    } else if ((!isParent() && !isSelf()) ||
+               getOriginalScope() != getScope()) {
       addUserClass(ar, m_className);
     }
   }
@@ -261,50 +295,11 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
   if (m_safeDef) m_safeDef->analyzeProgram(ar);
 
-  if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
-    onAnalyzeInclude(ar);
-
+  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     ConstructPtr self = shared_from_this();
-
-    // We need to know the name of the constant so that we can associate it
-    // with this file before we do type inference.
-    if (!m_class && m_className.empty() && m_type == DefineFunction &&
-        m_params && unsigned(m_params->getCount() - 2) <= 1u) {
-      ExpressionPtr ename = (*m_params)[0];
-      if (ConstantExpressionPtr cname =
-          dynamic_pointer_cast<ConstantExpression>(ename)) {
-        /*
-          Hack: If the name of the constant being defined is itself
-          a constant expression, assume that its not yet defined.
-          So define(FOO, 'bar') is equivalent to define('FOO', 'bar').
-        */
-        ename = makeScalarExpression(ar, cname->getName());
-        m_params->removeElement(0);
-        m_params->insertElement(ename);
-      }
-      ScalarExpressionPtr name =
-        dynamic_pointer_cast<ScalarExpression>(ename);
-      if (name) {
-        string varName = name->getIdentifier();
-        if (!varName.empty()) {
-          getFileScope()->declareConstant(ar, varName);
-
-          // handling define("CONSTANT", ...);
-          ExpressionPtr value = (*m_params)[1];
-          BlockScopePtr block = ar->findConstantDeclarer(varName);
-          ConstantTablePtr constants = block->getConstants();
-          if (constants != ar->getConstants()) {
-            constants->add(varName, Type::Some, value, ar, self);
-          }
-        }
-      }
-    }
-  } else if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     // Look up the corresponding FunctionScope and ClassScope
     // for this function call
-    {
-      setupScopes(ar);
-    }
+    setupScopes(ar);
     // check for dynamic constant and volatile function/class
     if (!m_class && m_className.empty() &&
       (m_type == DefinedFunction ||
@@ -686,10 +681,11 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
           // not found (i.e., undefined)
           if (!block) break;
           constants = block->getConstants();
-          Symbol *sym = constants->getSymbol(symbol);
+          const Symbol *sym = constants->getSymbol(symbol);
           assert(sym);
           if (!sym->isDynamic() && sym->getValue() != (*m_params)[1]) {
-            sym->setValue((*m_params)[1]);
+            // NOT THREAD-SAFE
+            const_cast<Symbol*>(sym)->setValue((*m_params)[1]);
             getScope()->addUpdates(BlockScope::UseKindConstRef);
           }
           break;

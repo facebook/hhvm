@@ -77,67 +77,67 @@ void VariableTable::getNames(std::set<string> &names,
 }
 
 bool VariableTable::isParameter(const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   return sym && sym->isParameter();
 }
 
 bool VariableTable::isPublic(const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   return sym && sym->isPublic();
 }
 
 bool VariableTable::isProtected(const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   return sym && sym->isProtected();
 }
 
 bool VariableTable::isPrivate(const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   return sym && sym->isPrivate();
 }
 
 bool VariableTable::isStatic(const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   return sym && sym->isStatic();
 }
 
 bool VariableTable::isGlobal(const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   return sym && sym->isGlobal();
 }
 
 bool VariableTable::isRedeclared(const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   return sym && sym->isRedeclared();
 }
 
 bool VariableTable::isLocalGlobal(const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   return sym && sym->isLocalGlobal();
 }
 
 bool VariableTable::isNestedStatic(const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   return sym && sym->isNestedStatic();
 }
 
 bool VariableTable::isLvalParam(const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   return sym && sym->isLvalParam();
 }
 
 bool VariableTable::isUsed(const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   return sym && sym->isUsed();
 }
 
 bool VariableTable::isNeeded(const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   return sym && sym->isNeeded();
 }
 
 bool VariableTable::isSuperGlobal(const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   return sym && sym->isSuperGlobal();
 }
 
@@ -187,7 +187,7 @@ bool VariableTable::needGlobalPointer() const {
 }
 
 bool VariableTable::isInherited(const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   return !sym ||
     (!sym->isGlobal() && !sym->isSystem() && !sym->getDeclaration());
 }
@@ -232,7 +232,7 @@ const char *VariableTable::getVariablePrefix(const Symbol *sym) const {
 string VariableTable::getVariableName(CodeGenerator &cg,
                                       AnalysisResultConstPtr ar,
                                       const string &name) const {
-  Symbol *sym = getSymbol(name);
+  const Symbol *sym = getSymbol(name);
   if (sym && sym->isStatic()) {
     if (!needLocalCopy(sym)) {
       return string(Option::StaticVariablePrefix) + cg.formatLabel(name);

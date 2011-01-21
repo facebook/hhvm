@@ -107,7 +107,7 @@ void ConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
     if (!m_dynamic) {
       ConstantTablePtr constants = ar->getConstants();
       if (!constants->getValue(m_name)) {
-        BlockScopeConstPtr block = ar->findConstantDeclarer(m_name);
+        BlockScopePtr block = ar->findConstantDeclarer(m_name);
         if (block) {
           Symbol *sym = block->getConstants()->getSymbol(m_name);
           assert(sym);
@@ -116,8 +116,13 @@ void ConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
           } else {
             ConstructPtr decl = sym->getDeclaration();
             if (decl) {
-              decl->getScope()->addUse(
-                getScope(), BlockScope::UseKindConstRef);
+              if (!decl->getScope()) {
+                sym->setDeclaration(ExpressionPtr());
+                sym->setValue(ExpressionPtr());
+              } else {
+                decl->getScope()->addUse(
+                  getScope(), BlockScope::UseKindConstRef);
+              }
             }
           }
         }
@@ -132,7 +137,7 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
   }
   ConstructPtr decl;
   if (!isScalar() && !m_dynamic && !(m_context & LValue)) {
-    Symbol *sym = ar->getConstants()->getSymbol(m_name);
+    const Symbol *sym = ar->getConstants()->getSymbol(m_name);
     bool system = true;
     if (!sym || !sym->getValue()) {
       system = false;
@@ -151,7 +156,8 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
         if (system && !value->is(KindOfScalarExpression)) {
           if (ExpressionPtr opt = value->preOptimize(ar)) {
             value = opt;
-            sym->setValue(value);
+            // NOT THREAD-SAFE
+            const_cast<Symbol*>(sym)->setValue(value);
           }
         }
         ExpressionPtr rep = Clone(value, getScope());

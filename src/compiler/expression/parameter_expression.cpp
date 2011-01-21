@@ -54,6 +54,21 @@ ExpressionPtr ParameterExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
+void ParameterExpression::parseHandler(AnalysisResultConstPtr ar,
+                                       FunctionScopePtr func,
+                                       ClassScopePtr cls) {
+  if (cls && !m_type.empty()) {
+    if (m_type == "self") {
+      m_type = cls->getName();
+    } else if (m_type == "parent") {
+      if (!cls->getParent().empty()) {
+        m_type = cls->getParent();
+      }
+    }
+  }
+  func->getVariables()->addParam(m_name, TypePtr(), ar, ExpressionPtr());
+}
+
 void ParameterExpression::defaultToNull(AnalysisResultPtr ar) {
   ASSERT(!m_defaultValue);
   m_defaultValue = CONSTANT("null");
@@ -65,23 +80,7 @@ void ParameterExpression::defaultToNull(AnalysisResultPtr ar) {
 void ParameterExpression::analyzeProgram(AnalysisResultPtr ar) {
   if (m_defaultValue) m_defaultValue->analyzeProgram(ar);
 
-  if (ar->isAnalyzeInclude()) {
-    if (!m_type.empty()) {
-      if (m_type == "self") {
-        ClassScopeRawPtr cls = getClassScope();
-        if (cls) {
-          m_type = cls->getName();
-        }
-      } else if (m_type == "parent") {
-        ClassScopeRawPtr cls = getClassScope();
-        if (cls && !cls->getParent().empty()) {
-          m_type = cls->getParent();
-        }
-      }
-    }
-    FunctionScopePtr fs = getFunctionScope();
-    fs->getVariables()->addParam(m_name, TypePtr(), ar, ExpressionPtr());
-  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
     if (!m_type.empty()) {
       addUserClass(ar, m_type);
     }

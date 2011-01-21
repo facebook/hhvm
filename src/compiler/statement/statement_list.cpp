@@ -136,19 +136,15 @@ void StatementList::analyzeProgramImpl(AnalysisResultPtr ar) {
     StatementPtr stmt = m_stmts[i];
 
     // effect testing
-    if (ar->isAnalyzeInclude() && !stmt->hasEffect() &&
-        !stmt->is(Statement::KindOfStatementList)) {
-      Compiler::Error(Compiler::StatementHasNoEffect, stmt);
-    }
-
-    // changing AUTOLOAD to includes
-    if (ar->getPhase() == AnalysisResult::AnalyzeInclude &&
-        stmt->is(Statement::KindOfExpStatement)) {
-      ExpStatementPtr expStmt = dynamic_pointer_cast<ExpStatement>(stmt);
-      if (stmt->isFileLevel()) {
-        expStmt->analyzeAutoload(ar);
+    if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
+      if (!stmt->hasEffect() &&
+          !stmt->is(Statement::KindOfStatementList)) {
+        Compiler::Error(Compiler::StatementHasNoEffect, stmt);
       }
-      expStmt->analyzeShortCircuit(ar);
+
+      if (stmt->is(Statement::KindOfExpStatement)) {
+        static_pointer_cast<ExpStatement>(stmt)->analyzeShortCircuit(ar);
+      }
     }
 
     bool scopeStmt = stmt->is(Statement::KindOfFunctionStatement) ||
@@ -339,8 +335,7 @@ StatementPtr StatementList::preOptimize(AnalysisResultConstPtr ar) {
     }
 
     if (s) {
-      if (ar->getPhase() != AnalysisResult::AnalyzeInclude &&
-          Option::EliminateDeadCode) {
+      if (Option::EliminateDeadCode) {
         if (s->is(KindOfBreakStatement) ||
             s->is(KindOfContinueStatement) ||
             s->is(KindOfReturnStatement) ||

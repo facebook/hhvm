@@ -45,6 +45,7 @@ public:
 
   ExpressionPtr getVariable() { return m_variable;}
   ExpressionPtr getValue() { return m_value;}
+  void setValue(ExpressionPtr v) { m_value = v; }
   int getLocalEffects() const;
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar, int state);

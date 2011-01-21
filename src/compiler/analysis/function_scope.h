@@ -62,7 +62,8 @@ public:
    * System functions.
    */
   FunctionScope(bool method, const std::string &name, bool reference);
-  void setParamCounts(AnalysisResultPtr ar, int minParam, int maxParam);
+  void setParamCounts(AnalysisResultConstPtr ar, int minParam, int maxParam);
+  void setParamSpecs(AnalysisResultPtr ar);
   void setParamName(int index, const std::string &name);
   void setParamDefault(int index, const std::string &value,
                        const std::string &text);

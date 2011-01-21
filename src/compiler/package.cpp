@@ -64,7 +64,8 @@ void Package::addAllFiles(bool force) {
 }
 
 void Package::addSourceFile(const char *fileName) {
-  if (fileName && *fileName) {
+  if (fileName && *fileName &&
+      m_filesParsed.find(fileName) == m_filesParsed.end()) {
     m_filesToParse.insert(Util::canonicalize(fileName));
   }
 }
@@ -225,22 +226,35 @@ bool Package::parse() {
   }
   if (threadCount <= 0) threadCount = 1;
 
-  JobQueueDispatcher<const char *, ParserWorker>
-    dispatcher(threadCount, true, 0, this);
-  dispatcher.start();
-  for (set<string>::const_iterator iter = m_filesToParse.begin();
-       iter != m_filesToParse.end(); ++iter) {
-    dispatcher.enqueue(m_files.add(iter->c_str()));
-  }
-  dispatcher.stop();
-  m_filesToParse.clear();
+  int round = 0;
+  bool firstPass = true;
+  std::map<std::string, std::string> codes;
+  do {
+    JobQueueDispatcher<const char *, ParserWorker>
+      dispatcher(threadCount, true, 0, this);
 
-  std::vector<ParserWorker*> workers;
-  dispatcher.getWorkers(workers);
-  for (unsigned int i = 0; i < workers.size(); i++) {
-    ParserWorker *worker = workers[i];
-    if (!worker->m_ret) return false;
-  }
+    set<string> files;
+    files.swap(m_filesToParse);
+    set<string>::const_iterator iter = files.begin(), end = files.end();
+    m_filesParsed.insert(iter, end);
+
+    dispatcher.start();
+    for (; iter != end; ++iter) {
+      dispatcher.enqueue(m_files.add(iter->c_str()));
+    }
+    m_ar->parseExtraCodes(round, codes);
+    codes.clear();
+    dispatcher.stop();
+    if (firstPass) {
+      std::vector<ParserWorker*> workers;
+      dispatcher.getWorkers(workers);
+      for (unsigned int i = 0; i < workers.size(); i++) {
+        ParserWorker *worker = workers[i];
+        if (!worker->m_ret) return false;
+      }
+      firstPass = false;
+    }
+  } while (m_ar->getExtraCodes(codes) || !m_filesToParse.empty());
 
   return true;
 }

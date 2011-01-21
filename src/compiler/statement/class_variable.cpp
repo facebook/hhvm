@@ -90,8 +90,7 @@ void ClassVariable::onParseRecur(AnalysisResultConstPtr ar,
 void ClassVariable::analyzeProgramImpl(AnalysisResultPtr ar) {
   m_declaration->analyzeProgram(ar);
   AnalysisResult::Phase phase = ar->getPhase();
-  if (phase != AnalysisResult::AnalyzeInclude &&
-      phase != AnalysisResult::AnalyzeAll) {
+  if (phase != AnalysisResult::AnalyzeAll) {
     return;
   }
   ClassScopePtr scope = getClassScope();
@@ -102,13 +101,10 @@ void ClassVariable::analyzeProgramImpl(AnalysisResultPtr ar) {
         dynamic_pointer_cast<AssignmentExpression>(exp);
       SimpleVariablePtr var =
         dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
-      if (phase == AnalysisResult::AnalyzeInclude) {
-        ExpressionPtr value = assignment->getValue();
-        scope->getVariables()->setClassInitVal(var->getName(), value);
-      } else {
-        scope->getVariables()->markOverride(ar, var->getName());
-      }
-    } else if (phase == AnalysisResult::AnalyzeAll) {
+      ExpressionPtr value = assignment->getValue();
+      scope->getVariables()->setClassInitVal(var->getName(), value);
+      scope->getVariables()->markOverride(ar, var->getName());
+    } else {
       SimpleVariablePtr var =
         dynamic_pointer_cast<SimpleVariable>(exp);
       scope->getVariables()->markOverride(ar, var->getName());

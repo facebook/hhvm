@@ -73,6 +73,7 @@ private:
   bool m_bAspTags;
   std::set<std::string> m_filesToParse;
   StringBag m_files;
+  std::set<std::string> m_filesParsed;
 
   Mutex m_mutex;
   AnalysisResultPtr m_ar;

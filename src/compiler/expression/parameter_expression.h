@@ -45,6 +45,8 @@ public:
   ExpressionPtr defaultValue() { return m_defaultValue; }
   TypePtr getTypeSpec(AnalysisResultPtr ar, bool forInference);
   bool hasTypeHint() const { return !m_type.empty(); }
+  void parseHandler(AnalysisResultConstPtr ar, FunctionScopePtr func,
+                    ClassScopePtr cls);
 private:
   std::string m_type;
   std::string m_originalType;

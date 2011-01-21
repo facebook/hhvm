@@ -516,12 +516,12 @@ int process(const ProgramOptions &po) {
   {
     Timer timer(Timer::WallTime, "parsing inputs");
     if (!po.inputs.empty() && po.target == "php" && po.format == "pickled") {
-        for (unsigned int i = 0; i < po.inputs.size(); i++) {
-          package.addSourceFile(po.inputs[i].c_str());
-        }
-        if (!package.parse()) {
-          return 1;
-        }
+      for (unsigned int i = 0; i < po.inputs.size(); i++) {
+        package.addSourceFile(po.inputs[i].c_str());
+      }
+      if (!package.parse()) {
+        return 1;
+      }
     } else {
       ar->setPackage(&package);
       ar->setParseOnDemand(po.parseOnDemand);
@@ -556,8 +556,10 @@ int process(const ProgramOptions &po) {
       }
     }
     if (po.target != "filecache") {
-      if (!package.parse()) {
-        return 1;
+      {
+        if (!package.parse()) {
+          return 1;
+        }
       }
       ar->analyzeProgram();
     }

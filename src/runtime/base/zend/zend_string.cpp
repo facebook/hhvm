@@ -18,7 +18,6 @@
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/zend/zend_printf.h>
 #include <runtime/base/zend/zend_math.h>
-#include <runtime/base/zend/utf8_to_utf16.h>
 
 #include <util/lock.h>
 #include <math.h>
@@ -2218,62 +2217,6 @@ char *string_cplus_escape(const char *s, int len)
         }
         break;
     }
-  }
-
-  return sb.detach(len);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// json
-
-#define REVERSE16(us) (((us & 0xf) << 12) | (((us >> 4) & 0xf) << 8) | (((us >> 8) & 0xf) << 4) | ((us >> 12) & 0xf))
-
-char *string_json_escape(const char *s, int &len, bool loose) {
-  StringBuffer sb;
-  if (len == 0) {
-    sb.append("\"\"", 2);
-  } else {
-    unsigned short *utf16 =
-      (unsigned short *)malloc(len * sizeof(unsigned short));
-
-    len = utf8_to_utf16(utf16, (char*)s, len, loose ? 1 : 0);
-    if (len < 0) {
-      sb.append("null", 4);
-    } else if (len == 0) {
-      sb.append("\"\"", 2);
-    } else {
-      static const char digits[] = "0123456789abcdef";
-
-      sb += '"';
-      for (int pos = 0; pos < len; pos++) {
-        unsigned short us = utf16[pos];
-        switch (us) {
-        case '"':  sb.append("\\\"", 2); break;
-        case '\\': sb.append("\\\\", 2); break;
-        case '/':  sb.append("\\/", 2);  break;
-        case '\b': sb.append("\\b", 2);  break;
-        case '\f': sb.append("\\f", 2);  break;
-        case '\n': sb.append("\\n", 2);  break;
-        case '\r': sb.append("\\r", 2);  break;
-        case '\t': sb.append("\\t", 2);  break;
-        default:
-          if (us >= ' ' && (us & 127) == us) {
-            sb.append((char)us);
-          } else {
-            sb.append("\\u", 2);
-            us = REVERSE16(us);
-            sb.append(digits[us & ((1 << 4) - 1)]); us >>= 4;
-            sb.append(digits[us & ((1 << 4) - 1)]); us >>= 4;
-            sb.append(digits[us & ((1 << 4) - 1)]); us >>= 4;
-            sb.append(digits[us & ((1 << 4) - 1)]);
-          }
-          break;
-        }
-      }
-      sb += '"';
-    }
-
-    free(utf16);
   }
 
   return sb.detach(len);

@@ -25,6 +25,7 @@
 #include <math.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/array/array_iterator.h>
+#include <runtime/base/util/request_local.h>
 
 using namespace std;
 
@@ -253,9 +254,7 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
   case JSON:
     {
       if (len < 0) len = strlen(v);
-      char *escaped = string_json_escape(v, len, m_option);
-      m_buf->append(escaped);
-      free(escaped);
+      m_buf->appendJsonEscape(v, len, m_option);
     }
     break;
   default:
@@ -462,7 +461,7 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
 
     // ...so to strictly follow PHP's output
     if (m_type == VarDump) {
-      m_buf->append(" ");
+      m_buf->append(' ');
     } else {
       writeRefCount();
     }
@@ -503,9 +502,9 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
   case JSON:
   case DebuggerDump:
     if (info.is_vector) {
-      m_buf->append("[");
+      m_buf->append('[');
     } else {
-      m_buf->append("{");
+      m_buf->append('{');
     }
     break;
   default:
@@ -651,11 +650,11 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
   case JSON:
   case DebuggerDump:
     if (!info.first_element) {
-      m_buf->append(",");
+      m_buf->append(',');
     }
     if (!info.is_vector) {
       write(key.toString());
-      m_buf->append(":");
+      m_buf->append(':');
     }
     break;
   default:
@@ -721,9 +720,9 @@ void VariableSerializer::writeArrayFooter(const ArrayData *arr) {
   case JSON:
   case DebuggerDump:
     if (info.is_vector) {
-      m_buf->append("]");
+      m_buf->append(']');
     } else {
-      m_buf->append("}");
+      m_buf->append('}');
     }
     break;
   default:

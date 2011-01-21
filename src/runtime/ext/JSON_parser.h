@@ -18,5 +18,5 @@
 
 #include <runtime/base/complex_types.h>
 
-int JSON_parser(HPHP::Variant &z, unsigned short p[], int length,
-                int assoc/*<fb>*/, int loose/*</fb>*/);
+bool JSON_parser(HPHP::Variant &z, const char *p, int length,
+                 bool assoc/*<fb>*/, bool loose/*</fb>*/);

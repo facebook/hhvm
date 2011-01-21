@@ -28,12 +28,12 @@ SOFTWARE.
 
 
 #include <runtime/ext/JSON_parser.h>
-#include <stdio.h>
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <system/gen/php/classes/stdclass.h>
+#include <runtime/base/zend/utf8_decode.h>
 
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";
@@ -289,11 +289,26 @@ static const int loose_state_transition_table[31][31] = {
 /**
  * A stack maintains the states of nested structures.
  */
-typedef struct json_parser {
+struct json_parser {
   int the_stack[JSON_PARSER_MAX_DEPTH];
   Variant the_zstack[JSON_PARSER_MAX_DEPTH];
   int the_top;
-} json_parser;
+  int the_mark; // the watermark
+};
+
+IMPLEMENT_THREAD_LOCAL(json_parser, s_json_parser);
+
+class JsonParserCleaner {
+public:
+  JsonParserCleaner(json_parser *json) : m_json(json) {}
+  ~JsonParserCleaner() {
+    for (int i = 0; i <= m_json->the_mark; i++) {
+      m_json->the_zstack[i].unset();
+    }
+  }
+private:
+  json_parser *m_json;
+};
 
 /**
  * These modes can be pushed on the PDA stack.
@@ -312,6 +327,9 @@ static int push(json_parser *json, int mode) {
     return false;
   }
   json->the_stack[json->the_top] = mode;
+  if (json->the_top > json->the_mark) {
+    json->the_mark = json->the_top;
+  }
   return true;
 }
 
@@ -323,9 +341,6 @@ static int push(json_parser *json, int mode) {
 static int pop(json_parser *json, int mode) {
   if (json->the_top < 0 || json->the_stack[json->the_top] != mode) {
     return false;
-  }
-  if (mode == MODE_ARRAY) {
-    json->the_zstack[json->the_top].unset();
   }
   json->the_stack[json->the_top] = 0;
   json->the_top -= 1;
@@ -374,7 +389,6 @@ static void json_create_zval(Variant &z, StringBuffer &buf, int type) {
     break;
   case KindOfString:
     z = buf.detach();
-    buf.reset();
     break;
   case KindOfBoolean:
     z = (buf.data() && (*buf.data() == 't'));
@@ -395,7 +409,7 @@ static void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
              && buf.size() >= 3
              && ((unsigned char)buf.charAt(buf.size() - 3)) == 0xed
              && ((unsigned char)buf.charAt(buf.size() - 2) & 0xf0) == 0xa0
-             && ((unsigned char)buf.charAt(buf.size() - 1)& 0xc0) == 0x80) {
+             && ((unsigned char)buf.charAt(buf.size() - 1) & 0xc0) == 0x80) {
     /* found surrogate pair */
     unsigned long utf32;
 
@@ -415,19 +429,19 @@ static void utf16_to_utf8(StringBuffer &buf, unsigned short utf16) {
   }
 }
 
-static void object_set(Variant &var, StringBuffer &key, Variant &value,
+static void object_set(Variant &var, StringBuffer &key, CVarRef value,
                        int assoc) {
   String data = key.detach();
   if (!assoc) {
+    // We know it is stdClass, and everything is public (and dynamic).
     if (data.empty()) {
-      var.toObject()->o_set("_empty_", ref(value));
+      var.getObjectData()->o_setPublic("_empty_", value);
     } else {
-      var.toObject()->o_set(data, ref(value));
+      var.getObjectData()->o_setPublic(data, value);
     }
   } else {
-    var.set(data, ref(value));
+    var.set(data, value);
   }
-  key.reset();
 }
 
 static void attach_zval(json_parser *json, int up, int cur, StringBuffer &key,
@@ -439,7 +453,7 @@ static void attach_zval(json_parser *json, int up, int cur, StringBuffer &key,
   if (up_mode == MODE_ARRAY) {
     root.append(ref(child));
   } else if (up_mode == MODE_OBJECT) {
-    object_set(root, key, child, assoc);
+    object_set(root, key, ref(child), assoc);
   }
 }
 
@@ -449,23 +463,23 @@ static void attach_zval(json_parser *json, int up, int cur, StringBuffer &key,
     to = tmp;                       \
   } while(0);
 #define JSON_RESET_TYPE() do { type = -1; } while(0);
-#define JSON(x) the_json.x
+#define JSON(x) the_json->x
 
 /**
- * The JSON_parser takes a UTF-16 encoded string and determines if it is a
+ * The JSON_parser takes a UTF-8 encoded string and determines if it is a
  * syntactically correct JSON text. Along the way, it creates a PHP variable.
  *
  * It is implemented as a Pushdown Automaton; that means it is a finite state
  * machine with a stack.
  */
-int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
-                int loose/*</fb>*/) {
+bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
+                 bool loose/*</fb>*/) {
   int b;  /* the next character */
   int c;  /* the next character class */
   int s;  /* the next state */
-  json_parser the_json; /* the parser state */
+  json_parser *the_json = s_json_parser.get(); /* the parser state */
+  JsonParserCleaner cleaner(the_json);
   int the_state = 0;
-  int the_index;
 
   /*<fb>*/
   int qchr = 0;
@@ -477,18 +491,25 @@ int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
   }
   /*</fb>*/
 
-  StringBuffer sb_buf, sb_key;
+  StringBuffer sb_buf(127), sb_key(127);
   StringBuffer *buf = &sb_buf;
   StringBuffer *key = &sb_key;
 
   int type = -1;
   unsigned short utf16 = 0;
 
-  JSON(the_top) = -1;
-  push(&the_json, MODE_DONE);
+  JSON(the_mark) = JSON(the_top) = -1;
+  push(the_json, MODE_DONE);
 
-  for (the_index = 0; the_index < length; the_index += 1) {
-    b = p[the_index];
+  UTF8To16Decoder decoder(p, length, loose);
+  for (;;) {
+    b = decoder.decode();
+    if (b == UTF8_END) break; // UTF-8 decoding finishes successfully.
+    if (b == UTF8_ERROR) {
+      return false;
+    }
+    ASSERT(b >= 0);
+
     if ((b & 127) == b) {
       /*<fb>*/
       c = byte_class[b];
@@ -528,7 +549,7 @@ int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
           empty }
         */
       case -9:
-        if (!pop(&the_json, MODE_KEY)) {
+        if (!pop(the_json, MODE_KEY)) {
           return false;
         }
         the_state = 9;
@@ -537,7 +558,7 @@ int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
           {
         */
       case -8:
-        if (!push(&the_json, MODE_KEY)) {
+        if (!push(the_json, MODE_KEY)) {
           return false;
         }
 
@@ -550,13 +571,12 @@ int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
             top.unset();
           }
           if (!assoc) {
-            top = Object(NEW(c_stdClass)());
+            top = NEW(c_stdClass)();
           } else {
             top = Array::Create();
           }
           if (JSON(the_top) > 1) {
-            attach_zval(&the_json, JSON(the_top-1), JSON(the_top), *key,
-                        assoc);
+            attach_zval(the_json, JSON(the_top-1), JSON(the_top), *key, assoc);
           }
           JSON_RESET_TYPE();
         }
@@ -573,8 +593,8 @@ int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
           trailing comma just didn't happen.
         */
         if (loose) {
-          if (pop(&the_json, MODE_KEY)) {
-            push(&the_json, MODE_OBJECT);
+          if (pop(the_json, MODE_KEY)) {
+            push(the_json, MODE_OBJECT);
           }
         }
         /*** END Facebook: json_utf8_loose ***/
@@ -590,7 +610,7 @@ int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
         }
 
 
-        if (!pop(&the_json, MODE_OBJECT)) {
+        if (!pop(the_json, MODE_OBJECT)) {
           return false;
         }
         the_state = 9;
@@ -599,7 +619,7 @@ int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
           [
         */
       case -6:
-        if (!push(&the_json, MODE_ARRAY)) {
+        if (!push(the_json, MODE_ARRAY)) {
           return false;
         }
         the_state = 2;
@@ -612,8 +632,7 @@ int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
           }
           JSON(the_zstack)[JSON(the_top)] = Array::Create();
           if (JSON(the_top) > 1) {
-            attach_zval(&the_json, JSON(the_top-1), JSON(the_top), *key,
-                        assoc);
+            attach_zval(the_json, JSON(the_top-1), JSON(the_top), *key, assoc);
           }
           JSON_RESET_TYPE();
         }
@@ -632,7 +651,7 @@ int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
             JSON_RESET_TYPE();
           }
 
-          if (!pop(&the_json, MODE_ARRAY)) {
+          if (!pop(the_json, MODE_ARRAY)) {
             return false;
           }
           the_state = 9;
@@ -655,7 +674,6 @@ int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
         case MODE_DONE:
           if (type == KindOfString) {
             z = buf->detach();
-            buf->reset();
             the_state = 9;
             break;
           }
@@ -672,14 +690,14 @@ int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
           Variant mval;
           if (type != -1 &&
               (JSON(the_stack)[JSON(the_top)] == MODE_OBJECT ||
-               JSON(the_stack[JSON(the_top)]) == MODE_ARRAY)) {
+               JSON(the_stack)[JSON(the_top)] == MODE_ARRAY)) {
             json_create_zval(mval, *buf, type);
           }
 
           switch (JSON(the_stack)[JSON(the_top)]) {
           case MODE_OBJECT:
-            if (pop(&the_json, MODE_OBJECT) &&
-                push(&the_json, MODE_KEY)) {
+            if (pop(the_json, MODE_OBJECT) &&
+                push(the_json, MODE_KEY)) {
               if (type != -1) {
                 Variant &top = JSON(the_zstack)[JSON(the_top)];
                 object_set(top, *key, mval, assoc);
@@ -721,7 +739,7 @@ int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
           :
         */
       case -2:
-        if (pop(&the_json, MODE_KEY) && push(&the_json, MODE_OBJECT)) {
+        if (pop(the_json, MODE_KEY) && push(the_json, MODE_OBJECT)) {
           the_state = 28;
           break;
         }
@@ -791,5 +809,5 @@ int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
     }
   }
 
-  return the_state == 9 && pop(&the_json, MODE_DONE);
+  return the_state == 9 && pop(the_json, MODE_DONE);
 }

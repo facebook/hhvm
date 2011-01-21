@@ -83,12 +83,23 @@ public:
    */
   void append(int n);
   void append(int64 n);
-  void append(char c);
+  void append(char c) {
+    if (m_buffer && m_pos + 1 <= m_size) {
+      m_buffer[m_pos++] = c;
+      return;
+    }
+    appendHelper(c);
+  }
+  void appendHelper(char c);
   void append(unsigned char c) { append((char)c);}
   void append(litstr  s) { ASSERT(s); append(s, strlen(s));}
   void append(CStrRef s);
   void append(const char *s, int len);
   void append(const std::string &s) { append(s.data(), s.size());}
+  /**
+   * Json-escape the string and then append it.
+   */
+  void appendJsonEscape(const char *s, int len, bool loose);
 
   StringBuffer &operator+=(int n)     { append(n); return *this;}
   StringBuffer &operator+=(char c)    { append(c); return *this;}

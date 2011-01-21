@@ -22,6 +22,7 @@
 #include <util/alloc.h>
 #include <runtime/base/file/file.h>
 #include <runtime/base/zend/zend_functions.h>
+#include <runtime/base/zend/utf8_decode.h>
 #include <runtime/base/taint/taint_observer.h>
 
 namespace HPHP {
@@ -194,7 +195,7 @@ void StringBuffer::append(int64 n) {
   append(p, len);
 }
 
-void StringBuffer::append(char ch) {
+void StringBuffer::appendHelper(char ch) {
   if (m_buffer == NULL) {
     m_size = m_initialSize;
     m_buffer = (char *)Util::safe_malloc(m_size + 1);
@@ -231,6 +232,60 @@ void StringBuffer::append(const char *s, int len) {
   memcpy(m_buffer + m_pos, s, len);
   m_pos += len;
   TAINT_OBSERVER_REGISTER_MUTATED(this);
+}
+
+#define REVERSE16(us)                                     \
+  (((us & 0xf) << 12)      | (((us >> 4) & 0xf) << 8) |   \
+  (((us >> 8) & 0xf) << 4) | ((us >> 12) & 0xf))          \
+
+void StringBuffer::appendJsonEscape(const char *s, int len, bool loose) {
+  if (len == 0) {
+    append("\"\"", 2);
+  } else {
+    static const char digits[] = "0123456789abcdef";
+
+    int start = size();
+    append('"');
+
+    UTF8To16Decoder decoder(s, len, loose);
+    for (;;) {
+      int c = decoder.decode();
+      if (c == UTF8_END) {
+        append('"');
+        break;
+      }
+      if (c == UTF8_ERROR) {
+        // discard the part that has been already decoded.
+        resize(start);
+        append("null", 4);
+        break;
+      }
+      ASSERT(c >= 0);
+      unsigned short us = (unsigned short)c;
+      switch (us) {
+      case '"':  append("\\\"", 2); break;
+      case '\\': append("\\\\", 2); break;
+      case '/':  append("\\/", 2);  break;
+      case '\b': append("\\b", 2);  break;
+      case '\f': append("\\f", 2);  break;
+      case '\n': append("\\n", 2);  break;
+      case '\r': append("\\r", 2);  break;
+      case '\t': append("\\t", 2);  break;
+      default:
+        if (us >= ' ' && (us & 127) == us) {
+          append((char)us);
+        } else {
+          append("\\u", 2);
+          us = REVERSE16(us);
+          append(digits[us & ((1 << 4) - 1)]); us >>= 4;
+          append(digits[us & ((1 << 4) - 1)]); us >>= 4;
+          append(digits[us & ((1 << 4) - 1)]); us >>= 4;
+          append(digits[us & ((1 << 4) - 1)]);
+        }
+        break;
+      }
+    }
+  }
 }
 
 void StringBuffer::printf(const char *format, ...) {

@@ -17,7 +17,7 @@
 
 #include <runtime/ext/ext_json.h>
 #include <runtime/ext/JSON_parser.h>
-#include <runtime/base/zend/utf8_to_utf16.h>
+#include <runtime/base/zend/utf8_decode.h>
 #include <runtime/base/variable_serializer.h>
 
 namespace HPHP {
@@ -39,24 +39,10 @@ Variant f_json_decode(CStrRef json, bool assoc /* = false */,
     return null;
   }
 
-  unsigned short *utf16 = (unsigned short *)malloc((json.size() + 1) *
-                                                   sizeof(unsigned short) + 1);
-
-  int utf16_len = utf8_to_utf16(utf16, (char*)json.data(), json.size(),
-                                loose ? 1 : 0);
-  if (utf16_len <= 0) {
-    if (utf16) {
-      free(utf16);
-    }
-    return null;
-  }
-
   Variant z;
-  if (JSON_parser(z, utf16, utf16_len, assoc, loose)) {
-    free(utf16);
+  if (JSON_parser(z, json.data(), json.size(), assoc, loose)) {
     return z;
   }
-  free(utf16);
 
   if (json.size() == 4) {
     if (!strcasecmp(json.data(), "null")) return null;

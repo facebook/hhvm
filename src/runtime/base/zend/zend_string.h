@@ -20,6 +20,7 @@
 
 #include <util/base.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/util/string_buffer.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -244,7 +245,6 @@ char *string_base64_decode(const char *input, int &len, bool strict);
 char *string_escape_shell_arg(const char *str);
 char *string_escape_shell_cmd(const char *str);
 char *string_cplus_escape(const char *s, int len);
-char *string_json_escape(const char *s, int &len, bool loose);
 
 /**
  * Convert between strings and numbers.

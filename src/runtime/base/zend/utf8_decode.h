@@ -16,24 +16,35 @@
 */
 /* utf8_decode.h */
 
+#ifndef __HPHP_ZEND_UTF8_DECODE_H__
+#define __HPHP_ZEND_UTF8_DECODE_H__
+
 #define UTF8_END   -1
 #define UTF8_ERROR -2
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-  typedef struct json_utf8_decode {
-    int the_index;
-    char *the_input;
-    int the_length;
-    int the_char;
-    int the_byte;
-  } json_utf8_decode;
+namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-  int  utf8_decode_at_byte(json_utf8_decode *utf8);
-  int  utf8_decode_at_character(json_utf8_decode *utf8);
-  void utf8_decode_init(json_utf8_decode *utf8, char p[], int length);
-  int  utf8_decode_next(json_utf8_decode *utf8);
-#ifdef __cplusplus
+struct json_utf8_decode {
+  int the_index;
+  const char *the_input;
+  int the_length;
+  int the_char;
+  int the_byte;
+};
+
+class UTF8To16Decoder {
+public:
+  UTF8To16Decoder(const char *utf8, int length, bool loose);
+  int decode();
+
+private:
+  json_utf8_decode m_decode;
+  int m_loose; // Faceook: json_utf8_loose
+  int m_low_surrogate;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 }
-#endif
+
+#endif // __HPHP_ZEND_UTF8_DECODE_H__

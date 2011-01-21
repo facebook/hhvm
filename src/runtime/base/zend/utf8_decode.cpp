@@ -26,7 +26,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "utf8_decode.h"
+#include <runtime/base/zend/utf8_decode.h>
 
 /*
     Very Strict UTF-8 Decoder
@@ -51,6 +51,8 @@ SOFTWARE.
     11111xxx       error
 */
 
+namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
 /*
     Get the next byte. It returns UTF8_END if there are no more bytes.
@@ -83,8 +85,8 @@ cont(json_utf8_decode *utf8)
 /*
     Initialize the UTF-8 decoder. The decoder is not reentrant,
 */
-void
-utf8_decode_init(json_utf8_decode *utf8, char p[], int length)
+static void
+utf8_decode_init(json_utf8_decode *utf8, const char *p, int length)
 {
     utf8->the_index = 0;
     utf8->the_input = p;
@@ -93,35 +95,13 @@ utf8_decode_init(json_utf8_decode *utf8, char p[], int length)
     utf8->the_byte = 0;
 }
 
-
-/*
-    Get the current byte offset. This is generally used in error reporting.
-*/
-int
-utf8_decode_at_byte(json_utf8_decode *utf8)
-{
-    return utf8->the_byte;
-}
-
-
-/*
-    Get the current character offset. This is generally used in error reporting.
-    The character offset matches the byte offset if the text is strictly ASCII.
-*/
-int
-utf8_decode_at_character(json_utf8_decode *utf8)
-{
-    return utf8->the_char > 0 ? utf8->the_char - 1 : 0;
-}
-
-
 /*
     Extract the next character.
     Returns: the character (between 0 and 1114111)
          or  UTF8_END   (the end)
          or  UTF8_ERROR (error)
 */
-int
+static int
 utf8_decode_next(json_utf8_decode *utf8)
 {
     int c;  /* the first byte of the character */
@@ -176,4 +156,42 @@ utf8_decode_next(json_utf8_decode *utf8)
         return r >= 65536 && r <= 1114111 ? r : UTF8_ERROR;
     }
     return UTF8_ERROR;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+UTF8To16Decoder::UTF8To16Decoder(const char *utf8, int length, bool loose)
+    : m_loose(loose), m_low_surrogate(0) {
+  utf8_decode_init(&m_decode, utf8, length);
+}
+
+int UTF8To16Decoder::decode() {
+  if (m_low_surrogate) {
+    int ret = m_low_surrogate;
+    m_low_surrogate = 0;
+    return ret;
+  } else {
+    int c = utf8_decode_next(&m_decode);
+    if (c < 0) {
+    /*** BEGIN Facebook: json_utf8_loose ***/
+      if (c == UTF8_END) {
+        return UTF8_END;
+      }
+      if (m_loose) {
+        return '?';
+      } else {
+        return UTF8_ERROR;
+      }
+    /*** END Facebook: json_utf8_loose ***/
+    } else if (c < 0x10000) {
+      return c;
+    } else {
+      c -= 0x10000;
+      m_low_surrogate = (0xDC00 | (c & 0x3FF));
+      return (0xD800 | (c >> 10));
+    }
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

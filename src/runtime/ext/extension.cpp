@@ -17,6 +17,7 @@
 
 #include <runtime/ext/extension.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/runtime_option.h>
 
 using namespace std;
 
@@ -79,6 +80,9 @@ void Extension::ShutdownModules() {
 }
 
 bool Extension::IsLoaded(CStrRef name) {
+  if (name == "apc") {
+    return RuntimeOption::EnableApc;
+  }
   ASSERT(s_registered_extensions);
   return s_registered_extensions->find(name.data()) !=
     s_registered_extensions->end();

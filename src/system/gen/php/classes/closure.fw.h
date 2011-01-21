@@ -22,25 +22,4 @@
 #include <sys/literal_strings_remap.h>
 #include <sys/scalar_arrays_remap.h>
 
-// Forward Declarations
-
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-
-// 1. Static Strings
-
-// 2. Static Arrays
-extern StaticArray s_sys_sa00000000;
-
-// 3. Constants
-
-// 4. Classes
-FORWARD_DECLARE_CLASS(Closure);
-FORWARD_DECLARE_CLASS(Continuation);
-
-///////////////////////////////////////////////////////////////////////////////
-}
-#include <php/classes/exception.fw.h>
-#include <php/classes/iterator.fw.h>
-
 #endif // __GENERATED_php_classes_closure_fw_h8df1dc07__

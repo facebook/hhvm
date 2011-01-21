@@ -18,11 +18,13 @@
 #ifndef __GENERATED_cls_ReflectionFunctionAbstract_h8c29f291__
 #define __GENERATED_cls_ReflectionFunctionAbstract_h8c29f291__
 
+#include <cls/ReflectionFunctionAbstract.fw.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/reflection.php line 248 */
+FORWARD_DECLARE_CLASS(ReflectionFunctionAbstract);
 class c_ReflectionFunctionAbstract : public ExtObjectData {
   public:
 
@@ -88,6 +90,8 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(isinternal);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionFunctionAbstract;
+Object co_ReflectionFunctionAbstract(CArrRef params, bool init = true);
+Object coo_ReflectionFunctionAbstract();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

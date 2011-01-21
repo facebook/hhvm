@@ -18,6 +18,7 @@
 #ifndef __GENERATED_cls_SplFileObject_h54740373__
 #define __GENERATED_cls_SplFileObject_h54740373__
 
+#include <cls/SplFileObject.fw.h>
 #include <cls/SplFileInfo.h>
 #include <cls/RecursiveIterator.h>
 #include <cls/Traversable.h>
@@ -27,6 +28,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/splfile.php line 383 */
+FORWARD_DECLARE_CLASS(SplFileObject);
 class c_SplFileObject : public c_SplFileInfo {
   public:
 
@@ -127,7 +129,13 @@ class c_SplFileObject : public c_SplFileInfo {
   DECLARE_METHOD_INVOKE_HELPERS(fstat);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
+extern const int64 q_SplFileObject_DROP_NEW_LINE;
+extern const int64 q_SplFileObject_READ_AHEAD;
+extern const int64 q_SplFileObject_SKIP_EMPTY;
+extern const int64 q_SplFileObject_READ_CSV;
 extern struct ObjectStaticCallbacks cw_SplFileObject;
+Object co_SplFileObject(CArrRef params, bool init = true);
+Object coo_SplFileObject();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

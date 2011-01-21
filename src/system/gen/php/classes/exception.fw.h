@@ -22,36 +22,4 @@
 #include <sys/literal_strings_remap.h>
 #include <sys/scalar_arrays_remap.h>
 
-// Forward Declarations
-
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-
-// 1. Static Strings
-extern StaticString s_sys_ss00000000;
-
-// 2. Static Arrays
-
-// 3. Constants
-
-// 4. Classes
-FORWARD_DECLARE_CLASS(UnexpectedValueException);
-FORWARD_DECLARE_CLASS(OverflowException);
-FORWARD_DECLARE_CLASS(OutOfBoundsException);
-FORWARD_DECLARE_CLASS(LogicException);
-FORWARD_DECLARE_CLASS(RangeException);
-FORWARD_DECLARE_CLASS(InvalidArgumentException);
-FORWARD_DECLARE_CLASS(UnderflowException);
-FORWARD_DECLARE_CLASS(OutOfRangeException);
-FORWARD_DECLARE_CLASS(BadMethodCallException);
-FORWARD_DECLARE_CLASS(RuntimeException);
-FORWARD_DECLARE_CLASS(Exception);
-FORWARD_DECLARE_CLASS(ErrorException);
-FORWARD_DECLARE_CLASS(BadFunctionCallException);
-FORWARD_DECLARE_CLASS(LengthException);
-FORWARD_DECLARE_CLASS(DomainException);
-
-///////////////////////////////////////////////////////////////////////////////
-}
-
 #endif // __GENERATED_php_classes_exception_fw_h518065ba__

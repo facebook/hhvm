@@ -18,7 +18,6 @@
 #ifndef __GENERATED_php_globals_symbols_he2a8df4d__
 #define __GENERATED_php_globals_symbols_he2a8df4d__
 
-#include <runtime/base/hphp_system.h>
 #include <php/globals/symbols.fw.h>
 
 // Declarations
@@ -29,9 +28,9 @@ namespace HPHP {
 // Includes and Functions
 Variant pm_php$globals$symbols_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 
-// Redeclared Functions
+// Constants
 
-// Dynamic Class Declarations
+// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

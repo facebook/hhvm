@@ -18,11 +18,13 @@
 #ifndef __GENERATED_cls_Directory_h6dfdf420__
 #define __GENERATED_cls_Directory_h6dfdf420__
 
+#include <cls/Directory.fw.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/directory.php line 3 */
+FORWARD_DECLARE_CLASS(Directory);
 class c_Directory : public ExtObjectData {
   public:
 
@@ -76,6 +78,8 @@ class c_Directory : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_Directory;
+Object co_Directory(CArrRef params, bool init = true);
+Object coo_Directory();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

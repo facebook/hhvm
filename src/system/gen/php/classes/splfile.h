@@ -18,13 +18,11 @@
 #ifndef __GENERATED_php_classes_splfile_h3e5c330e__
 #define __GENERATED_php_classes_splfile_h3e5c330e__
 
-#include <runtime/base/hphp_system.h>
 #include <php/classes/splfile.fw.h>
 
 // Declarations
 #include <cls/SplFileObject.h>
 #include <cls/SplFileInfo.h>
-#include <php/classes/iterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,13 +30,9 @@ namespace HPHP {
 // Includes and Functions
 Variant pm_php$classes$splfile_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 
-// Redeclared Functions
+// Constants
 
-// Dynamic Class Declarations
-Object co_SplFileObject(CArrRef params, bool init = true);
-Object coo_SplFileObject();
-Object co_SplFileInfo(CArrRef params, bool init = true);
-Object coo_SplFileInfo();
+// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

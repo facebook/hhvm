@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_ReflectionParameter_h178d2c14__
 #define __GENERATED_cls_ReflectionParameter_h178d2c14__
 
+#include <cls/ReflectionParameter.fw.h>
 #include <cls/Reflector.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/reflection.php line 46 */
+FORWARD_DECLARE_CLASS(ReflectionParameter);
 class c_ReflectionParameter : public ExtObjectData {
   public:
 
@@ -95,6 +97,8 @@ class c_ReflectionParameter : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(ispassedbyreference);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionParameter;
+Object co_ReflectionParameter(CArrRef params, bool init = true);
+Object coo_ReflectionParameter();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

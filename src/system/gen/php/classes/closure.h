@@ -18,14 +18,11 @@
 #ifndef __GENERATED_php_classes_closure_h884a4d67__
 #define __GENERATED_php_classes_closure_h884a4d67__
 
-#include <runtime/base/hphp_system.h>
 #include <php/classes/closure.fw.h>
 
 // Declarations
 #include <cls/Closure.h>
 #include <cls/Continuation.h>
-#include <php/classes/exception.h>
-#include <php/classes/iterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,13 +30,9 @@ namespace HPHP {
 // Includes and Functions
 Variant pm_php$classes$closure_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 
-// Redeclared Functions
+// Constants
 
-// Dynamic Class Declarations
-Object co_Closure(CArrRef params, bool init = true);
-Object coo_Closure();
-Object co_Continuation(CArrRef params, bool init = true);
-Object coo_Continuation();
+// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

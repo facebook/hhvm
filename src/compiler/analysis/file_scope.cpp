@@ -333,7 +333,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   BOOST_FOREACH(const string &str, m_usedConstsHeader) {
     BlockScopeConstPtr block = ar->findConstantDeclarer(str);
     assert(block);
-    ConstantTablePtr constants = block->getConstants();
+    ConstantTableConstPtr constants = block->getConstants();
     if (!cg.ensureInNamespace() && first) cg_printf("\n");
     first = false;
     constants->outputSingleConstant(cg, ar, str);

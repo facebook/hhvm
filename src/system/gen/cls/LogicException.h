@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_LogicException_hc260dc47__
 #define __GENERATED_cls_LogicException_hc260dc47__
 
+#include <cls/LogicException.fw.h>
 #include <cls/Exception.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/exception.php line 158 */
+FORWARD_DECLARE_CLASS(LogicException);
 class c_LogicException : public c_Exception {
   public:
 
@@ -62,6 +64,8 @@ class c_LogicException : public c_Exception {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_LogicException;
+Object co_LogicException(CArrRef params, bool init = true);
+Object coo_LogicException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

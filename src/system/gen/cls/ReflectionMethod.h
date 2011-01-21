@@ -18,6 +18,7 @@
 #ifndef __GENERATED_cls_ReflectionMethod_hf3cea799__
 #define __GENERATED_cls_ReflectionMethod_hf3cea799__
 
+#include <cls/ReflectionMethod.fw.h>
 #include <cls/ReflectionFunctionAbstract.h>
 #include <cls/Reflector.h>
 
@@ -25,6 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/reflection.php line 1563 */
+FORWARD_DECLARE_CLASS(ReflectionMethod);
 class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   public:
 
@@ -102,7 +104,15 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   DECLARE_METHOD_INVOKE_HELPERS(getclosure);
   DECLARE_METHOD_INVOKE_HELPERS(isabstract);
 };
+extern const int64 q_ReflectionMethod_IS_STATIC;
+extern const int64 q_ReflectionMethod_IS_PUBLIC;
+extern const int64 q_ReflectionMethod_IS_PROTECTED;
+extern const int64 q_ReflectionMethod_IS_PRIVATE;
+extern const int64 q_ReflectionMethod_IS_ABSTRACT;
+extern const int64 q_ReflectionMethod_IS_FINAL;
 extern struct ObjectStaticCallbacks cw_ReflectionMethod;
+Object co_ReflectionMethod(CArrRef params, bool init = true);
+Object coo_ReflectionMethod();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

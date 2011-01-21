@@ -22,47 +22,4 @@
 #include <sys/literal_strings_remap.h>
 #include <sys/scalar_arrays_remap.h>
 
-// Forward Declarations
-
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-
-// 1. Static Strings
-extern StaticString s_sys_ss00000000;
-
-// 2. Static Arrays
-
-// 3. Constants
-
-// 4. Classes
-FORWARD_DECLARE_CLASS(ReflectionFunctionAbstract);
-FORWARD_DECLARE_CLASS(ReflectionObject);
-FORWARD_DECLARE_GENERIC_INTERFACE(Reflector);
-FORWARD_DECLARE_CLASS(ReflectionException);
-FORWARD_DECLARE_CLASS(ReflectionClass);
-extern const int64 q_ReflectionClass_IS_IMPLICIT_ABSTRACT;
-extern const int64 q_ReflectionClass_IS_EXPLICIT_ABSTRACT;
-extern const int64 q_ReflectionClass_IS_FINAL;
-FORWARD_DECLARE_CLASS(ReflectionExtension);
-FORWARD_DECLARE_CLASS(ReflectionMethod);
-extern const int64 q_ReflectionMethod_IS_STATIC;
-extern const int64 q_ReflectionMethod_IS_PUBLIC;
-extern const int64 q_ReflectionMethod_IS_PROTECTED;
-extern const int64 q_ReflectionMethod_IS_PRIVATE;
-extern const int64 q_ReflectionMethod_IS_ABSTRACT;
-extern const int64 q_ReflectionMethod_IS_FINAL;
-FORWARD_DECLARE_CLASS(ReflectionProperty);
-extern const int64 q_ReflectionProperty_IS_STATIC;
-extern const int64 q_ReflectionProperty_IS_PUBLIC;
-extern const int64 q_ReflectionProperty_IS_PROTECTED;
-extern const int64 q_ReflectionProperty_IS_PRIVATE;
-FORWARD_DECLARE_CLASS(ReflectionFunction);
-extern const int64 q_ReflectionFunction_IS_DEPRECATED;
-FORWARD_DECLARE_CLASS(ReflectionParameter);
-
-///////////////////////////////////////////////////////////////////////////////
-}
-#include <php/classes/exception.fw.h>
-#include <php/classes/stdclass.fw.h>
-
 #endif // __GENERATED_php_classes_reflection_fw_h6b7c115e__

@@ -18,11 +18,13 @@
 #ifndef __GENERATED_cls_Traversable_h25a23027__
 #define __GENERATED_cls_Traversable_h25a23027__
 
+#include <cls/Traversable.fw.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 87 */
+FORWARD_DECLARE_GENERIC_INTERFACE(Traversable);
 class c_Traversable {
 };
 

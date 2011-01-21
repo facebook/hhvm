@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_OverflowException_hafddf195__
 #define __GENERATED_cls_OverflowException_hafddf195__
 
+#include <cls/OverflowException.fw.h>
 #include <cls/RuntimeException.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/exception.php line 236 */
+FORWARD_DECLARE_CLASS(OverflowException);
 class c_OverflowException : public c_RuntimeException {
   public:
 
@@ -62,6 +64,8 @@ class c_OverflowException : public c_RuntimeException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_OverflowException;
+Object co_OverflowException(CArrRef params, bool init = true);
+Object coo_OverflowException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

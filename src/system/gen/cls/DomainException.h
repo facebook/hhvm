@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_DomainException_h34b60206__
 #define __GENERATED_cls_DomainException_h34b60206__
 
+#include <cls/DomainException.fw.h>
 #include <cls/LogicException.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/exception.php line 187 */
+FORWARD_DECLARE_CLASS(DomainException);
 class c_DomainException : public c_LogicException {
   public:
 
@@ -62,6 +64,8 @@ class c_DomainException : public c_LogicException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_DomainException;
+Object co_DomainException(CArrRef params, bool init = true);
+Object coo_DomainException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

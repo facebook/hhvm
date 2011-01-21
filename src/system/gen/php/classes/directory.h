@@ -18,7 +18,6 @@
 #ifndef __GENERATED_php_classes_directory_hd42b8663__
 #define __GENERATED_php_classes_directory_hd42b8663__
 
-#include <runtime/base/hphp_system.h>
 #include <php/classes/directory.fw.h>
 
 // Declarations
@@ -30,11 +29,9 @@ namespace HPHP {
 // Includes and Functions
 Variant pm_php$classes$directory_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 
-// Redeclared Functions
+// Constants
 
-// Dynamic Class Declarations
-Object co_Directory(CArrRef params, bool init = true);
-Object coo_Directory();
+// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -18,6 +18,7 @@
 #ifndef __GENERATED_cls_Continuation_h7676edc2__
 #define __GENERATED_cls_Continuation_h7676edc2__
 
+#include <cls/Continuation.fw.h>
 #include <cls/Closure.h>
 #include <cls/Iterator.h>
 
@@ -25,6 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/closure.php line 31 */
+FORWARD_DECLARE_CLASS(Continuation);
 class c_Continuation : public c_Closure {
   public:
 
@@ -98,6 +100,8 @@ class c_Continuation : public c_Closure {
   DECLARE_METHOD_INVOKE_HELPERS(update);
 };
 extern struct ObjectStaticCallbacks cw_Continuation;
+Object co_Continuation(CArrRef params, bool init = true);
+Object coo_Continuation();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

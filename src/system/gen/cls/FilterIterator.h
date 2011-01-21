@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_FilterIterator_h189f6b17__
 #define __GENERATED_cls_FilterIterator_h189f6b17__
 
+#include <cls/FilterIterator.fw.h>
 #include <cls/OuterIterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 901 */
+FORWARD_DECLARE_CLASS(FilterIterator);
 class c_FilterIterator : public ExtObjectData {
   public:
 
@@ -62,6 +64,8 @@ class c_FilterIterator : public ExtObjectData {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_FilterIterator;
+Object co_FilterIterator(CArrRef params, bool init = true);
+Object coo_FilterIterator();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

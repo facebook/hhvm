@@ -18,11 +18,13 @@
 #ifndef __GENERATED_cls_SplFileInfo_h9ae251af__
 #define __GENERATED_cls_SplFileInfo_h9ae251af__
 
+#include <cls/SplFileInfo.fw.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/splfile.php line 11 */
+FORWARD_DECLARE_CLASS(SplFileInfo);
 class c_SplFileInfo : public ExtObjectData {
   public:
 
@@ -123,6 +125,8 @@ class c_SplFileInfo : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(gettype);
 };
 extern struct ObjectStaticCallbacks cw_SplFileInfo;
+Object co_SplFileInfo(CArrRef params, bool init = true);
+Object coo_SplFileInfo();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

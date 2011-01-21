@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_SeekableIterator_h36f44c42__
 #define __GENERATED_cls_SeekableIterator_h36f44c42__
 
+#include <cls/SeekableIterator.fw.h>
 #include <cls/Iterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 97 */
+FORWARD_DECLARE_GENERIC_INTERFACE(SeekableIterator);
 class c_SeekableIterator {
   // public: virtual void t_seek(CVarRef v_position) = 0;
 };

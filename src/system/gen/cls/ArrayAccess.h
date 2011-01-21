@@ -18,11 +18,13 @@
 #ifndef __GENERATED_cls_ArrayAccess_hf5bdd993__
 #define __GENERATED_cls_ArrayAccess_hf5bdd993__
 
+#include <cls/ArrayAccess.fw.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/arrayaccess.php line 10 */
+FORWARD_DECLARE_GENERIC_INTERFACE(ArrayAccess);
 class c_ArrayAccess {
   // public: virtual bool t_offsetexists(CVarRef v_index) = 0;
   // public: virtual Variant t_offsetget(Variant v_index) = 0;

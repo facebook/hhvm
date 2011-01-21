@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_OutOfBoundsException_hbd378326__
 #define __GENERATED_cls_OutOfBoundsException_hbd378326__
 
+#include <cls/OutOfBoundsException.fw.h>
 #include <cls/RuntimeException.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/exception.php line 228 */
+FORWARD_DECLARE_CLASS(OutOfBoundsException);
 class c_OutOfBoundsException : public c_RuntimeException {
   public:
 
@@ -62,6 +64,8 @@ class c_OutOfBoundsException : public c_RuntimeException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_OutOfBoundsException;
+Object co_OutOfBoundsException(CArrRef params, bool init = true);
+Object coo_OutOfBoundsException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

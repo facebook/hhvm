@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_UnexpectedValueException_hce6f5a94__
 #define __GENERATED_cls_UnexpectedValueException_hce6f5a94__
 
+#include <cls/UnexpectedValueException.fw.h>
 #include <cls/RuntimeException.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/exception.php line 262 */
+FORWARD_DECLARE_CLASS(UnexpectedValueException);
 class c_UnexpectedValueException : public c_RuntimeException {
   public:
 
@@ -62,6 +64,8 @@ class c_UnexpectedValueException : public c_RuntimeException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_UnexpectedValueException;
+Object co_UnexpectedValueException(CArrRef params, bool init = true);
+Object coo_UnexpectedValueException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

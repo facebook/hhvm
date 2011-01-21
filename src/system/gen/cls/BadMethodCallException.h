@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_BadMethodCallException_h0a9d48e5__
 #define __GENERATED_cls_BadMethodCallException_h0a9d48e5__
 
+#include <cls/BadMethodCallException.fw.h>
 #include <cls/BadFunctionCallException.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/exception.php line 178 */
+FORWARD_DECLARE_CLASS(BadMethodCallException);
 class c_BadMethodCallException : public c_BadFunctionCallException {
   public:
 
@@ -62,6 +64,8 @@ class c_BadMethodCallException : public c_BadFunctionCallException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_BadMethodCallException;
+Object co_BadMethodCallException(CArrRef params, bool init = true);
+Object coo_BadMethodCallException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

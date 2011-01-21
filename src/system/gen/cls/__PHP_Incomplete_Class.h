@@ -18,11 +18,13 @@
 #ifndef __GENERATED_cls___PHP_Incomplete_Class_h914d7894__
 #define __GENERATED_cls___PHP_Incomplete_Class_h914d7894__
 
+#include <cls/__PHP_Incomplete_Class.fw.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/stdclass.php line 8 */
+FORWARD_DECLARE_CLASS(__PHP_Incomplete_Class);
 class c___PHP_Incomplete_Class : public ExtObjectData {
   public:
 
@@ -61,6 +63,8 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
   void init();
 };
 extern struct ObjectStaticCallbacks cw___PHP_Incomplete_Class;
+Object co___PHP_Incomplete_Class(CArrRef params, bool init = true);
+Object coo___PHP_Incomplete_Class();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

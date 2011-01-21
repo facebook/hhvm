@@ -22,21 +22,4 @@
 #include <sys/literal_strings_remap.h>
 #include <sys/scalar_arrays_remap.h>
 
-// Forward Declarations
-
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-
-// 1. Static Strings
-
-// 2. Static Arrays
-
-// 3. Constants
-
-// 4. Classes
-FORWARD_DECLARE_GENERIC_INTERFACE(ArrayAccess);
-
-///////////////////////////////////////////////////////////////////////////////
-}
-
 #endif // __GENERATED_php_classes_arrayaccess_fw_h1fa8b503__

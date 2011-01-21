@@ -303,7 +303,7 @@ TypePtr Expression::checkTypesImpl(AnalysisResultConstPtr ar,
   return ret;
 }
 
-void Expression::setTypes(AnalysisResultPtr ar, TypePtr actualType,
+void Expression::setTypes(AnalysisResultConstPtr ar, TypePtr actualType,
                           TypePtr expectedType) {
   m_actualType = actualType;
   if (!Type::SameType(expectedType, actualType) &&
@@ -323,7 +323,8 @@ void Expression::setTypes(AnalysisResultPtr ar, TypePtr actualType,
   }
 
   if (m_actualType->isSpecificObject()) {
-    ar->addClassDependency(getFileScope(), m_actualType->getName());
+    const_pointer_cast<AnalysisResult>(ar)->
+      addClassDependency(getFileScope(), m_actualType->getName());
   }
 }
 

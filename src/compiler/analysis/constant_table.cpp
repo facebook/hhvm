@@ -291,11 +291,11 @@ void ConstantTable::collectCPPGlobalSymbols(StringPairVec &symbols,
 }
 
 void ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
-                              bool newline /* = true */) {
+                              bool newline /* = true */) const {
   bool printed = false;
-  for (StringToSymbolMap::iterator iter = m_symbolMap.begin(),
+  for (StringToSymbolMap::const_iterator iter = m_symbolMap.begin(),
          end = m_symbolMap.end(); iter != end; ++iter) {
-    Symbol *sym = &iter->second;
+    const Symbol *sym = &iter->second;
     if (outputCPP(cg, ar, sym)) printed = true;
   }
   if (newline && printed) {
@@ -304,7 +304,7 @@ void ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 }
 
 bool ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
-                              Symbol *sym) {
+                              const Symbol *sym) const {
   bool decl = true;
   if (cg.getContext() == CodeGenerator::CppConstantsDecl) {
     decl = false;
@@ -376,8 +376,8 @@ bool ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
 bool ConstantTable::outputSingleConstant(CodeGenerator &cg,
                                          AnalysisResultPtr ar,
-                                         const std::string &name) {
-  Symbol *sym = getSymbol(name);
+                                         const std::string &name) const {
+  const Symbol *sym = getSymbol(name);
   return sym && outputCPP(cg, ar, sym);
 }
 

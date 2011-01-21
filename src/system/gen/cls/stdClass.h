@@ -18,11 +18,13 @@
 #ifndef __GENERATED_cls_stdClass_hd2e0228e__
 #define __GENERATED_cls_stdClass_hd2e0228e__
 
+#include <cls/stdClass.fw.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/stdclass.php line 4 */
+FORWARD_DECLARE_CLASS(stdClass);
 class c_stdClass : public ExtObjectData {
   public:
 
@@ -61,6 +63,8 @@ class c_stdClass : public ExtObjectData {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_stdClass;
+Object co_stdClass(CArrRef params, bool init = true);
+Object coo_stdClass();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

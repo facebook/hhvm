@@ -211,7 +211,9 @@ public:
   static SymbolTablePtrList AllSymbolTables; // for stats purpose
   static void CountTypes(std::map<std::string, int> &counts);
   BlockScope *getScopePtr() const { return &m_blockScope; }
-  BlockScopeRawPtr getBlockScope() { return BlockScopeRawPtr(&m_blockScope); }
+  BlockScopeRawPtr getBlockScope() const {
+    return BlockScopeRawPtr(&m_blockScope);
+  }
 public:
   SymbolTable(BlockScope &blockScope, bool isConst);
   SymbolTable();

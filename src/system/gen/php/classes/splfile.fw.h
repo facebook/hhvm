@@ -22,34 +22,4 @@
 #include <sys/literal_strings_remap.h>
 #include <sys/scalar_arrays_remap.h>
 
-// Forward Declarations
-
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-
-// 1. Static Strings
-extern StaticString s_sys_ss00000000;
-extern StaticString s_sys_ss7e5fc106;
-extern StaticString s_sys_ssd332baa7;
-extern StaticString s_sys_ss914a58e9;
-extern StaticString s_sys_ss5d909898;
-extern StaticString s_sys_ssd59e789f;
-extern StaticString s_sys_ss0d42ecf6;
-
-// 2. Static Arrays
-
-// 3. Constants
-
-// 4. Classes
-FORWARD_DECLARE_CLASS(SplFileObject);
-extern const int64 q_SplFileObject_DROP_NEW_LINE;
-extern const int64 q_SplFileObject_READ_AHEAD;
-extern const int64 q_SplFileObject_SKIP_EMPTY;
-extern const int64 q_SplFileObject_READ_CSV;
-FORWARD_DECLARE_CLASS(SplFileInfo);
-
-///////////////////////////////////////////////////////////////////////////////
-}
-#include <php/classes/iterator.fw.h>
-
 #endif // __GENERATED_php_classes_splfile_fw_ha47b8d87__

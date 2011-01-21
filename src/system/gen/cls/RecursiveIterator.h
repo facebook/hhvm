@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_RecursiveIterator_hb3c636f2__
 #define __GENERATED_cls_RecursiveIterator_hb3c636f2__
 
+#include <cls/RecursiveIterator.fw.h>
 #include <cls/Iterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 131 */
+FORWARD_DECLARE_GENERIC_INTERFACE(RecursiveIterator);
 class c_RecursiveIterator {
   // public: virtual void t_getchildren() = 0;
   // public: virtual void t_haschildren() = 0;

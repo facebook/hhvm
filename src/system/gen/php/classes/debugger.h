@@ -18,7 +18,6 @@
 #ifndef __GENERATED_php_classes_debugger_h8e1c0252__
 #define __GENERATED_php_classes_debugger_h8e1c0252__
 
-#include <runtime/base/hphp_system.h>
 #include <php/classes/debugger.fw.h>
 
 // Declarations
@@ -30,9 +29,9 @@ namespace HPHP {
 // Includes and Functions
 Variant pm_php$classes$debugger_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 
-// Redeclared Functions
+// Constants
 
-// Dynamic Class Declarations
+// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

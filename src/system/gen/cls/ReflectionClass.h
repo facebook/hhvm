@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_ReflectionClass_hf4d8c830__
 #define __GENERATED_cls_ReflectionClass_hf4d8c830__
 
+#include <cls/ReflectionClass.fw.h>
 #include <cls/Reflector.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/reflection.php line 538 */
+FORWARD_DECLARE_CLASS(ReflectionClass);
 class c_ReflectionClass : public ExtObjectData {
   public:
 
@@ -154,7 +156,12 @@ class c_ReflectionClass : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(getproperty);
   DECLARE_METHOD_INVOKE_HELPERS(isinternal);
 };
+extern const int64 q_ReflectionClass_IS_IMPLICIT_ABSTRACT;
+extern const int64 q_ReflectionClass_IS_EXPLICIT_ABSTRACT;
+extern const int64 q_ReflectionClass_IS_FINAL;
 extern struct ObjectStaticCallbacks cw_ReflectionClass;
+Object co_ReflectionClass(CArrRef params, bool init = true);
+Object coo_ReflectionClass();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

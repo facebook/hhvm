@@ -18,6 +18,7 @@
 #ifndef __GENERATED_cls_DirectoryIterator_h523cccda__
 #define __GENERATED_cls_DirectoryIterator_h523cccda__
 
+#include <cls/DirectoryIterator.fw.h>
 #include <cls/SplFileInfo.h>
 #include <cls/Traversable.h>
 #include <cls/SeekableIterator.h>
@@ -26,6 +27,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 658 */
+FORWARD_DECLARE_CLASS(DirectoryIterator);
 class c_DirectoryIterator : public c_SplFileInfo {
   public:
 
@@ -87,6 +89,8 @@ class c_DirectoryIterator : public c_SplFileInfo {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_DirectoryIterator;
+Object co_DirectoryIterator(CArrRef params, bool init = true);
+Object coo_DirectoryIterator();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

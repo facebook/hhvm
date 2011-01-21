@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_OuterIterator_h82b793bf__
 #define __GENERATED_cls_OuterIterator_h82b793bf__
 
+#include <cls/OuterIterator.fw.h>
 #include <cls/Iterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 119 */
+FORWARD_DECLARE_GENERIC_INTERFACE(OuterIterator);
 class c_OuterIterator {
   // public: virtual void t_getinneriterator() = 0;
 };

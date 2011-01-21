@@ -335,7 +335,7 @@ protected:
   TypePtr inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
                                bool coerce, ExpressionPtr variable,
                                ExpressionPtr value = ExpressionPtr());
-  void setTypes(AnalysisResultPtr ar, TypePtr actualType,
+  void setTypes(AnalysisResultConstPtr ar, TypePtr actualType,
                 TypePtr expectedType);
   void setDynamicByIdentifier(AnalysisResultPtr ar,
                               const std::string &value);

@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_LengthException_h78d45e3c__
 #define __GENERATED_cls_LengthException_h78d45e3c__
 
+#include <cls/LengthException.fw.h>
 #include <cls/LogicException.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/exception.php line 204 */
+FORWARD_DECLARE_CLASS(LengthException);
 class c_LengthException : public c_LogicException {
   public:
 
@@ -62,6 +64,8 @@ class c_LengthException : public c_LogicException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_LengthException;
+Object co_LengthException(CArrRef params, bool init = true);
+Object coo_LengthException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

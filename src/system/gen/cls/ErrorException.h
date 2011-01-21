@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_ErrorException_h8c3c27ba__
 #define __GENERATED_cls_ErrorException_h8c3c27ba__
 
+#include <cls/ErrorException.fw.h>
 #include <cls/Exception.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/exception.php line 271 */
+FORWARD_DECLARE_CLASS(ErrorException);
 class c_ErrorException : public c_Exception {
   public:
 
@@ -72,6 +74,8 @@ class c_ErrorException : public c_Exception {
   DECLARE_METHOD_INVOKE_HELPERS(getseverity);
 };
 extern struct ObjectStaticCallbacks cw_ErrorException;
+Object co_ErrorException(CArrRef params, bool init = true);
+Object coo_ErrorException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

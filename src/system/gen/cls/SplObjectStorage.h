@@ -18,6 +18,7 @@
 #ifndef __GENERATED_cls_SplObjectStorage_h3ad1ae4b__
 #define __GENERATED_cls_SplObjectStorage_h3ad1ae4b__
 
+#include <cls/SplObjectStorage.fw.h>
 #include <cls/Iterator.h>
 #include <cls/Countable.h>
 
@@ -25,6 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/splobjectstorage.php line 12 */
+FORWARD_DECLARE_CLASS(SplObjectStorage);
 class c_SplObjectStorage : public ExtObjectData {
   public:
 
@@ -84,6 +86,8 @@ class c_SplObjectStorage : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_SplObjectStorage;
+Object co_SplObjectStorage(CArrRef params, bool init = true);
+Object coo_SplObjectStorage();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

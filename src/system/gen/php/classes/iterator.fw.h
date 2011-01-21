@@ -22,49 +22,4 @@
 #include <sys/literal_strings_remap.h>
 #include <sys/scalar_arrays_remap.h>
 
-// Forward Declarations
-
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-
-// 1. Static Strings
-
-// 2. Static Arrays
-
-// 3. Constants
-
-// 4. Classes
-FORWARD_DECLARE_GENERIC_INTERFACE(OuterIterator);
-FORWARD_DECLARE_GENERIC_INTERFACE(Serializable);
-FORWARD_DECLARE_GENERIC_INTERFACE(Traversable);
-FORWARD_DECLARE_GENERIC_INTERFACE(Countable);
-FORWARD_DECLARE_CLASS(ArrayIterator);
-FORWARD_DECLARE_GENERIC_INTERFACE(Iterator);
-FORWARD_DECLARE_CLASS(AppendIterator);
-FORWARD_DECLARE_GENERIC_INTERFACE(SeekableIterator);
-FORWARD_DECLARE_GENERIC_INTERFACE(RecursiveIterator);
-FORWARD_DECLARE_CLASS(RecursiveDirectoryIterator);
-extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_SELF;
-extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_FILEINFO;
-extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_PATHNAME;
-extern const int64 q_RecursiveDirectoryIterator_KEY_AS_PATHNAME;
-extern const int64 q_RecursiveDirectoryIterator_KEY_AS_FILENAME;
-extern const int64 q_RecursiveDirectoryIterator_NEW_CURRENT_AND_KEY;
-FORWARD_DECLARE_CLASS(DirectoryIterator);
-FORWARD_DECLARE_GENERIC_INTERFACE(IteratorAggregate);
-FORWARD_DECLARE_CLASS(RecursiveIteratorIterator);
-extern const int64 q_RecursiveIteratorIterator_LEAVES_ONLY;
-extern const int64 q_RecursiveIteratorIterator_SELF_FIRST;
-extern const int64 q_RecursiveIteratorIterator_CHILD_FIRST;
-extern const int64 q_RecursiveIteratorIterator_CATCH_GET_CHILD;
-FORWARD_DECLARE_CLASS(MutableArrayIterator);
-FORWARD_DECLARE_CLASS(FilterIterator);
-
-///////////////////////////////////////////////////////////////////////////////
-}
-#include <php/classes/arrayaccess.fw.h>
-#include <php/classes/exception.fw.h>
-#include <php/classes/splfile.fw.h>
-#include <php/globals/constants.fw.h>
-
 #endif // __GENERATED_php_classes_iterator_fw_ha3ef9254__

@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_IteratorAggregate_h29174a62__
 #define __GENERATED_cls_IteratorAggregate_h29174a62__
 
+#include <cls/IteratorAggregate.fw.h>
 #include <cls/Traversable.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 911 */
+FORWARD_DECLARE_GENERIC_INTERFACE(IteratorAggregate);
 class c_IteratorAggregate {
   // public: virtual void t_getiterator() = 0;
 };

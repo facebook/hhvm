@@ -18,11 +18,13 @@
 #ifndef __GENERATED_cls_Closure_hc5059823__
 #define __GENERATED_cls_Closure_hc5059823__
 
+#include <cls/Closure.fw.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/closure.php line 6 */
+FORWARD_DECLARE_CLASS(Closure);
 class c_Closure : public ExtObjectData {
   public:
 
@@ -76,6 +78,8 @@ class c_Closure : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(setvars);
 };
 extern struct ObjectStaticCallbacks cw_Closure;
+Object co_Closure(CArrRef params, bool init = true);
+Object coo_Closure();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

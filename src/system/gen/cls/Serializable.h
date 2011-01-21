@@ -18,11 +18,13 @@
 #ifndef __GENERATED_cls_Serializable_h5a05b3cb__
 #define __GENERATED_cls_Serializable_h5a05b3cb__
 
+#include <cls/Serializable.fw.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 40 */
+FORWARD_DECLARE_GENERIC_INTERFACE(Serializable);
 class c_Serializable {
   // public: virtual void t_serialize() = 0;
   // public: virtual void t_unserialize(CVarRef v_serialized) = 0;

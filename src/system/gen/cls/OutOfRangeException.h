@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_OutOfRangeException_hd4da4fc9__
 #define __GENERATED_cls_OutOfRangeException_hd4da4fc9__
 
+#include <cls/OutOfRangeException.fw.h>
 #include <cls/LogicException.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/exception.php line 212 */
+FORWARD_DECLARE_CLASS(OutOfRangeException);
 class c_OutOfRangeException : public c_LogicException {
   public:
 
@@ -62,6 +64,8 @@ class c_OutOfRangeException : public c_LogicException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_OutOfRangeException;
+Object co_OutOfRangeException(CArrRef params, bool init = true);
+Object coo_OutOfRangeException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

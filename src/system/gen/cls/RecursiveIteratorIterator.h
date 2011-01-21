@@ -18,6 +18,7 @@
 #ifndef __GENERATED_cls_RecursiveIteratorIterator_habb8beb5__
 #define __GENERATED_cls_RecursiveIteratorIterator_habb8beb5__
 
+#include <cls/RecursiveIteratorIterator.fw.h>
 #include <cls/OuterIterator.h>
 #include <cls/Traversable.h>
 
@@ -25,6 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 164 */
+FORWARD_DECLARE_CLASS(RecursiveIteratorIterator);
 class c_RecursiveIteratorIterator : public ExtObjectData {
   public:
 
@@ -82,7 +84,13 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(current);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
+extern const int64 q_RecursiveIteratorIterator_LEAVES_ONLY;
+extern const int64 q_RecursiveIteratorIterator_SELF_FIRST;
+extern const int64 q_RecursiveIteratorIterator_CHILD_FIRST;
+extern const int64 q_RecursiveIteratorIterator_CATCH_GET_CHILD;
 extern struct ObjectStaticCallbacks cw_RecursiveIteratorIterator;
+Object co_RecursiveIteratorIterator(CArrRef params, bool init = true);
+Object coo_RecursiveIteratorIterator();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

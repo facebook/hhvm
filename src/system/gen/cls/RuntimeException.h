@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_RuntimeException_h10646350__
 #define __GENERATED_cls_RuntimeException_h10646350__
 
+#include <cls/RuntimeException.fw.h>
 #include <cls/Exception.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/exception.php line 220 */
+FORWARD_DECLARE_CLASS(RuntimeException);
 class c_RuntimeException : public c_Exception {
   public:
 
@@ -62,6 +64,8 @@ class c_RuntimeException : public c_Exception {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_RuntimeException;
+Object co_RuntimeException(CArrRef params, bool init = true);
+Object coo_RuntimeException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

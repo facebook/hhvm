@@ -18,7 +18,6 @@
 #ifndef __GENERATED_php_classes_reflection_h1b89e197__
 #define __GENERATED_php_classes_reflection_h1b89e197__
 
-#include <runtime/base/hphp_system.h>
 #include <php/classes/reflection.fw.h>
 
 // Declarations
@@ -32,8 +31,6 @@
 #include <cls/ReflectionProperty.h>
 #include <cls/ReflectionFunction.h>
 #include <cls/ReflectionParameter.h>
-#include <php/classes/exception.h>
-#include <php/classes/stdclass.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,27 +38,9 @@ namespace HPHP {
 // Includes and Functions
 Variant pm_php$classes$reflection_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 
-// Redeclared Functions
+// Constants
 
-// Dynamic Class Declarations
-Object co_ReflectionFunctionAbstract(CArrRef params, bool init = true);
-Object coo_ReflectionFunctionAbstract();
-Object co_ReflectionObject(CArrRef params, bool init = true);
-Object coo_ReflectionObject();
-Object co_ReflectionException(CArrRef params, bool init = true);
-Object coo_ReflectionException();
-Object co_ReflectionClass(CArrRef params, bool init = true);
-Object coo_ReflectionClass();
-Object co_ReflectionExtension(CArrRef params, bool init = true);
-Object coo_ReflectionExtension();
-Object co_ReflectionMethod(CArrRef params, bool init = true);
-Object coo_ReflectionMethod();
-Object co_ReflectionProperty(CArrRef params, bool init = true);
-Object coo_ReflectionProperty();
-Object co_ReflectionFunction(CArrRef params, bool init = true);
-Object coo_ReflectionFunction();
-Object co_ReflectionParameter(CArrRef params, bool init = true);
-Object coo_ReflectionParameter();
+// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

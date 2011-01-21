@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_RangeException_h509e241f__
 #define __GENERATED_cls_RangeException_h509e241f__
 
+#include <cls/RangeException.fw.h>
 #include <cls/RuntimeException.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/exception.php line 244 */
+FORWARD_DECLARE_CLASS(RangeException);
 class c_RangeException : public c_RuntimeException {
   public:
 
@@ -62,6 +64,8 @@ class c_RangeException : public c_RuntimeException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_RangeException;
+Object co_RangeException(CArrRef params, bool init = true);
+Object coo_RangeException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

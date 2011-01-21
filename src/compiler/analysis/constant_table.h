@@ -78,12 +78,13 @@ public:
    * Generate all constant declarations for this symbol table.
    */
   void outputPHP(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar, bool newline = true);
+  void outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
+                 bool newline = true) const;
   void outputCPPDynamicDecl(CodeGenerator &cg, AnalysisResultPtr ar,
                             Type2SymbolListMap &type2names);
   void outputCPPDynamicImpl(CodeGenerator &cg, AnalysisResultPtr ar);
   bool outputSingleConstant(CodeGenerator &cg, AnalysisResultPtr ar,
-                            const std::string &name);
+                            const std::string &name) const;
 
   void collectCPPGlobalSymbols(StringPairVec &symbols, CodeGenerator &cg,
                                AnalysisResultPtr ar);
@@ -118,7 +119,8 @@ private:
   bool m_hasDynamic;
 
   ClassScopePtr findParent(AnalysisResultConstPtr ar, const std::string &name);
-  bool outputCPP(CodeGenerator &cg, AnalysisResultPtr ar, Symbol *sym);
+  bool outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
+                 const Symbol *sym) const;
   void outputCPPConstantSymbol(CodeGenerator &cg, AnalysisResultPtr ar,
                                Symbol *sym);
 

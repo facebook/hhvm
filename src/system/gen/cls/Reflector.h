@@ -18,11 +18,13 @@
 #ifndef __GENERATED_cls_Reflector_ha70269bc__
 #define __GENERATED_cls_Reflector_ha70269bc__
 
+#include <cls/Reflector.fw.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/reflection.php line 14 */
+FORWARD_DECLARE_GENERIC_INTERFACE(Reflector);
 class c_Reflector {
   // public: virtual String t___tostring() = 0;
   // public: static virtual void t_export() = 0;

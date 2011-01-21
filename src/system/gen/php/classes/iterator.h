@@ -18,7 +18,6 @@
 #ifndef __GENERATED_php_classes_iterator_h950047ba__
 #define __GENERATED_php_classes_iterator_h950047ba__
 
-#include <runtime/base/hphp_system.h>
 #include <php/classes/iterator.fw.h>
 
 // Declarations
@@ -37,9 +36,6 @@
 #include <cls/RecursiveIteratorIterator.h>
 #include <cls/MutableArrayIterator.h>
 #include <cls/FilterIterator.h>
-#include <php/classes/arrayaccess.h>
-#include <php/classes/splfile.h>
-#include <php/classes/exception.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,23 +43,9 @@ namespace HPHP {
 // Includes and Functions
 Variant pm_php$classes$iterator_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 
-// Redeclared Functions
+// Constants
 
-// Dynamic Class Declarations
-Object co_ArrayIterator(CArrRef params, bool init = true);
-Object coo_ArrayIterator();
-Object co_AppendIterator(CArrRef params, bool init = true);
-Object coo_AppendIterator();
-Object co_RecursiveDirectoryIterator(CArrRef params, bool init = true);
-Object coo_RecursiveDirectoryIterator();
-Object co_DirectoryIterator(CArrRef params, bool init = true);
-Object coo_DirectoryIterator();
-Object co_RecursiveIteratorIterator(CArrRef params, bool init = true);
-Object coo_RecursiveIteratorIterator();
-Object co_MutableArrayIterator(CArrRef params, bool init = true);
-Object coo_MutableArrayIterator();
-Object co_FilterIterator(CArrRef params, bool init = true);
-Object coo_FilterIterator();
+// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

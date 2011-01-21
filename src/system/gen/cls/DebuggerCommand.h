@@ -18,11 +18,13 @@
 #ifndef __GENERATED_cls_DebuggerCommand_h73a8724e__
 #define __GENERATED_cls_DebuggerCommand_h73a8724e__
 
+#include <cls/DebuggerCommand.fw.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/debugger.php line 3 */
+FORWARD_DECLARE_GENERIC_INTERFACE(DebuggerCommand);
 class c_DebuggerCommand {
   // public: virtual void t_onautocomplete(CVarRef v_client) = 0;
   // public: virtual void t_help(CVarRef v_client) = 0;

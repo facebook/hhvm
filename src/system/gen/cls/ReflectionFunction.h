@@ -18,6 +18,7 @@
 #ifndef __GENERATED_cls_ReflectionFunction_hd66cb4e2__
 #define __GENERATED_cls_ReflectionFunction_hd66cb4e2__
 
+#include <cls/ReflectionFunction.fw.h>
 #include <cls/ReflectionFunctionAbstract.h>
 #include <cls/Reflector.h>
 
@@ -25,6 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/reflection.php line 461 */
+FORWARD_DECLARE_CLASS(ReflectionFunction);
 class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   public:
 
@@ -78,7 +80,10 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   DECLARE_METHOD_INVOKE_HELPERS(export);
   DECLARE_METHOD_INVOKE_HELPERS(invoke);
 };
+extern const int64 q_ReflectionFunction_IS_DEPRECATED;
 extern struct ObjectStaticCallbacks cw_ReflectionFunction;
+Object co_ReflectionFunction(CArrRef params, bool init = true);
+Object coo_ReflectionFunction();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

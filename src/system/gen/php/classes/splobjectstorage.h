@@ -18,12 +18,10 @@
 #ifndef __GENERATED_php_classes_splobjectstorage_hd9cdafcc__
 #define __GENERATED_php_classes_splobjectstorage_hd9cdafcc__
 
-#include <runtime/base/hphp_system.h>
 #include <php/classes/splobjectstorage.fw.h>
 
 // Declarations
 #include <cls/SplObjectStorage.h>
-#include <php/classes/iterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,11 +29,9 @@ namespace HPHP {
 // Includes and Functions
 Variant pm_php$classes$splobjectstorage_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 
-// Redeclared Functions
+// Constants
 
-// Dynamic Class Declarations
-Object co_SplObjectStorage(CArrRef params, bool init = true);
-Object coo_SplObjectStorage();
+// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -22,20 +22,4 @@
 #include <sys/literal_strings_remap.h>
 #include <sys/scalar_arrays_remap.h>
 
-// Forward Declarations
-
-namespace HPHP {
-///////////////////////////////////////////////////////////////////////////////
-
-// 1. Static Strings
-
-// 2. Static Arrays
-
-// 3. Constants
-
-// 4. Classes
-
-///////////////////////////////////////////////////////////////////////////////
-}
-
 #endif // __GENERATED_php_globals_symbols_fw_h5207594c__

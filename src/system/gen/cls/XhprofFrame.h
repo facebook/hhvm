@@ -18,11 +18,13 @@
 #ifndef __GENERATED_cls_XhprofFrame_hed1dc80a__
 #define __GENERATED_cls_XhprofFrame_hed1dc80a__
 
+#include <cls/XhprofFrame.fw.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/xhprof.php line 6 */
+FORWARD_DECLARE_CLASS(XhprofFrame);
 class c_XhprofFrame : public ExtObjectData {
   public:
 
@@ -71,6 +73,8 @@ class c_XhprofFrame : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
 };
 extern struct ObjectStaticCallbacks cw_XhprofFrame;
+Object co_XhprofFrame(CArrRef params, bool init = true);
+Object coo_XhprofFrame();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

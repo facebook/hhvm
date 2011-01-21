@@ -18,11 +18,13 @@
 #ifndef __GENERATED_cls_Countable_hf53ba6c0__
 #define __GENERATED_cls_Countable_hf53ba6c0__
 
+#include <cls/Countable.fw.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 10 */
+FORWARD_DECLARE_GENERIC_INTERFACE(Countable);
 class c_Countable {
   // public: virtual void t_count() = 0;
 };

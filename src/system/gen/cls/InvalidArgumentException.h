@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_InvalidArgumentException_h1eaa4f7f__
 #define __GENERATED_cls_InvalidArgumentException_h1eaa4f7f__
 
+#include <cls/InvalidArgumentException.fw.h>
 #include <cls/LogicException.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/exception.php line 196 */
+FORWARD_DECLARE_CLASS(InvalidArgumentException);
 class c_InvalidArgumentException : public c_LogicException {
   public:
 
@@ -62,6 +64,8 @@ class c_InvalidArgumentException : public c_LogicException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_InvalidArgumentException;
+Object co_InvalidArgumentException(CArrRef params, bool init = true);
+Object coo_InvalidArgumentException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

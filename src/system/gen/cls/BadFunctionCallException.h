@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_BadFunctionCallException_h1998da7d__
 #define __GENERATED_cls_BadFunctionCallException_h1998da7d__
 
+#include <cls/BadFunctionCallException.fw.h>
 #include <cls/LogicException.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/exception.php line 168 */
+FORWARD_DECLARE_CLASS(BadFunctionCallException);
 class c_BadFunctionCallException : public c_LogicException {
   public:
 
@@ -62,6 +64,8 @@ class c_BadFunctionCallException : public c_LogicException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_BadFunctionCallException;
+Object co_BadFunctionCallException(CArrRef params, bool init = true);
+Object coo_BadFunctionCallException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

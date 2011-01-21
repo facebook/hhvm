@@ -66,6 +66,7 @@ extern StaticString s_sys_sse0c88471;
 extern StaticString s_sys_ss0f30800a;
 
 // 2. Static Arrays
+extern StaticArray s_sys_sa00000000;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

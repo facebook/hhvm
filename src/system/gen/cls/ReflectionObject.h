@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_ReflectionObject_h8fef8256__
 #define __GENERATED_cls_ReflectionObject_h8fef8256__
 
+#include <cls/ReflectionObject.fw.h>
 #include <cls/ReflectionClass.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/reflection.php line 1274 */
+FORWARD_DECLARE_CLASS(ReflectionObject);
 class c_ReflectionObject : public c_ReflectionClass {
   public:
 
@@ -66,6 +68,8 @@ class c_ReflectionObject : public c_ReflectionClass {
   DECLARE_METHOD_INVOKE_HELPERS(export);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionObject;
+Object co_ReflectionObject(CArrRef params, bool init = true);
+Object coo_ReflectionObject();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

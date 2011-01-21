@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_UnderflowException_h2fad4bbb__
 #define __GENERATED_cls_UnderflowException_h2fad4bbb__
 
+#include <cls/UnderflowException.fw.h>
 #include <cls/RuntimeException.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/exception.php line 253 */
+FORWARD_DECLARE_CLASS(UnderflowException);
 class c_UnderflowException : public c_RuntimeException {
   public:
 
@@ -62,6 +64,8 @@ class c_UnderflowException : public c_RuntimeException {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_UnderflowException;
+Object co_UnderflowException(CArrRef params, bool init = true);
+Object coo_UnderflowException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

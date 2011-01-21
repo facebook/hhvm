@@ -18,6 +18,7 @@
 #ifndef __GENERATED_cls_RecursiveDirectoryIterator_h20f53fae__
 #define __GENERATED_cls_RecursiveDirectoryIterator_h20f53fae__
 
+#include <cls/RecursiveDirectoryIterator.fw.h>
 #include <cls/DirectoryIterator.h>
 #include <cls/RecursiveIterator.h>
 
@@ -25,6 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 768 */
+FORWARD_DECLARE_CLASS(RecursiveDirectoryIterator);
 class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   public:
 
@@ -91,7 +93,15 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   DECLARE_METHOD_INVOKE_HELPERS(current);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
+extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_SELF;
+extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_FILEINFO;
+extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_PATHNAME;
+extern const int64 q_RecursiveDirectoryIterator_KEY_AS_PATHNAME;
+extern const int64 q_RecursiveDirectoryIterator_KEY_AS_FILENAME;
+extern const int64 q_RecursiveDirectoryIterator_NEW_CURRENT_AND_KEY;
 extern struct ObjectStaticCallbacks cw_RecursiveDirectoryIterator;
+Object co_RecursiveDirectoryIterator(CArrRef params, bool init = true);
+Object coo_RecursiveDirectoryIterator();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -18,6 +18,7 @@
 #ifndef __GENERATED_cls_ArrayIterator_hf630121e__
 #define __GENERATED_cls_ArrayIterator_hf630121e__
 
+#include <cls/ArrayIterator.fw.h>
 #include <cls/ArrayAccess.h>
 #include <cls/SeekableIterator.h>
 #include <cls/Countable.h>
@@ -26,6 +27,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 326 */
+FORWARD_DECLARE_CLASS(ArrayIterator);
 class c_ArrayIterator : public ExtObjectData {
   public:
 
@@ -116,6 +118,8 @@ class c_ArrayIterator : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(offsetset);
 };
 extern struct ObjectStaticCallbacks cw_ArrayIterator;
+Object co_ArrayIterator(CArrRef params, bool init = true);
+Object coo_ArrayIterator();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

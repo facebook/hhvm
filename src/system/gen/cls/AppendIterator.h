@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_AppendIterator_h34b70f7d__
 #define __GENERATED_cls_AppendIterator_h34b70f7d__
 
+#include <cls/AppendIterator.fw.h>
 #include <cls/OuterIterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 936 */
+FORWARD_DECLARE_CLASS(AppendIterator);
 class c_AppendIterator : public ExtObjectData {
   public:
 
@@ -91,6 +93,8 @@ class c_AppendIterator : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_AppendIterator;
+Object co_AppendIterator(CArrRef params, bool init = true);
+Object coo_AppendIterator();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

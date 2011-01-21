@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_Iterator_heabcbf94__
 #define __GENERATED_cls_Iterator_heabcbf94__
 
+#include <cls/Iterator.fw.h>
 #include <cls/Traversable.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 255 */
+FORWARD_DECLARE_GENERIC_INTERFACE(Iterator);
 class c_Iterator {
   // public: virtual void t_current() = 0;
   // public: virtual void t_key() = 0;

@@ -18,7 +18,6 @@
 #ifndef __GENERATED_php_classes_stdclass_hd7c356f1__
 #define __GENERATED_php_classes_stdclass_hd7c356f1__
 
-#include <runtime/base/hphp_system.h>
 #include <php/classes/stdclass.fw.h>
 
 // Declarations
@@ -31,13 +30,9 @@ namespace HPHP {
 // Includes and Functions
 Variant pm_php$classes$stdclass_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 
-// Redeclared Functions
+// Constants
 
-// Dynamic Class Declarations
-Object co_stdClass(CArrRef params, bool init = true);
-Object coo_stdClass();
-Object co___PHP_Incomplete_Class(CArrRef params, bool init = true);
-Object coo___PHP_Incomplete_Class();
+// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

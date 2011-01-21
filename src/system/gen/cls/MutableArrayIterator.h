@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_MutableArrayIterator_hcdab4664__
 #define __GENERATED_cls_MutableArrayIterator_hcdab4664__
 
+#include <cls/MutableArrayIterator.fw.h>
 #include <cls/ArrayIterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/iterator.php line 638 */
+FORWARD_DECLARE_CLASS(MutableArrayIterator);
 class c_MutableArrayIterator : public c_ArrayIterator {
   public:
 
@@ -71,6 +73,8 @@ class c_MutableArrayIterator : public c_ArrayIterator {
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
 };
 extern struct ObjectStaticCallbacks cw_MutableArrayIterator;
+Object co_MutableArrayIterator(CArrRef params, bool init = true);
+Object coo_MutableArrayIterator();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

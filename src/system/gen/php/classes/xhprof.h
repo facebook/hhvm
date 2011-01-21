@@ -18,7 +18,6 @@
 #ifndef __GENERATED_php_classes_xhprof_h310b399f__
 #define __GENERATED_php_classes_xhprof_h310b399f__
 
-#include <runtime/base/hphp_system.h>
 #include <php/classes/xhprof.fw.h>
 
 // Declarations
@@ -30,11 +29,9 @@ namespace HPHP {
 // Includes and Functions
 Variant pm_php$classes$xhprof_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 
-// Redeclared Functions
+// Constants
 
-// Dynamic Class Declarations
-Object co_XhprofFrame(CArrRef params, bool init = true);
-Object coo_XhprofFrame();
+// Redeclared Functions
 
 ///////////////////////////////////////////////////////////////////////////////
 }

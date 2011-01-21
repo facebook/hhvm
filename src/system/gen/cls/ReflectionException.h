@@ -18,12 +18,14 @@
 #ifndef __GENERATED_cls_ReflectionException_hd4ca6983__
 #define __GENERATED_cls_ReflectionException_hd4ca6983__
 
+#include <cls/ReflectionException.fw.h>
 #include <cls/Exception.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* SRC: classes/reflection.php line 27 */
+FORWARD_DECLARE_CLASS(ReflectionException);
 class c_ReflectionException : public c_Exception {
   public:
 
@@ -62,6 +64,8 @@ class c_ReflectionException : public c_Exception {
   void init();
 };
 extern struct ObjectStaticCallbacks cw_ReflectionException;
+Object co_ReflectionException(CArrRef params, bool init = true);
+Object coo_ReflectionException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -503,6 +503,13 @@ void ArrayElementExpression::outputCPPUnset(CodeGenerator &cg,
     m_offset->outputCPP(cg, ar);
     ScalarExpressionPtr sc =
       dynamic_pointer_cast<ScalarExpression>(m_offset);
+    if (sc && sc->isLiteralString()) {
+      String s(sc->getLiteralString());
+      int64 n;
+      if (!s->isStrictlyInteger(n)) {
+        cg_printf(", true");
+      }
+    }
     cg_printf(")");
   }
 }

@@ -449,7 +449,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/closure.php line 22 */
 void c_Closure::t_setvars(Variant v_vars) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::setVars);
-  v_vars.weakRemove(NAMSTR(s_sys_ssacf726a1, "__cont__"));
+  v_vars.weakRemove(NAMSTR(s_sys_ssacf726a1, "__cont__"), true);
   m_vars = v_vars;
 }
 namespace hphp_impl_splitter {}

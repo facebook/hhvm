@@ -705,6 +705,8 @@ bool ExpressionList::outputCPPInternal(CodeGenerator &cg,
   bool trailingComma = false;
   unsigned i = 0, s = m_exps.size();
   unsigned ix = m_kind == ListKindLeft ? 0 : s - 1;
+  bool uniqueStringKeys =
+    m_arrayElements && (checkLitstrKeys() == s); // TODO integer keys as well
   for ( ; i < s; i++) {
     if (ExpressionPtr exp = m_exps[i]) {
       if (pre) {
@@ -723,7 +725,7 @@ bool ExpressionList::outputCPPInternal(CodeGenerator &cg,
           // The value itself shouldn't be wrapped with ref() any more.
           ap->getValue()->setContext(NoRefWrapper);
         } else {
-          cg_printf("set(");
+          cg_printf(uniqueStringKeys ? "add(" : "set(");
         }
         exp->outputCPP(cg, ar);
         cg_printf(")");

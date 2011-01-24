@@ -1190,6 +1190,31 @@ class Variant {
   }
   Variant argvalAtImpl(bool byRef, CStrRef key, bool isString = false);
 
+  /**
+   * Checks whether the LHS array needs to be copied for a *one-level*
+   * array set, e.g., "$a[] = $v" or "$a['x'] = $v".
+   *
+   * Note:
+   *  (1) The semantics is equivalent to having a temporary variable
+   * holding to RHS value, i.e., "$tmp = $v; $a[] = $tmp". This is NOT
+   * exactly the same as PHP 5.3, where "$a = &$b; $a = array(); $a = $b;"
+   * creates a recursive array, although the final assignment is not
+   * strong-binding.
+   *  (2) It does NOT work with multi-level array set, i.e., "$a[][] = $v".
+   * The compiler needs to generate a real temporary.
+   */
+  bool needCopyForSet(CVarRef v) {
+    ASSERT(m_type == KindOfArray);
+    if (m_data.parr->getCount() > 1) return true;
+    if (!v.isContagious()) {
+      if (v.m_type == KindOfArray) return m_data.parr == v.m_data.parr;
+      if (v.m_type == KindOfVariant) {
+        return m_data.parr == v.m_data.pvar->m_data.parr;
+      }
+    }
+    return false;
+  }
+
  private:
   bool   toBooleanHelper() const;
   int64  toInt64Helper(int base = 10) const;

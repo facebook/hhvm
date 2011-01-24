@@ -1776,6 +1776,124 @@ bool TestCodeRun::TestArrayCopy() {
        "bool(false)\n"
        );
 
+  /**
+   * Zend PHP 5.2 outputs:
+   *   array(1) {
+   *     [0]=>
+   *     array(1) {
+   *       [0]=>
+   *       *RECURSION*
+   *     }
+   *   }
+   * The difference in behavior is intentional, and HPHP is consistent with
+   * Zend PHP 5.3.
+   */
+  MVCRO("<?php\n"
+        "function f($a) { $a[0] = $a; var_dump($a); }\n"
+        "f(false);\n"
+        ,
+        "array(1) {\n"
+        "  [0]=>\n"
+        "  bool(false)\n"
+        "}\n");
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   array(2) {
+   *     ["x"]=>
+   *     bool(false)
+   *     [0]=>
+   *     array(2) {
+   *       ["x"]=>
+   *       bool(false)
+   *       [0]=>
+   *       *RECURSION*
+   *     }
+   *   }
+   * The difference in behavior is intentional, and HPHP is consistent with
+   * Zend PHP 5.3.
+   */
+  MVCRO("<?php\n"
+        "function f($b) {\n"
+        "  $a = $b ? 0 : array('x' => $b);\n"
+        "  $a[0] = $a; var_dump($a);\n"
+        "}\n"
+        "f(false);\n"
+        ,
+        "array(2) {\n"
+        "  [\"x\"]=>\n"
+        "  bool(false)\n"
+        "  [0]=>\n"
+        "  array(1) {\n"
+        "    [\"x\"]=>\n"
+        "    bool(false)\n"
+        "  }\n"
+        "}\n");
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   array(1) {
+   *     [0]=>
+   *     array(1) {
+   *       [0]=>
+   *       *RECURSION*
+   *     }
+   *   }
+   * The difference in behavior is intentional, and HPHP is consistent with
+   * Zend PHP 5.3.
+   */
+  MVCRO("<?php\n"
+        "function f($a) { $a[] = $a; var_dump($a); }\n"
+        "f(false);\n"
+        ,
+        "array(1) {\n"
+        "  [0]=>\n"
+        "  bool(false)\n"
+        "}\n");
+
+  /**
+   * Even Zend PHP 5.3 does not get this right. It generates a recursive array.
+   */
+  MVCRO("<?php\n"
+        "function f($b) {\n"
+        "  $a = $b ? 0 : array('x' => $b);\n"
+        "  $a2 = &$a; $a[] = $a2; var_dump($a);\n"
+        "}\n"
+        "f(false);\n"
+        ,
+        "array(2) {\n"
+        "  [\"x\"]=>\n"
+        "  bool(false)\n"
+        "  [0]=>\n"
+        "  array(1) {\n"
+        "    [\"x\"]=>\n"
+        "    bool(false)\n"
+        "  }\n"
+        "}\n");
+
+  /**
+   * Zend PHP 5.2 creates a recursive array, but HPHP and Zend PHP 5.3 do not.
+   */
+  MVCRO("<?php\n"
+        "function f($b) {\n"
+        "  $a = $b ? 0 : array($b);\n"
+        "  $a[1][0] = $a; var_dump($a);\n"
+        "}\n"
+        "f(false);\n"
+        ,
+        "array(2) {\n"
+        "  [0]=>\n"
+        "  bool(false)\n"
+        "  [1]=>\n"
+        "  array(1) {\n"
+        "    [0]=>\n"
+        "    array(1) {\n"
+        "      [0]=>\n"
+        "      bool(false)\n"
+        "    }\n"
+        "  }\n"
+        "}\n");
+
   return true;
 }
 

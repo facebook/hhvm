@@ -2735,7 +2735,7 @@ Variant &Variant::o_unsetLval(CStrRef propName, CVarRef tmpForGet,
 #define IMPLEMENT_SETAT                                                 \
   if (m_type == KindOfArray) {                                          \
     ArrayData *escalated =                                              \
-      m_data.parr->set(ToKey(key), v, (m_data.parr->getCount() > 1));   \
+      m_data.parr->set(ToKey(key), v, needCopyForSet(v));               \
     if (escalated) {                                                    \
       set(escalated);                                                   \
     }                                                                   \
@@ -2858,10 +2858,9 @@ CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
   if (m_type == KindOfArray) {
     ArrayData *escalated;
     if (isString) {
-      escalated = m_data.parr->set(key, v, (m_data.parr->getCount() > 1));
+      escalated = m_data.parr->set(key, v, needCopyForSet(v));
     } else {
-      escalated = m_data.parr->set(ToKey(key), v,
-                                   (m_data.parr->getCount() > 1));
+      escalated = m_data.parr->set(ToKey(key), v, needCopyForSet(v));
     }
     if (escalated) {
       set(escalated);
@@ -2900,8 +2899,7 @@ CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
     break;
   }
   case KindOfObject:
-    getArrayAccess()->o_invoke(s_offsetSet,
-                               CREATE_VECTOR2(key, v));
+    getArrayAccess()->o_invoke(s_offsetSet, CREATE_VECTOR2(key, v));
     break;
   default:
     throw_bad_type_exception("not array objects");
@@ -2914,8 +2912,7 @@ CVarRef Variant::set(CVarRef key, CVarRef v) {
   if (m_type == KindOfArray) {
     Variant k(ToKey(key));
     if (k.isNull()) return lvalBlackHole();
-    ArrayData *escalated =
-      m_data.parr->set(k, v, (m_data.parr->getCount() > 1));
+    ArrayData *escalated = m_data.parr->set(k, v, needCopyForSet(v));
     if (escalated) {
       set(escalated);
     }
@@ -2950,8 +2947,7 @@ CVarRef Variant::set(CVarRef key, CVarRef v) {
     break;
   }
   case KindOfObject:
-    getArrayAccess()->o_invoke(s_offsetSet,
-                               CREATE_VECTOR2(key, v));
+    getArrayAccess()->o_invoke(s_offsetSet, CREATE_VECTOR2(key, v));
     break;
   default:
     throw_bad_type_exception("not array objects");
@@ -3108,20 +3104,9 @@ CVarRef Variant::append(CVarRef v) {
     break;
   case KindOfArray:
     {
-      bool contagious = false;
-      if (v.isContagious()) {
-        contagious = true;
-      }
-      ArrayData *escalated =
-        m_data.parr->append(v, (m_data.parr->getCount() > 1));
+      ArrayData *escalated = m_data.parr->append(v, needCopyForSet(v));
       if (escalated) {
         set(escalated);
-        // special case "$a[] = $a;" to match PHP's weird semantics
-        if (!contagious &&
-            (this == &v ||
-             (v.is(KindOfArray) && getArrayData() == v.getArrayData()))) {
-          const_cast<Variant&>(escalated->endRef()).set(escalated);
-        }
       }
     }
     break;

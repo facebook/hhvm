@@ -71,8 +71,10 @@ static void bt_handler(int sig) {
 
   char pid[sizeof(Process::GetProcessId())*3+2]; // '-' and \0
   sprintf(pid,"%u",Process::GetProcessId());
-  char tracefn [strlen("/tmp/stacktrace..log" + strlen(pid) +1 )];
-  sprintf(tracefn,"/tmp/stacktrace.%s.log" , pid);
+  char tracefn[StackTraceBase::ReportDirectory.length()
+               + strlen("/stacktrace..log") + strlen(pid) + 1];
+  sprintf(tracefn, "%s/stacktrace.%s.log",
+          StackTraceBase::ReportDirectory.c_str(), pid);
 
   st.log(strsignal(sig), tracefn, pid);
 
@@ -125,6 +127,7 @@ struct NamedBfd {
 // statics
 
 bool StackTraceBase::Enabled = true;
+string StackTraceBase::ReportDirectory("/tmp");
 string StackTraceBase::ReportEmail;
 
 void StackTraceBase::InstallReportOnSignal(int sig) {

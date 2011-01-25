@@ -635,6 +635,7 @@ next requests.
 
     CoreDumpEmail = email address
     CoreDumpReport = true
+    CoreDumpReportDirectory = /tmp
 
     LocalMemcache = false
     MemcacheReadOnly = false

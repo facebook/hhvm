@@ -399,6 +399,8 @@ public:
   void genMethodSlots();
 
   void outputCPPDynamicTables(CodeGenerator::Output output);
+  void outputCPPDynamicClassTables(CodeGenerator::Output output, int part);
+  void outputCPPDynamicClassTables(CodeGenerator::Output output);
   void outputCPPClassMapFile();
   void outputCPPSourceInfos();
   void outputCPPNameMaps();

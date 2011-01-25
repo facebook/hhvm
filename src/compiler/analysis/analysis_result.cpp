@@ -2400,6 +2400,94 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
   cg_printf(text4);
 }
 
+void AnalysisResult::outputCPPDynamicClassTables(
+  CodeGenerator::Output output) {
+  outputCPPDynamicClassTables(output, 1);
+  if (output != CodeGenerator::SystemCPP) {
+    outputCPPDynamicClassTables(output, 2);
+    outputCPPDynamicClassTables(output, 3);
+    outputCPPDynamicClassTables(output, 4);
+  }
+}
+
+void AnalysisResult::outputCPPDynamicClassTables(
+  CodeGenerator::Output output, int part) {
+  AnalysisResultPtr ar = shared_from_this();
+  bool system = output == CodeGenerator::SystemCPP;
+  string n;
+  string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
+    (system ? "dynamic_table_class"
+            : "dynamic_table_class_" + lexical_cast<string>(part)) + ".no.cpp";
+  Util::mkdir(tablePath);
+  ofstream fTable(tablePath.c_str());
+  CodeGenerator cg(&fTable, output);
+
+  outputCPPDynamicTablesHeader(cg, true, false);
+  cg.printSection("Class Invoke Tables");
+  if (part == 1) {
+    MethodSlot::emitMethodSlot(cg, ar, system); // FMC broken for IDL tests(?)
+  }
+  vector<const char*> classes;
+  ClassScopePtr cls;
+  StringToClassScopePtrVecMap classScopes;
+  for (StringToClassScopePtrVecMap::const_iterator iter =
+      m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
+    if (iter->second.size()) {
+      for (ClassScopePtrVec::const_iterator iter2 = iter->second.begin();
+          iter2 != iter->second.end(); ++iter2) {
+        cls = *iter2;
+        if (cls->isUserClass() && !cls->isInterface()) {
+          classes.push_back(cls->getOriginalName().c_str());
+          classScopes[cls->getName()].push_back(cls);
+          if (!system) {
+            cls->outputCPPDynamicClassDecl(cg);
+          }
+          cls->outputCPPGlobalTableWrappersDecl(cg, ar);
+          break;
+        }
+      }
+    }
+  }
+  if (system) {
+    BOOST_FOREACH(tie(n, cls), m_systemClasses) {
+      if (!cls->isInterface() && !cls->isSepExtension()) {
+        classes.push_back(cls->getOriginalName().c_str());
+      }
+    }
+    outputCPPExtClassImpl(cg);
+  } else {
+    BOOST_FOREACH(tie(n, cls), m_systemClasses) {
+      if (!cls->isInterface() && cls->isSepExtension()) {
+        classes.push_back(cls->getOriginalName().c_str());
+        cls->outputCPPDynamicClassDecl(cg);
+        cls->outputCPPGlobalTableWrappersDecl(cg, ar);
+        classScopes[cls->getName()].push_back(cls);
+      }
+    }
+    switch (part) {
+    case 1:
+      ClassScope::outputCPPClassVarInitImpl(cg, classScopes, classes);
+      break;
+    case 2:
+      ClassScope::outputCPPDynamicClassCreateImpl(cg, classScopes, classes);
+      break;
+    case 3:
+      ClassScope::outputCPPInvokeStaticMethodImpl(cg, classScopes, classes);
+      ClassScope::outputCPPGetCallInfoStaticMethodImpl(cg, classScopes,
+          classes);
+      break;
+    case 4:
+      ClassScope::outputCPPGetStaticPropertyImpl(cg, classScopes, classes);
+      ClassScope::outputCPPGetClassConstantImpl(cg, classScopes, classes);
+      break;
+    default:
+      assert(false);
+    }
+  }
+  cg.namespaceEnd();
+  fTable.close();
+}
+
 void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
   AnalysisResultPtr ar = shared_from_this();
   bool system = output == CodeGenerator::SystemCPP;
@@ -2426,65 +2514,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
     cg.namespaceEnd();
     fTable.close();
   }
-  {
-    string n;
-    string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
-      "dynamic_table_class.no.cpp";
-    Util::mkdir(tablePath);
-    ofstream fTable(tablePath.c_str());
-    CodeGenerator cg(&fTable, output);
-
-    outputCPPDynamicTablesHeader(cg, true, false);
-    cg.printSection("Class Invoke Tables");
-    MethodSlot::emitMethodSlot(cg, ar, system); // FMC broken for IDL tests(?)
-    vector<const char*> classes;
-    ClassScopePtr cls;
-    StringToClassScopePtrVecMap classScopes;
-    for (StringToClassScopePtrVecMap::const_iterator iter =
-        m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
-      if (iter->second.size()) {
-        for (ClassScopePtrVec::const_iterator iter2 = iter->second.begin();
-            iter2 != iter->second.end(); ++iter2) {
-          cls = *iter2;
-          if (cls->isUserClass() && !cls->isInterface()) {
-            classes.push_back(cls->getOriginalName().c_str());
-            classScopes[cls->getName()].push_back(cls);
-            if (!system) {
-              cls->outputCPPDynamicClassDecl(cg);
-            }
-            cls->outputCPPGlobalTableWrappersDecl(cg, ar);
-            break;
-          }
-        }
-      }
-    }
-    if (system) {
-      BOOST_FOREACH(tie(n, cls), m_systemClasses) {
-        if (!cls->isInterface() && !cls->isSepExtension()) {
-          classes.push_back(cls->getOriginalName().c_str());
-        }
-      }
-      outputCPPExtClassImpl(cg);
-    } else {
-      BOOST_FOREACH(tie(n, cls), m_systemClasses) {
-        if (!cls->isInterface() && cls->isSepExtension()) {
-          classes.push_back(cls->getOriginalName().c_str());
-          cls->outputCPPDynamicClassDecl(cg);
-          cls->outputCPPGlobalTableWrappersDecl(cg, ar);
-          classScopes[cls->getName()].push_back(cls);
-        }
-      }
-      ClassScope::outputCPPClassVarInitImpl(cg, classScopes, classes);
-      ClassScope::outputCPPDynamicClassCreateImpl(cg, classScopes, classes);
-      ClassScope::outputCPPInvokeStaticMethodImpl(cg, classScopes, classes);
-      ClassScope::outputCPPGetCallInfoStaticMethodImpl(cg, classScopes,
-          classes);
-      ClassScope::outputCPPGetStaticPropertyImpl(cg, classScopes, classes);
-      ClassScope::outputCPPGetClassConstantImpl(cg, classScopes, classes);
-    }
-    cg.namespaceEnd();
-    fTable.close();
-  }
+  outputCPPDynamicClassTables(output);
   {
     string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
       "dynamic_table_constant.no.cpp";

@@ -233,7 +233,8 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
   // invoke() will return Variant
   if (cls->isInterface() ||
       (func->isVirtual() &&
-       (ar->isSystem() || func->hasOverride() || func->isAbstract()) &&
+       (ar->isSystem() || func->isAbstract() ||
+        (func->hasOverride() && cls->getAttribute(ClassScope::NotFinal))) &&
        !func->isPerfectVirtual())) {
     valid = false;
   }

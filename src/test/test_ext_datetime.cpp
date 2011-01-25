@@ -103,7 +103,7 @@ bool TestExtDatetime::test_date_default_timezone_set() {
 bool TestExtDatetime::test_date_format() {
   Object dt = f_date_create("@1170288001");
   VS(f_date_format(dt, "Y-m-d\\TH:i:s\\Z"), "2007-02-01T00:00:01Z");
-  VS(f_date_format(dt, "Y-m-dTH:i:sZ"), "2007-02-01PDT00:00:01-28800");
+  VS(f_date_format(dt, "Y-m-dTH:i:sZ"), "2007-02-01PST00:00:01-28800");
   VS(DateTime(1255494072, true).toString(DateTime::Cookie),
      "Wed, 14-Oct-2009 04:21:12 GMT");
   return Count(true);
@@ -258,7 +258,7 @@ bool TestExtDatetime::test_date() {
      "05-16-18, 10-03-01, 1631 1618 6 Satam01 68 ");
   VS(f_date("\\i\\t \\i\\s \\t\\h\\e jS \\d\\a\\y.", d),
      "it is the 10th day.");
-  VS(f_date("D M j G:i:s T Y", d), "Sat Mar 10 5:16:18 PDT 2001");
+  VS(f_date("D M j G:i:s T Y", d), "Sat Mar 10 5:16:18 PST 2001");
   VS(f_date("H:m:s \\m \\i\\s\\ \\m\\o\\n\\t\\h", d), "05:03:18 m is month");
   VS(f_date("H:i:s", d), "05:16:18");
 

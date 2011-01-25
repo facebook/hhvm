@@ -544,7 +544,7 @@ String DateTime::rfcFormat(CStrRef format) const {
                  rfc_colon ? ":" : "", abs((offset % 3600) / 60));
       }
       break;
-    case 'T': s.append(utc() ? "GMT" : m_tz->abbr()); break;
+    case 'T': s.append(utc() ? "GMT" : m_time->tz_abbr); break;
     case 'e': s.append(utc() ? "UTC" : m_tz->name()); break;
     case 'Z': s.append(utc() ? 0 : m_tz->offset(toTimeStamp(error)));
       break;

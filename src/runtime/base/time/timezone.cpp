@@ -206,9 +206,9 @@ String TimeZone::name() const {
   return String(m_tzi->name, CopyString);
 }
 
-String TimeZone::abbr() const {
+String TimeZone::abbr(int type /* = 0 */) const {
   if (!m_tzi) return String();
-  return String(m_tzi->timezone_abbr, CopyString);
+  return String(&m_tzi->timezone_abbr[m_tzi->type[type].abbr_idx], CopyString);
 }
 
 int TimeZone::offset(int timestamp) const {

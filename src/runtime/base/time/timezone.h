@@ -76,7 +76,7 @@ public:
    * Get timezone's name or abbreviation.
    */
   String name() const;
-  String abbr() const;
+  String abbr(int type = 0) const;
 
   /**
    * Get offset from UTC at the specified timestamp under this timezone.

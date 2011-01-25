@@ -412,8 +412,8 @@ void ConcurrentTableSharedStore::dump(std::ostream & out) {
       out << i << " #### " << key << " #### ";
       Variant value = val.var->toLocal();
       try {
-        Variant valS(vs.serialize(value, true));
-        out << valS.toString()->toCPPString();
+        String valS(vs.serialize(value, true));
+        out << valS->toCPPString();
       } catch (const Exception &e) {
         out << "Exception: " << e.what();
       }

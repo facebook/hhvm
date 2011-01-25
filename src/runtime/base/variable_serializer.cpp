@@ -36,6 +36,11 @@ VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
                                        int maxRecur /* = 3 */)
   : m_type(type), m_option(option), m_buf(NULL), m_indent(0),
     m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(maxRecur) {
+  if (type == Serialize || type == APCSerialize) {
+    m_arrayIds = new PointerCounterMap();
+  } else {
+    m_arrayIds = NULL;
+  }
 }
 
 void VariableSerializer::setObjectInfo(CStrRef objClass, int objId) {
@@ -53,7 +58,7 @@ void VariableSerializer::setResourceInfo(CStrRef rsrcName, int rsrcId) {
   m_rsrcId = rsrcId;
 }
 
-Variant VariableSerializer::serialize(CVarRef v, bool ret) {
+String VariableSerializer::serialize(CVarRef v, bool ret) {
   StringBuffer buf;
   m_buf = &buf;
   if (ret) {
@@ -68,7 +73,7 @@ Variant VariableSerializer::serialize(CVarRef v, bool ret) {
     String str = m_buf->detach();
     g_context->write(str);
   }
-  return true;
+  return null_string;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -367,8 +372,9 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
   case Serialize:
   case APCSerialize:
     {
-      PointerCounterMap::const_iterator iter = m_arrayIds.find(ptr);
-      ASSERT(iter != m_arrayIds.end());
+      ASSERT(m_arrayIds);
+      PointerCounterMap::const_iterator iter = m_arrayIds->find(ptr);
+      ASSERT(iter != m_arrayIds->end());
       int id = iter->second;
       if (isObject) {
         m_buf->append("r:");
@@ -405,7 +411,6 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
   m_arrayInfos.push_back(ArrayInfo());
   ArrayInfo &info = m_arrayInfos.back();
   info.first_element = true;
-  info.is_vector = m_objClass.empty() && arr->isVectorData();
   info.indent_delta = 0;
 
   switch (m_type) {
@@ -501,6 +506,7 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
     break;
   case JSON:
   case DebuggerDump:
+    info.is_vector = m_objClass.empty() && arr->isVectorData();
     if (info.is_vector) {
       m_buf->append('[');
     } else {
@@ -667,8 +673,9 @@ void VariableSerializer::writeArrayValue(const ArrayData *arr, CVarRef value) {
   // Do not count referenced values after the first
   if ((m_type == Serialize || m_type == APCSerialize) &&
       !(value.isReferenced() &&
-        m_arrayIds.find(value.getVariantData()) != m_arrayIds.end()))
+        m_arrayIds->find(value.getVariantData()) != m_arrayIds->end())) {
     m_valueCount++;
+  }
 
   write(value);
   switch (m_type) {
@@ -771,12 +778,13 @@ bool VariableSerializer::incNestedLevel(void *ptr,
   case Serialize:
   case APCSerialize:
     {
+      ASSERT(m_arrayIds);
       int ct = ++m_counts[ptr];
-      if (m_arrayIds.find(ptr) != m_arrayIds.end() &&
+      if (m_arrayIds->find(ptr) != m_arrayIds->end() &&
           (m_referenced || isObject)) {
         return true;
       } else {
-        m_arrayIds[ptr] = m_valueCount;
+        (*m_arrayIds)[ptr] = m_valueCount;
       }
       return ct >= (m_maxCount - 1);
     }

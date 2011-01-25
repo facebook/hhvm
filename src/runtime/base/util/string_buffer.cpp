@@ -213,7 +213,7 @@ void StringBuffer::append(CStrRef s) {
   TAINT_OBSERVER_REGISTER_MUTATED(this);
 }
 
-void StringBuffer::append(const char *s, int len) {
+void StringBuffer::appendHelper(const char *s, int len) {
   if (m_buffer == NULL) {
     m_size = m_initialSize;
     if (len > m_size) {
@@ -231,7 +231,6 @@ void StringBuffer::append(const char *s, int len) {
   }
   memcpy(m_buffer + m_pos, s, len);
   m_pos += len;
-  TAINT_OBSERVER_REGISTER_MUTATED(this);
 }
 
 #define REVERSE16(us)                                     \

@@ -26,7 +26,7 @@ IMPLEMENT_DEFAULT_EXTENSION(json);
 
 String f_json_encode(CVarRef value, bool loose /* = false */) {
   VariableSerializer vs(VariableSerializer::JSON, loose ? 1 : 0);
-  Variant ret = vs.serialize(value, true);
+  String ret = vs.serialize(value, true);
   if (value.isContagious()) {
     value.clearContagious();
   }

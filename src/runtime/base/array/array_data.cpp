@@ -358,6 +358,11 @@ ssize_t ArrayData::iter_rewind(ssize_t prev) const {
 // helpers
 
 void ArrayData::serialize(VariableSerializer *serializer) const {
+  if (size() == 0) {
+    serializer->writeArrayHeader(this, 0);
+    serializer->writeArrayFooter(this);
+    return;
+  }
   if (serializer->incNestedLevel((void*)this)) {
     serializer->writeOverflow((void*)this);
   } else {
@@ -420,11 +425,11 @@ void ArrayData::dump() {
 
 void ArrayData::dump(std::string &out) {
   VariableSerializer vs(VariableSerializer::VarDump);
-  Variant ret(vs.serialize(Array(this), true));
+  String ret(vs.serialize(Array(this), true));
   out += "ArrayData(";
   out += boost::lexical_cast<string>(_count);
   out += "): ";
-  out += ret.toString().data();
+  out += ret.data();
 }
 
 void ArrayData::dump(std::ostream &out) {
@@ -435,8 +440,8 @@ void ArrayData::dump(std::ostream &out) {
     out << i << " #### " << key.toString()->toCPPString() << " #### ";
     Variant val(iter.second());
     try {
-      Variant valS(vs.serialize(val, true));
-      out << valS.toString()->toCPPString();
+      String valS(vs.serialize(val, true));
+      out << valS->toCPPString();
     } catch (const Exception &e) {
       out << "Exception: " << e.what();
     }

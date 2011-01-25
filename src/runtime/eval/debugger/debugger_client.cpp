@@ -276,17 +276,17 @@ String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */) {
   if (maxlen <= 0) {
     try {
       VariableSerializer vs(VariableSerializer::VarExport, 0, 2);
-      value = vs.serialize(v, true).toString();
+      value = vs.serialize(v, true);
     } catch (NestingLevelTooDeepException &e) {
       VariableSerializer vs(VariableSerializer::VarDump, 0, 2);
-      value = vs.serialize(v, true).toString();
+      value = vs.serialize(v, true);
     } catch (...) {
       ASSERT(false);
       throw;
     }
   } else {
     VariableSerializer vs(VariableSerializer::DebuggerDump, 0, 2);
-    value = vs.serialize(v, true).toString();
+    value = vs.serialize(v, true);
   }
 
   if (maxlen <= 0 || value.length() - maxlen < 30) {

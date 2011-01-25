@@ -547,8 +547,47 @@ Object f_clone(CVarRef v) {
 }
 
 String f_serialize(CVarRef value) {
-  VariableSerializer vs(VariableSerializer::Serialize);
-  return vs.serialize(value, true);
+  switch (value.getType()) {
+  case KindOfNull:
+    return "N;";
+  case KindOfBoolean:
+    return value.getBoolean() ? "b:1;" : "b:0;";
+  case KindOfByte:
+  case KindOfInt16:
+  case KindOfInt32:
+  case KindOfInt64: {
+    StringBuffer sb;
+    sb.append("i:");
+    sb.append(value.getInt64());
+    sb.append(';');
+    return sb.detach();
+  }
+  case KindOfStaticString:
+  case KindOfString: {
+    StringData *str = value.getStringData();
+    StringBuffer sb;
+    sb.append("s:");
+    sb.append(str->size());
+    sb.append(":\"");
+    sb.append(str->data(), str->size());
+    sb.append("\";");
+    return sb.detach();
+  }
+  case KindOfArray: {
+    ArrayData *arr = value.getArrayData();
+    if (arr->empty()) return "a:0:{}";
+    // fall-through
+  }
+  case KindOfObject:
+  case KindOfDouble: {
+    VariableSerializer vs(VariableSerializer::Serialize);
+    return vs.serialize(value, true);
+  }
+  default:
+    ASSERT(false);
+    break;
+  }
+  return "";
 }
 
 Variant unserialize_ex(CStrRef str, VariableUnserializer::Type type) {

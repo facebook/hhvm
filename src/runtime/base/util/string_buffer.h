@@ -94,7 +94,17 @@ public:
   void append(unsigned char c) { append((char)c);}
   void append(litstr  s) { ASSERT(s); append(s, strlen(s));}
   void append(CStrRef s);
-  void append(const char *s, int len);
+  void append(const char *s, int len) {
+    TAINT_OBSERVER_REGISTER_MUTATED(this);
+    ASSERT(len >= 0);
+    if (m_buffer && m_pos + len <= m_size) {
+      memcpy(m_buffer + m_pos, s, len);
+      m_pos += len;
+      return;
+    }
+    appendHelper(s, len);
+  }
+  void appendHelper(const char *s, int len);
   void append(const std::string &s) { append(s.data(), s.size());}
   /**
    * Json-escape the string and then append it.

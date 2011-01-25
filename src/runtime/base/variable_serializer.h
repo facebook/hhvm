@@ -47,14 +47,17 @@ public:
   };
 
   /**
-   * Constructor.
+   * Constructor and destructor.
    */
   VariableSerializer(Type type, int option = 0, int maxRecur = 3);
+  ~VariableSerializer() {
+    if (m_arrayIds) delete m_arrayIds;
+  }
 
   /**
    * Top level entry function called by f_ functions.
    */
-  Variant serialize(CVarRef v, bool ret);
+  String serialize(CVarRef v, bool ret);
 
   /**
    * Type specialized output functions.
@@ -101,7 +104,7 @@ private:
   StringBuffer *m_buf;
   int m_indent;
   PointerCounterMap m_counts;    // counting seen arrays for recursive levels
-  PointerCounterMap m_arrayIds;  // reference ids for objs/arrays
+  PointerCounterMap *m_arrayIds; // reference ids for objs/arrays
   int m_valueCount;              // Current ref index
   bool m_referenced;             // mark current array element as reference
   int m_refCount;                // current variable's reference count

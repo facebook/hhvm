@@ -205,8 +205,7 @@ void HphpArray::dumpDebugInfo() const {
     if (elms[i].data.m_type < KindOfTombstone) {
       Variant v = tvAsVariant(&elms[i].data);
       VariableSerializer vs(VariableSerializer::DebugDump);
-      Variant v2(vs.serialize(v, true));
-      String s = v2.toString().data();
+      String s = vs.serialize(v, true);
       if (elms[i].key != NULL) {
         String k = Util::escapeStringForCPP(elms[i].key->data());
         fprintf(stderr, "  [%3d] hash=0x%016llx key=\"%s\" data=(%.*s)\n",
@@ -221,8 +220,7 @@ void HphpArray::dumpDebugInfo() const {
       TypedValue* fixedLocation = elms[i].data.m_data.ptv;
       Variant v = tvAsVariant(fixedLocation);
       VariableSerializer vs(VariableSerializer::DebugDump);
-      Variant v2(vs.serialize(v, true));
-      String s = v2.toString().data();
+      String s = vs.serialize(v, true);
       String k = Util::escapeStringForCPP(elms[i].key->data());
       fprintf(stderr, "  [%3d] hash=0x%016llx key=\"%s\" "
               "fixed location=%p data=(%.*s)\n", int(i), elms[i].h,

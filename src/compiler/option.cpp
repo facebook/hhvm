@@ -218,6 +218,7 @@ bool Option::GenerateSourceInfo = false;
 bool Option::GenerateDocComments = true;
 bool Option::FlAnnotate = false;
 bool Option::SystemGen = false;
+bool Option::SplitDynamicClassTable = true;
 bool Option::UseMethodIndex = false;
 
 void (*Option::m_hookHandler)(Hdf &config);

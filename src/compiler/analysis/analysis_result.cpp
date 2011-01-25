@@ -2400,7 +2400,7 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
 void AnalysisResult::outputCPPDynamicClassTables(
   CodeGenerator::Output output) {
   outputCPPDynamicClassTables(output, 1);
-  if (output != CodeGenerator::SystemCPP) {
+  if (output != CodeGenerator::SystemCPP && Option::SplitDynamicClassTable) {
     outputCPPDynamicClassTables(output, 2);
     outputCPPDynamicClassTables(output, 3);
     outputCPPDynamicClassTables(output, 4);
@@ -2413,8 +2413,8 @@ void AnalysisResult::outputCPPDynamicClassTables(
   bool system = output == CodeGenerator::SystemCPP;
   string n;
   string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
-    (system ? "dynamic_table_class"
-            : "dynamic_table_class_" + lexical_cast<string>(part)) + ".no.cpp";
+    ((system || !Option::SplitDynamicClassTable) ? "dynamic_table_class"
+      : "dynamic_table_class_" + lexical_cast<string>(part)) + ".no.cpp";
   Util::mkdir(tablePath);
   ofstream fTable(tablePath.c_str());
   CodeGenerator cg(&fTable, output);
@@ -2464,15 +2464,15 @@ void AnalysisResult::outputCPPDynamicClassTables(
     switch (part) {
     case 1:
       ClassScope::outputCPPClassVarInitImpl(cg, classScopes, classes);
-      break;
+      if (Option::SplitDynamicClassTable) break;
     case 2:
       ClassScope::outputCPPDynamicClassCreateImpl(cg, classScopes, classes);
-      break;
+      if (Option::SplitDynamicClassTable) break;
     case 3:
       ClassScope::outputCPPInvokeStaticMethodImpl(cg, classScopes, classes);
       ClassScope::outputCPPGetCallInfoStaticMethodImpl(cg, classScopes,
           classes);
-      break;
+      if (Option::SplitDynamicClassTable) break;
     case 4:
       ClassScope::outputCPPGetStaticPropertyImpl(cg, classScopes, classes);
       ClassScope::outputCPPGetClassConstantImpl(cg, classScopes, classes);

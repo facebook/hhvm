@@ -358,6 +358,7 @@ public:
   static bool GenerateDocComments;
   static bool FlAnnotate; // annotate emitted code with compiler file-line info
   static bool SystemGen; // -t cpp -f sys
+  static bool SplitDynamicClassTable;
   static bool ControlFlow;
   static bool DumpAst;
 

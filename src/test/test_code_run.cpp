@@ -40,6 +40,7 @@ TestCodeRun::TestCodeRun() : m_perfMode(false) {
   Option::GenerateCPPNameSpace = true;
   Option::KeepStatementsWithNoEffect = false;
   Option::ParserThreadCount = 4;
+  Option::SplitDynamicClassTable = false;
 }
 
 bool TestCodeRun::preTest() {

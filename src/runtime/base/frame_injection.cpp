@@ -39,10 +39,6 @@ static inline void injection_check(ThreadInfo *info) {
 #ifdef INFINITE_RECURSION_DETECTION
   check_recursion(info);
 #endif
-
-#ifdef REQUEST_TIMEOUT_DETECTION
-  check_request_timeout(info);
-#endif
 }
 
 // constructors with hot profiler
@@ -143,6 +139,10 @@ FrameInjection::~FrameInjection() {
     Profiler *prof = m_info->m_profiler;
     if (prof) end_profiler_frame(prof);
   }
+#endif
+
+#ifdef REQUEST_TIMEOUT_DETECTION
+  check_request_timeout(m_info);
 #endif
 }
 

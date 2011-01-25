@@ -53,6 +53,7 @@ public:
   static std::string ServerUser; // run server under this user account
 
   static int  MaxLoopCount;
+  static int  MaxSerializedStringSize;
   static bool NoInfiniteRecursionDetection;
   static bool ThrowBadTypeExceptions;
   static bool ThrowTooManyArguments;

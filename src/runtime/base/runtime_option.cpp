@@ -57,6 +57,7 @@ int RuntimeOption::RuntimeErrorReportingLevel = ErrorConstants::HPHP_ALL;
 std::string RuntimeOption::ServerUser;
 
 int RuntimeOption::MaxLoopCount = 0;
+int RuntimeOption::MaxSerializedStringSize = 64 * 1024 * 1024; // 64MB
 bool RuntimeOption::NoInfiniteRecursionDetection = false;
 bool RuntimeOption::ThrowBadTypeExceptions = false;
 bool RuntimeOption::ThrowTooManyArguments = false;
@@ -513,6 +514,8 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     /* Remove this, once its removed from production configs */
     (void)error["NoInfiniteLoopDetection"].getBool();
 
+    MaxSerializedStringSize =
+      error["MaxSerializedStringSize"].getInt32(64 * 1024 * 1024);
     CallUserHandlerOnFatals = error["CallUserHandlerOnFatals"].getBool(true);
     MaxLoopCount = error["MaxLoopCount"].getInt32(0);
     NoInfiniteRecursionDetection =

@@ -26,8 +26,6 @@
 
 namespace HPHP {
 
-#define SERIALIZE_MAX_SIZE (64*1024*1024)
-
 const String null_string = String();
 const StaticString empty_string("");
 
@@ -586,7 +584,7 @@ void String::unserialize(VariableUnserializer *uns,
                          char delimiter0 /* = '"' */,
                          char delimiter1 /* = '"' */) {
   int size = uns->readInt();
-  if (size >= SERIALIZE_MAX_SIZE) {
+  if (size >= RuntimeOption::MaxSerializedStringSize) {
     throw Exception("Size of serialized string (%d) exceeds max", size);
   }
 

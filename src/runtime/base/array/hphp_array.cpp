@@ -111,7 +111,11 @@ static inline bool isIntegerKey(CVarRef v) {
 
 HphpArray::HphpArray(uint nSize /* = 0 */)
   : m_data(NULL), m_nextKI(0), m_nElms(0), m_hLoad(0), m_lastE(ElmIndEmpty),
-    m_linear(false), m_siPastEnd(false), m_dataPad(0), m_nIndirectElms(0) {
+    m_linear(false), m_siPastEnd(false),
+#ifndef USE_JEMALLOC
+    m_dataPad(0),
+#endif
+    m_nIndirectElms(0) {
 #ifdef PEDANTIC
   if (nSize > 0x7fffffffU) {
     raise_error("Cannot create an array with more than 2^31 - 1 elements");
@@ -936,23 +940,41 @@ HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
 }
 
 void HphpArray::reallocData(size_t maxElms, size_t tableSize) {
+#ifdef USE_JEMALLOC
+  size_t allocSize = (maxElms * sizeof(Elm)) + (tableSize * sizeof(ElmInd));
+  if (m_data == NULL) {
+    ASSERT(!m_linear);
+    if (allocm(&m_data, NULL, allocSize, ALLOCM_ALIGN(sizeof(Elm)))) {
+      throw OutOfMemoryException(allocSize);
+    }
+  } else if (m_linear) {
+    Elm* oldElms = data2Elms(m_data);
+    if (allocm(&m_data, NULL, allocSize, ALLOCM_ALIGN(sizeof(Elm)))) {
+      throw OutOfMemoryException(allocSize);
+    }
+    Elm* elms = data2Elms(m_data);
+    memcpy((void*)elms, (void*)oldElms, (m_lastE+1) * sizeof(Elm));
+    m_linear = false;
+  } else {
+    if (rallocm(&m_data, NULL, allocSize, 0, ALLOCM_ALIGN(sizeof(Elm)))) {
+      throw OutOfMemoryException(allocSize);
+    }
+  }
+#else
   // Allocate extra padding space so that if the resulting region is not
   // Elm-aligned, there is enough padding to be able to leave the first bytes
   // unused and start the element table at an Elm alignment boundary.
-  //
-  // Ideally it would be possible to specify alignment during reallocation, but
-  // no allocator interface for this currently exists.
   //
   // NB: It would be possible to optimistically allocate without padding, then
   // reallocate if alignment was inadquate.  However, this would not save very
   // much memory in practice, and recovering from the OOM failure case for the
   // reallocation would be messy to handle correctly.
-  void* block = realloc(m_linear ? NULL : getBlock(),
-                       (maxElms * sizeof(Elm))
-                       + (tableSize * sizeof(ElmInd))
-                       + ElmAlignment); // <-- pad
+  size_t allocSize = (maxElms * sizeof(Elm))
+                     + (tableSize * sizeof(ElmInd))
+                     + ElmAlignment; // <-- pad
+  void* block = realloc(m_linear ? NULL : getBlock(), allocSize);
   if (block == NULL) {
-    throw OutOfMemoryException(tableSize);
+    throw OutOfMemoryException(allocSize);
   }
   void* newData = block2Data(block);
   size_t newPad = uintptr_t(newData) - uintptr_t(block);
@@ -973,6 +995,7 @@ void HphpArray::reallocData(size_t maxElms, size_t tableSize) {
   }
   m_dataPad = newPad;
   m_data = newData;
+#endif
 }
 
 void HphpArray::delinearize() {
@@ -2167,7 +2190,9 @@ HphpArray* HphpArray::copyImpl() const {
   target->m_lastE = m_lastE;
   target->m_linear = false;
   target->m_siPastEnd = false;
+#ifndef USE_JEMALLOC
   target->m_dataPad = 0;
+#endif
   target->m_nIndirectElms = 0;
   size_t tableSize = computeTableSize(m_tableMask);
   size_t maxElms = computeMaxElms(m_tableMask);
@@ -2565,7 +2590,9 @@ void HphpArray::restore(const char*& buffer) {
     m_data = (void*)buffer;
   }
 
+#ifndef USE_JEMALLOC
   m_dataPad = 0;
+#endif
   Elm* elms = data2Elms(m_data);
   m_hash = elms2Hash(elms, maxElms);
 
@@ -2582,7 +2609,9 @@ void HphpArray::sweep() {
       free(getBlock());
     }
     m_data = NULL;
+#ifndef USE_JEMALLOC
     m_dataPad = 0;
+#endif
   }
   m_strongIterators.clear();
 }

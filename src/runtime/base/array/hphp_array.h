@@ -214,13 +214,19 @@ private:
   ElmInd  m_lastE;       // Index of last used element.
   char    m_linear;      // (true) ? m_data came from linear allocator.
   char    m_siPastEnd;   // (true) ? strong iterators possibly past end.
+#ifndef USE_JEMALLOC
   uchar   m_dataPad;     // Number of bytes that m_data was advanced to
                          //   achieve the required alignment
+#endif
   ElmInd  m_nIndirectElms; // Total number of elements in the array with
                            //   m_type == KindOfIndirect
 
-  inline void* getBlock() {
-    return ((void*)(uintptr_t(m_data) - uintptr_t(m_dataPad)));
+  inline void* getBlock() const {
+    return ((void*)(uintptr_t(m_data)
+#ifndef USE_JEMALLOC
+            - uintptr_t(m_dataPad)
+#endif
+            ));
   }
 
   void dumpDebugInfo() const;

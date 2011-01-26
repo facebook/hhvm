@@ -817,10 +817,10 @@ Variant Variant::operator+(CVarRef var) const {
   if (isIntVal() && var.isIntVal()) {
     return toInt64() + var.toInt64();
   }
-  if (is(KindOfArray) && var.is(KindOfArray)) {
+  int na = is(KindOfArray) + var.is(KindOfArray);
+  if (na == 2) {
     return toArray() + var.toArray();
-  }
-  if (is(KindOfArray) || var.is(KindOfArray)) {
+  } else if (na) {
     throw BadArrayMergeException();
   }
   if (isDouble() || var.isDouble()) {
@@ -852,7 +852,8 @@ Variant &Variant::operator+=(CVarRef var) {
     set(toInt64() + var.toInt64());
     return *this;
   }
-  if (is(KindOfArray) && var.is(KindOfArray)) {
+  int na = is(KindOfArray) + var.is(KindOfArray);
+  if (na == 2) {
     ArrayData *arr1 = getArrayData();
     ArrayData *arr2 = var.getArrayData();
     if (arr1 == NULL || arr2 == NULL) {
@@ -867,6 +868,8 @@ Variant &Variant::operator+=(CVarRef var) {
                                         arr1->getCount() > 1);
     if (escalated) set(escalated);
     return *this;
+  } else if (na) {
+    throw BadArrayMergeException();
   }
   if (isDouble() || var.isDouble()) {
     set(toDouble() + var.toDouble());

@@ -133,16 +133,16 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
 }
 
 FrameInjection::~FrameInjection() {
+#ifdef REQUEST_TIMEOUT_DETECTION
+  check_request_timeout(m_info);
+#endif
+
   m_info->m_top = m_prev;
 #ifdef HOTPROFILER
   if (m_prof) {
     Profiler *prof = m_info->m_profiler;
     if (prof) end_profiler_frame(prof);
   }
-#endif
-
-#ifdef REQUEST_TIMEOUT_DETECTION
-  check_request_timeout(m_info);
 #endif
 }
 

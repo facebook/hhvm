@@ -83,9 +83,16 @@ endif
 
 # Only use jemalloc *or* tcmalloc.
 ifdef USE_JEMALLOC
-override NO_TCMALLOC = 1
-override GOOGLE_TCMALLOC=
+ifdef TLS_GD
+# Clear USE_JEMALLOC, since it may have already been set by the parent make.
+# Ideally we would actually undefine USE_JEMALLOC:
+#   override undefine USE_JEMALLOC
+# However, the undefine feature is only available in GNU make 3.82 and later.
+override USE_JEMALLOC =
 endif
+override NO_TCMALLOC = 1
+override GOOGLE_TCMALLOC =
+endif # USE_JEMALLOC
 
 ifndef NO_TCMALLOC
 # For google profilers
@@ -94,6 +101,11 @@ ifndef NO_TCMALLOC
 
 # Whether to link with tcmalloc.a
 GOOGLE_TCMALLOC = 1
+endif
+
+ifdef TLS_GD
+# See related comments above re: USE_JEMALLOC.
+override GOOGLE_TCMALLOC =
 endif
 
 # For GNU profiler - gprof.

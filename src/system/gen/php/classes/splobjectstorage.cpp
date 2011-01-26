@@ -684,10 +684,7 @@ void c_SplObjectStorage::t_attach(CVarRef v_obj) {
     }
     if (tmp1) {
       {
-        {
-          Variant tmp4((v_obj));
-          m_storage.append((tmp4));
-        }
+        m_storage.append((v_obj));
       }
     }
   }

@@ -794,10 +794,7 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
           v_param = tmp4;
         }
         v_param->m_info = v_info;
-        {
-          p_ReflectionParameter tmp5((v_param));
-          v_ret.append((tmp5));
-        }
+        v_ret.append((v_param));
       }
     }
   }
@@ -3777,10 +3774,7 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = 65535LL
         }
         if (((((((toBoolean(bitwise_and(v_filter, 256LL /* ReflectionMethod::IS_PUBLIC */)) && v_m->t_ispublic()) || (toBoolean(bitwise_and(v_filter, 512LL /* ReflectionMethod::IS_PROTECTED */)) && v_m->t_isprotected())) || (toBoolean(bitwise_and(v_filter, 1024LL /* ReflectionMethod::IS_PRIVATE */)) && v_m->t_isprivate())) || (toBoolean(bitwise_and(v_filter, 1LL /* ReflectionMethod::IS_STATIC */)) && toBoolean(v_m->t_isstatic()))) || (toBoolean(bitwise_and(v_filter, 4LL /* ReflectionMethod::IS_FINAL */)) && toBoolean(v_m->t_isfinal()))) || (toBoolean(bitwise_and(v_filter, 2LL /* ReflectionMethod::IS_ABSTRACT */)) && toBoolean(v_m->t_isabstract())))) {
           {
-            {
-              p_ReflectionMethod tmp6((v_m));
-              v_ret.append((tmp6));
-            }
+            v_ret.append((v_m));
           }
         }
       }
@@ -3911,8 +3905,7 @@ Array c_ReflectionClass::t_getinterfaces() {
           {
             {
               const Variant &tmp5((v_cls->t_getname()));
-              p_ReflectionClass tmp6((v_cls));
-              v_ret.set(tmp5, (tmp6));
+              v_ret.set(tmp5, (v_cls));
             }
           }
         }
@@ -4132,8 +4125,7 @@ Array c_ReflectionClass::t_getstaticproperties() {
             {
               {
                 const Variant &tmp6((v_prop.o_getPublic(NAMSTR(s_sys_ssdc3cbddc, "name"), true)));
-                Variant tmp7((v_prop));
-                v_ret.set(tmp6, (tmp7));
+                v_ret.set(tmp6, (v_prop));
               }
             }
           }
@@ -4199,8 +4191,7 @@ Array c_ReflectionClass::t_getdefaultproperties() {
             {
               {
                 const Variant &tmp6((v_prop.o_getPublic(NAMSTR(s_sys_ssdc3cbddc, "name"), true)));
-                Variant tmp7((v_prop));
-                v_ret.set(tmp6, (tmp7));
+                v_ret.set(tmp6, (v_prop));
               }
             }
           }

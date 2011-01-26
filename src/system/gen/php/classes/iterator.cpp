@@ -1323,20 +1323,13 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 347 */
 void c_ArrayIterator::t_append(CVarRef v_value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::append);
-  {
-    Variant tmp1((v_value));
-    m_arr.append((tmp1));
-  }
+  m_arr.append((v_value));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 360 */
 void c_ArrayIterator::t_asort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::asort);
-  {
-    const Variant &tmp1((m_arr));
-    Variant &tmp1_lv = const_cast<Variant&>(tmp1);
-    x_asort(ref(tmp1_lv), toInt32(m_flags));
-  }
+  x_asort(ref(m_arr), toInt32(m_flags));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 374 */
@@ -1372,11 +1365,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 438 */
 void c_ArrayIterator::t_ksort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::ksort);
-  {
-    const Variant &tmp1((m_arr));
-    Variant &tmp1_lv = const_cast<Variant&>(tmp1);
-    x_ksort(ref(tmp1_lv), toInt32(m_flags));
-  }
+  x_ksort(ref(m_arr), toInt32(m_flags));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 452 */
@@ -1420,10 +1409,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 524 */
 Variant c_ArrayIterator::t_offsetset(CVarRef v_index, CVarRef v_newval) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetSet);
-  {
-    Variant tmp1((v_newval));
-    m_arr.set(v_index, (tmp1));
-  }
+  m_arr.set(v_index, (v_newval));
   return null;
 }
 namespace hphp_impl_splitter {}
@@ -1477,21 +1463,13 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 604 */
 void c_ArrayIterator::t_uasort(CVarRef v_cmp_function) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::uasort);
-  {
-    const Variant &tmp1((m_arr));
-    Variant &tmp1_lv = const_cast<Variant&>(tmp1);
-    x_uasort(ref(tmp1_lv), v_cmp_function);
-  }
+  x_uasort(ref(m_arr), v_cmp_function);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 621 */
 void c_ArrayIterator::t_uksort(CVarRef v_cmp_function) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::uksort);
-  {
-    const Variant &tmp1((m_arr));
-    Variant &tmp1_lv = const_cast<Variant&>(tmp1);
-    x_uksort(ref(tmp1_lv), v_cmp_function);
-  }
+  x_uksort(ref(m_arr), v_cmp_function);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 633 */

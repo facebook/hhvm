@@ -168,29 +168,7 @@ public:
   /**
    * Allocation/deallocation of object memory.
    */
-  void *alloc() {
-#ifdef SMART_ALLOCATOR_STACKTRACE
-    {
-      Lock lock(s_st_mutex);
-      bool enabled = StackTrace::Enabled;
-      StackTrace::Enabled = true;
-      s_st_allocs.operator[](m_freelist.back());
-      StackTrace::Enabled = enabled;
-    }
-#endif
-    ASSERT(m_stats);
-    // Just update the usage, while the peakUsage is maintained by
-    // FrameInjection.
-    m_stats->usage += m_itemSize;
-    if (m_freelist.size() > 0) {
-      // Fast path
-      void *ret = m_freelist.back();
-      m_freelist.pop_back();
-      return ret;
-    }
-    // Slow path
-    return allocHelper();
-  }
+  void *alloc();
   void *allocHelper() __attribute__((noinline));
   void dealloc(void *obj) {
     if (obj) {

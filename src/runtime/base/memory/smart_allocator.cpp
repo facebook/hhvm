@@ -149,38 +149,66 @@ SmartAllocatorImpl::~SmartAllocatorImpl() {
 ///////////////////////////////////////////////////////////////////////////////
 // alloc/dealloc helpers
 
-void *SmartAllocatorImpl::allocHelper() {
-  if (m_col >= m_colMax) {
-    if (m_allocatedBlocks == 0) {
-      // used up the last batch
-      ASSERT((m_blocks.size() - m_backupBlocks.size()) % m_multiplier == 0);
-      size_t size = m_colMax * m_multiplier;
-      char *p = (char *)malloc(size);
-      m_blocks.push_back(p);
-      m_blockIndex[((int64)p) / m_colMax] = m_blocks.size() - 1;
-#ifdef USE_JEMALLOC
-      // Cancel out jemalloc's accounting for this slab.
-      m_stats->usage -= size;
-#endif
-      m_allocatedBlocks = m_multiplier - 1;
-
-      m_stats->alloc += size;
-      if (m_stats->alloc > m_stats->peakAlloc) {
-        m_stats->peakAlloc = m_stats->alloc;
-      }
-    } else {
-      // still have some blocks left from the last batch
-      char *p = m_blocks.back() + m_colMax;
-      m_blocks.push_back(p);
-      m_blockIndex[((int64)p) / m_colMax] = m_blocks.size() - 1;
-      m_allocatedBlocks--;
-    }
-
-    m_row++;
-    ASSERT(m_row == (int)m_blocks.size() - 1);
-    ASSERT(m_col == m_colMax);
-    m_col = 0;
+void *SmartAllocatorImpl::alloc() {
+#ifdef SMART_ALLOCATOR_STACKTRACE
+  {
+    Lock lock(s_st_mutex);
+    bool enabled = StackTrace::Enabled;
+    StackTrace::Enabled = true;
+    s_st_allocs.operator[](m_freelist.back());
+    StackTrace::Enabled = enabled;
   }
+#endif
+  ASSERT(m_stats);
+  // Just update the usage, while the peakUsage is maintained by
+  // FrameInjection.
+  m_stats->usage += m_itemSize;
+  if (m_freelist.size() > 0) {
+    // Fast path
+    void *ret = m_freelist.back();
+    m_freelist.pop_back();
+    return ret;
+  } else if (m_col < m_colMax) {
+    char *ret = m_blocks[m_row] + m_col;
+    m_col += m_itemSize;
+    return ret;
+  }
+  // Slow path
+  return allocHelper();
+}
+
+void *SmartAllocatorImpl::allocHelper() {
+  ASSERT(m_col >= m_colMax);
+  if (m_allocatedBlocks == 0) {
+    // used up the last batch
+    ASSERT((m_blocks.size() - m_backupBlocks.size()) % m_multiplier == 0);
+    size_t size = m_colMax * m_multiplier;
+    char *p = (char *)malloc(size);
+    m_blocks.push_back(p);
+    m_blockIndex[((int64)p) / m_colMax] = m_blocks.size() - 1;
+#ifdef USE_JEMALLOC
+    // Cancel out jemalloc's accounting for this slab.
+    m_stats->usage -= size;
+#endif
+    m_allocatedBlocks = m_multiplier - 1;
+
+    m_stats->alloc += size;
+    if (m_stats->alloc > m_stats->peakAlloc) {
+      m_stats->peakAlloc = m_stats->alloc;
+    }
+  } else {
+    // still have some blocks left from the last batch
+    char *p = m_blocks.back() + m_colMax;
+    m_blocks.push_back(p);
+    m_blockIndex[((int64)p) / m_colMax] = m_blocks.size() - 1;
+    m_allocatedBlocks--;
+  }
+
+  m_row++;
+  ASSERT(m_row == (int)m_blocks.size() - 1);
+  ASSERT(m_col == m_colMax);
+  m_col = 0;
+
   char *ret = m_blocks[m_row] + m_col;
   m_col += m_itemSize;
   return ret;

@@ -262,6 +262,7 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
     if (where == WarmupDocException) {
       Logger::Error("warmup error: %s", e.getMessage().c_str());
     }
+    raise_notice(e.getMessage().c_str());
   } catch (const UncatchableException &e) {
     if (RuntimeOption::ServerStackTrace) {
       errorMsg = e.what();

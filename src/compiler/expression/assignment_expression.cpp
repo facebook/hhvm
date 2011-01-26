@@ -317,13 +317,29 @@ bool AssignmentExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                                         int state) {
   if (m_variable->is(Expression::KindOfArrayElementExpression)) {
     ExpressionPtr exp = m_value;
-    if (!(m_ref && exp->isRefable()) &&
-        !exp->isTemporary() && !exp->isScalar() &&
-        exp->getActualType() && !exp->getActualType()->isPrimitive() &&
-        exp->getActualType()->getKindOf() != Type::KindOfString) {
-      state |= Expression::StashAll;
+    ExpressionPtr vv(
+      static_pointer_cast<ArrayElementExpression>(m_variable)->getVariable());
+    if ((vv->is(KindOfArrayElementExpression) ||
+         vv->is(KindOfObjectPropertyExpression)) &&
+        (vv->getContainedEffects() && (CreateEffect|AccessorEffect))) {
+      /*
+        We are in a case such as
+          $a->b['c'] = ...;
+          $a['b']['c'] = ...;
+        Where evaluating m_variable may modify $a. Unless we can prove that
+        the rhs is not referring to the same thing as $a, we must generate
+        a temporary for it (note that we could do better with the following
+        checks).
+      */
+      if (!(m_ref && exp->isRefable()) &&
+          !exp->isTemporary() && !exp->isScalar() &&
+          exp->getActualType() && !exp->getActualType()->isPrimitive() &&
+          exp->getActualType()->getKindOf() != Type::KindOfString) {
+        state |= Expression::StashAll;
+      }
     }
   }
+
   return Expression::preOutputCPP(cg, ar, state);
 }
 
@@ -346,7 +362,10 @@ bool AssignmentExpression::SpecialAssignment(CodeGenerator &cg,
       }
       if (rval) {
         wrapValue(cg, ar, rval, ref,
-                  exp->getVariable()->is(KindOfArrayElementExpression));
+                  (exp->getVariable()->is(KindOfArrayElementExpression) ||
+                   exp->getVariable()->is(KindOfObjectPropertyExpression)) &&
+                  (exp->getVariable()->getContainedEffects() &&
+                   (CreateEffect|AccessorEffect)));
       } else {
         cg_printf(ref ? "ref(%s)" : "%s", rvalStr);
       }

@@ -421,7 +421,7 @@ LD_CMD = $(TIMECMD) $(LINKER)
 
 ifndef NO_GOLD
 LD_CMD += -B$(EXT_DIR)/binutils/
-LDFLAGS += -Xlinker --export-dynamic -Xlinker --no-warn-search-mismatch
+LDFLAGS += -Xlinker --export-dynamic -Xlinker --no-warn-search-mismatch -Wl,--build-id
 else
 LDFLAGS += -rdynamic
 endif

@@ -104,7 +104,9 @@ void ObjectPropertyExpression::setContext(Context context) {
     default:
       break;
   }
-  if (m_context & (LValue|RefValue)) {
+  if (!m_valid &&
+      (m_context & (LValue|RefValue)) &&
+      !(m_context & AssignmentLHS)) {
     setEffect(CreateEffect);
   }
   if (context == InvokeArgument) {
@@ -239,7 +241,10 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     hasContext(ExistContext) ? ClassScope::MayHaveUnknownPropTester :
     hasContext(UnsetContext) && hasContext(LValue) ?
     ClassScope::MayHavePropUnsetter : ClassScope::MayHaveUnknownPropGetter;
-  if (!cls->implementsAccessor(prop)) clearEffect(AccessorEffect);
+  if ((m_context & (AssignmentLHS|OprLValue)) ||
+      !cls->implementsAccessor(prop)) {
+    clearEffect(AccessorEffect);
+  }
 
   // resolved to this class
   if (m_context & RefValue) {
@@ -285,6 +290,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     m_valid = true;
 
     clearEffect(AccessorEffect);
+    clearEffect(CreateEffect);
     return ret;
   } else {
     m_actualType = Type::Variant;

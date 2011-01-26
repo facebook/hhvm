@@ -332,7 +332,7 @@ bool AssignmentExpression::SpecialAssignment(CodeGenerator &cg,
                                              ExpressionPtr lval,
                                              ExpressionPtr rval,
                                              const char *rvalStr, bool ref) {
-  if (lval->is(Expression::KindOfArrayElementExpression)) {
+  if (lval->is(KindOfArrayElementExpression)) {
     ArrayElementExpressionPtr exp =
       dynamic_pointer_cast<ArrayElementExpression>(lval);
     if (!exp->isSuperGlobal() && !exp->isDynamicGlobal()) {
@@ -345,7 +345,8 @@ bool AssignmentExpression::SpecialAssignment(CodeGenerator &cg,
         cg_printf(".append((");
       }
       if (rval) {
-        wrapValue(cg, ar, rval, ref, true);
+        wrapValue(cg, ar, rval, ref,
+                  exp->getVariable()->is(KindOfArrayElementExpression));
       } else {
         cg_printf(ref ? "ref(%s)" : "%s", rvalStr);
       }
@@ -367,7 +368,7 @@ bool AssignmentExpression::SpecialAssignment(CodeGenerator &cg,
       cg_printf(")");
       return true;
     }
-  } else if (lval->is(Expression::KindOfObjectPropertyExpression)) {
+  } else if (lval->is(KindOfObjectPropertyExpression)) {
     ObjectPropertyExpressionPtr var(
       dynamic_pointer_cast<ObjectPropertyExpression>(lval));
     if (!var->isValid()) {
@@ -404,7 +405,6 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
   bool ref = (m_ref && m_value->isRefable());
 
   bool setNull = false;
-  bool arrayLike = false;
 
   if (SpecialAssignment(cg, ar, m_variable, m_value, NULL, ref)) {
     return;
@@ -428,7 +428,7 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
     m_variable->outputCPP(cg, ar);
     cg_printf(" = ");
 
-    wrapValue(cg, ar, m_value, ref, arrayLike);
+    wrapValue(cg, ar, m_value, ref, false);
   }
   if (wrapped) {
     cg_printf(")");

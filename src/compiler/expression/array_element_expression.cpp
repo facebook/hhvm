@@ -236,7 +236,11 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
                      InvokeArgument | LValue | RefValue))) {
     setEffect(DiagnosticEffect);
   }
-  if (hasContext(LValue) || hasContext(RefValue)) setEffect(CreateEffect);
+  if (m_context & (AssignmentLHS|OprLValue)) {
+    clearEffect(AccessorEffect);
+  } else if (m_context & (LValue | RefValue)) {
+    setEffect(CreateEffect);
+  }
 
   // handling $GLOBALS[...]
   if (m_variable->is(Expression::KindOfSimpleVariable)) {
@@ -258,6 +262,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
           m_globalName = offset->getIdentifier();
           if (!m_globalName.empty()) {
             m_dynamicGlobal = false;
+            clearEffect(DiagnosticEffect);
             getScope()->getVariables()->
               setAttribute(VariableTable::NeedGlobalPointer);
             TypePtr ret;

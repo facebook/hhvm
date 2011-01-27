@@ -109,17 +109,14 @@ SharedStores::SharedStores() {
 
 void SharedStores::create() {
   for (int i = 0; i < MAX_SHARED_STORE; i++) {
-    if (RuntimeOption::ApcUseSharedMemory) {
-      m_stores[i] = new ProcessSharedStore(i);
-    } else {
-      switch (RuntimeOption::ApcTableType) {
+    switch (RuntimeOption::ApcTableType) {
       case RuntimeOption::ApcHashTable:
         switch (RuntimeOption::ApcTableLockType) {
-        case RuntimeOption::ApcMutex:
-          m_stores[i] = new MutexHashTableSharedStore(i);
-          break;
-        default:
-          m_stores[i] = new RwLockHashTableSharedStore(i);
+          case RuntimeOption::ApcMutex:
+            m_stores[i] = new MutexHashTableSharedStore(i);
+            break;
+          default:
+            m_stores[i] = new RwLockHashTableSharedStore(i);
         }
         break;
       case RuntimeOption::ApcLfuTable:
@@ -134,7 +131,7 @@ void SharedStores::create() {
             updatePeriod = RuntimeOption::DnsCacheKeyFrequencyUpdatePeriod;
           }
           m_stores[i] = new LfuTableSharedStore(i, maturity, maxCap,
-                                                updatePeriod);
+              updatePeriod);
         }
         break;
       case RuntimeOption::ApcConcurrentTable:
@@ -142,7 +139,6 @@ void SharedStores::create() {
         break;
       default:
         ASSERT(false);
-      }
     }
   }
 }

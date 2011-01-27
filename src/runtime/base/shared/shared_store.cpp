@@ -22,9 +22,6 @@ using namespace boost;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Mutex ProcessSharedStore::s_mutex;
-bool ProcessSharedStore::s_initialized = false;
-
 void LockedSharedStore::clear() {
   lockMap();
   clearImpl();

@@ -34,7 +34,6 @@ TestLogger Test::logger;
 
 bool Test::RunTests(std::string &suite, std::string &which, std::string &set) {
   bool allPassed = true;
-  SharedMemoryManager::Init(16 * 1024 * 1024, true);
   Option::Load();
 
   size_t pos = suite.find("::");

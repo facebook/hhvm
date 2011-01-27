@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ThreadSharedVariant;
+class SharedVariant;
 /**
  * an immutable map is a php-style array that can take strings and
  * ints as keys. the map also stores the order in which the elements
@@ -37,17 +37,17 @@ public:
   ImmutableMap(int num);
   ~ImmutableMap();
 
-  void add(ThreadSharedVariant *key, ThreadSharedVariant *val);
+  void add(SharedVariant *key, SharedVariant *val);
 
   int indexOf(StringData* key);
   int indexOf(int64 key);
 
-  ThreadSharedVariant* getKeyIndex(int index) {
+  SharedVariant* getKeyIndex(int index) {
     ASSERT(index < size());
     return m_buckets[index].key;
   }
 
-  ThreadSharedVariant* getValIndex(int index) {
+  SharedVariant* getValIndex(int index) {
     ASSERT(index < size());
     return m_buckets[index].val;
   }
@@ -68,8 +68,8 @@ private:
     /** index of the next bucket, or -1 if the end of a chain */
     int next;
     /** the value of this bucket */
-    ThreadSharedVariant *key;
-    ThreadSharedVariant *val;
+    SharedVariant *key;
+    SharedVariant *val;
   };
   /** index of the beginning of each hash chain */
   int *m_hash;

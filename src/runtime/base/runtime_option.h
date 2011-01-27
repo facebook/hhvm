@@ -266,9 +266,6 @@ public:
   static bool EnableApc;
   static bool EnableConstLoad;
   static bool ForceConstLoadToAPC;
-  static bool ApcUseSharedMemory;
-  static bool ApcUseGnuMap;
-  static int ApcSharedMemorySize;
   static std::string ApcPrimeLibrary;
   static int ApcLoadThread;
   static std::set<std::string> ApcCompletionKeys;

@@ -857,7 +857,6 @@ IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS(TestGlobals);
 
 bool TestCppBase::TestMemoryManager() {
   s_apc_store.reset();
-  RuntimeOption::ApcUseSharedMemory = false;
   MemoryManager::TheMemoryManager()->enable();
 
   TestGlobals *globals = NEW(TestGlobals)();

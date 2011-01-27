@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/shared/thread_shared_variant.h>
+#include <runtime/base/shared/shared_variant.h>
 #include <runtime/base/shared/immutable_map.h>
 
 namespace HPHP {
@@ -43,7 +43,7 @@ ImmutableMap::~ImmutableMap() {
   free(m_hash);
 }
 
-void ImmutableMap::add(ThreadSharedVariant *key, ThreadSharedVariant *val) {
+void ImmutableMap::add(SharedVariant *key, SharedVariant *val) {
   // NOTE: no check on duplication because we assume the original array has no
   // duplication
   int pos = m_curPos++;

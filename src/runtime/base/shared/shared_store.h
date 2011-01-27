@@ -19,8 +19,6 @@
 
 #include <runtime/base/shared/shared_store_base.h>
 #include <runtime/base/complex_types.h>
-#include <runtime/base/shared/process_shared_variant.h>
-#include <runtime/base/shared/thread_shared_variant.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
@@ -61,167 +59,22 @@ protected:
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// ProcessSharedStore
-
-class ProcessSharedStore : public LockedSharedStore {
-public:
-  ProcessSharedStore(int id) : LockedSharedStore(id) {
-    if (!s_initialized) {
-      Lock lock(s_mutex);
-      if (!s_initialized) {
-        SharedMemoryManager::Init(RuntimeOption::ApcSharedMemorySize *
-                                  1024 * 1024, true);
-        s_initialized = true;
-      }
-    }
-    std::string sid = boost::lexical_cast<std::string>(id);
-    std::string mapLockName = std::string("HPHP_MapLock") + sid;
-    std::string valLocksName = std::string("HPHP_VariantLocks") + sid;
-    std::string mapName = std::string("HPHP_APC") + sid;
-    m_mapLock = SharedMemoryManager::GetSegment()->
-      find_or_construct<boost::interprocess::interprocess_upgradable_mutex>
-      (mapLockName.c_str())();
-    m_locks = SharedMemoryManager::GetSegment()->
-      find_or_construct<ProcessSharedVariantLock>(valLocksName.c_str())
-      [SHARED_STORE_LOCK_CNT]();
-    m_vars = SharedMemory<SharedMap>::OpenOrCreate(mapName.c_str());
-  }
-  virtual bool find(CStrRef key, StoreValue *&val, bool &expired) {
-    ASSERT(expired == false);
-    SharedMap::iterator iter =
-      m_vars->find(SharedMemoryString(key.data(), key.size()));
-    if (iter != m_vars->end()) {
-      val = &iter->second;
-      if (iter->second.expired()) {
-        expired = true;
-        return false;
-      }
-      return true;
-    } else {
-      return false;
-    }
-  }
-  virtual void set(CStrRef key, SharedVariant* v, int64 ttl) {
-    (*m_vars)[SharedMemoryString(key.data(), key.size())].set(putVar(v), ttl);
-  }
-  virtual SharedVariant* construct(CStrRef key, CVarRef v) {
-    ProcessSharedVariantLock* lock = getLock(key);
-    return SharedMemoryManager::GetSegment()->construct<ProcessSharedVariant>
-      (boost::interprocess::anonymous_instance)(v, lock);
-  }
-  virtual SharedVariant* construct(litstr str, int len, CStrRef v,
-                                   bool serialized) {
-    if (serialized) {
-      return construct(String(str, len, AttachLiteral), f_unserialize(v));
-    }
-    return construct(String(str, len, AttachLiteral), v);
-  }
-  virtual SharedVariant* construct(litstr str, int len, CVarRef v) {
-    return construct(String(str, len, AttachLiteral), v);
-  }
-  virtual void lockMap() {
-    m_mapLock->lock();
-  }
-  virtual void readLockMap() {
-    m_mapLock->lock_sharable();
-  }
-  virtual void unlockMap() {
-    m_mapLock->unlock();
-  }
-  virtual void readUnlockMap() {
-    m_mapLock->unlock_sharable();
-  }
-
-  virtual SharedVariant* putVar(SharedVariant* v) const {
-    return (SharedVariant*)((size_t)v - (size_t)this);
-  }
-
-  virtual SharedVariant* getVar(SharedVariant* v) const {
-    return (SharedVariant*)((size_t)v + (size_t)this);
-  }
-
-  virtual void clearImpl() {
-    for (SharedMap::const_iterator iter = m_vars->begin();
-         iter != m_vars->end(); ++iter) {
-      ASSERT(getVar(iter->second.var));
-      getVar(iter->second.var)->decRef();
-    }
-    m_vars->clear();
-  }
-
-  virtual bool eraseLockedImpl(CStrRef key, bool expired) {
-    SharedMap::const_iterator iter =
-      m_vars->find(SharedMemoryString(key.data(), key.size()));
-    if (iter != m_vars->end()) {
-      if (expired) {
-        if (!iter->second.expired()) {
-          return false;
-        }
-      }
-      getVar(iter->second.var)->decRef();
-      m_vars->erase(iter);
-      return true;
-    }
-    return false;
-  }
-
-  virtual int size() {
-    int ret = 0;
-    lockMap();
-    ret = m_vars->size();
-    unlockMap();
-    return ret;
-  }
-
-  virtual void count(int &reachable, int &expired, int &persistent) {
-    reachable = expired = persistent = 0;
-    int now = time(NULL);
-    lockMap();
-    for (SharedMap::const_iterator iter = m_vars->begin();
-         iter != m_vars->end(); ++iter) {
-      ASSERT(getVar(iter->second.var));
-      reachable += getVar(iter->second.var)->countReachable();
-
-      int64 expiration = iter->second.expiry;
-      if (expiration == 0) {
-        persistent++;
-      } else if (expiration <= now) {
-        expired++;
-      }
-    }
-    unlockMap();
-  }
-
-private:
-  typedef SharedMemoryMap<SharedMemoryString, StoreValue> SharedMap;
-  ProcessSharedVariantLock* getLock(CStrRef key) {
-    ssize_t hash = hash_string(key.data(), key.size());
-    return &m_locks[hash % SHARED_STORE_LOCK_CNT];
-  }
-  SharedMap *m_vars;
-  boost::interprocess::interprocess_upgradable_mutex* m_mapLock;
-  ProcessSharedVariantLock *m_locks;
-  static Mutex s_mutex;
-  static bool s_initialized;
-};
-
-///////////////////////////////////////////////////////////////////////////////
 // Constructor Parents
 
-class ThreadSharedVariantFactory {
+class SharedVariantFactory {
 public:
-  ThreadSharedVariantFactory() : m_locks(NULL) {
+  SharedVariantFactory() : m_locks(NULL) {
   }
-  ~ThreadSharedVariantFactory() {
+  ~SharedVariantFactory() {
     if (m_locks) {
       delete [] m_locks;
     }
   }
 
   /**
-   * If the value v already wraps a ThreadSharedVariant, we do not have to
+   * If the value v already wraps a SharedVariant, we do not have to
    * regenerate it, but just bumping up the ref count.
-   * However, ThreadSharedVariantLockedRefs cannot be safely reused, because
+   * However, SharedVariantLockedRefs cannot be safely reused, because
    * it may contain a lock associated with a different key.
    */
   inline SharedVariant* create(CStrRef key, CVarRef v) {
@@ -230,7 +83,7 @@ public:
       wrapped->incRef();
       return wrapped;
     }
-    return new ThreadSharedVariant(v, false);
+    return new SharedVariant(v, false);
   }
   inline SharedVariant* create(litstr str, int len, CStrRef v,
                            bool serialized) {
@@ -239,7 +92,7 @@ public:
       wrapped->incRef();
       return wrapped;
     }
-    return new ThreadSharedVariant(v, serialized);
+    return new SharedVariant(v, serialized);
   }
   inline SharedVariant* create(litstr str, int len, CVarRef v) {
     SharedVariant *wrapped = v.getSharedVariant();
@@ -247,7 +100,7 @@ public:
       wrapped->incRef();
       return wrapped;
     }
-    return new ThreadSharedVariant(v, false);
+    return new SharedVariant(v, false);
   }
 protected:
   Mutex *m_locks;
@@ -265,7 +118,7 @@ protected:
 // Maps
 
 class HashTableSharedStore : public LockedSharedStore,
-                             private ThreadSharedVariantFactory {
+                             private SharedVariantFactory {
 public:
   HashTableSharedStore(int i) : LockedSharedStore(i) {}
   ~HashTableSharedStore() {
@@ -442,7 +295,7 @@ protected:
 };
 
 class LfuTableSharedStore : public SharedStore,
-                            private ThreadSharedVariantFactory {
+                            private SharedVariantFactory {
 public:
   LfuTableSharedStore(int id, time_t maturity, size_t maxCap, int updatePeriod)
     : SharedStore(id), m_vars(maturity, maxCap, updatePeriod) {

@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/shared/thread_shared_variant.h>
+#include <runtime/base/shared/shared_variant.h>
 #include <runtime/base/shared/immutable_obj.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/array/array_init.h>
@@ -42,9 +42,9 @@ ImmutableObj::ImmutableObj(ObjectData *obj) {
     Variant key(it.first());
     ASSERT(key.isString());
     CVarRef value = it.secondRef();
-    ThreadSharedVariant *val = NULL;
+    SharedVariant *val = NULL;
     if (!value.isNull()) {
-      val = new ThreadSharedVariant(value, false, true, true);
+      val = new SharedVariant(value, false, true, true);
     }
     m_props[m_propCount].val = val;
     m_props[m_propCount].name = key.getStringData()->copy(true);

@@ -24,7 +24,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class ThreadSharedVariant;
+class SharedVariant;
+class SharedVariantStats;
 
 class ImmutableObj {
 public:
@@ -37,7 +38,7 @@ public:
 private:
   struct Prop {
     StringData *name;
-    ThreadSharedVariant *val;
+    SharedVariant *val;
   };
   Prop* m_props;
   int m_propCount;

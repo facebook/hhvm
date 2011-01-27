@@ -19,6 +19,7 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/shared/shared_store_base.h>
 #include <runtime/base/server/access_log.h>
+#include <runtime/base/memory/leak_detectable.h>
 #include <runtime/base/util/extended_logger.h>
 #include <runtime/base/fiber_async_func.h>
 #include <runtime/base/util/simple_counter.h>
@@ -266,9 +267,6 @@ bool RuntimeOption::UseDirectCopy = false;
 bool RuntimeOption::EnableApc = true;
 bool RuntimeOption::EnableConstLoad = false;
 bool RuntimeOption::ForceConstLoadToAPC = true;
-bool RuntimeOption::ApcUseSharedMemory = false;
-int RuntimeOption::ApcSharedMemorySize = 1024; // 1GB
-bool RuntimeOption::ApcUseGnuMap = false;
 std::string RuntimeOption::ApcPrimeLibrary;
 int RuntimeOption::ApcLoadThread = 1;
 std::set<std::string> RuntimeOption::ApcCompletionKeys;
@@ -674,9 +672,6 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     EnableApc = apc["EnableApc"].getBool(true);
     EnableConstLoad = apc["EnableConstLoad"].getBool(false);
     ForceConstLoadToAPC = apc["ForceConstLoadToAPC"].getBool(true);
-    ApcUseSharedMemory = apc["UseSharedMemory"].getBool();
-    ApcUseGnuMap = apc["ApcUseGnuMap"].getBool();
-    ApcSharedMemorySize = apc["SharedMemorySize"].getInt32(1024 /* 1GB */);
     ApcPrimeLibrary = apc["PrimeLibrary"].getString();
     ApcLoadThread = apc["LoadThread"].getInt16(2);
     apc["CompletionKeys"].get(ApcCompletionKeys);

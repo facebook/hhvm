@@ -18,11 +18,22 @@
 #define __HPHP_SHARED_VARIANT_H__
 
 #include <runtime/base/types.h>
-#include <util/shared_memory_allocator.h>
-#include <runtime/base/memory/unsafe_pointer.h>
-#include <runtime/base/memory/leak_detectable.h>
-#include <util/mutex.h>
+#include <util/lock.h>
 #include <util/hash.h>
+#include <util/atomic.h>
+#include <runtime/base/complex_types.h>
+#include <runtime/base/shared/immutable_map.h>
+#include <runtime/base/shared/immutable_obj.h>
+
+#if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
+# if defined(__LITTLE_ENDIAN__)
+#  undef WORDS_BIGENDIAN
+# else
+#  if defined(__BIG_ENDIAN__)
+#   define WORDS_BIGENDIAN
+#  endif
+# endif
+#endif
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,69 +42,181 @@ class SharedMap;
 
 class SharedVariantStats;
 
-class SharedVariant
-#ifdef DEBUG_APC_LEAK
-  : public LeakDetectable
-#endif
-{
+typedef hphp_hash_map<int64, int, int64_hash> Int64ToIntMap;
+typedef hphp_hash_map<StringData *, int, string_data_hash, string_data_same>
+        StringDataToIntMap;
+
+///////////////////////////////////////////////////////////////////////////////
+
+class SharedVariant {
 public:
-  SharedVariant() {}
-  virtual ~SharedVariant() {}
+  SharedVariant(CVarRef source, bool serialized, bool inner = false,
+                bool unserializeObj = false);
+  ~SharedVariant();
 
-  virtual DataType getType() const = 0;
-  virtual CVarRef asCVarRef() const = 0;
+  // Create will do the wrapped check before creating a SharedVariant
+  static SharedVariant* Create(CVarRef source, bool serialized,
+                               bool inner = false,
+                               bool unserializeObj = false);
 
-  /**
-   * Reference counting. Needs to release memory when count == 0 in decRef().
-   */
-  virtual void incRef() = 0;
-  virtual void decRef() = 0;
-
-  virtual Variant toLocal() = 0;
-  virtual bool operator<(const SharedVariant& other) const { return false; }
-
-  virtual const char* stringData() const = 0;
-  virtual size_t stringLength() const = 0;
-  virtual int64 stringHash() const {
-    return hash_string(stringData(), stringLength());
+  bool is(DataType d) const { return m_type == d; }
+  DataType getType() const { return (DataType)m_type; }
+  CVarRef asCVarRef() const {
+    // Must be non-refcounted types
+    ASSERT(m_shouldCache == false);
+    ASSERT(m_flags == 0);
+    ASSERT(!IS_REFCOUNTED_TYPE(m_tv.m_type));
+    return tvAsCVarRef(&m_tv);
   }
 
-  virtual size_t arrSize() const = 0;
+  void incRef() {
+    atomic_inc(m_count);
+  }
 
-  virtual int getIndex(CVarRef key) = 0;
-  virtual int getIndex(CStrRef key) = 0;
-  virtual int getIndex(litstr key) = 0;
-  virtual int getIndex(int64 key) = 0;
+  void decRef() {
+    ASSERT(m_count);
+    if (atomic_dec(m_count) == 0) {
+      delete this;
+    }
+  }
 
-  virtual void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
-                         bool keepRef = false) = 0;
+  Variant toLocal();
 
-  /** Returns a key in thread-local space. */
-  virtual Variant getKey(ssize_t pos) const = 0;
-  virtual SharedVariant* getValue(ssize_t pos) const = 0;
+  int64 intData() const {
+    ASSERT(is(KindOfInt64));
+    return m_data.num;
+  }
 
-  int countReachable();
+  const char* stringData() const;
+  size_t stringLength() const;
+  int64 stringHash() const {
+    ASSERT(is(KindOfString) || is(KindOfStaticString));
+    return m_data.str->hash();
+  }
 
-  // recursively get stats from the SharedVariant
-  virtual void getStats(SharedVariantStats *stat) { /* Default is nothing */ }
-  virtual int32 getSpaceUsage() { return 0; }
+  size_t arrSize() const;
+  int getIndex(CVarRef key);
+  int getIndex(CStrRef key);
+  int getIndex(litstr key);
+  int getIndex(int64 key);
 
-  // whether it is an object, or an array that recursively contains an object
-  // or an array with circular reference
-  virtual bool shouldCache() const = 0;
+  void loadElems(ArrayData *&elems, const SharedMap &sharedMap,
+                         bool keepRef = false);
 
-  virtual SharedVariant *convertObj(CVarRef var) { return NULL; }
-  virtual bool isUnserializedObj() { return false; }
+  Variant getKey(ssize_t pos) const;
 
- protected:
+  SharedVariant* getValue(ssize_t pos) const;
+
+  // implementing LeakDetectable
+  void dump(std::string &out);
+
+  void getStats(SharedVariantStats *stats);
+  int32 getSpaceUsage();
+
+  StringData *getStringData() const {
+    ASSERT(is(KindOfString) || is(KindOfStaticString));
+    return m_data.str;
+  }
+
+  SharedVariant *convertObj(CVarRef var);
+  bool isUnserializedObj() { return getIsObj(); }
+  bool shouldCache() const { return m_shouldCache; }
+
+  int countReachable() const;
+
+private:
+  class VectorData {
+  public:
+    size_t size;
+    SharedVariant **vals;
+
+    VectorData(size_t s) : size(s) {
+      vals = new SharedVariant *[s];
+    }
+
+    ~VectorData() {
+      for (size_t i = 0; i < size; i++) {
+        vals[i]->decRef();
+      }
+      delete [] vals;
+    }
+  };
+
+  /* This macro is to help making the object layout binary compatible with
+   * Variant for primitive types. We want to have compile time assertion to
+   * guard it but still want to have anonymous struct. For non-refcounted
+   * types, m_shouldCache and m_flags are guaranteed to be 0, and other parts
+   * of runtime code will not touch the count.*/
+#ifdef WORDS_BIGENDIAN
+ #define SharedVarData \
+  union {\
+    int64 num;\
+    double dbl;\
+    StringData *str;\
+    ImmutableMap* map;\
+    VectorData* vec;\
+    ImmutableObj* obj;\
+  } m_data;\
+  int m_count;\
+  bool m_shouldCache;\
+  uint8 m_flags;\
+  uint16 m_type
+
+#else
+ #define SharedVarData \
+  union {\
+    int64 num;\
+    double dbl;\
+    StringData *str;\
+    ImmutableMap* map;\
+    VectorData* vec;\
+    ImmutableObj* obj;\
+  } m_data;\
+  int m_count;\
+  uint16 m_type;\
+  bool m_shouldCache;\
+  uint8 m_flags
+
+#endif
+
+  struct SharedVar {
+    SharedVarData;
+  };
+
+  union {
+    struct {
+      SharedVarData;
+    };
+    TypedValue m_tv;
+  };
+#undef SharedVarData
+
   const static uint8 SerializedArray = (1<<0);
   const static uint8 IsVector = (1<<1);
   const static uint8 IsObj = (1<<2);
   const static uint8 ObjAttempted = (1<<3);
 
-  // only for countReachable() return NULL if it is vector and key is not
-  // SharedVariant
-  virtual SharedVariant* getKeySV(ssize_t pos) const = 0;
+  static void compileTimeAssertions() {
+    CT_ASSERT(offsetof(SharedVar, m_data) == offsetof(TypedValue, m_data));
+    CT_ASSERT(offsetof(SharedVar, m_count) == offsetof(TypedValue, _count));
+    CT_ASSERT(offsetof(SharedVar, m_type) == offsetof(TypedValue, m_type));
+  }
+
+  bool getSerializedArray() const { return (bool)(m_flags & SerializedArray);}
+  void setSerializedArray() { m_flags |= SerializedArray;}
+  void clearSerializedArray() { m_flags &= ~SerializedArray;}
+
+  bool getIsVector() const { return (bool)(m_flags & IsVector);}
+  void setIsVector() { m_flags |= IsVector;}
+  void clearIsVector() { m_flags &= ~IsVector;}
+
+  bool getIsObj() const { return (bool)(m_flags & IsObj);}
+  void setIsObj() { m_flags |= IsObj;}
+  void clearIsObj() { m_flags &= ~IsObj;}
+
+  bool getObjAttempted() const { return (bool)(m_flags & ObjAttempted);}
+  void setObjAttempted() { m_flags |= ObjAttempted;}
+  void clearObjAttempted() { m_flags &= ~ObjAttempted;}
 };
 
 class SharedVariantStats {

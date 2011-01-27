@@ -19,7 +19,7 @@
 
 #include <runtime/base/shared/shared_store_base.h>
 #include <runtime/base/complex_types.h>
-#include <runtime/base/shared/thread_shared_variant.h>
+#include <runtime/base/shared/shared_variant.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
@@ -56,15 +56,15 @@ public:
 
   virtual SharedVariant* construct(litstr str, int len, CStrRef v,
                                    bool serialized) {
-    return ThreadSharedVariant::Create(v, serialized);
+    return SharedVariant::Create(v, serialized);
   }
   virtual SharedVariant* construct(litstr str, int len, CVarRef v) {
-    return ThreadSharedVariant::Create(v, false);
+    return SharedVariant::Create(v, false);
   }
 
 protected:
   virtual SharedVariant* construct(CStrRef key, CVarRef v) {
-    return ThreadSharedVariant::Create(v, false);
+    return SharedVariant::Create(v, false);
   }
 
   struct charHashCompare {

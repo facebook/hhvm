@@ -173,19 +173,9 @@ bool LibEventHttpClient::send(const std::string &url,
 
   evhttp_request* request = evhttp_request_new(on_request_completed, this);
 
-  // REVIEW: libevent never sends a Host header (nor does it properly send HTTP
-  // 400 for HTTP/1.1 requests without such a header), in blatent violation of
-  // RFC2616; this should perhaps be fixed in the library proper.
-  if (m_port == 80) {
-    evhttp_add_header(request->output_headers, "Host", m_address.c_str());
-  } else {
-    std::ostringstream ss;
-    ss << m_address << ":" << m_port;
-    evhttp_add_header(request->output_headers, "Host", ss.str().c_str());
-  }
-
   // request headers
   bool keepalive = true;
+  bool addHost = true;
   for (unsigned int i = 0; i < headers.size(); i++) {
     const std::string &header = headers[i];
     size_t pos = header.find(':');
@@ -193,6 +183,8 @@ bool LibEventHttpClient::send(const std::string &url,
       string name = header.substr(0, pos);
       if (strcasecmp(name.c_str(), "Connection") == 0) {
         keepalive = false;
+      } else if (strcasecmp(name.c_str(), "Host") == 0) {
+        addHost = false;
       }
       int ret = evhttp_add_header(request->output_headers,
                                   name.c_str(), header.c_str() + pos + 2);
@@ -204,6 +196,19 @@ bool LibEventHttpClient::send(const std::string &url,
   }
   if (keepalive) {
     evhttp_add_header(request->output_headers, "Connection", "keep-alive");
+  }
+  if (addHost) {
+    // REVIEW: libevent never sends a Host header (nor does it properly send
+    // HTTP 400 for HTTP/1.1 requests without such a header), in blatent
+    // violation of RFC2616; this should perhaps be fixed in the library
+    // proper.  For now, add it if it wasn't set by the caller.
+    if (m_port == 80) {
+      evhttp_add_header(request->output_headers, "Host", m_address.c_str());
+    } else {
+      std::ostringstream ss;
+      ss << m_address << ":" << m_port;
+      evhttp_add_header(request->output_headers, "Host", ss.str().c_str());
+    }
   }
 
   // post data

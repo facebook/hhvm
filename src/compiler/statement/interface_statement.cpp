@@ -87,6 +87,11 @@ void InterfaceStatement::onParse(AnalysisResultConstPtr ar,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
+int InterfaceStatement::getLocalEffects() const {
+  ClassScopeRawPtr classScope = getClassScope();
+  return classScope->isVolatile() ? OtherEffect | CanThrow : NoEffect;
+}
+
 std::string InterfaceStatement::getName() const {
   return string("Interface ") + getScope()->getName();
 }

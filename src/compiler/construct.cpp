@@ -32,8 +32,6 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int Construct::s_effectsTag = 1;
-
 Construct::Construct(BlockScopePtr scope, LocationPtr loc)
     : m_blockScope(scope), m_flagsVal(0), m_loc(loc),
       m_containedEffects(0), m_effectsTag(0) {
@@ -57,6 +55,11 @@ void Construct::resetScope(BlockScopeRawPtr scope) {
       kid->resetScope(scope);
     }
   }
+}
+
+void Construct::recomputeEffects() {
+  BlockScopeRawPtr scope = getScope();
+  if (scope) scope->incEffectsTag();
 }
 
 int Construct::getChildrenEffects() const {
@@ -85,8 +88,10 @@ int Construct::getChildrenEffects() const {
 }
 
 int Construct::getContainedEffects() const {
-  if (m_effectsTag != s_effectsTag) {
-    m_effectsTag = s_effectsTag;
+  BlockScopeRawPtr scope = getScope();
+  int curTag = scope ? scope->getEffectsTag() : m_effectsTag + 1;
+  if (m_effectsTag != curTag) {
+    m_effectsTag = curTag;
     m_containedEffects = getLocalEffects() | getChildrenEffects();
   }
   return m_containedEffects;

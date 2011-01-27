@@ -41,6 +41,8 @@ public:
   // implementing IParseHandler
   virtual void onParse(AnalysisResultConstPtr ar, FileScopePtr scope);
 
+  int getLocalEffects() const;
+
   virtual std::string getName() const;
   const std::string &getOriginalName() const { return m_originalName;}
   virtual void getAllParents(AnalysisResultConstPtr ar,

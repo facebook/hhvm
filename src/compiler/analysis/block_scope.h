@@ -163,6 +163,8 @@ public:
   void setChangedScopes(BlockScopeRawPtrQueue *scopes) {
     m_changedScopes = scopes;
   }
+  void incEffectsTag() { m_effectsTag++; }
+  int getEffectsTag() const { return m_effectsTag; }
 protected:
   std::string m_originalName;
   std::string m_name;
@@ -185,6 +187,8 @@ private:
   BlockScopeRawPtrFlagsVec m_orderedUsers;
   BlockScopeRawPtrFlagsHashMap m_userMap;
   BlockScopeRawPtrQueue *m_changedScopes;
+
+  int m_effectsTag;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

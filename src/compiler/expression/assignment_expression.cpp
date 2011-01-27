@@ -172,7 +172,7 @@ ExpressionPtr AssignmentExpression::optimize(AnalysisResultConstPtr ar) {
     if (var->checkUnused() &&
         !CheckNeeded(var, m_value)) {
       if (m_value->getContainedEffects() != getContainedEffects()) {
-        s_effectsTag++;
+        recomputeEffects();
       }
       return replaceValue(m_value);
     }

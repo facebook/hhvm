@@ -263,7 +263,6 @@ bool FunctionScope::hasEffect() const {
 void FunctionScope::setNoEffect() {
   if (!(m_attribute & FileScope::NoEffect)) {
     m_attribute |= FileScope::NoEffect;
-    Construct::recomputeEffects();
   }
 }
 

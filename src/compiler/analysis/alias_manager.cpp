@@ -851,7 +851,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
   case Expression::KindOfAssignmentExpression: {
     AssignmentExpressionPtr ae = spc(AssignmentExpression,e);
     if (e->hasContext(Expression::DeadStore)) {
-      Construct::recomputeEffects();
+      e->recomputeEffects();
       return ae->replaceValue(ae->getValue());
     }
 
@@ -1167,7 +1167,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
                 int i = findInterf(rhs, true, orig);
                 if (i == SameAccess &&
                     (sameExpr(cur, orig) || next && sameExpr(next, orig))) {
-                  Construct::recomputeEffects();
+                  e->recomputeEffects();
                   return e->replaceValue(canonicalizeRecurNonNull(rhs));
                 }
               }
@@ -1178,7 +1178,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
               ae->setContext(Expression::DeadStore);
               ae->setNthKid(1, ae->makeConstant(m_arp, "null"));
               ae->setNthKid(0, ae->makeConstant(m_arp, "null"));
-              Expression::recomputeEffects();
+              e->recomputeEffects();
               m_replaced++;
               return e->replaceValue(canonicalizeRecurNonNull(rep));
             }
@@ -1198,7 +1198,7 @@ ExpressionPtr AliasManager::canonicalizeNode(
       ExpressionPtr rhs = bop->getExp2();
       ExpressionPtr lhs = bop->getExp1();
       lhs->clearContext();
-      Construct::recomputeEffects();
+      e->recomputeEffects();
       return bop->replaceValue(
         canonicalizeNonNull(ExpressionPtr(
                               new BinaryOpExpression(
@@ -1342,7 +1342,7 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
   if (e->isVisited()) return ExpressionPtr();
   if (ExpressionPtr rep = e->fetchReplacement()) {
     if (e->getContainedEffects() != rep->getContainedEffects()) {
-      Expression::recomputeEffects();
+      e->recomputeEffects();
     }
     return canonicalizeRecurNonNull(e->replaceValue(rep));
   }

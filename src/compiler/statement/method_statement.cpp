@@ -181,6 +181,12 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
+int MethodStatement::getLocalEffects() const {
+  if (m_method) return NoEffect;
+  FunctionScopeRawPtr scope = getFunctionScope();
+  return scope->isVolatile() ? OtherEffect | CanThrow : NoEffect;
+}
+
 void MethodStatement::addParamRTTI(AnalysisResultPtr ar) {
   FunctionScopeRawPtr func = getFunctionScope();
 

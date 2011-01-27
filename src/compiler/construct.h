@@ -186,7 +186,7 @@ public:
                       AnalysisResultPtr ar = AnalysisResultPtr());
 
   std::string getText() { return getText(false); }
-  static void recomputeEffects() { s_effectsTag++; }
+  void recomputeEffects();
 
   /**
    * Write where this construct was in PHP files.
@@ -211,8 +211,6 @@ protected:
   LocationPtr m_loc;
   mutable int m_containedEffects;
   mutable int m_effectsTag;
-
-  static int s_effectsTag;
 
   /**
    * Called by analyzeProgram() to add a reference to a user class or

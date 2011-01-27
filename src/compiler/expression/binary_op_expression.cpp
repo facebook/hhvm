@@ -42,7 +42,7 @@ BinaryOpExpression::BinaryOpExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr exp1, ExpressionPtr exp2, int op)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_exp1(exp1), m_exp2(exp2), m_op(op), m_assign(false) {
+    m_exp1(exp1), m_exp2(exp2), m_op(op), m_assign(false), m_canThrow(false) {
   switch (m_op) {
   case T_PLUS_EQUAL:
   case T_MINUS_EQUAL:
@@ -146,13 +146,17 @@ ExpressionPtr BinaryOpExpression::unneededHelper() {
 
 int BinaryOpExpression::getLocalEffects() const {
   int effect = NoEffect;
+  m_canThrow = false;
   switch (m_op) {
   case '/':
   case '%':
   case T_DIV_EQUAL:
   case T_MOD_EQUAL: {
     Variant v2;
-    if (!m_exp2->getScalarValue(v2) || v2.equal(0)) effect = CanThrow;
+    if (!m_exp2->getScalarValue(v2) || v2.equal(0)) {
+      effect = CanThrow;
+      m_canThrow = true;
+    }
     break;
   }
   default:
@@ -269,6 +273,8 @@ bool BinaryOpExpression::canonCompare(ExpressionPtr e) const {
 ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (!m_exp2->isScalar()) {
     if (!m_exp1->isScalar()) return ExpressionPtr();
+  } else if (m_canThrow && !(getLocalEffects() & CanThrow)) {
+    recomputeEffects();
   }
   ExpressionPtr optExp;
   try {

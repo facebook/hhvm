@@ -67,6 +67,7 @@ private:
   ExpressionPtr m_exp2;
   int m_op;
   bool m_assign;
+  mutable bool m_canThrow;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

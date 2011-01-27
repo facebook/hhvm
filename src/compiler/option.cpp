@@ -170,7 +170,7 @@ bool Option::GenerateCPPNameSpace = true;
 bool Option::GenConcat = false;
 bool Option::GenArrayCreate = false;
 bool Option::GenHashTableInvokeFile = true;
-bool Option::GenHashTableInvokeFunc = false;
+bool Option::GenHashTableInvokeFunc = true;
 bool Option::KeepStatementsWithNoEffect = false;
 
 int Option::ConditionalIncludeExpandLevel = 1;

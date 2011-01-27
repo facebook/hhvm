@@ -2521,8 +2521,8 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
   bool system = output == CodeGenerator::SystemCPP;
   {
     string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
-      (Option::GenHashTableInvokeFunc ? "dynamic_table_func.cpp"
-                                        : "dynamic_table_func.no.cpp");
+      ((Option::GenHashTableInvokeFunc && !system) ?
+        "dynamic_table_func.cpp" : "dynamic_table_func.no.cpp");
     Util::mkdir(tablePath);
     ofstream fTable(tablePath.c_str());
     CodeGenerator cg(&fTable, output);

@@ -376,7 +376,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
         functions->find(name);iterFuncs =
       functions->find(name);
       ASSERT(iterFuncs != functions->end());
-      cg_printf("      (const char *)\"%s\", ", name);
+      cg_printf("      (const char *)\"%s\", ", cg.escapeLabel(name).c_str());
       if (!system) {
         cg_printf("(const char *)%d, ",
                   iterFuncs->second[0]->isRedeclaring() ? 1 : 0);
@@ -428,7 +428,7 @@ void FunctionContainer::outputCPPCodeInfoTable(CodeGenerator &cg,
       }
     }
   }
-  if (Option::GenHashTableInvokeFunc) {
+  if (Option::GenHashTableInvokeFunc && !system) {
     outputCPPHashTableGetCallInfo(cg, system, functions, funcs);
     return;
   }

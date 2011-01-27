@@ -83118,5845 +83118,2154 @@ Variant ei_fb_call_user_func_array_safe(Eval::VariableEnvironment &env, const Ev
   if (count != 2) return throw_wrong_arguments("fb_call_user_func_array_safe", count, 2, 2, 1);
   return (x_fb_call_user_func_array_safe(a0, a1));
 }
+typedef Variant (*ef_t)(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller);
+typedef Variant (*ef_t)(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller);
+
+class hashNodeFuncEval {
+public:
+  hashNodeFuncEval() {}
+  hashNodeFuncEval(int64 h, const char *n, const void *p) :
+    hash(h), name(n), ptr(p), next(NULL) {}
+  int64 hash;
+  const char *name;
+  const void *ptr;
+  hashNodeFuncEval *next;
+};
+static hashNodeFuncEval *funcMapTableEval[8192];
+static hashNodeFuncEval funcEvalBuckets[2103];
+
+static class EvalFuncTableInitializer {
+  public: EvalFuncTableInitializer() {
+    const char *funcEvalMapData[] = {
+      (const char *)"utf8_encode", (const char *)&ei_utf8_encode,
+      (const char *)"hphp_splfileobject___construct", (const char *)&ei_hphp_splfileobject___construct,
+      (const char *)"dom_document_create_comment", (const char *)&ei_dom_document_create_comment,
+      (const char *)"func_get_args", (const char *)&ei_func_get_args,
+      (const char *)"bzwrite", (const char *)&ei_bzwrite,
+      (const char *)"php_uname", (const char *)&ei_php_uname,
+      (const char *)"posix_uname", (const char *)&ei_posix_uname,
+      (const char *)"curl_multi_remove_handle", (const char *)&ei_curl_multi_remove_handle,
+      (const char *)"memcache_get_server_status", (const char *)&ei_memcache_get_server_status,
+      (const char *)"mysql_result", (const char *)&ei_mysql_result,
+      (const char *)"hphp_splfileobject_current", (const char *)&ei_hphp_splfileobject_current,
+      (const char *)"hphp_splfileinfo_getgroup", (const char *)&ei_hphp_splfileinfo_getgroup,
+      (const char *)"register_shutdown_function", (const char *)&ei_register_shutdown_function,
+      (const char *)"pixelsetmagentaquantum", (const char *)&ei_pixelsetmagentaquantum,
+      (const char *)"newmagickwand", (const char *)&ei_newmagickwand,
+      (const char *)"natsort", (const char *)&ei_natsort,
+      (const char *)"socket_accept", (const char *)&ei_socket_accept,
+      (const char *)"vprintf", (const char *)&ei_vprintf,
+      (const char *)"collator_set_attribute", (const char *)&ei_collator_set_attribute,
+      (const char *)"ucwords", (const char *)&ei_ucwords,
+      (const char *)"header", (const char *)&ei_header,
+      (const char *)"dom_element_has_attribute_ns", (const char *)&ei_dom_element_has_attribute_ns,
+      (const char *)"date_default_timezone_set", (const char *)&ei_date_default_timezone_set,
+      (const char *)"is_object", (const char *)&ei_is_object,
+      (const char *)"magicksetimagebias", (const char *)&ei_magicksetimagebias,
+      (const char *)"exif_imagetype", (const char *)&ei_exif_imagetype,
+      (const char *)"imagegrabscreen", (const char *)&ei_imagegrabscreen,
+      (const char *)"bcmod", (const char *)&ei_bcmod,
+      (const char *)"chr", (const char *)&ei_chr,
+      (const char *)"drawsetfontstretch", (const char *)&ei_drawsetfontstretch,
+      (const char *)"posix_setsid", (const char *)&ei_posix_setsid,
+      (const char *)"hphp_splfileinfo_setfileclass", (const char *)&ei_hphp_splfileinfo_setfileclass,
+      (const char *)"posix_getpwnam", (const char *)&ei_posix_getpwnam,
+      (const char *)"mcrypt_enc_get_supported_key_sizes", (const char *)&ei_mcrypt_enc_get_supported_key_sizes,
+      (const char *)"phpinfo", (const char *)&ei_phpinfo,
+      (const char *)"evhttp_async_get", (const char *)&ei_evhttp_async_get,
+      (const char *)"ldap_parse_result", (const char *)&ei_ldap_parse_result,
+      (const char *)"drawgettextantialias", (const char *)&ei_drawgettextantialias,
+      (const char *)"array_fill_keys", (const char *)&ei_array_fill_keys,
+      (const char *)"openssl_seal", (const char *)&ei_openssl_seal,
+      (const char *)"socket_clear_error", (const char *)&ei_socket_clear_error,
+      (const char *)"die", (const char *)&ei_die,
+      (const char *)"diskfreespace", (const char *)&ei_diskfreespace,
+      (const char *)"xml_set_start_namespace_decl_handler", (const char *)&ei_xml_set_start_namespace_decl_handler,
+      (const char *)"decbin", (const char *)&ei_decbin,
+      (const char *)"sizeof", (const char *)&ei_sizeof,
+      (const char *)"mb_convert_case", (const char *)&ei_mb_convert_case,
+      (const char *)"fb_set_taint", (const char *)&ei_fb_set_taint,
+      (const char *)"dir", (const char *)&ei_dir,
+      (const char *)"array_combine", (const char *)&ei_array_combine,
+      (const char *)"strpos", (const char *)&ei_strpos,
+      (const char *)"array_reverse", (const char *)&ei_array_reverse,
+      (const char *)"strrev", (const char *)&ei_strrev,
+      (const char *)"msg_set_queue", (const char *)&ei_msg_set_queue,
+      (const char *)"cos", (const char *)&ei_cos,
+      (const char *)"hphp_recursivedirectoryiterator_valid", (const char *)&ei_hphp_recursivedirectoryiterator_valid,
+      (const char *)"bcmul", (const char *)&ei_bcmul,
+      (const char *)"imap_header", (const char *)&ei_imap_header,
+      (const char *)"openlog", (const char *)&ei_openlog,
+      (const char *)"spl_autoload_register", (const char *)&ei_spl_autoload_register,
+      (const char *)"get_include_path", (const char *)&ei_get_include_path,
+      (const char *)"socket_select", (const char *)&ei_socket_select,
+      (const char *)"magickraiseimage", (const char *)&ei_magickraiseimage,
+      (const char *)"gzputs", (const char *)&ei_gzputs,
+      (const char *)"strpbrk", (const char *)&ei_strpbrk,
+      (const char *)"shm_remove_var", (const char *)&ei_shm_remove_var,
+      (const char *)"posix_setuid", (const char *)&ei_posix_setuid,
+      (const char *)"pixelgetyellow", (const char *)&ei_pixelgetyellow,
+      (const char *)"convert_uudecode", (const char *)&ei_convert_uudecode,
+      (const char *)"htmlspecialchars_decode", (const char *)&ei_htmlspecialchars_decode,
+      (const char *)"xmlwriter_end_document", (const char *)&ei_xmlwriter_end_document,
+      (const char *)"magickgetimagehistogram", (const char *)&ei_magickgetimagehistogram,
+      (const char *)"cpu_get_model", (const char *)&ei_cpu_get_model,
+      (const char *)"preg_last_error", (const char *)&ei_preg_last_error,
+      (const char *)"end", (const char *)&ei_end,
+      (const char *)"stream_get_line", (const char *)&ei_stream_get_line,
+      (const char *)"deg2rad", (const char *)&ei_deg2rad,
+      (const char *)"imap_mime_header_decode", (const char *)&ei_imap_mime_header_decode,
+      (const char *)"magickrollimage", (const char *)&ei_magickrollimage,
+      (const char *)"imap_getmailboxes", (const char *)&ei_imap_getmailboxes,
+      (const char *)"ldap_sort", (const char *)&ei_ldap_sort,
+      (const char *)"imagetruecolortopalette", (const char *)&ei_imagetruecolortopalette,
+      (const char *)"defined", (const char *)&ei_defined,
+      (const char *)"magickgetimageunits", (const char *)&ei_magickgetimageunits,
+      (const char *)"magicksetimageblueprimary", (const char *)&ei_magicksetimageblueprimary,
+      (const char *)"session_name", (const char *)&ei_session_name,
+      (const char *)"get_class_vars", (const char *)&ei_get_class_vars,
+      (const char *)"syslog", (const char *)&ei_syslog,
+      (const char *)"array_unique", (const char *)&ei_array_unique,
+      (const char *)"bcpow", (const char *)&ei_bcpow,
+      (const char *)"pixelgetopacityquantum", (const char *)&ei_pixelgetopacityquantum,
+      (const char *)"php_check_syntax", (const char *)&ei_php_check_syntax,
+      (const char *)"mysql_connect_with_db", (const char *)&ei_mysql_connect_with_db,
+      (const char *)"drawgetstrokemiterlimit", (const char *)&ei_drawgetstrokemiterlimit,
+      (const char *)"hphp_splfileobject_fpassthru", (const char *)&ei_hphp_splfileobject_fpassthru,
+      (const char *)"intl_error_name", (const char *)&ei_intl_error_name,
+      (const char *)"pixelsetquantumcolor", (const char *)&ei_pixelsetquantumcolor,
+      (const char *)"gztell", (const char *)&ei_gztell,
+      (const char *)"strval", (const char *)&ei_strval,
+      (const char *)"evhttp_recv", (const char *)&ei_evhttp_recv,
+      (const char *)"dom_node_replace_child", (const char *)&ei_dom_node_replace_child,
+      (const char *)"strspn", (const char *)&ei_strspn,
+      (const char *)"ini_restore", (const char *)&ei_ini_restore,
+      (const char *)"ldap_dn2ufn", (const char *)&ei_ldap_dn2ufn,
+      (const char *)"ceil", (const char *)&ei_ceil,
+      (const char *)"xmlwriter_end_dtd_attlist", (const char *)&ei_xmlwriter_end_dtd_attlist,
+      (const char *)"phpversion", (const char *)&ei_phpversion,
+      (const char *)"stream_filter_remove", (const char *)&ei_stream_filter_remove,
+      (const char *)"mcrypt_generic", (const char *)&ei_mcrypt_generic,
+      (const char *)"is_file", (const char *)&ei_is_file,
+      (const char *)"xml_set_end_namespace_decl_handler", (const char *)&ei_xml_set_end_namespace_decl_handler,
+      (const char *)"openssl_x509_export_to_file", (const char *)&ei_openssl_x509_export_to_file,
+      (const char *)"xhprof_network_disable", (const char *)&ei_xhprof_network_disable,
+      (const char *)"imagesetstyle", (const char *)&ei_imagesetstyle,
+      (const char *)"drawcolor", (const char *)&ei_drawcolor,
+      (const char *)"get_headers", (const char *)&ei_get_headers,
+      (const char *)"mysql_drop_db", (const char *)&ei_mysql_drop_db,
+      (const char *)"spl_object_hash", (const char *)&ei_spl_object_hash,
+      (const char *)"magickresampleimage", (const char *)&ei_magickresampleimage,
+      (const char *)"imap_last_error", (const char *)&ei_imap_last_error,
+      (const char *)"i18n_loc_get_default", (const char *)&ei_i18n_loc_get_default,
+      (const char *)"strtok", (const char *)&ei_strtok,
+      (const char *)"array_key_exists", (const char *)&ei_array_key_exists,
+      (const char *)"exp", (const char *)&ei_exp,
+      (const char *)"strstr", (const char *)&ei_strstr,
+      (const char *)"realpath", (const char *)&ei_realpath,
+      (const char *)"memcache_setoptimeout", (const char *)&ei_memcache_setoptimeout,
+      (const char *)"stream_filter_append", (const char *)&ei_stream_filter_append,
+      (const char *)"dom_characterdata_insert_data", (const char *)&ei_dom_characterdata_insert_data,
+      (const char *)"hphp_get_property", (const char *)&ei_hphp_get_property,
+      (const char *)"dom_characterdata_replace_data", (const char *)&ei_dom_characterdata_replace_data,
+      (const char *)"magickgetcharheight", (const char *)&ei_magickgetcharheight,
+      (const char *)"imagerotate", (const char *)&ei_imagerotate,
+      (const char *)"magickcompositeimage", (const char *)&ei_magickcompositeimage,
+      (const char *)"openssl_sign", (const char *)&ei_openssl_sign,
+      (const char *)"version_compare", (const char *)&ei_version_compare,
+      (const char *)"timezone_name_get", (const char *)&ei_timezone_name_get,
+      (const char *)"posix_getpgid", (const char *)&ei_posix_getpgid,
+      (const char *)"dom_node_has_attributes", (const char *)&ei_dom_node_has_attributes,
+      (const char *)"dom_text_is_whitespace_in_element_content", (const char *)&ei_dom_text_is_whitespace_in_element_content,
+      (const char *)"imagestring", (const char *)&ei_imagestring,
+      (const char *)"mcrypt_list_modes", (const char *)&ei_mcrypt_list_modes,
+      (const char *)"session_unregister", (const char *)&ei_session_unregister,
+      (const char *)"mcrypt_list_algorithms", (const char *)&ei_mcrypt_list_algorithms,
+      (const char *)"mcrypt_get_cipher_name", (const char *)&ei_mcrypt_get_cipher_name,
+      (const char *)"idn_to_unicode", (const char *)&ei_idn_to_unicode,
+      (const char *)"lchown", (const char *)&ei_lchown,
+      (const char *)"drawcomposite", (const char *)&ei_drawcomposite,
+      (const char *)"dechex", (const char *)&ei_dechex,
+      (const char *)"imagecolortransparent", (const char *)&ei_imagecolortransparent,
+      (const char *)"socket_get_option", (const char *)&ei_socket_get_option,
+      (const char *)"stream_filter_register", (const char *)&ei_stream_filter_register,
+      (const char *)"hphp_service_thread_stopped", (const char *)&ei_hphp_service_thread_stopped,
+      (const char *)"apache_response_headers", (const char *)&ei_apache_response_headers,
+      (const char *)"array_merge", (const char *)&ei_array_merge,
+      (const char *)"md5", (const char *)&ei_md5,
+      (const char *)"session_write_close", (const char *)&ei_session_write_close,
+      (const char *)"dom_namednodemap_item", (const char *)&ei_dom_namednodemap_item,
+      (const char *)"bcsub", (const char *)&ei_bcsub,
+      (const char *)"xmlwriter_flush", (const char *)&ei_xmlwriter_flush,
+      (const char *)"sha1_file", (const char *)&ei_sha1_file,
+      (const char *)"posix_ctermid", (const char *)&ei_posix_ctermid,
+      (const char *)"date", (const char *)&ei_date,
+      (const char *)"evhttp_post", (const char *)&ei_evhttp_post,
+      (const char *)"ldap_connect", (const char *)&ei_ldap_connect,
+      (const char *)"shuffle", (const char *)&ei_shuffle,
+      (const char *)"mcrypt_module_get_algo_block_size", (const char *)&ei_mcrypt_module_get_algo_block_size,
+      (const char *)"hphp_splfileobject_ftruncate", (const char *)&ei_hphp_splfileobject_ftruncate,
+      (const char *)"key", (const char *)&ei_key,
+      (const char *)"xmlwriter_start_dtd_entity", (const char *)&ei_xmlwriter_start_dtd_entity,
+      (const char *)"readfile", (const char *)&ei_readfile,
+      (const char *)"atan", (const char *)&ei_atan,
+      (const char *)"magickmodulateimage", (const char *)&ei_magickmodulateimage,
+      (const char *)"mysql_set_charset", (const char *)&ei_mysql_set_charset,
+      (const char *)"fb_unset_taint", (const char *)&ei_fb_unset_taint,
+      (const char *)"dom_document_xinclude", (const char *)&ei_dom_document_xinclude,
+      (const char *)"check_user_func_async", (const char *)&ei_check_user_func_async,
+      (const char *)"drawgetfontweight", (const char *)&ei_drawgetfontweight,
+      (const char *)"magickgetimageheight", (const char *)&ei_magickgetimageheight,
+      (const char *)"posix_getpgrp", (const char *)&ei_posix_getpgrp,
+      (const char *)"i18n_loc_get_error_code", (const char *)&ei_i18n_loc_get_error_code,
+      (const char *)"hash_file", (const char *)&ei_hash_file,
+      (const char *)"is_callable", (const char *)&ei_is_callable,
+      (const char *)"asin", (const char *)&ei_asin,
+      (const char *)"openssl_public_encrypt", (const char *)&ei_openssl_public_encrypt,
+      (const char *)"curl_multi_init", (const char *)&ei_curl_multi_init,
+      (const char *)"posix_getpwuid", (const char *)&ei_posix_getpwuid,
+      (const char *)"json_encode", (const char *)&ei_json_encode,
+      (const char *)"show_source", (const char *)&ei_show_source,
+      (const char *)"mcrypt_module_self_test", (const char *)&ei_mcrypt_module_self_test,
+      (const char *)"sscanf", (const char *)&ei_sscanf,
+      (const char *)"chop", (const char *)&ei_chop,
+      (const char *)"mb_convert_variables", (const char *)&ei_mb_convert_variables,
+      (const char *)"hphp_recursivedirectoryiterator_getsubpathname", (const char *)&ei_hphp_recursivedirectoryiterator_getsubpathname,
+      (const char *)"socket_close", (const char *)&ei_socket_close,
+      (const char *)"max", (const char *)&ei_max,
+      (const char *)"magickadaptivethresholdimage", (const char *)&ei_magickadaptivethresholdimage,
+      (const char *)"imap_body", (const char *)&ei_imap_body,
+      (const char *)"each", (const char *)&ei_each,
+      (const char *)"magickremoveimageprofiles", (const char *)&ei_magickremoveimageprofiles,
+      (const char *)"drawgettextalignment", (const char *)&ei_drawgettextalignment,
+      (const char *)"xbox_send_message", (const char *)&ei_xbox_send_message,
+      (const char *)"thrift_protocol_write_binary", (const char *)&ei_thrift_protocol_write_binary,
+      (const char *)"wandgetexceptiontype", (const char *)&ei_wandgetexceptiontype,
+      (const char *)"drawpathellipticarcabsolute", (const char *)&ei_drawpathellipticarcabsolute,
+      (const char *)"pixelsetgreen", (const char *)&ei_pixelsetgreen,
+      (const char *)"magickgetimagecolorspace", (const char *)&ei_magickgetimagecolorspace,
+      (const char *)"pixelsetalphaquantum", (const char *)&ei_pixelsetalphaquantum,
+      (const char *)"stream_bucket_append", (const char *)&ei_stream_bucket_append,
+      (const char *)"msg_stat_queue", (const char *)&ei_msg_stat_queue,
+      (const char *)"system", (const char *)&ei_system,
+      (const char *)"mb_parse_str", (const char *)&ei_mb_parse_str,
+      (const char *)"dom_characterdata_append_data", (const char *)&ei_dom_characterdata_append_data,
+      (const char *)"log", (const char *)&ei_log,
+      (const char *)"memcache_decrement", (const char *)&ei_memcache_decrement,
+      (const char *)"drawskewx", (const char *)&ei_drawskewx,
+      (const char *)"min", (const char *)&ei_min,
+      (const char *)"curl_multi_getcontent", (const char *)&ei_curl_multi_getcontent,
+      (const char *)"drawskewy", (const char *)&ei_drawskewy,
+      (const char *)"is_uploaded_file", (const char *)&ei_is_uploaded_file,
+      (const char *)"magicksetresourcelimit", (const char *)&ei_magicksetresourcelimit,
+      (const char *)"date_timezone_get", (const char *)&ei_date_timezone_get,
+      (const char *)"hphp_splfileobject_fwrite", (const char *)&ei_hphp_splfileobject_fwrite,
+      (const char *)"apache_get_rewrite_rules", (const char *)&ei_apache_get_rewrite_rules,
+      (const char *)"is_string", (const char *)&ei_is_string,
+      (const char *)"pcntl_wtermsig", (const char *)&ei_pcntl_wtermsig,
+      (const char *)"stream_context_get_default", (const char *)&ei_stream_context_get_default,
+      (const char *)"drawpathlinetorelative", (const char *)&ei_drawpathlinetorelative,
+      (const char *)"get_called_class", (const char *)&ei_get_called_class,
+      (const char *)"urlencode", (const char *)&ei_urlencode,
+      (const char *)"mb_preferred_mime_name", (const char *)&ei_mb_preferred_mime_name,
+      (const char *)"pixelgetgreenquantum", (const char *)&ei_pixelgetgreenquantum,
+      (const char *)"magicksetfilename", (const char *)&ei_magicksetfilename,
+      (const char *)"magickappendimages", (const char *)&ei_magickappendimages,
+      (const char *)"pcntl_wifstopped", (const char *)&ei_pcntl_wifstopped,
+      (const char *)"mb_ereg_search", (const char *)&ei_mb_ereg_search,
+      (const char *)"rewind", (const char *)&ei_rewind,
+      (const char *)"chunk_split", (const char *)&ei_chunk_split,
+      (const char *)"mb_list_encodings_alias_names", (const char *)&ei_mb_list_encodings_alias_names,
+      (const char *)"fb_output_compression", (const char *)&ei_fb_output_compression,
+      (const char *)"i18n_loc_set_attribute", (const char *)&ei_i18n_loc_set_attribute,
+      (const char *)"pixelsynciterator", (const char *)&ei_pixelsynciterator,
+      (const char *)"openssl_error_string", (const char *)&ei_openssl_error_string,
+      (const char *)"ismagickwand", (const char *)&ei_ismagickwand,
+      (const char *)"dom_element_has_attribute", (const char *)&ei_dom_element_has_attribute,
+      (const char *)"strrchr", (const char *)&ei_strrchr,
+      (const char *)"xmlwriter_start_dtd_element", (const char *)&ei_xmlwriter_start_dtd_element,
+      (const char *)"str_ireplace", (const char *)&ei_str_ireplace,
+      (const char *)"magickpainttransparentimage", (const char *)&ei_magickpainttransparentimage,
+      (const char *)"drawsettextundercolor", (const char *)&ei_drawsettextundercolor,
+      (const char *)"memcache_get_version", (const char *)&ei_memcache_get_version,
+      (const char *)"hphp_splfileobject_getflags", (const char *)&ei_hphp_splfileobject_getflags,
+      (const char *)"imap_mail_move", (const char *)&ei_imap_mail_move,
+      (const char *)"hphp_recursivedirectoryiterator_rewind", (const char *)&ei_hphp_recursivedirectoryiterator_rewind,
+      (const char *)"magickgetstringwidth", (const char *)&ei_magickgetstringwidth,
+      (const char *)"imap_createmailbox", (const char *)&ei_imap_createmailbox,
+      (const char *)"ldap_parse_reference", (const char *)&ei_ldap_parse_reference,
+      (const char *)"ctype_xdigit", (const char *)&ei_ctype_xdigit,
+      (const char *)"gmstrftime", (const char *)&ei_gmstrftime,
+      (const char *)"hphp_recursiveiteratoriterator_next", (const char *)&ei_hphp_recursiveiteratoriterator_next,
+      (const char *)"stream_socket_get_name", (const char *)&ei_stream_socket_get_name,
+      (const char *)"socket_set_option", (const char *)&ei_socket_set_option,
+      (const char *)"array_multisort", (const char *)&ei_array_multisort,
+      (const char *)"imagepsbbox", (const char *)&ei_imagepsbbox,
+      (const char *)"drawpathlinetoverticalabsolute", (const char *)&ei_drawpathlinetoverticalabsolute,
+      (const char *)"mailparse_msg_get_structure", (const char *)&ei_mailparse_msg_get_structure,
+      (const char *)"mb_ereg", (const char *)&ei_mb_ereg,
+      (const char *)"decoct", (const char *)&ei_decoct,
+      (const char *)"xml_parse", (const char *)&ei_xml_parse,
+      (const char *)"xml_get_current_line_number", (const char *)&ei_xml_get_current_line_number,
+      (const char *)"drawaffine", (const char *)&ei_drawaffine,
+      (const char *)"session_destroy", (const char *)&ei_session_destroy,
+      (const char *)"magicksetimagewhitepoint", (const char *)&ei_magicksetimagewhitepoint,
+      (const char *)"dom_document_get_elements_by_tag_name", (const char *)&ei_dom_document_get_elements_by_tag_name,
+      (const char *)"gzclose", (const char *)&ei_gzclose,
+      (const char *)"imagecolorat", (const char *)&ei_imagecolorat,
+      (const char *)"magickgetimageextrema", (const char *)&ei_magickgetimageextrema,
+      (const char *)"dom_node_insert_before", (const char *)&ei_dom_node_insert_before,
+      (const char *)"ord", (const char *)&ei_ord,
+      (const char *)"mktime", (const char *)&ei_mktime,
+      (const char *)"sem_get", (const char *)&ei_sem_get,
+      (const char *)"drawsetstrokelinejoin", (const char *)&ei_drawsetstrokelinejoin,
+      (const char *)"array_intersect", (const char *)&ei_array_intersect,
+      (const char *)"mailparse_msg_extract_whole_part_file", (const char *)&ei_mailparse_msg_extract_whole_part_file,
+      (const char *)"mb_strrichr", (const char *)&ei_mb_strrichr,
+      (const char *)"socket_sendto", (const char *)&ei_socket_sendto,
+      (const char *)"memcache_flush", (const char *)&ei_memcache_flush,
+      (const char *)"mb_output_handler", (const char *)&ei_mb_output_handler,
+      (const char *)"fclose", (const char *)&ei_fclose,
+      (const char *)"drawpathcurvetoquadraticbeziersmoothabsolute", (const char *)&ei_drawpathcurvetoquadraticbeziersmoothabsolute,
+      (const char *)"function_exists", (const char *)&ei_function_exists,
+      (const char *)"ctype_alpha", (const char *)&ei_ctype_alpha,
+      (const char *)"pos", (const char *)&ei_pos,
+      (const char *)"pagelet_server_is_enabled", (const char *)&ei_pagelet_server_is_enabled,
+      (const char *)"xbox_get_thread_timeout", (const char *)&ei_xbox_get_thread_timeout,
+      (const char *)"imagecolorexactalpha", (const char *)&ei_imagecolorexactalpha,
+      (const char *)"pow", (const char *)&ei_pow,
+      (const char *)"pixelgetredquantum", (const char *)&ei_pixelgetredquantum,
+      (const char *)"imagecolorsforindex", (const char *)&ei_imagecolorsforindex,
+      (const char *)"libxml_set_streams_context", (const char *)&ei_libxml_set_streams_context,
+      (const char *)"dom_node_clone_node", (const char *)&ei_dom_node_clone_node,
+      (const char *)"image_type_to_mime_type", (const char *)&ei_image_type_to_mime_type,
+      (const char *)"socket_create", (const char *)&ei_socket_create,
+      (const char *)"xmlwriter_write_pi", (const char *)&ei_xmlwriter_write_pi,
+      (const char *)"posix_getppid", (const char *)&ei_posix_getppid,
+      (const char *)"mb_stripos", (const char *)&ei_mb_stripos,
+      (const char *)"magickpingimage", (const char *)&ei_magickpingimage,
+      (const char *)"bcpowmod", (const char *)&ei_bcpowmod,
+      (const char *)"timezone_offset_get", (const char *)&ei_timezone_offset_get,
+      (const char *)"dom_document_create_text_node", (const char *)&ei_dom_document_create_text_node,
+      (const char *)"imap_num_msg", (const char *)&ei_imap_num_msg,
+      (const char *)"getrandmax", (const char *)&ei_getrandmax,
+      (const char *)"hphp_splfileobject_fseek", (const char *)&ei_hphp_splfileobject_fseek,
+      (const char *)"ctype_alnum", (const char *)&ei_ctype_alnum,
+      (const char *)"tan", (const char *)&ei_tan,
+      (const char *)"set_exception_handler", (const char *)&ei_set_exception_handler,
+      (const char *)"imap_qprint", (const char *)&ei_imap_qprint,
+      (const char *)"imagegrabwindow", (const char *)&ei_imagegrabwindow,
+      (const char *)"memcache_add", (const char *)&ei_memcache_add,
+      (const char *)"magickstereoimage", (const char *)&ei_magickstereoimage,
+      (const char *)"magickgetimagescene", (const char *)&ei_magickgetimagescene,
+      (const char *)"hphp_splfileinfo_isfile", (const char *)&ei_hphp_splfileinfo_isfile,
+      (const char *)"hphp_get_this", (const char *)&ei_hphp_get_this,
+      (const char *)"openssl_csr_sign", (const char *)&ei_openssl_csr_sign,
+      (const char *)"openssl_pkcs12_export", (const char *)&ei_openssl_pkcs12_export,
+      (const char *)"magickgetquantumdepth", (const char *)&ei_magickgetquantumdepth,
+      (const char *)"socket_listen", (const char *)&ei_socket_listen,
+      (const char *)"parse_str", (const char *)&ei_parse_str,
+      (const char *)"sin", (const char *)&ei_sin,
+      (const char *)"dom_node_append_child", (const char *)&ei_dom_node_append_child,
+      (const char *)"cosh", (const char *)&ei_cosh,
+      (const char *)"copy", (const char *)&ei_copy,
+      (const char *)"imagechar", (const char *)&ei_imagechar,
+      (const char *)"magicksetimagebackgroundcolor", (const char *)&ei_magicksetimagebackgroundcolor,
+      (const char *)"ldap_mod_add", (const char *)&ei_ldap_mod_add,
+      (const char *)"fb_thrift_serialize", (const char *)&ei_fb_thrift_serialize,
+      (const char *)"posix_ttyname", (const char *)&ei_posix_ttyname,
+      (const char *)"filectime", (const char *)&ei_filectime,
+      (const char *)"newpixelwand", (const char *)&ei_newpixelwand,
+      (const char *)"pcntl_wait", (const char *)&ei_pcntl_wait,
+      (const char *)"hypot", (const char *)&ei_hypot,
+      (const char *)"parse_url", (const char *)&ei_parse_url,
+      (const char *)"imap_headers", (const char *)&ei_imap_headers,
+      (const char *)"magickreadimageblob", (const char *)&ei_magickreadimageblob,
+      (const char *)"eregi", (const char *)&ei_eregi,
+      (const char *)"pixelsetcolorcount", (const char *)&ei_pixelsetcolorcount,
+      (const char *)"drawpathcurvetoquadraticbezierrelative", (const char *)&ei_drawpathcurvetoquadraticbezierrelative,
+      (const char *)"posix_getgroups", (const char *)&ei_posix_getgroups,
+      (const char *)"bzerrstr", (const char *)&ei_bzerrstr,
+      (const char *)"cpu_get_count", (const char *)&ei_cpu_get_count,
+      (const char *)"fileinode", (const char *)&ei_fileinode,
+      (const char *)"magickgetnumberimages", (const char *)&ei_magickgetnumberimages,
+      (const char *)"magickgetimagesblob", (const char *)&ei_magickgetimagesblob,
+      (const char *)"magickcontrastimage", (const char *)&ei_magickcontrastimage,
+      (const char *)"pcntl_setpriority", (const char *)&ei_pcntl_setpriority,
+      (const char *)"drawgetfontstretch", (const char *)&ei_drawgetfontstretch,
+      (const char *)"bcscale", (const char *)&ei_bcscale,
+      (const char *)"imageconvolution", (const char *)&ei_imageconvolution,
+      (const char *)"utf8_decode", (const char *)&ei_utf8_decode,
+      (const char *)"ldap_unbind", (const char *)&ei_ldap_unbind,
+      (const char *)"newpixelregioniterator", (const char *)&ei_newpixelregioniterator,
+      (const char *)"array_intersect_assoc", (const char *)&ei_array_intersect_assoc,
+      (const char *)"ob_get_level", (const char *)&ei_ob_get_level,
+      (const char *)"hebrev", (const char *)&ei_hebrev,
+      (const char *)"socket_set_block", (const char *)&ei_socket_set_block,
+      (const char *)"mcrypt_module_close", (const char *)&ei_mcrypt_module_close,
+      (const char *)"mb_strwidth", (const char *)&ei_mb_strwidth,
+      (const char *)"clonemagickwand", (const char *)&ei_clonemagickwand,
+      (const char *)"pixelgetred", (const char *)&ei_pixelgetred,
+      (const char *)"dom_document_create_processing_instruction", (const char *)&ei_dom_document_create_processing_instruction,
+      (const char *)"ip2long", (const char *)&ei_ip2long,
+      (const char *)"mb_stristr", (const char *)&ei_mb_stristr,
+      (const char *)"array_diff_ukey", (const char *)&ei_array_diff_ukey,
+      (const char *)"isdrawingwand", (const char *)&ei_isdrawingwand,
+      (const char *)"magicksetimagemattecolor", (const char *)&ei_magicksetimagemattecolor,
+      (const char *)"closedir", (const char *)&ei_closedir,
+      (const char *)"fb_call_user_func_safe_return", (const char *)&ei_fb_call_user_func_safe_return,
+      (const char *)"magickwriteimagesfile", (const char *)&ei_magickwriteimagesfile,
+      (const char *)"magickdescribeimage", (const char *)&ei_magickdescribeimage,
+      (const char *)"imageftbbox", (const char *)&ei_imageftbbox,
+      (const char *)"magicksetlastiterator", (const char *)&ei_magicksetlastiterator,
+      (const char *)"hphp_output_global_state", (const char *)&ei_hphp_output_global_state,
+      (const char *)"imagefontheight", (const char *)&ei_imagefontheight,
+      (const char *)"putenv", (const char *)&ei_putenv,
+      (const char *)"magickedgeimage", (const char *)&ei_magickedgeimage,
+      (const char *)"xml_error_string", (const char *)&ei_xml_error_string,
+      (const char *)"array_rand", (const char *)&ei_array_rand,
+      (const char *)"ldap_mod_del", (const char *)&ei_ldap_mod_del,
+      (const char *)"range", (const char *)&ei_range,
+      (const char *)"levenshtein", (const char *)&ei_levenshtein,
+      (const char *)"curl_multi_close", (const char *)&ei_curl_multi_close,
+      (const char *)"drawgetfillalpha", (const char *)&ei_drawgetfillalpha,
+      (const char *)"hash_hmac", (const char *)&ei_hash_hmac,
+      (const char *)"get_html_translation_table", (const char *)&ei_get_html_translation_table,
+      (const char *)"user_error", (const char *)&ei_user_error,
+      (const char *)"feof", (const char *)&ei_feof,
+      (const char *)"filemtime", (const char *)&ei_filemtime,
+      (const char *)"microtime", (const char *)&ei_microtime,
+      (const char *)"zend_version", (const char *)&ei_zend_version,
+      (const char *)"openssl_x509_free", (const char *)&ei_openssl_x509_free,
+      (const char *)"fb_call_user_func_safe", (const char *)&ei_fb_call_user_func_safe,
+      (const char *)"var_export", (const char *)&ei_var_export,
+      (const char *)"mb_strcut", (const char *)&ei_mb_strcut,
+      (const char *)"xmlwriter_end_comment", (const char *)&ei_xmlwriter_end_comment,
+      (const char *)"xmlwriter_end_dtd_element", (const char *)&ei_xmlwriter_end_dtd_element,
+      (const char *)"dom_text_split_text", (const char *)&ei_dom_text_split_text,
+      (const char *)"openssl_pkey_export_to_file", (const char *)&ei_openssl_pkey_export_to_file,
+      (const char *)"hphp_get_original_class_name", (const char *)&ei_hphp_get_original_class_name,
+      (const char *)"imagecolorclosesthwb", (const char *)&ei_imagecolorclosesthwb,
+      (const char *)"ldap_get_attributes", (const char *)&ei_ldap_get_attributes,
+      (const char *)"date_modify", (const char *)&ei_date_modify,
+      (const char *)"hphp_splfileinfo_setinfoclass", (const char *)&ei_hphp_splfileinfo_setinfoclass,
+      (const char *)"umask", (const char *)&ei_umask,
+      (const char *)"xml_get_current_column_number", (const char *)&ei_xml_get_current_column_number,
+      (const char *)"pixelsetblue", (const char *)&ei_pixelsetblue,
+      (const char *)"mb_http_output", (const char *)&ei_mb_http_output,
+      (const char *)"flock", (const char *)&ei_flock,
+      (const char *)"hphp_splfileobject_ftell", (const char *)&ei_hphp_splfileobject_ftell,
+      (const char *)"pcntl_wifexited", (const char *)&ei_pcntl_wifexited,
+      (const char *)"magicksetformat", (const char *)&ei_magicksetformat,
+      (const char *)"array_map", (const char *)&ei_array_map,
+      (const char *)"magicksharpenimage", (const char *)&ei_magicksharpenimage,
+      (const char *)"is_infinite", (const char *)&ei_is_infinite,
+      (const char *)"date_timezone_set", (const char *)&ei_date_timezone_set,
+      (const char *)"mb_ereg_search_init", (const char *)&ei_mb_ereg_search_init,
+      (const char *)"drawcircle", (const char *)&ei_drawcircle,
+      (const char *)"is_readable", (const char *)&ei_is_readable,
+      (const char *)"image_type_to_extension", (const char *)&ei_image_type_to_extension,
+      (const char *)"printf", (const char *)&ei_printf,
+      (const char *)"magicksetimagecompression", (const char *)&ei_magicksetimagecompression,
+      (const char *)"mcrypt_decrypt", (const char *)&ei_mcrypt_decrypt,
+      (const char *)"hphp_directoryiterator_next", (const char *)&ei_hphp_directoryiterator_next,
+      (const char *)"natcasesort", (const char *)&ei_natcasesort,
+      (const char *)"intl_get_error_message", (const char *)&ei_intl_get_error_message,
+      (const char *)"memcache_get", (const char *)&ei_memcache_get,
+      (const char *)"array_chunk", (const char *)&ei_array_chunk,
+      (const char *)"collator_asort", (const char *)&ei_collator_asort,
+      (const char *)"imagefilledpolygon", (const char *)&ei_imagefilledpolygon,
+      (const char *)"drawpoppattern", (const char *)&ei_drawpoppattern,
+      (const char *)"magickgetimagewidth", (const char *)&ei_magickgetimagewidth,
+      (const char *)"drawgetfontfamily", (const char *)&ei_drawgetfontfamily,
+      (const char *)"dl", (const char *)&ei_dl,
+      (const char *)"touch", (const char *)&ei_touch,
+      (const char *)"hphp_recursivedirectoryiterator___tostring", (const char *)&ei_hphp_recursivedirectoryiterator___tostring,
+      (const char *)"magicksetimagebordercolor", (const char *)&ei_magicksetimagebordercolor,
+      (const char *)"hphp_directoryiterator_rewind", (const char *)&ei_hphp_directoryiterator_rewind,
+      (const char *)"magickspliceimage", (const char *)&ei_magickspliceimage,
+      (const char *)"xhprof_frame_begin", (const char *)&ei_xhprof_frame_begin,
+      (const char *)"define", (const char *)&ei_define,
+      (const char *)"headers_sent", (const char *)&ei_headers_sent,
+      (const char *)"stream_context_get_options", (const char *)&ei_stream_context_get_options,
+      (const char *)"file", (const char *)&ei_file,
+      (const char *)"memcache_get_extended_stats", (const char *)&ei_memcache_get_extended_stats,
+      (const char *)"hphp_crash_log", (const char *)&ei_hphp_crash_log,
+      (const char *)"imagecolorresolvealpha", (const char *)&ei_imagecolorresolvealpha,
+      (const char *)"strtr", (const char *)&ei_strtr,
+      (const char *)"posix_strerror", (const char *)&ei_posix_strerror,
+      (const char *)"libxml_use_internal_errors", (const char *)&ei_libxml_use_internal_errors,
+      (const char *)"end_user_func_async", (const char *)&ei_end_user_func_async,
+      (const char *)"bzcompress", (const char *)&ei_bzcompress,
+      (const char *)"openssl_get_publickey", (const char *)&ei_openssl_get_publickey,
+      (const char *)"dom_node_lookup_prefix", (const char *)&ei_dom_node_lookup_prefix,
+      (const char *)"time_nanosleep", (const char *)&ei_time_nanosleep,
+      (const char *)"magicksetimageunits", (const char *)&ei_magicksetimageunits,
+      (const char *)"floor", (const char *)&ei_floor,
+      (const char *)"array_pad", (const char *)&ei_array_pad,
+      (const char *)"sem_release", (const char *)&ei_sem_release,
+      (const char *)"hphp_splfileinfo_getctime", (const char *)&ei_hphp_splfileinfo_getctime,
+      (const char *)"highlight_string", (const char *)&ei_highlight_string,
+      (const char *)"hphp_invoke", (const char *)&ei_hphp_invoke,
+      (const char *)"imageloadfont", (const char *)&ei_imageloadfont,
+      (const char *)"xmlwriter_start_element", (const char *)&ei_xmlwriter_start_element,
+      (const char *)"localeconv", (const char *)&ei_localeconv,
+      (const char *)"exif_thumbnail", (const char *)&ei_exif_thumbnail,
+      (const char *)"collator_get_error_message", (const char *)&ei_collator_get_error_message,
+      (const char *)"mysql_get_proto_info", (const char *)&ei_mysql_get_proto_info,
+      (const char *)"imagefontwidth", (const char *)&ei_imagefontwidth,
+      (const char *)"substr_compare", (const char *)&ei_substr_compare,
+      (const char *)"xbox_post_message", (const char *)&ei_xbox_post_message,
+      (const char *)"fb_rename_function", (const char *)&ei_fb_rename_function,
+      (const char *)"array_walk_recursive", (const char *)&ei_array_walk_recursive,
+      (const char *)"mysql_list_processes", (const char *)&ei_mysql_list_processes,
+      (const char *)"imagedashedline", (const char *)&ei_imagedashedline,
+      (const char *)"magickgetimagedelay", (const char *)&ei_magickgetimagedelay,
+      (const char *)"pi", (const char *)&ei_pi,
+      (const char *)"mb_substr_count", (const char *)&ei_mb_substr_count,
+      (const char *)"hphp_splfileinfo_getinode", (const char *)&ei_hphp_splfileinfo_getinode,
+      (const char *)"magickgettextdescent", (const char *)&ei_magickgettextdescent,
+      (const char *)"drawsetstrokealpha", (const char *)&ei_drawsetstrokealpha,
+      (const char *)"apc_delete_file", (const char *)&ei_apc_delete_file,
+      (const char *)"strrpos", (const char *)&ei_strrpos,
+      (const char *)"array_diff_assoc", (const char *)&ei_array_diff_assoc,
+      (const char *)"magickclippathimage", (const char *)&ei_magickclippathimage,
+      (const char *)"xmlwriter_write_element", (const char *)&ei_xmlwriter_write_element,
+      (const char *)"dom_document_schema_validate_xml", (const char *)&ei_dom_document_schema_validate_xml,
+      (const char *)"ereg", (const char *)&ei_ereg,
+      (const char *)"curl_multi_info_read", (const char *)&ei_curl_multi_info_read,
+      (const char *)"magickthresholdimage", (const char *)&ei_magickthresholdimage,
+      (const char *)"msg_remove_queue", (const char *)&ei_msg_remove_queue,
+      (const char *)"mb_strlen", (const char *)&ei_mb_strlen,
+      (const char *)"drawgetclippath", (const char *)&ei_drawgetclippath,
+      (const char *)"imagecopy", (const char *)&ei_imagecopy,
+      (const char *)"pixelsetcolor", (const char *)&ei_pixelsetcolor,
+      (const char *)"time_sleep_until", (const char *)&ei_time_sleep_until,
+      (const char *)"session_unset", (const char *)&ei_session_unset,
+      (const char *)"mb_ereg_replace", (const char *)&ei_mb_ereg_replace,
+      (const char *)"openssl_csr_get_public_key", (const char *)&ei_openssl_csr_get_public_key,
+      (const char *)"magickfximage", (const char *)&ei_magickfximage,
+      (const char *)"tmpfile", (const char *)&ei_tmpfile,
+      (const char *)"hash", (const char *)&ei_hash,
+      (const char *)"uasort", (const char *)&ei_uasort,
+      (const char *)"pixelgetalpha", (const char *)&ei_pixelgetalpha,
+      (const char *)"drawsettextencoding", (const char *)&ei_drawsettextencoding,
+      (const char *)"apache_request_headers", (const char *)&ei_apache_request_headers,
+      (const char *)"is_subclass_of", (const char *)&ei_is_subclass_of,
+      (const char *)"pixelgetmagentaquantum", (const char *)&ei_pixelgetmagentaquantum,
+      (const char *)"hphp_get_static_property", (const char *)&ei_hphp_get_static_property,
+      (const char *)"array_pop", (const char *)&ei_array_pop,
+      (const char *)"magickgetimagecolors", (const char *)&ei_magickgetimagecolors,
+      (const char *)"session_regenerate_id", (const char *)&ei_session_regenerate_id,
+      (const char *)"class_exists", (const char *)&ei_class_exists,
+      (const char *)"getallheaders", (const char *)&ei_getallheaders,
+      (const char *)"get_extension_funcs", (const char *)&ei_get_extension_funcs,
+      (const char *)"imagecolordeallocate", (const char *)&ei_imagecolordeallocate,
+      (const char *)"closelog", (const char *)&ei_closelog,
+      (const char *)"drawpathlinetoabsolute", (const char *)&ei_drawpathlinetoabsolute,
+      (const char *)"mcrypt_enc_get_iv_size", (const char *)&ei_mcrypt_enc_get_iv_size,
+      (const char *)"json_decode", (const char *)&ei_json_decode,
+      (const char *)"preg_replace", (const char *)&ei_preg_replace,
+      (const char *)"hphp_splfileinfo_getmtime", (const char *)&ei_hphp_splfileinfo_getmtime,
+      (const char *)"fmod", (const char *)&ei_fmod,
+      (const char *)"qlzcompress", (const char *)&ei_qlzcompress,
+      (const char *)"curl_errno", (const char *)&ei_curl_errno,
+      (const char *)"pagelet_server_task_start", (const char *)&ei_pagelet_server_task_start,
+      (const char *)"hash_init", (const char *)&ei_hash_init,
+      (const char *)"mb_strripos", (const char *)&ei_mb_strripos,
+      (const char *)"mysql_fetch_row", (const char *)&ei_mysql_fetch_row,
+      (const char *)"hphp_splfileobject_setcsvcontrol", (const char *)&ei_hphp_splfileobject_setcsvcontrol,
+      (const char *)"ob_get_flush", (const char *)&ei_ob_get_flush,
+      (const char *)"curl_error", (const char *)&ei_curl_error,
+      (const char *)"set_magic_quotes_runtime", (const char *)&ei_set_magic_quotes_runtime,
+      (const char *)"magickcharcoalimage", (const char *)&ei_magickcharcoalimage,
+      (const char *)"scandir", (const char *)&ei_scandir,
+      (const char *)"magickmosaicimages", (const char *)&ei_magickmosaicimages,
+      (const char *)"timezone_transitions_get", (const char *)&ei_timezone_transitions_get,
+      (const char *)"drawsetfontweight", (const char *)&ei_drawsetfontweight,
+      (const char *)"popdrawingwand", (const char *)&ei_popdrawingwand,
+      (const char *)"collator_sort_with_sort_keys", (const char *)&ei_collator_sort_with_sort_keys,
+      (const char *)"socket_shutdown", (const char *)&ei_socket_shutdown,
+      (const char *)"mcrypt_create_iv", (const char *)&ei_mcrypt_create_iv,
+      (const char *)"eval", (const char *)&ei_eval,
+      (const char *)"bindec", (const char *)&ei_bindec,
+      (const char *)"fileperms", (const char *)&ei_fileperms,
+      (const char *)"hphp_splfileobject_fstat", (const char *)&ei_hphp_splfileobject_fstat,
+      (const char *)"unserialize", (const char *)&ei_unserialize,
+      (const char *)"bzdecompress", (const char *)&ei_bzdecompress,
+      (const char *)"apc_exists", (const char *)&ei_apc_exists,
+      (const char *)"urldecode", (const char *)&ei_urldecode,
+      (const char *)"magickannotateimage", (const char *)&ei_magickannotateimage,
+      (const char *)"mailparse_msg_create", (const char *)&ei_mailparse_msg_create,
+      (const char *)"session_set_cookie_params", (const char *)&ei_session_set_cookie_params,
+      (const char *)"drawellipse", (const char *)&ei_drawellipse,
+      (const char *)"xmlwriter_write_element_ns", (const char *)&ei_xmlwriter_write_element_ns,
+      (const char *)"magicksetcompressionquality", (const char *)&ei_magicksetcompressionquality,
+      (const char *)"magickaddnoiseimage", (const char *)&ei_magickaddnoiseimage,
+      (const char *)"magickgetimagewhitepoint", (const char *)&ei_magickgetimagewhitepoint,
+      (const char *)"openssl_cipher_iv_length", (const char *)&ei_openssl_cipher_iv_length,
+      (const char *)"magickseparateimagechannel", (const char *)&ei_magickseparateimagechannel,
+      (const char *)"array_push", (const char *)&ei_array_push,
+      (const char *)"flush", (const char *)&ei_flush,
+      (const char *)"connection_aborted", (const char *)&ei_connection_aborted,
+      (const char *)"uksort", (const char *)&ei_uksort,
+      (const char *)"mysql_set_timeout", (const char *)&ei_mysql_set_timeout,
+      (const char *)"hash_update_stream", (const char *)&ei_hash_update_stream,
+      (const char *)"ob_start", (const char *)&ei_ob_start,
+      (const char *)"mysql_get_host_info", (const char *)&ei_mysql_get_host_info,
+      (const char *)"mb_language", (const char *)&ei_mb_language,
+      (const char *)"pixelgetnextiteratorrow", (const char *)&ei_pixelgetnextiteratorrow,
+      (const char *)"ldap_next_reference", (const char *)&ei_ldap_next_reference,
+      (const char *)"socket_get_status", (const char *)&ei_socket_get_status,
+      (const char *)"checkdnsrr", (const char *)&ei_checkdnsrr,
+      (const char *)"openssl_verify", (const char *)&ei_openssl_verify,
+      (const char *)"curl_exec", (const char *)&ei_curl_exec,
+      (const char *)"imap_renamemailbox", (const char *)&ei_imap_renamemailbox,
+      (const char *)"magickgetexceptiontype", (const char *)&ei_magickgetexceptiontype,
+      (const char *)"array_sum", (const char *)&ei_array_sum,
+      (const char *)"unregister_tick_function", (const char *)&ei_unregister_tick_function,
+      (const char *)"newpixelwandarray", (const char *)&ei_newpixelwandarray,
+      (const char *)"magickgetversion", (const char *)&ei_magickgetversion,
+      (const char *)"imagelayereffect", (const char *)&ei_imagelayereffect,
+      (const char *)"glob", (const char *)&ei_glob,
+      (const char *)"exec", (const char *)&ei_exec,
+      (const char *)"imap_binary", (const char *)&ei_imap_binary,
+      (const char *)"apd_continue", (const char *)&ei_apd_continue,
+      (const char *)"magickgetimagedepth", (const char *)&ei_magickgetimagedepth,
+      (const char *)"pclose", (const char *)&ei_pclose,
+      (const char *)"get_parent_class", (const char *)&ei_get_parent_class,
+      (const char *)"mb_strpos", (const char *)&ei_mb_strpos,
+      (const char *)"xmlwriter_write_dtd_attlist", (const char *)&ei_xmlwriter_write_dtd_attlist,
+      (const char *)"xml_set_element_handler", (const char *)&ei_xml_set_element_handler,
+      (const char *)"drawgetstrokeopacity", (const char *)&ei_drawgetstrokeopacity,
+      (const char *)"ldap_get_entries", (const char *)&ei_ldap_get_entries,
+      (const char *)"imap_8bit", (const char *)&ei_imap_8bit,
+      (const char *)"ob_iconv_handler", (const char *)&ei_ob_iconv_handler,
+      (const char *)"hphp_throw_fatal_error", (const char *)&ei_hphp_throw_fatal_error,
+      (const char *)"pathinfo", (const char *)&ei_pathinfo,
+      (const char *)"magickaffinetransformimage", (const char *)&ei_magickaffinetransformimage,
+      (const char *)"fb_stubout_intercept_handler", (const char *)&ei_fb_stubout_intercept_handler,
+      (const char *)"ob_get_status", (const char *)&ei_ob_get_status,
+      (const char *)"collator_create", (const char *)&ei_collator_create,
+      (const char *)"exit", (const char *)&ei_exit,
+      (const char *)"memcache_debug", (const char *)&ei_memcache_debug,
+      (const char *)"apc_sma_info", (const char *)&ei_apc_sma_info,
+      (const char *)"ldap_bind", (const char *)&ei_ldap_bind,
+      (const char *)"pixelsetbluequantum", (const char *)&ei_pixelsetbluequantum,
+      (const char *)"magickreadimagefile", (const char *)&ei_magickreadimagefile,
+      (const char *)"session_is_registered", (const char *)&ei_session_is_registered,
+      (const char *)"mysql_real_escape_string", (const char *)&ei_mysql_real_escape_string,
+      (const char *)"magickframeimage", (const char *)&ei_magickframeimage,
+      (const char *)"pixelgetblue", (const char *)&ei_pixelgetblue,
+      (const char *)"imagefill", (const char *)&ei_imagefill,
+      (const char *)"hphp_set_property", (const char *)&ei_hphp_set_property,
+      (const char *)"readgzfile", (const char *)&ei_readgzfile,
+      (const char *)"memcache_set", (const char *)&ei_memcache_set,
+      (const char *)"magicksampleimage", (const char *)&ei_magicksampleimage,
+      (const char *)"mysql_escape_string", (const char *)&ei_mysql_escape_string,
+      (const char *)"idn_to_utf8", (const char *)&ei_idn_to_utf8,
+      (const char *)"sql_regcase", (const char *)&ei_sql_regcase,
+      (const char *)"in_array", (const char *)&ei_in_array,
+      (const char *)"imap_search", (const char *)&ei_imap_search,
+      (const char *)"drawpathcurvetoquadraticbezierabsolute", (const char *)&ei_drawpathcurvetoquadraticbezierabsolute,
+      (const char *)"socket_set_timeout", (const char *)&ei_socket_set_timeout,
+      (const char *)"bin2hex", (const char *)&ei_bin2hex,
+      (const char *)"error_get_last", (const char *)&ei_error_get_last,
+      (const char *)"is_link", (const char *)&ei_is_link,
+      (const char *)"set_file_buffer", (const char *)&ei_set_file_buffer,
+      (const char *)"magicksetimageredprimary", (const char *)&ei_magicksetimageredprimary,
+      (const char *)"i18n_loc_set_default", (const char *)&ei_i18n_loc_set_default,
+      (const char *)"imap_subscribe", (const char *)&ei_imap_subscribe,
+      (const char *)"ftok", (const char *)&ei_ftok,
+      (const char *)"mysql_list_fields", (const char *)&ei_mysql_list_fields,
+      (const char *)"stream_wrapper_register", (const char *)&ei_stream_wrapper_register,
+      (const char *)"pixelsetredquantum", (const char *)&ei_pixelsetredquantum,
+      (const char *)"xhprof_disable", (const char *)&ei_xhprof_disable,
+      (const char *)"magickgammaimage", (const char *)&ei_magickgammaimage,
+      (const char *)"pixelsetcyan", (const char *)&ei_pixelsetcyan,
+      (const char *)"mb_decode_mimeheader", (const char *)&ei_mb_decode_mimeheader,
+      (const char *)"key_exists", (const char *)&ei_key_exists,
+      (const char *)"htmlentities", (const char *)&ei_htmlentities,
+      (const char *)"rad2deg", (const char *)&ei_rad2deg,
+      (const char *)"xmlwriter_start_dtd", (const char *)&ei_xmlwriter_start_dtd,
+      (const char *)"drawpathstart", (const char *)&ei_drawpathstart,
+      (const char *)"proc_nice", (const char *)&ei_proc_nice,
+      (const char *)"hphp_thread_is_warmup_enabled", (const char *)&ei_hphp_thread_is_warmup_enabled,
+      (const char *)"mysql_pconnect_with_db", (const char *)&ei_mysql_pconnect_with_db,
+      (const char *)"imagepsslantfont", (const char *)&ei_imagepsslantfont,
+      (const char *)"magickgetimagemattecolor", (const char *)&ei_magickgetimagemattecolor,
+      (const char *)"mb_strstr", (const char *)&ei_mb_strstr,
+      (const char *)"imap_fetchheader", (const char *)&ei_imap_fetchheader,
+      (const char *)"imap_listsubscribed", (const char *)&ei_imap_listsubscribed,
+      (const char *)"pixelgetblack", (const char *)&ei_pixelgetblack,
+      (const char *)"mysql_field_table", (const char *)&ei_mysql_field_table,
+      (const char *)"magicksetimagescene", (const char *)&ei_magicksetimagescene,
+      (const char *)"magickgetimagerenderingintent", (const char *)&ei_magickgetimagerenderingintent,
+      (const char *)"setlocale", (const char *)&ei_setlocale,
+      (const char *)"drawpushclippath", (const char *)&ei_drawpushclippath,
+      (const char *)"spl_autoload_extensions", (const char *)&ei_spl_autoload_extensions,
+      (const char *)"drawpopclippath", (const char *)&ei_drawpopclippath,
+      (const char *)"nl2br", (const char *)&ei_nl2br,
+      (const char *)"hphp_splfileinfo_getperms", (const char *)&ei_hphp_splfileinfo_getperms,
+      (const char *)"drawsetfillopacity", (const char *)&ei_drawsetfillopacity,
+      (const char *)"mb_substitute_character", (const char *)&ei_mb_substitute_character,
+      (const char *)"setrawcookie", (const char *)&ei_setrawcookie,
+      (const char *)"evhttp_get", (const char *)&ei_evhttp_get,
+      (const char *)"getimagesize", (const char *)&ei_getimagesize,
+      (const char *)"ldap_modify", (const char *)&ei_ldap_modify,
+      (const char *)"ldap_search", (const char *)&ei_ldap_search,
+      (const char *)"strcasecmp", (const char *)&ei_strcasecmp,
+      (const char *)"magickgetimagesignature", (const char *)&ei_magickgetimagesignature,
+      (const char *)"get_class_methods", (const char *)&ei_get_class_methods,
+      (const char *)"fopen", (const char *)&ei_fopen,
+      (const char *)"fb_const_fetch", (const char *)&ei_fb_const_fetch,
+      (const char *)"mcrypt_generic_end", (const char *)&ei_mcrypt_generic_end,
+      (const char *)"openssl_pkey_free", (const char *)&ei_openssl_pkey_free,
+      (const char *)"readlink", (const char *)&ei_readlink,
+      (const char *)"header_remove", (const char *)&ei_header_remove,
+      (const char *)"magickechoimagesblob", (const char *)&ei_magickechoimagesblob,
+      (const char *)"mailparse_msg_parse", (const char *)&ei_mailparse_msg_parse,
+      (const char *)"xmlwriter_text", (const char *)&ei_xmlwriter_text,
+      (const char *)"pixelsetindex", (const char *)&ei_pixelsetindex,
+      (const char *)"xhprof_network_enable", (const char *)&ei_xhprof_network_enable,
+      (const char *)"php_sapi_name", (const char *)&ei_php_sapi_name,
+      (const char *)"mcrypt_enc_get_key_size", (const char *)&ei_mcrypt_enc_get_key_size,
+      (const char *)"imap_get_quotaroot", (const char *)&ei_imap_get_quotaroot,
+      (const char *)"mysql_num_fields", (const char *)&ei_mysql_num_fields,
+      (const char *)"dom_xpath_register_php_functions", (const char *)&ei_dom_xpath_register_php_functions,
+      (const char *)"magicksteganoimage", (const char *)&ei_magicksteganoimage,
+      (const char *)"magicksetfirstiterator", (const char *)&ei_magicksetfirstiterator,
+      (const char *)"pixelgetcolorasstring", (const char *)&ei_pixelgetcolorasstring,
+      (const char *)"magickremoveimage", (const char *)&ei_magickremoveimage,
+      (const char *)"file_exists", (const char *)&ei_file_exists,
+      (const char *)"call_user_func_array", (const char *)&ei_call_user_func_array,
+      (const char *)"restore_include_path", (const char *)&ei_restore_include_path,
+      (const char *)"memcache_set_compress_threshold", (const char *)&ei_memcache_set_compress_threshold,
+      (const char *)"dom_element_set_id_attribute_ns", (const char *)&ei_dom_element_set_id_attribute_ns,
+      (const char *)"drawgettextundercolor", (const char *)&ei_drawgettextundercolor,
+      (const char *)"array_shift", (const char *)&ei_array_shift,
+      (const char *)"magicksetimageformat", (const char *)&ei_magicksetimageformat,
+      (const char *)"xmlwriter_open_memory", (const char *)&ei_xmlwriter_open_memory,
+      (const char *)"drawsetstrokemiterlimit", (const char *)&ei_drawsetstrokemiterlimit,
+      (const char *)"mb_convert_kana", (const char *)&ei_mb_convert_kana,
+      (const char *)"token_name", (const char *)&ei_token_name,
+      (const char *)"preg_quote", (const char *)&ei_preg_quote,
+      (const char *)"hphp_service_thread_started", (const char *)&ei_hphp_service_thread_started,
+      (const char *)"magickconvolveimage", (const char *)&ei_magickconvolveimage,
+      (const char *)"curl_getinfo", (const char *)&ei_curl_getinfo,
+      (const char *)"pfsockopen", (const char *)&ei_pfsockopen,
+      (const char *)"dom_element_get_elements_by_tag_name_ns", (const char *)&ei_dom_element_get_elements_by_tag_name_ns,
+      (const char *)"ucfirst", (const char *)&ei_ucfirst,
+      (const char *)"hphp_splfileinfo_isreadable", (const char *)&ei_hphp_splfileinfo_isreadable,
+      (const char *)"imap_check", (const char *)&ei_imap_check,
+      (const char *)"chroot", (const char *)&ei_chroot,
+      (const char *)"chdir", (const char *)&ei_chdir,
+      (const char *)"socket_write", (const char *)&ei_socket_write,
+      (const char *)"forward_static_call_array", (const char *)&ei_forward_static_call_array,
+      (const char *)"stream_bucket_new", (const char *)&ei_stream_bucket_new,
+      (const char *)"magickflipimage", (const char *)&ei_magickflipimage,
+      (const char *)"timezone_identifiers_list", (const char *)&ei_timezone_identifiers_list,
+      (const char *)"array_diff_key", (const char *)&ei_array_diff_key,
+      (const char *)"session_encode", (const char *)&ei_session_encode,
+      (const char *)"fread", (const char *)&ei_fread,
+      (const char *)"override_function", (const char *)&ei_override_function,
+      (const char *)"is_long", (const char *)&ei_is_long,
+      (const char *)"pixelsetred", (const char *)&ei_pixelsetred,
+      (const char *)"mailparse_uudecode_all", (const char *)&ei_mailparse_uudecode_all,
+      (const char *)"spl_autoload_call", (const char *)&ei_spl_autoload_call,
+      (const char *)"drawsetvectorgraphics", (const char *)&ei_drawsetvectorgraphics,
+      (const char *)"ctype_upper", (const char *)&ei_ctype_upper,
+      (const char *)"get_declared_classes", (const char *)&ei_get_declared_classes,
+      (const char *)"drawgetstrokelinejoin", (const char *)&ei_drawgetstrokelinejoin,
+      (const char *)"popen", (const char *)&ei_popen,
+      (const char *)"ldap_next_entry", (const char *)&ei_ldap_next_entry,
+      (const char *)"mailparse_msg_parse_file", (const char *)&ei_mailparse_msg_parse_file,
+      (const char *)"get_loaded_extensions", (const char *)&ei_get_loaded_extensions,
+      (const char *)"magickdrawimage", (const char *)&ei_magickdrawimage,
+      (const char *)"mcrypt_cbc", (const char *)&ei_mcrypt_cbc,
+      (const char *)"session_set_save_handler", (const char *)&ei_session_set_save_handler,
+      (const char *)"dom_element_get_attribute", (const char *)&ei_dom_element_get_attribute,
+      (const char *)"imagecreatetruecolor", (const char *)&ei_imagecreatetruecolor,
+      (const char *)"intl_is_failure", (const char *)&ei_intl_is_failure,
+      (const char *)"inet_ntop", (const char *)&ei_inet_ntop,
+      (const char *)"magickreadimage", (const char *)&ei_magickreadimage,
+      (const char *)"dom_node_is_default_namespace", (const char *)&ei_dom_node_is_default_namespace,
+      (const char *)"curl_init", (const char *)&ei_curl_init,
+      (const char *)"mcrypt_cfb", (const char *)&ei_mcrypt_cfb,
+      (const char *)"dom_document_create_document_fragment", (const char *)&ei_dom_document_create_document_fragment,
+      (const char *)"set_time_limit", (const char *)&ei_set_time_limit,
+      (const char *)"libxml_get_errors", (const char *)&ei_libxml_get_errors,
+      (const char *)"get_magic_quotes_gpc", (const char *)&ei_get_magic_quotes_gpc,
+      (const char *)"proc_get_status", (const char *)&ei_proc_get_status,
+      (const char *)"log10", (const char *)&ei_log10,
+      (const char *)"hphp_directoryiterator_seek", (const char *)&ei_hphp_directoryiterator_seek,
+      (const char *)"ldap_get_values", (const char *)&ei_ldap_get_values,
+      (const char *)"is_soap_fault", (const char *)&ei_is_soap_fault,
+      (const char *)"magickgetimagechannelmean", (const char *)&ei_magickgetimagechannelmean,
+      (const char *)"disk_total_space", (const char *)&ei_disk_total_space,
+      (const char *)"imagegd", (const char *)&ei_imagegd,
+      (const char *)"socket_set_blocking", (const char *)&ei_socket_set_blocking,
+      (const char *)"dom_element_get_elements_by_tag_name", (const char *)&ei_dom_element_get_elements_by_tag_name,
+      (const char *)"posix_mknod", (const char *)&ei_posix_mknod,
+      (const char *)"apc_define_constants", (const char *)&ei_apc_define_constants,
+      (const char *)"posix_kill", (const char *)&ei_posix_kill,
+      (const char *)"drawgetstrokealpha", (const char *)&ei_drawgetstrokealpha,
+      (const char *)"mcrypt_get_block_size", (const char *)&ei_mcrypt_get_block_size,
+      (const char *)"magickmorphimages", (const char *)&ei_magickmorphimages,
+      (const char *)"getlastmod", (const char *)&ei_getlastmod,
+      (const char *)"magickquantizeimage", (const char *)&ei_magickquantizeimage,
+      (const char *)"imagesavealpha", (const char *)&ei_imagesavealpha,
+      (const char *)"drawsetfontfamily", (const char *)&ei_drawsetfontfamily,
+      (const char *)"drawsettextantialias", (const char *)&ei_drawsettextantialias,
+      (const char *)"pixelsetgreenquantum", (const char *)&ei_pixelsetgreenquantum,
+      (const char *)"bcsqrt", (const char *)&ei_bcsqrt,
+      (const char *)"pcntl_signal", (const char *)&ei_pcntl_signal,
+      (const char *)"mcrypt_ecb", (const char *)&ei_mcrypt_ecb,
+      (const char *)"pixelsetcyanquantum", (const char *)&ei_pixelsetcyanquantum,
+      (const char *)"array_walk", (const char *)&ei_array_walk,
+      (const char *)"getmxrr", (const char *)&ei_getmxrr,
+      (const char *)"magickqueryfonts", (const char *)&ei_magickqueryfonts,
+      (const char *)"floatval", (const char *)&ei_floatval,
+      (const char *)"dom_element_get_attribute_node_ns", (const char *)&ei_dom_element_get_attribute_node_ns,
+      (const char *)"xml_set_object", (const char *)&ei_xml_set_object,
+      (const char *)"imap_utf7_encode", (const char *)&ei_imap_utf7_encode,
+      (const char *)"ctype_print", (const char *)&ei_ctype_print,
+      (const char *)"gzwrite", (const char *)&ei_gzwrite,
+      (const char *)"hphp_splfileinfo___tostring", (const char *)&ei_hphp_splfileinfo___tostring,
+      (const char *)"magickaddimage", (const char *)&ei_magickaddimage,
+      (const char *)"clearstatcache", (const char *)&ei_clearstatcache,
+      (const char *)"chgrp", (const char *)&ei_chgrp,
+      (const char *)"virtual", (const char *)&ei_virtual,
+      (const char *)"reset", (const char *)&ei_reset,
+      (const char *)"set_include_path", (const char *)&ei_set_include_path,
+      (const char *)"hphp_recursivedirectoryiterator_next", (const char *)&ei_hphp_recursivedirectoryiterator_next,
+      (const char *)"openssl_x509_export", (const char *)&ei_openssl_x509_export,
+      (const char *)"magickcolorizeimage", (const char *)&ei_magickcolorizeimage,
+      (const char *)"imagettftext", (const char *)&ei_imagettftext,
+      (const char *)"mb_strrchr", (const char *)&ei_mb_strrchr,
+      (const char *)"magickgetimageprofile", (const char *)&ei_magickgetimageprofile,
+      (const char *)"file_put_contents", (const char *)&ei_file_put_contents,
+      (const char *)"iconv_mime_encode", (const char *)&ei_iconv_mime_encode,
+      (const char *)"log1p", (const char *)&ei_log1p,
+      (const char *)"fwrite", (const char *)&ei_fwrite,
+      (const char *)"atan2", (const char *)&ei_atan2,
+      (const char *)"is_a", (const char *)&ei_is_a,
+      (const char *)"idate", (const char *)&ei_idate,
+      (const char *)"posix_initgroups", (const char *)&ei_posix_initgroups,
+      (const char *)"arsort", (const char *)&ei_arsort,
+      (const char *)"dom_characterdata_substring_data", (const char *)&ei_dom_characterdata_substring_data,
+      (const char *)"gethostbyaddr", (const char *)&ei_gethostbyaddr,
+      (const char *)"apc_delete", (const char *)&ei_apc_delete,
+      (const char *)"magicklevelimage", (const char *)&ei_magicklevelimage,
+      (const char *)"openssl_x509_parse", (const char *)&ei_openssl_x509_parse,
+      (const char *)"dom_nodelist_item", (const char *)&ei_dom_nodelist_item,
+      (const char *)"magickcommentimage", (const char *)&ei_magickcommentimage,
+      (const char *)"hphp_splfileinfo_islink", (const char *)&ei_hphp_splfileinfo_islink,
+      (const char *)"magicksetimagedelay", (const char *)&ei_magicksetimagedelay,
+      (const char *)"magickposterizeimage", (const char *)&ei_magickposterizeimage,
+      (const char *)"imap_status", (const char *)&ei_imap_status,
+      (const char *)"dom_namednodemap_get_named_item", (const char *)&ei_dom_namednodemap_get_named_item,
+      (const char *)"dom_element_get_attribute_ns", (const char *)&ei_dom_element_get_attribute_ns,
+      (const char *)"stream_socket_accept", (const char *)&ei_stream_socket_accept,
+      (const char *)"magickqueryconfigureoption", (const char *)&ei_magickqueryconfigureoption,
+      (const char *)"magickevaluateimage", (const char *)&ei_magickevaluateimage,
+      (const char *)"imagesx", (const char *)&ei_imagesx,
+      (const char *)"imagesy", (const char *)&ei_imagesy,
+      (const char *)"mysql_get_client_info", (const char *)&ei_mysql_get_client_info,
+      (const char *)"imap_mail_compose", (const char *)&ei_imap_mail_compose,
+      (const char *)"fb_crossall_query", (const char *)&ei_fb_crossall_query,
+      (const char *)"fseek", (const char *)&ei_fseek,
+      (const char *)"call_user_func_array_async", (const char *)&ei_call_user_func_array_async,
+      (const char *)"apc_compile_file", (const char *)&ei_apc_compile_file,
+      (const char *)"memcache_set_server_params", (const char *)&ei_memcache_set_server_params,
+      (const char *)"magicksetpassphrase", (const char *)&ei_magicksetpassphrase,
+      (const char *)"mysql_info", (const char *)&ei_mysql_info,
+      (const char *)"is_writable", (const char *)&ei_is_writable,
+      (const char *)"magickrotateimage", (const char *)&ei_magickrotateimage,
+      (const char *)"fgetcsv", (const char *)&ei_fgetcsv,
+      (const char *)"magickcolorfloodfillimage", (const char *)&ei_magickcolorfloodfillimage,
+      (const char *)"atanh", (const char *)&ei_atanh,
+      (const char *)"imagecopyresized", (const char *)&ei_imagecopyresized,
+      (const char *)"fpassthru", (const char *)&ei_fpassthru,
+      (const char *)"magickblackthresholdimage", (const char *)&ei_magickblackthresholdimage,
+      (const char *)"mcrypt_encrypt", (const char *)&ei_mcrypt_encrypt,
+      (const char *)"magicksetimagegreenprimary", (const char *)&ei_magicksetimagegreenprimary,
+      (const char *)"xmlwriter_start_attribute_ns", (const char *)&ei_xmlwriter_start_attribute_ns,
+      (const char *)"magickgetimageinterlacescheme", (const char *)&ei_magickgetimageinterlacescheme,
+      (const char *)"array_merge_recursive", (const char *)&ei_array_merge_recursive,
+      (const char *)"array_uintersect", (const char *)&ei_array_uintersect,
+      (const char *)"bzflush", (const char *)&ei_bzflush,
+      (const char *)"xml_set_unparsed_entity_decl_handler", (const char *)&ei_xml_set_unparsed_entity_decl_handler,
+      (const char *)"ob_get_contents", (const char *)&ei_ob_get_contents,
+      (const char *)"pixelgetcyan", (const char *)&ei_pixelgetcyan,
+      (const char *)"stream_select", (const char *)&ei_stream_select,
+      (const char *)"get_resource_type", (const char *)&ei_get_resource_type,
+      (const char *)"dangling_server_proxy_old_request", (const char *)&ei_dangling_server_proxy_old_request,
+      (const char *)"magickgetimagefilename", (const char *)&ei_magickgetimagefilename,
+      (const char *)"exif_tagname", (const char *)&ei_exif_tagname,
+      (const char *)"dom_document_create_attribute_ns", (const char *)&ei_dom_document_create_attribute_ns,
+      (const char *)"drawsetfillalpha", (const char *)&ei_drawsetfillalpha,
+      (const char *)"mb_convert_encoding", (const char *)&ei_mb_convert_encoding,
+      (const char *)"wandgetexceptionstring", (const char *)&ei_wandgetexceptionstring,
+      (const char *)"imap_set_quota", (const char *)&ei_imap_set_quota,
+      (const char *)"proc_open", (const char *)&ei_proc_open,
+      (const char *)"hphp_splfileobject_fgetss", (const char *)&ei_hphp_splfileobject_fgetss,
+      (const char *)"clearpixeliterator", (const char *)&ei_clearpixeliterator,
+      (const char *)"socket_server", (const char *)&ei_socket_server,
+      (const char *)"magickremoveimageprofile", (const char *)&ei_magickremoveimageprofile,
+      (const char *)"xmlwriter_write_dtd_element", (const char *)&ei_xmlwriter_write_dtd_element,
+      (const char *)"drawpushdefs", (const char *)&ei_drawpushdefs,
+      (const char *)"image2wbmp", (const char *)&ei_image2wbmp,
+      (const char *)"join", (const char *)&ei_join,
+      (const char *)"magicksetimage", (const char *)&ei_magicksetimage,
+      (const char *)"openssl_free_key", (const char *)&ei_openssl_free_key,
+      (const char *)"preg_grep", (const char *)&ei_preg_grep,
+      (const char *)"is_float", (const char *)&ei_is_float,
+      (const char *)"bzerrno", (const char *)&ei_bzerrno,
+      (const char *)"stream_socket_pair", (const char *)&ei_stream_socket_pair,
+      (const char *)"get_required_files", (const char *)&ei_get_required_files,
+      (const char *)"mysql_fetch_field", (const char *)&ei_mysql_fetch_field,
+      (const char *)"chmod", (const char *)&ei_chmod,
+      (const char *)"bzerror", (const char *)&ei_bzerror,
+      (const char *)"magickgettextascent", (const char *)&ei_magickgettextascent,
+      (const char *)"imap_errors", (const char *)&ei_imap_errors,
+      (const char *)"mb_regex_encoding", (const char *)&ei_mb_regex_encoding,
+      (const char *)"mail", (const char *)&ei_mail,
+      (const char *)"mcrypt_enc_self_test", (const char *)&ei_mcrypt_enc_self_test,
+      (const char *)"imap_mail", (const char *)&ei_imap_mail,
+      (const char *)"ignore_user_abort", (const char *)&ei_ignore_user_abort,
+      (const char *)"imagesetthickness", (const char *)&ei_imagesetthickness,
+      (const char *)"str_pad", (const char *)&ei_str_pad,
+      (const char *)"openssl_pkcs7_decrypt", (const char *)&ei_openssl_pkcs7_decrypt,
+      (const char *)"hphp_object_pointer", (const char *)&ei_hphp_object_pointer,
+      (const char *)"pagelet_server_task_result", (const char *)&ei_pagelet_server_task_result,
+      (const char *)"asinh", (const char *)&ei_asinh,
+      (const char *)"mailparse_msg_extract_part", (const char *)&ei_mailparse_msg_extract_part,
+      (const char *)"magickgetimagecompose", (const char *)&ei_magickgetimagecompose,
+      (const char *)"hphp_splfileinfo_getpath", (const char *)&ei_hphp_splfileinfo_getpath,
+      (const char *)"magickcropimage", (const char *)&ei_magickcropimage,
+      (const char *)"ob_gzhandler", (const char *)&ei_ob_gzhandler,
+      (const char *)"dom_document_normalize_document", (const char *)&ei_dom_document_normalize_document,
+      (const char *)"drawcomment", (const char *)&ei_drawcomment,
+      (const char *)"call_user_method", (const char *)&ei_call_user_method,
+      (const char *)"parse_hdf_file", (const char *)&ei_parse_hdf_file,
+      (const char *)"mb_split", (const char *)&ei_mb_split,
+      (const char *)"imagepolygon", (const char *)&ei_imagepolygon,
+      (const char *)"mysql_field_name", (const char *)&ei_mysql_field_name,
+      (const char *)"fputs", (const char *)&ei_fputs,
+      (const char *)"imagecolorallocatealpha", (const char *)&ei_imagecolorallocatealpha,
+      (const char *)"substr_count", (const char *)&ei_substr_count,
+      (const char *)"ldap_first_reference", (const char *)&ei_ldap_first_reference,
+      (const char *)"clock_settime", (const char *)&ei_clock_settime,
+      (const char *)"dom_namednodemap_get_named_item_ns", (const char *)&ei_dom_namednodemap_get_named_item_ns,
+      (const char *)"ftruncate", (const char *)&ei_ftruncate,
+      (const char *)"curl_version", (const char *)&ei_curl_version,
+      (const char *)"pixelgetbluequantum", (const char *)&ei_pixelgetbluequantum,
+      (const char *)"mysql_unbuffered_query", (const char *)&ei_mysql_unbuffered_query,
+      (const char *)"dom_characterdata_delete_data", (const char *)&ei_dom_characterdata_delete_data,
+      (const char *)"hphp_recursiveiteratoriterator___construct", (const char *)&ei_hphp_recursiveiteratoriterator___construct,
+      (const char *)"hash_final", (const char *)&ei_hash_final,
+      (const char *)"imagecolorresolve", (const char *)&ei_imagecolorresolve,
+      (const char *)"dom_document_import_node", (const char *)&ei_dom_document_import_node,
+      (const char *)"date_date_set", (const char *)&ei_date_date_set,
+      (const char *)"pixelsetyellow", (const char *)&ei_pixelsetyellow,
+      (const char *)"furchash_hphp_ext_supported", (const char *)&ei_furchash_hphp_ext_supported,
+      (const char *)"inet_pton", (const char *)&ei_inet_pton,
+      (const char *)"mcrypt_get_key_size", (const char *)&ei_mcrypt_get_key_size,
+      (const char *)"imap_delete", (const char *)&ei_imap_delete,
+      (const char *)"drawsettextalignment", (const char *)&ei_drawsettextalignment,
+      (const char *)"magickgetimageredprimary", (const char *)&ei_magickgetimageredprimary,
+      (const char *)"addslashes", (const char *)&ei_addslashes,
+      (const char *)"ldap_count_entries", (const char *)&ei_ldap_count_entries,
+      (const char *)"ereg_replace", (const char *)&ei_ereg_replace,
+      (const char *)"hphp_recursivedirectoryiterator_getchildren", (const char *)&ei_hphp_recursivedirectoryiterator_getchildren,
+      (const char *)"call_user_func_async", (const char *)&ei_call_user_func_async,
+      (const char *)"drawrender", (const char *)&ei_drawrender,
+      (const char *)"fb_rpc_intercept_handler", (const char *)&ei_fb_rpc_intercept_handler,
+      (const char *)"fb_intercept", (const char *)&ei_fb_intercept,
+      (const char *)"magickgetversionnumber", (const char *)&ei_magickgetversionnumber,
+      (const char *)"array_splice", (const char *)&ei_array_splice,
+      (const char *)"ftell", (const char *)&ei_ftell,
+      (const char *)"magicksetimagedepth", (const char *)&ei_magicksetimagedepth,
+      (const char *)"apc_load_constants", (const char *)&ei_apc_load_constants,
+      (const char *)"__halt_compiler", (const char *)&ei___halt_compiler,
+      (const char *)"magicklabelimage", (const char *)&ei_magicklabelimage,
+      (const char *)"hphp_log", (const char *)&ei_hphp_log,
+      (const char *)"stream_get_contents", (const char *)&ei_stream_get_contents,
+      (const char *)"imagecreatefromjpeg", (const char *)&ei_imagecreatefromjpeg,
+      (const char *)"chown", (const char *)&ei_chown,
+      (const char *)"hash_hmac_file", (const char *)&ei_hash_hmac_file,
+      (const char *)"magickechoimageblob", (const char *)&ei_magickechoimageblob,
+      (const char *)"link", (const char *)&ei_link,
+      (const char *)"fb_utf8ize", (const char *)&ei_fb_utf8ize,
+      (const char *)"drawsetfillpatternurl", (const char *)&ei_drawsetfillpatternurl,
+      (const char *)"iconv", (const char *)&ei_iconv,
+      (const char *)"highlight_file", (const char *)&ei_highlight_file,
+      (const char *)"iconv_mime_decode_headers", (const char *)&ei_iconv_mime_decode_headers,
+      (const char *)"imap_getsubscribed", (const char *)&ei_imap_getsubscribed,
+      (const char *)"ini_get_all", (const char *)&ei_ini_get_all,
+      (const char *)"collator_get_strength", (const char *)&ei_collator_get_strength,
+      (const char *)"ldap_get_values_len", (const char *)&ei_ldap_get_values_len,
+      (const char *)"hphp_splfileinfo_getrealpath", (const char *)&ei_hphp_splfileinfo_getrealpath,
+      (const char *)"openssl_pkcs7_verify", (const char *)&ei_openssl_pkcs7_verify,
+      (const char *)"hphp_directoryiterator_current", (const char *)&ei_hphp_directoryiterator_current,
+      (const char *)"hphp_splfileobject_fgetcsv", (const char *)&ei_hphp_splfileobject_fgetcsv,
+      (const char *)"furchash_hphp_ext", (const char *)&ei_furchash_hphp_ext,
+      (const char *)"stream_socket_recvfrom", (const char *)&ei_stream_socket_recvfrom,
+      (const char *)"drawgetcliprule", (const char *)&ei_drawgetcliprule,
+      (const char *)"apc_filehits", (const char *)&ei_apc_filehits,
+      (const char *)"pixelgetexceptionstring", (const char *)&ei_pixelgetexceptionstring,
+      (const char *)"mcrypt_ofb", (const char *)&ei_mcrypt_ofb,
+      (const char *)"imageantialias", (const char *)&ei_imageantialias,
+      (const char *)"hphp_splfileinfo_openfile", (const char *)&ei_hphp_splfileinfo_openfile,
+      (const char *)"dom_document_validate", (const char *)&ei_dom_document_validate,
+      (const char *)"idn_to_ascii", (const char *)&ei_idn_to_ascii,
+      (const char *)"error_log", (const char *)&ei_error_log,
+      (const char *)"hash_update", (const char *)&ei_hash_update,
+      (const char *)"ob_flush", (const char *)&ei_ob_flush,
+      (const char *)"md5_file", (const char *)&ei_md5_file,
+      (const char *)"drawgetexception", (const char *)&ei_drawgetexception,
+      (const char *)"file_get_contents", (const char *)&ei_file_get_contents,
+      (const char *)"uniqid", (const char *)&ei_uniqid,
+      (const char *)"strncasecmp", (const char *)&ei_strncasecmp,
+      (const char *)"magicksetimagepixels", (const char *)&ei_magicksetimagepixels,
+      (const char *)"drawgetfillopacity", (const char *)&ei_drawgetfillopacity,
+      (const char *)"imap_list", (const char *)&ei_imap_list,
+      (const char *)"xml_parser_create_ns", (const char *)&ei_xml_parser_create_ns,
+      (const char *)"ldap_delete", (const char *)&ei_ldap_delete,
+      (const char *)"fnmatch", (const char *)&ei_fnmatch,
+      (const char *)"hphp_splfileobject_eof", (const char *)&ei_hphp_splfileobject_eof,
+      (const char *)"metaphone", (const char *)&ei_metaphone,
+      (const char *)"mysql_errno", (const char *)&ei_mysql_errno,
+      (const char *)"stream_wrapper_unregister", (const char *)&ei_stream_wrapper_unregister,
+      (const char *)"magickcyclecolormapimage", (const char *)&ei_magickcyclecolormapimage,
+      (const char *)"hphp_recursiveiteratoriterator_current", (const char *)&ei_hphp_recursiveiteratoriterator_current,
+      (const char *)"restore_error_handler", (const char *)&ei_restore_error_handler,
+      (const char *)"hphp_recursivedirectoryiterator___construct", (const char *)&ei_hphp_recursivedirectoryiterator___construct,
+      (const char *)"magicksetimagevirtualpixelmethod", (const char *)&ei_magicksetimagevirtualpixelmethod,
+      (const char *)"socket_getpeername", (const char *)&ei_socket_getpeername,
+      (const char *)"memcache_close", (const char *)&ei_memcache_close,
+      (const char *)"mysql_error", (const char *)&ei_mysql_error,
+      (const char *)"drawtranslate", (const char *)&ei_drawtranslate,
+      (const char *)"mysql_list_dbs", (const char *)&ei_mysql_list_dbs,
+      (const char *)"imagefilter", (const char *)&ei_imagefilter,
+      (const char *)"base64_encode", (const char *)&ei_base64_encode,
+      (const char *)"dom_xpath_query", (const char *)&ei_dom_xpath_query,
+      (const char *)"hphpd_install_user_command", (const char *)&ei_hphpd_install_user_command,
+      (const char *)"dom_element_set_id_attribute_node", (const char *)&ei_dom_element_set_id_attribute_node,
+      (const char *)"is_null", (const char *)&ei_is_null,
+      (const char *)"octdec", (const char *)&ei_octdec,
+      (const char *)"drawsetclippath", (const char *)&ei_drawsetclippath,
+      (const char *)"magickconstituteimage", (const char *)&ei_magickconstituteimage,
+      (const char *)"pcntl_wexitstatus", (const char *)&ei_pcntl_wexitstatus,
+      (const char *)"iterator_apply", (const char *)&ei_iterator_apply,
+      (const char *)"apache_setenv", (const char *)&ei_apache_setenv,
+      (const char *)"dom_node_is_same_node", (const char *)&ei_dom_node_is_same_node,
+      (const char *)"clonedrawingwand", (const char *)&ei_clonedrawingwand,
+      (const char *)"ob_get_clean", (const char *)&ei_ob_get_clean,
+      (const char *)"expm1", (const char *)&ei_expm1,
+      (const char *)"openssl_decrypt", (const char *)&ei_openssl_decrypt,
+      (const char *)"ldap_first_entry", (const char *)&ei_ldap_first_entry,
+      (const char *)"curl_multi_select", (const char *)&ei_curl_multi_select,
+      (const char *)"magickswirlimage", (const char *)&ei_magickswirlimage,
+      (const char *)"mb_ereg_search_regs", (const char *)&ei_mb_ereg_search_regs,
+      (const char *)"ldap_errno", (const char *)&ei_ldap_errno,
+      (const char *)"mysql_get_server_info", (const char *)&ei_mysql_get_server_info,
+      (const char *)"mailparse_rfc822_parse_addresses", (const char *)&ei_mailparse_rfc822_parse_addresses,
+      (const char *)"magickgetimagemimetype", (const char *)&ei_magickgetimagemimetype,
+      (const char *)"soundex", (const char *)&ei_soundex,
+      (const char *)"magickgetimageformat", (const char *)&ei_magickgetimageformat,
+      (const char *)"mcrypt_module_get_supported_key_sizes", (const char *)&ei_mcrypt_module_get_supported_key_sizes,
+      (const char *)"preg_replace_callback", (const char *)&ei_preg_replace_callback,
+      (const char *)"dom_document_create_element", (const char *)&ei_dom_document_create_element,
+      (const char *)"ldap_error", (const char *)&ei_ldap_error,
+      (const char *)"xmlwriter_full_end_element", (const char *)&ei_xmlwriter_full_end_element,
+      (const char *)"ctype_graph", (const char *)&ei_ctype_graph,
+      (const char *)"session_register", (const char *)&ei_session_register,
+      (const char *)"asort", (const char *)&ei_asort,
+      (const char *)"apd_echo", (const char *)&ei_apd_echo,
+      (const char *)"rewinddir", (const char *)&ei_rewinddir,
+      (const char *)"ob_implicit_flush", (const char *)&ei_ob_implicit_flush,
+      (const char *)"pcntl_signal_dispatch", (const char *)&ei_pcntl_signal_dispatch,
+      (const char *)"session_get_cookie_params", (const char *)&ei_session_get_cookie_params,
+      (const char *)"pixelgetiteratorexceptionstring", (const char *)&ei_pixelgetiteratorexceptionstring,
+      (const char *)"stream_socket_client", (const char *)&ei_stream_socket_client,
+      (const char *)"drawsetstrokedasharray", (const char *)&ei_drawsetstrokedasharray,
+      (const char *)"mysql_free_result", (const char *)&ei_mysql_free_result,
+      (const char *)"is_real", (const char *)&ei_is_real,
+      (const char *)"mcrypt_enc_is_block_algorithm_mode", (const char *)&ei_mcrypt_enc_is_block_algorithm_mode,
+      (const char *)"array_slice", (const char *)&ei_array_slice,
+      (const char *)"count_chars", (const char *)&ei_count_chars,
+      (const char *)"hphp_splfileobject_getmaxlinelen", (const char *)&ei_hphp_splfileobject_getmaxlinelen,
+      (const char *)"array_uintersect_uassoc", (const char *)&ei_array_uintersect_uassoc,
+      (const char *)"drawsetstrokewidth", (const char *)&ei_drawsetstrokewidth,
+      (const char *)"posix_mkfifo", (const char *)&ei_posix_mkfifo,
+      (const char *)"array_count_values", (const char *)&ei_array_count_values,
+      (const char *)"memcache_connect", (const char *)&ei_memcache_connect,
+      (const char *)"pixelgetexception", (const char *)&ei_pixelgetexception,
+      (const char *)"mkdir", (const char *)&ei_mkdir,
+      (const char *)"magicksetsize", (const char *)&ei_magicksetsize,
+      (const char *)"debug_zval_dump", (const char *)&ei_debug_zval_dump,
+      (const char *)"iconv_substr", (const char *)&ei_iconv_substr,
+      (const char *)"xml_set_external_entity_ref_handler", (const char *)&ei_xml_set_external_entity_ref_handler,
+      (const char *)"mb_decode_numericentity", (const char *)&ei_mb_decode_numericentity,
+      (const char *)"ldap_next_attribute", (const char *)&ei_ldap_next_attribute,
+      (const char *)"hphp_splfileobject_fflush", (const char *)&ei_hphp_splfileobject_fflush,
+      (const char *)"imagejpeg", (const char *)&ei_imagejpeg,
+      (const char *)"imagesetbrush", (const char *)&ei_imagesetbrush,
+      (const char *)"mb_strtoupper", (const char *)&ei_mb_strtoupper,
+      (const char *)"usleep", (const char *)&ei_usleep,
+      (const char *)"mb_strrpos", (const char *)&ei_mb_strrpos,
+      (const char *)"collator_compare", (const char *)&ei_collator_compare,
+      (const char *)"extract", (const char *)&ei_extract,
+      (const char *)"imap_thread", (const char *)&ei_imap_thread,
+      (const char *)"session_decode", (const char *)&ei_session_decode,
+      (const char *)"get_browser", (const char *)&ei_get_browser,
+      (const char *)"html_entity_decode", (const char *)&ei_html_entity_decode,
+      (const char *)"spl_classes", (const char *)&ei_spl_classes,
+      (const char *)"preg_split", (const char *)&ei_preg_split,
+      (const char *)"magickpreviewimages", (const char *)&ei_magickpreviewimages,
+      (const char *)"zend_logo_guid", (const char *)&ei_zend_logo_guid,
+      (const char *)"magickgetimagesize", (const char *)&ei_magickgetimagesize,
+      (const char *)"apd_set_browser_trace", (const char *)&ei_apd_set_browser_trace,
+      (const char *)"xhprof_sample_enable", (const char *)&ei_xhprof_sample_enable,
+      (const char *)"hphp_splfileobject_key", (const char *)&ei_hphp_splfileobject_key,
+      (const char *)"mb_http_input", (const char *)&ei_mb_http_input,
+      (const char *)"gzinflate", (const char *)&ei_gzinflate,
+      (const char *)"imap_rfc822_parse_headers", (const char *)&ei_imap_rfc822_parse_headers,
+      (const char *)"openssl_pkcs7_sign", (const char *)&ei_openssl_pkcs7_sign,
+      (const char *)"assert", (const char *)&ei_assert,
+      (const char *)"stream_get_wrappers", (const char *)&ei_stream_get_wrappers,
+      (const char *)"gzfile", (const char *)&ei_gzfile,
+      (const char *)"session_id", (const char *)&ei_session_id,
+      (const char *)"stream_socket_sendto", (const char *)&ei_stream_socket_sendto,
+      (const char *)"gzpassthru", (const char *)&ei_gzpassthru,
+      (const char *)"stream_bucket_make_writeable", (const char *)&ei_stream_bucket_make_writeable,
+      (const char *)"posix_setegid", (const char *)&ei_posix_setegid,
+      (const char *)"drawgetexceptionstring", (const char *)&ei_drawgetexceptionstring,
+      (const char *)"hash_algos", (const char *)&ei_hash_algos,
+      (const char *)"drawsetstrokeantialias", (const char *)&ei_drawsetstrokeantialias,
+      (const char *)"destroypixelwand", (const char *)&ei_destroypixelwand,
+      (const char *)"fstat", (const char *)&ei_fstat,
+      (const char *)"magicksetimageresolution", (const char *)&ei_magicksetimageresolution,
+      (const char *)"mysql_db_name", (const char *)&ei_mysql_db_name,
+      (const char *)"is_finite", (const char *)&ei_is_finite,
+      (const char *)"pixelgetyellowquantum", (const char *)&ei_pixelgetyellowquantum,
+      (const char *)"ksort", (const char *)&ei_ksort,
+      (const char *)"thrift_protocol_read_binary", (const char *)&ei_thrift_protocol_read_binary,
+      (const char *)"get_included_files", (const char *)&ei_get_included_files,
+      (const char *)"strip_tags", (const char *)&ei_strip_tags,
+      (const char *)"mb_ereg_search_getpos", (const char *)&ei_mb_ereg_search_getpos,
+      (const char *)"pixelgetcyanquantum", (const char *)&ei_pixelgetcyanquantum,
+      (const char *)"magickgetexception", (const char *)&ei_magickgetexception,
+      (const char *)"imap_listscan", (const char *)&ei_imap_listscan,
+      (const char *)"ctype_punct", (const char *)&ei_ctype_punct,
+      (const char *)"next", (const char *)&ei_next,
+      (const char *)"shm_detach", (const char *)&ei_shm_detach,
+      (const char *)"shm_attach", (const char *)&ei_shm_attach,
+      (const char *)"magickflattenimages", (const char *)&ei_magickflattenimages,
+      (const char *)"dom_document_save_html_file", (const char *)&ei_dom_document_save_html_file,
+      (const char *)"similar_text", (const char *)&ei_similar_text,
+      (const char *)"hphp_get_thread_id", (const char *)&ei_hphp_get_thread_id,
+      (const char *)"imagecreatefromgd2part", (const char *)&ei_imagecreatefromgd2part,
+      (const char *)"dom_element_set_attribute", (const char *)&ei_dom_element_set_attribute,
+      (const char *)"iterator_to_array", (const char *)&ei_iterator_to_array,
+      (const char *)"iconv_get_encoding", (const char *)&ei_iconv_get_encoding,
+      (const char *)"getmyinode", (const char *)&ei_getmyinode,
+      (const char *)"gzgetc", (const char *)&ei_gzgetc,
+      (const char *)"hphp_set_static_property", (const char *)&ei_hphp_set_static_property,
+      (const char *)"unlink", (const char *)&ei_unlink,
+      (const char *)"mcrypt_module_open", (const char *)&ei_mcrypt_module_open,
+      (const char *)"token_get_all", (const char *)&ei_token_get_all,
+      (const char *)"base_convert", (const char *)&ei_base_convert,
+      (const char *)"gethostbynamel", (const char *)&ei_gethostbynamel,
+      (const char *)"var_dump", (const char *)&ei_var_dump,
+      (const char *)"xmlwriter_start_attribute", (const char *)&ei_xmlwriter_start_attribute,
+      (const char *)"pack", (const char *)&ei_pack,
+      (const char *)"gzgets", (const char *)&ei_gzgets,
+      (const char *)"array_intersect_uassoc", (const char *)&ei_array_intersect_uassoc,
+      (const char *)"basename", (const char *)&ei_basename,
+      (const char *)"imap_utf7_decode", (const char *)&ei_imap_utf7_decode,
+      (const char *)"krsort", (const char *)&ei_krsort,
+      (const char *)"clock_gettime", (const char *)&ei_clock_gettime,
+      (const char *)"pushdrawingwand", (const char *)&ei_pushdrawingwand,
+      (const char *)"imageline", (const char *)&ei_imageline,
+      (const char *)"socket_read", (const char *)&ei_socket_read,
+      (const char *)"xmlwriter_write_dtd_entity", (const char *)&ei_xmlwriter_write_dtd_entity,
+      (const char *)"mysql_tablename", (const char *)&ei_mysql_tablename,
+      (const char *)"collator_sort", (const char *)&ei_collator_sort,
+      (const char *)"magickwriteimage", (const char *)&ei_magickwriteimage,
+      (const char *)"mcrypt_module_get_algo_key_size", (const char *)&ei_mcrypt_module_get_algo_key_size,
+      (const char *)"hash_update_file", (const char *)&ei_hash_update_file,
+      (const char *)"magickembossimage", (const char *)&ei_magickembossimage,
+      (const char *)"forward_static_call", (const char *)&ei_forward_static_call,
+      (const char *)"gzencode", (const char *)&ei_gzencode,
+      (const char *)"checkdate", (const char *)&ei_checkdate,
+      (const char *)"magickimplodeimage", (const char *)&ei_magickimplodeimage,
+      (const char *)"magickgetimageindex", (const char *)&ei_magickgetimageindex,
+      (const char *)"ctype_lower", (const char *)&ei_ctype_lower,
+      (const char *)"imagepsloadfont", (const char *)&ei_imagepsloadfont,
+      (const char *)"iconv_mime_decode", (const char *)&ei_iconv_mime_decode,
+      (const char *)"hphp_recursiveiteratoriterator_key", (const char *)&ei_hphp_recursiveiteratoriterator_key,
+      (const char *)"mcrypt_module_is_block_algorithm", (const char *)&ei_mcrypt_module_is_block_algorithm,
+      (const char *)"imap_unsubscribe", (const char *)&ei_imap_unsubscribe,
+      (const char *)"imap_lsub", (const char *)&ei_imap_lsub,
+      (const char *)"wandgetexception", (const char *)&ei_wandgetexception,
+      (const char *)"fsockopen", (const char *)&ei_fsockopen,
+      (const char *)"usort", (const char *)&ei_usort,
+      (const char *)"pixelsetiteratorrow", (const char *)&ei_pixelsetiteratorrow,
+      (const char *)"call_user_func_serialized", (const char *)&ei_call_user_func_serialized,
+      (const char *)"hphp_splfileinfo_iswritable", (const char *)&ei_hphp_splfileinfo_iswritable,
+      (const char *)"dom_document_create_attribute", (const char *)&ei_dom_document_create_attribute,
+      (const char *)"ldap_get_option", (const char *)&ei_ldap_get_option,
+      (const char *)"socket_recv", (const char *)&ei_socket_recv,
+      (const char *)"sys_getloadavg", (const char *)&ei_sys_getloadavg,
+      (const char *)"evhttp_async_post", (const char *)&ei_evhttp_async_post,
+      (const char *)"hphp_recursivedirectoryiterator_seek", (const char *)&ei_hphp_recursivedirectoryiterator_seek,
+      (const char *)"array_values", (const char *)&ei_array_values,
+      (const char *)"ctype_digit", (const char *)&ei_ctype_digit,
+      (const char *)"ob_get_length", (const char *)&ei_ob_get_length,
+      (const char *)"magicksolarizeimage", (const char *)&ei_magicksolarizeimage,
+      (const char *)"ob_list_handlers", (const char *)&ei_ob_list_handlers,
+      (const char *)"array_uintersect_assoc", (const char *)&ei_array_uintersect_assoc,
+      (const char *)"openssl_x509_read", (const char *)&ei_openssl_x509_read,
+      (const char *)"magickgetimagecolormapcolor", (const char *)&ei_magickgetimagecolormapcolor,
+      (const char *)"hphp_splfileobject_getcvscontrol", (const char *)&ei_hphp_splfileobject_getcvscontrol,
+      (const char *)"settype", (const char *)&ei_settype,
+      (const char *)"posix_access", (const char *)&ei_posix_access,
+      (const char *)"imap_uid", (const char *)&ei_imap_uid,
+      (const char *)"explode", (const char *)&ei_explode,
+      (const char *)"fb_load_local_databases", (const char *)&ei_fb_load_local_databases,
+      (const char *)"imagecreatefromgd", (const char *)&ei_imagecreatefromgd,
+      (const char *)"proc_close", (const char *)&ei_proc_close,
+      (const char *)"magickgaussianblurimage", (const char *)&ei_magickgaussianblurimage,
+      (const char *)"apd_set_session_trace_socket", (const char *)&ei_apd_set_session_trace_socket,
+      (const char *)"openssl_pkcs12_export_to_file", (const char *)&ei_openssl_pkcs12_export_to_file,
+      (const char *)"mailparse_msg_free", (const char *)&ei_mailparse_msg_free,
+      (const char *)"openssl_private_decrypt", (const char *)&ei_openssl_private_decrypt,
+      (const char *)"dom_document_save", (const char *)&ei_dom_document_save,
+      (const char *)"hphp_get_extension_info", (const char *)&ei_hphp_get_extension_info,
+      (const char *)"imap_headerinfo", (const char *)&ei_imap_headerinfo,
+      (const char *)"output_add_rewrite_var", (const char *)&ei_output_add_rewrite_var,
+      (const char *)"xmlwriter_write_cdata", (const char *)&ei_xmlwriter_write_cdata,
+      (const char *)"mb_list_mime_names", (const char *)&ei_mb_list_mime_names,
+      (const char *)"ispixelwand", (const char *)&ei_ispixelwand,
+      (const char *)"xmlwriter_end_dtd", (const char *)&ei_xmlwriter_end_dtd,
+      (const char *)"curl_close", (const char *)&ei_curl_close,
+      (const char *)"array_udiff", (const char *)&ei_array_udiff,
+      (const char *)"session_cache_limiter", (const char *)&ei_session_cache_limiter,
+      (const char *)"stream_context_create", (const char *)&ei_stream_context_create,
+      (const char *)"drawgetstrokedashoffset", (const char *)&ei_drawgetstrokedashoffset,
+      (const char *)"openssl_pkey_get_public", (const char *)&ei_openssl_pkey_get_public,
+      (const char *)"imap_fetchbody", (const char *)&ei_imap_fetchbody,
+      (const char *)"interface_exists", (const char *)&ei_interface_exists,
+      (const char *)"hphp_directoryiterator___construct", (const char *)&ei_hphp_directoryiterator___construct,
+      (const char *)"drawpathmovetorelative", (const char *)&ei_drawpathmovetorelative,
+      (const char *)"apache_get_config", (const char *)&ei_apache_get_config,
+      (const char *)"curl_copy_handle", (const char *)&ei_curl_copy_handle,
+      (const char *)"drawgetvectorgraphics", (const char *)&ei_drawgetvectorgraphics,
+      (const char *)"drawpathfinish", (const char *)&ei_drawpathfinish,
+      (const char *)"png2wbmp", (const char *)&ei_png2wbmp,
+      (const char *)"drawmatte", (const char *)&ei_drawmatte,
+      (const char *)"imagecolormatch", (const char *)&ei_imagecolormatch,
+      (const char *)"drawrectangle", (const char *)&ei_drawrectangle,
+      (const char *)"fb_parallel_query", (const char *)&ei_fb_parallel_query,
+      (const char *)"dom_document_create_entity_reference", (const char *)&ei_dom_document_create_entity_reference,
+      (const char *)"mcrypt_enc_get_block_size", (const char *)&ei_mcrypt_enc_get_block_size,
+      (const char *)"stream_context_set_option", (const char *)&ei_stream_context_set_option,
+      (const char *)"drawpathcurvetorelative", (const char *)&ei_drawpathcurvetorelative,
+      (const char *)"phpcredits", (const char *)&ei_phpcredits,
+      (const char *)"drawgetfillrule", (const char *)&ei_drawgetfillrule,
+      (const char *)"parse_hdf_string", (const char *)&ei_parse_hdf_string,
+      (const char *)"xmlwriter_end_cdata", (const char *)&ei_xmlwriter_end_cdata,
+      (const char *)"magickgetversionstring", (const char *)&ei_magickgetversionstring,
+      (const char *)"pcntl_fork", (const char *)&ei_pcntl_fork,
+      (const char *)"dom_node_normalize", (const char *)&ei_dom_node_normalize,
+      (const char *)"doubleval", (const char *)&ei_doubleval,
+      (const char *)"assert_options", (const char *)&ei_assert_options,
+      (const char *)"magickhasnextimage", (const char *)&ei_magickhasnextimage,
+      (const char *)"rmdir", (const char *)&ei_rmdir,
+      (const char *)"drawgetstrokelinecap", (const char *)&ei_drawgetstrokelinecap,
+      (const char *)"hphp_clear_unflushed", (const char *)&ei_hphp_clear_unflushed,
+      (const char *)"magickscaleimage", (const char *)&ei_magickscaleimage,
+      (const char *)"spl_autoload_unregister", (const char *)&ei_spl_autoload_unregister,
+      (const char *)"pixelgetblackquantum", (const char *)&ei_pixelgetblackquantum,
+      (const char *)"magicknewimage", (const char *)&ei_magicknewimage,
+      (const char *)"destroypixelwands", (const char *)&ei_destroypixelwands,
+      (const char *)"shm_remove", (const char *)&ei_shm_remove,
+      (const char *)"hphp_splfileobject_setflags", (const char *)&ei_hphp_splfileobject_setflags,
+      (const char *)"date_sun_info", (const char *)&ei_date_sun_info,
+      (const char *)"hphp_directoryiterator_valid", (const char *)&ei_hphp_directoryiterator_valid,
+      (const char *)"magickresizeimage", (const char *)&ei_magickresizeimage,
+      (const char *)"parse_ini_file", (const char *)&ei_parse_ini_file,
+      (const char *)"stream_get_meta_data", (const char *)&ei_stream_get_meta_data,
+      (const char *)"imagepsencodefont", (const char *)&ei_imagepsencodefont,
+      (const char *)"ldap_set_option", (const char *)&ei_ldap_set_option,
+      (const char *)"magickgetsize", (const char *)&ei_magickgetsize,
+      (const char *)"memory_get_peak_usage", (const char *)&ei_memory_get_peak_usage,
+      (const char *)"pcntl_exec", (const char *)&ei_pcntl_exec,
+      (const char *)"xmlwriter_set_indent_string", (const char *)&ei_xmlwriter_set_indent_string,
+      (const char *)"php_strip_whitespace", (const char *)&ei_php_strip_whitespace,
+      (const char *)"strcoll", (const char *)&ei_strcoll,
+      (const char *)"write_hdf_file", (const char *)&ei_write_hdf_file,
+      (const char *)"socket_send", (const char *)&ei_socket_send,
+      (const char *)"zlib_get_coding_type", (const char *)&ei_zlib_get_coding_type,
+      (const char *)"hphp_splfileobject_fscanf", (const char *)&ei_hphp_splfileobject_fscanf,
+      (const char *)"qlzuncompress", (const char *)&ei_qlzuncompress,
+      (const char *)"mb_ereg_search_getregs", (const char *)&ei_mb_ereg_search_getregs,
+      (const char *)"mb_eregi", (const char *)&ei_mb_eregi,
+      (const char *)"pixelgetgreen", (const char *)&ei_pixelgetgreen,
+      (const char *)"mysql_client_encoding", (const char *)&ei_mysql_client_encoding,
+      (const char *)"zend_thread_id", (const char *)&ei_zend_thread_id,
+      (const char *)"ldap_mod_replace", (const char *)&ei_ldap_mod_replace,
+      (const char *)"collator_get_error_code", (const char *)&ei_collator_get_error_code,
+      (const char *)"stream_filter_prepend", (const char *)&ei_stream_filter_prepend,
+      (const char *)"imap_close", (const char *)&ei_imap_close,
+      (const char *)"substr", (const char *)&ei_substr,
+      (const char *)"magickcombineimages", (const char *)&ei_magickcombineimages,
+      (const char *)"pixelgetexceptiontype", (const char *)&ei_pixelgetexceptiontype,
+      (const char *)"unpack", (const char *)&ei_unpack,
+      (const char *)"hphp_splfileinfo_isdir", (const char *)&ei_hphp_splfileinfo_isdir,
+      (const char *)"magickgetimagepixels", (const char *)&ei_magickgetimagepixels,
+      (const char *)"array_product", (const char *)&ei_array_product,
+      (const char *)"substr_replace", (const char *)&ei_substr_replace,
+      (const char *)"xbox_get_thread_time", (const char *)&ei_xbox_get_thread_time,
+      (const char *)"xmlwriter_write_dtd", (const char *)&ei_xmlwriter_write_dtd,
+      (const char *)"mysql_select_db", (const char *)&ei_mysql_select_db,
+      (const char *)"fb_get_taint", (const char *)&ei_fb_get_taint,
+      (const char *)"use_soap_error_handler", (const char *)&ei_use_soap_error_handler,
+      (const char *)"debug_backtrace", (const char *)&ei_debug_backtrace,
+      (const char *)"drawpathcurvetosmoothrelative", (const char *)&ei_drawpathcurvetosmoothrelative,
+      (const char *)"mailparse_determine_best_xfer_encoding", (const char *)&ei_mailparse_determine_best_xfer_encoding,
+      (const char *)"imagettfbbox", (const char *)&ei_imagettfbbox,
+      (const char *)"mb_internal_encoding", (const char *)&ei_mb_internal_encoding,
+      (const char *)"msg_get_queue", (const char *)&ei_msg_get_queue,
+      (const char *)"posix_getegid", (const char *)&ei_posix_getegid,
+      (const char *)"magickmedianfilterimage", (const char *)&ei_magickmedianfilterimage,
+      (const char *)"imap_ping", (const char *)&ei_imap_ping,
+      (const char *)"xbox_task_result", (const char *)&ei_xbox_task_result,
+      (const char *)"mcrypt_generic_deinit", (const char *)&ei_mcrypt_generic_deinit,
+      (const char *)"method_exists", (const char *)&ei_method_exists,
+      (const char *)"money_format", (const char *)&ei_money_format,
+      (const char *)"imap_open", (const char *)&ei_imap_open,
+      (const char *)"inclued_get_data", (const char *)&ei_inclued_get_data,
+      (const char *)"clearmagickwand", (const char *)&ei_clearmagickwand,
+      (const char *)"dom_element_remove_attribute_node", (const char *)&ei_dom_element_remove_attribute_node,
+      (const char *)"array_udiff_assoc", (const char *)&ei_array_udiff_assoc,
+      (const char *)"xml_parser_free", (const char *)&ei_xml_parser_free,
+      (const char *)"is_resource", (const char *)&ei_is_resource,
+      (const char *)"hphp_splfileinfo_getsize", (const char *)&ei_hphp_splfileinfo_getsize,
+      (const char *)"posix_seteuid", (const char *)&ei_posix_seteuid,
+      (const char *)"magicksetinterlacescheme", (const char *)&ei_magicksetinterlacescheme,
+      (const char *)"str_shuffle", (const char *)&ei_str_shuffle,
+      (const char *)"mcrypt_enc_is_block_algorithm", (const char *)&ei_mcrypt_enc_is_block_algorithm,
+      (const char *)"call_user_func_array_rpc", (const char *)&ei_call_user_func_array_rpc,
+      (const char *)"fb_serialize", (const char *)&ei_fb_serialize,
+      (const char *)"magickgetcopyright", (const char *)&ei_magickgetcopyright,
+      (const char *)"magickstripimage", (const char *)&ei_magickstripimage,
+      (const char *)"fb_get_flush_stat", (const char *)&ei_fb_get_flush_stat,
+      (const char *)"base64_decode", (const char *)&ei_base64_decode,
+      (const char *)"rand", (const char *)&ei_rand,
+      (const char *)"crc32", (const char *)&ei_crc32,
+      (const char *)"stream_encoding", (const char *)&ei_stream_encoding,
+      (const char *)"drawgetstrokedasharray", (const char *)&ei_drawgetstrokedasharray,
+      (const char *)"magickgetimagedispose", (const char *)&ei_magickgetimagedispose,
+      (const char *)"drawpopdefs", (const char *)&ei_drawpopdefs,
+      (const char *)"xml_parser_create", (const char *)&ei_xml_parser_create,
+      (const char *)"session_save_path", (const char *)&ei_session_save_path,
+      (const char *)"pcntl_wifsignaled", (const char *)&ei_pcntl_wifsignaled,
+      (const char *)"openssl_pkcs7_encrypt", (const char *)&ei_openssl_pkcs7_encrypt,
+      (const char *)"read_exif_data", (const char *)&ei_read_exif_data,
+      (const char *)"drawsetstrokeopacity", (const char *)&ei_drawsetstrokeopacity,
+      (const char *)"drawroundrectangle", (const char *)&ei_drawroundrectangle,
+      (const char *)"hphp_directoryiterator_isdot", (const char *)&ei_hphp_directoryiterator_isdot,
+      (const char *)"drawgetstrokewidth", (const char *)&ei_drawgetstrokewidth,
+      (const char *)"date_create", (const char *)&ei_date_create,
+      (const char *)"strcspn", (const char *)&ei_strcspn,
+      (const char *)"drawgetclipunits", (const char *)&ei_drawgetclipunits,
+      (const char *)"sem_acquire", (const char *)&ei_sem_acquire,
+      (const char *)"socket_strerror", (const char *)&ei_socket_strerror,
+      (const char *)"magickgetstringheight", (const char *)&ei_magickgetstringheight,
+      (const char *)"dom_document_relaxng_validate_xml", (const char *)&ei_dom_document_relaxng_validate_xml,
+      (const char *)"rawurlencode", (const char *)&ei_rawurlencode,
+      (const char *)"strtotime", (const char *)&ei_strtotime,
+      (const char *)"imap_alerts", (const char *)&ei_imap_alerts,
+      (const char *)"dom_element_set_id_attribute", (const char *)&ei_dom_element_set_id_attribute,
+      (const char *)"hphp_recursivedirectoryiterator_getsubpath", (const char *)&ei_hphp_recursivedirectoryiterator_getsubpath,
+      (const char *)"imap_setflag_full", (const char *)&ei_imap_setflag_full,
+      (const char *)"apc_clear_cache", (const char *)&ei_apc_clear_cache,
+      (const char *)"dirname", (const char *)&ei_dirname,
+      (const char *)"strnatcasecmp", (const char *)&ei_strnatcasecmp,
+      (const char *)"magicksetsamplingfactors", (const char *)&ei_magicksetsamplingfactors,
+      (const char *)"openssl_pkey_get_private", (const char *)&ei_openssl_pkey_get_private,
+      (const char *)"magickaverageimages", (const char *)&ei_magickaverageimages,
+      (const char *)"iconv_strrpos", (const char *)&ei_iconv_strrpos,
+      (const char *)"collator_get_locale", (const char *)&ei_collator_get_locale,
+      (const char *)"drawsetviewbox", (const char *)&ei_drawsetviewbox,
+      (const char *)"magicksetimagecompressionquality", (const char *)&ei_magicksetimagecompressionquality,
+      (const char *)"mysql_ping", (const char *)&ei_mysql_ping,
+      (const char *)"xml_get_current_byte_index", (const char *)&ei_xml_get_current_byte_index,
+      (const char *)"magicktransformimage", (const char *)&ei_magicktransformimage,
+      (const char *)"drawgetstrokeantialias", (const char *)&ei_drawgetstrokeantialias,
+      (const char *)"ini_alter", (const char *)&ei_ini_alter,
+      (const char *)"get_class", (const char *)&ei_get_class,
+      (const char *)"magicksetimageprofile", (const char *)&ei_magicksetimageprofile,
+      (const char *)"mysql_field_seek", (const char *)&ei_mysql_field_seek,
+      (const char *)"drawgetfontsize", (const char *)&ei_drawgetfontsize,
+      (const char *)"mysql_num_rows", (const char *)&ei_mysql_num_rows,
+      (const char *)"hphp_recursiveiteratoriterator_rewind", (const char *)&ei_hphp_recursiveiteratoriterator_rewind,
+      (const char *)"magickgetimageresolution", (const char *)&ei_magickgetimageresolution,
+      (const char *)"array_diff", (const char *)&ei_array_diff,
+      (const char *)"xmlwriter_open_uri", (const char *)&ei_xmlwriter_open_uri,
+      (const char *)"magickgetimagetype", (const char *)&ei_magickgetimagetype,
+      (const char *)"simplexml_load_string", (const char *)&ei_simplexml_load_string,
+      (const char *)"magickunsharpmaskimage", (const char *)&ei_magickunsharpmaskimage,
+      (const char *)"quoted_printable_encode", (const char *)&ei_quoted_printable_encode,
+      (const char *)"gettype", (const char *)&ei_gettype,
+      (const char *)"magickgetimagebackgroundcolor", (const char *)&ei_magickgetimagebackgroundcolor,
+      (const char *)"hphp_splfileobject_setmaxlinelen", (const char *)&ei_hphp_splfileobject_setmaxlinelen,
+      (const char *)"array_intersect_key", (const char *)&ei_array_intersect_key,
+      (const char *)"array_change_key_case", (const char *)&ei_array_change_key_case,
+      (const char *)"ldap_first_attribute", (const char *)&ei_ldap_first_attribute,
+      (const char *)"gettimeofday", (const char *)&ei_gettimeofday,
+      (const char *)"xmlwriter_end_element", (const char *)&ei_xmlwriter_end_element,
+      (const char *)"drawpoint", (const char *)&ei_drawpoint,
+      (const char *)"strnatcmp", (const char *)&ei_strnatcmp,
+      (const char *)"property_exists", (const char *)&ei_property_exists,
+      (const char *)"mysql_affected_rows", (const char *)&ei_mysql_affected_rows,
+      (const char *)"magickdespeckleimage", (const char *)&ei_magickdespeckleimage,
+      (const char *)"imagecopymergegray", (const char *)&ei_imagecopymergegray,
+      (const char *)"ctype_cntrl", (const char *)&ei_ctype_cntrl,
+      (const char *)"hphp_splfileobject_next", (const char *)&ei_hphp_splfileobject_next,
+      (const char *)"is_array", (const char *)&ei_is_array,
+      (const char *)"rename", (const char *)&ei_rename,
+      (const char *)"date_format", (const char *)&ei_date_format,
+      (const char *)"hphp_splfileobject_fgetc", (const char *)&ei_hphp_splfileobject_fgetc,
+      (const char *)"imap_timeout", (const char *)&ei_imap_timeout,
+      (const char *)"magickshaveimage", (const char *)&ei_magickshaveimage,
+      (const char *)"dom_element_set_attribute_node_ns", (const char *)&ei_dom_element_set_attribute_node_ns,
+      (const char *)"xmlwriter_output_memory", (const char *)&ei_xmlwriter_output_memory,
+      (const char *)"ob_end_flush", (const char *)&ei_ob_end_flush,
+      (const char *)"magickwhitethresholdimage", (const char *)&ei_magickwhitethresholdimage,
+      (const char *)"drawpolyline", (const char *)&ei_drawpolyline,
+      (const char *)"hphp_splfileobject_fgets", (const char *)&ei_hphp_splfileobject_fgets,
+      (const char *)"hphp_get_function_info", (const char *)&ei_hphp_get_function_info,
+      (const char *)"prev", (const char *)&ei_prev,
+      (const char *)"imagegammacorrect", (const char *)&ei_imagegammacorrect,
+      (const char *)"str_replace", (const char *)&ei_str_replace,
+      (const char *)"dom_node_lookup_namespace_uri", (const char *)&ei_dom_node_lookup_namespace_uri,
+      (const char *)"fb_unserialize", (const char *)&ei_fb_unserialize,
+      (const char *)"clock_getres", (const char *)&ei_clock_getres,
+      (const char *)"magicktrimimage", (const char *)&ei_magicktrimimage,
+      (const char *)"imap_gc", (const char *)&ei_imap_gc,
+      (const char *)"hphp_splfileinfo_getpathinfo", (const char *)&ei_hphp_splfileinfo_getpathinfo,
+      (const char *)"magickgetimagegamma", (const char *)&ei_magickgetimagegamma,
+      (const char *)"newdrawingwand", (const char *)&ei_newdrawingwand,
+      (const char *)"gzrewind", (const char *)&ei_gzrewind,
+      (const char *)"ldap_explode_dn", (const char *)&ei_ldap_explode_dn,
+      (const char *)"posix_times", (const char *)&ei_posix_times,
+      (const char *)"drawgetfillcolor", (const char *)&ei_drawgetfillcolor,
+      (const char *)"dom_document_save_html", (const char *)&ei_dom_document_save_html,
+      (const char *)"mb_strtolower", (const char *)&ei_mb_strtolower,
+      (const char *)"openssl_encrypt", (const char *)&ei_openssl_encrypt,
+      (const char *)"localtime", (const char *)&ei_localtime,
+      (const char *)"fb_thrift_unserialize", (const char *)&ei_fb_thrift_unserialize,
+      (const char *)"sha1", (const char *)&ei_sha1,
+      (const char *)"collator_set_strength", (const char *)&ei_collator_set_strength,
+      (const char *)"implode", (const char *)&ei_implode,
+      (const char *)"date_isodate_set", (const char *)&ei_date_isodate_set,
+      (const char *)"hphp_get_iterator", (const char *)&ei_hphp_get_iterator,
+      (const char *)"magickpaintopaqueimage", (const char *)&ei_magickpaintopaqueimage,
+      (const char *)"mb_strimwidth", (const char *)&ei_mb_strimwidth,
+      (const char *)"drawsetfont", (const char *)&ei_drawsetfont,
+      (const char *)"xml_set_default_handler", (const char *)&ei_xml_set_default_handler,
+      (const char *)"magickchopimage", (const char *)&ei_magickchopimage,
+      (const char *)"wordwrap", (const char *)&ei_wordwrap,
+      (const char *)"gzgetss", (const char *)&ei_gzgetss,
+      (const char *)"magickgetimagevirtualpixelmethod", (const char *)&ei_magickgetimagevirtualpixelmethod,
+      (const char *)"imagedestroy", (const char *)&ei_imagedestroy,
+      (const char *)"timezone_open", (const char *)&ei_timezone_open,
+      (const char *)"ob_clean", (const char *)&ei_ob_clean,
+      (const char *)"mb_ereg_search_pos", (const char *)&ei_mb_ereg_search_pos,
+      (const char *)"bccomp", (const char *)&ei_bccomp,
+      (const char *)"gzdecode", (const char *)&ei_gzdecode,
+      (const char *)"magicksetimagecompose", (const char *)&ei_magicksetimagecompose,
+      (const char *)"apc_bin_dump", (const char *)&ei_apc_bin_dump,
+      (const char *)"ini_get", (const char *)&ei_ini_get,
+      (const char *)"mb_ereg_search_setpos", (const char *)&ei_mb_ereg_search_setpos,
+      (const char *)"stream_copy_to_stream", (const char *)&ei_stream_copy_to_stream,
+      (const char *)"xml_get_error_code", (const char *)&ei_xml_get_error_code,
+      (const char *)"spl_autoload", (const char *)&ei_spl_autoload,
+      (const char *)"pcntl_alarm", (const char *)&ei_pcntl_alarm,
+      (const char *)"drawpolygon", (const char *)&ei_drawpolygon,
+      (const char *)"mysql_connect", (const char *)&ei_mysql_connect,
+      (const char *)"xmlwriter_write_raw", (const char *)&ei_xmlwriter_write_raw,
+      (const char *)"fgetss", (const char *)&ei_fgetss,
+      (const char *)"imap_mail_copy", (const char *)&ei_imap_mail_copy,
+      (const char *)"drawarc", (const char *)&ei_drawarc,
+      (const char *)"set_error_handler", (const char *)&ei_set_error_handler,
+      (const char *)"str_word_count", (const char *)&ei_str_word_count,
+      (const char *)"drawsetcliprule", (const char *)&ei_drawsetcliprule,
+      (const char *)"openssl_pkcs12_read", (const char *)&ei_openssl_pkcs12_read,
+      (const char *)"ldap_list", (const char *)&ei_ldap_list,
+      (const char *)"func_num_args", (const char *)&ei_func_num_args,
+      (const char *)"drawsettextdecoration", (const char *)&ei_drawsettextdecoration,
+      (const char *)"str_rot13", (const char *)&ei_str_rot13,
+      (const char *)"openssl_pkey_new", (const char *)&ei_openssl_pkey_new,
+      (const char *)"magicksetimageindex", (const char *)&ei_magicksetimageindex,
+      (const char *)"ldap_rename", (const char *)&ei_ldap_rename,
+      (const char *)"ldap_start_tls", (const char *)&ei_ldap_start_tls,
+      (const char *)"tanh", (const char *)&ei_tanh,
+      (const char *)"drawscale", (const char *)&ei_drawscale,
+      (const char *)"drawrotate", (const char *)&ei_drawrotate,
+      (const char *)"getservbyname", (const char *)&ei_getservbyname,
+      (const char *)"compact", (const char *)&ei_compact,
+      (const char *)"hphp_splfileobject_valid", (const char *)&ei_hphp_splfileobject_valid,
+      (const char *)"imagecolorclosest", (const char *)&ei_imagecolorclosest,
+      (const char *)"magickwriteimages", (const char *)&ei_magickwriteimages,
+      (const char *)"pixelsetalpha", (const char *)&ei_pixelsetalpha,
+      (const char *)"magicksetimageiterations", (const char *)&ei_magicksetimageiterations,
+      (const char *)"drawpathmovetoabsolute", (const char *)&ei_drawpathmovetoabsolute,
+      (const char *)"quotemeta", (const char *)&ei_quotemeta,
+      (const char *)"parse_ini_string", (const char *)&ei_parse_ini_string,
+      (const char *)"imagefilltoborder", (const char *)&ei_imagefilltoborder,
+      (const char *)"xhprof_frame_end", (const char *)&ei_xhprof_frame_end,
+      (const char *)"xml_set_notation_decl_handler", (const char *)&ei_xml_set_notation_decl_handler,
+      (const char *)"is_writeable", (const char *)&ei_is_writeable,
+      (const char *)"magickgetwandsize", (const char *)&ei_magickgetwandsize,
+      (const char *)"hphp_directoryiterator___tostring", (const char *)&ei_hphp_directoryiterator___tostring,
+      (const char *)"memcache_add_server", (const char *)&ei_memcache_add_server,
+      (const char *)"dom_node_remove_child", (const char *)&ei_dom_node_remove_child,
+      (const char *)"imageinterlace", (const char *)&ei_imageinterlace,
+      (const char *)"preg_match_all", (const char *)&ei_preg_match_all,
+      (const char *)"imap_scanmailbox", (const char *)&ei_imap_scanmailbox,
+      (const char *)"proc_terminate", (const char *)&ei_proc_terminate,
+      (const char *)"apc_bin_loadfile", (const char *)&ei_apc_bin_loadfile,
+      (const char *)"posix_getcwd", (const char *)&ei_posix_getcwd,
+      (const char *)"drawpathcurvetoabsolute", (const char *)&ei_drawpathcurvetoabsolute,
+      (const char *)"hphp_set_error_page", (const char *)&ei_hphp_set_error_page,
+      (const char *)"preg_match", (const char *)&ei_preg_match,
+      (const char *)"timezone_abbreviations_list", (const char *)&ei_timezone_abbreviations_list,
+      (const char *)"magickradialblurimage", (const char *)&ei_magickradialblurimage,
+      (const char *)"posix_geteuid", (const char *)&ei_posix_geteuid,
+      (const char *)"mysql_fetch_lengths", (const char *)&ei_mysql_fetch_lengths,
+      (const char *)"magickwriteimagefile", (const char *)&ei_magickwriteimagefile,
+      (const char *)"serialize", (const char *)&ei_serialize,
+      (const char *)"exif_read_data", (const char *)&ei_exif_read_data,
+      (const char *)"pixelgetiteratorexceptiontype", (const char *)&ei_pixelgetiteratorexceptiontype,
+      (const char *)"destroydrawingwand", (const char *)&ei_destroydrawingwand,
+      (const char *)"lstat", (const char *)&ei_lstat,
+      (const char *)"apache_note", (const char *)&ei_apache_note,
+      (const char *)"drawgetexceptiontype", (const char *)&ei_drawgetexceptiontype,
+      (const char *)"drawbezier", (const char *)&ei_drawbezier,
+      (const char *)"xmlwriter_start_comment", (const char *)&ei_xmlwriter_start_comment,
+      (const char *)"ldap_set_rebind_proc", (const char *)&ei_ldap_set_rebind_proc,
+      (const char *)"drawsetstrokecolor", (const char *)&ei_drawsetstrokecolor,
+      (const char *)"drawpathlinetohorizontalrelative", (const char *)&ei_drawpathlinetohorizontalrelative,
+      (const char *)"gmmktime", (const char *)&ei_gmmktime,
+      (const char *)"gmdate", (const char *)&ei_gmdate,
+      (const char *)"posix_getgid", (const char *)&ei_posix_getgid,
+      (const char *)"sinh", (const char *)&ei_sinh,
+      (const char *)"apc_fetch", (const char *)&ei_apc_fetch,
+      (const char *)"fileowner", (const char *)&ei_fileowner,
+      (const char *)"imagecopymerge", (const char *)&ei_imagecopymerge,
+      (const char *)"magickclipimage", (const char *)&ei_magickclipimage,
+      (const char *)"intl_get_error_code", (const char *)&ei_intl_get_error_code,
+      (const char *)"imagestringup", (const char *)&ei_imagestringup,
+      (const char *)"mt_getrandmax", (const char *)&ei_mt_getrandmax,
+      (const char *)"magickgetresourcelimit", (const char *)&ei_magickgetresourcelimit,
+      (const char *)"hphp_current_ref", (const char *)&ei_hphp_current_ref,
+      (const char *)"hphp_splfileinfo_getlinktarget", (const char *)&ei_hphp_splfileinfo_getlinktarget,
+      (const char *)"imagecolorexact", (const char *)&ei_imagecolorexact,
+      (const char *)"hphp_recursivedirectoryiterator_current", (const char *)&ei_hphp_recursivedirectoryiterator_current,
+      (const char *)"setcookie", (const char *)&ei_setcookie,
+      (const char *)"fileatime", (const char *)&ei_fileatime,
+      (const char *)"apd_stop_trace", (const char *)&ei_apd_stop_trace,
+      (const char *)"hphpd_break", (const char *)&ei_hphpd_break,
+      (const char *)"addcslashes", (const char *)&ei_addcslashes,
+      (const char *)"magicksetimageoption", (const char *)&ei_magicksetimageoption,
+      (const char *)"xmlwriter_write_comment", (const char *)&ei_xmlwriter_write_comment,
+      (const char *)"drawgetfontstyle", (const char *)&ei_drawgetfontstyle,
+      (const char *)"dom_element_set_attribute_ns", (const char *)&ei_dom_element_set_attribute_ns,
+      (const char *)"dom_xpath_evaluate", (const char *)&ei_dom_xpath_evaluate,
+      (const char *)"imap_undelete", (const char *)&ei_imap_undelete,
+      (const char *)"bzclose", (const char *)&ei_bzclose,
+      (const char *)"strtoupper", (const char *)&ei_strtoupper,
+      (const char *)"xml_set_processing_instruction_handler", (const char *)&ei_xml_set_processing_instruction_handler,
+      (const char *)"apd_breakpoint", (const char *)&ei_apd_breakpoint,
+      (const char *)"magickgetimageblueprimary", (const char *)&ei_magickgetimageblueprimary,
+      (const char *)"memcache_delete", (const char *)&ei_memcache_delete,
+      (const char *)"array_fill", (const char *)&ei_array_fill,
+      (const char *)"magickspreadimage", (const char *)&ei_magickspreadimage,
+      (const char *)"dom_element_set_attribute_node", (const char *)&ei_dom_element_set_attribute_node,
+      (const char *)"memcache_replace", (const char *)&ei_memcache_replace,
+      (const char *)"stream_set_write_buffer", (const char *)&ei_stream_set_write_buffer,
+      (const char *)"mb_list_encodings", (const char *)&ei_mb_list_encodings,
+      (const char *)"sleep", (const char *)&ei_sleep,
+      (const char *)"cleardrawingwand", (const char *)&ei_cleardrawingwand,
+      (const char *)"imap_getacl", (const char *)&ei_imap_getacl,
+      (const char *)"imagecolorset", (const char *)&ei_imagecolorset,
+      (const char *)"openssl_x509_checkpurpose", (const char *)&ei_openssl_x509_checkpurpose,
+      (const char *)"timezone_name_from_abbr", (const char *)&ei_timezone_name_from_abbr,
+      (const char *)"array_intersect_ukey", (const char *)&ei_array_intersect_ukey,
+      (const char *)"drawpathcurvetosmoothabsolute", (const char *)&ei_drawpathcurvetosmoothabsolute,
+      (const char *)"imagefilledellipse", (const char *)&ei_imagefilledellipse,
+      (const char *)"pcntl_wstopsig", (const char *)&ei_pcntl_wstopsig,
+      (const char *)"memory_get_usage", (const char *)&ei_memory_get_usage,
+      (const char *)"get_defined_vars", (const char *)&ei_get_defined_vars,
+      (const char *)"intval", (const char *)&ei_intval,
+      (const char *)"pagelet_server_task_status", (const char *)&ei_pagelet_server_task_status,
+      (const char *)"dom_document_get_elements_by_tag_name_ns", (const char *)&ei_dom_document_get_elements_by_tag_name_ns,
+      (const char *)"iconv_set_encoding", (const char *)&ei_iconv_set_encoding,
+      (const char *)"mailparse_msg_get_part", (const char *)&ei_mailparse_msg_get_part,
+      (const char *)"magickmattefloodfillimage", (const char *)&ei_magickmattefloodfillimage,
+      (const char *)"mb_check_encoding", (const char *)&ei_mb_check_encoding,
+      (const char *)"magicksetimagefilename", (const char *)&ei_magicksetimagefilename,
+      (const char *)"newpixeliterator", (const char *)&ei_newpixeliterator,
+      (const char *)"ldap_get_dn", (const char *)&ei_ldap_get_dn,
+      (const char *)"mysql_list_tables", (const char *)&ei_mysql_list_tables,
+      (const char *)"call_user_func", (const char *)&ei_call_user_func,
+      (const char *)"imap_base64", (const char *)&ei_imap_base64,
+      (const char *)"magickgetinterlacescheme", (const char *)&ei_magickgetinterlacescheme,
+      (const char *)"ltrim", (const char *)&ei_ltrim,
+      (const char *)"magicktextureimage", (const char *)&ei_magicktextureimage,
+      (const char *)"mb_ereg_match", (const char *)&ei_mb_ereg_match,
+      (const char *)"imagecolorallocate", (const char *)&ei_imagecolorallocate,
+      (const char *)"mt_srand", (const char *)&ei_mt_srand,
+      (const char *)"define_syslog_variables", (const char *)&ei_define_syslog_variables,
+      (const char *)"mcrypt_enc_get_modes_name", (const char *)&ei_mcrypt_enc_get_modes_name,
+      (const char *)"fb_get_code_coverage", (const char *)&ei_fb_get_code_coverage,
+      (const char *)"array_flip", (const char *)&ei_array_flip,
+      (const char *)"count", (const char *)&ei_count,
+      (const char *)"lcg_value", (const char *)&ei_lcg_value,
+      (const char *)"php_logo_guid", (const char *)&ei_php_logo_guid,
+      (const char *)"hphp_set_iostatus_address", (const char *)&ei_hphp_set_iostatus_address,
+      (const char *)"time", (const char *)&ei_time,
+      (const char *)"magickcoalesceimages", (const char *)&ei_magickcoalesceimages,
+      (const char *)"pixelgetquantumcolor", (const char *)&ei_pixelgetquantumcolor,
+      (const char *)"openssl_private_encrypt", (const char *)&ei_openssl_private_encrypt,
+      (const char *)"hphp_get_status", (const char *)&ei_hphp_get_status,
+      (const char *)"xhprof_enable", (const char *)&ei_xhprof_enable,
+      (const char *)"hphp_splfileinfo_gettype", (const char *)&ei_hphp_splfileinfo_gettype,
+      (const char *)"imap_rfc822_parse_adrlist", (const char *)&ei_imap_rfc822_parse_adrlist,
+      (const char *)"xhprof_run_trace", (const char *)&ei_xhprof_run_trace,
+      (const char *)"libxml_clear_errors", (const char *)&ei_libxml_clear_errors,
+      (const char *)"xmlwriter_start_document", (const char *)&ei_xmlwriter_start_document,
+      (const char *)"magicknormalizeimage", (const char *)&ei_magicknormalizeimage,
+      (const char *)"magickgetformat", (const char *)&ei_magickgetformat,
+      (const char *)"hphp_get_class_info", (const char *)&ei_hphp_get_class_info,
+      (const char *)"mailparse_msg_get_part_data", (const char *)&ei_mailparse_msg_get_part_data,
+      (const char *)"dom_element_remove_attribute_ns", (const char *)&ei_dom_element_remove_attribute_ns,
+      (const char *)"imap_append", (const char *)&ei_imap_append,
+      (const char *)"openssl_csr_new", (const char *)&ei_openssl_csr_new,
+      (const char *)"xbox_task_start", (const char *)&ei_xbox_task_start,
+      (const char *)"newpixelwands", (const char *)&ei_newpixelwands,
+      (const char *)"mb_get_info", (const char *)&ei_mb_get_info,
+      (const char *)"getcwd", (const char *)&ei_getcwd,
+      (const char *)"posix_getrlimit", (const char *)&ei_posix_getrlimit,
+      (const char *)"imap_deletemailbox", (const char *)&ei_imap_deletemailbox,
+      (const char *)"fputcsv", (const char *)&ei_fputcsv,
+      (const char *)"stream_bucket_prepend", (const char *)&ei_stream_bucket_prepend,
+      (const char *)"apache_get_scoreboard", (const char *)&ei_apache_get_scoreboard,
+      (const char *)"sprintf", (const char *)&ei_sprintf,
+      (const char *)"ldap_err2str", (const char *)&ei_ldap_err2str,
+      (const char *)"memcache_get_stats", (const char *)&ei_memcache_get_stats,
+      (const char *)"xmlwriter_end_attribute", (const char *)&ei_xmlwriter_end_attribute,
+      (const char *)"imagecharup", (const char *)&ei_imagecharup,
+      (const char *)"fflush", (const char *)&ei_fflush,
+      (const char *)"magickwaveimage", (const char *)&ei_magickwaveimage,
+      (const char *)"imagepsfreefont", (const char *)&ei_imagepsfreefont,
+      (const char *)"dom_node_is_supported", (const char *)&ei_dom_node_is_supported,
+      (const char *)"magickgetsamplingfactors", (const char *)&ei_magickgetsamplingfactors,
+      (const char *)"mt_rand", (const char *)&ei_mt_rand,
+      (const char *)"hphp_splfileinfo_getpathname", (const char *)&ei_hphp_splfileinfo_getpathname,
+      (const char *)"magickflopimage", (const char *)&ei_magickflopimage,
+      (const char *)"register_cleanup_function", (const char *)&ei_register_cleanup_function,
+      (const char *)"getenv", (const char *)&ei_getenv,
+      (const char *)"is_dir", (const char *)&ei_is_dir,
+      (const char *)"get_defined_functions", (const char *)&ei_get_defined_functions,
+      (const char *)"stream_set_timeout", (const char *)&ei_stream_set_timeout,
+      (const char *)"magickenhanceimage", (const char *)&ei_magickenhanceimage,
+      (const char *)"memcache_increment", (const char *)&ei_memcache_increment,
+      (const char *)"pixelsetblack", (const char *)&ei_pixelsetblack,
+      (const char *)"magickgetcharwidth", (const char *)&ei_magickgetcharwidth,
+      (const char *)"magickshearimage", (const char *)&ei_magickshearimage,
+      (const char *)"stream_socket_enable_crypto", (const char *)&ei_stream_socket_enable_crypto,
+      (const char *)"stream_socket_server", (const char *)&ei_stream_socket_server,
+      (const char *)"imap_listmailbox", (const char *)&ei_imap_listmailbox,
+      (const char *)"apd_set_pprof_trace", (const char *)&ei_apd_set_pprof_trace,
+      (const char *)"sort", (const char *)&ei_sort,
+      (const char *)"ini_set", (const char *)&ei_ini_set,
+      (const char *)"drawgetfont", (const char *)&ei_drawgetfont,
+      (const char *)"imap_sort", (const char *)&ei_imap_sort,
+      (const char *)"readdir", (const char *)&ei_readdir,
+      (const char *)"mysql_close", (const char *)&ei_mysql_close,
+      (const char *)"magicksetimagerenderingintent", (const char *)&ei_magicksetimagerenderingintent,
+      (const char *)"magickreducenoiseimage", (const char *)&ei_magickreducenoiseimage,
+      (const char *)"magickblurimage", (const char *)&ei_magickblurimage,
+      (const char *)"hphpd_get_user_commands", (const char *)&ei_hphpd_get_user_commands,
+      (const char *)"magicktintimage", (const char *)&ei_magicktintimage,
+      (const char *)"rawurldecode", (const char *)&ei_rawurldecode,
+      (const char *)"strftime", (const char *)&ei_strftime,
+      (const char *)"xmlwriter_start_element_ns", (const char *)&ei_xmlwriter_start_element_ns,
+      (const char *)"imagecolorstotal", (const char *)&ei_imagecolorstotal,
+      (const char *)"hphp_splfileinfo_getowner", (const char *)&ei_hphp_splfileinfo_getowner,
+      (const char *)"write_hdf_string", (const char *)&ei_write_hdf_string,
+      (const char *)"dom_node_has_child_nodes", (const char *)&ei_dom_node_has_child_nodes,
+      (const char *)"apc_bin_dumpfile", (const char *)&ei_apc_bin_dumpfile,
+      (const char *)"xml_parse_into_struct", (const char *)&ei_xml_parse_into_struct,
+      (const char *)"icu_transliterate", (const char *)&ei_icu_transliterate,
+      (const char *)"mb_eregi_replace", (const char *)&ei_mb_eregi_replace,
+      (const char *)"hphp_splfileinfo_getatime", (const char *)&ei_hphp_splfileinfo_getatime,
+      (const char *)"array_unshift", (const char *)&ei_array_unshift,
+      (const char *)"stat", (const char *)&ei_stat,
+      (const char *)"hphp_directoryiterator_key", (const char *)&ei_hphp_directoryiterator_key,
+      (const char *)"posix_getpid", (const char *)&ei_posix_getpid,
+      (const char *)"get_current_user", (const char *)&ei_get_current_user,
+      (const char *)"filesize", (const char *)&ei_filesize,
+      (const char *)"round", (const char *)&ei_round,
+      (const char *)"pdo_drivers", (const char *)&ei_pdo_drivers,
+      (const char *)"sqrt", (const char *)&ei_sqrt,
+      (const char *)"ldap_close", (const char *)&ei_ldap_close,
+      (const char *)"memcache_pconnect", (const char *)&ei_memcache_pconnect,
+      (const char *)"mcrypt_enc_get_algorithms_name", (const char *)&ei_mcrypt_enc_get_algorithms_name,
+      (const char *)"hphp_splfileobject_rewind", (const char *)&ei_hphp_splfileobject_rewind,
+      (const char *)"fprintf", (const char *)&ei_fprintf,
+      (const char *)"extension_loaded", (const char *)&ei_extension_loaded,
+      (const char *)"mb_detect_order", (const char *)&ei_mb_detect_order,
+      (const char *)"magickmapimage", (const char *)&ei_magickmapimage,
+      (const char *)"get_magic_quotes_runtime", (const char *)&ei_get_magic_quotes_runtime,
+      (const char *)"pixelsetopacityquantum", (const char *)&ei_pixelsetopacityquantum,
+      (const char *)"imap_fetch_overview", (const char *)&ei_imap_fetch_overview,
+      (const char *)"ctype_space", (const char *)&ei_ctype_space,
+      (const char *)"destroymagickwand", (const char *)&ei_destroymagickwand,
+      (const char *)"mcrypt_generic_init", (const char *)&ei_mcrypt_generic_init,
+      (const char *)"quoted_printable_decode", (const char *)&ei_quoted_printable_decode,
+      (const char *)"hphp_splfileinfo_getfileinfo", (const char *)&ei_hphp_splfileinfo_getfileinfo,
+      (const char *)"get_cfg_var", (const char *)&ei_get_cfg_var,
+      (const char *)"imagerectangle", (const char *)&ei_imagerectangle,
+      (const char *)"call_user_func_rpc", (const char *)&ei_call_user_func_rpc,
+      (const char *)"pixelgetalphaquantum", (const char *)&ei_pixelgetalphaquantum,
+      (const char *)"fb_renamed_functions", (const char *)&ei_fb_renamed_functions,
+      (const char *)"imagepsextendfont", (const char *)&ei_imagepsextendfont,
+      (const char *)"magickgetimageblob", (const char *)&ei_magickgetimageblob,
+      (const char *)"stream_get_filters", (const char *)&ei_stream_get_filters,
+      (const char *)"magickqueryfontmetrics", (const char *)&ei_magickqueryfontmetrics,
+      (const char *)"ispixeliterator", (const char *)&ei_ispixeliterator,
+      (const char *)"imagefilledarc", (const char *)&ei_imagefilledarc,
+      (const char *)"getdate", (const char *)&ei_getdate,
+      (const char *)"hphp_debug_caller_info", (const char *)&ei_hphp_debug_caller_info,
+      (const char *)"xmlwriter_write_attribute", (const char *)&ei_xmlwriter_write_attribute,
+      (const char *)"imagearc", (const char *)&ei_imagearc,
+      (const char *)"magickreadimages", (const char *)&ei_magickreadimages,
+      (const char *)"drawgetgravity", (const char *)&ei_drawgetgravity,
+      (const char *)"connection_status", (const char *)&ei_connection_status,
+      (const char *)"imagecreatefromgd2", (const char *)&ei_imagecreatefromgd2,
+      (const char *)"stream_socket_shutdown", (const char *)&ei_stream_socket_shutdown,
+      (const char *)"pixelresetiterator", (const char *)&ei_pixelresetiterator,
+      (const char *)"msg_send", (const char *)&ei_msg_send,
+      (const char *)"getmygid", (const char *)&ei_getmygid,
+      (const char *)"dom_document_get_element_by_id", (const char *)&ei_dom_document_get_element_by_id,
+      (const char *)"array_udiff_uassoc", (const char *)&ei_array_udiff_uassoc,
+      (const char *)"strptime", (const char *)&ei_strptime,
+      (const char *)"array_diff_uassoc", (const char *)&ei_array_diff_uassoc,
+      (const char *)"xml_set_character_data_handler", (const char *)&ei_xml_set_character_data_handler,
+      (const char *)"pcntl_waitpid", (const char *)&ei_pcntl_waitpid,
+      (const char *)"array_replace_recursive", (const char *)&ei_array_replace_recursive,
+      (const char *)"gd_info", (const char *)&ei_gd_info,
+      (const char *)"stream_get_transports", (const char *)&ei_stream_get_transports,
+      (const char *)"drawsetstrokepatternurl", (const char *)&ei_drawsetstrokepatternurl,
+      (const char *)"ldap_add", (const char *)&ei_ldap_add,
+      (const char *)"acosh", (const char *)&ei_acosh,
+      (const char *)"drawsetfillrule", (const char *)&ei_drawsetfillrule,
+      (const char *)"posix_getlogin", (const char *)&ei_posix_getlogin,
+      (const char *)"posix_getsid", (const char *)&ei_posix_getsid,
+      (const char *)"imagegd2", (const char *)&ei_imagegd2,
+      (const char *)"imagecreate", (const char *)&ei_imagecreate,
+      (const char *)"socket_create_pair", (const char *)&ei_socket_create_pair,
+      (const char *)"imap_num_recent", (const char *)&ei_imap_num_recent,
+      (const char *)"openssl_x509_check_private_key", (const char *)&ei_openssl_x509_check_private_key,
+      (const char *)"collator_get_attribute", (const char *)&ei_collator_get_attribute,
+      (const char *)"imap_clearflag_full", (const char *)&ei_imap_clearflag_full,
+      (const char *)"shm_put_var", (const char *)&ei_shm_put_var,
+      (const char *)"debug_print_backtrace", (const char *)&ei_debug_print_backtrace,
+      (const char *)"hphp_splfileobject_seek", (const char *)&ei_hphp_splfileobject_seek,
+      (const char *)"imap_reopen", (const char *)&ei_imap_reopen,
+      (const char *)"stream_set_blocking", (const char *)&ei_stream_set_blocking,
+      (const char *)"ezmlm_hash", (const char *)&ei_ezmlm_hash,
+      (const char *)"xml_parser_get_option", (const char *)&ei_xml_parser_get_option,
+      (const char *)"array_search", (const char *)&ei_array_search,
+      (const char *)"is_int", (const char *)&ei_is_int,
+      (const char *)"dangling_server_proxy_new_request", (const char *)&ei_dangling_server_proxy_new_request,
+      (const char *)"xmlwriter_end_dtd_entity", (const char *)&ei_xmlwriter_end_dtd_entity,
+      (const char *)"trim", (const char *)&ei_trim,
+      (const char *)"drawpathclose", (const char *)&ei_drawpathclose,
+      (const char *)"magickprofileimage", (const char *)&ei_magickprofileimage,
+      (const char *)"connection_timeout", (const char *)&ei_connection_timeout,
+      (const char *)"imap_mailboxmsginfo", (const char *)&ei_imap_mailboxmsginfo,
+      (const char *)"mysql_data_seek", (const char *)&ei_mysql_data_seek,
+      (const char *)"pixelgetindex", (const char *)&ei_pixelgetindex,
+      (const char *)"class_implements", (const char *)&ei_class_implements,
+      (const char *)"hebrevc", (const char *)&ei_hebrevc,
+      (const char *)"get_meta_tags", (const char *)&ei_get_meta_tags,
+      (const char *)"bzopen", (const char *)&ei_bzopen,
+      (const char *)"magicknextimage", (const char *)&ei_magicknextimage,
+      (const char *)"hphp_recursivedirectoryiterator_key", (const char *)&ei_hphp_recursivedirectoryiterator_key,
+      (const char *)"mysql_create_db", (const char *)&ei_mysql_create_db,
+      (const char *)"mysql_stat", (const char *)&ei_mysql_stat,
+      (const char *)"get_object_vars", (const char *)&ei_get_object_vars,
+      (const char *)"msg_receive", (const char *)&ei_msg_receive,
+      (const char *)"is_integer", (const char *)&ei_is_integer,
+      (const char *)"imagecreatefromgif", (const char *)&ei_imagecreatefromgif,
+      (const char *)"posix_getuid", (const char *)&ei_posix_getuid,
+      (const char *)"mb_send_mail", (const char *)&ei_mb_send_mail,
+      (const char *)"hphp_splfileinfo___construct", (const char *)&ei_hphp_splfileinfo___construct,
+      (const char *)"imap_msgno", (const char *)&ei_imap_msgno,
+      (const char *)"register_postsend_function", (const char *)&ei_register_postsend_function,
+      (const char *)"long2ip", (const char *)&ei_long2ip,
+      (const char *)"getrusage", (const char *)&ei_getrusage,
+      (const char *)"evhttp_set_cache", (const char *)&ei_evhttp_set_cache,
+      (const char *)"magickoilpaintimage", (const char *)&ei_magickoilpaintimage,
+      (const char *)"strripos", (const char *)&ei_strripos,
+      (const char *)"magicksetimagecolormapcolor", (const char *)&ei_magicksetimagecolormapcolor,
+      (const char *)"magickgetfilename", (const char *)&ei_magickgetfilename,
+      (const char *)"magicksetimagegamma", (const char *)&ei_magicksetimagegamma,
+      (const char *)"mysql_pconnect", (const char *)&ei_mysql_pconnect,
+      (const char *)"stripos", (const char *)&ei_stripos,
+      (const char *)"http_build_query", (const char *)&ei_http_build_query,
+      (const char *)"apc_add", (const char *)&ei_apc_add,
+      (const char *)"iconv_strlen", (const char *)&ei_iconv_strlen,
+      (const char *)"vsprintf", (const char *)&ei_vsprintf,
+      (const char *)"imageistruecolor", (const char *)&ei_imageistruecolor,
+      (const char *)"mailparse_msg_extract_part_file", (const char *)&ei_mailparse_msg_extract_part_file,
+      (const char *)"dom_xpath_register_ns", (const char *)&ei_dom_xpath_register_ns,
+      (const char *)"is_nan", (const char *)&ei_is_nan,
+      (const char *)"imagegif", (const char *)&ei_imagegif,
+      (const char *)"eregi_replace", (const char *)&ei_eregi_replace,
+      (const char *)"magickgetimageiterations", (const char *)&ei_magickgetimageiterations,
+      (const char *)"register_tick_function", (const char *)&ei_register_tick_function,
+      (const char *)"pixelsetblackquantum", (const char *)&ei_pixelsetblackquantum,
+      (const char *)"jpeg2wbmp", (const char *)&ei_jpeg2wbmp,
+      (const char *)"mcrypt_get_iv_size", (const char *)&ei_mcrypt_get_iv_size,
+      (const char *)"mysql_fetch_array", (const char *)&ei_mysql_fetch_array,
+      (const char *)"magickpreviousimage", (const char *)&ei_magickpreviousimage,
+      (const char *)"magickborderimage", (const char *)&ei_magickborderimage,
+      (const char *)"mcrypt_module_is_block_mode", (const char *)&ei_mcrypt_module_is_block_mode,
+      (const char *)"mb_substr", (const char *)&ei_mb_substr,
+      (const char *)"get_defined_constants", (const char *)&ei_get_defined_constants,
+      (const char *)"mcrypt_enc_is_block_mode", (const char *)&ei_mcrypt_enc_is_block_mode,
+      (const char *)"mailparse_stream_encode", (const char *)&ei_mailparse_stream_encode,
+      (const char *)"drawsetstrokedashoffset", (const char *)&ei_drawsetstrokedashoffset,
+      (const char *)"disk_free_space", (const char *)&ei_disk_free_space,
+      (const char *)"php_ini_scanned_files", (const char *)&ei_php_ini_scanned_files,
+      (const char *)"pixelsetyellowquantum", (const char *)&ei_pixelsetyellowquantum,
+      (const char *)"bzread", (const char *)&ei_bzread,
+      (const char *)"dom_document_create_element_ns", (const char *)&ei_dom_document_create_element_ns,
+      (const char *)"openssl_public_decrypt", (const char *)&ei_openssl_public_decrypt,
+      (const char *)"convert_uuencode", (const char *)&ei_convert_uuencode,
+      (const char *)"magickequalizeimage", (const char *)&ei_magickequalizeimage,
+      (const char *)"mysql_field_len", (const char *)&ei_mysql_field_len,
+      (const char *)"drawsetclipunits", (const char *)&ei_drawsetclipunits,
+      (const char *)"mdecrypt_generic", (const char *)&ei_mdecrypt_generic,
+      (const char *)"getprotobyname", (const char *)&ei_getprotobyname,
+      (const char *)"xmlwriter_start_pi", (const char *)&ei_xmlwriter_start_pi,
+      (const char *)"mysql_field_type", (const char *)&ei_mysql_field_type,
+      (const char *)"apc_cas", (const char *)&ei_apc_cas,
+      (const char *)"getopt", (const char *)&ei_getopt,
+      (const char *)"clearpixelwand", (const char *)&ei_clearpixelwand,
+      (const char *)"drawsetgravity", (const char *)&ei_drawsetgravity,
+      (const char *)"magickgetimagecompressionquality", (const char *)&ei_magickgetimagecompressionquality,
+      (const char *)"magickquantizeimages", (const char *)&ei_magickquantizeimages,
+      (const char *)"mysql_insert_id", (const char *)&ei_mysql_insert_id,
+      (const char *)"hphp_thread_set_warmup_enabled", (const char *)&ei_hphp_thread_set_warmup_enabled,
+      (const char *)"stream_context_set_param", (const char *)&ei_stream_context_set_param,
+      (const char *)"drawpathlinetohorizontalabsolute", (const char *)&ei_drawpathlinetohorizontalabsolute,
+      (const char *)"openssl_csr_export", (const char *)&ei_openssl_csr_export,
+      (const char *)"socket_connect", (const char *)&ei_socket_connect,
+      (const char *)"stripslashes", (const char *)&ei_stripslashes,
+      (const char *)"magickhaspreviousimage", (const char *)&ei_magickhaspreviousimage,
+      (const char *)"imap_utf8", (const char *)&ei_imap_utf8,
+      (const char *)"drawgetstrokecolor", (const char *)&ei_drawgetstrokecolor,
+      (const char *)"imagecreatefromwbmp", (const char *)&ei_imagecreatefromwbmp,
+      (const char *)"str_repeat", (const char *)&ei_str_repeat,
+      (const char *)"stream_resolve_include_path", (const char *)&ei_stream_resolve_include_path,
+      (const char *)"ldap_read", (const char *)&ei_ldap_read,
+      (const char *)"apc_dec", (const char *)&ei_apc_dec,
+      (const char *)"iptcparse", (const char *)&ei_iptcparse,
+      (const char *)"posix_get_last_error", (const char *)&ei_posix_get_last_error,
+      (const char *)"iterator_count", (const char *)&ei_iterator_count,
+      (const char *)"curl_setopt_array", (const char *)&ei_curl_setopt_array,
+      (const char *)"socket_recvfrom", (const char *)&ei_socket_recvfrom,
+      (const char *)"imagepstext", (const char *)&ei_imagepstext,
+      (const char *)"mb_encode_mimeheader", (const char *)&ei_mb_encode_mimeheader,
+      (const char *)"socket_getsockname", (const char *)&ei_socket_getsockname,
+      (const char *)"imagecreatefromstring", (const char *)&ei_imagecreatefromstring,
+      (const char *)"vfprintf", (const char *)&ei_vfprintf,
+      (const char *)"magickcompareimages", (const char *)&ei_magickcompareimages,
+      (const char *)"fscanf", (const char *)&ei_fscanf,
+      (const char *)"stristr", (const char *)&ei_stristr,
+      (const char *)"xml_parser_set_option", (const char *)&ei_xml_parser_set_option,
+      (const char *)"dom_document_schema_validate_file", (const char *)&ei_dom_document_schema_validate_file,
+      (const char *)"magicksetimageinterlacescheme", (const char *)&ei_magicksetimageinterlacescheme,
+      (const char *)"dom_element_get_attribute_node", (const char *)&ei_dom_element_get_attribute_node,
+      (const char *)"dom_document_create_cdatasection", (const char *)&ei_dom_document_create_cdatasection,
+      (const char *)"destroypixeliterator", (const char *)&ei_destroypixeliterator,
+      (const char *)"magicksetimagetype", (const char *)&ei_magicksetimagetype,
+      (const char *)"hphp_recursiveiteratoriterator_getinneriterator", (const char *)&ei_hphp_recursiveiteratoriterator_getinneriterator,
+      (const char *)"date_sunrise", (const char *)&ei_date_sunrise,
+      (const char *)"magickgethomeurl", (const char *)&ei_magickgethomeurl,
+      (const char *)"mb_detect_encoding", (const char *)&ei_mb_detect_encoding,
+      (const char *)"wandhasexception", (const char *)&ei_wandhasexception,
+      (const char *)"error_reporting", (const char *)&ei_error_reporting,
+      (const char *)"imagepalettecopy", (const char *)&ei_imagepalettecopy,
+      (const char *)"hphp_splfileinfo_isexecutable", (const char *)&ei_hphp_splfileinfo_isexecutable,
+      (const char *)"rename_function", (const char *)&ei_rename_function,
+      (const char *)"gzcompress", (const char *)&ei_gzcompress,
+      (const char *)"gzeof", (const char *)&ei_gzeof,
+      (const char *)"bcadd", (const char *)&ei_bcadd,
+      (const char *)"fb_set_exit_callback", (const char *)&ei_fb_set_exit_callback,
+      (const char *)"curl_setopt", (const char *)&ei_curl_setopt,
+      (const char *)"imagealphablending", (const char *)&ei_imagealphablending,
+      (const char *)"pixelgetmagenta", (const char *)&ei_pixelgetmagenta,
+      (const char *)"drawannotation", (const char *)&ei_drawannotation,
+      (const char *)"magicksetimagedispose", (const char *)&ei_magicksetimagedispose,
+      (const char *)"getmypid", (const char *)&ei_getmypid,
+      (const char *)"drawsetfontsize", (const char *)&ei_drawsetfontsize,
+      (const char *)"gethostbyname", (const char *)&ei_gethostbyname,
+      (const char *)"stream_wrapper_restore", (const char *)&ei_stream_wrapper_restore,
+      (const char *)"magickgetimagecompression", (const char *)&ei_magickgetimagecompression,
+      (const char *)"hphp_invoke_method", (const char *)&ei_hphp_invoke_method,
+      (const char *)"xbox_schedule_thread_reset", (const char *)&ei_xbox_schedule_thread_reset,
+      (const char *)"date_offset_get", (const char *)&ei_date_offset_get,
+      (const char *)"pixelgetiteratorexception", (const char *)&ei_pixelgetiteratorexception,
+      (const char *)"mysql_field_flags", (const char *)&ei_mysql_field_flags,
+      (const char *)"linkinfo", (const char *)&ei_linkinfo,
+      (const char *)"strchr", (const char *)&ei_strchr,
+      (const char *)"magickqueryformats", (const char *)&ei_magickqueryformats,
+      (const char *)"class_parents", (const char *)&ei_class_parents,
+      (const char *)"date_time_set", (const char *)&ei_date_time_set,
+      (const char *)"iconv_strpos", (const char *)&ei_iconv_strpos,
+      (const char *)"i18n_loc_set_strength", (const char *)&ei_i18n_loc_set_strength,
+      (const char *)"magickgetimagebordercolor", (const char *)&ei_magickgetimagebordercolor,
+      (const char *)"ob_end_clean", (const char *)&ei_ob_end_clean,
+      (const char *)"dom_document_savexml", (const char *)&ei_dom_document_savexml,
+      (const char *)"trigger_error", (const char *)&ei_trigger_error,
+      (const char *)"pcntl_getpriority", (const char *)&ei_pcntl_getpriority,
+      (const char *)"date_default_timezone_get", (const char *)&ei_date_default_timezone_get,
+      (const char *)"strcmp", (const char *)&ei_strcmp,
+      (const char *)"hphp_recursivedirectoryiterator_haschildren", (const char *)&ei_hphp_recursivedirectoryiterator_haschildren,
+      (const char *)"hphp_instanceof", (const char *)&ei_hphp_instanceof,
+      (const char *)"import_request_variables", (const char *)&ei_import_request_variables,
+      (const char *)"magickgetpackagename", (const char *)&ei_magickgetpackagename,
+      (const char *)"openssl_random_pseudo_bytes", (const char *)&ei_openssl_random_pseudo_bytes,
+      (const char *)"destroypixelwandarray", (const char *)&ei_destroypixelwandarray,
+      (const char *)"spliti", (const char *)&ei_spliti,
+      (const char *)"posix_setgid", (const char *)&ei_posix_setgid,
+      (const char *)"is_double", (const char *)&ei_is_double,
+      (const char *)"get_declared_interfaces", (const char *)&ei_get_declared_interfaces,
+      (const char *)"output_reset_rewrite_vars", (const char *)&ei_output_reset_rewrite_vars,
+      (const char *)"passthru", (const char *)&ei_passthru,
+      (const char *)"magickmontageimage", (const char *)&ei_magickmontageimage,
+      (const char *)"hphp_get_timers", (const char *)&ei_hphp_get_timers,
+      (const char *)"session_commit", (const char *)&ei_session_commit,
+      (const char *)"apc_cache_info", (const char *)&ei_apc_cache_info,
+      (const char *)"convert_cyr_string", (const char *)&ei_convert_cyr_string,
+      (const char *)"sys_get_temp_dir", (const char *)&ei_sys_get_temp_dir,
+      (const char *)"libxml_get_last_error", (const char *)&ei_libxml_get_last_error,
+      (const char *)"drawline", (const char *)&ei_drawline,
+      (const char *)"drawsetfillcolor", (const char *)&ei_drawsetfillcolor,
+      (const char *)"gzopen", (const char *)&ei_gzopen,
+      (const char *)"getservbyport", (const char *)&ei_getservbyport,
+      (const char *)"hphp_splfileinfo_getfilename", (const char *)&ei_hphp_splfileinfo_getfilename,
+      (const char *)"stripcslashes", (const char *)&ei_stripcslashes,
+      (const char *)"curl_multi_add_handle", (const char *)&ei_curl_multi_add_handle,
+      (const char *)"ldap_free_result", (const char *)&ei_ldap_free_result,
+      (const char *)"array_replace", (const char *)&ei_array_replace,
+      (const char *)"xmlwriter_end_pi", (const char *)&ei_xmlwriter_end_pi,
+      (const char *)"imagewbmp", (const char *)&ei_imagewbmp,
+      (const char *)"shm_get_var", (const char *)&ei_shm_get_var,
+      (const char *)"magickgetmimetype", (const char *)&ei_magickgetmimetype,
+      (const char *)"mysql_fetch_assoc", (const char *)&ei_mysql_fetch_assoc,
+      (const char *)"socket_set_nonblock", (const char *)&ei_socket_set_nonblock,
+      (const char *)"array_filter", (const char *)&ei_array_filter,
+      (const char *)"mysql_query", (const char *)&ei_mysql_query,
+      (const char *)"crypt", (const char *)&ei_crypt,
+      (const char *)"xmlwriter_start_cdata", (const char *)&ei_xmlwriter_start_cdata,
+      (const char *)"fgetc", (const char *)&ei_fgetc,
+      (const char *)"move_uploaded_file", (const char *)&ei_move_uploaded_file,
+      (const char *)"hphp_splfileobject_flock", (const char *)&ei_hphp_splfileobject_flock,
+      (const char *)"imagecopyresampled", (const char *)&ei_imagecopyresampled,
+      (const char *)"imagecreatefrompng", (const char *)&ei_imagecreatefrompng,
+      (const char *)"imap_setacl", (const char *)&ei_imap_setacl,
+      (const char *)"magickgetimage", (const char *)&ei_magickgetimage,
+      (const char *)"imagesettile", (const char *)&ei_imagesettile,
+      (const char *)"hphp_recursiveiteratoriterator_valid", (const char *)&ei_hphp_recursiveiteratoriterator_valid,
+      (const char *)"fgets", (const char *)&ei_fgets,
+      (const char *)"tempnam", (const char *)&ei_tempnam,
+      (const char *)"bcdiv", (const char *)&ei_bcdiv,
+      (const char *)"hphp_splfileinfo_getbasename", (const char *)&ei_hphp_splfileinfo_getbasename,
+      (const char *)"rsort", (const char *)&ei_rsort,
+      (const char *)"drawgettextdecoration", (const char *)&ei_drawgettextdecoration,
+      (const char *)"strtolower", (const char *)&ei_strtolower,
+      (const char *)"posix_getgrgid", (const char *)&ei_posix_getgrgid,
+      (const char *)"apc_inc", (const char *)&ei_apc_inc,
+      (const char *)"hphp_create_object", (const char *)&ei_hphp_create_object,
+      (const char *)"hexdec", (const char *)&ei_hexdec,
+      (const char *)"imagefttext", (const char *)&ei_imagefttext,
+      (const char *)"xhprof_sample_disable", (const char *)&ei_xhprof_sample_disable,
+      (const char *)"ldap_compare", (const char *)&ei_ldap_compare,
+      (const char *)"dns_get_record", (const char *)&ei_dns_get_record,
+      (const char *)"openssl_get_privatekey", (const char *)&ei_openssl_get_privatekey,
+      (const char *)"imagepng", (const char *)&ei_imagepng,
+      (const char *)"socket_bind", (const char *)&ei_socket_bind,
+      (const char *)"getmyuid", (const char *)&ei_getmyuid,
+      (const char *)"pixelgetopacity", (const char *)&ei_pixelgetopacity,
+      (const char *)"drawsetstrokelinecap", (const char *)&ei_drawsetstrokelinecap,
+      (const char *)"xmlwriter_write_attribute_ns", (const char *)&ei_xmlwriter_write_attribute_ns,
+      (const char *)"array_keys", (const char *)&ei_array_keys,
+      (const char *)"call_user_method_array", (const char *)&ei_call_user_method_array,
+      (const char *)"imap_bodystruct", (const char *)&ei_imap_bodystruct,
+      (const char *)"magickmagnifyimage", (const char *)&ei_magickmagnifyimage,
+      (const char *)"is_bool", (const char *)&ei_is_bool,
+      (const char *)"magickgetimagegreenprimary", (const char *)&ei_magickgetimagegreenprimary,
+      (const char *)"hphp_get_iostatus", (const char *)&ei_hphp_get_iostatus,
+      (const char *)"session_start", (const char *)&ei_session_start,
+      (const char *)"filegroup", (const char *)&ei_filegroup,
+      (const char *)"dom_attr_is_id", (const char *)&ei_dom_attr_is_id,
+      (const char *)"gzread", (const char *)&ei_gzread,
+      (const char *)"drawpathellipticarcrelative", (const char *)&ei_drawpathellipticarcrelative,
+      (const char *)"openssl_csr_export_to_file", (const char *)&ei_openssl_csr_export_to_file,
+      (const char *)"magicksetimagecolorspace", (const char *)&ei_magicksetimagecolorspace,
+      (const char *)"nl_langinfo", (const char *)&ei_nl_langinfo,
+      (const char *)"hphp_get_stats", (const char *)&ei_hphp_get_stats,
+      (const char *)"strncmp", (const char *)&ei_strncmp,
+      (const char *)"mb_regex_set_options", (const char *)&ei_mb_regex_set_options,
+      (const char *)"pixelsetmagenta", (const char *)&ei_pixelsetmagenta,
+      (const char *)"dom_element_remove_attribute", (const char *)&ei_dom_element_remove_attribute,
+      (const char *)"magickdeconstructimages", (const char *)&ei_magickdeconstructimages,
+      (const char *)"xbox_task_status", (const char *)&ei_xbox_task_status,
+      (const char *)"openssl_open", (const char *)&ei_openssl_open,
+      (const char *)"apc_bin_load", (const char *)&ei_apc_bin_load,
+      (const char *)"current", (const char *)&ei_current,
+      (const char *)"stream_register_wrapper", (const char *)&ei_stream_register_wrapper,
+      (const char *)"hphp_stats", (const char *)&ei_hphp_stats,
+      (const char *)"imap_savebody", (const char *)&ei_imap_savebody,
+      (const char *)"opendir", (const char *)&ei_opendir,
+      (const char *)"magickgetexceptionstring", (const char *)&ei_magickgetexceptionstring,
+      (const char *)"mcrypt_module_is_block_algorithm_mode", (const char *)&ei_mcrypt_module_is_block_algorithm_mode,
+      (const char *)"dns_get_mx", (const char *)&ei_dns_get_mx,
+      (const char *)"posix_setpgid", (const char *)&ei_posix_setpgid,
+      (const char *)"headers_list", (const char *)&ei_headers_list,
+      (const char *)"escapeshellarg", (const char *)&ei_escapeshellarg,
+      (const char *)"imap_fetchstructure", (const char *)&ei_imap_fetchstructure,
+      (const char *)"is_scalar", (const char *)&ei_is_scalar,
+      (const char *)"acos", (const char *)&ei_acos,
+      (const char *)"drawgettextencoding", (const char *)&ei_drawgettextencoding,
+      (const char *)"filetype", (const char *)&ei_filetype,
+      (const char *)"magicksetresolution", (const char *)&ei_magicksetresolution,
+      (const char *)"posix_isatty", (const char *)&ei_posix_isatty,
+      (const char *)"dom_document_relaxng_validate_file", (const char *)&ei_dom_document_relaxng_validate_file,
+      (const char *)"escapeshellcmd", (const char *)&ei_escapeshellcmd,
+      (const char *)"apc_store", (const char *)&ei_apc_store,
+      (const char *)"magickresetiterator", (const char *)&ei_magickresetiterator,
+      (const char *)"libxml_disable_entity_loader", (const char *)&ei_libxml_disable_entity_loader,
+      (const char *)"magickmotionblurimage", (const char *)&ei_magickmotionblurimage,
+      (const char *)"session_cache_expire", (const char *)&ei_session_cache_expire,
+      (const char *)"magicksetwandsize", (const char *)&ei_magicksetwandsize,
+      (const char *)"number_format", (const char *)&ei_number_format,
+      (const char *)"array_reduce", (const char *)&ei_array_reduce,
+      (const char *)"xmlwriter_start_dtd_attlist", (const char *)&ei_xmlwriter_start_dtd_attlist,
+      (const char *)"constant", (const char *)&ei_constant,
+      (const char *)"strlen", (const char *)&ei_strlen,
+      (const char *)"srand", (const char *)&ei_srand,
+      (const char *)"mysql_fetch_object", (const char *)&ei_mysql_fetch_object,
+      (const char *)"drawpathlinetoverticalrelative", (const char *)&ei_drawpathlinetoverticalrelative,
+      (const char *)"magickminifyimage", (const char *)&ei_magickminifyimage,
+      (const char *)"date_sunset", (const char *)&ei_date_sunset,
+      (const char *)"symlink", (const char *)&ei_symlink,
+      (const char *)"imagesetpixel", (const char *)&ei_imagesetpixel,
+      (const char *)"session_module_name", (const char *)&ei_session_module_name,
+      (const char *)"split", (const char *)&ei_split,
+      (const char *)"drawsetfontstyle", (const char *)&ei_drawsetfontstyle,
+      (const char *)"imagecreatefromxbm", (const char *)&ei_imagecreatefromxbm,
+      (const char *)"mysql_db_query", (const char *)&ei_mysql_db_query,
+      (const char *)"imagecolorclosestalpha", (const char *)&ei_imagecolorclosestalpha,
+      (const char *)"gzuncompress", (const char *)&ei_gzuncompress,
+      (const char *)"imap_rfc822_write_address", (const char *)&ei_imap_rfc822_write_address,
+      (const char *)"is_executable", (const char *)&ei_is_executable,
+      (const char *)"socket_create_listen", (const char *)&ei_socket_create_listen,
+      (const char *)"pixelgetcolorcount", (const char *)&ei_pixelgetcolorcount,
+      (const char *)"magickqueryconfigureoptions", (const char *)&ei_magickqueryconfigureoptions,
+      (const char *)"iptcembed", (const char *)&ei_iptcembed,
+      (const char *)"posix_getgrnam", (const char *)&ei_posix_getgrnam,
+      (const char *)"rtrim", (const char *)&ei_rtrim,
+      (const char *)"print_r", (const char *)&ei_print_r,
+      (const char *)"drawpathcurvetoquadraticbeziersmoothrelative", (const char *)&ei_drawpathcurvetoquadraticbeziersmoothrelative,
+      (const char *)"openssl_pkey_export", (const char *)&ei_openssl_pkey_export,
+      (const char *)"abs", (const char *)&ei_abs,
+      (const char *)"restore_exception_handler", (const char *)&ei_restore_exception_handler,
+      (const char *)"shell_exec", (const char *)&ei_shell_exec,
+      (const char *)"spl_autoload_functions", (const char *)&ei_spl_autoload_functions,
+      (const char *)"curl_multi_exec", (const char *)&ei_curl_multi_exec,
+      (const char *)"htmlspecialchars", (const char *)&ei_htmlspecialchars,
+      (const char *)"imagexbm", (const char *)&ei_imagexbm,
+      (const char *)"magickgetreleasedate", (const char *)&ei_magickgetreleasedate,
+      (const char *)"xbox_set_thread_timeout", (const char *)&ei_xbox_set_thread_timeout,
+      (const char *)"sem_remove", (const char *)&ei_sem_remove,
+      (const char *)"imageellipse", (const char *)&ei_imageellipse,
+      (const char *)"getprotobynumber", (const char *)&ei_getprotobynumber,
+      (const char *)"pixelsetopacity", (const char *)&ei_pixelsetopacity,
+      (const char *)"lchgrp", (const char *)&ei_lchgrp,
+      (const char *)"simplexml_load_file", (const char *)&ei_simplexml_load_file,
+      (const char *)"openssl_pkey_get_details", (const char *)&ei_openssl_pkey_get_details,
+      (const char *)"imagetypes", (const char *)&ei_imagetypes,
+      (const char *)"gzseek", (const char *)&ei_gzseek,
+      (const char *)"magickgetmaxtextadvance", (const char *)&ei_magickgetmaxtextadvance,
+      (const char *)"func_get_arg", (const char *)&ei_func_get_arg,
+      (const char *)"imagefilledrectangle", (const char *)&ei_imagefilledrectangle,
+      (const char *)"drawpushpattern", (const char *)&ei_drawpushpattern,
+      (const char *)"xmlwriter_set_indent", (const char *)&ei_xmlwriter_set_indent,
+      (const char *)"openssl_csr_get_subject", (const char *)&ei_openssl_csr_get_subject,
+      (const char *)"is_numeric", (const char *)&ei_is_numeric,
+      (const char *)"gzdeflate", (const char *)&ei_gzdeflate,
+      (const char *)"dns_check_record", (const char *)&ei_dns_check_record,
+      (const char *)"magicknegateimage", (const char *)&ei_magicknegateimage,
+      (const char *)"imap_expunge", (const char *)&ei_imap_expunge,
+      (const char *)"socket_last_error", (const char *)&ei_socket_last_error,
+      (const char *)"create_function", (const char *)&ei_create_function,
+      (const char *)"imap_get_quota", (const char *)&ei_imap_get_quota,
+      (const char *)"str_split", (const char *)&ei_str_split,
+      (const char *)"date_parse", (const char *)&ei_date_parse,
+      (const char *)"imagecreatefromxpm", (const char *)&ei_imagecreatefromxpm,
+      (const char *)"mysql_thread_id", (const char *)&ei_mysql_thread_id,
+      (const char *)"mb_encode_numericentity", (const char *)&ei_mb_encode_numericentity,
+      (const char *)"fb_call_user_func_array_safe", (const char *)&ei_fb_call_user_func_array_safe,
+      NULL, NULL,
+    };
+    hashNodeFuncEval *b = funcEvalBuckets;
+    for (const char **s = funcEvalMapData; *s; s++, b++) {
+      const char *name = *s++;
+      const void *ptr = *s;
+      int64 hash = hash_string(name, strlen(name));
+      hashNodeFuncEval *node = new(b) hashNodeFuncEval(hash, name, ptr);
+      int h = hash & 8191;
+      if (funcMapTableEval[h]) node->next = funcMapTableEval[h];
+      funcMapTableEval[h] = node;
+    }
+  }
+} eval_func_table_initializer;
+
+static inline ef_t findFuncEval(const char *name, int64 hash) {
+  for (const hashNodeFuncEval *p = funcMapTableEval[hash & 8191]; p; p = p->next) {
+    if (p->hash == hash && !strcasecmp(p->name, name)) return (ef_t)p->ptr;
+  }
+  return NULL;
+}
+
 Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
-  switch (hash & 8191) {
-    case 1:
-      HASH_INVOKE_FROM_EVAL(0x4F7230DC25F0E001LL, magicknormalizeimage);
-      break;
-    case 2:
-      HASH_INVOKE_FROM_EVAL(0x76C320EDB9B6E002LL, xmlwriter_flush);
-      break;
-    case 3:
-      HASH_INVOKE_FROM_EVAL(0x7E0EC3E131BCA003LL, token_name);
-      break;
-    case 11:
-      HASH_INVOKE_FROM_EVAL(0x4FDCCE1C7754600BLL, ob_iconv_handler);
-      break;
-    case 24:
-      HASH_INVOKE_FROM_EVAL(0x4C915E3480E94018LL, mb_substr_count);
-      break;
-    case 40:
-      HASH_INVOKE_FROM_EVAL(0x601C5152277AE028LL, readfile);
-      break;
-    case 44:
-      HASH_INVOKE_FROM_EVAL(0x464EB9B1F955202CLL, apc_add);
-      break;
-    case 45:
-      HASH_INVOKE_FROM_EVAL(0x3BE730D90618202DLL, collator_sort_with_sort_keys);
-      break;
-    case 54:
-      HASH_INVOKE_FROM_EVAL(0x32F23F206C394036LL, curl_setopt_array);
-      break;
-    case 55:
-      HASH_INVOKE_FROM_EVAL(0x418D937957ECE037LL, tanh);
-      break;
-    case 62:
-      HASH_INVOKE_FROM_EVAL(0x497E31C70409603ELL, timezone_name_from_abbr);
-      break;
-    case 63:
-      HASH_INVOKE_FROM_EVAL(0x24206A195B9C203FLL, ucfirst);
-      break;
-    case 65:
-      HASH_INVOKE_FROM_EVAL(0x65B39B11F5D7C041LL, array_unique);
-      break;
-    case 66:
-      HASH_INVOKE_FROM_EVAL(0x0547079C94282042LL, imap_utf7_decode);
-      break;
-    case 68:
-      HASH_INVOKE_FROM_EVAL(0x378A73FF98B60044LL, curl_init);
-      break;
-    case 73:
-      HASH_INVOKE_FROM_EVAL(0x4282E0231F600049LL, fseek);
-      break;
-    case 75:
-      HASH_INVOKE_FROM_EVAL(0x17CD0E68E778C04BLL, drawsetstrokelinejoin);
-      HASH_INVOKE_FROM_EVAL(0x6370CF455EA8604BLL, socket_create);
-      break;
-    case 76:
-      HASH_INVOKE_FROM_EVAL(0x7848970191D5A04CLL, mysql_connect_with_db);
-      HASH_INVOKE_FROM_EVAL(0x03047FD5FC67204CLL, exif_read_data);
-      break;
-    case 87:
-      HASH_INVOKE_FROM_EVAL(0x12B22A2E6B344057LL, ldap_sort);
-      break;
-    case 92:
-      HASH_INVOKE_FROM_EVAL(0x2B7532A070BF605CLL, openssl_get_privatekey);
-      break;
-    case 98:
-      HASH_INVOKE_FROM_EVAL(0x745910AD5C922062LL, magickgetmimetype);
-      break;
-    case 100:
-      HASH_INVOKE_FROM_EVAL(0x5CC8BA5ADFAC0064LL, imagegrabscreen);
-      break;
-    case 101:
-      HASH_INVOKE_FROM_EVAL(0x777FE52584FAE065LL, apc_bin_dump);
-      break;
-    case 103:
-      HASH_INVOKE_FROM_EVAL(0x4512BD5EA7076067LL, openssl_csr_export_to_file);
-      break;
-    case 118:
-      HASH_INVOKE_FROM_EVAL(0x0CFFD02753B98076LL, bzread);
-      break;
-    case 120:
-      HASH_INVOKE_FROM_EVAL(0x01AE1DE8FA116078LL, call_user_func_array_async);
-      break;
-    case 122:
-      HASH_INVOKE_FROM_EVAL(0x5F9DDC342A83807ALL, date_default_timezone_get);
-      break;
-    case 131:
-      HASH_INVOKE_FROM_EVAL(0x1A90213EE1A56083LL, array_pop);
-      break;
-    case 137:
-      HASH_INVOKE_FROM_EVAL(0x4AD554CBAB9CC089LL, call_user_method_array);
-      break;
-    case 140:
-      HASH_INVOKE_FROM_EVAL(0x4F1D1ED7B087208CLL, exec);
-      HASH_INVOKE_FROM_EVAL(0x3A0B58797E8FE08CLL, xml_set_external_entity_ref_handler);
-      break;
-    case 141:
-      HASH_INVOKE_FROM_EVAL(0x200864F8F053C08DLL, magickgetversionstring);
-      break;
-    case 145:
-      HASH_INVOKE_FROM_EVAL(0x3E5CF6378A49C091LL, ldap_get_attributes);
-      HASH_INVOKE_FROM_EVAL(0x1C32BB63986C8091LL, socket_strerror);
-      break;
-    case 147:
-      HASH_INVOKE_FROM_EVAL(0x3B5E32078E37A093LL, imagedestroy);
-      break;
-    case 162:
-      HASH_INVOKE_FROM_EVAL(0x10DF7941C3F3E0A2LL, socket_bind);
-      break;
-    case 163:
-      HASH_INVOKE_FROM_EVAL(0x54242D2846BC60A3LL, magickunsharpmaskimage);
-      break;
-    case 168:
-      HASH_INVOKE_FROM_EVAL(0x6E8C61326DCE40A8LL, var_export);
-      break;
-    case 171:
-      HASH_INVOKE_FROM_EVAL(0x5B1D9F56698A40ABLL, html_entity_decode);
-      break;
-    case 173:
-      HASH_INVOKE_FROM_EVAL(0x4C9252FB9C3300ADLL, pixelsetalphaquantum);
-      break;
-    case 177:
-      HASH_INVOKE_FROM_EVAL(0x191B5F1B190BC0B1LL, dom_xpath_register_ns);
-      break;
-    case 185:
-      HASH_INVOKE_FROM_EVAL(0x5C659372B2CD80B9LL, imagecolorstotal);
-      break;
-    case 187:
-      HASH_INVOKE_FROM_EVAL(0x331E7DFBE6E240BBLL, libxml_get_errors);
-      break;
-    case 197:
-      HASH_INVOKE_FROM_EVAL(0x7424946F7ED520C5LL, magickgetimagefilename);
-      break;
-    case 199:
-      HASH_INVOKE_FROM_EVAL(0x677F33E78342A0C7LL, function_exists);
-      break;
-    case 200:
-      HASH_INVOKE_FROM_EVAL(0x30AB38D851C440C8LL, magickgetimagebackgroundcolor);
-      break;
-    case 202:
-      HASH_INVOKE_FROM_EVAL(0x2EE0967F6EB5A0CALL, date_format);
-      HASH_INVOKE_FROM_EVAL(0x4C67DEE74080E0CALL, magicksetimagecompose);
-      break;
-    case 206:
-      HASH_INVOKE_FROM_EVAL(0x64E390E5F2FDC0CELL, ismagickwand);
-      break;
-    case 210:
-      HASH_INVOKE_FROM_EVAL(0x7D1FAF3322A360D2LL, hphp_splfileobject___construct);
-      HASH_INVOKE_FROM_EVAL(0x5365BD7509BE60D2LL, ldap_dn2ufn);
-      HASH_INVOKE_FROM_EVAL(0x3E4DAD592CD0A0D2LL, magickdescribeimage);
-      break;
-    case 221:
-      HASH_INVOKE_FROM_EVAL(0x5F780851DB5240DDLL, hphp_current_ref);
-      break;
-    case 232:
-      HASH_INVOKE_FROM_EVAL(0x476F4B6CC987E0E8LL, magickframeimage);
-      break;
-    case 234:
-      HASH_INVOKE_FROM_EVAL(0x53BA3992F8C240EALL, imagegrabwindow);
-      break;
-    case 249:
-      HASH_INVOKE_FROM_EVAL(0x480797DB7165A0F9LL, xmlwriter_set_indent);
-      break;
-    case 261:
-      HASH_INVOKE_FROM_EVAL(0x71E3372AA1AD0105LL, is_infinite);
-      break;
-    case 267:
-      HASH_INVOKE_FROM_EVAL(0x7DE1BEE0C35D010BLL, pcntl_signal);
-      break;
-    case 272:
-      HASH_INVOKE_FROM_EVAL(0x16B481D0DEA32110LL, call_user_func_async);
-      break;
-    case 273:
-      HASH_INVOKE_FROM_EVAL(0x3A9A5D4FEE79A111LL, getmxrr);
-      break;
-    case 286:
-      HASH_INVOKE_FROM_EVAL(0x658444BB4E29E11ELL, openssl_free_key);
-      break;
-    case 291:
-      HASH_INVOKE_FROM_EVAL(0x3669138315204123LL, mcrypt_module_get_algo_key_size);
-      break;
-    case 292:
-      HASH_INVOKE_FROM_EVAL(0x7D4D28D561392124LL, drawsettextalignment);
-      break;
-    case 301:
-      HASH_INVOKE_FROM_EVAL(0x7579DBE83CE5812DLL, imagerectangle);
-      break;
-    case 315:
-      HASH_INVOKE_FROM_EVAL(0x1F61AFCDC510413BLL, imagefilter);
-      break;
-    case 321:
-      HASH_INVOKE_FROM_EVAL(0x43EA586FBFC6A141LL, spl_autoload_unregister);
-      HASH_INVOKE_FROM_EVAL(0x6B03203C8A01C141LL, imap_timeout);
-      break;
-    case 323:
-      HASH_INVOKE_FROM_EVAL(0x296C739F28D6C143LL, drawsetfontsize);
-      break;
-    case 337:
-      HASH_INVOKE_FROM_EVAL(0x3044E9F91628E151LL, mb_strlen);
-      break;
-    case 338:
-      HASH_INVOKE_FROM_EVAL(0x5D170BCBBBA02152LL, system);
-      break;
-    case 341:
-      HASH_INVOKE_FROM_EVAL(0x2623917110168155LL, fclose);
-      HASH_INVOKE_FROM_EVAL(0x4F43FE32079C0155LL, magickgetimagesblob);
-      break;
-    case 347:
-      HASH_INVOKE_FROM_EVAL(0x3711AF36391EA15BLL, mysql_list_tables);
-      break;
-    case 348:
-      HASH_INVOKE_FROM_EVAL(0x6CD7466174B9A15CLL, pixelsetredquantum);
-      break;
-    case 349:
-      HASH_INVOKE_FROM_EVAL(0x517941D034E3015DLL, iterator_to_array);
-      break;
-    case 353:
-      HASH_INVOKE_FROM_EVAL(0x309E780586D6C161LL, socket_set_nonblock);
-      break;
-    case 361:
-      HASH_INVOKE_FROM_EVAL(0x4983571BFEAE6169LL, magickaffinetransformimage);
-      HASH_INVOKE_FROM_EVAL(0x1612E331D1726169LL, drawsetstrokecolor);
-      break;
-    case 366:
-      HASH_INVOKE_FROM_EVAL(0x0125F8B9428E416ELL, hphp_create_object);
-      break;
-    case 379:
-      HASH_INVOKE_FROM_EVAL(0x59594143EFC7617BLL, mcrypt_module_open);
-      break;
-    case 385:
-      HASH_INVOKE_FROM_EVAL(0x1CBD3B58296C8181LL, xmlwriter_write_dtd);
-      break;
-    case 386:
-      HASH_INVOKE_FROM_EVAL(0x7BB7C27B2C118182LL, get_magic_quotes_gpc);
-      break;
-    case 389:
-      HASH_INVOKE_FROM_EVAL(0x54DB5DC6A069A185LL, hphp_get_class_info);
-      break;
-    case 391:
-      HASH_INVOKE_FROM_EVAL(0x1BC448670BA4E187LL, iconv_strpos);
-      break;
-    case 402:
-      HASH_INVOKE_FROM_EVAL(0x07B5BF934F6EA192LL, imagesettile);
-      break;
-    case 409:
-      HASH_INVOKE_FROM_EVAL(0x0CE71BC3B75D8199LL, mb_strimwidth);
-      break;
-    case 411:
-      HASH_INVOKE_FROM_EVAL(0x74F20C284227219BLL, similar_text);
-      break;
-    case 418:
-      HASH_INVOKE_FROM_EVAL(0x6DFC0765EBAB81A2LL, mcrypt_decrypt);
-      HASH_INVOKE_FROM_EVAL(0x615723D21421A1A2LL, sem_remove);
-      break;
-    case 425:
-      HASH_INVOKE_FROM_EVAL(0x0DDFE3B1F6EEE1A9LL, array_reduce);
-      break;
-    case 434:
-      HASH_INVOKE_FROM_EVAL(0x4B96F870584541B2LL, hphp_splfileobject_setflags);
-      break;
-    case 436:
-      HASH_INVOKE_FROM_EVAL(0x6F6C85F4855DE1B4LL, imap_check);
-      break;
-    case 438:
-      HASH_INVOKE_FROM_EVAL(0x33BD672B4AC301B6LL, mt_rand);
-      break;
-    case 445:
-      HASH_INVOKE_FROM_EVAL(0x589F7316EDC581BDLL, fb_serialize);
-      break;
-    case 447:
-      HASH_INVOKE_FROM_EVAL(0x0E88ACEB15A581BFLL, magickgetimageextrema);
-      break;
-    case 455:
-      HASH_INVOKE_FROM_EVAL(0x5AE12CB1FFDC21C7LL, drawellipse);
-      break;
-    case 458:
-      HASH_INVOKE_FROM_EVAL(0x75CA86838D24A1CALL, hash_algos);
-      break;
-    case 470:
-      HASH_INVOKE_FROM_EVAL(0x78831282736801D6LL, stream_context_get_default);
-      break;
-    case 472:
-      HASH_INVOKE_FROM_EVAL(0x60E9E392663921D8LL, readlink);
-      break;
-    case 476:
-      HASH_INVOKE_FROM_EVAL(0x5B3A4A72846B21DCLL, current);
-      break;
-    case 477:
-      HASH_INVOKE_FROM_EVAL(0x04666D6F67C7A1DDLL, mysql_list_processes);
-      break;
-    case 482:
-      HASH_INVOKE_FROM_EVAL(0x67D4BA8513BF41E2LL, newpixelwand);
-      break;
-    case 483:
-      HASH_INVOKE_FROM_EVAL(0x131D11F79A8801E3LL, mb_http_output);
-      HASH_INVOKE_FROM_EVAL(0x406BDC51A3FD81E3LL, pcntl_waitpid);
-      break;
-    case 493:
-      HASH_INVOKE_FROM_EVAL(0x1B09A9A533FFA1EDLL, drawgetexceptiontype);
-      HASH_INVOKE_FROM_EVAL(0x19932EEC5CAE01EDLL, hphp_splfileinfo_getfileinfo);
-      break;
-    case 497:
-      HASH_INVOKE_FROM_EVAL(0x02BCE5B0FBED61F1LL, strlen);
-      break;
-    case 499:
-      HASH_INVOKE_FROM_EVAL(0x582D10141D5601F3LL, stream_context_set_option);
-      break;
-    case 502:
-      HASH_INVOKE_FROM_EVAL(0x06DAF95935D221F6LL, dom_namednodemap_item);
-      break;
-    case 514:
-      HASH_INVOKE_FROM_EVAL(0x16699E33370A8202LL, idn_to_unicode);
-      break;
-    case 515:
-      HASH_INVOKE_FROM_EVAL(0x5B3C354575BB8203LL, mysql_free_result);
-      break;
-    case 520:
-      HASH_INVOKE_FROM_EVAL(0x7B525920E026C208LL, gztell);
-      break;
-    case 523:
-      HASH_INVOKE_FROM_EVAL(0x2F5144AB3647C20BLL, dom_text_is_whitespace_in_element_content);
-      break;
-    case 525:
-      HASH_INVOKE_FROM_EVAL(0x5C0DECC8CC67E20DLL, magickwriteimagesfile);
-      break;
-    case 529:
-      HASH_INVOKE_FROM_EVAL(0x438CD1A0327A8211LL, apc_define_constants);
-      break;
-    case 535:
-      HASH_INVOKE_FROM_EVAL(0x4BC4B81CC5F32217LL, dom_node_append_child);
-      break;
-    case 539:
-      HASH_INVOKE_FROM_EVAL(0x3A90CC67D58A021BLL, hash_hmac_file);
-      break;
-    case 545:
-      HASH_INVOKE_FROM_EVAL(0x345E2BAE171FA221LL, date_sunrise);
-      break;
-    case 546:
-      HASH_INVOKE_FROM_EVAL(0x39E4E0175FADC222LL, drawskewx);
-      break;
-    case 547:
-      HASH_INVOKE_FROM_EVAL(0x5208E8B08455E223LL, dom_node_has_child_nodes);
-      break;
-    case 556:
-      HASH_INVOKE_FROM_EVAL(0x4129FFBF3548E22CLL, mb_strpos);
-      break;
-    case 557:
-      HASH_INVOKE_FROM_EVAL(0x3B0FE36F9A7AE22DLL, bzflush);
-      break;
-    case 560:
-      HASH_INVOKE_FROM_EVAL(0x036A5935D9936230LL, hphp_splfileinfo_openfile);
-      break;
-    case 561:
-      HASH_INVOKE_FROM_EVAL(0x61A192D10C004231LL, magickconvolveimage);
-      break;
-    case 564:
-      HASH_INVOKE_FROM_EVAL(0x422C51C95928A234LL, str_replace);
-      break;
-    case 568:
-      HASH_INVOKE_FROM_EVAL(0x0B7BB85A435F8238LL, bzdecompress);
-      HASH_INVOKE_FROM_EVAL(0x695AC59F79E2A238LL, mb_encode_mimeheader);
-      break;
-    case 572:
-      HASH_INVOKE_FROM_EVAL(0x306F1D92E413A23CLL, check_user_func_async);
-      break;
-    case 574:
-      HASH_INVOKE_FROM_EVAL(0x5E54CE856B78223ELL, array_flip);
-      break;
-    case 576:
-      HASH_INVOKE_FROM_EVAL(0x0DB9DD4AE24B0240LL, base64_encode);
-      break;
-    case 584:
-      HASH_INVOKE_FROM_EVAL(0x7071BB6F0591E248LL, serialize);
-      break;
-    case 589:
-      HASH_INVOKE_FROM_EVAL(0x5E73B9F3B7C8224DLL, parse_hdf_string);
-      break;
-    case 591:
-      HASH_INVOKE_FROM_EVAL(0x1D8FE8E68F7EA24FLL, pixelsetiteratorrow);
-      break;
-    case 600:
-      HASH_INVOKE_FROM_EVAL(0x32C51FFF185F4258LL, memcache_set);
-      break;
-    case 605:
-      HASH_INVOKE_FROM_EVAL(0x7E6024E53AEEE25DLL, apc_delete);
-      break;
-    case 608:
-      HASH_INVOKE_FROM_EVAL(0x71D2D4757B7E4260LL, apache_request_headers);
-      break;
-    case 609:
-      HASH_INVOKE_FROM_EVAL(0x48305E8ABB8BC261LL, hphp_instanceof);
-      break;
-    case 610:
-      HASH_INVOKE_FROM_EVAL(0x63AC0EED6D946262LL, pcntl_fork);
-      break;
-    case 613:
-      HASH_INVOKE_FROM_EVAL(0x561DB8F1DC0BC265LL, magickseparateimagechannel);
-      break;
-    case 615:
-      HASH_INVOKE_FROM_EVAL(0x50C5488E19492267LL, mb_list_encodings_alias_names);
-      break;
-    case 625:
-      HASH_INVOKE_FROM_EVAL(0x135CE067FA0A6271LL, bzerrno);
-      break;
-    case 626:
-      HASH_INVOKE_FROM_EVAL(0x1C65F32FF28BC272LL, pathinfo);
-      break;
-    case 637:
-      HASH_INVOKE_FROM_EVAL(0x7DB57C59E607627DLL, mcrypt_generic_deinit);
-      break;
-    case 638:
-      HASH_INVOKE_FROM_EVAL(0x4111669F4862E27ELL, drawpathlinetoverticalrelative);
-      break;
-    case 639:
-      HASH_INVOKE_FROM_EVAL(0x5B94A6962F1EC27FLL, magickechoimagesblob);
-      break;
-    case 640:
-      HASH_INVOKE_FROM_EVAL(0x2E54EF1891172280LL, hphp_splfileinfo_isexecutable);
-      break;
-    case 641:
-      HASH_INVOKE_FROM_EVAL(0x1765A2E5186DE281LL, socket_write);
-      break;
-    case 643:
-      HASH_INVOKE_FROM_EVAL(0x4C83B098C8BDA283LL, posix_setsid);
-      break;
-    case 645:
-      HASH_INVOKE_FROM_EVAL(0x5F7DC3612050A285LL, drawsetfontweight);
-      HASH_INVOKE_FROM_EVAL(0x1A895A2307126285LL, openssl_pkcs7_decrypt);
-      break;
-    case 646:
-      HASH_INVOKE_FROM_EVAL(0x3A2E2C40B019E286LL, is_a);
-      HASH_INVOKE_FROM_EVAL(0x4F028FA6AAEEC286LL, call_user_method);
-      break;
-    case 647:
-      HASH_INVOKE_FROM_EVAL(0x27698DDEDAD6E287LL, openssl_pkey_new);
-      HASH_INVOKE_FROM_EVAL(0x23A1E13930E44287LL, xbox_schedule_thread_reset);
-      break;
-    case 656:
-      HASH_INVOKE_FROM_EVAL(0x04C11602C720A290LL, convert_cyr_string);
-      break;
-    case 660:
-      HASH_INVOKE_FROM_EVAL(0x4D05DD57E4052294LL, xmlwriter_output_memory);
-      break;
-    case 661:
-      HASH_INVOKE_FROM_EVAL(0x69868C648BC12295LL, apc_store);
-      break;
-    case 665:
-      HASH_INVOKE_FROM_EVAL(0x22D380E06E67E299LL, stream_encoding);
-      HASH_INVOKE_FROM_EVAL(0x5665CB664C38A299LL, parse_ini_string);
-      break;
-    case 666:
-      HASH_INVOKE_FROM_EVAL(0x24BD9EBDC721E29ALL, hphp_debug_caller_info);
-      break;
-    case 668:
-      HASH_INVOKE_FROM_EVAL(0x0F71D3E47044E29CLL, drawpathcurvetosmoothrelative);
-      break;
-    case 674:
-      HASH_INVOKE_FROM_EVAL(0x1FBF8A270331C2A2LL, write_hdf_file);
-      break;
-    case 685:
-      HASH_INVOKE_FROM_EVAL(0x35D259398CDDA2ADLL, pixelgetredquantum);
-      HASH_INVOKE_FROM_EVAL(0x00AB6FC4E9EE62ADLL, imagefilledrectangle);
-      break;
-    case 691:
-      HASH_INVOKE_FROM_EVAL(0x44530C37F2B522B3LL, drawgetstrokedasharray);
-      HASH_INVOKE_FROM_EVAL(0x59BB7B8078AC22B3LL, tempnam);
-      break;
-    case 694:
-      HASH_INVOKE_FROM_EVAL(0x0C4B98B47B0862B6LL, apd_echo);
-      break;
-    case 696:
-      HASH_INVOKE_FROM_EVAL(0x3C6D50F3BB8102B8LL, next);
-      break;
-    case 700:
-      HASH_INVOKE_FROM_EVAL(0x33E08846F3EB42BCLL, ldap_get_values);
-      break;
-    case 708:
-      HASH_INVOKE_FROM_EVAL(0x6018C9F7DF40C2C4LL, xml_get_current_column_number);
-      break;
-    case 716:
-      HASH_INVOKE_FROM_EVAL(0x44273F8BA3F542CCLL, imagesx);
-      break;
-    case 718:
-      HASH_INVOKE_FROM_EVAL(0x1922D51F3E1522CELL, xmlwriter_end_dtd_attlist);
-      break;
-    case 722:
-      HASH_INVOKE_FROM_EVAL(0x4D9A87BD0CF742D2LL, imagepsextendfont);
-      break;
-    case 733:
-      HASH_INVOKE_FROM_EVAL(0x5F585DF7CB82E2DDLL, hphp_splfileinfo_iswritable);
-      break;
-    case 739:
-      HASH_INVOKE_FROM_EVAL(0x45382D0BA5B262E3LL, mysql_get_proto_info);
-      break;
-    case 749:
-      HASH_INVOKE_FROM_EVAL(0x215E0E2EFA7422EDLL, drawgetstrokeantialias);
-      break;
-    case 750:
-      HASH_INVOKE_FROM_EVAL(0x5D43C0E4868EC2EELL, forward_static_call);
-      HASH_INVOKE_FROM_EVAL(0x2884B7B3252B02EELL, imagealphablending);
-      break;
-    case 752:
-      HASH_INVOKE_FROM_EVAL(0x25CA0794823AA2F0LL, openssl_csr_get_public_key);
-      break;
-    case 761:
-      HASH_INVOKE_FROM_EVAL(0x00CFD56391DF82F9LL, mysql_data_seek);
-      break;
-    case 764:
-      HASH_INVOKE_FROM_EVAL(0x66D59E4DBC7382FCLL, drawscale);
-      break;
-    case 772:
-      HASH_INVOKE_FROM_EVAL(0x33A532FDB8EAC304LL, memcache_delete);
-      break;
-    case 777:
-      HASH_INVOKE_FROM_EVAL(0x414038596F552309LL, magickgetversionnumber);
-      HASH_INVOKE_FROM_EVAL(0x47CB27E8FDB60309LL, array_fill);
-      break;
-    case 779:
-      HASH_INVOKE_FROM_EVAL(0x0C6F751411F5E30BLL, strrev);
-      HASH_INVOKE_FROM_EVAL(0x65F586C35A88030BLL, magickresizeimage);
-      break;
-    case 814:
-      HASH_INVOKE_FROM_EVAL(0x7D1DCB9F4168032ELL, imap_getsubscribed);
-      break;
-    case 816:
-      HASH_INVOKE_FROM_EVAL(0x300F758BB0E16330LL, mysql_num_rows);
-      break;
-    case 817:
-      HASH_INVOKE_FROM_EVAL(0x00DAFE46631AE331LL, stream_set_timeout);
-      break;
-    case 818:
-      HASH_INVOKE_FROM_EVAL(0x037055C215998332LL, bcsub);
-      break;
-    case 824:
-      HASH_INVOKE_FROM_EVAL(0x549D51040C250338LL, cleardrawingwand);
-      break;
-    case 825:
-      HASH_INVOKE_FROM_EVAL(0x48D57F17C5132339LL, drawgetclippath);
-      break;
-    case 826:
-      HASH_INVOKE_FROM_EVAL(0x34DDF0DFC546033ALL, xbox_task_start);
-      break;
-    case 829:
-      HASH_INVOKE_FROM_EVAL(0x4E166ECE0EC6A33DLL, openssl_pkey_get_public);
-      break;
-    case 830:
-      HASH_INVOKE_FROM_EVAL(0x758EA7E9AA45C33ELL, xmlwriter_end_document);
-      break;
-    case 836:
-      HASH_INVOKE_FROM_EVAL(0x1A9DC76AB74F6344LL, openssl_verify);
-      break;
-    case 838:
-      HASH_INVOKE_FROM_EVAL(0x4B30FBA18042E346LL, session_cache_expire);
-      break;
-    case 843:
-      HASH_INVOKE_FROM_EVAL(0x3880550F6AD8034BLL, session_destroy);
-      break;
-    case 845:
-      HASH_INVOKE_FROM_EVAL(0x5998E61D600D634DLL, drawaffine);
-      break;
-    case 858:
-      HASH_INVOKE_FROM_EVAL(0x4BF5DEBDB76EC35ALL, mcrypt_enc_get_iv_size);
-      HASH_INVOKE_FROM_EVAL(0x0E0C79E42812235ALL, imagepng);
-      break;
-    case 861:
-      HASH_INVOKE_FROM_EVAL(0x54C3E9AB6FB8E35DLL, magickswirlimage);
-      break;
-    case 863:
-      HASH_INVOKE_FROM_EVAL(0x280DE04F84FB235FLL, popdrawingwand);
-      break;
-    case 869:
-      HASH_INVOKE_FROM_EVAL(0x68DBF8ABB26A8365LL, hphp_directoryiterator_rewind);
-      break;
-    case 870:
-      HASH_INVOKE_FROM_EVAL(0x4EF3469306E44366LL, floatval);
-      break;
-    case 871:
-      HASH_INVOKE_FROM_EVAL(0x4810A9774785C367LL, posix_getpgrp);
-      break;
-    case 873:
-      HASH_INVOKE_FROM_EVAL(0x6C715D7DD63DA369LL, is_integer);
-      break;
-    case 889:
-      HASH_INVOKE_FROM_EVAL(0x5ED8901DB5D14379LL, magickcharcoalimage);
-      break;
-    case 890:
-      HASH_INVOKE_FROM_EVAL(0x69EA8DC005FEC37ALL, hphp_splfileobject_fwrite);
-      break;
-    case 893:
-      HASH_INVOKE_FROM_EVAL(0x7C40E2514FB5437DLL, dom_namednodemap_get_named_item_ns);
-      break;
-    case 904:
-      HASH_INVOKE_FROM_EVAL(0x791E946E04F50388LL, magicksetresourcelimit);
-      break;
-    case 907:
-      HASH_INVOKE_FROM_EVAL(0x7CC683891D5F038BLL, imap_qprint);
-      HASH_INVOKE_FROM_EVAL(0x73A3F87C0A56238BLL, stat);
-      break;
-    case 909:
-      HASH_INVOKE_FROM_EVAL(0x4127DE142CD4A38DLL, xml_get_error_code);
-      break;
-    case 914:
-      HASH_INVOKE_FROM_EVAL(0x2395B0A85E292392LL, hphp_splfileobject_flock);
-      break;
-    case 916:
-      HASH_INVOKE_FROM_EVAL(0x269A220896FD2394LL, deg2rad);
-      HASH_INVOKE_FROM_EVAL(0x36953788781F4394LL, mailparse_msg_extract_part);
-      break;
-    case 917:
-      HASH_INVOKE_FROM_EVAL(0x422599B9E8AC0395LL, stream_bucket_make_writeable);
-      break;
-    case 918:
-      HASH_INVOKE_FROM_EVAL(0x15EC64198D93C396LL, openssl_pkcs12_read);
-      break;
-    case 919:
-      HASH_INVOKE_FROM_EVAL(0x1D2C305EA5C82397LL, idn_to_utf8);
-      break;
-    case 920:
-      HASH_INVOKE_FROM_EVAL(0x215547858BA7E398LL, hphp_recursiveiteratoriterator___construct);
-      break;
-    case 922:
-      HASH_INVOKE_FROM_EVAL(0x0CC562CBD773639ALL, i18n_loc_get_default);
-      break;
-    case 923:
-      HASH_INVOKE_FROM_EVAL(0x25DF28703309C39BLL, idate);
-      break;
-    case 924:
-      HASH_INVOKE_FROM_EVAL(0x0136F8F03932E39CLL, session_unset);
-      break;
-    case 927:
-      HASH_INVOKE_FROM_EVAL(0x57E72C21F67D039FLL, user_error);
-      HASH_INVOKE_FROM_EVAL(0x0368F1779E3AE39FLL, mysql_field_table);
-      break;
-    case 929:
-      HASH_INVOKE_FROM_EVAL(0x5C29B6D7973903A1LL, proc_nice);
-      break;
-    case 930:
-      HASH_INVOKE_FROM_EVAL(0x0207E332D629A3A2LL, mailparse_msg_get_structure);
-      break;
-    case 936:
-      HASH_INVOKE_FROM_EVAL(0x0121CD6CDCE1C3A8LL, mysql_pconnect_with_db);
-      break;
-    case 937:
-      HASH_INVOKE_FROM_EVAL(0x7F9E810BC93023A9LL, memcache_close);
-      break;
-    case 938:
-      HASH_INVOKE_FROM_EVAL(0x3238A5BD362443AALL, escapeshellcmd);
-      break;
-    case 946:
-      HASH_INVOKE_FROM_EVAL(0x3DB7EBC0B670C3B2LL, magicksetimageredprimary);
-      break;
-    case 947:
-      HASH_INVOKE_FROM_EVAL(0x61720D771D1A23B3LL, posix_getpwnam);
-      break;
-    case 949:
-      HASH_INVOKE_FROM_EVAL(0x03BE37E94875C3B5LL, fb_set_exit_callback);
-      break;
-    case 955:
-      HASH_INVOKE_FROM_EVAL(0x5A3F5AAD1B13A3BBLL, is_executable);
-      break;
-    case 957:
-      HASH_INVOKE_FROM_EVAL(0x60294C2616F6A3BDLL, mcrypt_enc_get_supported_key_sizes);
-      break;
-    case 968:
-      HASH_INVOKE_FROM_EVAL(0x3101CE70BA49A3C8LL, error_reporting);
-      break;
-    case 971:
-      HASH_INVOKE_FROM_EVAL(0x4C3B6BE9112E63CBLL, str_split);
-      break;
-    case 972:
-      HASH_INVOKE_FROM_EVAL(0x50C88817090C63CCLL, pcntl_wait);
-      break;
-    case 974:
-      HASH_INVOKE_FROM_EVAL(0x4F9F68F60FD7A3CELL, drawgetfillrule);
-      break;
-    case 979:
-      HASH_INVOKE_FROM_EVAL(0x734FD402E190E3D3LL, evhttp_async_get);
-      break;
-    case 980:
-      HASH_INVOKE_FROM_EVAL(0x0FF21F9BE4CCC3D4LL, call_user_func_rpc);
-      break;
-    case 996:
-      HASH_INVOKE_FROM_EVAL(0x7E7718CC939D63E4LL, setrawcookie);
-      break;
-    case 1000:
-      HASH_INVOKE_FROM_EVAL(0x6BB9D669DDB703E8LL, xml_get_current_byte_index);
-      HASH_INVOKE_FROM_EVAL(0x4A3127C309B0C3E8LL, drawsetstrokelinecap);
-      break;
-    case 1002:
-      HASH_INVOKE_FROM_EVAL(0x6DA49696220FE3EALL, mailparse_rfc822_parse_addresses);
-      break;
-    case 1003:
-      HASH_INVOKE_FROM_EVAL(0x1DAE0831CECB63EBLL, ob_get_clean);
-      break;
-    case 1006:
-      HASH_INVOKE_FROM_EVAL(0x598472448937E3EELL, magickqueryfontmetrics);
-      break;
-    case 1008:
-      HASH_INVOKE_FROM_EVAL(0x69C07B1F19CE83F0LL, imap_rfc822_parse_headers);
-      break;
-    case 1012:
-      HASH_INVOKE_FROM_EVAL(0x1938C8715806E3F4LL, spl_classes);
-      break;
-    case 1025:
-      HASH_INVOKE_FROM_EVAL(0x3DCB1C92B5864401LL, gzrewind);
-      break;
-    case 1028:
-      HASH_INVOKE_FROM_EVAL(0x2B12B0E9109D0404LL, iptcembed);
-      break;
-    case 1033:
-      HASH_INVOKE_FROM_EVAL(0x2E57E06900594409LL, xbox_send_message);
-      break;
-    case 1037:
-      HASH_INVOKE_FROM_EVAL(0x2939C5BAE0C4A40DLL, nl2br);
-      HASH_INVOKE_FROM_EVAL(0x267529454569840DLL, ob_flush);
-      HASH_INVOKE_FROM_EVAL(0x002CCCD877D9640DLL, drawpathclose);
-      break;
-    case 1062:
-      HASH_INVOKE_FROM_EVAL(0x21EFB0B9D1514426LL, magicksetpassphrase);
-      break;
-    case 1069:
-      HASH_INVOKE_FROM_EVAL(0x2A5A519E4BFE442DLL, mb_eregi);
-      break;
-    case 1071:
-      HASH_INVOKE_FROM_EVAL(0x316F2725AC15042FLL, stream_resolve_include_path);
-      break;
-    case 1072:
-      HASH_INVOKE_FROM_EVAL(0x6349C9658B2A2430LL, memcache_pconnect);
-      break;
-    case 1074:
-      HASH_INVOKE_FROM_EVAL(0x71C6E38BC56CE432LL, stream_wrapper_register);
-      break;
-    case 1082:
-      HASH_INVOKE_FROM_EVAL(0x5019A1FBF377C43ALL, imagepsbbox);
-      break;
-    case 1084:
-      HASH_INVOKE_FROM_EVAL(0x59ECE01C7629643CLL, mysql_drop_db);
-      break;
-    case 1089:
-      HASH_INVOKE_FROM_EVAL(0x158E2271E381C441LL, hash_file);
-      break;
-    case 1090:
-      HASH_INVOKE_FROM_EVAL(0x3F869126D0336442LL, trigger_error);
-      break;
-    case 1106:
-      HASH_INVOKE_FROM_EVAL(0x1056EF1C14D2A452LL, socket_connect);
-      break;
-    case 1117:
-      HASH_INVOKE_FROM_EVAL(0x0246AF48CD31245DLL, count_chars);
-      break;
-    case 1125:
-      HASH_INVOKE_FROM_EVAL(0x05D72365192CE465LL, fwrite);
-      HASH_INVOKE_FROM_EVAL(0x406A1404F48E4465LL, posix_getuid);
-      break;
-    case 1136:
-      HASH_INVOKE_FROM_EVAL(0x0C626F268F120470LL, __halt_compiler);
-      break;
-    case 1139:
-      HASH_INVOKE_FROM_EVAL(0x0F8F276A48900473LL, drawgetstrokelinecap);
-      break;
-    case 1141:
-      HASH_INVOKE_FROM_EVAL(0x268706C46202C475LL, sem_acquire);
-      break;
-    case 1148:
-      HASH_INVOKE_FROM_EVAL(0x1A08C578AD3BC47CLL, apache_response_headers);
-      break;
-    case 1150:
-      HASH_INVOKE_FROM_EVAL(0x0AC36D9F961B247ELL, newpixeliterator);
-      break;
-    case 1157:
-      HASH_INVOKE_FROM_EVAL(0x61499C92F4FBA485LL, hphp_splfileobject_fgetc);
-      break;
-    case 1161:
-      HASH_INVOKE_FROM_EVAL(0x7505924F05854489LL, dom_element_set_attribute_ns);
-      break;
-    case 1165:
-      HASH_INVOKE_FROM_EVAL(0x275D127C87EF048DLL, mysql_db_query);
-      break;
-    case 1167:
-      HASH_INVOKE_FROM_EVAL(0x43672229728A648FLL, drawpushpattern);
-      break;
-    case 1181:
-      HASH_INVOKE_FROM_EVAL(0x7A59813AC331449DLL, mb_ereg_search_regs);
-      break;
-    case 1183:
-      HASH_INVOKE_FROM_EVAL(0x7FF66005524E649FLL, drawgettextdecoration);
-      break;
-    case 1188:
-      HASH_INVOKE_FROM_EVAL(0x6EC476E42A53A4A4LL, ldap_err2str);
-      break;
-    case 1192:
-      HASH_INVOKE_FROM_EVAL(0x6F4497457F1584A8LL, dom_element_set_id_attribute_node);
-      break;
-    case 1196:
-      HASH_INVOKE_FROM_EVAL(0x245AA2790C87C4ACLL, image_type_to_mime_type);
-      HASH_INVOKE_FROM_EVAL(0x6E8FFA56842304ACLL, drawgetfont);
-      break;
-    case 1197:
-      HASH_INVOKE_FROM_EVAL(0x3D98ACFCEBB764ADLL, hphp_set_property);
-      break;
-    case 1200:
-      HASH_INVOKE_FROM_EVAL(0x3AF65A9F3653E4B0LL, addslashes);
-      break;
-    case 1204:
-      HASH_INVOKE_FROM_EVAL(0x00621C58E54D44B4LL, hphp_recursiveiteratoriterator_key);
-      break;
-    case 1209:
-      HASH_INVOKE_FROM_EVAL(0x5351290CD139A4B9LL, mb_strrpos);
-      break;
-    case 1213:
-      HASH_INVOKE_FROM_EVAL(0x35BE8F6E7726C4BDLL, dechex);
-      HASH_INVOKE_FROM_EVAL(0x1F4D41588D2EA4BDLL, hphp_get_status);
-      break;
-    case 1214:
-      HASH_INVOKE_FROM_EVAL(0x57278846B8B0E4BELL, ldap_count_entries);
-      break;
-    case 1215:
-      HASH_INVOKE_FROM_EVAL(0x01681C307C5AE4BFLL, strtoupper);
-      break;
-    case 1219:
-      HASH_INVOKE_FROM_EVAL(0x7AAC29849263C4C3LL, getprotobyname);
-      break;
-    case 1220:
-      HASH_INVOKE_FROM_EVAL(0x67EADCF4E81084C4LL, mb_ereg);
-      break;
-    case 1222:
-      HASH_INVOKE_FROM_EVAL(0x651F7FBBA90604C6LL, magickgetimageindex);
-      HASH_INVOKE_FROM_EVAL(0x4F7AA8120E33E4C6LL, collator_get_attribute);
-      break;
-    case 1230:
-      HASH_INVOKE_FROM_EVAL(0x60783C20BF7724CELL, mailparse_msg_free);
-      break;
-    case 1231:
-      HASH_INVOKE_FROM_EVAL(0x72DECE786967A4CFLL, magickpreviousimage);
-      break;
-    case 1239:
-      HASH_INVOKE_FROM_EVAL(0x215403F1E335C4D7LL, magicksolarizeimage);
-      break;
-    case 1240:
-      HASH_INVOKE_FROM_EVAL(0x2532EB687D51E4D8LL, unregister_tick_function);
-      break;
-    case 1247:
-      HASH_INVOKE_FROM_EVAL(0x2E5E5A0FC3B5C4DFLL, xml_set_character_data_handler);
-      break;
-    case 1248:
-      HASH_INVOKE_FROM_EVAL(0x340A51AE22A924E0LL, reset);
-      break;
-    case 1255:
-      HASH_INVOKE_FROM_EVAL(0x4CE852AAFF77E4E7LL, inclued_get_data);
-      break;
-    case 1260:
-      HASH_INVOKE_FROM_EVAL(0x784F675D436004ECLL, imap_close);
-      break;
-    case 1265:
-      HASH_INVOKE_FROM_EVAL(0x65BD541EAB38E4F1LL, mysql_close);
-      break;
-    case 1269:
-      HASH_INVOKE_FROM_EVAL(0x528AC8D252D224F5LL, log10);
-      break;
-    case 1271:
-      HASH_INVOKE_FROM_EVAL(0x0BD9C5D811CB04F7LL, dom_element_set_id_attribute_ns);
-      break;
-    case 1272:
-      HASH_INVOKE_FROM_EVAL(0x011006D90D79E4F8LL, mysql_errno);
-      break;
-    case 1277:
-      HASH_INVOKE_FROM_EVAL(0x002387F1D23B44FDLL, mcrypt_list_modes);
-      HASH_INVOKE_FROM_EVAL(0x2CEAE845E4F404FDLL, dom_document_save);
-      break;
-    case 1287:
-      HASH_INVOKE_FROM_EVAL(0x197A5D237BD4C507LL, mb_ereg_search_getpos);
-      break;
-    case 1291:
-      HASH_INVOKE_FROM_EVAL(0x71DCF11E3640C50BLL, hphp_directoryiterator_valid);
-      break;
-    case 1295:
-      HASH_INVOKE_FROM_EVAL(0x5A66CCB3D924450FLL, xml_parser_create);
-      break;
-    case 1297:
-      HASH_INVOKE_FROM_EVAL(0x09D5355CA8198511LL, mb_internal_encoding);
-      break;
-    case 1305:
-      HASH_INVOKE_FROM_EVAL(0x54EDBB6BAF318519LL, memcache_add);
-      break;
-    case 1316:
-      HASH_INVOKE_FROM_EVAL(0x28E724EDE0BB6524LL, mb_strcut);
-      break;
-    case 1318:
-      HASH_INVOKE_FROM_EVAL(0x57DDA4C3F7FF8526LL, fputcsv);
-      break;
-    case 1319:
-      HASH_INVOKE_FROM_EVAL(0x6B2B942CAF1A2527LL, array_shift);
-      break;
-    case 1331:
-      HASH_INVOKE_FROM_EVAL(0x313D2A505076A533LL, dir);
-      break;
-    case 1334:
-      HASH_INVOKE_FROM_EVAL(0x746DC7AD953EA536LL, memcache_set_compress_threshold);
-      break;
-    case 1335:
-      HASH_INVOKE_FROM_EVAL(0x175B86BCB3124537LL, magickgetexceptionstring);
-      break;
-    case 1341:
-      HASH_INVOKE_FROM_EVAL(0x0F32841DBF7A053DLL, fb_crossall_query);
-      break;
-    case 1346:
-      HASH_INVOKE_FROM_EVAL(0x59A44591E67D4542LL, drawrender);
-      break;
-    case 1347:
-      HASH_INVOKE_FROM_EVAL(0x20E2B1D920122543LL, die);
-      break;
-    case 1350:
-      HASH_INVOKE_FROM_EVAL(0x12A739BE0ED32546LL, ignore_user_abort);
-      HASH_INVOKE_FROM_EVAL(0x081F76AC889BC546LL, getrusage);
-      break;
-    case 1352:
-      HASH_INVOKE_FROM_EVAL(0x0AD3BFAB5F780548LL, magickcoalesceimages);
-      break;
-    case 1357:
-      HASH_INVOKE_FROM_EVAL(0x1B9E769FFEC3C54DLL, pcntl_wtermsig);
-      break;
-    case 1359:
-      HASH_INVOKE_FROM_EVAL(0x063200B5AAFEC54FLL, mysql_thread_id);
-      break;
-    case 1382:
-      HASH_INVOKE_FROM_EVAL(0x3DA2058E5C540566LL, spliti);
-      break;
-    case 1386:
-      HASH_INVOKE_FROM_EVAL(0x74599147803DC56ALL, magickgetstringwidth);
-      break;
-    case 1387:
-      HASH_INVOKE_FROM_EVAL(0x0DE86977367F656BLL, register_shutdown_function);
-      break;
-    case 1390:
-      HASH_INVOKE_FROM_EVAL(0x2A1F1B52160DE56ELL, zend_logo_guid);
-      break;
-    case 1392:
-      HASH_INVOKE_FROM_EVAL(0x13D0427F3BB3E570LL, get_declared_interfaces);
-      HASH_INVOKE_FROM_EVAL(0x21B3935EB3140570LL, mysql_fetch_object);
-      break;
-    case 1399:
-      HASH_INVOKE_FROM_EVAL(0x72E1FD3DCD45C577LL, bzopen);
-      break;
-    case 1401:
-      HASH_INVOKE_FROM_EVAL(0x1DC8A386E219C579LL, ldap_add);
-      break;
-    case 1405:
-      HASH_INVOKE_FROM_EVAL(0x78EDB608B02A857DLL, join);
-      HASH_INVOKE_FROM_EVAL(0x22E08DEDF360057DLL, pixelsetmagenta);
-      break;
-    case 1406:
-      HASH_INVOKE_FROM_EVAL(0x132776D93181E57ELL, ldap_set_option);
-      break;
-    case 1408:
-      HASH_INVOKE_FROM_EVAL(0x709140577B2C6580LL, xhprof_network_enable);
-      break;
-    case 1410:
-      HASH_INVOKE_FROM_EVAL(0x02688986D5D76582LL, magickspreadimage);
-      break;
-    case 1411:
-      HASH_INVOKE_FROM_EVAL(0x3B2CD86F5DB72583LL, magickblackthresholdimage);
-      break;
-    case 1419:
-      HASH_INVOKE_FROM_EVAL(0x1EF2C1426AB0A58BLL, dom_node_replace_child);
-      HASH_INVOKE_FROM_EVAL(0x3A34B44E4C51C58BLL, xml_set_element_handler);
-      break;
-    case 1420:
-      HASH_INVOKE_FROM_EVAL(0x560C2F71978CE58CLL, shm_put_var);
-      break;
-    case 1422:
-      HASH_INVOKE_FROM_EVAL(0x0012B121E023458ELL, hphp_set_iostatus_address);
-      break;
-    case 1426:
-      HASH_INVOKE_FROM_EVAL(0x3E9519FE856C4592LL, curl_multi_init);
-      HASH_INVOKE_FROM_EVAL(0x5464E148E8A0C592LL, get_extension_funcs);
-      HASH_INVOKE_FROM_EVAL(0x7F65501600346592LL, mcrypt_get_block_size);
-      HASH_INVOKE_FROM_EVAL(0x66B19094ED494592LL, imap_uid);
-      break;
-    case 1427:
-      HASH_INVOKE_FROM_EVAL(0x0F5984B8A7FD8593LL, hphp_splfileinfo_getperms);
-      break;
-    case 1431:
-      HASH_INVOKE_FROM_EVAL(0x513787A813DB0597LL, date_date_set);
-      break;
-    case 1433:
-      HASH_INVOKE_FROM_EVAL(0x12F502A88E0AA599LL, magickcompositeimage);
-      break;
-    case 1448:
-      HASH_INVOKE_FROM_EVAL(0x4FBB1F662399A5A8LL, is_soap_fault);
-      break;
-    case 1453:
-      HASH_INVOKE_FROM_EVAL(0x4110AF96B98B25ADLL, gzeof);
-      break;
-    case 1461:
-      HASH_INVOKE_FROM_EVAL(0x5EFE573046B565B5LL, mcrypt_module_close);
-      break;
-    case 1466:
-      HASH_INVOKE_FROM_EVAL(0x05B8EB2C515885BALL, vprintf);
-      break;
-    case 1472:
-      HASH_INVOKE_FROM_EVAL(0x61465CD8C67905C0LL, openssl_pkey_free);
-      break;
-    case 1478:
-      HASH_INVOKE_FROM_EVAL(0x3B3D5CE69B1565C6LL, mcrypt_module_is_block_mode);
-      break;
-    case 1480:
-      HASH_INVOKE_FROM_EVAL(0x1CE8175A87C785C8LL, dom_document_validate);
-      break;
-    case 1483:
-      HASH_INVOKE_FROM_EVAL(0x6751946191FBE5CBLL, override_function);
-      break;
-    case 1484:
-      HASH_INVOKE_FROM_EVAL(0x2A6F86821A39C5CCLL, expm1);
-      break;
-    case 1486:
-      HASH_INVOKE_FROM_EVAL(0x406AC1DDB92925CELL, parse_hdf_file);
-      break;
-    case 1487:
-      HASH_INVOKE_FROM_EVAL(0x5D9818B3E1C385CFLL, openssl_pkey_export_to_file);
-      break;
-    case 1489:
-      HASH_INVOKE_FROM_EVAL(0x054503DBBF5CA5D1LL, imagecopy);
-      break;
-    case 1493:
-      HASH_INVOKE_FROM_EVAL(0x43901543EA8625D5LL, curl_multi_select);
-      break;
-    case 1494:
-      HASH_INVOKE_FROM_EVAL(0x6D265875A19685D6LL, is_float);
-      break;
-    case 1495:
-      HASH_INVOKE_FROM_EVAL(0x617AD1AD708785D7LL, magickmodulateimage);
-      break;
-    case 1508:
-      HASH_INVOKE_FROM_EVAL(0x3A9643992AC805E4LL, magickdrawimage);
-      break;
-    case 1510:
-      HASH_INVOKE_FROM_EVAL(0x6FE2E44FBC44E5E6LL, magickaddnoiseimage);
-      HASH_INVOKE_FROM_EVAL(0x08069ECE0EA3C5E6LL, imagecopymergegray);
-      break;
-    case 1518:
-      HASH_INVOKE_FROM_EVAL(0x3076D369F63E65EELL, pixelgetalpha);
-      break;
-    case 1524:
-      HASH_INVOKE_FROM_EVAL(0x1E89F15B7F2805F4LL, openssl_pkcs7_encrypt);
-      HASH_INVOKE_FROM_EVAL(0x459330C31956A5F4LL, vsprintf);
-      break;
-    case 1527:
-      HASH_INVOKE_FROM_EVAL(0x18E4CC945005E5F7LL, drawpushclippath);
-      break;
-    case 1531:
-      HASH_INVOKE_FROM_EVAL(0x3535B6615F2B05FBLL, session_cache_limiter);
-      break;
-    case 1533:
-      HASH_INVOKE_FROM_EVAL(0x0C1CB24A3FC065FDLL, bcmul);
-      HASH_INVOKE_FROM_EVAL(0x46832743CAF5C5FDLL, dom_element_set_attribute_node);
-      break;
-    case 1537:
-      HASH_INVOKE_FROM_EVAL(0x0F3403D8676C2601LL, mysql_query);
-      break;
-    case 1545:
-      HASH_INVOKE_FROM_EVAL(0x52D5698F31D12609LL, pcntl_setpriority);
-      break;
-    case 1555:
-      HASH_INVOKE_FROM_EVAL(0x36783304F63C4613LL, sscanf);
-      HASH_INVOKE_FROM_EVAL(0x4AC405EA2B8C4613LL, magickresetiterator);
-      break;
-    case 1558:
-      HASH_INVOKE_FROM_EVAL(0x66C7616225F1C616LL, pixelsetgreen);
-      HASH_INVOKE_FROM_EVAL(0x7FA6D13B0D38E616LL, imagegif);
-      break;
-    case 1563:
-      HASH_INVOKE_FROM_EVAL(0x40DDE277D934061BLL, gzputs);
-      break;
-    case 1565:
-      HASH_INVOKE_FROM_EVAL(0x7E98B97C1B5D861DLL, magickqueryconfigureoptions);
-      break;
-    case 1570:
-      HASH_INVOKE_FROM_EVAL(0x134550B9EB596622LL, drawgetfontstyle);
-      break;
-    case 1577:
-      HASH_INVOKE_FROM_EVAL(0x679B81CE06EE0629LL, bcdiv);
-      break;
-    case 1578:
-      HASH_INVOKE_FROM_EVAL(0x608EA42B08A7462ALL, linkinfo);
-      break;
-    case 1585:
-      HASH_INVOKE_FROM_EVAL(0x5AD6595ACA656631LL, pixelresetiterator);
-      break;
-    case 1595:
-      HASH_INVOKE_FROM_EVAL(0x391C68F2BE85E63BLL, pixelgetiteratorexceptionstring);
-      break;
-    case 1596:
-      HASH_INVOKE_FROM_EVAL(0x62DE03461EF4663CLL, symlink);
-      break;
-    case 1606:
-      HASH_INVOKE_FROM_EVAL(0x234F6A0A486E8646LL, natcasesort);
-      break;
-    case 1614:
-      HASH_INVOKE_FROM_EVAL(0x7E978C38D741664ELL, fgetcsv);
-      break;
-    case 1618:
-      HASH_INVOKE_FROM_EVAL(0x03066277F647E652LL, hphp_splfileobject_ftell);
-      break;
-    case 1623:
-      HASH_INVOKE_FROM_EVAL(0x33CBF1153473A657LL, imap_base64);
-      break;
-    case 1625:
-      HASH_INVOKE_FROM_EVAL(0x7A4B37C23D674659LL, collator_get_error_message);
-      break;
-    case 1628:
-      HASH_INVOKE_FROM_EVAL(0x381BBFEABFEC865CLL, libxml_get_last_error);
-      break;
-    case 1630:
-      HASH_INVOKE_FROM_EVAL(0x1491ED033E39465ELL, dom_document_schema_validate_xml);
-      break;
-    case 1636:
-      HASH_INVOKE_FROM_EVAL(0x5B0759F776EC2664LL, newdrawingwand);
-      break;
-    case 1637:
-      HASH_INVOKE_FROM_EVAL(0x08A6AD20C2C5A665LL, hphp_set_static_property);
-      break;
-    case 1639:
-      HASH_INVOKE_FROM_EVAL(0x557A08AC57724667LL, hphp_splfileinfo_getpathinfo);
-      break;
-    case 1647:
-      HASH_INVOKE_FROM_EVAL(0x7D68CADB8069466FLL, magickaverageimages);
-      break;
-    case 1658:
-      HASH_INVOKE_FROM_EVAL(0x583AA7498A40E67ALL, drawgetcliprule);
-      break;
-    case 1661:
-      HASH_INVOKE_FROM_EVAL(0x111DACCF8628267DLL, array_replace_recursive);
-      break;
-    case 1666:
-      HASH_INVOKE_FROM_EVAL(0x665D2615E377A682LL, pagelet_server_task_start);
-      break;
-    case 1680:
-      HASH_INVOKE_FROM_EVAL(0x166D5E2336878690LL, imagepolygon);
-      break;
-    case 1681:
-      HASH_INVOKE_FROM_EVAL(0x57BA0BC1A4870691LL, magickgetquantumdepth);
-      break;
-    case 1682:
-      HASH_INVOKE_FROM_EVAL(0x16BE0DBA42800692LL, magickgetimagesize);
-      break;
-    case 1684:
-      HASH_INVOKE_FROM_EVAL(0x2673FAB2B4DE4694LL, destroypixelwands);
-      break;
-    case 1690:
-      HASH_INVOKE_FROM_EVAL(0x5CC40F6A365FE69ALL, session_register);
-      break;
-    case 1691:
-      HASH_INVOKE_FROM_EVAL(0x24D34E49C21DE69BLL, mb_stristr);
-      break;
-    case 1694:
-      HASH_INVOKE_FROM_EVAL(0x5E9821F06711669ELL, gethostbynamel);
-      break;
-    case 1702:
-      HASH_INVOKE_FROM_EVAL(0x0D841874977646A6LL, krsort);
-      break;
-    case 1704:
-      HASH_INVOKE_FROM_EVAL(0x45AB8F419BA666A8LL, drawpathlinetohorizontalabsolute);
-      break;
-    case 1706:
-      HASH_INVOKE_FROM_EVAL(0x541926FB6D6FC6AALL, magickgetimagecolors);
-      break;
-    case 1712:
-      HASH_INVOKE_FROM_EVAL(0x23AAF570C78AC6B0LL, ip2long);
-      break;
-    case 1714:
-      HASH_INVOKE_FROM_EVAL(0x0D669C546C0EC6B2LL, proc_terminate);
-      break;
-    case 1717:
-      HASH_INVOKE_FROM_EVAL(0x623CE67C41A9E6B5LL, ldap_next_attribute);
-      break;
-    case 1718:
-      HASH_INVOKE_FROM_EVAL(0x0553DE5D0C70C6B6LL, imap_headers);
-      break;
-    case 1719:
-      HASH_INVOKE_FROM_EVAL(0x0C44E5EEB9C646B7LL, memcache_connect);
-      break;
-    case 1721:
-      HASH_INVOKE_FROM_EVAL(0x316F054CB76446B9LL, openssl_sign);
-      break;
-    case 1722:
-      HASH_INVOKE_FROM_EVAL(0x4605D48C234606BALL, dom_document_import_node);
-      break;
-    case 1732:
-      HASH_INVOKE_FROM_EVAL(0x4842AF70A71BE6C4LL, uksort);
-      HASH_INVOKE_FROM_EVAL(0x34184B42D6AA86C4LL, mb_ereg_search_pos);
-      HASH_INVOKE_FROM_EVAL(0x3C042C09F662C6C4LL, drawsetstrokepatternurl);
-      break;
-    case 1736:
-      HASH_INVOKE_FROM_EVAL(0x29DD2C9F889246C8LL, passthru);
-      break;
-    case 1737:
-      HASH_INVOKE_FROM_EVAL(0x2D8DF100C30D06C9LL, xmlwriter_set_indent_string);
-      break;
-    case 1750:
-      HASH_INVOKE_FROM_EVAL(0x158348EB08F406D6LL, strtr);
-      break;
-    case 1764:
-      HASH_INVOKE_FROM_EVAL(0x40D0E3AF799226E4LL, bin2hex);
-      break;
-    case 1772:
-      HASH_INVOKE_FROM_EVAL(0x0A5EFECAE87EA6ECLL, hphp_splfileobject_eof);
-      break;
-    case 1773:
-      HASH_INVOKE_FROM_EVAL(0x2B661CD43C6006EDLL, hphpd_break);
-      break;
-    case 1775:
-      HASH_INVOKE_FROM_EVAL(0x0FA74D85885F86EFLL, output_add_rewrite_var);
-      break;
-    case 1777:
-      HASH_INVOKE_FROM_EVAL(0x6B7347DF1AA7E6F1LL, drawpopdefs);
-      break;
-    case 1778:
-      HASH_INVOKE_FROM_EVAL(0x314DA880FE2CE6F2LL, session_start);
-      break;
-    case 1779:
-      HASH_INVOKE_FROM_EVAL(0x5768A80BB0B926F3LL, apd_set_session_trace_socket);
-      break;
-    case 1782:
-      HASH_INVOKE_FROM_EVAL(0x534C1A5E626C26F6LL, collator_get_error_code);
-      break;
-    case 1791:
-      HASH_INVOKE_FROM_EVAL(0x623C20A027A606FFLL, array_uintersect_uassoc);
-      break;
-    case 1801:
-      HASH_INVOKE_FROM_EVAL(0x7681C631B34CC709LL, hphp_splfileobject_fflush);
-      HASH_INVOKE_FROM_EVAL(0x21972B2BC7A14709LL, imageistruecolor);
-      break;
-    case 1803:
-      HASH_INVOKE_FROM_EVAL(0x5F7873F2DF5BE70BLL, ctype_cntrl);
-      break;
-    case 1807:
-      HASH_INVOKE_FROM_EVAL(0x2FB2FA1DD832C70FLL, xmlwriter_write_attribute_ns);
-      break;
-    case 1819:
-      HASH_INVOKE_FROM_EVAL(0x3C16230CBC6D471BLL, imagecreatetruecolor);
-      break;
-    case 1820:
-      HASH_INVOKE_FROM_EVAL(0x50AC61A28C5AC71CLL, imagecolorclosestalpha);
-      break;
-    case 1827:
-      HASH_INVOKE_FROM_EVAL(0x78420E0B5D110723LL, imagetruecolortopalette);
-      break;
-    case 1828:
-      HASH_INVOKE_FROM_EVAL(0x4DAA3FBC2BD3A724LL, magickequalizeimage);
-      break;
-    case 1829:
-      HASH_INVOKE_FROM_EVAL(0x31EAD049860CE725LL, posix_kill);
-      break;
-    case 1834:
-      HASH_INVOKE_FROM_EVAL(0x17C0D9B1C10B872ALL, openssl_x509_export);
-      HASH_INVOKE_FROM_EVAL(0x1F98B41362CDA72ALL, magickgetimagegreenprimary);
-      break;
-    case 1840:
-      HASH_INVOKE_FROM_EVAL(0x0D558F552A784730LL, ob_get_contents);
-      break;
-    case 1842:
-      HASH_INVOKE_FROM_EVAL(0x2B1C192C419B8732LL, drawgetexception);
-      break;
-    case 1855:
-      HASH_INVOKE_FROM_EVAL(0x650E641CC0E3873FLL, connection_aborted);
-      break;
-    case 1863:
-      HASH_INVOKE_FROM_EVAL(0x3CD58419E181A747LL, magickstereoimage);
-      HASH_INVOKE_FROM_EVAL(0x13BB9EC5A2D2E747LL, hphp_splfileinfo_isdir);
-      break;
-    case 1864:
-      HASH_INVOKE_FROM_EVAL(0x0D7BBA9608A36748LL, magickcombineimages);
-      break;
-    case 1875:
-      HASH_INVOKE_FROM_EVAL(0x42795829DF700753LL, mysql_get_host_info);
-      break;
-    case 1876:
-      HASH_INVOKE_FROM_EVAL(0x53AEFD595C044754LL, max);
-      break;
-    case 1879:
-      HASH_INVOKE_FROM_EVAL(0x7554E3E8674F2757LL, mb_list_encodings);
-      break;
-    case 1887:
-      HASH_INVOKE_FROM_EVAL(0x3EDB48C5DDD9675FLL, socket_select);
-      break;
-    case 1888:
-      HASH_INVOKE_FROM_EVAL(0x1BD984C11BB16760LL, array_merge);
-      HASH_INVOKE_FROM_EVAL(0x7AB5E6EA37196760LL, date_timezone_set);
-      break;
-    case 1889:
-      HASH_INVOKE_FROM_EVAL(0x6AF50085AC2AC761LL, xmlwriter_write_element);
-      break;
-    case 1891:
-      HASH_INVOKE_FROM_EVAL(0x7FCE6DD53FED6763LL, intl_is_failure);
-      HASH_INVOKE_FROM_EVAL(0x19DCB392D4686763LL, hphp_get_timers);
-      break;
-    case 1895:
-      HASH_INVOKE_FROM_EVAL(0x2FC27987B3F88767LL, dom_node_clone_node);
-      HASH_INVOKE_FROM_EVAL(0x6C280D5855D20767LL, drawsetfillalpha);
-      break;
-    case 1896:
-      HASH_INVOKE_FROM_EVAL(0x179A72074C778768LL, openssl_x509_export_to_file);
-      break;
-    case 1904:
-      HASH_INVOKE_FROM_EVAL(0x6F6C5B9E3DC64770LL, drawgetstrokemiterlimit);
-      break;
-    case 1910:
-      HASH_INVOKE_FROM_EVAL(0x616DDB67073A0776LL, ord);
-      break;
-    case 1914:
-      HASH_INVOKE_FROM_EVAL(0x1FBF36B5D65E677ALL, fb_call_user_func_safe_return);
-      HASH_INVOKE_FROM_EVAL(0x4330CE9C9002477ALL, array_udiff_uassoc);
-      break;
-    case 1920:
-      HASH_INVOKE_FROM_EVAL(0x29824AAA934CE780LL, array_filter);
-      break;
-    case 1923:
-      HASH_INVOKE_FROM_EVAL(0x53B4DBE58B356783LL, imagesetthickness);
-      break;
-    case 1930:
-      HASH_INVOKE_FROM_EVAL(0x70A1EC006032E78ALL, pixelgetquantumcolor);
-      break;
-    case 1935:
-      HASH_INVOKE_FROM_EVAL(0x7B4E25772D0AC78FLL, simplexml_load_file);
-      break;
-    case 1938:
-      HASH_INVOKE_FROM_EVAL(0x0D4891A5E1A20792LL, get_defined_functions);
-      break;
-    case 1940:
-      HASH_INVOKE_FROM_EVAL(0x66ECE26DDCC12794LL, imap_fetchheader);
-      break;
-    case 1941:
-      HASH_INVOKE_FROM_EVAL(0x34BA3AAA6711C795LL, dom_document_create_entity_reference);
-      break;
-    case 1945:
-      HASH_INVOKE_FROM_EVAL(0x26D226FD28566799LL, date_isodate_set);
-      break;
-    case 1959:
-      HASH_INVOKE_FROM_EVAL(0x1F76E954F9A147A7LL, magickcontrastimage);
-      break;
-    case 1961:
-      HASH_INVOKE_FROM_EVAL(0x7C251B7DE8DB87A9LL, mcrypt_list_algorithms);
-      break;
-    case 1962:
-      HASH_INVOKE_FROM_EVAL(0x45A53A884414A7AALL, pack);
-      HASH_INVOKE_FROM_EVAL(0x58D6464A3A9127AALL, apc_bin_loadfile);
-      break;
-    case 1977:
-      HASH_INVOKE_FROM_EVAL(0x1B6467AD87E167B9LL, log1p);
-      break;
-    case 1983:
-      HASH_INVOKE_FROM_EVAL(0x3F46374E6E1B07BFLL, posix_getpwuid);
-      break;
-    case 1984:
-      HASH_INVOKE_FROM_EVAL(0x152D1AB941A647C0LL, hphp_get_extension_info);
-      HASH_INVOKE_FROM_EVAL(0x52FDAC1D298D67C0LL, mcrypt_enc_get_algorithms_name);
-      break;
-    case 1988:
-      HASH_INVOKE_FROM_EVAL(0x3C696836396BE7C4LL, mb_language);
-      break;
-    case 1990:
-      HASH_INVOKE_FROM_EVAL(0x3D6D684AF537A7C6LL, ldap_explode_dn);
-      break;
-    case 1994:
-      HASH_INVOKE_FROM_EVAL(0x3C781898488687CALL, xml_parse);
-      HASH_INVOKE_FROM_EVAL(0x55B68546CFAC87CALL, magicksetimageresolution);
-      break;
-    case 1997:
-      HASH_INVOKE_FROM_EVAL(0x4C19B770DFFFE7CDLL, imap_listmailbox);
-      break;
-    case 1998:
-      HASH_INVOKE_FROM_EVAL(0x3AE33FEA6830C7CELL, magickshearimage);
-      break;
-    case 1999:
-      HASH_INVOKE_FROM_EVAL(0x2FAB1F75659707CFLL, is_scalar);
-      break;
-    case 2009:
-      HASH_INVOKE_FROM_EVAL(0x2ED6760DAA3A67D9LL, strcasecmp);
-      break;
-    case 2012:
-      HASH_INVOKE_FROM_EVAL(0x1FE65AFCC92967DCLL, rmdir);
-      break;
-    case 2013:
-      HASH_INVOKE_FROM_EVAL(0x2B5AEDF1A5FC47DDLL, strripos);
-      break;
-    case 2017:
-      HASH_INVOKE_FROM_EVAL(0x7AA1691D3D94A7E1LL, dom_xpath_evaluate);
-      break;
-    case 2018:
-      HASH_INVOKE_FROM_EVAL(0x0888289CBD2887E2LL, iconv_substr);
-      break;
-    case 2024:
-      HASH_INVOKE_FROM_EVAL(0x53B7BF8991FA67E8LL, i18n_loc_get_error_code);
-      break;
-    case 2025:
-      HASH_INVOKE_FROM_EVAL(0x6BB8AC68771287E9LL, strcmp);
-      break;
-    case 2027:
-      HASH_INVOKE_FROM_EVAL(0x54AE7140B95027EBLL, pixelgetgreenquantum);
-      HASH_INVOKE_FROM_EVAL(0x1A397501431EC7EBLL, is_numeric);
-      break;
-    case 2035:
-      HASH_INVOKE_FROM_EVAL(0x4B57E07A323FE7F3LL, drawpathlinetoverticalabsolute);
-      break;
-    case 2041:
-      HASH_INVOKE_FROM_EVAL(0x376FB2649384A7F9LL, str_pad);
-      break;
-    case 2042:
-      HASH_INVOKE_FROM_EVAL(0x0FD7C3144B4007FALL, libxml_set_streams_context);
-      break;
-    case 2045:
-      HASH_INVOKE_FROM_EVAL(0x238E501F2536E7FDLL, drawsetclippath);
-      break;
-    case 2048:
-      HASH_INVOKE_FROM_EVAL(0x0E66983DD04B0800LL, get_current_user);
-      break;
-    case 2049:
-      HASH_INVOKE_FROM_EVAL(0x290E54137CF06801LL, dom_nodelist_item);
-      break;
-    case 2052:
-      HASH_INVOKE_FROM_EVAL(0x349A0DF6723B6804LL, pixelsetcolorcount);
-      break;
-    case 2056:
-      HASH_INVOKE_FROM_EVAL(0x19279D6DB4F70808LL, hash_hmac);
-      break;
-    case 2060:
-      HASH_INVOKE_FROM_EVAL(0x3FF63423EC4B280CLL, posix_getegid);
-      break;
-    case 2061:
-      HASH_INVOKE_FROM_EVAL(0x11EC19E702F2C80DLL, getmyinode);
-      break;
-    case 2064:
-      HASH_INVOKE_FROM_EVAL(0x4297B1072CE76810LL, fb_call_user_func_array_safe);
-      break;
-    case 2067:
-      HASH_INVOKE_FROM_EVAL(0x1A6B577442218813LL, pixelsetmagentaquantum);
-      break;
-    case 2081:
-      HASH_INVOKE_FROM_EVAL(0x2D52FB9B52EC2821LL, xml_set_notation_decl_handler);
-      break;
-    case 2082:
-      HASH_INVOKE_FROM_EVAL(0x13C241C02DE72822LL, dom_document_relaxng_validate_xml);
-      break;
-    case 2084:
-      HASH_INVOKE_FROM_EVAL(0x2B78E204F615A824LL, openssl_pkcs12_export_to_file);
-      break;
-    case 2087:
-      HASH_INVOKE_FROM_EVAL(0x33EC567341B9C827LL, magickgetmaxtextadvance);
-      break;
-    case 2089:
-      HASH_INVOKE_FROM_EVAL(0x39EE4CCCA716E829LL, stream_context_get_options);
-      break;
-    case 2092:
-      HASH_INVOKE_FROM_EVAL(0x34F0E032AB05C82CLL, pixelsetblue);
-      break;
-    case 2093:
-      HASH_INVOKE_FROM_EVAL(0x1C4AE57BF4E4A82DLL, apc_dec);
-      break;
-    case 2095:
-      HASH_INVOKE_FROM_EVAL(0x79A05154A7F5482FLL, magickgetimagedelay);
-      break;
-    case 2104:
-      HASH_INVOKE_FROM_EVAL(0x63E554E0F11CE838LL, mysql_unbuffered_query);
-      HASH_INVOKE_FROM_EVAL(0x0890F9052322E838LL, fstat);
-      break;
-    case 2115:
-      HASH_INVOKE_FROM_EVAL(0x567A7139AD476843LL, socket_listen);
-      break;
-    case 2118:
-      HASH_INVOKE_FROM_EVAL(0x50088ED5D482C846LL, ldap_mod_add);
-      break;
-    case 2119:
-      HASH_INVOKE_FROM_EVAL(0x4E69A952E3EA4847LL, magicksetfilename);
-      break;
-    case 2122:
-      HASH_INVOKE_FROM_EVAL(0x7D3F626E636C084ALL, ldap_delete);
-      break;
-    case 2123:
-      HASH_INVOKE_FROM_EVAL(0x68B7597C22FA484BLL, openssl_public_encrypt);
-      break;
-    case 2126:
-      HASH_INVOKE_FROM_EVAL(0x488C2F267BF2884ELL, array_intersect);
-      break;
-    case 2127:
-      HASH_INVOKE_FROM_EVAL(0x632D491E42E7E84FLL, session_get_cookie_params);
-      break;
-    case 2128:
-      HASH_INVOKE_FROM_EVAL(0x4DDB82A3632FA850LL, atan);
-      break;
-    case 2140:
-      HASH_INVOKE_FROM_EVAL(0x5A017A4C6A41E85CLL, curl_multi_add_handle);
-      break;
-    case 2142:
-      HASH_INVOKE_FROM_EVAL(0x6B4DE6865142285ELL, destroypixeliterator);
-      break;
-    case 2148:
-      HASH_INVOKE_FROM_EVAL(0x168EDA8238EEE864LL, mb_detect_order);
-      break;
-    case 2152:
-      HASH_INVOKE_FROM_EVAL(0x785C812E6292E868LL, i18n_loc_set_default);
-      break;
-    case 2155:
-      HASH_INVOKE_FROM_EVAL(0x0C1BBEDECEF1C86BLL, newmagickwand);
-      break;
-    case 2156:
-      HASH_INVOKE_FROM_EVAL(0x6414504A6658286CLL, stripos);
-      break;
-    case 2159:
-      HASH_INVOKE_FROM_EVAL(0x1476A177CC50686FLL, mb_strstr);
-      break;
-    case 2160:
-      HASH_INVOKE_FROM_EVAL(0x34F50577C14C6870LL, array_diff_uassoc);
-      break;
-    case 2162:
-      HASH_INVOKE_FROM_EVAL(0x3C7B86F57AFA0872LL, hebrev);
-      HASH_INVOKE_FROM_EVAL(0x558D62FBEB210872LL, str_rot13);
-      break;
-    case 2163:
-      HASH_INVOKE_FROM_EVAL(0x4C06B4AFC1C08873LL, str_shuffle);
-      break;
-    case 2173:
-      HASH_INVOKE_FROM_EVAL(0x54F84DC9A334287DLL, gzencode);
-      HASH_INVOKE_FROM_EVAL(0x2B36081E0828487DLL, debug_print_backtrace);
-      break;
-    case 2179:
-      HASH_INVOKE_FROM_EVAL(0x3EBD8F559B4EA883LL, hphp_splfileobject_getflags);
-      break;
-    case 2180:
-      HASH_INVOKE_FROM_EVAL(0x766CD15A7F2A0884LL, array_uintersect);
-      break;
-    case 2191:
-      HASH_INVOKE_FROM_EVAL(0x539868C56806688FLL, imagecopyresampled);
-      break;
-    case 2200:
-      HASH_INVOKE_FROM_EVAL(0x4AC522FF7BB60898LL, xmlwriter_write_dtd_entity);
-      break;
-    case 2208:
-      HASH_INVOKE_FROM_EVAL(0x6B1A3BCE67BAC8A0LL, openssl_csr_new);
-      break;
-    case 2220:
-      HASH_INVOKE_FROM_EVAL(0x1EFFE951E79348ACLL, imap_expunge);
-      break;
-    case 2226:
-      HASH_INVOKE_FROM_EVAL(0x31830AA5032428B2LL, is_double);
-      break;
-    case 2234:
-      HASH_INVOKE_FROM_EVAL(0x28D343EC901608BALL, imap_listsubscribed);
-      break;
-    case 2236:
-      HASH_INVOKE_FROM_EVAL(0x7AE3AE9B634988BCLL, stream_context_create);
-      break;
-    case 2244:
-      HASH_INVOKE_FROM_EVAL(0x5C28BE7FFE6A68C4LL, xml_set_start_namespace_decl_handler);
-      break;
-    case 2245:
-      HASH_INVOKE_FROM_EVAL(0x146A1A7658CCA8C5LL, asinh);
-      break;
-    case 2247:
-      HASH_INVOKE_FROM_EVAL(0x4623383F8534E8C7LL, array_multisort);
-      HASH_INVOKE_FROM_EVAL(0x6D9B9BE3CED388C7LL, apc_load_constants);
-      break;
-    case 2254:
-      HASH_INVOKE_FROM_EVAL(0x3FFAA982E4B1E8CELL, date_offset_get);
-      break;
-    case 2258:
-      HASH_INVOKE_FROM_EVAL(0x74EB6C564ABC68D2LL, dom_document_create_text_node);
-      break;
-    case 2260:
-      HASH_INVOKE_FROM_EVAL(0x6DB4EE8696C7E8D4LL, magicksetimageiterations);
-      break;
-    case 2262:
-      HASH_INVOKE_FROM_EVAL(0x2F585B36DDDB68D6LL, mb_convert_case);
-      HASH_INVOKE_FROM_EVAL(0x26DC8AB4A9CBE8D6LL, iconv);
-      break;
-    case 2264:
-      HASH_INVOKE_FROM_EVAL(0x69FB5DBA88A308D8LL, imap_8bit);
-      HASH_INVOKE_FROM_EVAL(0x3A65182A3E8908D8LL, openssl_open);
-      break;
-    case 2265:
-      HASH_INVOKE_FROM_EVAL(0x18B64D6BFE4208D9LL, stream_get_transports);
-      break;
-    case 2268:
-      HASH_INVOKE_FROM_EVAL(0x31F50FDA18B888DCLL, magickgetimagetype);
-      break;
-    case 2276:
-      HASH_INVOKE_FROM_EVAL(0x16A18007E10F48E4LL, socket_getsockname);
-      break;
-    case 2278:
-      HASH_INVOKE_FROM_EVAL(0x69887F054A1E28E6LL, strtok);
-      break;
-    case 2279:
-      HASH_INVOKE_FROM_EVAL(0x608729F27FA428E7LL, error_get_last);
-      break;
-    case 2295:
-      HASH_INVOKE_FROM_EVAL(0x17582BEA497D48F7LL, ctype_alpha);
-      break;
-    case 2298:
-      HASH_INVOKE_FROM_EVAL(0x6F0F82818B68A8FALL, array_values);
-      break;
-    case 2299:
-      HASH_INVOKE_FROM_EVAL(0x214532C4A2BC28FBLL, ldap_next_entry);
-      break;
-    case 2302:
-      HASH_INVOKE_FROM_EVAL(0x047BF4D3D0ED08FELL, strchr);
-      break;
-    case 2315:
-      HASH_INVOKE_FROM_EVAL(0x2987B15E11FE890BLL, clock_settime);
-      break;
-    case 2321:
-      HASH_INVOKE_FROM_EVAL(0x5B9B2C3B32906911LL, drawsetfillpatternurl);
-      break;
-    case 2323:
-      HASH_INVOKE_FROM_EVAL(0x55757E1242390913LL, cos);
-      break;
-    case 2324:
-      HASH_INVOKE_FROM_EVAL(0x6E22C6D840B44914LL, mcrypt_generic_init);
-      break;
-    case 2331:
-      HASH_INVOKE_FROM_EVAL(0x37A3DF6E0795091BLL, memcache_increment);
-      break;
-    case 2333:
-      HASH_INVOKE_FROM_EVAL(0x069C028EFEF8C91DLL, date);
-      break;
-    case 2337:
-      HASH_INVOKE_FROM_EVAL(0x0F5917FFCDD6C921LL, mb_substr);
-      break;
-    case 2346:
-      HASH_INVOKE_FROM_EVAL(0x174C510386E6492ALL, hphp_directoryiterator_key);
-      break;
-    case 2350:
-      HASH_INVOKE_FROM_EVAL(0x26E8B741BDDDC92ELL, xmlwriter_start_element);
-      break;
-    case 2352:
-      HASH_INVOKE_FROM_EVAL(0x507CE1912FD74930LL, mail);
-      break;
-    case 2356:
-      HASH_INVOKE_FROM_EVAL(0x4FB95164A5F84934LL, mcrypt_generic_end);
-      break;
-    case 2357:
-      HASH_INVOKE_FROM_EVAL(0x46BD9A56BDE40935LL, mysql_escape_string);
-      break;
-    case 2361:
-      HASH_INVOKE_FROM_EVAL(0x5B60C8396C624939LL, mb_substitute_character);
-      break;
-    case 2366:
-      HASH_INVOKE_FROM_EVAL(0x0CADFE289C92893ELL, socket_getpeername);
-      break;
-    case 2371:
-      HASH_INVOKE_FROM_EVAL(0x7C565AD57BC84943LL, pixelsetindex);
-      break;
-    case 2373:
-      HASH_INVOKE_FROM_EVAL(0x7CB0596B6CCFA945LL, split);
-      break;
-    case 2375:
-      HASH_INVOKE_FROM_EVAL(0x630288865DE68947LL, php_strip_whitespace);
-      break;
-    case 2381:
-      HASH_INVOKE_FROM_EVAL(0x3D3AD12E52FF294DLL, imagecreatefromwbmp);
-      break;
-    case 2391:
-      HASH_INVOKE_FROM_EVAL(0x253AC5D4E450A957LL, magickgetreleasedate);
-      break;
-    case 2394:
-      HASH_INVOKE_FROM_EVAL(0x103C12985527295ALL, hphp_splfileobject_setcsvcontrol);
-      HASH_INVOKE_FROM_EVAL(0x7056E766A274895ALL, virtual);
-      break;
-    case 2397:
-      HASH_INVOKE_FROM_EVAL(0x21DBCE74EB1FC95DLL, xmlwriter_text);
-      break;
-    case 2401:
-      HASH_INVOKE_FROM_EVAL(0x5EA7052A00E88961LL, magickgetcopyright);
-      break;
-    case 2407:
-      HASH_INVOKE_FROM_EVAL(0x1419B3BF428B2967LL, evhttp_async_post);
-      break;
-    case 2418:
-      HASH_INVOKE_FROM_EVAL(0x758263CEBF2E8972LL, assert_options);
-      break;
-    case 2421:
-      HASH_INVOKE_FROM_EVAL(0x7E26D48503362975LL, drawpathcurvetoabsolute);
-      HASH_INVOKE_FROM_EVAL(0x488141281A75E975LL, imagecreatefromgif);
-      break;
-    case 2423:
-      HASH_INVOKE_FROM_EVAL(0x0C16C797916C2977LL, posix_setegid);
-      break;
-    case 2430:
-      HASH_INVOKE_FROM_EVAL(0x5067A65AD1D0297ELL, pixelgetiteratorexception);
-      break;
-    case 2438:
-      HASH_INVOKE_FROM_EVAL(0x6ECE4BDB8842E986LL, posix_strerror);
-      break;
-    case 2439:
-      HASH_INVOKE_FROM_EVAL(0x22B3CF8DD3D1A987LL, pixelsynciterator);
-      break;
-    case 2440:
-      HASH_INVOKE_FROM_EVAL(0x489355BDBE396988LL, drawsettextencoding);
-      break;
-    case 2441:
-      HASH_INVOKE_FROM_EVAL(0x60BF7CDD733A2989LL, bzerrstr);
-      break;
-    case 2446:
-      HASH_INVOKE_FROM_EVAL(0x333D4DFD4927898ELL, magickgetimagewhitepoint);
-      break;
-    case 2451:
-      HASH_INVOKE_FROM_EVAL(0x79AD7C6D77A3A993LL, imap_reopen);
-      break;
-    case 2456:
-      HASH_INVOKE_FROM_EVAL(0x501AAD31C8086998LL, posix_getcwd);
-      break;
-    case 2459:
-      HASH_INVOKE_FROM_EVAL(0x564D8D3DA1E8E99BLL, xml_get_current_line_number);
-      break;
-    case 2464:
-      HASH_INVOKE_FROM_EVAL(0x047EF9173590C9A0LL, session_decode);
-      break;
-    case 2466:
-      HASH_INVOKE_FROM_EVAL(0x01D2367A02F0A9A2LL, magicksetsize);
-      break;
-    case 2467:
-      HASH_INVOKE_FROM_EVAL(0x43D1339C52E309A3LL, hphp_service_thread_started);
-      HASH_INVOKE_FROM_EVAL(0x78261FA60B8D89A3LL, imagepsloadfont);
-      break;
-    case 2469:
-      HASH_INVOKE_FROM_EVAL(0x76988956F35329A5LL, xmlwriter_end_cdata);
-      break;
-    case 2473:
-      HASH_INVOKE_FROM_EVAL(0x6F9CF95104CAE9A9LL, pixelgetyellowquantum);
-      break;
-    case 2481:
-      HASH_INVOKE_FROM_EVAL(0x7C1CE38F14E529B1LL, date_default_timezone_set);
-      break;
-    case 2482:
-      HASH_INVOKE_FROM_EVAL(0x65D7CBE8681CE9B2LL, gzgetss);
-      break;
-    case 2492:
-      HASH_INVOKE_FROM_EVAL(0x7E7BF1BDA6DB49BCLL, hphp_splfileinfo_getgroup);
-      HASH_INVOKE_FROM_EVAL(0x672DA903B52249BCLL, xhprof_frame_begin);
-      break;
-    case 2494:
-      HASH_INVOKE_FROM_EVAL(0x458B5ABEDAC1C9BELL, disk_free_space);
-      break;
-    case 2498:
-      HASH_INVOKE_FROM_EVAL(0x6A7BDB900E7429C2LL, magickconstituteimage);
-      break;
-    case 2502:
-      HASH_INVOKE_FROM_EVAL(0x080F661DB8BFC9C6LL, hphp_splfileinfo_getmtime);
-      break;
-    case 2503:
-      HASH_INVOKE_FROM_EVAL(0x6ECDF24B29D789C7LL, strtolower);
-      break;
-    case 2509:
-      HASH_INVOKE_FROM_EVAL(0x4E61FE901C1C29CDLL, array_intersect_key);
-      break;
-    case 2510:
-      HASH_INVOKE_FROM_EVAL(0x7A9FB932873D09CELL, gmmktime);
-      break;
-    case 2511:
-      HASH_INVOKE_FROM_EVAL(0x415B91CAEE0689CFLL, magickgetimageinterlacescheme);
-      break;
-    case 2515:
-      HASH_INVOKE_FROM_EVAL(0x1C31A9E1207209D3LL, mb_split);
-      HASH_INVOKE_FROM_EVAL(0x10C82F357BB7E9D3LL, curl_version);
-      HASH_INVOKE_FROM_EVAL(0x25CA0299103F49D3LL, magickgetsize);
-      break;
-    case 2519:
-      HASH_INVOKE_FROM_EVAL(0x7628053EFCC0C9D7LL, hphp_clear_unflushed);
-      break;
-    case 2523:
-      HASH_INVOKE_FROM_EVAL(0x48B2E069B89489DBLL, magickappendimages);
-      break;
-    case 2526:
-      HASH_INVOKE_FROM_EVAL(0x5C039967E60089DELL, array_intersect_ukey);
-      break;
-    case 2534:
-      HASH_INVOKE_FROM_EVAL(0x1B44CF284E9B09E6LL, interface_exists);
-      break;
-    case 2537:
-      HASH_INVOKE_FROM_EVAL(0x6A45EB471332A9E9LL, imagecolorexactalpha);
-      HASH_INVOKE_FROM_EVAL(0x330EE2729DB7C9E9LL, drawgetfontstretch);
-      break;
-    case 2546:
-      HASH_INVOKE_FROM_EVAL(0x6C1415DAD1E7C9F2LL, fb_get_flush_stat);
-      break;
-    case 2547:
-      HASH_INVOKE_FROM_EVAL(0x6535B60A4BC449F3LL, dns_get_record);
-      break;
-    case 2548:
-      HASH_INVOKE_FROM_EVAL(0x51201EE65BC729F4LL, localtime);
-      break;
-    case 2549:
-      HASH_INVOKE_FROM_EVAL(0x2BC61637253BE9F5LL, drawgetfontweight);
-      break;
-    case 2557:
-      HASH_INVOKE_FROM_EVAL(0x2394D4E030AB69FDLL, getmypid);
-      break;
-    case 2564:
-      HASH_INVOKE_FROM_EVAL(0x0B88D3F582D16A04LL, memcache_get_extended_stats);
-      break;
-    case 2572:
-      HASH_INVOKE_FROM_EVAL(0x13E0C91488484A0CLL, imap_unsubscribe);
-      break;
-    case 2577:
-      HASH_INVOKE_FROM_EVAL(0x472CA39715598A11LL, mb_eregi_replace);
-      break;
-    case 2584:
-      HASH_INVOKE_FROM_EVAL(0x66A378C6BBC26A18LL, dom_document_create_cdatasection);
-      break;
-    case 2588:
-      HASH_INVOKE_FROM_EVAL(0x12D49AD562F38A1CLL, date_timezone_get);
-      break;
-    case 2591:
-      HASH_INVOKE_FROM_EVAL(0x35C8BD7DFDADEA1FLL, hphp_directoryiterator_current);
-      break;
-    case 2592:
-      HASH_INVOKE_FROM_EVAL(0x2A420675E6AF0A20LL, basename);
-      break;
-    case 2593:
-      HASH_INVOKE_FROM_EVAL(0x14279BB1A6872A21LL, atan2);
-      break;
-    case 2594:
-      HASH_INVOKE_FROM_EVAL(0x3FC127C442BAEA22LL, session_id);
-      break;
-    case 2597:
-      HASH_INVOKE_FROM_EVAL(0x5EC0A3DD935EEA25LL, magickresampleimage);
-      HASH_INVOKE_FROM_EVAL(0x1DB9A1FB97A3AA25LL, magicksetimageoption);
-      break;
-    case 2602:
-      HASH_INVOKE_FROM_EVAL(0x3CAEA6B8D1C92A2ALL, stream_bucket_prepend);
-      break;
-    case 2604:
-      HASH_INVOKE_FROM_EVAL(0x073ACDF9B3F06A2CLL, memcache_setoptimeout);
-      break;
-    case 2609:
-      HASH_INVOKE_FROM_EVAL(0x1F3E32847C1CCA31LL, mb_ereg_match);
-      break;
-    case 2619:
-      HASH_INVOKE_FROM_EVAL(0x545A7BE199EC4A3BLL, pcntl_getpriority);
-      break;
-    case 2620:
-      HASH_INVOKE_FROM_EVAL(0x21DF7BAEEFABCA3CLL, umask);
-      break;
-    case 2624:
-      HASH_INVOKE_FROM_EVAL(0x4926EE59103B2A40LL, destroydrawingwand);
-      HASH_INVOKE_FROM_EVAL(0x682C14726D484A40LL, fileatime);
-      break;
-    case 2628:
-      HASH_INVOKE_FROM_EVAL(0x7F6A6306BBE8AA44LL, imagelayereffect);
-      break;
-    case 2636:
-      HASH_INVOKE_FROM_EVAL(0x4894583F517C6A4CLL, intl_get_error_code);
-      HASH_INVOKE_FROM_EVAL(0x7039B1C3356B8A4CLL, hphp_splfileobject_rewind);
-      break;
-    case 2640:
-      HASH_INVOKE_FROM_EVAL(0x506BBFC1B32AEA50LL, memcache_replace);
-      break;
-    case 2647:
-      HASH_INVOKE_FROM_EVAL(0x5088945958DD4A57LL, mktime);
-      HASH_INVOKE_FROM_EVAL(0x7E929ED7D9BE6A57LL, ini_get);
-      break;
-    case 2648:
-      HASH_INVOKE_FROM_EVAL(0x6E823A722DE1EA58LL, stream_socket_client);
-      break;
-    case 2653:
-      HASH_INVOKE_FROM_EVAL(0x7E1E9C4C3D4E8A5DLL, stream_select);
-      break;
-    case 2654:
-      HASH_INVOKE_FROM_EVAL(0x2C6826999658AA5ELL, getopt);
-      break;
-    case 2655:
-      HASH_INVOKE_FROM_EVAL(0x7CAE3FE798EC0A5FLL, php_logo_guid);
-      break;
-    case 2661:
-      HASH_INVOKE_FROM_EVAL(0x469199B8FD886A65LL, putenv);
-      HASH_INVOKE_FROM_EVAL(0x3590F3AAC94E0A65LL, array_change_key_case);
-      break;
-    case 2665:
-      HASH_INVOKE_FROM_EVAL(0x1DD37E722E11AA69LL, session_regenerate_id);
-      break;
-    case 2681:
-      HASH_INVOKE_FROM_EVAL(0x28AC28C54C4E6A79LL, openssl_error_string);
-      HASH_INVOKE_FROM_EVAL(0x2ACAD5A7A8C78A79LL, qlzuncompress);
-      break;
-    case 2689:
-      HASH_INVOKE_FROM_EVAL(0x09367774F803EA81LL, hphp_recursiveiteratoriterator_valid);
-      break;
-    case 2690:
-      HASH_INVOKE_FROM_EVAL(0x258205B54DC06A82LL, newpixelwands);
-      break;
-    case 2692:
-      HASH_INVOKE_FROM_EVAL(0x08C1A5A05B6A0A84LL, ob_get_length);
-      break;
-    case 2693:
-      HASH_INVOKE_FROM_EVAL(0x2180916F8D4F6A85LL, drawcomment);
-      break;
-    case 2695:
-      HASH_INVOKE_FROM_EVAL(0x7C5A22328CAB4A87LL, ereg_replace);
-      break;
-    case 2699:
-      HASH_INVOKE_FROM_EVAL(0x7ACBCD9CF335AA8BLL, xmlwriter_start_document);
-      break;
-    case 2708:
-      HASH_INVOKE_FROM_EVAL(0x465E6C67F885AA94LL, drawgetstrokelinejoin);
-      HASH_INVOKE_FROM_EVAL(0x7761D019E0B5EA94LL, magickstripimage);
-      HASH_INVOKE_FROM_EVAL(0x0AC7CBCE30442A94LL, imagepalettecopy);
-      break;
-    case 2720:
-      HASH_INVOKE_FROM_EVAL(0x55FAF12AF1920AA0LL, sha1_file);
-      break;
-    case 2723:
-      HASH_INVOKE_FROM_EVAL(0x2B75B48A53AACAA3LL, imagestring);
-      break;
-    case 2726:
-      HASH_INVOKE_FROM_EVAL(0x4BBA1E164DF9CAA6LL, localeconv);
-      break;
-    case 2729:
-      HASH_INVOKE_FROM_EVAL(0x2238FC7870E9CAA9LL, strspn);
-      break;
-    case 2731:
-      HASH_INVOKE_FROM_EVAL(0x1331979EF8EF0AABLL, mb_ereg_search);
-      break;
-    case 2732:
-      HASH_INVOKE_FROM_EVAL(0x18CF3E4A60E4AAACLL, pi);
-      break;
-    case 2735:
-      HASH_INVOKE_FROM_EVAL(0x3ED47399FE1D6AAFLL, dom_document_create_attribute_ns);
-      break;
-    case 2738:
-      HASH_INVOKE_FROM_EVAL(0x569EED88F20BAAB2LL, drawgettextundercolor);
-      break;
-    case 2740:
-      HASH_INVOKE_FROM_EVAL(0x1BAFB965204D0AB4LL, openssl_x509_check_private_key);
-      break;
-    case 2757:
-      HASH_INVOKE_FROM_EVAL(0x3754E97715176AC5LL, hphp_get_stats);
-      break;
-    case 2759:
-      HASH_INVOKE_FROM_EVAL(0x3886D2664F874AC7LL, openssl_pkcs7_verify);
-      break;
-    case 2761:
-      HASH_INVOKE_FROM_EVAL(0x5CA9671385EF0AC9LL, sem_release);
-      break;
-    case 2762:
-      HASH_INVOKE_FROM_EVAL(0x45B30CD663284ACALL, is_int);
-      break;
-    case 2763:
-      HASH_INVOKE_FROM_EVAL(0x348888DDF223AACBLL, mt_getrandmax);
-      break;
-    case 2764:
-      HASH_INVOKE_FROM_EVAL(0x750D0396676E6ACCLL, imagecolorexact);
-      break;
-    case 2765:
-      HASH_INVOKE_FROM_EVAL(0x604572CB0314EACDLL, imap_listscan);
-      break;
-    case 2773:
-      HASH_INVOKE_FROM_EVAL(0x5338F971C6DCEAD5LL, hphp_splfileinfo_islink);
-      break;
-    case 2774:
-      HASH_INVOKE_FROM_EVAL(0x231BCE6071220AD6LL, drawcircle);
-      break;
-    case 2776:
-      HASH_INVOKE_FROM_EVAL(0x52401023E146AAD8LL, xmlwriter_end_dtd);
-      break;
-    case 2780:
-      HASH_INVOKE_FROM_EVAL(0x547E7EE64761AADCLL, imagecreatefromxbm);
-      break;
-    case 2788:
-      HASH_INVOKE_FROM_EVAL(0x47B15A7136E94AE4LL, strnatcasecmp);
-      HASH_INVOKE_FROM_EVAL(0x1827F1C22F1CCAE4LL, hebrevc);
-      break;
-    case 2790:
-      HASH_INVOKE_FROM_EVAL(0x0E09D0FEA30B6AE6LL, hphp_get_function_info);
-      break;
-    case 2795:
-      HASH_INVOKE_FROM_EVAL(0x528D41A17B8FCAEBLL, imap_set_quota);
-      break;
-    case 2808:
-      HASH_INVOKE_FROM_EVAL(0x757229A894864AF8LL, session_set_cookie_params);
-      break;
-    case 2810:
-      HASH_INVOKE_FROM_EVAL(0x3C32181DDB860AFALL, imap_getacl);
-      break;
-    case 2815:
-      HASH_INVOKE_FROM_EVAL(0x7833F4C337542AFFLL, openssl_pkey_export);
-      break;
-    case 2819:
-      HASH_INVOKE_FROM_EVAL(0x32458C11C6E74B03LL, pixelsetblackquantum);
-      break;
-    case 2826:
-      HASH_INVOKE_FROM_EVAL(0x14B366EF64A66B0ALL, get_loaded_extensions);
-      break;
-    case 2829:
-      HASH_INVOKE_FROM_EVAL(0x368DBC0699272B0DLL, magicknegateimage);
-      break;
-    case 2836:
-      HASH_INVOKE_FROM_EVAL(0x76675F14C1138B14LL, gzuncompress);
-      break;
-    case 2837:
-      HASH_INVOKE_FROM_EVAL(0x24D0895FBB7BCB15LL, is_callable);
-      HASH_INVOKE_FROM_EVAL(0x773E3809C4954B15LL, hphp_recursivedirectoryiterator_current);
-      break;
-    case 2841:
-      HASH_INVOKE_FROM_EVAL(0x0551EACBE8278B19LL, decoct);
-      break;
-    case 2842:
-      HASH_INVOKE_FROM_EVAL(0x399522EE0CF3EB1ALL, drawsetstrokewidth);
-      break;
-    case 2843:
-      HASH_INVOKE_FROM_EVAL(0x1B7CE8114AEACB1BLL, magickannotateimage);
-      break;
-    case 2853:
-      HASH_INVOKE_FROM_EVAL(0x798F2776FECAEB25LL, get_required_files);
-      break;
-    case 2857:
-      HASH_INVOKE_FROM_EVAL(0x17C38BE3A6EE8B29LL, mysql_field_flags);
-      break;
-    case 2865:
-      HASH_INVOKE_FROM_EVAL(0x442B1E05FC146B31LL, stream_context_set_param);
-      break;
-    case 2867:
-      HASH_INVOKE_FROM_EVAL(0x00DCD60DD8752B33LL, set_exception_handler);
-      break;
-    case 2869:
-      HASH_INVOKE_FROM_EVAL(0x78842C1950B38B35LL, drawpathfinish);
-      break;
-    case 2878:
-      HASH_INVOKE_FROM_EVAL(0x5E2AF775FEB04B3ELL, posix_getppid);
-      break;
-    case 2885:
-      HASH_INVOKE_FROM_EVAL(0x684881C79ED1AB45LL, func_get_args);
-      break;
-    case 2886:
-      HASH_INVOKE_FROM_EVAL(0x00D8FE7A00252B46LL, escapeshellarg);
-      break;
-    case 2893:
-      HASH_INVOKE_FROM_EVAL(0x37DF53E4D9348B4DLL, xbox_post_message);
-      break;
-    case 2896:
-      HASH_INVOKE_FROM_EVAL(0x6237393C71E56B50LL, array_fill_keys);
-      break;
-    case 2899:
-      HASH_INVOKE_FROM_EVAL(0x40F0B69D55F7EB53LL, drawsetstrokealpha);
-      break;
-    case 2904:
-      HASH_INVOKE_FROM_EVAL(0x6158E2E0A5ACCB58LL, idn_to_ascii);
-      break;
-    case 2907:
-      HASH_INVOKE_FROM_EVAL(0x29203294F6214B5BLL, memcache_debug);
-      HASH_INVOKE_FROM_EVAL(0x23FD09A13E0D8B5BLL, xmlwriter_open_memory);
-      break;
-    case 2922:
-      HASH_INVOKE_FROM_EVAL(0x4BD4E9D9D4A56B6ALL, exif_tagname);
-      break;
-    case 2923:
-      HASH_INVOKE_FROM_EVAL(0x1D4136B4CEAE4B6BLL, stripcslashes);
-      break;
-    case 2927:
-      HASH_INVOKE_FROM_EVAL(0x2D8D57FC1DC6CB6FLL, import_request_variables);
-      break;
-    case 2928:
-      HASH_INVOKE_FROM_EVAL(0x1A73FD4416FECB70LL, magickwriteimagefile);
-      break;
-    case 2937:
-      HASH_INVOKE_FROM_EVAL(0x31242F51AA828B79LL, drawpoppattern);
-      break;
-    case 2943:
-      HASH_INVOKE_FROM_EVAL(0x308C90AD9478CB7FLL, substr_compare);
-      break;
-    case 2946:
-      HASH_INVOKE_FROM_EVAL(0x5BDE96FD5015AB82LL, base_convert);
-      break;
-    case 2949:
-      HASH_INVOKE_FROM_EVAL(0x41F8FDD700C0CB85LL, socket_last_error);
-      break;
-    case 2967:
-      HASH_INVOKE_FROM_EVAL(0x09837A82A928AB97LL, is_null);
-      break;
-    case 2978:
-      HASH_INVOKE_FROM_EVAL(0x4870ADD98EE02BA2LL, pcntl_wifsignaled);
-      break;
-    case 2979:
-      HASH_INVOKE_FROM_EVAL(0x444A3375EFBC2BA3LL, openssl_public_decrypt);
-      break;
-    case 2987:
-      HASH_INVOKE_FROM_EVAL(0x006481EAF2A70BABLL, ldap_errno);
-      break;
-    case 2991:
-      HASH_INVOKE_FROM_EVAL(0x6A2236CDDFF12BAFLL, magickhaspreviousimage);
-      break;
-    case 2993:
-      HASH_INVOKE_FROM_EVAL(0x04A24B397CF46BB1LL, strrchr);
-      break;
-    case 2997:
-      HASH_INVOKE_FROM_EVAL(0x3F7DCC3A00800BB5LL, imagecolorallocate);
-      break;
-    case 3004:
-      HASH_INVOKE_FROM_EVAL(0x43B74276235F4BBCLL, is_bool);
-      break;
-    case 3006:
-      HASH_INVOKE_FROM_EVAL(0x79617ED8EFD1ABBELL, get_class_vars);
-      HASH_INVOKE_FROM_EVAL(0x5ECB0B145B88EBBELL, imagefilledarc);
-      HASH_INVOKE_FROM_EVAL(0x42684202E2E62BBELL, mcrypt_get_iv_size);
-      break;
-    case 3017:
-      HASH_INVOKE_FROM_EVAL(0x0B4E7B9180C4ABC9LL, xml_set_end_namespace_decl_handler);
-      HASH_INVOKE_FROM_EVAL(0x22BA0903D344CBC9LL, array_rand);
-      break;
-    case 3018:
-      HASH_INVOKE_FROM_EVAL(0x0D375A94E75ACBCALL, hphp_throw_fatal_error);
-      break;
-    case 3021:
-      HASH_INVOKE_FROM_EVAL(0x22251ECF8CD58BCDLL, array_product);
-      break;
-    case 3022:
-      HASH_INVOKE_FROM_EVAL(0x600AFF0A6378ABCELL, is_writeable);
-      break;
-    case 3024:
-      HASH_INVOKE_FROM_EVAL(0x7046755D8374EBD0LL, ctype_digit);
-      break;
-    case 3028:
-      HASH_INVOKE_FROM_EVAL(0x5B2F2A23D8368BD4LL, magickraiseimage);
-      break;
-    case 3032:
-      HASH_INVOKE_FROM_EVAL(0x06D5979AB150EBD8LL, dom_node_lookup_namespace_uri);
-      break;
-    case 3045:
-      HASH_INVOKE_FROM_EVAL(0x0E804FCE5C14CBE5LL, imap_sort);
-      break;
-    case 3047:
-      HASH_INVOKE_FROM_EVAL(0x1BB5D99C1D29CBE7LL, strstr);
-      break;
-    case 3048:
-      HASH_INVOKE_FROM_EVAL(0x4E903B706977ABE8LL, imagepsslantfont);
-      break;
-    case 3054:
-      HASH_INVOKE_FROM_EVAL(0x03F50E435DE20BEELL, magickclippathimage);
-      HASH_INVOKE_FROM_EVAL(0x790B7C44A3442BEELL, asort);
-      break;
-    case 3060:
-      HASH_INVOKE_FROM_EVAL(0x46EC26486531ABF4LL, imap_deletemailbox);
-      break;
-    case 3062:
-      HASH_INVOKE_FROM_EVAL(0x08B4BEBAB3312BF6LL, image_type_to_extension);
-      break;
-    case 3077:
-      HASH_INVOKE_FROM_EVAL(0x2EC378A759F9EC05LL, xbox_task_status);
-      break;
-    case 3079:
-      HASH_INVOKE_FROM_EVAL(0x66EF68EF3C144C07LL, imap_gc);
-      break;
-    case 3083:
-      HASH_INVOKE_FROM_EVAL(0x0EEE484739520C0BLL, magickthresholdimage);
-      HASH_INVOKE_FROM_EVAL(0x0833BCE91C40CC0BLL, magickqueryconfigureoption);
-      break;
-    case 3090:
-      HASH_INVOKE_FROM_EVAL(0x510B683F2E764C12LL, fb_load_local_databases);
-      break;
-    case 3099:
-      HASH_INVOKE_FROM_EVAL(0x67742A0F218F6C1BLL, posix_initgroups);
-      HASH_INVOKE_FROM_EVAL(0x7D615C7E3ADB2C1BLL, xmlwriter_write_comment);
-      break;
-    case 3102:
-      HASH_INVOKE_FROM_EVAL(0x32D5F30455C90C1ELL, imap_subscribe);
-      break;
-    case 3104:
-      HASH_INVOKE_FROM_EVAL(0x7BD43EB167198C20LL, xmlwriter_write_pi);
-      break;
-    case 3111:
-      HASH_INVOKE_FROM_EVAL(0x5A02EE8ED39F0C27LL, posix_getgrnam);
-      break;
-    case 3112:
-      HASH_INVOKE_FROM_EVAL(0x79A4E240F18BAC28LL, rand);
-      break;
-    case 3115:
-      HASH_INVOKE_FROM_EVAL(0x09A98E99D51E8C2BLL, hphp_recursivedirectoryiterator_seek);
-      break;
-    case 3116:
-      HASH_INVOKE_FROM_EVAL(0x116C3EC924B9AC2CLL, imagegd);
-      break;
-    case 3125:
-      HASH_INVOKE_FROM_EVAL(0x2B9A380A29D0EC35LL, session_write_close);
-      break;
-    case 3141:
-      HASH_INVOKE_FROM_EVAL(0x6EF89BCAD607CC45LL, strncasecmp);
-      break;
-    case 3143:
-      HASH_INVOKE_FROM_EVAL(0x44055093E56E4C47LL, mcrypt_enc_get_key_size);
-      break;
-    case 3145:
-      HASH_INVOKE_FROM_EVAL(0x2D3F0F8DB0C20C49LL, dom_node_insert_before);
-      HASH_INVOKE_FROM_EVAL(0x357F73CEBD6E2C49LL, write_hdf_string);
-      break;
-    case 3146:
-      HASH_INVOKE_FROM_EVAL(0x3C23768CFB492C4ALL, gzinflate);
-      break;
-    case 3150:
-      HASH_INVOKE_FROM_EVAL(0x5DAC1C64D8F08C4ELL, openssl_pkey_get_private);
-      break;
-    case 3153:
-      HASH_INVOKE_FROM_EVAL(0x56EDB60C824E8C51LL, key);
-      break;
-    case 3154:
-      HASH_INVOKE_FROM_EVAL(0x1FC294B806F76C52LL, php_sapi_name);
-      break;
-    case 3159:
-      HASH_INVOKE_FROM_EVAL(0x793259E03C37CC57LL, memcache_decrement);
-      break;
-    case 3171:
-      HASH_INVOKE_FROM_EVAL(0x43C0E9827D502C63LL, array_intersect_assoc);
-      break;
-    case 3172:
-      HASH_INVOKE_FROM_EVAL(0x3409D717D9246C64LL, libxml_use_internal_errors);
-      break;
-    case 3178:
-      HASH_INVOKE_FROM_EVAL(0x41BD9EA0BC5E4C6ALL, move_uploaded_file);
-      break;
-    case 3179:
-      HASH_INVOKE_FROM_EVAL(0x7C6B37BF6300AC6BLL, iconv_mime_encode);
-      break;
-    case 3185:
-      HASH_INVOKE_FROM_EVAL(0x1E074215FE5FCC71LL, set_error_handler);
-      break;
-    case 3189:
-      HASH_INVOKE_FROM_EVAL(0x528366F3195ACC75LL, xbox_task_result);
-      break;
-    case 3190:
-      HASH_INVOKE_FROM_EVAL(0x1C35934C6BC52C76LL, libxml_clear_errors);
-      break;
-    case 3192:
-      HASH_INVOKE_FROM_EVAL(0x665F08996BD4AC78LL, magicksetimagegreenprimary);
-      break;
-    case 3194:
-      HASH_INVOKE_FROM_EVAL(0x05D7B804ECDE8C7ALL, checkdnsrr);
-      HASH_INVOKE_FROM_EVAL(0x05F3BC04D61CAC7ALL, get_defined_vars);
-      break;
-    case 3195:
-      HASH_INVOKE_FROM_EVAL(0x749E45FBD48BEC7BLL, hphp_recursivedirectoryiterator___tostring);
-      HASH_INVOKE_FROM_EVAL(0x71B25229CD080C7BLL, dom_element_set_attribute_node_ns);
-      break;
-    case 3198:
-      HASH_INVOKE_FROM_EVAL(0x5F41821072A06C7ELL, hphp_splfileinfo_getctime);
-      break;
-    case 3204:
-      HASH_INVOKE_FROM_EVAL(0x5D49AF7004696C84LL, shm_detach);
-      break;
-    case 3209:
-      HASH_INVOKE_FROM_EVAL(0x0F9C0C82F40F2C89LL, pixelsetcyanquantum);
-      break;
-    case 3214:
-      HASH_INVOKE_FROM_EVAL(0x467470230015AC8ELL, mcrypt_module_is_block_algorithm_mode);
-      break;
-    case 3215:
-      HASH_INVOKE_FROM_EVAL(0x4173EFD9A8EECC8FLL, magicknewimage);
-      break;
-    case 3216:
-      HASH_INVOKE_FROM_EVAL(0x05556EDFC1BB0C90LL, mysql_info);
-      HASH_INVOKE_FROM_EVAL(0x3F0C947E68D02C90LL, ini_get_all);
-      break;
-    case 3222:
-      HASH_INVOKE_FROM_EVAL(0x47C5BC101A512C96LL, magickquantizeimage);
-      break;
-    case 3225:
-      HASH_INVOKE_FROM_EVAL(0x2EA6E1D600786C99LL, mb_strtoupper);
-      break;
-    case 3230:
-      HASH_INVOKE_FROM_EVAL(0x50296037C7968C9ELL, preg_split);
-      break;
-    case 3233:
-      HASH_INVOKE_FROM_EVAL(0x4590B5971EC9ACA1LL, getmygid);
-      break;
-    case 3235:
-      HASH_INVOKE_FROM_EVAL(0x737253E9FC112CA3LL, socket_close);
-      break;
-    case 3245:
-      HASH_INVOKE_FROM_EVAL(0x1C1216F2B7C16CADLL, ftell);
-      break;
-    case 3246:
-      HASH_INVOKE_FROM_EVAL(0x3ACD2F1EA5282CAELL, magickmattefloodfillimage);
-      break;
-    case 3249:
-      HASH_INVOKE_FROM_EVAL(0x735555B148E58CB1LL, ldap_read);
-      break;
-    case 3250:
-      HASH_INVOKE_FROM_EVAL(0x56023CC5ECC9ECB2LL, dns_get_mx);
-      break;
-    case 3252:
-      HASH_INVOKE_FROM_EVAL(0x41FBEF9F7A024CB4LL, xmlwriter_end_element);
-      HASH_INVOKE_FROM_EVAL(0x742AD1AA5A80ECB4LL, output_reset_rewrite_vars);
-      break;
-    case 3254:
-      HASH_INVOKE_FROM_EVAL(0x560637BE51C36CB6LL, ezmlm_hash);
-      break;
-    case 3259:
-      HASH_INVOKE_FROM_EVAL(0x031F9B7B9A08ECBBLL, bzcompress);
-      HASH_INVOKE_FROM_EVAL(0x41D3B07854936CBBLL, token_get_all);
-      HASH_INVOKE_FROM_EVAL(0x15ACD9F32D214CBBLL, mysql_fetch_lengths);
-      break;
-    case 3260:
-      HASH_INVOKE_FROM_EVAL(0x19C1872E55A7ECBCLL, is_long);
-      HASH_INVOKE_FROM_EVAL(0x3978BE548631ECBCLL, hash_final);
-      HASH_INVOKE_FROM_EVAL(0x733137183026ACBCLL, hphp_splfileobject_next);
-      break;
-    case 3266:
-      HASH_INVOKE_FROM_EVAL(0x42BCEFCF899D0CC2LL, magickgetimagecolorspace);
-      break;
-    case 3267:
-      HASH_INVOKE_FROM_EVAL(0x7A147B8B98C76CC3LL, key_exists);
-      break;
-    case 3272:
-      HASH_INVOKE_FROM_EVAL(0x4CF625DF902F8CC8LL, imap_get_quotaroot);
-      break;
-    case 3277:
-      HASH_INVOKE_FROM_EVAL(0x14C550B86A16ACCDLL, hphp_get_this);
-      break;
-    case 3282:
-      HASH_INVOKE_FROM_EVAL(0x1FD3FB2AB0F48CD2LL, magickgetimagesignature);
-      break;
-    case 3283:
-      HASH_INVOKE_FROM_EVAL(0x6406BC03A5D84CD3LL, dom_element_remove_attribute);
-      break;
-    case 3286:
-      HASH_INVOKE_FROM_EVAL(0x11166D3106DB6CD6LL, wandhasexception);
-      break;
-    case 3289:
-      HASH_INVOKE_FROM_EVAL(0x27BFAF1293A60CD9LL, ldap_get_dn);
-      break;
-    case 3290:
-      HASH_INVOKE_FROM_EVAL(0x674AA2DBDA5E4CDALL, imageloadfont);
-      break;
-    case 3296:
-      HASH_INVOKE_FROM_EVAL(0x28FB6C2FF0372CE0LL, openssl_decrypt);
-      break;
-    case 3298:
-      HASH_INVOKE_FROM_EVAL(0x6B92530A9ABA0CE2LL, session_commit);
-      HASH_INVOKE_FROM_EVAL(0x2D5A5580B9FD2CE2LL, imap_setacl);
-      break;
-    case 3306:
-      HASH_INVOKE_FROM_EVAL(0x5A8AF4F880DA4CEALL, mailparse_msg_extract_whole_part_file);
-      HASH_INVOKE_FROM_EVAL(0x7821BD05E5228CEALL, imagewbmp);
-      break;
-    case 3310:
-      HASH_INVOKE_FROM_EVAL(0x78FFA0E69D6AACEELL, mcrypt_cfb);
-      break;
-    case 3313:
-      HASH_INVOKE_FROM_EVAL(0x21C8FC9A94404CF1LL, php_ini_scanned_files);
-      break;
-    case 3317:
-      HASH_INVOKE_FROM_EVAL(0x26729ECB00B8ECF5LL, end_user_func_async);
-      break;
-    case 3319:
-      HASH_INVOKE_FROM_EVAL(0x1C30C8470100ECF7LL, mcrypt_enc_is_block_mode);
-      break;
-    case 3321:
-      HASH_INVOKE_FROM_EVAL(0x537CF5DE8C43CCF9LL, curl_getinfo);
-      break;
-    case 3327:
-      HASH_INVOKE_FROM_EVAL(0x48A2F2A7A4620CFFLL, pixelsetyellowquantum);
-      break;
-    case 3330:
-      HASH_INVOKE_FROM_EVAL(0x018F22AEA371ED02LL, filemtime);
-      HASH_INVOKE_FROM_EVAL(0x7EB48D1BB5B7AD02LL, dom_element_set_attribute);
-      break;
-    case 3332:
-      HASH_INVOKE_FROM_EVAL(0x1248250E701DAD04LL, magickgaussianblurimage);
-      break;
-    case 3335:
-      HASH_INVOKE_FROM_EVAL(0x19B643D858DC6D07LL, magickgetimagerenderingintent);
-      break;
-    case 3338:
-      HASH_INVOKE_FROM_EVAL(0x6E8996DD071CED0ALL, dom_element_remove_attribute_node);
-      break;
-    case 3344:
-      HASH_INVOKE_FROM_EVAL(0x5CEFA5A265104D10LL, count);
-      break;
-    case 3345:
-      HASH_INVOKE_FROM_EVAL(0x2D484921B5400D11LL, magickradialblurimage);
-      break;
-    case 3349:
-      HASH_INVOKE_FROM_EVAL(0x1C8D554F57DCAD15LL, hphp_object_pointer);
-      break;
-    case 3351:
-      HASH_INVOKE_FROM_EVAL(0x12BB5E00E714ED17LL, magickgetimagecompose);
-      break;
-    case 3354:
-      HASH_INVOKE_FROM_EVAL(0x75DB75CA9DE56D1ALL, xml_parser_get_option);
-      break;
-    case 3355:
-      HASH_INVOKE_FROM_EVAL(0x70C22A7EEF54CD1BLL, ldap_compare);
-      break;
-    case 3359:
-      HASH_INVOKE_FROM_EVAL(0x566465036CCBCD1FLL, min);
-      break;
-    case 3366:
-      HASH_INVOKE_FROM_EVAL(0x429D088E9779CD26LL, dom_document_normalize_document);
-      break;
-    case 3369:
-      HASH_INVOKE_FROM_EVAL(0x632D50B69429ED29LL, socket_set_block);
-      break;
-    case 3382:
-      HASH_INVOKE_FROM_EVAL(0x515841235FADCD36LL, class_implements);
-      break;
-    case 3387:
-      HASH_INVOKE_FROM_EVAL(0x0784B2B034560D3BLL, destroypixelwand);
-      HASH_INVOKE_FROM_EVAL(0x6C9AE626DAD02D3BLL, mailparse_msg_extract_part_file);
-      break;
-    case 3392:
-      HASH_INVOKE_FROM_EVAL(0x198627C81DABAD40LL, register_cleanup_function);
-      break;
-    case 3401:
-      HASH_INVOKE_FROM_EVAL(0x41785512C45FCD49LL, mysql_ping);
-      break;
-    case 3408:
-      HASH_INVOKE_FROM_EVAL(0x39B11A2A25E40D50LL, mysql_get_server_info);
-      HASH_INVOKE_FROM_EVAL(0x337D2252CDA22D50LL, is_real);
-      break;
-    case 3418:
-      HASH_INVOKE_FROM_EVAL(0x4ACCF26A7AE80D5ALL, imagefilltoborder);
-      break;
-    case 3419:
-      HASH_INVOKE_FROM_EVAL(0x41B5E3D2AADE2D5BLL, drawroundrectangle);
-      break;
-    case 3420:
-      HASH_INVOKE_FROM_EVAL(0x1371413B4F6F8D5CLL, pixelgetred);
-      break;
-    case 3424:
-      HASH_INVOKE_FROM_EVAL(0x567276D68FE12D60LL, preg_quote);
-      break;
-    case 3425:
-      HASH_INVOKE_FROM_EVAL(0x34F150F3D94E6D61LL, gzpassthru);
-      break;
-    case 3430:
-      HASH_INVOKE_FROM_EVAL(0x0C393EE8F6540D66LL, bccomp);
-      break;
-    case 3437:
-      HASH_INVOKE_FROM_EVAL(0x21D924BA98BFCD6DLL, file_get_contents);
-      HASH_INVOKE_FROM_EVAL(0x7D9E024FD8696D6DLL, get_class);
-      HASH_INVOKE_FROM_EVAL(0x4351AFD0FD818D6DLL, magickmotionblurimage);
-      break;
-    case 3441:
-      HASH_INVOKE_FROM_EVAL(0x74FDC4596C654D71LL, dom_node_is_default_namespace);
-      break;
-    case 3446:
-      HASH_INVOKE_FROM_EVAL(0x7467E8107EF08D76LL, unpack);
-      break;
-    case 3447:
-      HASH_INVOKE_FROM_EVAL(0x3ED49C2BBDDFAD77LL, ldap_next_reference);
-      break;
-    case 3454:
-      HASH_INVOKE_FROM_EVAL(0x384E8BC9B5FE2D7ELL, magickfximage);
-      break;
-    case 3455:
-      HASH_INVOKE_FROM_EVAL(0x4E19AFB75A62AD7FLL, imagerotate);
-      break;
-    case 3457:
-      HASH_INVOKE_FROM_EVAL(0x25EA810DAEA74D81LL, ob_clean);
-      break;
-    case 3458:
-      HASH_INVOKE_FROM_EVAL(0x363D0D4E6D8ACD82LL, imap_alerts);
-      break;
-    case 3463:
-      HASH_INVOKE_FROM_EVAL(0x344091B785FE8D87LL, socket_set_timeout);
-      break;
-    case 3464:
-      HASH_INVOKE_FROM_EVAL(0x2AFF8525E93D6D88LL, drawsetfillopacity);
-      HASH_INVOKE_FROM_EVAL(0x1F22C82816F9AD88LL, hphp_splfileinfo_getpath);
-      break;
-    case 3470:
-      HASH_INVOKE_FROM_EVAL(0x6A351AEDFC4D0D8ELL, magickgetimagemimetype);
-      break;
-    case 3471:
-      HASH_INVOKE_FROM_EVAL(0x1806DC9468882D8FLL, gzfile);
-      break;
-    case 3472:
-      HASH_INVOKE_FROM_EVAL(0x5E4360FC28D0AD90LL, magicksetinterlacescheme);
-      break;
-    case 3473:
-      HASH_INVOKE_FROM_EVAL(0x5695393CF6428D91LL, dom_element_set_id_attribute);
-      HASH_INVOKE_FROM_EVAL(0x48444F8F18E60D91LL, strftime);
-      break;
-    case 3486:
-      HASH_INVOKE_FROM_EVAL(0x30C1AE2B06990D9ELL, gzseek);
-      break;
-    case 3488:
-      HASH_INVOKE_FROM_EVAL(0x7084C6294240CDA0LL, octdec);
-      break;
-    case 3496:
-      HASH_INVOKE_FROM_EVAL(0x18FEAF2459E5ADA8LL, dom_element_has_attribute);
-      HASH_INVOKE_FROM_EVAL(0x474A096265502DA8LL, glob);
-      HASH_INVOKE_FROM_EVAL(0x7FB39C41E339ADA8LL, imap_setflag_full);
-      break;
-    case 3499:
-      HASH_INVOKE_FROM_EVAL(0x66764CAABFF4CDABLL, array_keys);
-      break;
-    case 3506:
-      HASH_INVOKE_FROM_EVAL(0x257371BC40186DB2LL, magickblurimage);
-      break;
-    case 3507:
-      HASH_INVOKE_FROM_EVAL(0x53F2C6F5AE244DB3LL, drawpushdefs);
-      break;
-    case 3512:
-      HASH_INVOKE_FROM_EVAL(0x2B1D442AEA06ADB8LL, strpbrk);
-      break;
-    case 3516:
-      HASH_INVOKE_FROM_EVAL(0x770DEDCB168B0DBCLL, mb_ereg_search_setpos);
-      break;
-    case 3517:
-      HASH_INVOKE_FROM_EVAL(0x01E6FF7D9746CDBDLL, stream_socket_accept);
-      break;
-    case 3523:
-      HASH_INVOKE_FROM_EVAL(0x069EE6F604BA2DC3LL, array_reverse);
-      break;
-    case 3526:
-      HASH_INVOKE_FROM_EVAL(0x73210FEAA2EACDC6LL, imagecolorsforindex);
-      break;
-    case 3530:
-      HASH_INVOKE_FROM_EVAL(0x3BB701F2BDD0ADCALL, magickgetimageprofile);
-      break;
-    case 3534:
-      HASH_INVOKE_FROM_EVAL(0x3E5C990C32470DCELL, array_combine);
-      HASH_INVOKE_FROM_EVAL(0x40C3C7DE46D62DCELL, ob_start);
-      break;
-    case 3536:
-      HASH_INVOKE_FROM_EVAL(0x0E1C354339208DD0LL, imagetypes);
-      break;
-    case 3543:
-      HASH_INVOKE_FROM_EVAL(0x1AE08377A1630DD7LL, mysql_insert_id);
-      break;
-    case 3548:
-      HASH_INVOKE_FROM_EVAL(0x5EBE067E3FAECDDCLL, ob_gzhandler);
-      HASH_INVOKE_FROM_EVAL(0x2497295AC9F72DDCLL, stream_set_blocking);
-      break;
-    case 3549:
-      HASH_INVOKE_FROM_EVAL(0x3B00B916C3682DDDLL, ctype_upper);
-      break;
-    case 3560:
-      HASH_INVOKE_FROM_EVAL(0x47A4BA8616D02DE8LL, restore_exception_handler);
-      break;
-    case 3572:
-      HASH_INVOKE_FROM_EVAL(0x73B30E65808A6DF4LL, ctype_xdigit);
-      break;
-    case 3596:
-      HASH_INVOKE_FROM_EVAL(0x3AD6E084483B2E0CLL, array_udiff_assoc);
-      break;
-    case 3597:
-      HASH_INVOKE_FROM_EVAL(0x5EB0A2F93E650E0DLL, array_diff_key);
-      break;
-    case 3598:
-      HASH_INVOKE_FROM_EVAL(0x5230E4C9D8D64E0ELL, highlight_string);
-      break;
-    case 3602:
-      HASH_INVOKE_FROM_EVAL(0x76636D0F0C090E12LL, curl_copy_handle);
-      break;
-    case 3604:
-      HASH_INVOKE_FROM_EVAL(0x58F426377837AE14LL, imap_body);
-      break;
-    case 3607:
-      HASH_INVOKE_FROM_EVAL(0x3D13FD5FE3AF6E17LL, imagestringup);
-      break;
-    case 3616:
-      HASH_INVOKE_FROM_EVAL(0x7BDA47B5C47EAE20LL, fread);
-      break;
-    case 3617:
-      HASH_INVOKE_FROM_EVAL(0x5B7F218FA08D8E21LL, imagefilledellipse);
-      break;
-    case 3625:
-      HASH_INVOKE_FROM_EVAL(0x73FE5C79E14A0E29LL, pixelsetbluequantum);
-      break;
-    case 3628:
-      HASH_INVOKE_FROM_EVAL(0x19AB40AB4CC50E2CLL, imap_fetch_overview);
-      break;
-    case 3630:
-      HASH_INVOKE_FROM_EVAL(0x3E62C1A48E9EEE2ELL, hphp_splfileinfo_getsize);
-      break;
-    case 3634:
-      HASH_INVOKE_FROM_EVAL(0x000AAF93F814AE32LL, drawsetvectorgraphics);
-      break;
-    case 3635:
-      HASH_INVOKE_FROM_EVAL(0x38433635F28B4E33LL, is_readable);
-      break;
-    case 3642:
-      HASH_INVOKE_FROM_EVAL(0x13048F0A79F7CE3ALL, magicksetsamplingfactors);
-      break;
-    case 3648:
-      HASH_INVOKE_FROM_EVAL(0x11681FDE841D0E40LL, drawskewy);
-      break;
-    case 3650:
-      HASH_INVOKE_FROM_EVAL(0x160B01F095B20E42LL, mb_output_handler);
-      break;
-    case 3654:
-      HASH_INVOKE_FROM_EVAL(0x7F4C1DF551150E46LL, pixelgetnextiteratorrow);
-      break;
-    case 3660:
-      HASH_INVOKE_FROM_EVAL(0x1EEBDFD62B6BEE4CLL, mcrypt_module_get_algo_block_size);
-      break;
-    case 3663:
-      HASH_INVOKE_FROM_EVAL(0x62C934CD93938E4FLL, magickimplodeimage);
-      break;
-    case 3664:
-      HASH_INVOKE_FROM_EVAL(0x4022005DE7E24E50LL, openssl_pkcs7_sign);
-      break;
-    case 3668:
-      HASH_INVOKE_FROM_EVAL(0x6BF155774D546E54LL, define_syslog_variables);
-      HASH_INVOKE_FROM_EVAL(0x7B6BF544EB420E54LL, hphp_recursivedirectoryiterator_haschildren);
-      break;
-    case 3671:
-      HASH_INVOKE_FROM_EVAL(0x2DEF52641933CE57LL, magickgetimagemattecolor);
-      break;
-    case 3676:
-      HASH_INVOKE_FROM_EVAL(0x532D0D905CE60E5CLL, posix_times);
-      break;
-    case 3677:
-      HASH_INVOKE_FROM_EVAL(0x38373F6643B14E5DLL, ldap_parse_reference);
-      break;
-    case 3681:
-      HASH_INVOKE_FROM_EVAL(0x593EA675D239CE61LL, ldap_first_reference);
-      break;
-    case 3682:
-      HASH_INVOKE_FROM_EVAL(0x7639C74DBC4F4E62LL, array_splice);
-      break;
-    case 3683:
-      HASH_INVOKE_FROM_EVAL(0x4B6FE37D66784E63LL, imagesy);
-      break;
-    case 3684:
-      HASH_INVOKE_FROM_EVAL(0x4F0DF8BBC4340E64LL, stream_socket_server);
-      break;
-    case 3685:
-      HASH_INVOKE_FROM_EVAL(0x21D5A3208639EE65LL, dom_element_get_attribute_node_ns);
-      break;
-    case 3688:
-      HASH_INVOKE_FROM_EVAL(0x5B1DFB89BFC1CE68LL, realpath);
-      break;
-    case 3689:
-      HASH_INVOKE_FROM_EVAL(0x24B836D2C79D0E69LL, magickgetimagepixels);
-      break;
-    case 3690:
-      HASH_INVOKE_FROM_EVAL(0x2F9816D9A2B2CE6ALL, mysql_set_charset);
-      break;
-    case 3693:
-      HASH_INVOKE_FROM_EVAL(0x714001ABB0D76E6DLL, magickgetinterlacescheme);
-      break;
-    case 3695:
-      HASH_INVOKE_FROM_EVAL(0x7E6223D0CF184E6FLL, magickqueryformats);
-      break;
-    case 3701:
-      HASH_INVOKE_FROM_EVAL(0x4EC7C66593DDEE75LL, sql_regcase);
-      break;
-    case 3703:
-      HASH_INVOKE_FROM_EVAL(0x12B7B2D835B80E77LL, chmod);
-      break;
-    case 3708:
-      HASH_INVOKE_FROM_EVAL(0x4D9C5B9A944CCE7CLL, convert_uudecode);
-      break;
-    case 3713:
-      HASH_INVOKE_FROM_EVAL(0x3B426B13FA584E81LL, fb_unserialize);
-      break;
-    case 3715:
-      HASH_INVOKE_FROM_EVAL(0x724011CF7C31AE83LL, sqrt);
-      break;
-    case 3716:
-      HASH_INVOKE_FROM_EVAL(0x1765A63835CC4E84LL, drawgetfontfamily);
-      break;
-    case 3717:
-      HASH_INVOKE_FROM_EVAL(0x4710320ED6638E85LL, rename_function);
-      break;
-    case 3720:
-      HASH_INVOKE_FROM_EVAL(0x1569DCC552EE8E88LL, cosh);
-      break;
-    case 3722:
-      HASH_INVOKE_FROM_EVAL(0x15C9E5C16374EE8ALL, gzclose);
-      break;
-    case 3728:
-      HASH_INVOKE_FROM_EVAL(0x33D6CC3959D3CE90LL, clearmagickwand);
-      break;
-    case 3731:
-      HASH_INVOKE_FROM_EVAL(0x37A9E8F91C33EE93LL, magickborderimage);
-      break;
-    case 3742:
-      HASH_INVOKE_FROM_EVAL(0x76EBE919625D8E9ELL, openssl_pkcs12_export);
-      break;
-    case 3743:
-      HASH_INVOKE_FROM_EVAL(0x224004A728974E9FLL, spl_object_hash);
-      HASH_INVOKE_FROM_EVAL(0x7CFF820207DC6E9FLL, debug_backtrace);
-      break;
-    case 3750:
-      HASH_INVOKE_FROM_EVAL(0x1D7B8E395613AEA6LL, dom_element_remove_attribute_ns);
-      break;
-    case 3753:
-      HASH_INVOKE_FROM_EVAL(0x308D76DB12424EA9LL, magicksetimageindex);
-      break;
-    case 3758:
-      HASH_INVOKE_FROM_EVAL(0x5772A0B8C16DAEAELL, posix_setuid);
-      break;
-    case 3759:
-      HASH_INVOKE_FROM_EVAL(0x12D83A92EFB0EEAFLL, xmlwriter_open_uri);
-      break;
-    case 3761:
-      HASH_INVOKE_FROM_EVAL(0x33FE101882726EB1LL, proc_close);
-      break;
-    case 3763:
-      HASH_INVOKE_FROM_EVAL(0x732DAA2292946EB3LL, imap_header);
-      HASH_INVOKE_FROM_EVAL(0x7379B5B97EC2EEB3LL, hypot);
-      break;
-    case 3776:
-      HASH_INVOKE_FROM_EVAL(0x2475D7045D9DEEC0LL, magicksetimagecompression);
-      break;
-    case 3780:
-      HASH_INVOKE_FROM_EVAL(0x7052903F1B17AEC4LL, parse_str);
-      break;
-    case 3785:
-      HASH_INVOKE_FROM_EVAL(0x58C8DCAAE5B7CEC9LL, get_cfg_var);
-      break;
-    case 3786:
-      HASH_INVOKE_FROM_EVAL(0x08E6C1CD3AC64ECALL, hphp_splfileinfo_gettype);
-      HASH_INVOKE_FROM_EVAL(0x1AA83A1057BE6ECALL, mysql_field_len);
-      break;
-    case 3794:
-      HASH_INVOKE_FROM_EVAL(0x3CCD09EC3511CED2LL, apd_stop_trace);
-      break;
-    case 3803:
-      HASH_INVOKE_FROM_EVAL(0x16331E18B5CD8EDBLL, timezone_open);
-      break;
-    case 3804:
-      HASH_INVOKE_FROM_EVAL(0x0B8B6A66FE646EDCLL, openssl_encrypt);
-      break;
-    case 3808:
-      HASH_INVOKE_FROM_EVAL(0x7A1C6E429399CEE0LL, iconv_set_encoding);
-      break;
-    case 3811:
-      HASH_INVOKE_FROM_EVAL(0x1F4AACF075E9CEE3LL, memcache_get_server_status);
-      HASH_INVOKE_FROM_EVAL(0x0E1368A3BDFE6EE3LL, hphp_recursiveiteratoriterator_rewind);
-      break;
-    case 3812:
-      HASH_INVOKE_FROM_EVAL(0x6C4B9D0271790EE4LL, imap_rfc822_parse_adrlist);
-      break;
-    case 3813:
-      HASH_INVOKE_FROM_EVAL(0x367CFD20B4446EE5LL, is_array);
-      break;
-    case 3816:
-      HASH_INVOKE_FROM_EVAL(0x6CB6650E66CE4EE8LL, magicksetimagebordercolor);
-      break;
-    case 3819:
-      HASH_INVOKE_FROM_EVAL(0x72882DBF2D49CEEBLL, set_magic_quotes_runtime);
-      break;
-    case 3832:
-      HASH_INVOKE_FROM_EVAL(0x33FD10AC81146EF8LL, thrift_protocol_read_binary);
-      break;
-    case 3837:
-      HASH_INVOKE_FROM_EVAL(0x0CF27A6BC84CEEFDLL, openssl_get_publickey);
-      HASH_INVOKE_FROM_EVAL(0x283E167EB3F04EFDLL, posix_getgid);
-      break;
-    case 3841:
-      HASH_INVOKE_FROM_EVAL(0x7B6A0D7510184F01LL, mysql_fetch_assoc);
-      break;
-    case 3845:
-      HASH_INVOKE_FROM_EVAL(0x6842585E79988F05LL, magickmosaicimages);
-      break;
-    case 3846:
-      HASH_INVOKE_FROM_EVAL(0x1D3B08AA0AF50F06LL, gettype);
-      HASH_INVOKE_FROM_EVAL(0x6692475BA65A2F06LL, imagearc);
-      break;
-    case 3850:
-      HASH_INVOKE_FROM_EVAL(0x36EA41EEA02D4F0ALL, imap_mail_copy);
-      break;
-    case 3851:
-      HASH_INVOKE_FROM_EVAL(0x7756593AAC1F6F0BLL, imagecreatefromstring);
-      break;
-    case 3856:
-      HASH_INVOKE_FROM_EVAL(0x700A75BF904DAF10LL, magickgetcharwidth);
-      break;
-    case 3858:
-      HASH_INVOKE_FROM_EVAL(0x042492DDA48C4F12LL, gzdeflate);
-      break;
-    case 3860:
-      HASH_INVOKE_FROM_EVAL(0x04525BA2AE51EF14LL, date_sun_info);
-      break;
-    case 3861:
-      HASH_INVOKE_FROM_EVAL(0x12F09EAED9078F15LL, mysql_fetch_field);
-      break;
-    case 3862:
-      HASH_INVOKE_FROM_EVAL(0x23B7D9E4EC992F16LL, stream_get_line);
-      HASH_INVOKE_FROM_EVAL(0x38664EFE3E0A0F16LL, json_decode);
-      HASH_INVOKE_FROM_EVAL(0x0287B907DDA3EF16LL, hphpd_get_user_commands);
-      break;
-    case 3872:
-      HASH_INVOKE_FROM_EVAL(0x2C4206A0BD904F20LL, hphp_splfileobject_fseek);
-      break;
-    case 3873:
-      HASH_INVOKE_FROM_EVAL(0x4282496A4BF42F21LL, php_uname);
-      HASH_INVOKE_FROM_EVAL(0x77EC28645855AF21LL, magicksetcompressionquality);
-      break;
-    case 3876:
-      HASH_INVOKE_FROM_EVAL(0x05BD68F1D09CEF24LL, array_count_values);
-      HASH_INVOKE_FROM_EVAL(0x5FA07E8B63BEAF24LL, mcrypt_enc_get_modes_name);
-      break;
-    case 3879:
-      HASH_INVOKE_FROM_EVAL(0x4BAA5B688E6F6F27LL, gd_info);
-      break;
-    case 3897:
-      HASH_INVOKE_FROM_EVAL(0x0D4446B2DBC8EF39LL, hphp_splfileinfo_getinode);
-      HASH_INVOKE_FROM_EVAL(0x496CF4113CEA8F39LL, magicksetimagefilename);
-      break;
-    case 3899:
-      HASH_INVOKE_FROM_EVAL(0x7EE74F798791CF3BLL, magickedgeimage);
-      break;
-    case 3900:
-      HASH_INVOKE_FROM_EVAL(0x41136A5F28E84F3CLL, forward_static_call_array);
-      break;
-    case 3903:
-      HASH_INVOKE_FROM_EVAL(0x1A9EFDD653DB8F3FLL, pcntl_wstopsig);
-      break;
-    case 3906:
-      HASH_INVOKE_FROM_EVAL(0x3B46305DA1154F42LL, drawpopclippath);
-      break;
-    case 3909:
-      HASH_INVOKE_FROM_EVAL(0x4E36A077234B8F45LL, pixelgetblack);
-      HASH_INVOKE_FROM_EVAL(0x79265AADD9A8AF45LL, mcrypt_cbc);
-      HASH_INVOKE_FROM_EVAL(0x5D3A31AB0E326F45LL, crc32);
-      break;
-    case 3910:
-      HASH_INVOKE_FROM_EVAL(0x079EA27F72594F46LL, gzgets);
-      break;
-    case 3920:
-      HASH_INVOKE_FROM_EVAL(0x7978A278AEAFAF50LL, pixelgetmagenta);
-      break;
-    case 3923:
-      HASH_INVOKE_FROM_EVAL(0x7B965BB0B7A8EF53LL, hphp_get_iostatus);
-      break;
-    case 3926:
-      HASH_INVOKE_FROM_EVAL(0x621590803EC88F56LL, imageline);
-      break;
-    case 3929:
-      HASH_INVOKE_FROM_EVAL(0x38246B6BDE246F59LL, magickgetimagedispose);
-      break;
-    case 3931:
-      HASH_INVOKE_FROM_EVAL(0x24F698A8A4B5AF5BLL, imagecolordeallocate);
-      break;
-    case 3935:
-      HASH_INVOKE_FROM_EVAL(0x703D339DD44E8F5FLL, dom_element_get_elements_by_tag_name);
-      break;
-    case 3936:
-      HASH_INVOKE_FROM_EVAL(0x4F1D2858AD31AF60LL, imagecreatefromgd);
-      break;
-    case 3939:
-      HASH_INVOKE_FROM_EVAL(0x1FFD204252F60F63LL, magicksetimageprofile);
-      break;
-    case 3942:
-      HASH_INVOKE_FROM_EVAL(0x6FFF1304EA444F66LL, drawsetstrokemiterlimit);
-      break;
-    case 3943:
-      HASH_INVOKE_FROM_EVAL(0x319407AC92912F67LL, ereg);
-      break;
-    case 3946:
-      HASH_INVOKE_FROM_EVAL(0x1670096FDE27AF6ALL, rewind);
-      break;
-    case 3950:
-      HASH_INVOKE_FROM_EVAL(0x3A56371CDDEA0F6ELL, gzgetc);
-      break;
-    case 3951:
-      HASH_INVOKE_FROM_EVAL(0x42C4EC9D9F782F6FLL, htmlentities);
-      break;
-    case 3952:
-      HASH_INVOKE_FROM_EVAL(0x68C257B62A36EF70LL, magicksetimagebackgroundcolor);
-      HASH_INVOKE_FROM_EVAL(0x71557D108E5C0F70LL, xml_set_object);
-      break;
-    case 3956:
-      HASH_INVOKE_FROM_EVAL(0x18BC9BF6D1E3CF74LL, magickpreviewimages);
-      break;
-    case 3961:
-      HASH_INVOKE_FROM_EVAL(0x4BE9D91DD8624F79LL, money_format);
-      break;
-    case 3962:
-      HASH_INVOKE_FROM_EVAL(0x7B0E6DB649084F7ALL, clearstatcache);
-      break;
-    case 3967:
-      HASH_INVOKE_FROM_EVAL(0x5E3767128C04CF7FLL, imap_open);
-      break;
-    case 3973:
-      HASH_INVOKE_FROM_EVAL(0x7EF68B9A55222F85LL, wandgetexceptionstring);
-      break;
-    case 3977:
-      HASH_INVOKE_FROM_EVAL(0x13F52A829BAC0F89LL, timezone_identifiers_list);
-      break;
-    case 3979:
-      HASH_INVOKE_FROM_EVAL(0x3703D22147C24F8BLL, pixelsetcyan);
-      break;
-    case 3986:
-      HASH_INVOKE_FROM_EVAL(0x288D61E7DE28AF92LL, ucwords);
-      break;
-    case 3988:
-      HASH_INVOKE_FROM_EVAL(0x76B9D87BC7F02F94LL, preg_match);
-      break;
-    case 3991:
-      HASH_INVOKE_FROM_EVAL(0x6F9651265C096F97LL, magickreadimages);
-      break;
-    case 3992:
-      HASH_INVOKE_FROM_EVAL(0x66F1F0DB16C82F98LL, imagesavealpha);
-      break;
-    case 3995:
-      HASH_INVOKE_FROM_EVAL(0x44244ECFB9F76F9BLL, dom_document_create_element_ns);
-      break;
-    case 4015:
-      HASH_INVOKE_FROM_EVAL(0x03979AACDBB24FAFLL, mailparse_msg_get_part);
-      break;
-    case 4016:
-      HASH_INVOKE_FROM_EVAL(0x4A0B5F4676578FB0LL, imagecolorresolvealpha);
-      break;
-    case 4020:
-      HASH_INVOKE_FROM_EVAL(0x3900FDF1C97BEFB4LL, drawrotate);
-      break;
-    case 4021:
-      HASH_INVOKE_FROM_EVAL(0x79D3B90DEF10AFB5LL, spl_autoload_extensions);
-      break;
-    case 4022:
-      HASH_INVOKE_FROM_EVAL(0x56C0CCB57BB6EFB6LL, magicksetimageunits);
-      HASH_INVOKE_FROM_EVAL(0x2B451EF5D52C4FB6LL, array_diff);
-      break;
-    case 4026:
-      HASH_INVOKE_FROM_EVAL(0x0664323CB1CC2FBALL, imagecolorset);
-      break;
-    case 4028:
-      HASH_INVOKE_FROM_EVAL(0x0A8ED0466E41AFBCLL, bzclose);
-      break;
-    case 4031:
-      HASH_INVOKE_FROM_EVAL(0x70B38AB9EAE16FBFLL, ini_set);
-      break;
-    case 4034:
-      HASH_INVOKE_FROM_EVAL(0x6CA22E62D4762FC2LL, magickpainttransparentimage);
-      break;
-    case 4037:
-      HASH_INVOKE_FROM_EVAL(0x38498DD4C28D0FC5LL, hphp_splfileinfo_getatime);
-      break;
-    case 4043:
-      HASH_INVOKE_FROM_EVAL(0x38237A4515F42FCBLL, array_pad);
-      break;
-    case 4045:
-      HASH_INVOKE_FROM_EVAL(0x474566F3A2BE0FCDLL, mcrypt_enc_is_block_algorithm);
-      break;
-    case 4047:
-      HASH_INVOKE_FROM_EVAL(0x3A3CFC1F001A6FCFLL, magickreadimagefile);
-      break;
-    case 4048:
-      HASH_INVOKE_FROM_EVAL(0x21104CCA2942AFD0LL, fb_const_fetch);
-      HASH_INVOKE_FROM_EVAL(0x2EAA47FA6C3FEFD0LL, drawgetstrokealpha);
-      break;
-    case 4052:
-      HASH_INVOKE_FROM_EVAL(0x4970B72A182E4FD4LL, readdir);
-      break;
-    case 4053:
-      HASH_INVOKE_FROM_EVAL(0x751283FE764CAFD5LL, mysql_select_db);
-      break;
-    case 4071:
-      HASH_INVOKE_FROM_EVAL(0x217067889854CFE7LL, xmlwriter_start_dtd);
-      break;
-    case 4080:
-      HASH_INVOKE_FROM_EVAL(0x1189B7C4F4874FF0LL, php_check_syntax);
-      break;
-    case 4085:
-      HASH_INVOKE_FROM_EVAL(0x191ECE88E06E6FF5LL, dom_node_is_supported);
-      break;
-    case 4087:
-      HASH_INVOKE_FROM_EVAL(0x7883232CD1A7CFF7LL, dom_node_is_same_node);
-      break;
-    case 4092:
-      HASH_INVOKE_FROM_EVAL(0x51647BC5C0A14FFCLL, imap_clearflag_full);
-      break;
-    case 4094:
-      HASH_INVOKE_FROM_EVAL(0x32F8747E480CCFFELL, connection_status);
-      break;
-    case 4097:
-      HASH_INVOKE_FROM_EVAL(0x7585739E84DBF001LL, imap_delete);
-      break;
-    case 4101:
-      HASH_INVOKE_FROM_EVAL(0x20D579E7E4131005LL, imagecolorclosest);
-      HASH_INVOKE_FROM_EVAL(0x18A0F1EE8E249005LL, msg_send);
-      break;
-    case 4106:
-      HASH_INVOKE_FROM_EVAL(0x555D7A3FB939300ALL, apache_setenv);
-      break;
-    case 4109:
-      HASH_INVOKE_FROM_EVAL(0x40FA17130FA7100DLL, openssl_seal);
-      break;
-    case 4118:
-      HASH_INVOKE_FROM_EVAL(0x5623A698A728F016LL, getlastmod);
-      break;
-    case 4122:
-      HASH_INVOKE_FROM_EVAL(0x03834225EBBC101ALL, drawsettextundercolor);
-      break;
-    case 4130:
-      HASH_INVOKE_FROM_EVAL(0x145D42B2AB55D022LL, drawmatte);
-      break;
-    case 4131:
-      HASH_INVOKE_FROM_EVAL(0x35C74650867B7023LL, imagesetpixel);
-      break;
-    case 4147:
-      HASH_INVOKE_FROM_EVAL(0x48F35DFD653D7033LL, pclose);
-      break;
-    case 4149:
-      HASH_INVOKE_FROM_EVAL(0x280EC96FB50A9035LL, imap_ping);
-      break;
-    case 4155:
-      HASH_INVOKE_FROM_EVAL(0x40329F2A6B84D03BLL, dom_node_lookup_prefix);
-      break;
-    case 4158:
-      HASH_INVOKE_FROM_EVAL(0x32E6E5D3CCE3703ELL, magickgetimagewidth);
-      HASH_INVOKE_FROM_EVAL(0x43461C4D9130103ELL, exit);
-      HASH_INVOKE_FROM_EVAL(0x67C1ED9B816E503ELL, md5_file);
-      break;
-    case 4163:
-      HASH_INVOKE_FROM_EVAL(0x5ACCF9166CD9D043LL, ftruncate);
-      break;
-    case 4169:
-      HASH_INVOKE_FROM_EVAL(0x047A8BF04DB51049LL, range);
-      break;
-    case 4179:
-      HASH_INVOKE_FROM_EVAL(0x15A9EB33DA6E9053LL, getimagesize);
-      HASH_INVOKE_FROM_EVAL(0x07EB5C3A3BEA3053LL, acosh);
-      break;
-    case 4186:
-      HASH_INVOKE_FROM_EVAL(0x271AB768D202F05ALL, mcrypt_module_is_block_algorithm);
-      break;
-    case 4187:
-      HASH_INVOKE_FROM_EVAL(0x7BDA06BD1F8AD05BLL, imap_scanmailbox);
-      break;
-    case 4191:
-      HASH_INVOKE_FROM_EVAL(0x4B70746F965E705FLL, preg_last_error);
-      break;
-    case 4199:
-      HASH_INVOKE_FROM_EVAL(0x0CE1918B30DF5067LL, sys_getloadavg);
-      break;
-    case 4207:
-      HASH_INVOKE_FROM_EVAL(0x04D1CF7E4592106FLL, imap_mail_move);
-      HASH_INVOKE_FROM_EVAL(0x4C6FD8808A62506FLL, session_set_save_handler);
-      break;
-    case 4208:
-      HASH_INVOKE_FROM_EVAL(0x3C466098FF7B5070LL, mb_check_encoding);
-      break;
-    case 4216:
-      HASH_INVOKE_FROM_EVAL(0x6B268C26E21C1078LL, arsort);
-      break;
-    case 4217:
-      HASH_INVOKE_FROM_EVAL(0x08AA4EA901C9B079LL, session_encode);
-      break;
-    case 4228:
-      HASH_INVOKE_FROM_EVAL(0x53FD8C9AC3F4D084LL, dangling_server_proxy_new_request);
-      break;
-    case 4231:
-      HASH_INVOKE_FROM_EVAL(0x255D919D501C5087LL, dom_characterdata_delete_data);
-      break;
-    case 4238:
-      HASH_INVOKE_FROM_EVAL(0x3E4AE974AFA9708ELL, pixelsetquantumcolor);
-      break;
-    case 4241:
-      HASH_INVOKE_FROM_EVAL(0x673B36244DC87091LL, closelog);
-      break;
-    case 4254:
-      HASH_INVOKE_FROM_EVAL(0x4AF87BA91163D09ELL, mysql_db_name);
-      HASH_INVOKE_FROM_EVAL(0x74F0D6D8F1F2709ELL, drawsetstrokedashoffset);
-      break;
-    case 4255:
-      HASH_INVOKE_FROM_EVAL(0x2B130322DEC4B09FLL, pixelgetopacityquantum);
-      break;
-    case 4257:
-      HASH_INVOKE_FROM_EVAL(0x0DF945F12533F0A1LL, abs);
-      break;
-    case 4263:
-      HASH_INVOKE_FROM_EVAL(0x74C787060F7290A7LL, icu_transliterate);
-      break;
-    case 4267:
-      HASH_INVOKE_FROM_EVAL(0x439DF153FC32D0ABLL, printf);
-      break;
-    case 4268:
-      HASH_INVOKE_FROM_EVAL(0x6E27DC1E74C5B0ACLL, drawpathstart);
-      break;
-    case 4270:
-      HASH_INVOKE_FROM_EVAL(0x47AB4A08446BD0AELL, bcmod);
-      HASH_INVOKE_FROM_EVAL(0x4BBD5D8A6E0110AELL, error_log);
-      break;
-    case 4271:
-      HASH_INVOKE_FROM_EVAL(0x3954FFED1E0650AFLL, stream_register_wrapper);
-      break;
-    case 4272:
-      HASH_INVOKE_FROM_EVAL(0x5B9F8B3E1D8330B0LL, stream_socket_sendto);
-      break;
-    case 4274:
-      HASH_INVOKE_FROM_EVAL(0x48BBFB59FB7F90B2LL, iconv_strlen);
-      break;
-    case 4280:
-      HASH_INVOKE_FROM_EVAL(0x05A4C165810A30B8LL, gzread);
-      break;
-    case 4284:
-      HASH_INVOKE_FROM_EVAL(0x3900350CD9D990BCLL, imagecreatefromjpeg);
-      break;
-    case 4288:
-      HASH_INVOKE_FROM_EVAL(0x6EDC1E7A8D5710C0LL, memcache_add_server);
-      break;
-    case 4293:
-      HASH_INVOKE_FROM_EVAL(0x6B477F3B9CDB10C5LL, base64_decode);
-      break;
-    case 4309:
-      HASH_INVOKE_FROM_EVAL(0x3BF44C6DECD790D5LL, xmlwriter_start_dtd_entity);
-      break;
-    case 4312:
-      HASH_INVOKE_FROM_EVAL(0x79F2E516A3B070D8LL, libxml_disable_entity_loader);
-      break;
-    case 4313:
-      HASH_INVOKE_FROM_EVAL(0x08F6B727D60670D9LL, magicksetimagedepth);
-      break;
-    case 4314:
-      HASH_INVOKE_FROM_EVAL(0x6F242340B2E930DALL, hphp_splfileinfo_setfileclass);
-      break;
-    case 4315:
-      HASH_INVOKE_FROM_EVAL(0x3801923AD84670DBLL, apc_inc);
-      break;
-    case 4320:
-      HASH_INVOKE_FROM_EVAL(0x2E4612DF112010E0LL, imagecopyresized);
-      break;
-    case 4324:
-      HASH_INVOKE_FROM_EVAL(0x2B9425038D4230E4LL, imagecreatefromxpm);
-      break;
-    case 4327:
-      HASH_INVOKE_FROM_EVAL(0x79E6FD78989B10E7LL, tmpfile);
-      HASH_INVOKE_FROM_EVAL(0x59DE3A26AFF570E7LL, magickshaveimage);
-      break;
-    case 4328:
-      HASH_INVOKE_FROM_EVAL(0x17CB328F55FDF0E8LL, drawsetstrokeantialias);
-      break;
-    case 4339:
-      HASH_INVOKE_FROM_EVAL(0x315CCBC8C5C7D0F3LL, xmlwriter_write_raw);
-      break;
-    case 4355:
-      HASH_INVOKE_FROM_EVAL(0x1FFCBCF1927D7103LL, posix_setpgid);
-      break;
-    case 4357:
-      HASH_INVOKE_FROM_EVAL(0x509B763CDAD9D105LL, gethostbyaddr);
-      break;
-    case 4360:
-      HASH_INVOKE_FROM_EVAL(0x60B8B61133F59108LL, quoted_printable_decode);
-      break;
-    case 4370:
-      HASH_INVOKE_FROM_EVAL(0x0B1BA48B0CFB1112LL, strval);
-      HASH_INVOKE_FROM_EVAL(0x28C44527BD59D112LL, is_link);
-      break;
-    case 4372:
-      HASH_INVOKE_FROM_EVAL(0x02A4724E6A881114LL, mb_decode_numericentity);
-      break;
-    case 4377:
-      HASH_INVOKE_FROM_EVAL(0x3AB82455A70F5119LL, imagecolortransparent);
-      HASH_INVOKE_FROM_EVAL(0x2B31A877824A1119LL, stristr);
-      break;
-    case 4380:
-      HASH_INVOKE_FROM_EVAL(0x070A63F6A0B8711CLL, array_walk_recursive);
-      break;
-    case 4381:
-      HASH_INVOKE_FROM_EVAL(0x291088666B8BF11DLL, drawsetfontfamily);
-      break;
-    case 4383:
-      HASH_INVOKE_FROM_EVAL(0x4C70C24C84F5511FLL, magicksetimagegamma);
-      break;
-    case 4389:
-      HASH_INVOKE_FROM_EVAL(0x7A8B3EC0235EF125LL, magickprofileimage);
-      break;
-    case 4403:
-      HASH_INVOKE_FROM_EVAL(0x6A7E0B15FF689133LL, mb_ereg_search_init);
-      break;
-    case 4407:
-      HASH_INVOKE_FROM_EVAL(0x5666016FA3C0F137LL, socket_clear_error);
-      break;
-    case 4408:
-      HASH_INVOKE_FROM_EVAL(0x2676902697E37138LL, xmlwriter_start_comment);
-      break;
-    case 4410:
-      HASH_INVOKE_FROM_EVAL(0x2A57E5D29D73D13ALL, register_tick_function);
-      break;
-    case 4411:
-      HASH_INVOKE_FROM_EVAL(0x3E0C793B95A9713BLL, imap_bodystruct);
-      break;
-    case 4415:
-      HASH_INVOKE_FROM_EVAL(0x5BFDE63106CE713FLL, dom_element_get_attribute);
-      break;
-    case 4431:
-      HASH_INVOKE_FROM_EVAL(0x61A61E91C477514FLL, chop);
-      HASH_INVOKE_FROM_EVAL(0x7863294A8F33D14FLL, file);
-      break;
-    case 4434:
-      HASH_INVOKE_FROM_EVAL(0x26DD46D8C1F47152LL, ldap_bind);
-      break;
-    case 4451:
-      HASH_INVOKE_FROM_EVAL(0x36D6B73D289DD163LL, date_sunset);
-      break;
-    case 4456:
-      HASH_INVOKE_FROM_EVAL(0x14E46EA3CBCFB168LL, magickgetsamplingfactors);
-      break;
-    case 4462:
-      HASH_INVOKE_FROM_EVAL(0x15B61E061268B16ELL, magickenhanceimage);
-      break;
-    case 4466:
-      HASH_INVOKE_FROM_EVAL(0x59FE6A862E1CB172LL, get_browser);
-      break;
-    case 4468:
-      HASH_INVOKE_FROM_EVAL(0x345E070844E3F174LL, create_function);
-      break;
-    case 4471:
-      HASH_INVOKE_FROM_EVAL(0x174DB93CAF0D1177LL, hphp_splfileinfo___tostring);
-      break;
-    case 4473:
-      HASH_INVOKE_FROM_EVAL(0x6884FAF0D1EF3179LL, posix_mknod);
-      break;
-    case 4476:
-      HASH_INVOKE_FROM_EVAL(0x3E1343B4A3AD717CLL, magickgettextascent);
-      break;
-    case 4479:
-      HASH_INVOKE_FROM_EVAL(0x4EF9496D16F9D17FLL, xmlwriter_start_element_ns);
-      break;
-    case 4481:
-      HASH_INVOKE_FROM_EVAL(0x2227E30BAB23B181LL, dom_xpath_query);
-      break;
-    case 4482:
-      HASH_INVOKE_FROM_EVAL(0x130B62A8C77F3182LL, mb_ereg_search_getregs);
-      break;
-    case 4485:
-      HASH_INVOKE_FROM_EVAL(0x13E90F8874839185LL, ob_get_status);
-      break;
-    case 4486:
-      HASH_INVOKE_FROM_EVAL(0x5DB5E45860801186LL, openssl_csr_export);
-      break;
-    case 4489:
-      HASH_INVOKE_FROM_EVAL(0x0CC53B2F0D38D189LL, timezone_offset_get);
-      break;
-    case 4503:
-      HASH_INVOKE_FROM_EVAL(0x15AD9CE061C75197LL, timezone_transitions_get);
-      break;
-    case 4507:
-      HASH_INVOKE_FROM_EVAL(0x7FF6C2A693CE119BLL, magickcyclecolormapimage);
-      break;
-    case 4512:
-      HASH_INVOKE_FROM_EVAL(0x6FB5104FC97A31A0LL, drawpathcurvetorelative);
-      break;
-    case 4514:
-      HASH_INVOKE_FROM_EVAL(0x2A9015499A2EB1A2LL, fnmatch);
-      break;
-    case 4515:
-      HASH_INVOKE_FROM_EVAL(0x735B81C45C2971A3LL, drawgetfillopacity);
-      break;
-    case 4518:
-      HASH_INVOKE_FROM_EVAL(0x37B4612178EF91A6LL, memcache_get_version);
-      break;
-    case 4521:
-      HASH_INVOKE_FROM_EVAL(0x740DC7FFAD8BB1A9LL, imagecolorat);
-      break;
-    case 4522:
-      HASH_INVOKE_FROM_EVAL(0x11A5C66A3D0711AALL, apc_sma_info);
-      break;
-    case 4525:
-      HASH_INVOKE_FROM_EVAL(0x5A6EFF8C71A431ADLL, socket_get_status);
-      HASH_INVOKE_FROM_EVAL(0x50538F37398AF1ADLL, ldap_get_option);
-      break;
-    case 4527:
-      HASH_INVOKE_FROM_EVAL(0x5B1F9C2E9FE111AFLL, fb_utf8ize);
-      break;
-    case 4541:
-      HASH_INVOKE_FROM_EVAL(0x4B3F35310DEA31BDLL, socket_create_pair);
-      break;
-    case 4543:
-      HASH_INVOKE_FROM_EVAL(0x681CD0E7D9DB71BFLL, pow);
-      break;
-    case 4546:
-      HASH_INVOKE_FROM_EVAL(0x02103322F88C71C2LL, pixelgetcolorcount);
-      break;
-    case 4548:
-      HASH_INVOKE_FROM_EVAL(0x3617DAE43A23D1C4LL, xml_parser_set_option);
-      break;
-    case 4550:
-      HASH_INVOKE_FROM_EVAL(0x188D37410B6051C6LL, session_unregister);
-      break;
-    case 4552:
-      HASH_INVOKE_FROM_EVAL(0x11C0B5DA066891C8LL, preg_match_all);
-      break;
-    case 4556:
-      HASH_INVOKE_FROM_EVAL(0x3DF488365DAAF1CCLL, drawgettextencoding);
-      break;
-    case 4557:
-      HASH_INVOKE_FROM_EVAL(0x37340B707E7CD1CDLL, magickgetimagebordercolor);
-      break;
-    case 4558:
-      HASH_INVOKE_FROM_EVAL(0x2E7741B5440FB1CELL, magicksetlastiterator);
-      break;
-    case 4559:
-      HASH_INVOKE_FROM_EVAL(0x595E413CAA7E11CFLL, qlzcompress);
-      break;
-    case 4560:
-      HASH_INVOKE_FROM_EVAL(0x03012F3DDD7AB1D0LL, getservbyport);
-      break;
-    case 4564:
-      HASH_INVOKE_FROM_EVAL(0x219F3257BA3371D4LL, decbin);
-      break;
-    case 4569:
-      HASH_INVOKE_FROM_EVAL(0x7A69D0078F4F31D9LL, ldap_start_tls);
-      break;
-    case 4570:
-      HASH_INVOKE_FROM_EVAL(0x0482E069503A91DALL, posix_setgid);
-      break;
-    case 4571:
-      HASH_INVOKE_FROM_EVAL(0x3FEBBC0DA79F31DBLL, fb_call_user_func_safe);
-      break;
-    case 4572:
-      HASH_INVOKE_FROM_EVAL(0x1D626FADDFCA11DCLL, imap_num_msg);
-      HASH_INVOKE_FROM_EVAL(0x14FB46333D6D11DCLL, xml_set_default_handler);
-      break;
-    case 4573:
-      HASH_INVOKE_FROM_EVAL(0x03A183D73942B1DDLL, apc_filehits);
-      break;
-    case 4574:
-      HASH_INVOKE_FROM_EVAL(0x44563CC8FA9B11DELL, memcache_set_server_params);
-      break;
-    case 4575:
-      HASH_INVOKE_FROM_EVAL(0x7403251412E931DFLL, syslog);
-      break;
-    case 4576:
-      HASH_INVOKE_FROM_EVAL(0x5932D2750A8A91E0LL, magickgetpackagename);
-      break;
-    case 4577:
-      HASH_INVOKE_FROM_EVAL(0x2771C632A60371E1LL, ftok);
-      HASH_INVOKE_FROM_EVAL(0x0ED729A444C611E1LL, openssl_x509_read);
-      break;
-    case 4580:
-      HASH_INVOKE_FROM_EVAL(0x08F7A6C37FC7B1E4LL, shm_get_var);
-      break;
-    case 4584:
-      HASH_INVOKE_FROM_EVAL(0x7F843353646391E8LL, rad2deg);
-      break;
-    case 4594:
-      HASH_INVOKE_FROM_EVAL(0x46AFE55982B371F2LL, posix_geteuid);
-      break;
-    case 4595:
-      HASH_INVOKE_FROM_EVAL(0x11BB3CDC5E4971F3LL, xmlwriter_end_pi);
-      break;
-    case 4597:
-      HASH_INVOKE_FROM_EVAL(0x542FBDCF960031F5LL, fprintf);
-      HASH_INVOKE_FROM_EVAL(0x02ABC00C046291F5LL, imageellipse);
-      break;
-    case 4602:
-      HASH_INVOKE_FROM_EVAL(0x135D5CBF936B11FALL, msg_receive);
-      break;
-    case 4605:
-      HASH_INVOKE_FROM_EVAL(0x5304E6B47ED0B1FDLL, srand);
-      break;
-    case 4620:
-      HASH_INVOKE_FROM_EVAL(0x41B15671649A320CLL, curl_multi_getcontent);
-      HASH_INVOKE_FROM_EVAL(0x257BEA4D6DC9920CLL, ctype_alnum);
-      break;
-    case 4622:
-      HASH_INVOKE_FROM_EVAL(0x533642044A00520ELL, pixelgetmagentaquantum);
-      break;
-    case 4623:
-      HASH_INVOKE_FROM_EVAL(0x08DC8BF3ADAE520FLL, getallheaders);
-      HASH_INVOKE_FROM_EVAL(0x53631CF3A937320FLL, get_class_methods);
-      break;
-    case 4624:
-      HASH_INVOKE_FROM_EVAL(0x15EF510022CAF210LL, xml_parser_create_ns);
-      HASH_INVOKE_FROM_EVAL(0x2D41D7F8F4113210LL, sinh);
-      break;
-    case 4628:
-      HASH_INVOKE_FROM_EVAL(0x7D85E9FACB92D214LL, magickgetimageblob);
-      break;
-    case 4632:
-      HASH_INVOKE_FROM_EVAL(0x56C95225813A5218LL, memory_get_usage);
-      HASH_INVOKE_FROM_EVAL(0x4D63F2C9AAB79218LL, fb_renamed_functions);
-      break;
-    case 4634:
-      HASH_INVOKE_FROM_EVAL(0x72C0C89D897E721ALL, magicksetimagetype);
-      break;
-    case 4636:
-      HASH_INVOKE_FROM_EVAL(0x482D58D8EE3A521CLL, imap_lsub);
-      break;
-    case 4646:
-      HASH_INVOKE_FROM_EVAL(0x007B6BD94D767226LL, hphp_splfileobject_fpassthru);
-      break;
-    case 4647:
-      HASH_INVOKE_FROM_EVAL(0x5A26F00A81BA5227LL, xmlwriter_start_attribute_ns);
-      break;
-    case 4648:
-      HASH_INVOKE_FROM_EVAL(0x44911AEE34D63228LL, time_sleep_until);
-      HASH_INVOKE_FROM_EVAL(0x7CD3C6F6495D3228LL, memcache_get_stats);
-      break;
-    case 4654:
-      HASH_INVOKE_FROM_EVAL(0x0B7559F53F31D22ELL, fb_stubout_intercept_handler);
-      break;
-    case 4657:
-      HASH_INVOKE_FROM_EVAL(0x7C07D66F70E43231LL, mailparse_determine_best_xfer_encoding);
-      break;
-    case 4660:
-      HASH_INVOKE_FROM_EVAL(0x23C478B2D95F3234LL, dom_element_has_attribute_ns);
-      break;
-    case 4662:
-      HASH_INVOKE_FROM_EVAL(0x5542AABF33A2F236LL, stream_filter_remove);
-      break;
-    case 4666:
-      HASH_INVOKE_FROM_EVAL(0x679ABBE5A08C523ALL, xml_parse_into_struct);
-      break;
-    case 4675:
-      HASH_INVOKE_FROM_EVAL(0x78183A24F2ACB243LL, strtotime);
-      break;
-    case 4688:
-      HASH_INVOKE_FROM_EVAL(0x30747B708DA1D250LL, pushdrawingwand);
-      break;
-    case 4694:
-      HASH_INVOKE_FROM_EVAL(0x0384346A8857D256LL, clonemagickwand);
-      break;
-    case 4699:
-      HASH_INVOKE_FROM_EVAL(0x2F8F40E95EDF925BLL, sizeof);
-      break;
-    case 4708:
-      HASH_INVOKE_FROM_EVAL(0x261F403C4174D264LL, posix_getsid);
-      break;
-    case 4711:
-      HASH_INVOKE_FROM_EVAL(0x38B376B9D9091267LL, xmlwriter_write_attribute);
-      break;
-    case 4716:
-      HASH_INVOKE_FROM_EVAL(0x188DF1EB5FD1B26CLL, mailparse_msg_parse_file);
-      break;
-    case 4718:
-      HASH_INVOKE_FROM_EVAL(0x5672949384A4F26ELL, stream_filter_register);
-      break;
-    case 4723:
-      HASH_INVOKE_FROM_EVAL(0x61C991F216E85273LL, inet_ntop);
-      HASH_INVOKE_FROM_EVAL(0x08CC1E49661DB273LL, dom_element_get_attribute_ns);
-      break;
-    case 4730:
-      HASH_INVOKE_FROM_EVAL(0x39E05F957C7DD27ALL, magickgetimagedepth);
-      break;
-    case 4732:
-      HASH_INVOKE_FROM_EVAL(0x0F7E33D551E0727CLL, posix_getpid);
-      break;
-    case 4735:
-      HASH_INVOKE_FROM_EVAL(0x57E8781CF111727FLL, fileowner);
-      break;
-    case 4736:
-      HASH_INVOKE_FROM_EVAL(0x0C61AE35699F1280LL, imap_thread);
-      break;
-    case 4737:
-      HASH_INVOKE_FROM_EVAL(0x0881440DCF5D3281LL, magickflattenimages);
-      break;
-    case 4762:
-      HASH_INVOKE_FROM_EVAL(0x68272A37CC9E729ALL, mb_strtolower);
-      break;
-    case 4763:
-      HASH_INVOKE_FROM_EVAL(0x4A09634AE6DFF29BLL, fileperms);
-      break;
-    case 4771:
-      HASH_INVOKE_FROM_EVAL(0x10E7B5A0E29CF2A3LL, bcscale);
-      HASH_INVOKE_FROM_EVAL(0x743EA4BF2CC8F2A3LL, mysql_field_type);
-      break;
-    case 4774:
-      HASH_INVOKE_FROM_EVAL(0x73EF3A19F76872A6LL, iconv_strrpos);
-      break;
-    case 4776:
-      HASH_INVOKE_FROM_EVAL(0x5409127FEDE332A8LL, exif_imagetype);
-      break;
-    case 4782:
-      HASH_INVOKE_FROM_EVAL(0x36AB9E6AA687F2AELL, xmlwriter_start_dtd_element);
-      break;
-    case 4790:
-      HASH_INVOKE_FROM_EVAL(0x0E9C9B409F94B2B6LL, setcookie);
-      break;
-    case 4794:
-      HASH_INVOKE_FROM_EVAL(0x4A3D2113D3DFD2BALL, newpixelwandarray);
-      break;
-    case 4796:
-      HASH_INVOKE_FROM_EVAL(0x41F7E2214DDE12BCLL, mcrypt_enc_self_test);
-      break;
-    case 4797:
-      HASH_INVOKE_FROM_EVAL(0x327C865E52FD12BDLL, ldap_get_values_len);
-      break;
-    case 4798:
-      HASH_INVOKE_FROM_EVAL(0x72D6F9B3661AB2BELL, magickgetimage);
-      break;
-    case 4800:
-      HASH_INVOKE_FROM_EVAL(0x5B7C1B74BA3452C0LL, newpixelregioniterator);
-      break;
-    case 4803:
-      HASH_INVOKE_FROM_EVAL(0x446D76A95365D2C3LL, pixelgetyellow);
-      break;
-    case 4804:
-      HASH_INVOKE_FROM_EVAL(0x1C7B8161F3C412C4LL, dom_document_create_document_fragment);
-      break;
-    case 4812:
-      HASH_INVOKE_FROM_EVAL(0x407EF03C23BF92CCLL, drawpathellipticarcabsolute);
-      break;
-    case 4815:
-      HASH_INVOKE_FROM_EVAL(0x4ACE27EC476632CFLL, apc_bin_dumpfile);
-      break;
-    case 4821:
-      HASH_INVOKE_FROM_EVAL(0x4D04C580CF9212D5LL, posix_getgroups);
-      break;
-    case 4822:
-      HASH_INVOKE_FROM_EVAL(0x06E9C984B5F0B2D6LL, furchash_hphp_ext);
-      break;
-    case 4824:
-      HASH_INVOKE_FROM_EVAL(0x56C4896BA2FF52D8LL, drawsetstrokeopacity);
-      break;
-    case 4826:
-      HASH_INVOKE_FROM_EVAL(0x5C6A85B448C352DALL, posix_uname);
-      break;
-    case 4834:
-      HASH_INVOKE_FROM_EVAL(0x4AEC19D75BF652E2LL, magickremoveimage);
-      break;
-    case 4845:
-      HASH_INVOKE_FROM_EVAL(0x1B9FC9E27B8AB2EDLL, memcache_flush);
-      break;
-    case 4850:
-      HASH_INVOKE_FROM_EVAL(0x2EE56D216BB832F2LL, time_nanosleep);
-      break;
-    case 4852:
-      HASH_INVOKE_FROM_EVAL(0x418EC805C5FD32F4LL, mcrypt_get_key_size);
-      break;
-    case 4857:
-      HASH_INVOKE_FROM_EVAL(0x319EF52B36AAB2F9LL, posix_isatty);
-      break;
-    case 4859:
-      HASH_INVOKE_FROM_EVAL(0x4D393D30CE1112FBLL, drawpathmovetoabsolute);
-      break;
-    case 4862:
-      HASH_INVOKE_FROM_EVAL(0x208B66A8731F72FELL, sem_get);
-      HASH_INVOKE_FROM_EVAL(0x755A9950B65472FELL, drawgetgravity);
-      break;
-    case 4866:
-      HASH_INVOKE_FROM_EVAL(0x0103FE1E2C307302LL, socket_recvfrom);
-      break;
-    case 4869:
-      HASH_INVOKE_FROM_EVAL(0x65D40C6B4842F305LL, clearpixelwand);
-      break;
-    case 4870:
-      HASH_INVOKE_FROM_EVAL(0x689D60184DD81306LL, htmlspecialchars_decode);
-      break;
-    case 4875:
-      HASH_INVOKE_FROM_EVAL(0x2D2BC1125ECA930BLL, dom_document_relaxng_validate_file);
-      break;
-    case 4876:
-      HASH_INVOKE_FROM_EVAL(0x553940FCE453330CLL, hphp_splfileobject_getmaxlinelen);
-      break;
-    case 4881:
-      HASH_INVOKE_FROM_EVAL(0x141EDCAE1D155311LL, xbox_get_thread_time);
-      break;
-    case 4885:
-      HASH_INVOKE_FROM_EVAL(0x4F1E663AE18FD315LL, msg_remove_queue);
-      break;
-    case 4894:
-      HASH_INVOKE_FROM_EVAL(0x27FF9DB54420531ELL, xml_error_string);
-      break;
-    case 4900:
-      HASH_INVOKE_FROM_EVAL(0x5E5E4F998C8E7324LL, pcntl_wifexited);
-      break;
-    case 4904:
-      HASH_INVOKE_FROM_EVAL(0x73FEB3BF75FFB328LL, ctype_space);
-      break;
-    case 4907:
-      HASH_INVOKE_FROM_EVAL(0x2BDB1EE3869E132BLL, restore_error_handler);
-      break;
-    case 4911:
-      HASH_INVOKE_FROM_EVAL(0x7DD6461A6290B32FLL, mysql_real_escape_string);
-      break;
-    case 4912:
-      HASH_INVOKE_FROM_EVAL(0x1601C1826E90B330LL, strptime);
-      break;
-    case 4931:
-      HASH_INVOKE_FROM_EVAL(0x6794CFB89DEEF343LL, curl_exec);
-      break;
-    case 4933:
-      HASH_INVOKE_FROM_EVAL(0x45FAE3D08E96B345LL, curl_errno);
-      break;
-    case 4938:
-      HASH_INVOKE_FROM_EVAL(0x208BB4C3C0BA534ALL, xmlwriter_write_dtd_element);
-      break;
-    case 4939:
-      HASH_INVOKE_FROM_EVAL(0x57A9E8878872D34BLL, parse_ini_file);
-      break;
-    case 4940:
-      HASH_INVOKE_FROM_EVAL(0x0644E5FB91C8134CLL, array_udiff);
-      break;
-    case 4943:
-      HASH_INVOKE_FROM_EVAL(0x4F2D0EFF0D4B534FLL, fb_get_taint);
-      HASH_INVOKE_FROM_EVAL(0x5C8B3B9FA833934FLL, ldap_first_attribute);
-      break;
-    case 4945:
-      HASH_INVOKE_FROM_EVAL(0x2B422699C3A57351LL, sha1);
-      break;
-    case 4948:
-      HASH_INVOKE_FROM_EVAL(0x501F4DF5C8997354LL, hphp_get_property);
-      HASH_INVOKE_FROM_EVAL(0x77EB4D2F5BDDB354LL, magickgetimageresolution);
-      break;
-    case 4955:
-      HASH_INVOKE_FROM_EVAL(0x1AC48909BEEF935BLL, func_get_arg);
-      break;
-    case 4968:
-      HASH_INVOKE_FROM_EVAL(0x5D406167C673D368LL, magickcompareimages);
-      break;
-    case 4974:
-      HASH_INVOKE_FROM_EVAL(0x7CE90898E882F36ELL, pixelsetyellow);
-      break;
-    case 4978:
-      HASH_INVOKE_FROM_EVAL(0x7107AE03689F5372LL, hphp_invoke);
-      break;
-    case 4984:
-      HASH_INVOKE_FROM_EVAL(0x34BAEFD8AE59D378LL, hphp_set_error_page);
-      break;
-    case 4996:
-      HASH_INVOKE_FROM_EVAL(0x44C1BC500D175384LL, wandgetexception);
-      break;
-    case 4997:
-      HASH_INVOKE_FROM_EVAL(0x7C5CA3E2E3C8F385LL, magickflipimage);
-      HASH_INVOKE_FROM_EVAL(0x57554E082E0ED385LL, pcntl_exec);
-      HASH_INVOKE_FROM_EVAL(0x0B0B8765A4CDD385LL, hphp_splfileobject_fgets);
-      break;
-    case 4998:
-      HASH_INVOKE_FROM_EVAL(0x589E24C7664D5386LL, doubleval);
-      break;
-    case 5003:
-      HASH_INVOKE_FROM_EVAL(0x32354CC291ECF38BLL, fb_intercept);
-      break;
-    case 5004:
-      HASH_INVOKE_FROM_EVAL(0x7F18BA1FBD95B38CLL, hphp_directoryiterator_next);
-      break;
-    case 5009:
-      HASH_INVOKE_FROM_EVAL(0x25FA64929C619391LL, asin);
-      break;
-    case 5010:
-      HASH_INVOKE_FROM_EVAL(0x2052D8D4822EF392LL, is_subclass_of);
-      break;
-    case 5013:
-      HASH_INVOKE_FROM_EVAL(0x7B0552A224E27395LL, bcsqrt);
-      break;
-    case 5017:
-      HASH_INVOKE_FROM_EVAL(0x66DA89629BA5D399LL, posix_getgrgid);
-      break;
-    case 5018:
-      HASH_INVOKE_FROM_EVAL(0x4C24BC37D807D39ALL, collator_get_strength);
-      break;
-    case 5019:
-      HASH_INVOKE_FROM_EVAL(0x5B33B55D4B7E339BLL, fpassthru);
-      break;
-    case 5022:
-      HASH_INVOKE_FROM_EVAL(0x27AD0D17AA7FB39ELL, ldap_set_rebind_proc);
-      break;
-    case 5023:
-      HASH_INVOKE_FROM_EVAL(0x4019A6916456339FLL, dom_node_remove_child);
-      break;
-    case 5026:
-      HASH_INVOKE_FROM_EVAL(0x0A2A4AA078D433A2LL, hexdec);
-      break;
-    case 5028:
-      HASH_INVOKE_FROM_EVAL(0x1676FB393F8493A4LL, constant);
-      break;
-    case 5030:
-      HASH_INVOKE_FROM_EVAL(0x40E0D496EE29B3A6LL, call_user_func_array);
-      break;
-    case 5032:
-      HASH_INVOKE_FROM_EVAL(0x4120B8157ED413A8LL, i18n_loc_set_strength);
-      break;
-    case 5043:
-      HASH_INVOKE_FROM_EVAL(0x6077CFE09EE4D3B3LL, session_save_path);
-      break;
-    case 5046:
-      HASH_INVOKE_FROM_EVAL(0x6E6C0E9A715073B6LL, dom_xpath_register_php_functions);
-      HASH_INVOKE_FROM_EVAL(0x6C07640F7C5BD3B6LL, imagettfbbox);
-      break;
-    case 5052:
-      HASH_INVOKE_FROM_EVAL(0x0629158C42C893BCLL, compact);
-      break;
-    case 5054:
-      HASH_INVOKE_FROM_EVAL(0x49A34964289453BELL, eregi);
-      break;
-    case 5055:
-      HASH_INVOKE_FROM_EVAL(0x0E38CDC93E5893BFLL, magicksetimagemattecolor);
-      break;
-    case 5064:
-      HASH_INVOKE_FROM_EVAL(0x4D100C70E86593C8LL, stream_set_write_buffer);
-      break;
-    case 5067:
-      HASH_INVOKE_FROM_EVAL(0x0173CC6FACAB93CBLL, quotemeta);
-      break;
-    case 5070:
-      HASH_INVOKE_FROM_EVAL(0x02BEFBEE8287D3CELL, get_magic_quotes_runtime);
-      break;
-    case 5074:
-      HASH_INVOKE_FROM_EVAL(0x67C155632E5373D2LL, mailparse_msg_create);
-      HASH_INVOKE_FROM_EVAL(0x4363FF80EEC953D2LL, imap_undelete);
-      break;
-    case 5075:
-      HASH_INVOKE_FROM_EVAL(0x0A8D4FAF266973D3LL, bcpow);
-      break;
-    case 5079:
-      HASH_INVOKE_FROM_EVAL(0x382B5B1EF00153D7LL, imagecreatefrompng);
-      break;
-    case 5084:
-      HASH_INVOKE_FROM_EVAL(0x7BCD0D27FFD953DCLL, imap_num_recent);
-      break;
-    case 5098:
-      HASH_INVOKE_FROM_EVAL(0x0D3C8F00B0C633EALL, inet_pton);
-      break;
-    case 5105:
-      HASH_INVOKE_FROM_EVAL(0x5EFE291585A713F1LL, method_exists);
-      break;
-    case 5106:
-      HASH_INVOKE_FROM_EVAL(0x0FE12E46BC9853F2LL, stream_filter_append);
-      HASH_INVOKE_FROM_EVAL(0x41A19AE18BC8B3F2LL, curl_error);
-      HASH_INVOKE_FROM_EVAL(0x696241660648B3F2LL, magickwhitethresholdimage);
-      break;
-    case 5108:
-      HASH_INVOKE_FROM_EVAL(0x26D53A77483EF3F4LL, drawbezier);
-      break;
-    case 5111:
-      HASH_INVOKE_FROM_EVAL(0x43F22CB4E3E8F3F7LL, apache_note);
-      break;
-    case 5112:
-      HASH_INVOKE_FROM_EVAL(0x4C024573FCD5B3F8LL, var_dump);
-      HASH_INVOKE_FROM_EVAL(0x514EA9C8FF5B33F8LL, posix_getrlimit);
-      break;
-    case 5114:
-      HASH_INVOKE_FROM_EVAL(0x1B217E78CBC713FALL, zend_thread_id);
-      break;
-    case 5121:
-      HASH_INVOKE_FROM_EVAL(0x36B9C440B1881401LL, fmod);
-      break;
-    case 5130:
-      HASH_INVOKE_FROM_EVAL(0x6DC61C51FA1D340ALL, show_source);
-      break;
-    case 5131:
-      HASH_INVOKE_FROM_EVAL(0x6C2CE092B900D40BLL, hphp_splfileinfo___construct);
-      break;
-    case 5133:
-      HASH_INVOKE_FROM_EVAL(0x152C7161567F940DLL, func_num_args);
-      break;
-    case 5139:
-      HASH_INVOKE_FROM_EVAL(0x56EC1A6732D07413LL, drawgetfontsize);
-      HASH_INVOKE_FROM_EVAL(0x20C24D873DC65413LL, openssl_csr_get_subject);
-      break;
-    case 5147:
-      HASH_INVOKE_FROM_EVAL(0x47279C717370B41BLL, acos);
-      break;
-    case 5150:
-      HASH_INVOKE_FROM_EVAL(0x3E4E7C561D3A541ELL, fgetss);
-      break;
-    case 5151:
-      HASH_INVOKE_FROM_EVAL(0x301963016A91741FLL, hphp_stats);
-      break;
-    case 5155:
-      HASH_INVOKE_FROM_EVAL(0x4C9108B5A5807423LL, drawsetfillcolor);
-      break;
-    case 5158:
-      HASH_INVOKE_FROM_EVAL(0x161D8EA3339AB426LL, apc_cas);
-      break;
-    case 5164:
-      HASH_INVOKE_FROM_EVAL(0x12D324CC744BF42CLL, pixelgetcolorasstring);
-      break;
-    case 5165:
-      HASH_INVOKE_FROM_EVAL(0x333D1E2E28B0942DLL, imagejpeg);
-      break;
-    case 5171:
-      HASH_INVOKE_FROM_EVAL(0x6829094421CDB433LL, touch);
-      break;
-    case 5173:
-      HASH_INVOKE_FROM_EVAL(0x75DAFEF5BFEF1435LL, imagesetstyle);
-      HASH_INVOKE_FROM_EVAL(0x044386A0E8B25435LL, drawgetclipunits);
-      break;
-    case 5175:
-      HASH_INVOKE_FROM_EVAL(0x1AAF02CF6DEBB437LL, magickdeconstructimages);
-      break;
-    case 5177:
-      HASH_INVOKE_FROM_EVAL(0x34C52EF423EFD439LL, proc_open);
-      break;
-    case 5184:
-      HASH_INVOKE_FROM_EVAL(0x5247425ED698B440LL, hphp_thread_is_warmup_enabled);
-      break;
-    case 5185:
-      HASH_INVOKE_FROM_EVAL(0x05892E3C5B9EB441LL, closedir);
-      break;
-    case 5198:
-      HASH_INVOKE_FROM_EVAL(0x3D3BE7A6EBB6544ELL, openssl_cipher_iv_length);
-      break;
-    case 5201:
-      HASH_INVOKE_FROM_EVAL(0x7539134E1CC61451LL, xmlwriter_start_cdata);
-      break;
-    case 5212:
-      HASH_INVOKE_FROM_EVAL(0x436AB52B2099145CLL, ldap_close);
-      break;
-    case 5214:
-      HASH_INVOKE_FROM_EVAL(0x0ED191E71A60545ELL, magicksetfirstiterator);
-      break;
-    case 5226:
-      HASH_INVOKE_FROM_EVAL(0x32643AE461D3F46ALL, mailparse_stream_encode);
-      break;
-    case 5228:
-      HASH_INVOKE_FROM_EVAL(0x07D959A8C0CF546CLL, stream_wrapper_unregister);
-      HASH_INVOKE_FROM_EVAL(0x4F39BD300305746CLL, hphp_splfileobject_key);
-      break;
-    case 5229:
-      HASH_INVOKE_FROM_EVAL(0x738D381800CE946DLL, ldap_parse_result);
-      HASH_INVOKE_FROM_EVAL(0x5229C0069FD7D46DLL, vfprintf);
-      break;
-    case 5231:
-      HASH_INVOKE_FROM_EVAL(0x5B8F2ABBB480346FLL, bzwrite);
-      break;
-    case 5239:
-      HASH_INVOKE_FROM_EVAL(0x18666906A8001477LL, array_diff_assoc);
-      break;
-    case 5240:
-      HASH_INVOKE_FROM_EVAL(0x080594ABE715B478LL, hphp_splfileobject_current);
-      HASH_INVOKE_FROM_EVAL(0x6497CC8295DDB478LL, fb_thrift_unserialize);
-      break;
-    case 5241:
-      HASH_INVOKE_FROM_EVAL(0x4859AF715D5A3479LL, magickmagnifyimage);
-      break;
-    case 5244:
-      HASH_INVOKE_FROM_EVAL(0x2FA7269AB0E1147CLL, mysql_field_seek);
-      break;
-    case 5246:
-      HASH_INVOKE_FROM_EVAL(0x1D583AA4F7F6547ELL, drawpathlinetorelative);
-      break;
-    case 5247:
-      HASH_INVOKE_FROM_EVAL(0x68AE04B02253B47FLL, mb_parse_str);
-      break;
-    case 5249:
-      HASH_INVOKE_FROM_EVAL(0x1876287F59CEB481LL, bzerror);
-      break;
-    case 5250:
-      HASH_INVOKE_FROM_EVAL(0x4590C853C2027482LL, magickembossimage);
-      break;
-    case 5253:
-      HASH_INVOKE_FROM_EVAL(0x250DD3D58EA37485LL, gmstrftime);
-      break;
-    case 5257:
-      HASH_INVOKE_FROM_EVAL(0x4F7EAF5B37663489LL, magickgetimageredprimary);
-      break;
-    case 5258:
-      HASH_INVOKE_FROM_EVAL(0x7E88764A1DE8548ALL, drawgetstrokewidth);
-      break;
-    case 5259:
-      HASH_INVOKE_FROM_EVAL(0x5860ACF621DD948BLL, is_file);
-      break;
-    case 5261:
-      HASH_INVOKE_FROM_EVAL(0x23511F83C2BC548DLL, header);
-      HASH_INVOKE_FROM_EVAL(0x4162939E6335F48DLL, xhprof_network_disable);
-      break;
-    case 5267:
-      HASH_INVOKE_FROM_EVAL(0x56377FCC2447D493LL, magicksetimagepixels);
-      break;
-    case 5271:
-      HASH_INVOKE_FROM_EVAL(0x353E2A635A47F497LL, evhttp_get);
-      HASH_INVOKE_FROM_EVAL(0x5388045C2D13D497LL, mysql_num_fields);
-      break;
-    case 5285:
-      HASH_INVOKE_FROM_EVAL(0x18BE9B1C2DE6D4A5LL, imagexbm);
-      break;
-    case 5289:
-      HASH_INVOKE_FROM_EVAL(0x386378F2BA3234A9LL, magickevaluateimage);
-      break;
-    case 5295:
-      HASH_INVOKE_FROM_EVAL(0x42463E7E5C3434AFLL, mb_strrichr);
-      HASH_INVOKE_FROM_EVAL(0x6AC751181531F4AFLL, simplexml_load_string);
-      break;
-    case 5296:
-      HASH_INVOKE_FROM_EVAL(0x0E11D317044974B0LL, magickgetnumberimages);
-      break;
-    case 5297:
-      HASH_INVOKE_FROM_EVAL(0x060619D7A1B5F4B1LL, checkdate);
-      break;
-    case 5299:
-      HASH_INVOKE_FROM_EVAL(0x57034CAD772AF4B3LL, magickgetimagechannelmean);
-      break;
-    case 5302:
-      HASH_INVOKE_FROM_EVAL(0x3DE291DCBA5134B6LL, dom_document_create_element);
-      HASH_INVOKE_FROM_EVAL(0x12A9166E68DCF4B6LL, pixelgetgreen);
-      break;
-    case 5303:
-      HASH_INVOKE_FROM_EVAL(0x7EEBC81AF9BC54B7LL, xml_parser_free);
-      break;
-    case 5306:
-      HASH_INVOKE_FROM_EVAL(0x6B49D11E633274BALL, fopen);
-      break;
-    case 5309:
-      HASH_INVOKE_FROM_EVAL(0x5BA371A93F60F4BDLL, use_soap_error_handler);
-      break;
-    case 5316:
-      HASH_INVOKE_FROM_EVAL(0x4A24DB9D6B0334C4LL, hphp_recursivedirectoryiterator_next);
-      break;
-    case 5317:
-      HASH_INVOKE_FROM_EVAL(0x34A38DDF2CD914C5LL, long2ip);
-      break;
-    case 5320:
-      HASH_INVOKE_FROM_EVAL(0x1B8BBFC882FDB4C8LL, magicktintimage);
-      break;
-    case 5325:
-      HASH_INVOKE_FROM_EVAL(0x02B0E99C1E68F4CDLL, imap_createmailbox);
-      break;
-    case 5329:
-      HASH_INVOKE_FROM_EVAL(0x29EE24C41FD3D4D1LL, mysql_field_name);
-      break;
-    case 5334:
-      HASH_INVOKE_FROM_EVAL(0x19ECDD5A937DD4D6LL, mailparse_msg_get_part_data);
-      break;
-    case 5336:
-      HASH_INVOKE_FROM_EVAL(0x14BF763DDDC014D8LL, imagepsencodefont);
-      HASH_INVOKE_FROM_EVAL(0x56B908FC91C834D8LL, magickflopimage);
-      HASH_INVOKE_FROM_EVAL(0x1301F911ED6D54D8LL, is_nan);
-      HASH_INVOKE_FROM_EVAL(0x575C5AE3D2A694D8LL, ob_end_clean);
-      break;
-    case 5343:
-      HASH_INVOKE_FROM_EVAL(0x747A7F585CD694DFLL, zend_version);
-      break;
-    case 5347:
-      HASH_INVOKE_FROM_EVAL(0x7D57A0D72D6254E3LL, ob_implicit_flush);
-      break;
-    case 5358:
-      HASH_INVOKE_FROM_EVAL(0x5895ADDD91F354EELL, hphp_thread_set_warmup_enabled);
-      break;
-    case 5362:
-      HASH_INVOKE_FROM_EVAL(0x41276F8DE35354F2LL, dom_document_get_elements_by_tag_name);
-      break;
-    case 5364:
-      HASH_INVOKE_FROM_EVAL(0x436B36C5EB8DB4F4LL, mcrypt_generic);
-      break;
-    case 5365:
-      HASH_INVOKE_FROM_EVAL(0x112A0ACDD8B9D4F5LL, mb_list_mime_names);
-      break;
-    case 5383:
-      HASH_INVOKE_FROM_EVAL(0x4FC9FE38A748B507LL, intl_get_error_message);
-      break;
-    case 5384:
-      HASH_INVOKE_FROM_EVAL(0x63A08D6AD1209508LL, magickgetexception);
-      break;
-    case 5393:
-      HASH_INVOKE_FROM_EVAL(0x3C0304A55503D511LL, magickgetimageiterations);
-      break;
-    case 5395:
-      HASH_INVOKE_FROM_EVAL(0x772E8BF114FEF513LL, eregi_replace);
-      break;
-    case 5396:
-      HASH_INVOKE_FROM_EVAL(0x100385A0988FD514LL, magickgetfilename);
-      break;
-    case 5410:
-      HASH_INVOKE_FROM_EVAL(0x7DA98E0379D33522LL, chdir);
-      break;
-    case 5413:
-      HASH_INVOKE_FROM_EVAL(0x230FE1D6EC599525LL, link);
-      break;
-    case 5420:
-      HASH_INVOKE_FROM_EVAL(0x1AB55BBA0967952CLL, mb_convert_variables);
-      break;
-    case 5423:
-      HASH_INVOKE_FROM_EVAL(0x6770E2559C9A152FLL, openssl_private_decrypt);
-      break;
-    case 5425:
-      HASH_INVOKE_FROM_EVAL(0x6776C27C6123D531LL, dl);
-      break;
-    case 5426:
-      HASH_INVOKE_FROM_EVAL(0x6193A26936F4D532LL, disk_total_space);
-      HASH_INVOKE_FROM_EVAL(0x684966A7B9C15532LL, hphp_get_iterator);
-      break;
-    case 5429:
-      HASH_INVOKE_FROM_EVAL(0x6C87406DDC0AB535LL, mcrypt_ecb);
-      break;
-    case 5430:
-      HASH_INVOKE_FROM_EVAL(0x0E80D04691227536LL, eval);
-      break;
-    case 5431:
-      HASH_INVOKE_FROM_EVAL(0x0830FF7C379D7537LL, dom_text_split_text);
-      HASH_INVOKE_FROM_EVAL(0x557C72DE98679537LL, hash_update_stream);
-      break;
-    case 5433:
-      HASH_INVOKE_FROM_EVAL(0x3C88F0FAC3EDD539LL, phpversion);
-      break;
-    case 5436:
-      HASH_INVOKE_FROM_EVAL(0x5CA55E62F2A5953CLL, drawgetstrokeopacity);
-      break;
-    case 5438:
-      HASH_INVOKE_FROM_EVAL(0x36A80B48E08B753ELL, implode);
-      break;
-    case 5443:
-      HASH_INVOKE_FROM_EVAL(0x0962EACAE0F0B543LL, hphp_splfileinfo_getlinktarget);
-      break;
-    case 5444:
-      HASH_INVOKE_FROM_EVAL(0x4D397FE5D0C0B544LL, magickmedianfilterimage);
-      break;
-    case 5451:
-      HASH_INVOKE_FROM_EVAL(0x40CE61115E11154BLL, msg_stat_queue);
-      break;
-    case 5452:
-      HASH_INVOKE_FROM_EVAL(0x1D011CB0E810D54CLL, pdo_drivers);
-      break;
-    case 5453:
-      HASH_INVOKE_FROM_EVAL(0x0F0702D91EAFB54DLL, drawgettextantialias);
-      break;
-    case 5455:
-      HASH_INVOKE_FROM_EVAL(0x30DE78E7131B954FLL, furchash_hphp_ext_supported);
-      break;
-    case 5466:
-      HASH_INVOKE_FROM_EVAL(0x268EE73DB2EA555ALL, get_object_vars);
-      break;
-    case 5468:
-      HASH_INVOKE_FROM_EVAL(0x5749AD20CAFCD55CLL, pixelgetbluequantum);
-      break;
-    case 5475:
-      HASH_INVOKE_FROM_EVAL(0x1B1B2D70792D9563LL, mysql_get_client_info);
-      break;
-    case 5478:
-      HASH_INVOKE_FROM_EVAL(0x6E2FDBD28F895566LL, timezone_abbreviations_list);
-      break;
-    case 5487:
-      HASH_INVOKE_FROM_EVAL(0x016722439BBA756FLL, filetype);
-      break;
-    case 5489:
-      HASH_INVOKE_FROM_EVAL(0x2AD3361DE8B1D571LL, pcntl_signal_dispatch);
-      break;
-    case 5492:
-      HASH_INVOKE_FROM_EVAL(0x636C871213F37574LL, mcrypt_encrypt);
-      break;
-    case 5495:
-      HASH_INVOKE_FROM_EVAL(0x412521E7ADB21577LL, iconv_mime_decode_headers);
-      HASH_INVOKE_FROM_EVAL(0x1E154D823451B577LL, magicksetresolution);
-      break;
-    case 5502:
-      HASH_INVOKE_FROM_EVAL(0x31529E9BCA1E157ELL, shm_remove);
-      break;
-    case 5506:
-      HASH_INVOKE_FROM_EVAL(0x0B1F0EB755BDB582LL, ispixeliterator);
-      break;
-    case 5530:
-      HASH_INVOKE_FROM_EVAL(0x77F1EDE7D5EF759ALL, apc_cache_info);
-      break;
-    case 5531:
-      HASH_INVOKE_FROM_EVAL(0x37D003B09D0C759BLL, stream_get_contents);
-      break;
-    case 5536:
-      HASH_INVOKE_FROM_EVAL(0x20502FCACBB9F5A0LL, convert_uuencode);
-      break;
-    case 5537:
-      HASH_INVOKE_FROM_EVAL(0x297690F3A63335A1LL, magickrotateimage);
-      break;
-    case 5540:
-      HASH_INVOKE_FROM_EVAL(0x3C014439AE5D75A4LL, magickgetcharheight);
-      break;
-    case 5548:
-      HASH_INVOKE_FROM_EVAL(0x763BA2B1C60A55ACLL, pixelgetalphaquantum);
-      break;
-    case 5551:
-      HASH_INVOKE_FROM_EVAL(0x1636FBA5043CF5AFLL, ldap_error);
-      break;
-    case 5554:
-      HASH_INVOKE_FROM_EVAL(0x1887622B9AAE75B2LL, imap_mime_header_decode);
-      break;
-    case 5555:
-      HASH_INVOKE_FROM_EVAL(0x001DBE44BC0B55B3LL, magicksetimagecolormapcolor);
-      HASH_INVOKE_FROM_EVAL(0x7AFA32F70E8195B3LL, xbox_set_thread_timeout);
-      break;
-    case 5557:
-      HASH_INVOKE_FROM_EVAL(0x3F9C5B4708FC55B5LL, timezone_name_get);
-      break;
-    case 5558:
-      HASH_INVOKE_FROM_EVAL(0x1A05907F563235B6LL, collator_set_attribute);
-      break;
-    case 5569:
-      HASH_INVOKE_FROM_EVAL(0x7731B90FB7C975C1LL, magickremoveimageprofile);
-      break;
-    case 5577:
-      HASH_INVOKE_FROM_EVAL(0x75B299F5E35A95C9LL, mb_strwidth);
-      HASH_INVOKE_FROM_EVAL(0x60F8818C0F38D5C9LL, hphp_directoryiterator___tostring);
-      break;
-    case 5588:
-      HASH_INVOKE_FROM_EVAL(0x2FE56B4C457AB5D4LL, ctype_graph);
-      break;
-    case 5605:
-      HASH_INVOKE_FROM_EVAL(0x470F990B218315E5LL, fb_unset_taint);
-      break;
-    case 5610:
-      HASH_INVOKE_FROM_EVAL(0x0B7ACBAB402015EALL, mb_send_mail);
-      break;
-    case 5621:
-      HASH_INVOKE_FROM_EVAL(0x0D1BD0E5AF4175F5LL, drawsetfont);
-      HASH_INVOKE_FROM_EVAL(0x73A1F34DF95B35F5LL, get_defined_constants);
-      break;
-    case 5624:
-      HASH_INVOKE_FROM_EVAL(0x7C48F6EA39B7B5F8LL, magickadaptivethresholdimage);
-      break;
-    case 5627:
-      HASH_INVOKE_FROM_EVAL(0x0FEC4ED541B7F5FBLL, magickgetimagevirtualpixelmethod);
-      break;
-    case 5628:
-      HASH_INVOKE_FROM_EVAL(0x39156C7CCE2D75FCLL, hash_update);
-      break;
-    case 5630:
-      HASH_INVOKE_FROM_EVAL(0x397D3C6576ED75FELL, set_include_path);
-      break;
-    case 5631:
-      HASH_INVOKE_FROM_EVAL(0x40A557CBB9FC35FFLL, mysql_tablename);
-      break;
-    case 5632:
-      HASH_INVOKE_FROM_EVAL(0x552D7CAD93755600LL, dom_document_create_comment);
-      break;
-    case 5653:
-      HASH_INVOKE_FROM_EVAL(0x6AD774816F8F7615LL, mb_strrchr);
-      break;
-    case 5657:
-      HASH_INVOKE_FROM_EVAL(0x6DD51BF03F003619LL, mailparse_uudecode_all);
-      HASH_INVOKE_FROM_EVAL(0x2F29627AF1A97619LL, shm_attach);
-      break;
-    case 5660:
-      HASH_INVOKE_FROM_EVAL(0x70725954DC99F61CLL, mcrypt_create_iv);
-      break;
-    case 5661:
-      HASH_INVOKE_FROM_EVAL(0x69E1368FD737F61DLL, dom_namednodemap_get_named_item);
-      break;
-    case 5665:
-      HASH_INVOKE_FROM_EVAL(0x0F71DDE51AA55621LL, hphp_output_global_state);
-      break;
-    case 5672:
-      HASH_INVOKE_FROM_EVAL(0x1E77B3BCF062D628LL, magickreadimage);
-      break;
-    case 5676:
-      HASH_INVOKE_FROM_EVAL(0x5CEA60D9C54A162CLL, pcntl_wifstopped);
-      break;
-    case 5679:
-      HASH_INVOKE_FROM_EVAL(0x652C331CE138362FLL, is_string);
-      break;
-    case 5684:
-      HASH_INVOKE_FROM_EVAL(0x5E6328F2E6C61634LL, imap_binary);
-      break;
-    case 5687:
-      HASH_INVOKE_FROM_EVAL(0x60276BC7990F9637LL, mysql_list_dbs);
-      HASH_INVOKE_FROM_EVAL(0x75AFA49220C9B637LL, collator_sort);
-      break;
-    case 5694:
-      HASH_INVOKE_FROM_EVAL(0x60302D15A677963ELL, ldap_free_result);
-      break;
-    case 5695:
-      HASH_INVOKE_FROM_EVAL(0x17242BC6C9C9563FLL, crypt);
-      break;
-    case 5702:
-      HASH_INVOKE_FROM_EVAL(0x4901517CB796F646LL, msg_set_queue);
-      break;
-    case 5710:
-      HASH_INVOKE_FROM_EVAL(0x769E5C6A5369F64ELL, ob_list_handlers);
-      break;
-    case 5711:
-      HASH_INVOKE_FROM_EVAL(0x1F3F16CED6BDD64FLL, imap_utf8);
-      break;
-    case 5717:
-      HASH_INVOKE_FROM_EVAL(0x629EDDC1E74ED655LL, array_uintersect_assoc);
-      break;
-    case 5726:
-      HASH_INVOKE_FROM_EVAL(0x205BB9CFF397B65ELL, ldap_mod_replace);
-      break;
-    case 5727:
-      HASH_INVOKE_FROM_EVAL(0x1355AFB40AB1165FLL, drawsetfontstyle);
-      break;
-    case 5730:
-      HASH_INVOKE_FROM_EVAL(0x5629E14D6B9FF662LL, dom_document_get_element_by_id);
-      break;
-    case 5747:
-      HASH_INVOKE_FROM_EVAL(0x126FC82D358E9673LL, magicksetimagevirtualpixelmethod);
-      break;
-    case 5751:
-      HASH_INVOKE_FROM_EVAL(0x001F23CAC36E3677LL, magickgetimagescene);
-      break;
-    case 5755:
-      HASH_INVOKE_FROM_EVAL(0x5BCED33A57D9B67BLL, intval);
-      break;
-    case 5756:
-      HASH_INVOKE_FROM_EVAL(0x43B1BAFFB27F367CLL, session_is_registered);
-      break;
-    case 5757:
-      HASH_INVOKE_FROM_EVAL(0x69616E2817E1967DLL, fileinode);
-      break;
-    case 5762:
-      HASH_INVOKE_FROM_EVAL(0x5F6750E1C7E5D682LL, imageinterlace);
-      break;
-    case 5773:
-      HASH_INVOKE_FROM_EVAL(0x07A946E3DD8E968DLL, ldap_connect);
-      break;
-    case 5775:
-      HASH_INVOKE_FROM_EVAL(0x2EFF4F69EB1DF68FLL, apache_get_config);
-      break;
-    case 5779:
-      HASH_INVOKE_FROM_EVAL(0x7CA1300231493693LL, imap_get_quota);
-      break;
-    case 5781:
-      HASH_INVOKE_FROM_EVAL(0x7186EF5EF0581695LL, exp);
-      break;
-    case 5782:
-      HASH_INVOKE_FROM_EVAL(0x0DD7A2DB53093696LL, utf8_decode);
-      break;
-    case 5799:
-      HASH_INVOKE_FROM_EVAL(0x38BBEE42F136D6A7LL, magickgetimageblueprimary);
-      break;
-    case 5802:
-      HASH_INVOKE_FROM_EVAL(0x6E9D4D3A119D76AALL, wandgetexceptiontype);
-      HASH_INVOKE_FROM_EVAL(0x48C4DB333172F6AALL, parse_url);
-      break;
-    case 5803:
-      HASH_INVOKE_FROM_EVAL(0x72B3F8E02D8B16ABLL, array_unshift);
-      break;
-    case 5807:
-      HASH_INVOKE_FROM_EVAL(0x65497D63C0D716AFLL, getdate);
-      break;
-    case 5813:
-      HASH_INVOKE_FROM_EVAL(0x798B4197212456B5LL, bcpowmod);
-      HASH_INVOKE_FROM_EVAL(0x7E773A36449576B5LL, imagecharup);
-      break;
-    case 5818:
-      HASH_INVOKE_FROM_EVAL(0x72B901C3605CB6BALL, pixelsetopacity);
-      break;
-    case 5822:
-      HASH_INVOKE_FROM_EVAL(0x081D5EA9920076BELL, drawgetfillalpha);
-      break;
-    case 5829:
-      HASH_INVOKE_FROM_EVAL(0x28526EF49FF516C5LL, pixelsetgreenquantum);
-      break;
-    case 5834:
-      HASH_INVOKE_FROM_EVAL(0x41BCD0A72B1396CALL, xmlwriter_start_dtd_attlist);
-      break;
-    case 5841:
-      HASH_INVOKE_FROM_EVAL(0x2B3D5B9AF915D6D1LL, imagecopymerge);
-      break;
-    case 5842:
-      HASH_INVOKE_FROM_EVAL(0x1FDF80EA9B8A96D2LL, collator_set_strength);
-      break;
-    case 5844:
-      HASH_INVOKE_FROM_EVAL(0x04A0E6E8337E56D4LL, drawcolor);
-      break;
-    case 5845:
-      HASH_INVOKE_FROM_EVAL(0x317FFA522A7D96D5LL, imagefilledpolygon);
-      break;
-    case 5857:
-      HASH_INVOKE_FROM_EVAL(0x11DA0A0EB8E0D6E1LL, clock_getres);
-      break;
-    case 5860:
-      HASH_INVOKE_FROM_EVAL(0x1CF3544CB5C9D6E4LL, xml_set_processing_instruction_handler);
-      HASH_INVOKE_FROM_EVAL(0x31FFFC333AA6D6E4LL, drawsetfillrule);
-      break;
-    case 5863:
-      HASH_INVOKE_FROM_EVAL(0x44201A16F3D876E7LL, trim);
-      break;
-    case 5869:
-      HASH_INVOKE_FROM_EVAL(0x04BD4B43921956EDLL, ldap_search);
-      break;
-    case 5870:
-      HASH_INVOKE_FROM_EVAL(0x76382756EA00B6EELL, is_object);
-      break;
-    case 5872:
-      HASH_INVOKE_FROM_EVAL(0x014BD9A6823256F0LL, extract);
-      break;
-    case 5875:
-      HASH_INVOKE_FROM_EVAL(0x6F1968BE449FB6F3LL, stream_socket_pair);
-      break;
-    case 5881:
-      HASH_INVOKE_FROM_EVAL(0x20740D956F0236F9LL, image2wbmp);
-      break;
-    case 5889:
-      HASH_INVOKE_FROM_EVAL(0x1A80392751AA7701LL, magickgetformat);
-      break;
-    case 5892:
-      HASH_INVOKE_FROM_EVAL(0x5EFE15CE970A5704LL, drawpolyline);
-      break;
-    case 5899:
-      HASH_INVOKE_FROM_EVAL(0x27AF8F6A5DF0B70BLL, dom_document_xinclude);
-      break;
-    case 5901:
-      HASH_INVOKE_FROM_EVAL(0x7CE752299E80B70DLL, unserialize);
-      HASH_INVOKE_FROM_EVAL(0x4F3C0DB2F6C8F70DLL, unlink);
-      break;
-    case 5908:
-      HASH_INVOKE_FROM_EVAL(0x1778ED2AF035F714LL, rsort);
-      break;
-    case 5909:
-      HASH_INVOKE_FROM_EVAL(0x25D578B4772C1715LL, define);
-      break;
-    case 5912:
-      HASH_INVOKE_FROM_EVAL(0x7971A5647C957718LL, date_time_set);
-      break;
-    case 5920:
-      HASH_INVOKE_FROM_EVAL(0x2D213FD80048F720LL, usleep);
-      break;
-    case 5926:
-      HASH_INVOKE_FROM_EVAL(0x523AB2EA95DAD726LL, get_included_files);
-      break;
-    case 5927:
-      HASH_INVOKE_FROM_EVAL(0x11641BE0F11CD727LL, magickgammaimage);
-      break;
-    case 5929:
-      HASH_INVOKE_FROM_EVAL(0x1D30F1E638D71729LL, readgzfile);
-      break;
-    case 5933:
-      HASH_INVOKE_FROM_EVAL(0x14563723F798172DLL, magickpaintopaqueimage);
-      break;
-    case 5946:
-      HASH_INVOKE_FROM_EVAL(0x404236CC5ABD973ALL, xhprof_run_trace);
-      break;
-    case 5953:
-      HASH_INVOKE_FROM_EVAL(0x5062777D2B947741LL, wordwrap);
-      break;
-    case 5961:
-      HASH_INVOKE_FROM_EVAL(0x73E4417BA7B49749LL, curl_multi_info_read);
-      break;
-    case 5962:
-      HASH_INVOKE_FROM_EVAL(0x1FF03B7DE19DD74ALL, drawpathmovetorelative);
-      break;
-    case 5963:
-      HASH_INVOKE_FROM_EVAL(0x7DA9307A6149B74BLL, get_meta_tags);
-      break;
-    case 5969:
-      HASH_INVOKE_FROM_EVAL(0x017FF216C00D9751LL, property_exists);
-      break;
-    case 5979:
-      HASH_INVOKE_FROM_EVAL(0x05D293F45C15F75BLL, ldap_mod_del);
-      HASH_INVOKE_FROM_EVAL(0x0ED4D905630EB75BLL, openssl_random_pseudo_bytes);
-      break;
-    case 5980:
-      HASH_INVOKE_FROM_EVAL(0x6D5B592E524AF75CLL, hphp_splfileinfo_getbasename);
-      break;
-    case 5989:
-      HASH_INVOKE_FROM_EVAL(0x1D803CE961921765LL, md5);
-      HASH_INVOKE_FROM_EVAL(0x45631C592AD6D765LL, str_ireplace);
-      break;
-    case 5990:
-      HASH_INVOKE_FROM_EVAL(0x1F4505BE6460D766LL, scandir);
-      break;
-    case 5997:
-      HASH_INVOKE_FROM_EVAL(0x3304663FBC6C976DLL, get_html_translation_table);
-      HASH_INVOKE_FROM_EVAL(0x553ADA5A41AE976DLL, mb_ereg_replace);
-      break;
-    case 5998:
-      HASH_INVOKE_FROM_EVAL(0x6DB71D850799D76ELL, hphp_splfileobject_fscanf);
-      break;
-    case 6000:
-      HASH_INVOKE_FROM_EVAL(0x5DD71E685F179770LL, cpu_get_model);
-      break;
-    case 6005:
-      HASH_INVOKE_FROM_EVAL(0x04D9076808F79775LL, getenv);
-      break;
-    case 6006:
-      HASH_INVOKE_FROM_EVAL(0x4102C410C5031776LL, magickcolorizeimage);
-      break;
-    case 6011:
-      HASH_INVOKE_FROM_EVAL(0x129E39AC523A977BLL, magickgethomeurl);
-      break;
-    case 6019:
-      HASH_INVOKE_FROM_EVAL(0x38704D99FEA9B783LL, mysql_fetch_array);
-      break;
-    case 6020:
-      HASH_INVOKE_FROM_EVAL(0x784FD2E7191A3784LL, drawpathellipticarcrelative);
-      break;
-    case 6021:
-      HASH_INVOKE_FROM_EVAL(0x5BFC6198960A5785LL, in_array);
-      break;
-    case 6023:
-      HASH_INVOKE_FROM_EVAL(0x4991643BD854D787LL, drawgetexceptionstring);
-      break;
-    case 6024:
-      HASH_INVOKE_FROM_EVAL(0x32D8CE5D0FA6D788LL, ldap_rename);
-      break;
-    case 6038:
-      HASH_INVOKE_FROM_EVAL(0x5B42B2AB1B57D796LL, array_replace);
-      break;
-    case 6043:
-      HASH_INVOKE_FROM_EVAL(0x1196D899ACCD379BLL, evhttp_recv);
-      break;
-    case 6045:
-      HASH_INVOKE_FROM_EVAL(0x02ECD8C169DF579DLL, feof);
-      break;
-    case 6047:
-      HASH_INVOKE_FROM_EVAL(0x4B092931EFB7979FLL, mysql_create_db);
-      break;
-    case 6057:
-      HASH_INVOKE_FROM_EVAL(0x7707A7FEA07FB7A9LL, hphp_recursivedirectoryiterator___construct);
-      break;
-    case 6061:
-      HASH_INVOKE_FROM_EVAL(0x7DA08D9D148837ADLL, posix_mkfifo);
-      break;
-    case 6062:
-      HASH_INVOKE_FROM_EVAL(0x00141B0E3E6F77AELL, xml_set_unparsed_entity_decl_handler);
-      break;
-    case 6063:
-      HASH_INVOKE_FROM_EVAL(0x16CB9891EF26D7AFLL, drawgetstrokedashoffset);
-      break;
-    case 6073:
-      HASH_INVOKE_FROM_EVAL(0x1FC9406FD7FCD7B9LL, strrpos);
-      break;
-    case 6081:
-      HASH_INVOKE_FROM_EVAL(0x4E172EA6743697C1LL, ldap_first_entry);
-      break;
-    case 6086:
-      HASH_INVOKE_FROM_EVAL(0x0C8A7BE6ABC957C6LL, clearpixeliterator);
-      break;
-    case 6087:
-      HASH_INVOKE_FROM_EVAL(0x686C5142FD0337C7LL, lcg_value);
-      break;
-    case 6089:
-      HASH_INVOKE_FROM_EVAL(0x6BF7D7B5FBFF77C9LL, hphp_get_thread_id);
-      break;
-    case 6097:
-      HASH_INVOKE_FROM_EVAL(0x35B661C87484D7D1LL, openssl_csr_sign);
-      break;
-    case 6116:
-      HASH_INVOKE_FROM_EVAL(0x2621680306BC97E4LL, magicksetimagescene);
-      break;
-    case 6119:
-      HASH_INVOKE_FROM_EVAL(0x4215DDB57604F7E7LL, xmlwriter_start_pi);
-      break;
-    case 6125:
-      HASH_INVOKE_FROM_EVAL(0x0DC2C2D372EC97EDLL, hphp_crash_log);
-      break;
-    case 6127:
-      HASH_INVOKE_FROM_EVAL(0x5367B0F3A4D2D7EFLL, ldap_list);
-      break;
-    case 6128:
-      HASH_INVOKE_FROM_EVAL(0x14F700DD189DB7F0LL, drawsetclipunits);
-      break;
-    case 6131:
-      HASH_INVOKE_FROM_EVAL(0x73877357478137F3LL, posix_ctermid);
-      HASH_INVOKE_FROM_EVAL(0x7F436B50B7BBD7F3LL, getcwd);
-      break;
-    case 6146:
-      HASH_INVOKE_FROM_EVAL(0x2BA2A6480C563802LL, imap_errors);
-      break;
-    case 6147:
-      HASH_INVOKE_FROM_EVAL(0x10F7244AA9CB5803LL, imagepstext);
-      break;
-    case 6150:
-      HASH_INVOKE_FROM_EVAL(0x4D832DD6A72AB806LL, dom_document_create_attribute);
-      break;
-    case 6152:
-      HASH_INVOKE_FROM_EVAL(0x083B8F01AE15B808LL, assert);
-      break;
-    case 6153:
-      HASH_INVOKE_FROM_EVAL(0x52DCFB6F41D41809LL, dom_characterdata_append_data);
-      HASH_INVOKE_FROM_EVAL(0x221F5A9D5E021809LL, magickwriteimages);
-      break;
-    case 6154:
-      HASH_INVOKE_FROM_EVAL(0x5A0D1AE1D4C6F80ALL, array_slice);
-      break;
-    case 6157:
-      HASH_INVOKE_FROM_EVAL(0x727F5A6D8E26B80DLL, extension_loaded);
-      break;
-    case 6163:
-      HASH_INVOKE_FROM_EVAL(0x5F7940A713863813LL, floor);
-      break;
-    case 6164:
-      HASH_INVOKE_FROM_EVAL(0x3C0DFA15D3447814LL, rawurldecode);
-      break;
-    case 6167:
-      HASH_INVOKE_FROM_EVAL(0x0D8B1D0A8C381817LL, stream_bucket_new);
-      break;
-    case 6168:
-      HASH_INVOKE_FROM_EVAL(0x0FBDB0B22A59B818LL, mailparse_msg_parse);
-      break;
-    case 6173:
-      HASH_INVOKE_FROM_EVAL(0x4D624A655A9B581DLL, drawpoint);
-      break;
-    case 6177:
-      HASH_INVOKE_FROM_EVAL(0x107DBCA79C15B821LL, addcslashes);
-      break;
-    case 6185:
-      HASH_INVOKE_FROM_EVAL(0x57FFCEB7FA2D9829LL, usort);
-      break;
-    case 6190:
-      HASH_INVOKE_FROM_EVAL(0x3402C1E7544C382ELL, lstat);
-      break;
-    case 6192:
-      HASH_INVOKE_FROM_EVAL(0x5BBFA7EAEBD25830LL, pixelgetcyanquantum);
-      break;
-    case 6196:
-      HASH_INVOKE_FROM_EVAL(0x605132E71CE7D834LL, array_push);
-      break;
-    case 6197:
-      HASH_INVOKE_FROM_EVAL(0x1C4A162E6635B835LL, imageftbbox);
-      HASH_INVOKE_FROM_EVAL(0x43A96BA7F58EB835LL, hphp_splfileobject_valid);
-      break;
-    case 6200:
-      HASH_INVOKE_FROM_EVAL(0x03098F16B0AD5838LL, mcrypt_module_get_supported_key_sizes);
-      break;
-    case 6203:
-      HASH_INVOKE_FROM_EVAL(0x63E2EA180786B83BLL, pixelsetblack);
-      break;
-    case 6204:
-      HASH_INVOKE_FROM_EVAL(0x7C8969C75CA1783CLL, get_declared_classes);
-      HASH_INVOKE_FROM_EVAL(0x034EDEBD109FD83CLL, filesize);
-      break;
-    case 6220:
-      HASH_INVOKE_FROM_EVAL(0x26A2BBC465A2B84CLL, strcoll);
-      break;
-    case 6225:
-      HASH_INVOKE_FROM_EVAL(0x488BFCC942C73851LL, gzopen);
-      break;
-    case 6230:
-      HASH_INVOKE_FROM_EVAL(0x51FD8C9B5109F856LL, dom_characterdata_replace_data);
-      break;
-    case 6233:
-      HASH_INVOKE_FROM_EVAL(0x41924CBA5B717859LL, imap_append);
-      break;
-    case 6238:
-      HASH_INVOKE_FROM_EVAL(0x3D8327794429585ELL, hphpd_install_user_command);
-      break;
-    case 6241:
-      HASH_INVOKE_FROM_EVAL(0x2AD6B0E3B9F3B861LL, array_search);
-      break;
-    case 6243:
-      HASH_INVOKE_FROM_EVAL(0x21B30164F5D49863LL, is_resource);
-      break;
-    case 6247:
-      HASH_INVOKE_FROM_EVAL(0x65A68A31B96E7867LL, hash);
-      break;
-    case 6249:
-      HASH_INVOKE_FROM_EVAL(0x246EC2B1844DB869LL, pixelgetexception);
-      break;
-    case 6263:
-      HASH_INVOKE_FROM_EVAL(0x6AA3788C9B737877LL, magickdespeckleimage);
-      break;
-    case 6264:
-      HASH_INVOKE_FROM_EVAL(0x011B54958C597878LL, get_called_class);
-      HASH_INVOKE_FROM_EVAL(0x00F8C6758B50B878LL, drawpathcurvetoquadraticbezierabsolute);
-      break;
-    case 6267:
-      HASH_INVOKE_FROM_EVAL(0x3B8E5E63B5E0F87BLL, spl_autoload_call);
-      break;
-    case 6268:
-      HASH_INVOKE_FROM_EVAL(0x11DFC3C9D916387CLL, hphp_splfileobject_ftruncate);
-      HASH_INVOKE_FROM_EVAL(0x6451BCB825D1787CLL, chroot);
-      break;
-    case 6272:
-      HASH_INVOKE_FROM_EVAL(0x7549612A72BA5880LL, hphp_splfileinfo_getrealpath);
-      break;
-    case 6280:
-      HASH_INVOKE_FROM_EVAL(0x1062CF2DA5443888LL, imagedashedline);
-      break;
-    case 6287:
-      HASH_INVOKE_FROM_EVAL(0x5DDC2A079AB7988FLL, dom_document_schema_validate_file);
-      break;
-    case 6301:
-      HASH_INVOKE_FROM_EVAL(0x1FC855F0E4F1189DLL, magickminifyimage);
-      break;
-    case 6305:
-      HASH_INVOKE_FROM_EVAL(0x1756D4437A4098A1LL, date_modify);
-      HASH_INVOKE_FROM_EVAL(0x71B0B871CB62B8A1LL, spl_autoload);
-      break;
-    case 6311:
-      HASH_INVOKE_FROM_EVAL(0x57105D4E43B078A7LL, magicksetformat);
-      HASH_INVOKE_FROM_EVAL(0x6C6B4B739AE1B8A7LL, curl_close);
-      break;
-    case 6313:
-      HASH_INVOKE_FROM_EVAL(0x346B2DB3BA2378A9LL, imagecolormatch);
-      break;
-    case 6314:
-      HASH_INVOKE_FROM_EVAL(0x44BC069A75EE98AALL, xhprof_disable);
-      break;
-    case 6315:
-      HASH_INVOKE_FROM_EVAL(0x39F11BA6A4D778ABLL, strnatcmp);
-      break;
-    case 6316:
-      HASH_INVOKE_FROM_EVAL(0x5B1F4C6424DDD8ACLL, openlog);
-      break;
-    case 6320:
-      HASH_INVOKE_FROM_EVAL(0x2CEF8DDC092698B0LL, drawgetvectorgraphics);
-      break;
-    case 6326:
-      HASH_INVOKE_FROM_EVAL(0x5866C5DF3A1AD8B6LL, dom_element_get_attribute_node);
-      break;
-    case 6363:
-      HASH_INVOKE_FROM_EVAL(0x4052842EC87038DBLL, magickcropimage);
-      break;
-    case 6376:
-      HASH_INVOKE_FROM_EVAL(0x4F7ED8C3156AD8E8LL, magicksetimagedispose);
-      break;
-    case 6389:
-      HASH_INVOKE_FROM_EVAL(0x45DA105C5B48F8F5LL, apd_set_pprof_trace);
-      break;
-    case 6396:
-      HASH_INVOKE_FROM_EVAL(0x4C2AFB2EFDB1B8FCLL, stripslashes);
-      break;
-    case 6402:
-      HASH_INVOKE_FROM_EVAL(0x454DAD4DE5C29902LL, xhprof_frame_end);
-      break;
-    case 6411:
-      HASH_INVOKE_FROM_EVAL(0x67B879A1120C190BLL, headers_sent);
-      break;
-    case 6417:
-      HASH_INVOKE_FROM_EVAL(0x04F822B7817E5911LL, bindec);
-      HASH_INVOKE_FROM_EVAL(0x0AFD4F231D6CB911LL, magickaddimage);
-      break;
-    case 6425:
-      HASH_INVOKE_FROM_EVAL(0x022B16C0D64D7919LL, file_put_contents);
-      break;
-    case 6431:
-      HASH_INVOKE_FROM_EVAL(0x277D7E2D1F5C191FLL, drawpathcurvetoquadraticbezierrelative);
-      HASH_INVOKE_FROM_EVAL(0x4E2C55C92D71F91FLL, magickcolorfloodfillimage);
-      break;
-    case 6435:
-      HASH_INVOKE_FROM_EVAL(0x044B276686B77923LL, fscanf);
-      break;
-    case 6445:
-      HASH_INVOKE_FROM_EVAL(0x27363CE6CBFC392DLL, pcntl_wexitstatus);
-      HASH_INVOKE_FROM_EVAL(0x2337F8C3EE17192DLL, sprintf);
-      break;
-    case 6447:
-      HASH_INVOKE_FROM_EVAL(0x13A6C6CAF50EB92FLL, imap_search);
-      break;
-    case 6448:
-      HASH_INVOKE_FROM_EVAL(0x30972530BD557930LL, shell_exec);
-      break;
-    case 6450:
-      HASH_INVOKE_FROM_EVAL(0x72C01E1D90BE5932LL, mcrypt_enc_get_block_size);
-      break;
-    case 6453:
-      HASH_INVOKE_FROM_EVAL(0x06486B6912479935LL, zlib_get_coding_type);
-      HASH_INVOKE_FROM_EVAL(0x48D3CA6CA0B29935LL, mb_regex_set_options);
-      break;
-    case 6462:
-      HASH_INVOKE_FROM_EVAL(0x3946D67A0D16D93ELL, hphp_splfileinfo_isreadable);
-      break;
-    case 6471:
-      HASH_INVOKE_FROM_EVAL(0x1E694036FEBA3947LL, imap_fetchstructure);
-      break;
-    case 6472:
-      HASH_INVOKE_FROM_EVAL(0x6A3412DE82715948LL, openssl_x509_checkpurpose);
-      break;
-    case 6473:
-      HASH_INVOKE_FROM_EVAL(0x243BB8B284895949LL, apache_get_rewrite_rules);
-      break;
-    case 6475:
-      HASH_INVOKE_FROM_EVAL(0x37F356F578FA394BLL, substr);
-      break;
-    case 6476:
-      HASH_INVOKE_FROM_EVAL(0x10DB229871AB794CLL, imap_msgno);
-      break;
-    case 6483:
-      HASH_INVOKE_FROM_EVAL(0x068438AFD33A9953LL, imagecolorclosesthwb);
-      break;
-    case 6511:
-      HASH_INVOKE_FROM_EVAL(0x134EF88685C0396FLL, magickgetexceptiontype);
-      break;
-    case 6513:
-      HASH_INVOKE_FROM_EVAL(0x442A28FB6F6C3971LL, xmlwriter_start_attribute);
-      HASH_INVOKE_FROM_EVAL(0x72C73F5DA7D6F971LL, magickgetimagecolormapcolor);
-      break;
-    case 6528:
-      HASH_INVOKE_FROM_EVAL(0x3D3445105C335980LL, filectime);
-      break;
-    case 6530:
-      HASH_INVOKE_FROM_EVAL(0x214EA70BDD8FB982LL, magickmorphimages);
-      break;
-    case 6531:
-      HASH_INVOKE_FROM_EVAL(0x3DA64BF893DBF983LL, strncmp);
-      break;
-    case 6536:
-      HASH_INVOKE_FROM_EVAL(0x55BE7AE8DEF3F988LL, magickgetstringheight);
-      break;
-    case 6539:
-      HASH_INVOKE_FROM_EVAL(0x0E863EF8C11A598BLL, is_writable);
-      break;
-    case 6541:
-      HASH_INVOKE_FROM_EVAL(0x69003892F71C798DLL, apache_get_scoreboard);
-      HASH_INVOKE_FROM_EVAL(0x651A8CBB8D2A398DLL, mysql_stat);
-      break;
-    case 6542:
-      HASH_INVOKE_FROM_EVAL(0x45CFDEE19995398ELL, hphp_recursiveiteratoriterator_next);
-      break;
-    case 6544:
-      HASH_INVOKE_FROM_EVAL(0x342D957A86A03990LL, hphp_splfileobject_seek);
-      break;
-    case 6558:
-      HASH_INVOKE_FROM_EVAL(0x59D2DFF08F4DB99ELL, imagecreate);
-      break;
-    case 6564:
-      HASH_INVOKE_FROM_EVAL(0x6F8676B049C919A4LL, array_intersect_uassoc);
-      break;
-    case 6572:
-      HASH_INVOKE_FROM_EVAL(0x522256BAA78159ACLL, popen);
-      break;
-    case 6573:
-      HASH_INVOKE_FROM_EVAL(0x05C5AD90751159ADLL, drawpathcurvetoquadraticbeziersmoothabsolute);
-      break;
-    case 6575:
-      HASH_INVOKE_FROM_EVAL(0x25268012A48A99AFLL, magickclipimage);
-      break;
-    case 6582:
-      HASH_INVOKE_FROM_EVAL(0x5FC1B94446EA59B6LL, magickremoveimageprofiles);
-      break;
-    case 6583:
-      HASH_INVOKE_FROM_EVAL(0x18F2C246FACAD9B7LL, each);
-      break;
-    case 6584:
-      HASH_INVOKE_FROM_EVAL(0x3741447B159359B8LL, mcrypt_get_cipher_name);
-      HASH_INVOKE_FROM_EVAL(0x4EFD7A9C90E559B8LL, posix_ttyname);
-      break;
-    case 6585:
-      HASH_INVOKE_FROM_EVAL(0x145702974C97F9B9LL, ltrim);
-      break;
-    case 6586:
-      HASH_INVOKE_FROM_EVAL(0x13B3172E092D99BALL, is_dir);
-      break;
-    case 6596:
-      HASH_INVOKE_FROM_EVAL(0x47B7D3745D80B9C4LL, socket_get_option);
-      break;
-    case 6602:
-      HASH_INVOKE_FROM_EVAL(0x5C5B0CC85133B9CALL, mkdir);
-      break;
-    case 6603:
-      HASH_INVOKE_FROM_EVAL(0x032DFAC5B24679CBLL, header_remove);
-      break;
-    case 6610:
-      HASH_INVOKE_FROM_EVAL(0x3DCCD1FEAD8759D2LL, array_sum);
-      break;
-    case 6613:
-      HASH_INVOKE_FROM_EVAL(0x245860A2FE4CB9D5LL, socket_set_blocking);
-      break;
-    case 6623:
-      HASH_INVOKE_FROM_EVAL(0x349E2E0F2CD7B9DFLL, magickgetversion);
-      break;
-    case 6633:
-      HASH_INVOKE_FROM_EVAL(0x4ADFA265F07AB9E9LL, drawgettextalignment);
-      break;
-    case 6634:
-      HASH_INVOKE_FROM_EVAL(0x25DDD924EFE979EALL, hash_update_file);
-      break;
-    case 6635:
-      HASH_INVOKE_FROM_EVAL(0x71B0FF80B88459EBLL, diskfreespace);
-      break;
-    case 6639:
-      HASH_INVOKE_FROM_EVAL(0x7EA6200B688459EFLL, ldap_modify);
-      break;
-    case 6640:
-      HASH_INVOKE_FROM_EVAL(0x1FC307200E8959F0LL, stream_bucket_append);
-      break;
-    case 6645:
-      HASH_INVOKE_FROM_EVAL(0x35BABFBC091759F5LL, socket_server);
-      break;
-    case 6652:
-      HASH_INVOKE_FROM_EVAL(0x55814D0EC267B9FCLL, imap_status);
-      break;
-    case 6660:
-      HASH_INVOKE_FROM_EVAL(0x17B83C425BD09A04LL, atanh);
-      break;
-    case 6663:
-      HASH_INVOKE_FROM_EVAL(0x391E0A4CF1EC9A07LL, stream_socket_recvfrom);
-      break;
-    case 6664:
-      HASH_INVOKE_FROM_EVAL(0x0436CA4DFB315A08LL, soundex);
-      break;
-    case 6667:
-      HASH_INVOKE_FROM_EVAL(0x70075DC878825A0BLL, ctype_lower);
-      break;
-    case 6669:
-      HASH_INVOKE_FROM_EVAL(0x736C133EFF8E5A0DLL, mysql_list_fields);
-      HASH_INVOKE_FROM_EVAL(0x50A7146A79877A0DLL, pcntl_alarm);
-      break;
-    case 6697:
-      HASH_INVOKE_FROM_EVAL(0x618D2A98986B1A29LL, ldap_unbind);
-      break;
-    case 6708:
-      HASH_INVOKE_FROM_EVAL(0x2D948E4099975A34LL, restore_include_path);
-      HASH_INVOKE_FROM_EVAL(0x5AB266C6E7075A34LL, mysql_error);
-      break;
-    case 6712:
-      HASH_INVOKE_FROM_EVAL(0x3E65EF9761BE5A38LL, pixelgetiteratorexceptiontype);
-      break;
-    case 6715:
-      HASH_INVOKE_FROM_EVAL(0x785ECCF53D98BA3BLL, curl_multi_exec);
-      break;
-    case 6718:
-      HASH_INVOKE_FROM_EVAL(0x31C3A072D092FA3ELL, socket_create_listen);
-      break;
-    case 6719:
-      HASH_INVOKE_FROM_EVAL(0x4C0E2C6882051A3FLL, magickgetresourcelimit);
-      break;
-    case 6722:
-      HASH_INVOKE_FROM_EVAL(0x128914E131AFFA42LL, microtime);
-      HASH_INVOKE_FROM_EVAL(0x5FF7C3A6BDDCFA42LL, mb_convert_kana);
-      break;
-    case 6725:
-      HASH_INVOKE_FROM_EVAL(0x7CDF1FB642529A45LL, dom_characterdata_insert_data);
-      break;
-    case 6727:
-      HASH_INVOKE_FROM_EVAL(0x1B45CFF586F85A47LL, utf8_encode);
-      break;
-    case 6734:
-      HASH_INVOKE_FROM_EVAL(0x1635DCC4882CBA4ELL, dom_node_has_attributes);
-      break;
-    case 6747:
-      HASH_INVOKE_FROM_EVAL(0x2B18DFF183C0BA5BLL, mb_get_info);
-      break;
-    case 6758:
-      HASH_INVOKE_FROM_EVAL(0x60C4B9EEDBD5FA66LL, pos);
-      break;
-    case 6760:
-      HASH_INVOKE_FROM_EVAL(0x01DD2057FD9B1A68LL, xmlwriter_write_cdata);
-      HASH_INVOKE_FROM_EVAL(0x32AD0455A7689A68LL, magickoilpaintimage);
-      break;
-    case 6761:
-      HASH_INVOKE_FROM_EVAL(0x10CDCF2BB4057A69LL, debug_zval_dump);
-      break;
-    case 6763:
-      HASH_INVOKE_FROM_EVAL(0x0912965F4440FA6BLL, str_repeat);
-      break;
-    case 6769:
-      HASH_INVOKE_FROM_EVAL(0x5B5DA6AD0AD63A71LL, drawannotation);
-      break;
-    case 6770:
-      HASH_INVOKE_FROM_EVAL(0x71AFF1D58D103A72LL, imagefontheight);
-      break;
-    case 6773:
-      HASH_INVOKE_FROM_EVAL(0x7A957BEC6CA57A75LL, preg_replace_callback);
-      break;
-    case 6781:
-      HASH_INVOKE_FROM_EVAL(0x414C2E31304E9A7DLL, stream_get_filters);
-      break;
-    case 6786:
-      HASH_INVOKE_FROM_EVAL(0x79786FABC5551A82LL, jpeg2wbmp);
-      break;
-    case 6787:
-      HASH_INVOKE_FROM_EVAL(0x11149278DB0A9A83LL, levenshtein);
-      break;
-    case 6789:
-      HASH_INVOKE_FROM_EVAL(0x755DEFDEDF35DA85LL, ctype_print);
-      break;
-    case 6792:
-      HASH_INVOKE_FROM_EVAL(0x1818A3CFBA357A88LL, magicksetwandsize);
-      break;
-    case 6795:
-      HASH_INVOKE_FROM_EVAL(0x7588BD0546C8BA8BLL, hphp_recursivedirectoryiterator_valid);
-      break;
-    case 6796:
-      HASH_INVOKE_FROM_EVAL(0x6A2EEE463F969A8CLL, getservbyname);
-      break;
-    case 6802:
-      HASH_INVOKE_FROM_EVAL(0x1257DB9F159E9A92LL, magickmontageimage);
-      break;
-    case 6803:
-      HASH_INVOKE_FROM_EVAL(0x4A32653C8E719A93LL, pixelgetcyan);
-      break;
-    case 6804:
-      HASH_INVOKE_FROM_EVAL(0x4B1501C4C22FFA94LL, quoted_printable_encode);
-      break;
-    case 6805:
-      HASH_INVOKE_FROM_EVAL(0x34B8A4E5AE0EFA95LL, pixelgetopacity);
-      break;
-    case 6807:
-      HASH_INVOKE_FROM_EVAL(0x0089115038C03A97LL, array_diff_ukey);
-      break;
-    case 6809:
-      HASH_INVOKE_FROM_EVAL(0x1382CEA1527CFA99LL, imap_utf7_encode);
-      break;
-    case 6810:
-      HASH_INVOKE_FROM_EVAL(0x19AFF8596E19DA9ALL, xhprof_enable);
-      break;
-    case 6813:
-      HASH_INVOKE_FROM_EVAL(0x1234AB687C515A9DLL, mb_encode_numericentity);
-      break;
-    case 6815:
-      HASH_INVOKE_FROM_EVAL(0x2E5E23ECA0525A9FLL, bcadd);
-      break;
-    case 6821:
-      HASH_INVOKE_FROM_EVAL(0x2418528164415AA5LL, magickscaleimage);
-      break;
-    case 6823:
-      HASH_INVOKE_FROM_EVAL(0x797CEC173CBB7AA7LL, ob_get_flush);
-      break;
-    case 6834:
-      HASH_INVOKE_FROM_EVAL(0x62519270CC9F1AB2LL, stream_get_meta_data);
-      break;
-    case 6847:
-      HASH_INVOKE_FROM_EVAL(0x030DFC3D3C88BABFLL, filegroup);
-      break;
-    case 6855:
-      HASH_INVOKE_FROM_EVAL(0x5D2F899A270D9AC7LL, xmlwriter_end_dtd_element);
-      HASH_INVOKE_FROM_EVAL(0x79215854355CBAC7LL, proc_get_status);
-      break;
-    case 6860:
-      HASH_INVOKE_FROM_EVAL(0x2BD6476D2C467ACCLL, pagelet_server_task_status);
-      break;
-    case 6861:
-      HASH_INVOKE_FROM_EVAL(0x173EDC165B673ACDLL, magicktransformimage);
-      break;
-    case 6865:
-      HASH_INVOKE_FROM_EVAL(0x47E2B4F7B8DE5AD1LL, xmlwriter_write_dtd_attlist);
-      HASH_INVOKE_FROM_EVAL(0x314317450857FAD1LL, ctype_punct);
-      break;
-    case 6869:
-      HASH_INVOKE_FROM_EVAL(0x0D5DAF8034B41AD5LL, get_include_path);
-      break;
-    case 6875:
-      HASH_INVOKE_FROM_EVAL(0x56E867A1F7507ADBLL, dom_document_create_processing_instruction);
-      break;
-    case 6877:
-      HASH_INVOKE_FROM_EVAL(0x3E319E451A32FADDLL, magicksharpenimage);
-      break;
-    case 6878:
-      HASH_INVOKE_FROM_EVAL(0x31D1C58F7BD89ADELL, hphp_directoryiterator_seek);
-      break;
-    case 6891:
-      HASH_INVOKE_FROM_EVAL(0x225F05071947BAEBLL, drawpathlinetoabsolute);
-      break;
-    case 6893:
-      HASH_INVOKE_FROM_EVAL(0x46C33B4739C2FAEDLL, shm_remove_var);
-      break;
-    case 6894:
-      HASH_INVOKE_FROM_EVAL(0x160A82E3E2CBBAEELL, is_finite);
-      break;
-    case 6896:
-      HASH_INVOKE_FROM_EVAL(0x6B259D5D9D681AF0LL, register_postsend_function);
-      break;
-    case 6900:
-      HASH_INVOKE_FROM_EVAL(0x2EC0ABF9A979FAF4LL, ob_get_level);
-      break;
-    case 6902:
-      HASH_INVOKE_FROM_EVAL(0x2C7C9772AE983AF6LL, drawsetgravity);
-      break;
-    case 6904:
-      HASH_INVOKE_FROM_EVAL(0x12859AD75BAF3AF8LL, magickreadimageblob);
-      break;
-    case 6909:
-      HASH_INVOKE_FROM_EVAL(0x16BA422EB6C51AFDLL, gzwrite);
-      break;
-    case 6910:
-      HASH_INVOKE_FROM_EVAL(0x04E86BA79B6CBAFELL, stream_socket_shutdown);
-      break;
-    case 6913:
-      HASH_INVOKE_FROM_EVAL(0x6F3503C7FB12DB01LL, lchgrp);
-      break;
-    case 6915:
-      HASH_INVOKE_FROM_EVAL(0x673A96C50F00FB03LL, str_word_count);
-      break;
-    case 6922:
-      HASH_INVOKE_FROM_EVAL(0x14AF32A23B507B0ALL, metaphone);
-      break;
-    case 6924:
-      HASH_INVOKE_FROM_EVAL(0x000A2D80D67ADB0CLL, imap_mail);
-      break;
-    case 6935:
-      HASH_INVOKE_FROM_EVAL(0x66F9A476DAB47B17LL, pixelsetcolor);
-      break;
-    case 6936:
-      HASH_INVOKE_FROM_EVAL(0x70448A629A74FB18LL, ksort);
-      break;
-    case 6940:
-      HASH_INVOKE_FROM_EVAL(0x249399CEC35B7B1CLL, png2wbmp);
-      break;
-    case 6942:
-      HASH_INVOKE_FROM_EVAL(0x7160AA24D4251B1ELL, mb_strripos);
-      break;
-    case 6944:
-      HASH_INVOKE_FROM_EVAL(0x1112712715D75B20LL, pixelgetblackquantum);
-      break;
-    case 6950:
-      HASH_INVOKE_FROM_EVAL(0x24CE95457EACBB26LL, get_parent_class);
-      break;
-    case 6954:
-      HASH_INVOKE_FROM_EVAL(0x1F4984938E1DBB2ALL, sort);
-      break;
-    case 6956:
-      HASH_INVOKE_FROM_EVAL(0x70742211FA3EFB2CLL, imagettftext);
-      break;
-    case 6963:
-      HASH_INVOKE_FROM_EVAL(0x4D5D45D1F1EB3B33LL, posix_access);
-      break;
-    case 6964:
-      HASH_INVOKE_FROM_EVAL(0x0B7D52E2540ABB34LL, tan);
-      break;
-    case 6967:
-      HASH_INVOKE_FROM_EVAL(0x053B14F52350FB37LL, socket_shutdown);
-      break;
-    case 6968:
-      HASH_INVOKE_FROM_EVAL(0x68C09D6CB8E79B38LL, class_exists);
-      break;
-    case 6969:
-      HASH_INVOKE_FROM_EVAL(0x02A2C373E54FFB39LL, hash_init);
-      break;
-    case 6970:
-      HASH_INVOKE_FROM_EVAL(0x49A45F75B2B25B3ALL, apd_breakpoint);
-      break;
-    case 6972:
-      HASH_INVOKE_FROM_EVAL(0x35F4A0789F367B3CLL, drawpathlinetohorizontalrelative);
-      break;
-    case 6975:
-      HASH_INVOKE_FROM_EVAL(0x0B07AD87DF1B5B3FLL, urldecode);
-      break;
-    case 6976:
-      HASH_INVOKE_FROM_EVAL(0x24CBCBA5C4407B40LL, evhttp_set_cache);
-      break;
-    case 6980:
-      HASH_INVOKE_FROM_EVAL(0x4E4449EBAADD7B44LL, magickpingimage);
-      break;
-    case 6981:
-      HASH_INVOKE_FROM_EVAL(0x72E3AE55A0B33B45LL, ispixelwand);
-      break;
-    case 6997:
-      HASH_INVOKE_FROM_EVAL(0x333FB673518A1B55LL, ldap_get_entries);
-      break;
-    case 7005:
-      HASH_INVOKE_FROM_EVAL(0x4888951358F53B5DLL, dom_document_get_elements_by_tag_name_ns);
-      break;
-    case 7007:
-      HASH_INVOKE_FROM_EVAL(0x48E30DE7A228BB5FLL, spl_autoload_register);
-      break;
-    case 7009:
-      HASH_INVOKE_FROM_EVAL(0x7636825871399B61LL, highlight_file);
-      break;
-    case 7016:
-      HASH_INVOKE_FROM_EVAL(0x674F1DA24EDE7B68LL, xmlwriter_end_attribute);
-      break;
-    case 7019:
-      HASH_INVOKE_FROM_EVAL(0x5543A0CACD153B6BLL, substr_replace);
-      break;
-    case 7025:
-      HASH_INVOKE_FROM_EVAL(0x5E5C875DB04CFB71LL, drawrectangle);
-      break;
-    case 7029:
-      HASH_INVOKE_FROM_EVAL(0x42F0AED7599C1B75LL, magickechoimageblob);
-      break;
-    case 7030:
-      HASH_INVOKE_FROM_EVAL(0x2A63A0BF9B7E3B76LL, ini_alter);
-      break;
-    case 7031:
-      HASH_INVOKE_FROM_EVAL(0x7F5F29D8E63ABB77LL, mcrypt_module_self_test);
-      HASH_INVOKE_FROM_EVAL(0x5025B43B46679B77LL, openssl_x509_free);
-      break;
-    case 7033:
-      HASH_INVOKE_FROM_EVAL(0x1AD83CBEA1E87B79LL, imap_getmailboxes);
-      break;
-    case 7036:
-      HASH_INVOKE_FROM_EVAL(0x3A096F905FBF7B7CLL, magickcommentimage);
-      break;
-    case 7037:
-      HASH_INVOKE_FROM_EVAL(0x28DE19828167FB7DLL, magickmapimage);
-      break;
-    case 7051:
-      HASH_INVOKE_FROM_EVAL(0x3B72159A4B04FB8BLL, set_time_limit);
-      break;
-    case 7053:
-      HASH_INVOKE_FROM_EVAL(0x3B831DB1A615FB8DLL, xhprof_sample_enable);
-      break;
-    case 7054:
-      HASH_INVOKE_FROM_EVAL(0x62A4D7A03F7C3B8ELL, ceil);
-      break;
-    case 7065:
-      HASH_INVOKE_FROM_EVAL(0x076E66D4089A3B99LL, mb_stripos);
-      break;
-    case 7066:
-      HASH_INVOKE_FROM_EVAL(0x023133732CB51B9ALL, exif_thumbnail);
-      break;
-    case 7071:
-      HASH_INVOKE_FROM_EVAL(0x390A267EC6B51B9FLL, socket_sendto);
-      break;
-    case 7076:
-      HASH_INVOKE_FROM_EVAL(0x0D95DD13A2D3BBA4LL, drawtranslate);
-      break;
-    case 7082:
-      HASH_INVOKE_FROM_EVAL(0x7C833A303C7CFBAALL, getrandmax);
-      break;
-    case 7086:
-      HASH_INVOKE_FROM_EVAL(0x66F099E732977BAELL, imap_renamemailbox);
-      break;
-    case 7088:
-      HASH_INVOKE_FROM_EVAL(0x1F3E4C6660247BB0LL, imagecolorresolve);
-      HASH_INVOKE_FROM_EVAL(0x7D9BF61D6CDE3BB0LL, fb_parallel_query);
-      break;
-    case 7102:
-      HASH_INVOKE_FROM_EVAL(0x3F56AF1511AEDBBELL, magicklabelimage);
-      break;
-    case 7111:
-      HASH_INVOKE_FROM_EVAL(0x10C5CF7B55173BC7LL, settype);
-      break;
-    case 7114:
-      HASH_INVOKE_FROM_EVAL(0x4122DFAC25BDFBCALL, hphp_splfileinfo_getowner);
-      break;
-    case 7117:
-      HASH_INVOKE_FROM_EVAL(0x53A88C8F973CFBCDLL, apc_clear_cache);
-      break;
-    case 7118:
-      HASH_INVOKE_FROM_EVAL(0x45D6BA980AFFDBCELL, msg_get_queue);
-      break;
-    case 7120:
-      HASH_INVOKE_FROM_EVAL(0x02A0F9CE4022BBD0LL, imap_fetchbody);
-      HASH_INVOKE_FROM_EVAL(0x6846CA07A5E21BD0LL, hphp_directoryiterator___construct);
-      break;
-    case 7122:
-      HASH_INVOKE_FROM_EVAL(0x6FE3C5FF5E883BD2LL, round);
-      break;
-    case 7124:
-      HASH_INVOKE_FROM_EVAL(0x4E4EB301A994DBD4LL, drawpolygon);
-      break;
-    case 7128:
-      HASH_INVOKE_FROM_EVAL(0x21E44C7C7A911BD8LL, phpinfo);
-      break;
-    case 7134:
-      HASH_INVOKE_FROM_EVAL(0x58D0D9B66F045BDELL, strpos);
-      break;
-    case 7136:
-      HASH_INVOKE_FROM_EVAL(0x2E10B74DC6067BE0LL, strip_tags);
-      break;
-    case 7137:
-      HASH_INVOKE_FROM_EVAL(0x25FBB61480091BE1LL, mysql_client_encoding);
-      break;
-    case 7147:
-      HASH_INVOKE_FROM_EVAL(0x505B44DDF2383BEBLL, drawgetfillcolor);
-      HASH_INVOKE_FROM_EVAL(0x0C1904372E8EDBEBLL, stream_copy_to_stream);
-      break;
-    case 7148:
-      HASH_INVOKE_FROM_EVAL(0x44279BB3E2191BECLL, socket_accept);
-      HASH_INVOKE_FROM_EVAL(0x5A22BA9B012A9BECLL, dom_document_save_html);
-      break;
-    case 7152:
-      HASH_INVOKE_FROM_EVAL(0x187C049E785A1BF0LL, iconv_get_encoding);
-      HASH_INVOKE_FROM_EVAL(0x04C0582DB1AD7BF0LL, mt_srand);
-      break;
-    case 7153:
-      HASH_INVOKE_FROM_EVAL(0x0CA96856E5BEFBF1LL, iptcparse);
-      break;
-    case 7156:
-      HASH_INVOKE_FROM_EVAL(0x1444DB037B4D5BF4LL, imagegammacorrect);
-      break;
-    case 7159:
-      HASH_INVOKE_FROM_EVAL(0x74ABB4A1E10BBBF7LL, time);
-      break;
-    case 7161:
-      HASH_INVOKE_FROM_EVAL(0x5B7F6E0A642BBBF9LL, sleep);
-      break;
-    case 7164:
-      HASH_INVOKE_FROM_EVAL(0x64F52E1DB5E95BFCLL, curl_multi_remove_handle);
-      break;
-    case 7170:
-      HASH_INVOKE_FROM_EVAL(0x249340DF734D9C02LL, magickgetimageheight);
-      break;
-    case 7176:
-      HASH_INVOKE_FROM_EVAL(0x48E1616EE837FC08LL, is_uploaded_file);
-      break;
-    case 7178:
-      HASH_INVOKE_FROM_EVAL(0x1E47C281193ABC0ALL, collator_compare);
-      break;
-    case 7186:
-      HASH_INVOKE_FROM_EVAL(0x062C0FFA8E29DC12LL, intl_error_name);
-      break;
-    case 7191:
-      HASH_INVOKE_FROM_EVAL(0x3A702EF906B37C17LL, collator_get_locale);
-      break;
-    case 7196:
-      HASH_INVOKE_FROM_EVAL(0x758A62BD65E6FC1CLL, imagegd2);
-      break;
-    case 7198:
-      HASH_INVOKE_FROM_EVAL(0x7039C5EBB1D6BC1ELL, array_walk);
-      break;
-    case 7199:
-      HASH_INVOKE_FROM_EVAL(0x3A5D921797669C1FLL, hphp_log);
-      break;
-    case 7201:
-      HASH_INVOKE_FROM_EVAL(0x0179CBA2C5F4DC21LL, magickgetimageformat);
-      break;
-    case 7218:
-      HASH_INVOKE_FROM_EVAL(0x0B9B362534621C32LL, isdrawingwand);
-      break;
-    case 7219:
-      HASH_INVOKE_FROM_EVAL(0x49965C44E9EE3C33LL, set_file_buffer);
-      break;
-    case 7224:
-      HASH_INVOKE_FROM_EVAL(0x21564F9315F3FC38LL, drawsettextdecoration);
-      break;
-    case 7228:
-      HASH_INVOKE_FROM_EVAL(0x69488CC69B897C3CLL, hphp_recursiveiteratoriterator_getinneriterator);
-      break;
-    case 7230:
-      HASH_INVOKE_FROM_EVAL(0x15EC581662651C3ELL, date_parse);
-      break;
-    case 7238:
-      HASH_INVOKE_FROM_EVAL(0x7D992445F5E37C46LL, magicktextureimage);
-      break;
-    case 7243:
-      HASH_INVOKE_FROM_EVAL(0x120E7B01366DFC4BLL, call_user_func_serialized);
-      break;
-    case 7248:
-      HASH_INVOKE_FROM_EVAL(0x04534F26B8D05C50LL, drawgetstrokecolor);
-      break;
-    case 7255:
-      HASH_INVOKE_FROM_EVAL(0x313E8EB28A111C57LL, hphp_splfileinfo_setinfoclass);
-      break;
-    case 7256:
-      HASH_INVOKE_FROM_EVAL(0x1B8C3DA27170DC58LL, dirname);
-      break;
-    case 7257:
-      HASH_INVOKE_FROM_EVAL(0x57633BDF8DB3FC59LL, i18n_loc_set_attribute);
-      break;
-    case 7262:
-      HASH_INVOKE_FROM_EVAL(0x47B38F1E4FA29C5ELL, fb_get_code_coverage);
-      break;
-    case 7265:
-      HASH_INVOKE_FROM_EVAL(0x6E54EEDA1D887C61LL, magicksetimageinterlacescheme);
-      HASH_INVOKE_FROM_EVAL(0x5176725DA884DC61LL, curl_setopt);
-      break;
-    case 7271:
-      HASH_INVOKE_FROM_EVAL(0x07DC355325165C67LL, magickwriteimage);
-      break;
-    case 7272:
-      HASH_INVOKE_FROM_EVAL(0x10D6AE9D688D1C68LL, copy);
-      break;
-    case 7281:
-      HASH_INVOKE_FROM_EVAL(0x18D9ED67E8E0FC71LL, dom_attr_is_id);
-      break;
-    case 7284:
-      HASH_INVOKE_FROM_EVAL(0x20F0AAA486F39C74LL, dom_element_get_elements_by_tag_name_ns);
-      break;
-    case 7297:
-      HASH_INVOKE_FROM_EVAL(0x767806D6F1053C81LL, sin);
-      break;
-    case 7301:
-      HASH_INVOKE_FROM_EVAL(0x56DA17241B793C85LL, mysql_set_timeout);
-      break;
-    case 7313:
-      HASH_INVOKE_FROM_EVAL(0x4E04B71729485C91LL, clonedrawingwand);
-      break;
-    case 7315:
-      HASH_INVOKE_FROM_EVAL(0x0F8242C6327B5C93LL, dns_check_record);
-      break;
-    case 7322:
-      HASH_INVOKE_FROM_EVAL(0x374F20BDAF709C9ALL, mb_preferred_mime_name);
-      break;
-    case 7323:
-      HASH_INVOKE_FROM_EVAL(0x36F7F9FD7766DC9BLL, xmlwriter_end_comment);
-      break;
-    case 7342:
-      HASH_INVOKE_FROM_EVAL(0x12580A083B0D7CAELL, iterator_apply);
-      break;
-    case 7344:
-      HASH_INVOKE_FROM_EVAL(0x373B3FADEACB7CB0LL, openssl_private_encrypt);
-      break;
-    case 7345:
-      HASH_INVOKE_FROM_EVAL(0x40D8DC24FA917CB1LL, hphp_splfileobject_fgetss);
-      break;
-    case 7351:
-      HASH_INVOKE_FROM_EVAL(0x3DFD5CA79919DCB7LL, imageantialias);
-      HASH_INVOKE_FROM_EVAL(0x39E03AAC188D3CB7LL, magickgetimagecompressionquality);
-      break;
-    case 7360:
-      HASH_INVOKE_FROM_EVAL(0x3033FE14E114FCC0LL, magicksetimageblueprimary);
-      break;
-    case 7362:
-      HASH_INVOKE_FROM_EVAL(0x34B6388D7730BCC2LL, drawline);
-      break;
-    case 7374:
-      HASH_INVOKE_FROM_EVAL(0x0183A548B759BCCELL, posix_getpgid);
-      HASH_INVOKE_FROM_EVAL(0x66273C5932B1FCCELL, clock_gettime);
-      break;
-    case 7375:
-      HASH_INVOKE_FROM_EVAL(0x407B1F3AFEC43CCFLL, pixelgetblue);
-      break;
-    case 7377:
-      HASH_INVOKE_FROM_EVAL(0x576C5DC462663CD1LL, explode);
-      break;
-    case 7379:
-      HASH_INVOKE_FROM_EVAL(0x544302E2FAD3FCD3LL, magicknextimage);
-      break;
-    case 7380:
-      HASH_INVOKE_FROM_EVAL(0x323FE1D92C9B3CD4LL, gzdecode);
-      break;
-    case 7381:
-      HASH_INVOKE_FROM_EVAL(0x757BC444FDF79CD5LL, posix_get_last_error);
-      break;
-    case 7386:
-      HASH_INVOKE_FROM_EVAL(0x09C6455B4BC6FCDALL, drawsetviewbox);
-      break;
-    case 7396:
-      HASH_INVOKE_FROM_EVAL(0x7CDDF96AFEA2DCE4LL, chunk_split);
-      break;
-    case 7407:
-      HASH_INVOKE_FROM_EVAL(0x6AA89C314C647CEFLL, magickgetimagehistogram);
-      break;
-    case 7410:
-      HASH_INVOKE_FROM_EVAL(0x26C49BBC67475CF2LL, magicksetimagewhitepoint);
-      break;
-    case 7411:
-      HASH_INVOKE_FROM_EVAL(0x6CA8CF41D27D1CF3LL, imap_headerinfo);
-      HASH_INVOKE_FROM_EVAL(0x5C1F75D51C077CF3LL, pixelgetindex);
-      break;
-    case 7419:
-      HASH_INVOKE_FROM_EVAL(0x09B4EE276DCCFCFBLL, mysql_fetch_row);
-      break;
-    case 7422:
-      HASH_INVOKE_FROM_EVAL(0x768F3E6D1CBA5CFELL, socket_recv);
-      break;
-    case 7423:
-      HASH_INVOKE_FROM_EVAL(0x748D3DFF0EB57CFFLL, uniqid);
-      break;
-    case 7430:
-      HASH_INVOKE_FROM_EVAL(0x2BA9FB0F8B76DD06LL, number_format);
-      break;
-    case 7433:
-      HASH_INVOKE_FROM_EVAL(0x153F7DBFC9047D09LL, pixelsetred);
-      break;
-    case 7436:
-      HASH_INVOKE_FROM_EVAL(0x30A8326034801D0CLL, mysql_pconnect);
-      break;
-    case 7437:
-      HASH_INVOKE_FROM_EVAL(0x3ACE8A8BC9ACDD0DLL, iconv_mime_decode);
-      break;
-    case 7440:
-      HASH_INVOKE_FROM_EVAL(0x42BEEC88EE81FD10LL, imagechar);
-      HASH_INVOKE_FROM_EVAL(0x08F41A00D5D57D10LL, mb_decode_mimeheader);
-      break;
-    case 7442:
-      HASH_INVOKE_FROM_EVAL(0x5F165B40AEEE5D12LL, hphp_splfileinfo_getfilename);
-      break;
-    case 7444:
-      HASH_INVOKE_FROM_EVAL(0x63837ECAF6235D14LL, preg_replace);
-      break;
-    case 7450:
-      HASH_INVOKE_FROM_EVAL(0x39994614C6315D1ALL, hphp_recursivedirectoryiterator_key);
-      break;
-    case 7454:
-      HASH_INVOKE_FROM_EVAL(0x25DADFF238A15D1ELL, collator_create);
-      break;
-    case 7461:
-      HASH_INVOKE_FROM_EVAL(0x71DF0C17F47EDD25LL, getprotobynumber);
-      break;
-    case 7464:
-      HASH_INVOKE_FROM_EVAL(0x7C12261259F87D28LL, mcrypt_enc_is_block_algorithm_mode);
-      break;
-    case 7466:
-      HASH_INVOKE_FROM_EVAL(0x7A9C06B9CF853D2ALL, substr_count);
-      break;
-    case 7474:
-      HASH_INVOKE_FROM_EVAL(0x4DAC43060BA57D32LL, stream_wrapper_restore);
-      break;
-    case 7479:
-      HASH_INVOKE_FROM_EVAL(0x6F2182E089377D37LL, imap_list);
-      HASH_INVOKE_FROM_EVAL(0x3ACF745D381E9D37LL, rtrim);
-      break;
-    case 7480:
-      HASH_INVOKE_FROM_EVAL(0x0BA3AD85EB597D38LL, pagelet_server_task_result);
-      break;
-    case 7489:
-      HASH_INVOKE_FROM_EVAL(0x6B6DA1EE18673D41LL, xmlwriter_end_dtd_entity);
-      break;
-    case 7490:
-      HASH_INVOKE_FROM_EVAL(0x40497FCA4EC4DD42LL, posix_seteuid);
-      HASH_INVOKE_FROM_EVAL(0x298BA735FA3ABD42LL, nl_langinfo);
-      break;
-    case 7493:
-      HASH_INVOKE_FROM_EVAL(0x400A44045A999D45LL, rawurlencode);
-      break;
-    case 7494:
-      HASH_INVOKE_FROM_EVAL(0x502CF4EB0A747D46LL, magicksetimagebias);
-      HASH_INVOKE_FROM_EVAL(0x455DB7F86BCEDD46LL, pixelsetopacityquantum);
-      HASH_INVOKE_FROM_EVAL(0x59AD2C922FF75D46LL, mdecrypt_generic);
-      break;
-    case 7497:
-      HASH_INVOKE_FROM_EVAL(0x113ED435AEFDDD49LL, imagecolorallocatealpha);
-      break;
-    case 7503:
-      HASH_INVOKE_FROM_EVAL(0x0FBCF35ADD209D4FLL, drawarc);
-      break;
-    case 7509:
-      HASH_INVOKE_FROM_EVAL(0x36D672EF4FBEFD55LL, json_encode);
-      break;
-    case 7512:
-      HASH_INVOKE_FROM_EVAL(0x146109BDD2F97D58LL, hphp_splfileobject_setmaxlinelen);
-      break;
-    case 7520:
-      HASH_INVOKE_FROM_EVAL(0x6FACBD7F02B6FD60LL, uasort);
-      break;
-    case 7521:
-      HASH_INVOKE_FROM_EVAL(0x357BAB6E700EBD61LL, destroypixelwandarray);
-      break;
-    case 7534:
-      HASH_INVOKE_FROM_EVAL(0x0B1348D1540E7D6ELL, magicksetimageformat);
-      break;
-    case 7539:
-      HASH_INVOKE_FROM_EVAL(0x7D8DCC72522CBD73LL, mb_detect_encoding);
-      break;
-    case 7540:
-      HASH_INVOKE_FROM_EVAL(0x51E8B5B728E33D74LL, imap_last_error);
-      break;
-    case 7543:
-      HASH_INVOKE_FROM_EVAL(0x7FCAAAB932C57D77LL, iterator_count);
-      break;
-    case 7544:
-      HASH_INVOKE_FROM_EVAL(0x6352349F97557D78LL, stream_socket_get_name);
-      break;
-    case 7547:
-      HASH_INVOKE_FROM_EVAL(0x680A7EB3DA1F5D7BLL, prev);
-      break;
-    case 7554:
-      HASH_INVOKE_FROM_EVAL(0x2D15262403ADDD82LL, drawcomposite);
-      break;
-    case 7555:
-      HASH_INVOKE_FROM_EVAL(0x1B0FF5C02F571D83LL, fb_rename_function);
-      break;
-    case 7561:
-      HASH_INVOKE_FROM_EVAL(0x230E7AD147721D89LL, end);
-      break;
-    case 7569:
-      HASH_INVOKE_FROM_EVAL(0x7C2B3FE61FBDFD91LL, openssl_pkey_get_details);
-      break;
-    case 7576:
-      HASH_INVOKE_FROM_EVAL(0x06A796D329C21D98LL, call_user_func);
-      break;
-    case 7581:
-      HASH_INVOKE_FROM_EVAL(0x74BE8836F3B13D9DLL, session_name);
-      break;
-    case 7584:
-      HASH_INVOKE_FROM_EVAL(0x73B43ABDD5C61DA0LL, shuffle);
-      HASH_INVOKE_FROM_EVAL(0x5E8606470A09BDA0LL, magickposterizeimage);
-      HASH_INVOKE_FROM_EVAL(0x167A11C41EB71DA0LL, pixelgetexceptiontype);
-      break;
-    case 7586:
-      HASH_INVOKE_FROM_EVAL(0x71583A8FEF5C7DA2LL, sys_get_temp_dir);
-      break;
-    case 7589:
-      HASH_INVOKE_FROM_EVAL(0x46B2F287D2FC7DA5LL, memcache_get);
-      break;
-    case 7590:
-      HASH_INVOKE_FROM_EVAL(0x28DC1AD6DA9E7DA6LL, gethostbyname);
-      break;
-    case 7592:
-      HASH_INVOKE_FROM_EVAL(0x572AE270D9E4FDA8LL, socket_set_option);
-      break;
-    case 7593:
-      HASH_INVOKE_FROM_EVAL(0x35828C81A86A9DA9LL, cpu_get_count);
-      break;
-    case 7594:
-      HASH_INVOKE_FROM_EVAL(0x6326C14D0FFA7DAALL, fb_thrift_serialize);
-      break;
-    case 7595:
-      HASH_INVOKE_FROM_EVAL(0x188720048AB37DABLL, magickquantizeimages);
-      break;
-    case 7601:
-      HASH_INVOKE_FROM_EVAL(0x67EAC6D7332F3DB1LL, hphp_splfileobject_fgetcsv);
-      break;
-    case 7603:
-      HASH_INVOKE_FROM_EVAL(0x628069E483F35DB3LL, hphp_splfileobject_fstat);
-      break;
-    case 7610:
-      HASH_INVOKE_FROM_EVAL(0x5E0C6E797607DDBALL, mysql_result);
-      HASH_INVOKE_FROM_EVAL(0x7964DE73DCA17DBALL, magickhasnextimage);
-      break;
-    case 7613:
-      HASH_INVOKE_FROM_EVAL(0x48AA091B1E493DBDLL, setlocale);
-      break;
-    case 7617:
-      HASH_INVOKE_FROM_EVAL(0x683E88F441F9BDC1LL, chgrp);
-      break;
-    case 7619:
-      HASH_INVOKE_FROM_EVAL(0x0433140BB339DDC3LL, log);
-      break;
-    case 7620:
-      HASH_INVOKE_FROM_EVAL(0x2A38BA8B4A0F9DC4LL, apc_fetch);
-      break;
-    case 7624:
-      HASH_INVOKE_FROM_EVAL(0x66C3E73210067DC8LL, magickgetimageunits);
-      break;
-    case 7630:
-      HASH_INVOKE_FROM_EVAL(0x4AD5B65BCE665DCELL, array_key_exists);
-      break;
-    case 7637:
-      HASH_INVOKE_FROM_EVAL(0x7E1801C8E70D1DD5LL, imagefontwidth);
-      break;
-    case 7639:
-      HASH_INVOKE_FROM_EVAL(0x638690DF6D06FDD7LL, imageconvolution);
-      break;
-    case 7647:
-      HASH_INVOKE_FROM_EVAL(0x044D7013BDB33DDFLL, spl_autoload_functions);
-      break;
-    case 7660:
-      HASH_INVOKE_FROM_EVAL(0x5B51DD18C3E13DECLL, openssl_x509_parse);
-      HASH_INVOKE_FROM_EVAL(0x5ABB7486CE861DECLL, array_merge_recursive);
-      break;
-    case 7663:
-      HASH_INVOKE_FROM_EVAL(0x0BB22147ADADDDEFLL, pfsockopen);
-      HASH_INVOKE_FROM_EVAL(0x72293DCE8CC4BDEFLL, htmlspecialchars);
-      break;
-    case 7667:
-      HASH_INVOKE_FROM_EVAL(0x7AE1BE187F18FDF3LL, fgets);
-      break;
-    case 7668:
-      HASH_INVOKE_FROM_EVAL(0x5046A0D9DFDB5DF4LL, strcspn);
-      break;
-    case 7671:
-      HASH_INVOKE_FROM_EVAL(0x23E563F1EC919DF7LL, hphp_splfileinfo_getpathname);
-      break;
-    case 7672:
-      HASH_INVOKE_FROM_EVAL(0x5E43280BC8DD1DF8LL, magicktrimimage);
-      break;
-    case 7674:
-      HASH_INVOKE_FROM_EVAL(0x4FB6B5C2636D1DFALL, apc_exists);
-      break;
-    case 7675:
-      HASH_INVOKE_FROM_EVAL(0x47C62D58B0B65DFBLL, thrift_protocol_write_binary);
-      break;
-    case 7678:
-      HASH_INVOKE_FROM_EVAL(0x21F24104004CFDFELL, evhttp_post);
-      HASH_INVOKE_FROM_EVAL(0x072690BF719D7DFELL, hphp_recursivedirectoryiterator_rewind);
-      break;
-    case 7682:
-      HASH_INVOKE_FROM_EVAL(0x7829D2171DFBFE02LL, magickgetimagegamma);
-      break;
-    case 7693:
-      HASH_INVOKE_FROM_EVAL(0x756B92411E7FBE0DLL, stream_get_wrappers);
-      break;
-    case 7698:
-      HASH_INVOKE_FROM_EVAL(0x05FAA2085D94FE12LL, urlencode);
-      break;
-    case 7700:
-      HASH_INVOKE_FROM_EVAL(0x41E394B12170BE14LL, socket_send);
-      HASH_INVOKE_FROM_EVAL(0x3192209D50C1FE14LL, pixelsetalpha);
-      break;
-    case 7701:
-      HASH_INVOKE_FROM_EVAL(0x525F197D74423E15LL, get_resource_type);
-      break;
-    case 7703:
-      HASH_INVOKE_FROM_EVAL(0x0F5759A501FAFE17LL, imagecreatefromgd2part);
-      break;
-    case 7705:
-      HASH_INVOKE_FROM_EVAL(0x4A694B42B21A9E19LL, destroymagickwand);
-      break;
-    case 7707:
-      HASH_INVOKE_FROM_EVAL(0x7FA0B63054221E1BLL, magickrollimage);
-      break;
-    case 7717:
-      HASH_INVOKE_FROM_EVAL(0x1C6246FA51EBDE25LL, hphp_get_static_property);
-      break;
-    case 7720:
-      HASH_INVOKE_FROM_EVAL(0x3456885FF0679E28LL, lchown);
-      break;
-    case 7725:
-      HASH_INVOKE_FROM_EVAL(0x7817FA38BAAEFE2DLL, fsockopen);
-      break;
-    case 7734:
-      HASH_INVOKE_FROM_EVAL(0x2E42ED1E15CCFE36LL, mysql_affected_rows);
-      break;
-    case 7738:
-      HASH_INVOKE_FROM_EVAL(0x6E2CF6ECA0987E3ALL, get_headers);
-      break;
-    case 7748:
-      HASH_INVOKE_FROM_EVAL(0x71B7756BD1B43E44LL, dom_document_savexml);
-      break;
-    case 7767:
-      HASH_INVOKE_FROM_EVAL(0x21B07F1F212BDE57LL, hphp_get_original_class_name);
-      break;
-    case 7771:
-      HASH_INVOKE_FROM_EVAL(0x299F1A5895461E5BLL, curl_multi_close);
-      break;
-    case 7779:
-      HASH_INVOKE_FROM_EVAL(0x5697E5F6AAF47E63LL, mb_http_input);
-      break;
-    case 7782:
-      HASH_INVOKE_FROM_EVAL(0x6CB3DEB458A2DE66LL, apc_bin_load);
-      break;
-    case 7786:
-      HASH_INVOKE_FROM_EVAL(0x25C0C5E961AFDE6ALL, xmlwriter_full_end_element);
-      break;
-    case 7793:
-      HASH_INVOKE_FROM_EVAL(0x6AC126DCE941FE71LL, memory_get_peak_usage);
-      break;
-    case 7795:
-      HASH_INVOKE_FROM_EVAL(0x3B28CA1BE1D0DE73LL, xbox_get_thread_timeout);
-      break;
-    case 7796:
-      HASH_INVOKE_FROM_EVAL(0x47D0510206B89E74LL, ini_restore);
-      break;
-    case 7798:
-      HASH_INVOKE_FROM_EVAL(0x36E9EC047FC73E76LL, mb_convert_encoding);
-      break;
-    case 7802:
-      HASH_INVOKE_FROM_EVAL(0x6A3D9F8EDB005E7ALL, flush);
-      break;
-    case 7806:
-      HASH_INVOKE_FROM_EVAL(0x51060D186C703E7ELL, headers_list);
-      break;
-    case 7809:
-      HASH_INVOKE_FROM_EVAL(0x0ECFC3676B4FDE81LL, chr);
-      break;
-    case 7810:
-      HASH_INVOKE_FROM_EVAL(0x379F7BF525FF1E82LL, magicksetimagecolorspace);
-      break;
-    case 7822:
-      HASH_INVOKE_FROM_EVAL(0x29A2FBD427647E8ELL, mysql_connect);
-      break;
-    case 7827:
-      HASH_INVOKE_FROM_EVAL(0x5E968924197F5E93LL, mcrypt_ofb);
-      break;
-    case 7831:
-      HASH_INVOKE_FROM_EVAL(0x6254E9BDC11F3E97LL, imagecreatefromgd2);
-      break;
-    case 7835:
-      HASH_INVOKE_FROM_EVAL(0x2A019CAA1188BE9BLL, preg_grep);
-      break;
-    case 7840:
-      HASH_INVOKE_FROM_EVAL(0x37C5AF6E7E8B5EA0LL, fputs);
-      break;
-    case 7843:
-      HASH_INVOKE_FROM_EVAL(0x6467FFB910B8BEA3LL, magickspliceimage);
-      break;
-    case 7851:
-      HASH_INVOKE_FROM_EVAL(0x632D4FC346797EABLL, pixelgetexceptionstring);
-      break;
-    case 7859:
-      HASH_INVOKE_FROM_EVAL(0x7DB9D839ACE0DEB3LL, natsort);
-      break;
-    case 7860:
-      HASH_INVOKE_FROM_EVAL(0x1F936B3C5406DEB4LL, fb_set_taint);
-      break;
-    case 7863:
-      HASH_INVOKE_FROM_EVAL(0x58B9EFA0FB35FEB7LL, stream_filter_prepend);
-      break;
-    case 7865:
-      HASH_INVOKE_FROM_EVAL(0x2A483AD7A3D07EB9LL, magickgetwandsize);
-      break;
-    case 7866:
-      HASH_INVOKE_FROM_EVAL(0x1F5B2728DE875EBALL, magicksetimage);
-      break;
-    case 7869:
-      HASH_INVOKE_FROM_EVAL(0x31A30B274AD2DEBDLL, call_user_func_array_rpc);
-      break;
-    case 7872:
-      HASH_INVOKE_FROM_EVAL(0x495316E596537EC0LL, imagefttext);
-      break;
-    case 7874:
-      HASH_INVOKE_FROM_EVAL(0x4CDD0B7BF826FEC2LL, rewinddir);
-      break;
-    case 7877:
-      HASH_INVOKE_FROM_EVAL(0x7D69B3537C353EC5LL, hphp_splfileinfo_isfile);
-      break;
-    case 7879:
-      HASH_INVOKE_FROM_EVAL(0x4FC99DC20A955EC7LL, session_module_name);
-      break;
-    case 7894:
-      HASH_INVOKE_FROM_EVAL(0x134B37520683DED6LL, imagesetbrush);
-      break;
-    case 7896:
-      HASH_INVOKE_FROM_EVAL(0x338D9D95095D1ED8LL, magicksetimagedelay);
-      break;
-    case 7897:
-      HASH_INVOKE_FROM_EVAL(0x7F802A06996BBED9LL, apd_set_browser_trace);
-      break;
-    case 7898:
-      HASH_INVOKE_FROM_EVAL(0x29E2771785CCBEDALL, magickgettextdescent);
-      break;
-    case 7899:
-      HASH_INVOKE_FROM_EVAL(0x1340509769275EDBLL, magickgetimagecompression);
-      break;
-    case 7905:
-      HASH_INVOKE_FROM_EVAL(0x528BA9796BD0FEE1LL, fb_rpc_intercept_handler);
-      break;
-    case 7907:
-      HASH_INVOKE_FROM_EVAL(0x28A98134BD97BEE3LL, mb_regex_encoding);
-      HASH_INVOKE_FROM_EVAL(0x0D76FFBE30B13EE3LL, imap_mailboxmsginfo);
-      break;
-    case 7908:
-      HASH_INVOKE_FROM_EVAL(0x5B6FF42ACB2FBEE4LL, getmyuid);
-      break;
-    case 7912:
-      HASH_INVOKE_FROM_EVAL(0x32B3951DFD2B9EE8LL, hphp_directoryiterator_isdot);
-      break;
-    case 7916:
-      HASH_INVOKE_FROM_EVAL(0x115CC08BC872FEECLL, fb_output_compression);
-      break;
-    case 7920:
-      HASH_INVOKE_FROM_EVAL(0x7DFF9707F1CD9EF0LL, dangling_server_proxy_old_request);
-      break;
-    case 7922:
-      HASH_INVOKE_FROM_EVAL(0x7601F38FDB3DDEF2LL, hphp_service_thread_stopped);
-      break;
-    case 7929:
-      HASH_INVOKE_FROM_EVAL(0x200FC256EB093EF9LL, gettimeofday);
-      break;
-    case 7931:
-      HASH_INVOKE_FROM_EVAL(0x6D450F078F02BEFBLL, apd_continue);
-      break;
-    case 7936:
-      HASH_INVOKE_FROM_EVAL(0x09637D7CA2E33F00LL, fgetc);
-      break;
-    case 7937:
-      HASH_INVOKE_FROM_EVAL(0x66137942508EBF01LL, date_create);
-      break;
-    case 7938:
-      HASH_INVOKE_FROM_EVAL(0x78A02A603FA6FF02LL, magickreducenoiseimage);
-      break;
-    case 7951:
-      HASH_INVOKE_FROM_EVAL(0x61E7A36CA7FF5F0FLL, drawsetcliprule);
-      HASH_INVOKE_FROM_EVAL(0x4BD54A631F665F0FLL, drawpathcurvetosmoothabsolute);
-      break;
-    case 7955:
-      HASH_INVOKE_FROM_EVAL(0x3B197C0731233F13LL, dom_characterdata_substring_data);
-      break;
-    case 7963:
-      HASH_INVOKE_FROM_EVAL(0x27A4633381195F1BLL, chown);
-      break;
-    case 7967:
-      HASH_INVOKE_FROM_EVAL(0x7C0C145EFE0EBF1FLL, defined);
-      break;
-    case 7969:
-      HASH_INVOKE_FROM_EVAL(0x1FF5B9A4FC78BF21LL, drawsettextantialias);
-      HASH_INVOKE_FROM_EVAL(0x20DD4631AD975F21LL, imap_rfc822_write_address);
-      break;
-    case 7980:
-      HASH_INVOKE_FROM_EVAL(0x035EFF9E1757DF2CLL, http_build_query);
-      HASH_INVOKE_FROM_EVAL(0x22607B4EE253DF2CLL, imap_savebody);
-      break;
-    case 7986:
-      HASH_INVOKE_FROM_EVAL(0x78257F34467BDF32LL, drawsetstrokedasharray);
-      HASH_INVOKE_FROM_EVAL(0x2B66EACB77AE9F32LL, print_r);
-      break;
-    case 7993:
-      HASH_INVOKE_FROM_EVAL(0x3E9146C06AAEFF39LL, magicksetimagecompressionquality);
-      break;
-    case 8004:
-      HASH_INVOKE_FROM_EVAL(0x65353A823EB91F44LL, imap_mail_compose);
-      break;
-    case 8021:
-      HASH_INVOKE_FROM_EVAL(0x49D986274B1C5F55LL, collator_asort);
-      break;
-    case 8024:
-      HASH_INVOKE_FROM_EVAL(0x0551AAE8F1A6FF58LL, magicklevelimage);
-      break;
-    case 8027:
-      HASH_INVOKE_FROM_EVAL(0x76418F884500DF5BLL, stream_socket_enable_crypto);
-      break;
-    case 8029:
-      HASH_INVOKE_FROM_EVAL(0x07FF92CF46DDFF5DLL, imagepsfreefont);
-      break;
-    case 8036:
-      HASH_INVOKE_FROM_EVAL(0x41EF51E62AD3DF64LL, pagelet_server_is_enabled);
-      HASH_INVOKE_FROM_EVAL(0x280051555A21DF64LL, rename);
-      break;
-    case 8043:
-      HASH_INVOKE_FROM_EVAL(0x56EF59D6CB0A5F6BLL, dom_document_save_html_file);
-      break;
-    case 8044:
-      HASH_INVOKE_FROM_EVAL(0x23D5E9E53D11BF6CLL, gmdate);
-      break;
-    case 8050:
-      HASH_INVOKE_FROM_EVAL(0x4B22EF06BAA83F72LL, version_compare);
-      break;
-    case 8062:
-      HASH_INVOKE_FROM_EVAL(0x7064BEBF508F3F7ELL, socket_read);
-      break;
-    case 8064:
-      HASH_INVOKE_FROM_EVAL(0x63F18DE0DB807F80LL, magickqueryfonts);
-      break;
-    case 8068:
-      HASH_INVOKE_FROM_EVAL(0x14402B01D00E9F84LL, magicksteganoimage);
-      break;
-    case 8070:
-      HASH_INVOKE_FROM_EVAL(0x44CE4DB1CE7E9F86LL, flock);
-      break;
-    case 8075:
-      HASH_INVOKE_FROM_EVAL(0x2755DD4112AA5F8BLL, magicksampleimage);
-      break;
-    case 8078:
-      HASH_INVOKE_FROM_EVAL(0x7A8F1104B0CCDF8ELL, phpcredits);
-      break;
-    case 8079:
-      HASH_INVOKE_FROM_EVAL(0x4A6C46DC7FE29F8FLL, hphp_recursivedirectoryiterator_getchildren);
-      break;
-    case 8081:
-      HASH_INVOKE_FROM_EVAL(0x78463112BE739F91LL, connection_timeout);
-      break;
-    case 8085:
-      HASH_INVOKE_FROM_EVAL(0x40D620CBA0D41F95LL, opendir);
-      break;
-    case 8087:
-      HASH_INVOKE_FROM_EVAL(0x35117886C885DF97LL, hphp_recursivedirectoryiterator_getsubpathname);
-      break;
-    case 8088:
-      HASH_INVOKE_FROM_EVAL(0x0293F60B46511F98LL, drawsetfontstretch);
-      break;
-    case 8090:
-      HASH_INVOKE_FROM_EVAL(0x2B7CAC006AF27F9ALL, fflush);
-      break;
-    case 8093:
-      HASH_INVOKE_FROM_EVAL(0x0AD6DE8829773F9DLL, apc_compile_file);
-      break;
-    case 8100:
-      HASH_INVOKE_FROM_EVAL(0x0E7E9AA21AE99FA4LL, hphp_recursiveiteratoriterator_current);
-      break;
-    case 8102:
-      HASH_INVOKE_FROM_EVAL(0x0DEEA8C3E3A47FA6LL, read_exif_data);
-      break;
-    case 8110:
-      HASH_INVOKE_FROM_EVAL(0x64D269A505D51FAELL, array_map);
-      break;
-    case 8113:
-      HASH_INVOKE_FROM_EVAL(0x0F78ECF42C30DFB1LL, array_chunk);
-      break;
-    case 8119:
-      HASH_INVOKE_FROM_EVAL(0x6465CD999F4C5FB7LL, hphp_invoke_method);
-      break;
-    case 8120:
-      HASH_INVOKE_FROM_EVAL(0x6DB2DB341ECF3FB8LL, file_exists);
-      break;
-    case 8129:
-      HASH_INVOKE_FROM_EVAL(0x3FF9AAFF85DDDFC1LL, class_parents);
-      break;
-    case 8130:
-      HASH_INVOKE_FROM_EVAL(0x460470C490FAFFC2LL, dom_node_normalize);
-      break;
-    case 8142:
-      HASH_INVOKE_FROM_EVAL(0x042193C97C65FFCELL, magickwaveimage);
-      break;
-    case 8144:
-      HASH_INVOKE_FROM_EVAL(0x53DB5D0490C51FD0LL, xhprof_sample_disable);
-      break;
-    case 8150:
-      HASH_INVOKE_FROM_EVAL(0x7FC00035D14B9FD6LL, apc_delete_file);
-      break;
-    case 8152:
-      HASH_INVOKE_FROM_EVAL(0x4234F2B59531FFD8LL, posix_getlogin);
-      break;
-    case 8157:
-      HASH_INVOKE_FROM_EVAL(0x4EDEDA4278CD3FDDLL, magickchopimage);
-      break;
-    case 8158:
-      HASH_INVOKE_FROM_EVAL(0x7F5FC3CAF8CE9FDELL, gzcompress);
-      HASH_INVOKE_FROM_EVAL(0x72925D2DF7E61FDELL, drawpathcurvetoquadraticbeziersmoothrelative);
-      break;
-    case 8168:
-      HASH_INVOKE_FROM_EVAL(0x4D7AEC41CFD73FE8LL, hphp_recursivedirectoryiterator_getsubpath);
-      break;
-    case 8171:
-      HASH_INVOKE_FROM_EVAL(0x67D1EE05DFE71FEBLL, hphp_splfileobject_getcvscontrol);
-      break;
-    case 8175:
-      HASH_INVOKE_FROM_EVAL(0x00EEEE9C6CEA5FEFLL, xmlwriter_write_element_ns);
-      break;
-    case 8182:
-      HASH_INVOKE_FROM_EVAL(0x25FCE64E12505FF6LL, magicksetimagerenderingintent);
-      break;
-    case 8186:
-      HASH_INVOKE_FROM_EVAL(0x13EE24AF67113FFALL, ob_end_flush);
-      break;
-    case 8187:
-      HASH_INVOKE_FROM_EVAL(0x63BE4CEF1FC47FFBLL, imagefill);
-      break;
-    default:
-      break;
-  }
+  ef_t ptr = findFuncEval(s, hash);
+  if (ptr) return ptr(env, caller);
   Variant ret = invoke_failed(s, null_array, -1, fatal);
   eval_get_params(env, caller);
   return ret;

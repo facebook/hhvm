@@ -72,7 +72,7 @@ class StringData {
     return NULL;
   }
 
-  static StringData *escalate(StringData *in);
+  static StringData *Escalate(StringData *in);
 
   /**
    * When we have static StringData in SharedStore, we should avoid directly
@@ -138,6 +138,14 @@ class StringData {
   void setChar(int offset, CStrRef substring);
   void inc();
   void negate();
+  void set(bool    key, CStrRef v) { setChar(key ? 1 : 0, v); }
+  void set(char    key, CStrRef v) { setChar(key, v); }
+  void set(short   key, CStrRef v) { setChar(key, v); }
+  void set(int     key, CStrRef v) { setChar(key, v); }
+  void set(int64   key, CStrRef v) { setChar(key, v); }
+  void set(double  key, CStrRef v) { setChar((int64)key, v); }
+  void set(CStrRef key, CStrRef v);
+  void set(CVarRef key, CStrRef v);
 
   /**
    * Type conversion functions.

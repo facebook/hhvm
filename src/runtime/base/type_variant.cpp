@@ -2759,12 +2759,13 @@ Variant &Variant::o_unsetLval(CStrRef propName, CVarRef tmpForGet,
     break;                                                              \
   case KindOfStaticString:                                              \
   case KindOfString: {                                                  \
-    String s = toString();                                              \
-    if (s.empty()) {                                                    \
+    StringData *s = getStringData();                                    \
+    if (s->empty()) {                                                   \
       set(Array::Create(ToKey(key), v));                                \
     } else {                                                            \
-      s.lvalAt(key) = v;                                                \
-      set(s);                                                           \
+      StringData *es = StringData::Escalate(s);                         \
+      es->set(key, v.toString());                                       \
+      if (es != s) set(es);                                             \
     }                                                                   \
     break;                                                              \
   }                                                                     \
@@ -2888,16 +2889,17 @@ CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
     return m_data.pvar->set(key, v);
   case KindOfStaticString:
   case KindOfString: {
-    String s = toString();
-    if (s.empty()) {
+    StringData *s = getStringData();
+    if (s->empty()) {
       if (isString) {
         set(Array::Create(key, v));
       } else {
         set(Array::Create(ToKey(key), v));
       }
     } else {
-      s.lvalAt(key) = v;
-      set(s);
+      StringData *es = StringData::Escalate(s);
+      es->set(key, v.toString());
+      if (es != s) set(es);
     }
     break;
   }
@@ -2938,14 +2940,15 @@ CVarRef Variant::set(CVarRef key, CVarRef v) {
     return m_data.pvar->set(key, v);
   case KindOfStaticString:
   case KindOfString: {
-    String s = toString();
-    if (s.empty()) {
+    StringData *s = getStringData();
+    if (s->empty()) {
       Variant k(ToKey(key));
       if (k.isNull()) return lvalBlackHole();
       set(Array::Create(k, v));
     } else {
-      s.lvalAt(key) = v;
-      set(s);
+      StringData *es = StringData::Escalate(s);
+      es->set(key, v.toString());
+      if (es != s) set(es);
     }
     break;
   }

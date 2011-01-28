@@ -210,11 +210,10 @@ void StringData::escalate() {
   m_hash = 0;
 }
 
-StringData *StringData::escalate(StringData *in) {
+StringData *StringData::Escalate(StringData *in) {
   if (!in) return NEW(StringData)();
   if (in->_count != 1 || in->isImmutable()) {
     StringData *ret = NEW(StringData)(in->data(), in->size(), CopyString);
-    ret->incRefCount();
     if (!in->decRefCount()) in->release();
     return ret;
   }
@@ -346,6 +345,14 @@ void StringData::negate() {
   for (int i = 0; i < len; i++) {
     buf[i] = ~(buf[i]);
   }
+}
+
+void StringData::set(CStrRef key, CStrRef v) {
+  setChar(key.toInt32(), v);
+}
+
+void StringData::set(CVarRef key, CStrRef v) {
+  setChar(key.toInt32(), v);
 }
 
 void StringData::setStatic() const {

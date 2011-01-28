@@ -305,7 +305,9 @@ public:
 
  private:
   StringOffset lvalAtImpl(int key) {
-    return StringOffset((m_px = StringData::escalate(m_px)), key);
+    m_px = StringData::Escalate(m_px);
+    m_px->incRefCount();
+    return StringOffset(m_px, key);
   }
 
   String rvalAtImpl(int key) const {

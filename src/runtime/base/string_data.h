@@ -164,13 +164,9 @@ class StringData {
   }
 
   int64 hash() const {
-    if (isStatic()) return getPrecomputedHash();
     if (isShared()) return getSharedStringHash();
     int64 h = m_hash & 0x7fffffffffffffffull;
-    if (h == 0) {
-      h = hashHelper();
-      m_hash |= h;
-    }
+    if (h == 0) return hashHelper();
     return h;
   }
 

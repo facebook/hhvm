@@ -502,7 +502,7 @@ void throw_request_timeout_exception() {
 void throw_memory_exceeded_exception() {
   // NOTE: This is marked as __attribute__((noreturn))
   // in base/types.h AND base/builtin_functions.h
-  throw UncatchableException("request has exceeded memory limit");
+  throw FatalErrorException("request has exceeded memory limit");
 }
 
 void throw_call_non_object() {

@@ -153,6 +153,8 @@ public:
     m_delta = delta;
 #endif
     if (m_stats.usage > m_stats.peakUsage) {
+      // NOTE: the peak memory usage monotonically increases, so there cannot
+      // be a second OOM exception in one request.
       if (m_stats.maxBytes > 0 && m_stats.peakUsage <= m_stats.maxBytes &&
           m_stats.usage > m_stats.maxBytes) {
         refreshStatsHelper();

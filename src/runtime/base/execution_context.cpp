@@ -101,6 +101,7 @@ void ExecutionContext::fiberInit(FiberLocal *src, FiberReferenceMap &refMap) {
   m_timezone = ec->m_timezone.fiberCopy();
   m_timezoneDefault = ec->m_timezoneDefault.fiberCopy();
   m_argSeparatorOutput = ec->m_argSeparatorOutput.fiberCopy();
+  m_allowedDirs = ec->m_allowedDirs.fiberMarshal(refMap);
 }
 
 void ExecutionContext::fiberExit(FiberLocal *src, FiberReferenceMap &refMap) {

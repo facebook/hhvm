@@ -182,11 +182,13 @@ Array DateTime::Parse(CStrRef datetime) {
       element.set("hour",   parsed_time->relative.h);
       element.set("minute", parsed_time->relative.i);
       element.set("second", parsed_time->relative.s);
-    }
-    if (parsed_time->have_weekday_relative) {
-      element.set("weekday", parsed_time->relative.weekday);
-    }
-    if (parsed_time->have_relative || parsed_time->have_weekday_relative) {
+#if defined(TIMELIB_VERSION)
+      if (parsed_time->relative.have_weekday_relative) {
+#else
+      if (parsed_time->have_weekday_relative) {
+#endif
+        element.set("weekday", parsed_time->relative.weekday);
+      }
       ret.set("relative", element);
     }
   }
@@ -397,7 +399,12 @@ void DateTime::modify(CStrRef diff) {
   m_time->relative.s = tmp_time->relative.s;
   m_time->relative.weekday = tmp_time->relative.weekday;
   m_time->have_relative = tmp_time->have_relative;
+#if defined(TIMELIB_VERSION)
+  m_time->relative.have_weekday_relative =
+    tmp_time->relative.have_weekday_relative;
+#else
   m_time->have_weekday_relative = tmp_time->have_weekday_relative;
+#endif
   m_time->sse_uptodate = 0;
   timelib_time_dtor(tmp_time);
   update();

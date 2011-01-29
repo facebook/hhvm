@@ -444,6 +444,11 @@ private:
   (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
    const std::vector<const char*> &classes, const char* macro,
    bool useString = false);
+
+  static void outputCPPHashTableClassVarInit
+    (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
+     const std::vector<const char*> &classes);
+
   void outputCPPMethodInvokeTable
     (CodeGenerator &cg, AnalysisResultPtr ar,
      const std::vector <const char*> &keys,

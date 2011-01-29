@@ -713,10 +713,98 @@ void ClassScope::outputCPPClassJumpTable
   }
 }
 
+void ClassScope::outputCPPHashTableClassVarInit
+(CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
+ const vector<const char*> &classes) {
+  ASSERT(cg.getCurrentIndentation() == 0);
+  const char text1[] =
+    "class hashNodeCVI {\n"
+    "public:\n"
+    "  hashNodeCVI() {}\n"
+    "  hashNodeCVI(int64 h, const char *n, int o,\n"
+    "              const struct ObjectStaticCallbacks *p) :\n"
+    "    hash(h), name(n), off(o), ptr(p), next(NULL) {}\n"
+    "  int64 hash;\n"
+    "  const char *name;\n"
+    "  int64 off;\n"
+    "  const struct ObjectStaticCallbacks *ptr;\n"
+    "  hashNodeCVI *next;\n"
+    "};\n"
+    "static hashNodeCVI *cviMapTable[%d];\n"
+    "static hashNodeCVI cviBuckets[%d];\n"
+    "\n"
+    "#define GET_OFFSET(n) (&gv.%s ## n - gv.tgv_ClassStaticsPtr + 1)\n"
+    "static class CVITableInitializer {\n"
+    "  public: CVITableInitializer() {\n"
+    "    GlobalVariables gv;\n"
+    "    const char *cviMapData[] = {\n";
+
+  const char text2[] =
+    "      NULL, NULL, NULL,\n"
+    "    };\n"
+    "    hashNodeCVI *b = cviBuckets;\n"
+    "    for (const char **s = cviMapData; *s; s++, b++) {\n"
+    "      const char *name = *s++;\n"
+    "      int64 off = (int64)(*s++);\n"
+    "      const struct ObjectStaticCallbacks *ptr =\n"
+    "        (const struct ObjectStaticCallbacks *)(*s);\n"
+    "      int64 hash = hash_string(name, strlen(name));\n"
+    "      hashNodeCVI *node = new(b) hashNodeCVI(hash, name, off, ptr);\n"
+    "      int h = hash & %d;\n"
+    "      if (cviMapTable[h]) node->next = cviMapTable[h];\n"
+    "      cviMapTable[h] = node;\n"
+    "    }\n"
+    "  }\n"
+    "} cvi_table_initializer;\n"
+    "\n"
+    "static inline const hashNodeCVI *\n"
+    "findCVI(const char *name, int64 hash) {\n"
+    "  for (const hashNodeCVI *p = cviMapTable[hash & %d]; p; p = p->next) {\n"
+    "    if (p->hash == hash && !strcasecmp(p->name, name)) return p;\n"
+    "  }\n"
+    "  return NULL;\n"
+    "}\n";
+
+  int tableSize = Util::roundUpToPowerOfTwo(classes.size() * 2);
+  cg_printf(text1, tableSize, classes.size(), Option::ClassStaticsObjectPrefix);
+  for (uint i = 0; i < classes.size(); i++) {
+    const char *clsName = classes[i];
+    StringToClassScopePtrVecMap::const_iterator iterClasses =
+      classScopes.find(Util::toLower(clsName));
+    if (iterClasses->second[0]->isRedeclaring()) {
+      cg_printf("      (const char *)\"%s\", "
+                "(const char *)GET_OFFSET(%s), "
+                "(const char *)NULL,\n",
+                cg.formatLabel(clsName).c_str(),
+                iterClasses->second[0]->getName().c_str());
+    } else if (iterClasses->second[0]->isVolatile()) {
+      cg_printf("      (const char *)\"%s\", "
+                "(const char *)-1, "
+                "(const char *)&%s%s,\n",
+                cg.formatLabel(clsName).c_str(),
+                Option::ClassWrapperFunctionPrefix,
+                cg.formatLabel(clsName).c_str());
+    } else {
+      cg_printf("      (const char *)\"%s\", "
+                "(const char *)0, "
+                "(const char *)&%s%s,\n",
+                cg.formatLabel(clsName).c_str(),
+                Option::ClassWrapperFunctionPrefix,
+                cg.formatLabel(clsName).c_str());
+    }
+  }
+  cg_printf(text2, tableSize - 1, tableSize - 1);
+}
+
 void ClassScope::outputCPPClassVarInitImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
+  bool useHashTable = false;
+  if (Option::GenHashTableClassVarInit && classes.size() > 0 && !system) {
+    useHashTable = true;
+    outputCPPHashTableClassVarInit(cg, classScopes, classes);
+  }
   cg_indentBegin("Variant get%s_class_var_init(const char *s, "
                  "const char *var) {\n",
                  system ? "_builtin" : "");
@@ -729,9 +817,25 @@ void ClassScope::outputCPPClassVarInitImpl
               "return r;\n");
     cg_indentEnd("}\n");
   }
-  outputCPPClassJumpTable(cg, classScopes, classes, "HASH_GET_CLASS_VAR_INIT");
+  if (!useHashTable) {
+    outputCPPClassJumpTable(cg, classScopes, classes,
+                            "HASH_GET_CLASS_VAR_INIT");
+  } else {
+    cg.printDeclareGlobals();
+    cg_printf("const hashNodeCVI *p = findCVI(s, hash_string(s));\n"
+              "if (!p) return get_builtin_class_var_init(s, var);\n"
+              "int64 off = p->off;\n"
+              "if (off == 0) return p->ptr->os_getInit(var);\n"
+              "checkClassExists(s, g);\n"
+              "if (off < 0) return p->ptr->os_getInit(var); "
+              "// volatile class\n"
+              "return g->tgv_ClassStaticsPtr[off-1]->os_getInit(var); "
+              "// redeclared class\n");
+  }
   if (!system) {
-    cg_printf("return get_builtin_class_var_init(s, var);\n");
+    if (!useHashTable) {
+      cg_printf("return get_builtin_class_var_init(s, var);\n");
+    }
   } else {
     cg_printf("return throw_missing_class(s);\n");
   }

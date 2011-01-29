@@ -2446,6 +2446,12 @@ void AnalysisResult::outputCPPDynamicClassTables(
   string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
     ((system || !Option::SplitDynamicClassTable) ? "dynamic_table_class"
       : "dynamic_table_class_" + lexical_cast<string>(part)) + ".no.cpp";
+
+  if (part == 1 && Option::GenHashTableClassVarInit && !system) {
+    tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
+                "dynamic_table_class_1.cpp";
+  }
+
   Util::mkdir(tablePath);
   ofstream fTable(tablePath.c_str());
   CodeGenerator cg(&fTable, output);

@@ -105,6 +105,7 @@ public:
   static std::string ForceCompressionParam;
   static bool EnableMagicQuotesGpc;
   static bool EnableKeepAlive;
+  static bool ExposeHPHP;
   static int ConnectionTimeoutSeconds;
   static bool EnableOutputBuffering;
   static std::string OutputHandler;

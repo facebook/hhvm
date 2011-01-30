@@ -606,6 +606,10 @@ void Transport::prepareHeaders(bool compressed, const void *data, int size) {
     addHeaderImpl("Content-Type", contentType.c_str());
   }
 
+  if (RuntimeOption::ExposeHPHP) {
+    addHeaderImpl("X-Powered-By", "HPHP");
+  }
+
   // shutting down servers, so need to terminate all Keep-Alive connections
   if (!RuntimeOption::EnableKeepAlive || isServerStopping()) {
     addHeaderImpl("Connection", "close");

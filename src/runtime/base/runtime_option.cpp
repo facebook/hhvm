@@ -111,6 +111,7 @@ std::string RuntimeOption::ForceCompressionCookie;
 std::string RuntimeOption::ForceCompressionParam;
 bool RuntimeOption::EnableMagicQuotesGpc = false;
 bool RuntimeOption::EnableKeepAlive = true;
+bool RuntimeOption::ExposeHPHP = true;
 int RuntimeOption::ConnectionTimeoutSeconds = -1;
 bool RuntimeOption::EnableOutputBuffering = false;
 std::string RuntimeOption::OutputHandler;
@@ -579,6 +580,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
 
     EnableMagicQuotesGpc = server["EnableMagicQuotesGpc"].getBool();
     EnableKeepAlive = server["EnableKeepAlive"].getBool(true);
+    ExposeHPHP = server["ExposeHPHP"].getBool(true);
     ConnectionTimeoutSeconds = server["ConnectionTimeoutSeconds"].getInt16(-1);
     EnableOutputBuffering = server["EnableOutputBuffering"].getBool();
     OutputHandler = server["OutputHandler"].getString();

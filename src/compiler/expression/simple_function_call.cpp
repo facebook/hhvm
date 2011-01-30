@@ -361,10 +361,23 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         // compact('a', 'b', 'c') becomes compact('a', $a, 'b', $b, 'c', $c),
         // but only for variables that exist in the variable table.
         vector<ExpressionPtr> new_params;
+        vector<string> strs;
         for (int i = 0; i < m_params->getCount(); i++) {
           ExpressionPtr e = (*m_params)[i];
           assert(e->isLiteralString());
           string name = e->getLiteralString();
+
+          // no need to record duplicate names
+          bool found = false;
+          for (unsigned j = 0; j < strs.size(); j++) {
+            if (strcasecmp(name.data(), strs[j].data()) == 0) {
+              found = true;
+              break;
+            }
+          }
+          if (found) continue;
+          strs.push_back(name);
+
           if (vt->getSymbol(name)) {
             SimpleVariablePtr var(new SimpleVariable(
                                     e->getScope(), e->getLocation(),
@@ -1129,7 +1142,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                   Option::VariablePrefix, sv->getName().c_str());
       }
       e->preOutputCPP(cg, ar, 0);
-      cg_printf("compact%d.set(", m_ciTemp);
+      cg_printf("compact%d.add(", m_ciTemp);
       cg_printString(p, ar, shared_from_this());
       cg_printf(", ");
       e->outputCPP(cg, ar);

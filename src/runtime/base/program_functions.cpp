@@ -88,6 +88,7 @@ struct ProgramOptions {
   string     buildId;
   int        xhprofFlags;
   string     show;
+  string     parse;
 
   Eval::DebuggerClientOptions debugger_options;
 };
@@ -666,6 +667,8 @@ static int execute_program_impl(int argc, char **argv) {
      "lint specified file")
     ("show,w", value<string>(&po.show),
      "output specified file and do nothing else")
+    ("parse", value<string>(&po.parse),
+     "parse specified file and dump the AST")
     ("temp-file",
      "file specified is temporary and removed after execution")
     ("count", value<int>(&po.count)->default_value(1),
@@ -804,6 +807,15 @@ static int execute_program_impl(int argc, char **argv) {
       ret = 1;
     }
     return ret;
+  }
+
+  if (!po.parse.empty()) {
+    std::vector<Eval::StaticStatementPtr> statics;
+    Eval::Parser::Reset();
+    Eval::StatementPtr tree =
+      Eval::Parser::ParseFile(po.parse.c_str(), statics);
+    tree->dump(cout);
+    return 0;
   }
 
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {

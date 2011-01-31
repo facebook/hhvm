@@ -16022,6 +16022,19 @@ bool TestCodeRun::TestClosure() {
         "string(3) \"Foo\"\n"
         "string(9) \"{closure}\"\n");
 
+  MVCRO("<?php\n"
+        "function h() {\n"
+        "  return array_filter(array(1, 2, 3),\n"
+        "                      function($e) { return !($e & 1); });\n"
+        "}\n"
+        "h();\n"
+        "var_dump(h());\n",
+
+        "array(1) {\n"
+        "  [1]=>\n"
+        "  int(2)\n"
+        "}\n");
+
   return true;
 }
 

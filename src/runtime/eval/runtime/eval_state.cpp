@@ -212,7 +212,8 @@ ClassEvalState &RequestEvalState::declareClass(const ClassStatement *cls) {
 void RequestEvalState::declareFunction(const FunctionStatement *fn) {
   RequestEvalState *self = s_res.get();
   String name = fn->name();
-  if (self->m_functions.find(name) != self->m_functions.end() ||
+  if (self->m_functions.find(name) != self->m_functions.end() &&
+      (self->m_functions[name] != fn || name[0] != '0') || // anonymous funcs
       get_renamed_function(name) != name) {
     raise_error("Cannot redeclare %s()", name.c_str());
   }

@@ -214,7 +214,6 @@ StringData *StringData::Escalate(StringData *in) {
   if (!in) return NEW(StringData)();
   if (in->_count != 1 || in->isImmutable()) {
     StringData *ret = NEW(StringData)(in->data(), in->size(), CopyString);
-    if (!in->decRefCount()) in->release();
     return ret;
   }
   in->m_hash = 0;

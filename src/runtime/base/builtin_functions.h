@@ -198,8 +198,8 @@ inline bool instanceOf(ObjectData *v, CStrRef s) {
 
 template <class K, class V>
 const V &String::set(K key, const V &value) {
-  m_px = StringData::Escalate(m_px);
-  m_px->incRefCount();
+  StringData *s = StringData::Escalate(m_px);
+  SmartPtr<StringData>::operator=(s);
   m_px->setChar(toInt32(key), toString(value));
   return value;
 }

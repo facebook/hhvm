@@ -305,8 +305,8 @@ public:
 
  private:
   StringOffset lvalAtImpl(int key) {
-    m_px = StringData::Escalate(m_px);
-    m_px->incRefCount();
+    StringData *s = StringData::Escalate(m_px);
+    SmartPtr<StringData>::operator=(s);
     return StringOffset(m_px, key);
   }
 

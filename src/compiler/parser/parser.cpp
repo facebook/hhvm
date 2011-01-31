@@ -906,6 +906,7 @@ void Parser::saveParseTree(Token &tree) {
   completeScope(pseudoMain);
   pseudoMain->setOuterScope(m_file);
   m_file->setOuterScope(m_ar);
+  m_ar->parseExtraCode(m_file->getName());
 }
 
 void Parser::onStatementListStart(Token &out) {

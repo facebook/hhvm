@@ -203,17 +203,6 @@ public:
 
   void outputSwigFFIStubs(CodeGenerator &cg, AnalysisResultPtr ar);
 
-  std::string addLambda(const std::string &rt, const std::string &args,
-                        const std::string &body) {
-    lambda l;
-    l.name = CodeGenerator::GetNewLambda();
-    l.rt = rt;
-    l.args = args;
-    l.body = body;
-    m_lambdas.push_back(l);
-    return l.name;
-  }
-
   FileScopePtr shared_from_this() {
     return boost::static_pointer_cast<FileScope>
       (BlockScope::shared_from_this());
@@ -251,8 +240,6 @@ private:
     std::string args;
     std::string body;
   };
-
-  std::vector<lambda> m_lambdas;
 
   FunctionScopePtr createPseudoMain(AnalysisResultConstPtr ar);
   void outputCPPHelper(CodeGenerator &cg, AnalysisResultPtr ar,

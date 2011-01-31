@@ -253,13 +253,6 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   cg.setContext(CodeGenerator::CppImplementation);
   cg_printf("/* preface starts */\n");
-  for (vector<lambda>::const_iterator it = m_lambdas.begin();
-       it != m_lambdas.end(); ++it) {
-    cg_indentBegin("inline %s %s(%s) {\n", it->rt.c_str(), it->name.c_str(),
-                   it->args.c_str());
-    cg_printf("%s\n", it->body.c_str());
-    cg_indentEnd("}\n");
-  }
 
   for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
        it != m_functions.end(); ++it) {

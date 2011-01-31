@@ -79,27 +79,22 @@ void AnalysisResult::appendExtraCode(const std::string &key,
   extraCode += code + "\n";
 }
 
-bool AnalysisResult::getExtraCodes(std::map<std::string, std::string> &codes) {
-  codes.clear();
-  codes.swap(m_extraCodes);
-  return !codes.empty();
-}
-
-void AnalysisResult::parseExtraCodes(int &round, map<string, string> &codes) {
-  round++;
-  AnalysisResultPtr ar = shared_from_this();
-  for (map<string, string>::const_iterator iter = codes.begin();
-       iter != codes.end(); ++iter) {
-    string sfilename = iter->first + Option::LambdaPrefix + "lambda" +
-      lexical_cast<string>(round);
-    const char *filename = m_extraCodeFileNames.add(sfilename.c_str());
-    Compiler::Parser::ParseString(iter->second.c_str(), ar, filename);
-  }
-}
-
 void AnalysisResult::appendExtraCode(const std::string &key,
                                      const std::string &code) const {
   lock()->appendExtraCode(key, code);
+}
+
+void AnalysisResult::parseExtraCode(const string &key) {
+  Lock lock(m_mutex);
+  map<string, string>::iterator iter = m_extraCodes.find(key);
+  if (iter != m_extraCodes.end()) {
+    string code = iter->second;
+    string sfilename = iter->first + "." + Option::LambdaPrefix + "lambda";
+    m_extraCodes.erase(key);
+
+    const char *filename = m_extraCodeFileNames.add(sfilename.c_str());
+    Compiler::Parser::ParseString(code.c_str(), shared_from_this(), filename);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -135,7 +130,7 @@ void AnalysisResult::parseOnDemand(const std::string &name) const {
         Option::PackageExcludeFiles.find(rname) ==
         Option::PackageExcludeFiles.end() &&
         !Option::IsFileExcluded(rname, Option::PackageExcludePatterns)) {
-      lock()->m_package->addSourceFile(rname.c_str());
+      m_package->addSourceFile(rname.c_str());
     }
   }
 }

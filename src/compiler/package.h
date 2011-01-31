@@ -41,7 +41,7 @@ public:
 
   void addAllFiles(bool force); // add from Option::PackageDirectories/Files
 
-  void addSourceFile(const char *fileName);
+  void addSourceFile(const char *fileName, bool check = false);
   void addInputList(const char *listFileName);
   void addStaticFile(const char *fileName);
   void addDirectory(const std::string &path, bool force);
@@ -73,7 +73,7 @@ private:
   bool m_bAspTags;
   std::set<std::string> m_filesToParse;
   StringBag m_files;
-  std::set<std::string> m_filesParsed;
+  void *m_dispatcher;
 
   Mutex m_mutex;
   AnalysisResultPtr m_ar;

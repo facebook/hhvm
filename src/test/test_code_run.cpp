@@ -95,11 +95,6 @@ bool TestCodeRun::GenerateFiles(const char *input,
   Compiler::Parser::ParseString(input, ar);
   BuiltinSymbols::Load(ar);
   ar->loadBuiltins();
-  int round = 0;
-  map<string,string> codes;
-  while (ar->getExtraCodes(codes)) {
-    ar->parseExtraCodes(round, codes);
-  }
   ar->analyzeProgram();
   ar->preOptimize();
   ar->inferTypes();

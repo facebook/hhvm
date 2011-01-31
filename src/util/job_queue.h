@@ -70,7 +70,7 @@ namespace HPHP {
 /**
  * A job queue that's suitable for multiple threads to work on.
  */
-template<typename TJob>
+template<typename TJob, bool waitable = false>
 class JobQueue : public SynchronizableMulti {
 public:
   // trial class for signaling queue stop
@@ -102,7 +102,7 @@ public:
    * by this queue class, it's up to a worker class on whether to deallocate
    * the job object correctly.
    */
-  TJob dequeue(int id) {
+  TJob dequeue(int id, bool inc = false) {
     Lock lock(this);
     bool flushed = false;
     while (m_jobs.empty()) {
@@ -119,6 +119,7 @@ public:
         }
       }
     }
+    if (inc) incActiveWorker();
     m_jobCount = m_jobs.size() - 1;
     if (m_lifo) {
       TJob job = m_jobs.back();
@@ -139,14 +140,17 @@ public:
     notifyAll(); // so all waiting threads can find out queue is stopped
   }
 
+  void waitEmpty() {}
+  void signalEmpty() {}
+
   /**
    * Keeps track of how many active workers are working on the queue.
    */
   void incActiveWorker() {
     atomic_inc(m_workerCount);
   }
-  void decActiveWorker() {
-    atomic_dec(m_workerCount);
+  int decActiveWorker() {
+    return atomic_dec(m_workerCount);
   }
   int getActiveWorker() {
     return m_workerCount;
@@ -168,14 +172,40 @@ public:
   bool m_lifo;
 };
 
+template<typename TJob>
+class JobQueue<TJob,true> : public JobQueue<TJob,false> {
+public:
+  JobQueue(int threadCount, bool threadRoundRobin, int dropCacheTimeout,
+           bool lifo) : JobQueue<TJob,false>(threadCount, threadRoundRobin,
+                                             dropCacheTimeout, lifo) {
+    pthread_cond_init(&m_cond, NULL);
+  }
+  ~JobQueue() {
+    pthread_cond_destroy(&m_cond);
+  }
+  void waitEmpty() {
+    Lock lock(this);
+    while (this->getActiveWorker() || this->getQueuedJobs()) {
+      pthread_cond_wait(&m_cond, &this->getMutex().getRaw());
+    }
+  }
+  void signalEmpty() {
+    pthread_cond_signal(&m_cond);
+  }
+private:
+  pthread_cond_t m_cond;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Base class for a customized worker.
  */
-template<typename TJob, bool countActive = false>
+template<typename TJob, bool countActive = false, bool waitable = false>
 class JobQueueWorker {
 public:
+  typedef TJob JobType;
+  static const bool Waitable = waitable;
   /**
    * Default constructor.
    */
@@ -190,7 +220,8 @@ public:
    * Two-phase object creation for easier derivation and for JobQueueDispatcher
    * to easily create a vector of workers.
    */
-  void create(int id, JobQueue<TJob> *queue, void *func, void *opaque) {
+  void create(int id, JobQueue<TJob,waitable> *queue,
+              void *func, void *opaque) {
     ASSERT(queue);
     m_id = id;
     m_queue = queue;
@@ -213,11 +244,18 @@ public:
     onThreadEnter();
     while (!m_stopped) {
       try {
-        TJob job = m_queue->dequeue(m_id);
-        if (countActive) m_queue->incActiveWorker();
+        TJob job = m_queue->dequeue(m_id, countActive);
         doJob(job);
-        if (countActive) m_queue->decActiveWorker();
-      } catch (typename JobQueue<TJob>::StopSignal) {
+        if (countActive) {
+          if (!m_queue->decActiveWorker() && waitable) {
+            Lock lock(m_queue);
+            if (!m_queue->getActiveWorker() &&
+                !m_queue->getQueuedJobs()) {
+              m_queue->signalEmpty();
+            }
+          }
+        }
+      } catch (typename JobQueue<TJob,waitable>::StopSignal) {
         m_stopped = true; // queue is empty and stopped, so we are done
       }
     }
@@ -239,7 +277,7 @@ protected:
 
 private:
 
-  JobQueue<TJob> *m_queue;
+  JobQueue<TJob, waitable> *m_queue;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -341,6 +379,12 @@ public:
     workers.insert(workers.end(), m_workers.begin(), m_workers.end());
   }
 
+  void waitEmpty(bool stop = true) {
+    if (m_stopped) return;
+    m_queue.waitEmpty();
+    if (stop) this->stop();
+  }
+
   /**
    * Stop all workers after all jobs are processed. No new jobs should be
    * enqueued at this moment, or this call may block for longer time.
@@ -387,7 +431,7 @@ private:
   bool m_stopped;
   int m_id;
   void *m_opaque;
-  JobQueue<TJob> m_queue;
+  JobQueue<TJob, TWorker::Waitable> m_queue;
 
   Mutex m_mutex;
   std::set<TWorker*> m_workers;

@@ -137,9 +137,7 @@ public:
    */
   void appendExtraCode(const std::string &key, const std::string &code);
   void appendExtraCode(const std::string &key, const std::string &code) const;
-  void parseExtraCodes(int &round,
-                       std::map<std::string, std::string> &extraCodes);
-  bool getExtraCodes(std::map<std::string, std::string> &extraCodes);
+  void parseExtraCode(const std::string &key);
 
   Phase getPhase() const { return m_phase;}
   void setPhase(Phase phase) { m_phase = phase;}

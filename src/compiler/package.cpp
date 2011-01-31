@@ -42,7 +42,7 @@ using namespace std;
 Package::Package(const char *root, bool bShortTags /* = true */,
                  bool bAspTags /* = false */)
   : m_bShortTags(bShortTags), m_bAspTags(bAspTags), m_files(4000),
-    m_lineCount(0), m_charCount(0) {
+    m_dispatcher(0), m_lineCount(0), m_charCount(0) {
   m_root = Util::normalizeDir(root);
   m_ar = AnalysisResultPtr(new AnalysisResult());
   m_fileCache = FileCachePtr(new FileCache());
@@ -60,13 +60,6 @@ void Package::addAllFiles(bool force) {
          iter != Option::PackageFiles.end(); ++iter) {
       addSourceFile((*iter).c_str());
     }
-  }
-}
-
-void Package::addSourceFile(const char *fileName) {
-  if (fileName && *fileName &&
-      m_filesParsed.find(fileName) == m_filesParsed.end()) {
-    m_filesToParse.insert(Util::canonicalize(fileName));
   }
 }
 
@@ -199,21 +192,36 @@ FileCachePtr Package::getFileCache() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class ParserWorker : public JobQueueWorker<const char *> {
+class ParserWorker :
+    public JobQueueWorker<std::pair<const char *,bool>, true, true> {
 public:
   bool m_ret;
   ParserWorker() : m_ret(true) {}
 
-  virtual void doJob(const char *filename) {
+  virtual void doJob(JobType job) {
+    bool ret;
     try {
       Package *package = (Package*)m_opaque;
-      m_ret = package->parseImpl(filename);
+      ret = package->parseImpl(job.first);
     } catch (Exception &e) {
       Logger::Error("%s", e.getMessage().c_str());
-      m_ret = false;
+      ret = false;
     }
+    if (!ret && job.second) m_ret = false;
   }
 };
+
+void Package::addSourceFile(const char *fileName, bool check /* = false */) {
+  if (fileName && *fileName) {
+    Lock lock(m_mutex);
+    bool inserted = m_filesToParse.insert(Util::canonicalize(fileName)).second;
+    if (inserted && m_dispatcher) {
+      ((JobQueueDispatcher<ParserWorker::JobType,
+        ParserWorker>*)m_dispatcher)->enqueue(
+          make_pair(m_files.add(fileName), check));
+    }
+  }
+}
 
 bool Package::parse() {
   if (m_filesToParse.empty()) {
@@ -226,35 +234,29 @@ bool Package::parse() {
   }
   if (threadCount <= 0) threadCount = 1;
 
-  int round = 0;
-  bool firstPass = true;
-  std::map<std::string, std::string> codes;
-  do {
-    JobQueueDispatcher<const char *, ParserWorker>
-      dispatcher(threadCount, true, 0, this);
+  JobQueueDispatcher<ParserWorker::JobType, ParserWorker>
+    dispatcher(threadCount, true, 0, this);
 
-    set<string> files;
-    files.swap(m_filesToParse);
-    set<string>::const_iterator iter = files.begin(), end = files.end();
-    m_filesParsed.insert(iter, end);
+  m_dispatcher = &dispatcher;
 
-    dispatcher.start();
-    for (; iter != end; ++iter) {
-      dispatcher.enqueue(m_files.add(iter->c_str()));
-    }
-    m_ar->parseExtraCodes(round, codes);
-    codes.clear();
-    dispatcher.stop();
-    if (firstPass) {
-      std::vector<ParserWorker*> workers;
-      dispatcher.getWorkers(workers);
-      for (unsigned int i = 0; i < workers.size(); i++) {
-        ParserWorker *worker = workers[i];
-        if (!worker->m_ret) return false;
-      }
-      firstPass = false;
-    }
-  } while (m_ar->getExtraCodes(codes) || !m_filesToParse.empty());
+  std::set<string> files;
+  files.swap(m_filesToParse);
+
+  dispatcher.start();
+  for (std::set<string>::iterator iter = files.begin(), end = files.end();
+       iter != end; ++iter) {
+    addSourceFile((*iter).c_str(), true);
+  }
+  dispatcher.waitEmpty();
+
+  m_dispatcher = 0;
+
+  std::vector<ParserWorker*> workers;
+  dispatcher.getWorkers(workers);
+  for (unsigned int i = 0; i < workers.size(); i++) {
+    ParserWorker *worker = workers[i];
+    if (!worker->m_ret) return false;
+  }
 
   return true;
 }

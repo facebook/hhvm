@@ -245,6 +245,7 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   ServerStats::LogPage(isFile ? rpcFile : rpcFunc, code);
 
   m_context->onShutdownPostSend();
+  m_context->obClean(); // in case postsend/cleanup output something
   m_context->restoreSession();
   return !error;
 }

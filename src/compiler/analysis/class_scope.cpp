@@ -375,6 +375,7 @@ std::string ClassScope::findCommonParent(AnalysisResultConstPtr ar,
 void ClassScope::setVolatile() {
   if (!m_volatile) {
     m_volatile = true;
+    Lock lock(s_depsMutex);
     const BlockScopeRawPtrFlagsVec &orderedUsers = getOrderedUsers();
     for (BlockScopeRawPtrFlagsVec::const_iterator it = orderedUsers.begin(),
            end = orderedUsers.end(); it != end; ++it) {

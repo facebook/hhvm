@@ -110,6 +110,7 @@ StatementPtr ClassConstant::preOptimize(AnalysisResultConstPtr ar) {
       dynamic_pointer_cast<ConstantExpression>(var)->getName();
 
     Symbol *sym = getScope()->getConstants()->getSymbol(name);
+    Lock lock(BlockScope::s_constMutex);
     if (sym->getValue() != val) {
       getScope()->addUpdates(BlockScope::UseKindConstRef);
       sym->setValue(val);

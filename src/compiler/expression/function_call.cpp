@@ -16,6 +16,7 @@
 
 #include <compiler/expression/function_call.h>
 #include <util/util.h>
+#include <util/logger.h>
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/function_scope.h>
@@ -200,8 +201,9 @@ void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 }
 
 struct InlineCloneInfo {
-  InlineCloneInfo() : callWithThis(false) {}
+  InlineCloneInfo(FunctionScopePtr fs) : func(fs), callWithThis(false) {}
 
+  FunctionScopePtr              func;
   StringToExpressionPtrMap      sepm;
   ExpressionListPtr             elist;
   bool                          callWithThis;
@@ -273,7 +275,7 @@ static ExpressionPtr cloneForInlineRecur(InlineCloneInfo &info,
   {
     FunctionCallPtr call(
       static_pointer_cast<FunctionCall>(exp));
-    if (call->getFuncScope() && call->getFuncScope()->isInlining()) {
+    if (call->getFuncScope() == info.func) {
       call->setNoInline();
     }
     break;
@@ -283,7 +285,7 @@ static ExpressionPtr cloneForInlineRecur(InlineCloneInfo &info,
       SimpleFunctionCallPtr call(static_pointer_cast<SimpleFunctionCall>(exp));
       call->addLateDependencies(ar);
       call->setLocalThis(info.localThis);
-      if (call->getFuncScope() && call->getFuncScope()->isInlining()) {
+      if (call->getFuncScope() == info.func) {
         call->setNoInline();
       }
     }
@@ -346,10 +348,20 @@ static int cloneStmtsForInline(InlineCloneInfo &info, StatementPtr s,
 ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
                                     ExpressionPtr obj, std::string localThis) {
   FunctionScopePtr fs = getFunctionScope();
-  if (m_noInline || !fs ||
-      m_funcScope->isInlining() ||
-      !m_funcScope->getInlineAsExpr() ||
-      !m_funcScope->getStmt()) {
+  if (m_noInline || !fs || fs == m_funcScope || !m_funcScope->getStmt()) {
+    return ExpressionPtr();
+  }
+
+  BlockScope::s_jobStateMutex.lock();
+  if (m_funcScope->getMark() == BlockScope::MarkProcessing) {
+    fs->setForceRerun(true);
+    BlockScope::s_jobStateMutex.unlock();
+    return ExpressionPtr();
+  }
+  ReadLock lock(m_funcScope->getInlineMutex());
+  BlockScope::s_jobStateMutex.unlock();
+
+  if (!m_funcScope->getInlineAsExpr()) {
     return ExpressionPtr();
   }
 
@@ -376,12 +388,11 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
     return ExpressionPtr();
   }
 
-  InlineCloneInfo info;
+  InlineCloneInfo info(m_funcScope);
   info.elist = ExpressionListPtr(new ExpressionList(
                                    getScope(), getLocation(),
                                    KindOfExpressionList,
                                    ExpressionList::ListKindWrapped));
-
   std::ostringstream oss;
   oss << fs->nextInlineIndex() << "_" << m_name << "_";
   std::string prefix = oss.str();
@@ -454,12 +465,10 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
     }
   }
 
-  m_funcScope->setInlining(true);
   if (cloneStmtsForInline(info, m->getStmts(), prefix, ar,
                           getFunctionScope()) <= 0) {
     info.elist->addElement(makeConstant(ar, "null"));
   }
-  m_funcScope->setInlining(false);
 
   if (info.sepm.size()) {
     ExpressionListPtr unset_list

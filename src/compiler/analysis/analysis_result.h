@@ -120,7 +120,6 @@ public:
 
 public:
   AnalysisResult();
-  Mutex &getMutex() { return m_mutex;}
   Locker lock() const { return Locker(this); }
   void setPackage(Package *package) { m_package = package;}
   void setParseOnDemand(bool v) { m_parseOnDemand = v;}
@@ -162,7 +161,6 @@ public:
   void getFuncScopesSet(BlockScopeRawPtrQueue &v, FunctionContainerPtr fc);
   void getScopesSet(BlockScopeRawPtrQueue &v);
 
-  ExpressionPtr preOptimize(ExpressionPtr e);
   void preOptimize();
   void inferTypes();
   void postOptimize();
@@ -357,7 +355,6 @@ public:
   bool isSystem() const { return m_system; }
 
 private:
-  Mutex m_mutex;
   Package *m_package;
   bool m_parseOnDemand;
   std::vector<std::string> m_parseOnDemandDirs;

@@ -119,8 +119,9 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
   ClassScopePtr defClass = cls;
   ConstructPtr decl = constants->getValueRecur(ar, m_varName, defClass);
   if (decl) {
-    cls = defClass;
+    BlockScope::s_constMutex.lock();
     ExpressionPtr value = dynamic_pointer_cast<Expression>(decl);
+    BlockScope::s_constMutex.unlock();
     if (value->isScalar()) {
       ExpressionPtr rep = Clone(value, getScope());
       bool annotate = Option::FlAnnotate;

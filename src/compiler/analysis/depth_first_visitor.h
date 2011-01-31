@@ -27,8 +27,11 @@ namespace HPHP {
 template <class T>
 class DepthFirstVisitor {
 public:
-  DepthFirstVisitor(T d) : m_data(d) {}
+  DepthFirstVisitor(T d) : m_data(d) {
+    setup();
+  }
 
+  void setup() {}
   ExpressionPtr visitExprRecur(ExpressionPtr e) {
     for (int i = 0, n = e->getKidCount(); i < n; i++) {
       if (ExpressionPtr kid = e->getNthExpr(i)) {
@@ -122,9 +125,98 @@ public:
     }
   }
 
-  ExpressionPtr visit(ExpressionPtr);
-  StatementPtr visit(StatementPtr);
-  int visit(BlockScopeRawPtr scope);
+  bool activateScope(BlockScopeRawPtr scope) {
+    if (scope->getMark() == BlockScope::MarkProcessed) {
+      const BlockScopeRawPtrFlagsVec &ordered =
+        scope->getOrderedUsers();
+      for (BlockScopeRawPtrFlagsVec::const_iterator it = ordered.begin(),
+             end = ordered.end(); it != end; ++it) {
+        BlockScopeRawPtrFlagsVec::value_type pf = *it;
+        int m = pf->first->getMark();
+        if (m == BlockScope::MarkWaiting ||
+            m == BlockScope::MarkReady) {
+          pf->first->setNumDepsToWaitFor(
+            pf->first->getNumDepsToWaitFor() + 1);
+        }
+      }
+    }
+
+    const BlockScopeRawPtrVec &deps = scope->getDeps();
+    int numDeps = 0;
+    for (size_t i = 0; i < deps.size(); i++) {
+      BlockScopeRawPtr dep = deps[i];
+      int m = dep->getMark();
+      if (m == BlockScope::MarkWaiting ||
+          m == BlockScope::MarkReady ||
+          m == BlockScope::MarkProcessing) {
+        numDeps++;
+      }
+    }
+
+    scope->setNumDepsToWaitFor(numDeps);
+    scope->setMark(BlockScope::MarkWaiting);
+    if (!numDeps) {
+      scope->setMark(BlockScope::MarkReady);
+      return true;
+    }
+    return false;
+  }
+
+  void visitParallelDeps(
+    BlockScopeRawPtr scope, BlockScopeRawPtrQueue &queue) {
+
+    Lock lock(scope->getMutex());
+    scope->setLockedMark(BlockScope::MarkProcessingDeps);
+    const BlockScopeRawPtrVec &deps = scope->getDeps();
+    {
+      Lock ldeps(BlockScope::s_depsMutex);
+      for (size_t i = 0; i < deps.size(); i++) {
+        BlockScopeRawPtr dep = deps[i];
+        int m = dep->getLockedMark();
+        if (m == BlockScope::MarkWaitingInQueue) {
+          BlockScope::s_depsMutex.unlock();
+          this->visitParallelDeps(dep, queue);
+          BlockScope::s_depsMutex.lock();
+        }
+      }
+    }
+
+    Lock l1(BlockScope::s_depsMutex);
+    Lock l2(BlockScope::s_jobStateMutex);
+    if (activateScope(scope)) {
+      this->enqueue(scope);
+    }
+  }
+
+  bool visitParallel(BlockScopeRawPtrQueue &scopes, bool first = true) {
+    BlockScopeRawPtrQueue::iterator end = scopes.end();
+    bool ret = false;
+    for (BlockScopeRawPtrQueue::iterator it = scopes.begin(); it != end; ++it) {
+      BlockScopeRawPtr scope = *it;
+      if (!first) {
+        if (scope->getMark() != BlockScope::MarkWaiting) {
+          assert(scope->getMark() == BlockScope::MarkProcessed);
+          continue;
+        }
+      }
+      (*it)->setMark(BlockScope::MarkWaitingInQueue);
+      ret = true;
+    }
+
+    for (BlockScopeRawPtrQueue::iterator it = scopes.begin(); it != end; ++it) {
+      BlockScopeRawPtr scope = *it;
+      if (scope->getLockedMark() == BlockScope::MarkWaitingInQueue) {
+        visitParallelDeps(scope, scopes);
+      }
+    }
+    return ret;
+  }
+
+  ExpressionPtr visit(ExpressionPtr) { return ExpressionPtr(); }
+  StatementPtr visit(StatementPtr) { return StatementPtr(); }
+  int visit(BlockScopeRawPtr scope) { return 0; }
+  void enqueue(BlockScopeRawPtr scope) {}
+  T &data() { return m_data; }
 private:
   T     m_data;
 };

@@ -702,8 +702,8 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
           constants = block->getConstants();
           const Symbol *sym = constants->getSymbol(symbol);
           assert(sym);
+          Lock lock(BlockScope::s_constMutex);
           if (!sym->isDynamic() && sym->getValue() != (*m_params)[1]) {
-            // NOT THREAD-SAFE
             const_cast<Symbol*>(sym)->setValue((*m_params)[1]);
             getScope()->addUpdates(BlockScope::UseKindConstRef);
           }
@@ -734,6 +734,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
           constants = block->getConstants();
           // already set to be dynamic
           if (constants->isDynamic(symbol)) return ExpressionPtr();
+          Lock lock(BlockScope::s_constMutex);
           ConstructPtr decl = constants->getValue(symbol);
           ExpressionPtr constValue = dynamic_pointer_cast<Expression>(decl);
           if (constValue->isScalar()) {

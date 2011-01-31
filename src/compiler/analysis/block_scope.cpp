@@ -30,12 +30,16 @@ using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+Mutex BlockScope::s_jobStateMutex;
+Mutex BlockScope::s_depsMutex;
+Mutex BlockScope::s_constMutex;
+
 BlockScope::BlockScope(const std::string &name, const std::string &docComment,
                        StatementPtr stmt, KindOf kind)
   : m_attributeClassInfo(0), m_docComment(docComment), m_stmt(stmt),
     m_kind(kind), m_loopNestedLevel(0),
     m_pass(0), m_updated(0), m_mark(MarkWaitingInQueue), m_changedScopes(0),
-    m_effectsTag(1) {
+    m_effectsTag(1), m_forceRerun(false) {
   m_originalName = name;
   m_name = Util::toLower(name);
   m_variables = VariableTablePtr(new VariableTable(*this));
@@ -121,12 +125,22 @@ void BlockScope::addUse(BlockScopeRawPtr user, int useKinds) {
       is(FunctionScope) &&
       static_cast<HPHP::FunctionScope*>(this)->isUserFunction()) {
 
+    if (user.get() == this) return;
+
+    Lock lock(s_depsMutex);
+    Lock l2(s_jobStateMutex);
     std::pair<BlockScopeRawPtrFlagsHashMap::iterator,bool> val =
       m_userMap.insert(BlockScopeRawPtrFlagsHashMap::value_type(user,
                                                                 useKinds));
     if (val.second) {
       m_orderedUsers.push_back(&*val.first);
       user->m_orderedDeps.push_back(BlockScopeRawPtr(this));
+      if (user->getMark() == BlockScope::MarkReady ||
+          user->getMark() == BlockScope::MarkWaiting) {
+        if (getMark() != BlockScope::MarkProcessed) {
+          user->setNumDepsToWaitFor(user->getNumDepsToWaitFor()+1);
+        }
+      }
     } else {
       val.first->second |= useKinds;
     }

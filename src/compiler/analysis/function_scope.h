@@ -88,8 +88,6 @@ public:
   bool isRefReturn() const { return m_refReturn;}
   bool isDynamicInvoke() const { return m_dynamicInvoke; }
   bool hasImpl() const;
-  bool isInlining() const { return m_inlining; }
-  void setInlining(bool f) { m_inlining = f; }
   void setDirectInvoke() { m_directInvoke = true; }
   bool hasDirectInvoke() const { return m_directInvoke; }
   bool isGenerator() const;
@@ -367,6 +365,7 @@ public:
   }
 
   void addCaller(BlockScopePtr caller);
+  ReadWriteMutex &getInlineMutex() { return m_inlineMutex; }
 
   DECLARE_BOOST_TYPES(RefParamInfo);
 
@@ -436,7 +435,6 @@ private:
   unsigned m_inlineSameContext : 1;
   unsigned m_contextSensitive : 1;
   unsigned m_directInvoke : 1;
-  unsigned m_inlining : 1;
   int m_redeclaring; // multiple definition of the same function
   StatementPtr m_stmtCloned; // cloned method body stmt
   int m_inlineIndex;
@@ -445,6 +443,7 @@ private:
                                     bool ret, bool constructor, int maxCount);
   ExpressionPtrVec m_retExprsToFix;
   ExpressionListPtr m_closureVars;
+  ReadWriteMutex m_inlineMutex;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

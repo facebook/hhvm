@@ -85,7 +85,7 @@ void AnalysisResult::appendExtraCode(const std::string &key,
 }
 
 void AnalysisResult::parseExtraCode(const string &key) {
-  Lock lock(m_mutex);
+  Lock lock(getMutex());
   map<string, string>::iterator iter = m_extraCodes.find(key);
   if (iter != m_extraCodes.end()) {
     string code = iter->second;
@@ -838,19 +838,151 @@ void AnalysisResult::getScopesSet(BlockScopeRawPtrQueue &v) {
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct PreOptVisitor {
-  PreOptVisitor(AnalysisResultPtr ar) : m_ar(ar) {}
+template <typename When>
+struct OptWorker;
+
+template <typename When>
+struct OptVisitor {
+  typedef OptVisitor<When> Visitor;
+
+  OptVisitor(AnalysisResultPtr ar, unsigned nscope) :
+      m_ar(ar), m_nscope(nscope), m_dispatcher(0) {
+  }
+  OptVisitor(const Visitor &po) : m_ar(po.m_ar),
+                                  m_nscope(po.m_nscope),
+                                  m_dispatcher(po.m_dispatcher) {
+    const_cast<Visitor&>(po).m_dispatcher = 0;
+  }
+  ~OptVisitor() {
+    delete m_dispatcher;
+  }
+
+  void start() {
+    m_dispatcher->start();
+  }
+
+  void wait() {
+    m_dispatcher->waitEmpty(false);
+  }
+
+  void stop() {
+    m_dispatcher->waitEmpty();
+  }
 
   AnalysisResultPtr m_ar;
+  unsigned m_nscope;
+  JobQueueDispatcher<BlockScope *, OptWorker<When> > *m_dispatcher;
 };
 
+template <typename When>
+class OptWorker : public JobQueueWorker<BlockScope *, true, true> {
+public:
+  OptWorker() {}
+
+  virtual void onThreadExit() {
+    g_context.reset();
+  }
+  virtual void doJob(BlockScope *scope) {
+    try {
+      DepthFirstVisitor<OptVisitor<When> > *visitor =
+        (DepthFirstVisitor<OptVisitor<When> >*)m_opaque;
+      {
+        Lock lstate(BlockScope::s_jobStateMutex);
+        assert(scope->getMark() == BlockScope::MarkReady);
+        if (scope->getNumDepsToWaitFor()) {
+          scope->setMark(BlockScope::MarkWaiting);
+          return;
+        }
+        scope->setMark(BlockScope::MarkProcessing);
+      }
+
+      Lock lock(scope->getMutex());
+      scope->setForceRerun(false);
+      int useKinds = visitor->visitScope(BlockScopeRawPtr(scope));
+
+      {
+        Lock l2(BlockScope::s_depsMutex);
+        Lock l1(BlockScope::s_jobStateMutex);
+        const BlockScopeRawPtrFlagsVec &ordered = scope->getOrderedUsers();
+        for (BlockScopeRawPtrFlagsVec::const_iterator it = ordered.begin(),
+               end = ordered.end(); it != end; ++it) {
+          BlockScopeRawPtrFlagsVec::value_type pf = *it;
+          int m = pf->first->getMark();
+          if (pf->second & useKinds && m == BlockScope::MarkProcessed) {
+            bool ready = visitor->activateScope(pf->first);
+            assert(!ready);
+            m = BlockScope::MarkWaiting;
+          }
+
+          if (m == BlockScope::MarkWaiting || m == BlockScope::MarkReady) {
+            int nd = pf->first->getNumDepsToWaitFor();
+            assert(nd >= 1);
+            pf->first->setNumDepsToWaitFor(--nd);
+            if (!nd && m == BlockScope::MarkWaiting) {
+              pf->first->setMark(BlockScope::MarkReady);
+              visitor->enqueue(pf->first);
+            }
+          }
+        }
+        scope->setMark(BlockScope::MarkProcessed);
+        if (scope->forceRerun()) {
+          if (visitor->activateScope(BlockScopeRawPtr(scope))) {
+            visitor->enqueue(BlockScopeRawPtr(scope));
+          }
+        } else {
+          const BlockScopeRawPtrVec &deps = scope->getDeps();
+          for (size_t i = 0; i < deps.size(); i++) {
+            BlockScopeRawPtr dep = deps[i];
+            if (dep->getMark() == BlockScope::MarkProcessing) {
+              bool ready = visitor->activateScope(BlockScopeRawPtr(scope));
+              assert(!ready);
+              break;
+            }
+          }
+        }
+      }
+    } catch (Exception &e) {
+      Logger::Error("%s", e.getMessage().c_str());
+    }
+  }
+};
+
+struct Pre {};
+struct Post {};
+
+typedef OptVisitor<Pre> PreOptVisitor;
+typedef OptWorker<Pre> PreOptWorker;
+typedef OptVisitor<Post> PostOptVisitor;
+typedef OptWorker<Post> PostOptWorker;
+
 template<>
-int DepthFirstVisitor<PreOptVisitor>::visit(BlockScopeRawPtr scope) {
-  scope->clearUpdated();
+void DepthFirstVisitor<PreOptVisitor>::setup() {
+    unsigned int threadCount = Option::ParserThreadCount;
+    if (threadCount > this->m_data.m_nscope) {
+      threadCount = this->m_data.m_nscope;
+    }
+    if (threadCount <= 0) threadCount = 1;
+
+    this->m_data.m_dispatcher =
+      new JobQueueDispatcher<BlockScope *, PreOptWorker >(
+        threadCount, true, 0, this);
+}
+
+template<>
+void DepthFirstVisitor<PreOptVisitor>::enqueue(
+  BlockScopeRawPtr scope) {
+  this->m_data.m_dispatcher->enqueue(scope.get());
+}
+
+template<>
+int DepthFirstVisitor<PreOptVisitor>::visitScope(BlockScopeRawPtr scope) {
+  int updates, all_updates = 0;
   StatementPtr stmt = scope->getStmt();
   if (MethodStatementPtr m =
       dynamic_pointer_cast<MethodStatement>(stmt)) {
-    while (true) {
+    WriteLock lock(m->getFunctionScope()->getInlineMutex());
+    do {
+      scope->clearUpdated();
       if (Option::LocalCopyProp || Option::EliminateDeadCode) {
         AliasManager am(-1);
         if (am.optimize(this->m_data.m_ar, m)) {
@@ -860,22 +992,25 @@ int DepthFirstVisitor<PreOptVisitor>::visit(BlockScopeRawPtr scope) {
         StatementPtr rep = this->visitStmtRecur(stmt);
         assert(!rep);
       }
-      int updates = scope->getUpdated();
-      scope->clearUpdated();
-      if (updates & BlockScope::UseKindCaller) {
-        if (!m->getFunctionScope()->getInlineAsExpr()) {
-          updates &= ~BlockScope::UseKindCaller;
-          if (!updates) continue;
-        }
-      }
-      return updates;
+      updates = scope->getUpdated();
+      all_updates |= updates;
+    } while (updates);
+    if (all_updates & BlockScope::UseKindCaller &&
+        !m->getFunctionScope()->getInlineAsExpr()) {
+      all_updates &= ~BlockScope::UseKindCaller;
     }
-  } else {
-    StatementPtr rep = this->visitStmtRecur(stmt);
-    assert(!rep);
+    return all_updates;
   }
 
-  return scope->getUpdated();
+  do {
+    scope->clearUpdated();
+    StatementPtr rep = this->visitStmtRecur(stmt);
+    assert(!rep);
+    updates = scope->getUpdated();
+    all_updates |= updates;
+  } while (updates);
+
+  return all_updates;
 }
 
 template<>
@@ -888,17 +1023,22 @@ StatementPtr DepthFirstVisitor<PreOptVisitor>::visit(StatementPtr stmt) {
   return stmt->preOptimize(this->m_data.m_ar);
 }
 
-ExpressionPtr AnalysisResult::preOptimize(ExpressionPtr e) {
-  DepthFirstVisitor<PreOptVisitor> dfv(shared_from_this());
-  return dfv.visitExprRecur(e);
-}
-
 void AnalysisResult::preOptimize() {
   setPhase(FirstPreOptimize);
-  DepthFirstVisitor<PreOptVisitor> dfv(shared_from_this());
   BlockScopeRawPtrQueue scopes;
   getScopesSet(scopes);
-  dfv.visitDepthFirst(scopes);
+  DepthFirstVisitor<PreOptVisitor> dfv(
+    PreOptVisitor(shared_from_this(), scopes.size()));
+
+  bool first = true;
+  bool again;
+  dfv.data().start();
+  do {
+    again = dfv.visitParallel(scopes, first);
+    first = false;
+    dfv.data().wait();
+  } while (again);
+  dfv.data().stop();
 }
 
 struct InferTypesVisitor {
@@ -1006,11 +1146,24 @@ void AnalysisResult::inferTypes() {
   methodSlotThread.waitForEnd();
 }
 
-struct PostOptVisitor {
-  PostOptVisitor(AnalysisResultPtr ar) : m_ar(ar) {}
+template<>
+void DepthFirstVisitor<PostOptVisitor>::setup() {
+    unsigned int threadCount = Option::ParserThreadCount;
+    if (threadCount > this->m_data.m_nscope) {
+      threadCount = this->m_data.m_nscope;
+    }
+    if (threadCount <= 0) threadCount = 1;
 
-  AnalysisResultPtr m_ar;
-};
+    this->m_data.m_dispatcher =
+      new JobQueueDispatcher<BlockScope *, PostOptWorker >(
+        threadCount, true, 0, this);
+}
+
+template<>
+void DepthFirstVisitor<PostOptVisitor>::enqueue(
+  BlockScopeRawPtr scope) {
+  this->m_data.m_dispatcher->enqueue(scope.get());
+}
 
 template<>
 int DepthFirstVisitor<PostOptVisitor>::visit(BlockScopeRawPtr scope) {
@@ -1051,14 +1204,26 @@ StatementPtr DepthFirstVisitor<PostOptVisitor>::visit(StatementPtr stmt) {
 
 void AnalysisResult::postOptimize() {
   setPhase(AnalysisResult::PostOptimize);
-  DepthFirstVisitor<PostOptVisitor> dfv(shared_from_this());
+
   BlockScopeRawPtrQueue scopes;
   getScopesSet(scopes);
+
+  DepthFirstVisitor<PostOptVisitor> dfv(
+    PostOptVisitor(shared_from_this(), scopes.size()));
+
+  bool first = true;
+  bool again;
+  dfv.data().start();
+  do {
+    again = dfv.visitParallel(scopes, first);
+    first = false;
+    dfv.data().wait();
+  } while (again);
+  dfv.data().stop();
+
   if (Option::ControlFlow) {
-    BlockScopeRawPtrQueue saved = scopes;
-    dfv.visitDepthFirst(scopes);
-    for (BlockScopeRawPtrQueue::iterator it = saved.begin(),
-           end = saved.end(); it != end; ++it) {
+    for (BlockScopeRawPtrQueue::iterator it = scopes.begin(),
+           end = scopes.end(); it != end; ++it) {
       BlockScopeRawPtr scope = *it;
       if (MethodStatementPtr m =
           dynamic_pointer_cast<MethodStatement>(scope->getStmt())) {
@@ -1066,8 +1231,6 @@ void AnalysisResult::postOptimize() {
         am.finalSetup(shared_from_this(), m);
       }
     }
-  } else {
-    dfv.visitDepthFirst(scopes);
   }
 }
 

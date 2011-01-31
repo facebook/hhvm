@@ -79,7 +79,6 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
 #ifndef ENABLE_LATE_STATIC_BINDING
   bound = true;
 #endif
-
   if (function.isString() || function.instanceof("closure")) {
     String sfunction = function.toString();
     int c = sfunction.find("::");
@@ -181,6 +180,9 @@ Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
   if (mcp.ci) {
     return (mcp.ci->getMeth())(mcp, params);
   } else {
+    if (g_context->getThrowAllErrors()) {
+      o_invoke_failed(s.data(), method.data(), fatal);
+    }
     return null;
   }
 }

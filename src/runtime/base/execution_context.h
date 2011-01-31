@@ -205,6 +205,7 @@ public:
   }
   void setArgSeparatorOutput(CStrRef s) { m_argSeparatorOutput = s;}
   void setThrowAllErrors(bool f) { m_throwAllErrors = f; }
+  bool getThrowAllErrors() const { return m_throwAllErrors; }
   void setExitCallback(Variant f) { m_exitCallback = f; }
   Variant getExitCallback() { return m_exitCallback; }
   void addAllowedDirectory(CStrRef s) { m_allowedDirs.set(s, true); }

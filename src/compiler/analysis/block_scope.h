@@ -18,6 +18,7 @@
 #define __BLOCK_SCOPE_H__
 
 #include <compiler/hphp.h>
+#include <util/lock.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,11 +71,13 @@ public:
   };
 
   enum Marks {
-    MarkWaitingInQueue = 0,
-    MarkProcessingDeps = 1,
-    MarkProcessing = 2,
-    MarkProcessedInQueue = 3,
-    MarkProcessed = 4
+    MarkWaitingInQueue,
+    MarkProcessingDeps,
+    MarkReady,
+    MarkWaiting,
+    MarkProcessing,
+    MarkProcessedInQueue,
+    MarkProcessed
   };
 
   BlockScope(const std::string &name, const std::string &docComment,
@@ -151,6 +154,11 @@ public:
   void setMark(Marks m) { m_mark = m; }
   Marks getMark() const { return m_mark; }
 
+  void setLockedMark(Marks m) { Lock l(s_jobStateMutex); m_mark = m; }
+  Marks getLockedMark() const { Lock l(s_jobStateMutex); return m_mark; }
+  int getLockedNumDepsToWaitFor() const {
+    Lock l(s_jobStateMutex); return m_numDepsToWaitFor;
+  }
   void setPass(int p) { m_pass = p; }
   void incPass() { m_pass++; }
   int getPass() const { return m_pass; }
@@ -165,6 +173,12 @@ public:
   }
   void incEffectsTag() { m_effectsTag++; }
   int getEffectsTag() const { return m_effectsTag; }
+
+  Mutex &getMutex() { return m_mutex; }
+  void setNumDepsToWaitFor(int n) { m_numDepsToWaitFor = n; }
+  int getNumDepsToWaitFor() const { return m_numDepsToWaitFor; }
+  void setForceRerun(bool v) { m_forceRerun = v; }
+  bool forceRerun() const { return m_forceRerun; }
 protected:
   std::string m_originalName;
   std::string m_name;
@@ -187,8 +201,14 @@ private:
   BlockScopeRawPtrFlagsVec m_orderedUsers;
   BlockScopeRawPtrFlagsHashMap m_userMap;
   BlockScopeRawPtrQueue *m_changedScopes;
-
   int m_effectsTag;
+  int m_numDepsToWaitFor;
+  Mutex m_mutex;
+  bool m_forceRerun;
+public:
+  static Mutex s_jobStateMutex;
+  static Mutex s_depsMutex;
+  static Mutex s_constMutex;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -117,6 +117,13 @@ void ConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
             ConstructPtr decl = sym->getDeclaration();
             if (decl) {
               if (!decl->getScope()) {
+                /*
+                   this only happens if a define is parsed, but a
+                   later syntax error in the same file prevents
+                   completeScope being called on the scope containing
+                   the define.
+                   Might be better to catch this in the parser...
+                */
                 sym->setDeclaration(ExpressionPtr());
                 sym->setValue(ExpressionPtr());
               } else {
@@ -136,7 +143,7 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
     return ExpressionPtr();
   }
   ConstructPtr decl;
-  if (!isScalar() && !m_dynamic && !(m_context & LValue)) {
+  while (!isScalar() && !m_dynamic && !(m_context & LValue)) {
     const Symbol *sym = ar->getConstants()->getSymbol(m_name);
     bool system = true;
     if (!sym || !sym->getValue()) {
@@ -150,29 +157,30 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
         }
       }
     }
-    if (sym && sym->getValue()) {
-      ExpressionPtr value = dynamic_pointer_cast<Expression>(sym->getValue());
-      if (value->isScalar()) {
-        if (system && !value->is(KindOfScalarExpression)) {
-          if (ExpressionPtr opt = value->preOptimize(ar)) {
-            value = opt;
-            // NOT THREAD-SAFE
-            const_cast<Symbol*>(sym)->setValue(value);
-          }
-        }
-        ExpressionPtr rep = Clone(value, getScope());
-        bool annotate = Option::FlAnnotate;
-        Option::FlAnnotate = false; // avoid nested comments on getText
-        rep->setComment(getText());
-        Option::FlAnnotate = annotate;
-        rep->setLocation(getLocation());
-        if (!system && !value->is(KindOfScalarExpression)) {
-          value->getScope()->addUse(getScope(), BlockScope::UseKindConstRef);
-        }
-        return replaceValue(rep);
+    if (!sym) break;
+    if (!system) BlockScope::s_constMutex.lock();
+    ExpressionPtr value = dynamic_pointer_cast<Expression>(sym->getValue());
+    if (!system) BlockScope::s_constMutex.unlock();
+
+    if (!value || !value->isScalar()) break;
+
+    if (system && !value->is(KindOfScalarExpression)) {
+      if (ExpressionPtr opt = value->preOptimize(ar)) {
+        value = opt;
       }
     }
+    ExpressionPtr rep = Clone(value, getScope());
+    bool annotate = Option::FlAnnotate;
+    Option::FlAnnotate = false; // avoid nested comments on getText
+    rep->setComment(getText());
+    Option::FlAnnotate = annotate;
+    rep->setLocation(getLocation());
+    if (!system && !value->is(KindOfScalarExpression)) {
+      value->getScope()->addUse(getScope(), BlockScope::UseKindConstRef);
+    }
+    return replaceValue(rep);
   }
+
   return ExpressionPtr();
 }
 

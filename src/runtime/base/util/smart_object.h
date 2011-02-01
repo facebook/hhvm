@@ -76,11 +76,11 @@ public:
   }
 
   T *operator->() const {
-    return static_cast<T*>(Object::operator->());
+    return static_cast<T*>(static_cast<void*>((Object::operator->())));
   }
 
   T *get() const {
-    return static_cast<T*>(Object::get());
+    return static_cast<T*>(static_cast<void*>(Object::get()));
   }
 
   template<class Y>

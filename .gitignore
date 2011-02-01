@@ -27,6 +27,7 @@
 /facebook/autoload_files
 /facebook/volatile.hdf
 /facebook/hotcold.hdf
+/facebook/libcore_files
 /facebook/push/output_www
 /facebook/push/autoload_files
 /facebook/push/volatile.hdf

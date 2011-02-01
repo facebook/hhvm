@@ -68,11 +68,12 @@ bool ScannerToken::htmlTrim() {
 
 // hzhao: This is to avoid including headers from runtime/base.
 extern char *string_html_decode(const char *input, int &len,
-                                const char *charset_hint, bool all);
+                                const char *charset_hint, bool all,
+                                bool xhp);
 
-void ScannerToken::htmlDecode() {
+void ScannerToken::xhpDecode() {
   int len = m_text.size();
-  char *ret = string_html_decode(m_text.data(), len, "UTF-8", true);
+  char *ret = string_html_decode(m_text.data(), len, "UTF-8", true, true);
   m_text = string(ret, len);
   free(ret);
 }

@@ -7216,7 +7216,7 @@ yyreduce:
 
 /* Line 1464 of yacc.c  */
 #line 1626 "../../../../src/util/parser/hphp.y"
-    { (yyvsp[(1) - (1)]).htmlDecode();
+    { (yyvsp[(1) - (1)]).xhpDecode();
                                          _p->onScalar((yyval),
                                          T_CONSTANT_ENCAPSED_STRING, (yyvsp[(1) - (1)]));;}
     break;
@@ -7234,7 +7234,7 @@ yyreduce:
 #line 1632 "../../../../src/util/parser/hphp.y"
     { (yyval).reset();
                                          if ((yyvsp[(1) - (1)]).htmlTrim()) {
-                                           (yyvsp[(1) - (1)]).htmlDecode();
+                                           (yyvsp[(1) - (1)]).xhpDecode();
                                            _p->onScalar((yyval),
                                            T_CONSTANT_ENCAPSED_STRING, (yyvsp[(1) - (1)]));
                                          }

@@ -1623,7 +1623,7 @@ xhp_attribute_name:
                                          T_CONSTANT_ENCAPSED_STRING, $1);}
 ;
 xhp_attribute_value:
-    T_XHP_TEXT                         { $1.htmlDecode();
+    T_XHP_TEXT                         { $1.xhpDecode();
                                          _p->onScalar($$,
                                          T_CONSTANT_ENCAPSED_STRING, $1);}
   | '{' expr '}'                       { $$ = $2;}
@@ -1631,7 +1631,7 @@ xhp_attribute_value:
 xhp_child:
     T_XHP_TEXT                         { $$.reset();
                                          if ($1.htmlTrim()) {
-                                           $1.htmlDecode();
+                                           $1.xhpDecode();
                                            _p->onScalar($$,
                                            T_CONSTANT_ENCAPSED_STRING, $1);
                                          }

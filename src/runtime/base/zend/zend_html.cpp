@@ -423,6 +423,7 @@ HtmlEntityMap;
 static volatile bool EntityMapInited = false;
 static Mutex EntityMapMutex;
 static HtmlEntityMap EntityMap[cs_end];
+static HtmlEntityMap XHPEntityMap[cs_end];
 
 static void init_entity_table() {
   for (unsigned int i = 0; entity_map[i].charset != cs_terminator; i++) {
@@ -456,12 +457,26 @@ static void init_entity_table() {
           continue;
       }
       EntityMap[charset][entity] = (const char *)buf;
+      XHPEntityMap[charset][entity] = (const char *)buf;
     }
 
     EntityMap[charset]["quot"] = "\"";
     EntityMap[charset]["lt"] = "<";
     EntityMap[charset]["gt"] = ">";
     EntityMap[charset]["amp"] = "&";
+
+    XHPEntityMap[charset]["quot"] = "\"";
+    XHPEntityMap[charset]["lt"] = "<";
+    XHPEntityMap[charset]["gt"] = ">";
+    XHPEntityMap[charset]["amp"] = "&";
+    // XHP-specific entities
+    XHPEntityMap[charset]["apos"] = "\'";
+    XHPEntityMap[charset]["cloud"] = "\u2601";
+    XHPEntityMap[charset]["umbrella"] = "\u2602";
+    XHPEntityMap[charset]["snowman"] = "\u2603";
+    XHPEntityMap[charset]["snowflake"] = "\u2745";
+    XHPEntityMap[charset]["comet"] = "\u2604";
+    XHPEntityMap[charset]["thunderstorm"] = "\u2608";
   }
 
   // the first element is an empty table
@@ -469,6 +484,14 @@ static void init_entity_table() {
   EntityMap[cs_terminator]["lt"] = "<";
   EntityMap[cs_terminator]["gt"] = ">";
   EntityMap[cs_terminator]["amp"] = "&";
+  // XHP-specific entities
+  XHPEntityMap[cs_terminator]["apos"] = "\'";
+  XHPEntityMap[cs_terminator]["cloud"] = "\u2601";
+  XHPEntityMap[cs_terminator]["umbrella"] = "\u2602";
+  XHPEntityMap[cs_terminator]["snowman"] = "\u2603";
+  XHPEntityMap[cs_terminator]["snowflake"] = "\u2745";
+  XHPEntityMap[cs_terminator]["comet"] = "\u2604";
+  XHPEntityMap[cs_terminator]["thunderstorm"] = "\u2608";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -551,7 +574,8 @@ char *string_html_encode(const char *input, int &len, bool encode_double_quote,
 }
 
 inline static bool decode_entity(char *entity, int *len,
-                                 enum entity_charset charset, bool all) {
+                                 enum entity_charset charset, bool all,
+                                 bool xhp = false) {
   // entity is 16 bytes, allocated statically below
   // default in PHP
   int quote_style = ENT_COMPAT;
@@ -629,9 +653,10 @@ inline static bool decode_entity(char *entity, int *len,
   } else {
     HtmlEntityMap *entityMap;
     if (all) {
-      entityMap = &EntityMap[charset];
+      entityMap = xhp ? &XHPEntityMap[charset] : &EntityMap[charset];
     } else {
-      entityMap = &EntityMap[cs_terminator];
+      entityMap = xhp ? &XHPEntityMap[cs_terminator]
+                      : &EntityMap[cs_terminator];
     }
     HtmlEntityMap::const_iterator iter = entityMap->find(entity);
     if (iter != entityMap->end()) {
@@ -645,7 +670,8 @@ inline static bool decode_entity(char *entity, int *len,
 }
 
 char *string_html_decode(const char *input, int &len,
-                         const char *charset_hint, bool all) {
+                         const char *charset_hint, bool all,
+                         bool xhp /* = false */) {
   ASSERT(input);
   if (!*input) {
     return NULL;
@@ -681,7 +707,7 @@ char *string_html_decode(const char *input, int &len,
           char buf[16];
           memcpy(buf, p, l);
           buf[l] = '\0';
-          if (decode_entity(buf, &l, charset, all)) {
+          if (decode_entity(buf, &l, charset, all, xhp)) {
             memcpy(q, buf, l);
             found = true;
             p = t;

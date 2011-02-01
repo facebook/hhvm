@@ -71,7 +71,7 @@ public:
 
   void xhpLabel(bool prefix = true);
   bool htmlTrim(); // true if non-empty after trimming
-  void htmlDecode();
+  void xhpDecode();  // xhp supports more entities than html
 
 protected:
   int m_num; // internal token id

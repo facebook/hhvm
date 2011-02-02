@@ -650,5 +650,33 @@ bool TestServer::TestPageletServer() {
         "First! GET",
         "string");
 
+  VSGET("<?php\n"
+        "if ($_SERVER['THREAD_TYPE'] == 'Pagelet Thread') {\n"
+        "  echo 'hello';\n"
+        "  pagelet_server_flush();\n"
+        "  ob_start();\n"
+        "  echo 'world';\n"
+        "  pagelet_server_flush();\n"
+        "  echo 'what';\n"
+        "} else {\n"
+        "  $h = array('Host: ' . $_SERVER['HTTP_HOST']);\n"
+        "  $t = pagelet_server_task_start('/string', $h, '');\n"
+        "  for ($i = 0; ; $i++) {\n"
+        "    while (($s = pagelet_server_task_status($t)) == \n"
+        "           PAGELET_NOT_READY) { sleep(1); }\n"
+        "    echo \"Step $i:\\n\";\n"
+        "    $r = pagelet_server_task_result($t, $h, $c);\n"
+        "    echo $r . \"\\n\";\n"
+        "    if ($s == PAGELET_DONE) break;\n"
+        "  }\n"
+        "}\n",
+        "Step 0:\n"
+        "hello\n"
+        "Step 1:\n"
+        "world\n"
+        "Step 2:\n"
+        "what\n",
+        "string");
+
   return true;
 }

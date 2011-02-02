@@ -39,13 +39,17 @@ public:
    * Query if a task is finished. This is non-blocking and can be called as
    * many times as desired.
    */
-  static bool TaskStatus(CObjRef task);
+  static int64 TaskStatus(CObjRef task);
 
   /**
    * Get results of a task. This is blocking until task is finished.
-   *
    */
   static String TaskResult(CObjRef task, Array &headers, int &code);
+
+  /**
+   * Add a piece of response to the pipeline.
+   */
+  static void AddToPipeline(const std::string &s);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

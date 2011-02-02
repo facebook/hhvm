@@ -25,12 +25,25 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const int64 k_PAGELET_NOT_READY;
+extern const int64 k_PAGELET_READY;
+extern const int64 k_PAGELET_DONE;
+
+enum PageletStatusType {
+  PAGELET_NOT_READY,
+  PAGELET_READY,
+  PAGELET_DONE
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 bool f_dangling_server_proxy_old_request();
 bool f_dangling_server_proxy_new_request(CStrRef host);
 bool f_pagelet_server_is_enabled();
 Object f_pagelet_server_task_start(CStrRef url, CArrRef headers = null_array, CStrRef post_data = null_string);
-bool f_pagelet_server_task_status(CObjRef task);
+int64 f_pagelet_server_task_status(CObjRef task);
 String f_pagelet_server_task_result(CObjRef task, Variant headers, Variant code);
+void f_pagelet_server_flush();
 bool f_xbox_send_message(CStrRef msg, Variant ret, int64 timeout_ms, CStrRef host = "localhost");
 bool f_xbox_post_message(CStrRef msg, CStrRef host = "localhost");
 Object f_xbox_task_start(CStrRef message);

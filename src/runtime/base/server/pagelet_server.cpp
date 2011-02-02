@@ -20,6 +20,7 @@
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/resource_data.h>
+#include <runtime/ext/ext_server.h>
 #include <util/job_queue.h>
 #include <util/lock.h>
 #include <util/logger.h>
@@ -121,10 +122,27 @@ public:
     return m_done;
   }
 
+  void addToPipeline(const string &s) {
+    Lock lock(this);
+    m_pipeline.push_back(s);
+    notify();
+  }
+
+  bool isPipelineEmpty() {
+    Lock lock(this);
+    return m_pipeline.empty();
+  }
+
   String getResults(Array &headers, int &code) {
     {
       Lock lock(this);
-      while (!m_done) wait();
+      while (!m_done && m_pipeline.empty()) wait();
+      if (!m_pipeline.empty()) {
+        // intermediate results do not have headers and code
+        string ret = m_pipeline.front();
+        m_pipeline.pop_front();
+        return ret;
+      }
     }
 
     String response(m_response.c_str(), m_response.size(), CopyString);
@@ -167,6 +185,8 @@ private:
   HeaderMap m_responseHeaders;
   string m_response;
   int m_code;
+
+  deque<string> m_pipeline; // the intermediate pagelet results
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -254,14 +274,29 @@ Object PageletServer::TaskStart(CStrRef url, CArrRef headers,
   return ret;
 }
 
-bool PageletServer::TaskStatus(CObjRef task) {
+int64 PageletServer::TaskStatus(CObjRef task) {
   PageletTask *ptask = task.getTyped<PageletTask>();
-  return ptask->getJob()->isDone();
+  PageletTransport *job = ptask->getJob();
+  if (!job->isPipelineEmpty()) {
+    return PAGELET_READY;
+  }
+  if (job->isDone()) {
+    return PAGELET_DONE;
+  }
+  return PAGELET_NOT_READY;
 }
 
 String PageletServer::TaskResult(CObjRef task, Array &headers, int &code) {
   PageletTask *ptask = task.getTyped<PageletTask>();
   return ptask->getJob()->getResults(headers, code);
+}
+
+void PageletServer::AddToPipeline(const string &s) {
+  ASSERT(!s.empty());
+  PageletTransport *job =
+    dynamic_cast<PageletTransport *>(g_context->getTransport());
+  ASSERT(job);
+  job->addToPipeline(s);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

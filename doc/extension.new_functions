@@ -43,6 +43,7 @@ testing and some alternative PHP implementation.
 - pagelet_server_task_start
 - pagelet_server_task_status
 - pagelet_server_task_result
+- pagelet_server_flush
 
 - xbox_send_message
 - xbox_post_message
@@ -94,7 +95,7 @@ testing and some alternative PHP implementation.
 
 $_SERVER['THREAD_TYPE'] can be:
 
-- REQUEST
-- PAGELET
-- XBOX
-- RPC
+- Web Request
+- Pagelet Thread
+- Xbox Thread
+- RPC Thread

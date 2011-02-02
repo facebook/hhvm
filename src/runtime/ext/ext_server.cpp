@@ -106,6 +106,10 @@ bool f_dangling_server_proxy_new_request(CStrRef host) {
 ///////////////////////////////////////////////////////////////////////////////
 // Pagelet Server
 
+const int64 k_PAGELET_NOT_READY = PAGELET_NOT_READY;
+const int64 k_PAGELET_READY     = PAGELET_READY;
+const int64 k_PAGELET_DONE      = PAGELET_DONE;
+
 bool f_pagelet_server_is_enabled() {
   return PageletServer::Enabled();
 }
@@ -121,7 +125,7 @@ Object f_pagelet_server_task_start(CStrRef url,
   return PageletServer::TaskStart(url, headers, remote_host, post_data);
 }
 
-bool f_pagelet_server_task_status(CObjRef task) {
+int64 f_pagelet_server_task_status(CObjRef task) {
   return PageletServer::TaskStatus(task);
 }
 
@@ -133,6 +137,20 @@ String f_pagelet_server_task_result(CObjRef task, Variant headers,
   headers = rheaders;
   code = rcode;
   return response;
+}
+
+void f_pagelet_server_flush() {
+  ExecutionContext *context = g_context.get();
+  Transport *transport = context->getTransport();
+  if (transport && transport->getThreadType() == Transport::PageletThread) {
+    // this method is only meaningful in a pagelet thread
+    context->obFlushAll();
+    String content = context->obDetachContents();
+    string s(content.data(), content.size());
+    if (!s.empty()) {
+      PageletServer::AddToPipeline(s);
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

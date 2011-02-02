@@ -10289,6 +10289,16 @@ Variant ifa_socket_shutdown(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg1((a1));
   return (f_socket_shutdown(arg0, arg1));
 }
+Variant i_pagelet_server_flush(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(pagelet_server_flush);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("pagelet_server_flush", 0, 1);
+  return (f_pagelet_server_flush(), null);
+}
+Variant ifa_pagelet_server_flush(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("pagelet_server_flush", 0, 1);
+  return (f_pagelet_server_flush(), null);
+}
 Variant i_mcrypt_create_iv(void *extra, CArrRef params) {
   FUNCTION_INJECTION(mcrypt_create_iv);
   int count __attribute__((__unused__)) = params.size();
@@ -50744,6 +50754,18 @@ Variant ei_socket_shutdown(Eval::VariableEnvironment &env, const Eval::FunctionC
   if (count <= 1) return (x_socket_shutdown(a0));
   else return (x_socket_shutdown(a0, a1));
 }
+Variant ei_pagelet_server_flush(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("pagelet_server_flush", 0, 1);
+  return (x_pagelet_server_flush(), null);
+}
 Variant ei_mcrypt_create_iv(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -83132,7 +83154,7 @@ public:
   hashNodeFuncEval *next;
 };
 static hashNodeFuncEval *funcMapTableEval[8192];
-static hashNodeFuncEval funcEvalBuckets[2103];
+static hashNodeFuncEval funcEvalBuckets[2104];
 
 static class EvalFuncTableInitializer {
   public: EvalFuncTableInitializer() {
@@ -83686,6 +83708,7 @@ static class EvalFuncTableInitializer {
       (const char *)"popdrawingwand", (const char *)&ei_popdrawingwand,
       (const char *)"collator_sort_with_sort_keys", (const char *)&ei_collator_sort_with_sort_keys,
       (const char *)"socket_shutdown", (const char *)&ei_socket_shutdown,
+      (const char *)"pagelet_server_flush", (const char *)&ei_pagelet_server_flush,
       (const char *)"mcrypt_create_iv", (const char *)&ei_mcrypt_create_iv,
       (const char *)"eval", (const char *)&ei_eval,
       (const char *)"bindec", (const char *)&ei_bindec,
@@ -85819,6 +85842,7 @@ CallInfo ci_drawsetfontweight((void*)&i_drawsetfontweight, (void*)&ifa_drawsetfo
 CallInfo ci_popdrawingwand((void*)&i_popdrawingwand, (void*)&ifa_popdrawingwand, 1, 0, 0x0000000000000000LL, (void*)&ei_popdrawingwand);
 CallInfo ci_collator_sort_with_sort_keys((void*)&i_collator_sort_with_sort_keys, (void*)&ifa_collator_sort_with_sort_keys, 2, 0, 0x0000000000000002LL, (void*)&ei_collator_sort_with_sort_keys);
 CallInfo ci_socket_shutdown((void*)&i_socket_shutdown, (void*)&ifa_socket_shutdown, 2, 0, 0x0000000000000000LL, (void*)&ei_socket_shutdown);
+CallInfo ci_pagelet_server_flush((void*)&i_pagelet_server_flush, (void*)&ifa_pagelet_server_flush, 0, 0, 0x0000000000000000LL, (void*)&ei_pagelet_server_flush);
 CallInfo ci_mcrypt_create_iv((void*)&i_mcrypt_create_iv, (void*)&ifa_mcrypt_create_iv, 2, 0, 0x0000000000000000LL, (void*)&ei_mcrypt_create_iv);
 CallInfo ci_eval((void*)&i_eval, (void*)&ifa_eval, 1, 0, 0x0000000000000000LL, (void*)&ei_eval);
 CallInfo ci_bindec((void*)&i_bindec, (void*)&ifa_bindec, 1, 0, 0x0000000000000000LL, (void*)&ei_bindec);
@@ -96940,6 +96964,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 6425:
       HASH_GUARD(0x022B16C0D64D7919LL, file_put_contents) {
         ci = &ci_file_put_contents;
+        return true;
+      }
+      break;
+    case 6428:
+      HASH_GUARD(0x5B20795C75E3791CLL, pagelet_server_flush) {
+        ci = &ci_pagelet_server_flush;
         return true;
       }
       break;

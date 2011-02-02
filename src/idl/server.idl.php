@@ -78,6 +78,24 @@ DefineFunction(
     ),
   ));
 
+DefineConstant(
+  array(
+    'name'   => "PAGELET_NOT_READY", // no data is available
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "PAGELET_READY",     // data available (flushed)
+    'type'   => Int64,
+  ));
+
+DefineConstant(
+  array(
+    'name'   => "PAGELET_DONE",      // the pagelet request is finished
+    'type'   => Int64,
+  ));
+
 DefineFunction(
   array(
     'name'   => "pagelet_server_is_enabled",
@@ -125,8 +143,8 @@ DefineFunction(
     'desc'   => "Checks finish status of a pagelet task.",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
-      'type'   => Boolean,
-      'desc'   => "TRUE if done, FALSE otherwise.",
+      'type'   => Int64,
+      'desc'   => "PAGELET_NOT_READY if there is no data available, PAGELET_READY if (partial) data is available from pagelet_server_flush(), and PAGELET_DONE if the pagelet request is done.",
     ),
     'args'   => array(
       array(
@@ -162,6 +180,17 @@ DefineFunction(
         'type'   => Variant | Reference,
         'desc'   => "HTTP response code.",
       ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "pagelet_server_flush",
+    'desc'   => "Flush all the currently buffered output, so that the main thread can read it with pagelet_server_task_result(). This is only meaningful in a pagelet thread.",
+    'flags'  => HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => null,
+      'desc'   => "No value is returned.",
     ),
   ));
 

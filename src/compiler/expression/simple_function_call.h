@@ -66,7 +66,7 @@ public:
   virtual ConstructPtr getNthKid(int n) const;
   virtual void setNthKid(int n, ConstructPtr cp);
   static SimpleFunctionCallPtr GetFunctionCallForCallUserFunc(
-    AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, bool testOnly,
+    AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, int testOnly,
     int firstParam, bool &error);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
   void setupScopes(AnalysisResultConstPtr ar);

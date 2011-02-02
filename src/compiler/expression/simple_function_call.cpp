@@ -300,6 +300,12 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     // Look up the corresponding FunctionScope and ClassScope
     // for this function call
     setupScopes(ar);
+    if (m_funcScope && m_funcScope->getOptFunction()) {
+      SimpleFunctionCallPtr self(
+        static_pointer_cast<SimpleFunctionCall>(shared_from_this()));
+      (m_funcScope->getOptFunction())(0, ar, self, 1);
+    }
+
     // check for dynamic constant and volatile function/class
     if (!m_class && m_className.empty() &&
       (m_type == DefinedFunction ||
@@ -1864,7 +1870,7 @@ bool SimpleFunctionCall::canInvokeFewArgs() {
 }
 
 SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
-  AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, bool testOnly,
+  AnalysisResultConstPtr ar, SimpleFunctionCallPtr call, int testOnly,
   int firstParam, bool &error) {
   error = false;
   ExpressionListPtr params = call->getParams();
@@ -1882,6 +1888,7 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
             return SimpleFunctionCallPtr();
           }
           if (func->isUserFunction()) func->setVolatile();
+          if (testOnly < 0) return SimpleFunctionCallPtr();
           ExpressionListPtr p2;
           if (testOnly) {
             p2 = ExpressionListPtr(
@@ -1948,6 +1955,8 @@ SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(
           }
         }
 
+        if (testOnly < 0) return SimpleFunctionCallPtr();
+
         size_t c = smethod.find("::");
         if (c != 0 && c != string::npos && c+2 < smethod.size()) {
           string name = smethod.substr(0, c);
@@ -2007,21 +2016,24 @@ ExpressionPtr hphp_opt_call_user_func(CodeGenerator *cg,
                                       AnalysisResultConstPtr ar,
                                       SimpleFunctionCallPtr call, int mode) {
   bool error = false;
-  if (!cg && !mode && !ar->isSystem()) {
+  if (!cg && mode <= 1 && !ar->isSystem()) {
     const std::string &name = call->getName();
     bool isArray = name == "call_user_func_array";
     if (name == "call_user_func" || isArray) {
       SimpleFunctionCallPtr rep(
-        SimpleFunctionCall::GetFunctionCallForCallUserFunc(ar, call, false,
+        SimpleFunctionCall::GetFunctionCallForCallUserFunc(ar, call,
+                                                           mode ? -1 : 0,
                                                            1, error));
-      if (error) {
-        rep.reset();
-      } else if (rep) {
-        rep->setSafeCall(-1);
-        rep->addLateDependencies(ar);
-        if (isArray) rep->setArrayParams();
+      if (!mode) {
+        if (error) {
+          rep.reset();
+        } else if (rep) {
+          rep->setSafeCall(-1);
+          rep->addLateDependencies(ar);
+          if (isArray) rep->setArrayParams();
+        }
+        return rep;
       }
-      return rep;
     }
   }
   return ExpressionPtr();
@@ -2031,32 +2043,34 @@ ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
                                          AnalysisResultConstPtr ar,
                                          SimpleFunctionCallPtr call, int mode) {
   bool error = false;
-  if (!cg && !mode && !ar->isSystem()) {
+  if (!cg && mode <= 1 && !ar->isSystem()) {
     const std::string &name = call->getName();
     bool isArray = name == "fb_call_user_func_array_safe";
     bool safe_ret = name == "fb_call_user_func_safe_return";
     if (isArray || safe_ret || name == "fb_call_user_func_safe") {
       SimpleFunctionCallPtr rep(
         SimpleFunctionCall::GetFunctionCallForCallUserFunc(
-          ar, call, false, safe_ret ? 2 : 1, error));
-      if (error) {
-        if (safe_ret) {
-          return (*call->getParams())[1];
-        } else {
-          Array ret(Array::Create(0, false));
-          ret.set(1, Variant());
-          return call->makeScalarExpression(ar, ret);
+          ar, call, mode ? -1 : 0, safe_ret ? 2 : 1, error));
+      if (!mode) {
+        if (error) {
+          if (safe_ret) {
+            return (*call->getParams())[1];
+          } else {
+            Array ret(Array::Create(0, false));
+            ret.set(1, Variant());
+            return call->makeScalarExpression(ar, ret);
+          }
         }
-      }
-      if (rep) {
-        if (isArray) rep->setArrayParams();
-        rep->addLateDependencies(ar);
-        rep->setSafeCall(1);
-        if (safe_ret) {
-          ExpressionPtr def = (*call->getParams())[1];
-          rep->setSafeDefault(def);
+        if (rep) {
+          if (isArray) rep->setArrayParams();
+          rep->addLateDependencies(ar);
+          rep->setSafeCall(1);
+          if (safe_ret) {
+            ExpressionPtr def = (*call->getParams())[1];
+            rep->setSafeDefault(def);
+          }
+          return rep;
         }
-        return rep;
       }
     }
   }
@@ -2066,12 +2080,12 @@ ExpressionPtr hphp_opt_fb_call_user_func(CodeGenerator *cg,
 ExpressionPtr hphp_opt_is_callable(CodeGenerator *cg,
                                    AnalysisResultConstPtr ar,
                                    SimpleFunctionCallPtr call, int mode) {
-  if (!cg && !mode && !ar->isSystem()) {
+  if (!cg && mode <= 1 && !ar->isSystem()) {
     bool error = false;
     SimpleFunctionCallPtr rep(
       SimpleFunctionCall::GetFunctionCallForCallUserFunc(
-        ar, call, true, 1, error));
-    if (error) {
+        ar, call, mode ? 1 : -1, 1, error));
+    if (error && !mode) {
       return call->makeConstant(ar, "false");
     }
     return rep;

@@ -489,6 +489,8 @@ ExpressionPtr FunctionCall::inliner(AnalysisResultConstPtr ar,
     }
   }
 
+  recomputeEffects();
+
   return replaceValue(info.elist);
 }
 

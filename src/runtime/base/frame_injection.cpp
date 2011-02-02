@@ -39,6 +39,9 @@ static inline void injection_check(ThreadInfo *info) {
 #ifdef INFINITE_RECURSION_DETECTION
   check_recursion(info);
 #endif
+  if (info->m_pendingException) {
+    throw_pending_exception(info);
+  }
 }
 
 // constructors with hot profiler

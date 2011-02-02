@@ -32,7 +32,7 @@ public:
   ExtendedException(const char *fmt, ...);
   ArrayPtr getBackTrace() const { return m_bt; }
   virtual ~ExtendedException() throw() {}
-private:
+protected:
   ArrayPtr m_bt;
 };
 
@@ -122,6 +122,7 @@ public:
   FatalErrorException(int, const char *msg, ...) {
     va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
   }
+  FatalErrorException(const std::string &msg, ArrayPtr backtrace);
   virtual ~FatalErrorException() throw() {}
 };
 

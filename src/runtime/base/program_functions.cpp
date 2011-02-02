@@ -1162,6 +1162,8 @@ void hphp_session_exit() {
   ServerNote::Reset();
   g_context.reset();
 
+  ThreadInfo::s_threadInfo->clearPendingException();
+
   MemoryManager *mm = MemoryManager::TheMemoryManager().get();
   if (RuntimeOption::CheckMemory) {
     mm->checkMemory(false);

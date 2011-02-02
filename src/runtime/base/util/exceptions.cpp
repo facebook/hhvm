@@ -46,5 +46,11 @@ ExtendedException::ExtendedException(const char *fmt, ...) {
   }
 }
 
+FatalErrorException::FatalErrorException(const std::string &msg,
+                                         ArrayPtr backtrace) {
+  m_msg = msg;
+  m_bt = backtrace;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

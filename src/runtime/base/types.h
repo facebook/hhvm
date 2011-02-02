@@ -190,6 +190,7 @@ class Profiler;
 class GlobalVariables;
 
 // implemented in runtime/base/thread_info
+DECLARE_BOOST_TYPES(Array);
 class ThreadInfo {
 public:
   enum Executing {
@@ -225,12 +226,16 @@ public:
 
   GlobalVariables *m_globals;
   Executing m_executing;
+  bool m_pendingException;
+  ArrayPtr m_exceptionStack;
+  std::string m_exceptionMsg;
 
   ThreadInfo();
   ~ThreadInfo();
 
   void onSessionInit();
   void onSessionExit();
+  void clearPendingException();
 };
 
 extern void throw_infinite_recursion_exception();
@@ -254,6 +259,9 @@ inline void check_request_timeout(ThreadInfo *info) {
   info->m_mm->refreshStats();
   if (info->m_reqInjectionData.surprised) check_request_surprise(info);
 }
+
+void throw_pending_exception(ThreadInfo *info) ATTRIBUTE_COLD
+                                               __attribute__((noreturn));
 
 void check_request_timeout_ex(ThreadInfo *info, int lc);
 

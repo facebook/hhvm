@@ -40,6 +40,7 @@ ThreadInfo::ThreadInfo() : m_executing(Idling) {
   m_mm = MemoryManager::TheMemoryManager().get();
 
   m_profiler = NULL;
+  m_pendingException = false;
 
   // get the default thread stack size once
   pthread_attr_t info;
@@ -78,6 +79,14 @@ void ThreadInfo::onSessionInit() {
   // allowing some slack for (a) stack usage above the caller of reset() and
   // (b) stack usage after the position gets checked.
   m_stacklimit = &marker - (m_stacksize - StackSlack);
+}
+
+void ThreadInfo::clearPendingException() {
+  if (m_pendingException) {
+    m_pendingException = false;
+    m_exceptionMsg.clear();
+    m_exceptionStack.reset();
+  }
 }
 
 void ThreadInfo::onSessionExit() {

@@ -378,9 +378,22 @@ void check_request_surprise(ThreadInfo *info) {
 
   p.surpriseMutex.unlock();
 
-  if (do_timedout) throw_request_timeout_exception();
-  if (do_memExceeded) throw_memory_exceeded_exception();
+  if (do_timedout && !info->m_pendingException) {
+    generate_request_timeout_exception();
+  }
+  if (do_memExceeded && !info->m_pendingException) {
+    generate_memory_exceeded_exception();
+  }
   if (do_signaled) f_pcntl_signal_dispatch();
+}
+
+void throw_pending_exception(ThreadInfo *info) {
+  ASSERT(info->m_pendingException);
+  info->m_pendingException = false;
+  FatalErrorException e(info->m_exceptionMsg, info->m_exceptionStack);
+  info->m_exceptionMsg.clear();
+  info->m_exceptionStack.reset();
+  throw e;
 }
 
 void get_call_info_or_fail(const CallInfo *&ci, void *&extra, CStrRef name) {
@@ -472,6 +485,9 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop) {
 
 void check_request_timeout_ex(ThreadInfo *info, int lc) {
   check_request_timeout(info);
+  if (info->m_pendingException) {
+    throw_pending_exception(info);
+  }
   if (RuntimeOption::MaxLoopCount > 0 && lc > RuntimeOption::MaxLoopCount) {
     throw FatalErrorException(0, "loop iterated over %d times",
                               RuntimeOption::MaxLoopCount);
@@ -486,7 +502,7 @@ void throw_infinite_recursion_exception() {
     throw UncatchableException("infinite recursion detected");
   }
 }
-void throw_request_timeout_exception() {
+void generate_request_timeout_exception() {
   ThreadInfo *info = ThreadInfo::s_threadInfo.get();
   RequestInjectionData &data = info->m_reqInjectionData;
   if (data.timeoutSeconds > 0) {
@@ -495,16 +511,27 @@ void throw_request_timeout_exception() {
     // right before a new requets resets "started". In this case, we flag
     // "timedout" back to "false".
     if (time(0) - data.started >= data.timeoutSeconds) {
-      throw FatalErrorException(0, "entire web request took longer than %d "
-                                "seconds and timed out", data.timeoutSeconds);
+      info->m_pendingException = true;
+      info->m_exceptionMsg = "entire web request took longer than ";
+      info->m_exceptionMsg +=
+        boost::lexical_cast<std::string>(data.timeoutSeconds);
+      info->m_exceptionMsg += " seconds and timed out";
+      if (RuntimeOption::InjectedStackTrace) {
+        info->m_exceptionStack =
+          ArrayPtr(new Array(FrameInjection::GetBacktrace(false, true)));
+      }
     }
   }
 }
 
-void throw_memory_exceeded_exception() {
-  // NOTE: This is marked as __attribute__((noreturn))
-  // in base/types.h AND base/builtin_functions.h
-  throw FatalErrorException("request has exceeded memory limit");
+void generate_memory_exceeded_exception() {
+  ThreadInfo *info = ThreadInfo::s_threadInfo.get();
+  info->m_pendingException = true;
+  info->m_exceptionMsg = "request has exceeded memory limit";
+  if (RuntimeOption::InjectedStackTrace) {
+    info->m_exceptionStack =
+      ArrayPtr(new Array(FrameInjection::GetBacktrace(false, true)));
+  }
 }
 
 void throw_call_non_object() {

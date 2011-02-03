@@ -19,4 +19,7 @@ endif
 include $(PROJECT_ROOT)/src/rules.mk
 TARGETS = $(APP_TARGET)
 
+GIT_SHA1 := $(shell git describe --all --long --abbrev=40 --always)
+CPPFLAGS += -DCOMPILER_ID=\"$(GIT_SHA1)\"
+
 all: $(TARGETS)

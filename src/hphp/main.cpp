@@ -340,6 +340,9 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
      "files according to preprocessed file sizes, instead of original file "
      "sizes (default). Run bin/ppp.php to generate an HDF configuration file "
      "to specify here.")
+#ifdef COMPILER_ID
+    ("compiler-id", "display the git hash for the compiler id")
+#endif
     ;
 
   positional_options_description p;
@@ -366,6 +369,13 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
 #include "../version"
     return 1;
   }
+
+#ifdef COMPILER_ID
+  if (vm.count("compiler-id")) {
+    cout << COMPILER_ID << "\n";
+    return 1;
+  }
+#endif
 
   // log level
   if (po.logLevel != -1) {

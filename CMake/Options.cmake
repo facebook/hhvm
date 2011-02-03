@@ -18,3 +18,5 @@ option(ENABLE_FULL_SETLINE "Enable full setline function for debugger and code-c
 option(WANT_FB_LIBMCC "want FB Memcache" OFF)
 
 option(USE_TCMALLOC "Use tcmalloc" ON)
+option(USE_GOOGLE_HEAP_PROFILER "Use Google heap profiler" OFF)
+option(USE_GOOGLE_CPU_PROFILER "Use Google cpu profiler" OFF)

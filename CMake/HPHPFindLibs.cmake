@@ -69,8 +69,6 @@ set(CMAKE_REQUIRED_LIBRARIES)
 # GD checks
 find_package(GD REQUIRED)
 
-option(WANT_FB_LIBMCC "want FB Memcache" 0)
-
 if (WANT_FB_LIBMCC)
 	add_definitions(-DHPHP_WITH_LIBMCC)
 	message(FATAL_ERROR Need to add libmcc and libch for linking)
@@ -136,7 +134,6 @@ FIND_LIBRARY(UNWIND_LIB unwind)
 
 # Google tmalloc
 add_definitions(-DNO_JEMALLOC=1)
-option(USE_TCMALLOC "Use tcmalloc" ON)
 
 if (USE_TCMALLOC)
 	FIND_LIBRARY(GOOGLE_TCMALLOC_LIB tcmalloc_minimal)

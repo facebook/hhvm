@@ -1,6 +1,4 @@
-OPTION(INFINITE_LOOP_DETECTION "Enable Infinite Loop Detection" ON)
-OPTION(INFINITE_RECURSION_DETECTION "Enable Infinite Recursion Detection" ON)
-OPTION(REQUEST_TIMEOUT_DETECTION "Enable Timeout Detection" ON)
+include(Options)
 
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release")
@@ -51,6 +49,50 @@ add_definitions(-D_GNU_SOURCE -D_REENTRANT=1 -D_PTHREADS=1)
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Release")
 	add_definitions(-DRELEASE=1)
+endif()
+
+if(INFINITE_LOOP_DETECTION)
+	add_definitions(-DINFINITE_LOOP_DETECTION=1)
+endif()
+
+if(INFINITE_RECURSION_DETECTION)
+	add_definitions(-DINFINITE_RECURSION_DETECTION=1)
+endif()
+
+if(REQUEST_TIMEOUT_DETECTION)
+	add_definitions(-DREQUEST_TIMEOUT_DETECTION=1)
+endif()
+
+if(ENABLE_LATE_STATIC_BINDING)
+	add_definitions(-DENABLE_LATE_STATIC_BINDING=1)
+endif()
+
+if(DEBUG_MEMORY_LEAK)
+	add_definitions(-DDEBUG_MEMORY_LEAK=1)
+endif()
+
+if(DEBUG_APC_LEAK)
+	add_definitions(-DDEBUG_APC_LEAK=1)
+endif()
+
+if(ALWAYS_ASSERT)
+	add_definitions(-DALWAYS_ASSERT=1)
+endif()
+
+if(HOTPROFILER)
+	add_definitions(-DHOTPROFILER=1)
+endif()
+
+if(HOTPROFILER_NO_BUILTIN)
+	add_definitions(-DHOTPROFILER_NO_BUILTIN=1)
+endif()
+
+if(EXECUTION_PROFILER)
+	add_definitions(-DEXECUTION_PROFILER=1)
+endif()
+
+if(ENABLE_FULL_SETLINE)
+	add_definitions(-DENABLE_FULL_SETLINE=1)
 endif()
 
 if(APPLE OR FREEBSD)

@@ -132,9 +132,7 @@ endif (ICU_FOUND)
 # (google heap OR cpu profiler) AND libunwind 
 FIND_LIBRARY(UNWIND_LIB unwind)
 
-# Google tmalloc and profiler
-add_definitions(-DNO_JEMALLOC=1)
-
+# jemalloc/tmalloc and profiler
 if (USE_GOOGLE_HEAP_PROFILER OR USE_GOOGLE_CPU_PROFILER)
 	FIND_LIBRARY(GOOGLE_PROFILER_LIB profiler)
 	if (GOOGLE_PROFILER_LIB)
@@ -158,7 +156,25 @@ if (USE_GOOGLE_HEAP_PROFILER AND GOOGLE_PROFILER_LIB)
 	endif()
 endif()
 
-if (USE_TCMALLOC AND NOT GOOGLE_HEAP_PROFILER_ENABLED AND NOT CMAKE_BUILD_TYPE STREQUAL Debug)
+if (USE_JEMALLOC AND NOT GOOGLE_TCMALLOC_ENABLED
+		AND NOT CMAKE_BUILD_TYPE STREQUAL Debug)
+	FIND_LIBRARY(JEMALLOC_LIB jemalloc)
+	if (JEMALLOC_LIB)
+		CHECK_LIBRARY_EXISTS(jemalloc mallctl "" HAVE_JEMALLOC_FUN)
+		if (HAVE_JEMALLOC_FUN)
+			message(STATUS "Found jemalloc: ${JEMALLOC_LIB}")
+			set(JEMALLOC_ENABLED 1)
+		else()
+			message(STATUS "Found jemalloc at ${JEMALLOC_LIB}, but unable to find its API "
+			               "(maybe the library was configured with a non-empty function prefix?)")
+		endif()
+	else()
+		message(STATUS "Can't find jemalloc")
+	endif()
+endif()
+
+if (USE_TCMALLOC AND NOT JEMALLOC_ENABLED AND NOT GOOGLE_TCMALLOC_ENABLED
+		AND NOT CMAKE_BUILD_TYPE STREQUAL Debug)
 	FIND_LIBRARY(GOOGLE_TCMALLOC_MIN_LIB tcmalloc_minimal)
 	if (GOOGLE_TCMALLOC_MIN_LIB)
 		message(STATUS "Found minimal tcmalloc: ${GOOGLE_TCMALLOC_MIN_LIB}")
@@ -168,6 +184,11 @@ if (USE_TCMALLOC AND NOT GOOGLE_HEAP_PROFILER_ENABLED AND NOT CMAKE_BUILD_TYPE S
 	endif()
 endif()
 
+if (JEMALLOC_ENABLED)
+	add_definitions(-DUSE_JEMALLOC=1)
+else()
+	add_definitions(-DNO_JEMALLOC=1)
+endif()
 if (GOOGLE_TCMALLOC_ENABLED)
 	add_definitions(-DGOOGLE_TCMALLOC=1)
 else()
@@ -339,6 +360,10 @@ endif()
 
 	if (GOOGLE_HEAP_PROFILER_ENABLED OR GOOGLE_CPU_PROFILER_ENABLED)
 		target_link_libraries(${target} ${GOOGLE_PROFILER_LIB})
+	endif()
+
+	if (JEMALLOC_ENABLED)
+		target_link_libraries(${target} ${JEMALLOC_LIB})
 	endif()
 
 	if (GOOGLE_HEAP_PROFILER_ENABLED)

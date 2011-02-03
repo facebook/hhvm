@@ -148,9 +148,11 @@ public:
     // calls malloc(), so that later smart allocations that adjust m_stats.usage
     // don't double-count memory.  Thus musage in the example code may well
     // substantially exceed m_stats.usage.
-    int64 delta = int64(*m_allocated) - int64(*m_deallocated);
-    m_stats.usage += delta - m_delta;
-    m_delta = delta;
+    if (s_stats_enabled) {
+      int64 delta = int64(*m_allocated) - int64(*m_deallocated);
+      m_stats.usage += delta - m_delta;
+      m_delta = delta;
+    }
 #endif
     if (m_stats.usage > m_stats.peakUsage) {
       if (m_stats.maxBytes > 0 && m_stats.peakUsage <= m_stats.maxBytes &&
@@ -171,7 +173,9 @@ public:
     ~MaskAlloc() {
 #ifdef USE_JEMALLOC
       // exclude mallocs and frees since construction
-      m_mm->m_delta = int64(*m_mm->m_allocated) - int64(*m_mm->m_deallocated);
+      if (s_stats_enabled) {
+        m_mm->m_delta = int64(*m_mm->m_allocated) - int64(*m_mm->m_deallocated);
+      }
 #endif
     }
   };
@@ -193,6 +197,9 @@ private:
   uint64* m_allocated;
   uint64* m_deallocated;
   int64  m_delta;
+
+public:
+  static bool s_stats_enabled;
 #endif
 };
 

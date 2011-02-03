@@ -18,30 +18,33 @@
 #include <runtime/base/memory/leak_detectable.h>
 #include <runtime/base/memory/sweepable.h>
 #include <runtime/base/runtime_option.h>
-#ifdef USE_JEMALLOC
-#include <jemalloc/jemalloc.h>
-#endif
+#include <util/alloc.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef USE_JEMALLOC
+bool MemoryManager::s_stats_enabled = false;
+
 static size_t threadAllocatedpMib[2];
 static size_t threadDeallocatedpMib[2];
 static pthread_once_t mibOnce = PTHREAD_ONCE_INIT;
 static void mibInit() {
+  if (!mallctlnametomib) return;
   size_t miblen = sizeof(threadAllocatedpMib) / sizeof(size_t);
   if (mallctlnametomib("thread.allocatedp", threadAllocatedpMib, &miblen)) {
-    assert(false);
+    return;
   }
   miblen = sizeof(threadDeallocatedpMib) / sizeof(size_t);
   if (mallctlnametomib("thread.deallocatedp", threadDeallocatedpMib, &miblen)) {
-    assert(false);
+    return;
   }
+  MemoryManager::s_stats_enabled = true;
 }
 
 static inline void thread_stats(uint64*& allocated, uint64*& deallocated) {
   pthread_once(&mibOnce, mibInit);
+  if (!MemoryManager::s_stats_enabled) return;
 
   size_t len = sizeof(allocated);
   if (mallctlbymib(threadAllocatedpMib,
@@ -82,7 +85,9 @@ void MemoryManager::resetStats() {
   m_stats.peakUsage = 0;
   m_stats.peakAlloc = 0;
 #ifdef USE_JEMALLOC
-  m_delta = int64(*m_allocated) - int64(*m_deallocated);
+  if (s_stats_enabled) {
+    m_delta = int64(*m_allocated) - int64(*m_deallocated);
+  }
 #endif
 }
 

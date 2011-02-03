@@ -221,7 +221,7 @@ Array f_mailparse_rfc822_parse_addresses(CStrRef addresses) {
 }
 
 static int mailparse_stream_output(int c, void *stream) {
-  char buf[1];
+  char buf[2];
   buf[0] = c;
   buf[1] = '\0';
   return ((File*)stream)->write(buf, 1);

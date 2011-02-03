@@ -46,12 +46,12 @@ void safe_free(void *ptr) {
 }
 
 void flush_thread_caches() {
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
   if (mallctl) {
     mallctl("tcache.flush", NULL, NULL, NULL, 0);
-  } else
+  }
 #endif
-#ifndef NO_TCMALLOC
+#ifdef GOOGLE_TCMALLOC
   if (MallocExtensionInstance) {
     MallocExtensionInstance()->MarkThreadIdle();
   }

@@ -285,7 +285,7 @@ void apc_load(int thread) {
   }
 
   if (RuntimeOption::EnableConstLoad) {
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
     size_t allocated_before = 0;
     size_t allocated_after = 0;
     size_t sz = sizeof(size_t);
@@ -301,7 +301,7 @@ void apc_load(int thread) {
     }
 #endif
     apc_load_func(handle, "_hphp_const_load_all")();
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
     if (mallctl) {
       uint64_t epoch = 1;
       mallctl("epoch", NULL, NULL, &epoch, sizeof(epoch));

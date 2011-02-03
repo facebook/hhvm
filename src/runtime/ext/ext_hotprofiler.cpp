@@ -319,7 +319,7 @@ static inline uint64 vtsc(int64 MHz) {
     tv_to_cycles(usage.ru_utime, MHz) + tv_to_cycles(usage.ru_stime, MHz);
 }
 
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
 
 #define JEMALLOC_STAT_MIB_LEN 2
 size_t mallctl_mib_len = JEMALLOC_STAT_MIB_LEN;
@@ -353,7 +353,7 @@ mallctl_mib_init()
 uint64
 get_allocs()
 {
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
   if (mallctl) {
     if (!mallctl_alloc_mib) {
       if (!mallctl_mib_init()) {
@@ -369,7 +369,7 @@ get_allocs()
     return stat;
   }
 #endif
-#ifndef NO_TCMALLOC
+#ifdef GOOGLE_TCMALLOC
   if (MallocExtensionInstance) {
     size_t stat;
     MallocExtensionInstance()->GetNumericProperty(
@@ -383,7 +383,7 @@ get_allocs()
 uint64
 get_frees()
 {
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
   if (mallctl) {
     if (!mallctl_free_mib) {
       if (!mallctl_mib_init()) {
@@ -399,7 +399,7 @@ get_frees()
     return stat;
   }
 #endif
-#ifndef NO_TCMALLOC
+#ifdef GOOGLE_TCMALLOC
   if (MallocExtensionInstance) {
     size_t stat;
     MallocExtensionInstance()->GetNumericProperty(

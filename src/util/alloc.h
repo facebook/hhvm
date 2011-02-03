@@ -19,21 +19,21 @@
 
 #include "exception.h"
 
-#ifndef NO_TCMALLOC
+#ifdef GOOGLE_TCMALLOC
 #include <google/malloc_extension.h>
 #endif
 
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
 #include <jemalloc/jemalloc.h>
 #endif
 
 extern "C" {
-#ifndef NO_TCMALLOC
+#ifdef GOOGLE_TCMALLOC
 #define MallocExtensionInstance _ZN15MallocExtension8instanceEv
   MallocExtension* MallocExtensionInstance() __attribute__((weak));
 #endif
 
-#ifndef NO_JEMALLOC
+#ifdef USE_JEMALLOC
   int mallctl(const char *name, void *oldp, size_t *oldlenp, void *newp,
               size_t newlen) __attribute__((weak));
   int mallctlnametomib(const char *name, size_t* mibp, size_t*miblenp)

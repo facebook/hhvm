@@ -137,7 +137,7 @@ void StatementList::analyzeProgramImpl(AnalysisResultPtr ar) {
 
     // effect testing
     if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-      if (!stmt->hasEffect() &&
+      if (!stmt->hasEffect() && !stmt->hasDecl() &&
           !stmt->is(Statement::KindOfStatementList)) {
         Compiler::Error(Compiler::StatementHasNoEffect, stmt);
       }

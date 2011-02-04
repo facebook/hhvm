@@ -137,9 +137,20 @@ void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_variable->analyzeProgram(ar);
   if (m_offset) m_offset->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    if (!m_global && (m_context & AccessContext) &&
+        !(m_context & (LValue|RefValue|DeepReference|
+                       UnsetContext|RefParameter|InvokeArgument))) {
+      TypePtr type = m_variable->getActualType();
+      if (!type ||
+          (!type->is(Type::KindOfString) && !type->is(Type::KindOfArray))) {
+        FunctionScopePtr scope = getFunctionScope();
+        if (scope) scope->setNeedsRefTemp();
+      }
+    }
     if (m_global && !m_dynamicGlobal &&
         !(getContext() &
-          (LValue|RefValue|RefParameter|UnsetContext|ExistContext))) {
+          (LValue|RefValue|DeepReference|RefParameter
+           |UnsetContext|ExistContext))) {
       VariableTablePtr vars = ar->getVariables();
       Symbol *sym = vars->getSymbol(m_globalName);
       if (!sym || sym->getDeclaration().get() == this) {
@@ -384,6 +395,7 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
             type->is(Type::KindOfArray) &&
             !Type::SameType(m_variable->getImplementedType(), type)) {
           act = type;
+          type = m_variable->getImplementedType();
           m_variable->setActualType(m_variable->getImplementedType());
         }
         m_variable->outputCPP(cg, ar);
@@ -395,20 +407,30 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
     if (m_offset) {
       bool lvalAt = false;
       bool rvalAt = false;
+      bool byRef = false;
+      bool arrRef = false;
       if (hasContext(UnsetContext)) {
         // do nothing
       } else if (hasContext(InvokeArgument) && cg.callInfoTop() != -1) {
         cg_printf(".argvalAt(cit%d->isRef(%d), ", cg.callInfoTop(), m_argNum);
-      } else if (m_context & (LValue|RefValue)) {
+      } else if (m_context & (LValue|RefValue|DeepReference)) {
         cg_printf(".lvalAt(");
         lvalAt = true;
       } else {
-        cg_printf(".rvalAt(");
+        byRef = (m_context & AccessContext) &&
+          (!type || !type->is(Type::KindOfString));
+        arrRef = byRef && type && type->is(Type::KindOfArray);
+        cg_printf(".rval%s%s(",
+                  arrRef || !byRef ? "At" : "", byRef ? "Ref" : "");
         rvalAt = true;
       }
       m_offset->outputCPP(cg, ar);
       if (!type || !type->is(Type::KindOfString)) {
         if (rvalAt) {
+          if (byRef && !arrRef) {
+            const string &tmp = cg.getReferenceTemp();
+            cg_printf(", %s", tmp.empty() ? "Variant()" : tmp.c_str());
+          }
           if (!hasContext(ExistContext)) {
             cg_printf(", true"); // raise undefined index error
           } else {

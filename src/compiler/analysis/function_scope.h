@@ -91,6 +91,8 @@ public:
   void setDirectInvoke() { m_directInvoke = true; }
   bool hasDirectInvoke() const { return m_directInvoke; }
   bool isGenerator() const;
+  void setNeedsRefTemp() { m_needsRefTemp = true; }
+  bool needsRefTemp() const { return m_needsRefTemp; }
 
   void setInlineSameContext(bool f) { m_inlineSameContext = f; }
   bool getInlineSameContext() const { return m_inlineSameContext; }
@@ -435,6 +437,7 @@ private:
   unsigned m_inlineSameContext : 1;
   unsigned m_contextSensitive : 1;
   unsigned m_directInvoke : 1;
+  unsigned m_needsRefTemp : 1;
   int m_redeclaring; // multiple definition of the same function
   StatementPtr m_stmtCloned; // cloned method body stmt
   int m_inlineIndex;

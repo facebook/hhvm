@@ -647,17 +647,11 @@ class Variant {
   /**
    * Offset functions
    */
+  Variant rvalAtHelper(int64 offset, bool error = false) const;
   Variant rvalAt(bool offset, bool error = false) const;
-  Variant rvalAt(char offset, bool error = false) const {
-    return rvalAt((int64)offset, error);
-  }
-  Variant rvalAt(short offset, bool error = false) const {
-    return rvalAt((int64)offset, error);
-  }
   Variant rvalAt(int offset, bool error = false) const {
     return rvalAt((int64)offset, error);
   }
-  Variant rvalAtHelper(int64 offset, bool error = false) const;
   Variant rvalAt(int64 offset, bool error = false) const {
     if (m_type == KindOfArray) {
       return m_data.parr->get(offset, error);
@@ -670,6 +664,31 @@ class Variant {
   Variant rvalAt(CStrRef offset, bool error = false,
       bool isString = false) const;
   Variant rvalAt(CVarRef offset, bool error = false) const;
+
+  template <typename T>
+  CVarRef rvalRefHelper(T offset, CVarRef tmp, bool error) const;
+  template <typename T>
+  CVarRef rvalRefHelper(T offset, CVarRef tmp, bool error,
+                          bool isString) const;
+  CVarRef rvalRef(bool offset, CVarRef tmp, bool error = false) const {
+    return rvalRef((int64)offset, tmp, error);
+  }
+  CVarRef rvalRef(int offset, CVarRef tmp, bool error = false) const {
+    return rvalRef((int64)offset, tmp, error);
+  }
+  CVarRef rvalRef(int64 offset, CVarRef tmp, bool error = false) const {
+    if (m_type == KindOfArray) {
+      return m_data.parr->get(offset, error);
+    }
+    return rvalRefHelper(offset, tmp, error);
+  }
+  CVarRef rvalRef(double offset, CVarRef tmp, bool error = false) const;
+  CVarRef rvalRef(litstr offset, CVarRef tmp, bool error = false,
+                  bool isString = false) const;
+  CVarRef rvalRef(CStrRef offset, CVarRef tmp, bool error = false,
+                  bool isString = false) const;
+  CVarRef rvalRef(CVarRef offset, CVarRef tmp, bool error = false) const;
+
   const Variant operator[](bool    key) const { return rvalAt(key);}
   const Variant operator[](char    key) const { return rvalAt(key);}
   const Variant operator[](short   key) const { return rvalAt(key);}

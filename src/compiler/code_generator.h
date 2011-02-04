@@ -136,7 +136,15 @@ public:
   void printRaw(const char *msg) { print(msg, false);}
   bool wrapExpressionBegin();
   bool wrapExpressionEnd();
-
+  void genReferenceTemp(ConstructPtr scope);
+  void clearRefereceTemp() { m_referenceTemps[m_curStream].clear(); }
+  const std::string &getReferenceTemp();
+  bool hasReferenceTemp() const {
+    return !m_referenceTemps[m_curStream].empty();
+  }
+  void setReferenceTempUsed(bool flag) {
+    m_referenceTempsUsed[m_curStream] = flag;
+  }
   /**
    * Pre-formatted outputs.
    */
@@ -245,6 +253,8 @@ private:
   int m_lineNo[StreamCount];
   int m_inComments[StreamCount];
   bool m_wrappedExpression[StreamCount];
+  std::string m_referenceTemps[StreamCount];
+  bool m_referenceTempsUsed[StreamCount];
   bool m_inExpression[StreamCount];
   bool m_inFileOrClassHeader;
   bool m_inNamespace;

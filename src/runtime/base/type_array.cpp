@@ -398,17 +398,17 @@ Variant Array::rvalAt(bool key, bool error /* = false*/) const {
   return null_variant;
 }
 
-Variant Array::rvalAt(char key, bool error /* = false */) const {
-  if (m_px) return m_px->get((int64)key, error);
-  return null_variant;
-}
-
-Variant Array::rvalAt(short key, bool error /* = false */) const {
-  if (m_px) return m_px->get((int64)key, error);
+CVarRef Array::rvalAtRef(bool key, bool error /* = false*/) const {
+  if (m_px) return m_px->get(key ? 1LL : 0LL, error);
   return null_variant;
 }
 
 Variant Array::rvalAt(int key, bool error /* = false */) const {
+  if (m_px) return m_px->get((int64)key, error);
+  return null_variant;
+}
+
+CVarRef Array::rvalAtRef(int key, bool error /* = false */) const {
   if (m_px) return m_px->get((int64)key, error);
   return null_variant;
 }
@@ -418,7 +418,17 @@ Variant Array::rvalAt(int64 key, bool error /* = false */) const {
   return null_variant;
 }
 
+CVarRef Array::rvalAtRef(int64 key, bool error /* = false */) const {
+  if (m_px) return m_px->get(key, error);
+  return null_variant;
+}
+
 Variant Array::rvalAt(double key, bool error /* = false */) const {
+  if (m_px) return m_px->get((int64)key, error);
+  return null_variant;
+}
+
+CVarRef Array::rvalAtRef(double key, bool error /* = false */) const {
   if (m_px) return m_px->get((int64)key, error);
   return null_variant;
 }

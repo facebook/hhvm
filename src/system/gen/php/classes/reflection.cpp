@@ -8878,6 +8878,7 @@ void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
   bool oldInCtor = gasInCtor(true);
   Variant v_params;
 
+  Variant tmp_ref;
   if ((toBoolean(v_func) && toBoolean(v_param))) {
     {
       {
@@ -8888,8 +8889,9 @@ void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
         v_params = tmp2;
       }
       {
-        const Variant &tmp3((v_params.rvalAt(v_param, true).o_getPublic(NAMSTR(s_sys_ss33988b3e, "info"), true)));
+        const Variant &tmp3((v_params.rvalRef(v_param, tmp_ref, true).o_getPublic(NAMSTR(s_sys_ss33988b3e, "info"), true)));
         m_info = tmp3;
+        tmp_ref.unset();
       }
     }
   }

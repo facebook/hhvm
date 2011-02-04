@@ -27,6 +27,8 @@
 #include <compiler/expression/simple_variable.h>
 #include <compiler/expression/assignment_expression.h>
 #include <compiler/expression/array_pair_expression.h>
+#include <compiler/expression/array_element_expression.h>
+#include <compiler/expression/object_property_expression.h>
 #include <compiler/expression/unary_op_expression.h>
 #include <compiler/analysis/constant_table.h>
 #include <compiler/analysis/variable_table.h>
@@ -831,13 +833,37 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   return ret;
 }
 
-static bool checkOffsetChain(ExpressionPtr e) {
-  if (e->is(Expression::KindOfObjectPropertyExpression) ||
-      e->is(Expression::KindOfArrayElementExpression)) {
+static bool checkOffsetChain(CodeGenerator &cg, ExpressionPtr e,
+                             bool &needsRefTemp) {
+  bool isArray = e->is(Expression::KindOfArrayElementExpression);
+  if (isArray || e->is(Expression::KindOfObjectPropertyExpression)) {
+    if (cg.hasReferenceTemp()) {
+      bool lval =
+        e->hasContext(Expression::LValue) ||
+        e->hasContext(Expression::RefValue) ||
+        e->hasContext(Expression::DeepReference) ||
+        e->hasContext(Expression::UnsetContext);
+
+      if (isArray) {
+        if (!lval && !e->hasContext(Expression::InvokeArgument) &&
+            !static_pointer_cast<ArrayElementExpression>(e)->isSuperGlobal()) {
+          TypePtr type = e->getNthExpr(0)->getActualType();
+          if (!type ||
+              (!type->is(Type::KindOfString) && !type->is(Type::KindOfArray))) {
+            needsRefTemp = true;
+          }
+        }
+      } else {
+        if (lval &&
+            !static_pointer_cast<ObjectPropertyExpression>(e)->isValid()) {
+          needsRefTemp = true;
+        }
+      }
+    }
     if (ExpressionPtr e1 = e->getNthExpr(1)) {
       if (e1->hasEffect()) return true;
     }
-    return checkOffsetChain(e->getNthExpr(0));
+    return checkOffsetChain(cg, e->getNthExpr(0), needsRefTemp);
   }
   return e->hasEffect();
 }
@@ -846,11 +872,13 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
                                     AnalysisResultPtr ar,
                                     int state) {
   bool ret = (state & FixOrder);
+  bool needRefTemp = false;
   if (!hasContext(AccessContext)) {
     if (!ret) {
-      ret = checkOffsetChain(getNthExpr(0));
+      ret = checkOffsetChain(cg, getNthExpr(0), needRefTemp);
       if (!ret &&
-          (m_context & (LValue | OprLValue | RefValue | RefParameter))) {
+          (m_context & (LValue | OprLValue |
+                        RefValue | DeepReference | RefParameter))) {
         if (ExpressionPtr e1 = getNthExpr(1)) {
           if (e1->hasEffect()) {
             ret = true;
@@ -859,23 +887,31 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
       }
     }
   }
-  if (!ret) return Expression::preOutputCPP(cg, ar, state);
-  if (!cg.inExpression()) return ret;
 
-  state |= FixOrder;
-
-  if (ExpressionPtr e0 = getNthExpr(0)) {
-    e0->preOutputCPP(cg, ar, state & ~(StashVars));
+  if (!ret) {
+    if (needRefTemp && cg.inExpression()) {
+      cg.wrapExpressionBegin();
+    }
+    return Expression::preOutputCPP(cg, ar, state) || needRefTemp;
   }
 
-  if (ExpressionPtr e1 = getNthExpr(1)) {
-    e1->preOutputCPP(cg, ar, state & ~(StashVars));
-  }
+  if (cg.inExpression()) {
+    cg.wrapExpressionBegin();
+    state |= FixOrder;
 
-  if (!hasContext(AccessContext)) {
-    if (!(m_context & (AssignmentLHS | OprLValue |
-                       ExistContext | UnsetContext))) {
-      Expression::preOutputStash(cg, ar, state);
+    if (ExpressionPtr e0 = getNthExpr(0)) {
+      e0->preOutputCPP(cg, ar, state & ~(StashVars));
+    }
+
+    if (ExpressionPtr e1 = getNthExpr(1)) {
+      e1->preOutputCPP(cg, ar, state & ~(StashVars));
+    }
+
+    if (!hasContext(AccessContext)) {
+      if (!(m_context & (AssignmentLHS | OprLValue |
+                         ExistContext | UnsetContext))) {
+        Expression::preOutputStash(cg, ar, state);
+      }
     }
   }
 

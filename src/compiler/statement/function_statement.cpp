@@ -280,8 +280,10 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
                                  ClassScopePtr(), funcScope);
         }
         funcScope->outputCPP(cg, ar);
+        if (funcScope->needsRefTemp()) cg.genReferenceTemp(shared_from_this());
         cg.setContext(CodeGenerator::NoContext); // no inner functions/classes
         outputCPPStmt(cg, ar);
+        if (funcScope->needsRefTemp()) cg.clearRefereceTemp();
         cg_indentEnd("}\n");
         ASSERT(startLineImplementation >= 0);
         m_cppLength = cg.getLineNo(CodeGenerator::PrimaryStream)

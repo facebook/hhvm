@@ -130,6 +130,7 @@ void CodeGenerator::indentEnd(const char *fmt, ...) {
 bool CodeGenerator::wrapExpressionBegin() {
   if (!m_wrappedExpression[m_curStream]) {
     m_wrappedExpression[m_curStream] = true;
+    m_referenceTempsUsed[m_curStream] = false;
     indentBegin("{\n");
     return true;
   }
@@ -138,11 +139,30 @@ bool CodeGenerator::wrapExpressionBegin() {
 
 bool CodeGenerator::wrapExpressionEnd() {
   if (m_wrappedExpression[m_curStream]) {
+    if (m_referenceTempsUsed[m_curStream]) {
+      printf("%s.unset();\n", m_referenceTemps[m_curStream].c_str());
+    }
     m_wrappedExpression[m_curStream] = false;
     indentEnd("}\n");
     return true;
   }
   return false;
+}
+
+void CodeGenerator::genReferenceTemp(ConstructPtr cp) {
+  string &rt = m_referenceTemps[m_curStream];
+  rt = (string)Option::TempPrefix + "_ref";
+  printf("Variant %s;\n", rt.c_str());
+}
+
+const string &CodeGenerator::getReferenceTemp() {
+  static string empty = "";
+  if (m_wrappedExpression[m_curStream] &&
+      !m_referenceTemps[m_curStream].empty()) {
+    m_referenceTempsUsed[m_curStream] = true;
+    return m_referenceTemps[m_curStream];
+  }
+  return empty;
 }
 
 bool CodeGenerator::inComments() const {

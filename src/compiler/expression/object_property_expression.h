@@ -64,7 +64,6 @@ private:
   unsigned m_propSymValid : 1;
 
   int m_localEffects;
-  std::string m_lvalTmp;
 
   Symbol *m_propSym;
   ClassScopeRawPtr m_objectClass;

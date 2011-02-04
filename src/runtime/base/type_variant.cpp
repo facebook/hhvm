@@ -2220,6 +2220,137 @@ Variant Variant::rvalAt(CVarRef offset, bool error /* = false */) const {
   return null_variant;
 }
 
+template <typename T>
+CVarRef Variant::rvalRefHelper(T offset, CVarRef tmp, bool error) const {
+  switch (m_type) {
+  case KindOfStaticString:
+  case KindOfString:
+    const_cast<Variant&>(tmp) = m_data.pstr->getChar(HPHP::toInt32(offset));
+    return tmp;
+  case KindOfObject:
+    const_cast<Variant&>(tmp) =
+      getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+    return tmp;
+  case KindOfVariant:
+    return m_data.pvar->rvalRef(offset, tmp, error);
+  case KindOfNull:
+    break;
+  default:
+    if (error) {
+      raise_bad_offset_notice();
+    }
+    break;
+  }
+  return null_variant;
+}
+
+template <typename T>
+CVarRef Variant::rvalRefHelper(T offset, CVarRef tmp,
+                               bool error, bool isString) const {
+  switch (m_type) {
+  case KindOfStaticString:
+  case KindOfString:
+    const_cast<Variant&>(tmp) = m_data.pstr->getChar(HPHP::toInt32(offset));
+    return tmp;
+  case KindOfObject:
+    const_cast<Variant&>(tmp) =
+      getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
+    return tmp;
+  case KindOfVariant:
+    return m_data.pvar->rvalRef(offset, tmp, error, isString);
+  case KindOfNull:
+    break;
+  default:
+    if (error) {
+      raise_bad_offset_notice();
+    }
+    break;
+  }
+  return null_variant;
+}
+
+template
+CVarRef Variant::rvalRefHelper(int64 offset, CVarRef tmp, bool error) const;
+
+CVarRef Variant::rvalRef(double offset, CVarRef tmp,
+                         bool error /* = false */) const {
+  return rvalRef((int64)offset, tmp, error);
+}
+
+CVarRef Variant::rvalRef(litstr offset, CVarRef tmp, bool error /* = false */,
+                        bool isString /* = false */) const {
+  if (m_type == KindOfArray) {
+    if (isString) return m_data.parr->get(offset, error);
+    int64 n;
+    int len = strlen(offset);
+    if (!is_strictly_integer(offset, len, n)) {
+      return m_data.parr->get(offset, error);
+    } else {
+      return m_data.parr->get(n, error);
+    }
+  }
+  return rvalRefHelper(offset, tmp, error, isString);
+}
+
+CVarRef Variant::rvalRef(CStrRef offset, CVarRef tmp, bool error /* = false */,
+                         bool isString /* = false */) const {
+  if (m_type == KindOfArray) {
+    if (isString) return m_data.parr->get(offset, error);
+    if (offset.isNull()) return m_data.parr->get(empty_string, error);
+    int64 n;
+    if (!offset->isStrictlyInteger(n)) {
+      return m_data.parr->get(offset, error);
+    } else {
+      return m_data.parr->get(n, error);
+    }
+  }
+  return rvalRefHelper(offset, tmp, error, isString);
+}
+
+CVarRef Variant::rvalRef(CVarRef offset, CVarRef tmp,
+                        bool error /* = false */) const {
+  if (m_type == KindOfArray) {
+    // Fast path for KindOfArray
+    switch (offset.m_type) {
+    case KindOfNull:
+      return m_data.parr->get(empty_string, error);
+    case KindOfBoolean:
+    case KindOfByte:
+    case KindOfInt16:
+    case KindOfInt32:
+    case KindOfInt64:
+      return m_data.parr->get(offset.m_data.num, error);
+    case KindOfDouble:
+      return m_data.parr->get((int64)offset.m_data.dbl, error);
+    case KindOfStaticString:
+    case KindOfString: {
+      int64 n;
+      if (offset.m_data.pstr->isStrictlyInteger(n)) {
+        return m_data.parr->get(n, error);
+      } else {
+        return m_data.parr->get(offset.asCStrRef(), error);
+      }
+    }
+    case KindOfArray:
+      throw_bad_type_exception("Invalid type used as key");
+      break;
+    case KindOfObject:
+      if (offset.isResource()) {
+        return m_data.parr->get(offset.toInt64(), error);
+      }
+      throw_bad_type_exception("Invalid type used as key");
+      break;
+    case KindOfVariant:
+      return rvalRef(*(offset.m_data.pvar), tmp, error);
+    default:
+      ASSERT(false);
+      break;
+    }
+    return null_variant;
+  }
+  return rvalRefHelper(offset, tmp, error);
+}
+
 template<typename T>
 Variant& Variant::lvalAtImpl(const T &key, bool checkExist /* false */)  {
   if (m_type == KindOfVariant) {

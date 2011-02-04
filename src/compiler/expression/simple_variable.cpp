@@ -163,7 +163,7 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                            construct, scope->getModifiers());
     }
   } else if ((m_context & (LValue|Declaration)) &&
-             !(m_context & ObjectContext)) {
+             !(m_context & (ObjectContext|RefValue))) {
     if (m_globals) {
       ret = Type::Variant;
     } else if (m_superGlobal) {

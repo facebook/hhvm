@@ -224,8 +224,6 @@ class Array : public SmartPtr<ArrayData> {
    * Offset
    */
   Variant rvalAt(bool    key, bool error = false) const;
-  Variant rvalAt(char    key, bool error = false) const;
-  Variant rvalAt(short   key, bool error = false) const;
   Variant rvalAt(int     key, bool error = false) const;
   Variant rvalAt(int64   key, bool error = false) const;
   Variant rvalAt(double  key, bool error = false) const;
@@ -236,6 +234,10 @@ class Array : public SmartPtr<ArrayData> {
   /**
    * To get offset for temporary usage
    */
+  CVarRef rvalAtRef(bool    key, bool error = false) const;
+  CVarRef rvalAtRef(int     key, bool error = false) const;
+  CVarRef rvalAtRef(int64   key, bool error = false) const;
+  CVarRef rvalAtRef(double  key, bool error = false) const;
   CVarRef rvalAtRef(litstr key, bool error = false, bool isKey = false) const;
   CVarRef rvalAtRef(CVarRef key, bool error = false, bool isKey = false) const;
   CVarRef rvalAtRef(CStrRef key, bool error = false, bool isKey = false) const;

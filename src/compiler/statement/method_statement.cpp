@@ -555,6 +555,9 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
               cg_printf("setInDtor();\n");
             }
             funcScope->outputCPP(cg, ar);
+            if (funcScope->needsRefTemp()) {
+              cg.genReferenceTemp(shared_from_this());
+            }
             cg.setContext(
               CodeGenerator::NoContext); // no inner functions/classes
             if (!funcScope->isStatic() && funcScope->getVariables()->
@@ -565,6 +568,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
               }
             }
             outputCPPStmt(cg, ar);
+            if (funcScope->needsRefTemp()) cg.clearRefereceTemp();
           }
           cg_indentEnd("}\n");
           ASSERT(startLineImplementation >= 0);

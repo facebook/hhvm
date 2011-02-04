@@ -173,6 +173,7 @@ void ReturnStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     m_exp->outputCPP(cg, ar);
     if (close) cg_printf(")");
     cg_printf(";\n");
+    cg.setReferenceTempUsed(false);
     m_exp->outputCPPEnd(cg, ar);
   } else if (func &&
              !(func->inPseudoMain() && !Option::GenerateCPPMain &&

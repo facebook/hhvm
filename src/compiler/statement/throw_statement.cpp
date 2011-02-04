@@ -88,5 +88,6 @@ void ThrowStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf("throw_exception(");
   m_exp->outputCPP(cg, ar);
   cg_printf(");\n");
+  cg.setReferenceTempUsed(false);
   m_exp->outputCPPEnd(cg, ar);
 }

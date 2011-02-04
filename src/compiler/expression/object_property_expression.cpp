@@ -143,6 +143,12 @@ void ObjectPropertyExpression::clearContext(Context context) {
 void ObjectPropertyExpression::analyzeProgram(AnalysisResultPtr ar) {
   m_object->analyzeProgram(ar);
   m_property->analyzeProgram(ar);
+  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    if (!m_valid && m_context & (LValue|RefValue|DeepReference|UnsetContext)) {
+      FunctionScopePtr func = getFunctionScope();
+      if (func) func->setNeedsRefTemp();
+    }
+  }
 }
 
 ConstructPtr ObjectPropertyExpression::getNthKid(int n) const {
@@ -231,7 +237,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   }
 
   if (!cls) {
-    if (m_context & (LValue | RefValue | UnsetContext)) {
+    if (m_context & (LValue | RefValue | DeepReference | UnsetContext)) {
       ar->forceClassVariants(name, getOriginalClass(), false);
     }
     return Type::Variant;
@@ -317,10 +323,6 @@ void ObjectPropertyExpression::outputPHP(CodeGenerator &cg,
 void ObjectPropertyExpression::preOutputStash(CodeGenerator &cg,
                                               AnalysisResultPtr ar,
                                               int state) {
-  if (!m_valid && (m_context & (LValue | RefValue | UnsetContext))) {
-    m_lvalTmp = genCPPTemp(cg, ar);
-    cg_printf("Variant %s;\n", m_lvalTmp.c_str());
-  }
   Expression::preOutputStash(cg, ar, state);
 }
 
@@ -341,6 +343,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
   const char *error = ", true";
   std::string context = "";
   bool doUnset = m_context & LValue && m_context & UnsetContext;
+  bool needTemp = false;
 
   if (cg.getOutput() != CodeGenerator::SystemCPP) {
     context = originalClassName(cg, true);
@@ -358,7 +361,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     if (m_context & InvokeArgument) {
       ASSERT(cg.callInfoTop() != -1);
       func += "argval";
-    } else if (m_context & (LValue | RefValue | UnsetContext)) {
+    } else if (m_context & (LValue | RefValue | DeepReference | UnsetContext)) {
       if (m_context & UnsetContext) {
         assert(!(m_context & LValue)); // handled by doUnset
         func += "unsetLval";
@@ -366,7 +369,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
         func += "lval";
       }
       error = "";
-      context = ", " + (m_lvalTmp.empty() ? "Variant()" : m_lvalTmp) + context;
+      needTemp = true;
     } else {
       func += "get";
       if (isNonPrivate(ar)) {
@@ -396,6 +399,10 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       cg_printf("cit%d->isRef(%d), ", cg.callInfoTop(), m_argNum);
     }
     outputCPPProperty(cg, ar);
+    if (needTemp) {
+      const string &tmp = cg.getReferenceTemp();
+      context = ", " + (tmp.empty() ? "Variant()" : tmp) + context;
+    }
     cg_printf("%s%s)", error, context.c_str());
   }
 }

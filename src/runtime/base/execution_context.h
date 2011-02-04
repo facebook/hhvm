@@ -208,8 +208,6 @@ public:
   bool getThrowAllErrors() const { return m_throwAllErrors; }
   void setExitCallback(Variant f) { m_exitCallback = f; }
   Variant getExitCallback() { return m_exitCallback; }
-  void addAllowedDirectory(CStrRef s) { m_allowedDirs.set(s, true); }
-  Array getAllowedDirectories() { return m_allowedDirs; }
 
 private:
   class OutputBuffer {
@@ -256,7 +254,6 @@ private:
   String m_timezoneDefault;
   String m_argSeparatorOutput;
   bool m_throwAllErrors;
-  Array m_allowedDirs;
 
   // session backup/restore for RPCRequestHandler
   Array m_shutdownsBackup;

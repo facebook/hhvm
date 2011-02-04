@@ -275,20 +275,6 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   }
   context->setTransport(transport);
 
-  if (RuntimeOption::SafeFileAccess) {
-    for (unsigned i = 0; i < RuntimeOption::AllowedDirectories.size(); i++) {
-      context->addAllowedDirectory(RuntimeOption::AllowedDirectories[i]);
-    }
-    string spath = sourceRootInfo.path();
-    if (!spath.empty()) {
-      context->addAllowedDirectory(spath);
-      char *rpath = realpath(spath.c_str(), NULL);
-      if (rpath) {
-        context->addAllowedDirectory(String(rpath, AttachString));
-      }
-    }
-  }
-
   string file = reqURI.absolutePath().c_str();
   {
     ServerStatsHelper ssh("input");

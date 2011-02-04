@@ -48,17 +48,6 @@ namespace HPHP {
 StaticString File::s_class_name("File");
 StaticString File::s_resource_name("stream");
 
-static bool allowAccess(const char *filename, int length) {
-  for (ArrayIter iter(g_context->getAllowedDirectories()); iter; ++iter) {
-    String d = iter.first().toString();
-    int len = d.length();
-    if (length >= len && strncmp(filename, d.data(), len) == 0) {
-      return true;
-    }
-  }
-  return false;
-}
-
 String File::TranslatePath(CStrRef filename, bool useFileCache /* = false */) {
   String canonicalized(Util::canonicalize(string(filename.data(),
                                                  filename.size())));
@@ -77,14 +66,14 @@ String File::TranslatePath(CStrRef filename, bool useFileCache /* = false */) {
   }
 
   if (RuntimeOption::SafeFileAccess) {
-    if (allowAccess(canonicalized.data(), canonicalized.size())) {
-      return canonicalized;
-    }
-    char resolved_path[PATH_MAX];
-    if (realpath(canonicalized.data(), resolved_path) &&
-        canonicalized != resolved_path &&
-        allowAccess(resolved_path, strlen(resolved_path))) {
-      return canonicalized;
+    for (unsigned int i = 0; i < RuntimeOption::AllowedDirectories.size();
+         i++) {
+      string &directory = RuntimeOption::AllowedDirectories[i];
+      int len = directory.size();
+      if (canonicalized.length() >= len &&
+          strncmp(canonicalized.data(), directory.data(), len) == 0) {
+        return canonicalized;
+      }
     }
 
     // disallow access with an absolute path

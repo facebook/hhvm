@@ -21,7 +21,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define IMPLEMENT_LOGLEVEL(LOGLEVEL, err)                              \
+#define IMPLEMENT_LOGLEVEL(LOGLEVEL)                                   \
   void ExtendedLogger::LOGLEVEL(const char *fmt, ...) {                \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
     if (RuntimeOption::InjectedStackTrace &&                           \
@@ -29,14 +29,14 @@
       Array bt = FrameInjection::GetBacktrace();                       \
       if (!bt.empty()) {                                               \
         va_list ap; va_start(ap, fmt);                                 \
-        Logger::LogEscapeMore(err, fmt, ap);                           \
+        Logger::LogEscapeMore(Log ## LOGLEVEL, fmt, ap);               \
         va_end(ap);                                                    \
-        Log(err, bt);                                                  \
+        Log(Log ## LOGLEVEL, bt);                                      \
         return;                                                        \
       }                                                                \
     }                                                                  \
     va_list ap; va_start(ap, fmt);                                     \
-    Logger::Log(err, fmt, ap);                                         \
+    Logger::Log(Log ## LOGLEVEL, fmt, ap);                             \
     va_end(ap);                                                        \
   }                                                                    \
   void ExtendedLogger::LOGLEVEL(const std::string &msg) {              \
@@ -45,19 +45,19 @@
         !ExtendedLogger::EnabledByDefault) {                           \
       Array bt = FrameInjection::GetBacktrace();                       \
       if (!bt.empty()) {                                               \
-        Logger::Log(err, msg, NULL, true, true);                       \
-        Log(err, bt);                                                  \
+        Logger::Log(Log ## LOGLEVEL, msg, NULL, true, true);           \
+        Log(Log ## LOGLEVEL, bt);                                      \
         return;                                                        \
       }                                                                \
     }                                                                  \
-    Logger::Log(err, msg, NULL, true);                                 \
+    Logger::Log(Log ## LOGLEVEL, msg, NULL, true);                     \
   }                                                                    \
   void ExtendedLogger::Raw ## LOGLEVEL(const std::string &msg) {       \
     if (LogLevel < Log ## LOGLEVEL) return;                            \
-    Logger::Log(err, msg, NULL, false);                                \
+    Logger::Log(Log ## LOGLEVEL, msg, NULL, false);                    \
     if (RuntimeOption::InjectedStackTrace &&                           \
         !ExtendedLogger::EnabledByDefault) {                           \
-      Log(err, FrameInjection::GetBacktrace());                        \
+      Log(Log ## LOGLEVEL, FrameInjection::GetBacktrace());            \
     }                                                                  \
   }                                                                    \
 
@@ -69,42 +69,43 @@ bool ExtendedLogger::EnabledByDefault = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_LOGLEVEL(Error,   true);
-IMPLEMENT_LOGLEVEL(Warning, true);
-IMPLEMENT_LOGLEVEL(Info,    false);
-IMPLEMENT_LOGLEVEL(Verbose, false);
+IMPLEMENT_LOGLEVEL(Error);
+IMPLEMENT_LOGLEVEL(Warning);
+IMPLEMENT_LOGLEVEL(Info);
+IMPLEMENT_LOGLEVEL(Verbose);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void ExtendedLogger::log(bool err, const char *type, const Exception &e,
-                         const char *file /* = NULL */, int line /* = 0 */) {
-  if (!UseLogAggregator && !UseLogFile) return;
-  Logger::log(err, type, e, file, line);
+void ExtendedLogger::log(LogLevelType level, const char *type,
+                         const Exception &e, const char *file /* = NULL */,
+                         int line /* = 0 */) {
+  if (!IsEnabled()) return;
+  Logger::log(level, type, e, file, line);
 
   if (RuntimeOption::InjectedStackTrace) {
     const ExtendedException *ee = dynamic_cast<const ExtendedException *>(&e);
     if (ee) {
-      Log(err, *ee->getBackTrace());
+      Log(level, *ee->getBackTrace());
     }
   }
 }
 
-void ExtendedLogger::log(bool err, const std::string &msg,
+void ExtendedLogger::log(LogLevelType level, const std::string &msg,
                          const StackTrace *stackTrace,
                          bool escape /* = true */,
                          bool escapeMore /* = false */) {
   if (RuntimeOption::InjectedStackTrace) {
     Array bt = FrameInjection::GetBacktrace();
     if (!bt.empty()) {
-      Logger::log(err, msg, stackTrace, escape, escape);
-      Log(err, bt, escape, escapeMore);
+      Logger::log(level, msg, stackTrace, escape, escape);
+      Log(level, bt, escape, escapeMore);
       return;
     }
   }
-  Logger::log(err, msg, stackTrace, escape, escapeMore);
+  Logger::log(level, msg, stackTrace, escape, escapeMore);
 }
 
-void ExtendedLogger::Log(bool err, CArrRef stackTrace,
+void ExtendedLogger::Log(LogLevelType level, CArrRef stackTrace,
                          bool escape /* = true */,
                          bool escapeMore /* = false */) {
   ASSERT(!escapeMore || escape);
@@ -118,7 +119,7 @@ void ExtendedLogger::Log(bool err, CArrRef stackTrace,
 
   // TODO Should we also send the stacktrace to LogAggregator?
   if (UseLogFile) {
-    FILE *f = Output ? Output : (err ? stderr : stdout);
+    FILE *f = Output ? Output : GetStandardOut(level);
     PrintStackTrace(f, stackTrace, escape, escapeMore);
 
     FILE *tf = threadData->log;

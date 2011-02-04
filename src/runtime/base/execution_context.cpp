@@ -632,7 +632,7 @@ void ExecutionContext::handleError(const std::string &msg,
       }
     }
 
-    Logger::Log(true, prefix.c_str(), ee, file, line);
+    Logger::Log(Logger::LogError, prefix.c_str(), ee, file, line);
   }
 }
 
@@ -703,7 +703,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
     }
   }
   if (RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(true, "HipHop Fatal error: ", e, file, line);
+    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e, file, line);
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
@@ -711,7 +711,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(true, "HipHop Fatal error: ", e, file, line);
+    Logger::Log(Logger::LogError, "HipHop Fatal error: ", e, file, line);
   }
   return handled;
 }

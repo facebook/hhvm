@@ -206,7 +206,7 @@ bool Option::EliminateDeadCode = true;
 bool Option::LocalCopyProp = true;
 bool Option::StringLoopOpts = true;
 bool Option::AutoInline = false;
-bool Option::ControlFlow = false;
+bool Option::ControlFlow = true;
 bool Option::DumpAst = false;
 
 bool Option::AllDynamic = true;
@@ -415,7 +415,7 @@ void Option::Load(Hdf &config) {
   LocalCopyProp      = config["LocalCopyProp"].getBool(true);
   StringLoopOpts     = config["StringLoopOpts"].getBool(true);
   AutoInline         = config["AutoInline"].getBool(false);
-  ControlFlow        = config["ControlFlow"].getBool(false);
+  ControlFlow        = config["ControlFlow"].getBool(true);
   DumpAst            = config["DumpAst"].getBool(false);
   PregenerateCPP     = config["PregenerateCPP"].getBool(false);
 

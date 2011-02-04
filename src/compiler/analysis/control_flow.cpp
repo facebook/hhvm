@@ -426,11 +426,16 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
             }
             break;
           case Expression::KindOfQOpExpression:
-            addEdge(e->getNthExpr(0), AfterConstruct,
-                    e->getNthExpr(2), BeforeConstruct);
-            addEdge(e->getNthExpr(1), AfterConstruct,
-                    e->getNthExpr(2), AfterConstruct);
-            noFallThrough(e->getNthExpr(1));
+            if (ExpressionPtr e1 = e->getNthExpr(1)) {
+              addEdge(e->getNthExpr(0), AfterConstruct,
+                      e->getNthExpr(2), BeforeConstruct);
+              addEdge(e1, AfterConstruct,
+                      e->getNthExpr(2), AfterConstruct);
+              noFallThrough(e1);
+            } else {
+              addEdge(e->getNthExpr(0), AfterConstruct,
+                      e->getNthExpr(2), AfterConstruct);
+            }
             break;
           default:
             break;

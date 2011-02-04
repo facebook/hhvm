@@ -96,7 +96,7 @@ bool AliasManager::parseOptimizations(const std::string &optimizations,
       Option::EliminateDeadCode = val;
       Option::LocalCopyProp = val;
       Option::AutoInline = val;
-//      Option::ControlFlow = val;
+      Option::ControlFlow = val;
     } else {
       errs = "Unknown optimization: " + opt;
       return false;
@@ -1353,8 +1353,10 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
     case Expression::KindOfQOpExpression:
       canonicalizeKid(e, e->getNthExpr(0), 0);
       beginScope();
-      canonicalizeKid(e, e->getNthExpr(1), 1);
-      resetScope();
+      if (ExpressionPtr e1 = e->getNthExpr(1)) {
+        canonicalizeKid(e, e1, 1);
+        resetScope();
+      }
       canonicalizeKid(e, e->getNthExpr(2), 2);
       endScope();
       return canonicalizeNode(e);

@@ -896,7 +896,6 @@ public:
         scope->setMark(BlockScope::MarkProcessing);
       }
 
-      Lock lock(scope->getMutex());
       scope->setForceRerun(false);
       int useKinds = visitor->visitScope(BlockScopeRawPtr(scope));
 
@@ -1202,6 +1201,21 @@ StatementPtr DepthFirstVisitor<PostOptVisitor>::visit(StatementPtr stmt) {
   return stmt->postOptimize(this->m_data.m_ar);
 }
 
+class FinalWorker : public JobQueueWorker<MethodStatementPtr> {
+public:
+  virtual void onThreadExit() {
+    g_context.reset();
+  }
+  virtual void doJob(MethodStatementPtr m) {
+    try {
+      AliasManager am(1);
+      am.finalSetup(((AnalysisResult*)m_opaque)->shared_from_this(), m);
+    } catch (Exception &e) {
+      Logger::Error("%s", e.getMessage().c_str());
+    }
+  }
+};
+
 void AnalysisResult::postOptimize() {
   setPhase(AnalysisResult::PostOptimize);
 
@@ -1211,26 +1225,38 @@ void AnalysisResult::postOptimize() {
   DepthFirstVisitor<PostOptVisitor> dfv(
     PostOptVisitor(shared_from_this(), scopes.size()));
 
+  unsigned int threadCount = Option::ParserThreadCount;
+  if (threadCount > scopes.size()) {
+    threadCount = scopes.size();
+  }
+  if (threadCount <= 0) threadCount = 1;
+
+  JobQueueDispatcher<FinalWorker::JobType, FinalWorker> dispatcher(
+    threadCount, true, 0, this);
+
   bool first = true;
   bool again;
   dfv.data().start();
   do {
     again = dfv.visitParallel(scopes, first);
+    if (first && Option::ControlFlow) {
+      for (BlockScopeRawPtrQueue::iterator it = scopes.begin(),
+             end = scopes.end(); it != end; ++it) {
+        BlockScopeRawPtr scope = *it;
+        if (MethodStatementPtr m =
+            dynamic_pointer_cast<MethodStatement>(scope->getStmt())) {
+          dispatcher.enqueue(m);
+        }
+      }
+    }
     first = false;
     dfv.data().wait();
   } while (again);
   dfv.data().stop();
 
   if (Option::ControlFlow) {
-    for (BlockScopeRawPtrQueue::iterator it = scopes.begin(),
-           end = scopes.end(); it != end; ++it) {
-      BlockScopeRawPtr scope = *it;
-      if (MethodStatementPtr m =
-          dynamic_pointer_cast<MethodStatement>(scope->getStmt())) {
-        AliasManager am(1);
-        am.finalSetup(shared_from_this(), m);
-      }
-    }
+    dispatcher.start();
+    dispatcher.stop();
   }
 }
 

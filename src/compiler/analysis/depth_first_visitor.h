@@ -165,7 +165,6 @@ public:
   void visitParallelDeps(
     BlockScopeRawPtr scope, BlockScopeRawPtrQueue &queue) {
 
-    Lock lock(scope->getMutex());
     scope->setLockedMark(BlockScope::MarkProcessingDeps);
     const BlockScopeRawPtrVec &deps = scope->getDeps();
     {

@@ -298,12 +298,11 @@ Variant f_array_push(int _argc, Variant array, CVarRef var, CArrRef _argv /* = n
     throw_bad_array_exception();
     return false;
   }
-  CArrRef arr = array.toArrNR();
   array.append(var);
   for (ArrayIter iter(_argv); iter; ++iter) {
     array.append(iter.second());
   }
-  return arr.size();
+  return array.toArrNR().size();
 }
 
 static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
@@ -396,7 +395,7 @@ static void compact(T *variables, Array &ret, CVarRef var) {
       compact(variables, ret, iter.second());
     }
   } else {
-    StrNR varname = var.toStrNR();
+    String varname = var.toString();
     if (!varname.empty() && variables->exists(varname)) {
       ret.set(varname, variables->get(varname));
     }

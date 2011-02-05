@@ -55,6 +55,11 @@ public:
   std::vector<pthread_cond_t> m_conds;
   std::list<pthread_cond_t*> m_cond_list;
 
+  // iterators in std::list are valid even after element removal
+  typedef hphp_hash_map<pthread_cond_t*, std::list<pthread_cond_t*>::iterator,
+                        pointer_hash<pthread_cond_t> > CondIterMap;
+  CondIterMap m_cond_map;
+
   bool waitImpl(int id, bool front, timespec *ts);
 };
 

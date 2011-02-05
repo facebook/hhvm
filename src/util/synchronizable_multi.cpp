@@ -60,8 +60,10 @@ bool SynchronizableMulti::waitImpl(int id, bool front, timespec *ts) {
 
   if (front) {
     m_cond_list.push_front(cond);
+    m_cond_map[cond] = m_cond_list.begin();
   } else {
     m_cond_list.push_back(cond);
+    m_cond_map[cond] = --m_cond_list.end();
   }
 
   int ret;
@@ -73,13 +75,11 @@ bool SynchronizableMulti::waitImpl(int id, bool front, timespec *ts) {
   ASSERT(ret != EPERM); // did you lock the mutex?
 
   if (ret) {
-    for (std::list<pthread_cond_t*>::iterator iter = m_cond_list.begin();
-         iter != m_cond_list.end(); ++iter) {
-      if (*iter == cond) {
-        m_cond_list.erase(iter);
-        break;
-      }
-    }
+    CondIterMap::iterator iter = m_cond_map.find(cond);
+    ASSERT(iter != m_cond_map.end());
+
+    m_cond_list.erase(iter->second);
+    m_cond_map.erase(iter);
   }
 
   return ret != ETIMEDOUT;
@@ -87,8 +87,10 @@ bool SynchronizableMulti::waitImpl(int id, bool front, timespec *ts) {
 
 void SynchronizableMulti::notify() {
   if (!m_cond_list.empty()) {
-    pthread_cond_signal(m_cond_list.front());
+    pthread_cond_t *cond = m_cond_list.front();
+    pthread_cond_signal(cond);
     m_cond_list.pop_front();
+    m_cond_map.erase(cond);
   }
 }
 
@@ -97,6 +99,7 @@ void SynchronizableMulti::notifyAll() {
     pthread_cond_signal(m_cond_list.front());
     m_cond_list.pop_front();
   }
+  m_cond_map.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

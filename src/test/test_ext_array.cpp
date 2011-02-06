@@ -729,7 +729,8 @@ bool TestExtArray::test_array_product() {
 
 bool TestExtArray::test_array_push() {
   Variant input = CREATE_VECTOR2("orange", "banana");
-  f_array_push(3, ref(input), "apple", CREATE_VECTOR1("raspberry"));
+  Variant size =
+    f_array_push(3, ref(input), "apple", CREATE_VECTOR1("raspberry"));
   VS(f_print_r(input, true),
      "Array\n"
      "(\n"
@@ -738,6 +739,7 @@ bool TestExtArray::test_array_push() {
      "    [2] => apple\n"
      "    [3] => raspberry\n"
      ")\n");
+  VS(size.toInt64(), 4);
 
   return Count(true);
 }

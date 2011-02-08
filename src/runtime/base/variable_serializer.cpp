@@ -300,10 +300,15 @@ void VariableSerializer::write(CArrRef v) {
 
 void VariableSerializer::write(CObjRef v) {
   if (!v.isNull() && m_type == JSON) {
-    Array props(ArrayData::Create());
-    v->o_getArray(props, true);
-    setObjectInfo(v->o_getClassName(), v->o_getId());
-    props.serialize(this);
+    if (incNestedLevel(v.get(), true)) {
+      writeOverflow(v.get(), true);
+    } else {
+      Array props(ArrayData::Create());
+      v->o_getArray(props, true);
+      setObjectInfo(v->o_getClassName(), v->o_getId());
+      props.serialize(this);
+    }
+    decNestedLevel(v.get());
   } else {
     v.serialize(this);
   }
@@ -390,6 +395,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
     }
     break;
   case JSON:
+    raise_warning("json_encode(): recursion detected");
     m_buf->append("null");
     break;
   default:

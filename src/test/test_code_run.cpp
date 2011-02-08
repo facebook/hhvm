@@ -11194,6 +11194,12 @@ bool TestCodeRun::TestJson() {
        "$obj = new A();"
        "$obj->aaaa();");
 
+  // recursive object
+  MVCR("<?php\n"
+       "class Foo { }\n"
+       "$foo = new Foo(); $foo->foo = $foo;\n"
+       "var_dump(json_encode($foo));\n");
+
 #if 0
   MVCR("<?php "
       "$a = array(1);"

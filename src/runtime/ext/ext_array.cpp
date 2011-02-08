@@ -147,7 +147,7 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
     } else if (arr1.exists(key, true)) {
       // There is no need to do toKey() conversion, for a key that is already
       // in the array.
-      Variant &v = arr1.lvalAt(key, false, true);
+      Variant &v = arr1.lvalAt(key, AccessFlags::Key);
       Array subarr1(v.toArray()->copy());
       php_array_merge_recursive(seen, v.isReferenced(), subarr1,
                                 value.toArray());
@@ -210,7 +210,7 @@ static void php_array_replace(Array &arr1, CArrRef arr2) {
   for (ArrayIter iter(arr2); iter; ++iter) {
     Variant key = iter.first();
     CVarRef value = iter.secondRef();
-    arr1.lvalAt(key, false, true).setWithRef(value);
+    arr1.lvalAt(key, AccessFlags::Key).setWithRef(value);
   }
 }
 
@@ -228,7 +228,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
     Variant key = iter.first();
     CVarRef value = iter.secondRef();
     if (arr1.exists(key, true) && value.isArray()) {
-      Variant &v = arr1.lvalAt(key, false, true);
+      Variant &v = arr1.lvalAt(key, AccessFlags::Key);
       if (v.isArray()) {
         Array subarr1 = v.toArray();
         CArrRef arr_value = value.toArrNR();
@@ -239,7 +239,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
         arr1.set(key, value, true);
       }
     } else {
-      arr1.lvalAt(key, false, true).setWithRef(value);
+      arr1.lvalAt(key, AccessFlags::Key).setWithRef(value);
     }
   }
 
@@ -345,7 +345,7 @@ int f_array_unshift(int _argc, Variant array, CVarRef var, CArrRef _argv /* = nu
         if (key.isInteger()) {
           newArray.appendWithRef(value);
         } else {
-          newArray.lvalAt(key, false, true).setWithRef(value);
+          newArray.lvalAt(key, AccessFlags::Key).setWithRef(value);
         }
       }
       array = newArray;

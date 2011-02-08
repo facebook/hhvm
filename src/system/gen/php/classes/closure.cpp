@@ -1351,7 +1351,7 @@ Variant c_Continuation::t_get_arg(CVarRef v_id) {
       }
     }
   }
-  return m_args.rvalAt(v_id, true);
+  return m_args.rvalAt(v_id, AccessFlags::Error);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/closure.php line 67 */
@@ -1403,7 +1403,7 @@ void c_Continuation::t_next() {
           v_tokens = tmp1;
         }
         {
-          Variant tmp2((v_tokens.rvalAt(1LL, true)));
+          Variant tmp2((v_tokens.rvalAt(1LL, AccessFlags::Error)));
           v_func = tmp2;
         }
         {

@@ -164,7 +164,7 @@ Variant ArrayUtil::Splice(CArrRef input, int offset, int length /* = 0 */,
       if (key.isNumeric()) {
         removed->appendWithRef(v);
       } else {
-        removed->lvalAt(key, false, true).setWithRef(v);
+        removed->lvalAt(key, AccessFlags::Key).setWithRef(v);
       }
     }
   }
@@ -183,7 +183,7 @@ Variant ArrayUtil::Splice(CArrRef input, int offset, int length /* = 0 */,
     if (key.isNumeric()) {
       out_hash.appendWithRef(v);
     } else {
-      out_hash.lvalAt(key, false, true).setWithRef(v);
+      out_hash.lvalAt(key, AccessFlags::Key).setWithRef(v);
     }
   }
 

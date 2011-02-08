@@ -526,7 +526,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
       if (getRef) {
         Variant tmp;
         Variant &ov = o_lval(prop->name, tmp, context);
-        Variant &av = ret.lvalAt(prop->name, false, true);
+        Variant &av = ret.lvalAt(prop->name, AccessFlags::Key);
         av = ref(ov);
       } else {
         ret.set(prop->name, o_getUnchecked(prop->name,
@@ -542,7 +542,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
         String key = iter.first().toString();
         if (dynamics->exists(key)) {
           CVarRef value = iter.secondRef();
-          Variant &av = ret.lvalAt(key, false, true);
+          Variant &av = ret.lvalAt(key, AccessFlags::Key);
           av = ref(value);
         }
       }
@@ -860,7 +860,7 @@ Variant &ObjectData::___offsetget_lval(Variant v_name) {
     // element in properties array
     o_properties = NEW(Array)();
   }
-  return o_properties->lvalAt(v_name, false, true);
+  return o_properties->lvalAt(v_name, AccessFlags::Key);
 }
 bool ObjectData::t___isset(Variant v_name) {
   return false;

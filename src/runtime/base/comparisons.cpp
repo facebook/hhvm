@@ -39,14 +39,6 @@ bool not_less(CVarRef v1, CVarRef v2) {
   return !less(v1, v2);
 }
 
-bool equal(char v1, const StringData *v2) {
-  return equal((int64)v1, v2);
-}
-
-bool equal(short v1, const StringData *v2) {
-  return equal((int64)v1, v2);
-}
-
 bool equal(int v1, const StringData *v2) {
   return equal((int64)v1, v2);
 }
@@ -65,15 +57,6 @@ bool equal(int64 v1, const StringData *v2) {
 
 bool equalAsStr(bool v1, const StringData *v2) {
   return same(toString(v1), v2);
-}
-
-
-bool equalAsStr(char v1, const StringData *v2) {
-  return equalAsStr((int)v1, v2);
-}
-
-bool equalAsStr(short v1, const StringData *v2) {
-  return equalAsStr((int)v1, v2);
 }
 
 bool equalAsStr(int v1, const StringData *v2) {
@@ -120,14 +103,6 @@ bool equalAsStr(double v1, litstr  v2) {
   return same(String(v1), v2);
 }
 
-bool less(char v1, const StringData *v2) {
-  return less((int64)v1, v2);
-}
-
-bool less(short v1, const StringData *v2) {
-  return less((int64)v1, v2);
-}
-
 bool less(int v1, const StringData *v2) {
   return less((int64)v1, v2);
 }
@@ -142,14 +117,6 @@ bool less(int64 v1, const StringData *v2) {
   } else {
     return v1 < 0;
   }
-}
-
-bool more(char v1, const StringData *v2) {
-  return more((int64)v1, v2);
-}
-
-bool more(short v1, const StringData *v2) {
-  return more((int64)v1, v2);
 }
 
 bool more(int v1, const StringData *v2) {

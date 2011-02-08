@@ -670,7 +670,7 @@ void ClassStatement::toArray(Array &props, Array &vals) const {
         pname += tmp;
       }
       if (vals.exists(pname)) {
-        Variant &p = vals.lvalAt(pname, -1);
+        Variant &p = vals.lvalAt(pname, AccessFlags::Key);
         props.set(pname, p.isReferenced() ? ref(p) : p);
       }
     }

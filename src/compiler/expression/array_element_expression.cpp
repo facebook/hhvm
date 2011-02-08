@@ -218,7 +218,9 @@ ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
           m_offset->getScalarValue(o)) {
         try {
           g_context->setThrowAllErrors(true);
-          Variant res = v.rvalAt(o, !hasContext(ExistContext));
+          Variant res = v.rvalAt(
+            o, hasContext(ExistContext) ?
+            AccessFlags::None : AccessFlags::Error);
           g_context->setThrowAllErrors(false);
           return replaceValue(makeScalarExpression(ar, res));
         } catch (...) {
@@ -409,6 +411,7 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
       bool rvalAt = false;
       bool byRef = false;
       bool arrRef = false;
+      const char *sep = ", AccessFlags::";
       if (hasContext(UnsetContext)) {
         // do nothing
       } else if (hasContext(InvokeArgument) && cg.callInfoTop() != -1) {
@@ -432,9 +435,8 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
             cg_printf(", %s", tmp.empty() ? "Variant()" : tmp.c_str());
           }
           if (!hasContext(ExistContext)) {
-            cg_printf(", true"); // raise undefined index error
-          } else {
-            cg_printf(", false");
+            cg_printf(", AccessFlags::Error"); // raise undefined index error
+            sep = "_";
           }
         } else if (lvalAt) {
           if (hasContext(AccessContext)) {
@@ -445,9 +447,8 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
             // either invoke OffsetGet, or fatal, and modifications to a
             // referenced element would be reflected in all copies
             // of the array anyway.
-            cg_printf(", true");
-          } else {
-            cg_printf(", false");
+            cg_printf(", AccessFlags::CheckExist");
+            sep = "_";
           }
         }
         ScalarExpressionPtr sc =
@@ -456,7 +457,11 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
           String s(sc->getLiteralString());
           int64 n;
           if (!s.get()->isStrictlyInteger(n)) {
-            cg_printf(", true"); // skip toKey() at run time
+            if (lvalAt || rvalAt) {
+              cg_printf("%sKey", sep);
+            } else {
+              cg_printf(", true"); // skip toKey() at run time
+            }
           }
         }
       }

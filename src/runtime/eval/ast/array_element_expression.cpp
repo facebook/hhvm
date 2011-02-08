@@ -47,7 +47,7 @@ Variant ArrayElementExpression::eval(VariableEnvironment &env) const {
     idx = m_idx->eval(env);
   }
   SET_LINE;
-  return arr.rvalAt(idx, true);
+  return arr.rvalAt(idx, AccessFlags::Error);
 }
 
 Variant ArrayElementExpression::evalExist(VariableEnvironment &env) const {

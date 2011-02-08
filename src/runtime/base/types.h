@@ -343,6 +343,24 @@ const char * methodIndexLookupReverse(MethodIndex methodIndex) ;
 class CallInfo;
 class MethodCallPackage;
 
+class AccessFlags {
+public:
+  enum Type {
+    None = 0,
+
+    Error = 1,
+    CheckExist = 2,
+    Key = 4,
+
+    Error_Key = Error | Key,
+    CheckExist_Key = CheckExist | Key
+  };
+  static Type IsKey(bool s) { return s ? Key : None; }
+  static Type IsError(bool e) { return e ? Error : None; }
+};
+
+#define ACCESSPARAMS_DECL AccessFlags::Type flags = AccessFlags::None
+#define ACCESSPARAMS_IMPL AccessFlags::Type flags
 ///////////////////////////////////////////////////////////////////////////////
 }
 

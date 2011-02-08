@@ -753,14 +753,16 @@ bool empty(CVarRef v, litstr offset, bool isString /* = false */) {
   if (!v.isArray()) {
     return empty(v, Variant(offset));
   }
-  return !toBoolean(v.toArrNR().rvalAtRef(offset, false, isString));
+  return !toBoolean(v.toArrNR().rvalAtRef(offset,
+                                          AccessFlags::IsKey(isString)));
 }
 
 bool empty(CVarRef v, CStrRef offset, bool isString /* = false */) {
   if (!v.isArray()) {
     return empty(v, Variant(offset));
   }
-  return !toBoolean(v.toArrNR().rvalAtRef(offset, false, isString));
+  return !toBoolean(v.toArrNR().rvalAtRef(offset,
+                                          AccessFlags::IsKey(isString)));
 }
 
 bool empty(CVarRef v, CVarRef offset) {
@@ -822,7 +824,8 @@ bool isset(CVarRef v, CVarRef offset) {
 
 bool isset(CVarRef v, litstr offset, bool isString /* = false */) {
   if (v.isArray()) {
-    return isset(v.toArrNR().rvalAtRef(offset, false, isString));
+    return isset(v.toArrNR().rvalAtRef(offset,
+                                       AccessFlags::IsKey(isString)));
   }
   if (v.isObject() || v.isString()) {
     return isset(v, Variant(offset));
@@ -832,7 +835,8 @@ bool isset(CVarRef v, litstr offset, bool isString /* = false */) {
 
 bool isset(CVarRef v, CStrRef offset, bool isString /* = false */) {
   if (v.isArray()) {
-    return isset(v.toArrNR().rvalAtRef(offset, false, isString));
+    return isset(v.toArrNR().rvalAtRef(offset,
+                                       AccessFlags::IsKey(isString)));
   }
   if (v.isObject() || v.isString()) {
     return isset(v, Variant(offset));

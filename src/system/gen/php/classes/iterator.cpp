@@ -1395,7 +1395,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 508 */
 Variant c_ArrayIterator::t_offsetget(Variant v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetGet);
-  return m_arr.rvalAt(v_index, true);
+  return m_arr.rvalAt(v_index, AccessFlags::Error);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 508 */

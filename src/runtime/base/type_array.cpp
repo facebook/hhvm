@@ -152,9 +152,8 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
       bool found = false;
       if (array->exists(key)) {
         if (by_value) {
-          found = value_cmp_as_string_function(value,
-                                               array.rvalAt(key, false, true),
-                                               value_data) == 0;
+          found = value_cmp_as_string_function(
+            value, array.rvalAt(key, AccessFlags::Key), value_data) == 0;
         } else {
           found = true;
         }
@@ -393,50 +392,50 @@ void Array::escalate(bool mutableIteration /* = false */) {
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions
 
-Variant Array::rvalAt(bool key, bool error /* = false*/) const {
-  if (m_px) return m_px->get(key ? 1LL : 0LL, error);
+Variant Array::rvalAt(bool key, ACCESSPARAMS_IMPL) const {
+  if (m_px) return m_px->get(key ? 1LL : 0LL, flags & AccessFlags::Error);
   return null_variant;
 }
 
-CVarRef Array::rvalAtRef(bool key, bool error /* = false*/) const {
-  if (m_px) return m_px->get(key ? 1LL : 0LL, error);
+CVarRef Array::rvalAtRef(bool key, ACCESSPARAMS_IMPL) const {
+  if (m_px) return m_px->get(key ? 1LL : 0LL, flags & AccessFlags::Error);
   return null_variant;
 }
 
-Variant Array::rvalAt(int key, bool error /* = false */) const {
-  if (m_px) return m_px->get((int64)key, error);
+Variant Array::rvalAt(int key, ACCESSPARAMS_IMPL) const {
+  if (m_px) return m_px->get((int64)key, flags & AccessFlags::Error);
   return null_variant;
 }
 
-CVarRef Array::rvalAtRef(int key, bool error /* = false */) const {
-  if (m_px) return m_px->get((int64)key, error);
+CVarRef Array::rvalAtRef(int key, ACCESSPARAMS_IMPL) const {
+  if (m_px) return m_px->get((int64)key, flags & AccessFlags::Error);
   return null_variant;
 }
 
-Variant Array::rvalAt(int64 key, bool error /* = false */) const {
-  if (m_px) return m_px->get(key, error);
+Variant Array::rvalAt(int64 key, ACCESSPARAMS_IMPL) const {
+  if (m_px) return m_px->get(key, flags & AccessFlags::Error);
   return null_variant;
 }
 
-CVarRef Array::rvalAtRef(int64 key, bool error /* = false */) const {
-  if (m_px) return m_px->get(key, error);
+CVarRef Array::rvalAtRef(int64 key, ACCESSPARAMS_IMPL) const {
+  if (m_px) return m_px->get(key, flags & AccessFlags::Error);
   return null_variant;
 }
 
-Variant Array::rvalAt(double key, bool error /* = false */) const {
-  if (m_px) return m_px->get((int64)key, error);
+Variant Array::rvalAt(double key, ACCESSPARAMS_IMPL) const {
+  if (m_px) return m_px->get((int64)key, flags & AccessFlags::Error);
   return null_variant;
 }
 
-CVarRef Array::rvalAtRef(double key, bool error /* = false */) const {
-  if (m_px) return m_px->get((int64)key, error);
+CVarRef Array::rvalAtRef(double key, ACCESSPARAMS_IMPL) const {
+  if (m_px) return m_px->get((int64)key, flags & AccessFlags::Error);
   return null_variant;
 }
 
-CVarRef Array::rvalAtRef(litstr key, bool error /* = false */,
-                         bool isKey /* = false */) const {
+CVarRef Array::rvalAtRef(litstr key, ACCESSPARAMS_IMPL) const {
   if (m_px) {
-    if (isKey) return m_px->get(key, error);
+    bool error = flags & AccessFlags::Error;
+    if (flags & AccessFlags::Key) return m_px->get(key, error);
     int64 n;
     int len = strlen(key);
     if (!is_strictly_integer(key, len, n)) {
@@ -448,15 +447,14 @@ CVarRef Array::rvalAtRef(litstr key, bool error /* = false */,
   return null_variant;
 }
 
-Variant Array::rvalAt(litstr key, bool error /* = false */,
-                      bool isKey /* = false */) const {
-  return Array::rvalAtRef(key, error, isKey);
+Variant Array::rvalAt(litstr key, ACCESSPARAMS_IMPL) const {
+  return Array::rvalAtRef(key, flags);
 }
 
-CVarRef Array::rvalAtRef(CStrRef key, bool error /* = false */,
-                         bool isKey /* = false */) const {
+CVarRef Array::rvalAtRef(CStrRef key, ACCESSPARAMS_IMPL) const {
   if (m_px) {
-    if (isKey) return m_px->get(key, error);
+    bool error = flags & AccessFlags::Error;
+    if (flags & AccessFlags::Key) return m_px->get(key, error);
     if (key.isNull()) return m_px->get(empty_string, error);
     int64 n;
     if (!key->isStrictlyInteger(n)) {
@@ -468,32 +466,31 @@ CVarRef Array::rvalAtRef(CStrRef key, bool error /* = false */,
   return null_variant;
 }
 
-Variant Array::rvalAt(CStrRef key, bool error /* = false */,
-                      bool isKey /* = false */) const {
-  return Array::rvalAtRef(key, error, isKey);
+Variant Array::rvalAt(CStrRef key, ACCESSPARAMS_IMPL) const {
+  return Array::rvalAtRef(key, flags);
 }
 
-CVarRef Array::rvalAtRef(CVarRef key, bool error /* = false */,
-                         bool isKey /* = false */) const {
+CVarRef Array::rvalAtRef(CVarRef key, ACCESSPARAMS_IMPL) const {
   if (!m_px) return null_variant;
   switch (key.m_type) {
   case KindOfNull:
-    return m_px->get(empty_string, error);
+    return m_px->get(empty_string, flags & AccessFlags::Error);
   case KindOfBoolean:
   case KindOfByte:
   case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
-    return m_px->get(key.m_data.num, error);
+    return m_px->get(key.m_data.num, flags & AccessFlags::Error);
   case KindOfDouble:
-    return m_px->get((int64)key.m_data.dbl, error);
+    return m_px->get((int64)key.m_data.dbl, flags & AccessFlags::Error);
   case KindOfStaticString:
   case KindOfString: {
     int64 n;
-    if (!isKey && key.m_data.pstr->isStrictlyInteger(n)) {
-      return m_px->get(n, error);
+    if (!(flags & AccessFlags::Key) &&
+        key.m_data.pstr->isStrictlyInteger(n)) {
+      return m_px->get(n, flags & AccessFlags::Error);
     } else {
-      return m_px->get(key.asCStrRef(), error);
+      return m_px->get(key.asCStrRef(), flags & AccessFlags::Error);
     }
   }
   case KindOfArray:
@@ -501,12 +498,12 @@ CVarRef Array::rvalAtRef(CVarRef key, bool error /* = false */,
     break;
   case KindOfObject:
     if (key.isResource()) {
-      return m_px->get(key.toInt64(), error);
+      return m_px->get(key.toInt64(), flags & AccessFlags::Error);
     }
     throw_bad_type_exception("Invalid type used as key");
     break;
   case KindOfVariant:
-    return rvalAtRef(*(key.m_data.pvar), error, isKey);
+    return rvalAtRef(*(key.m_data.pvar), flags);
   default:
     ASSERT(false);
     break;
@@ -514,9 +511,8 @@ CVarRef Array::rvalAtRef(CVarRef key, bool error /* = false */,
   return null_variant;
 }
 
-Variant Array::rvalAt(CVarRef key, bool error /* = false */,
-                      bool isKey /* = false */) const {
-  return Array::rvalAtRef(key, error, isKey);
+Variant Array::rvalAt(CVarRef key, ACCESSPARAMS_IMPL) const {
+  return Array::rvalAtRef(key, flags);
 }
 
 Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
@@ -524,7 +520,7 @@ Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
     if (!m_px) {
       SmartPtr<ArrayData>::operator=(ArrayData::Create());
     }
-    return &lvalAt(key, false, true);
+    return &lvalAt(key, AccessFlags::Key);
   }
   Variant *ret = NULL;
   if (m_px) {
@@ -543,7 +539,7 @@ Variant *Array::lvalPtr(int64 key, bool forWrite, bool create) {
     if (!m_px) {
       SmartPtr<ArrayData>::operator=(ArrayData::Create());
     }
-    return &lvalAt(key, false);
+    return &lvalAt(key, AccessFlags::None);
   }
   Variant *ret = NULL;
   if (m_px) {
@@ -571,23 +567,20 @@ Variant &Array::lvalAt() {
   return *ret;
 }
 
-Variant &Array::lvalAt(litstr  key, bool checkExist /* = false */,
-                       bool isKey /* = false */) {
-  if (isKey) return lvalAtImpl(String(key), checkExist);
-  return lvalAtImpl(String(key).toKey(), checkExist);
+Variant &Array::lvalAt(litstr  key, ACCESSPARAMS_IMPL) {
+  if (flags & AccessFlags::Key) return lvalAtImpl(String(key), flags);
+  return lvalAtImpl(String(key).toKey(), flags);
 }
 
-Variant &Array::lvalAt(CStrRef key, bool checkExist /* = false */,
-                       bool isKey /* = false */) {
-  if (isKey) return lvalAtImpl(key, checkExist);
-  return lvalAtImpl(key.toKey(), checkExist);
+Variant &Array::lvalAt(CStrRef key, ACCESSPARAMS_IMPL) {
+  if (flags & AccessFlags::Key) return lvalAtImpl(key, flags);
+  return lvalAtImpl(key.toKey(), flags);
 }
-Variant &Array::lvalAt(CVarRef key, bool checkExist /* = false */,
-                       bool isKey /* = false */) {
-  if (isKey) return lvalAtImpl(key, checkExist);
+Variant &Array::lvalAt(CVarRef key, ACCESSPARAMS_IMPL) {
+  if (flags & AccessFlags::Key) return lvalAtImpl(key, flags);
   VarNR k(key.toKey());
   if (!k.isNull()) {
-    return lvalAtImpl(k, checkExist);
+    return lvalAtImpl(k, flags);
   }
   return Variant::lvalBlackHole();
 }
@@ -658,12 +651,12 @@ Variant &Array::addLval(CVarRef key, bool isKey /* = false */) {
 }
 
 Variant Array::refvalAt(CStrRef key, bool isString /* = false */) {
-  return ref(lvalAt(key, false, isString));
+  return ref(lvalAt(key, AccessFlags::IsKey(isString)));
 }
 
 Variant Array::argvalAt(bool byRef, CStrRef key, bool isString /* = false */) {
   if (byRef) {
-    return ref(lvalAt(key, false, isString));
+    return ref(lvalAt(key, AccessFlags::IsKey(isString)));
   } else {
     return rvalAt(key);
   }
@@ -902,7 +895,8 @@ void Array::unserialize(VariableUnserializer *uns) {
     bool isAPC = (uns->getType() == VariableUnserializer::APCSerialize);
     for (int64 i = 0; i < size; i++) {
       Variant key(uns->unserializeKey());
-      Variant &value = isAPC ? addLval(key, true) : lvalAt(key, false, true);
+      Variant &value = isAPC ? addLval(key, true) :
+        lvalAt(key, AccessFlags::Key);
       value.unserialize(uns);
     }
   }

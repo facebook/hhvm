@@ -1411,7 +1411,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
       m_emptyJumpTables.insert(JumpTableLocalGetImpl);
     }
     // Valid variable names cannot be numerical.
-    cg_printf("return rvalAt(s, false, true);\n");
+    cg_printf("return rvalAt(s, AccessFlags::Key);\n");
     cg_indentEnd("}\n");
 
     if (getAttribute(ContainsCompact)) {

@@ -387,8 +387,6 @@ class Variant {
   Variant unary_plus() const { return Variant(*this).operator+();}
   Variant  operator +  (CVarRef v) const;
   Variant &operator += (CVarRef v);
-  Variant &operator += (char    n) { return operator+=((int64)n);}
-  Variant &operator += (short   n) { return operator+=((int64)n);}
   Variant &operator += (int     n) { return operator+=((int64)n);}
   Variant &operator += (int64   n);
   Variant &operator += (double  n);
@@ -397,32 +395,24 @@ class Variant {
   Variant  operator -  () const;
   Variant  operator -  (CVarRef v) const;
   Variant &operator -= (CVarRef v);
-  Variant &operator -= (char    n) { return operator-=((int64)n);}
-  Variant &operator -= (short   n) { return operator-=((int64)n);}
   Variant &operator -= (int     n) { return operator-=((int64)n);}
   Variant &operator -= (int64   n);
   Variant &operator -= (double  n);
 
   Variant  operator *  (CVarRef v) const;
   Variant &operator *= (CVarRef v);
-  Variant &operator *= (char    n) { return operator*=((int64)n);}
-  Variant &operator *= (short   n) { return operator*=((int64)n);}
   Variant &operator *= (int     n) { return operator*=((int64)n);}
   Variant &operator *= (int64   n);
   Variant &operator *= (double  n);
 
   Variant  operator /  (CVarRef v) const;
   Variant &operator /= (CVarRef v);
-  Variant &operator /= (char    n) { return operator/=((int64)n);}
-  Variant &operator /= (short   n) { return operator/=((int64)n);}
   Variant &operator /= (int     n) { return operator/=((int64)n);}
   Variant &operator /= (int64   n);
   Variant &operator /= (double  n);
 
   int64    operator %  (CVarRef v) const;
   Variant &operator %= (CVarRef v);
-  Variant &operator %= (char    n) { return operator%=((int64)n);}
-  Variant &operator %= (short   n) { return operator%=((int64)n);}
   Variant &operator %= (int     n) { return operator%=((int64)n);}
   Variant &operator %= (int64   n);
   Variant &operator %= (double  n);
@@ -544,8 +534,6 @@ class Variant {
    * Comparisons
    */
   bool same(bool    v2) const;
-  bool same(char    v2) const;
-  bool same(short   v2) const;
   bool same(int     v2) const;
   bool same(int64   v2) const;
   bool same(double  v2) const;
@@ -557,8 +545,6 @@ class Variant {
   bool same(CVarRef v2) const;
 
   bool equal(bool    v2) const;
-  bool equal(char    v2) const;
-  bool equal(short   v2) const;
   bool equal(int     v2) const;
   bool equal(int64   v2) const;
   bool equal(double  v2) const;
@@ -570,8 +556,6 @@ class Variant {
   bool equal(CVarRef v2) const;
 
   bool equalAsStr(bool    v2) const;
-  bool equalAsStr(char    v2) const;
-  bool equalAsStr(short   v2) const;
   bool equalAsStr(int     v2) const;
   bool equalAsStr(int64   v2) const;
   bool equalAsStr(double  v2) const;
@@ -583,8 +567,6 @@ class Variant {
   bool equalAsStr(CVarRef v2) const;
 
   bool less(bool    v2) const;
-  bool less(char    v2) const;
-  bool less(short   v2) const;
   bool less(int     v2) const;
   bool less(int64   v2) const;
   bool less(double  v2) const;
@@ -596,8 +578,6 @@ class Variant {
   bool less(CVarRef v2) const;
 
   bool more(bool    v2) const;
-  bool more(char    v2) const;
-  bool more(short   v2) const;
   bool more(int     v2) const;
   bool more(int64   v2) const;
   bool more(double  v2) const;
@@ -647,51 +627,42 @@ class Variant {
   /**
    * Offset functions
    */
-  Variant rvalAtHelper(int64 offset, bool error = false) const;
-  Variant rvalAt(bool offset, bool error = false) const;
-  Variant rvalAt(int offset, bool error = false) const {
-    return rvalAt((int64)offset, error);
+  Variant rvalAtHelper(int64 offset, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(bool offset, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(int offset, ACCESSPARAMS_DECL) const {
+    return rvalAt((int64)offset, flags);
   }
-  Variant rvalAt(int64 offset, bool error = false) const {
+  Variant rvalAt(int64 offset, ACCESSPARAMS_DECL) const {
     if (m_type == KindOfArray) {
-      return m_data.parr->get(offset, error);
+      return m_data.parr->get(offset, flags & AccessFlags::Error);
     }
-    return rvalAtHelper(offset, error);
+    return rvalAtHelper(offset, flags);
   }
-  Variant rvalAt(double offset, bool error = false) const;
-  Variant rvalAt(litstr offset, bool error = false,
-      bool isString = false) const;
-  Variant rvalAt(CStrRef offset, bool error = false,
-      bool isString = false) const;
-  Variant rvalAt(CVarRef offset, bool error = false) const;
+  Variant rvalAt(double offset, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(litstr offset, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(CStrRef offset, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(CVarRef offset, ACCESSPARAMS_DECL) const;
 
   template <typename T>
-  CVarRef rvalRefHelper(T offset, CVarRef tmp, bool error) const;
-  template <typename T>
-  CVarRef rvalRefHelper(T offset, CVarRef tmp, bool error,
-                          bool isString) const;
-  CVarRef rvalRef(bool offset, CVarRef tmp, bool error = false) const {
-    return rvalRef((int64)offset, tmp, error);
+  CVarRef rvalRefHelper(T offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
+  CVarRef rvalRef(bool offset, CVarRef tmp, ACCESSPARAMS_DECL) const {
+    return rvalRef((int64)offset, tmp, flags);
   }
-  CVarRef rvalRef(int offset, CVarRef tmp, bool error = false) const {
-    return rvalRef((int64)offset, tmp, error);
+  CVarRef rvalRef(int offset, CVarRef tmp, ACCESSPARAMS_DECL) const {
+    return rvalRef((int64)offset, tmp, flags);
   }
-  CVarRef rvalRef(int64 offset, CVarRef tmp, bool error = false) const {
+  CVarRef rvalRef(int64 offset, CVarRef tmp, ACCESSPARAMS_DECL) const {
     if (m_type == KindOfArray) {
-      return m_data.parr->get(offset, error);
+      return m_data.parr->get(offset, flags & AccessFlags::Error);
     }
-    return rvalRefHelper(offset, tmp, error);
+    return rvalRefHelper(offset, tmp, flags);
   }
-  CVarRef rvalRef(double offset, CVarRef tmp, bool error = false) const;
-  CVarRef rvalRef(litstr offset, CVarRef tmp, bool error = false,
-                  bool isString = false) const;
-  CVarRef rvalRef(CStrRef offset, CVarRef tmp, bool error = false,
-                  bool isString = false) const;
-  CVarRef rvalRef(CVarRef offset, CVarRef tmp, bool error = false) const;
+  CVarRef rvalRef(double offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
+  CVarRef rvalRef(litstr offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
+  CVarRef rvalRef(CStrRef offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
+  CVarRef rvalRef(CVarRef offset, CVarRef tmp, ACCESSPARAMS_DECL) const;
 
   const Variant operator[](bool    key) const { return rvalAt(key);}
-  const Variant operator[](char    key) const { return rvalAt(key);}
-  const Variant operator[](short   key) const { return rvalAt(key);}
   const Variant operator[](int     key) const { return rvalAt(key);}
   const Variant operator[](int64   key) const { return rvalAt(key);}
   const Variant operator[](double  key) const { return rvalAt(key);}
@@ -729,19 +700,15 @@ class Variant {
   static Variant &lvalInvalid();
   static Variant &lvalBlackHole();
 
-  Variant &lvalAt(bool    key, bool checkExist = false);
-  Variant &lvalAt(char    key, bool checkExist = false);
-  Variant &lvalAt(short   key, bool checkExist = false);
-  Variant &lvalAt(int     key, bool checkExist = false);
-  Variant &lvalAt(int64   key, bool checkExist = false);
-  Variant &lvalAt(double  key, bool checkExist = false);
-  Variant &lvalAt(litstr  key, bool checkExist = false, bool isString = false);
-  Variant &lvalAt(CStrRef key, bool checkExist = false, bool isString = false);
-  Variant &lvalAt(CVarRef key, bool checkExist = false);
+  Variant &lvalAt(bool    key, ACCESSPARAMS_DECL);
+  Variant &lvalAt(int     key, ACCESSPARAMS_DECL);
+  Variant &lvalAt(int64   key, ACCESSPARAMS_DECL);
+  Variant &lvalAt(double  key, ACCESSPARAMS_DECL);
+  Variant &lvalAt(litstr  key, ACCESSPARAMS_DECL);
+  Variant &lvalAt(CStrRef key, ACCESSPARAMS_DECL);
+  Variant &lvalAt(CVarRef key, ACCESSPARAMS_DECL);
 
   Variant refvalAt(bool    key);
-  Variant refvalAt(char    key);
-  Variant refvalAt(short   key);
   Variant refvalAt(int     key);
   Variant refvalAt(int64   key);
   Variant refvalAt(double  key);
@@ -750,8 +717,6 @@ class Variant {
   Variant refvalAt(CVarRef key);
 
   Variant argvalAt(bool byRef, bool    key);
-  Variant argvalAt(bool byRef, char    key);
-  Variant argvalAt(bool byRef, short   key);
   Variant argvalAt(bool byRef, int     key);
   Variant argvalAt(bool byRef, int64   key);
   Variant argvalAt(bool byRef, double  key);
@@ -798,8 +763,6 @@ class Variant {
    * this function.
    */
   CVarRef set(bool    key, CVarRef v);
-  CVarRef set(char    key, CVarRef v) { return set((int64)key, v); }
-  CVarRef set(short   key, CVarRef v) { return set((int64)key, v); }
   CVarRef set(int     key, CVarRef v) { return set((int64)key, v); }
   CVarRef set(int64   key, CVarRef v);
   CVarRef set(double  key, CVarRef v);
@@ -812,12 +775,6 @@ class Variant {
   CVarRef append(CVarRef v);
 
   CVarRef setOpEqual(int op, bool key, CVarRef v);
-  CVarRef setOpEqual(int op, char key, CVarRef v) {
-    return setOpEqual(op, (int64)key, v);
-  }
-  CVarRef setOpEqual(int op, short key, CVarRef v) {
-    return setOpEqual(op, (int64)key, v);
-  }
   CVarRef setOpEqual(int op, int key, CVarRef v) {
     return setOpEqual(op, (int64)key, v);
   }
@@ -834,8 +791,6 @@ class Variant {
   T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
 
   void remove(bool    key) { removeImpl(key);}
-  void remove(char    key) { removeImpl((int64)key);}
-  void remove(short   key) { removeImpl((int64)key);}
   void remove(int     key) { removeImpl((int64)key);}
   void remove(int64   key) { removeImpl(key);}
   void remove(double  key) { removeImpl(key);}
@@ -1177,7 +1132,7 @@ class Variant {
   void split();  // breaking weak binding by making a real copy
 
   template<typename T>
-  Variant &lvalAtImpl(const T &key, bool checkExist = false);
+  Variant &lvalAtImpl(const T &key, ACCESSPARAMS_DECL);
 
   template<typename T>
   Variant refvalAtImpl(const T &key) {
@@ -1202,7 +1157,7 @@ class Variant {
           (is(KindOfBoolean) && !toBoolean()) ||
           (is(KindOfStaticString) && getStringData()->empty()) ||
           (is(KindOfString) && getStringData()->empty()))) {
-      return ref(lvalAt(key, false));
+      return ref(lvalAt(key));
     } else {
       return rvalAt(key);
     }
@@ -1368,14 +1323,6 @@ Variant Array::argvalAt(bool byRef, const T &key) {
 }
 
 inline const Variant Array::operator[](bool    key) const {
-  return rvalAt(key);
-}
-
-inline const Variant Array::operator[](char    key) const {
-  return rvalAt(key);
-}
-
-inline const Variant Array::operator[](short   key) const {
   return rvalAt(key);
 }
 

@@ -223,28 +223,26 @@ class Array : public SmartPtr<ArrayData> {
   /**
    * Offset
    */
-  Variant rvalAt(bool    key, bool error = false) const;
-  Variant rvalAt(int     key, bool error = false) const;
-  Variant rvalAt(int64   key, bool error = false) const;
-  Variant rvalAt(double  key, bool error = false) const;
-  Variant rvalAt(litstr  key, bool error = false, bool isKey = false) const;
-  Variant rvalAt(CStrRef key, bool error = false, bool isKey = false) const;
-  Variant rvalAt(CVarRef key, bool error = false, bool isKey = false) const;
+  Variant rvalAt(bool    key, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(int     key, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(int64   key, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(double  key, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(litstr  key, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(CStrRef key, ACCESSPARAMS_DECL) const;
+  Variant rvalAt(CVarRef key, ACCESSPARAMS_DECL) const;
 
   /**
    * To get offset for temporary usage
    */
-  CVarRef rvalAtRef(bool    key, bool error = false) const;
-  CVarRef rvalAtRef(int     key, bool error = false) const;
-  CVarRef rvalAtRef(int64   key, bool error = false) const;
-  CVarRef rvalAtRef(double  key, bool error = false) const;
-  CVarRef rvalAtRef(litstr key, bool error = false, bool isKey = false) const;
-  CVarRef rvalAtRef(CVarRef key, bool error = false, bool isKey = false) const;
-  CVarRef rvalAtRef(CStrRef key, bool error = false, bool isKey = false) const;
+  CVarRef rvalAtRef(bool    key, ACCESSPARAMS_DECL) const;
+  CVarRef rvalAtRef(int     key, ACCESSPARAMS_DECL) const;
+  CVarRef rvalAtRef(int64   key, ACCESSPARAMS_DECL) const;
+  CVarRef rvalAtRef(double  key, ACCESSPARAMS_DECL) const;
+  CVarRef rvalAtRef(litstr key, ACCESSPARAMS_DECL) const;
+  CVarRef rvalAtRef(CVarRef key, ACCESSPARAMS_DECL) const;
+  CVarRef rvalAtRef(CStrRef key, ACCESSPARAMS_DECL) const;
 
   const Variant operator[](bool    key) const;
-  const Variant operator[](char    key) const;
-  const Variant operator[](short   key) const;
   const Variant operator[](int     key) const;
   const Variant operator[](int64   key) const;
   const Variant operator[](double  key) const;
@@ -284,27 +282,21 @@ class Array : public SmartPtr<ArrayData> {
 
   Variant &lvalAt();
 
-  Variant &lvalAt(bool    key, bool checkExist = false) {
-    return lvalAtImpl(key, checkExist);
+  Variant &lvalAt(bool    key, ACCESSPARAMS_DECL) {
+    return lvalAtImpl(key, flags);
   }
-  Variant &lvalAt(char    key, bool checkExist = false) {
-    return lvalAtImpl(key, checkExist);
+  Variant &lvalAt(int     key, ACCESSPARAMS_DECL) {
+    return lvalAtImpl(key, flags);
   }
-  Variant &lvalAt(short   key, bool checkExist = false) {
-    return lvalAtImpl(key, checkExist);
+  Variant &lvalAt(int64   key, ACCESSPARAMS_DECL) {
+    return lvalAtImpl(key, flags);
   }
-  Variant &lvalAt(int     key, bool checkExist = false) {
-    return lvalAtImpl(key, checkExist);
+  Variant &lvalAt(double  key, ACCESSPARAMS_DECL) {
+    return lvalAtImpl((int64)key, flags);
   }
-  Variant &lvalAt(int64   key, bool checkExist = false) {
-    return lvalAtImpl(key, checkExist);
-  }
-  Variant &lvalAt(double  key, bool checkExist = false) {
-    return lvalAtImpl((int64)key, checkExist);
-  }
-  Variant &lvalAt(litstr  key, bool checkExist = false, bool isKey = false);
-  Variant &lvalAt(CStrRef key, bool checkExist = false, bool isKey = false);
-  Variant &lvalAt(CVarRef key, bool checkExist = false, bool isKey = false);
+  Variant &lvalAt(litstr  key, ACCESSPARAMS_DECL);
+  Variant &lvalAt(CStrRef key, ACCESSPARAMS_DECL);
+  Variant &lvalAt(CVarRef key, ACCESSPARAMS_DECL);
 
   // defined in type_variant.h
   template<typename T>
@@ -532,13 +524,14 @@ class Array : public SmartPtr<ArrayData> {
                  PFUNC_CMP value_cmp_function, const void *value_data) const;
 
   template<typename T>
-  Variant &lvalAtImpl(const T &key, bool checkExist = false) {
+  Variant &lvalAtImpl(const T &key, ACCESSPARAMS_DECL) {
     if (!m_px) {
       SmartPtr<ArrayData>::operator=(ArrayData::Create());
     }
     Variant *ret = NULL;
     ArrayData *escalated =
-      m_px->lval(key, ret, m_px->getCount() > 1, checkExist);
+      m_px->lval(key, ret, m_px->getCount() > 1,
+                 flags & AccessFlags::CheckExist);
     if (escalated) {
       SmartPtr<ArrayData>::operator=(escalated);
     }

@@ -19,6 +19,7 @@
 #include <runtime/base/preg.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/comparisons.h>
+#include <runtime/base/timeout_thread.h>
 #include <util/util.h>
 
 using namespace std;
@@ -32,20 +33,68 @@ static IMPLEMENT_THREAD_LOCAL_PROXY(VirtualHost, false, s_current_vhost);
 VirtualHost &VirtualHost::GetDefault() { return s_default_vhost; }
 
 void VirtualHost::SetCurrent(VirtualHost *vhost) {
-  s_current_vhost.set(vhost);
+  s_current_vhost.set(vhost ? vhost : &s_default_vhost);
 }
 
 const VirtualHost *VirtualHost::GetCurrent() {
   VirtualHost *ret = s_current_vhost.get();
-  if (ret == NULL) {
-    ret = &s_default_vhost;
-  }
+  ASSERT(ret);
   return ret;
+}
+
+int64 VirtualHost::GetMaxPostSize() {
+  const VirtualHost *vh = GetCurrent();
+  ASSERT(vh);
+  if (vh->m_runtimeOption.maxPostSize != -1) {
+    return vh->m_runtimeOption.maxPostSize;
+  }
+  return RuntimeOption::MaxPostSize;
+}
+
+int64 VirtualHost::GetUploadMaxFileSize() {
+  const VirtualHost *vh = GetCurrent();
+  ASSERT(vh);
+  if (vh->m_runtimeOption.uploadMaxFileSize != -1) {
+    return vh->m_runtimeOption.uploadMaxFileSize;
+  }
+  return RuntimeOption::UploadMaxFileSize;
+}
+
+const vector<string> &VirtualHost::GetAllowedDirectories() {
+  const VirtualHost *vh = GetCurrent();
+  ASSERT(vh);
+  if (!vh->m_runtimeOption.allowedDirectories.empty()) {
+    return vh->m_runtimeOption.allowedDirectories;
+  }
+  return RuntimeOption::AllowedDirectories;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void VirtualHost::initRuntimeOption(Hdf overwrite) {
+  int requestTimeoutSeconds =
+    overwrite["Server.RequestTimeoutSeconds"].getInt32(-1);
+  int64 maxPostSize =
+    overwrite["Server.MaxPostSize"].getInt32(-1);
+  if (maxPostSize != -1) maxPostSize *= (1LL << 20);
+  int64 uploadMaxFileSize =
+    overwrite["Server.Upload.UploadMaxFileSize"].getInt32(-1);
+  if (uploadMaxFileSize != -1) uploadMaxFileSize *= (1LL << 20);
+  overwrite["AllowedDirectories"].get(m_runtimeOption.allowedDirectories);
+  m_runtimeOption.requestTimeoutSeconds = requestTimeoutSeconds;
+  m_runtimeOption.maxPostSize = maxPostSize;
+  m_runtimeOption.uploadMaxFileSize = uploadMaxFileSize;
+}
+
+void VirtualHost::setRequestTimeoutSeconds() const {
+  if (m_runtimeOption.requestTimeoutSeconds != -1) {
+    TimeoutThread::DeferTimeout(m_runtimeOption.requestTimeoutSeconds);
+  }
+}
+
 VirtualHost::VirtualHost() : m_disabled(false) {
+  Hdf empty;
+  initRuntimeOption(empty);
 }
 
 VirtualHost::VirtualHost(Hdf vh) : m_disabled(false) {
@@ -58,6 +107,8 @@ void VirtualHost::init(Hdf vh) {
   const char *prefix = vh["Prefix"].get("");
   const char *pattern = vh["Pattern"].get("");
   const char *pathTranslation = vh["PathTranslation"].get("");
+  Hdf overwrite = vh["overwrite"];
+  initRuntimeOption(overwrite);
 
   if (prefix) m_prefix = prefix;
   if (pattern) {

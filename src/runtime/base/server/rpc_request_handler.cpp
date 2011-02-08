@@ -79,6 +79,7 @@ void RPCRequestHandler::handleRequest(Transport *transport) {
     transport->onSendEnd();
     return;
   }
+  vhost->setRequestTimeoutSeconds();
 
   // resolve source root
   string host = transport->getHeader("Host");

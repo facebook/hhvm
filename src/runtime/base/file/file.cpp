@@ -66,9 +66,11 @@ String File::TranslatePath(CStrRef filename, bool useFileCache /* = false */) {
   }
 
   if (RuntimeOption::SafeFileAccess) {
-    for (unsigned int i = 0; i < RuntimeOption::AllowedDirectories.size();
+    const vector<string> &allowedDirectories =
+      VirtualHost::GetAllowedDirectories();
+    for (unsigned int i = 0; i < allowedDirectories.size();
          i++) {
-      string &directory = RuntimeOption::AllowedDirectories[i];
+      const string &directory = allowedDirectories[i];
       int len = directory.size();
       if (canonicalized.length() >= len &&
           strncmp(canonicalized.data(), directory.data(), len) == 0) {

@@ -31,12 +31,16 @@ public:
 
   static void SetCurrent(VirtualHost *vhost);
   static const VirtualHost *GetCurrent();
+  static int64 GetMaxPostSize();
+  static int64 GetUploadMaxFileSize();
+  static const std::vector<std::string> &GetAllowedDirectories();
 
 public:
   VirtualHost();
   VirtualHost(Hdf vh);
 
   void init(Hdf vh);
+  void setRequestTimeoutSeconds() const;
 
   const std::string &getName() const { return m_name;}
   const std::string &getPathTranslation() const { return m_pathTranslation;}
@@ -85,6 +89,15 @@ private:
     std::string replaceWith; // what to replace with
   };
 
+  struct VhostRuntimeOption {
+  public:
+    int requestTimeoutSeconds;
+    int64 maxPostSize;
+    int64 uploadMaxFileSize;
+    std::vector<std::string> allowedDirectories;
+  };
+
+  void initRuntimeOption(Hdf overwrite);
   bool m_disabled;
   std::string m_name;
   std::string m_prefix;
@@ -98,6 +111,8 @@ private:
   std::vector<RewriteRule> m_rewriteRules;
   IpBlockMapPtr m_ipBlocks;
   std::vector<QueryStringFilter> m_queryStringFilters;
+
+  VhostRuntimeOption m_runtimeOption;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

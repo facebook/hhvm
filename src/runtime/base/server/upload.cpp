@@ -937,11 +937,11 @@ void rfc1867PostHandler(Transport *transport,
         }
 
 
-        if (RuntimeOption::UploadMaxFileSize > 0 &&
-            total_bytes > RuntimeOption::UploadMaxFileSize) {
+        if (VirtualHost::GetUploadMaxFileSize() > 0 &&
+            total_bytes > VirtualHost::GetUploadMaxFileSize()) {
           Logger::Verbose("upload_max_filesize of %ld bytes exceeded - file "
                           "[%s=%s] not saved",
-                          RuntimeOption::UploadMaxFileSize,
+                          VirtualHost::GetUploadMaxFileSize(),
                           param, filename);
           cancel_upload = UPLOAD_ERROR_A;
         } else if (max_file_size && (total_bytes > max_file_size)) {

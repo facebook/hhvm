@@ -28,6 +28,7 @@
 #include <system/gen/php/globals/symbols.h>
 #include <runtime/base/server/upload.h>
 #include <runtime/base/server/replay_transport.h>
+#include <runtime/base/server/virtual_host.h>
 #include <runtime/base/util/http_client.h>
 #include <runtime/base/taint/taint_helper.h>
 
@@ -46,7 +47,7 @@ static bool read_all_post_data(Transport *transport,
     do {
       int delta = 0;
       const void *extra = transport->getMorePostData(delta);
-      if (size + delta < RuntimeOption::MaxPostSize &&
+      if (size + delta < VirtualHost::GetMaxPostSize() &&
           RuntimeOption::AlwaysPopulateRawPostData) {
         data = Util::buffer_append(data, size, extra, delta);
         size += delta;
@@ -118,11 +119,11 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
       int content_length = atoi(contentLength.c_str());
       bool rfc1867Post = IsRfc1867(contentType, boundary);
       if (rfc1867Post) {
-        if (content_length > RuntimeOption::MaxPostSize) {
+        if (content_length > VirtualHost::GetMaxPostSize()) {
           // $_POST and $_FILES are empty
           Logger::Warning("POST Content-Length of %d bytes exceeds "
                           "the limit of %lld bytes",
-                          content_length, RuntimeOption::MaxPostSize);
+                          content_length, VirtualHost::GetMaxPostSize());
           needDelete = read_all_post_data(transport, data, size);
         } else {
           if (transport->hasMorePostData()) {

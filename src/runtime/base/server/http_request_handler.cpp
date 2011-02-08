@@ -240,6 +240,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
 
   // main body
   hphp_session_init();
+  vhost->setRequestTimeoutSeconds();
 
   bool ret = false;
   try {

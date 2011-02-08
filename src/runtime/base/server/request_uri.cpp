@@ -255,11 +255,13 @@ bool RequestURI::virtualFolderExists(const VirtualHost *vhost,
       return true;
     }
 
-    if (find(RuntimeOption::AllowedDirectories.begin(),
-             RuntimeOption::AllowedDirectories.end(),
-             fullname.c_str()) != RuntimeOption::AllowedDirectories.end())
+    const vector<string> &allowedDirectories =
+      VirtualHost::GetAllowedDirectories();
+    if (find(allowedDirectories.begin(),
+             allowedDirectories.end(),
+             fullname.c_str()) != allowedDirectories.end()) {
       return true;
-
+    }
     struct stat st;
     return (stat(m_absolutePath.c_str(), &st) == 0 &&
             (st.st_mode & S_IFMT) == S_IFDIR);

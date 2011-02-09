@@ -342,9 +342,9 @@ void SharedVariant::loadElems(ArrayData *&elems,
   ArrayInit ai(count, getIsVector(), keepRef);
   for (uint i = 0; i < count; i++) {
     if (getIsVector()) {
-      ai.add((int64)i, sharedMap.getValueRef(i), true);
+      ai.add((int64)i, sharedMap.getValue(i), true);
     } else {
-      ai.add(m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValueRef(i),
+      ai.add(m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValue(i),
              true);
     }
   }

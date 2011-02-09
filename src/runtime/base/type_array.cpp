@@ -912,6 +912,8 @@ Array Array::fiberMarshal(FiberReferenceMap &refMap) const {
     Array ret = Array::Create();
     if (m_px->isGlobalArrayWrapper()) {
       ret = get_global_array_wrapper();
+    } else if (m_px->isSharedMap()) {
+      return m_px->copy();
     } else {
       for (ArrayIter iter(*this); iter; ++iter) {
         ret.set(iter.first().fiberMarshal(refMap),
@@ -928,6 +930,8 @@ Array Array::fiberUnmarshal(FiberReferenceMap &refMap) const {
     Array ret = Array::Create();
     if (m_px->isGlobalArrayWrapper()) {
       ret = get_global_array_wrapper();
+    } else if (m_px->isSharedMap()) {
+      return m_px->copy();
     } else {
       for (ArrayIter iter(*this); iter; ++iter) {
         ret.set(iter.first().fiberUnmarshal(refMap),

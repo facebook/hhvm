@@ -363,10 +363,12 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
       m_kind = ListKindWrapped;
     }
   } else {
-    if (hasContext(UnsetContext) &&
-        ar->getPhase() >= AnalysisResult::PostOptimize) {
-      while (i--) {
-        ExpressionPtr &e = m_exps[i];
+    bool isUnset = hasContext(UnsetContext) &&
+      ar->getPhase() >= AnalysisResult::PostOptimize;
+    int isGlobal = -1;
+    while (i--) {
+      ExpressionPtr &e = m_exps[i];
+      if (isUnset) {
         if (e->is(Expression::KindOfSimpleVariable)) {
           SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(e);
           if (var->checkUnused()) {
@@ -377,6 +379,17 @@ void ExpressionList::optimize(AnalysisResultConstPtr ar) {
               changed = true;
             }
           }
+        }
+      } else {
+        bool global = e && (e->getContext() & Declaration) == Declaration;
+        if (isGlobal < 0) {
+          isGlobal = global;
+        } else {
+          assert(isGlobal == global);
+        }
+        if (isGlobal && e->isScalar()) {
+          removeElement(i);
+          changed = true;
         }
       }
     }

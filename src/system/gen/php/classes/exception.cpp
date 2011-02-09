@@ -1644,65 +1644,65 @@ void c_Exception::t___init__() {
   Variant v_frame;
 
   {
-    const Array &tmp1((x_debug_backtrace()));
-    m_trace = tmp1;
+    const Array &tmp0((x_debug_backtrace()));
+    m_trace = tmp0;
   }
-  LOOP_COUNTER(2);
+  LOOP_COUNTER(1);
   {
     while (!(empty(m_trace))) {
-      LOOP_COUNTER_CHECK(2);
+      LOOP_COUNTER_CHECK(1);
       {
         {
-          Variant tmp3((m_trace.rvalAt(0LL, AccessFlags::Error)));
-          v_top = tmp3;
+          Variant tmp0((m_trace.rvalAt(0LL, AccessFlags::Error)));
+          v_top = tmp0;
         }
         {
-          bool tmp4;
+          bool tmp0;
           {
-            bool tmp5 = (empty(v_top, NAMSTR(s_sys_ssc82dbd12, "class"), true));
+            bool tmp1 = (empty(v_top, NAMSTR(s_sys_ssc82dbd12, "class"), true));
+            if (!tmp1) {
+              bool tmp2 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key)), NAMSTR(s_sys_ssa26bedd7, "__init__"))) && toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key)), NAMSTR(s_sys_ssa1b87da7, "__construct")))));
+              if (tmp2) {
+                const String &tmp3((toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key))));
+                const String &tmp4((toString(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
+                tmp2 = (toBoolean(x_strcasecmp(tmp3, tmp4)));
+              }
+              tmp1 = (tmp2);
+            }
+            bool tmp5 = (tmp1);
             if (!tmp5) {
-              bool tmp6 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key)), NAMSTR(s_sys_ssa26bedd7, "__init__"))) && toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key)), NAMSTR(s_sys_ssa1b87da7, "__construct")))));
+              bool tmp6 = (toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key)), NAMSTR(s_sys_ssae8717ad, "exception"))));
               if (tmp6) {
-                const String &tmp7((toString(v_top.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key))));
-                const String &tmp8((toString(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
-                tmp6 = (toBoolean(x_strcasecmp(tmp7, tmp8)));
+                bool tmp7((x_is_subclass_of(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key), NAMSTR(s_sys_ssae8717ad, "exception"))));
+                tmp6 = (!(tmp7));
               }
               tmp5 = (tmp6);
             }
-            bool tmp9 = (tmp5);
-            if (!tmp9) {
-              bool tmp10 = (toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key)), NAMSTR(s_sys_ssae8717ad, "exception"))));
-              if (tmp10) {
-                bool tmp11((x_is_subclass_of(v_top.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key), NAMSTR(s_sys_ssae8717ad, "exception"))));
-                tmp10 = (!(tmp11));
-              }
-              tmp9 = (tmp10);
-            }
-            tmp4 = (tmp9);
+            tmp0 = (tmp5);
           }
-          if (tmp4) {
+          if (tmp0) {
             {
               break;
             }
           }
         }
         {
-          const Variant &tmp12((x_array_shift(ref(m_trace))));
-          v_frame = tmp12;
+          const Variant &tmp0((x_array_shift(ref(m_trace))));
+          v_frame = tmp0;
         }
       }
     }
   }
   if (isset(v_frame, NAMSTR(s_sys_ss8ce7db5b, "file"), true)) {
     {
-      Variant tmp13((v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Error_Key)));
-      m_file = tmp13;
+      Variant tmp0((v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Error_Key)));
+      m_file = tmp0;
     }
   }
   if (isset(v_frame, NAMSTR(s_sys_ssddf8728c, "line"), true)) {
     {
-      Variant tmp14((v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Error_Key)));
-      m_line = tmp14;
+      Variant tmp0((v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Error_Key)));
+      m_line = tmp0;
     }
   }
 }
@@ -1770,27 +1770,27 @@ String c_Exception::t_gettraceasstring() {
             continue;
           }
           {
-            StringBuffer tmp4_buf;
-            tmp4_buf.append("#", 1);
-            tmp4_buf.append(toString(v_i));
-            tmp4_buf.append(" ", 1);
-            tmp4_buf.append(toString((isset(v_frame, NAMSTR(s_sys_ss8ce7db5b, "file"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Error_Key))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
-            tmp4_buf.append("(", 1);
-            tmp4_buf.append(toString((isset(v_frame, NAMSTR(s_sys_ssddf8728c, "line"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Error_Key))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
-            tmp4_buf.append("): ", 3);
-            Variant tmp5;
+            StringBuffer tmp0_buf;
+            tmp0_buf.append("#", 1);
+            tmp0_buf.append(toString(v_i));
+            tmp0_buf.append(" ", 1);
+            tmp0_buf.append(toString((isset(v_frame, NAMSTR(s_sys_ss8ce7db5b, "file"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Error_Key))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
+            tmp0_buf.append("(", 1);
+            tmp0_buf.append(toString((isset(v_frame, NAMSTR(s_sys_ssddf8728c, "line"), true) ? ((Variant)(v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Error_Key))) : ((Variant)(NAMSTR(s_sys_ss00000000, ""))))));
+            tmp0_buf.append("): ", 3);
+            Variant tmp1;
             if (isset(v_frame, NAMSTR(s_sys_ssc82dbd12, "class"), true)) {
-              const String &tmp6((toString(v_frame.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
-              const String &tmp7((toString(v_frame.rvalAt(NAMSTR(s_sys_ss724a760a, "type"), AccessFlags::Error_Key))));
-              tmp5 = (concat(tmp6, tmp7));
+              const String &tmp2((toString(v_frame.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
+              const String &tmp3((toString(v_frame.rvalAt(NAMSTR(s_sys_ss724a760a, "type"), AccessFlags::Error_Key))));
+              tmp1 = (concat(tmp2, tmp3));
             } else {
-              tmp5 = (NAMSTR(s_sys_ss00000000, ""));
+              tmp1 = (NAMSTR(s_sys_ss00000000, ""));
             }
-            tmp4_buf.append(toString(tmp5));
-            tmp4_buf.append(toString(v_frame.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key)));
-            tmp4_buf.append("()\n", 3);
-            CStrRef tmp4(tmp4_buf.detach());
-            tmp_sbuf_v_s.add(tmp4);
+            tmp0_buf.append(toString(tmp1));
+            tmp0_buf.append(toString(v_frame.rvalAt(NAMSTR(s_sys_ss52403931, "function"), AccessFlags::Error_Key)));
+            tmp0_buf.append("()\n", 3);
+            CStrRef tmp0(tmp0_buf.detach());
+            tmp_sbuf_v_s.add(tmp0);
           }
           v_i++;
         }
@@ -1806,19 +1806,19 @@ namespace hphp_impl_splitter {}
 String c_Exception::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__toString);
   {
-    StringBuffer tmp1_buf;
-    tmp1_buf.append("exception '", 11);
-    tmp1_buf.append(toString(x_get_class(VarNR(GET_THIS_TYPED(Exception)))));
-    tmp1_buf.append("' with message '", 16);
-    tmp1_buf.append(toString(t_getmessage()));
-    tmp1_buf.append("' in ", 5);
-    tmp1_buf.append(toString(t_getfile()));
-    tmp1_buf.append(":", 1);
-    tmp1_buf.append(toString(t_getline()));
-    tmp1_buf.append("\nStack trace:\n", 14);
-    tmp1_buf.append(t_gettraceasstring());
-    CStrRef tmp1(tmp1_buf.detach());
-    return tmp1;
+    StringBuffer tmp0_buf;
+    tmp0_buf.append("exception '", 11);
+    tmp0_buf.append(toString(x_get_class(VarNR(GET_THIS_TYPED(Exception)))));
+    tmp0_buf.append("' with message '", 16);
+    tmp0_buf.append(toString(t_getmessage()));
+    tmp0_buf.append("' in ", 5);
+    tmp0_buf.append(toString(t_getfile()));
+    tmp0_buf.append(":", 1);
+    tmp0_buf.append(toString(t_getline()));
+    tmp0_buf.append("\nStack trace:\n", 14);
+    tmp0_buf.append(t_gettraceasstring());
+    CStrRef tmp0(tmp0_buf.detach());
+    return tmp0;
   }
 }
 namespace hphp_impl_splitter {}

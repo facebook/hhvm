@@ -966,8 +966,9 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
       closeParen++;
     }
     if (is(Expression::KindOfArrayElementExpression)) {
-      if (((m_context & LValue) && !(m_context & NoLValueWrapper)) ||
-          ((m_context & RefValue) && !(m_context & InvokeArgument))) {
+      if (((m_context & LValue) || ((m_context & RefValue) &&
+                                    !(m_context & InvokeArgument))) &&
+          !(m_context & NoLValueWrapper)) {
         cg_printf("lval(");
         closeParen++;
       }

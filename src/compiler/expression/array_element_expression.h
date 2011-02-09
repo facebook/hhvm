@@ -42,6 +42,7 @@ public:
   bool isSuperGlobal() const { return m_global;}
   bool isDynamicGlobal() const { return m_dynamicGlobal;}
   const std::string &getGlobalName() const { return m_globalName;}
+  ExpressionPtr unneeded();
 
   /**
    * This is purely for resolving a nasty case of intepreting

@@ -29,6 +29,9 @@ class GlobalStatement : public Statement {
 public:
   GlobalStatement(STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionListPtr exp);
 
+  StatementPtr preOptimize(AnalysisResultConstPtr ar);
+  StatementPtr postOptimize(AnalysisResultConstPtr ar);
+
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
 private:

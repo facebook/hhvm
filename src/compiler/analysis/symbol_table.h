@@ -125,6 +125,7 @@ public:
   void setClosureVar() { m_flags.m_closureVar = true; }
   void setRefClosureVar() { m_flags.m_refClosureVar = true; }
 
+  void clearGlobal() { m_flags.m_global = false; }
   void clearUsed() { m_flags.m_used = false; }
   void clearNeeded() { m_flags.m_needed = false; }
   void clearReferenced() { m_flags.m_referenced = false; }

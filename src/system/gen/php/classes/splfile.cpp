@@ -1820,12 +1820,12 @@ Variant c_SplFileObject::t_fscanf(int num_args, CVarRef v_format, Array args /* 
   Array v_argv;
 
   {
-    int tmp1((num_args));
-    v_argc = tmp1;
+    int tmp0((num_args));
+    v_argc = tmp0;
   }
   {
-    const Array &tmp2((func_get_args(num_args, Array(ArrayInit(1, true).set(v_format).create()),args)));
-    v_argv = tmp2;
+    const Array &tmp0((func_get_args(num_args, Array(ArrayInit(1, true).set(v_format).create()),args)));
+    v_argv = tmp0;
   }
   return x_hphp_splfileobject_fscanf(toInt64(v_argc), GET_THIS_TYPED(SplFileObject), toString(v_format), VarNR(v_argv));
 }

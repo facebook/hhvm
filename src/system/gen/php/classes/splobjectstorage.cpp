@@ -612,8 +612,8 @@ namespace hphp_impl_splitter {}
 bool c_SplObjectStorage::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::valid);
   {
-    const Variant &tmp1((x_key(ref(m_storage))));
-    return !same(tmp1, false);
+    const Variant &tmp0((x_key(ref(m_storage))));
+    return !same(tmp0, false);
   }
 }
 namespace hphp_impl_splitter {}
@@ -673,16 +673,16 @@ namespace hphp_impl_splitter {}
 void c_SplObjectStorage::t_attach(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::attach);
   {
-    bool tmp1;
+    bool tmp0;
     {
-      bool tmp2 = (x_is_object(v_obj));
-      if (tmp2) {
-        bool tmp3((t_contains(v_obj)));
-        tmp2 = (!(tmp3));
+      bool tmp1 = (x_is_object(v_obj));
+      if (tmp1) {
+        bool tmp2((t_contains(v_obj)));
+        tmp1 = (!(tmp2));
       }
-      tmp1 = (tmp2);
+      tmp0 = (tmp1);
     }
-    if (tmp1) {
+    if (tmp0) {
       {
         m_storage.append((v_obj));
       }
@@ -710,10 +710,10 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
               {
                 m_storage.weakRemove(v_idx);
                 {
-                  MethodCallPackage mcp4;
-                  mcp4.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
-                  const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
-                  (mcp4.bindClass(info)->getMeth0Args())(mcp4, 0);
+                  MethodCallPackage mcp0;
+                  mcp0.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
+                  const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+                  (mcp0.bindClass(info)->getMeth0Args())(mcp0, 0);
                 }
                 return;
               }

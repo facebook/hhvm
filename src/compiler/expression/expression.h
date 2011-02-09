@@ -100,8 +100,9 @@ public:
     DeepReference = 0x40000,     // Value is not available for copy propagation
                                  // because it is referenced in some way
                                  // eg $b in &$b['foo']
-    AccessContext = 0x80000      // ArrayElementExpression::m_variable or
+    AccessContext = 0x80000,     // ArrayElementExpression::m_variable or
                                  // ObjectPropertyExpression::m_object
+    RefAssignmentLHS = 0x100000  // LHS of a reference assignment
   };
 
   enum Order {
@@ -216,7 +217,7 @@ public:
     return false;
   }
   void deepCopy(ExpressionPtr exp);
-  ExpressionPtr unneeded();
+  virtual ExpressionPtr unneeded();
   virtual ExpressionPtr unneededHelper();
 
   /**

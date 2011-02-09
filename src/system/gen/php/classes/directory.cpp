@@ -399,8 +399,8 @@ void c_Directory::t___construct(Variant v_path) {
   bool oldInCtor = gasInCtor(true);
   m_path = v_path;
   {
-    const Variant &tmp1((x_opendir(toString(v_path))));
-    m_handle = tmp1;
+    const Variant &tmp0((x_opendir(toString(v_path))));
+    m_handle = tmp0;
   }
   gasInCtor(oldInCtor);
 }

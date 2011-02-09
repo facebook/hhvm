@@ -53,6 +53,7 @@ AssignmentExpression::AssignmentExpression
   m_variable->setContext(Expression::NoLValueWrapper);
   m_value->setContext(Expression::AssignmentRHS);
   if (ref) {
+    m_variable->setContext(Expression::RefAssignmentLHS);
     m_value->setContext(Expression::RefValue);
 
     // we have &new special case that's handled in this class

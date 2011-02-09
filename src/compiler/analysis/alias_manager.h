@@ -23,6 +23,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(MethodStatement);
+DECLARE_BOOST_TYPES(SimpleVariable);
+
 class ControlFlowGraph;
 
 class BucketMapEntry {
@@ -141,12 +143,17 @@ class AliasManager {
 
   void dumpAccessChain();
   int testAccesses(ExpressionPtr e1, ExpressionPtr e2);
+  void cleanRefs(ExpressionPtr rv,
+                 ExpressionPtrList::reverse_iterator it,
+                 ExpressionPtrList::reverse_iterator &end,
+                 int depth);
   void cleanInterf(ExpressionPtr rv,
                    ExpressionPtrList::reverse_iterator it,
                    ExpressionPtrList::reverse_iterator &end,
                    int depth);
   void killLocals();
   bool okToKill(ExpressionPtr ep, bool killRef);
+  bool couldBeAliased(SimpleVariablePtr sv);
   int checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
                   int &depth, int &effects);
   int findInterf(ExpressionPtr rv, bool isLoad, ExpressionPtr &rep);

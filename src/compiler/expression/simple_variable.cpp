@@ -73,8 +73,11 @@ bool SimpleVariable::couldBeAliased() const {
 bool SimpleVariable::canKill(bool isref) const {
   if (m_globals || m_superGlobal) return false;
   assert(m_sym);
-  return !m_sym->isGlobal() && !m_sym->isStatic() &&
-    (isref || !m_sym->isReferenced());
+  if (m_sym->isGlobal() || m_sym->isStatic()) {
+    return isref && !getScope()->inPseudoMain();
+  }
+
+  return isref || !m_sym->isReferenced();
 }
 
 void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {

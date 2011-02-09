@@ -434,9 +434,9 @@ namespace hphp_impl_splitter {}
 String c_Closure::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__toString);
   {
-    const String &tmp1((toString(m_func)));
-    const String &tmp2((toString(x_hphp_object_pointer(GET_THIS_TYPED(Closure)))));
-    return concat3(tmp1, NAMSTR(s_sys_ssdb381ae8, ":"), tmp2);
+    const String &tmp0((toString(m_func)));
+    const String &tmp1((toString(x_hphp_object_pointer(GET_THIS_TYPED(Closure)))));
+    return concat3(tmp0, NAMSTR(s_sys_ssdb381ae8, ":"), tmp1);
   }
 }
 namespace hphp_impl_splitter {}
@@ -1336,16 +1336,16 @@ namespace hphp_impl_splitter {}
 Variant c_Continuation::t_get_arg(CVarRef v_id) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::get_arg);
   {
-    bool tmp1;
+    bool tmp0;
     {
-      bool tmp2 = (less(v_id, 0LL));
-      if (!tmp2) {
-        int tmp3((x_count(m_args)));
-        tmp2 = (not_less(v_id, tmp3));
+      bool tmp1 = (less(v_id, 0LL));
+      if (!tmp1) {
+        int tmp2((x_count(m_args)));
+        tmp1 = (not_less(v_id, tmp2));
       }
-      tmp1 = (tmp2);
+      tmp0 = (tmp1);
     }
-    if (tmp1) {
+    if (tmp0) {
       {
         return false;
       }
@@ -1399,18 +1399,18 @@ void c_Continuation::t_next() {
     if (toBoolean(m_obj)) {
       {
         {
-          const Variant &tmp1((x_explode(NAMSTR(s_sys_ss819481f3, "::"), toString(m_func))));
-          v_tokens = tmp1;
+          const Variant &tmp0((x_explode(NAMSTR(s_sys_ss819481f3, "::"), toString(m_func))));
+          v_tokens = tmp0;
         }
         {
-          Variant tmp2((v_tokens.rvalAt(1LL, AccessFlags::Error)));
-          v_func = tmp2;
+          Variant tmp0((v_tokens.rvalAt(1LL, AccessFlags::Error)));
+          v_func = tmp0;
         }
         {
-          MethodCallPackage mcp3;
-          mcp3.methodCall((m_obj.objectForCall()), toString(v_func), -1);
-          const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
-          (mcp3.bindClass(info)->getMeth1Args())(mcp3, 1, GET_THIS_TYPED(Continuation));
+          MethodCallPackage mcp0;
+          mcp0.methodCall((m_obj.objectForCall()), toString(v_func), -1);
+          const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+          (mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, GET_THIS_TYPED(Continuation));
         }
       }
     }

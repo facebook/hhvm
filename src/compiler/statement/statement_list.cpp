@@ -24,6 +24,7 @@
 #include <compiler/statement/method_statement.h>
 #include <compiler/statement/class_statement.h>
 #include <compiler/statement/return_statement.h>
+#include <compiler/statement/block_statement.h>
 #include <util/parser/hphp.tab.hpp>
 #include <compiler/expression/binary_op_expression.h>
 #include <compiler/expression/assignment_expression.h>
@@ -305,37 +306,59 @@ StatementPtr StatementList::preOptimize(AnalysisResultConstPtr ar) {
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     StatementPtr &s = m_stmts[i];
     if (del) {
-      switch (s->getKindOf()) {
-      case Statement::KindOfBlockStatement:
-      case Statement::KindOfIfBranchStatement:
-      case Statement::KindOfIfStatement:
-      case Statement::KindOfWhileStatement:
-      case Statement::KindOfDoStatement:
-      case Statement::KindOfForStatement:
-      case Statement::KindOfSwitchStatement:
-      case Statement::KindOfCaseStatement:
-      case Statement::KindOfBreakStatement:
-      case Statement::KindOfContinueStatement:
-      case Statement::KindOfReturnStatement:
-      case Statement::KindOfGlobalStatement:
-      case Statement::KindOfStaticStatement:
-      case Statement::KindOfEchoStatement:
-      case Statement::KindOfUnsetStatement:
-      case Statement::KindOfExpStatement:
-      case Statement::KindOfForEachStatement:
-      case Statement::KindOfCatchStatement:
-      case Statement::KindOfTryStatement:
-      case Statement::KindOfThrowStatement:
-        removeElement(i--);
-        changed = true;
-        continue;
-      default:
-        break;
+      if (s->hasReachableLabel()) {
+        del = false;
+      } else {
+        switch (s->getKindOf()) {
+          case Statement::KindOfBlockStatement:
+          case Statement::KindOfIfBranchStatement:
+          case Statement::KindOfIfStatement:
+          case Statement::KindOfWhileStatement:
+          case Statement::KindOfDoStatement:
+          case Statement::KindOfForStatement:
+          case Statement::KindOfSwitchStatement:
+          case Statement::KindOfCaseStatement:
+          case Statement::KindOfBreakStatement:
+          case Statement::KindOfContinueStatement:
+          case Statement::KindOfReturnStatement:
+          case Statement::KindOfGlobalStatement:
+          case Statement::KindOfStaticStatement:
+          case Statement::KindOfEchoStatement:
+          case Statement::KindOfUnsetStatement:
+          case Statement::KindOfExpStatement:
+          case Statement::KindOfForEachStatement:
+          case Statement::KindOfCatchStatement:
+          case Statement::KindOfTryStatement:
+          case Statement::KindOfThrowStatement:
+            removeElement(i--);
+            changed = true;
+            continue;
+          default:
+            break;
+        }
       }
     }
 
     if (s) {
-      if (Option::EliminateDeadCode) {
+      if (s->is(KindOfBlockStatement)) {
+        BlockStatementPtr bs(static_pointer_cast<BlockStatement>(s));
+        StatementListPtr stmts(bs->getStmts());
+        if (!stmts) {
+          removeElement(i--);
+          changed = true;
+          continue;
+        } else {
+          FunctionScopePtr fs(getFunctionScope());
+          if (fs && (!fs->inPseudoMain() || !stmts->hasDecl())) {
+            removeElement(i);
+            m_stmts.insert(m_stmts.begin() + i,
+                           stmts->m_stmts.begin(), stmts->m_stmts.end());
+            i--;
+            changed = true;
+            continue;
+          }
+        }
+      } else if (Option::EliminateDeadCode) {
         if (s->is(KindOfBreakStatement) ||
             s->is(KindOfContinueStatement) ||
             s->is(KindOfReturnStatement) ||
@@ -348,8 +371,6 @@ StatementPtr StatementList::preOptimize(AnalysisResultConstPtr ar) {
             removeElement(i--);
             changed = true;
           }
-        } else if (s->hasReachableLabel()) {
-          del = false;
         }
       }
     }
@@ -370,6 +391,11 @@ StatementPtr StatementList::postOptimize(AnalysisResultConstPtr ar) {
         getScope()->addUpdates(BlockScope::UseKindCaller);
         continue;
       }
+    } else if (s->is(KindOfBlockStatement) &&
+               !static_pointer_cast<BlockStatement>(s)->getStmts()) {
+      removeElement(i--);
+      getScope()->addUpdates(BlockScope::UseKindCaller);
+      continue;
     }
   }
   return StatementPtr();

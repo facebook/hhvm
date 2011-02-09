@@ -15,6 +15,7 @@
 */
 
 #include <compiler/statement/global_statement.h>
+#include <compiler/statement/block_statement.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/analysis/block_scope.h>
 #include <compiler/analysis/variable_table.h>
@@ -36,9 +37,16 @@ GlobalStatement::GlobalStatement
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
     m_exp(exp) {
 
+  set<string> seen;
   for (int i = 0; i < m_exp->getCount(); i++) {
     ExpressionPtr exp = (*m_exp)[i];
-    exp->setContext(Expression::LValue);
+    exp->setContext(Expression::Declaration);
+    if (exp->is(Expression::KindOfSimpleVariable)) {
+      const string &name = static_pointer_cast<SimpleVariable>(exp)->getName();
+      if (!seen.insert(name).second) {
+        m_exp->removeElement(i--);
+      }
+    }
   }
 }
 
@@ -82,6 +90,20 @@ void GlobalStatement::setNthKid(int n, ConstructPtr cp) {
       ASSERT(false);
       break;
   }
+}
+
+StatementPtr GlobalStatement::preOptimize(AnalysisResultConstPtr ar) {
+  if (!m_exp->getCount()) {
+    return NULL_STATEMENT();
+  }
+  return StatementPtr();
+}
+
+StatementPtr GlobalStatement::postOptimize(AnalysisResultConstPtr ar) {
+  if (!m_exp->getCount()) {
+    return NULL_STATEMENT();
+  }
+  return StatementPtr();
 }
 
 void GlobalStatement::inferTypes(AnalysisResultPtr ar) {

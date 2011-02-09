@@ -567,6 +567,7 @@ void VariableTable::clearUsed() {
       sym.second.clearUsed();
       sym.second.clearNeeded();
       sym.second.clearReferenced();
+      sym.second.clearGlobal();
     } else {
       sym.second.setReferenced();
     }

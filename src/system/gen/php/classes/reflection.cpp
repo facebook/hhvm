@@ -790,8 +790,8 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
       v_name = iter3->first();
       {
         {
-          const p_ReflectionParameter &tmp4((p_ReflectionParameter((NEWOBJ(c_ReflectionParameter)())->create(null, null))));
-          v_param = tmp4;
+          const p_ReflectionParameter &tmp0((p_ReflectionParameter((NEWOBJ(c_ReflectionParameter)())->create(null, null))));
+          v_param = tmp0;
         }
         v_param->m_info = v_info;
         v_ret.append((v_param));
@@ -817,25 +817,25 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
 
   v_count = 0LL;
   {
-    const Array &tmp1((t_getparameters()));
-    v_params = tmp1;
+    const Array &tmp0((t_getparameters()));
+    v_params = tmp0;
   }
   {
-    LOOP_COUNTER(2);
-    for (ArrayIter iter4 = v_params.begin(s_class_name, true); !iter4.end(); ++iter4) {
-      LOOP_COUNTER_CHECK(2);
-      iter4.second(v_param);
-      v_name = iter4.first();
+    LOOP_COUNTER(1);
+    for (ArrayIter iter3 = v_params.begin(s_class_name, true); !iter3.end(); ++iter3) {
+      LOOP_COUNTER_CHECK(1);
+      iter3.second(v_param);
+      v_name = iter3.first();
       {
         {
-          bool tmp5;
+          bool tmp0;
           {
-            MethodCallPackage mcp6;
-            mcp6.methodCall((v_param.objectForCall()), NAMSTR(s_sys_ss6d9ef7e5, "isOptional"), 0x2D6EF48BBAB22735LL);
-            const CallInfo *cit6  __attribute__((__unused__)) = mcp6.ci;
-            tmp5 = (toBoolean((mcp6.bindClass(info)->getMeth0Args())(mcp6, 0)));
+            MethodCallPackage mcp1;
+            mcp1.methodCall((v_param.objectForCall()), NAMSTR(s_sys_ss6d9ef7e5, "isOptional"), 0x2D6EF48BBAB22735LL);
+            const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+            tmp0 = (toBoolean((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0)));
           }
-          if (tmp5) {
+          if (tmp0) {
             {
               break;
             }
@@ -1043,9 +1043,9 @@ Variant c_ReflectionObject::ti_export(CStrRef cls, Variant v_obj, CVarRef v_ret)
   String v_str;
 
   {
-    p_ReflectionObject tmp1 = NEWOBJ(c_ReflectionObject)();
-    (tmp1->create(v_obj));
-    v_obj = tmp1;
+    p_ReflectionObject tmp0 = NEWOBJ(c_ReflectionObject)();
+    (tmp0->create(v_obj));
+    v_obj = tmp0;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -3419,29 +3419,29 @@ void c_ReflectionClass::t___construct(Variant v_name) {
   if (x_is_object(v_name)) {
     {
       {
-        const Variant &tmp1((x_get_class(v_name)));
-        v_name = tmp1;
+        const Variant &tmp0((x_get_class(v_name)));
+        v_name = tmp0;
       }
     }
   }
   else {
     {
       {
-        bool tmp2;
+        bool tmp0;
         {
-          bool tmp3((toBoolean(x_call_user_func(2, NAMSTR(s_sys_ssb7ae555d, "class_exists"), Array(ArrayInit(1, true).setRef(v_name).create())))));
-          bool tmp4 = (!(tmp3));
-          if (tmp4) {
-            bool tmp5((toBoolean(x_call_user_func(2, NAMSTR(s_sys_ss5f48f4d6, "interface_exists"), Array(ArrayInit(1, true).setRef(v_name).create())))));
-            tmp4 = (!(tmp5));
+          bool tmp1((toBoolean(x_call_user_func(2, NAMSTR(s_sys_ssb7ae555d, "class_exists"), Array(ArrayInit(1, true).setRef(v_name).create())))));
+          bool tmp2 = (!(tmp1));
+          if (tmp2) {
+            bool tmp3((toBoolean(x_call_user_func(2, NAMSTR(s_sys_ss5f48f4d6, "interface_exists"), Array(ArrayInit(1, true).setRef(v_name).create())))));
+            tmp2 = (!(tmp3));
           }
-          tmp2 = (tmp4);
+          tmp0 = (tmp2);
         }
-        if (tmp2) {
+        if (tmp0) {
           {
             {
-              p_ReflectionException tmp6 = NEWOBJ(c_ReflectionException)();
-              throw_exception((tmp6->create(concat3(NAMSTR(s_sys_ssa78ef7eb, "Class "), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp6));
+              p_ReflectionException tmp0 = NEWOBJ(c_ReflectionException)();
+              throw_exception((tmp0->create(concat3(NAMSTR(s_sys_ssa78ef7eb, "Class "), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp0));
             }
           }
         }
@@ -3449,8 +3449,8 @@ void c_ReflectionClass::t___construct(Variant v_name) {
     }
   }
   {
-    const String &tmp7((x_hphp_get_original_class_name(toString(v_name))));
-    m_name = tmp7;
+    const String &tmp0((x_hphp_get_original_class_name(toString(v_name))));
+    m_name = tmp0;
   }
   gasInCtor(oldInCtor);
 }
@@ -3465,41 +3465,41 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
   if (!(toBoolean(m_info))) {
     {
       {
-        const Variant &tmp1((x_call_user_func(2, NAMSTR(s_sys_ss7732a9a6, "hphp_get_class_info"), Array(ArrayInit(1, true).setRef(m_name).create()))));
-        m_info = tmp1;
+        const Variant &tmp0((x_call_user_func(2, NAMSTR(s_sys_ss7732a9a6, "hphp_get_class_info"), Array(ArrayInit(1, true).setRef(m_name).create()))));
+        m_info = tmp0;
       }
       if (empty(m_info)) {
         {
           {
-            p_ReflectionException tmp2 = NEWOBJ(c_ReflectionException)();
-            throw_exception((tmp2->create(concat3(NAMSTR(s_sys_ssa78ef7eb, "Class "), toString(m_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp2));
+            p_ReflectionException tmp0 = NEWOBJ(c_ReflectionException)();
+            throw_exception((tmp0->create(concat3(NAMSTR(s_sys_ssa78ef7eb, "Class "), toString(m_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp0));
           }
         }
       }
       {
-        LOOP_COUNTER(3);
-        Variant map4 = m_info.rvalAt(NAMSTR(s_sys_sscfb8e254, "interfaces"), AccessFlags::Error_Key);
-        for (ArrayIterPtr iter5 = map4.begin(s_class_name, true); !iter5->end(); iter5->next()) {
-          LOOP_COUNTER_CHECK(3);
-          iter5->second(v__);
-          v_interface = iter5->first();
+        LOOP_COUNTER(1);
+        Variant map2 = m_info.rvalAt(NAMSTR(s_sys_sscfb8e254, "interfaces"), AccessFlags::Error_Key);
+        for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+          LOOP_COUNTER_CHECK(1);
+          iter3->second(v__);
+          v_interface = iter3->first();
           {
             {
-              p_ReflectionClass tmp6 = NEWOBJ(c_ReflectionClass)();
-              (tmp6->create(v_interface));
-              v_p = tmp6;
+              p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+              (tmp0->create(v_interface));
+              v_p = tmp0;
             }
             {
-              const Variant &tmp7((v_p->t_fetch(NAMSTR(s_sys_ss5b229ad5, "methods"))));
-              m_info.setOpEqual(277, NAMSTR(s_sys_ss5b229ad5, "methods"), (tmp7), true);
+              const Variant &tmp0((v_p->t_fetch(NAMSTR(s_sys_ss5b229ad5, "methods"))));
+              m_info.setOpEqual(277, NAMSTR(s_sys_ss5b229ad5, "methods"), (tmp0), true);
             }
             {
-              Variant tmp8((v_p->m_info.rvalAt(NAMSTR(s_sys_ss623ae369, "constants"), AccessFlags::Error_Key)));
-              m_info.setOpEqual(277, NAMSTR(s_sys_ss623ae369, "constants"), (tmp8), true);
+              Variant tmp0((v_p->m_info.rvalAt(NAMSTR(s_sys_ss623ae369, "constants"), AccessFlags::Error_Key)));
+              m_info.setOpEqual(277, NAMSTR(s_sys_ss623ae369, "constants"), (tmp0), true);
             }
             {
-              Variant tmp9((v_p->m_info.rvalAt(NAMSTR(s_sys_sscfb8e254, "interfaces"), AccessFlags::Error_Key)));
-              m_info.setOpEqual(277, NAMSTR(s_sys_sscfb8e254, "interfaces"), (tmp9), true);
+              Variant tmp0((v_p->m_info.rvalAt(NAMSTR(s_sys_sscfb8e254, "interfaces"), AccessFlags::Error_Key)));
+              m_info.setOpEqual(277, NAMSTR(s_sys_sscfb8e254, "interfaces"), (tmp0), true);
             }
           }
         }
@@ -3507,33 +3507,33 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
       if (!(empty(m_info, NAMSTR(s_sys_ssfb10fd8c, "parent"), true))) {
         {
           {
-            p_ReflectionClass tmp10 = NEWOBJ(c_ReflectionClass)();
-            (tmp10->create(m_info.rvalAt(NAMSTR(s_sys_ssfb10fd8c, "parent"), AccessFlags::Error_Key)));
-            v_p = tmp10;
+            p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+            (tmp0->create(m_info.rvalAt(NAMSTR(s_sys_ssfb10fd8c, "parent"), AccessFlags::Error_Key)));
+            v_p = tmp0;
           }
           if (toBoolean(t_isinterface())) {
             {
               {
-                Variant tmp11((m_info.rvalAt(NAMSTR(s_sys_ssfb10fd8c, "parent"), AccessFlags::Error_Key)));
-                lval(m_info.lvalAt(NAMSTR(s_sys_sscfb8e254, "interfaces"), AccessFlags::CheckExist_Key)).append((tmp11));
+                Variant tmp0((m_info.rvalAt(NAMSTR(s_sys_ssfb10fd8c, "parent"), AccessFlags::Error_Key)));
+                lval(m_info.lvalAt(NAMSTR(s_sys_sscfb8e254, "interfaces"), AccessFlags::CheckExist_Key)).append((tmp0));
               }
             }
           }
           {
-            const Variant &tmp12((v_p->t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"))));
-            m_info.setOpEqual(277, NAMSTR(s_sys_sscfb8e254, "interfaces"), (tmp12), true);
+            const Variant &tmp0((v_p->t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"))));
+            m_info.setOpEqual(277, NAMSTR(s_sys_sscfb8e254, "interfaces"), (tmp0), true);
           }
           {
-            Variant tmp13((v_p->m_info.rvalAt(NAMSTR(s_sys_ss90269404, "properties"), AccessFlags::Error_Key)));
-            m_info.setOpEqual(277, NAMSTR(s_sys_ss90269404, "properties"), (tmp13), true);
+            Variant tmp0((v_p->m_info.rvalAt(NAMSTR(s_sys_ss90269404, "properties"), AccessFlags::Error_Key)));
+            m_info.setOpEqual(277, NAMSTR(s_sys_ss90269404, "properties"), (tmp0), true);
           }
           {
-            Variant tmp14((v_p->m_info.rvalAt(NAMSTR(s_sys_ss5b229ad5, "methods"), AccessFlags::Error_Key)));
-            m_info.setOpEqual(277, NAMSTR(s_sys_ss5b229ad5, "methods"), (tmp14), true);
+            Variant tmp0((v_p->m_info.rvalAt(NAMSTR(s_sys_ss5b229ad5, "methods"), AccessFlags::Error_Key)));
+            m_info.setOpEqual(277, NAMSTR(s_sys_ss5b229ad5, "methods"), (tmp0), true);
           }
           {
-            Variant tmp15((v_p->m_info.rvalAt(NAMSTR(s_sys_ss623ae369, "constants"), AccessFlags::Error_Key)));
-            m_info.setOpEqual(277, NAMSTR(s_sys_ss623ae369, "constants"), (tmp15), true);
+            Variant tmp0((v_p->m_info.rvalAt(NAMSTR(s_sys_ss623ae369, "constants"), AccessFlags::Error_Key)));
+            m_info.setOpEqual(277, NAMSTR(s_sys_ss623ae369, "constants"), (tmp0), true);
           }
         }
       }
@@ -3548,8 +3548,8 @@ bool c_ReflectionClass::t_test(CVarRef v_what, CVarRef v_name) {
   Variant v_v;
 
   {
-    const Variant &tmp1((t_fetch(v_what)));
-    v_v = tmp1;
+    const Variant &tmp0((t_fetch(v_what)));
+    v_v = tmp0;
   }
   return (toBoolean(v_v) && isset(v_v, v_name));
 }
@@ -3567,9 +3567,9 @@ Variant c_ReflectionClass::ti_export(CStrRef cls, CVarRef v_name, CVarRef v_ret)
   String v_str;
 
   {
-    p_ReflectionClass tmp1 = NEWOBJ(c_ReflectionClass)();
-    (tmp1->create(v_name));
-    v_obj = tmp1;
+    p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+    (tmp0->create(v_name));
+    v_obj = tmp0;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -3597,8 +3597,8 @@ namespace hphp_impl_splitter {}
 bool c_ReflectionClass::t_isuserdefined() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isUserDefined);
   {
-    bool tmp1((toBoolean(t_fetch(NAMSTR(s_sys_ss9332a8ac, "internal")))));
-    return !(tmp1);
+    bool tmp0((toBoolean(t_fetch(NAMSTR(s_sys_ss9332a8ac, "internal")))));
+    return !(tmp0);
   }
 }
 namespace hphp_impl_splitter {}
@@ -3606,8 +3606,8 @@ namespace hphp_impl_splitter {}
 bool c_ReflectionClass::t_isinstantiable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInstantiable);
   {
-    bool tmp1((toBoolean(t_fetch(NAMSTR(s_sys_ss12c8a8a6, "abstract")))));
-    return !(tmp1);
+    bool tmp0((toBoolean(t_fetch(NAMSTR(s_sys_ss12c8a8a6, "abstract")))));
+    return !(tmp0);
   }
 }
 namespace hphp_impl_splitter {}
@@ -3621,8 +3621,8 @@ namespace hphp_impl_splitter {}
 bool c_ReflectionClass::t_hasmethod(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::hasMethod);
   {
-    const String &tmp1((x_strtolower(toString(v_name))));
-    return t_test(NAMSTR(s_sys_ss5b229ad5, "methods"), VarNR(tmp1));
+    const String &tmp0((x_strtolower(toString(v_name))));
+    return t_test(NAMSTR(s_sys_ss5b229ad5, "methods"), VarNR(tmp0));
   }
 }
 namespace hphp_impl_splitter {}
@@ -3667,12 +3667,12 @@ Variant c_ReflectionClass::t_getconstructor() {
     }
   }
   {
-    bool tmp1;
+    bool tmp0;
     {
-      const Variant &tmp2((t_fetch(NAMSTR(s_sys_ssdc3cbddc, "name"))));
-      tmp1 = (t_hasmethod((v_name = tmp2)));
+      const Variant &tmp1((t_fetch(NAMSTR(s_sys_ssdc3cbddc, "name"))));
+      tmp0 = (t_hasmethod((v_name = tmp1)));
     }
-    if (tmp1) {
+    if (tmp0) {
       {
         return t_getmethod(v_name);
       }
@@ -3690,54 +3690,54 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
   p_ReflectionMethod v_ret;
 
   {
-    const String &tmp1((x_strtolower(toString(v_name))));
-    v_lname = tmp1;
+    const String &tmp0((x_strtolower(toString(v_name))));
+    v_lname = tmp0;
   }
   {
-    const Variant &tmp2((t_fetch(NAMSTR(s_sys_ss5b229ad5, "methods"))));
-    v_methods = tmp2;
+    const Variant &tmp0((t_fetch(NAMSTR(s_sys_ss5b229ad5, "methods"))));
+    v_methods = tmp0;
   }
   if (!(isset(v_methods, v_lname))) {
     {
       {
-        Variant tmp3((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
-        v_class = tmp3;
+        Variant tmp0((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
+        v_class = tmp0;
       }
       {
-        p_ReflectionException tmp4 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp4->create(concat5(NAMSTR(s_sys_ssdc6e02c2, "Method "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp4));
+        p_ReflectionException tmp0 = NEWOBJ(c_ReflectionException)();
+        throw_exception((tmp0->create(concat5(NAMSTR(s_sys_ssdc6e02c2, "Method "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp0));
       }
     }
   }
   {
-    const p_ReflectionMethod &tmp5((p_ReflectionMethod((NEWOBJ(c_ReflectionMethod)())->create(null, null))));
-    v_ret = tmp5;
+    const p_ReflectionMethod &tmp0((p_ReflectionMethod((NEWOBJ(c_ReflectionMethod)())->create(null, null))));
+    v_ret = tmp0;
   }
   {
-    Variant tmp6((v_methods.rvalAt(v_lname, AccessFlags::Error)));
-    v_ret->m_info = tmp6;
+    Variant tmp0((v_methods.rvalAt(v_lname, AccessFlags::Error)));
+    v_ret->m_info = tmp0;
   }
   v_ret->m_name = v_lname;
   {
-    Variant tmp7((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
-    v_ret->m_class = tmp7;
+    Variant tmp0((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
+    v_ret->m_class = tmp0;
   }
   {
-    bool tmp8;
+    bool tmp0;
     {
-      bool tmp9 = (equal(v_lname, NAMSTR(s_sys_ssa1b87da7, "__construct")));
-      if (!tmp9) {
-        bool tmp10((toBoolean(x_strcasecmp(v_lname, toString(v_ret->m_class)))));
-        bool tmp11 = (!(tmp10));
-        if (tmp11) {
-          bool tmp12((t_hasmethod(NAMSTR(s_sys_ssa1b87da7, "__construct"))));
-          tmp11 = (!(tmp12));
+      bool tmp1 = (equal(v_lname, NAMSTR(s_sys_ssa1b87da7, "__construct")));
+      if (!tmp1) {
+        bool tmp2((toBoolean(x_strcasecmp(v_lname, toString(v_ret->m_class)))));
+        bool tmp3 = (!(tmp2));
+        if (tmp3) {
+          bool tmp4((t_hasmethod(NAMSTR(s_sys_ssa1b87da7, "__construct"))));
+          tmp3 = (!(tmp4));
         }
-        tmp9 = (tmp11);
+        tmp1 = (tmp3);
       }
-      tmp8 = (tmp9);
+      tmp0 = (tmp1);
     }
-    if (tmp8) {
+    if (tmp0) {
       {
         v_ret->m_info.set(NAMSTR(s_sys_ssefecb9dd, "constructor"), (true), true);
       }
@@ -3758,19 +3758,19 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = 65535LL
 
   v_ret = s_sys_sa00000000;
   {
-    const Variant &tmp1((t_fetch(NAMSTR(s_sys_ss5b229ad5, "methods"))));
-    v_methods = tmp1;
+    const Variant &tmp0((t_fetch(NAMSTR(s_sys_ss5b229ad5, "methods"))));
+    v_methods = tmp0;
   }
   {
-    LOOP_COUNTER(2);
-    for (ArrayIterPtr iter4 = v_methods.begin(s_class_name, true); !iter4->end(); iter4->next()) {
-      LOOP_COUNTER_CHECK(2);
-      iter4->second(v__);
-      v_name = iter4->first();
+    LOOP_COUNTER(1);
+    for (ArrayIterPtr iter3 = v_methods.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+      LOOP_COUNTER_CHECK(1);
+      iter3->second(v__);
+      v_name = iter3->first();
       {
         {
-          const p_ReflectionMethod &tmp5((t_getmethod(v_name)));
-          v_m = tmp5;
+          const p_ReflectionMethod &tmp0((t_getmethod(v_name)));
+          v_m = tmp0;
         }
         if (((((((toBoolean(bitwise_and(v_filter, 256LL /* ReflectionMethod::IS_PUBLIC */)) && v_m->t_ispublic()) || (toBoolean(bitwise_and(v_filter, 512LL /* ReflectionMethod::IS_PROTECTED */)) && v_m->t_isprotected())) || (toBoolean(bitwise_and(v_filter, 1024LL /* ReflectionMethod::IS_PRIVATE */)) && v_m->t_isprivate())) || (toBoolean(bitwise_and(v_filter, 1LL /* ReflectionMethod::IS_STATIC */)) && toBoolean(v_m->t_isstatic()))) || (toBoolean(bitwise_and(v_filter, 4LL /* ReflectionMethod::IS_FINAL */)) && toBoolean(v_m->t_isfinal()))) || (toBoolean(bitwise_and(v_filter, 2LL /* ReflectionMethod::IS_ABSTRACT */)) && toBoolean(v_m->t_isabstract())))) {
           {
@@ -3791,33 +3791,33 @@ p_ReflectionProperty c_ReflectionClass::t_getproperty(CVarRef v_name) {
   p_ReflectionProperty v_ret;
 
   {
-    const Variant &tmp1((t_fetch(NAMSTR(s_sys_ss90269404, "properties"))));
-    v_properties = tmp1;
+    const Variant &tmp0((t_fetch(NAMSTR(s_sys_ss90269404, "properties"))));
+    v_properties = tmp0;
   }
   if (!(isset(v_properties, v_name))) {
     {
       {
-        Variant tmp2((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
-        v_class = tmp2;
+        Variant tmp0((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
+        v_class = tmp0;
       }
       {
-        p_ReflectionException tmp3 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp3->create(concat5(NAMSTR(s_sys_ss9795dfc8, "Property "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp3));
+        p_ReflectionException tmp0 = NEWOBJ(c_ReflectionException)();
+        throw_exception((tmp0->create(concat5(NAMSTR(s_sys_ss9795dfc8, "Property "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp0));
       }
     }
   }
   {
-    const p_ReflectionProperty &tmp4((p_ReflectionProperty((NEWOBJ(c_ReflectionProperty)())->create(null, null))));
-    v_ret = tmp4;
+    const p_ReflectionProperty &tmp0((p_ReflectionProperty((NEWOBJ(c_ReflectionProperty)())->create(null, null))));
+    v_ret = tmp0;
   }
   {
-    Variant tmp5((v_properties.rvalAt(v_name, AccessFlags::Error)));
-    v_ret->m_info = tmp5;
+    Variant tmp0((v_properties.rvalAt(v_name, AccessFlags::Error)));
+    v_ret->m_info = tmp0;
   }
   v_ret->m_name = v_name;
   {
-    Variant tmp6((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
-    v_ret->m_class = tmp6;
+    Variant tmp0((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
+    v_ret->m_class = tmp0;
   }
   return v_ret;
 }
@@ -3839,8 +3839,8 @@ Array c_ReflectionClass::t_getproperties() {
       v_name = iter3->first();
       {
         {
-          const p_ReflectionProperty &tmp4((t_getproperty(v_name)));
-          v_ret.append((tmp4));
+          const p_ReflectionProperty &tmp0((t_getproperty(v_name)));
+          v_ret.append((tmp0));
         }
       }
     }
@@ -3861,18 +3861,18 @@ Variant c_ReflectionClass::t_getconstant(CVarRef v_name) {
   Variant v_class;
 
   {
-    const Variant &tmp1((t_fetch(NAMSTR(s_sys_ss623ae369, "constants"))));
-    v_constants = tmp1;
+    const Variant &tmp0((t_fetch(NAMSTR(s_sys_ss623ae369, "constants"))));
+    v_constants = tmp0;
   }
   if (!(isset(v_constants, v_name))) {
     {
       {
-        Variant tmp2((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
-        v_class = tmp2;
+        Variant tmp0((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
+        v_class = tmp0;
       }
       {
-        p_ReflectionException tmp3 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp3->create(concat5(NAMSTR(s_sys_ssd816f860, "Class constant "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp3));
+        p_ReflectionException tmp0 = NEWOBJ(c_ReflectionException)();
+        throw_exception((tmp0->create(concat5(NAMSTR(s_sys_ssd816f860, "Class constant "), toString(v_class), NAMSTR(s_sys_ss819481f3, "::"), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp0));
       }
     }
   }
@@ -3897,15 +3897,15 @@ Array c_ReflectionClass::t_getinterfaces() {
       v_name = iter3->first();
       {
         {
-          p_ReflectionClass tmp4 = NEWOBJ(c_ReflectionClass)();
-          (tmp4->create(v_name));
-          v_cls = tmp4;
+          p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+          (tmp0->create(v_name));
+          v_cls = tmp0;
         }
         if (toBoolean(v_cls->t_isinterface())) {
           {
             {
-              const Variant &tmp5((v_cls->t_getname()));
-              v_ret.set(tmp5, (v_cls));
+              const Variant &tmp0((v_cls->t_getname()));
+              v_ret.set(tmp0, (v_cls));
             }
           }
         }
@@ -3933,15 +3933,15 @@ Array c_ReflectionClass::t_getinterfacenames() {
       v_name = iter3->first();
       {
         {
-          p_ReflectionClass tmp4 = NEWOBJ(c_ReflectionClass)();
-          (tmp4->create(v_name));
-          v_cls = tmp4;
+          p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+          (tmp0->create(v_name));
+          v_cls = tmp0;
         }
         if (toBoolean(v_cls->t_isinterface())) {
           {
             {
-              const Variant &tmp5((v_cls->t_getname()));
-              v_ret.append((tmp5));
+              const Variant &tmp0((v_cls->t_getname()));
+              v_ret.append((tmp0));
             }
           }
         }
@@ -3987,8 +3987,8 @@ Object c_ReflectionClass::t_newinstance(int num_args, Array args /* = Array() */
   Array v_args;
 
   {
-    const Array &tmp1((func_get_args(num_args, Array(),args)));
-    v_args = tmp1;
+    const Array &tmp0((func_get_args(num_args, Array(),args)));
+    v_args = tmp0;
   }
   return x_hphp_create_object(toString(m_name), v_args);
 }
@@ -3997,9 +3997,9 @@ namespace hphp_impl_splitter {}
 Object c_ReflectionClass::t_newinstanceargs(CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::newInstanceArgs);
   {
-    const String &tmp1((toString(m_name)));
-    const Array &tmp2((toArray(x_array_values(v_args))));
-    return x_hphp_create_object(tmp1, tmp2);
+    const String &tmp0((toString(m_name)));
+    const Array &tmp1((toArray(x_array_values(v_args))));
+    return x_hphp_create_object(tmp0, tmp1);
   }
 }
 namespace hphp_impl_splitter {}
@@ -4007,21 +4007,21 @@ namespace hphp_impl_splitter {}
 Variant c_ReflectionClass::t_getparentclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getParentClass);
   {
-    bool tmp1;
+    bool tmp0;
     {
-      const Variant &tmp2((t_fetch(NAMSTR(s_sys_ssfb10fd8c, "parent"))));
-      tmp1 = (empty(tmp2));
+      const Variant &tmp1((t_fetch(NAMSTR(s_sys_ssfb10fd8c, "parent"))));
+      tmp0 = (empty(tmp1));
     }
-    if (tmp1) {
+    if (tmp0) {
       {
         return false;
       }
     }
   }
   {
-    p_ReflectionClass tmp3 = NEWOBJ(c_ReflectionClass)();
-    const Variant &tmp4((t_fetch(NAMSTR(s_sys_ssfb10fd8c, "parent"))));
-    return (tmp3->create(tmp4), tmp3);
+    p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+    const Variant &tmp1((t_fetch(NAMSTR(s_sys_ssfb10fd8c, "parent"))));
+    return (tmp0->create(tmp1), tmp0);
   }
 }
 namespace hphp_impl_splitter {}
@@ -4034,29 +4034,29 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   if (instanceOf(v_cls, NAMSTR(s_sys_ssfc63c2bb, "ReflectionClass"))) {
     {
       {
-        MethodCallPackage mcp1;
-        mcp1.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
-        const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-        Variant tmp2(((mcp1.bindClass(info)->getMeth1Args())(mcp1, 1, NAMSTR(s_sys_ssdc3cbddc, "name"))));
-        v_cls = tmp2;
+        MethodCallPackage mcp0;
+        mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
+        const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+        Variant tmp1(((mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, NAMSTR(s_sys_ssdc3cbddc, "name"))));
+        v_cls = tmp1;
       }
     }
   }
   {
-    LOOP_COUNTER(3);
-    Variant map4 = t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"));
-    for (ArrayIterPtr iter5 = map4.begin(s_class_name, true); !iter5->end(); iter5->next()) {
-      LOOP_COUNTER_CHECK(3);
-      iter5->second(v__);
-      v_name = iter5->first();
+    LOOP_COUNTER(1);
+    Variant map2 = t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"));
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+      LOOP_COUNTER_CHECK(1);
+      iter3->second(v__);
+      v_name = iter3->first();
       {
         {
-          bool tmp6;
+          bool tmp0;
           {
-            int tmp7((x_strcasecmp(toString(v_cls), toString(v_name))));
-            tmp6 = (equal(tmp7, 0LL));
+            int tmp1((x_strcasecmp(toString(v_cls), toString(v_name))));
+            tmp0 = (equal(tmp1, 0LL));
           }
-          if (tmp6) {
+          if (tmp0) {
             {
               return true;
             }
@@ -4066,36 +4066,36 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
     }
   }
   {
-    bool tmp8;
+    bool tmp0;
     {
-      const Variant &tmp9((t_fetch(NAMSTR(s_sys_ssfb10fd8c, "parent"))));
-      tmp8 = (empty(tmp9));
+      const Variant &tmp1((t_fetch(NAMSTR(s_sys_ssfb10fd8c, "parent"))));
+      tmp0 = (empty(tmp1));
     }
-    if (tmp8) {
+    if (tmp0) {
       {
         return false;
       }
     }
   }
   {
-    bool tmp10;
+    bool tmp0;
     {
-      const String &tmp11((toString(v_cls)));
-      const String &tmp12((toString(t_fetch(NAMSTR(s_sys_ssfb10fd8c, "parent")))));
-      int tmp13((x_strcasecmp(tmp11, tmp12)));
-      tmp10 = (equal(tmp13, 0LL));
+      const String &tmp1((toString(v_cls)));
+      const String &tmp2((toString(t_fetch(NAMSTR(s_sys_ssfb10fd8c, "parent")))));
+      int tmp3((x_strcasecmp(tmp1, tmp2)));
+      tmp0 = (equal(tmp3, 0LL));
     }
-    if (tmp10) {
+    if (tmp0) {
       {
         return true;
       }
     }
   }
   {
-    MethodCallPackage mcp14;
-    mcp14.methodCall((t_getparentclass().objectForCall()), NAMSTR(s_sys_ssdd355b2b, "isSubclassOf"), 0x373333991926C97ELL);
-    const CallInfo *cit14  __attribute__((__unused__)) = mcp14.ci;
-    return wrap_variant((mcp14.bindClass(info)->getMeth1Args())(mcp14, 1, v_cls));
+    MethodCallPackage mcp0;
+    mcp0.methodCall((t_getparentclass().objectForCall()), NAMSTR(s_sys_ssdd355b2b, "isSubclassOf"), 0x373333991926C97ELL);
+    const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+    return wrap_variant((mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, v_cls));
   }
 }
 namespace hphp_impl_splitter {}
@@ -4114,18 +4114,18 @@ Array c_ReflectionClass::t_getstaticproperties() {
       iter3->second(v_prop);
       {
         {
-          bool tmp4;
+          bool tmp0;
           {
-            MethodCallPackage mcp5;
-            mcp5.methodCall((v_prop.objectForCall()), NAMSTR(s_sys_ss404bf1b4, "isStatic"), 0x7A15DC56E8CC0B19LL);
-            const CallInfo *cit5  __attribute__((__unused__)) = mcp5.ci;
-            tmp4 = (toBoolean((mcp5.bindClass(info)->getMeth0Args())(mcp5, 0)));
+            MethodCallPackage mcp1;
+            mcp1.methodCall((v_prop.objectForCall()), NAMSTR(s_sys_ss404bf1b4, "isStatic"), 0x7A15DC56E8CC0B19LL);
+            const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+            tmp0 = (toBoolean((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0)));
           }
-          if (tmp4) {
+          if (tmp0) {
             {
               {
-                const Variant &tmp6((v_prop.o_getPublic(NAMSTR(s_sys_ssdc3cbddc, "name"), true)));
-                v_ret.set(tmp6, (v_prop));
+                const Variant &tmp0((v_prop.o_getPublic(NAMSTR(s_sys_ssdc3cbddc, "name"), true)));
+                v_ret.set(tmp0, (v_prop));
               }
             }
           }
@@ -4141,16 +4141,16 @@ Variant c_ReflectionClass::t_getstaticpropertyvalue(CVarRef v_name, CVarRef v_de
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getStaticPropertyValue);
   {
-    bool tmp1;
+    bool tmp0;
     {
-      bool tmp2 = (t_hasproperty(v_name));
-      if (tmp2) {
-        const p_ReflectionProperty &tmp3((t_getproperty(v_name)));
-        tmp2 = (toBoolean(tmp3->t_isstatic()));
+      bool tmp1 = (t_hasproperty(v_name));
+      if (tmp1) {
+        const p_ReflectionProperty &tmp2((t_getproperty(v_name)));
+        tmp1 = (toBoolean(tmp2->t_isstatic()));
       }
-      tmp1 = (tmp2);
+      tmp0 = (tmp1);
     }
-    if (tmp1) {
+    if (tmp0) {
       {
         return x_hphp_get_static_property(toString(m_name), toString(v_name));
       }
@@ -4180,18 +4180,18 @@ Array c_ReflectionClass::t_getdefaultproperties() {
       iter3->second(v_prop);
       {
         {
-          bool tmp4;
+          bool tmp0;
           {
-            MethodCallPackage mcp5;
-            mcp5.methodCall((v_prop.objectForCall()), NAMSTR(s_sys_ss9dad4367, "isDefault"), 0x384A52597AB11F15LL);
-            const CallInfo *cit5  __attribute__((__unused__)) = mcp5.ci;
-            tmp4 = (toBoolean((mcp5.bindClass(info)->getMeth0Args())(mcp5, 0)));
+            MethodCallPackage mcp1;
+            mcp1.methodCall((v_prop.objectForCall()), NAMSTR(s_sys_ss9dad4367, "isDefault"), 0x384A52597AB11F15LL);
+            const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+            tmp0 = (toBoolean((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0)));
           }
-          if (tmp4) {
+          if (tmp0) {
             {
               {
-                const Variant &tmp6((v_prop.o_getPublic(NAMSTR(s_sys_ssdc3cbddc, "name"), true)));
-                v_ret.set(tmp6, (v_prop));
+                const Variant &tmp0((v_prop.o_getPublic(NAMSTR(s_sys_ssdc3cbddc, "name"), true)));
+                v_ret.set(tmp0, (v_prop));
               }
             }
           }
@@ -4218,49 +4218,49 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   if (instanceOf(v_cls, NAMSTR(s_sys_ssfc63c2bb, "ReflectionClass"))) {
     {
       {
-        MethodCallPackage mcp1;
-        mcp1.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
-        const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-        Variant tmp2(((mcp1.bindClass(info)->getMeth1Args())(mcp1, 1, NAMSTR(s_sys_ssdc3cbddc, "name"))));
-        v_cls = tmp2;
+        MethodCallPackage mcp0;
+        mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
+        const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+        Variant tmp1(((mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, NAMSTR(s_sys_ssdc3cbddc, "name"))));
+        v_cls = tmp1;
       }
     }
   }
   {
-    p_ReflectionClass tmp3 = NEWOBJ(c_ReflectionClass)();
-    (tmp3->create(v_cls));
-    v_clsObj = tmp3;
+    p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+    (tmp0->create(v_cls));
+    v_clsObj = tmp0;
   }
   {
-    bool tmp4;
+    bool tmp0;
     {
-      bool tmp5((toBoolean(v_clsObj->t_isinterface())));
-      tmp4 = (!(tmp5));
+      bool tmp1((toBoolean(v_clsObj->t_isinterface())));
+      tmp0 = (!(tmp1));
     }
-    if (tmp4) {
+    if (tmp0) {
       {
         {
-          p_ReflectionException tmp6 = NEWOBJ(c_ReflectionException)();
-          throw_exception((tmp6->create(concat3(NAMSTR(s_sys_ss44fe7272, "Interface "), toString(v_cls), NAMSTR(s_sys_ss4c77dad1, " is a Class"))), tmp6));
+          p_ReflectionException tmp0 = NEWOBJ(c_ReflectionException)();
+          throw_exception((tmp0->create(concat3(NAMSTR(s_sys_ss44fe7272, "Interface "), toString(v_cls), NAMSTR(s_sys_ss4c77dad1, " is a Class"))), tmp0));
         }
       }
     }
   }
   {
-    LOOP_COUNTER(7);
-    Variant map8 = t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"));
-    for (ArrayIterPtr iter9 = map8.begin(s_class_name, true); !iter9->end(); iter9->next()) {
-      LOOP_COUNTER_CHECK(7);
-      iter9->second(v__);
-      v_name = iter9->first();
+    LOOP_COUNTER(1);
+    Variant map2 = t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"));
+    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+      LOOP_COUNTER_CHECK(1);
+      iter3->second(v__);
+      v_name = iter3->first();
       {
         {
-          bool tmp10;
+          bool tmp0;
           {
-            int tmp11((x_strcasecmp(toString(v_cls), toString(v_name))));
-            tmp10 = (equal(tmp11, 0LL));
+            int tmp1((x_strcasecmp(toString(v_cls), toString(v_name))));
+            tmp0 = (equal(tmp1, 0LL));
           }
-          if (tmp10) {
+          if (tmp0) {
             {
               return true;
             }
@@ -4282,10 +4282,10 @@ namespace hphp_impl_splitter {}
 Variant c_ReflectionClass::t_getextensionname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtensionName);
   {
-    MethodCallPackage mcp1;
-    mcp1.methodCall((t_fetch(NAMSTR(s_sys_sse9bf4500, "extension")).objectForCall()), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
-    const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-    return wrap_variant((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0));
+    MethodCallPackage mcp0;
+    mcp0.methodCall((t_fetch(NAMSTR(s_sys_sse9bf4500, "extension")).objectForCall()), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
+    const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+    return wrap_variant((mcp0.bindClass(info)->getMeth0Args())(mcp0, 0));
   }
 }
 namespace hphp_impl_splitter {}
@@ -5007,8 +5007,8 @@ void c_ReflectionExtension::t___construct(Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::__construct);
   bool oldInCtor = gasInCtor(true);
   {
-    const Array &tmp1((x_hphp_get_extension_info(toString(v_name))));
-    m_info = tmp1;
+    const Array &tmp0((x_hphp_get_extension_info(toString(v_name))));
+    m_info = tmp0;
   }
   gasInCtor(oldInCtor);
 }
@@ -5026,9 +5026,9 @@ Variant c_ReflectionExtension::ti_export(CStrRef cls, CVarRef v_name, CVarRef v_
   String v_str;
 
   {
-    p_ReflectionExtension tmp1 = NEWOBJ(c_ReflectionExtension)();
-    (tmp1->create(v_name));
-    v_obj = tmp1;
+    p_ReflectionExtension tmp0 = NEWOBJ(c_ReflectionExtension)();
+    (tmp0->create(v_name));
+    v_obj = tmp0;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -5091,11 +5091,11 @@ Array c_ReflectionExtension::t_getclassnames() {
       iter3->second(v_cls);
       {
         {
-          MethodCallPackage mcp4;
-          mcp4.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
-          const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
-          Variant tmp5(((mcp4.bindClass(info)->getMeth0Args())(mcp4, 0)));
-          v_ret.append((tmp5));
+          MethodCallPackage mcp0;
+          mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
+          const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+          Variant tmp1(((mcp0.bindClass(info)->getMeth0Args())(mcp0, 0)));
+          v_ret.append((tmp1));
         }
       }
     }
@@ -6147,24 +6147,24 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMST
   if ((!(toBoolean(v_name)) && x_is_string(v_cls))) {
     {
       {
-        const Variant &tmp1((x_explode(NAMSTR(s_sys_ss819481f3, "::"), toString(v_cls))));
-        v_arr = tmp1;
+        const Variant &tmp0((x_explode(NAMSTR(s_sys_ss819481f3, "::"), toString(v_cls))));
+        v_arr = tmp0;
       }
       {
-        bool tmp2;
+        bool tmp0;
         {
-          int tmp3((x_count(v_arr)));
-          tmp2 = (equal(tmp3, 2LL));
+          int tmp1((x_count(v_arr)));
+          tmp0 = (equal(tmp1, 2LL));
         }
-        if (tmp2) {
+        if (tmp0) {
           {
             {
-              Variant tmp4((v_arr.rvalAt(0LL, AccessFlags::Error)));
-              v_cls = tmp4;
+              Variant tmp0((v_arr.rvalAt(0LL, AccessFlags::Error)));
+              v_cls = tmp0;
             }
             {
-              Variant tmp5((v_arr.rvalAt(1LL, AccessFlags::Error)));
-              v_name = tmp5;
+              Variant tmp0((v_arr.rvalAt(1LL, AccessFlags::Error)));
+              v_name = tmp0;
             }
           }
         }
@@ -6176,42 +6176,42 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMST
       if (!(x_is_object(v_cls))) {
         {
           {
-            p_ReflectionClass tmp6 = NEWOBJ(c_ReflectionClass)();
-            (tmp6->create(v_cls));
-            v_cls = tmp6;
+            p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+            (tmp0->create(v_cls));
+            v_cls = tmp0;
           }
         }
       }
       else {
         {
           {
-            p_ReflectionClass tmp7 = NEWOBJ(c_ReflectionClass)();
-            const Variant &tmp8((x_get_class(v_cls)));
-            (tmp7->create(tmp8));
-            v_cls = tmp7;
+            p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+            const Variant &tmp1((x_get_class(v_cls)));
+            (tmp0->create(tmp1));
+            v_cls = tmp0;
           }
         }
       }
       {
-        MethodCallPackage mcp9;
-        mcp9.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
-        const CallInfo *cit9  __attribute__((__unused__)) = mcp9.ci;
-        Variant tmp10(((mcp9.bindClass(info)->getMeth1Args())(mcp9, 1, v_name)));
-        v_method = tmp10;
+        MethodCallPackage mcp0;
+        mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
+        const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+        Variant tmp1(((mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, v_name)));
+        v_method = tmp1;
       }
       if (toBoolean(v_method)) {
         {
           {
-            const Variant &tmp11((v_method.o_getPublic(NAMSTR(s_sys_ss33988b3e, "info"), true)));
-            m_info = tmp11;
+            const Variant &tmp0((v_method.o_getPublic(NAMSTR(s_sys_ss33988b3e, "info"), true)));
+            m_info = tmp0;
           }
           {
-            const Variant &tmp12((v_method.o_getPublic(NAMSTR(s_sys_ssdc3cbddc, "name"), true)));
-            m_name = tmp12;
+            const Variant &tmp0((v_method.o_getPublic(NAMSTR(s_sys_ssdc3cbddc, "name"), true)));
+            m_name = tmp0;
           }
           {
-            const Variant &tmp13((v_method.o_getPublic(NAMSTR(s_sys_ssc82dbd12, "class"), true)));
-            m_class = tmp13;
+            const Variant &tmp0((v_method.o_getPublic(NAMSTR(s_sys_ssc82dbd12, "class"), true)));
+            m_class = tmp0;
           }
         }
       }
@@ -6235,28 +6235,28 @@ Variant c_ReflectionMethod::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name
   if (!(x_is_object(v_cls))) {
     {
       {
-        p_ReflectionClass tmp1 = NEWOBJ(c_ReflectionClass)();
-        (tmp1->create(v_cls));
-        v_cls = tmp1;
+        p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+        (tmp0->create(v_cls));
+        v_cls = tmp0;
       }
     }
   }
   else {
     {
       {
-        p_ReflectionClass tmp2 = NEWOBJ(c_ReflectionClass)();
-        const Variant &tmp3((x_get_class(v_cls)));
-        (tmp2->create(tmp3));
-        v_cls = tmp2;
+        p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+        const Variant &tmp1((x_get_class(v_cls)));
+        (tmp0->create(tmp1));
+        v_cls = tmp0;
       }
     }
   }
   {
-    MethodCallPackage mcp4;
-    mcp4.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
-    const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
-    Variant tmp5(((mcp4.bindClass(info)->getMeth1Args())(mcp4, 1, v_name)));
-    v_obj = tmp5;
+    MethodCallPackage mcp0;
+    mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
+    const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+    Variant tmp1(((mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, v_name)));
+    v_obj = tmp1;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -6274,15 +6274,15 @@ Variant c_ReflectionMethod::t_invoke(int num_args, CVarRef v_obj, Array args /* 
   Variant v_args;
 
   {
-    const Array &tmp1((func_get_args(num_args, Array(ArrayInit(1, true).set(v_obj).create()),args)));
-    v_args = tmp1;
+    const Array &tmp0((func_get_args(num_args, Array(ArrayInit(1, true).set(v_obj).create()),args)));
+    v_args = tmp0;
   }
   x_array_shift(ref(v_args));
   {
-    Variant tmp2((v_obj));
-    const String &tmp3((toString(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
-    const String &tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
-    return x_hphp_invoke_method(tmp2, tmp3, tmp4, toArray(v_args));
+    Variant tmp0((v_obj));
+    const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
+    const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
+    return x_hphp_invoke_method(tmp0, tmp1, tmp2, toArray(v_args));
   }
 }
 namespace hphp_impl_splitter {}
@@ -6290,11 +6290,11 @@ namespace hphp_impl_splitter {}
 Variant c_ReflectionMethod::t_invokeargs(CVarRef v_obj, CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::invokeArgs);
   {
-    Variant tmp1((v_obj));
-    const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
-    const String &tmp3((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
-    const Array &tmp4((toArray(x_array_values(v_args))));
-    return x_hphp_invoke_method(tmp1, tmp2, tmp3, tmp4);
+    Variant tmp0((v_obj));
+    const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
+    const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
+    const Array &tmp3((toArray(x_array_values(v_args))));
+    return x_hphp_invoke_method(tmp0, tmp1, tmp2, tmp3);
   }
 }
 namespace hphp_impl_splitter {}
@@ -6344,8 +6344,8 @@ namespace hphp_impl_splitter {}
 bool c_ReflectionMethod::t_isdestructor() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isDestructor);
   {
-    const Variant &tmp1((t_getname()));
-    return equal(tmp1, NAMSTR(s_sys_ssa5a7f4f9, "__destruct"));
+    const Variant &tmp0((t_getname()));
+    return equal(tmp0, NAMSTR(s_sys_ssa5a7f4f9, "__destruct"));
   }
 }
 namespace hphp_impl_splitter {}
@@ -6370,8 +6370,8 @@ Variant c_ReflectionMethod::t_getdeclaringclass() {
     }
   }
   {
-    p_ReflectionClass tmp1 = NEWOBJ(c_ReflectionClass)();
-    return (tmp1->create(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key)), tmp1);
+    p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+    return (tmp0->create(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key)), tmp0);
   }
 }
 namespace hphp_impl_splitter {}
@@ -7346,42 +7346,42 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
       if (!(x_is_object(v_cls))) {
         {
           {
-            p_ReflectionClass tmp1 = NEWOBJ(c_ReflectionClass)();
-            (tmp1->create(v_cls));
-            v_cls = tmp1;
+            p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+            (tmp0->create(v_cls));
+            v_cls = tmp0;
           }
         }
       }
       else {
         {
           {
-            p_ReflectionClass tmp2 = NEWOBJ(c_ReflectionClass)();
-            const Variant &tmp3((x_get_class(v_cls)));
-            (tmp2->create(tmp3));
-            v_cls = tmp2;
+            p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+            const Variant &tmp1((x_get_class(v_cls)));
+            (tmp0->create(tmp1));
+            v_cls = tmp0;
           }
         }
       }
       {
-        MethodCallPackage mcp4;
-        mcp4.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
-        const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
-        Variant tmp5(((mcp4.bindClass(info)->getMeth1Args())(mcp4, 1, v_name)));
-        v_prop = tmp5;
+        MethodCallPackage mcp0;
+        mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
+        const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+        Variant tmp1(((mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, v_name)));
+        v_prop = tmp1;
       }
       if (toBoolean(v_prop)) {
         {
           {
-            const Variant &tmp6((v_prop.o_getPublic(NAMSTR(s_sys_ss33988b3e, "info"), true)));
-            m_info = tmp6;
+            const Variant &tmp0((v_prop.o_getPublic(NAMSTR(s_sys_ss33988b3e, "info"), true)));
+            m_info = tmp0;
           }
           {
-            const Variant &tmp7((v_prop.o_getPublic(NAMSTR(s_sys_ssdc3cbddc, "name"), true)));
-            m_name = tmp7;
+            const Variant &tmp0((v_prop.o_getPublic(NAMSTR(s_sys_ssdc3cbddc, "name"), true)));
+            m_name = tmp0;
           }
           {
-            const Variant &tmp8((v_prop.o_getPublic(NAMSTR(s_sys_ssc82dbd12, "class"), true)));
-            m_class = tmp8;
+            const Variant &tmp0((v_prop.o_getPublic(NAMSTR(s_sys_ssc82dbd12, "class"), true)));
+            m_class = tmp0;
           }
         }
       }
@@ -7405,28 +7405,28 @@ Variant c_ReflectionProperty::ti_export(CStrRef cls, Variant v_cls, CVarRef v_na
   if (!(x_is_object(v_cls))) {
     {
       {
-        p_ReflectionClass tmp1 = NEWOBJ(c_ReflectionClass)();
-        (tmp1->create(v_cls));
-        v_cls = tmp1;
+        p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+        (tmp0->create(v_cls));
+        v_cls = tmp0;
       }
     }
   }
   else {
     {
       {
-        p_ReflectionClass tmp2 = NEWOBJ(c_ReflectionClass)();
-        const Variant &tmp3((x_get_class(v_cls)));
-        (tmp2->create(tmp3));
-        v_cls = tmp2;
+        p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+        const Variant &tmp1((x_get_class(v_cls)));
+        (tmp0->create(tmp1));
+        v_cls = tmp0;
       }
     }
   }
   {
-    MethodCallPackage mcp4;
-    mcp4.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
-    const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
-    Variant tmp5(((mcp4.bindClass(info)->getMeth1Args())(mcp4, 1, v_name)));
-    v_obj = tmp5;
+    MethodCallPackage mcp0;
+    mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
+    const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+    Variant tmp1(((mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, v_name)));
+    v_obj = tmp1;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -7491,19 +7491,19 @@ Variant c_ReflectionProperty::t_getvalue(CVarRef v_obj //  = null_variant
   if (toBoolean(t_isstatic())) {
     {
       {
-        const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
-        const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
-        return x_hphp_get_static_property(tmp1, tmp2);
+        const String &tmp0((toString(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
+        const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
+        return x_hphp_get_static_property(tmp0, tmp1);
       }
     }
   }
   if (toBoolean(v_obj)) {
     {
       {
-        const Object &tmp3((toObject(v_obj)));
-        const String &tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
-        const String &tmp5((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
-        return x_hphp_get_property(tmp3, tmp4, tmp5);
+        const Object &tmp0((toObject(v_obj)));
+        const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
+        const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
+        return x_hphp_get_property(tmp0, tmp1, tmp2);
       }
     }
   }
@@ -7516,19 +7516,19 @@ void c_ReflectionProperty::t_setvalue(CVarRef v_obj, CVarRef v_value) {
   if (toBoolean(t_isstatic())) {
     {
       {
-        const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
-        const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
-        x_hphp_set_static_property(tmp1, tmp2, v_value);
+        const String &tmp0((toString(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
+        const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
+        x_hphp_set_static_property(tmp0, tmp1, v_value);
       }
     }
   }
   else {
     {
       {
-        const Object &tmp3((toObject(v_obj)));
-        const String &tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
-        const String &tmp5((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
-        x_hphp_set_property(tmp3, tmp4, tmp5, v_value);
+        const Object &tmp0((toObject(v_obj)));
+        const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key))));
+        const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
+        x_hphp_set_property(tmp0, tmp1, tmp2, v_value);
       }
     }
   }
@@ -7543,8 +7543,8 @@ Variant c_ReflectionProperty::t_getdeclaringclass() {
     }
   }
   {
-    p_ReflectionClass tmp1 = NEWOBJ(c_ReflectionClass)();
-    return (tmp1->create(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key)), tmp1);
+    p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+    return (tmp0->create(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key)), tmp0);
   }
 }
 namespace hphp_impl_splitter {}
@@ -8004,14 +8004,14 @@ void c_ReflectionFunction::t___construct(Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::__construct);
   bool oldInCtor = gasInCtor(true);
   {
-    const Array &tmp1((x_hphp_get_function_info(toString(v_name))));
-    m_info = tmp1;
+    const Array &tmp0((x_hphp_get_function_info(toString(v_name))));
+    m_info = tmp0;
   }
   if (empty(m_info)) {
     {
       {
-        p_ReflectionException tmp2 = NEWOBJ(c_ReflectionException)();
-        throw_exception((tmp2->create(concat3(NAMSTR(s_sys_ss985d885e, "Function "), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp2));
+        p_ReflectionException tmp0 = NEWOBJ(c_ReflectionException)();
+        throw_exception((tmp0->create(concat3(NAMSTR(s_sys_ss985d885e, "Function "), toString(v_name), NAMSTR(s_sys_ss5784ed2b, " does not exist"))), tmp0));
       }
     }
   }
@@ -8031,9 +8031,9 @@ Variant c_ReflectionFunction::ti_export(CStrRef cls, CVarRef v_name, CVarRef v_r
   String v_str;
 
   {
-    p_ReflectionFunction tmp1 = NEWOBJ(c_ReflectionFunction)();
-    (tmp1->create(v_name));
-    v_obj = tmp1;
+    p_ReflectionFunction tmp0 = NEWOBJ(c_ReflectionFunction)();
+    (tmp0->create(v_name));
+    v_obj = tmp0;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -8051,12 +8051,12 @@ Variant c_ReflectionFunction::t_invoke(int num_args, Array args /* = Array() */)
   Array v_args;
 
   {
-    const Array &tmp1((func_get_args(num_args, Array(),args)));
-    v_args = tmp1;
+    const Array &tmp0((func_get_args(num_args, Array(),args)));
+    v_args = tmp0;
   }
   {
-    const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
-    return x_hphp_invoke(tmp2, v_args);
+    const String &tmp0((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
+    return x_hphp_invoke(tmp0, v_args);
   }
 }
 namespace hphp_impl_splitter {}
@@ -8064,9 +8064,9 @@ namespace hphp_impl_splitter {}
 Variant c_ReflectionFunction::t_invokeargs(CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::invokeArgs);
   {
-    const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
-    const Array &tmp2((toArray(x_array_values(v_args))));
-    return x_hphp_invoke(tmp1, tmp2);
+    const String &tmp0((toString(m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key))));
+    const Array &tmp1((toArray(x_array_values(v_args))));
+    return x_hphp_invoke(tmp0, tmp1);
   }
 }
 namespace hphp_impl_splitter {}
@@ -8882,15 +8882,15 @@ void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
   if ((toBoolean(v_func) && toBoolean(v_param))) {
     {
       {
-        MethodCallPackage mcp1;
-        mcp1.methodCall((v_func.objectForCall()), NAMSTR(s_sys_ss1902bc14, "getParameters"), 0x3E62225132C2A32DLL);
-        const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-        Variant tmp2(((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0)));
-        v_params = tmp2;
+        MethodCallPackage mcp0;
+        mcp0.methodCall((v_func.objectForCall()), NAMSTR(s_sys_ss1902bc14, "getParameters"), 0x3E62225132C2A32DLL);
+        const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+        Variant tmp1(((mcp0.bindClass(info)->getMeth0Args())(mcp0, 0)));
+        v_params = tmp1;
       }
       {
-        const Variant &tmp3((v_params.rvalRef(v_param, tmp_ref, AccessFlags::Error).o_getPublic(NAMSTR(s_sys_ss33988b3e, "info"), true)));
-        m_info = tmp3;
+        const Variant &tmp0((v_params.rvalRef(v_param, tmp_ref, AccessFlags::Error).o_getPublic(NAMSTR(s_sys_ss33988b3e, "info"), true)));
+        m_info = tmp0;
         tmp_ref.unset();
       }
     }
@@ -8911,9 +8911,9 @@ Variant c_ReflectionParameter::ti_export(CStrRef cls, CVarRef v_func, CVarRef v_
   String v_str;
 
   {
-    p_ReflectionParameter tmp1 = NEWOBJ(c_ReflectionParameter)();
-    (tmp1->create(v_func, v_param));
-    v_obj = tmp1;
+    p_ReflectionParameter tmp0 = NEWOBJ(c_ReflectionParameter)();
+    (tmp0->create(v_func, v_param));
+    v_obj = tmp0;
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -8946,8 +8946,8 @@ Variant c_ReflectionParameter::t_getdeclaringclass() {
     }
   }
   {
-    p_ReflectionClass tmp1 = NEWOBJ(c_ReflectionClass)();
-    return (tmp1->create(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key)), tmp1);
+    p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+    return (tmp0->create(m_info.rvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Error_Key)), tmp0);
   }
 }
 namespace hphp_impl_splitter {}
@@ -8960,8 +8960,8 @@ Variant c_ReflectionParameter::t_getclass() {
     }
   }
   {
-    p_ReflectionClass tmp1 = NEWOBJ(c_ReflectionClass)();
-    return (tmp1->create(m_info.rvalAt(NAMSTR(s_sys_ss724a760a, "type"), AccessFlags::Error_Key)), tmp1);
+    p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
+    return (tmp0->create(m_info.rvalAt(NAMSTR(s_sys_ss724a760a, "type"), AccessFlags::Error_Key)), tmp0);
   }
 }
 namespace hphp_impl_splitter {}
@@ -8995,26 +8995,26 @@ Variant c_ReflectionParameter::t_getdefaultvalue() {
   Variant v_defaultValue;
 
   {
-    bool tmp1;
+    bool tmp0;
     {
-      bool tmp2((t_isoptional()));
-      tmp1 = (!(tmp2));
+      bool tmp1((t_isoptional()));
+      tmp0 = (!(tmp1));
     }
-    if (tmp1) {
+    if (tmp0) {
       {
         throw_exception(p_ReflectionException((NEWOBJ(c_ReflectionException)())->create(NAMSTR(s_sys_ss4ad0c110, "Parameter is not optional"))));
       }
     }
   }
   {
-    Variant tmp3((m_info.rvalAt(NAMSTR(s_sys_ss570270cc, "default"), AccessFlags::Error_Key)));
-    v_defaultValue = tmp3;
+    Variant tmp0((m_info.rvalAt(NAMSTR(s_sys_ss570270cc, "default"), AccessFlags::Error_Key)));
+    v_defaultValue = tmp0;
   }
   if (instanceOf(v_defaultValue, NAMSTR(s_sys_ss41c7a197, "stdclass"))) {
     {
       {
-        const String &tmp4((toString(v_defaultValue.o_getPublic(NAMSTR(s_sys_ss309aefff, "msg"), true))));
-        x_hphp_throw_fatal_error(tmp4);
+        const String &tmp0((toString(v_defaultValue.o_getPublic(NAMSTR(s_sys_ss309aefff, "msg"), true))));
+        x_hphp_throw_fatal_error(tmp0);
       }
     }
   }

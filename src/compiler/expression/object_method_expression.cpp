@@ -305,6 +305,16 @@ void ObjectMethodExpression::outputCPPObjectCall(CodeGenerator &cg,
 bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
                                           AnalysisResultPtr ar, int state) {
   if (!m_name.empty() && m_valid && m_object->getType()->isSpecificObject()) {
+    if (m_object->hasEffect()) {
+      if (cg.inExpression()) {
+        m_object->preOutputCPP(cg, ar, FixOrder);
+        if (m_params) m_params->preOutputCPP(cg, ar, 0);
+        if (state & FixOrder) {
+          preOutputStash(cg, ar, state);
+        }
+      }
+      return true;
+    }
     return FunctionCall::preOutputCPP(cg, ar, state);
   }
   // Short circuit out if inExpression() returns false

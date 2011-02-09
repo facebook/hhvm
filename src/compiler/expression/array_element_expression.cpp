@@ -147,14 +147,18 @@ void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
         if (scope) scope->setNeedsRefTemp();
       }
     }
-    if (m_global && !m_dynamicGlobal &&
-        !(getContext() &
-          (LValue|RefValue|DeepReference|RefParameter
-           |UnsetContext|ExistContext))) {
-      VariableTablePtr vars = ar->getVariables();
-      Symbol *sym = vars->getSymbol(m_globalName);
-      if (!sym || sym->getDeclaration().get() == this) {
-        Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
+    if (m_global) {
+      if (getContext() & (LValue|RefValue|DeepReference)) {
+        setContext(NoLValueWrapper);
+      } else if (!m_dynamicGlobal &&
+          !(getContext() &
+            (LValue|RefValue|RefParameter|DeepReference|
+             UnsetContext|ExistContext))) {
+        VariableTablePtr vars = ar->getVariables();
+        Symbol *sym = vars->getSymbol(m_globalName);
+        if (!sym || sym->getDeclaration().get() == this) {
+          Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
+        }
       }
     }
   }
@@ -212,19 +216,26 @@ void ArrayElementExpression::clearEffect(Effect effect) {
 ExpressionPtr ArrayElementExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (!(m_context & (RefValue|LValue|UnsetContext|OprLValue|
                      InvokeArgument|DeepReference|DeepOprLValue))) {
-    if (m_offset && m_variable->isScalar() && m_offset->isScalar()) {
+    if (m_offset && m_variable->isScalar()) {
       Variant v, o;
-      if (m_variable->getScalarValue(v) &&
-          m_offset->getScalarValue(o)) {
-        try {
-          g_context->setThrowAllErrors(true);
-          Variant res = v.rvalAt(
-            o, hasContext(ExistContext) ?
-            AccessFlags::None : AccessFlags::Error);
-          g_context->setThrowAllErrors(false);
-          return replaceValue(makeScalarExpression(ar, res));
-        } catch (...) {
-          g_context->setThrowAllErrors(false);
+      if (m_variable->getScalarValue(v)) {
+        if (m_context & ExistContext &&
+            !v.isArray() &&
+            !v.isString() &&
+            !m_offset->hasEffect()) {
+          return replaceValue(makeConstant(ar, "null"));
+        }
+        if (m_offset->isScalar() && m_offset->getScalarValue(o)) {
+          try {
+            g_context->setThrowAllErrors(true);
+            Variant res = v.rvalAt(
+              o, hasContext(ExistContext) ?
+              AccessFlags::None : AccessFlags::Error);
+            g_context->setThrowAllErrors(false);
+            return replaceValue(makeScalarExpression(ar, res));
+          } catch (...) {
+            g_context->setThrowAllErrors(false);
+          }
         }
       }
     }
@@ -338,6 +349,13 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
   TypePtr ret = propagateTypes(ar, Type::Variant);
   m_implementedType = Type::Variant;
   return ret; // so not to lose values
+}
+
+ExpressionPtr ArrayElementExpression::unneeded() {
+  if (m_global) {
+    if (m_offset) return m_offset->unneeded();
+  }
+  return Expression::unneeded();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -170,7 +170,11 @@ int UnaryOpExpression::getLocalEffects() const {
 }
 
 void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (ar->getPhase() == AnalysisResult::AnalyzeFinal && m_op == '@') {
+  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
+    if (m_op == T_ISSET || m_op == T_EMPTY) {
+      setExistContext();
+    }
+  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal && m_op == '@') {
     StatementPtr stmt = ar->getStatementForSilencer();
     ASSERT(stmt);
     m_silencer = stmt->requireSilencers(1);

@@ -31,6 +31,7 @@ public:
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
+  StatementListPtr getStmts() const { return m_stmts; }
   virtual bool hasDecl() const;
   virtual bool hasImpl() const;
   virtual bool hasBody() const;

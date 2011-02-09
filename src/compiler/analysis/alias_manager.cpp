@@ -316,6 +316,24 @@ void AliasManager::dumpAccessChain() {
   }
 }
 
+bool AliasManager::couldBeAliased(SimpleVariablePtr sv) {
+  if (!sv->couldBeAliased()) return false;
+  if (m_inPseudoMain) return true;
+  int context = sv->getContext();
+  if ((context & Expression::Declaration) ==
+      Expression::Declaration /* global declaration */ ||
+      (context & Expression::RefAssignmentLHS) ||
+      (context & (Expression::LValue|Expression::UnsetContext)) ==
+      (Expression::LValue|Expression::UnsetContext)) {
+    /*
+      All of these are effectively reference assignments, so the only
+      thing that interferes is an exact match.
+    */
+    return false;
+  }
+  return true;
+}
+
 int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
   Expression::KindOf k1 = e1->getKindOf(), k2 = e2->getKindOf();
   while (true) {
@@ -382,7 +400,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
             }
 
             if (m_wildRefs ||
-                (sv1->couldBeAliased() && sv2->couldBeAliased())) {
+                (couldBeAliased(sv1) && couldBeAliased(sv2))) {
               return InterfAccess;
             }
           }
@@ -392,7 +410,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
           return InterfAccess;
 
         case Expression::KindOfArrayElementExpression:
-          if (m_wildRefs || sv1->couldBeAliased()) {
+          if (m_wildRefs || couldBeAliased(sv1)) {
             return InterfAccess;
           }
           return DisjointAccess;
@@ -414,7 +432,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
         case Expression::KindOfStaticMemberExpression:
         case Expression::KindOfObjectPropertyExpression:
         default: def:
-          if (m_wildRefs || sv1->couldBeAliased()) {
+          if (m_wildRefs || couldBeAliased(sv1)) {
             return InterfAccess;
           }
           return DisjointAccess;
@@ -471,6 +489,54 @@ static void updateDepthAndFlags(ExpressionPtr e, int &depth, int &flags) {
   }
 }
 
+void AliasManager::cleanRefs(ExpressionPtr e,
+                             ExpressionPtrList::reverse_iterator it,
+                             ExpressionPtrList::reverse_iterator &end,
+                             int depth) {
+  if (e->is(Expression::KindOfAssignmentExpression) ||
+      e->is(Expression::KindOfBinaryOpExpression) ||
+      e->is(Expression::KindOfUnaryOpExpression)) {
+    ExpressionPtr var = e->getNthExpr(0);
+    if (var->is(Expression::KindOfSimpleVariable) &&
+        !(var->getContext() & Expression::RefAssignmentLHS)) {
+      SimpleVariablePtr sv(spc(SimpleVariable, var));
+      if (sv->getSymbol() && sv->getSymbol()->isReferenced()) {
+        /*
+          Suppose we have:
+          $t = &$q;
+          $t = 0;
+          return $q;
+
+          The $q from the return interferes with "$t = 0;", so we
+          remove "$t = 0" from the list (meaning that we /wont/ kill it).
+          But $q does not interfere with "$t = &$q". So when we remove
+          "$t = 0", we also have to remove any reference assignments
+          to $t.
+        */
+        int effects = 0;
+        bool pIsLoad = false;
+        ++it;
+        while (it != end) {
+          ExpressionPtr p = *it;
+          if (p->is(Expression::KindOfScalarExpression)) {
+            checkInterf(var, p, pIsLoad, depth, effects);
+            if (depth < 0) return;
+          } else if (p->is(Expression::KindOfAssignmentExpression) ||
+              (p->is(Expression::KindOfSimpleVariable) &&
+               (p->getContext() & Expression::Declaration) ==
+               Expression::Declaration)) {
+            if (checkInterf(var, p, pIsLoad, depth, effects) == SameAccess) {
+              m_accessList.erase(it, end);
+              continue;
+            }
+          }
+          ++it;
+        }
+      }
+    }
+  }
+}
+
 void AliasManager::cleanInterf(ExpressionPtr load,
                                ExpressionPtrList::reverse_iterator it,
                                ExpressionPtrList::reverse_iterator &end,
@@ -484,6 +550,7 @@ void AliasManager::cleanInterf(ExpressionPtr load,
       if (a == NotAccess) {
         if (depth < 0) return;
       } else if (!eIsLoad) {
+        cleanRefs(e, it, end, depth);
         m_accessList.erase(it, end);
         continue;
       }
@@ -551,11 +618,14 @@ void AliasManager::killLocals() {
 
       case Expression::KindOfAssignmentExpression:
         if (!(effects & emask)) {
-          if (okToKill(spc(AssignmentExpression, e)->getVariable(), false)) {
+          AssignmentExpressionPtr ae(spc(AssignmentExpression, e));
+          if (okToKill(ae->getVariable(),
+                       ae->getValue()->getContext() & Expression::RefValue)) {
             e->setContext(Expression::DeadStore);
             m_replaced++;
           }
         }
+        cleanRefs(e, it, end, depth);
         goto kill_it;
 
       case Expression::KindOfBinaryOpExpression:
@@ -581,13 +651,19 @@ void AliasManager::killLocals() {
       case Expression::KindOfDynamicVariable:
       case Expression::KindOfArrayElementExpression:
       case Expression::KindOfStaticMemberExpression:
-        if (e->hasContext(Expression::UnsetContext) &&
-            e->hasContext(Expression::LValue)) {
+        if ((e->getContext() &
+             (Expression::LValue | Expression::UnsetContext)) ==
+            (Expression::LValue | Expression::UnsetContext) ||
+            (e->getContext() & Expression::Declaration) ==
+            Expression::Declaration) {
           if (!(effects & emask) && okToKill(e, true)) {
             bool ok = (m_postOpt || !e->is(Expression::KindOfSimpleVariable));
             if (!ok) {
               Symbol *sym = spc(SimpleVariable,e)->getSymbol();
-              ok = !sym || (!sym->isNeeded() && !sym->isUsed());
+              ok =
+                !sym ||
+                (sym->isGlobal() && !e->hasContext(Expression::UnsetContext)) ||
+                (!sym->isNeeded() && !sym->isUsed());
             }
             if (ok) {
               e->setReplacement(e->makeConstant(m_arp, "null"));
@@ -648,8 +724,14 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
     case Expression::KindOfSimpleVariable:
     case Expression::KindOfDynamicVariable:
     case Expression::KindOfArrayElementExpression:
-    case Expression::KindOfStaticMemberExpression:
+    case Expression::KindOfStaticMemberExpression: {
+      int m = e->getContext() &
+                 (Expression::LValue|
+                  Expression::Declaration|
+                  Expression::UnsetContext);
+      isLoad = !(m & Expression::LValue) || m == Expression::LValue;
       return testAccesses(e, rv);
+    }
 
     case Expression::KindOfUnaryOpExpression:
       isLoad = false;
@@ -796,6 +878,7 @@ void AliasManager::processAccessChain(ExpressionPtr e) {
       ExpressionPtr rep(canonicalizeNode(kid, true));
       if (rep) {
         e->setNthKid(i, rep);
+        setChanged();
       }
       break;
     }

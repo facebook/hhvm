@@ -149,7 +149,8 @@ static SuperGlobalInitializer g_sinit;
 FuncScopeVariableEnvironment::
 FuncScopeVariableEnvironment(const FunctionStatement *func, int argc)
   : m_func(func), m_staticEnv(NULL), m_argc(argc),
-    m_argStart(RequestEvalState::argStack().pos()) {
+    m_argStart(RequestEvalState::argStack().pos()),
+    m_argPop(false) {
 
   const Block::VariableIndices &vi = func->varIndices();
   const vector<string> &vars = func->variables();
@@ -180,7 +181,9 @@ FuncScopeVariableEnvironment(const FunctionStatement *func, int argc)
 }
 
 FuncScopeVariableEnvironment::~FuncScopeVariableEnvironment() {
-  RequestEvalState::argStack().pop(m_argc);
+  if (m_argPop) {
+    RequestEvalState::argStack().pop(m_argc);
+  }
   ASSERT(RequestEvalState::argStack().pos() == m_argStart);
 }
 

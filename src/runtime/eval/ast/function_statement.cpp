@@ -246,6 +246,7 @@ Variant FunctionStatement::invoke(CArrRef params) const {
   DECLARE_THREAD_INFO_NOINIT
   FuncScopeVariableEnvironment env(this, params.size());
   EvalFrameInjection fi(empty_string, m_name.c_str(), env, loc()->file);
+  env.setArgPop();
   if (m_ref) {
     return ref(invokeImpl(env, params));
   }
@@ -337,7 +338,9 @@ Variant FunctionStatement::directInvoke(VariableEnvironment &env,
   DECLARE_THREAD_INFO_NOINIT
   FuncScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
+  fenv.setArgPop();
   EvalFrameInjection fi(empty_string, m_name.c_str(), fenv, loc()->file);
+  fenv.setArgPop();
   if (m_ref) {
     return ref(evalBody(fenv));
   } else {
@@ -353,6 +356,7 @@ Variant FunctionStatement::invokeClosure(CObjRef closure,
   DECLARE_THREAD_INFO_NOINIT
   FuncScopeVariableEnvironment fenv(this, 0);
   directBind(env, caller, fenv);
+  fenv.setArgPop();
 
   p_Closure c = closure.getTyped<c_Closure>();
   for (ArrayIter iter(c->m_vars); iter; ++iter) {

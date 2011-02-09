@@ -50,9 +50,10 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
     : m_class(cls), m_name(name),
       m_object(NULL), m_line(0), m_flags(0),
       m_staticClass(NULL), m_callingObject(NULL) {
-  info = doCommon();
-  hotProfilerInit(info, name);
+  info = m_info = ThreadInfo::s_threadInfo.get();
   injection_check(info);
+  doCommon();
+  hotProfilerInit(info, name);
 }
 
 FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
@@ -60,9 +61,10 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
     : m_class(cls), m_name(name),
       m_object(obj), m_line(0), m_flags(0),
       m_staticClass(NULL), m_callingObject(NULL) {
-  info = doCommon();
-  hotProfilerInit(info, name);
+  info = m_info = ThreadInfo::s_threadInfo.get();
   injection_check(info);
+  doCommon();
+  hotProfilerInit(info, name);
 }
 
 FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
@@ -70,9 +72,10 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
     : m_class(cls), m_name(name),
       m_object(NULL), m_line(0), m_flags(fs),
       m_staticClass(NULL), m_callingObject(NULL) {
-  info = doCommon();
-  hotProfilerInit(info, name);
+  info = m_info = ThreadInfo::s_threadInfo.get();
   injection_check(info);
+  doCommon();
+  hotProfilerInit(info, name);
 }
 
 FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
@@ -80,9 +83,10 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
     : m_class(cls), m_name(name),
       m_object(obj), m_line(0), m_flags(fs),
       m_staticClass(NULL), m_callingObject(NULL) {
-  info = doCommon();
-  hotProfilerInit(info, name);
+  info = m_info = ThreadInfo::s_threadInfo.get();
   injection_check(info);
+  doCommon();
+  hotProfilerInit(info, name);
 }
 
 // constructors without hot profiler
@@ -91,11 +95,12 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
     : m_class(cls), m_name(name),
       m_object(NULL), m_line(0), m_flags(0),
       m_staticClass(NULL), m_callingObject(NULL) {
-  info = doCommon();
+  info = m_info = ThreadInfo::s_threadInfo.get();
+  injection_check(info);
+  doCommon();
 #ifdef HOTPROFILER
   m_prof = false;
 #endif
-  injection_check(info);
 }
 
 FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
@@ -103,11 +108,12 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
     : m_class(cls), m_name(name),
       m_object(obj), m_line(0), m_flags(0),
       m_staticClass(NULL), m_callingObject(NULL) {
-  info = doCommon();
+  info = m_info = ThreadInfo::s_threadInfo.get();
+  injection_check(info);
+  doCommon();
 #ifdef HOTPROFILER
   m_prof = false;
 #endif
-  injection_check(info);
 }
 
 FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
@@ -115,11 +121,12 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
     : m_class(cls), m_name(name),
       m_object(NULL), m_line(0), m_flags(fs),
       m_staticClass(NULL), m_callingObject(NULL) {
-  info = doCommon();
+  info = m_info = ThreadInfo::s_threadInfo.get();
+  injection_check(info);
+  doCommon();
 #ifdef HOTPROFILER
   m_prof = false;
 #endif
-  injection_check(info);
 }
 
 FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
@@ -128,7 +135,9 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
     : m_info(info), m_class(cls), m_name(name),
       m_object(obj), m_line(0), m_flags(fs),
       m_staticClass(NULL), m_callingObject(NULL) {
-  info = doCommon();
+  info = m_info = ThreadInfo::s_threadInfo.get();
+  injection_check(info);
+  doCommon();
 #ifdef HOTPROFILER
   m_prof = false;
 #endif

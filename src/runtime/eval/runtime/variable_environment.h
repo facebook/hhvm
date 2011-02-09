@@ -141,6 +141,7 @@ public:
   virtual bool exists(CStrRef name) const;
   virtual Variant &getImpl(CStrRef s);
   void incArgc() { m_argc++; }
+  void setArgPop() { m_argPop = true; }
   virtual Array getDefinedVariables() const;
   virtual ObjectData *getContinuation() const;
 private:
@@ -151,6 +152,7 @@ private:
   AssocList m_alist;
   int m_argc;
   uint m_argStart;
+  bool m_argPop;
 };
 
 class MethScopeVariableEnvironment : public FuncScopeVariableEnvironment {

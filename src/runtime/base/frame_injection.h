@@ -147,13 +147,11 @@ private:
   const String   *m_staticClass;
   ObjectData     *m_callingObject;
 
-  inline ThreadInfo *doCommon() {
-    m_info = ThreadInfo::s_threadInfo.get();
+  inline void doCommon() {
     ASSERT(m_class.get());
     ASSERT(m_name);
     m_prev = m_info->m_top;
     m_info->m_top = this;
-    return m_info;
   }
   inline void hotProfilerInit(ThreadInfo *info, const char *name) {
 #ifdef HOTPROFILER

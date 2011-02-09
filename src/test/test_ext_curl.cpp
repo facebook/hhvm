@@ -324,7 +324,7 @@ bool TestExtCurl::test_evhttp_set_cache() {
     VS(ret["code"], 200);
     VS(ret["response"], "OK");
     VS(ret["headers"][0], "ECHOED: foo");
-    VS(ret["headers"][3], "Content-Length: 2");
+    VS(ret["headers"][4], "Content-Length: 2");
   }
 
   return Count(true);
@@ -336,7 +336,7 @@ bool TestExtCurl::test_evhttp_get() {
   VS(ret["code"], 200);
   VS(ret["response"], "OK");
   VS(ret["headers"][0], "ECHOED: foo");
-  VS(ret["headers"][3], "Content-Length: 2");
+  VS(ret["headers"][4], "Content-Length: 2");
   return Count(true);
 }
 
@@ -346,7 +346,7 @@ bool TestExtCurl::test_evhttp_post() {
   VS(ret["code"], 200);
   VS(ret["response"], "POST: echo");
   VS(ret["headers"][0], "ECHOED: foo");
-  VS(ret["headers"][3], "Content-Length: 10");
+  VS(ret["headers"][4], "Content-Length: 10");
   return Count(true);
 }
 
@@ -375,7 +375,7 @@ bool TestExtCurl::test_evhttp_async_get() {
   VS(ret["code"], 200);
   VS(ret["response"], "OK");
   VS(ret["headers"][0], "ECHOED: foo");
-  VS(ret["headers"][3], "Content-Length: 2");
+  VS(ret["headers"][4], "Content-Length: 2");
   return Count(true);
 }
 
@@ -386,7 +386,7 @@ bool TestExtCurl::test_evhttp_async_post() {
   VS(ret["code"], 200);
   VS(ret["response"], "POST: echo");
   VS(ret["headers"][0], "ECHOED: foo");
-  VS(ret["headers"][3], "Content-Length: 10");
+  VS(ret["headers"][4], "Content-Length: 10");
   return Count(true);
 }
 

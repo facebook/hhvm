@@ -1387,6 +1387,13 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     m_params->preOutputCPP(cg, ar, state);
     cg.popCallInfo();
   }
+
+  if (state & FixOrder) {
+    if (cg.inExpression()) {
+      preOutputStash(cg, ar, state);
+    }
+  }
+
   return true;
 }
 

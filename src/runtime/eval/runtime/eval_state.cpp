@@ -348,36 +348,37 @@ bool RequestEvalState::includeFile(Variant &res, CStrRef path, bool once,
     }
     efile = it->second;
   } else {
-    char *rpath = (char *)malloc(PATH_MAX);
-    if (rpath == NULL) {
-      return false;
-    }
-    if (realpath(spath.c_str(), rpath) && rpath != spath) {
-      it = self->m_evaledFiles.find(rpath);
+    char rpath[PATH_MAX];
+    bool alreadyResolved = !RuntimeOption::CheckSymLink && (spath[0] == '/');
+    string checkoutPath(spath);
+    if (alreadyResolved || realpath(spath.c_str(), rpath)) {
+      it = self->m_evaledFiles.find(alreadyResolved ? spath.c_str() : rpath);
       if (it != self->m_evaledFiles.end()) {
         self->m_evaledFiles[spath] = efile = it->second;
         efile->incRef();
         if (once) {
-          free(rpath);
           res = true;
           return true;
         }
       }
+      if (alreadyResolved) {
+        rpath[0] = 0;
+      } else {
+        checkoutPath = rpath;
+      }
     } else {
-      free(rpath);
-      rpath = 0;
+      rpath[0] = 0;
     }
     if (!efile) {
-      efile = FileRepository::checkoutFile(rpath ? rpath : spath, s);
+      efile = FileRepository::checkoutFile(checkoutPath, s);
       if (efile) {
         self->m_evaledFiles[spath] = efile;
-        if (rpath) {
+        if (rpath[0]) {
           self->m_evaledFiles[rpath] = efile;
           efile->incRef();
         }
       }
     }
-    free(rpath);
   }
   if (efile) {
     res = efile->eval(variables);

@@ -248,12 +248,18 @@ bool ListAssignment::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       type->is(Type::KindOfString) ||
       type->is(Type::KindOfObject);
   }
-  m_cppTemp = genCPPTemp(cg, ar);
   cg.wrapExpressionBegin();
   if (outputLineMap(cg, ar)) cg_printf("0);\n");
-  cg_printf("CVarRef %s((", m_cppTemp.c_str());
-  m_array->outputCPP(cg, ar);
-  cg_printf("));\n");
+  if (notArray && isUnused()) {
+    if (m_array->outputCPPUnneeded(cg, ar)) cg_printf(";\n");
+    m_cppTemp = "null";
+  } else {
+    m_cppTemp = genCPPTemp(cg, ar);
+    cg_printf("CVarRef %s((", m_cppTemp.c_str());
+    m_array->outputCPP(cg, ar);
+    cg_printf("));\n");
+    if (notArray) cg_printf("id(%s);\n", m_cppTemp.c_str());
+  }
   std::string tmp;
   if (notArray) {
     tmp = "null";

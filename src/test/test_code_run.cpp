@@ -870,6 +870,12 @@ bool TestCodeRun::TestListAssignment() {
        "    array('x', array('y1', 'y2'), 'z'); "
        "var_dump($a);");
 
+  MVCR("<?php "
+       "function foo($a) {"
+       "  list($x, $y) = 'x'.$a;"
+       "  return $x + $y;"
+       "}");
+
   return true;
 }
 

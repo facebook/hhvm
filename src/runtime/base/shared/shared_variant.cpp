@@ -250,16 +250,6 @@ SharedVariant::~SharedVariant() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const char *SharedVariant::stringData() const {
-  ASSERT(is(KindOfString) || is(KindOfStaticString));
-  return m_data.str->data();
-}
-
-size_t SharedVariant::stringLength() const {
-  ASSERT(is(KindOfString) || is(KindOfStaticString));
-  return m_data.str->size();
-}
-
 size_t SharedVariant::arrSize() const {
   ASSERT(is(KindOfArray));
   if (getIsVector()) return m_data.vec->size;

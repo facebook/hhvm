@@ -87,8 +87,16 @@ public:
     return m_data.num;
   }
 
-  const char* stringData() const;
-  size_t stringLength() const;
+  const char *stringData() const {
+    ASSERT(is(KindOfString) || is(KindOfStaticString));
+    return m_data.str->data();
+  }
+
+  size_t stringLength() const {
+    ASSERT(is(KindOfString) || is(KindOfStaticString));
+    return m_data.str->size();
+  }
+
   int64 stringHash() const {
     ASSERT(is(KindOfString) || is(KindOfStaticString));
     return m_data.str->hash();

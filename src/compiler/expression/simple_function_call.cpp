@@ -171,6 +171,7 @@ void SimpleFunctionCall::onParse(AnalysisResultConstPtr ar, FileScopePtr fs) {
           m_lambda = CodeGenerator::GetNewLambda();
           string code = "function " + m_lambda + "(" + params + ") "
             "{" + body + "}";
+          m_lambda = "1_" + m_lambda;
           ar->appendExtraCode(fs->getName(), code);
         }
         break;

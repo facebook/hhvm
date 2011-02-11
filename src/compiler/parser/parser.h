@@ -82,7 +82,8 @@ DECLARE_BOOST_TYPES(Parser);
 class Parser : public ParserBase {
 public:
   static StatementListPtr ParseString(const char *input, AnalysisResultPtr ar,
-                                      const char *fileName = NULL);
+                                      const char *fileName = NULL,
+                                      bool lambdaMode = false);
 
 public:
   Parser(Scanner &scanner, const char *fileName,
@@ -218,6 +219,8 @@ private:
 
   std::vector<bool> m_hasCallToGetArgs;
   std::vector<StringToExpressionPtrVecMap> m_staticVars;
+  bool m_lambdaMode;
+
   void pushComment();
   std::string popComment();
 

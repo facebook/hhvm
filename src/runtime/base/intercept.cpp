@@ -189,17 +189,27 @@ void rename_function(CStrRef old_name, CStrRef new_name) {
   StringIMap<String> &funcs = s_intercept_data->m_renamed_functions;
 
   String orig_name = old_name;
-  StringIMap<String>::iterator iter = funcs.find(old_name);
-  if (iter != funcs.end()) {
-    if (!iter->second.empty()) {
-      orig_name = iter->second;
-      iter->second = empty_string;
+  /*
+    Name beginning with '1' is from create_function.
+    We allow such functions to be renamed to multiple
+    different names. They also report that they exist,
+    even after renaming
+  */
+  if (old_name.data()[0] != '1') {
+    StringIMap<String>::iterator iter = funcs.find(old_name);
+    if (iter != funcs.end()) {
+      if (!iter->second.empty()) {
+        orig_name = iter->second;
+        iter->second = empty_string;
+      }
+    } else {
+      funcs[old_name] = empty_string;
     }
-  } else {
-    funcs[old_name] = empty_string;
   }
 
-  funcs[new_name] = orig_name;
+  if (new_name.data()[0] != '1') {
+    funcs[new_name] = orig_name;
+  }
   s_intercept_data->m_has_renamed_functions = true;
 }
 

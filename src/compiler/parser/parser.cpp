@@ -131,13 +131,15 @@ namespace Compiler {
 // statics
 
 StatementListPtr Parser::ParseString(const char *input, AnalysisResultPtr ar,
-                                     const char *fileName /* = NULL */) {
+                                     const char *fileName /* = NULL */,
+                                     bool lambdaMode /* = false */) {
   ASSERT(input);
   if (!fileName || !*fileName) fileName = "string";
 
   int len = strlen(input);
   Scanner scanner(input, len, Option::ScannerType, fileName);
   Parser parser(scanner, fileName, ar, len);
+  parser.m_lambdaMode = lambdaMode;
   if (parser.parse()) {
     return parser.getTree();
   }
@@ -150,7 +152,7 @@ StatementListPtr Parser::ParseString(const char *input, AnalysisResultPtr ar,
 
 Parser::Parser(Scanner &scanner, const char *fileName,
                AnalysisResultPtr ar, int fileSize /* = 0 */)
-    : ParserBase(scanner, fileName), m_ar(ar) {
+    : ParserBase(scanner, fileName), m_ar(ar), m_lambdaMode(false) {
   m_file = FileScopePtr(new FileScope(m_fileName, fileSize));
 
   newScope();
@@ -700,6 +702,8 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
     string funcName = name->text();
     if (funcName.empty()) {
       funcName = getClosureName();
+    } else if (m_lambdaMode) {
+      funcName = "1_" + funcName;
     }
     func = NEW_STMT(FunctionStatement, ref->num(), funcName,
                     old_params, dynamic_pointer_cast<StatementList>(stmt->stmt),

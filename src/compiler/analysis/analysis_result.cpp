@@ -93,7 +93,8 @@ void AnalysisResult::parseExtraCode(const string &key) {
     m_extraCodes.erase(key);
 
     const char *filename = m_extraCodeFileNames.add(sfilename.c_str());
-    Compiler::Parser::ParseString(code.c_str(), shared_from_this(), filename);
+    Compiler::Parser::ParseString(code.c_str(), shared_from_this(),
+                                  filename, true);
   }
 }
 

@@ -751,7 +751,7 @@ int AliasManager::checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
 }
 
 int AliasManager::findInterf(ExpressionPtr rv, bool isLoad,
-                             ExpressionPtr &rep) {
+                             ExpressionPtr &rep, int *flags /* = 0 */) {
   BucketMapEntry &lvs = m_accessList;
 
   rep.reset();
@@ -765,6 +765,7 @@ int AliasManager::findInterf(ExpressionPtr rv, bool isLoad,
   int depth = 0, min_depth = 0, max_depth = 0;
   for (; it != end; ++it) {
     ExpressionPtr e = *it;
+    if (e->getContext() & Expression::DeadStore) continue;
     bool eIsLoad = false;
     int effects = 0;
     int a = checkInterf(rv, e, eIsLoad, depth, effects);
@@ -798,43 +799,27 @@ int AliasManager::findInterf(ExpressionPtr rv, bool isLoad,
             }
           }
         }
-        if (eIsLoad) {
-          if (a == SameAccess) {
-            if (isLoad) {
-              // The value of an earlier load is available
-              // if it dominates this one
-              if (depth > min_depth) {
-                a = InterfAccess;
-              }
-            } else {
-              // The assignment definitely hits the load
-              // if it post-dominates it.
-              if (min_depth < 0) {
-                a = InterfAccess;
-              }
+        if (a == SameAccess) {
+          if (flags) {
+            *flags = 0;
+            if (depth > min_depth) *flags |= NoCopyProp;
+            if (min_depth < 0) *flags |= NoDeadStore;
+          } else if (isLoad) {
+            // The value of an earlier load is available
+            // if it dominates this one
+            if (depth > min_depth) {
+              a = InterfAccess;
+            }
+          } else {
+            // The assignment definitely hits the load
+            // if it post-dominates it.
+            if (min_depth < 0) {
+              a = InterfAccess;
             }
           }
-          if (a != SameAccess &&
-              isLoad && isReadOnlyAccess(e)) {
-            continue;
-          }
-        } else {
-          if (a == SameAccess) {
-            if (isLoad) {
-              // we can propagate the value of an assignment
-              // to a load, provided the assignment dominates
-              // the load.
-              if (depth > min_depth) {
-                a = InterfAccess;
-              }
-            } else {
-              // a later assignment kills an earlier one
-              // provided the later one post-dominates the earlier
-              if (min_depth < 0) {
-                a = InterfAccess;
-              }
-            }
-          }
+        }
+        if (a != SameAccess && eIsLoad && isLoad && isReadOnlyAccess(e)) {
+          continue;
         }
         rep = e;
         return a;
@@ -1292,8 +1277,9 @@ ExpressionPtr AliasManager::canonicalizeNode(
     if (rop) {
       ExpressionPtr lhs = bop->getExp1();
       ExpressionPtr alt;
-      int interf = findInterf(lhs, true, alt);
-      if (interf == SameAccess) {
+      int flags = 0;
+      int interf = findInterf(lhs, true, alt, &flags);
+      if (interf == SameAccess && !(flags & NoCopyProp)) {
         switch (alt->getKindOf()) {
           case Expression::KindOfAssignmentExpression: {
             ExpressionPtr op0 = spc(AssignmentExpression,alt)->getValue();
@@ -1316,9 +1302,56 @@ ExpressionPtr AliasManager::canonicalizeNode(
             alt = spc(AssignmentExpression,alt)->getVariable();
             break;
           }
-          case Expression::KindOfBinaryOpExpression:
+          case Expression::KindOfBinaryOpExpression: {
+            BinaryOpExpressionPtr b2(spc(BinaryOpExpression, alt));
+            if (!(flags & NoDeadStore) && b2->getOp() == bop->getOp()) {
+              switch (rop) {
+                case '-':
+                  rop = '+';
+                  break;
+                case '+':
+                case '*':
+                case '.':
+                case '&':
+                case '|':
+                case '^':
+                  break;
+                default:
+                  rop = 0;
+                  break;
+              }
+              if (rop) {
+                ExpressionPtr op0 = b2->getExp2();
+                bool ok = op0->isScalar();
+                if (!ok && !op0->hasEffect()) {
+                  m_noAdd = true;
+                  ExpressionPtr v = op0->clone();
+                  v->clearContext();
+                  v = canonicalizeRecurNonNull(v);
+                  m_noAdd = false;
+                  while (v->getCanonPtr() && v->getCanonPtr() != op0) {
+                    v = v->getCanonPtr();
+                  }
+                  ok = v->getCanonPtr();
+                }
+                if (ok) {
+                  b2->setContext(Expression::DeadStore);
+                  ExpressionPtr r(new BinaryOpExpression(
+                                    bop->getScope(), bop->getLocation(),
+                                    Expression::KindOfBinaryOpExpression,
+                                    op0->clone(), bop->getExp2(),
+                                    rop));
+                  ExpressionPtr b(new BinaryOpExpression(
+                                    bop->getScope(), bop->getLocation(),
+                                    Expression::KindOfBinaryOpExpression,
+                                    lhs, r, bop->getOp()));
+                  return e->replaceValue(canonicalizeRecurNonNull(b));
+                }
+              }
+            }
             alt = spc(BinaryOpExpression,alt)->getExp1();
             break;
+          }
           case Expression::KindOfUnaryOpExpression:
             alt = spc(UnaryOpExpression,alt)->getExpression();
             break;

@@ -109,6 +109,7 @@ class AliasManager {
   enum { MaxBuckets = 0x10000 };
   enum { FallThrough, CondBranch, Branch, Converge };
   enum { SameAccess, InterfAccess, DisjointAccess, NotAccess };
+  enum { NoCopyProp = 1, NoDeadStore = 2 };
   struct CondStackElem {
     CondStackElem(size_t s = 0) : m_size(s), m_exprs() {}
     size_t              m_size;
@@ -156,7 +157,8 @@ class AliasManager {
   bool couldBeAliased(SimpleVariablePtr sv);
   int checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
                   int &depth, int &effects);
-  int findInterf(ExpressionPtr rv, bool isLoad, ExpressionPtr &rep);
+  int findInterf(ExpressionPtr rv, bool isLoad, ExpressionPtr &rep,
+                 int *flags = 0);
   void applyAssign(ExpressionPtr lhs, ExpressionPtr rhs);
   void processAccessChain(ExpressionPtr e);
 

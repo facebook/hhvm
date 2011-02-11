@@ -44,7 +44,7 @@ public:
   int getOp() const { return m_op;}
 
   ExpressionPtr foldConst(AnalysisResultConstPtr ar);
-  ExpressionPtr foldConstRightAssoc(AnalysisResultConstPtr ar);
+  ExpressionPtr foldRightAssoc(AnalysisResultConstPtr ar);
 
   virtual ExpressionPtr unneededHelper();
   virtual bool canonCompare(ExpressionPtr e) const;

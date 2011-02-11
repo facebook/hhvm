@@ -272,7 +272,16 @@ bool BinaryOpExpression::canonCompare(ExpressionPtr e) const {
 
 ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultConstPtr ar) {
   if (!m_exp2->isScalar()) {
-    if (!m_exp1->isScalar()) return ExpressionPtr();
+    if (!m_exp1->isScalar()) {
+      if (m_exp1->is(KindOfBinaryOpExpression)) {
+        BinaryOpExpressionPtr b(
+          dynamic_pointer_cast<BinaryOpExpression>(m_exp1));
+        if (b->m_op == m_op && b->m_exp1->isScalar()) {
+          return foldRightAssoc(ar);
+        }
+      }
+      return ExpressionPtr();
+    }
   } else if (m_canThrow && !(getLocalEffects() & CanThrow)) {
     recomputeEffects();
   }
@@ -406,6 +415,30 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
                               m_op == T_IS_NOT_IDENTICAL);
           }
           break;
+        case '+':
+        case '.':
+        case '*':
+        case '&':
+        case '|':
+        case '^':
+          if (m_exp2->is(KindOfBinaryOpExpression)) {
+            BinaryOpExpressionPtr binOpExp =
+              dynamic_pointer_cast<BinaryOpExpression>(m_exp2);
+            if (binOpExp->m_op == m_op && binOpExp->m_exp1->isScalar()) {
+              ExpressionPtr aExp = m_exp1;
+              ExpressionPtr bExp = binOpExp->m_exp1;
+              ExpressionPtr cExp = binOpExp->m_exp2;
+              m_exp1 = binOpExp = Clone(binOpExp);
+              m_exp2 = cExp;
+              binOpExp->m_exp1 = aExp;
+              binOpExp->m_exp2 = bExp;
+              if (ExpressionPtr optExp = binOpExp->foldConst(ar)) {
+                m_exp1 = optExp;
+              }
+              return static_pointer_cast<Expression>(shared_from_this());
+            }
+          }
+        break;
         default:
           break;
       }
@@ -494,7 +527,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
       case T_BOOLEAN_AND:
       case T_LOGICAL_OR:
       case T_LOGICAL_AND:
-        optExp = foldConstRightAssoc(ar);
+        optExp = foldRightAssoc(ar);
         if (optExp) return optExp;
         break;
       case T_IS_IDENTICAL:
@@ -512,7 +545,7 @@ ExpressionPtr BinaryOpExpression::foldConst(AnalysisResultConstPtr ar) {
 }
 
 ExpressionPtr
-BinaryOpExpression::foldConstRightAssoc(AnalysisResultConstPtr ar) {
+BinaryOpExpression::foldRightAssoc(AnalysisResultConstPtr ar) {
   ExpressionPtr optExp1;
   switch (m_op) {
   case '.':
@@ -526,21 +559,14 @@ BinaryOpExpression::foldConstRightAssoc(AnalysisResultConstPtr ar) {
         ExpressionPtr aExp = binOpExp->m_exp1;
         ExpressionPtr bExp = binOpExp->m_exp2;
         ExpressionPtr cExp = m_exp2;
-        BinaryOpExpressionPtr bcExp =
-          BinaryOpExpressionPtr(new BinaryOpExpression(
-                                  getScope(), getLocation(),
-                                  Expression::KindOfBinaryOpExpression,
-                                  bExp, cExp, m_op));
-        ExpressionPtr optExp = bcExp->foldConst(ar);
-        if (optExp) {
-          BinaryOpExpressionPtr a_bcExp
-            (new BinaryOpExpression(getScope(), getLocation(),
-                                    Expression::KindOfBinaryOpExpression,
-                                    aExp, optExp, m_op));
-          optExp = a_bcExp->foldConstRightAssoc(ar);
-          if (optExp) return optExp;
-          else return a_bcExp;
+        m_exp1 = aExp;
+        m_exp2 = binOpExp = Clone(binOpExp);
+        binOpExp->m_exp1 = bExp;
+        binOpExp->m_exp2 = cExp;
+        if (ExpressionPtr optExp = binOpExp->foldConst(ar)) {
+          m_exp2 = optExp;
         }
+        return static_pointer_cast<Expression>(shared_from_this());
       }
     }
     break;

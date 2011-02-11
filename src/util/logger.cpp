@@ -222,7 +222,7 @@ char *Logger::EscapeString(const std::string &msg) {
   const char *end;
   char *target;
   for (source = msg.c_str(), end = source + msg.size(), target = new_str;
-       source < end; source++) {
+       source < end && *source; source++) {
     char c = *source;
     if ((unsigned char) c < 32 || (unsigned char) c > 126) {
       *target++ = '\\';
@@ -230,12 +230,13 @@ char *Logger::EscapeString(const std::string &msg) {
       case '\n': *target++ = 'n'; break;
       case '\t': *target++ = 't'; break;
       case '\r': *target++ = 'r'; break;
-      case '\a': *target++ = 'a'; break;
       case '\v': *target++ = 'v'; break;
       case '\b': *target++ = 'b'; break;
-      case '\f': *target++ = 'f'; break;
-      default: target += sprintf(target, "x%02X", (unsigned char)c);
+      default: target += sprintf(target, "x%02x", (unsigned char)c);
       }
+    } else if (c == '\\') {
+      *target++ = c;
+      *target++ = c;
     } else {
       *target++ = c;
     }

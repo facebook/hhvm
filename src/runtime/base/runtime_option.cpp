@@ -47,6 +47,7 @@ std::string RuntimeOption::LogFileSymLink;
 std::string RuntimeOption::LogAggregatorFile;
 std::string RuntimeOption::LogAggregatorDatabase;
 int RuntimeOption::LogAggregatorSleepSeconds = 10;
+bool RuntimeOption::AlwaysEscapeLog = false;
 bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
 bool RuntimeOption::InjectedStackTrace = true;
 int RuntimeOption::InjectedStackTraceLimit = -1;
@@ -473,6 +474,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     }
     Logger::DropCacheChunkSize =
       logger["DropCacheChunkSize"].getInt32(1 << 20);
+    AlwaysEscapeLog = logger["AlwaysEscapeLog"].getBool(false);
 
     Hdf aggregator = logger["Aggregator"];
     Logger::UseLogAggregator = aggregator.getBool();

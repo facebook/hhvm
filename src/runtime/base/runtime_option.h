@@ -42,6 +42,7 @@ public:
   static std::string LogAggregatorFile;
   static std::string LogAggregatorDatabase;
   static int LogAggregatorSleepSeconds;
+  static bool AlwaysEscapeLog;
   static bool AlwaysLogUnhandledExceptions;
   static bool InjectedStackTrace;
   static int InjectedStackTraceLimit; // limit the size of the backtrace

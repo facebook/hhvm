@@ -203,10 +203,10 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_exp->preOutputCPP(cg, ar, 0)) {
     varId = cg.createNewLocalId(shared_from_this());
     m_exp->getType()->outputCPPDecl(cg, ar, getScope());
-    cg_printf(" %s%d;\n", Option::TempPrefix, varId);
+    cg_printf(" %s%d;\n", Option::SwitchPrefix, varId);
 
     m_exp->outputCPPBegin(cg, ar);
-    cg_printf("%s%d = (", Option::TempPrefix, varId);
+    cg_printf("%s%d = (", Option::SwitchPrefix, varId);
     m_exp->outputCPP(cg, ar);
     cg_printf(");\n");
     m_exp->outputCPPEnd(cg, ar);
@@ -215,7 +215,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (staticCases) {
     cg_printf("switch (");
     if (varId >= 0) {
-      cg_printf("%s%d", Option::TempPrefix, varId);
+      cg_printf("%s%d", Option::SwitchPrefix, varId);
     } else {
       m_exp->outputCPP(cg, ar);
     }
@@ -226,7 +226,7 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (varId < 0) {
       varId = cg.createNewLocalId(shared_from_this());
       m_exp->getType()->outputCPPDecl(cg, ar, getScope());
-      cg_printf(" %s%d = (", Option::TempPrefix, varId);
+      cg_printf(" %s%d = (", Option::SwitchPrefix, varId);
       m_exp->outputCPP(cg, ar);
       cg_printf(");\n");
     }

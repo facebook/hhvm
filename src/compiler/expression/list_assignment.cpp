@@ -249,6 +249,7 @@ bool ListAssignment::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       type->is(Type::KindOfObject);
   }
   cg.wrapExpressionBegin();
+  m_cppTemp = genCPPTemp(cg, ar);
   if (outputLineMap(cg, ar)) cg_printf("0);\n");
   if (notArray && isUnused()) {
     if (m_array->outputCPPUnneeded(cg, ar)) cg_printf(";\n");

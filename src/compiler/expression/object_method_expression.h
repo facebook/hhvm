@@ -31,7 +31,9 @@ public:
                          ExpressionPtr object, ExpressionPtr method,
                          ExpressionListPtr params);
 
-  DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
+  virtual ConstructPtr getNthKid(int n) const;
+  virtual void setNthKid(int n, ConstructPtr cp);
   ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
 
   virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,

@@ -273,12 +273,12 @@ void SimpleFunctionCall::addLateDependencies(AnalysisResultConstPtr ar) {
 }
 
 ConstructPtr SimpleFunctionCall::getNthKid(int n) const {
-  if (!n) return m_safeDef;
+  if (n == 1) return m_safeDef;
   return FunctionCall::getNthKid(n);
 }
 
 void SimpleFunctionCall::setNthKid(int n, ConstructPtr cp) {
-  if (!n) {
+  if (n == 1) {
     m_safeDef = boost::dynamic_pointer_cast<Expression>(cp);
   } else {
     FunctionCall::setNthKid(n, cp);
@@ -1351,6 +1351,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           cg_printf("\"static\"");
           lsb = true;
         } else {
+          m_class->preOutputCPP(cg, ar, 0);
           cg_printf("mcp%d.dynamicNamedCall%s(", m_ciTemp,
               ms ? "_with_index" : "");
           m_class->outputCPP(cg, ar);
@@ -1376,15 +1377,16 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
   if (safeCheck) {
     cg_indentEnd("}\n");
-
   }
 
-  if (m_class) m_class->preOutputCPP(cg, ar, state);
-  if (m_safeDef) m_safeDef->preOutputCPP(cg, ar, state);
+  int s = m_safeDef && m_params &&
+    m_safeDef->hasEffect() && m_params->hasEffect() ? FixOrder | StashVars : 0;
+
+  if (m_safeDef) m_safeDef->preOutputCPP(cg, ar, s);
 
   if (m_params && m_params->getCount() > 0) {
     cg.pushCallInfo(m_ciTemp);
-    m_params->preOutputCPP(cg, ar, state);
+    m_params->preOutputCPP(cg, ar, s & ~StashVars);
     cg.popCallInfo();
   }
 

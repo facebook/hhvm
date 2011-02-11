@@ -137,6 +137,7 @@ const char *Option::TempPrefix = "tmp";
 const char *Option::MapPrefix = "map";
 const char *Option::IterPrefix = "iter";
 const char *Option::InitPrefix = "inited_";
+const char *Option::SwitchPrefix = "switch";
 
 const char *Option::SystemFilePrefix = "sys/";
 const char *Option::UserFilePrefix = "php/";
@@ -329,6 +330,7 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(MapPrefix);
     READ_CG_OPTION(IterPrefix);
     READ_CG_OPTION(InitPrefix);
+    READ_CG_OPTION(SwitchPrefix);
     READ_CG_OPTION(FFIFnPrefix);
     READ_CG_OPTION(SystemFilePrefix);
     READ_CG_OPTION(UserFilePrefix);

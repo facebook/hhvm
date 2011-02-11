@@ -112,12 +112,13 @@ int IfBranchStatement::outputCPPIfBranch(CodeGenerator &cg,
   int varId = -1;
   if (m_condition) {
     if (m_condition->preOutputCPP(cg, ar, 0)) {
-      cg_indentBegin("{\n");
+      cg.wrapExpressionBegin();
       varId = cg.createNewLocalId(shared_from_this());
       m_condition->getType()->outputCPPDecl(cg, ar, getScope());
       cg_printf(" %s%d;\n", Option::TempPrefix, varId);
 
-      m_condition->outputCPPBegin(cg, ar);
+      cg_indentBegin("{\n");
+      m_condition->preOutputCPP(cg, ar, 0);
       cg_printf("%s%d = (", Option::TempPrefix, varId);
       m_condition->outputCPP(cg, ar);
       cg_printf(");\n");

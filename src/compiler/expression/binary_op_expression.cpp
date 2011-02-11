@@ -980,7 +980,14 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   if (!effect2) {
-    return m_exp1->preOutputCPP(cg, ar, state);
+    bool ret = m_exp1->preOutputCPP(cg, ar, 0);
+    if (state & FixOrder) {
+      ret = true;
+      if (cg.inExpression()) {
+        preOutputStash(cg, ar, state);
+      }
+    }
+    return ret;
   }
 
   bool fix_e1 = m_exp1->preOutputCPP(cg, ar, 0);

@@ -92,11 +92,11 @@ void FunctionCall::deepCopy(FunctionCallPtr exp) {
 ConstructPtr FunctionCall::getNthKid(int n) const {
   switch (n) {
     case 0:
-      return m_nameExp;
-    case 1:
-      return m_params;
-    case 2:
       return m_class;
+    case 1:
+      return m_nameExp;
+    case 2:
+      return m_params;
     default:
       ASSERT(false);
       break;
@@ -111,13 +111,13 @@ int FunctionCall::getKidCount() const {
 void FunctionCall::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
-      m_nameExp = boost::dynamic_pointer_cast<Expression>(cp);
+      m_class = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     case 1:
-      m_params = boost::dynamic_pointer_cast<ExpressionList>(cp);
+      m_nameExp = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     case 2:
-      m_class = boost::dynamic_pointer_cast<Expression>(cp);
+      m_params = boost::dynamic_pointer_cast<ExpressionList>(cp);
       break;
     default:
       ASSERT(false);

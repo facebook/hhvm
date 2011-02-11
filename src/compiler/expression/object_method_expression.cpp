@@ -93,27 +93,15 @@ bool ObjectMethodExpression::canInvokeFewArgs() {
 }
 
 ConstructPtr ObjectMethodExpression::getNthKid(int n) const {
-  switch (n) {
-    case 0:
-      return m_object;
-    default:
-      return FunctionCall::getNthKid(n-1);
-  }
-  ASSERT(false);
-}
-
-int ObjectMethodExpression::getKidCount() const {
-  return FunctionCall::getKidCount() + 1;
+  if (!n) return m_object;
+  return FunctionCall::getNthKid(n);
 }
 
 void ObjectMethodExpression::setNthKid(int n, ConstructPtr cp) {
-  switch (n) {
-    case 0:
-      m_object = boost::dynamic_pointer_cast<Expression>(cp);
-      break;
-    default:
-      FunctionCall::setNthKid(n-1, cp);
-      break;
+  if (!n) {
+    m_object = boost::dynamic_pointer_cast<Expression>(cp);
+  } else {
+    FunctionCall::setNthKid(n, cp);
   }
 }
 
@@ -321,9 +309,9 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
   }
   // Short circuit out if inExpression() returns false
   if (!cg.inExpression()) return true;
+  cg.wrapExpressionBegin();
   m_ciTemp = cg.createNewLocalId(shared_from_this());
 
-  cg.wrapExpressionBegin();
   if (outputLineMap(cg, ar)) cg_printf("0);\n");
 
   bool isThis = m_object->isThis();
@@ -385,9 +373,7 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
     preOutputStash(cg, ar, state);
     cg.popCallInfo();
   }
-  if (hasCPPTemp() && !(state & FixOrder)) {
-    cg_printf("id(%s);\n", cppTemp().c_str());
-  }
+
   return true;
 }
 

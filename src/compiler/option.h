@@ -250,6 +250,7 @@ public:
   static const char *MapPrefix;
   static const char *IterPrefix;
   static const char *InitPrefix;
+  static const char *SwitchPrefix;
 
   static const char *FFIFnPrefix;
 

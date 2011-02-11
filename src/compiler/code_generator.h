@@ -258,6 +258,7 @@ private:
   bool m_inExpression[StreamCount];
   bool m_inFileOrClassHeader;
   bool m_inNamespace;
+  int m_localId[StreamCount];
 
   static int s_idLambda;
   std::map<std::string, int> m_idCounters;

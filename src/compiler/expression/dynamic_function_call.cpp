@@ -130,13 +130,8 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   // Short circuit out if inExpression() returns false
   if (!cg.inExpression()) return true;
 
-  if (m_class) {
-    m_class->preOutputCPP(cg, ar, state);
-  }
-
-  m_nameExp->preOutputCPP(cg, ar, state);
-
   cg.wrapExpressionBegin();
+
   m_ciTemp = cg.createNewLocalId(shared_from_this());
   bool lsb = false;
 
@@ -149,6 +144,13 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printString(m_origClassName, ar, shared_from_this());
     cg_printf(");\n");
   }
+
+  if (m_class) {
+    int s = m_class->hasEffect() || m_nameExp->hasEffect() ?
+      FixOrder : 0;
+    m_class->preOutputCPP(cg, ar, s);
+  }
+  m_nameExp->preOutputCPP(cg, ar, 0);
 
   if (nonStatic) {
     cg_printf("const CallInfo *cit%d;\n", m_ciTemp);
@@ -204,16 +206,16 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
   if (m_params && m_params->getCount() > 0) {
     cg.pushCallInfo(m_ciTemp);
-    m_params->preOutputCPP(cg, ar, state);
+    m_params->preOutputCPP(cg, ar, 0);
     cg.popCallInfo();
   }
 
-  cg.pushCallInfo(m_ciTemp);
-  preOutputStash(cg, ar, state);
-  cg.popCallInfo();
-  if (!(state & FixOrder)) {
-    cg_printf("id(%s);\n", cppTemp().c_str());
+  if (state & FixOrder) {
+    cg.pushCallInfo(m_ciTemp);
+    preOutputStash(cg, ar, state);
+    cg.popCallInfo();
   }
+
   return true;
 }
 

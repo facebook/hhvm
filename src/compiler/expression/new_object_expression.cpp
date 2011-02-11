@@ -230,7 +230,7 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     // Short circuit out if inExpression() returns false
     if (!cg.inExpression()) return true;
 
-    if (m_nameExp) m_nameExp->preOutputCPP(cg, ar, state);
+    if (m_nameExp) m_nameExp->preOutputCPP(cg, ar, 0);
     cg.wrapExpressionBegin();
     m_ciTemp = cg.createNewLocalId(shared_from_this());
     m_objectTemp = cg.createNewLocalId(shared_from_this());
@@ -266,7 +266,7 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
     if (m_params && m_params->getCount() > 0) {
       cg.pushCallInfo(m_ciTemp);
-      m_params->preOutputCPP(cg, ar, state);
+      m_params->preOutputCPP(cg, ar, 0);
       cg.popCallInfo();
     }
     cg_printf("(cit%d->getMeth())(mcp%d, ", m_ciTemp, m_ciTemp);
@@ -286,9 +286,6 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       cg.popCallInfo();
     }
 
-    if (hasCPPTemp() && !(state & FixOrder)) {
-      cg_printf("id(%s);\n", cppTemp().c_str());
-    }
     return true;
   } else {
     bool tempRcvr = true;

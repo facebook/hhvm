@@ -131,6 +131,8 @@ bool CodeGenerator::wrapExpressionBegin() {
   if (!m_wrappedExpression[m_curStream]) {
     m_wrappedExpression[m_curStream] = true;
     m_referenceTempsUsed[m_curStream] = false;
+    m_localId[m_curStream] = 0;
+    setInExpression(true);
     indentBegin("{\n");
     return true;
   }
@@ -461,6 +463,9 @@ int CodeGenerator::createNewId(ConstructPtr cs) {
 }
 
 int CodeGenerator::createNewLocalId(ConstructPtr ar) {
+  if (m_wrappedExpression[m_curStream]) {
+    return m_localId[m_curStream]++;
+  }
   FunctionScopePtr func = ar->getFunctionScope();
   if (func) {
     return func->nextInlineIndex();

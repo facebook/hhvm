@@ -165,7 +165,7 @@ void CaseStatement::outputCPPAsIf(CodeGenerator &cg, AnalysisResultPtr ar,
                                   int varId, int caseNum) {
   if (m_condition) {
     m_condition->outputCPPBegin(cg, ar);
-    cg_printf("if (equal(%s%d, (", Option::TempPrefix, varId);
+    cg_printf("if (equal(%s%d, (", Option::SwitchPrefix, varId);
     m_condition->outputCPP(cg, ar);
     cg_printf("))) goto case_%d_%d;\n", varId, caseNum);
     m_condition->outputCPPEnd(cg, ar);

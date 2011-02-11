@@ -307,6 +307,20 @@ include_directories(${HPHP_HOME}/src)
 include_directories(${HPHP_HOME}/src/system/gen)
 
 macro(hphp_link target)
+	if (GOOGLE_HEAP_PROFILER_ENABLED OR GOOGLE_CPU_PROFILER_ENABLED)
+		target_link_libraries(${target} ${GOOGLE_PROFILER_LIB})
+	endif()
+
+	if (JEMALLOC_ENABLED)
+		target_link_libraries(${target} ${JEMALLOC_LIB})
+	endif()
+
+	if (GOOGLE_HEAP_PROFILER_ENABLED)
+		target_link_libraries(${target} ${GOOGLE_TCMALLOC_FULL_LIB})
+	elseif (GOOGLE_TCMALLOC_ENABLED)
+		target_link_libraries(${target} ${GOOGLE_TCMALLOC_MIN_LIB})
+	endif()
+
 	target_link_libraries(${target} ${Boost_LIBRARIES})
 	target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
 	target_link_libraries(${target} ${PCRE_LIBRARY})
@@ -352,20 +366,6 @@ endif()
 	elseif (APPLE)
 		target_link_libraries(${target} ${CRYPTO_LIB})
 		target_link_libraries(${target} ${ICONV_LIB})
-	endif()
-
-	if (GOOGLE_HEAP_PROFILER_ENABLED OR GOOGLE_CPU_PROFILER_ENABLED)
-		target_link_libraries(${target} ${GOOGLE_PROFILER_LIB})
-	endif()
-
-	if (JEMALLOC_ENABLED)
-		target_link_libraries(${target} ${JEMALLOC_LIB})
-	endif()
-
-	if (GOOGLE_HEAP_PROFILER_ENABLED)
-		target_link_libraries(${target} ${GOOGLE_TCMALLOC_FULL_LIB})
-	elseif (GOOGLE_TCMALLOC_ENABLED)
-		target_link_libraries(${target} ${GOOGLE_TCMALLOC_MIN_LIB})
 	endif()
 
 	target_link_libraries(${target} timelib)

@@ -17,7 +17,7 @@ option(ENABLE_FULL_SETLINE "Enable full setline function for debugger and code-c
 
 option(WANT_FB_LIBMCC "want FB Memcache" OFF)
 
-option(USE_JEMALLOC "Use jemalloc" OFF)
+option(USE_JEMALLOC "Use jemalloc" ON)
 
 option(USE_TCMALLOC "Use tcmalloc (if jemalloc is not used)" ON)
 option(USE_GOOGLE_HEAP_PROFILER "Use Google heap profiler" OFF)

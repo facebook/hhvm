@@ -201,8 +201,10 @@ class Variant {
   /**
    * Clear the original data, and set it to be the same as in v, and if
    * v is referenced, keep the reference.
+   * In order to correctly copy circular arrays, even if v is the only
+   * strong reference to arr, we still keep the reference.
    */
-  Variant &setWithRef(CVarRef v);
+  Variant &setWithRef(CVarRef v, const ArrayData *arr = NULL);
 
   /**
    * Fast accessors that can be used by generated code when type inference can

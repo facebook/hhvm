@@ -248,10 +248,11 @@ Variant& Variant::assign(CVarRef v) {
   return *this;
 }
 
-Variant &Variant::setWithRef(CVarRef v) {
+Variant &Variant::setWithRef(CVarRef v, const ArrayData *arr /* = NULL */) {
   ASSERT(!isContagious() && this != &v && !v.isContagious());
 
-  CVarRef rhs = v.m_type == KindOfVariant && v.m_data.pvar->getCount() <= 1 ?
+  CVarRef rhs = v.m_type == KindOfVariant && v.m_data.pvar->getCount() <= 1 &&
+                (!arr || v.m_data.pvar->m_data.parr != arr) ?
                 *v.m_data.pvar : v;
   if (IS_REFCOUNTED_TYPE(rhs.m_type)) {
 #ifdef FAST_REFCOUNT_FOR_VARIANT

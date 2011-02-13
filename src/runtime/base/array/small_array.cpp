@@ -559,7 +559,7 @@ ArrayData *SmallArray::lvalNew(Variant *&ret, bool copy) {
       return a;
     }
     int p = a->m_nListTail;
-    ASSERT(p >= 0 && p < SARR_TABLE_SIZE && m_arBuckets[p].kind != Empty);
+    ASSERT(p >= 0 && p < SARR_TABLE_SIZE && a->m_arBuckets[p].kind != Empty);
     ret = &a->m_arBuckets[p].data;
     return a;
   }

@@ -1143,7 +1143,7 @@ ZendArray *ZendArray::copyImpl() const {
   Bucket *last = NULL;
   for (Bucket *p = m_pListHead; p; p = p->pListNext) {
     Bucket *np = NEW(Bucket)();
-    np->data.setWithRef(p->data);
+    np->data.setWithRef(p->data, this);
     np->h = p->h;
     if (p->key) {
       np->key = p->key;

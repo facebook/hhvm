@@ -5947,6 +5947,10 @@ bool TestCodeRun::TestReference() {
   // circular references
   //VCR("<?php $a = array('a' => &$a); var_dump($a);");
   //VCR("<?php $a = array('a' => &$a); $b = array($a); var_dump($b);");
+  MVCR("<?php\n"
+       "$a1 = array(&$a1, 1); $a2 = $a1; unset($a1);\n"
+       "$a2[0][] = 2;\n"
+       "var_dump($a2[0][0][0][2]);\n");
 
   // shallow copy of members (either of arrays or objects)
   MVCR("<?php function test($a) { $a[1] = 10; $a['r'] = 20;} "
@@ -11191,6 +11195,14 @@ bool TestCodeRun::TestSerialization() {
       "var_dump((array)$x);"
       "var_dump(serialize($x));"
       "var_dump($x);");
+
+  // Zend PHP 5.2 has a bug here, fixed in 5.3.
+  MVCRO("<?php\n"
+        "$a = array(array());\n"
+        "$a[0][0] = &$a[0];\n"
+        "var_dump(serialize($a));\n",
+
+        "string(24) \"a:1:{i:0;a:1:{i:0;R:2;}}\"\n");
 
   return true;
 }

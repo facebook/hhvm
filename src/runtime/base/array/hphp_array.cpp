@@ -1205,10 +1205,11 @@ void HphpArray::compact(bool renumber /* = false */) {
   } \
   to->_count = 0; \
 
-#define ELEMENT_CLONE(fr, to) \
+#define ELEMENT_CLONE(fr, to, arr) \
   if (LIKELY(fr->m_type != KindOfVariant)) { \
     TV_DUP_CELL_NC(fr, to); \
-  } else if (fr->m_data.ptv->_count <= 1) { \
+  } else if (fr->m_data.ptv->_count <= 1 && \
+             fr->m_data.ptv->m_data.parr != arr) { \
     fr = fr->m_data.ptv; \
     TV_DUP_CELL_NC(fr, to); \
   } else { \
@@ -2237,7 +2238,7 @@ HphpArray* HphpArray::copyImpl() const {
           fr = &e->data;
         }
         TypedValue* to = &te->data;
-        ELEMENT_CLONE(fr, to);
+        ELEMENT_CLONE(fr, to, this);
       } else {
         // Tombstone.
         te->h = 0;

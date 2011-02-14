@@ -32,12 +32,11 @@ include $(PROJECT_ROOT)/src/rules.mk
 GIT_SHA1 := $(shell git describe --all --long --abbrev=40 --always)
 CPPFLAGS += -DCOMPILER_ID=\"$(GIT_SHA1)\"
 
-EXCEPTIONS := $(EXT_DIR)/mozilla/%.a $(EXT_DIR)/imap/lib/c-client.a
+EXCEPTIONS := $(EXT_DIR)/mozilla/%.a $(EXT_DIR)/imap/lib/c-client.a $(ICU_LIBDIR)/%.a
 
-STATIC_LIBS := $(subst libsicu,libicu,$(filter-out $(EXCEPTIONS), $(ALL_LIBS)))
+STATIC_LIBS := $(filter-out $(EXCEPTIONS), $(ALL_LIBS))
 
-SHARED_LIBS = $(EXT_DIR)/icu/lib/libicuuc.so \
-              $(EXT_DIR)/binutils/libbinutils.so \
+SHARED_LIBS = $(EXT_DIR)/binutils/libbinutils.so \
               $(EXT_DIR)/imap/lib/libc-client.so.2007 \
               $(shell find $(EXT_DIR)/mozilla -name "*.so") \
               $(patsubst %.a, %.so, $(STATIC_LIBS)) \

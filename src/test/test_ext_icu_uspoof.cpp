@@ -35,19 +35,13 @@ bool TestExtIcu_uspoof::RunTests(const std::string &which) {
 
 bool TestExtIcu_uspoof::test_SpoofChecker_issuspicious() {
   p_SpoofChecker checker(NEW(c_SpoofChecker)());
-  VS(checker->t_issuspicious("hello, world"), false);
   VS(checker->t_issuspicious("facebook"), false);
 
   // facebook with Cyrillic spoof characters
   VS(checker->t_issuspicious("f\u0430\u0441\u0435b\u043e\u043ek"), true);
 
-  // facebook with Latin spoof characters
-  //
-  // TODO: HPHP's current version of ICU has an old version of
-  // confusables.txt.  Once we upgrade to ICU 4.6, or provide the new
-  // version of confusables.txt, uncomment this test.
-  //
-  // VS(checker->t_issuspicious("\u017faceboo\u1d0b"), true);
+  // "Russia" in Cyrillic with Latin spoof characters
+  VS(checker->t_issuspicious("Pocc\u0438\u044f"), true);
 
   // paypal with Cyrillic spoof characters
   VS(checker->t_issuspicious("http://www.payp\u0430l.com"), true);
@@ -81,17 +75,24 @@ bool TestExtIcu_uspoof::test_SpoofChecker_areconfusable() {
   VS(checker->t_areconfusable("facebook", "f\u0430\u0441\u0435b\u043e\u043ek"),
      true);
 
-  // TODO: HPHP's version of ICU has an old version of
-  // confusables.txt.  Once we upgrade to ICU 4.6, or provide the new
-  // version of confusables.txt, uncomment this test.
+  VS(checker->t_areconfusable("facebook", "\U0001d41faceboo\u1d0b"), true);
+
+  // TODO: ICU bug 8341: \u017f should be treated as a spoof of "f".  Once
+  // that bug is fixed, enable this test.
   //
-  // VS(checker->t_areconfusable("facebook", "\u017faceboo\u1d0b"), true);
+  // VS(checker->t_areconfusable("facebook", "\u017facebook"), true);
 
   VS(checker->t_areconfusable("paypal", "payp\u0430l"), true);
   VS(checker->t_areconfusable(
        "NAPKIN PEZ",
        "\u039d\u0391\u03a1\u039a\u0399\u039d \u03a1\u0395\u0396"),
      true);
+
+  VS(checker->t_areconfusable(
+       "facebook",
+       "ufiek-a\u048ba\u049d \u049da\u048b\u00f0a\u048b\u01e5a\u048b-\u049dota-"
+       "\u00f0o\u00f0ol"),
+     false);
 
   try {
     checker->t_areconfusable(

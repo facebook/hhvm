@@ -559,10 +559,12 @@ GOOGLE_LIBS += $(EXT_DIR)/google-perftools/lib/libtcmalloc_minimal.a \
 endif
 endif
 
+ICU_VERSION = 4_6
+ICU_LIBDIR = $(EXT_DIR)/icu-$(ICU_VERSION)/lib
 ICU_LIBS = \
-	$(EXT_DIR)/icu/lib/libsicui18n.a \
-	$(EXT_DIR)/icu/lib/libsicuuc.a \
-	$(EXT_DIR)/icu/lib/libsicudata.a \
+	$(ICU_LIBDIR)/libicui18n.a \
+	$(ICU_LIBDIR)/libicuuc.a \
+	$(ICU_LIBDIR)/libicudata.a \
 
 endif
 

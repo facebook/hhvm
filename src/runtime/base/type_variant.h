@@ -34,10 +34,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class IArrayIterator;
-typedef SmartPtr<IArrayIterator> ArrayIterPtr;
+class ArrayIter;
 class MutableArrayIter;
-typedef SmartPtr<MutableArrayIter> MutableArrayIterPtr;
 
 /**
  * Perhaps the most important class in the entire runtime. When type inference
@@ -449,12 +447,12 @@ class Variant {
   /**
    * Iterator functions. See array_iterator.h for end() and next().
    */
-  ArrayIterPtr begin(CStrRef context = null_string,
-                     bool setIterDirty = false) const;
+  ArrayIter begin(CStrRef context = null_string,
+                  bool setIterDirty = false) const;
   // used by generated code
-  MutableArrayIterPtr begin(Variant *key, Variant &val,
-                            CStrRef context = null_string,
-                            bool setIterDirty = false);
+  MutableArrayIter begin(Variant *key, Variant &val,
+                         CStrRef context = null_string,
+                         bool setIterDirty = false);
 
   // Mutable iteration requires the most escalation.
   void escalate(bool mutableIteration = false);

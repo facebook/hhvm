@@ -38,12 +38,12 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
   if (m_key) {
     TempExpressionList *texp = m_key->cast<TempExpressionList>();
     if (texp) {
-      for (ArrayIterPtr iter = map.begin(env.currentContext(), true);
-           !iter->end(); iter->next()) {
+      for (ArrayIter iter = map.begin(env.currentContext(), true);
+           !iter.end(); iter.next()) {
         {
           LOOP_COUNTER_CHECK(1);
-          const Variant &value = iter->second();
-          const Variant &key = iter->first();
+          const Variant &value = iter.second();
+          const Variant &key = iter.first();
           TempExpressionHelper helper(texp, env);
           m_value->set(env, value);
           texp->setImpl(env, key);
@@ -54,11 +54,11 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
         EVAL_STMT_HANDLE_GOTO_END(restart1);
       }
     } else {
-      for (ArrayIterPtr iter = map.begin(env.currentContext(), true);
-           !iter->end(); iter->next()) {
+      for (ArrayIter iter = map.begin(env.currentContext(), true);
+           !iter.end(); iter.next()) {
         LOOP_COUNTER_CHECK(1);
-        const Variant &value = iter->second();
-        const Variant &key = iter->first();
+        const Variant &value = iter.second();
+        const Variant &key = iter.first();
         m_value->set(env, value);
         m_key->set(env, key);
         if (!m_body) continue;
@@ -68,10 +68,10 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
       }
     }
   } else {
-    for (ArrayIterPtr iter = map.begin(env.currentContext(), true);
-         !iter->end(); iter->next()) {
+    for (ArrayIter iter = map.begin(env.currentContext(), true);
+         !iter.end(); iter.next()) {
       LOOP_COUNTER_CHECK(1);
-      m_value->set(env, iter->second());
+      m_value->set(env, iter.second());
       if (!m_body) continue;
       EVAL_STMT_HANDLE_GOTO_BEGIN(restart3);
       EVAL_STMT_HANDLE_BREAK(m_body, env);

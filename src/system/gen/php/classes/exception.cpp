@@ -1762,9 +1762,9 @@ String c_Exception::t_gettraceasstring() {
     Variant map2 = t_gettrace();
     {
       StringBuffer tmp_sbuf_v_s(512);
-      for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+      for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
         LOOP_COUNTER_CHECK(1);
-        iter3->second(v_frame);
+        iter3.second(v_frame);
         {
           if (!(x_is_array(v_frame))) {
             continue;

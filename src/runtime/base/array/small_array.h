@@ -36,7 +36,6 @@ public:
 
   virtual Variant getKey(ssize_t pos) const;
   virtual Variant getValue(ssize_t pos) const;
-  virtual void fetchValue(ssize_t pos, Variant &v) const;
   virtual CVarRef getValueRef(ssize_t pos) const;
   virtual bool isVectorData() const;
 

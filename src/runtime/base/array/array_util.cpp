@@ -695,7 +695,7 @@ void ArrayUtil::Walk(Variant input, PFUNC_WALK walk_function,
   Variant k;
   Variant v;
   input.escalate(true);
-  for (MutableArrayIterPtr iter = input.begin(&k, v); iter->advance(); ) {
+  for (MutableArrayIter iter = input.begin(&k, v); iter.advance(); ) {
     if (recursive && v.is(KindOfArray)) {
       ASSERT(seen);
       ArrayData *arr = v.getArrayData();

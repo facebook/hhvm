@@ -865,7 +865,7 @@ int64 c_SimpleXMLElement::t_count() {
   }
   if (m_is_property) {
     int64 n = 0; Variant var(this);
-    for (ArrayIterPtr iter = var.begin(); !iter->end(); iter->next()) {
+    for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
       ++n;
     }
     return n;
@@ -885,7 +885,7 @@ bool c_SimpleXMLElement::t_offsetexists(CVarRef index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::offsetexists);
   if (index.isInteger()) {
     int64 n = 0; int64 nIndex = index.toInt64(); Variant var(this);
-    for (ArrayIterPtr iter = var.begin(); !iter->end(); iter->next()) {
+    for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
       if (n++ == nIndex) {
         return true;
       }
@@ -900,9 +900,9 @@ Variant c_SimpleXMLElement::t_offsetget(CVarRef index) {
   if (index.isInteger()) {
     if (m_is_property) {
       int64 n = 0; int64 nIndex = index.toInt64(); Variant var(this);
-      for (ArrayIterPtr iter = var.begin(); !iter->end(); iter->next()) {
+      for (ArrayIter iter = var.begin(); !iter.end(); iter.next()) {
         if (n++ == nIndex) {
-          return iter->second();
+          return iter.second();
         }
       }
       return this;

@@ -56,10 +56,6 @@ ArrayData::~ArrayData() {
   }
 }
 
-void ArrayData::fetchValue(ssize_t pos, Variant & v) const {
-  v = getValueRef(pos);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // reads
 

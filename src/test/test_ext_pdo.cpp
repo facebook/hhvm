@@ -122,16 +122,16 @@ bool TestExtPdo::test_pdo_sqlite() {
               create(source.c_str(), TEST_USERNAME, TEST_PASSWORD,
                      CREATE_MAP1(q_PDO_ATTR_PERSISTENT, false)));
     Variant vstmt = dbh->t_query("select * from foo");
-    ArrayIterPtr iter = vstmt.begin();
-    VERIFY(!iter->end());
-    VS(iter->first(), 0);
-    VS(iter->second(), CREATE_MAP2("bar", "ABC", 0, "ABC"));
-    iter->next();
-    VERIFY(!iter->end());
-    VS(iter->first(), 1);
-    VS(iter->second(), CREATE_MAP2("bar", "DEF", 0, "DEF"));
-    iter->next();
-    VERIFY(iter->end());
+    ArrayIter iter = vstmt.begin();
+    VERIFY(!iter.end());
+    VS(iter.first(), 0);
+    VS(iter.second(), CREATE_MAP2("bar", "ABC", 0, "ABC"));
+    iter.next();
+    VERIFY(!iter.end());
+    VS(iter.first(), 1);
+    VS(iter.second(), CREATE_MAP2("bar", "DEF", 0, "DEF"));
+    iter.next();
+    VERIFY(iter.end());
 
   } catch (Object &e) {
     VS(e, null);

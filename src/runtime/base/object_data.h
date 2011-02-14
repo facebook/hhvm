@@ -34,10 +34,8 @@ class FunctionCallExpression;
 class VariableEnvironment;
 }
 
-class IArrayIterator;
-typedef SmartPtr<IArrayIterator> ArrayIterPtr;
+class ArrayIter;
 class MutableArrayIter;
-typedef SmartPtr<MutableArrayIter> MutableArrayIterPtr;
 
 /**
  * Base class of all user-defined classes. All data members and methods in
@@ -99,9 +97,9 @@ class ObjectData : public Countable {
     return oldInCtor;
   }
 
-  ArrayIterPtr begin(CStrRef context = null_string);
-  MutableArrayIterPtr begin(Variant *key, Variant &val,
-                            CStrRef context = null_string);
+  ArrayIter begin(CStrRef context = null_string);
+  MutableArrayIter begin(Variant *key, Variant &val,
+                         CStrRef context = null_string);
 
   /**
    * o_instanceof() can be used for both classes and interfaces. Note

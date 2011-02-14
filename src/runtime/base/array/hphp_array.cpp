@@ -364,18 +364,6 @@ Variant HphpArray::getValue(ssize_t pos) const {
   }
 }
 
-void HphpArray::fetchValue(ssize_t pos, Variant& v) const {
-  ASSERT(pos != ArrayData::invalid_index);
-  Elm* elms = data2Elms(m_data);
-  Elm* e = &elms[/*(ElmInd)*/pos];
-  ASSERT(e->data.m_type != KindOfTombstone);
-  if (LIKELY(e->data.m_type != KindOfIndirect)) {
-    v = tvAsCVarRef(&e->data);
-  } else {
-    v = tvAsCVarRef(e->data.m_data.ptv);
-  }
-}
-
 CVarRef HphpArray::getValueRef(ssize_t pos) const {
   ASSERT(pos != ArrayData::invalid_index);
   Elm* elms = data2Elms(m_data);

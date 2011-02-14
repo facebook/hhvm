@@ -2098,7 +2098,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, CVarRef data_, int style,
 
   if (data.isObject() && data.toObject().instanceof("iterator")) {
     array_copy = Array::Create();
-    for (ObjectArrayIter iter(data.toObject().get()); iter; ++iter) {
+    for (ArrayIter iter(data.toObject().get()); iter; ++iter) {
       if (!iter.first().isNull() && iter.first().isString()) {
         array_copy.set(iter.first(), iter.second());
       } else {

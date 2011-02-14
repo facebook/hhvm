@@ -31,52 +31,68 @@ namespace HPHP {
  *     ...
  *   }
  */
-class IArrayIterator : public Countable {
-public:
-  virtual ~IArrayIterator() {}
-  void release() { delete this;}
-
-  operator bool() { return !end();}
-  void operator++() { next();}
-
-  virtual bool end() = 0;
-  virtual void next() = 0;
-
-  /**
-   * Getting key, value or l-value at current position.
-   */
-  virtual Variant first() = 0;
-  virtual Variant second() = 0;
-  virtual void second(Variant & v) = 0;
-  virtual CVarRef secondRef() = 0;
-};
-typedef SmartPtr<IArrayIterator> ArrayIterPtr;
 
 /**
  * Iterator for an immutable array.
  */
-class ArrayIter : public IArrayIterator {
+class ArrayIter {
 public:
   /**
    * Constructors.
    */
+  ArrayIter();
   ArrayIter(const ArrayData *data);
-  ArrayIter(const ArrayIter &iter);
   ArrayIter(CArrRef array);
+  ArrayIter(ObjectData *obj, bool rewind = true);
   ~ArrayIter();
 
-  bool end();
-  void next();
-  Variant first();
+  operator bool() { return !end(); }
+  void operator++() { next(); }
+
+  bool end() {
+    if (!m_obj) {
+      return m_pos == ArrayData::invalid_index;
+    }
+    return endHelper();
+  }
+  void next() {
+    if (!m_obj) {
+      ASSERT(m_data);
+      ASSERT(m_pos != ArrayData::invalid_index);
+      m_pos = m_data->iter_advance(m_pos);
+      return;
+    }
+    return nextHelper();
+  }
+  Variant first() {
+    if (!m_obj) {
+      ASSERT(m_data);
+      ASSERT(m_pos != ArrayData::invalid_index);
+      return m_data->getKey(m_pos);
+    }
+    return firstHelper();
+  }
   Variant second();
-  void second(Variant & v);
+  void second(Variant &v) {
+    if (!m_obj) {
+      ASSERT(m_data);
+      ASSERT(m_pos != ArrayData::invalid_index);
+      v = m_data->getValueRef(m_pos);
+      return;
+    }
+    secondHelper(v);
+  }
   CVarRef secondRef();
 
 private:
   const ArrayData *m_data;
+  ObjectData *m_obj;
   ssize_t m_pos;
 
-  void create();
+  bool endHelper();
+  void nextHelper();
+  Variant firstHelper();
+  void secondHelper(Variant &v);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -88,12 +104,12 @@ struct FullPos {
 };
 
 /**
- * Iterator for "foreach ($arr => &$v)" or "foreach ($array as $n => &$v)".
+ * Iterator for "foreach ($arr as &$v)" or "foreach ($array as $n => &$v)".
  * In this case, any changes to $arr inside iteration needs to be visible to
  * the iteration. Therefore, we need to store Variant* with the iterator to
  * see those changes. This class should only be used for generated code.
  */
-class MutableArrayIter : public Countable {
+class MutableArrayIter {
 public:
   MutableArrayIter(const Variant* var, Variant* key, Variant& val);
   MutableArrayIter(ArrayData* data, Variant* key, Variant& val);
@@ -109,30 +125,6 @@ private:
   FullPos m_fp;
   int size();
   ArrayData* getData();
-};
-typedef SmartPtr<MutableArrayIter> MutableArrayIterPtr;
-
-///////////////////////////////////////////////////////////////////////////////
-
-/**
- * Iterator for "iterator" class of objects.
- */
-class ObjectArrayIter : public IArrayIterator {
-public:
-  ObjectArrayIter(ObjectData *obj, Variant *iterator = NULL);
-  ~ObjectArrayIter();
-
-  // implementing IArrayIterator
-  bool end();
-  void next();
-  Variant first();
-  Variant second();
-  void second(Variant & v);
-  CVarRef secondRef();
-
-private:
-  ObjectData *m_obj;
-  Variant *m_iterator;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

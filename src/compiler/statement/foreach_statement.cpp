@@ -168,7 +168,6 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   int mapId = cg.createNewLocalId(shared_from_this());
   bool passTemp = true;
-  bool isArray = false;
   bool nameSimple = !m_name || m_name->is(Expression::KindOfSimpleVariable);
   bool valueSimple = m_value->is(Expression::KindOfSimpleVariable);
 
@@ -223,7 +222,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   int iterId = cg.createNewLocalId(shared_from_this());
   cg_printf("for (");
   if (m_ref) {
-    cg_printf("MutableArrayIterPtr %s%d = %s%d.begin(",
+    cg_printf("MutableArrayIter %s%d = %s%d.begin(",
               Option::IterPrefix, iterId, Option::MapPrefix, mapId);
     if (!nameSimple) {
       cg_printf("&%s%d_n", Option::MapPrefix, mapId);
@@ -245,10 +244,10 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     } else {
       cg_printf(", null_string");
     }
-    cg_printf(", true); %s%d->advance();", Option::IterPrefix, iterId);
+    cg_printf(", true); %s%d.advance();", Option::IterPrefix, iterId);
   } else {
     if (passTemp) {
-      cg_printf("ArrayIterPtr %s%d = %s%d.begin(",
+      cg_printf("ArrayIter %s%d = %s%d.begin(",
                 Option::IterPrefix, iterId,
                 Option::MapPrefix, mapId);
       ClassScopePtr cls = getClassScope();
@@ -258,17 +257,11 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("null_string");
       }
       cg_printf(", true); ");
-      cg_printf("!%s%d->end(); %s%d->next()",
+      cg_printf("!%s%d.end(); %s%d.next()",
                 Option::IterPrefix, iterId,
                 Option::IterPrefix, iterId);
     } else {
-      TypePtr actualType = m_array->getActualType();
-      if (actualType && actualType->is(Type::KindOfArray)) {
-        isArray = true;
-        cg_printf("ArrayIter %s%d = ", Option::IterPrefix, iterId);
-      } else {
-        cg_printf("ArrayIterPtr %s%d = ", Option::IterPrefix, iterId);
-      }
+      cg_printf("ArrayIter %s%d = ", Option::IterPrefix, iterId);
       TypePtr expectedType = m_array->getExpectedType();
       // Clear m_expectedType to avoid type cast (toArray).
       m_array->setExpectedType(TypePtr());
@@ -282,13 +275,8 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("null_string");
       }
       cg_printf(", true); ");
-      if (isArray) {
-        cg_printf("!%s%d.end(); ", Option::IterPrefix, iterId);
-        cg_printf("++%s%d", Option::IterPrefix, iterId);
-      } else {
-        cg_printf("!%s%d->end(); ", Option::IterPrefix, iterId);
-        cg_printf("%s%d->next()", Option::IterPrefix, iterId);
-      }
+      cg_printf("!%s%d.end(); ", Option::IterPrefix, iterId);
+      cg_printf("++%s%d", Option::IterPrefix, iterId);
     }
   }
   cg_indentBegin(") {\n");
@@ -308,16 +296,15 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     simple variables.
   */
 
-  const char *op = isArray ? "." : "->";
   string valueStr, nameStr;
 
   if (!m_ref) {
-    Util::string_printf(valueStr, "%s%d%ssecond()",
-                        Option::IterPrefix, iterId, op);
-    Util::string_printf(nameStr, "%s%d%sfirst()",
-                        Option::IterPrefix, iterId, op);
+    Util::string_printf(valueStr, "%s%d.second()",
+                        Option::IterPrefix, iterId);
+    Util::string_printf(nameStr, "%s%d.first()",
+                        Option::IterPrefix, iterId);
     if (valueSimple) {
-      cg_printf("%s%d%ssecond(", Option::IterPrefix, iterId, op);
+      cg_printf("%s%d.second(", Option::IterPrefix, iterId);
       m_value->outputCPP(cg, ar);
       cg_printf(");\n");
     } else if (m_name || m_value->hasEffect()) {

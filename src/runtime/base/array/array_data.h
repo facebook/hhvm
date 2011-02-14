@@ -90,7 +90,6 @@ class ArrayData : public Countable {
    */
   virtual Variant getKey(ssize_t pos) const = 0;
   virtual Variant getValue(ssize_t pos) const = 0;
-  virtual void fetchValue(ssize_t pos, Variant &v) const;
   /**
    * getValueRef() gets a reference to value at position "pos".
    */

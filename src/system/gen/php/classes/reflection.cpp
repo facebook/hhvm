@@ -784,10 +784,10 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
   {
     LOOP_COUNTER(1);
     Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss1f20ac62, "params"), AccessFlags::Error_Key);
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
-      iter3->second(v_info);
-      v_name = iter3->first();
+      iter3.second(v_info);
+      v_name = iter3.first();
       {
         {
           const p_ReflectionParameter &tmp0((p_ReflectionParameter((NEWOBJ(c_ReflectionParameter)())->create(null, null))));
@@ -3479,10 +3479,10 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
       {
         LOOP_COUNTER(1);
         Variant map2 = m_info.rvalAt(NAMSTR(s_sys_sscfb8e254, "interfaces"), AccessFlags::Error_Key);
-        for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+        for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
           LOOP_COUNTER_CHECK(1);
-          iter3->second(v__);
-          v_interface = iter3->first();
+          iter3.second(v__);
+          v_interface = iter3.first();
           {
             {
               p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
@@ -3763,10 +3763,10 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = 65535LL
   }
   {
     LOOP_COUNTER(1);
-    for (ArrayIterPtr iter3 = v_methods.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+    for (ArrayIter iter3 = v_methods.begin(s_class_name, true); !iter3.end(); ++iter3) {
       LOOP_COUNTER_CHECK(1);
-      iter3->second(v__);
-      v_name = iter3->first();
+      iter3.second(v__);
+      v_name = iter3.first();
       {
         {
           const p_ReflectionMethod &tmp0((t_getmethod(v_name)));
@@ -3833,10 +3833,10 @@ Array c_ReflectionClass::t_getproperties() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMSTR(s_sys_ss90269404, "properties"));
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
-      iter3->second(v__);
-      v_name = iter3->first();
+      iter3.second(v__);
+      v_name = iter3.first();
       {
         {
           const p_ReflectionProperty &tmp0((t_getproperty(v_name)));
@@ -3891,10 +3891,10 @@ Array c_ReflectionClass::t_getinterfaces() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"));
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
-      iter3->second(v__);
-      v_name = iter3->first();
+      iter3.second(v__);
+      v_name = iter3.first();
       {
         {
           p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
@@ -3927,10 +3927,10 @@ Array c_ReflectionClass::t_getinterfacenames() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"));
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
-      iter3->second(v__);
-      v_name = iter3->first();
+      iter3.second(v__);
+      v_name = iter3.first();
       {
         {
           p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
@@ -4045,10 +4045,10 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"));
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
-      iter3->second(v__);
-      v_name = iter3->first();
+      iter3.second(v__);
+      v_name = iter3.first();
       {
         {
           bool tmp0;
@@ -4109,9 +4109,9 @@ Array c_ReflectionClass::t_getstaticproperties() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_getproperties();
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
-      iter3->second(v_prop);
+      iter3.second(v_prop);
       {
         {
           bool tmp0;
@@ -4175,9 +4175,9 @@ Array c_ReflectionClass::t_getdefaultproperties() {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_getproperties();
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
-      iter3->second(v_prop);
+      iter3.second(v_prop);
       {
         {
           bool tmp0;
@@ -4249,10 +4249,10 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"));
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
-      iter3->second(v__);
-      v_name = iter3->first();
+      iter3.second(v__);
+      v_name = iter3.first();
       {
         {
           bool tmp0;
@@ -5086,9 +5086,9 @@ Array c_ReflectionExtension::t_getclassnames() {
   {
     LOOP_COUNTER(1);
     Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss0415e4a0, "classes"), AccessFlags::Error_Key);
-    for (ArrayIterPtr iter3 = map2.begin(s_class_name, true); !iter3->end(); iter3->next()) {
+    for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
-      iter3->second(v_cls);
+      iter3.second(v_cls);
       {
         {
           MethodCallPackage mcp0;

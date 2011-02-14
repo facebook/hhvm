@@ -21,30 +21,23 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+// Static strings.
+
+static StaticString s_rewind("rewind");
+static StaticString s_valid("valid");
+static StaticString s_next("next");
+static StaticString s_key("key");
+static StaticString s_current("current");
+static StaticString s_Iterator("Iterator");
+static StaticString s_Continuation("Continuation");
+
+///////////////////////////////////////////////////////////////////////////////
 // ArrayIter
 
-ArrayIter::ArrayIter(const ArrayData *data)
-  : m_data(data), m_pos(0) {
-  create();
-}
+ArrayIter::ArrayIter()
+  : m_data(NULL), m_obj(NULL), m_pos(ArrayData::invalid_index) { }
 
-ArrayIter::ArrayIter(const ArrayIter &iter)
-  : m_data(iter.m_data), m_pos(0) {
-  create();
-}
-
-ArrayIter::ArrayIter(CArrRef array)
-  : m_data(array.get()), m_pos(0) {
-  create();
-}
-
-ArrayIter::~ArrayIter() {
-  if (m_data && m_data->decRefCount() == 0) {
-    const_cast<ArrayData*>(m_data)->release();
-  }
-}
-
-void ArrayIter::create() {
+ArrayIter::ArrayIter(const ArrayData *data) : m_data(data), m_obj(NULL) {
   if (m_data) {
     m_data->incRefCount();
     m_pos = m_data->iter_begin();
@@ -53,35 +46,72 @@ void ArrayIter::create() {
   }
 }
 
-bool ArrayIter::end() {
-  return m_pos == ArrayData::invalid_index;
+ArrayIter::ArrayIter(CArrRef array)
+  : m_data(array.get()), m_obj(NULL), m_pos(0) {
+  if (m_data) {
+    m_data->incRefCount();
+    m_pos = m_data->iter_begin();
+  } else {
+    m_pos = ArrayData::invalid_index;
+  }
 }
 
-void ArrayIter::next() {
-  ASSERT(m_data);
-  ASSERT(m_pos != ArrayData::invalid_index);
-  m_pos = m_data->iter_advance(m_pos);
+ArrayIter::ArrayIter(ObjectData *obj, bool rewind /* = true */)
+  : m_data(NULL), m_obj(obj), m_pos(ArrayData::invalid_index) {
+  ASSERT(m_obj);
+  ASSERT(m_obj->o_instanceof(s_Iterator));
+  m_obj->incRefCount();
+  if (m_obj->o_instanceof(s_Continuation)) {
+    m_obj->o_invoke(s_next, Array());
+  } else if (rewind) {
+    m_obj->o_invoke(s_rewind, Array());
+  }
+  // If it is from IteratorAggregate, there is no need to rewind.
 }
 
-Variant ArrayIter::first() {
-  ASSERT(m_data);
-  ASSERT(m_pos != ArrayData::invalid_index);
-  return m_data->getKey(m_pos);
+ArrayIter::~ArrayIter() {
+  if (m_data && m_data->decRefCount() == 0) {
+    const_cast<ArrayData*>(m_data)->release();
+    return;
+  }
+  if (m_obj && m_obj->decRefCount() == 0) {
+    const_cast<ObjectData*>(m_obj)->release();
+  }
+}
+
+bool ArrayIter::endHelper() {
+  ASSERT(m_obj);
+  return !m_obj->o_invoke(s_valid, Array());
+}
+
+void ArrayIter::nextHelper() {
+  ASSERT(m_obj);
+  m_obj->o_invoke(s_next, Array());
+}
+
+Variant ArrayIter::firstHelper() {
+  ASSERT(m_obj);
+  return m_obj->o_invoke(s_key, Array());
 }
 
 Variant ArrayIter::second() {
+  if (m_obj) {
+    return m_obj->o_invoke(s_current, Array());
+  }
   ASSERT(m_data);
   ASSERT(m_pos != ArrayData::invalid_index);
   return m_data->getValue(m_pos);
 }
 
-void ArrayIter::second(Variant & v) {
-  ASSERT(m_data);
-  ASSERT(m_pos != ArrayData::invalid_index);
-  m_data->fetchValue(m_pos, v);
+void ArrayIter::secondHelper(Variant & v) {
+  ASSERT(m_obj);
+  v = m_obj->o_invoke(s_current, Array());
 }
 
 CVarRef ArrayIter::secondRef() {
+  if (m_obj) {
+    throw FatalErrorException("taking reference on iterator objects");
+  }
   ASSERT(m_data);
   ASSERT(m_pos != ArrayData::invalid_index);
   return m_data->getValueRef(m_pos);
@@ -159,59 +189,5 @@ ArrayData *MutableArrayIter::getData() {
   }
   return NULL;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// ObjectArrayIter
-
-static StaticString s_rewind("rewind");
-static StaticString s_valid("valid");
-static StaticString s_next("next");
-static StaticString s_key("key");
-static StaticString s_current("current");
-
-ObjectArrayIter::ObjectArrayIter(ObjectData *obj,
-                                 Variant *iterator /* = NULL */)
-  : m_obj(obj), m_iterator(NULL) {
-  ASSERT(m_obj);
-  ASSERT(m_obj->o_instanceof("iterator"));
-  if (iterator) {
-    m_iterator = new Variant();
-    *m_iterator = *iterator;
-    // m_iterator from IteratorAggregate only, no need to rewind
-  } else if (m_obj->o_instanceof("continuation")) {
-    m_obj->o_invoke(s_next, Array(), -1);
-  } else {
-    m_obj->o_invoke(s_rewind, Array(), -1);
-  }
-}
-
-ObjectArrayIter::~ObjectArrayIter() {
-  delete m_iterator;
-}
-
-bool ObjectArrayIter::end() {
-  return !m_obj->o_invoke(s_valid, Array(), -1);
-}
-
-void ObjectArrayIter::next() {
-  m_obj->o_invoke(s_next, Array(), -1);
-}
-
-Variant ObjectArrayIter::first() {
-  return m_obj->o_invoke(s_key, Array(), -1);
-}
-
-Variant ObjectArrayIter::second() {
-  return m_obj->o_invoke(s_current, Array(), -1);
-}
-
-void ObjectArrayIter::second(Variant & v) {
-  v = m_obj->o_invoke(s_current, Array(), -1);
-}
-
-CVarRef ObjectArrayIter::secondRef() {
-  throw FatalErrorException("taking reference on iterator objects");
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 }

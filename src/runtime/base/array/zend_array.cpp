@@ -218,12 +218,6 @@ Variant ZendArray::getValue(ssize_t pos) const {
   return p->data;
 }
 
-void ZendArray::fetchValue(ssize_t pos, Variant & v) const {
-  ASSERT(pos && pos != ArrayData::invalid_index);
-  Bucket *p = reinterpret_cast<Bucket *>(pos);
-  v = p->data;
-}
-
 CVarRef ZendArray::getValueRef(ssize_t pos) const {
   ASSERT(pos && pos != ArrayData::invalid_index);
   Bucket *p = reinterpret_cast<Bucket *>(pos);

@@ -26,15 +26,15 @@ const Object Object::s_nullObject = Object();
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ArrayIterPtr Object::begin(CStrRef context /* = null_string */,
-                           bool setIterDirty /* = false */) const {
+ArrayIter Object::begin(CStrRef context /* = null_string */,
+                        bool setIterDirty /* = false */) const {
   if (!m_px) throw NullPointerException();
   return m_px->begin(context);
 }
 
-MutableArrayIterPtr Object::begin(Variant *key, Variant &val,
-                                  CStrRef context /* = null_string */,
-                                  bool setIterDirty /* = false */) const {
+MutableArrayIter Object::begin(Variant *key, Variant &val,
+                               CStrRef context /* = null_string */,
+                               bool setIterDirty /* = false */) const {
   if (!m_px) throw NullPointerException();
   return m_px->begin(key, val, context);
 }

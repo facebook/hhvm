@@ -1513,22 +1513,22 @@ Variant Variant::operator--(int) {
 ///////////////////////////////////////////////////////////////////////////////
 // iterator functions
 
-ArrayIterPtr Variant::begin(CStrRef context /* = null_string */,
-                            bool setIterDirty /* = false */) const {
+ArrayIter Variant::begin(CStrRef context /* = null_string */,
+                         bool setIterDirty /* = false */) const {
   if (is(KindOfArray)) {
     if (setIterDirty) array_iter_dirty_set();
-    return new ArrayIter(getArrayData());
+    return ArrayIter(getArrayData());
   }
   if (is(KindOfObject)) {
     return getObjectData()->begin(context);
   }
   raise_warning("Invalid argument supplied for foreach()");
-  return new ArrayIter(NULL);
+  return ArrayIter();
 }
 
-MutableArrayIterPtr Variant::begin(Variant *key, Variant &val,
-                                   CStrRef context /* = null_string */,
-                                   bool setIterDirty /* = false */) {
+MutableArrayIter Variant::begin(Variant *key, Variant &val,
+                                CStrRef context /* = null_string */,
+                                bool setIterDirty /* = false */) {
   if (is(KindOfObject)) {
     return getObjectData()->begin(key, val, context);
   }
@@ -1541,7 +1541,7 @@ MutableArrayIterPtr Variant::begin(Variant *key, Variant &val,
       set(arr->copy());
     }
   }
-  return new MutableArrayIter(this, key, val);
+  return MutableArrayIter(this, key, val);
 }
 
 void Variant::escalate(bool mutableIteration /* = false */) {

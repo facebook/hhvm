@@ -180,33 +180,37 @@ bool ObjectData::os_get_call_info_with_index(MethodCallPackage &info,
 ///////////////////////////////////////////////////////////////////////////////
 // instance methods and properties
 
-ArrayIterPtr ObjectData::begin(CStrRef context /* = null_string */) {
-  if (o_instanceof("Iterator")) {
-    return new ObjectArrayIter(this);
+static StaticString s_Iterator("Iterator");
+static StaticString s_IteratorAggregate("IteratorAggregate");
+static StaticString s_getIterator("getIterator");
+
+ArrayIter ObjectData::begin(CStrRef context /* = null_string */) {
+  if (o_instanceof(s_Iterator)) {
+    return ArrayIter(this);
   }
   ObjectData *obj = this;
-  while (obj->o_instanceof("IteratorAggregate")) {
-    Variant iterator = obj->o_invoke("getiterator", Array(), -1);
+  while (obj->o_instanceof(s_IteratorAggregate)) {
+    Variant iterator = obj->o_invoke(s_getIterator, Array());
     if (!iterator.isObject()) break;
-    if (iterator.instanceof("Iterator")) {
-      return new ObjectArrayIter(iterator.getObjectData(), &iterator);
+    if (iterator.instanceof(s_Iterator)) {
+      return ArrayIter(iterator.getObjectData(), false);
     }
     obj = iterator.getObjectData();
   }
-  return new ArrayIter(obj->o_toIterArray(context));
+  return ArrayIter(obj->o_toIterArray(context));
 }
 
-MutableArrayIterPtr ObjectData::begin(Variant *key, Variant &val,
-                                      CStrRef context /* = null_string */) {
-  if (o_instanceof("Iterator")) {
+MutableArrayIter ObjectData::begin(Variant *key, Variant &val,
+                                   CStrRef context /* = null_string */) {
+  if (o_instanceof(s_Iterator)) {
     throw FatalErrorException("An iterator cannot be used with "
                               "foreach by reference");
   }
   ObjectData *obj = this;
-  while (obj->o_instanceof("IteratorAggregate")) {
-    Variant iterator = obj->o_invoke("getiterator", Array(), -1);
+  while (obj->o_instanceof(s_IteratorAggregate)) {
+    Variant iterator = obj->o_invoke(s_getIterator, Array());
     if (!iterator.isObject()) break;
-    if (iterator.instanceof("Iterator")) {
+    if (iterator.instanceof(s_Iterator)) {
       throw FatalErrorException("An iterator cannot be used with "
                                 "foreach by reference");
     }
@@ -215,7 +219,7 @@ MutableArrayIterPtr ObjectData::begin(Variant *key, Variant &val,
   Array properties = obj->o_toIterArray(context, true);
   properties.escalate(true);
   ArrayData *arr = properties.getArrayData();
-  return new MutableArrayIter(arr, key, val);
+  return MutableArrayIter(arr, key, val);
 }
 
 Variant *ObjectData::o_realProp(CStrRef propName, int flags,

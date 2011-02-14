@@ -106,11 +106,6 @@ Variant SmallArray::getValue(ssize_t pos) const {
   return m_arBuckets[pos].data;
 }
 
-void SmallArray::fetchValue(ssize_t pos, Variant &v) const {
-  ASSERT(pos >= 0 && pos < SARR_TABLE_SIZE && m_arBuckets[pos].kind != Empty);
-  v = m_arBuckets[pos].data;
-}
-
 CVarRef SmallArray::getValueRef(ssize_t pos) const {
   ASSERT(pos >= 0 && pos < SARR_TABLE_SIZE && m_arBuckets[pos].kind != Empty);
   return m_arBuckets[pos].data;

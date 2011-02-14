@@ -39,8 +39,8 @@ ObjectMethodExpression::ObjectMethodExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr object, ExpressionPtr method, ExpressionListPtr params)
   : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES,
-                 method, "", params, ExpressionPtr()), m_object(object),
-    m_invokeFewArgsDecision(true), m_bindClass(true) {
+                 method, "", params, ExpressionPtr()),
+    m_object(object), m_bindClass(true) {
   m_object->setContext(Expression::ObjectContext);
   m_object->clearContext(Expression::LValue);
   m_object->clearContext(Expression::AccessContext);
@@ -80,16 +80,6 @@ void ObjectMethodExpression::analyzeProgram(AnalysisResultPtr ar) {
 
     markRefParams(func, m_name, canInvokeFewArgs());
   }
-}
-
-bool ObjectMethodExpression::canInvokeFewArgs() {
-  // We can always change out minds about saying yes, but once we say
-  // no, it sticks.
-  if (m_invokeFewArgsDecision && m_params &&
-      m_params->getCount() > Option::InvokeFewArgsCount) {
-    m_invokeFewArgsDecision = false;
-  }
-  return m_invokeFewArgsDecision;
 }
 
 ConstructPtr ObjectMethodExpression::getNthKid(int n) const {
@@ -389,8 +379,6 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
 
 void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
-
-  bool fewParams = canInvokeFewArgs();
   if (!m_name.empty() && m_valid && m_object->getType()->isSpecificObject()) {
     // Static method call
     outputCPPObjectCall(cg, ar);
@@ -405,43 +393,6 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
     cg_printf(")");
   } else {
     cg_printf("(mcp%d.bindClass(info)->", m_ciTemp);
-    if (fewParams) {
-      int pcount = m_params ? m_params->getCount() : 0;
-      if (Option::InvokeWithSpecificArgs) {
-        cg_printf("getMeth%dArgs())(mcp%d, ", pcount, m_ciTemp);
-      } else {
-        cg_printf("getMethFewArgs())(mcp%d, ", m_ciTemp);
-      }
-      if (pcount) {
-        cg_printf("%d, ", pcount);
-        cg.pushCallInfo(m_ciTemp);
-        FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, 0,
-                                          false);
-        cg.popCallInfo();
-      } else {
-        cg_printf("0");
-      }
-      FunctionScope::RefParamInfoPtr info;
-      if (!m_name.empty()) {
-        info = FunctionScope::GetRefParamInfo(m_name);
-      }
-      if (!Option::InvokeWithSpecificArgs) {
-        for (int i = pcount; i < Option::InvokeFewArgsCount; ++i) {
-          cg_printf(", null_variant");
-        }
-      }
-      cg_printf(")");
-    } else {
-      cg_printf("getMeth())(mcp%d, ", m_ciTemp);
-      if (m_params && m_params->getCount()) {
-        cg.pushCallInfo(m_ciTemp);
-        FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, -1,
-                                          false);
-        cg.popCallInfo();
-      } else {
-        cg_printf("Array()");
-      }
-      cg_printf(")");
-    }
+    outputDynamicCall(cg, ar, true);
   }
 }

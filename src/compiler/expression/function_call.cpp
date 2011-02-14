@@ -53,8 +53,9 @@ FunctionCall::FunctionCall
     m_ciTemp(-1), m_params(params), m_valid(false),
     m_extraArg(0), m_variableArgument(false), m_voidReturn(false),
     m_voidWrapper(false), m_allowVoidReturn(false), m_redeclared(false),
-    m_noStatic(false), m_noInline(false), m_argArrayId(-1), m_argArrayHash(-1),
-    m_argArrayIndex(-1) {
+    m_noStatic(false), m_noInline(false), m_invokeFewArgsDecision(true),
+    m_arrayParams(false),
+    m_argArrayId(-1), m_argArrayHash(-1), m_argArrayIndex(-1) {
 
   if (m_nameExp &&
       m_nameExp->getKindOf() == Expression::KindOfScalarExpression) {
@@ -87,6 +88,17 @@ void FunctionCall::deepCopy(FunctionCallPtr exp) {
   exp->m_class = Clone(m_class);
   exp->m_params = Clone(m_params);
   exp->m_nameExp = Clone(m_nameExp);
+}
+
+bool FunctionCall::canInvokeFewArgs() {
+  // We can always change out minds about saying yes, but once we say
+  // no, it sticks.
+  if (m_invokeFewArgsDecision &&
+      ((m_params && m_params->getCount() > Option::InvokeFewArgsCount) ||
+       m_arrayParams)) {
+    m_invokeFewArgsDecision = false;
+  }
+  return m_invokeFewArgsDecision;
 }
 
 ConstructPtr FunctionCall::getNthKid(int n) const {
@@ -587,6 +599,48 @@ bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   return true;
+}
+
+void FunctionCall::outputDynamicCall(CodeGenerator &cg,
+                                     AnalysisResultPtr ar, bool method) {
+  const char *kind = method ? "Meth" : "Func";
+  const char *var = method ? "mcp" : "vt";
+
+  int pcount = m_params ? m_params->getCount() : 0;
+  if (canInvokeFewArgs()) {
+    if (Option::InvokeWithSpecificArgs) {
+      cg_printf("get%s%dArgs())(%s%d, ", kind, pcount, var, m_ciTemp);
+    } else {
+      cg_printf("get%sFewArgs())(%s%d, ", kind, var, m_ciTemp);
+    }
+    if (pcount) {
+      cg_printf("%d, ", pcount);
+      cg.pushCallInfo(m_ciTemp);
+      FunctionScope::OutputCPPArguments(m_params, FunctionScopePtr(),
+                                        cg, ar, 0, false);
+      cg.popCallInfo();
+    } else {
+      cg_printf("0");
+    }
+    if (!canInvokeFewArgs()) {
+      for (int i = pcount; i < Option::InvokeFewArgsCount; i++) {
+        cg_printf(", null_variant");
+      }
+    }
+  } else {
+    cg_printf("get%s())(%s%d, ", kind, var, m_ciTemp);
+
+    if (pcount) {
+      cg.pushCallInfo(m_ciTemp);
+      FunctionScope::OutputCPPArguments(m_params, FunctionScopePtr(),
+                                        cg, ar, -1, false);
+      cg.popCallInfo();
+    } else {
+      cg_printf("Array()");
+    }
+  }
+
+  cg_printf(")");
 }
 
 void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {

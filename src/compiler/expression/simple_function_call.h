@@ -41,7 +41,6 @@ public:
   bool isDefineWithoutImpl(AnalysisResultConstPtr ar);
   void setValid() { m_valid = true; }
   void setNoPrefix() { m_noPrefix = true; }
-  void setArrayParams() { m_arrayParams = true; }
 
   virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                 bool coerce);
@@ -102,14 +101,11 @@ protected:
   unsigned m_noPrefix : 1;
   unsigned m_invokeFewArgsDecision : 1;
   unsigned m_dynamicInvoke : 1;
-  unsigned m_arrayParams : 1;
 
   int m_safe;
   ExpressionPtr m_safeDef;
   std::string m_lambda;
 
-  // only used for redeclared functions
-  bool canInvokeFewArgs();
   void outputCPPParamOrderControlled(CodeGenerator &cg, AnalysisResultPtr ar);
   ExpressionPtr optimize(AnalysisResultConstPtr ar);
 private:

@@ -76,7 +76,7 @@ void NewObjectExpression::analyzeProgram(AnalysisResultPtr ar) {
     }
 
     if (m_params) {
-      markRefParams(func, "", false);
+      markRefParams(func, "", canInvokeFewArgs());
     }
   }
 }
@@ -136,7 +136,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   } else {
     ar->containsDynamicClass();
     if (m_params) {
-      m_params->markParams(false);
+      m_params->markParams(canInvokeFewArgs());
     }
   }
 
@@ -264,21 +264,16 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf("mcp%d.construct(obj%d);\n", m_ciTemp, m_objectTemp);
     cg_printf("const CallInfo *cit%d = mcp%d.ci;\n", m_ciTemp, m_ciTemp);
 
-    if (m_params && m_params->getCount() > 0) {
+    int pcount = m_params ? m_params->getCount() : 0;
+    if (pcount > 0) {
       cg.pushCallInfo(m_ciTemp);
       m_params->preOutputCPP(cg, ar, 0);
       cg.popCallInfo();
     }
-    cg_printf("(cit%d->getMeth())(mcp%d, ", m_ciTemp, m_ciTemp);
-    if (m_params && m_params->getOutputCount()) {
-      cg.pushCallInfo(m_ciTemp);
-      FunctionScope::OutputCPPArguments(m_params, m_funcScope,
-                                        cg, ar, -1, false);
-      cg.popCallInfo();
-    } else {
-      cg_printf("Array()");
-    }
-    cg_printf(");\n");
+
+    cg_printf("(cit%d->", m_ciTemp);
+    outputDynamicCall(cg, ar, true);
+    cg_printf(";\n");
 
     if (state & FixOrder) {
       cg.pushCallInfo(m_ciTemp);

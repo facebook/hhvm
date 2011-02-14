@@ -48,8 +48,6 @@ private:
   void setInvokeParams(AnalysisResultPtr ar);
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);
-  bool canInvokeFewArgs();
-  bool m_invokeFewArgsDecision;
   bool m_bindClass;
 
   void outputCPPObject(CodeGenerator &cg, AnalysisResultPtr ar);

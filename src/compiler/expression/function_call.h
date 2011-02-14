@@ -54,8 +54,12 @@ public:
   void deepCopy(FunctionCallPtr exp);
 
   FunctionScopePtr getFuncScope() const { return m_funcScope; }
+  bool canInvokeFewArgs();
+  void setArrayParams() { m_arrayParams = true; }
 
 protected:
+  void outputDynamicCall(CodeGenerator &cg,
+                         AnalysisResultPtr ar, bool method);
   ExpressionPtr m_nameExp;
   std::string m_name;
   std::string m_origName;
@@ -78,6 +82,8 @@ protected:
   unsigned m_redeclared : 1;
   unsigned m_noStatic : 1;
   unsigned m_noInline : 1;
+  unsigned m_invokeFewArgsDecision : 1;
+  unsigned m_arrayParams : 1;
 
   // Extra arguments form an array, to which the scalar array optimization
   // should also apply.

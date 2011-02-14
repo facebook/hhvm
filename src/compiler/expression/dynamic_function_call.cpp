@@ -18,6 +18,7 @@
 #include <compiler/analysis/code_error.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/scalar_expression.h>
+#include <compiler/expression/simple_function_call.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/class_scope.h>
 #include <util/util.h>
@@ -57,9 +58,30 @@ void DynamicFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
       addUserClass(ar, m_className);
     }
     if (m_params) {
-      m_params->markParams(false);
+      m_params->markParams(canInvokeFewArgs());
     }
   }
+}
+
+ExpressionPtr DynamicFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
+  if (ExpressionPtr rep = FunctionCall::preOptimize(ar)) return rep;
+
+  if (m_nameExp->isScalar()) {
+    Variant v;
+    if (m_nameExp->getScalarValue(v) &&
+        v.isString()) {
+      string name = v.toString().c_str();
+      ExpressionPtr cls = m_class;
+      if (!cls && !m_className.empty()) {
+        cls = makeScalarExpression(ar, m_className);
+      }
+      return ExpressionPtr(NewSimpleFunctionCall(
+        getScope(), getLocation(),
+        Expression::KindOfSimpleFunctionCall,
+        name, m_params, cls));
+    }
+  }
+  return ExpressionPtr();
 }
 
 TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
@@ -125,8 +147,13 @@ void DynamicFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     int state) {
   bool nonStatic = !m_class && m_className.empty();
-  if (!nonStatic && !m_class && !m_classScope && !isRedeclared())
+  if (!nonStatic && !m_class && !m_classScope && !isRedeclared()) {
+    // call to an unknown class
+    // set m_noStatic to avoid pointlessly wrapping the call
+    // in STATIC_CLASS_NAME_CALL()
+    m_noStatic = true;
     return FunctionCall::preOutputCPP(cg, ar, state);
+  }
   // Short circuit out if inExpression() returns false
   if (!cg.inExpression()) return true;
 
@@ -221,55 +248,15 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
 void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
+  bool method = false;
   if (m_class || !m_className.empty()) {
-    if (m_class || m_classScope || isRedeclared()) {
-      cg.printf("(cit%d->getMeth())(mcp%d, ", m_ciTemp, m_ciTemp);
-      if (m_params && m_params->getCount() > 0) {
-        cg.pushCallInfo(m_ciTemp);
-        FunctionScopePtr dummy;
-        FunctionScope::OutputCPPArguments(m_params, dummy, cg, ar, -1, false);
-        cg.popCallInfo();
-      } else {
-        cg_printf("Array()");
-      }
-      cg_printf(")");
-      return;
-    } else {
+    if (!m_class && !m_classScope && !isRedeclared()) {
       cg_printf("throw_fatal(\"unknown class %s\")", m_className.c_str());
-      cg_printf(")");
       return;
     }
-  } else {
-    //cg.printf("invoke(");
-    cg_printf("(cit%d->getFunc())(vt%d, ", m_ciTemp, m_ciTemp);
-    if (m_params && m_params->getCount() > 0) {
-      cg.pushCallInfo(m_ciTemp);
-      FunctionScopePtr dummy;
-      FunctionScope::OutputCPPArguments(m_params, dummy, cg, ar, -1, false);
-      cg.popCallInfo();
-    } else {
-      cg_printf("Array()");
-    }
-    cg_printf(")");
-    return;
+    method = true;
   }
-  if (m_nameExp->is(Expression::KindOfSimpleVariable)) {
-    m_nameExp->outputCPP(cg, ar);
-  } else {
-    cg_printf("(");
-    m_nameExp->outputCPP(cg, ar);
-    cg_printf(")");
-  }
-  cg_printf(", ");
-  if (m_params && m_params->getCount() > 0) {
-    FunctionScopePtr dummy;
-    FunctionScope::OutputCPPArguments(m_params, dummy, cg, ar, -1, false);
-  } else {
-    cg_printf("Array()");
-  }
-  if (m_class) {
-    cg_printf(")");
-  } else {
-    cg_printf(", -1)");
-  }
+
+  cg_printf("(cit%d->", m_ciTemp);
+  outputDynamicCall(cg, ar, method);
 }

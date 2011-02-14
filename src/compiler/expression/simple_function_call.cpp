@@ -94,8 +94,7 @@ SimpleFunctionCall::SimpleFunctionCall
   : FunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES,
                  ExpressionPtr(), name, params, cls),
     m_type(UnknownType), m_dynamicConstant(false),
-    m_builtinFunction(false), m_noPrefix(false), m_invokeFewArgsDecision(true),
-    m_dynamicInvoke(false), m_arrayParams(false),
+    m_builtinFunction(false), m_noPrefix(false), m_dynamicInvoke(false),
     m_safe(0) {
 
   if (!m_class && m_className.empty()) {
@@ -1584,8 +1583,8 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       }
     }
     if (canInvokeFewArgs() && !m_arrayParams) {
-      if (m_params && m_params->getCount()) {
-        cg_printf("%d, ", m_params->getCount());
+      if (pcount) {
+        cg_printf("%d, ", pcount);
         cg.pushCallInfo(m_ciTemp);
         FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, 0,
                                           false);
@@ -1599,7 +1598,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         }
       }
     } else {
-      if ((!m_params) || (m_params->getCount() == 0)) {
+      if (!pcount) {
         cg_printf("Array()");
       } else {
         cg.pushCallInfo(m_ciTemp);
@@ -1867,17 +1866,6 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
   }
 
   outputCPPParamOrderControlled(cg, ar);
-}
-
-bool SimpleFunctionCall::canInvokeFewArgs() {
-  // We can always change out minds about saying yes, but once we say
-  // no, it sticks.
-  if (m_dynamicInvoke ||
-      (m_invokeFewArgsDecision && m_params &&
-       m_params->getCount() > Option::InvokeFewArgsCount)) {
-    m_invokeFewArgsDecision = false;
-  }
-  return m_invokeFewArgsDecision;
 }
 
 SimpleFunctionCallPtr SimpleFunctionCall::GetFunctionCallForCallUserFunc(

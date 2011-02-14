@@ -219,7 +219,7 @@ CPPFLAGS += \
   -isystem $(EXT_DIR)/oniguruma/include \
   -isystem $(EXT_DIR)/ldap/include \
   -isystem $(EXT_DIR)/oracle/include \
-  -isystem $(EXT_DIR)/icu/include \
+  -isystem $(ICU_INCLUDEDIR) \
   -isystem $(EXT_DIR)/xhp/include \
   -isystem $(EXT_DIR)/libmcc/include \
   -isystem $(EXT_DIR)/libch/include \
@@ -561,6 +561,7 @@ endif
 
 ICU_VERSION = 4_6
 ICU_LIBDIR = $(EXT_DIR)/icu-$(ICU_VERSION)/lib
+ICU_INCLUDEDIR = $(EXT_DIR)/icu-$(ICU_VERSION)/include
 ICU_LIBS = \
 	$(ICU_LIBDIR)/libicui18n.a \
 	$(ICU_LIBDIR)/libicuuc.a \

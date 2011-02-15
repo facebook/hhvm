@@ -161,14 +161,9 @@ Example unsupported case: phpt...bug22690
 is only supported in limited cases.
 Example unsupported case: phpt...bug24403
 
-4. Dynamic declared globals
+4. $GLOBALS is not an ordinary variable:
 
-are not supported, e.g. (phpt...bug24396)
-
-  global $$k;
-  $$k = $v;
-
-Also, in PHP, $GLOBALS can be used as a regular variable, for example,
+In php you can assign to $GLOBALS
 
   $GLOBALS = 0;
   $x = $GLOBALS - 5;
@@ -228,3 +223,5 @@ In HipHop, they are the same.
 
 In PHP, jumping to a GOTO label across try/catch blocks is allowed. In HipHop,
 it isn't.
+
+(6) ReflectionProperty::setAccessible() is not supported.

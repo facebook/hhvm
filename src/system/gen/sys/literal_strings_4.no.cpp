@@ -74,6 +74,7 @@ StaticString s_sys_ssf6c6cae3("getMulti");
 StaticString s_sys_ssf72d4a28("hasFeature");
 StaticString s_sys_ssf7da8a33("tutorial");
 StaticString s_sys_ssf7fe16d3("loadDims");
+StaticString s_sys_ssf82f565f("ReflectionProperty::setAccessible is not supported");
 StaticString s_sys_ssf833b943("loadImages");
 StaticString s_sys_ssf8395a4d("getStartLine");
 StaticString s_sys_ssf88f9505("errorinfo");
@@ -84,7 +85,6 @@ StaticString s_sys_ssfb10fd8c("parent");
 StaticString s_sys_ssfb433b54("nextrowset");
 StaticString s_sys_ssfb6412d4("): failed to open dir");
 StaticString s_sys_ssfb726449("Cannot rewind on a Continuation object");
-StaticString s_sys_ssfbb3eb52("addUrl");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

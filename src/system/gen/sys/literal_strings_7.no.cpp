@@ -22,6 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss344c5db6("hasAttributes");
 StaticString s_sys_ss37217e60("hasConstant");
 StaticString s_sys_ss372c9151("ksort");
 StaticString s_sys_ss37eff1c8("getInnerIterator");
@@ -84,7 +85,6 @@ StaticString s_sys_ss4efec04e("getResultCode");
 StaticString s_sys_ss4f2f48c7("getMessage");
 StaticString s_sys_ss4fa2c4dd("helpTitle");
 StaticString s_sys_ss500f232f("lasterrormsg");
-StaticString s_sys_ss504bc94d("isInternal");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -79,7 +79,7 @@ class c_ReflectionProperty : public ExtObjectData {
   public: bool t_isprotected();
   public: Variant t_isstatic();
   public: Variant t_isdefault();
-  public: void t_setaccessible();
+  public: void t_setaccessible(CVarRef v_accessible);
   public: Variant t_getmodifiers();
   public: Variant t_getvalue(CVarRef v_obj = null_variant);
   public: void t_setvalue(CVarRef v_obj, CVarRef v_value);

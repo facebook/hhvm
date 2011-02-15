@@ -15207,6 +15207,22 @@ bool TestCodeRun::TestAPC() {
         "var_dump($t[0]->i);\n",
         "int(100)\n");
 
+  // Serializable object in APC
+  MVCRO("<?php\n"
+        "class A implements Serializable {\n"
+        "  var $a = 123;\n"
+        "  function serialize() { return serialize($this->a); }\n"
+        "  function unserialize($s) { $this->a = unserialize($s); }\n"
+        "}\n"
+        "$o = new A;\n"
+        "apc_store('key', $o);\n"
+        "$r = apc_fetch('key');\n"
+        "var_dump($r);\n",
+        "object(A)#2 (1) {\n"
+        "  [\"a\"]=>\n"
+        "  int(123)\n"
+        "}\n");
+
   return true;
 }
 

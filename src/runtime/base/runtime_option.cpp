@@ -703,7 +703,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     ApcExpireOnSets = apc["ExpireOnSets"].getBool();
     ApcPurgeFrequency = apc["PurgeFrequency"].getInt32(4096);
 
-    ApcAllowObj = apc["AllowObj"].getBool();
+    ApcAllowObj = apc["AllowObject"].getBool();
 
     ApcKeyMaturityThreshold = apc["KeyMaturityThreshold"].getInt32(20);
     ApcMaximumCapacity = apc["MaximumCapacity"].getInt64(0);

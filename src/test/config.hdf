@@ -11,6 +11,7 @@ ErrorHandling {
 Server {
   Port = 8080
   EnableMemoryManager = false
+  APC.AllowObject = true
 
   AllowedFiles {
     0 = string

@@ -376,6 +376,10 @@ SharedVariant* SharedVariant::convertObj(CVarRef var) {
   setObjAttempted();
   PointerSet seen;
   ObjectData *obj = var.getObjectData();
+  if (obj->o_instanceof("Serializable")) {
+    // should also check the object itself
+    return NULL;
+  }
   CArrRef arr = obj->o_toArray();
   if (arr->hasInternalReference(seen, true)) {
     return NULL;

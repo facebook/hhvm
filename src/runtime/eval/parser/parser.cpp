@@ -181,6 +181,11 @@ void Token::operator=(Token &other) {
   }
 }
 
+Parser::ParserFrameInjection::ParserFrameInjection(
+  ThreadInfo *&info, const char *func, const char *fileName) :
+    FrameInjection(info, empty_string, func, false),
+    m_file(fileName) {}
+
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
@@ -227,6 +232,9 @@ void Parser::error(const char* fmt, ...) {
   Util::string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
+  ThreadInfo *info;
+  ParserFrameInjection fi(info, "include", m_fileName);
+  fi.setLine(line1());
   raise_error("%s", msg.c_str());
 }
 
@@ -771,18 +779,16 @@ void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
   out->listElems().push_back(le);
 }
 
-class InvalidLvalException : public FatalErrorException {
-public:
-  InvalidLvalException()
-      : FatalErrorException("Can't use function return/method value "
-                            "in write context") {}
-};
+void Parser::throw_invalid_lval() {
+  error("Can't use function return/method value "
+        "in write context");
+}
 
 void Parser::onAssign(Token &out, Token &var, Token &expr, bool ref) {
   out.reset();
   LvalExpressionPtr lv = get_lval_expr(var->exp());
   if (!lv) {
-    throw InvalidLvalException();
+    throw_invalid_lval();
   }
   if (ref) {
     out->exp() = NEW_EXP(AssignmentRef, lv, expr->exp());
@@ -796,7 +802,7 @@ void Parser::onAssignNew(Token &out, Token &var, Token &name, Token &args) {
   out.reset();
   LvalExpressionPtr lv = get_lval_expr(var->exp());
   if (!lv) {
-    throw InvalidLvalException();
+    throw_invalid_lval();
   }
   ExpressionPtr exp;
   exp = NEW_EXP(NewObject, name->name(), args->exprs());
@@ -831,7 +837,7 @@ void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
     {
       LvalExpressionPtr lv = operand->getExp<LvalExpression>();
       if (!lv) {
-        throw InvalidLvalException();
+        throw_invalid_lval();
       }
       out->exp() =  NEW_EXP(IncOp,operand->exp(), op == T_INC, front);
       break;
@@ -869,7 +875,7 @@ void Parser::onBinaryOpExp(Token &out, Token &operand1, Token &operand2,
     {
       LvalExpressionPtr lv = get_lval_expr(operand1->exp());
       if (!lv) {
-        throw InvalidLvalException();
+        throw_invalid_lval();
       }
       out->exp() = NEW_EXP(AssignmentOp, op, lv, operand2->exp());
       set_lval_expr(out, operand1);
@@ -893,7 +899,7 @@ void Parser::onQOp(Token &out, Token &exprCond, Token *expYes, Token &expNo) {
 
 void Parser::onArray(Token &out, Token &pairs, int op /* = T_ARRAY */) {
   if (op != T_ARRAY && !RuntimeOption::EnableHipHopSyntax) {
-    raise_error("Typed collection is not enabled: %s", getMessage().c_str());
+    error("Typed collection is not enabled: %s", getMessage().c_str());
     return;
   }
   out.reset();
@@ -1002,7 +1008,7 @@ void Parser::onClassStart(int type, Token &name, Token *parent) {
   if (name.text() == "self" || name.text() == "parent" ||
       Construct::GetTypeHintTypes().find(name.text()) !=
       Construct::GetTypeHintTypes().end()) {
-    raise_error("Cannot use '%s' as class name as it is reserved: %s",
+    error("Cannot use '%s' as class name as it is reserved: %s",
                 name.text().c_str(), getMessage().c_str());
   }
 
@@ -1139,26 +1145,26 @@ void Parser::onMemberModifier(Token &out, Token *modifiers, Token &modifier) {
 
   if ((out.num() & ClassStatement::AccessMask) &&
       (mod & ClassStatement::AccessMask)) {
-    raise_error("Multiple access type modifiers are not allowed: %s",
-                getMessage().c_str());
+    error("Multiple access type modifiers are not allowed: %s",
+          getMessage().c_str());
   }
   if ((out.num() & ClassStatement::Static) && (mod & ClassStatement::Static)) {
-    raise_error("Multiple static modifiers are not allowed: %s",
-                getMessage().c_str());
+    error("Multiple static modifiers are not allowed: %s",
+          getMessage().c_str());
   }
   if ((out.num() & ClassStatement::Abstract) &&
       (mod & ClassStatement::Abstract)) {
-    raise_error("Multiple abstract modifiers are not allowed: %s",
-                getMessage().c_str());
+    error("Multiple abstract modifiers are not allowed: %s",
+          getMessage().c_str());
   }
   if ((out.num() & ClassStatement::Final) && (mod & ClassStatement::Final)) {
-    raise_error("Multiple final modifiers are not allowed: %s",
-                getMessage().c_str());
+    error("Multiple final modifiers are not allowed: %s",
+          getMessage().c_str());
   }
   if (((out.num()|mod) & (ClassStatement::Abstract|ClassStatement::Final)) ==
       (ClassStatement::Abstract|ClassStatement::Final)) {
-    raise_error("Cannot use final modifier on an abstract class member: %s",
-                getMessage().c_str());
+    error("Cannot use final modifier on an abstract class member: %s",
+          getMessage().c_str());
   }
 
   out.setNum(out.num() | mod);
@@ -1301,8 +1307,8 @@ void Parser::onReturn(Token &out, Token *expr, bool checkYield /* = true */) {
   if (checkYield && haveFunc()) {
     FunctionStatementPtr func = peekFunc();
     if (func->hasYield()) {
-      raise_error("Cannot mix 'return' and 'yield' in the same function: %s",
-                  getMessage().c_str());
+      error("Cannot mix 'return' and 'yield' in the same function: %s",
+            getMessage().c_str());
     }
     func->setHasReturn();
   }
@@ -1310,30 +1316,30 @@ void Parser::onReturn(Token &out, Token *expr, bool checkYield /* = true */) {
 
 void Parser::onYield(Token &out, Token *expr) {
   if (!RuntimeOption::EnableHipHopSyntax) {
-    raise_error("Yield is not enabled: %s", getMessage().c_str());
+    error("Yield is not enabled: %s", getMessage().c_str());
     return;
   }
   if (!haveFunc()) {
-    raise_error("Yield cannot only be used inside a function: %s",
-                getMessage().c_str());
+    error("Yield cannot only be used inside a function: %s",
+          getMessage().c_str());
     return;
   }
 
   FunctionStatementPtr func = peekFunc();
   if (func->hasReturn()) {
-    raise_error("Cannot mix 'return' and 'yield' in the same function: %s",
-                getMessage().c_str());
+    error("Cannot mix 'return' and 'yield' in the same function: %s",
+          getMessage().c_str());
     return;
   }
   if (haveClass()) {
     if (strcasecmp(func->name().data(), peekClass()->name().data()) == 0) {
-      raise_error("'yield' is not allowed in potential constructors: %s",
-                  getMessage().c_str());
+      error("'yield' is not allowed in potential constructors: %s",
+            getMessage().c_str());
       return;
     }
     if (func->name().substr(0, 2) == "__") {
-      raise_error("'yield' is not allowed in constructor, destructor, or "
-                  "magic methods: %s", getMessage().c_str());
+      error("'yield' is not allowed in constructor, destructor, or "
+            "magic methods: %s", getMessage().c_str());
       return;
     }
   }
@@ -1498,7 +1504,7 @@ void Parser::onGoto(Token &out, Token &label, bool limited) {
 
 void Parser::onTypeDecl(Token &out, Token &type, Token &decl) {
   if (!RuntimeOption::EnableHipHopExperimentalSyntax) {
-    raise_error("Type hint is not enabled: %s", getMessage().c_str());
+    error("Type hint is not enabled: %s", getMessage().c_str());
     return;
   }
 }
@@ -1540,7 +1546,7 @@ NamePtr Parser::procStaticClassName(Token &className, bool text) {
 bool Parser::hasType(Token &type) {
   if (!type.text().empty()) {
     if (!RuntimeOption::EnableHipHopSyntax) {
-      raise_error("Type hint is not enabled: %s", getMessage().c_str());
+      error("Type hint is not enabled: %s", getMessage().c_str());
       return false;
     }
     return true;

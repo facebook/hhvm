@@ -132,7 +132,7 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
 FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
                                const char *name, ObjectData *obj,
                                int fs, bool unused)
-    : m_info(info), m_class(cls), m_name(name),
+    : m_class(cls), m_name(name),
       m_object(obj), m_line(0), m_flags(fs),
       m_staticClass(NULL), m_callingObject(NULL) {
   info = m_info = ThreadInfo::s_threadInfo.get();
@@ -141,7 +141,6 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
 #ifdef HOTPROFILER
   m_prof = false;
 #endif
-  injection_check(info);
 }
 
 FrameInjection::~FrameInjection() {

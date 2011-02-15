@@ -107,6 +107,7 @@ public:
   static bool EnableMagicQuotesGpc;
   static bool EnableKeepAlive;
   static bool ExposeHPHP;
+  static bool ExposeXFBServer;
   static int ConnectionTimeoutSeconds;
   static bool EnableOutputBuffering;
   static std::string OutputHandler;

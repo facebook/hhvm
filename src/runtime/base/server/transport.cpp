@@ -610,6 +610,11 @@ void Transport::prepareHeaders(bool compressed, const void *data, int size) {
     addHeaderImpl("X-Powered-By", "HPHP");
   }
 
+  if (RuntimeOption::ExposeXFBServer &&
+      m_responseHeaders.find("X-FB-Server") == m_responseHeaders.end()) {
+    addHeaderImpl("X-FB-Server", String(RuntimeOption::ServerPrimaryIP));
+  }
+
   // shutting down servers, so need to terminate all Keep-Alive connections
   if (!RuntimeOption::EnableKeepAlive || isServerStopping()) {
     addHeaderImpl("Connection", "close");

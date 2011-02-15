@@ -32,7 +32,7 @@ include $(PROJECT_ROOT)/src/rules.mk
 GIT_SHA1 := $(shell git describe --all --long --abbrev=40 --always)
 CPPFLAGS += -DCOMPILER_ID=\"$(GIT_SHA1)\"
 
-EXCEPTIONS := $(EXT_DIR)/mozilla/%.a $(EXT_DIR)/imap/lib/c-client.a $(ICU_LIBDIR)/%.a
+EXCEPTIONS := $(EXT_DIR)/mozilla/%.a $(EXT_DIR)/imap/lib/c-client.a
 
 STATIC_LIBS := $(filter-out $(EXCEPTIONS), $(ALL_LIBS))
 

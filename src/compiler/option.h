@@ -156,9 +156,10 @@ public:
   static bool GenHashTableInvokeFunc;
 
   /**
-   * Generate hash-table lookup based get_class_var_init
+   * Generate hash-table lookup based dynamic class functions
+   * get_class_var_init, create_object_only, etc.
    */
-  static bool GenHashTableClassVarInit;
+  static bool GenHashTableDynClass;
 
   /**
    * Separate compilation

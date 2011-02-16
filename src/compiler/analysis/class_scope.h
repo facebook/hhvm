@@ -308,9 +308,6 @@ public:
   static void outputCPPDynamicClassCreateImpl
   (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
    const std::vector<const char*> &classes);
-  static void outputCPPInvokeStaticMethodImpl
-  (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
-   const std::vector<const char*> &classes);
   static void outputCPPGetCallInfoStaticMethodImpl
   (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
    const std::vector<const char*> &classes);

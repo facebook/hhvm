@@ -315,9 +315,6 @@ do { \
 #define HASH_CALL_INFO_STATIC_METHOD_WITH_INDEX_REDECLARED(code, f)     \
   if (hash == code && !strcasecmp(s->data(), #f))                       \
     return CLASS_CHECK(g->cso_ ## f->os_get_call_info_with_index(mcp, mi, -1))
-#define HASH_GET_OBJECT_STATIC_CALLBACKS_REDECLARED(code, f)            \
-  if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(g->cwo_ ## f)
 #define HASH_GET_CLASS_VAR_INIT(code, f)                                \
   if (hash == code && !strcasecmp(s, #f))                               \
     return cw_ ## f.os_getInit(var)

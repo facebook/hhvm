@@ -2051,7 +2051,6 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
 
   ClassScope::outputCPPClassVarInitImpl(cg, merged, classes);
   ClassScope::outputCPPDynamicClassCreateImpl(cg, merged, classes);
-  ClassScope::outputCPPInvokeStaticMethodImpl(cg, merged, classes);
   ClassScope::outputCPPGetCallInfoStaticMethodImpl(cg, merged, classes);
   ClassScope::outputCPPGetStaticPropertyImpl(cg, merged, classes);
   ClassScope::outputCPPGetClassConstantImpl(cg, merged, classes);
@@ -2617,9 +2616,11 @@ void AnalysisResult::outputCPPDynamicClassTables(
   CodeGenerator::Output output) {
   outputCPPDynamicClassTables(output, 1);
   if (output != CodeGenerator::SystemCPP && Option::SplitDynamicClassTable) {
-    outputCPPDynamicClassTables(output, 2);
-    outputCPPDynamicClassTables(output, 3);
-    outputCPPDynamicClassTables(output, 4);
+    if (!Option::GenHashTableDynClass) {
+      outputCPPDynamicClassTables(output, 2);
+      outputCPPDynamicClassTables(output, 3);
+      outputCPPDynamicClassTables(output, 4);
+    }
   }
 }
 
@@ -2632,9 +2633,9 @@ void AnalysisResult::outputCPPDynamicClassTables(
     ((system || !Option::SplitDynamicClassTable) ? "dynamic_table_class"
       : "dynamic_table_class_" + lexical_cast<string>(part)) + ".no.cpp";
 
-  if (part == 1 && Option::GenHashTableClassVarInit && !system) {
+  if (part == 1 && Option::GenHashTableDynClass && !system) {
     tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
-                "dynamic_table_class_1.cpp";
+                "dynamic_table_class.cpp";
   }
 
   Util::mkdir(tablePath);
@@ -2683,18 +2684,19 @@ void AnalysisResult::outputCPPDynamicClassTables(
         classScopes[cls->getName()].push_back(cls);
       }
     }
+    bool fallThrough =
+      (!Option::SplitDynamicClassTable || Option::GenHashTableDynClass);
     switch (part) {
     case 1:
       ClassScope::outputCPPClassVarInitImpl(cg, classScopes, classes);
-      if (Option::SplitDynamicClassTable) break;
+      if (!fallThrough) break;
     case 2:
       ClassScope::outputCPPDynamicClassCreateImpl(cg, classScopes, classes);
-      if (Option::SplitDynamicClassTable) break;
+      if (!fallThrough) break;
     case 3:
-      ClassScope::outputCPPInvokeStaticMethodImpl(cg, classScopes, classes);
       ClassScope::outputCPPGetCallInfoStaticMethodImpl(cg, classScopes,
           classes);
-      if (Option::SplitDynamicClassTable) break;
+      if (!fallThrough) break;
     case 4:
       ClassScope::outputCPPGetStaticPropertyImpl(cg, classScopes, classes);
       ClassScope::outputCPPGetClassConstantImpl(cg, classScopes, classes);

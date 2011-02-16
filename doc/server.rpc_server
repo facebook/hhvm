@@ -53,6 +53,9 @@ response is stdout's output (from echos and prints) without JSON encoding.
 If none is needed, use "output=-1" to suppress them. Then an empty string will
 be returned. This may be useful, if the function is not a query but an action.
 
+If more complete information about the return value is needed, use "output=3"
+to obtain a PHP-serialized string.
+
 By default, "output=0" and function's return is encoded in JSON response.
 
 To summarize,
@@ -60,6 +63,7 @@ To summarize,
 0: (default) just function's return in JSON encoding
 1: just stdout as a string without JSON encoding
 2: both function's return and stdout in a JSON encoded array
+3: just function's return with PHP serialization
 -1: none
 
 4. File invocation

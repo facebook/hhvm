@@ -489,6 +489,10 @@ Variant f_hphp_get_iterator(Variant iterable, bool isMutable) {
       obj = iterator.getObjectData();
     }
     if (obj->o_instanceof("Iterator")) {
+      // Queue up any continuations to the first element
+      if (obj->o_instanceof("Continuation")) {
+        obj->o_invoke("next", Array());
+      }
       return obj;
     }
 

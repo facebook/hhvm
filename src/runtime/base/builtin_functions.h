@@ -628,7 +628,7 @@ public:
   int m_flags;
   int64 m_refFlags;
   bool isRef(int n) const {
-    return n <= m_argCount ? (m_refFlags & (1 << n)) : (m_flags & RefVarArgs);
+    return n < m_argCount ? (m_refFlags & (1 << n)) : (m_flags & RefVarArgs);
   }
   typedef Variant (*FuncInvoker)(void*, CArrRef);
   typedef Variant (*FuncInvokerFewArgs)(void*, int,

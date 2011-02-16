@@ -6403,6 +6403,25 @@ bool TestCodeRun::TestDynamicFunctions() {
       "$goo(foo());"
       "bar(foo());");
 
+  // Test dynamically calling a builtin that is RefVariableArguments
+  MVCR("<?php "
+      "if ($argc > 100) { $f = 'var_dump'; } else { $f = 'sscanf'; }"
+      "$auth = \"24\\tLewis Carroll\";"
+      "$n = $f($auth, \"%d\\t%s %s\", $id, $first, $last);"
+      "echo \"$id,$first,$last\\n\";");
+
+  // Test dynamically calling a builtin that is MixedVariableArguments
+  MVCR("<?php "
+      "function bar($flag) {"
+      "  $arr = array(array('b' => 3, 'a' => 2, 'c' => 1),"
+      "               array('x' => 6, 'y' => 4, 'z' => 5),"
+      "               array('p' => 8, 'q' => 9, 'r' => 7));"
+      "  if ($flag) { $f = 'var_dump'; } else { $f = 'array_multisort'; }"
+      "  $f($arr[0], $arr[1], $arr[2]);"
+      "  var_dump($arr);"
+      "}"
+      "bar($argc > 100);");
+
   return true;
 }
 

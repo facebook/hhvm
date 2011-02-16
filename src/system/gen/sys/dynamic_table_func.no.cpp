@@ -3556,10 +3556,10 @@ Variant ifa_sscanf(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg0((a0));
   CVarRef arg1((a1));
   Array p;
-  if (count >= 3) p.append(a2);
-  if (count >= 4) p.append(a3);
-  if (count >= 5) p.append(a4);
-  if (count >= 6) p.append(a5);
+  if (count >= 3) p.append(ref(a2));
+  if (count >= 4) p.append(ref(a3));
+  if (count >= 5) p.append(ref(a4));
+  if (count >= 6) p.append(ref(a5));
   return (f_sscanf(count, arg0, arg1, p));
 }
 Variant i_chop(void *extra, CArrRef params) {
@@ -4894,11 +4894,11 @@ Variant ifa_array_multisort(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count < 1) return throw_missing_arguments("array_multisort", count+1, 1);
   CVarRef arg0(ref(a0));
   Array p;
-  if (count >= 2) p.append(a1);
-  if (count >= 3) p.append(a2);
-  if (count >= 4) p.append(a3);
-  if (count >= 5) p.append(a4);
-  if (count >= 6) p.append(a5);
+  if (count >= 2) p.append(ref(a1));
+  if (count >= 3) p.append(ref(a2));
+  if (count >= 4) p.append(ref(a3));
+  if (count >= 5) p.append(ref(a4));
+  if (count >= 6) p.append(ref(a5));
   return (f_array_multisort(count, arg0, p));
 }
 Variant i_imagepsbbox(void *extra, CArrRef params) {
@@ -17744,11 +17744,11 @@ Variant ifa_call_user_func_async(void *extra, int count, INVOKE_FEW_ARGS_IMPL_AR
   if (count < 1) return throw_missing_arguments("call_user_func_async", count+1, 1);
   CVarRef arg0((a0));
   Array p;
-  if (count >= 2) p.append(a1);
-  if (count >= 3) p.append(a2);
-  if (count >= 4) p.append(a3);
-  if (count >= 5) p.append(a4);
-  if (count >= 6) p.append(a5);
+  if (count >= 2) p.append(ref(a1));
+  if (count >= 3) p.append(ref(a2));
+  if (count >= 4) p.append(ref(a3));
+  if (count >= 5) p.append(ref(a4));
+  if (count >= 6) p.append(ref(a5));
   return (f_call_user_func_async(count, arg0, p));
 }
 Variant i_drawrender(void *extra, CArrRef params) {
@@ -21918,11 +21918,11 @@ Variant ifa_forward_static_call(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARG
   if (count < 1) return throw_missing_arguments("forward_static_call", count+1, 1);
   CVarRef arg0((a0));
   Array p;
-  if (count >= 2) p.append(a1);
-  if (count >= 3) p.append(a2);
-  if (count >= 4) p.append(a3);
-  if (count >= 5) p.append(a4);
-  if (count >= 6) p.append(a5);
+  if (count >= 2) p.append(ref(a1));
+  if (count >= 3) p.append(ref(a2));
+  if (count >= 4) p.append(ref(a3));
+  if (count >= 5) p.append(ref(a4));
+  if (count >= 6) p.append(ref(a5));
   return (f_forward_static_call(count, arg0, p));
 }
 Variant i_gzencode(void *extra, CArrRef params) {
@@ -29945,11 +29945,11 @@ Variant ifa_call_user_func(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count < 1) return throw_missing_arguments("call_user_func", count+1, 1);
   CVarRef arg0((a0));
   Array p;
-  if (count >= 2) p.append(a1);
-  if (count >= 3) p.append(a2);
-  if (count >= 4) p.append(a3);
-  if (count >= 5) p.append(a4);
-  if (count >= 6) p.append(a5);
+  if (count >= 2) p.append(ref(a1));
+  if (count >= 3) p.append(ref(a2));
+  if (count >= 4) p.append(ref(a3));
+  if (count >= 5) p.append(ref(a4));
+  if (count >= 6) p.append(ref(a5));
   return (f_call_user_func(count, arg0, p));
 }
 Variant i_imap_base64(void *extra, CArrRef params) {
@@ -32146,7 +32146,7 @@ Variant ifa_call_user_func_rpc(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS
   CVarRef arg3((a3));
   CVarRef arg4((a4));
   Array p;
-  if (count >= 6) p.append(a5);
+  if (count >= 6) p.append(ref(a5));
   return (f_call_user_func_rpc(count, arg0, arg1, arg2, arg3, arg4, p));
 }
 Variant i_pixelgetalphaquantum(void *extra, CArrRef params) {
@@ -35151,10 +35151,10 @@ Variant ifa_fscanf(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg0((a0));
   CVarRef arg1((a1));
   Array p;
-  if (count >= 3) p.append(a2);
-  if (count >= 4) p.append(a3);
-  if (count >= 5) p.append(a4);
-  if (count >= 6) p.append(a5);
+  if (count >= 3) p.append(ref(a2));
+  if (count >= 4) p.append(ref(a3));
+  if (count >= 5) p.append(ref(a4));
+  if (count >= 6) p.append(ref(a5));
   return (f_fscanf(count, arg0, arg1, p));
 }
 Variant i_stristr(void *extra, CArrRef params) {

@@ -1145,6 +1145,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
   const char *voidWrapper = (m_returnType || voidWrapperOff) ? "" : ", null";
   const char *retrn = ret ? "return " : "";
   bool variable = isVariableArgument();
+  bool refVariable = isReferenceVariableArgument();
   int maxCount = fewArgs ? Option::InvokeFewArgsCount : INT_MAX;
   bool useDefaults = !m_stmt || ar->isSystem();
 
@@ -1255,7 +1256,11 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
         if (i < Option::InvokeFewArgsCount) {
           cg_printf("Array p;\n");
           for (int j = i; j < Option::InvokeFewArgsCount; j++) {
-            cg_printf("if (count >= %d) p.append(a%d);\n", j + 1, j);
+            if (refVariable) {
+              cg_printf("if (count >= %d) p.append(ref(a%d));\n", j + 1, j);
+            } else {
+              cg_printf("if (count >= %d) p.append(a%d);\n", j + 1, j);
+            }
           }
           extra = ", p";
         }

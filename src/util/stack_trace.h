@@ -42,6 +42,7 @@ public:
 
 public:
   static bool Enabled;
+  static std::string ReportDirectory;
   static std::string ReportEmail;
 
   /**

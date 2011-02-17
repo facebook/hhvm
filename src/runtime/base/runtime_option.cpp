@@ -875,6 +875,10 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     if (CoreDumpReport) {
       StackTrace::InstallReportOnErrors();
     }
+    std::string reportDirectory = debug["CoreDumpReportDirectory"].getString();
+    if (!reportDirectory.empty()) {
+      StackTrace::ReportDirectory = reportDirectory;
+    }
     LocalMemcache = debug["LocalMemcache"].getBool();
     MemcacheReadOnly = debug["MemcacheReadOnly"].getBool();
 

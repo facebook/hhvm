@@ -120,8 +120,8 @@ void FunctionContainer::outputCPPJumpTableSupport
 (CodeGenerator &cg, AnalysisResultPtr ar, bool &hasRedeclared,
  vector<const char *> *funcs /* = NULL */) {
   bool systemcpp = cg.getOutput() == CodeGenerator::SystemCPP;
-  bool profile = systemcpp;
   const char *funcPrefix = Option::FunctionPrefix;
+  if (systemcpp) funcPrefix = Option::BuiltinFunctionPrefix;
   // output invoke support methods
   for (FunctionIterator fit(m_functions, hasRedeclared); fit.ready();
       fit.next()) {
@@ -135,9 +135,6 @@ void FunctionContainer::outputCPPJumpTableSupport
 
     cg_indentBegin("Variant %s%s(void *extra, CArrRef params) {\n",
         Option::InvokePrefix, cname);
-    if (profile) {
-      cg_printf("FUNCTION_INJECTION(%s);\n", cname);
-    }
     FunctionScope::OutputCPPDynamicInvokeCount(cg);
     func->outputCPPDynamicInvoke(cg, ar, funcPrefix, cname);
     cg_indentEnd("}\n");

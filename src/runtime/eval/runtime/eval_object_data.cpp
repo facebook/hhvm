@@ -42,13 +42,6 @@ EvalObjectData::EvalObjectData(ClassEvalState &cls, const char* pname,
   m_class_name = m_cls.getClass()->name();
 }
 
-// Only used for cloning and so should not register object
-EvalObjectData::EvalObjectData(ClassEvalState &cls) :
-  DynamicObjectData(NULL, this), m_cls(cls) {
-  // an object can never live longer than its class
-  m_class_name = m_cls.getClass()->name();
-}
-
 void EvalObjectData::init() {
   m_cls.getClass()->initializeObject(this);
   DynamicObjectData::init();
@@ -372,19 +365,16 @@ Variant EvalObjectData::t___clone() {
 }
 
 ObjectData* EvalObjectData::cloneImpl() {
-  EvalObjectData *e = NEW(EvalObjectData)(m_cls);
-  if (!parent.isNull()) {
-    e->setParent(parent->clone());
-  } else {
-    cloneSet(e);
-  }
-  e->m_privates = m_privates;
-  // Registration is done here because the clone constructor is not
-  // passed root.
-  if (root == this) {
-    RequestEvalState::registerObject(e);
-  }
+  EvalObjectData *e = NEW(EvalObjectData)(m_cls,
+                                          parent.isNull() ? 0 :
+                                          parent->o_getClassName().c_str());
+  EvalObjectData::cloneSet(e);
   return e;
+}
+
+void EvalObjectData::cloneSet(ObjectData *clone) {
+  DynamicObjectData::cloneSet(clone);
+  static_cast<EvalObjectData*>(clone)->m_privates = m_privates;
 }
 
 Variant &EvalObjectData::___offsetget_lval(Variant v_name) {

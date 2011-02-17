@@ -1423,19 +1423,21 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
                  Option::ClassPrefix, clsName);
   cg_printf("%s%s *obj = NEW(%s%s)();\n", Option::ClassPrefix, clsName,
             Option::ClassPrefix, clsName);
-  cg_printf("cloneSet(obj);\n");
+  cg_printf("%s%s::cloneSet(obj);\n", Option::ClassPrefix, clsName);
   cg_printf("return obj;\n");
   cg_indentEnd("}\n");
-  cg_indentBegin("void %s%s::cloneSet(%s%s *clone) {\n",
-                 Option::ClassPrefix, clsName, Option::ClassPrefix, clsName);
-  getVariables()->outputCPPPropertyClone(cg, ar, derivesFromRedeclaring());
-  if (derivesFromRedeclaring()) {
-    cg_printf("clone->setParent(parent->clone());\n");
+  cg_indentBegin("void %s%s::cloneSet(ObjectData *cl) {\n",
+                 Option::ClassPrefix, clsName);
+  cg_printf("%s%s *clone = static_cast<%s%s*>(cl);\n",
+            Option::ClassPrefix, clsName, Option::ClassPrefix, clsName);
+  if (derivesFromRedeclaring() == DirectFromRedeclared) {
+    cg_printf("DynamicObjectData::cloneSet(clone);\n");
   } else if(!getParent().empty()) {
     cg_printf("%s%s::cloneSet(clone);\n", Option::ClassPrefix, parent.c_str());
   } else {
     cg_printf("ObjectData::cloneSet(clone);\n");
   }
+  getVariables()->outputCPPPropertyClone(cg, ar, derivesFromRedeclaring());
   cg_indentEnd("}\n");
 
   // doCall

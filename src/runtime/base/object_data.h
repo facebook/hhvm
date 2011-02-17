@@ -296,9 +296,9 @@ class ObjectData : public Countable {
   static Variant NullConstructor(MethodCallPackage &info, CArrRef params);
   static Variant NullConstructorFewArgs(MethodCallPackage &info, int count,
       INVOKE_FEW_ARGS_IMPL_ARGS);
+  virtual void cloneSet(ObjectData *clone);
  protected:
   virtual ObjectData* cloneImpl() = 0;
-  void cloneSet(ObjectData *clone);
 
   virtual bool hasCall();
   virtual bool hasCallStatic();

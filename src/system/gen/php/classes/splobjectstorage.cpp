@@ -62,7 +62,7 @@ Variant &c_SplObjectStorage::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplObjectStorage
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SplObjectStorage
 void c_SplObjectStorage::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_storage)) props.add(NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage"), m_storage.isReferenced() ? ref(m_storage) : m_storage, true);
+  if (!pubOnly) if (isInitialized(m_storage)) props.lvalAt(NAMSTR(s_sys_ss78cb1b27, "\000SplObjectStorage\000storage"), AccessFlags::Key).setWithRef(m_storage);
   if (!pubOnly) props.add(NAMSTR(s_sys_ssef33be8d, "\000SplObjectStorage\000index"), m_index, true);
   c_ObjectData::o_getArray(props, pubOnly);
 }
@@ -136,13 +136,14 @@ bool c_SplObjectStorage::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_SplObjectStorage::cloneImpl() {
   c_SplObjectStorage *obj = NEW(c_SplObjectStorage)();
-  cloneSet(obj);
+  c_SplObjectStorage::cloneSet(obj);
   return obj;
 }
-void c_SplObjectStorage::cloneSet(c_SplObjectStorage *clone) {
-  clone->m_storage = m_storage.isReferenced() ? ref(m_storage) : m_storage;
-  clone->m_index = m_index;
+void c_SplObjectStorage::cloneSet(ObjectData *cl) {
+  c_SplObjectStorage *clone = static_cast<c_SplObjectStorage*>(cl);
   ObjectData::cloneSet(clone);
+  clone->m_storage.setWithRef(m_storage);
+  clone->m_index = m_index;
 }
 Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);

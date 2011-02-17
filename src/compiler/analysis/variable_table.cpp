@@ -1517,18 +1517,9 @@ void VariableTable::outputCPPPropertyClone(CodeGenerator &cg,
     if (sym->isStatic() || sym->isOverride()) continue;
     if (sym->getFinalType()->is(Type::KindOfVariant)) {
       if (!dynamicObject || isPrivate(name)) {
-        cg_printf("clone->%s%s = %s%s.isReferenced() ? ref(%s%s) : %s%s;\n",
-                  Option::PropertyPrefix, formatted.c_str(),
-                  Option::PropertyPrefix, formatted.c_str(),
+        cg_printf("clone->%s%s.setWithRef(%s%s);\n",
                   Option::PropertyPrefix, formatted.c_str(),
                   Option::PropertyPrefix, formatted.c_str());
-      } else {
-        cg_printf("Variant v%d = o_get(", i);
-        cg_printString(name, ar, getBlockScope());
-        cg_printf(");\n");
-        cg_printf("clone->o_set(");
-        cg_printString(name, ar, getBlockScope());
-        cg_printf(", v%d.isReferenced() ? ref(v%d) : v%d);\n", i, i, i);
       }
     } else {
       cg_printf("clone->%s%s = %s%s;\n",
@@ -1629,12 +1620,10 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
         cg_printString(prop, ar, getBlockScope());
         cg_printf(", null_variant, true);\n");
       } else if (sym->getFinalType()->is(Type::KindOfVariant)) {
-        cg_printf("if (isInitialized(%s%s)) props.%s(",
-                  Option::PropertyPrefix, s, priv ? "add" : "set");
+        cg_printf("if (isInitialized(%s%s)) props.lvalAt(",
+                  Option::PropertyPrefix, s);
         cg_printString(prop, ar, getBlockScope());
-        cg_printf(", %s%s.isReferenced() ? ref(%s%s) : %s%s, "
-                  "true);\n",
-                  Option::PropertyPrefix, s, Option::PropertyPrefix, s,
+        cg_printf(", AccessFlags::Key).setWithRef(%s%s);\n",
                   Option::PropertyPrefix, s);
       } else {
         cg_printf("props.%s(", priv ? "add" : "set");

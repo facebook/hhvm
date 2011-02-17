@@ -63,8 +63,8 @@ Variant &c_Closure::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Closure
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Closure
 void c_Closure::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_func)) props.set(NAMSTR(s_sys_sse63d8c2d, "func"), m_func.isReferenced() ? ref(m_func) : m_func, true);
-  if (!pubOnly) if (isInitialized(m_vars)) props.set(NAMSTR(s_sys_ss0f30800a, "vars"), m_vars.isReferenced() ? ref(m_vars) : m_vars, true);
+  if (!pubOnly) if (isInitialized(m_func)) props.lvalAt(NAMSTR(s_sys_sse63d8c2d, "func"), AccessFlags::Key).setWithRef(m_func);
+  if (!pubOnly) if (isInitialized(m_vars)) props.lvalAt(NAMSTR(s_sys_ss0f30800a, "vars"), AccessFlags::Key).setWithRef(m_vars);
   c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Closure
@@ -118,13 +118,14 @@ bool c_Closure::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_Closure::cloneImpl() {
   c_Closure *obj = NEW(c_Closure)();
-  cloneSet(obj);
+  c_Closure::cloneSet(obj);
   return obj;
 }
-void c_Closure::cloneSet(c_Closure *clone) {
-  clone->m_func = m_func.isReferenced() ? ref(m_func) : m_func;
-  clone->m_vars = m_vars.isReferenced() ? ref(m_vars) : m_vars;
+void c_Closure::cloneSet(ObjectData *cl) {
+  c_Closure *clone = static_cast<c_Closure*>(cl);
   ObjectData::cloneSet(clone);
+  clone->m_func.setWithRef(m_func);
+  clone->m_vars.setWithRef(m_vars);
 }
 Variant c_Closure::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
@@ -501,12 +502,12 @@ Variant &c_Continuation::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Continuation
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Continuation
 void c_Continuation::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_obj)) props.add(NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj"), m_obj.isReferenced() ? ref(m_obj) : m_obj, true);
-  if (!pubOnly) if (isInitialized(m_args)) props.add(NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args"), m_args.isReferenced() ? ref(m_args) : m_args, true);
-  if (isInitialized(m_label)) props.set(NAMSTR(s_sys_ss1491baad, "label"), m_label.isReferenced() ? ref(m_label) : m_label, true);
+  if (!pubOnly) if (isInitialized(m_obj)) props.lvalAt(NAMSTR(s_sys_ssc9ae0c06, "\000Continuation\000obj"), AccessFlags::Key).setWithRef(m_obj);
+  if (!pubOnly) if (isInitialized(m_args)) props.lvalAt(NAMSTR(s_sys_ss9621feb5, "\000Continuation\000args"), AccessFlags::Key).setWithRef(m_args);
+  if (isInitialized(m_label)) props.lvalAt(NAMSTR(s_sys_ss1491baad, "label"), AccessFlags::Key).setWithRef(m_label);
   if (!pubOnly) props.add(NAMSTR(s_sys_ss837e9a25, "\000Continuation\000done"), m_done, true);
   if (!pubOnly) props.add(NAMSTR(s_sys_sscbecc3ad, "\000Continuation\000index"), m_index, true);
-  if (!pubOnly) if (isInitialized(m_value)) props.add(NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value"), m_value.isReferenced() ? ref(m_value) : m_value, true);
+  if (!pubOnly) if (isInitialized(m_value)) props.lvalAt(NAMSTR(s_sys_ss4e65aff3, "\000Continuation\000value"), AccessFlags::Key).setWithRef(m_value);
   if (!pubOnly) props.add(NAMSTR(s_sys_ssde0dbfb2, "\000Continuation\000running"), m_running, true);
   c_Closure::o_getArray(props, pubOnly);
 }
@@ -604,18 +605,19 @@ bool c_Continuation::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_Continuation::cloneImpl() {
   c_Continuation *obj = NEW(c_Continuation)();
-  cloneSet(obj);
+  c_Continuation::cloneSet(obj);
   return obj;
 }
-void c_Continuation::cloneSet(c_Continuation *clone) {
-  clone->m_obj = m_obj.isReferenced() ? ref(m_obj) : m_obj;
-  clone->m_args = m_args.isReferenced() ? ref(m_args) : m_args;
-  clone->m_label = m_label.isReferenced() ? ref(m_label) : m_label;
+void c_Continuation::cloneSet(ObjectData *cl) {
+  c_Continuation *clone = static_cast<c_Continuation*>(cl);
+  c_Closure::cloneSet(clone);
+  clone->m_obj.setWithRef(m_obj);
+  clone->m_args.setWithRef(m_args);
+  clone->m_label.setWithRef(m_label);
   clone->m_done = m_done;
   clone->m_index = m_index;
-  clone->m_value = m_value.isReferenced() ? ref(m_value) : m_value;
+  clone->m_value.setWithRef(m_value);
   clone->m_running = m_running;
-  c_Closure::cloneSet(clone);
 }
 Variant c_Continuation::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);

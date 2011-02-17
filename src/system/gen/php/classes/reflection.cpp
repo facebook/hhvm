@@ -59,7 +59,7 @@ Variant &c_ReflectionFunctionAbstract::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionFunctionAbstract
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionFunctionAbstract
 void c_ReflectionFunctionAbstract::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss33988b3e, "info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
+  if (!pubOnly) if (isInitialized(m_info)) props.lvalAt(NAMSTR(s_sys_ss33988b3e, "info"), AccessFlags::Key).setWithRef(m_info);
   c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionFunctionAbstract
@@ -110,12 +110,13 @@ bool c_ReflectionFunctionAbstract::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_ReflectionFunctionAbstract::cloneImpl() {
   c_ReflectionFunctionAbstract *obj = NEW(c_ReflectionFunctionAbstract)();
-  cloneSet(obj);
+  c_ReflectionFunctionAbstract::cloneSet(obj);
   return obj;
 }
-void c_ReflectionFunctionAbstract::cloneSet(c_ReflectionFunctionAbstract *clone) {
-  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
+void c_ReflectionFunctionAbstract::cloneSet(ObjectData *cl) {
+  c_ReflectionFunctionAbstract *clone = static_cast<c_ReflectionFunctionAbstract*>(cl);
   ObjectData::cloneSet(clone);
+  clone->m_info.setWithRef(m_info);
 }
 Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
@@ -921,10 +922,11 @@ bool c_ReflectionObject::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_ReflectionObject::cloneImpl() {
   c_ReflectionObject *obj = NEW(c_ReflectionObject)();
-  cloneSet(obj);
+  c_ReflectionObject::cloneSet(obj);
   return obj;
 }
-void c_ReflectionObject::cloneSet(c_ReflectionObject *clone) {
+void c_ReflectionObject::cloneSet(ObjectData *cl) {
+  c_ReflectionObject *clone = static_cast<c_ReflectionObject*>(cl);
   c_ReflectionClass::cloneSet(clone);
 }
 Variant c_ReflectionObject::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1118,10 +1120,11 @@ bool c_ReflectionException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_ReflectionException::cloneImpl() {
   c_ReflectionException *obj = NEW(c_ReflectionException)();
-  cloneSet(obj);
+  c_ReflectionException::cloneSet(obj);
   return obj;
 }
-void c_ReflectionException::cloneSet(c_ReflectionException *clone) {
+void c_ReflectionException::cloneSet(ObjectData *cl) {
+  c_ReflectionException *clone = static_cast<c_ReflectionException*>(cl);
   c_Exception::cloneSet(clone);
 }
 Variant c_ReflectionException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1184,8 +1187,8 @@ Variant &c_ReflectionClass::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionClass
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionClass
 void c_ReflectionClass::o_getArray(Array &props, bool pubOnly) const {
-  if (isInitialized(m_name)) props.set(NAMSTR(s_sys_ssdc3cbddc, "name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
-  if (!pubOnly) if (isInitialized(m_info)) props.add(NAMSTR(s_sys_ss84e1d89d, "\000ReflectionClass\000info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
+  if (isInitialized(m_name)) props.lvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Key).setWithRef(m_name);
+  if (!pubOnly) if (isInitialized(m_info)) props.lvalAt(NAMSTR(s_sys_ss84e1d89d, "\000ReflectionClass\000info"), AccessFlags::Key).setWithRef(m_info);
   c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionClass
@@ -1267,13 +1270,14 @@ bool c_ReflectionClass::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_ReflectionClass::cloneImpl() {
   c_ReflectionClass *obj = NEW(c_ReflectionClass)();
-  cloneSet(obj);
+  c_ReflectionClass::cloneSet(obj);
   return obj;
 }
-void c_ReflectionClass::cloneSet(c_ReflectionClass *clone) {
-  clone->m_name = m_name.isReferenced() ? ref(m_name) : m_name;
-  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
+void c_ReflectionClass::cloneSet(ObjectData *cl) {
+  c_ReflectionClass *clone = static_cast<c_ReflectionClass*>(cl);
   ObjectData::cloneSet(clone);
+  clone->m_name.setWithRef(m_name);
+  clone->m_info.setWithRef(m_info);
 }
 Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
@@ -4321,8 +4325,8 @@ Variant &c_ReflectionExtension::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionExtension
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionExtension
 void c_ReflectionExtension::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_name)) props.add(NAMSTR(s_sys_ss8bbc8ede, "\000ReflectionExtension\000name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
-  if (!pubOnly) if (isInitialized(m_info)) props.add(NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
+  if (!pubOnly) if (isInitialized(m_name)) props.lvalAt(NAMSTR(s_sys_ss8bbc8ede, "\000ReflectionExtension\000name"), AccessFlags::Key).setWithRef(m_name);
+  if (!pubOnly) if (isInitialized(m_info)) props.lvalAt(NAMSTR(s_sys_ss5596f6c8, "\000ReflectionExtension\000info"), AccessFlags::Key).setWithRef(m_info);
   c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionExtension
@@ -4390,13 +4394,14 @@ bool c_ReflectionExtension::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_ReflectionExtension::cloneImpl() {
   c_ReflectionExtension *obj = NEW(c_ReflectionExtension)();
-  cloneSet(obj);
+  c_ReflectionExtension::cloneSet(obj);
   return obj;
 }
-void c_ReflectionExtension::cloneSet(c_ReflectionExtension *clone) {
-  clone->m_name = m_name.isReferenced() ? ref(m_name) : m_name;
-  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
+void c_ReflectionExtension::cloneSet(ObjectData *cl) {
+  c_ReflectionExtension *clone = static_cast<c_ReflectionExtension*>(cl);
   ObjectData::cloneSet(clone);
+  clone->m_name.setWithRef(m_name);
+  clone->m_info.setWithRef(m_info);
 }
 Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
@@ -5147,8 +5152,8 @@ Variant &c_ReflectionMethod::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionMethod
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionMethod
 void c_ReflectionMethod::o_getArray(Array &props, bool pubOnly) const {
-  if (isInitialized(m_name)) props.set(NAMSTR(s_sys_ssdc3cbddc, "name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
-  if (isInitialized(m_class)) props.set(NAMSTR(s_sys_ssc82dbd12, "class"), m_class.isReferenced() ? ref(m_class) : m_class, true);
+  if (isInitialized(m_name)) props.lvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Key).setWithRef(m_name);
+  if (isInitialized(m_class)) props.lvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Key).setWithRef(m_class);
   c_ReflectionFunctionAbstract::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionMethod
@@ -5229,13 +5234,14 @@ bool c_ReflectionMethod::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_ReflectionMethod::cloneImpl() {
   c_ReflectionMethod *obj = NEW(c_ReflectionMethod)();
-  cloneSet(obj);
+  c_ReflectionMethod::cloneSet(obj);
   return obj;
 }
-void c_ReflectionMethod::cloneSet(c_ReflectionMethod *clone) {
-  clone->m_name = m_name.isReferenced() ? ref(m_name) : m_name;
-  clone->m_class = m_class.isReferenced() ? ref(m_class) : m_class;
+void c_ReflectionMethod::cloneSet(ObjectData *cl) {
+  c_ReflectionMethod *clone = static_cast<c_ReflectionMethod*>(cl);
   c_ReflectionFunctionAbstract::cloneSet(clone);
+  clone->m_name.setWithRef(m_name);
+  clone->m_class.setWithRef(m_class);
 }
 Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
@@ -6415,9 +6421,9 @@ Variant &c_ReflectionProperty::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionProperty
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionProperty
 void c_ReflectionProperty::o_getArray(Array &props, bool pubOnly) const {
-  if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss33988b3e, "info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
-  if (isInitialized(m_name)) props.set(NAMSTR(s_sys_ssdc3cbddc, "name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
-  if (isInitialized(m_class)) props.set(NAMSTR(s_sys_ssc82dbd12, "class"), m_class.isReferenced() ? ref(m_class) : m_class, true);
+  if (isInitialized(m_info)) props.lvalAt(NAMSTR(s_sys_ss33988b3e, "info"), AccessFlags::Key).setWithRef(m_info);
+  if (isInitialized(m_name)) props.lvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Key).setWithRef(m_name);
+  if (isInitialized(m_class)) props.lvalAt(NAMSTR(s_sys_ssc82dbd12, "class"), AccessFlags::Key).setWithRef(m_class);
   c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionProperty
@@ -6494,14 +6500,15 @@ bool c_ReflectionProperty::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_ReflectionProperty::cloneImpl() {
   c_ReflectionProperty *obj = NEW(c_ReflectionProperty)();
-  cloneSet(obj);
+  c_ReflectionProperty::cloneSet(obj);
   return obj;
 }
-void c_ReflectionProperty::cloneSet(c_ReflectionProperty *clone) {
-  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
-  clone->m_name = m_name.isReferenced() ? ref(m_name) : m_name;
-  clone->m_class = m_class.isReferenced() ? ref(m_class) : m_class;
+void c_ReflectionProperty::cloneSet(ObjectData *cl) {
+  c_ReflectionProperty *clone = static_cast<c_ReflectionProperty*>(cl);
   ObjectData::cloneSet(clone);
+  clone->m_info.setWithRef(m_info);
+  clone->m_name.setWithRef(m_name);
+  clone->m_class.setWithRef(m_class);
 }
 Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
@@ -7641,10 +7648,11 @@ bool c_ReflectionFunction::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_ReflectionFunction::cloneImpl() {
   c_ReflectionFunction *obj = NEW(c_ReflectionFunction)();
-  cloneSet(obj);
+  c_ReflectionFunction::cloneSet(obj);
   return obj;
 }
-void c_ReflectionFunction::cloneSet(c_ReflectionFunction *clone) {
+void c_ReflectionFunction::cloneSet(ObjectData *cl) {
+  c_ReflectionFunction *clone = static_cast<c_ReflectionFunction*>(cl);
   c_ReflectionFunctionAbstract::cloneSet(clone);
 }
 Variant c_ReflectionFunction::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -8110,7 +8118,7 @@ Variant &c_ReflectionParameter::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionParameter
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionParameter
 void c_ReflectionParameter::o_getArray(Array &props, bool pubOnly) const {
-  if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss33988b3e, "info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
+  if (isInitialized(m_info)) props.lvalAt(NAMSTR(s_sys_ss33988b3e, "info"), AccessFlags::Key).setWithRef(m_info);
   c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionParameter
@@ -8164,12 +8172,13 @@ bool c_ReflectionParameter::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_ReflectionParameter::cloneImpl() {
   c_ReflectionParameter *obj = NEW(c_ReflectionParameter)();
-  cloneSet(obj);
+  c_ReflectionParameter::cloneSet(obj);
   return obj;
 }
-void c_ReflectionParameter::cloneSet(c_ReflectionParameter *clone) {
-  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
+void c_ReflectionParameter::cloneSet(ObjectData *cl) {
+  c_ReflectionParameter *clone = static_cast<c_ReflectionParameter*>(cl);
   ObjectData::cloneSet(clone);
+  clone->m_info.setWithRef(m_info);
 }
 Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);

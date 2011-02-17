@@ -154,7 +154,7 @@ namespace HPHP {
   DECLARE_OBJECT_ALLOCATION(c_##cls)                                    \
   protected:                                                            \
   ObjectData *cloneImpl();                                              \
-  void cloneSet(c_##cls *cl);                                           \
+  void cloneSet(ObjectData *cl);                                        \
   public:                                                               \
   static const char *GetClassName() { return #originalName; }           \
   static StaticString s_class_name;                                     \

@@ -93,10 +93,11 @@ bool c_UnexpectedValueException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_UnexpectedValueException::cloneImpl() {
   c_UnexpectedValueException *obj = NEW(c_UnexpectedValueException)();
-  cloneSet(obj);
+  c_UnexpectedValueException::cloneSet(obj);
   return obj;
 }
-void c_UnexpectedValueException::cloneSet(c_UnexpectedValueException *clone) {
+void c_UnexpectedValueException::cloneSet(ObjectData *cl) {
+  c_UnexpectedValueException *clone = static_cast<c_UnexpectedValueException*>(cl);
   c_RuntimeException::cloneSet(clone);
 }
 Variant c_UnexpectedValueException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -188,10 +189,11 @@ bool c_OverflowException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_OverflowException::cloneImpl() {
   c_OverflowException *obj = NEW(c_OverflowException)();
-  cloneSet(obj);
+  c_OverflowException::cloneSet(obj);
   return obj;
 }
-void c_OverflowException::cloneSet(c_OverflowException *clone) {
+void c_OverflowException::cloneSet(ObjectData *cl) {
+  c_OverflowException *clone = static_cast<c_OverflowException*>(cl);
   c_RuntimeException::cloneSet(clone);
 }
 Variant c_OverflowException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -283,10 +285,11 @@ bool c_OutOfBoundsException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_OutOfBoundsException::cloneImpl() {
   c_OutOfBoundsException *obj = NEW(c_OutOfBoundsException)();
-  cloneSet(obj);
+  c_OutOfBoundsException::cloneSet(obj);
   return obj;
 }
-void c_OutOfBoundsException::cloneSet(c_OutOfBoundsException *clone) {
+void c_OutOfBoundsException::cloneSet(ObjectData *cl) {
+  c_OutOfBoundsException *clone = static_cast<c_OutOfBoundsException*>(cl);
   c_RuntimeException::cloneSet(clone);
 }
 Variant c_OutOfBoundsException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -377,10 +380,11 @@ bool c_LogicException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_LogicException::cloneImpl() {
   c_LogicException *obj = NEW(c_LogicException)();
-  cloneSet(obj);
+  c_LogicException::cloneSet(obj);
   return obj;
 }
-void c_LogicException::cloneSet(c_LogicException *clone) {
+void c_LogicException::cloneSet(ObjectData *cl) {
+  c_LogicException *clone = static_cast<c_LogicException*>(cl);
   c_Exception::cloneSet(clone);
 }
 Variant c_LogicException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -472,10 +476,11 @@ bool c_RangeException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_RangeException::cloneImpl() {
   c_RangeException *obj = NEW(c_RangeException)();
-  cloneSet(obj);
+  c_RangeException::cloneSet(obj);
   return obj;
 }
-void c_RangeException::cloneSet(c_RangeException *clone) {
+void c_RangeException::cloneSet(ObjectData *cl) {
+  c_RangeException *clone = static_cast<c_RangeException*>(cl);
   c_RuntimeException::cloneSet(clone);
 }
 Variant c_RangeException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -569,10 +574,11 @@ bool c_InvalidArgumentException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_InvalidArgumentException::cloneImpl() {
   c_InvalidArgumentException *obj = NEW(c_InvalidArgumentException)();
-  cloneSet(obj);
+  c_InvalidArgumentException::cloneSet(obj);
   return obj;
 }
-void c_InvalidArgumentException::cloneSet(c_InvalidArgumentException *clone) {
+void c_InvalidArgumentException::cloneSet(ObjectData *cl) {
+  c_InvalidArgumentException *clone = static_cast<c_InvalidArgumentException*>(cl);
   c_LogicException::cloneSet(clone);
 }
 Variant c_InvalidArgumentException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -662,10 +668,11 @@ bool c_UnderflowException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_UnderflowException::cloneImpl() {
   c_UnderflowException *obj = NEW(c_UnderflowException)();
-  cloneSet(obj);
+  c_UnderflowException::cloneSet(obj);
   return obj;
 }
-void c_UnderflowException::cloneSet(c_UnderflowException *clone) {
+void c_UnderflowException::cloneSet(ObjectData *cl) {
+  c_UnderflowException *clone = static_cast<c_UnderflowException*>(cl);
   c_RuntimeException::cloneSet(clone);
 }
 Variant c_UnderflowException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -757,10 +764,11 @@ bool c_OutOfRangeException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_OutOfRangeException::cloneImpl() {
   c_OutOfRangeException *obj = NEW(c_OutOfRangeException)();
-  cloneSet(obj);
+  c_OutOfRangeException::cloneSet(obj);
   return obj;
 }
-void c_OutOfRangeException::cloneSet(c_OutOfRangeException *clone) {
+void c_OutOfRangeException::cloneSet(ObjectData *cl) {
+  c_OutOfRangeException *clone = static_cast<c_OutOfRangeException*>(cl);
   c_LogicException::cloneSet(clone);
 }
 Variant c_OutOfRangeException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -857,10 +865,11 @@ bool c_BadMethodCallException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_BadMethodCallException::cloneImpl() {
   c_BadMethodCallException *obj = NEW(c_BadMethodCallException)();
-  cloneSet(obj);
+  c_BadMethodCallException::cloneSet(obj);
   return obj;
 }
-void c_BadMethodCallException::cloneSet(c_BadMethodCallException *clone) {
+void c_BadMethodCallException::cloneSet(ObjectData *cl) {
+  c_BadMethodCallException *clone = static_cast<c_BadMethodCallException*>(cl);
   c_BadFunctionCallException::cloneSet(clone);
 }
 Variant c_BadMethodCallException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -949,10 +958,11 @@ bool c_RuntimeException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_RuntimeException::cloneImpl() {
   c_RuntimeException *obj = NEW(c_RuntimeException)();
-  cloneSet(obj);
+  c_RuntimeException::cloneSet(obj);
   return obj;
 }
-void c_RuntimeException::cloneSet(c_RuntimeException *clone) {
+void c_RuntimeException::cloneSet(ObjectData *cl) {
+  c_RuntimeException *clone = static_cast<c_RuntimeException*>(cl);
   c_Exception::cloneSet(clone);
 }
 Variant c_RuntimeException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1024,11 +1034,11 @@ Variant &c_Exception::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Exception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Exception
 void c_Exception::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_message)) props.set(NAMSTR(s_sys_ss155366df, "message"), m_message.isReferenced() ? ref(m_message) : m_message, true);
-  if (!pubOnly) if (isInitialized(m_code)) props.set(NAMSTR(s_sys_ssab7a1dec, "code"), m_code.isReferenced() ? ref(m_code) : m_code, true);
-  if (!pubOnly) if (isInitialized(m_file)) props.set(NAMSTR(s_sys_ss8ce7db5b, "file"), m_file.isReferenced() ? ref(m_file) : m_file, true);
-  if (!pubOnly) if (isInitialized(m_line)) props.set(NAMSTR(s_sys_ssddf8728c, "line"), m_line.isReferenced() ? ref(m_line) : m_line, true);
-  if (!pubOnly) if (isInitialized(m_trace)) props.set(NAMSTR(s_sys_ss94c9ce77, "trace"), m_trace.isReferenced() ? ref(m_trace) : m_trace, true);
+  if (!pubOnly) if (isInitialized(m_message)) props.lvalAt(NAMSTR(s_sys_ss155366df, "message"), AccessFlags::Key).setWithRef(m_message);
+  if (!pubOnly) if (isInitialized(m_code)) props.lvalAt(NAMSTR(s_sys_ssab7a1dec, "code"), AccessFlags::Key).setWithRef(m_code);
+  if (!pubOnly) if (isInitialized(m_file)) props.lvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Key).setWithRef(m_file);
+  if (!pubOnly) if (isInitialized(m_line)) props.lvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Key).setWithRef(m_line);
+  if (!pubOnly) if (isInitialized(m_trace)) props.lvalAt(NAMSTR(s_sys_ss94c9ce77, "trace"), AccessFlags::Key).setWithRef(m_trace);
   c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Exception
@@ -1091,16 +1101,17 @@ bool c_Exception::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_Exception::cloneImpl() {
   c_Exception *obj = NEW(c_Exception)();
-  cloneSet(obj);
+  c_Exception::cloneSet(obj);
   return obj;
 }
-void c_Exception::cloneSet(c_Exception *clone) {
-  clone->m_message = m_message.isReferenced() ? ref(m_message) : m_message;
-  clone->m_code = m_code.isReferenced() ? ref(m_code) : m_code;
-  clone->m_file = m_file.isReferenced() ? ref(m_file) : m_file;
-  clone->m_line = m_line.isReferenced() ? ref(m_line) : m_line;
-  clone->m_trace = m_trace.isReferenced() ? ref(m_trace) : m_trace;
+void c_Exception::cloneSet(ObjectData *cl) {
+  c_Exception *clone = static_cast<c_Exception*>(cl);
   ObjectData::cloneSet(clone);
+  clone->m_message.setWithRef(m_message);
+  clone->m_code.setWithRef(m_code);
+  clone->m_file.setWithRef(m_file);
+  clone->m_line.setWithRef(m_line);
+  clone->m_trace.setWithRef(m_trace);
 }
 Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
@@ -1850,7 +1861,7 @@ Variant &c_ErrorException::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ErrorException
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ErrorException
 void c_ErrorException::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_severity)) props.set(NAMSTR(s_sys_ssb84c8cfa, "severity"), m_severity.isReferenced() ? ref(m_severity) : m_severity, true);
+  if (!pubOnly) if (isInitialized(m_severity)) props.lvalAt(NAMSTR(s_sys_ssb84c8cfa, "severity"), AccessFlags::Key).setWithRef(m_severity);
   c_Exception::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ErrorException
@@ -1904,12 +1915,13 @@ bool c_ErrorException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_ErrorException::cloneImpl() {
   c_ErrorException *obj = NEW(c_ErrorException)();
-  cloneSet(obj);
+  c_ErrorException::cloneSet(obj);
   return obj;
 }
-void c_ErrorException::cloneSet(c_ErrorException *clone) {
-  clone->m_severity = m_severity.isReferenced() ? ref(m_severity) : m_severity;
+void c_ErrorException::cloneSet(ObjectData *cl) {
+  c_ErrorException *clone = static_cast<c_ErrorException*>(cl);
   c_Exception::cloneSet(clone);
+  clone->m_severity.setWithRef(m_severity);
 }
 Variant c_ErrorException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
@@ -2301,10 +2313,11 @@ bool c_BadFunctionCallException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_BadFunctionCallException::cloneImpl() {
   c_BadFunctionCallException *obj = NEW(c_BadFunctionCallException)();
-  cloneSet(obj);
+  c_BadFunctionCallException::cloneSet(obj);
   return obj;
 }
-void c_BadFunctionCallException::cloneSet(c_BadFunctionCallException *clone) {
+void c_BadFunctionCallException::cloneSet(ObjectData *cl) {
+  c_BadFunctionCallException *clone = static_cast<c_BadFunctionCallException*>(cl);
   c_LogicException::cloneSet(clone);
 }
 Variant c_BadFunctionCallException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -2396,10 +2409,11 @@ bool c_LengthException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_LengthException::cloneImpl() {
   c_LengthException *obj = NEW(c_LengthException)();
-  cloneSet(obj);
+  c_LengthException::cloneSet(obj);
   return obj;
 }
-void c_LengthException::cloneSet(c_LengthException *clone) {
+void c_LengthException::cloneSet(ObjectData *cl) {
+  c_LengthException *clone = static_cast<c_LengthException*>(cl);
   c_LogicException::cloneSet(clone);
 }
 Variant c_LengthException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -2491,10 +2505,11 @@ bool c_DomainException::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_DomainException::cloneImpl() {
   c_DomainException *obj = NEW(c_DomainException)();
-  cloneSet(obj);
+  c_DomainException::cloneSet(obj);
   return obj;
 }
-void c_DomainException::cloneSet(c_DomainException *clone) {
+void c_DomainException::cloneSet(ObjectData *cl) {
+  c_DomainException *clone = static_cast<c_DomainException*>(cl);
   c_LogicException::cloneSet(clone);
 }
 Variant c_DomainException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

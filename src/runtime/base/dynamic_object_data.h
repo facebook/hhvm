@@ -38,8 +38,6 @@ class DynamicObjectData : public ObjectData {
   virtual void setRoot(ObjectData *r);
   virtual ObjectData *getRoot();
 
-  virtual ObjectData* clone();
-
   // properties
   virtual Array o_toArray(bool warn = false) const;
   virtual Array o_getDynamicProperties() const;
@@ -75,6 +73,7 @@ class DynamicObjectData : public ObjectData {
   ObjectData *getRedeclaredParent() const { return parent.get(); }
 
  protected:
+  void cloneSet(ObjectData *clone);
   ObjectData* root;
   Object parent;
 };

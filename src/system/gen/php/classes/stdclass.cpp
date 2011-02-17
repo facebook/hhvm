@@ -89,10 +89,11 @@ bool c_stdClass::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_stdClass::cloneImpl() {
   c_stdClass *obj = NEW(c_stdClass)();
-  cloneSet(obj);
+  c_stdClass::cloneSet(obj);
   return obj;
 }
-void c_stdClass::cloneSet(c_stdClass *clone) {
+void c_stdClass::cloneSet(ObjectData *cl) {
+  c_stdClass *clone = static_cast<c_stdClass*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_stdClass::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -179,10 +180,11 @@ bool c___PHP_Incomplete_Class::o_instanceof(CStrRef s) const {
 }
 ObjectData *c___PHP_Incomplete_Class::cloneImpl() {
   c___PHP_Incomplete_Class *obj = NEW(c___PHP_Incomplete_Class)();
-  cloneSet(obj);
+  c___PHP_Incomplete_Class::cloneSet(obj);
   return obj;
 }
-void c___PHP_Incomplete_Class::cloneSet(c___PHP_Incomplete_Class *clone) {
+void c___PHP_Incomplete_Class::cloneSet(ObjectData *cl) {
+  c___PHP_Incomplete_Class *clone = static_cast<c___PHP_Incomplete_Class*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c___PHP_Incomplete_Class::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

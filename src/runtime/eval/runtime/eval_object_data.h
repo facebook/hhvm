@@ -32,7 +32,6 @@ class EvalObjectData : public DynamicObjectData {
 public:
   EvalObjectData(ClassEvalState &cls, const char* pname,
                  ObjectData *r = NULL);
-  EvalObjectData(ClassEvalState &cls);
   void dynConstruct(CArrRef params);
   void dynConstructFromEval(VariableEnvironment &env,
                             const FunctionCallExpression *call);
@@ -86,6 +85,7 @@ public:
 
 protected:
   virtual ObjectData* cloneImpl();
+  virtual void cloneSet(ObjectData *clone);
 
   virtual bool hasCall();
   virtual bool hasCallStatic();

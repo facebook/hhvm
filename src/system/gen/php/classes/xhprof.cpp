@@ -97,10 +97,11 @@ bool c_XhprofFrame::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_XhprofFrame::cloneImpl() {
   c_XhprofFrame *obj = NEW(c_XhprofFrame)();
-  cloneSet(obj);
+  c_XhprofFrame::cloneSet(obj);
   return obj;
 }
-void c_XhprofFrame::cloneSet(c_XhprofFrame *clone) {
+void c_XhprofFrame::cloneSet(ObjectData *cl) {
+  c_XhprofFrame *clone = static_cast<c_XhprofFrame*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_XhprofFrame::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

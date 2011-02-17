@@ -61,8 +61,8 @@ Variant &c_Directory::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Directory
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Directory
 void c_Directory::o_getArray(Array &props, bool pubOnly) const {
-  if (isInitialized(m_path)) props.set(NAMSTR(s_sys_ssf362b3c4, "path"), m_path.isReferenced() ? ref(m_path) : m_path, true);
-  if (isInitialized(m_handle)) props.set(NAMSTR(s_sys_ss46eeef5c, "handle"), m_handle.isReferenced() ? ref(m_handle) : m_handle, true);
+  if (isInitialized(m_path)) props.lvalAt(NAMSTR(s_sys_ssf362b3c4, "path"), AccessFlags::Key).setWithRef(m_path);
+  if (isInitialized(m_handle)) props.lvalAt(NAMSTR(s_sys_ss46eeef5c, "handle"), AccessFlags::Key).setWithRef(m_handle);
   c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Directory
@@ -116,13 +116,14 @@ bool c_Directory::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_Directory::cloneImpl() {
   c_Directory *obj = NEW(c_Directory)();
-  cloneSet(obj);
+  c_Directory::cloneSet(obj);
   return obj;
 }
-void c_Directory::cloneSet(c_Directory *clone) {
-  clone->m_path = m_path.isReferenced() ? ref(m_path) : m_path;
-  clone->m_handle = m_handle.isReferenced() ? ref(m_handle) : m_handle;
+void c_Directory::cloneSet(ObjectData *cl) {
+  c_Directory *clone = static_cast<c_Directory*>(cl);
   ObjectData::cloneSet(clone);
+  clone->m_path.setWithRef(m_path);
+  clone->m_handle.setWithRef(m_handle);
 }
 Variant c_Directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);

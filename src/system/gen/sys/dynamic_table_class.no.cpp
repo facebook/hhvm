@@ -582,10 +582,11 @@ void c_PDOException::destruct() {
 }
 ObjectData *c_PDOException::cloneImpl() {
   c_PDOException *obj = NEW(c_PDOException)();
-  cloneSet(obj);
+  c_PDOException::cloneSet(obj);
   return obj;
 }
-void c_PDOException::cloneSet(c_PDOException *clone) {
+void c_PDOException::cloneSet(ObjectData *cl) {
+  c_PDOException *clone = static_cast<c_PDOException*>(cl);
   c_Exception::cloneSet(clone);
 }
 Variant c_PDOException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -805,10 +806,11 @@ void c_DOMDocumentFragment::destruct() {
 }
 ObjectData *c_DOMDocumentFragment::cloneImpl() {
   c_DOMDocumentFragment *obj = NEW(c_DOMDocumentFragment)();
-  cloneSet(obj);
+  c_DOMDocumentFragment::cloneSet(obj);
   return obj;
 }
-void c_DOMDocumentFragment::cloneSet(c_DOMDocumentFragment *clone) {
+void c_DOMDocumentFragment::cloneSet(ObjectData *cl) {
+  c_DOMDocumentFragment *clone = static_cast<c_DOMDocumentFragment*>(cl);
   c_DOMNode::cloneSet(clone);
 }
 Variant c_DOMDocumentFragment::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1086,10 +1088,11 @@ void c_DOMText::destruct() {
 }
 ObjectData *c_DOMText::cloneImpl() {
   c_DOMText *obj = NEW(c_DOMText)();
-  cloneSet(obj);
+  c_DOMText::cloneSet(obj);
   return obj;
 }
-void c_DOMText::cloneSet(c_DOMText *clone) {
+void c_DOMText::cloneSet(ObjectData *cl) {
+  c_DOMText *clone = static_cast<c_DOMText*>(cl);
   c_DOMCharacterData::cloneSet(clone);
 }
 Variant c_DOMText::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -1640,10 +1643,11 @@ void c_DebuggerClient::destruct() {
 }
 ObjectData *c_DebuggerClient::cloneImpl() {
   c_DebuggerClient *obj = NEW(c_DebuggerClient)();
-  cloneSet(obj);
+  c_DebuggerClient::cloneSet(obj);
   return obj;
 }
-void c_DebuggerClient::cloneSet(c_DebuggerClient *clone) {
+void c_DebuggerClient::cloneSet(ObjectData *cl) {
+  c_DebuggerClient *clone = static_cast<c_DebuggerClient*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_DebuggerClient::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -3368,10 +3372,11 @@ void c_DOMCDATASection::destruct() {
 }
 ObjectData *c_DOMCDATASection::cloneImpl() {
   c_DOMCDATASection *obj = NEW(c_DOMCDATASection)();
-  cloneSet(obj);
+  c_DOMCDATASection::cloneSet(obj);
   return obj;
 }
-void c_DOMCDATASection::cloneSet(c_DOMCDATASection *clone) {
+void c_DOMCDATASection::cloneSet(ObjectData *cl) {
+  c_DOMCDATASection *clone = static_cast<c_DOMCDATASection*>(cl);
   c_DOMText::cloneSet(clone);
 }
 Variant c_DOMCDATASection::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -3624,10 +3629,11 @@ void c_Locale::destruct() {
 }
 ObjectData *c_Locale::cloneImpl() {
   c_Locale *obj = NEW(c_Locale)();
-  cloneSet(obj);
+  c_Locale::cloneSet(obj);
   return obj;
 }
-void c_Locale::cloneSet(c_Locale *clone) {
+void c_Locale::cloneSet(ObjectData *cl) {
+  c_Locale *clone = static_cast<c_Locale*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_Locale::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -3847,10 +3853,11 @@ void c_DOMDocumentType::destruct() {
 }
 ObjectData *c_DOMDocumentType::cloneImpl() {
   c_DOMDocumentType *obj = NEW(c_DOMDocumentType)();
-  cloneSet(obj);
+  c_DOMDocumentType::cloneSet(obj);
   return obj;
 }
-void c_DOMDocumentType::cloneSet(c_DOMDocumentType *clone) {
+void c_DOMDocumentType::cloneSet(ObjectData *cl) {
+  c_DOMDocumentType *clone = static_cast<c_DOMDocumentType*>(cl);
   c_DOMNode::cloneSet(clone);
 }
 Variant c_DOMDocumentType::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -4238,10 +4245,11 @@ void c_SQLite3Stmt::destruct() {
 }
 ObjectData *c_SQLite3Stmt::cloneImpl() {
   c_SQLite3Stmt *obj = NEW(c_SQLite3Stmt)();
-  cloneSet(obj);
+  c_SQLite3Stmt::cloneSet(obj);
   return obj;
 }
-void c_SQLite3Stmt::cloneSet(c_SQLite3Stmt *clone) {
+void c_SQLite3Stmt::cloneSet(ObjectData *cl) {
+  c_SQLite3Stmt *clone = static_cast<c_SQLite3Stmt*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_SQLite3Stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -4860,10 +4868,11 @@ void c_DOMNodeList::destruct() {
 }
 ObjectData *c_DOMNodeList::cloneImpl() {
   c_DOMNodeList *obj = NEW(c_DOMNodeList)();
-  cloneSet(obj);
+  c_DOMNodeList::cloneSet(obj);
   return obj;
 }
-void c_DOMNodeList::cloneSet(c_DOMNodeList *clone) {
+void c_DOMNodeList::cloneSet(ObjectData *cl) {
+  c_DOMNodeList *clone = static_cast<c_DOMNodeList*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_DOMNodeList::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -5371,10 +5380,11 @@ void c_Normalizer::destruct() {
 }
 ObjectData *c_Normalizer::cloneImpl() {
   c_Normalizer *obj = NEW(c_Normalizer)();
-  cloneSet(obj);
+  c_Normalizer::cloneSet(obj);
   return obj;
 }
-void c_Normalizer::cloneSet(c_Normalizer *clone) {
+void c_Normalizer::cloneSet(ObjectData *cl) {
+  c_Normalizer *clone = static_cast<c_Normalizer*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_Normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -5751,10 +5761,11 @@ void c_DOMCharacterData::destruct() {
 }
 ObjectData *c_DOMCharacterData::cloneImpl() {
   c_DOMCharacterData *obj = NEW(c_DOMCharacterData)();
-  cloneSet(obj);
+  c_DOMCharacterData::cloneSet(obj);
   return obj;
 }
-void c_DOMCharacterData::cloneSet(c_DOMCharacterData *clone) {
+void c_DOMCharacterData::cloneSet(ObjectData *cl) {
+  c_DOMCharacterData *clone = static_cast<c_DOMCharacterData*>(cl);
   c_DOMNode::cloneSet(clone);
 }
 Variant c_DOMCharacterData::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -6446,10 +6457,11 @@ void c_DOMEntityReference::destruct() {
 }
 ObjectData *c_DOMEntityReference::cloneImpl() {
   c_DOMEntityReference *obj = NEW(c_DOMEntityReference)();
-  cloneSet(obj);
+  c_DOMEntityReference::cloneSet(obj);
   return obj;
 }
-void c_DOMEntityReference::cloneSet(c_DOMEntityReference *clone) {
+void c_DOMEntityReference::cloneSet(ObjectData *cl) {
+  c_DOMEntityReference *clone = static_cast<c_DOMEntityReference*>(cl);
   c_DOMNode::cloneSet(clone);
 }
 Variant c_DOMEntityReference::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -6693,10 +6705,11 @@ void c_SimpleXMLElementIterator::destruct() {
 }
 ObjectData *c_SimpleXMLElementIterator::cloneImpl() {
   c_SimpleXMLElementIterator *obj = NEW(c_SimpleXMLElementIterator)();
-  cloneSet(obj);
+  c_SimpleXMLElementIterator::cloneSet(obj);
   return obj;
 }
-void c_SimpleXMLElementIterator::cloneSet(c_SimpleXMLElementIterator *clone) {
+void c_SimpleXMLElementIterator::cloneSet(ObjectData *cl) {
+  c_SimpleXMLElementIterator *clone = static_cast<c_SimpleXMLElementIterator*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_SimpleXMLElementIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -7183,10 +7196,11 @@ void c_DateTimeZone::destruct() {
 }
 ObjectData *c_DateTimeZone::cloneImpl() {
   c_DateTimeZone *obj = NEW(c_DateTimeZone)();
-  cloneSet(obj);
+  c_DateTimeZone::cloneSet(obj);
   return obj;
 }
-void c_DateTimeZone::cloneSet(c_DateTimeZone *clone) {
+void c_DateTimeZone::cloneSet(ObjectData *cl) {
+  c_DateTimeZone *clone = static_cast<c_DateTimeZone*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_DateTimeZone::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -7669,10 +7683,11 @@ void c_DOMNodeIterator::destruct() {
 }
 ObjectData *c_DOMNodeIterator::cloneImpl() {
   c_DOMNodeIterator *obj = NEW(c_DOMNodeIterator)();
-  cloneSet(obj);
+  c_DOMNodeIterator::cloneSet(obj);
   return obj;
 }
-void c_DOMNodeIterator::cloneSet(c_DOMNodeIterator *clone) {
+void c_DOMNodeIterator::cloneSet(ObjectData *cl) {
+  c_DOMNodeIterator *clone = static_cast<c_DOMNodeIterator*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_DOMNodeIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -8116,10 +8131,11 @@ void c_DOMImplementation::destruct() {
 }
 ObjectData *c_DOMImplementation::cloneImpl() {
   c_DOMImplementation *obj = NEW(c_DOMImplementation)();
-  cloneSet(obj);
+  c_DOMImplementation::cloneSet(obj);
   return obj;
 }
-void c_DOMImplementation::cloneSet(c_DOMImplementation *clone) {
+void c_DOMImplementation::cloneSet(ObjectData *cl) {
+  c_DOMImplementation *clone = static_cast<c_DOMImplementation*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_DOMImplementation::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -8545,10 +8561,11 @@ void c_SoapHeader::destruct() {
 }
 ObjectData *c_SoapHeader::cloneImpl() {
   c_SoapHeader *obj = NEW(c_SoapHeader)();
-  cloneSet(obj);
+  c_SoapHeader::cloneSet(obj);
   return obj;
 }
-void c_SoapHeader::cloneSet(c_SoapHeader *clone) {
+void c_SoapHeader::cloneSet(ObjectData *cl) {
+  c_SoapHeader *clone = static_cast<c_SoapHeader*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_SoapHeader::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -8876,10 +8893,11 @@ void c_DOMNotation::destruct() {
 }
 ObjectData *c_DOMNotation::cloneImpl() {
   c_DOMNotation *obj = NEW(c_DOMNotation)();
-  cloneSet(obj);
+  c_DOMNotation::cloneSet(obj);
   return obj;
 }
-void c_DOMNotation::cloneSet(c_DOMNotation *clone) {
+void c_DOMNotation::cloneSet(ObjectData *cl) {
+  c_DOMNotation *clone = static_cast<c_DOMNotation*>(cl);
   c_DOMNode::cloneSet(clone);
 }
 Variant c_DOMNotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -9267,10 +9285,11 @@ void c_DebuggerProxy::destruct() {
 }
 ObjectData *c_DebuggerProxy::cloneImpl() {
   c_DebuggerProxy *obj = NEW(c_DebuggerProxy)();
-  cloneSet(obj);
+  c_DebuggerProxy::cloneSet(obj);
   return obj;
 }
-void c_DebuggerProxy::cloneSet(c_DebuggerProxy *clone) {
+void c_DebuggerProxy::cloneSet(ObjectData *cl) {
+  c_DebuggerProxy *clone = static_cast<c_DebuggerProxy*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_DebuggerProxy::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -9742,10 +9761,11 @@ void c_Memcached::destruct() {
 }
 ObjectData *c_Memcached::cloneImpl() {
   c_Memcached *obj = NEW(c_Memcached)();
-  cloneSet(obj);
+  c_Memcached::cloneSet(obj);
   return obj;
 }
-void c_Memcached::cloneSet(c_Memcached *clone) {
+void c_Memcached::cloneSet(ObjectData *cl) {
+  c_Memcached *clone = static_cast<c_Memcached*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_Memcached::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -12329,10 +12349,11 @@ void c_DOMComment::destruct() {
 }
 ObjectData *c_DOMComment::cloneImpl() {
   c_DOMComment *obj = NEW(c_DOMComment)();
-  cloneSet(obj);
+  c_DOMComment::cloneSet(obj);
   return obj;
 }
-void c_DOMComment::cloneSet(c_DOMComment *clone) {
+void c_DOMComment::cloneSet(ObjectData *cl) {
+  c_DOMComment *clone = static_cast<c_DOMComment*>(cl);
   c_DOMCharacterData::cloneSet(clone);
 }
 Variant c_DOMComment::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -12588,10 +12609,11 @@ void c_SQLite3::destruct() {
 }
 ObjectData *c_SQLite3::cloneImpl() {
   c_SQLite3 *obj = NEW(c_SQLite3)();
-  cloneSet(obj);
+  c_SQLite3::cloneSet(obj);
   return obj;
 }
-void c_SQLite3::cloneSet(c_SQLite3 *clone) {
+void c_SQLite3::cloneSet(ObjectData *cl) {
+  c_SQLite3 *clone = static_cast<c_SQLite3*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_SQLite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -13699,10 +13721,11 @@ void c_DOMAttr::destruct() {
 }
 ObjectData *c_DOMAttr::cloneImpl() {
   c_DOMAttr *obj = NEW(c_DOMAttr)();
-  cloneSet(obj);
+  c_DOMAttr::cloneSet(obj);
   return obj;
 }
-void c_DOMAttr::cloneSet(c_DOMAttr *clone) {
+void c_DOMAttr::cloneSet(ObjectData *cl) {
+  c_DOMAttr *clone = static_cast<c_DOMAttr*>(cl);
   c_DOMNode::cloneSet(clone);
 }
 Variant c_DOMAttr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -14182,10 +14205,11 @@ void c_SoapVar::destruct() {
 }
 ObjectData *c_SoapVar::cloneImpl() {
   c_SoapVar *obj = NEW(c_SoapVar)();
-  cloneSet(obj);
+  c_SoapVar::cloneSet(obj);
   return obj;
 }
-void c_SoapVar::cloneSet(c_SoapVar *clone) {
+void c_SoapVar::cloneSet(ObjectData *cl) {
+  c_SoapVar *clone = static_cast<c_SoapVar*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_SoapVar::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -14537,10 +14561,11 @@ void c_DOMNamedNodeMap::destruct() {
 }
 ObjectData *c_DOMNamedNodeMap::cloneImpl() {
   c_DOMNamedNodeMap *obj = NEW(c_DOMNamedNodeMap)();
-  cloneSet(obj);
+  c_DOMNamedNodeMap::cloneSet(obj);
   return obj;
 }
-void c_DOMNamedNodeMap::cloneSet(c_DOMNamedNodeMap *clone) {
+void c_DOMNamedNodeMap::cloneSet(ObjectData *cl) {
+  c_DOMNamedNodeMap *clone = static_cast<c_DOMNamedNodeMap*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_DOMNamedNodeMap::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -15144,10 +15169,11 @@ void c_SQLite3Result::destruct() {
 }
 ObjectData *c_SQLite3Result::cloneImpl() {
   c_SQLite3Result *obj = NEW(c_SQLite3Result)();
-  cloneSet(obj);
+  c_SQLite3Result::cloneSet(obj);
   return obj;
 }
-void c_SQLite3Result::cloneSet(c_SQLite3Result *clone) {
+void c_SQLite3Result::cloneSet(ObjectData *cl) {
+  c_SQLite3Result *clone = static_cast<c_SQLite3Result*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_SQLite3Result::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -15668,10 +15694,11 @@ void c_SimpleXMLElement::destruct() {
 }
 ObjectData *c_SimpleXMLElement::cloneImpl() {
   c_SimpleXMLElement *obj = NEW(c_SimpleXMLElement)();
-  cloneSet(obj);
+  c_SimpleXMLElement::cloneSet(obj);
   return obj;
 }
-void c_SimpleXMLElement::cloneSet(c_SimpleXMLElement *clone) {
+void c_SimpleXMLElement::cloneSet(ObjectData *cl) {
+  c_SimpleXMLElement *clone = static_cast<c_SimpleXMLElement*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_SimpleXMLElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -17188,10 +17215,11 @@ void c_Memcache::destruct() {
 }
 ObjectData *c_Memcache::cloneImpl() {
   c_Memcache *obj = NEW(c_Memcache)();
-  cloneSet(obj);
+  c_Memcache::cloneSet(obj);
   return obj;
 }
-void c_Memcache::cloneSet(c_Memcache *clone) {
+void c_Memcache::cloneSet(ObjectData *cl) {
+  c_Memcache *clone = static_cast<c_Memcache*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_Memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -18754,10 +18782,11 @@ void c_DOMProcessingInstruction::destruct() {
 }
 ObjectData *c_DOMProcessingInstruction::cloneImpl() {
   c_DOMProcessingInstruction *obj = NEW(c_DOMProcessingInstruction)();
-  cloneSet(obj);
+  c_DOMProcessingInstruction::cloneSet(obj);
   return obj;
 }
-void c_DOMProcessingInstruction::cloneSet(c_DOMProcessingInstruction *clone) {
+void c_DOMProcessingInstruction::cloneSet(ObjectData *cl) {
+  c_DOMProcessingInstruction *clone = static_cast<c_DOMProcessingInstruction*>(cl);
   c_DOMNode::cloneSet(clone);
 }
 Variant c_DOMProcessingInstruction::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -19193,10 +19222,11 @@ void c_PDOStatement::destruct() {
 }
 ObjectData *c_PDOStatement::cloneImpl() {
   c_PDOStatement *obj = NEW(c_PDOStatement)();
-  cloneSet(obj);
+  c_PDOStatement::cloneSet(obj);
   return obj;
 }
-void c_PDOStatement::cloneSet(c_PDOStatement *clone) {
+void c_PDOStatement::cloneSet(ObjectData *cl) {
+  c_PDOStatement *clone = static_cast<c_PDOStatement*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_PDOStatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -20830,10 +20860,11 @@ void c_SoapClient::destruct() {
 }
 ObjectData *c_SoapClient::cloneImpl() {
   c_SoapClient *obj = NEW(c_SoapClient)();
-  cloneSet(obj);
+  c_SoapClient::cloneSet(obj);
   return obj;
 }
-void c_SoapClient::cloneSet(c_SoapClient *clone) {
+void c_SoapClient::cloneSet(ObjectData *cl) {
+  c_SoapClient *clone = static_cast<c_SoapClient*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_SoapClient::doCall(Variant v_name, Variant v_arguments, bool fatal) {
@@ -21762,10 +21793,11 @@ void c_SoapParam::destruct() {
 }
 ObjectData *c_SoapParam::cloneImpl() {
   c_SoapParam *obj = NEW(c_SoapParam)();
-  cloneSet(obj);
+  c_SoapParam::cloneSet(obj);
   return obj;
 }
-void c_SoapParam::cloneSet(c_SoapParam *clone) {
+void c_SoapParam::cloneSet(ObjectData *cl) {
+  c_SoapParam *clone = static_cast<c_SoapParam*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_SoapParam::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -22053,10 +22085,11 @@ void c_DateTime::destruct() {
 }
 ObjectData *c_DateTime::cloneImpl() {
   c_DateTime *obj = NEW(c_DateTime)();
-  cloneSet(obj);
+  c_DateTime::cloneSet(obj);
   return obj;
 }
-void c_DateTime::cloneSet(c_DateTime *clone) {
+void c_DateTime::cloneSet(ObjectData *cl) {
+  c_DateTime *clone = static_cast<c_DateTime*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_DateTime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -22851,10 +22884,11 @@ void c_Collator::destruct() {
 }
 ObjectData *c_Collator::cloneImpl() {
   c_Collator *obj = NEW(c_Collator)();
-  cloneSet(obj);
+  c_Collator::cloneSet(obj);
   return obj;
 }
-void c_Collator::cloneSet(c_Collator *clone) {
+void c_Collator::cloneSet(ObjectData *cl) {
+  c_Collator *clone = static_cast<c_Collator*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_Collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -23995,10 +24029,11 @@ void c_PDO::destruct() {
 }
 ObjectData *c_PDO::cloneImpl() {
   c_PDO *obj = NEW(c_PDO)();
-  cloneSet(obj);
+  c_PDO::cloneSet(obj);
   return obj;
 }
-void c_PDO::cloneSet(c_PDO *clone) {
+void c_PDO::cloneSet(ObjectData *cl) {
+  c_PDO *clone = static_cast<c_PDO*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_PDO::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -25082,10 +25117,11 @@ void c_ImageSprite::destruct() {
 }
 ObjectData *c_ImageSprite::cloneImpl() {
   c_ImageSprite *obj = NEW(c_ImageSprite)();
-  cloneSet(obj);
+  c_ImageSprite::cloneSet(obj);
   return obj;
 }
-void c_ImageSprite::cloneSet(c_ImageSprite *clone) {
+void c_ImageSprite::cloneSet(ObjectData *cl) {
+  c_ImageSprite *clone = static_cast<c_ImageSprite*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_ImageSprite::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -25924,10 +25960,11 @@ void c_DOMEntity::destruct() {
 }
 ObjectData *c_DOMEntity::cloneImpl() {
   c_DOMEntity *obj = NEW(c_DOMEntity)();
-  cloneSet(obj);
+  c_DOMEntity::cloneSet(obj);
   return obj;
 }
-void c_DOMEntity::cloneSet(c_DOMEntity *clone) {
+void c_DOMEntity::cloneSet(ObjectData *cl) {
+  c_DOMEntity *clone = static_cast<c_DOMEntity*>(cl);
   c_DOMNode::cloneSet(clone);
 }
 Variant c_DOMEntity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -26315,10 +26352,11 @@ void c_XMLWriter::destruct() {
 }
 ObjectData *c_XMLWriter::cloneImpl() {
   c_XMLWriter *obj = NEW(c_XMLWriter)();
-  cloneSet(obj);
+  c_XMLWriter::cloneSet(obj);
   return obj;
 }
-void c_XMLWriter::cloneSet(c_XMLWriter *clone) {
+void c_XMLWriter::cloneSet(ObjectData *cl) {
+  c_XMLWriter *clone = static_cast<c_XMLWriter*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_XMLWriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -28874,10 +28912,11 @@ void c_DOMException::destruct() {
 }
 ObjectData *c_DOMException::cloneImpl() {
   c_DOMException *obj = NEW(c_DOMException)();
-  cloneSet(obj);
+  c_DOMException::cloneSet(obj);
   return obj;
 }
-void c_DOMException::cloneSet(c_DOMException *clone) {
+void c_DOMException::cloneSet(ObjectData *cl) {
+  c_DOMException *clone = static_cast<c_DOMException*>(cl);
   c_Exception::cloneSet(clone);
 }
 Variant c_DOMException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -29157,10 +29196,11 @@ void c_DOMXPath::destruct() {
 }
 ObjectData *c_DOMXPath::cloneImpl() {
   c_DOMXPath *obj = NEW(c_DOMXPath)();
-  cloneSet(obj);
+  c_DOMXPath::cloneSet(obj);
   return obj;
 }
-void c_DOMXPath::cloneSet(c_DOMXPath *clone) {
+void c_DOMXPath::cloneSet(ObjectData *cl) {
+  c_DOMXPath *clone = static_cast<c_DOMXPath*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_DOMXPath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -29815,10 +29855,11 @@ void c_SoapServer::destruct() {
 }
 ObjectData *c_SoapServer::cloneImpl() {
   c_SoapServer *obj = NEW(c_SoapServer)();
-  cloneSet(obj);
+  c_SoapServer::cloneSet(obj);
   return obj;
 }
-void c_SoapServer::cloneSet(c_SoapServer *clone) {
+void c_SoapServer::cloneSet(ObjectData *cl) {
+  c_SoapServer *clone = static_cast<c_SoapServer*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_SoapServer::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -30553,10 +30594,11 @@ void c_DOMNode::destruct() {
 }
 ObjectData *c_DOMNode::cloneImpl() {
   c_DOMNode *obj = NEW(c_DOMNode)();
-  cloneSet(obj);
+  c_DOMNode::cloneSet(obj);
   return obj;
 }
-void c_DOMNode::cloneSet(c_DOMNode *clone) {
+void c_DOMNode::cloneSet(ObjectData *cl) {
+  c_DOMNode *clone = static_cast<c_DOMNode*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_DOMNode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -31916,10 +31958,11 @@ void c_SpoofChecker::destruct() {
 }
 ObjectData *c_SpoofChecker::cloneImpl() {
   c_SpoofChecker *obj = NEW(c_SpoofChecker)();
-  cloneSet(obj);
+  c_SpoofChecker::cloneSet(obj);
   return obj;
 }
-void c_SpoofChecker::cloneSet(c_SpoofChecker *clone) {
+void c_SpoofChecker::cloneSet(ObjectData *cl) {
+  c_SpoofChecker *clone = static_cast<c_SpoofChecker*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_SpoofChecker::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -32381,10 +32424,11 @@ void c_DOMDocument::destruct() {
 }
 ObjectData *c_DOMDocument::cloneImpl() {
   c_DOMDocument *obj = NEW(c_DOMDocument)();
-  cloneSet(obj);
+  c_DOMDocument::cloneSet(obj);
   return obj;
 }
-void c_DOMDocument::cloneSet(c_DOMDocument *clone) {
+void c_DOMDocument::cloneSet(ObjectData *cl) {
+  c_DOMDocument *clone = static_cast<c_DOMDocument*>(cl);
   c_DOMNode::cloneSet(clone);
 }
 Variant c_DOMDocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -34494,10 +34538,11 @@ void c_LibXMLError::destruct() {
 }
 ObjectData *c_LibXMLError::cloneImpl() {
   c_LibXMLError *obj = NEW(c_LibXMLError)();
-  cloneSet(obj);
+  c_LibXMLError::cloneSet(obj);
   return obj;
 }
-void c_LibXMLError::cloneSet(c_LibXMLError *clone) {
+void c_LibXMLError::cloneSet(ObjectData *cl) {
+  c_LibXMLError *clone = static_cast<c_LibXMLError*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_LibXMLError::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -34717,10 +34762,11 @@ void c_SoapFault::destruct() {
 }
 ObjectData *c_SoapFault::cloneImpl() {
   c_SoapFault *obj = NEW(c_SoapFault)();
-  cloneSet(obj);
+  c_SoapFault::cloneSet(obj);
   return obj;
 }
-void c_SoapFault::cloneSet(c_SoapFault *clone) {
+void c_SoapFault::cloneSet(ObjectData *cl) {
+  c_SoapFault *clone = static_cast<c_SoapFault*>(cl);
   c_Exception::cloneSet(clone);
 }
 Variant c_SoapFault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -35116,10 +35162,11 @@ void c_DOMElement::destruct() {
 }
 ObjectData *c_DOMElement::cloneImpl() {
   c_DOMElement *obj = NEW(c_DOMElement)();
-  cloneSet(obj);
+  c_DOMElement::cloneSet(obj);
   return obj;
 }
-void c_DOMElement::cloneSet(c_DOMElement *clone) {
+void c_DOMElement::cloneSet(ObjectData *cl) {
+  c_DOMElement *clone = static_cast<c_DOMElement*>(cl);
   c_DOMNode::cloneSet(clone);
 }
 Variant c_DOMElement::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

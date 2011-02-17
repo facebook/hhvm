@@ -65,8 +65,8 @@ Variant &c_ArrayIterator::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ArrayIterator
 void c_ArrayIterator::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_arr)) props.set(NAMSTR(s_sys_ss7cb08d68, "arr"), m_arr.isReferenced() ? ref(m_arr) : m_arr, true);
-  if (!pubOnly) if (isInitialized(m_flags)) props.set(NAMSTR(s_sys_ss28fae70d, "flags"), m_flags.isReferenced() ? ref(m_flags) : m_flags, true);
+  if (!pubOnly) if (isInitialized(m_arr)) props.lvalAt(NAMSTR(s_sys_ss7cb08d68, "arr"), AccessFlags::Key).setWithRef(m_arr);
+  if (!pubOnly) if (isInitialized(m_flags)) props.lvalAt(NAMSTR(s_sys_ss28fae70d, "flags"), AccessFlags::Key).setWithRef(m_flags);
   c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ArrayIterator
@@ -131,13 +131,14 @@ bool c_ArrayIterator::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_ArrayIterator::cloneImpl() {
   c_ArrayIterator *obj = NEW(c_ArrayIterator)();
-  cloneSet(obj);
+  c_ArrayIterator::cloneSet(obj);
   return obj;
 }
-void c_ArrayIterator::cloneSet(c_ArrayIterator *clone) {
-  clone->m_arr = m_arr.isReferenced() ? ref(m_arr) : m_arr;
-  clone->m_flags = m_flags.isReferenced() ? ref(m_flags) : m_flags;
+void c_ArrayIterator::cloneSet(ObjectData *cl) {
+  c_ArrayIterator *clone = static_cast<c_ArrayIterator*>(cl);
   ObjectData::cloneSet(clone);
+  clone->m_arr.setWithRef(m_arr);
+  clone->m_flags.setWithRef(m_flags);
 }
 Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
@@ -1510,7 +1511,7 @@ Variant &c_AppendIterator::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_AppendIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_AppendIterator
 void c_AppendIterator::o_getArray(Array &props, bool pubOnly) const {
-  if (!pubOnly) if (isInitialized(m_iterators)) props.add(NAMSTR(s_sys_ssb3fce46e, "\000AppendIterator\000iterators"), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, true);
+  if (!pubOnly) if (isInitialized(m_iterators)) props.lvalAt(NAMSTR(s_sys_ssb3fce46e, "\000AppendIterator\000iterators"), AccessFlags::Key).setWithRef(m_iterators);
   c_ObjectData::o_getArray(props, pubOnly);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_AppendIterator
@@ -1580,12 +1581,13 @@ bool c_AppendIterator::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_AppendIterator::cloneImpl() {
   c_AppendIterator *obj = NEW(c_AppendIterator)();
-  cloneSet(obj);
+  c_AppendIterator::cloneSet(obj);
   return obj;
 }
-void c_AppendIterator::cloneSet(c_AppendIterator *clone) {
-  clone->m_iterators = m_iterators.isReferenced() ? ref(m_iterators) : m_iterators;
+void c_AppendIterator::cloneSet(ObjectData *cl) {
+  c_AppendIterator *clone = static_cast<c_AppendIterator*>(cl);
   ObjectData::cloneSet(clone);
+  clone->m_iterators.setWithRef(m_iterators);
 }
 Variant c_AppendIterator::doCall(Variant v_name, Variant v_arguments, bool fatal) {
   return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
@@ -2436,10 +2438,11 @@ bool c_RecursiveDirectoryIterator::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_RecursiveDirectoryIterator::cloneImpl() {
   c_RecursiveDirectoryIterator *obj = NEW(c_RecursiveDirectoryIterator)();
-  cloneSet(obj);
+  c_RecursiveDirectoryIterator::cloneSet(obj);
   return obj;
 }
-void c_RecursiveDirectoryIterator::cloneSet(c_RecursiveDirectoryIterator *clone) {
+void c_RecursiveDirectoryIterator::cloneSet(ObjectData *cl) {
+  c_RecursiveDirectoryIterator *clone = static_cast<c_RecursiveDirectoryIterator*>(cl);
   c_DirectoryIterator::cloneSet(clone);
 }
 Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -3260,10 +3263,11 @@ bool c_DirectoryIterator::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_DirectoryIterator::cloneImpl() {
   c_DirectoryIterator *obj = NEW(c_DirectoryIterator)();
-  cloneSet(obj);
+  c_DirectoryIterator::cloneSet(obj);
   return obj;
 }
-void c_DirectoryIterator::cloneSet(c_DirectoryIterator *clone) {
+void c_DirectoryIterator::cloneSet(ObjectData *cl) {
+  c_DirectoryIterator *clone = static_cast<c_DirectoryIterator*>(cl);
   c_SplFileInfo::cloneSet(clone);
 }
 Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -3926,10 +3930,11 @@ bool c_RecursiveIteratorIterator::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_RecursiveIteratorIterator::cloneImpl() {
   c_RecursiveIteratorIterator *obj = NEW(c_RecursiveIteratorIterator)();
-  cloneSet(obj);
+  c_RecursiveIteratorIterator::cloneSet(obj);
   return obj;
 }
-void c_RecursiveIteratorIterator::cloneSet(c_RecursiveIteratorIterator *clone) {
+void c_RecursiveIteratorIterator::cloneSet(ObjectData *cl) {
+  c_RecursiveIteratorIterator *clone = static_cast<c_RecursiveIteratorIterator*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_RecursiveIteratorIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -4501,10 +4506,11 @@ bool c_MutableArrayIterator::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_MutableArrayIterator::cloneImpl() {
   c_MutableArrayIterator *obj = NEW(c_MutableArrayIterator)();
-  cloneSet(obj);
+  c_MutableArrayIterator::cloneSet(obj);
   return obj;
 }
-void c_MutableArrayIterator::cloneSet(c_MutableArrayIterator *clone) {
+void c_MutableArrayIterator::cloneSet(ObjectData *cl) {
+  c_MutableArrayIterator *clone = static_cast<c_MutableArrayIterator*>(cl);
   c_ArrayIterator::cloneSet(clone);
 }
 Variant c_MutableArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -4799,10 +4805,11 @@ bool c_FilterIterator::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_FilterIterator::cloneImpl() {
   c_FilterIterator *obj = NEW(c_FilterIterator)();
-  cloneSet(obj);
+  c_FilterIterator::cloneSet(obj);
   return obj;
 }
-void c_FilterIterator::cloneSet(c_FilterIterator *clone) {
+void c_FilterIterator::cloneSet(ObjectData *cl) {
+  c_FilterIterator *clone = static_cast<c_FilterIterator*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_FilterIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

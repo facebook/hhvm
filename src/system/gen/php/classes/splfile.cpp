@@ -124,10 +124,11 @@ bool c_SplFileObject::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_SplFileObject::cloneImpl() {
   c_SplFileObject *obj = NEW(c_SplFileObject)();
-  cloneSet(obj);
+  c_SplFileObject::cloneSet(obj);
   return obj;
 }
-void c_SplFileObject::cloneSet(c_SplFileObject *clone) {
+void c_SplFileObject::cloneSet(ObjectData *cl) {
+  c_SplFileObject *clone = static_cast<c_SplFileObject*>(cl);
   c_SplFileInfo::cloneSet(clone);
 }
 Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
@@ -2001,10 +2002,11 @@ bool c_SplFileInfo::o_instanceof(CStrRef s) const {
 }
 ObjectData *c_SplFileInfo::cloneImpl() {
   c_SplFileInfo *obj = NEW(c_SplFileInfo)();
-  cloneSet(obj);
+  c_SplFileInfo::cloneSet(obj);
   return obj;
 }
-void c_SplFileInfo::cloneSet(c_SplFileInfo *clone) {
+void c_SplFileInfo::cloneSet(ObjectData *cl) {
+  c_SplFileInfo *clone = static_cast<c_SplFileInfo*>(cl);
   ObjectData::cloneSet(clone);
 }
 Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {

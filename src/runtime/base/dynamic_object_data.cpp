@@ -69,7 +69,9 @@ void DynamicObjectData::destruct() {
     if (inCtorDtor()) {
       parent->setInDtor();
     }
-    parent = Object();
+    this->incRefCount();
+    parent.reset();
+    this->decRefCount();
   }
 }
 
@@ -83,12 +85,12 @@ ObjectData *DynamicObjectData::getRoot() {
   return root;
 }
 
-ObjectData* DynamicObjectData::clone() {
-  ObjectData *clone = cloneImpl();
-  clone->setRoot(clone);
-  return clone;
+void DynamicObjectData::cloneSet(ObjectData *clone) {
+  if (!parent.isNull()) {
+    parent->cloneSet(static_cast<DynamicObjectData*>(clone)->parent.get());
+  }
+  ObjectData::cloneSet(clone);
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // instance methods and properties

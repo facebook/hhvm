@@ -32,7 +32,8 @@ namespace HPHP {
  */
 class File : public SweepableResourceData {
 public:
-  static String TranslatePath(CStrRef filename, bool useFileCache = false);
+  static String TranslatePath(CStrRef filename, bool useFileCache = false,
+                              bool keepRelative = false);
   static String TranslateCommand(CStrRef cmd);
   static Variant Open(CStrRef filename, CStrRef mode,
                       CArrRef options = null_array);

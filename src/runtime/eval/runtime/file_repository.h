@@ -59,7 +59,7 @@ public:
    * From then on, invoke_file will store the PhpFile and use that.
    */
   static PhpFile *checkoutFile(const std::string &name, const struct stat &s);
-  static bool findFile(std::string &path, struct stat &s, const char *currentDir);
+  static bool findFile(std::string &path, struct stat &s);
 private:
   static Mutex s_lock;
   static hphp_hash_map<std::string, PhpFile*, string_hash> m_files;

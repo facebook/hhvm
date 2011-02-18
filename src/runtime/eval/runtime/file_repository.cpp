@@ -124,8 +124,31 @@ PhpFile *FileRepository::checkoutFile(const std::string &rname,
   return ret;
 }
 
-bool FileRepository::findFile(std::string &path, struct stat &s,
-                              const char *currentDir) {
+bool FileRepository::findFile(std::string &path, struct stat &s) {
+  if (path.empty()) return false;
+  if (path[0] != '/') {
+    if (!g_context->getIncludePathArray().isNull()) {
+      for (ArrayIter iter(g_context->getIncludePathArray()); iter; ++iter) {
+        string ip = iter.second().toString().data();
+        string p;
+        if (!ip.empty() && ip[ip.length() - 1] == '/') {
+          p = ip + path;
+        } else {
+          p = ip + "/" + path;
+        }
+        if (fileStat(p, s) && !S_ISDIR(s.st_mode)) {
+          path = p;
+          return true;
+        }
+      }
+    }
+    string cwd = g_context->getCwd().data();
+    if (!cwd.empty() && cwd[cwd.length() - 1] == '/') {
+      path = cwd + path;
+    } else {
+      path = cwd + "/" + path;
+    }
+  }
   return fileStat(path, s) && !S_ISDIR(s.st_mode);
 }
 

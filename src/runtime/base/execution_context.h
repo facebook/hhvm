@@ -209,6 +209,10 @@ public:
   void setExitCallback(Variant f) { m_exitCallback = f; }
   Variant getExitCallback() { return m_exitCallback; }
 
+  void setIncludePath(CStrRef path);
+  String getIncludePath() const;
+  Array getIncludePathArray() const { return m_include_paths; }
+
 private:
   class OutputBuffer {
   public:
@@ -261,6 +265,9 @@ private:
   std::vector<Variant> m_userExceptionHandlersBackup;
 
   Variant m_exitCallback;
+
+  // include_path configuration option
+  Array m_include_paths;
 
   // helper functions
   void resetCurrentBuffer();

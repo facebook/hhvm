@@ -150,14 +150,16 @@ Array f_get_defined_constants(CVarRef categorize /* = null_variant */) {
 }
 
 String f_get_include_path() {
-  return "";
+  return g_context->getIncludePath();
 }
 
 void f_restore_include_path() {
 }
 
 String f_set_include_path(CStrRef new_include_path) {
-  return "";
+  String s = g_context->getIncludePath();
+  g_context->setIncludePath(new_include_path);
+  return s;
 }
 
 Array f_get_included_files() {

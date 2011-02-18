@@ -248,6 +248,10 @@ bool IniSetting::Get(CStrRef name, String &value) {
     value = String((int64)RuntimeOption::WarningFrequency);
     return true;
   }
+  if (name == "include_path") {
+    value = g_context->getIncludePath();
+    return true;
+  }
 
   DefaultMap::iterator iter = s_global_ini.find(name.data());
   if (iter != s_global_ini.end()) {
@@ -299,6 +303,9 @@ bool IniSetting::Set(CStrRef name, CStrRef value) {
     return true;
   } else if (name == "warning_frequency") {
     RuntimeOption::WarningFrequency = value.toInt64();
+    return true;
+  } else if (name == "include_path") {
+    g_context->setIncludePath(value);
     return true;
   }
 

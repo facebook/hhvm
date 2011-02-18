@@ -32,6 +32,7 @@
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/base/taint/taint_helper.h>
 #include <runtime/base/taint/taint_data.h>
+#include <runtime/ext/ext_string.h>
 #include <util/logger.h>
 #include <util/process.h>
 #include <util/text_color.h>
@@ -101,6 +102,8 @@ void ExecutionContext::fiberInit(FiberLocal *src, FiberReferenceMap &refMap) {
   m_timezone = ec->m_timezone.fiberCopy();
   m_timezoneDefault = ec->m_timezoneDefault.fiberCopy();
   m_argSeparatorOutput = ec->m_argSeparatorOutput.fiberCopy();
+
+  m_include_paths = ec->m_include_paths.fiberMarshal(refMap);
 }
 
 void ExecutionContext::fiberExit(FiberLocal *src, FiberReferenceMap &refMap) {
@@ -759,6 +762,26 @@ String ExecutionContext::getenv(CStrRef name) const {
     return String(value, CopyString);
   }
   return String();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void ExecutionContext::setIncludePath(CStrRef path) {
+  m_include_paths = f_explode(":", path);
+}
+
+String ExecutionContext::getIncludePath() const {
+  StringBuffer sb;
+  bool first = true;
+  for (ArrayIter iter(m_include_paths); iter; ++iter) {
+    if (first) {
+      first = false;
+    } else {
+      sb.append(':');
+    }
+    sb.append(iter.second().toString());
+  }
+  return sb.detach();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

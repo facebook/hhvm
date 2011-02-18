@@ -209,6 +209,7 @@ private:
   VariantStack m_argStack;
   VariantStack m_bytecodeStack;
   Array m_includes;
+
   void reset();
   void destructObjects();
   void destructObject(EvalObjectData *eo);

@@ -47,19 +47,25 @@ FileScope::FileScope(const string &fileName, int fileSize)
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
-FunctionScopePtr FileScope::setTree(AnalysisResultConstPtr ar,
-                                    StatementListPtr tree) {
-  m_tree = tree;
-
-  for (int i = 0; i < tree->getCount(); i++) {
-    StatementPtr stmt = (*tree)[i];
+void FileScope::setFileLevel(StatementListPtr stmtList) {
+  for (int i = 0; i < stmtList->getCount(); i++) {
+    StatementPtr stmt = (*stmtList)[i];
     stmt->setFileLevel();
     if (stmt->is(Statement::KindOfExpStatement)) {
       ExpStatementPtr expStmt = dynamic_pointer_cast<ExpStatement>(stmt);
       ExpressionPtr exp = expStmt->getExpression();
       exp->setFileLevel();
     }
+    if (stmt->is(Statement::KindOfStatementList)) {
+      setFileLevel(dynamic_pointer_cast<StatementList>(stmt));
+    }
   }
+}
+
+FunctionScopePtr FileScope::setTree(AnalysisResultConstPtr ar,
+                                    StatementListPtr tree) {
+  m_tree = tree;
+  setFileLevel(tree);
   return createPseudoMain(ar);
 }
 

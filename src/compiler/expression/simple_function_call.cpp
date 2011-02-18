@@ -330,8 +330,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
               if (block) { // found the constant
                 constants = block->getConstants();
                 // set to be dynamic
-                if (m_type == DefinedFunction ||
-                    (!isFileLevel() && !isTopLevel())) {
+                if (m_type == DefinedFunction || !isTopLevel()) {
                   constants->setDynamic(ar, symbol);
                 }
               }

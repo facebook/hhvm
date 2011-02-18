@@ -242,6 +242,7 @@ private:
   };
 
   FunctionScopePtr createPseudoMain(AnalysisResultConstPtr ar);
+  void setFileLevel(StatementListPtr stmt);
   void outputCPPHelper(CodeGenerator &cg, AnalysisResultPtr ar,
                        bool classes = true);
 };

@@ -7505,6 +7505,13 @@ bool TestCodeRun::TestCompilation() {
 
   MVCR("<?php function test($a) { return null * $a; }");
 
+  MVCR("<?php "
+      "function foo() {"
+      "  define('AAA', 1);"
+      "  if (false) {"
+      "    define('BBB', 'bbb');"
+      "  }"
+      "}");
   return true;
 }
 

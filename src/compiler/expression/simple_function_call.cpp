@@ -308,7 +308,8 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
     // check for dynamic constant and volatile function/class
     if (!m_class && m_className.empty() &&
-      (m_type == DefinedFunction ||
+      (m_type == DefineFunction ||
+       m_type == DefinedFunction ||
        m_type == FunctionExistsFunction ||
        m_type == ClassExistsFunction ||
        m_type == InterfaceExistsFunction) &&
@@ -320,6 +321,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         if (name && name->isLiteralString()) {
           string symbol = name->getLiteralString();
           switch (m_type) {
+          case DefineFunction:
           case DefinedFunction: {
             ConstantTablePtr constants = ar->getConstants();
             if (!constants->isPresent(symbol)) {
@@ -328,7 +330,10 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
               if (block) { // found the constant
                 constants = block->getConstants();
                 // set to be dynamic
-                constants->setDynamic(ar, symbol);
+                if (m_type == DefinedFunction ||
+                    (!isFileLevel() && !isTopLevel())) {
+                  constants->setDynamic(ar, symbol);
+                }
               }
             }
             break;
@@ -1684,7 +1689,8 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
         } else if (m_dynamicConstant) {
           cg_printf("g->declareConstant(");
           cg_printString(varName, ar, shared_from_this());
-          cg_printf(", g->%s%s, ", Option::ConstantPrefix, varName.c_str());
+          cg_printf(", g->%s%s, ", Option::ConstantPrefix,
+                    cg.formatLabel(varName).c_str());
           value->outputCPP(cg, ar);
           cg_printf(")");
         } else {

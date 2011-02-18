@@ -59,6 +59,15 @@ void LibEventJob::stopTimer() {
     long dnsec = end.tv_nsec - start.tv_nsec;
     int64 dusec = dsec * 1000000 + dnsec / 1000;
     ServerStats::Log("page.wall.queuing", dusec);
+
+#ifdef EVHTTP_CONNECTION_GET_START
+    struct timespec evstart;
+    evhttp_connection_get_start(request->evcon, &evstart);
+    dsec = start.tv_sec - evstart.tv_sec;
+    dnsec = start.tv_nsec - evstart.tv_nsec;
+    dusec = dsec * 1000000 + dnsec / 1000;
+    ServerStats::Log("page.wall.request_read_time", dusec);
+#endif
   }
 }
 

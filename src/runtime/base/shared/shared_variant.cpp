@@ -325,16 +325,17 @@ SharedVariant* SharedVariant::getValue(ssize_t pos) const {
 }
 
 void SharedVariant::loadElems(ArrayData *&elems,
-                                    const SharedMap &sharedMap,
-                                    bool keepRef /* = false */) {
+                              const SharedMap &sharedMap,
+                              bool keepRef /* = false */) {
   ASSERT(is(KindOfArray));
   uint count = arrSize();
-  ArrayInit ai(count, getIsVector(), keepRef);
+  bool isVector = getIsVector();
+  ArrayInit ai(count, isVector, keepRef);
   for (uint i = 0; i < count; i++) {
-    if (getIsVector()) {
-      ai.add((int64)i, sharedMap.getValue(i), true);
+    if (isVector) {
+      ai.set(sharedMap.getValueRef(i));
     } else {
-      ai.add(m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValue(i),
+      ai.add(m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValueRef(i),
              true);
     }
   }

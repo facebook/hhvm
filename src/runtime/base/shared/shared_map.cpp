@@ -17,6 +17,7 @@
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/shared/shared_map.h>
 #include <runtime/base/array/array_iterator.h>
+#include <runtime/base/array/array_init.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/runtime_error.h>
 
@@ -29,24 +30,24 @@ SharedMap::SharedMap(SharedVariant* source) : m_arr(source) {
   source->incRef();
 }
 
-Variant SharedMap::getValue(ssize_t pos) const {
-  SharedVariant *sv = m_arr->getValue(pos);
-  DataType t = sv->getType();
-  if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
-  Variant *pv = m_localCache.lvalPtr(pos, false, false);
-  if (pv) return *pv;
-  return sv->toLocal();
-}
-
 CVarRef SharedMap::getValueRef(ssize_t pos) const {
   SharedVariant *sv = m_arr->getValue(pos);
   DataType t = sv->getType();
   if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
-  Variant *pv = m_localCache.lvalPtr(pos, false, false);
+  Variant *pv = m_localCache.lvalPtr((int64)pos, false, false);
   if (pv) return *pv;
   Variant &r = m_localCache.addLval((int64)pos);
   r = sv->toLocal();
   return r;
+}
+
+Variant SharedMap::getValueUncached(ssize_t pos) const {
+  SharedVariant *sv = m_arr->getValue(pos);
+  DataType t = sv->getType();
+  if (!IS_REFCOUNTED_TYPE(t)) return sv->asCVarRef();
+  Variant *pv = m_localCache.lvalPtr((int64)pos, false, false);
+  if (pv) return *pv;
+  return sv->toLocal();
 }
 
 bool SharedMap::exists(CVarRef k) const {
@@ -245,6 +246,14 @@ ArrayData *SharedMap::remove(CVarRef k, bool copy) {
 
 ArrayData *SharedMap::copy() const {
   return escalate();
+}
+
+ArrayData *SharedMap::fiberCopy() const {
+  ArrayInit ai(size());
+  for (int i = 0; i < size(); i++) {
+    ai.add(getKey(i), getValueUncached(i), true);
+  }
+  return ai.create();
 }
 
 ArrayData *SharedMap::append(CVarRef v, bool copy) {

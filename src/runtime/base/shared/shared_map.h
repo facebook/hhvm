@@ -52,7 +52,7 @@ public:
     return m_arr->getKey(pos);
   }
 
-  Variant getValue(ssize_t pos) const;
+  Variant getValue(ssize_t pos) const { return getValueRef(pos); }
   CVarRef getValueRef(ssize_t pos) const;
 
   bool exists(int64 k) const;
@@ -95,6 +95,10 @@ public:
   ArrayData *remove(CVarRef k, bool copy);
 
   ArrayData *copy() const;
+  /**
+   * Copy (escalate) the SharedMap without triggering local cache.
+   */
+  ArrayData *fiberCopy() const;
 
   ArrayData *append(CVarRef v, bool copy);
   ArrayData *appendWithRef(CVarRef v, bool copy);
@@ -118,6 +122,8 @@ public:
 private:
   SharedVariant *m_arr;
   mutable Array m_localCache;
+
+  Variant getValueUncached(ssize_t pos) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -15125,6 +15125,17 @@ bool TestCodeRun::TestFiber() {
         "int(1)\n"
         "int(123)\n"
         );
+  MVCRO("<?php "
+        "function fiber($a) {var_dump($a[0][1]);}"
+        "$arr = array(array(1,2),3);"
+        "apc_store('key', $arr);"
+        "$arr2 = apc_fetch('key');"
+        "$f = call_user_func_async('fiber', $arr2);"
+        "end_user_func_async($f);"
+        "var_dump($arr2[0][1]);",
+        "int(2)\n"
+        "int(2)\n"
+        );
 
   return true;
 }

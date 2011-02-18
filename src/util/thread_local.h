@@ -210,11 +210,9 @@ void ThreadLocalCreate<T>::createKey() {
 template<typename T>
 class ThreadLocalSingleton {
 public:
-  ThreadLocalSingleton() : m_key(0) {
-    m_key = getKey();
-  }
+  ThreadLocalSingleton() { getKey(); }
 
-  T *get() const {
+  static T *get() {
     T *& p = getSingleton();
     if (p == NULL) {
       createKey(p);
@@ -222,17 +220,17 @@ public:
     return p;
   }
 
-  void createKey(T *& p) const __attribute__((noinline));
+  static void createKey(T *& p) __attribute__((noinline));
 
-  bool isNull() const { return getSingleton() == NULL; }
+  static bool isNull() { return getSingleton() == NULL; }
 
-  void reset() {
+  static void reset() {
     T *& p = getSingleton();
     if (p) {
       T::Delete(p);
       p = NULL;
     }
-    pthread_setspecific(m_key, NULL);
+    pthread_setspecific(s_key, NULL);
   }
 
   static void OnThreadExit(void *obj) {
@@ -248,7 +246,7 @@ public:
   }
 
 private:
-  pthread_key_t m_key;
+  static pthread_key_t s_key;
 
   static T *& getSingleton() {
     static __attribute__ ((tls_model (TLS_MODEL))) __thread
@@ -257,19 +255,21 @@ private:
   }
 
   static pthread_key_t getKey() {
-    static pthread_key_t key = 0;
-    if (key == 0) {
-      ThreadLocalCreateKey(&key, ThreadLocalSingleton<T>::OnThreadExit);
+    if (s_key == 0) {
+      ThreadLocalCreateKey(&s_key, ThreadLocalSingleton<T>::OnThreadExit);
     }
-    return key;
+    return s_key;
   }
 };
 
 template<typename T>
-void ThreadLocalSingleton<T>::createKey(T *& p) const {
+void ThreadLocalSingleton<T>::createKey(T *& p) {
   p = T::Create();
-  pthread_setspecific(m_key, p);
+  pthread_setspecific(s_key, p);
 }
+
+template<typename T>
+pthread_key_t ThreadLocalSingleton<T>::s_key;
 
 ///////////////////////////////////////////////////////////////////////////////
 // some classes don't need new/delete at all

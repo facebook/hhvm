@@ -2107,7 +2107,7 @@ void c_AppendIterator::t_append(CVarRef v_it) {
     MethodCallPackage mcp0;
     mcp0.methodCall((m_iterators.objectForCall()), NAMSTR(s_sys_ssba65d5ee, "append"), 0x4DEE4A472DC69EC2LL);
     const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-    (mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, v_it);
+    (mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_it);
   }
 }
 namespace hphp_impl_splitter {}
@@ -2118,7 +2118,7 @@ Variant c_AppendIterator::t_getinneriterator() {
     MethodCallPackage mcp0;
     mcp0.methodCall((m_iterators.objectForCall()), NAMSTR(s_sys_ssb3a5c1b3, "current"), 0x5B3A4A72846B21DCLL);
     const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-    return wrap_variant((mcp0.bindClass(info)->getMeth0Args())(mcp0, 0));
+    return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
   }
 }
 namespace hphp_impl_splitter {}
@@ -2129,7 +2129,7 @@ void c_AppendIterator::t_rewind() {
     MethodCallPackage mcp0;
     mcp0.methodCall((m_iterators.objectForCall()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
     const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-    (mcp0.bindClass(info)->getMeth0Args())(mcp0, 0);
+    (mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0);
   }
   {
     bool tmp0;
@@ -2137,7 +2137,7 @@ void c_AppendIterator::t_rewind() {
       MethodCallPackage mcp1;
       mcp1.methodCall((m_iterators.objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
       const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-      tmp0 = (toBoolean((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0)));
+      tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
     }
     if (tmp0) {
       {
@@ -2146,9 +2146,9 @@ void c_AppendIterator::t_rewind() {
           mcp1.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
           const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
           MethodCallPackage mcp0;
-          mcp0.methodCall(((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0).objectForCall()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
+          mcp0.methodCall(((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0).objectForCall()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
           const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-          (mcp0.bindClass(info)->getMeth0Args())(mcp0, 0);
+          (mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0);
         }
       }
     }
@@ -2162,15 +2162,15 @@ bool c_AppendIterator::t_valid() {
     MethodCallPackage mcp0;
     mcp0.methodCall((m_iterators.objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
     const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-    bool tmp1 = (toBoolean((mcp0.bindClass(info)->getMeth0Args())(mcp0, 0)));
+    bool tmp1 = (toBoolean((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0)));
     if (tmp1) {
       MethodCallPackage mcp3;
       mcp3.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
       const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
       MethodCallPackage mcp2;
-      mcp2.methodCall(((mcp3.bindClass(info)->getMeth0Args())(mcp3, 0).objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
+      mcp2.methodCall(((mcp3.bindClass(fi)->getMeth0Args())(mcp3, 0).objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
       const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
-      tmp1 = (toBoolean((mcp2.bindClass(info)->getMeth0Args())(mcp2, 0)));
+      tmp1 = (toBoolean((mcp2.bindClass(fi)->getMeth0Args())(mcp2, 0)));
     }
     return tmp1;
   }
@@ -2184,14 +2184,14 @@ Variant c_AppendIterator::t_current() {
     mcp0.methodCall((m_iterators.objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
     const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
     Variant tmp1;
-    if (toBoolean((mcp0.bindClass(info)->getMeth0Args())(mcp0, 0))) {
+    if (toBoolean((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0))) {
       MethodCallPackage mcp3;
       mcp3.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
       const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
       MethodCallPackage mcp2;
-      mcp2.methodCall(((mcp3.bindClass(info)->getMeth0Args())(mcp3, 0).objectForCall()), NAMSTR(s_sys_ssb3a5c1b3, "current"), 0x5B3A4A72846B21DCLL);
+      mcp2.methodCall(((mcp3.bindClass(fi)->getMeth0Args())(mcp3, 0).objectForCall()), NAMSTR(s_sys_ssb3a5c1b3, "current"), 0x5B3A4A72846B21DCLL);
       const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
-      tmp1 = ((mcp2.bindClass(info)->getMeth0Args())(mcp2, 0));
+      tmp1 = ((mcp2.bindClass(fi)->getMeth0Args())(mcp2, 0));
     } else {
       tmp1 = (null);
     }
@@ -2207,14 +2207,14 @@ Variant c_AppendIterator::t_key() {
     mcp0.methodCall((m_iterators.objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
     const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
     Variant tmp1;
-    if (toBoolean((mcp0.bindClass(info)->getMeth0Args())(mcp0, 0))) {
+    if (toBoolean((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0))) {
       MethodCallPackage mcp3;
       mcp3.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
       const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
       MethodCallPackage mcp2;
-      mcp2.methodCall(((mcp3.bindClass(info)->getMeth0Args())(mcp3, 0).objectForCall()), NAMSTR(s_sys_ss12e90587, "key"), 0x56EDB60C824E8C51LL);
+      mcp2.methodCall(((mcp3.bindClass(fi)->getMeth0Args())(mcp3, 0).objectForCall()), NAMSTR(s_sys_ss12e90587, "key"), 0x56EDB60C824E8C51LL);
       const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
-      tmp1 = ((mcp2.bindClass(info)->getMeth0Args())(mcp2, 0));
+      tmp1 = ((mcp2.bindClass(fi)->getMeth0Args())(mcp2, 0));
     } else {
       tmp1 = (null);
     }
@@ -2231,7 +2231,7 @@ void c_AppendIterator::t_next() {
       MethodCallPackage mcp1;
       mcp1.methodCall((m_iterators.objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
       const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-      tmp0 = (!(toBoolean((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0))));
+      tmp0 = (!(toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0))));
     }
     if (tmp0) {
       {
@@ -2244,9 +2244,9 @@ void c_AppendIterator::t_next() {
     mcp1.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
     const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
     MethodCallPackage mcp0;
-    mcp0.methodCall(((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0).objectForCall()), NAMSTR(s_sys_ss50652d33, "next"), 0x3C6D50F3BB8102B8LL);
+    mcp0.methodCall(((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0).objectForCall()), NAMSTR(s_sys_ss50652d33, "next"), 0x3C6D50F3BB8102B8LL);
     const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-    (mcp0.bindClass(info)->getMeth0Args())(mcp0, 0);
+    (mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0);
   }
   {
     bool tmp0;
@@ -2255,9 +2255,9 @@ void c_AppendIterator::t_next() {
       mcp2.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
       const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
       MethodCallPackage mcp1;
-      mcp1.methodCall(((mcp2.bindClass(info)->getMeth0Args())(mcp2, 0).objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
+      mcp1.methodCall(((mcp2.bindClass(fi)->getMeth0Args())(mcp2, 0).objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
       const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-      tmp0 = (toBoolean((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0)));
+      tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
     }
     if (tmp0) {
       {
@@ -2269,7 +2269,7 @@ void c_AppendIterator::t_next() {
     MethodCallPackage mcp0;
     mcp0.methodCall((m_iterators.objectForCall()), NAMSTR(s_sys_ss50652d33, "next"), 0x3C6D50F3BB8102B8LL);
     const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-    (mcp0.bindClass(info)->getMeth0Args())(mcp0, 0);
+    (mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0);
   }
   LOOP_COUNTER(1);
   {
@@ -2278,7 +2278,7 @@ void c_AppendIterator::t_next() {
         MethodCallPackage mcp0;
         mcp0.methodCall((m_iterators.objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
         const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-        if (!(toBoolean((mcp0.bindClass(info)->getMeth0Args())(mcp0, 0)))) break;
+        if (!(toBoolean((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0)))) break;
       }
       LOOP_COUNTER_CHECK(1);
       {
@@ -2287,9 +2287,9 @@ void c_AppendIterator::t_next() {
           mcp1.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
           const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
           MethodCallPackage mcp0;
-          mcp0.methodCall(((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0).objectForCall()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
+          mcp0.methodCall(((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0).objectForCall()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
           const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-          (mcp0.bindClass(info)->getMeth0Args())(mcp0, 0);
+          (mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0);
         }
         {
           bool tmp0;
@@ -2298,9 +2298,9 @@ void c_AppendIterator::t_next() {
             mcp2.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
             const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
             MethodCallPackage mcp1;
-            mcp1.methodCall(((mcp2.bindClass(info)->getMeth0Args())(mcp2, 0).objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
+            mcp1.methodCall(((mcp2.bindClass(fi)->getMeth0Args())(mcp2, 0).objectForCall()), NAMSTR(s_sys_ss9943cbf4, "valid"), 0x6413CB5154808C44LL);
             const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-            tmp0 = (toBoolean((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0)));
+            tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
           }
           if (tmp0) {
             {
@@ -2312,7 +2312,7 @@ void c_AppendIterator::t_next() {
           MethodCallPackage mcp0;
           mcp0.methodCall((m_iterators.objectForCall()), NAMSTR(s_sys_ss50652d33, "next"), 0x3C6D50F3BB8102B8LL);
           const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-          (mcp0.bindClass(info)->getMeth0Args())(mcp0, 0);
+          (mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0);
         }
       }
     }
@@ -2327,7 +2327,7 @@ Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
     MethodCallPackage mcp1;
     mcp1.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss37eff1c8, "getInnerIterator"), 0x3106F858B09C7424LL);
     const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-    const Variant &tmp2(((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0)));
+    const Variant &tmp2(((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
     tmp0.set(tmp2);
     tmp0.set(v_func);
     const Array &tmp3((Array(tmp0)));

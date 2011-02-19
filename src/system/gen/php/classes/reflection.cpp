@@ -834,7 +834,7 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
             MethodCallPackage mcp1;
             mcp1.methodCall((v_param.objectForCall()), NAMSTR(s_sys_ss6d9ef7e5, "isOptional"), 0x2D6EF48BBAB22735LL);
             const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-            tmp0 = (toBoolean((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0)));
+            tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
           }
           if (tmp0) {
             {
@@ -4041,7 +4041,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
         MethodCallPackage mcp0;
         mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
         const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-        Variant tmp1(((mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, NAMSTR(s_sys_ssdc3cbddc, "name"))));
+        Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, NAMSTR(s_sys_ssdc3cbddc, "name"))));
         v_cls = tmp1;
       }
     }
@@ -4099,7 +4099,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
     MethodCallPackage mcp0;
     mcp0.methodCall((t_getparentclass().objectForCall()), NAMSTR(s_sys_ssdd355b2b, "isSubclassOf"), 0x373333991926C97ELL);
     const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-    return wrap_variant((mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, v_cls));
+    return wrap_variant((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_cls));
   }
 }
 namespace hphp_impl_splitter {}
@@ -4123,7 +4123,7 @@ Array c_ReflectionClass::t_getstaticproperties() {
             MethodCallPackage mcp1;
             mcp1.methodCall((v_prop.objectForCall()), NAMSTR(s_sys_ss404bf1b4, "isStatic"), 0x7A15DC56E8CC0B19LL);
             const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-            tmp0 = (toBoolean((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0)));
+            tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
           }
           if (tmp0) {
             {
@@ -4189,7 +4189,7 @@ Array c_ReflectionClass::t_getdefaultproperties() {
             MethodCallPackage mcp1;
             mcp1.methodCall((v_prop.objectForCall()), NAMSTR(s_sys_ss9dad4367, "isDefault"), 0x384A52597AB11F15LL);
             const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
-            tmp0 = (toBoolean((mcp1.bindClass(info)->getMeth0Args())(mcp1, 0)));
+            tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
           }
           if (tmp0) {
             {
@@ -4225,7 +4225,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
         MethodCallPackage mcp0;
         mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
         const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-        Variant tmp1(((mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, NAMSTR(s_sys_ssdc3cbddc, "name"))));
+        Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, NAMSTR(s_sys_ssdc3cbddc, "name"))));
         v_cls = tmp1;
       }
     }
@@ -4289,7 +4289,7 @@ Variant c_ReflectionClass::t_getextensionname() {
     MethodCallPackage mcp0;
     mcp0.methodCall((t_fetch(NAMSTR(s_sys_sse9bf4500, "extension")).objectForCall()), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
     const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-    return wrap_variant((mcp0.bindClass(info)->getMeth0Args())(mcp0, 0));
+    return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
   }
 }
 namespace hphp_impl_splitter {}
@@ -5099,7 +5099,7 @@ Array c_ReflectionExtension::t_getclassnames() {
           MethodCallPackage mcp0;
           mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
           const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-          Variant tmp1(((mcp0.bindClass(info)->getMeth0Args())(mcp0, 0)));
+          Variant tmp1(((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0)));
           v_ret.append((tmp1));
         }
       }
@@ -6202,7 +6202,7 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMST
         MethodCallPackage mcp0;
         mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
         const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-        Variant tmp1(((mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, v_name)));
+        Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
         v_method = tmp1;
       }
       if (toBoolean(v_method)) {
@@ -6261,7 +6261,7 @@ Variant c_ReflectionMethod::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name
     MethodCallPackage mcp0;
     mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
     const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-    Variant tmp1(((mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, v_name)));
+    Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
     v_obj = tmp1;
   }
   v_str = (toString(v_obj));
@@ -7383,7 +7383,7 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
         MethodCallPackage mcp0;
         mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
         const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-        Variant tmp1(((mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, v_name)));
+        Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
         v_prop = tmp1;
       }
       if (toBoolean(v_prop)) {
@@ -7442,7 +7442,7 @@ Variant c_ReflectionProperty::ti_export(CStrRef cls, Variant v_cls, CVarRef v_na
     MethodCallPackage mcp0;
     mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
     const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-    Variant tmp1(((mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, v_name)));
+    Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
     v_obj = tmp1;
   }
   v_str = (toString(v_obj));
@@ -8906,7 +8906,7 @@ void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
         MethodCallPackage mcp0;
         mcp0.methodCall((v_func.objectForCall()), NAMSTR(s_sys_ss1902bc14, "getParameters"), 0x3E62225132C2A32DLL);
         const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-        Variant tmp1(((mcp0.bindClass(info)->getMeth0Args())(mcp0, 0)));
+        Variant tmp1(((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0)));
         v_params = tmp1;
       }
       {

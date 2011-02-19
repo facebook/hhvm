@@ -714,7 +714,7 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
                   MethodCallPackage mcp0;
                   mcp0.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
                   const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-                  (mcp0.bindClass(info)->getMeth0Args())(mcp0, 0);
+                  (mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0);
                 }
                 return;
               }

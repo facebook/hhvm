@@ -59,6 +59,10 @@ public:
     if (t) t->m_callingObject = obj;
   }
 
+  void setStaticClassName(CStrRef cls) { m_staticClass = &cls; }
+  void resetStaticClassName() { m_staticClass = NULL; }
+  void setCallingObject(ObjectData *obj) { m_callingObject = obj; }
+
   static bool IsGlobalScope();
   static bool IsGlobalScope(FrameInjection *frame);
   static FrameInjection *GetStackFrame(int level);

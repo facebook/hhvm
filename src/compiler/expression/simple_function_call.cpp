@@ -988,8 +988,8 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
     if (m_params) {
       if (func) {
-        FunctionScope::RefParamInfoPtr info =
-          FunctionScope::GetRefParamInfo(m_name);
+        FunctionScope::FunctionInfoPtr info =
+          FunctionScope::GetFunctionInfo(m_name);
         assert(info);
         for (int i = m_params->getCount(); i--; ) {
           if (info->isRefParam(i)) {

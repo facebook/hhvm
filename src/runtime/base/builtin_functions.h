@@ -598,7 +598,7 @@ public:
   void noFatal() { m_fatal = false; }
   void fail();
   void lateStaticBind(ThreadInfo *ti);
-  const CallInfo *bindClass(ThreadInfo *ti);
+  const CallInfo *bindClass(FrameInjection &fi);
   String getClassName();
   const CallInfo *ci;
   void *extra;

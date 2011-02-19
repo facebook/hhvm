@@ -1733,15 +1733,18 @@ void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
   cg.printf(", %d, %d, 0x%.16lXLL);\n", m_maxParam, flags, refflags);
 }
 
-FunctionScope::StringToRefParamInfoPtrMap FunctionScope::s_refParamInfo;
+FunctionScope::StringToFunctionInfoPtrMap FunctionScope::s_refParamInfo;
 static Mutex s_refParamInfoLock;
 
-void FunctionScope::RecordRefParamInfo(string fname, FunctionScopePtr func) {
+void FunctionScope::RecordFunctionInfo(string fname, FunctionScopePtr func) {
   Lock lock(s_refParamInfoLock);
-  RefParamInfoPtr info = s_refParamInfo[fname];
+  FunctionInfoPtr info = s_refParamInfo[fname];
   if (!info) {
-    info = RefParamInfoPtr(new RefParamInfo());
+    info = FunctionInfoPtr(new FunctionInfo());
     s_refParamInfo[fname] = info;
+  }
+  if (func->isStatic()) {
+    info->setMaybeStatic();
   }
   if (func->isReferenceVariableArgument()) {
     info->setRefVarArg(func->getMaxParamCount());
@@ -1754,10 +1757,10 @@ void FunctionScope::RecordRefParamInfo(string fname, FunctionScopePtr func) {
   }
 }
 
-FunctionScope::RefParamInfoPtr FunctionScope::GetRefParamInfo(string fname) {
-  StringToRefParamInfoPtrMap::iterator it = s_refParamInfo.find(fname);
+FunctionScope::FunctionInfoPtr FunctionScope::GetFunctionInfo(string fname) {
+  StringToFunctionInfoPtrMap::iterator it = s_refParamInfo.find(fname);
   if (it == s_refParamInfo.end()) {
-    return RefParamInfoPtr();
+    return FunctionInfoPtr();
   }
   return it->second;
 }

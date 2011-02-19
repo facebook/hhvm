@@ -1412,7 +1412,7 @@ void c_Continuation::t_next() {
           MethodCallPackage mcp0;
           mcp0.methodCall((m_obj.objectForCall()), toString(v_func), -1);
           const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
-          (mcp0.bindClass(info)->getMeth1Args())(mcp0, 1, GET_THIS_TYPED(Continuation));
+          (mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, GET_THIS_TYPED(Continuation));
         }
       }
     }

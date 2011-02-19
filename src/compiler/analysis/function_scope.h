@@ -369,15 +369,15 @@ public:
   void addCaller(BlockScopePtr caller);
   ReadWriteMutex &getInlineMutex() { return m_inlineMutex; }
 
-  DECLARE_BOOST_TYPES(RefParamInfo);
+  DECLARE_BOOST_TYPES(FunctionInfo);
 
-  static void RecordRefParamInfo(std::string fname, FunctionScopePtr func);
+  static void RecordFunctionInfo(std::string fname, FunctionScopePtr func);
 
-  static RefParamInfoPtr GetRefParamInfo(std::string fname);
+  static FunctionInfoPtr GetFunctionInfo(std::string fname);
 
-  class RefParamInfo {
+  class FunctionInfo {
   public:
-    RefParamInfo(int rva = -1) : m_refVarArg(rva) { }
+    FunctionInfo(int rva = -1) : m_maybeStatic(false), m_refVarArg(rva) { }
 
     bool isRefParam(int p) const {
       if (m_refVarArg >= 0 && p >= m_refVarArg) return true;
@@ -392,7 +392,11 @@ public:
       m_refParams.insert(p);
     }
 
+    void setMaybeStatic() { m_maybeStatic = true; }
+    bool getMaybeStatic() { return m_maybeStatic; }
+
   private:
+    bool m_maybeStatic; // this could be a static method
     int m_refVarArg; // -1: no ref varargs;
                      // otherwise, any arg >= m_refVarArg is a reference
     std::set<int> m_refParams; // set of ref arg positions
@@ -403,7 +407,7 @@ private:
                             AnalysisResultPtr ar,
                             int m_maxParam);
 
-  static StringToRefParamInfoPtrMap s_refParamInfo;
+  static StringToFunctionInfoPtrMap s_refParamInfo;
 
   int m_minParam;
   int m_maxParam;

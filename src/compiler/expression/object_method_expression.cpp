@@ -102,7 +102,7 @@ TypePtr ObjectMethodExpression::inferTypes(AnalysisResultPtr ar,
 }
 
 void ObjectMethodExpression::setInvokeParams(AnalysisResultPtr ar) {
-  FunctionScope::RefParamInfoPtr info = FunctionScope::GetRefParamInfo(m_name);
+  FunctionScope::FunctionInfoPtr info = FunctionScope::GetFunctionInfo(m_name);
   if (info || m_name.empty()) {
     for (int i = m_params->getCount(); i--; ) {
       if (!info || info->isRefParam(i)) {
@@ -392,7 +392,14 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
                                       m_argArrayIndex);
     cg_printf(")");
   } else {
-    cg_printf("(mcp%d.bindClass(info)->", m_ciTemp);
+    bool maybeStatic = true;
+    if (!ar->isSystem() && !m_name.empty()) {
+      FunctionScope::FunctionInfoPtr info =
+        FunctionScope::GetFunctionInfo(m_name);
+      if (info && !info->getMaybeStatic()) maybeStatic = false;
+    }
+    cg_printf("(mcp%d.%s->",
+              m_ciTemp, maybeStatic ? "bindClass(fi)" : "ci" );
     outputDynamicCall(cg, ar, true);
   }
 }

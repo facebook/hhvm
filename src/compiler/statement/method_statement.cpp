@@ -175,7 +175,7 @@ void MethodStatement::onParseRecur(AnalysisResultConstPtr ar,
       param->parseHandler(ar, fs, classScope);
     }
   }
-  FunctionScope::RecordRefParamInfo(m_name, fs);
+  FunctionScope::RecordFunctionInfo(m_name, fs);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

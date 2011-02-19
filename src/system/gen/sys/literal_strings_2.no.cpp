@@ -22,7 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ssb3fce46e("\000AppendIterator\000iterators", 25);
 StaticString s_sys_ssb5a1e6bc("ReflectionObject");
 StaticString s_sys_ssb6132cef("setoptimeout");
 StaticString s_sys_ssb65737a4("DomainException");
@@ -57,6 +56,7 @@ StaticString s_sys_ssc4385198("endDTD");
 StaticString s_sys_ssc483d02b("relaxNGValidateSource");
 StaticString s_sys_ssc556d1b5("isFinal");
 StaticString s_sys_ssc57472df("RecursiveIteratorIterator");
+StaticString s_sys_ssc589966e("getUTF8");
 StaticString s_sys_ssc5f10d1a("getStats");
 StaticString s_sys_ssc60228c6("open");
 StaticString s_sys_ssc64ebfff("Iterator");
@@ -85,6 +85,7 @@ StaticString s_sys_sscd5dc41e("ReflectionParameter");
 StaticString s_sys_sscdbb2d67("getMethod");
 StaticString s_sys_ssce568670("appendByKey");
 StaticString s_sys_ssce80f767("isProtected");
+StaticString s_sys_ssced27431("increment");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

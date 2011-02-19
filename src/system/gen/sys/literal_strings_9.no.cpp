@@ -22,7 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ss6974a1cc("__toString");
 StaticString s_sys_ss69f4b5d8("escapestring");
 StaticString s_sys_ss6a9626a3("seek");
 StaticString s_sys_ss6aa5ef61("helpBody");
@@ -41,6 +40,7 @@ StaticString s_sys_ss6d9ef7e5("isOptional");
 StaticString s_sys_ss6e47b4b1("isPassedByReference");
 StaticString s_sys_ss6e6aaece("RangeException");
 StaticString s_sys_ss6e9f1eba("lookupNamespaceUri");
+StaticString s_sys_ss6ec1e6d8("detectAll");
 StaticString s_sys_ss70529da2("modify");
 StaticString s_sys_ss70eaeb85("send");
 StaticString s_sys_ss71028683("getOffset");

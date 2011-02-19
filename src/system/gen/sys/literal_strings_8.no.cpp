@@ -22,7 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ss504bc94d("isInternal");
 StaticString s_sys_ss50652d33("next");
 StaticString s_sys_ss508b1d41("addfunction");
 StaticString s_sys_ss5097084d("setByKey");
@@ -47,6 +46,7 @@ StaticString s_sys_ss5916f77a("argCount");
 StaticString s_sys_ss5ac66c5d("execute");
 StaticString s_sys_ss5b229ad5("methods");
 StaticString s_sys_ss5b2a52c1("ReflectionFunctionAbstract");
+StaticString s_sys_ss5b474ef3("getLanguage");
 StaticString s_sys_ss5b753b53("Countable");
 StaticString s_sys_ss5baf0fe3("isDot");
 StaticString s_sys_ss5be7a94a("static_variables");
@@ -85,6 +85,7 @@ StaticString s_sys_ss6863d210("schemaValidateSource");
 StaticString s_sys_ss68bc25e3("__dorequest");
 StaticString s_sys_ss68d731f7("getChildren");
 StaticString s_sys_ss690e46e7("saveHTML");
+StaticString s_sys_ss6974a1cc("__toString");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

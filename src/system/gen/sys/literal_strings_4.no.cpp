@@ -22,8 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_sse4a1cad7("getVersion");
-StaticString s_sys_sse5340a31("mapping");
 StaticString s_sys_sse590286e("offsetUnset");
 StaticString s_sys_sse5c78f27("begintransaction");
 StaticString s_sys_sse63d8c2d("func");
@@ -34,6 +32,7 @@ StaticString s_sys_sse867e166("__set");
 StaticString s_sys_sse896cb09("read");
 StaticString s_sys_sse8a6ad69("getMaxLineLen");
 StaticString s_sys_sse9bf4500("extension");
+StaticString s_sys_sse9da2c6e("setText");
 StaticString s_sys_ssea00c58c("isLink");
 StaticString s_sys_ssea339844("createComment");
 StaticString s_sys_sseac4979f("get");
@@ -61,6 +60,7 @@ StaticString s_sys_ssf38cf473("wrap");
 StaticString s_sys_ssf3f5d744("hasProperty");
 StaticString s_sys_ssf401cc22("getFile");
 StaticString s_sys_ssf4426a16("evaluate");
+StaticString s_sys_ssf45b9a33("isValid");
 StaticString s_sys_ssf46d6580("fetch");
 StaticString s_sys_ssf4c4a1fc("getAttributeNode");
 StaticString s_sys_ssf4c6e0f5("isWhitespaceInElementContent");
@@ -85,6 +85,7 @@ StaticString s_sys_ssfb10fd8c("parent");
 StaticString s_sys_ssfb433b54("nextrowset");
 StaticString s_sys_ssfb6412d4("): failed to open dir");
 StaticString s_sys_ssfb726449("Cannot rewind on a Continuation object");
+StaticString s_sys_ssfbb3eb52("addUrl");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

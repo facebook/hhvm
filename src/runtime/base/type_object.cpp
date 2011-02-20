@@ -28,14 +28,14 @@ const Object Object::s_nullObject = Object();
 
 ArrayIter Object::begin(CStrRef context /* = null_string */,
                         bool setIterDirty /* = false */) const {
-  if (!m_px) throw NullPointerException();
+  if (!m_px) throw_null_pointer_exception();
   return m_px->begin(context);
 }
 
 MutableArrayIter Object::begin(Variant *key, Variant &val,
                                CStrRef context /* = null_string */,
                                bool setIterDirty /* = false */) const {
-  if (!m_px) throw NullPointerException();
+  if (!m_px) throw_null_pointer_exception();
   return m_px->begin(key, val, context);
 }
 
@@ -72,12 +72,12 @@ bool Object::more(CObjRef v2) const {
 
 Variant Object::o_get(CStrRef propName, bool error /* = true */,
                       CStrRef context /* = null_string */) const {
-  if (!m_px) throw NullPointerException();
+  if (!m_px) throw_null_pointer_exception();
   return m_px->o_get(propName, error, context);
 }
 
 Variant Object::o_getPublic(CStrRef propName, bool error /* = true */) const {
-  if (!m_px) throw NullPointerException();
+  if (!m_px) throw_null_pointer_exception();
   return m_px->o_getPublic(propName, error);
 }
 

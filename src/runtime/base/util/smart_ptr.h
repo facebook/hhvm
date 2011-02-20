@@ -95,7 +95,7 @@ public:
    * Magic delegation.
    */
   T *operator->() const {
-    if (!m_px) throw NullPointerException();
+    if (!m_px) throw_null_pointer_exception();
     return m_px;
   }
 
@@ -202,7 +202,7 @@ public:
    * Magic delegation.
    */
   T *operator->() const {
-    if (!m_px) throw NullPointerException();
+    if (!m_px) throw_null_pointer_exception();
     return m_px;
   }
 

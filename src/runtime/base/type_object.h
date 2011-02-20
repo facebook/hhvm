@@ -95,7 +95,7 @@ class Object : public SmartPtr<ObjectData> {
     ObjectData *cur = m_px;
     if (!cur) {
       if (!nullOkay) {
-        throw NullPointerException();
+        throw_null_pointer_exception();
       }
       return NULL;
     }

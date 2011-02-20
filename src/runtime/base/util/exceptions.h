@@ -256,6 +256,8 @@ public:
   virtual ~PhpFileDoesNotExistException() throw() {}
 };
 
+void throw_null_pointer_exception() ATTRIBUTE_COLD __attribute__((noreturn));
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

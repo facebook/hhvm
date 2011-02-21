@@ -672,8 +672,21 @@ void ExecutionContext::recordLastError(const Exception &e,
 
 bool ExecutionContext::onFatalError(const Exception &e) {
   recordLastError(e);
+  const char *file = NULL;
+  int line = 0;
+  if (RuntimeOption::InjectedStackTrace) {
+    const ExtendedException *ee = dynamic_cast<const ExtendedException *>(&e);
+    if (ee) {
+      ArrayPtr bt = ee->getBackTrace();
+      if (!bt->empty()) {
+        Array top = bt->rvalAt(0).toArray();
+        if (top.exists("file")) file = top.rvalAt("file").toString();
+        if (top.exists("line")) line = top.rvalAt("line");
+      }
+    }
+  }
   if (RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(true, "HipHop Fatal error: ", e);
+    Logger::Log(true, "HipHop Fatal error: ", e, file, line);
   }
   bool handled = false;
   if (RuntimeOption::CallUserHandlerOnFatals) {
@@ -681,7 +694,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
     handled = callUserErrorHandler(e, errnum, true);
   }
   if (!handled && !RuntimeOption::AlwaysLogUnhandledExceptions) {
-    Logger::Log(true, "HipHop Fatal error: ", e);
+    Logger::Log(true, "HipHop Fatal error: ", e, file, line);
   }
   return handled;
 }

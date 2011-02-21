@@ -76,10 +76,10 @@ bool SynchronizableMulti::waitImpl(int id, bool front, timespec *ts) {
 
   if (ret) {
     CondIterMap::iterator iter = m_cond_map.find(cond);
-    ASSERT(iter != m_cond_map.end());
-
-    m_cond_list.erase(iter->second);
-    m_cond_map.erase(iter);
+    if (iter != m_cond_map.end()) {
+      m_cond_list.erase(iter->second);
+      m_cond_map.erase(iter);
+    }
   }
 
   return ret != ETIMEDOUT;

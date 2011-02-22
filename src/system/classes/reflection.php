@@ -889,10 +889,16 @@ class ReflectionClass implements Reflector {
  *
  * @return     mixed   An array of ReflectionProperty objects.
  */
-  public function getProperties() {
+  public function getProperties($filter = 0xFFFF) {
     $ret = array();
     foreach ($this->fetch('properties') as $name => $_) {
-      $ret[] = $this->getProperty($name);
+      $p = $this->getProperty($name);
+      if (($filter & ReflectionProperty::IS_PUBLIC)    && $p->isPublic()    ||
+          ($filter & ReflectionProperty::IS_PROTECTED) && $p->isProtected() ||
+          ($filter & ReflectionProperty::IS_PRIVATE)   && $p->isPrivate()   ||
+          ($filter & ReflectionProperty::IS_STATIC)    && $p->isStatic()) {
+        $ret[] = $p;
+      }
     }
     return $ret;
   }

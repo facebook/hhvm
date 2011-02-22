@@ -90,7 +90,7 @@ class c_ReflectionClass : public ExtObjectData {
   public: p_ReflectionMethod t_getmethod(CVarRef v_name);
   public: Array t_getmethods(CVarRef v_filter = 65535LL);
   public: p_ReflectionProperty t_getproperty(CVarRef v_name);
-  public: Array t_getproperties();
+  public: Array t_getproperties(CVarRef v_filter = 65535LL);
   public: Variant t_getconstants();
   public: Variant t_getconstant(CVarRef v_name);
   public: Array t_getinterfaces();

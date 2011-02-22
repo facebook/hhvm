@@ -7876,6 +7876,16 @@ bool TestCodeRun::TestReflectionClasses() {
        "$inter = new ReflectionClass('B');"
        "var_dump($inter->hasMethod('foo'));");
 
+  MVCR("<?php\n"
+       "class A { private $a; protected $b; public $c; static $d; }\n"
+       "function f($a) { foreach ($a as $v) { var_dump($v->getName()); } }\n"
+       "$r = new ReflectionClass('A');\n"
+       "$a = $r->getProperties(); f($a);\n"
+       "$a = $r->getProperties(ReflectionProperty::IS_PUBLIC); f($a);\n"
+       "$a = $r->getProperties(ReflectionProperty::IS_PRIVATE); f($a);\n"
+       "$a = $r->getProperties(ReflectionProperty::IS_PROTECTED); f($a);\n"
+       "$a = $r->getProperties(ReflectionProperty::IS_STATIC); f($a);\n");
+
   return true;
 }
 

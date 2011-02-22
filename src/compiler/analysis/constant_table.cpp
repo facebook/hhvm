@@ -80,6 +80,7 @@ void ConstantTable::setDynamic(AnalysisResultConstPtr ar,
                                const std::string &name) {
   Symbol *sym = genSymbol(name, true);
   if (!sym->isDynamic()) {
+    Lock lock(BlockScope::s_constMutex);
     sym->setDynamic();
     if (sym->getDeclaration()) {
       sym->getDeclaration()->getScope()->
@@ -298,7 +299,10 @@ bool ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     decl = false;
   }
 
-  if (!sym->declarationSet() || sym->isDynamic()) return false;
+  if (!const_cast<Symbol*>(sym)->checkDefined() ||
+      sym->isDynamic()) {
+    return false;
+  }
   if (sym->isSystem() && cg.getOutput() != CodeGenerator::SystemCPP) {
     return false;
   }

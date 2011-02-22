@@ -151,7 +151,8 @@ ExpressionPtr ConstantExpression::preOptimize(AnalysisResultConstPtr ar) {
       BlockScopeConstPtr block = ar->findConstantDeclarer(m_name);
       if (block) {
         sym = block->getConstants()->getSymbol(m_name);
-        if (sym && sym->isDynamic()) {
+        if (sym &&
+            (!const_cast<Symbol*>(sym)->checkDefined() || sym->isDynamic())) {
           sym = 0;
           m_dynamic = true;
         }
@@ -270,8 +271,9 @@ void ConstantExpression::outputCPPImpl(CodeGenerator &cg,
       requireFwDeclaration = true;
     }
   } else {
-    cg_printf("getUndefinedConstant(%s%s)",
-              Option::ConstantPrefix, cg.formatLabel(m_name).c_str());
+    cg_printf("getUndefinedConstant(");
+    cg_printString(cg.formatLabel(m_name).c_str(), ar, shared_from_this());
+    cg_printf(")");
     requireFwDeclaration = true;
   }
 

@@ -125,6 +125,19 @@ void Symbol::import(BlockScopeRawPtr scope, const Symbol &src_sym) {
   m_coerced = src_sym.m_coerced;
 }
 
+bool Symbol::checkDefined() {
+  if (isSystem()) return true;
+  assert(m_flags.m_declaration_set);
+  if (!m_declaration) return false;
+  if (!m_declaration.unique()) return true;
+  if (!m_flags.m_replaced) {
+    Lock lock(BlockScope::s_constMutex);
+    setDynamic();
+    return false;
+  }
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
@@ -187,6 +200,13 @@ ClassScopeRawPtr SymbolTable::getClassScope() {
 bool SymbolTable::isPresent(const std::string &name) const {
   if (const Symbol *sym = getSymbol(name)) {
     return sym->isPresent();
+  }
+  return false;
+}
+
+bool SymbolTable::checkDefined(const std::string &name) {
+  if (const Symbol *sym = getSymbol(name)) {
+    return const_cast<Symbol*>(sym)->checkDefined();
   }
   return false;
 }

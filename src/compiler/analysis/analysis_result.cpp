@@ -2760,6 +2760,11 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       ct->getSymbols(syms);
       BOOST_FOREACH(string sym, syms) {
         if (ct->isSystem(sym) && !system) continue;
+        ClassScopePtr defClass;
+        if (!ct->getDeclarationRecur(ar, sym, defClass)) {
+          assert(!defClass);
+          continue;
+        }
         strings.push_back(sym.c_str());
         dyns[sym.c_str()] = ct->isDynamic(sym);
       }

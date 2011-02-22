@@ -131,6 +131,7 @@ void c_EncodingMatch::validate() {
 }
 
 bool c_EncodingMatch::t_isvalid() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(EncodingMatch, EncodingMatch::isvalid);
   return m_encoding_match != 0;
 }
 

@@ -18,10 +18,13 @@ CXX_NOOPT_SOURCES := $(filter %.no.cpp, $(REC_SOURCES))
 PROGRAMS = test hphp hphpi compiler tools
 SUB_CLEAN_DIRS = idl hphp runtime ../facebook/extensions
 
+include $(PROJECT_ROOT)/src/dirs.mk
+
 C_SOURCES := $(filter-out $(GENERATED_CPP_SOURCES) $(GENERATED_C_SOURCES),\
 	$(filter %.c, $(REC_SOURCES)))
 CXX_SOURCES := $(filter-out $(GENERATED_CXX_SOURCES) $(CXX_NOOPT_SOURCES),\
 	$(filter %.cpp,$(REC_SOURCES)))
+
 ASM_SOURCES := $(filter %.S, $(REC_SOURCES))
 
 ASM_SOURCES += $(wildcard $(PROJECT_ROOT)/facebook/src/util/*.S)

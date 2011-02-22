@@ -3732,6 +3732,31 @@ bool TestCodeRun::TestObject() {
        "}"
        "test();");
 
+  MVCR("<?php\n"
+       "class A { }\n"
+       "class B extends A {\n"
+       "  static function check1($a) { return $a instanceof self; }\n"
+       "  static function check2($a) { return $a instanceof parent; }\n"
+       "}\n"
+       "$a = new B;\n"
+       "var_dump(B::check1($a), B::check2($a));\n"
+       "$b = (object)array(1, 2, 3);\n"
+       "var_dump(B::check1($b), B::check2($b));\n");
+
+  MVCR("<php\n"
+       "class X { static function f($o, $s) { return $o instanceof $s; } }\n"
+       "$x = new X;\n"
+       "var_dump(X::f($x, 'self'));\n"
+       "var_dump(X::f($x, 'X'));\n");
+
+  MVCR("<php\n"
+       "class X {\n"
+       "  static function f($o) {\n"
+       "    $s = 'self'; return $o instanceof $s;\n"
+       "  }\n"
+       "}\n"
+       "X::f(new X);\n");
+
   return true;
 }
 

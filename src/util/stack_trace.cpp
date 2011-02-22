@@ -128,7 +128,7 @@ struct NamedBfd {
 
 bool StackTraceBase::Enabled = true;
 string StackTraceBase::ReportEmail;
-string StackTraceBase::ReportDirectory;
+string StackTraceBase::ReportDirectory("/tmp");
 
 void StackTraceBase::InstallReportOnSignal(int sig) {
   signal(sig, bt_handler);

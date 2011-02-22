@@ -124,11 +124,11 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
     case 0:
       HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss88a8c728, "getNumberOfParameters")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
@@ -138,11 +138,11 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
     case 1:
       HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss8fed3624, "getNumberOfRequiredParameters")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
@@ -152,11 +152,11 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
     case 2:
       HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss88e41acd, "getClosure")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
@@ -166,11 +166,11 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
     case 4:
       HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5e0a51ee, "isUserDefined")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
@@ -178,11 +178,11 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ssf8395a4d, "getStartLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
@@ -192,11 +192,11 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
     case 5:
       HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ssc2df217e, "getName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
@@ -206,11 +206,11 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
     case 8:
       HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss33872dc4, "getStaticVariables")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
@@ -218,11 +218,11 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss06d80b5c, "returnsReference")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
@@ -232,11 +232,11 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
     case 13:
       HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss1902bc14, "getParameters")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
@@ -244,11 +244,11 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
       }
       HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss3a783e44, "getFileName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
@@ -258,11 +258,11 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
     case 15:
       HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss504bc94d, "isInternal")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
@@ -272,11 +272,11 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
     case 16:
       HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss8934f5fc, "getEndLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
@@ -286,11 +286,11 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
     case 24:
       HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ssd5dbbd47, "getDocComment")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
@@ -937,17 +937,17 @@ Variant c_ReflectionObject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
@@ -967,17 +967,17 @@ Variant c_ReflectionObject::os_invoke_from_eval(const char *c, const char *s, Ev
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
@@ -1285,11 +1285,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 4:
       HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ssf8395a4d, "getStartLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
@@ -1300,14 +1300,14 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ssf3f5d744, "hasProperty")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
@@ -1317,11 +1317,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 19:
       HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
@@ -1331,11 +1331,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 20:
       HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss97b15062, "getModifiers")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
@@ -1346,14 +1346,14 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_sse1ffa7cf, "hasMethod")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
@@ -1363,11 +1363,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 27:
       HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ssc7d7a51a, "getDefaultProperties")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
@@ -1377,11 +1377,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 30:
       HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss27634730, "isInterface")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
@@ -1391,11 +1391,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 34:
       HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss1ce69cd5, "getStaticProperties")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
@@ -1406,14 +1406,14 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss43d0dde2, "isInstance")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
@@ -1421,11 +1421,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss7157d1ae, "getExtensionName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
@@ -1436,14 +1436,14 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss4483b6ae, "getMethods")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
@@ -1452,11 +1452,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss53ec6e8f, "getConstructor")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
@@ -1464,11 +1464,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss8e2abdf3, "getInterfaceNames")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
@@ -1480,17 +1480,17 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
@@ -1499,11 +1499,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ssc556d1b5, "isFinal")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
@@ -1513,12 +1513,12 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 48:
       HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss56c85b78, "newInstance")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
         Array vargs;
-        for (; it != params.end(); ++it) {
-          vargs.append((*it)->eval(env));
+        for (; i != params.size(); ++i) {
+          vargs.append(params[i]->eval(env));
         }
         int count __attribute__((__unused__)) = params.size();
         if (count <= 0) return (t_newinstance(count));
@@ -1529,14 +1529,14 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss0f90caf6, "getConstant")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
@@ -1547,14 +1547,14 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_sscdbb2d67, "getMethod")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
@@ -1564,11 +1564,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 55:
       HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ssdf34c0b4, "isAbstract")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
@@ -1578,11 +1578,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 59:
       HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_sscd0bfaee, "getExtension")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
@@ -1592,11 +1592,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 60:
       HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss4d6442de, "isInstantiable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
@@ -1607,14 +1607,14 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss37217e60, "hasConstant")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
@@ -1624,11 +1624,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 67:
       HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ssd6eedaeb, "getInterfaces")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
@@ -1638,11 +1638,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 68:
       HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss7ace3627, "getProperties")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
@@ -1653,14 +1653,14 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ssd029c1ac, "getProperty")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
@@ -1670,11 +1670,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 77:
       HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss3a783e44, "getFileName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
@@ -1684,11 +1684,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 78:
       HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss8f9bd044, "isIterateable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
@@ -1698,11 +1698,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 79:
       HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss504bc94d, "isInternal")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
@@ -1712,11 +1712,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 85:
       HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss6c17831d, "getConstants")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
@@ -1727,14 +1727,14 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
@@ -1744,11 +1744,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 100:
       HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5e0a51ee, "isUserDefined")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
@@ -1758,11 +1758,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 101:
       HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ssc2df217e, "getName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
@@ -1773,14 +1773,14 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ssd8c7abd7, "newInstanceArgs")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
@@ -1792,17 +1792,17 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
@@ -1814,17 +1814,17 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
@@ -1834,11 +1834,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 112:
       HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss8934f5fc, "getEndLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
@@ -1850,17 +1850,17 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
@@ -1870,11 +1870,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 114:
       HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss24749844, "getParentClass")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
@@ -1884,11 +1884,11 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
     case 120:
       HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ssd5dbbd47, "getDocComment")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
@@ -1899,14 +1899,14 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ssef52e4e1, "implementsInterface")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
@@ -1915,14 +1915,14 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ssf46d6580, "fetch")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
@@ -1933,14 +1933,14 @@ Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ssdd355b2b, "isSubclassOf")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
@@ -1960,17 +1960,17 @@ Variant c_ReflectionClass::os_invoke_from_eval(const char *c, const char *s, Eva
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
@@ -3391,14 +3391,14 @@ void c_ReflectionClass::getConstructor(MethodCallPackage &mcp) {
 void c_ReflectionClass::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  unsigned int i = 0;
   do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
+    if (i == params.size()) break;
+    a0 = params[i]->eval(env);
+    i++;
   } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
+  for (; i != params.size(); ++i) {
+    params[i]->eval(env);
   }
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 1);
@@ -4409,11 +4409,11 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
     case 2:
       HASH_GUARD_LITSTR(0x0113D73FC859EDC2LL, NAMSTR(s_sys_ssd5cc982b, "getClasses")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
@@ -4423,11 +4423,11 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
     case 5:
       HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ssc2df217e, "getName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
@@ -4439,17 +4439,17 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
@@ -4459,11 +4459,11 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
     case 15:
       HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1d6e06d8, "getFunctions")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
@@ -4473,11 +4473,11 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
     case 19:
       HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
@@ -4487,11 +4487,11 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
     case 20:
       HASH_GUARD_LITSTR(0x5CE2786E11341594LL, NAMSTR(s_sys_ss09d4c665, "getClassNames")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
@@ -4501,11 +4501,11 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
     case 21:
       HASH_GUARD_LITSTR(0x306B5F4D1D03D335LL, NAMSTR(s_sys_ssa4e142d1, "getINIEntries")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
@@ -4513,11 +4513,11 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss6c17831d, "getConstants")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
@@ -4527,11 +4527,11 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
     case 22:
       HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_sse4a1cad7, "getVersion")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
@@ -4542,14 +4542,14 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
@@ -4557,11 +4557,11 @@ Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss33988b3e, "info")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
@@ -4581,17 +4581,17 @@ Variant c_ReflectionExtension::os_invoke_from_eval(const char *c, const char *s,
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
@@ -4982,14 +4982,14 @@ void c_ReflectionExtension::getConstructor(MethodCallPackage &mcp) {
 void c_ReflectionExtension::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  unsigned int i = 0;
   do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
+    if (i == params.size()) break;
+    a0 = params[i]->eval(env);
+    i++;
   } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
+  for (; i != params.size(); ++i) {
+    params[i]->eval(env);
   }
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 1);
@@ -5250,15 +5250,15 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ssc90e239b, "invoke")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
         Array vargs;
-        for (; it != params.end(); ++it) {
-          vargs.append((*it)->eval(env));
+        for (; i != params.size(); ++i) {
+          vargs.append(params[i]->eval(env));
         }
         int count __attribute__((__unused__)) = params.size();
         if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
@@ -5267,11 +5267,11 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss88e41acd, "getClosure")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
@@ -5281,11 +5281,11 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 3:
       HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss94ec964c, "getDeclaringClass")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
@@ -5297,17 +5297,17 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
@@ -5317,11 +5317,11 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 7:
       HASH_GUARD_LITSTR(0x51A20EA0E327F607LL, NAMSTR(s_sys_ss9631f2ea, "isDestructor")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
@@ -5334,20 +5334,20 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a2 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
@@ -5357,11 +5357,11 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 10:
       HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ssce80f767, "isProtected")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
@@ -5371,11 +5371,11 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 14:
       HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ssc556d1b5, "isFinal")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
@@ -5385,11 +5385,11 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 15:
       HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ssa812760b, "isPrivate")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
@@ -5399,11 +5399,11 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 19:
       HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
@@ -5413,11 +5413,11 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 20:
       HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss97b15062, "getModifiers")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
@@ -5427,11 +5427,11 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 23:
       HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ssdf34c0b4, "isAbstract")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
@@ -5441,11 +5441,11 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 25:
       HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss404bf1b4, "isStatic")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
@@ -5455,11 +5455,11 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 26:
       HASH_GUARD_LITSTR(0x654B5F965C5CAC7ALL, NAMSTR(s_sys_ss90d9de57, "isConstructor")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
@@ -5469,11 +5469,11 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
     case 28:
       HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ssdec3c0f0, "isPublic")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
@@ -5485,17 +5485,17 @@ Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 2);
@@ -5517,20 +5517,20 @@ Variant c_ReflectionMethod::os_invoke_from_eval(const char *c, const char *s, Ev
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a2 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
@@ -6112,17 +6112,17 @@ void c_ReflectionMethod::dynConstructFromEval(Eval::VariableEnvironment &env, co
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  unsigned int i = 0;
   do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
+    if (i == params.size()) break;
+    a0 = params[i]->eval(env);
+    i++;
+    if (i == params.size()) break;
+    a1 = params[i]->eval(env);
+    i++;
   } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
+  for (; i != params.size(); ++i) {
+    params[i]->eval(env);
   }
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 1);
@@ -6517,14 +6517,14 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD_LITSTR(0x791E9751F5B8C5A2LL, NAMSTR(s_sys_ss3fe4822b, "setAccessible")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionProperty::setAccessible", count, 1, 1, 1);
@@ -6535,14 +6535,14 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD_LITSTR(0x56879BCEB40997E3LL, NAMSTR(s_sys_ssd14ebd08, "getValue")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
@@ -6551,11 +6551,11 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss94ec964c, "getDeclaringClass")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
@@ -6565,11 +6565,11 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 5:
       HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ssc2df217e, "getName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
@@ -6582,20 +6582,20 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a2 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
@@ -6605,11 +6605,11 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 10:
       HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ssce80f767, "isProtected")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
@@ -6619,11 +6619,11 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 15:
       HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ssa812760b, "isPrivate")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
@@ -6633,11 +6633,11 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 19:
       HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
@@ -6647,11 +6647,11 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 20:
       HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss97b15062, "getModifiers")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
@@ -6661,11 +6661,11 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 21:
       HASH_GUARD_LITSTR(0x384A52597AB11F15LL, NAMSTR(s_sys_ss9dad4367, "isDefault")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
@@ -6675,17 +6675,17 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
@@ -6695,11 +6695,11 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 24:
       HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ssd5dbbd47, "getDocComment")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
@@ -6709,11 +6709,11 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 25:
       HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss404bf1b4, "isStatic")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
@@ -6723,11 +6723,11 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 28:
       HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ssdec3c0f0, "isPublic")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
@@ -6739,17 +6739,17 @@ Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
@@ -6770,20 +6770,20 @@ Variant c_ReflectionProperty::os_invoke_from_eval(const char *c, const char *s, 
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a2 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
@@ -7323,17 +7323,17 @@ void c_ReflectionProperty::dynConstructFromEval(Eval::VariableEnvironment &env, 
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  unsigned int i = 0;
   do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
+    if (i == params.size()) break;
+    a0 = params[i]->eval(env);
+    i++;
+    if (i == params.size()) break;
+    a1 = params[i]->eval(env);
+    i++;
   } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
+  for (; i != params.size(); ++i) {
+    params[i]->eval(env);
   }
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 1);
@@ -7661,12 +7661,12 @@ Variant c_ReflectionFunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 2:
       HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ssc90e239b, "invoke")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
         Array vargs;
-        for (; it != params.end(); ++it) {
-          vargs.append((*it)->eval(env));
+        for (; i != params.size(); ++i) {
+          vargs.append(params[i]->eval(env));
         }
         int count __attribute__((__unused__)) = params.size();
         if (count <= 0) return (t_invoke(count));
@@ -7676,11 +7676,11 @@ Variant c_ReflectionFunction::o_invoke_from_eval(const char *s, Eval::VariableEn
     case 3:
       HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
@@ -7691,14 +7691,14 @@ Variant c_ReflectionFunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss1fa13716, "invokeArgs")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
@@ -7710,17 +7710,17 @@ Variant c_ReflectionFunction::o_invoke_from_eval(const char *s, Eval::VariableEn
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
@@ -7731,14 +7731,14 @@ Variant c_ReflectionFunction::o_invoke_from_eval(const char *s, Eval::VariableEn
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
@@ -7758,17 +7758,17 @@ Variant c_ReflectionFunction::os_invoke_from_eval(const char *c, const char *s, 
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
@@ -7995,14 +7995,14 @@ void c_ReflectionFunction::getConstructor(MethodCallPackage &mcp) {
 void c_ReflectionFunction::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  unsigned int i = 0;
   do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
+    if (i == params.size()) break;
+    a0 = params[i]->eval(env);
+    i++;
   } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
+  for (; i != params.size(); ++i) {
+    params[i]->eval(env);
   }
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 1);
@@ -8186,11 +8186,11 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 3:
       HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss94ec964c, "getDeclaringClass")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
@@ -8200,11 +8200,11 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 5:
       HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ssc2df217e, "getName")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
@@ -8217,20 +8217,20 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a2 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
@@ -8238,11 +8238,11 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       HASH_GUARD_LITSTR(0x4044F1EEBF3BB8C8LL, NAMSTR(s_sys_ssf1bd1a9d, "getPosition")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
@@ -8252,11 +8252,11 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 9:
       HASH_GUARD_LITSTR(0x4F51DA0B633E9909LL, NAMSTR(s_sys_ss969a2913, "getClass")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
@@ -8264,11 +8264,11 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       HASH_GUARD_LITSTR(0x24ED05F4504C4C09LL, NAMSTR(s_sys_ss5bfa95ac, "allowsNull")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
@@ -8278,11 +8278,11 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 12:
       HASH_GUARD_LITSTR(0x27C482A6C7951E0CLL, NAMSTR(s_sys_ss1c65f80a, "getDefaultValue")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
@@ -8292,11 +8292,11 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 17:
       HASH_GUARD_LITSTR(0x13E3F304BDD89FB1LL, NAMSTR(s_sys_ss6e47b4b1, "isPassedByReference")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
@@ -8306,11 +8306,11 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 18:
       HASH_GUARD_LITSTR(0x6E34805C91257C92LL, NAMSTR(s_sys_ssf4dfdccf, "isDefaultValueAvailable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
@@ -8320,11 +8320,11 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 19:
       HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
@@ -8334,11 +8334,11 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 21:
       HASH_GUARD_LITSTR(0x2D6EF48BBAB22735LL, NAMSTR(s_sys_ss6d9ef7e5, "isOptional")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
@@ -8348,11 +8348,11 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
     case 29:
       HASH_GUARD_LITSTR(0x5A9CE40C0F25871DLL, NAMSTR(s_sys_ssbc590ceb, "isArray")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
@@ -8364,17 +8364,17 @@ Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableE
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
@@ -8395,20 +8395,20 @@ Variant c_ReflectionParameter::os_invoke_from_eval(const char *c, const char *s,
         Variant a1;
         Variant a2;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a2 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
@@ -8866,17 +8866,17 @@ void c_ReflectionParameter::dynConstructFromEval(Eval::VariableEnvironment &env,
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  unsigned int i = 0;
   do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
+    if (i == params.size()) break;
+    a0 = params[i]->eval(env);
+    i++;
+    if (i == params.size()) break;
+    a1 = params[i]->eval(env);
+    i++;
   } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
+  for (; i != params.size(); ++i) {
+    params[i]->eval(env);
   }
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 1);

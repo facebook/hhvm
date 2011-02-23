@@ -157,7 +157,8 @@ void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
         VariableTablePtr vars = ar->getVariables();
         Symbol *sym = vars->getSymbol(m_globalName);
         if (!sym || sym->getDeclaration().get() == this) {
-          Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
+          Compiler::Error(Compiler::UseUndeclaredGlobalVariable,
+                          shared_from_this());
         }
       }
     }

@@ -89,10 +89,14 @@ bool TestCodeError::TestUseUndeclaredVariable() {
   VE(UseUndeclaredVariable,
      "<?php class T {} function t() { $a = new T(); print $a->a; }");
 */
-  VE(UseUndeclaredVariable, "<?php print $GLOBALS['a'];");
   VE(UseUndeclaredVariable,
      "<?php class A { public $a = 123; } print A::$a;");
 
+  return true;
+}
+
+bool TestCodeError::TestUseUndeclaredGlobalVariable() {
+  VE(UseUndeclaredGlobalVariable, "<?php print $GLOBALS['a'];");
   return true;
 }
 

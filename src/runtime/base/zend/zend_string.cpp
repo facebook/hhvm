@@ -2326,8 +2326,10 @@ int string_levenshtein(const char *s1, int l1, const char *s2, int l2,
   if(l1==0) return l2*cost_ins;
   if(l2==0) return l1*cost_del;
 
-  if((l1>LEVENSHTEIN_MAX_LENTH)||(l2>LEVENSHTEIN_MAX_LENTH))
+  if((l1>LEVENSHTEIN_MAX_LENTH)||(l2>LEVENSHTEIN_MAX_LENTH)) {
+    raise_warning("levenshtein(): Argument string(s) too long");
     return -1;
+  }
 
   p1 = (int*)malloc((l2+1) * sizeof(int));
   p2 = (int*)malloc((l2+1) * sizeof(int));

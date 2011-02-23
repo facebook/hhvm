@@ -2464,12 +2464,11 @@ safe:
           }
         } else {
           switch (param->parameter.getType()) {
+          case KindOfUninit:
           case KindOfNull:
             plc->quoted = "NULL";
             break;
 
-          case KindOfByte:
-          case KindOfInt16:
           case KindOfInt32:
           case KindOfInt64:
           case KindOfDouble:

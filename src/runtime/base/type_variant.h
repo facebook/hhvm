@@ -93,23 +93,19 @@ class Variant {
    * setUninitNull occurs frequently; use this version where possible.
    */
   inline void setUninitNull() {
-    CT_ASSERT(offsetof(Variant, m_data) == 0     &&
-              offsetof(Variant, _count) == 8     &&
+    CT_ASSERT(offsetof(Variant, _count) == 8     &&
               offsetof(Variant, m_type) == 12    &&
-              sizeof(m_data) == sizeof(uint64_t) &&
               sizeof(_count) == sizeof(uint32_t) &&
-              sizeof(m_type) == sizeof(uint32_t) &&
-              sizeof(Variant) == 2 * sizeof(uint64_t));
+              sizeof(m_type) == sizeof(uint32_t));
     /**
-     * Two qword stores are faster than the three stores needed for
-     * assigning the three members, and gcc can't figure it out.
-     * Note that there are no endianness assumptions: the only "split"
-     * integer field is m_typeAndCount, and we're writing all 0's to it.
+     * One qword store is faster than two dword stores, and gcc can't figure it
+     * out. Note that there are no endianness assumptions: while m_typeAndCount
+     * is a "split" integer field, we're writing all 0's to it so byte order
+     * doesn't matter.
      *
      * The dance with the union is needed to explain to g++ 4.4 that the
      * store through m_countAndTypeUnion aliases _count and m_type.
      */
-    m_data.num = 1;
     m_countAndTypeUnion = 0;
     ASSERT(!isInitialized());
   }
@@ -130,8 +126,8 @@ class Variant {
    * operator overloads.
    */
   Variant(bool    v) : _count(0), m_type(KindOfBoolean) { m_data.num = (v?1:0);}
-  Variant(char    v) : _count(0), m_type(KindOfByte   ) { m_data.num = v;}
-  Variant(short   v) : _count(0), m_type(KindOfInt16  ) { m_data.num = v;}
+  Variant(char    v) : _count(0), m_type(KindOfInt32  ) { m_data.num = v;}
+  Variant(short   v) : _count(0), m_type(KindOfInt32  ) { m_data.num = v;}
   Variant(int     v) : _count(0), m_type(KindOfInt32  ) { m_data.num = v;}
   Variant(int64   v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   Variant(uint64  v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
@@ -155,12 +151,13 @@ class Variant {
   Variant(Variant *v);
 
   template<typename T>
-  Variant(const SmartObject<T> &v) : _count(0), m_type(KindOfNull) {
+  Variant(const SmartObject<T> &v) {
+    setUninitNull();
     set(v);
   }
 
   inline ALWAYS_INLINE void VariantHelper(CVarRef v) {
-    m_countAndTypeUnion = 0;
+    setUninitNull();
     if (v.isContagious()) {
       assignContagious(v);
       return;
@@ -187,8 +184,7 @@ class Variant {
    */
   void unset() {
     if (IS_REFCOUNTED_TYPE(m_type)) destruct();
-    m_data.num = 1;
-    m_type = KindOfNull;
+    m_type = KindOfUninit;
   }
 
   /**
@@ -261,10 +257,10 @@ class Variant {
     return getType() == type;
   }
   bool isInitialized() const {
-    return m_type != KindOfNull || m_data.num != 1 /* uninitialized */;
+    return m_type != KindOfUninit;
   }
   bool isNull() const {
-    return getType() == KindOfNull;
+    return getType() <= KindOfNull;
   }
   bool isBoolean() const {
     return getType() == KindOfBoolean;
@@ -286,10 +282,9 @@ class Variant {
   }
   bool isIntVal() const {
     switch (m_type) {
+      case KindOfUninit:
       case KindOfNull:
       case KindOfBoolean:
-      case KindOfByte:
-      case KindOfInt16:
       case KindOfInt32:
       case KindOfInt64:
       case KindOfObject:
@@ -337,9 +332,7 @@ class Variant {
     return val;
   }
   int64 getInt64() const {
-    ASSERT(getType() == KindOfByte    ||
-           getType() == KindOfInt16   ||
-           getType() == KindOfInt32   ||
+    ASSERT(getType() == KindOfInt32   ||
            getType() == KindOfInt64);
     return m_type == KindOfVariant ? m_data.pvar->m_data.num : m_data.num;
   }
@@ -479,7 +472,7 @@ class Variant {
    * Explicit type conversions
    */
   bool   toBoolean() const {
-    if (m_type == KindOfNull) return false;
+    if (m_type <= KindOfNull) return false;
     if (m_type <= KindOfInt64) return m_data.num;
     return toBooleanHelper();
   }
@@ -487,12 +480,12 @@ class Variant {
   short  toInt16  (int base = 10) const { return (short)toInt64(base);}
   int    toInt32  (int base = 10) const { return (int)toInt64(base);}
   int64  toInt64  () const {
-    if (m_type == KindOfNull) return 0;
+    if (m_type <= KindOfNull) return 0;
     if (m_type <= KindOfInt64) return m_data.num;
     return toInt64Helper(10);
   }
   int64  toInt64  (int base) const {
-    if (m_type == KindOfNull) return 0;
+    if (m_type <= KindOfNull) return 0;
     if (m_type <= KindOfInt64) return m_data.num;
     return toInt64Helper(base);
   }
@@ -936,9 +929,7 @@ class Variant {
   }
   static int64 GetInt64(TypedValueAccessor acc) {
     ASSERT(acc);
-    ASSERT(acc->m_type == KindOfByte  ||
-           acc->m_type == KindOfInt16 ||
-           acc->m_type == KindOfInt32 ||
+    ASSERT(acc->m_type == KindOfInt32 ||
            acc->m_type == KindOfInt64);
     return acc->m_data.num;
   }
@@ -1029,8 +1020,8 @@ class Variant {
   void bind(CVarRef v) {
     if (!IS_REFCOUNTED_TYPE(v.m_type)) {
       m_type = v.m_type;
-      /* drop uninitialized flag */
-      m_data.num = m_type == KindOfNull ? 0 : v.m_data.num;
+      if (m_type == KindOfUninit) m_type = KindOfNull; // drop uninit
+      m_data.num = v.m_data.num;
       return;
     }
 #ifdef FAST_REFCOUNT_FOR_VARIANT
@@ -1047,7 +1038,6 @@ class Variant {
          */
         var->incRefCount();
       } else {
-        m_data.num = 0;
         m_type = KindOfNull;
       }
     } else {
@@ -1063,7 +1053,6 @@ class Variant {
         m_data.pstr = str;
         str->incRefCount();
       } else {
-        m_data.num = 0;
         m_type = KindOfNull;
       }
       break;
@@ -1075,7 +1064,6 @@ class Variant {
         m_data.parr = arr;
         arr->incRefCount();
       } else {
-        m_data.num = 0;
         m_type = KindOfNull;
       }
       break;
@@ -1087,7 +1075,6 @@ class Variant {
         m_data.pobj = obj;
         obj->incRefCount();
       } else {
-        m_data.num = 0;
         m_type = KindOfNull;
       }
       break;
@@ -1244,7 +1231,6 @@ public:
   }
 
   VarNR() : Variant(KindOfNull) {
-    m_data.num = 0;
   }
 
   ~VarNR() {

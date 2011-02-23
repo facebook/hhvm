@@ -546,10 +546,9 @@ void throw_unexpected_argument_type(int argNum, const char *fnName,
                                     const char *expected, CVarRef val) {
   const char *otype = NULL;
   switch (val.getType()) {
+  case KindOfUninit:
   case KindOfNull:    otype = "null";        break;
   case KindOfBoolean: otype = "bool";        break;
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:   otype = "int";         break;
   case KindOfDouble:  otype = "double";      break;
@@ -577,12 +576,11 @@ Object f_clone(CVarRef v) {
 
 String f_serialize(CVarRef value) {
   switch (value.getType()) {
+  case KindOfUninit:
   case KindOfNull:
     return "N;";
   case KindOfBoolean:
     return value.getBoolean() ? "b:1;" : "b:0;";
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64: {
     StringBuffer sb;

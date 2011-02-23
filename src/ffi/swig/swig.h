@@ -155,12 +155,11 @@ HPHP::Variant *hphpArray(HPHP::HphpSession *s) {
 
 int hphpGetType(HPHP::HphpSession *s, HPHP::Variant *v) {
   switch (v->getType()) {
+  case HPHP::KindOfUninit:
   case HPHP::KindOfNull:
     return TypeNull;
   case HPHP::KindOfBoolean:
     return TypeBoolean;
-  case HPHP::KindOfByte:
-  case HPHP::KindOfInt16:
   case HPHP::KindOfInt32:
   case HPHP::KindOfInt64:
     return TypeInt;

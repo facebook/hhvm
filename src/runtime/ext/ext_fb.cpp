@@ -95,10 +95,9 @@ static int fb_serialized_size(CVarRef thing, int depth, int *bytes) {
 
   /* Get the size for an object, including one byte for the type */
   switch (thing.getType()) {
+  case KindOfUninit:
   case KindOfNull:      *bytes = 1; break;     /* type */
   case KindOfBoolean:   *bytes = 2; break;    /* type + sizeof(char) */
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:     *bytes = 1 + INT_SIZE(thing.toInt64()); break;
   case KindOfDouble:    *bytes = 9; break;     /* type + sizeof(double) */
@@ -190,8 +189,6 @@ static bool fb_serialize_into_buffer(CVarRef thing, char *buff, int *pos) {
     buff[(*pos)++] = T_BOOLEAN;
     buff[(*pos)++] = (int8_t)thing.toInt64();
     break;
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
     fb_serialize_long_into_buffer(thing.toInt64(), buff, pos);

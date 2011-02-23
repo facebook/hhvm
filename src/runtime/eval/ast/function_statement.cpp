@@ -54,6 +54,7 @@ Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
     TypePtrMap::const_iterator iter;
     if ((iter = types.find(type)) != types.end()) {
       m_kind = iter->second;
+      ASSERT(m_kind != KindOfUninit);
     } else {
       m_kind = KindOfObject;
       if (strcasecmp(type.c_str(), "self") == 0 && parser->haveClass()) {
@@ -65,6 +66,7 @@ Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
       bool correct = false;
       if (s) {
         DataType dtype = s->getValue().getType();
+        ASSERT(dtype != KindOfUninit);
         correct = m_nullDefault = dtype == KindOfNull;
       } else {
         ArrayExpressionPtr a = m_defVal->unsafe_cast<ArrayExpression>();
@@ -87,6 +89,7 @@ void Parameter::bind(VariableEnvironment &env, CVarRef val,
                      bool ref /* = false */) const {
   if (m_kind != KindOfNull) {
     DataType otype = val.getType();
+    ASSERT(otype != KindOfUninit);
     if (!(m_nullDefault && otype == KindOfNull ||
           otype == m_kind &&
           (m_kind != KindOfObject ||

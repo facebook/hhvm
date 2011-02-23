@@ -46,10 +46,9 @@ void hphp_ffi_ObjectData_decRef(ObjectData *p) {
 }
 int hphp_ffi_exportVariant(CVarRef v, void** result) {
   switch (v.getType()) {
+  case KindOfUninit:
   case KindOfNull:    return 0;
   case KindOfBoolean: *result = (void*)v.toBoolean(); return 1;
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64: {
     *result = (void*)v.toInt64();

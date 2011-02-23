@@ -39,8 +39,6 @@ public:
 
   static const KindOf KindOfVoid       = 0x0001;
   static const KindOf KindOfBoolean    = 0x0002;
-  static const KindOf KindOfByte       = 0x0004;
-  static const KindOf KindOfInt16      = 0x0008;
   static const KindOf KindOfInt32      = 0x0010;
   static const KindOf KindOfInt64      = 0x0020;
   static const KindOf KindOfDouble     = 0x0040;
@@ -59,8 +57,7 @@ public:
   */
   static const KindOf KindOfAuto       = 0x0400;
 
-  static const KindOf KindOfInteger = (KindOf)(KindOfInt64 | KindOfInt32 |
-                                               KindOfInt16 | KindOfByte);
+  static const KindOf KindOfInteger = (KindOf)(KindOfInt64 | KindOfInt32);
   static const KindOf KindOfNumeric = (KindOf)(KindOfDouble | KindOfInteger);
   static const KindOf KindOfPrimitive = (KindOf)(KindOfNumeric | KindOfString);
   static const KindOf KindOfPlusOperand = (KindOf)(KindOfNumeric | KindOfArray);

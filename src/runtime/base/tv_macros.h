@@ -141,7 +141,7 @@
 // Assumes 'tv' is dead
 // NOTE: this helper will initialize tv->_count to 0
 #define TV_WRITE_UNINIT(tv) \
-  (tv)->m_data.num = 1; \
+  (tv)->m_data.num = 0; \
   (tv)->_count = 0; \
-  (tv)->m_type = KindOfNull
+  (tv)->m_type = KindOfUninit
 

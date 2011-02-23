@@ -66,8 +66,6 @@ ScalarExpression::ScalarExpression
   case KindOfString:
     m_type = T_STRING;
     break;
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
     m_type = T_LNUMBER;

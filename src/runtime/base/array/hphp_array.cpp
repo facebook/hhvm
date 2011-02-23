@@ -176,9 +176,7 @@ ssize_t HphpArray::size() const {
     } else if (e->data.m_type == KindOfIndirect) {
       TypedValue* tv = e->data.m_data.ptv;
       // Check for uninit null
-      if (tv->m_type != KindOfNull || tv->m_data.num != 1LL) {
-        ++sz;
-      }
+      if (tv->m_type != KindOfUninit) ++sz;
     }
   }
   return sz;
@@ -262,9 +260,7 @@ inline /*ElmInd*/ ssize_t HphpArray::nextElm(Elm* elms,
     } else if (elms[ei].data.m_type == KindOfIndirect) {
       TypedValue* tv = elms[ei].data.m_data.ptv;
       // Check for uninit null
-      if (tv->m_type != KindOfNull || tv->m_data.num != 1LL) {
-        return ei;
-      }
+      if (tv->m_type != KindOfUninit) return ei;
     }
   }
   return (ssize_t)ElmIndEmpty;
@@ -280,9 +276,7 @@ inline /*ElmInd*/ ssize_t HphpArray::prevElm(Elm* elms,
     } else if (elms[ei].data.m_type == KindOfIndirect) {
       TypedValue* tv = elms[ei].data.m_data.ptv;
       // Check for uninit null
-      if (tv->m_type != KindOfNull || tv->m_data.num != 1LL) {
-        return ei;
-      }
+      if (tv->m_type != KindOfUninit) return ei;
     }
   }
   return (ssize_t)ElmIndEmpty;
@@ -325,9 +319,7 @@ ssize_t HphpArray::iter_advance_helper(ssize_t pos) const {
     } else if (elms[pos].data.m_type == KindOfIndirect) {
       TypedValue* tv = elms[pos].data.m_data.ptv;
       // Check for uninit null
-      if (tv->m_type != KindOfNull || tv->m_data.num != 1LL) {
-        return pos;
-      }
+      if (tv->m_type != KindOfUninit) return pos;
     }
   }
   return ArrayData::invalid_index;
@@ -389,9 +381,7 @@ bool HphpArray::isVectorData() const {
     }
     if (UNLIKELY(e->data.m_type == KindOfIndirect)) {
       TypedValue* tv = e->data.m_data.ptv;
-      if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
-        continue;
-      }
+      if (tv->m_type == KindOfUninit) continue;
     }
     if (e->key != NULL || e->h != i) {
       return false;
@@ -719,9 +709,7 @@ CVarRef HphpArray::get(litstr k, bool error /* = false */) const {
     } else {
       TypedValue* tv = e->data.m_data.ptv;
       // Check for uninit null
-      if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
-        goto undefined_index;
-      }
+      if (tv->m_type == KindOfUninit) goto undefined_index;
       return tvAsCVarRef(tv);
     }
   }
@@ -744,9 +732,7 @@ CVarRef HphpArray::get(CStrRef k, bool error /* = false */) const {
     } else {
       TypedValue* tv = e->data.m_data.ptv;
       // Check for uninit null
-      if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
-        goto undefined_index;
-      }
+      if (tv->m_type == KindOfUninit) goto undefined_index;
       return tvAsCVarRef(tv);
     }
   }
@@ -780,9 +766,7 @@ CVarRef HphpArray::get(CVarRef k, bool error /* = false */) const {
       } else {
         TypedValue* tv = e->data.m_data.ptv;
         // Check for uninit null
-        if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
-          goto undefined_index;
-        }
+        if (tv->m_type == KindOfUninit) goto undefined_index;
         return tvAsCVarRef(tv);
       }
     }
@@ -806,9 +790,7 @@ Variant HphpArray::fetch(CStrRef k) const {
     } else {
       TypedValue* tv = e->data.m_data.ptv;
       // Check for uninit null
-      if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
-        return false;
-      }
+      if (tv->m_type == KindOfUninit) return false;
       return tvAsCVarRef(tv);
     }
   }
@@ -833,9 +815,7 @@ void HphpArray::load(CVarRef k, Variant& v) const {
     } else {
       tv = e->data.m_data.ptv;
       // Check for uninit null
-      if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
-        return;
-      }
+      if (tv->m_type == KindOfUninit) return;
     }
     v.setWithRef(tvAsCVarRef(tv));
   }
@@ -1250,7 +1230,6 @@ bool HphpArray::nextInsertWithRef(CVarRef data) {
   // Set key.
   e->h = ki;
   e->key = NULL;
-  e->data.m_data.num = 0;
   e->data._count = 0;
   e->data.m_type = KindOfNull;
   tvAsVariant(&e->data).setWithRef(data);
@@ -1287,7 +1266,6 @@ bool HphpArray::addLvalImpl(int64 ki, Variant** pDest,
   e->h = ki;
   e->key = NULL;
 
-  e->data.m_data.num = 0;
   e->data._count = 0;
   e->data.m_type = KindOfNull;
   *pDest = &(tvAsVariant(&e->data));
@@ -1331,7 +1309,6 @@ bool HphpArray::addLvalImpl(StringData* key, int64 h, Variant** pDest,
   e->key->incRefCount();
   // Initialize element to null and store the address of the element into
   // *pDest.
-  e->data.m_data.num = 0;
   e->data._count = 0;
   e->data.m_type = KindOfNull;
   *pDest = &(tvAsVariant(&e->data));
@@ -1384,9 +1361,7 @@ inline bool HphpArray::addVal(StringData* key, CVarRef data,
     } else {
       TypedValue* tv = elms[*ei].data.m_data.ptv;
       // Check for uninit null
-      if (tv->m_type != KindOfNull || tv->m_data.num != 1LL) {
-        return false;
-      }
+      if (tv->m_type != KindOfUninit) return false;
     }
   }
   TypedValue* to;
@@ -1407,7 +1382,7 @@ inline bool HphpArray::addVal(StringData* key, CVarRef data,
     Elm* e = &elms[*ei];
     ASSERT(e->data.m_type == KindOfIndirect);
     to = (TypedValue*)(e->data.m_data.ptv);
-    ASSERT(to->m_type == KindOfNull && to->m_data.num == 1);
+    ASSERT(to->m_type == KindOfUninit);
   }
   // Set the element
   TypedValue* fr = (TypedValue*)(&data);
@@ -1431,7 +1406,6 @@ inline bool HphpArray::addValWithRef(int64 ki, CVarRef data,
 
   Elm* e = allocElm(ei);
 
-  e->data.m_data.num = 0;
   e->data._count = 0;
   e->data.m_type = KindOfNull;
 
@@ -1466,7 +1440,6 @@ inline bool HphpArray::addValWithRef(StringData* key, CVarRef data,
   e->key = key;
   e->key->incRefCount();
 
-  e->data.m_data.num = 0;
   e->data._count = 0;
   e->data.m_type = KindOfNull;
   tvAsVariant(&e->data).setWithRef(data);
@@ -1576,7 +1549,7 @@ TypedValue* HphpArray::migrate(StringData* k, TypedValue* tv) {
         // Migrate the existing indirect element back to the array
         memcpy(slot, cur, sizeof(TypedValue));
         // Check for uninit null
-        if (cur->m_type == KindOfNull && cur->m_data.num == 1LL) {
+        if (cur->m_type == KindOfUninit) {
           // Erase the element
           erase(ei);
         }
@@ -1803,7 +1776,7 @@ ArrayData *HphpArray::lvalPtr(CStrRef k, Variant*& ret, bool copy,
       } else {
         TypedValue* tv = e->data.m_data.ptv;
         // Check for uninit null
-        if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
+        if (tv->m_type == KindOfUninit) {
           ret = NULL;
         } else {
           ret = &(tvAsVariant(e->data.m_data.ptv));
@@ -2080,8 +2053,7 @@ void HphpArray::erase(ElmInd* ei, bool updateNext /* = false */) {
     if (IS_REFCOUNTED_TYPE(tv->m_type)) {
       tvDecRef(tv);
     }
-    tv->m_type = KindOfNull;
-    tv->m_data.num = 1;
+    tv->m_type = KindOfUninit;
   }
 
   if (nextElementUnsetInsideForeachByReference) {
@@ -2205,7 +2177,7 @@ HphpArray* HphpArray::copyImpl() const {
           } else {
             fr = e->data.m_data.ptv;
             // Check for uninit null
-            if (fr->m_type == KindOfNull && fr->m_data.num == 1LL) {
+            if (fr->m_type == KindOfUninit) {
               // If the indirect memory location is set to uninit
               // null, we treat it as a tombstone.
               te->h = 0;
@@ -2327,7 +2299,7 @@ ArrayData* HphpArray::pop(Variant& value) {
       TypedValue* tv = e->data.m_data.ptv;
       // iter_end() must guarantee that it will not return an element
       // which is KindOfIndirect and points to an uninit null value
-      ASSERT(tv->m_type != KindOfNull || tv->m_data.num != 1LL);
+      ASSERT(tv->m_type != KindOfUninit);
       value = tvAsCVarRef(tv);
     }
     ElmInd* ei = (e->key != NULL)
@@ -2367,7 +2339,7 @@ ArrayData* HphpArray::dequeue(Variant& value) {
       TypedValue* tv = e->data.m_data.ptv;
       // nextElm() must guarantee that it will not return an element
       // which is KindOfIndirect and points to an uninit null value
-      ASSERT(tv->m_type != KindOfNull || tv->m_data.num != 1LL);
+      ASSERT(tv->m_type != KindOfUninit);
       value = tvAsCVarRef(tv);
     }
     erase((e->key != NULL)
@@ -2444,9 +2416,7 @@ void HphpArray::onSetStatic() {
       } else {
         TypedValue* tv = e->data.m_data.ptv;
         // Check for uninit null
-        if (tv->m_type != KindOfNull || tv->m_data.num != 1LL) {
-          tvAsVariant(tv).setStatic();
-        }
+        if (tv->m_type != KindOfUninit) tvAsVariant(tv).setStatic();
       }
     }
   }
@@ -2538,7 +2508,7 @@ void HphpArray::backup(LinearAllocator& allocator) {
       } else {
         TypedValue* tv = e->data.m_data.ptv;
         // Check for uninit null
-        if (tv->m_type == KindOfNull && tv->m_data.num == 1LL) {
+        if (tv->m_type == KindOfUninit) {
           // Tombstone
           allocator.backup((const char*)(&ts), sizeof(Elm));
         } else {

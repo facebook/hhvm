@@ -110,22 +110,21 @@ enum DataType {
    * Beware if you change the order, as we may have a few type checks in the
    * code that depend on the order.
    */
-  KindOfNull    = 0,
-  KindOfBoolean = 1,
-  KindOfByte    = 2,
-  KindOfInt16   = 3,
-  KindOfInt32   = 4,
-  KindOfInt64   = 5,
-  KindOfDouble  = 6,
-  KindOfStaticString  = 7,
-  KindOfString  = 8,
-  KindOfArray   = 9,
-  KindOfObject  = 10,
-  KindOfVariant = 11,
+  KindOfUninit  = 0,
+  KindOfNull    = 1,
+  KindOfBoolean = 2,
+  KindOfInt32   = 3,
+  KindOfInt64   = 4,
+  KindOfDouble  = 5,
+  KindOfStaticString  = 6,
+  KindOfString  = 7,
+  KindOfArray   = 8,
+  KindOfObject  = 9,
+  KindOfVariant = 10,
 
-  MaxNumDataTypes = 12, // marker, not a valid type
+  MaxNumDataTypes = 11, // marker, not a valid type
 
-  MaxDataType   = 0x7fffffff // Allow KindOf* > 12 in HphpArray.
+  MaxDataType   = 0x7fffffff // Allow KindOf* > 11 in HphpArray.
 };
 
 inline int getDataTypeIndex(DataType t) {

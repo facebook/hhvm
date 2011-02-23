@@ -473,11 +473,10 @@ Variant Array::rvalAt(CStrRef key, ACCESSPARAMS_IMPL) const {
 CVarRef Array::rvalAtRef(CVarRef key, ACCESSPARAMS_IMPL) const {
   if (!m_px) return null_variant;
   switch (key.m_type) {
+  case KindOfUninit:
   case KindOfNull:
     return m_px->get(empty_string, flags & AccessFlags::Error);
   case KindOfBoolean:
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
     return m_px->get(key.m_data.num, flags & AccessFlags::Error);
@@ -727,8 +726,6 @@ bool Array::exists(CStrRef key, bool isKey /* = false */) const {
 bool Array::exists(CVarRef key, bool isKey /* = false */) const {
   switch(key.getType()) {
   case KindOfBoolean:
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
     return existsImpl(key.toInt64());
@@ -761,8 +758,6 @@ void Array::remove(CStrRef key, bool isString /* = false */) {
 void Array::remove(CVarRef key) {
   switch(key.getType()) {
   case KindOfBoolean:
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
     removeImpl(key.toInt64());

@@ -434,6 +434,7 @@ static int php_count_recursive(CArrRef array) {
 
 int f_count(CVarRef var, bool recursive /* = false */) {
   switch (var.getType()) {
+  case KindOfUninit:
   case KindOfNull:
     return 0;
   case KindOfObject:

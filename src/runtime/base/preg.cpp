@@ -506,7 +506,7 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
         subpat_names[name_idx] = name_table + 2;
         if (is_numeric_string(subpat_names[name_idx],
                               strlen(subpat_names[name_idx]),
-                              NULL, NULL, 0) > 0) {
+                              NULL, NULL, 0) != KindOfNull) {
           raise_warning("Numeric named subpatterns are not allowed");
           free(offsets);
           free(subpat_names);

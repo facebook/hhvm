@@ -42,15 +42,16 @@ void RTTIInfo::translate_rtti(const char *rttiDirectory) {
     for (int j = 0; j < MaxNumDataTypes; j++) total += m_profData[i][j];
     if (!total) continue;
     printf("%s(%d):", m_id2name[i].c_str(), total);
+    if (m_profData[i][getDataTypeIndex(KindOfUninit)]) {
+      printf(" n/%u", m_profData[i][getDataTypeIndex(KindOfUninit)]);
+    }
     if (m_profData[i][getDataTypeIndex(KindOfNull)]) {
       printf(" n/%u", m_profData[i][getDataTypeIndex(KindOfNull)]);
     }
     if (m_profData[i][getDataTypeIndex(KindOfBoolean)]) {
       printf(" b/%u", m_profData[i][getDataTypeIndex(KindOfBoolean)]);
     }
-    int totalInt = m_profData[i][getDataTypeIndex(KindOfByte)] +
-                   m_profData[i][getDataTypeIndex(KindOfInt16)] +
-                   m_profData[i][getDataTypeIndex(KindOfInt32)] +
+    int totalInt = m_profData[i][getDataTypeIndex(KindOfInt32)] +
                    m_profData[i][getDataTypeIndex(KindOfInt64)];
     if (totalInt) printf(" i/%u", totalInt);
     if (m_profData[i][getDataTypeIndex(KindOfDouble)]) {

@@ -121,3 +121,15 @@ For example,
 This will ignore all modifications from a new thread, except $GLOBALS['CACHE'],
 which will merge any values under $GLOBALS['CACHE'][$key] that are not present
 in main thread.
+
+Check status of the async job(s):
+
+mixed check_user_func_async(mixed $handles, int $timeout = -1);
+
+This function takes one or multiple handles and check whether the job(s) have
+finished. If taking a single handle, it will return TRUE or FALSE to indicate
+whether the job has finished. If taking an array, it will return an array of
+finished jobs.
+The parameter timeout is in milliseconds. If -1 is specified, it is
+non-blocking. If 0 is specified, it blocks until some of the specified jobs
+are done.

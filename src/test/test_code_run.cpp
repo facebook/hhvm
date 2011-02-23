@@ -12353,7 +12353,9 @@ bool TestCodeRun::TestConstant() {
   MVCR("<?php "
       "var_dump(INF);"
       "var_dump(NAN);");
-
+  MVCR("<?php "
+      "define('A_B', 555);"
+      "define('A_'. 'B', 'B');");
   return true;
 }
 

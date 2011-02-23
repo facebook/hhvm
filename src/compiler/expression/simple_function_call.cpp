@@ -708,6 +708,10 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
           assert(sym);
           Lock lock(BlockScope::s_constMutex);
           if (!sym->isDynamic() && sym->getValue() != (*m_params)[1]) {
+            if (sym->getDeclaration() != shared_from_this()) {
+              // redeclared
+              const_cast<Symbol*>(sym)->setDynamic();
+            }
             const_cast<Symbol*>(sym)->setValue((*m_params)[1]);
             getScope()->addUpdates(BlockScope::UseKindConstRef);
           }

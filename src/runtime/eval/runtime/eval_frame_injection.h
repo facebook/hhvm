@@ -33,6 +33,7 @@ public:
     EvalStaticClassNameHelper(CObjRef obj);
     ~EvalStaticClassNameHelper();
     bool m_set;
+    const String *m_prev;
   };
 
   EvalFrameInjection(CStrRef cls, const char *name,

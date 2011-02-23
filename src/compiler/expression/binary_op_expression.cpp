@@ -1292,7 +1292,9 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
           dynamic_pointer_cast<ScalarExpression>(second);
         bool notQuoted = scalar && !scalar->isQuoted();
         std::string s = second->getLiteralString();
-        if (s != "") {
+        if (s == "static" && notQuoted) {
+          cg_printf("FrameInjection::GetStaticClassName(info)");
+        } else if (s != "") {
           if (s == "self" && notQuoted) {
             ClassScopeRawPtr cls = getOriginalClass();
             if (cls) {

@@ -43,10 +43,15 @@ public:
 
   // what does "static::" resolve to?
   static CStrRef GetStaticClassName(ThreadInfo *info);
-  static void SetStaticClassName(ThreadInfo *info, CStrRef cls) {
+  static const String *SetStaticClassName(ThreadInfo *info, CStrRef cls) {
     ASSERT(info);
     FrameInjection *t = info->m_top;
-    if (t) t->m_staticClass = &cls;
+    if (t) {
+      const String *old = t->m_staticClass;
+      t->m_staticClass = &cls;
+      return old;
+    }
+    return NULL;
   }
   static void ResetStaticClassName(ThreadInfo *info) {
     ASSERT(info);

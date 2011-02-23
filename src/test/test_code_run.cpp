@@ -15689,6 +15689,23 @@ bool TestCodeRun::TestLateStaticBinding() {
 
         "B");
 
+  // instanceof static and new static
+  MVCRO("<?php\n"
+        "class A {\n"
+        "  static function f() { return new static; }\n"
+        "  static function g($o) { return $o instanceof static; }\n"
+        "}\n"
+        "class B extends A { }\n"
+        "var_dump(A::g(A::f()));\n"
+        "var_dump(A::g(B::f()));\n"
+        "var_dump(B::g(A::f()));\n"
+        "var_dump(B::g(B::f()));\n",
+
+        "bool(true)\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        "bool(true)\n");
+
   return true;
 }
 

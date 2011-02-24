@@ -688,28 +688,30 @@ Variant Array::key(CVarRef search_value, bool strict /* = false */) const {
 
 Array Array::keys(CVarRef search_value /* = null_variant */,
                   bool strict /* = false */) const {
-  Array ret = Array::Create();
   if (search_value.isNull()) {
+    ArrayInit ai(size(), true);
     for (ArrayIter iter(*this); iter; ++iter) {
-      ret.append(iter.first());
+      ai.set(iter.first());
     }
+    return ai.create();
   } else {
+    Array ret = Array::Create();
     for (ArrayIter iter(*this); iter; ++iter) {
       if ((strict && iter.secondRef().same(search_value)) ||
           (!strict && iter.secondRef().equal(search_value))) {
         ret.append(iter.first());
       }
     }
+    return ret;
   }
-  return ret;
 }
 
 Array Array::values() const {
-  Array ret = Array::Create();
+  ArrayInit ai(size());
   for (ArrayIter iter(*this); iter; ++iter) {
-    ret.append(iter.secondRef());
+    ai.set(iter.secondRef());
   }
-  return ret;
+  return ai.create();
 }
 
 bool Array::exists(litstr key, bool isKey /* = false */) const {

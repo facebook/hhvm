@@ -57,8 +57,11 @@ namespace HPHP {
  * Calculates and adjusts "start" and "length" according to string's length.
  * This function determines how those two parameters are interpreted in varies
  * substr-related functions.
+ *
+ * The parameter strict controls whether to disallow the empty sub-string
+ * after the end.
  */
-bool string_substr_check(int len, int &f, int &l) {
+static bool string_substr_check(int len, int &f, int &l, bool strict = true) {
   // if "from" position is negative, count start position from the end
   if (f < 0) {
     f += len;
@@ -66,7 +69,7 @@ bool string_substr_check(int len, int &f, int &l) {
       return false;
     }
   }
-  if (f >= len) {
+  if (f > len || f == len && strict) {
     return false;
   }
 
@@ -671,7 +674,7 @@ char *string_replace(const char *s, int &len, int start, int length,
                      const char *replacement, int len_repl) {
   ASSERT(s);
   ASSERT(replacement);
-  if (!string_substr_check(len, start, length)) {
+  if (!string_substr_check(len, start, length, false)) {
     len = 0;
     return string_duplicate("", 0);
   }

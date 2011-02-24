@@ -638,7 +638,7 @@ bool ClassStatement::attemptPropertyAccess(CStrRef prop, const char *context,
     level = Protected;
   }
   // Var is private in superclass, treat an new
-  if (level == Private && rec) return true;
+  if (rec && level == Private && (mods & Static) == 0) return true;
   return hasAccess(context, level);
 }
 

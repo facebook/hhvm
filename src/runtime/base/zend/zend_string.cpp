@@ -520,10 +520,10 @@ int string_find(const char *input, int len, char ch, int pos,
     if (!string_substr_check(len, pos, l)) {
       return -1;
     }
-    for (int i = pos; i < len; i++) {
-      if (input[i] == ch) {
-        return i;
-      }
+
+    void *ptr = memchr(input + pos, ch, len - pos);
+    if (ptr != NULL) {
+      return (int)((const char *)ptr - input);
     }
   }
   return -1;
@@ -586,11 +586,10 @@ int string_find(const char *input, int len, const char *s, int s_len,
     if (!string_substr_check(len, pos, l)) {
       return -1;
     }
-    int i_max = len - s_len + 1;
-    for (int i = pos; i < i_max; i++) {
-      if (input[i] == s[0] && memcmp(input+i, s, s_len) == 0) {
-        return i;
-      }
+
+    void *ptr = memmem(input + pos, len - pos, s, s_len);
+    if (ptr != NULL) {
+      return (int)((const char *)ptr - input);
     }
   }
   return -1;
@@ -766,41 +765,6 @@ char *string_replace(const char *input, int &len,
 
   len = p - ret;
   return ret;
-}
-
-int string_span(const char *s1, int s1_len, const char *s2, int s2_len) {
-  const char *s1_end = s1 + s1_len;
-  const char *s2_end = s2 + s2_len;
-  register const char *p = s1, *spanp;
-  register char c = *p;
-
- cont:
-  for (spanp = s2; p != s1_end && spanp != s2_end;) {
-    if (*spanp++ == c) {
-      c = *(++p);
-      goto cont;
-    }
-  }
-  return (p - s1);
-}
-
-int string_cspan(const char *s1, int s1_len, const char *s2, int s2_len) {
-  const char *s1_end = s1 + s1_len;
-  const char *s2_end = s2 + s2_len;
-  register const char *p, *spanp;
-  register char c = *s1;
-
-  for (p = s1;;) {
-    spanp = s2;
-    do {
-      if (*spanp == c || p == s1_end) {
-        return p - s1;
-      }
-    } while (spanp++ < (s2_end - 1));
-    c = *++p;
-  }
-  ASSERT(false);
-  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -200,13 +200,6 @@ char *string_replace(const char *input, int &len,
                      int &count, bool case_sensitive);
 
 /**
- * Find the longest span of substrings that have or not have specified
- * characters. Please read PHP's documentation for more details.
- */
-int string_span(const char *s1, int s1_len, const char *s2, int s2_len);
-int string_cspan(const char *s1, int s1_len, const char *s2, int s2_len);
-
-/**
  * Reverse, repeat or shuffle a string.
  */
 char *string_reverse(const char *s, int len);

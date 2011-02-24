@@ -226,8 +226,8 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
           break;
         case 3: response = f_serialize(funcRet); break;
       }
-      code = 200;
       transport->sendRaw((void*)response.data(), response.size());
+      code = transport->getResponseCode();
     } else if (error) {
       code = 500;
       transport->sendString(errorMsg, 500);

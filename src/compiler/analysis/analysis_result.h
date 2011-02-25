@@ -354,6 +354,9 @@ public:
   void setSystem() { m_system = true; }
   bool isSystem() const { return m_system; }
 
+  void setSepExtension() { m_sepExtension = true; }
+  bool isSepExtension() { return m_sepExtension; }
+
 private:
   Package *m_package;
   bool m_parseOnDemand;
@@ -473,6 +476,7 @@ private:
   int m_funcTableSize;
   CodeGenerator::MapIntToStringVec m_funcTable;
   bool m_system;
+  bool m_sepExtension;
 
   /**
    * Checks whether the file is in one of the on-demand parsing directories.

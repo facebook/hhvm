@@ -183,35 +183,58 @@ bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_printf("const CallInfo *cit%d;\n", m_ciTemp);
     cg_printf("void *vt%d;\n", m_ciTemp);
     cg_printf("get_call_info_or_fail(cit%d, vt%d, ", m_ciTemp, m_ciTemp);
+
+    if (m_nameExp->is(Expression::KindOfSimpleVariable)) {
+      m_nameExp->outputCPP(cg, ar);
+    } else {
+      cg_printf("(");
+      m_nameExp->outputCPP(cg, ar);
+      cg_printf(")");
+    }
   } else {
     cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp);
     if (m_class) {
       if (m_class->is(KindOfScalarExpression)) {
         ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
                           getString().c_str(), "static") == 0);
-        cg_printf("mcp%d.staticMethodCall(", m_ciTemp);
-        cg_printf("\"static\"");
+        cg_printf("CStrRef cls%d = ", m_ciTemp);
+        cg_printString("static", ar, shared_from_this());
         lsb = true;
       } else {
-        cg_printf("mcp%d.dynamicNamedCall(", m_ciTemp);
+        cg_printf("CVarRef cls%d = ", m_ciTemp);
         m_class->outputCPP(cg, ar);
       }
-      cg_printf(", ");
     } else if (m_classScope) {
-      cg_printf("mcp%d.staticMethodCall(\"%s\", ", m_ciTemp,
-                m_classScope->getId(cg).c_str());
+      cg_printf("CStrRef cls%d = ", m_ciTemp);
+      cg_printString(m_classScope->getId(cg), ar, shared_from_this());
     } else {
-      cg_printf("mcp%d.staticMethodCall(\"%s\", ", m_ciTemp,
-                m_className.c_str());
+      cg_printf("CStrRef cls%d = ", m_ciTemp);
+      cg_printString(m_className, ar, shared_from_this());
     }
-  }
+    cg_printf(";\n");
 
-  if (m_nameExp->is(Expression::KindOfSimpleVariable)) {
-    m_nameExp->outputCPP(cg, ar);
-  } else {
-    cg_printf("(");
-    m_nameExp->outputCPP(cg, ar);
-    cg_printf(")");
+    cg_printf("CStrRef mth%d = ", m_ciTemp);
+    if (m_nameExp->is(Expression::KindOfSimpleVariable)) {
+      m_nameExp->outputCPP(cg, ar);
+    } else {
+      cg_printf("(");
+      m_nameExp->outputCPP(cg, ar);
+      cg_printf(")");
+    }
+    cg_printf(";\n");
+
+    if (m_class) {
+      if (m_class->is(KindOfScalarExpression)) {
+        cg_printf("mcp%d.staticMethodCall(cls%d, mth%d",
+                  m_ciTemp, m_ciTemp, m_ciTemp);
+      } else {
+        cg_printf("mcp%d.dynamicNamedCall(cls%d, mth%d",
+                  m_ciTemp, m_ciTemp, m_ciTemp);
+      }
+    } else {
+      cg_printf("mcp%d.staticMethodCall(cls%d, mth%d",
+                m_ciTemp, m_ciTemp, m_ciTemp);
+    }
   }
 
   if (!nonStatic) {

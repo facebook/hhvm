@@ -200,7 +200,7 @@ Variant c_XhprofFrame::ifa___construct(MethodCallPackage &mcp, int count, INVOKE
   return (self->t___construct(arg0), null);
 }
 bool c_XhprofFrame::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:

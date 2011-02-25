@@ -262,9 +262,6 @@ void ObjectMethodExpression::outputCPPObject(CodeGenerator &cg,
     if (!ok) cg_printf("Variant(");
     m_object->outputCPP(cg, ar);
     if (!ok) cg_printf(")");
-    if (!ok || !t || !t->is(Type::KindOfObject)) {
-      cg_printf(".objectForCall()");
-    }
   }
 }
 
@@ -332,6 +329,23 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
     ms = ar->getOrAddMethodSlot(m_name, self);
   }
   cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp);
+
+  if (!isThis) {
+    TypePtr t = m_object->getType();
+    if (t && t->is(Type::KindOfObject)) {
+      cg_printf("CObjRef obj%d = ", m_ciTemp);
+    } else {
+      cg_printf("CVarRef obj%d = ", m_ciTemp);
+    }
+    outputCPPObject(cg, ar);
+    cg_printf(";\n");
+  }
+  if (m_name.empty()) {
+    cg_printf("CStrRef mth%d = ", m_ciTemp);
+    m_nameExp->outputCPP(cg, ar);
+    cg_printf(";\n");
+  }
+
   if (ms) {
     cg_printf("mcp%d.methodCallWithIndex((", m_ciTemp);
   } else {
@@ -345,7 +359,7 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
       cg_printf("this");
     }
   } else {
-    outputCPPObject(cg, ar);
+    cg_printf("obj%d", m_ciTemp);
   }
   cg_printf("), ");
   if (!m_name.empty()) {
@@ -356,11 +370,10 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
     }
     cg_printf(", 0x%016llXLL);\n", hash);
   } else {
-    m_nameExp->outputCPP(cg, ar);
-    cg_printf(", -1);\n");
+    cg_printf("mth%d, -1);\n", m_ciTemp);
   }
-  cg_printf("const CallInfo *cit%d  __attribute__((__unused__)) ="
-      " mcp%d.ci;\n", m_ciTemp, m_ciTemp);
+  cg_printf("const CallInfo *cit%d __attribute__((__unused__)) = mcp%d.ci;\n",
+            m_ciTemp, m_ciTemp);
 
   if (m_params && m_params->getCount() > 0) {
     cg.pushCallInfo(m_ciTemp);

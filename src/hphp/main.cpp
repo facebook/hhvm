@@ -600,6 +600,7 @@ int process(const ProgramOptions &po) {
   } else if (po.target == "filecache") {
     // do nothing
   } else if (po.target == "sep-ext-cpp") {
+    ar->setSepExtension();
     ret = generateSepExtCpp(po, ar);
   } else {
     Logger::Error("Unknown target: %s", po.target.c_str());

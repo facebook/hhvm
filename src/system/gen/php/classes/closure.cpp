@@ -317,7 +317,7 @@ Variant c_Closure::ifa_setvars(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   return (self->t_setvars(arg0), null);
 }
 bool c_Closure::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 2:
@@ -1113,7 +1113,7 @@ Variant c_Continuation::ifa_update(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t_update(arg0, arg1, arg2), null);
 }
 bool c_Continuation::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
@@ -1410,8 +1410,10 @@ void c_Continuation::t_next() {
         }
         {
           MethodCallPackage mcp0;
-          mcp0.methodCall((m_obj.objectForCall()), toString(v_func), -1);
-          const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+          CVarRef obj0 = m_obj;
+          CStrRef mth0 = toString(v_func);
+          mcp0.methodCall((obj0), mth0, -1);
+          const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
           (mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, GET_THIS_TYPED(Continuation));
         }
       }

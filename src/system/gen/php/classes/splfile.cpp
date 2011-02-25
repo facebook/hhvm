@@ -1456,7 +1456,7 @@ Variant c_SplFileObject::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FE
   return (self->t_rewind(), null);
 }
 bool c_SplFileObject::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 0:
@@ -3183,7 +3183,7 @@ Variant c_SplFileInfo::ifa_gettype(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t_gettype());
 }
 bool c_SplFileInfo::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 5:

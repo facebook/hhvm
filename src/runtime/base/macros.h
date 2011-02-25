@@ -210,6 +210,15 @@ namespace HPHP {
                                 int count, INVOKE_FEW_ARGS_IMPL_ARGS);  \
   static Variant i_##methname(MethodCallPackage &mcp, CArrRef params);  \
 
+#define DECLARE_METHOD_INVOKE_HELPERS_NOPARAM(methname)                 \
+  static CallInfo ci_##methname;                                        \
+  static Variant ifa_##methname(MethodCallPackage &mcp,                 \
+                                int count, INVOKE_FEW_ARGS_IMPL_ARGS);  \
+  static Variant i_##methname(MethodCallPackage &mcp, CArrRef params) { \
+    return ((CallInfo::MethInvoker0Args)ifa_##methname)                 \
+           (mcp, (int)params.size());                                   \
+  }                                                                     \
+
 //////////////////////////////////////////////////////////////////////////////
 // jump table entries
 

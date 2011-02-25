@@ -103,7 +103,7 @@ Variant c_stdClass::os_invoke_from_eval(const char *c, const char *s, Eval::Vari
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_stdClass::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c_stdClass::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -194,7 +194,7 @@ Variant c___PHP_Incomplete_Class::os_invoke_from_eval(const char *c, const char 
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c___PHP_Incomplete_Class::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_ObjectData::os_get_call_info(mcp, hash);
 }
 bool c___PHP_Incomplete_Class::o_get_call_info(MethodCallPackage &mcp, int64 hash) {

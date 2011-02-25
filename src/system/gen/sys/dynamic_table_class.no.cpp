@@ -684,7 +684,7 @@ Variant c_PDOException::ifa___construct(MethodCallPackage &mcp, int count, INVOK
   return (self->t___construct(), null);
 }
 bool c_PDOException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -958,7 +958,7 @@ Variant c_DOMDocumentFragment::ifa_appendxml(MethodCallPackage &mcp, int count, 
   return (self->t_appendxml(arg0));
 }
 bool c_DOMDocumentFragment::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 1:
@@ -1439,7 +1439,7 @@ Variant c_DOMText::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   return (self->t___isset(arg0));
 }
 bool c_DOMText::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -3096,7 +3096,7 @@ Variant c_DebuggerClient::ifa_wrap(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t_wrap(arg0));
 }
 bool c_DebuggerClient::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 0:
@@ -3644,7 +3644,7 @@ Variant c_EncodingDetector::ifa_detectall(MethodCallPackage &mcp, int count, INV
   return (self->t_detectall());
 }
 bool c_EncodingDetector::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 0:
@@ -3900,7 +3900,7 @@ Variant c_DOMCDATASection::ifa___construct(MethodCallPackage &mcp, int count, IN
   return (self->t___construct(arg0), null);
 }
 bool c_DOMCDATASection::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -4147,7 +4147,7 @@ Variant c_Locale::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_
   return (self->t___construct(), null);
 }
 bool c_Locale::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -4521,7 +4521,7 @@ Variant c_DOMDocumentType::ifa___isset(MethodCallPackage &mcp, int count, INVOKE
   return (self->t___isset(arg0));
 }
 bool c_DOMDocumentType::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -5098,7 +5098,7 @@ Variant c_SQLite3Stmt::ifa_bindvalue(MethodCallPackage &mcp, int count, INVOKE_F
   return (self->t_bindvalue(arg0, arg1, arg2));
 }
 bool c_SQLite3Stmt::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
@@ -5620,7 +5620,7 @@ Variant c_DOMNodeList::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t___isset(arg0));
 }
 bool c_DOMNodeList::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -5979,7 +5979,7 @@ Variant c_Normalizer::i___construct(MethodCallPackage &mcp, CArrRef params) {
 Variant c_Normalizer::i_normalize(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5992,7 +5992,7 @@ Variant c_Normalizer::i_normalize(MethodCallPackage &mcp, CArrRef params) {
 Variant c_Normalizer::i_isnormalized(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -6026,7 +6026,7 @@ Variant c_Normalizer::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_
 }
 Variant c_Normalizer::ifa_normalize(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0((a0));
   if (count <= 1) return (c_Normalizer::ti_normalize(c, arg0));
   CVarRef arg1((a1));
@@ -6034,14 +6034,14 @@ Variant c_Normalizer::ifa_normalize(MethodCallPackage &mcp, int count, INVOKE_FE
 }
 Variant c_Normalizer::ifa_isnormalized(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0((a0));
   if (count <= 1) return (c_Normalizer::ti_isnormalized(c, arg0));
   CVarRef arg1((a1));
   return (c_Normalizer::ti_isnormalized(c, arg0, arg1));
 }
 bool c_Normalizer::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 2:
@@ -6701,7 +6701,7 @@ Variant c_DOMCharacterData::ifa___isset(MethodCallPackage &mcp, int count, INVOK
   return (self->t___isset(arg0));
 }
 bool c_DOMCharacterData::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 13:
@@ -6985,7 +6985,7 @@ Variant c_DOMEntityReference::ifa___construct(MethodCallPackage &mcp, int count,
   return (self->t___construct(arg0), null);
 }
 bool c_DOMEntityReference::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -7415,7 +7415,7 @@ Variant c_SimpleXMLElementIterator::ifa_rewind(MethodCallPackage &mcp, int count
   return (self->t_rewind());
 }
 bool c_SimpleXMLElementIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 1:
@@ -7798,7 +7798,7 @@ Variant c_DateTimeZone::i_gettransitions(MethodCallPackage &mcp, CArrRef params)
 Variant c_DateTimeZone::i_listidentifiers(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   return (c_DateTimeZone::ti_listidentifiers(c));
 }
 Variant c_DateTimeZone::i___destruct(MethodCallPackage &mcp, CArrRef params) {
@@ -7850,7 +7850,7 @@ Variant c_DateTimeZone::i___construct(MethodCallPackage &mcp, CArrRef params) {
 Variant c_DateTimeZone::i_listabbreviations(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   return (c_DateTimeZone::ti_listabbreviations(c));
 }
 Variant c_DateTimeZone::i_getname(MethodCallPackage &mcp, CArrRef params) {
@@ -7878,7 +7878,7 @@ Variant c_DateTimeZone::ifa_gettransitions(MethodCallPackage &mcp, int count, IN
 }
 Variant c_DateTimeZone::ifa_listidentifiers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   return (c_DateTimeZone::ti_listidentifiers(c));
 }
 Variant c_DateTimeZone::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -7918,7 +7918,7 @@ Variant c_DateTimeZone::ifa___construct(MethodCallPackage &mcp, int count, INVOK
 }
 Variant c_DateTimeZone::ifa_listabbreviations(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   return (c_DateTimeZone::ti_listabbreviations(c));
 }
 Variant c_DateTimeZone::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -7933,7 +7933,7 @@ Variant c_DateTimeZone::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FE
   return (self->t_getname());
 }
 bool c_DateTimeZone::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -8393,7 +8393,7 @@ Variant c_DOMNodeIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_
   return (self->t_rewind());
 }
 bool c_DOMNodeIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 1:
@@ -8839,7 +8839,7 @@ Variant c_DOMImplementation::ifa_hasfeature(MethodCallPackage &mcp, int count, I
   return (self->t_hasfeature(arg0, arg1));
 }
 bool c_DOMImplementation::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -9122,7 +9122,7 @@ Variant c_SoapHeader::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_
   return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
 }
 bool c_SoapHeader::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -9561,7 +9561,7 @@ Variant c_DOMNotation::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t___isset(arg0));
 }
 bool c_DOMNotation::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -9891,7 +9891,7 @@ Variant c_DebuggerProxy::ifa_send(MethodCallPackage &mcp, int count, INVOKE_FEW_
   return (self->t_send(arg0));
 }
 bool c_DebuggerProxy::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 0:
@@ -12404,7 +12404,7 @@ Variant c_Memcached::ifa_prependbykey(MethodCallPackage &mcp, int count, INVOKE_
   return (self->t_prependbykey(arg0, arg1, arg2));
 }
 bool c_Memcached::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 127) {
     case 2:
@@ -12880,7 +12880,7 @@ Variant c_DOMComment::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_
   return (self->t___construct(arg0), null);
 }
 bool c_DOMComment::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -13919,7 +13919,7 @@ Variant c_SQLite3::ifa_querysingle(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t_querysingle(arg0, arg1));
 }
 bool c_SQLite3::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 1:
@@ -14446,7 +14446,7 @@ Variant c_DOMAttr::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   return (self->t___isset(arg0));
 }
 bool c_DOMAttr::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -14775,7 +14775,7 @@ Variant c_SoapVar::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
 }
 bool c_SoapVar::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -15419,7 +15419,7 @@ Variant c_DOMNamedNodeMap::ifa___isset(MethodCallPackage &mcp, int count, INVOKE
   return (self->t___isset(arg0));
 }
 bool c_DOMNamedNodeMap::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 3:
@@ -15950,7 +15950,7 @@ Variant c_SQLite3Result::ifa_finalize(MethodCallPackage &mcp, int count, INVOKE_
   return (self->t_finalize());
 }
 bool c_SQLite3Result::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 0:
@@ -17311,7 +17311,7 @@ Variant c_SimpleXMLElement::ifa_offsetset(MethodCallPackage &mcp, int count, INV
   return (self->t_offsetset(arg0, arg1), null);
 }
 bool c_SimpleXMLElement::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 0:
@@ -18962,7 +18962,7 @@ Variant c_Memcache::ifa_getextendedstats(MethodCallPackage &mcp, int count, INVO
   return (self->t_getextendedstats(arg0, arg1, arg2));
 }
 bool c_Memcache::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 1:
@@ -19469,7 +19469,7 @@ Variant c_DOMProcessingInstruction::ifa___isset(MethodCallPackage &mcp, int coun
   return (self->t___isset(arg0));
 }
 bool c_DOMProcessingInstruction::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -19928,7 +19928,7 @@ Variant c_EncodingMatch::ifa_isvalid(MethodCallPackage &mcp, int count, INVOKE_F
   return (self->t_isvalid());
 }
 bool c_EncodingMatch::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -21442,7 +21442,7 @@ Variant c_PDOStatement::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t_rewind());
 }
 bool c_PDOStatement::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 1:
@@ -22432,7 +22432,7 @@ Variant c_SoapClient::ifa___call(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   return (self->t___call(arg0, arg1));
 }
 bool c_SoapClient::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 4:
@@ -22767,7 +22767,7 @@ Variant c_SoapParam::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   return (self->t___construct(arg0, arg1), null);
 }
 bool c_SoapParam::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -23469,7 +23469,7 @@ Variant c_DateTime::ifa_modify(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   return (self->t_modify(arg0));
 }
 bool c_DateTime::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 7:
@@ -24205,7 +24205,7 @@ Variant c_Collator::i_setstrength(MethodCallPackage &mcp, CArrRef params) {
 Variant c_Collator::i_create(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -24390,7 +24390,7 @@ Variant c_Collator::ifa_setstrength(MethodCallPackage &mcp, int count, INVOKE_FE
 }
 Variant c_Collator::ifa_create(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0((a0));
   return (c_Collator::ti_create(c, arg0));
 }
@@ -24445,7 +24445,7 @@ Variant c_Collator::ifa_compare(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   return (self->t_compare(arg0, arg1));
 }
 bool c_Collator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
@@ -25403,7 +25403,7 @@ Variant c_PDO::i_commit(MethodCallPackage &mcp, CArrRef params) {
 Variant c_PDO::i_getavailabledrivers(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   return (c_PDO::ti_getavailabledrivers(c));
 }
 Variant c_PDO::i_quote(MethodCallPackage &mcp, CArrRef params) {
@@ -25622,7 +25622,7 @@ Variant c_PDO::ifa_commit(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMP
 }
 Variant c_PDO::ifa_getavailabledrivers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   return (c_PDO::ti_getavailabledrivers(c));
 }
 Variant c_PDO::ifa_quote(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -25700,7 +25700,7 @@ Variant c_PDO::ifa___sleep(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IM
   return (self->t___sleep());
 }
 bool c_PDO::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 7:
@@ -26634,7 +26634,7 @@ Variant c_ImageSprite::ifa_addfile(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t_addfile(arg0, arg1));
 }
 bool c_ImageSprite::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
@@ -27068,7 +27068,7 @@ Variant c_DOMEntity::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   return (self->t___isset(arg0));
 }
 bool c_DOMEntity::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -29398,7 +29398,7 @@ Variant c_XMLWriter::ifa_startcomment(MethodCallPackage &mcp, int count, INVOKE_
   return (self->t_startcomment());
 }
 bool c_XMLWriter::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 127) {
     case 2:
@@ -29892,7 +29892,7 @@ Variant c_DOMException::ifa___construct(MethodCallPackage &mcp, int count, INVOK
   return (self->t___construct(arg0, arg1), null);
 }
 bool c_DOMException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -30533,7 +30533,7 @@ Variant c_DOMXPath::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   return (self->t___isset(arg0));
 }
 bool c_DOMXPath::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 2:
@@ -31251,7 +31251,7 @@ Variant c_SoapServer::ifa_setclass(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t_setclass(count, arg0, p), null);
 }
 bool c_SoapServer::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 3:
@@ -32552,7 +32552,7 @@ Variant c_DOMNode::ifa_haschildnodes(MethodCallPackage &mcp, int count, INVOKE_F
   return (self->t_haschildnodes());
 }
 bool c_DOMNode::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 3:
@@ -33134,7 +33134,7 @@ Variant c_SpoofChecker::ifa_issuspicious(MethodCallPackage &mcp, int count, INVO
   return (self->t_issuspicious(arg0, arg1));
 }
 bool c_SpoofChecker::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -35046,7 +35046,7 @@ Variant c_DOMDocument::ifa_createdocumentfragment(MethodCallPackage &mcp, int co
   return (self->t_createdocumentfragment());
 }
 bool c_DOMDocument::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 127) {
     case 5:
@@ -35496,7 +35496,7 @@ Variant c_LibXMLError::ifa___construct(MethodCallPackage &mcp, int count, INVOKE
   return (self->t___construct(), null);
 }
 bool c_LibXMLError::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -35810,7 +35810,7 @@ Variant c_SoapFault::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
 }
 bool c_SoapFault::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 3:
@@ -37226,7 +37226,7 @@ Variant c_DOMElement::ifa_setattributenode(MethodCallPackage &mcp, int count, IN
   return (self->t_setattributenode(arg0));
 }
 bool c_DOMElement::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 10:
@@ -37964,7 +37964,7 @@ Object create_builtin_object_only(const char *s, ObjectData* root /* = NULL*/) {
   return throw_missing_class(s);
 }
 bool get_call_info_static_method_builtin(MethodCallPackage &mcp) {
-  StringData *s __attribute__((__unused__)) (mcp.rootObj.getStringData());
+  StringData *s __attribute__((__unused__)) (mcp.rootCls);
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = s->hash();
   switch (hash & 255) {

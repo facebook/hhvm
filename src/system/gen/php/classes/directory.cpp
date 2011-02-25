@@ -297,7 +297,7 @@ Variant c_Directory::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   return (self->t_rewind(), null);
 }
 bool c_Directory::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 1:

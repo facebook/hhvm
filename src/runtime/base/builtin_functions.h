@@ -334,7 +334,13 @@ String get_static_class_name(CVarRef objOrClassName);
 
 Variant f_call_user_func_array(CVarRef function, CArrRef params,
                                bool bound = false);
-bool get_user_func_handler(CVarRef function, MethodCallPackage& mcp);
+
+/**
+ * The MethodCallPackage does not hold the reference of the class name or
+ * the method name. Therefore caller must provide the holders.
+ */
+bool get_user_func_handler(CVarRef function, MethodCallPackage& mcp,
+                           String &classname, String &methodname);
 
 Variant invoke(CStrRef function, CArrRef params, int64 hash = -1,
                bool tryInterp = true, bool fatal = true);
@@ -468,15 +474,6 @@ Variant include_impl_invoke(CStrRef file, bool once = false,
                             LVariableTable* variables = NULL,
                             const char *currentDir = "");
 
-inline void assignCallTemp(Variant& temp, CVarRef val) {
-  temp.unset();
-  temp.clearContagious();
-  temp = val;
-  if (temp.isReferenced()) {
-    temp.setContagious();
-  }
-}
-
 /**
  * For wrapping expressions that have no effect, so to make gcc happy.
  */
@@ -550,38 +547,35 @@ class CallInfo;
 
 class MethodCallPackage {
 public:
-  MethodCallPackage() : ci(NULL), extra(NULL), m_fatal(true), m_isFunc(false),
-                        obj(NULL) {}
+  MethodCallPackage()
+  : ci(NULL), extra(NULL), isObj(false), obj(NULL),
+    m_fatal(true), m_isFunc(false) {}
 
   // e->n() style method call
   void methodCall(CObjRef self, CStrRef method, int64 prehash = -1) {
     methodCall(self.get(), method, prehash);
   }
-  void methodCall(ObjectData *self, CStrRef method, int64 prehash = -1) {
-    rootObj = self;
-    name = method;
-    self->o_get_call_info(*this, prehash);
-  }
+  void methodCall(ObjectData *self, CStrRef method, int64 prehash = -1);
+  void methodCall(CVarRef self, CStrRef method, int64 prehash = -1);
   void methodCallWithIndex(CObjRef self, CStrRef method, MethodIndex mi,
                            int64 prehash = -1) {
     methodCallWithIndex(self.get(), method, mi, prehash);
   }
   void methodCallWithIndex(ObjectData *self, CStrRef method, MethodIndex mi,
-                           int64 prehash = -1) {
-    rootObj = self;
-    name = method;
-    self->o_get_call_info_with_index(*this, mi, prehash);
-  }
+                           int64 prehash = -1);
+  void methodCallWithIndex(CVarRef self, CStrRef method, MethodIndex mi,
+                           int64 prehash = -1);
   // K::n() style call, where K is a parent and n is not static and in an
   // instance method. Lookup is done outside since K is known.
   void methodCallEx(CObjRef self, CStrRef method) {
-    rootObj = self;
-    name = method;
+    isObj = true;
+    rootObj = self.get();
+    name = &method;
   }
   // K::n() style call where K::n() is a static method. Lookup is done outside
-  void staticMethodCall(litstr cname, CStrRef method) {
-    rootObj = cname;
-    name = method;
+  void staticMethodCall(CStrRef cname, CStrRef method) {
+    rootCls = cname.get();
+    name = &method;
   }
   // e::n() call. e could evaluate to be either a string or object.
   void dynamicNamedCall(CVarRef self, CStrRef method, int64 prehash = -1);
@@ -590,9 +584,6 @@ public:
   // e::n() call where e is definitely a string
   void dynamicNamedCall(CStrRef self, CStrRef method, int64 prehash = -1);
   void dynamicNamedCallWithIndex(CStrRef self, CStrRef method,
-      MethodIndex mi, int64 prehash = -1);
-  void dynamicNamedCall(const char *self, CStrRef method, int64 prehash = -1);
-  void dynamicNamedCallWithIndex(const char *self, CStrRef method,
       MethodIndex mi, int64 prehash = -1);
   // function call
   void functionNamedCall(CStrRef func);
@@ -604,13 +595,19 @@ public:
   void lateStaticBind(ThreadInfo *ti);
   const CallInfo *bindClass(FrameInjection &fi);
   String getClassName();
+
+  // Data members
   const CallInfo *ci;
   void *extra;
-  Variant rootObj; // object or class name
+  bool isObj;
+  union { // object or class name
+    ObjectData *rootObj;
+    StringData *rootCls;
+  };
+  ObjectData *obj;
+  const String *name;
   bool m_fatal;
   bool m_isFunc;
-  ObjectData *obj;
-  String name;
 };
 
 class CallInfo {

@@ -227,6 +227,13 @@ Variant f_simplexml_load_string(CStrRef data,
     if (class_name.empty()) {
       throw_invalid_argument("class_name: [empty]");
     }
+
+    //HPHPi should invoke the autoloader
+    if (!class_exists(class_name)) {
+      throw_invalid_argument("Class %s does not exist", class_name.data());
+      return null;
+    }
+
     const ClassInfo *cls = ClassInfo::FindClass(class_name);
     if (cls == NULL) {
       throw_invalid_argument("class not found: %s", class_name.data());

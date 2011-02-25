@@ -137,6 +137,12 @@ Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {
     return false;
   }
 
+  //HPHPi could invoke the autoloader
+  if (autoload && !class_exists(clsname, autoload)) {
+    throw_invalid_argument("Class %s does not exist", clsname.data());
+    return false;
+  }
+
   const ClassInfo *info = ClassInfo::FindClass(clsname);
   if (info == NULL) {
     return false;
@@ -159,6 +165,12 @@ Variant f_class_parents(CVarRef obj, bool autoload /* = true */) {
   } else if (obj.isObject()) {
     clsname = obj.toObject()->o_getClassName();
   } else {
+    return false;
+  }
+
+  //HPHPi could invoke the autoloader
+  if (autoload && !class_exists(clsname, autoload)) {
+    throw_invalid_argument("Class %s does not exist", clsname.data());
     return false;
   }
 

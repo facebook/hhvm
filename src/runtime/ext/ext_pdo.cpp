@@ -41,7 +41,7 @@
 using namespace std;
 
 namespace HPHP {
-IMPLEMENT_DEFAULT_EXTENSION(pdo);
+IMPLEMENT_DEFAULT_EXTENSION(PDO);
 ///////////////////////////////////////////////////////////////////////////////
 // PDO constants
 

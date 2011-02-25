@@ -62,8 +62,18 @@ const int64 k_UCOL_HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
 const int64 k_UCOL_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
 
 static bool filter_func(CVarRef value, const void *data) {
-  Variant *callback = (Variant *)data;
-  return f_call_user_func_array(*callback, CREATE_VECTOR1(value));
+  MethodCallPackage *mcp = (MethodCallPackage *)data;
+  if (mcp->m_isFunc) {
+    if (CallInfo::FuncInvoker1Args invoker = mcp->ci->getFunc1Args()) {
+      return invoker(mcp->extra, 1, value);
+    }
+    return (mcp->ci->getFunc())(mcp->extra, CREATE_VECTOR1(value));
+  } else {
+    if (CallInfo::MethInvoker1Args invoker = mcp->ci->getMeth1Args()) {
+      return invoker(*mcp, 1, value);
+    }
+    return (mcp->ci->getMeth())(*mcp, CREATE_VECTOR1(value));
+  }
 }
 Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
   if (!input.isArray()) {
@@ -74,7 +84,11 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
   if (callback.isNull()) {
     return ArrayUtil::Filter(arr_input);
   }
-  return ArrayUtil::Filter(arr_input, filter_func, &callback);
+  MethodCallPackage mcp;
+  if (!get_user_func_handler(callback, mcp)) {
+    return null;
+  }
+  return ArrayUtil::Filter(arr_input, filter_func, &mcp);
 }
 
 bool f_array_key_exists(CVarRef key, CVarRef search) {
@@ -103,14 +117,18 @@ bool f_array_key_exists(CVarRef key, CVarRef search) {
 }
 
 static Variant map_func(CArrRef params, const void *data) {
-  Variant *callback = (Variant *)data;
-  if (!callback->isNull()) {
-    return f_call_user_func_array(*callback, params);
+  if (!data) {
+    if (params.size() == 1) {
+      return params[0];
+    }
+    return params;
   }
-  if (params.size() == 1) {
-    return params[0];
+  MethodCallPackage *mcp = (MethodCallPackage *)data;
+  if (mcp->m_isFunc) {
+    return (mcp->ci->getFunc())(mcp->extra, params);
+  } else {
+    return (mcp->ci->getMeth())(*mcp, params);
   }
-  return params;
 }
 Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* = null_array */) {
   Array inputs;
@@ -122,7 +140,11 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
   if (!_argv.empty()) {
     inputs = inputs.merge(_argv);
   }
-  return ArrayUtil::Map(inputs, map_func, &callback);
+  MethodCallPackage mcp;
+  if (!get_user_func_handler(callback, mcp)) {
+    return ArrayUtil::Map(inputs, map_func, NULL);
+  }
+  return ArrayUtil::Map(inputs, map_func, &mcp);
 }
 
 static void php_array_merge(Array &arr1, CArrRef arr2) {
@@ -306,8 +328,18 @@ Variant f_array_push(int _argc, Variant array, CVarRef var, CArrRef _argv /* = n
 }
 
 static Variant reduce_func(CVarRef result, CVarRef operand, const void *data) {
-  Variant *callback = (Variant *)data;
-  return f_call_user_func_array(*callback, CREATE_VECTOR2(result, operand));
+  MethodCallPackage *mcp = (MethodCallPackage *)data;
+  if (mcp->m_isFunc) {
+    if (CallInfo::FuncInvoker2Args invoker = mcp->ci->getFunc2Args()) {
+      return invoker(mcp->extra, 2, result, operand);
+    }
+    return (mcp->ci->getFunc())(mcp->extra, CREATE_VECTOR2(result, operand));
+  } else {
+    if (CallInfo::MethInvoker2Args invoker = mcp->ci->getMeth2Args()) {
+      return invoker(*mcp, 2, result, operand);
+    }
+    return (mcp->ci->getMeth())(*mcp, CREATE_VECTOR2(result, operand));
+  }
 }
 Variant f_array_reduce(CVarRef input, CVarRef callback,
                        CVarRef initial /* = null_variant */) {
@@ -316,7 +348,11 @@ Variant f_array_reduce(CVarRef input, CVarRef callback,
     return null;
   }
   CArrRef arr_input = input.toArrNR();
-  return ArrayUtil::Reduce(arr_input, reduce_func, &callback, initial);
+  MethodCallPackage mcp;
+  if (!get_user_func_handler(callback, mcp)) {
+    return null;
+  }
+  return ArrayUtil::Reduce(arr_input, reduce_func, &mcp, initial);
 }
 
 int f_array_unshift(int _argc, Variant array, CVarRef var, CArrRef _argv /* = null_array */) {
@@ -360,8 +396,32 @@ int f_array_unshift(int _argc, Variant array, CVarRef var, CArrRef _argv /* = nu
 
 static void walk_func(Variant value, CVarRef key, CVarRef userdata,
                       const void *data) {
-  Variant *callback = (Variant *)data;
-  f_call_user_func_array(*callback, CREATE_VECTOR3(ref(value), key, userdata));
+  MethodCallPackage *mcp = (MethodCallPackage *)data;
+  // Here to avoid crash in interpreter, we need to use different variation
+  // in 'FewArgs' cases
+  if (mcp->m_isFunc) {
+    if (mcp->ci->getFuncFewArgs()) { // To test whether we have FewArgs
+      if (userdata.isNull()) {
+        (mcp->ci->getFunc2Args())(mcp->extra, 2, ref(value), key);
+      } else{
+        (mcp->ci->getFunc3Args())(mcp->extra, 3, ref(value), key, userdata);
+      }
+      return;
+    }
+    (mcp->ci->getFunc())(mcp->extra, CREATE_VECTOR3(ref(value), key,
+                         userdata));
+  } else {
+    if (mcp->ci->getMethFewArgs()) { // To test whether we have FewArgs
+      if (userdata.isNull()) {
+        (mcp->ci->getMeth2Args())(*mcp, 2, ref(value), key);
+      } else {
+        (mcp->ci->getMeth3Args())(*mcp, 3, ref(value), key, userdata);
+      }
+      return;
+    }
+    (mcp->ci->getMeth())(*mcp, CREATE_VECTOR3(ref(value), key,
+                         userdata));
+  }
 }
 bool f_array_walk_recursive(Variant input, CVarRef funcname,
                             CVarRef userdata /* = null_variant */) {
@@ -369,8 +429,12 @@ bool f_array_walk_recursive(Variant input, CVarRef funcname,
     throw_bad_array_exception();
     return false;
   }
+  MethodCallPackage mcp;
+  if (!get_user_func_handler(funcname, mcp)) {
+    return null;
+  }
   PointerSet seen;
-  ArrayUtil::Walk(ref(input), walk_func, &funcname, true, &seen, userdata);
+  ArrayUtil::Walk(ref(input), walk_func, &mcp, true, &seen, userdata);
   return true;
 }
 bool f_array_walk(Variant input, CVarRef funcname,
@@ -379,7 +443,11 @@ bool f_array_walk(Variant input, CVarRef funcname,
     throw_bad_array_exception();
     return false;
   }
-  ArrayUtil::Walk(ref(input), walk_func, &funcname, false, NULL, userdata);
+  MethodCallPackage mcp;
+  if (!get_user_func_handler(funcname, mcp)) {
+    return null;
+  }
+  ArrayUtil::Walk(ref(input), walk_func, &mcp, false, NULL, userdata);
   return true;
 }
 

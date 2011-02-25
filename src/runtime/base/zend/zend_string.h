@@ -300,6 +300,16 @@ char *string_convert_hebrew_string(const char *str, int &str_len,
 // helpers
 
 /**
+ * Calculates and adjusts "start" and "length" according to string's length.
+ * This function determines how those two parameters are interpreted in varies
+ * substr-related functions.
+ *
+ * The parameter strict controls whether to disallow the empty sub-string
+ * after the end.
+ */
+bool string_substr_check(int len, int &f, int &l, bool strict = true);
+
+/**
  * Fills a 256-byte bytemask with input. You can specify a range like 'a..z',
  * it needs to be incrementing. This function determines how "charlist"
  * parameters are interpreted in varies functions that take a list of

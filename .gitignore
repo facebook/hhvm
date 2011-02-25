@@ -40,3 +40,8 @@ CMakeCache.txt
 cmake_install.cmake
 
 /output_gd/
+
+/.cproject
+/.project
+/.settings
+

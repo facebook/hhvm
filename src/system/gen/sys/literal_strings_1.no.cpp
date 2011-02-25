@@ -22,7 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ss963681e7("__setsoapheaders");
 StaticString s_sys_ss969a2913("getClass");
 StaticString s_sys_ss96f7c57c("fflush");
 StaticString s_sys_ss9795dfc8("Property ");
@@ -63,6 +62,7 @@ StaticString s_sys_ssa7f86c5a("commit");
 StaticString s_sys_ssa812760b("isPrivate");
 StaticString s_sys_ssa93e2205("flush");
 StaticString s_sys_ssa9a8d951("isExecutable");
+StaticString s_sys_ssaa14dfdd("detect");
 StaticString s_sys_ssaa916331("lasterrorcode");
 StaticString s_sys_ssab7a1dec("code");
 StaticString s_sys_ssabd12782("setcompressthreshold");
@@ -85,6 +85,7 @@ StaticString s_sys_ssb1c4aa6f("getATime");
 StaticString s_sys_ssb303f411("__isset");
 StaticString s_sys_ssb30ca8a5("setMaxLineLen");
 StaticString s_sys_ssb3a5c1b3("current");
+StaticString s_sys_ssb3fce46e("\000AppendIterator\000iterators", 25);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

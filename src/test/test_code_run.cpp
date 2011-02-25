@@ -3732,6 +3732,31 @@ bool TestCodeRun::TestObject() {
        "}"
        "test();");
 
+  MVCR("<?php\n"
+       "class A { }\n"
+       "class B extends A {\n"
+       "  static function check1($a) { return $a instanceof self; }\n"
+       "  static function check2($a) { return $a instanceof parent; }\n"
+       "}\n"
+       "$a = new B;\n"
+       "var_dump(B::check1($a), B::check2($a));\n"
+       "$b = (object)array(1, 2, 3);\n"
+       "var_dump(B::check1($b), B::check2($b));\n");
+
+  MVCR("<php\n"
+       "class X { static function f($o, $s) { return $o instanceof $s; } }\n"
+       "$x = new X;\n"
+       "var_dump(X::f($x, 'self'));\n"
+       "var_dump(X::f($x, 'X'));\n");
+
+  MVCR("<php\n"
+       "class X {\n"
+       "  static function f($o) {\n"
+       "    $s = 'self'; return $o instanceof $s;\n"
+       "  }\n"
+       "}\n"
+       "X::f(new X);\n");
+
   return true;
 }
 
@@ -7875,6 +7900,16 @@ bool TestCodeRun::TestReflectionClasses() {
        "var_dump($klass->implementsInterface('A'));"
        "$inter = new ReflectionClass('B');"
        "var_dump($inter->hasMethod('foo'));");
+
+  MVCR("<?php\n"
+       "class A { private $a; protected $b; public $c; static $d; }\n"
+       "function f($a) { foreach ($a as $v) { var_dump($v->getName()); } }\n"
+       "$r = new ReflectionClass('A');\n"
+       "$a = $r->getProperties(); f($a);\n"
+       "$a = $r->getProperties(ReflectionProperty::IS_PUBLIC); f($a);\n"
+       "$a = $r->getProperties(ReflectionProperty::IS_PRIVATE); f($a);\n"
+       "$a = $r->getProperties(ReflectionProperty::IS_PROTECTED); f($a);\n"
+       "$a = $r->getProperties(ReflectionProperty::IS_STATIC); f($a);\n");
 
   return true;
 }
@@ -12343,7 +12378,12 @@ bool TestCodeRun::TestConstant() {
   MVCR("<?php "
       "var_dump(INF);"
       "var_dump(NAN);");
-
+  MVCR("<?php "
+      "define('A_B', 555);"
+      "define('A_'. 'B', 'B');");
+  MVCR("<?php "
+      "var_dump(define('AF_UNIX', 5));"
+      "var_dump(AF_UNIX);");
   return true;
 }
 
@@ -13941,6 +13981,7 @@ bool TestCodeRun::TestExtString() {
       "                        array('bob', 'cat'), 0));"
       "var_dump(substr_replace(array('ABCDEFGH:/MNRPQR/'),"
       "                        array('bob'), array(0,1)));"
+      "var_dump(substr_replace('abc', 'xyz', 3, 0));"
 
       "var_dump(sscanf(\"SN/2350001\", \"SN/%d\"));"
       "var_dump(sscanf(\"SN/2350001\", \"SN/%d\", $out));"
@@ -15651,6 +15692,23 @@ bool TestCodeRun::TestLateStaticBinding() {
         "$b->g();\n",
 
         "B");
+
+  // instanceof static and new static
+  MVCRO("<?php\n"
+        "class A {\n"
+        "  static function f() { return new static; }\n"
+        "  static function g($o) { return $o instanceof static; }\n"
+        "}\n"
+        "class B extends A { }\n"
+        "var_dump(A::g(A::f()));\n"
+        "var_dump(A::g(B::f()));\n"
+        "var_dump(B::g(A::f()));\n"
+        "var_dump(B::g(B::f()));\n",
+
+        "bool(true)\n"
+        "bool(true)\n"
+        "bool(false)\n"
+        "bool(true)\n");
 
   return true;
 }

@@ -364,12 +364,15 @@ struct ObjectStaticCallbacks {
 
 template<int M>
 class ItemSize {
- public:
+ private:
   enum {
     prev = (M + M + 3) / 3 >= UNIT_SIZE ? (M + M + 3) / 3 : UNIT_SIZE,
-    value = (ItemSize<prev>::value < M ?
-             ALIGN_WORD(ItemSize<prev>::value + (ItemSize<prev>::value >> 1)) :
-             ItemSize<prev>::value)
+    pval = ItemSize<prev>::value
+  };
+ public:
+  enum {
+    index = ItemSize<prev>::index + (int)(pval < M),
+    value = (pval < M ? ALIGN_WORD(pval + (pval >> 1)) : pval)
   };
 };
 
@@ -377,9 +380,42 @@ template<>
 class ItemSize<UNIT_SIZE> {
  public:
   enum {
-    prev = 0,
+    index = 0,
     value = UNIT_SIZE
   };
+};
+
+typedef ObjectAllocatorBase *(*ObjectAllocatorBaseGetter)(void);
+class ObjectAllocatorCollector {
+public:
+  static std::map<int, ObjectAllocatorBaseGetter> &getWrappers() {
+    static std::map<int, ObjectAllocatorBaseGetter> wrappers;
+    return wrappers;
+  }
+  template <typename T>
+  static ObjectAllocatorBaseGetter setup() {
+    ThreadLocalSingleton<ObjectAllocator<ItemSize<sizeof(T)>::value> > tls;
+    return getWrappers()[ItemSize<sizeof(T)>::index] =
+      (ObjectAllocatorBaseGetter)tls.get;
+  }
+};
+
+class ObjectAllocatorWrapper {
+public:
+  ObjectAllocatorWrapper(ObjectAllocatorBaseGetter get)
+  : m_get(get) {
+  }
+
+  ObjectAllocatorBase *operator->() const {
+    return m_get();
+  }
+
+  ObjectAllocatorBase *get() const {
+    return m_get();
+  }
+
+private:
+  ObjectAllocatorBase *(*m_get)(void);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1755,6 +1755,7 @@ class_name_reference:
   | T_XHP_LABEL                        { $1.xhpLabel();
                                          _p->onName($$,$1,Parser::StringName);}
   | dynamic_class_name_reference       { _p->onName($$,$1,Parser::ExprName);}
+  | T_STATIC                           { _p->onName($$,$1,Parser::StaticName);}
 ;
 dynamic_class_name_reference:
     base_variable                      { _p->pushObject($1);}

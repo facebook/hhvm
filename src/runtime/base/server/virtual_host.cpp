@@ -80,7 +80,8 @@ void VirtualHost::initRuntimeOption(Hdf overwrite) {
   int64 uploadMaxFileSize =
     overwrite["Server.Upload.UploadMaxFileSize"].getInt32(-1);
   if (uploadMaxFileSize != -1) uploadMaxFileSize *= (1LL << 20);
-  overwrite["AllowedDirectories"].get(m_runtimeOption.allowedDirectories);
+  overwrite["Server.AllowedDirectories"].
+    get(m_runtimeOption.allowedDirectories);
   m_runtimeOption.requestTimeoutSeconds = requestTimeoutSeconds;
   m_runtimeOption.maxPostSize = maxPostSize;
   m_runtimeOption.uploadMaxFileSize = uploadMaxFileSize;

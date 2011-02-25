@@ -178,6 +178,10 @@ inline String &concat_assign(const StringOffset &s1, CStrRef s2) {
   return concat_assign(s1.lval(), s2);
 }
 
+inline bool instanceOf(ObjectData *v, CStrRef s) {
+  return v && v->o_instanceof(s);
+}
+
 inline bool instanceOf(bool    v, CStrRef s) { return false;}
 inline bool instanceOf(char    v, CStrRef s) { return false;}
 inline bool instanceOf(short   v, CStrRef s) { return false;}
@@ -187,13 +191,9 @@ inline bool instanceOf(double  v, CStrRef s) { return false;}
 inline bool instanceOf(litstr  v, CStrRef s) { return false;}
 inline bool instanceOf(CStrRef v, CStrRef s) { return false;}
 inline bool instanceOf(CArrRef v, CStrRef s) { return false;}
-inline bool instanceOf(CObjRef v, CStrRef s) { return v.instanceof(s);}
+inline bool instanceOf(CObjRef v, CStrRef s) { return instanceOf(v.get(), s);}
 inline bool instanceOf(CVarRef v, CStrRef s) {
-  return v.is(KindOfObject) &&
-    v.toObject().instanceof(s);
-}
-inline bool instanceOf(ObjectData *v, CStrRef s) {
-  return v && v->o_instanceof(s);
+  return v.is(KindOfObject) && instanceOf(v.getObjectData(), s);
 }
 
 template <class K, class V>
@@ -598,7 +598,7 @@ public:
   void noFatal() { m_fatal = false; }
   void fail();
   void lateStaticBind(ThreadInfo *ti);
-  const CallInfo *bindClass(ThreadInfo *ti);
+  const CallInfo *bindClass(FrameInjection &fi);
   String getClassName();
   const CallInfo *ci;
   void *extra;

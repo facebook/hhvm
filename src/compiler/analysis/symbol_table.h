@@ -58,7 +58,10 @@ public:
                   TypePtr type, bool coerced);
 
   bool isPresent() const { return m_flags.m_declaration_set; }
+  bool checkDefined();
   bool declarationSet() const { return m_flags.m_declaration_set; }
+  bool isReplaced() const { return m_flags.m_replaced; }
+  void setReplaced() { m_flags.m_replaced = true; }
   bool valueSet() const { return m_flags.m_value_set; }
   bool isSystem() const { return m_flags.m_system; }
   bool isSep() const { return m_flags.m_sep; }
@@ -168,6 +171,7 @@ private:
 
       /* ConstantTable */
       unsigned m_dynamic : 1;
+      unsigned m_replaced : 1;
 
       /* VariableTable */
       unsigned m_protected : 1;
@@ -229,9 +233,14 @@ public:
   void import(SymbolTablePtr src);
 
   /**
-   * Whether it's defined.
+   * Whether it's declared.
    */
   bool isPresent(const std::string &name) const;
+
+  /**
+   * Whether a symbol is defined.
+   */
+  bool checkDefined(const std::string &name);
 
   /**
    * Whether a symbol is a system symbol.

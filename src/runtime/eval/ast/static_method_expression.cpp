@@ -38,8 +38,7 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
   // of a method when an object is available and the object's class inherits.
   // Super slow.
   String cname = m_cname->get(env);
-  EvalFrameInjection::EvalStaticClassNameHelper helper(cname,
-      m_cname->isSp());
+  bool sp = m_cname->isSp();
   String name(m_name->get(env));
   Variant &vco = env.currentObject();
   Object co;
@@ -68,15 +67,21 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
       }
     }
     if (!ms) {
-      return ref(co->o_invoke_ex(cname, name, getParams(env)));
+      Array params = getParams(env);
+      EvalFrameInjection::EvalStaticClassNameHelper helper(cname, sp);
+      return ref(co->o_invoke_ex(cname, name, params));
     } else if (!(ms->getModifiers() & ClassStatement::Static)) {
+      EvalFrameInjection::EvalStaticClassNameHelper helper(cname, sp);
       return ref(ms->invokeInstanceDirect(co, env, this));
     }
   }
   if (ms) {
+    EvalFrameInjection::EvalStaticClassNameHelper helper(cname, sp);
     return ref(ms->invokeStaticDirect(cname.data(), env, this));
   }
-  return ref(invoke_static_method(cname.data(), name.data(), getParams(env)));
+  Array params = getParams(env);
+  EvalFrameInjection::EvalStaticClassNameHelper helper(cname, sp);
+  return ref(invoke_static_method(cname.data(), name.data(), params));
 }
 
 void StaticMethodExpression::dump(std::ostream &out) const {

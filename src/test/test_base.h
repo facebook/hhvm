@@ -75,12 +75,12 @@ class TestBase {
   error_messages += TestBase::error_buffer;                             \
 
 #define SKIP(reason)                                                    \
-  LOG_TEST_ERROR("%s skipped [" #reason "]", __FUNCTION__);             \
+  LOG_TEST_ERROR("%s skipped [%s]", __FUNCTION__, #reason);             \
   return CountSkip();                                                   \
 
 #define VERIFY(exp)                                                     \
   if (!(exp)) {                                                         \
-    LOG_TEST_ERROR("%s:%d: [" #exp "] is false", __FILE__, __LINE__);   \
+    LOG_TEST_ERROR("%s:%d: [%s] is false", __FILE__, __LINE__, #exp);   \
     return Count(false);                                                \
   }                                                                     \
 

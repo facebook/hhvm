@@ -508,7 +508,7 @@ void BuiltinSymbols::LoadFunctions(AnalysisResultPtr ar,
        it != s_functions.end(); ++it) {
     if (functions.find(it->first) == functions.end()) {
       functions[it->first].push_back(it->second);
-      FunctionScope::RecordRefParamInfo(it->first, it->second);
+      FunctionScope::RecordFunctionInfo(it->first, it->second);
     }
   }
 }
@@ -537,7 +537,7 @@ void BuiltinSymbols::LoadClasses(AnalysisResultPtr ar,
     const StringToFunctionScopePtrVecMap &funcs = iter->second->getFunctions();
     for (StringToFunctionScopePtrVecMap::const_iterator iter =
            funcs.begin(); iter != funcs.end(); ++iter) {
-      FunctionScope::RecordRefParamInfo(iter->first, iter->second.back());
+      FunctionScope::RecordFunctionInfo(iter->first, iter->second.back());
     }
   }
 }

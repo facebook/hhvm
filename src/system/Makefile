@@ -1,7 +1,8 @@
 
 PROJECT_ROOT = ../..
 
-HPHP = $(PROJECT_ROOT)/src/hphp/hphp
+include $(PROJECT_ROOT)/src/dirs.mk
+
 PHP_FILES = $(wildcard */*.php)
 
 all:

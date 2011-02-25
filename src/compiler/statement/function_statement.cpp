@@ -67,7 +67,7 @@ void FunctionStatement::onParse(AnalysisResultConstPtr ar, FileScopePtr scope) {
       param->parseHandler(ar, fs, ClassScopePtr());
     }
   }
-  FunctionScope::RecordRefParamInfo(m_name, fs);
+  FunctionScope::RecordFunctionInfo(m_name, fs);
   if (!scope->addFunction(ar, fs)) {
     m_ignored = true;
     return;

@@ -155,8 +155,8 @@ void FunctionCall::markRefParams(FunctionScopePtr func,
       }
     }
   } else if (!m_name.empty()) {
-    FunctionScope::RefParamInfoPtr info =
-      FunctionScope::GetRefParamInfo(m_name);
+    FunctionScope::FunctionInfoPtr info =
+      FunctionScope::GetFunctionInfo(m_name);
     if (info) {
       for (int i = params.getCount(); i--; ) {
         if (info->isRefParam(i)) {
@@ -578,21 +578,19 @@ bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   cg.wrapExpressionBegin();
   if (m_classScope) {
     string className = m_classScope->getId(cg);
-    cg_printf("FrameInjection::SetStaticClassName(info, "
-              "%s%s::s_class_name);\n",
+    cg_printf("fi.setStaticClassName(%s%s::s_class_name);\n",
               Option::ClassPrefix, className.c_str());
   } else {
     m_clsNameTemp = cg.createNewLocalId(shared_from_this());
     cg_printf("CStrRef clsName%d(", m_clsNameTemp);
     cg_printString(m_origClassName, ar, shared_from_this());
     cg_printf(");\n");
-    cg_printf("FrameInjection::SetStaticClassName(info, clsName%d);\n",
-              m_clsNameTemp);
+    cg_printf("fi.setStaticClassName(clsName%d);\n", m_clsNameTemp);
   }
   m_noStatic = true;
   preOutputStash(cg, ar, FixOrder);
   m_noStatic = false;
-  cg_printf("FrameInjection::ResetStaticClassName(info);\n");
+  cg_printf("fi.resetStaticClassName();\n");
 
   if (!(state & FixOrder)) {
     cg_printf("id(%s);\n", cppTemp().c_str());

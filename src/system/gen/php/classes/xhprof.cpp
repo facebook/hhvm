@@ -110,11 +110,11 @@ Variant c_XhprofFrame::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     case 3:
       HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("XhprofFrame::__destruct", 0, 1);
@@ -123,14 +123,14 @@ Variant c_XhprofFrame::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count != 1) return throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 2);
@@ -260,14 +260,14 @@ void c_XhprofFrame::getConstructor(MethodCallPackage &mcp) {
 void c_XhprofFrame::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  unsigned int i = 0;
   do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
+    if (i == params.size()) break;
+    a0 = params[i]->eval(env);
+    i++;
   } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
+  for (; i != params.size(); ++i) {
+    params[i]->eval(env);
   }
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 1);

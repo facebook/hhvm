@@ -583,7 +583,8 @@ bool Variant::isResource() const {
 
 bool Variant::instanceof(CStrRef s) const {
   if (m_type == KindOfObject) {
-    return toObject().instanceof(s);
+    ASSERT(m_data.pobj);
+    return m_data.pobj->o_instanceof(s);
   }
   if (m_type == KindOfVariant) {
     return m_data.pvar->instanceof(s);

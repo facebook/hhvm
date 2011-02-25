@@ -1288,8 +1288,24 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   case T_INSTANCEOF:
     {
       if (second->isScalar()) {
+        ScalarExpressionPtr scalar =
+          dynamic_pointer_cast<ScalarExpression>(second);
+        bool notQuoted = scalar && !scalar->isQuoted();
         std::string s = second->getLiteralString();
-        if (s != "") {
+        if (s == "static" && notQuoted) {
+          cg_printf("FrameInjection::GetStaticClassName(info)");
+        } else if (s != "") {
+          if (s == "self" && notQuoted) {
+            ClassScopeRawPtr cls = getOriginalClass();
+            if (cls) {
+              s = cls->getOriginalName();
+            }
+          } else if (s == "parent" && notQuoted) {
+            ClassScopeRawPtr cls = getOriginalClass();
+            if (cls && !cls->getParent().empty()) {
+              s = cls->getParent();
+            }
+          }
           cg_printString(s, ar, shared_from_this());
         } else {
           second->outputCPP(cg, ar);

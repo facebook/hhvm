@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 1274 */
+/* SRC: classes/reflection.php line 1280 */
 FORWARD_DECLARE_CLASS(ReflectionObject);
 class c_ReflectionObject : public c_ReflectionClass {
   public:

@@ -17,14 +17,9 @@ override USE_CCACHE :=
 override NO_DISTCC := 1
 endif
 
-# only want to do this once per invocation of make
-# (particularly the build rules)
-# unfortunately, the variables get passed down to
-# recursive makes (but with the wrong values), so
-# check here whether we've already run at this level
-ifneq ($(CWD),$(DIRS_INCLUDED))
-
-DIRS_INCLUDED := $(CWD)
+ifneq ($(origin DIRS_INCLUDED), override)
+override DIRS_INCLUDED := 1
+unexport DIRS_INCLUDED
 
 # This is to make sure "make" without any target will actually "make all".
 overall: all quiet
@@ -156,6 +151,8 @@ OUT_TOP := $(OUT_TOP_BASE)$(OUT_EXT)
 OUT_DIR := $(OUT_TOP)$(REL)/
 LIB_DIR := $(OUT_TOP)
 OUT_TOP := $(OUT_TOP)/
+HPHP := $(HPHP_LIB)/hphp
+HPHPI := $(HPHP_LIB)/hphpi
 
 else
 
@@ -167,6 +164,8 @@ ifneq ($(HPHP_LIB),$(HPHP_ROOT)/bin)
 LIB_DIR := $(HPHP_LIB)
 endif
 endif
+HPHP := $(PROJECT_ROOT)/src/hphp/hphp
+HPHPI := $(PROJECT_ROOT)/src/hphpi/hphpi
 
 endif
 

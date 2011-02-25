@@ -27,6 +27,12 @@ InstanceOfExpression::InstanceOfExpression(EXPRESSION_ARGS, ExpressionPtr obj,
 
 Variant InstanceOfExpression::eval(VariableEnvironment &env) const {
   Variant obj(m_obj->eval(env));
+  String sname(m_name->get());
+  if (sname == "self") {
+    return instanceOf(obj, FrameInjection::GetClassName(false));
+  } else if (sname == "parent") {
+    return instanceOf(obj, FrameInjection::GetParentClassName(false));
+  }
   String name(m_name->get(env));
   return instanceOf(obj, name);
 }

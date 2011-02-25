@@ -22,7 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ssfbb3eb52("addUrl");
 StaticString s_sys_ssfc2d4779("getType");
 StaticString s_sys_ssfc63c2bb("ReflectionClass");
 StaticString s_sys_ssfdbe04fa("set");
@@ -40,6 +39,7 @@ StaticString s_sys_ss05c2645c("substringData");
 StaticString s_sys_ss0626a7ce("uasort");
 StaticString s_sys_ss06d80b5c("returnsReference");
 StaticString s_sys_ss0723515e("__wakeup");
+StaticString s_sys_ss0727dc04("getConfidence");
 StaticString s_sys_ss07445cb3("num_args");
 StaticString s_sys_ss077ab997("getFilename");
 StaticString s_sys_ss079dd82d("InvalidArgumentException");
@@ -85,6 +85,7 @@ StaticString s_sys_ss14e5c43c("running");
 StaticString s_sys_ss14eade34("hasChildNodes");
 StaticString s_sys_ss155366df("message");
 StaticString s_sys_ss15921d14("areConfusable");
+StaticString s_sys_ss15a9d310("fgetcsv");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

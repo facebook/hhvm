@@ -1119,11 +1119,11 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 0:
       HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ssa26bedd7, "__init__")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -1133,11 +1133,11 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 3:
       HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ssb0933c52, "getLine")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -1147,11 +1147,11 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 10:
       HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss7854bd7b, "getTraceAsString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -1161,11 +1161,11 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 15:
       HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss6c5c70db, "getCode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -1175,11 +1175,11 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 18:
       HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss4f2f48c7, "getMessage")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -1189,11 +1189,11 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 19:
       HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -1203,11 +1203,11 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 26:
       HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ssccbba71e, "getTrace")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -1217,11 +1217,11 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     case 30:
       HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ssf401cc22, "getFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -1233,17 +1233,17 @@ Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
@@ -1614,17 +1614,17 @@ void c_Exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  unsigned int i = 0;
   do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
+    if (i == params.size()) break;
+    a0 = params[i]->eval(env);
+    i++;
+    if (i == params.size()) break;
+    a1 = params[i]->eval(env);
+    i++;
   } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
+  for (; i != params.size(); ++i) {
+    params[i]->eval(env);
   }
   int count __attribute__((__unused__)) = params.size();
   if (count > 2) throw_toomany_arguments("Exception::__construct", 2, 1);
@@ -1934,26 +1934,26 @@ Variant c_ErrorException::o_invoke_from_eval(const char *s, Eval::VariableEnviro
         Variant a3;
         Variant a4;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a3 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a4 = (*it)->eval(env);
-          it++;
+          if (i == params.size()) break;
+          a0 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a1 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a2 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a3 = params[i]->eval(env);
+          i++;
+          if (i == params.size()) break;
+          a4 = params[i]->eval(env);
+          i++;
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
@@ -1966,11 +1966,11 @@ Variant c_ErrorException::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ssd323f9f4, "getSeverity")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        unsigned int i = 0;
         do {
         } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+        for (; i != params.size(); ++i) {
+          params[i]->eval(env);
         }
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
@@ -2175,26 +2175,26 @@ void c_ErrorException::dynConstructFromEval(Eval::VariableEnvironment &env, cons
   Variant a3;
   Variant a4;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  unsigned int i = 0;
   do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a2 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a3 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a4 = (*it)->eval(env);
-    it++;
+    if (i == params.size()) break;
+    a0 = params[i]->eval(env);
+    i++;
+    if (i == params.size()) break;
+    a1 = params[i]->eval(env);
+    i++;
+    if (i == params.size()) break;
+    a2 = params[i]->eval(env);
+    i++;
+    if (i == params.size()) break;
+    a3 = params[i]->eval(env);
+    i++;
+    if (i == params.size()) break;
+    a4 = params[i]->eval(env);
+    i++;
   } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
+  for (; i != params.size(); ++i) {
+    params[i]->eval(env);
   }
   int count __attribute__((__unused__)) = params.size();
   if (count > 5) throw_toomany_arguments("ErrorException::__construct", 5, 1);

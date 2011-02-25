@@ -29,12 +29,12 @@ static std::set<ThreadInfo*> s_thread_infos;
 IMPLEMENT_THREAD_LOCAL(ThreadInfo, ThreadInfo::s_threadInfo);
 
 ThreadInfo::ThreadInfo() : m_executing(Idling) {
-  map<int, ObjectAllocatorWrapper *> &wrappers =
+  map<int, ObjectAllocatorBaseGetter> &wrappers =
     ObjectAllocatorCollector::getWrappers();
   m_allocators.resize(wrappers.rbegin()->first + 1);
-  for (map<int, ObjectAllocatorWrapper *>::iterator it = wrappers.begin();
+  for (map<int, ObjectAllocatorBaseGetter>::iterator it = wrappers.begin();
        it != wrappers.end(); it++) {
-    m_allocators[it->first] = it->second->get();
+    m_allocators[it->first] = it->second();
   }
 
   m_mm = MemoryManager::TheMemoryManager().get();

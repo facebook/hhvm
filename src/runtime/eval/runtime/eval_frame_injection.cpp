@@ -30,21 +30,23 @@ Array EvalFrameInjection::getArgs() {
 }
 
 EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
-(CStrRef name, bool sp) : m_set(false) {
+(CStrRef name, bool sp) : m_set(false), m_prev(NULL) {
   if (!sp) {
-    FrameInjection::SetStaticClassName(ThreadInfo::s_threadInfo.get(), name);
+    m_prev =
+      FrameInjection::SetStaticClassName(ThreadInfo::s_threadInfo.get(), name);
     m_set = true;
   }
 }
 
 EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
-(CObjRef obj) : m_set(false) {
+(CObjRef obj) : m_set(false), m_prev(NULL) {
   FrameInjection::SetCallingObject(ThreadInfo::s_threadInfo.get(), obj.get());
 }
 
 EvalFrameInjection::EvalStaticClassNameHelper::~EvalStaticClassNameHelper() {
   if (m_set) {
-    FrameInjection::ResetStaticClassName(ThreadInfo::s_threadInfo.get());
+    FrameInjection::SetStaticClassName(ThreadInfo::s_threadInfo.get(),
+                                       *m_prev);
   }
 }
 

@@ -106,7 +106,7 @@ bool Socket::waitForData() {
       return valopt == 0;
     } else {
       m_timedOut = true;
-      break;
+      return true;
     }
   }
   return false;

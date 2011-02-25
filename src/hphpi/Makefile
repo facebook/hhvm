@@ -2,9 +2,6 @@
 PROJECT_ROOT = ../..
 include $(PROJECT_ROOT)/src/dirs.mk
 
-HPHP = $(if $(OUT_TOP),$(LIB_DIR),$(PROJECT_ROOT)/src/hphp)/hphp
-HPHPI = $(OUT_TOP)hphpi
-
 PHP_FILES = hphpi.php
 
 all: $(HPHPI)
@@ -23,4 +20,3 @@ clobber:
 .PHONY: do-setup objects
 do-setup objects:
 	@true
-

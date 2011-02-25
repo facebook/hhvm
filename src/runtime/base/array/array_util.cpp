@@ -29,11 +29,11 @@ namespace HPHP {
 // compositions
 
 Variant ArrayUtil::CreateArray(CArrRef keys, CVarRef value) {
-  Array ret = Array::Create();
+  ArrayInit ai(keys.size());
   for (ArrayIter iter(keys); iter; ++iter) {
-    ret.set(iter.secondRef(), value);
+    ai.set(iter.secondRef(), value);
   }
-  return ret;
+  return ai.create();
 }
 
 Variant ArrayUtil::CreateArray(int start_index, int num, CVarRef value) {

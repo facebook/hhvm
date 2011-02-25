@@ -20,6 +20,7 @@
 #include "hash.inc"
 #include "iconv.inc"
 #include "icu.inc"
+#include "icu_ucsdet.inc"
 #include "icu_uspoof.inc"
 #include "image.inc"
 #include "imagesprite.inc"

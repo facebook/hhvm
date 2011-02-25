@@ -52,5 +52,9 @@ FatalErrorException::FatalErrorException(const std::string &msg,
   m_bt = backtrace;
 }
 
+void throw_null_pointer_exception() {
+  throw NullPointerException();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

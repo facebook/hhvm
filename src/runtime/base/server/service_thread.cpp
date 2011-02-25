@@ -33,9 +33,9 @@ ServiceThread *ServiceThread::GetThisThread() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ServiceThread::ServiceThread(const std::string &url) :
+ServiceThread::ServiceThread(const std::string &url, bool loop /*= false*/) :
   AsyncFunc<ServiceThread>(this, &ServiceThread::threadRun),
-  m_started(false), m_stopped(false), m_url(url) {
+  m_loop(loop), m_started(loop), m_stopped(false), m_url(url) {
 }
 
 void ServiceThread::threadRun() {
@@ -47,11 +47,14 @@ void ServiceThread::threadRun() {
   hdf["url"] = m_url;
   hdf["remote_host"] = RuntimeOption::ServerIP;
 
-  ReplayTransport rt;
-  rt.replayInput(hdf);
   HttpRequestHandler handler;
   handler.disablePathTranslation();
-  handler.handleRequest(&rt);
+
+  do {
+    ReplayTransport rt;
+    rt.replayInput(hdf);
+    handler.handleRequest(&rt);
+  } while (m_loop && !m_stopped);
 
   Logger::Info("Service thread %s stopped", m_url.c_str());
 }

@@ -22,7 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString s_sys_ss344c5db6("hasAttributes");
 StaticString s_sys_ss37217e60("hasConstant");
 StaticString s_sys_ss372c9151("ksort");
 StaticString s_sys_ss37eff1c8("getInnerIterator");
@@ -54,6 +53,7 @@ StaticString s_sys_ss44fe7272("Interface ");
 StaticString s_sys_ss45739f33("getCTime");
 StaticString s_sys_ss45e71386("getCommand");
 StaticString s_sys_ss45f15bcd("fetchobject");
+StaticString s_sys_ss46bad435("setDeclaredEncoding");
 StaticString s_sys_ss46e7e29a("fetchcolumn");
 StaticString s_sys_ss46e9d423("schemaValidate");
 StaticString s_sys_ss46eeef5c("handle");
@@ -85,6 +85,7 @@ StaticString s_sys_ss4efec04e("getResultCode");
 StaticString s_sys_ss4f2f48c7("getMessage");
 StaticString s_sys_ss4fa2c4dd("helpTitle");
 StaticString s_sys_ss500f232f("lasterrormsg");
+StaticString s_sys_ss504bc94d("isInternal");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

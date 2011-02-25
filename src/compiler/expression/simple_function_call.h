@@ -112,6 +112,7 @@ private:
   int checkObjCall(AnalysisResultPtr ar);
   std::string getThisString(bool withArrow);
   std::string m_localThis;
+  void *m_extra; // e.g., raw pointer to the symbol defined
 };
 
 SimpleFunctionCallPtr NewSimpleFunctionCall(

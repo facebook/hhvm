@@ -89,6 +89,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   // reset global symbols to nulls or empty arrays
   pm_php$globals$symbols_php();
 
+  Variant &server = g->GV(_SERVER);
+  server.set("REQUEST_START_TIME", time(NULL));
+
   // $_ENV
   process_env_variables(g->GV(_ENV));
   g->GV(_ENV).set("HPHP", 1);
@@ -171,7 +174,6 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   }
 
   // $_SERVER
-  Variant &server = g->GV(_SERVER);
 
   // HTTP_ headers -- we don't exclude headers we handle elsewhere (e.g.,
   // Content-Type, Authorization), since the CGI "spec" merely says the server

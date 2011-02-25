@@ -95,7 +95,7 @@ SimpleFunctionCall::SimpleFunctionCall
                  ExpressionPtr(), name, params, cls),
     m_type(UnknownType), m_dynamicConstant(false),
     m_builtinFunction(false), m_noPrefix(false), m_dynamicInvoke(false),
-    m_safe(0) {
+    m_safe(0), m_extra(NULL) {
 
   if (!m_class && m_className.empty()) {
     m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
@@ -308,8 +308,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
     // check for dynamic constant and volatile function/class
     if (!m_class && m_className.empty() &&
-      (m_type == DefineFunction ||
-       m_type == DefinedFunction ||
+      (m_type == DefinedFunction ||
        m_type == FunctionExistsFunction ||
        m_type == ClassExistsFunction ||
        m_type == InterfaceExistsFunction) &&
@@ -321,7 +320,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         if (name && name->isLiteralString()) {
           string symbol = name->getLiteralString();
           switch (m_type) {
-          case DefineFunction:
           case DefinedFunction: {
             ConstantTablePtr constants = ar->getConstants();
             if (!constants->isPresent(symbol)) {
@@ -330,8 +328,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
               if (block) { // found the constant
                 constants = block->getConstants();
                 // set to be dynamic
-                if (m_type == DefinedFunction ||
-                    (!isFileLevel() && !isTopLevel())) {
+                if (m_type == DefinedFunction) {
                   constants->setDynamic(ar, symbol);
                 }
               }
@@ -461,7 +458,10 @@ bool SimpleFunctionCall::isDefineWithoutImpl(AnalysisResultConstPtr ar) {
     if (!name) return false;
     string varName = name->getIdentifier();
     if (varName.empty()) return false;
-    if (ar->getConstants()->isSystem(varName)) return true;
+    if (ar->isSystemConstant(varName)) {
+      assert(!m_extra);
+      return true;
+    }
     ExpressionPtr value = (*m_params)[1];
     return (!ar->isConstantRedeclared(varName)) && value->isScalar();
   } else {
@@ -707,8 +707,13 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
           constants = block->getConstants();
           const Symbol *sym = constants->getSymbol(symbol);
           assert(sym);
+          m_extra = (void *)sym;
           Lock lock(BlockScope::s_constMutex);
           if (!sym->isDynamic() && sym->getValue() != (*m_params)[1]) {
+            if (sym->getDeclaration() != shared_from_this()) {
+              // redeclared
+              const_cast<Symbol*>(sym)->setDynamic();
+            }
             const_cast<Symbol*>(sym)->setValue((*m_params)[1]);
             getScope()->addUpdates(BlockScope::UseKindConstRef);
           }
@@ -812,7 +817,12 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
 ExpressionPtr SimpleFunctionCall::postOptimize(AnalysisResultConstPtr ar) {
   if (!Option::KeepStatementsWithNoEffect && isDefineWithoutImpl(ar)) {
     Construct::recomputeEffects();
-    return CONSTANT("true");
+    if (m_extra) {
+      Symbol *sym = (Symbol *)m_extra;
+      Lock lock(BlockScope::s_constMutex);
+      sym->setReplaced();
+    }
+    return m_extra ? CONSTANT("true") : CONSTANT("false");
   }
   if (m_type == StaticCompactFunction) {
     for (int i = 0; i < m_params->getCount(); i += 2) {
@@ -893,10 +903,12 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
           ExpressionPtr value = (*m_params)[1];
           TypePtr varType = value->inferAndCheck(ar, Type::Some, false);
           BlockScopePtr block = ar->findConstantDeclarer(varName);
+          bool newlyDeclared = false;
           if (!block) {
             getFileScope()->declareConstant(ar, varName);
             block = ar->findConstantDeclarer(varName);
             ASSERT(block);
+            newlyDeclared = true;
           }
           ConstantTablePtr constants = block->getConstants();
           if (constants != ar->getConstants()) {
@@ -909,10 +921,19 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
               getScope()->getVariables()->
                 setAttribute(VariableTable::NeedGlobalPointer);
             } else {
-              constants->setType(ar, varName, varType, true);
+              if (newlyDeclared) {
+                constants->add(varName, varType, value, ar, self);
+                const Symbol *sym = constants->getSymbol(varName);
+                assert(sym);
+                m_extra = (void *)sym;
+              } else {
+                constants->setType(ar, varName, varType, true);
+              }
             }
             // in case the old 'value' has been optimized
             constants->setValue(ar, varName, value);
+          } else {
+            assert(!newlyDeclared);
           }
           m_valid = true;
           return checkTypesImpl(ar, type, Type::Boolean, coerce);
@@ -989,8 +1010,8 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
     if (m_params) {
       if (func) {
-        FunctionScope::RefParamInfoPtr info =
-          FunctionScope::GetRefParamInfo(m_name);
+        FunctionScope::FunctionInfoPtr info =
+          FunctionScope::GetFunctionInfo(m_name);
         assert(info);
         for (int i = m_params->getCount(); i--; ) {
           if (info->isRefParam(i)) {
@@ -1695,7 +1716,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
           cg_printf(")");
         } else {
           bool needAssignment = true;
-          bool isSystem = ar->getConstants()->isSystem(varName);
+          bool isSystem = ar->isSystemConstant(varName);
           if (isSystem ||
               ((!ar->isConstantRedeclared(varName)) && value->isScalar())) {
             needAssignment = false;

@@ -578,7 +578,6 @@ inline static bool decode_entity(char *entity, int *len,
                                  bool xhp = false) {
   // entity is 16 bytes, allocated statically below
   // default in PHP
-  int quote_style = ENT_COMPAT;
   ASSERT(entity && *entity);
   if (entity[0] == '#') {
     int code;
@@ -607,9 +606,6 @@ inline static bool decode_entity(char *entity, int *len,
         if ((code >= 0x80 && code < 0xa0) || code > 0xff) {
           return false;
         } else {
-          if (code == 39 || !quote_style) {
-            return false;
-          }
           entity[0] = code;
           entity[1] = '\0';
         }

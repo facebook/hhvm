@@ -30,6 +30,7 @@
 // #define IM_MEMORY_CHECK
 
 namespace HPHP {
+IMPLEMENT_DEFAULT_EXTENSION(exif);
 IMPLEMENT_DEFAULT_EXTENSION(gd);
 ///////////////////////////////////////////////////////////////////////////////
 

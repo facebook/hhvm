@@ -38,6 +38,9 @@ using namespace std;
 #endif
 
 namespace HPHP {
+IMPLEMENT_DEFAULT_EXTENSION(sysvmsg);
+IMPLEMENT_DEFAULT_EXTENSION(sysvsem);
+IMPLEMENT_DEFAULT_EXTENSION(sysvshm);
 ///////////////////////////////////////////////////////////////////////////////
 
 int64 f_ftok(CStrRef pathname, CStrRef proj) {

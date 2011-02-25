@@ -203,6 +203,7 @@ public:
   void onTypeDecl(Token &out, Token &type, Token &decl);
   void onTypedVariable(Token &out, Token *exprs, Token &var, Token *value);
 
+  FileScopePtr getFileScope() { return m_file; }
 private:
   AnalysisResultPtr m_ar;
   FileScopePtr m_file;

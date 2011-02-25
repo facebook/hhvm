@@ -16,6 +16,8 @@
 
 #include <compiler/expression/array_pair_expression.h>
 #include <compiler/expression/scalar_expression.h>
+#include <compiler/expression/unary_op_expression.h>
+#include <util/parser/hphp.tab.hpp>
 
 using namespace HPHP;
 using namespace boost;
@@ -43,14 +45,21 @@ ExpressionPtr ArrayPairExpression::clone() {
 }
 
 bool ArrayPairExpression::isScalar() const {
-  return (!m_name || m_name->isScalar()) && m_value->isScalar();
+  return isScalarArrayPair();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // parser functions
 
 bool ArrayPairExpression::isScalarArrayPair() const {
-  return (!m_name || m_name->isScalar()) && m_value->isScalar();
+  if (!m_value->isScalar()) return false;
+  if (!m_name) return true;
+  if (!m_name->isScalar()) return false;
+  if (m_name->is(KindOfUnaryOpExpression) &&
+      static_pointer_cast<UnaryOpExpression>(m_name)->getOp() == T_ARRAY) {
+    return false;
+  }
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

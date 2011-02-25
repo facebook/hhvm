@@ -40,6 +40,7 @@ public:
 
   virtual bool containsDynamicConstant(AnalysisResultPtr ar) const;
 
+  const std::string &getConName() const { return m_varName; }
 private:
   std::string m_varName;
   BlockScope *m_defScope;

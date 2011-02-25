@@ -75,6 +75,7 @@ public:
     return FunctionScopeRawPtr((FunctionScope*)b.get());
   }
 
+  const std::string &getDocComment() const { return m_docComment; }
 protected:
   bool m_method;
   ModifierExpressionPtr m_modifiers;

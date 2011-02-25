@@ -40,6 +40,26 @@ ArrayElementExpression::ArrayElementExpression
     m_variable(variable), m_offset(offset), m_global(false),
     m_dynamicGlobal(false), m_localEffects(AccessorEffect) {
   m_variable->setContext(Expression::AccessContext);
+
+  if (m_variable->is(Expression::KindOfSimpleVariable)) {
+    SimpleVariablePtr var =
+      dynamic_pointer_cast<SimpleVariable>(m_variable);
+    if (var->getName() == "GLOBALS") {
+      m_global = true;
+      m_dynamicGlobal = true;
+      if (m_offset && m_offset->is(Expression::KindOfScalarExpression)) {
+        ScalarExpressionPtr offset =
+          dynamic_pointer_cast<ScalarExpression>(m_offset);
+
+        if (offset->isLiteralString()) {
+          m_globalName = offset->getIdentifier();
+          if (!m_globalName.empty()) {
+            m_dynamicGlobal = false;
+          }
+        }
+      }
+    }
+  }
 }
 
 ExpressionPtr ArrayElementExpression::clone() {
@@ -125,6 +145,8 @@ bool ArrayElementExpression::appendClass(ExpressionPtr cls) {
       (new StaticMemberExpression(
         m_variable->getScope(), m_variable->getLocation(),
         Expression::KindOfStaticMemberExpression, cls, m_variable));
+    m_global = m_dynamicGlobal = false;
+    m_globalName.clear();
     return true;
   }
   return false;

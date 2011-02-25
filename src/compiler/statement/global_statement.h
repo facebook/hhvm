@@ -34,6 +34,7 @@ public:
 
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
 
+  ExpressionListPtr getVars() const { return m_exp; }
 private:
   ExpressionListPtr m_exp;
 };

@@ -38,6 +38,7 @@ public:
     return 1 + (m_stmt ? m_stmt->getRecursiveCount() : 0);
   }
 
+  bool isStrong() const { return m_ref; }
 private:
   ExpressionPtr m_array;
   ExpressionPtr m_name;

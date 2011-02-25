@@ -39,7 +39,9 @@ public:
 
   void resolveStatic(const std::string &name);
 
-  const std::string &getName() { return m_className; }
+  const std::string &getOriginalClassName() const { return m_origClassName; }
+  const std::string &getClassName() const { return m_className; }
+  ExpressionPtr getClass() const { return m_class; }
 
   ClassScopePtr resolveClass();
   bool checkPresent();

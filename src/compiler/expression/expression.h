@@ -76,6 +76,7 @@ public:
   };
 
   enum Context {
+    NoContext    = 0,
     RValue       = 0,
     LValue       = 1,            // assignment exp; foreach stmt
     Declaration  = LValue | 2,   // global or static stmt

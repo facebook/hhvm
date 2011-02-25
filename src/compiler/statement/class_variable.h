@@ -38,6 +38,8 @@ public:
   // implementing IParseHandler
   virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope);
 
+  ExpressionListPtr getVarList() const { return m_declaration; }
+  ModifierExpressionPtr getModifiers() const { return m_modifiers; }
 private:
   ModifierExpressionPtr m_modifiers;
   ExpressionListPtr m_declaration;

@@ -69,6 +69,10 @@ UnaryOpExpression::UnaryOpExpression
   case T_CLONE:
     m_localEffects = UnknownEffect;
     break;
+  case T_ISSET:
+  case T_EMPTY:
+    setExistContext();
+    break;
   case T_UNSET:
     m_localEffects = AssignEffect;
     m_exp->setContext(UnsetContext);
@@ -170,11 +174,7 @@ int UnaryOpExpression::getLocalEffects() const {
 }
 
 void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
-    if (m_op == T_ISSET || m_op == T_EMPTY) {
-      setExistContext();
-    }
-  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal && m_op == '@') {
+  if (ar->getPhase() == AnalysisResult::AnalyzeFinal && m_op == '@') {
     StatementPtr stmt = ar->getStatementForSilencer();
     ASSERT(stmt);
     m_silencer = stmt->requireSilencers(1);

@@ -543,3 +543,42 @@ Variant ScalarExpression::getVariant() {
   }
   return null;
 }
+
+bool ScalarExpression::getString(const std::string *&s) const {
+  switch (m_type) {
+    case T_ENCAPSED_AND_WHITESPACE:
+    case T_CONSTANT_ENCAPSED_STRING:
+    case T_STRING:
+    case T_NUM_STRING:
+      s = &m_value;
+      return true;
+    case T_CLASS_C:
+    case T_NS_C:
+    case T_METHOD_C:
+    case T_FUNC_C:
+      s = &m_translated;
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool ScalarExpression::getInt(int64 &i) const {
+  if (m_type == T_LNUMBER) {
+    i = strtoll(m_value.c_str(), NULL, 0);
+    return true;
+  } else if (m_type == T_LINE) {
+    i = getLocation() ? getLocation()->line1 : 0;
+    return true;
+  }
+
+  return false;
+}
+
+bool ScalarExpression::getDouble(double &d) const {
+  if (m_type == T_DNUMBER) {
+    d = String(m_value).toDouble();
+    return true;
+  }
+  return false;
+}

@@ -58,7 +58,7 @@ public:
 
   static int getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
                            bool &hasVoid);
-
+  bool isAssignmentOp() const { return m_assign; }
 private:
   ExpressionPtr simplifyLogical(AnalysisResultConstPtr ar);
   ExpressionPtr simplifyArithmetic(AnalysisResultConstPtr ar);

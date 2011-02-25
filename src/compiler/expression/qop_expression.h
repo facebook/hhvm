@@ -39,6 +39,9 @@ public:
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                     int state);
   bool outputCPPUnneeded(CodeGenerator &cg, AnalysisResultPtr ar);
+  ExpressionPtr getCondition() const { return m_condition; }
+  ExpressionPtr getYes() const { return m_expYes; }
+  ExpressionPtr getNo() const { return m_expNo; }
 private:
   ExpressionPtr m_condition;
   ExpressionPtr m_expYes;

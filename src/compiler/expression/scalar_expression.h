@@ -69,6 +69,9 @@ public:
 
   std::string getCPPLiteralString(CodeGenerator &cg, bool *binary = NULL);
 
+  bool getString(const std::string *&s) const;
+  bool getInt(int64 &i) const;
+  bool getDouble(double &d) const;
 private:
   int m_type;
   std::string m_serializedValue;

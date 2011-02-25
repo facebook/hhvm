@@ -187,6 +187,7 @@ std::string Option::JavaFFIRootPackage;
 std::string Option::ProgramName;
 std::string Option::PreprocessedPartitionConfig;
 
+bool Option::ParseTimeOpts = true;
 bool Option::EnableHipHopSyntax = false;
 bool Option::EnableHipHopExperimentalSyntax = false;
 bool Option::EnableShortTags = true;

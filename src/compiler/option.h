@@ -162,6 +162,11 @@ public:
   static bool GenHashTableDynClass;
 
   /**
+   * Generate hash-table lookup based get_constant
+   */
+  static bool GenHashTableGetConstant;
+
+  /**
    * Separate compilation
    */
   static bool SeparateCompilation;

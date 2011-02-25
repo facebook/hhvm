@@ -1075,7 +1075,9 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
     cg_printf("\n");
     cg_indentBegin("void init_static_variables() {\n");
     cg_printf("ScalarArrays::initialize();\n");
-    cg_printf("StaticString::FinishInit();\n");
+    if (Option::GenHashTableGetConstant) {
+      cg_printf("init_constant_table();\n");
+    }
     cg_indentEnd("}\n");
     cg_printf("static ThreadLocalSingleton<GlobalVariables> g_variables;\n");
 

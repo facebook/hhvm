@@ -121,7 +121,12 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
         m_sym->getDeclaration().get() == this &&
         !variables->getAttribute(VariableTable::ContainsLDynamicVariable) &&
         !getScope()->is(BlockScope::ClassScope)) {
-      Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
+      if (getScope()->inPseudoMain()) {
+        Compiler::Error(Compiler::UseUndeclaredGlobalVariable,
+                        shared_from_this());
+      } else {
+        Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
+      }
     }
   }
 }

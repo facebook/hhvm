@@ -81,7 +81,6 @@ bool TestCodeError::TestUseEvaluation() {
 }
 
 bool TestCodeError::TestUseUndeclaredVariable() {
-  VE(UseUndeclaredVariable, "<?php print $a;");
   VE(UseUndeclaredVariable, "<?php $a = 1; function t() { print $a;}");
 /*
   Removing for now. We dont warn about non-static properties.
@@ -96,6 +95,7 @@ bool TestCodeError::TestUseUndeclaredVariable() {
 }
 
 bool TestCodeError::TestUseUndeclaredGlobalVariable() {
+  VE(UseUndeclaredGlobalVariable, "<?php print $a;");
   VE(UseUndeclaredGlobalVariable, "<?php print $GLOBALS['a'];");
   return true;
 }

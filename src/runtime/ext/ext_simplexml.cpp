@@ -17,6 +17,7 @@
 
 #include <runtime/ext/ext_simplexml.h>
 #include <runtime/ext/ext_file.h>
+#include <runtime/base/builtin_functions.h>
 #include <runtime/base/class_info.h>
 #include <runtime/base/util/request_local.h>
 
@@ -34,17 +35,24 @@ public:
   // overriding ResourceData
   virtual CStrRef o_getClassName() const { return s_class_name; }
 
-  XmlDocWrapper(xmlDocPtr doc) : m_doc(doc) {
+  const char *getXmlClassName() const { return m_xml_class_name; }
+
+  XmlDocWrapper(xmlDocPtr doc, const char *xml_class_name)
+                : m_doc(doc), m_xml_class_name(strdup(xml_class_name)) {
   }
 
   ~XmlDocWrapper() {
     if (m_doc) {
       xmlFreeDoc(m_doc);
     }
+    if (m_xml_class_name) {
+      free((void *)m_xml_class_name);
+    }
   }
 
 private:
-  xmlDocPtr m_doc;
+  xmlDocPtr     m_doc;
+  const char    *m_xml_class_name;
 };
 IMPLEMENT_OBJECT_ALLOCATION(XmlDocWrapper)
 
@@ -108,32 +116,40 @@ static void add_property(Array &properties, xmlNodePtr node, Object value) {
   }
 }
 
-static c_SimpleXMLElement *create_text(CObjRef doc, xmlNodePtr node,
+static Object create_text(CObjRef doc, xmlNodePtr node,
                                        CStrRef value, CStrRef ns,
                                        bool is_prefix, bool free_text) {
-  c_SimpleXMLElement *elem = NEW(c_SimpleXMLElement)();
+
+  XmlDocWrapper *wrapper = doc.getTyped<XmlDocWrapper>();
+  Object obj = create_object(wrapper->getXmlClassName(), Array(), false);
+  c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
+
   elem->m_doc = doc;
   elem->m_node = node->parent; // assign to parent, not node
   elem->m_children.set(0, value);
   elem->m_is_text = true;
   elem->m_free_text = free_text;
   elem->m_attributes = collect_attributes(node->parent, ns, is_prefix);
-  return elem;
+  return obj;
 }
 
 static Array create_children(CObjRef doc, xmlNodePtr root,
                              CStrRef ns, bool is_prefix);
 
-static c_SimpleXMLElement *create_element(CObjRef doc, xmlNodePtr node,
-                                          CStrRef ns, bool is_prefix) {
-  c_SimpleXMLElement *elem = NEW(c_SimpleXMLElement)();
+static Object create_element(CObjRef doc, xmlNodePtr node,
+                             CStrRef ns, bool is_prefix) {
+
+  XmlDocWrapper *wrapper = doc.getTyped<XmlDocWrapper>();
+  Object obj = create_object(wrapper->getXmlClassName(), Array(), false);
+  c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
+
   elem->m_doc = doc;
   elem->m_node = node;
   if (node) {
     elem->m_children = create_children(doc, node, ns, is_prefix);
     elem->m_attributes = collect_attributes(node, ns, is_prefix);
   }
-  return elem;
+  return obj;
 }
 
 static Array create_children(CObjRef doc, xmlNodePtr root,
@@ -251,9 +267,9 @@ Variant f_simplexml_load_string(CStrRef data,
   if (!doc) {
     return false;
   }
-  c_SimpleXMLElement *ret = create_element(Object(NEW(XmlDocWrapper)(doc)),
-                                           root, ns, is_prefix);
-  return Object(ret);
+
+  return create_element(Object(NEW(XmlDocWrapper)(doc, class_name)), root, ns,
+                        is_prefix);
 }
 
 Variant f_simplexml_load_file(CStrRef filename,
@@ -298,7 +314,7 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64 options /* = 0 */,
 
   xmlDocPtr doc = xmlReadMemory(xml.data(), xml.size(), NULL, NULL, options);
   if (doc) {
-    m_doc = Object(NEW(XmlDocWrapper)(doc));
+    m_doc = Object(NEW(XmlDocWrapper)(doc, "SimpleXMLElement"));
     m_node = xmlDocGetRootElement(doc);
     if (m_node) {
       m_children = create_children(m_doc, m_node, ns, is_prefix);
@@ -465,7 +481,10 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
     return Object();
   }
 
-  c_SimpleXMLElement *elem = NEW(c_SimpleXMLElement)();
+  XmlDocWrapper *wrapper = m_doc.getTyped<XmlDocWrapper>();
+  Object obj = create_object(wrapper->getXmlClassName(), Array(), false);
+  c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
+
   elem->m_doc = m_doc;
   elem->m_node = m_node;
   elem->m_is_text = m_is_text;
@@ -502,7 +521,7 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
     }
     elem->m_children = props;
   }
-  return elem;
+  return obj;
 }
 
 String c_SimpleXMLElement::t_getname() {
@@ -527,7 +546,10 @@ Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
     return Object();
   }
 
-  c_SimpleXMLElement *elem = NEW(c_SimpleXMLElement)();
+  XmlDocWrapper *wrapper = m_doc.getTyped<XmlDocWrapper>();
+  Object obj = create_object(wrapper->getXmlClassName(), Array(), false);
+  c_SimpleXMLElement *elem = obj.getTyped<c_SimpleXMLElement>();
+
   elem->m_doc = m_doc;
   elem->m_node = m_node;
   elem->m_is_attribute = true;
@@ -539,7 +561,7 @@ Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
     }
     elem->m_children.set("@attributes", elem->m_attributes);
   }
-  return elem;
+  return obj;
 }
 
 Variant c_SimpleXMLElement::t_addchild(CStrRef qname,
@@ -687,17 +709,21 @@ Variant c_SimpleXMLElement::t___get(Variant name) {
   }
   if (ret.isObject()) {
     c_SimpleXMLElement *elem = ret.toObject().getTyped<c_SimpleXMLElement>();
-    c_SimpleXMLElement *e = NEW(c_SimpleXMLElement)();
+
+    XmlDocWrapper *wrapper = elem->m_doc.getTyped<XmlDocWrapper>();
+    Object obj = create_object(wrapper->getXmlClassName(), Array(), false);
+  	c_SimpleXMLElement *e = obj.getTyped<c_SimpleXMLElement>();
+
     e->m_doc = elem->m_doc;
     e->m_node = elem->m_node;
     e->m_children = ref(elem->m_children);
     e->m_attributes = ref(elem->m_attributes);
     e->m_is_text = elem->m_is_text;
     e->m_is_property = true;
-    return e;
+    return obj;
   }
   if (ret.isNull()) {
-    return NEW(c_SimpleXMLElement)();
+    return create_object(o_getClassName(), Array(), false);
   }
   return ret;
 }
@@ -998,8 +1024,9 @@ void c_SimpleXMLElementIterator::reset_iterator(c_SimpleXMLElement *parent) {
   // same name of mine.
   if (m_parent->m_is_property) {
     String name = m_parent->t_getname();
-    m_parent = create_element(m_parent->m_doc, m_parent->m_node->parent,
-                              "", false);
+    Object obj = create_element(m_parent->m_doc, m_parent->m_node->parent,
+        "", false);
+    m_parent = obj.getTyped<c_SimpleXMLElement>();
     Variant children = m_parent->m_children[name];
     m_parent->m_children = CREATE_MAP1(name, children);
 

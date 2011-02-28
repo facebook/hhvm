@@ -507,7 +507,7 @@ int string_find(const char *input, int len, char ch, int pos,
       return -1;
     }
 
-    void *ptr = memchr(input + pos, ch, len - pos);
+    const void *ptr = memchr(input + pos, ch, len - pos);
     if (ptr != NULL) {
       return (int)((const char *)ptr - input);
     }

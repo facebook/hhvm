@@ -41,6 +41,7 @@ public:
   virtual bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
       int state);
 
+  ExpressionPtr getObject() const { return m_object; }
 private:
   ExpressionPtr m_object;
   int m_objTemp;

@@ -200,13 +200,6 @@ char *string_replace(const char *input, int &len,
                      int &count, bool case_sensitive);
 
 /**
- * Find the longest span of substrings that have or not have specified
- * characters. Please read PHP's documentation for more details.
- */
-int string_span(const char *s1, int s1_len, const char *s2, int s2_len);
-int string_cspan(const char *s1, int s1_len, const char *s2, int s2_len);
-
-/**
  * Reverse, repeat or shuffle a string.
  */
 char *string_reverse(const char *s, int len);
@@ -305,6 +298,16 @@ char *string_convert_hebrew_string(const char *str, int &str_len,
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
+
+/**
+ * Calculates and adjusts "start" and "length" according to string's length.
+ * This function determines how those two parameters are interpreted in varies
+ * substr-related functions.
+ *
+ * The parameter strict controls whether to disallow the empty sub-string
+ * after the end.
+ */
+bool string_substr_check(int len, int &f, int &l, bool strict = true);
 
 /**
  * Fills a 256-byte bytemask with input. You can specify a range like 'a..z',

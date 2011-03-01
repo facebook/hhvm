@@ -33,6 +33,7 @@ public:
   DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
   StatementPtr preOptimize(AnalysisResultConstPtr ar);
 
+  ExpressionListPtr getVars() const { return m_exp; }
 private:
   ExpressionListPtr m_exp;
 };

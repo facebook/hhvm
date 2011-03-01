@@ -33,6 +33,7 @@ public:
   StatementPtr preOptimize(AnalysisResultConstPtr ar);
   StatementPtr postOptimize(AnalysisResultConstPtr ar);
 
+  ExpressionListPtr getExps() const { return m_exp; }
 private:
   ExpressionListPtr m_exp;
 };

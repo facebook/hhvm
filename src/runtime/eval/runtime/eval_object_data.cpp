@@ -312,10 +312,11 @@ Variant EvalObjectData::t___unset(Variant v_name) {
 }
 
 bool EvalObjectData::hasCall() {
-  return getMethodStatement("__call");
+  return getMethodStatement("__call") || DynamicObjectData::hasCall();
 }
 bool EvalObjectData::hasCallStatic() {
-  return getMethodStatement("__callStatic");
+  return getMethodStatement("__callStatic") ||
+         DynamicObjectData::hasCallStatic();
 }
 bool EvalObjectData::php_sleep(Variant &ret) {
   ret = t___sleep();

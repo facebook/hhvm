@@ -28,6 +28,7 @@
 #include <util/text_art.h>
 #include <util/logger.h>
 #include <util/process.h>
+#include <boost/format.hpp>
 
 #define USE_VARARGS
 #define PREFER_STDARG
@@ -345,6 +346,7 @@ String DebuggerClient::FormatTitle(const char *title) {
 
 DebuggerClient::DebuggerClient()
     : m_tutorial(0),
+      m_printFunction(""),
       m_mainThread(this, &DebuggerClient::run), m_stopped(false),
       m_inputState(TakingCommand), m_runState(NotYet),
       m_signum(CmdSignal::SignalNone), m_sigTime(0),
@@ -1448,7 +1450,7 @@ bool DebuggerClient::processTakeCode() {
     return processEval();
   }
   if (first == '=') {
-    m_code = string("<?php $_") + m_line + "; var_export($_);";
+    m_code = string("<?php $_") + m_line + "; " + m_printFunction;
     return processEval();
   }
   if (first == '$') {
@@ -1761,6 +1763,12 @@ void DebuggerClient::loadConfig() {
   }
 
   m_tutorial = m_config["Tutorial"].getInt32(0);
+  std::string pprint = m_config["PrettyPrint"].getString("hphpd_print_value");
+
+  m_printFunction = (boost::format(
+    "(function_exists(\"%s\") ? %s($_) : print_r($_));")  % pprint % pprint)
+    .str();
+
   m_config["Tutorial"]["Visited"].get(m_tutorialVisited);
 
   for (Hdf node = m_config["Macros"].firstChild(); node.exists();

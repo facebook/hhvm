@@ -75,6 +75,10 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
     FunctionTypeMap["apc_fetch"]            = UnserializeFunction;
 
     FunctionTypeMap["get_defined_vars"]     = GetDefinedVarsFunction;
+
+    FunctionTypeMap["fb_call_user_func_safe"] = FBCallUserFuncSafeFunction;
+    FunctionTypeMap["fb_call_user_func_safe_return"] =
+      FBCallUserFuncSafeFunction;
   }
 }
 
@@ -97,7 +101,7 @@ SimpleFunctionCall::SimpleFunctionCall
     m_builtinFunction(false), m_noPrefix(false), m_dynamicInvoke(false),
     m_safe(0), m_extra(NULL) {
 
-  if (!m_class && m_className.empty()) {
+  if (Option::ParseTimeOpts && !m_class && m_className.empty()) {
     m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
       Option::DynamicInvokeFunctions.end();
     map<string, int>::const_iterator iter =
@@ -308,11 +312,12 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
 
     // check for dynamic constant and volatile function/class
     if (!m_class && m_className.empty() &&
-      (m_type == DefinedFunction ||
-       m_type == FunctionExistsFunction ||
-       m_type == ClassExistsFunction ||
-       m_type == InterfaceExistsFunction) &&
-      m_params && m_params->getCount() >= 1) {
+        (m_type == DefinedFunction ||
+         m_type == FunctionExistsFunction ||
+         m_type == FBCallUserFuncSafeFunction ||
+         m_type == ClassExistsFunction ||
+         m_type == InterfaceExistsFunction) &&
+        m_params && m_params->getCount() >= 1) {
       ExpressionPtr value = (*m_params)[0];
       if (value->isScalar()) {
         ScalarExpressionPtr name =
@@ -320,38 +325,39 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
         if (name && name->isLiteralString()) {
           string symbol = name->getLiteralString();
           switch (m_type) {
-          case DefinedFunction: {
-            ConstantTablePtr constants = ar->getConstants();
-            if (!constants->isPresent(symbol)) {
-              // user constant
-              BlockScopePtr block = ar->findConstantDeclarer(symbol);
-              if (block) { // found the constant
-                constants = block->getConstants();
-                // set to be dynamic
-                if (m_type == DefinedFunction) {
-                  constants->setDynamic(ar, symbol);
+            case DefinedFunction: {
+              ConstantTablePtr constants = ar->getConstants();
+              if (!constants->isPresent(symbol)) {
+                // user constant
+                BlockScopePtr block = ar->findConstantDeclarer(symbol);
+                if (block) { // found the constant
+                  constants = block->getConstants();
+                  // set to be dynamic
+                  if (m_type == DefinedFunction) {
+                    constants->setDynamic(ar, symbol);
+                  }
                 }
               }
+              break;
             }
-            break;
-          }
-          case FunctionExistsFunction: {
-            FunctionScopePtr func = ar->findFunction(Util::toLower(symbol));
-            if (func && func->isUserFunction()) {
-              func->setVolatile();
+            case FBCallUserFuncSafeFunction:
+            case FunctionExistsFunction: {
+              FunctionScopePtr func = ar->findFunction(Util::toLower(symbol));
+              if (func && func->isUserFunction()) {
+                func->setVolatile();
+              }
+              break;
             }
-            break;
-          }
-          case InterfaceExistsFunction:
-          case ClassExistsFunction: {
-            ClassScopePtr cls = ar->findClass(Util::toLower(symbol));
-            if (cls && cls->isUserClass()) {
-              cls->setVolatile();
+            case InterfaceExistsFunction:
+            case ClassExistsFunction: {
+              ClassScopePtr cls = ar->findClass(Util::toLower(symbol));
+              if (cls && cls->isUserClass()) {
+                cls->setVolatile();
+              }
+              break;
             }
-            break;
-          }
-          default:
-            ASSERT(false);
+            default:
+              ASSERT(false);
           }
         }
       }
@@ -682,131 +688,135 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultConstPtr ar) {
   if (!m_class && m_className.empty() &&
       (m_type == DefineFunction ||
        m_type == DefinedFunction ||
+       m_type == FBCallUserFuncSafeFunction ||
        m_type == FunctionExistsFunction ||
        m_type == ClassExistsFunction ||
        m_type == InterfaceExistsFunction) &&
       m_params &&
       (m_type == DefineFunction ?
-       unsigned(m_params->getCount() - 2) <= 1u : m_params->getCount() == 1)) {
+       unsigned(m_params->getCount() - 2) <= 1u :
+       m_type == FBCallUserFuncSafeFunction ? m_params->getCount() >= 1 :
+       m_params->getCount() == 1)) {
     ExpressionPtr value = (*m_params)[0];
     if (value->isScalar()) {
       ScalarExpressionPtr name = dynamic_pointer_cast<ScalarExpression>(value);
       if (name && name->isLiteralString()) {
         string symbol = name->getLiteralString();
         switch (m_type) {
-        case DefineFunction: {
-          ConstantTableConstPtr constants = ar->getConstants();
-          // system constant
-          if (constants->isPresent(symbol)) {
+          case DefineFunction: {
+            ConstantTableConstPtr constants = ar->getConstants();
+            // system constant
+            if (constants->isPresent(symbol)) {
+              break;
+            }
+            // user constant
+            BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
+            // not found (i.e., undefined)
+            if (!block) break;
+            constants = block->getConstants();
+            const Symbol *sym = constants->getSymbol(symbol);
+            assert(sym);
+            m_extra = (void *)sym;
+            Lock lock(BlockScope::s_constMutex);
+            if (!sym->isDynamic() && sym->getValue() != (*m_params)[1]) {
+              if (sym->getDeclaration() != shared_from_this()) {
+                // redeclared
+                const_cast<Symbol*>(sym)->setDynamic();
+              }
+              const_cast<Symbol*>(sym)->setValue((*m_params)[1]);
+              getScope()->addUpdates(BlockScope::UseKindConstRef);
+            }
             break;
           }
-          // user constant
-          BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
-          // not found (i.e., undefined)
-          if (!block) break;
-          constants = block->getConstants();
-          const Symbol *sym = constants->getSymbol(symbol);
-          assert(sym);
-          m_extra = (void *)sym;
-          Lock lock(BlockScope::s_constMutex);
-          if (!sym->isDynamic() && sym->getValue() != (*m_params)[1]) {
-            if (sym->getDeclaration() != shared_from_this()) {
-              // redeclared
-              const_cast<Symbol*>(sym)->setDynamic();
-            }
-            const_cast<Symbol*>(sym)->setValue((*m_params)[1]);
-            getScope()->addUpdates(BlockScope::UseKindConstRef);
-          }
-          break;
-        }
-        case DefinedFunction: {
-          if (symbol == "false" ||
-              symbol == "true" ||
-              symbol == "null") {
-            return CONSTANT("true");
-          }
-          ConstantTableConstPtr constants = ar->getConstants();
-          // system constant
-          if (constants->isPresent(symbol) && !constants->isDynamic(symbol)) {
-            return CONSTANT("true");
-          }
-          // user constant
-          BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
-          // not found (i.e., undefined)
-          if (!block) {
-            if (symbol.find("::") == std::string::npos) {
-              return CONSTANT("false");
-            } else {
-              // e.g., defined("self::ZERO")
-              return ExpressionPtr();
-            }
-          }
-          constants = block->getConstants();
-          // already set to be dynamic
-          if (constants->isDynamic(symbol)) return ExpressionPtr();
-          Lock lock(BlockScope::s_constMutex);
-          ConstructPtr decl = constants->getValue(symbol);
-          ExpressionPtr constValue = dynamic_pointer_cast<Expression>(decl);
-          if (constValue->isScalar()) {
-            return CONSTANT("true");
-          } else {
-            return ExpressionPtr();
-          }
-          break;
-        }
-        case FunctionExistsFunction: {
-          const std::string &lname = Util::toLower(symbol);
-          if (Option::DynamicInvokeFunctions.find(lname) ==
-              Option::DynamicInvokeFunctions.end()) {
-            FunctionScopePtr func = ar->findFunction(lname);
-            if (!func) {
-              return CONSTANT("false");
-            }
-            if (func->isUserFunction()) {
-              func->setVolatile();
-            }
-            if (!func->isVolatile()) {
+          case DefinedFunction: {
+            if (symbol == "false" ||
+                symbol == "true" ||
+                symbol == "null") {
               return CONSTANT("true");
             }
-          }
-          break;
-        }
-        case InterfaceExistsFunction: {
-          ClassScopePtrVec classes = ar->findClasses(Util::toLower(symbol));
-          bool interfaceFound = false;
-          for (ClassScopePtrVec::const_iterator it = classes.begin();
-               it != classes.end(); ++it) {
-            ClassScopePtr cls = *it;
-            if (cls->isUserClass()) cls->setVolatile();
-            if (cls->isInterface()) {
-              interfaceFound = true;
+            ConstantTableConstPtr constants = ar->getConstants();
+            // system constant
+            if (constants->isPresent(symbol) && !constants->isDynamic(symbol)) {
+              return CONSTANT("true");
             }
-          }
-          if (!interfaceFound) return CONSTANT("false");
-          if (classes.size() == 1 && !classes.back()->isVolatile()) {
-            return CONSTANT("true");
-          }
-          break;
-        }
-        case ClassExistsFunction: {
-          ClassScopePtrVec classes = ar->findClasses(Util::toLower(symbol));
-          bool classFound = false;
-          for (ClassScopePtrVec::const_iterator it = classes.begin();
-               it != classes.end(); ++it) {
-            ClassScopePtr cls = *it;
-            if (cls->isUserClass()) cls->setVolatile();
-            if (!cls->isInterface()) {
-              classFound = true;
+            // user constant
+            BlockScopeConstPtr block = ar->findConstantDeclarer(symbol);
+            // not found (i.e., undefined)
+            if (!block) {
+              if (symbol.find("::") == std::string::npos) {
+                return CONSTANT("false");
+              } else {
+                // e.g., defined("self::ZERO")
+                return ExpressionPtr();
+              }
             }
+            constants = block->getConstants();
+            // already set to be dynamic
+            if (constants->isDynamic(symbol)) return ExpressionPtr();
+            Lock lock(BlockScope::s_constMutex);
+            ConstructPtr decl = constants->getValue(symbol);
+            ExpressionPtr constValue = dynamic_pointer_cast<Expression>(decl);
+            if (constValue->isScalar()) {
+              return CONSTANT("true");
+            } else {
+              return ExpressionPtr();
+            }
+            break;
           }
-          if (!classFound) return CONSTANT("false");
-          if (classes.size() == 1 && !classes.back()->isVolatile()) {
-            return CONSTANT("true");
+          case FBCallUserFuncSafeFunction:
+          case FunctionExistsFunction: {
+            const std::string &lname = Util::toLower(symbol);
+            if (Option::DynamicInvokeFunctions.find(lname) ==
+                Option::DynamicInvokeFunctions.end()) {
+              FunctionScopePtr func = ar->findFunction(lname);
+              if (!func) {
+                return CONSTANT("false");
+              }
+              if (func->isUserFunction()) {
+                func->setVolatile();
+              }
+              if (!func->isVolatile()) {
+                return CONSTANT("true");
+              }
+            }
+            break;
           }
-          break;
-        }
-        default:
-          ASSERT(false);
+          case InterfaceExistsFunction: {
+            ClassScopePtrVec classes = ar->findClasses(Util::toLower(symbol));
+            bool interfaceFound = false;
+            for (ClassScopePtrVec::const_iterator it = classes.begin();
+                 it != classes.end(); ++it) {
+              ClassScopePtr cls = *it;
+              if (cls->isUserClass()) cls->setVolatile();
+              if (cls->isInterface()) {
+                interfaceFound = true;
+              }
+            }
+            if (!interfaceFound) return CONSTANT("false");
+            if (classes.size() == 1 && !classes.back()->isVolatile()) {
+              return CONSTANT("true");
+            }
+            break;
+          }
+          case ClassExistsFunction: {
+            ClassScopePtrVec classes = ar->findClasses(Util::toLower(symbol));
+            bool classFound = false;
+            for (ClassScopePtrVec::const_iterator it = classes.begin();
+                 it != classes.end(); ++it) {
+              ClassScopePtr cls = *it;
+              if (cls->isUserClass()) cls->setVolatile();
+              if (!cls->isInterface()) {
+                classFound = true;
+              }
+            }
+            if (!classFound) return CONSTANT("false");
+            if (classes.size() == 1 && !classes.back()->isVolatile()) {
+              return CONSTANT("true");
+            }
+            break;
+          }
+          default:
+            ASSERT(false);
         }
       }
     }
@@ -1438,23 +1448,23 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
                                                        AnalysisResultPtr ar) {
   if (!m_class && m_className.empty()) {
     switch (m_type) {
-    case ExtractFunction:
-      cg_printf("extract(variables, ");
-      FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, 0,
-                                        false);
-      cg_printf(")");
-      return;
-    case CompactFunction:
-      cg_printf("compact(variables, ");
-      FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, -1,
-                                        true);
-      cg_printf(")");
-      return;
-    case StaticCompactFunction:
-      cg_printf("Array(compact%d.create())", m_ciTemp);
-      return;
-    default:
-      break;
+      case ExtractFunction:
+        cg_printf("extract(variables, ");
+        FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, 0,
+                                          false);
+        cg_printf(")");
+        return;
+      case CompactFunction:
+        cg_printf("compact(variables, ");
+        FunctionScope::OutputCPPArguments(m_params, m_funcScope, cg, ar, -1,
+                                          true);
+        cg_printf(")");
+        return;
+      case StaticCompactFunction:
+        cg_printf("Array(compact%d.create())", m_ciTemp);
+        return;
+      default:
+        break;
     }
   }
   bool volatileCheck = false;
@@ -1474,8 +1484,8 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
     } else if (!m_funcScope || m_funcScope->isVolatile()) {
       if (m_valid) {
         cg_printf("(%s->FVF(%s)",
-            cg.getGlobals(ar),
-            cg.formatLabel(m_name).c_str());
+                  cg.getGlobals(ar),
+                  cg.formatLabel(m_name).c_str());
       }
       volatileCheck = true;
     }
@@ -1756,7 +1766,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
     }
 
     switch (m_type) {
-    case VariableArgumentFunction:
+      case VariableArgumentFunction:
       {
         FunctionScopePtr func = getFunctionScope();
         if (func) {
@@ -1788,9 +1798,9 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
         }
       }
       break;
-    case FunctionExistsFunction:
-    case ClassExistsFunction:
-    case InterfaceExistsFunction:
+      case FunctionExistsFunction:
+      case ClassExistsFunction:
+      case InterfaceExistsFunction:
       {
         bool literalString = false;
         string symbol;
@@ -1808,7 +1818,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
         if (literalString) {
           const std::string &lname = Util::toLower(symbol);
           switch (m_type) {
-          case FunctionExistsFunction:
+            case FunctionExistsFunction:
             {
               bool dynInvoke = Option::DynamicInvokeFunctions.find(lname) !=
                 Option::DynamicInvokeFunctions.end();
@@ -1833,8 +1843,8 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
               cg_printf(")");
             }
             break;
-          case ClassExistsFunction:
-          case InterfaceExistsFunction:
+            case ClassExistsFunction:
+            case InterfaceExistsFunction:
             {
               ClassScopePtrVec classes = ar->findClasses(Util::toLower(symbol));
               int found = 0;
@@ -1877,18 +1887,18 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
               }
             }
             break;
-          default:
-            break;
+            default:
+              break;
           }
           return;
         }
       }
       break;
-    case GetDefinedVarsFunction:
-      cg_printf("get_defined_vars(variables)");
-      return;
-    default:
-      break;
+      case GetDefinedVarsFunction:
+        cg_printf("get_defined_vars(variables)");
+        return;
+      default:
+        break;
     }
   }
 

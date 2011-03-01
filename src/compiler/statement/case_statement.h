@@ -48,7 +48,7 @@ public:
    * SwitchStatement needs to inspect this expression.
    */
   ExpressionPtr getCondition() { return m_condition;}
-
+  StatementPtr getStatement() { return m_stmt; }
   /**
    * Generate an "if" statement that sets caseVar to caseNum if m_condition
    * evaluates true.

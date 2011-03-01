@@ -1835,7 +1835,9 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
         if (Symbol *sym = sv->getSymbol()) {
           if (sv->isThis()) {
             sv->getFunctionScope()->setContainsThis();
-            if (m_graph && e->hasContext(Expression::ObjectContext)) {
+            if (!e->hasContext(Expression::ObjectContext)) {
+              sv->getFunctionScope()->setContainsBareThis();
+            } else if (m_graph) {
               int &id = m_gidMap["v:this"];
               if (!id) id = m_gidMap.size();
               e->setCanonID(id);
@@ -1908,7 +1910,7 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
       if (m_graph) {
         StaticClassName *p = dynamic_cast<StaticClassName*>(e.get());
         assert(p);
-        const std::string &name = p->getName();
+        const std::string &name = p->getClassName();
         if (!name.empty()) {
           int &id = m_gidMap[name];
           if (!id) id = m_gidMap.size();
@@ -1958,6 +1960,7 @@ void AliasManager::gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m) {
   }
 
   func->setContainsThis(false);
+  func->setContainsBareThis(false);
   func->setInlineSameContext(false);
 
   int i, nkid = m->getKidCount(), cost = 0;
@@ -1969,6 +1972,7 @@ void AliasManager::gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m) {
 
   if (func->containsThis() && !m->getClassScope()) {
     func->setContainsThis(false);
+    func->setContainsBareThis(false);
   }
 
   if (m_inlineAsExpr) {

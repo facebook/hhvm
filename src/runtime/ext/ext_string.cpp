@@ -431,16 +431,40 @@ Variant f_substr_count(CStrRef haystack, CStrRef needle, int offset /* = 0 */,
 
 Variant f_strspn(CStrRef str1, CStrRef str2, int start /* = 0 */,
                  int length /* = 0x7FFFFFFF */) {
-  String s = str1.substr(start, length);
-  if (s.isNull()) return false;
-  return string_span(s, s.size(), str2, str2.size());
+  const char *s1 = str1;
+  const char *s2 = str2;
+  int s1_len = str1.size();
+  int s2_len = str2.size();
+
+  if (!string_substr_check(s1_len, start, length)) {
+    return false;
+  }
+
+  s1 += start;
+  for (int pos = 0; pos < length; ++pos) {
+    if (memchr(s2, *(s1++), s2_len) == NULL) return pos;
+  }
+
+  return length;
 }
 
 Variant f_strcspn(CStrRef str1, CStrRef str2, int start /* = 0 */,
                   int length /* = 0x7FFFFFFF */) {
-  String s = str1.substr(start, length);
-  if (s.isNull()) return false;
-  return string_cspan(s, s.size(), str2, str2.size());
+  const char *s1 = str1;
+  const char *s2 = str2;
+  int s1_len = str1.size();
+  int s2_len = str2.size();
+
+  if (!string_substr_check(s1_len, start, length)) {
+    return false;
+  }
+
+  s1 += start;
+  for (int pos = 0; pos < length; ++pos) {
+    if (memchr(s2, *(s1++), s2_len) != NULL) return pos;
+  }
+
+  return length;
 }
 
 Variant f_count_chars(CStrRef str, int64 mode /* = 0 */) {

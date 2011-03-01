@@ -46,6 +46,10 @@ public:
   virtual ExpressionPtr preOptimize(AnalysisResultConstPtr ar);
   virtual ExpressionPtr postOptimize(AnalysisResultConstPtr ar);
 
+  const std::string &getName() const { return m_name; }
+  const std::string &getOriginalName() const { return m_origName; }
+  ExpressionPtr getNameExp() const { return m_nameExp; }
+  ExpressionListPtr getParams() const { return m_params; }
   void setNoInline() { m_noInline = true; }
   void setAllowVoidReturn() { m_allowVoidReturn = true;}
   void setFunctionAndClassScope(FunctionScopePtr fsp, ClassScopePtr csp);

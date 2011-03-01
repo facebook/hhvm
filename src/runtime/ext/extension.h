@@ -44,6 +44,12 @@ namespace HPHP {
     name ## Extension() : Extension(#name) {}           \
   } s_ ## name ## _extension
 
+#define IMPLEMENT_DEFAULT_EXTENSION_VERSION(name, v)    \
+  static class name ## Extension : public Extension {   \
+  public:                                               \
+    name ## Extension() : Extension(#name, #v) {}       \
+  } s_ ## name ## _extension
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class Extension : public IDebuggable {

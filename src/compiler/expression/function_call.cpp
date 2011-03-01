@@ -179,7 +179,7 @@ void FunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   if (m_nameExp) m_nameExp->analyzeProgram(ar);
   if (m_params) m_params->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (m_funcScope) {
+    if (m_funcScope && !m_arrayParams) {
       for (int i = 0, n = m_funcScope->getMaxParamCount(); i < n; ++i) {
         if (TypePtr specType = m_funcScope->getParamTypeSpec(i)) {
           const char *fmt = 0;

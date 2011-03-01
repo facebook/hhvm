@@ -98,13 +98,15 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
       if (m_name == "this" && getClassScope()) {
         func->setContainsThis();
         m_this = true;
-        if (!hasContext(ObjectContext) &&
-            variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
-          ClassScopePtr cls = getClassScope();
-          TypePtr t = cls->isRedeclaring() ?
-            Type::Variant : Type::CreateObjectType(cls->getName());
-          variables->add(m_sym, t, true, ar, shared_from_this(),
-                         getScope()->getModifiers());
+        if (!hasContext(ObjectContext)) {
+          func->setContainsBareThis();
+          if (variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
+            ClassScopePtr cls = getClassScope();
+            TypePtr t = cls->isRedeclaring() ?
+              Type::Variant : Type::CreateObjectType(cls->getName());
+            variables->add(m_sym, t, true, ar, shared_from_this(),
+                           getScope()->getModifiers());
+          }
         }
       }
       if (m_sym && !(m_context & AssignmentLHS) &&
@@ -119,7 +121,12 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
         m_sym->getDeclaration().get() == this &&
         !variables->getAttribute(VariableTable::ContainsLDynamicVariable) &&
         !getScope()->is(BlockScope::ClassScope)) {
-      Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
+      if (getScope()->inPseudoMain()) {
+        Compiler::Error(Compiler::UseUndeclaredGlobalVariable,
+                        shared_from_this());
+      } else {
+        Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
+      }
     }
   }
 }

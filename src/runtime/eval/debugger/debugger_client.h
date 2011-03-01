@@ -273,6 +273,7 @@ private:
   std::string m_configFileName;
   Hdf m_config;
   int m_tutorial;
+  std::string m_printFunction;
   std::set<std::string> m_tutorialVisited;
 
   DebuggerClientOptions m_options;

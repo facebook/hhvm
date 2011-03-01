@@ -345,16 +345,12 @@ String SessionModule::create_sid() {
 ///////////////////////////////////////////////////////////////////////////////
 // FileSessionModule
 
-class FileSessionModule : public SessionModule {
+class FileSessionData {
 public:
-  FileSessionModule()
-    : SessionModule("files"), m_fd(-1), m_dirdepth(0), m_st_size(0),
-      m_filemode(0600) {
+  FileSessionData() : m_fd(-1), m_dirdepth(0), m_st_size(0), m_filemode(0600) {
   }
 
-  virtual bool open(const char *save_path, const char *session_name) {
-    Lock lock(m_mutex);
-
+  bool open(const char *save_path, const char *session_name) {
     String tmpdir;
     if (*save_path == '\0') {
       tmpdir = f_sys_get_temp_dir();
@@ -401,16 +397,14 @@ public:
     return true;
   }
 
-  virtual bool close() {
-    Lock lock(m_mutex);
+  bool close() {
     closeImpl();
     m_lastkey.clear();
     m_basedir.clear();
     return true;
   }
 
-  virtual bool read(const char *key, String &value) {
-    Lock lock(m_mutex);
+  bool read(const char *key, String &value) {
     openImpl(key);
     if (m_fd < 0) {
       return false;
@@ -450,8 +444,7 @@ public:
     return true;
   }
 
-  virtual bool write(const char *key, CStrRef value) {
-    Lock lock(m_mutex);
+  bool write(const char *key, CStrRef value) {
     openImpl(key);
     if (m_fd < 0) {
       return false;
@@ -493,8 +486,7 @@ public:
     return true;
   }
 
-  virtual bool destroy(const char *key) {
-    Lock lock(m_mutex);
+  bool destroy(const char *key) {
     char buf[PATH_MAX];
     if (!createPath(buf, sizeof(buf), key)) {
       return false;
@@ -514,8 +506,7 @@ public:
     return true;
   }
 
-  virtual bool gc(int maxlifetime, int *nrdels) {
-    Lock lock(m_mutex);
+  bool gc(int maxlifetime, int *nrdels) {
     /* we don't perform any cleanup, if dirdepth is larger than 0.
        we return true, since all cleanup should be handled by
        an external entity (i.e. find -ctime x | xargs rm) */
@@ -526,7 +517,6 @@ public:
   }
 
 private:
-  Mutex m_mutex;
   int m_fd;
   string m_lastkey;
   string m_basedir;
@@ -685,6 +675,31 @@ private:
 
     closedir(dir);
     return nrdels;
+  }
+};
+IMPLEMENT_THREAD_LOCAL(FileSessionData, s_file_session_data);
+
+class FileSessionModule : public SessionModule {
+public:
+  FileSessionModule() : SessionModule("files") {
+  }
+  virtual bool open(const char *save_path, const char *session_name) {
+    return s_file_session_data->open(save_path, session_name);
+  }
+  virtual bool close() {
+    return s_file_session_data->close();
+  }
+  virtual bool read(const char *key, String &value) {
+    return s_file_session_data->read(key, value);
+  }
+  virtual bool write(const char *key, CStrRef value) {
+    return s_file_session_data->write(key, value);
+  }
+  virtual bool destroy(const char *key) {
+    return s_file_session_data->destroy(key);
+  }
+  virtual bool gc(int maxlifetime, int *nrdels) {
+    return s_file_session_data->gc(maxlifetime, nrdels);
   }
 };
 static FileSessionModule s_file_session_module;

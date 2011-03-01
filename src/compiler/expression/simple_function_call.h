@@ -58,8 +58,6 @@ public:
 
   void addDependencies(AnalysisResultPtr ar);
   void addLateDependencies(AnalysisResultConstPtr ar);
-  const std::string &getName() const { return m_name;}
-  ExpressionListPtr getParams() const { return m_params; }
   void setSafeCall(int flag) { m_safe = flag; }
   void setSafeDefault(ExpressionPtr def) { m_safeDef = def; }
   virtual ConstructPtr getNthKid(int n) const;
@@ -90,6 +88,7 @@ protected:
     InterfaceExistsFunction,
     UnserializeFunction,
     GetDefinedVarsFunction,
+    FBCallUserFuncSafeFunction,
 
     LastType, // marker, not a valid type
   };

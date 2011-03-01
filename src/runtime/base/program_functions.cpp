@@ -960,8 +960,8 @@ static IMPLEMENT_THREAD_LOCAL(WarmupState, s_warmup_state);
 
 void hphp_process_init() {
   ClassInfo::Load();
-  init_static_variables();
   Process::InitProcessStatics();
+  init_static_variables();
   PageletServer::Restart();
   XboxServer::Restart();
   FiberAsyncFunc::Restart();

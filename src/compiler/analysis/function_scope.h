@@ -173,7 +173,8 @@ public:
    */
   bool containsThis() const { return m_containsThis;}
   void setContainsThis(bool f=true) { m_containsThis = f;}
-
+  bool containsBareThis() const { return m_containsBareThis; }
+  void setContainsBareThis(bool f=true) { m_containsBareThis = f; }
   /**
    * How many parameters a caller should provide.
    */
@@ -436,6 +437,7 @@ private:
   unsigned m_inlineable : 1;
   unsigned m_sep : 1;
   unsigned m_containsThis : 1; // contains a usage of $this?
+  unsigned m_containsBareThis : 1; // $this outside object-context
   unsigned m_nrvoFix : 1;
   unsigned m_inlineAsExpr : 1;
   unsigned m_inlineSameContext : 1;

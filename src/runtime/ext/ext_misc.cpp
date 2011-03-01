@@ -28,6 +28,9 @@
 namespace HPHP {
 using namespace std;
 
+// Make sure "tokenizer" gets added to the list of extensions
+IMPLEMENT_DEFAULT_EXTENSION(tokenizer);
+
 const double k_INF = numeric_limits<double>::infinity();
 const double k_NAN = numeric_limits<double>::quiet_NaN();
 

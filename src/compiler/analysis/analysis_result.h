@@ -401,8 +401,6 @@ public:
   void genMethodSlots();
 
   void outputCPPDynamicTables(CodeGenerator::Output output);
-  void outputCPPDynamicClassTables(CodeGenerator::Output output, int part);
-  void outputCPPDynamicClassTables(CodeGenerator::Output output);
   void outputCPPClassMapFile();
   void outputCPPSourceInfos();
   void outputCPPNameMaps();
@@ -576,7 +574,13 @@ private:
   void outputCPPHashTableInvokeFile(CodeGenerator &cg,
                                     const std::vector<const char*> &entries,
                                     bool needEvalHook);
-
+  void outputCPPDynamicClassTables(CodeGenerator::Output output, int part);
+  void outputCPPDynamicClassTables(CodeGenerator::Output output);
+  void outputCPPDynamicConstantTable(CodeGenerator::Output output);
+  void outputCPPHashTableGetConstant(CodeGenerator &cg, bool system,
+                                     const std::vector<const char *> &strings,
+                                     const std::vector<TypePtr> &types,
+                                     const hphp_const_char_map<bool> &dyns);
   void cloneRTTIFuncs(ClassScopePtr cls,
                       const StringToFunctionScopePtrVecMap &functions);
 

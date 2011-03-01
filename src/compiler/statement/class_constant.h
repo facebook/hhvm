@@ -35,6 +35,7 @@ public:
   // implementing IParseHandler
   virtual void onParseRecur(AnalysisResultConstPtr ar, ClassScopePtr scope);
 
+  ExpressionListPtr getConList() { return m_exp; }
 private:
   ExpressionListPtr m_exp;
 };

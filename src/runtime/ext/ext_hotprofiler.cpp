@@ -63,6 +63,7 @@
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(hotprofiler);
+IMPLEMENT_DEFAULT_EXTENSION(xhprof);
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 

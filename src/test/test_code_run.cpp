@@ -29,6 +29,8 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static const char *php_path = "/usr/local/php/bin/php";
+
 // By default, use shared linking for faster testing.
 bool TestCodeRun::FastMode = true;
 
@@ -214,7 +216,7 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
     const char *argv1[] = {"", fullPath.c_str(), NULL};
     const char *argv2[] = {"", "-n", fullPath.c_str(), NULL};
     string err;
-    Process::Exec("php", nowarnings ? argv2 : argv1, NULL, expected, &err);
+    Process::Exec(php_path, nowarnings ? argv2 : argv1, NULL, expected, &err);
     if (!err.empty() && nowarnings) {
       printf("%s:%d\nParsing: [%s]\nFailed to run %s: %s\n",
              file, line, input, fullPath.c_str(), err.c_str());

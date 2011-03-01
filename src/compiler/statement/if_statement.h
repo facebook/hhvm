@@ -36,6 +36,7 @@ public:
   virtual bool hasRetExp() const;
   virtual int getRecursiveCount() const;
 
+  StatementListPtr getIfBranches() const { return m_stmts; }
 private:
   StatementListPtr m_stmts;
 };

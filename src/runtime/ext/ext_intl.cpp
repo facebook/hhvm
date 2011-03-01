@@ -30,6 +30,7 @@
 #include <unicode/unorm.h>
 
 namespace HPHP {
+IMPLEMENT_DEFAULT_EXTENSION(idn);
 ///////////////////////////////////////////////////////////////////////////////
 
 int64 f_intl_get_error_code() {

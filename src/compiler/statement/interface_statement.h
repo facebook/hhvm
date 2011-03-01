@@ -52,6 +52,8 @@ public:
     ASSERT(b->is(BlockScope::ClassScope));
     return ClassScopeRawPtr((ClassScope*)b.get());
   }
+
+  StatementListPtr getStmts() { return m_stmt; }
 protected:
   std::string m_originalName;
   std::string m_name;

@@ -911,6 +911,9 @@ void Parser::saveParseTree(Token &tree) {
   pseudoMain->setOuterScope(m_file);
   m_file->setOuterScope(m_ar);
   m_ar->parseExtraCode(m_file->getName());
+  LocationPtr loc = getLocation();
+  loc->line0 = loc->char0 = 1;
+  pseudoMain->getStmt()->setLocation(loc);
 }
 
 void Parser::onStatementListStart(Token &out) {

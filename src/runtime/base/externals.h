@@ -134,6 +134,12 @@ extern Variant invoke_file(CStrRef file, bool once = false,
 extern void init_static_variables();
 
 /**
+ * Initializes the constant table.
+ */
+extern void init_builtin_constant_table();
+extern void init_constant_table();
+
+/**
  * Returns a thread local global variable class pointer.
  */
 class GlobalVariables;

@@ -51,12 +51,30 @@ Variant f_stream_copy_to_stream(CObjRef source, CObjRef dest,
                                 int offset /* = 0 */) {
   if (maxlength == 0) return 0;
   if (maxlength == PHP_STREAM_COPY_ALL) maxlength = 0;
-  Variant ret = f_stream_get_contents(source, maxlength, offset);
-  if (same(ret, false)) {
+
+  File *srcFile = source.getTyped<File>();
+  File *destFile = dest.getTyped<File>();
+  if (maxlength < 0) {
+    throw_invalid_argument("maxlength: %d", maxlength);
     return false;
   }
-
-  return dest.getTyped<File>()->write(ret.toString());
+  if (offset > 0 && !srcFile->seek(offset, SEEK_SET) ) {
+    raise_warning("Failed to seek to position %ld in the stream", offset);
+    return false;
+  }
+  int cbytes = 0;
+  if (maxlength == 0) maxlength = INT_MAX;
+  while (cbytes < maxlength) {
+    char buf[8192];
+    int remaining = maxlength - cbytes;
+    int toread = ((remaining > (int)sizeof(buf)) ? sizeof(buf): remaining);
+    int rbytes = srcFile->readImpl(buf, toread);
+    if (rbytes == 0) break;
+    if (rbytes < 0) return false;
+    if (destFile->writeImpl(buf, rbytes) != rbytes) return false;
+    cbytes += rbytes;
+  }
+  return cbytes;
 }
 
 Variant f_stream_get_contents(CObjRef handle, int maxlen /* = 0 */,

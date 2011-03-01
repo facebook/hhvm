@@ -2709,6 +2709,267 @@ void AnalysisResult::outputCPPDynamicClassTables(
   fTable.close();
 }
 
+void AnalysisResult::outputCPPHashTableGetConstant(
+  CodeGenerator &cg,
+  bool system,
+  const vector<const char *> &strings,
+  const vector<TypePtr> &types,
+  const hphp_const_char_map<bool> &dyns) {
+  ASSERT(strings.size() > 0);
+  ASSERT(cg.getCurrentIndentation() == 0);
+  const char text1[] =
+    "class hashNodeCon {\n"
+    "public:\n"
+    "  hashNodeCon() {}\n"
+    "  hashNodeCon(int64 h, const char *n, int64 o, int64 t,\n"
+    "              int64 *p) :\n"
+    "    hash(h), name(n), off(o), type(t), next(NULL) {\n"
+    "    if (off > 0) return;\n"
+    "    switch (t) {\n"
+    "    case %d: case %d: case %d: case %d: case %d: case %d: case %d:\n"
+    "      value = p;\n"
+    "      break;\n"
+    "    default: assert(false);\n"
+    "    }\n"
+    "  }\n"
+    "  int64 hash;\n"
+    "  const char *name;\n"
+    "  int64 off;\n"
+    "  int64 type;\n"
+    "  int64 *value;\n"
+    "  hashNodeCon *next;\n"
+    "};\n"
+    "static hashNodeCon *conMapTable[%d];\n"
+    "static hashNodeCon conBuckets[%d];\n"
+    "\n"
+    "void init_%sconstant_table() {\n%s"
+    "  %s gv;\n"
+    "  const char *conMapData[] = {\n";
+
+  const char text2[] =
+    "    NULL, NULL, NULL, NULL\n"
+    "  };\n"
+    "  hashNodeCon *b = conBuckets;\n"
+    "  for (const char **s = conMapData; *s; s++, b++) {\n"
+    "    const char *name = *s++;\n"
+    "    int64 off = (int64)(*s++);\n"
+    "    int64 type = (int64)(*s++);\n"
+    "    int64 *p = (int64*)(*s);\n"
+    "    int64 hash = hash_string(name, strlen(name));\n"
+    "    hashNodeCon *node =\n"
+    "      new(b) hashNodeCon(hash, name, off, type, p);\n"
+    "    int h = hash & %d;\n"
+    "    if (conMapTable[h]) node->next = conMapTable[h];\n"
+    "    conMapTable[h] = node;\n"
+    "  }\n"
+    "}\n"
+    "\n"
+    "static const hashNodeCon *\n"
+    "findCon(const char *name, int64 hash) {\n"
+    "  for (const hashNodeCon *p = conMapTable[hash & %d]; p; p = p->next) {\n"
+    "    if (p->hash == hash && !strcmp(p->name, name)) return p;\n"
+    "  }\n"
+    "  return NULL;\n"
+    "}\n";
+
+  int tableSize = Util::roundUpToPowerOfTwo(strings.size() * 2);
+  cg_printf(text1,
+            Type::KindOfBoolean,
+            Type::KindOfInt64,
+            Type::KindOfDouble,
+            Type::KindOfString,
+            Type::KindOfArray,
+            Type::KindOfObject,
+            Type::KindOfVariant,
+            tableSize, strings.size(),
+            system ? "builtin_" : "",
+            system ? "" : "  init_builtin_constant_table();\n",
+            system ? "SystemGlobals" : "GlobalVariables");
+  for (uint i = 0; i < strings.size(); i++) {
+    const char *name = strings[i];
+    string escaped = cg.escapeLabel(name);
+    string varName = string(Option::ConstantPrefix) + cg.formatLabel(name);
+    hphp_const_char_map<bool>::const_iterator it = dyns.find(name);
+    bool dyn = it != dyns.end() && it->second;
+    if (dyn) {
+      cg_printf("      (const char *)\"%s\", "
+                "(const char *)(&gv.%s - gv.%stgv_Variant + 1), "
+                "(const char *)NULL, "
+                "(const char *)NULL,\n",
+                escaped.c_str(), varName.c_str(), system ? "s" : "");
+    } else {
+      TypePtr type = types[i];
+      Type::KindOf kindOf = type->getKindOf();
+      cg_printf("      (const char *)\"%s\", "
+                "(const char *)-1, "
+                "(const char *)%d, ",
+                escaped.c_str(), kindOf);
+      switch (kindOf) {
+      case Type::KindOfBoolean:
+      case Type::KindOfInt64:
+      case Type::KindOfDouble:
+      case Type::KindOfString:
+      case Type::KindOfArray:
+      case Type::KindOfVariant:
+        cg_printf("(const char *)&%s,\n", varName.c_str());
+        break;
+      case Type::KindOfObject:
+        if (!system) assert(false);
+        if (strcmp(name, "STDERR") == 0) {
+          cg_printf("(const char *)&BuiltinFiles::GetSTDERR,\n");
+        } else if (strcmp(name, "STDIN") == 0) {
+          cg_printf("(const char *)&BuiltinFiles::GetSTDIN,\n");
+        } else if (strcmp(name, "STDOUT") == 0) {
+          cg_printf("(const char *)&BuiltinFiles::GetSTDOUT,\n");
+        } else {
+          assert(false);
+        }
+        break;
+      default: assert(false);
+      }
+    }
+  }
+  cg_printf(text2, tableSize - 1, tableSize - 1);
+}
+
+void AnalysisResult::outputCPPDynamicConstantTable(
+  CodeGenerator::Output output) {
+  AnalysisResultPtr ar = shared_from_this();
+  bool system = output == CodeGenerator::SystemCPP;
+  string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
+    (Option::GenHashTableGetConstant ?
+     "dynamic_table_constant.cpp" : "dynamic_table_constant.no.cpp");
+  Util::mkdir(tablePath);
+  ofstream fTable(tablePath.c_str());
+  CodeGenerator cg(&fTable, output);
+
+  outputCPPDynamicTablesHeader(cg, true, false);
+  vector<const char *> strings;
+  vector<TypePtr> types;
+  hphp_const_char_map<bool> dyns;
+  ConstantTablePtr ct = getConstants();
+   vector<string> syms;
+  ct->getSymbols(syms);
+  BOOST_FOREACH(string sym, syms) {
+    if (system || ct->isSepExtension(sym)) {
+      strings.push_back(sym.c_str());
+      types.push_back(ct->getSymbol(sym)->getFinalType());
+      dyns[sym.c_str()] = ct->isDynamic(sym);
+    }
+  }
+  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+    ConstantTablePtr ct = fs->getConstants();
+    vector<string> syms;
+    ct->getSymbols(syms);
+    BOOST_FOREACH(string sym, syms) {
+      if (ct->isSystem(sym) && !system) continue;
+      ClassScopePtr defClass;
+      if (!ct->getDeclarationRecur(ar, sym, defClass)) {
+        assert(!defClass);
+        continue;
+      }
+      strings.push_back(sym.c_str());
+      types.push_back(ct->getSymbol(sym)->getFinalType());
+      dyns[sym.c_str()] = ct->isDynamic(sym);
+    }
+    ct->outputCPP(cg, ar);
+  }
+
+  cg.printSection("Get Constant Table");
+  const char text1[] = {
+    "if (p->off < 0) {\n"
+    "  switch (p->type) {\n"
+    "  case %d: return *(bool*)(p->value);\n"
+    "  case %d: return *(int64*)(p->value);\n"
+    "  case %d: return *(double*)(p->value);\n"
+    "  case %d: return *(StaticString*)(p->value);\n"
+    "  case %d: return *(StaticArray*)(p->value);\n"
+    "  case %d: { CVarRef (*f)()=(CVarRef(*)())(p->value); return (*f)(); }\n"
+    "  case %d: return *(Variant*)(p->value);\n"
+    "  default: assert(false);\n"
+    "  }\n"
+    "}\n"
+  };
+  const char text2[] = {
+    "if (error) raise_notice(\"Use of undefined constant %%s - "
+    "assumed '%%s'\", s, s);\n"
+    "return name;\n"
+  };
+  bool useHashTable = (Option::GenHashTableGetConstant && strings.size() > 0);
+  if (useHashTable) {
+    outputCPPHashTableGetConstant(cg, system, strings, types, dyns);
+  } else if (system) {
+    cg_printf("void init_builtin_constant_table() {}\n");
+  } else {
+    cg_printf("void init_constant_table() { "
+              "init_builtin_constant_table(); }\n");
+  }
+  cg_indentBegin("Variant get_%sconstant(CStrRef name, bool error) {\n",
+      system ? "builtin_" : "");
+  cg.printDeclareGlobals();
+
+  if (!system && Option::EnableEval == Option::FullEval) {
+    // See if there's an eval'd version
+    cg_indentBegin("{\n");
+    cg_printf("Variant r;\n");
+    cg_printf("if (eval_constant_hook(r, name)) return r;\n");
+    cg_indentEnd("}\n");
+  }
+
+  if (useHashTable) {
+    if (system) cg_printf("const char* s = name.data();\n");
+    cg_printf("const hashNodeCon *p = findCon(name.data(), name->hash());\n");
+    if (system) {
+      cg_indentBegin("if (!p) {\n");
+      cg_printf(text2);
+      cg_indentEnd("}\n");
+    } else {
+      cg_printf("if (!p) return get_builtin_constant(name, error);\n");
+    }
+    cg_printf(text1,
+              Type::KindOfBoolean,
+              Type::KindOfInt64,
+              Type::KindOfDouble,
+              Type::KindOfString,
+              Type::KindOfArray,
+              Type::KindOfObject,
+              Type::KindOfVariant);
+    cg_printf("return getDynamicConstant(g->%stgv_Variant[p->off-1], "
+              "name);\n", system ? "s" : "");
+  } else if (strings.size() > 0) {
+    cg_printf("const char* s = name.data();\n");
+    for (JumpTable jt(cg, strings, false, false, false); jt.ready();
+         jt.next()) {
+      const char *name = jt.key();
+      string varName = string(Option::ConstantPrefix) + cg.formatLabel(name);
+      hphp_const_char_map<bool>::const_iterator it = dyns.find(name);
+      bool dyn = it != dyns.end() && it->second;
+      if (dyn) {
+        string escaped = cg.escapeLabel(name);
+        cg_printf("HASH_RETURN(0x%016llXLL, "
+                  "getDynamicConstant(g->%s, \"%s\"), \"%s\");\n",
+                  hash_string(name), varName.c_str(),
+                 escaped.c_str(), escaped.c_str());
+      } else {
+        cg_printf("HASH_RETURN(0x%016llXLL, %s, \"%s\");\n",
+                  hash_string(name), varName.c_str(),
+                  cg.escapeLabel(name).c_str());
+      }
+    }
+  }
+
+  if (!useHashTable) {
+    if (system) {
+      cg_printf(text2);
+    } else {
+      cg_printf("return get_builtin_constant(name, error);\n");
+    }
+  }
+  cg_indentEnd("}\n");
+  cg.namespaceEnd();
+  fTable.close();
+}
+
 void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
   AnalysisResultPtr ar = shared_from_this();
   bool system = output == CodeGenerator::SystemCPP;
@@ -2734,89 +2995,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
     fTable.close();
   }
   outputCPPDynamicClassTables(output);
-  {
-    string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
-      "dynamic_table_constant.no.cpp";
-    Util::mkdir(tablePath);
-    ofstream fTable(tablePath.c_str());
-    CodeGenerator cg(&fTable, output);
-
-    outputCPPDynamicTablesHeader(cg, true, false);
-
-    vector<const char *> strings;
-    hphp_const_char_map<bool> dyns;
-    ConstantTablePtr ct = getConstants();
-    vector<string> syms;
-    ct->getSymbols(syms);
-    BOOST_FOREACH(string sym, syms) {
-      if (system || ct->isSepExtension(sym)) {
-        strings.push_back(sym.c_str());
-        dyns[sym.c_str()] = ct->isDynamic(sym);
-      }
-    }
-    BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-      ConstantTablePtr ct = fs->getConstants();
-      vector<string> syms;
-      ct->getSymbols(syms);
-      BOOST_FOREACH(string sym, syms) {
-        if (ct->isSystem(sym) && !system) continue;
-        ClassScopePtr defClass;
-        if (!ct->getDeclarationRecur(ar, sym, defClass)) {
-          assert(!defClass);
-          continue;
-        }
-        strings.push_back(sym.c_str());
-        dyns[sym.c_str()] = ct->isDynamic(sym);
-      }
-      ct->outputCPP(cg, ar);
-    }
-
-    cg.printSection("Get Constant Table");
-    cg_indentBegin("Variant get_%sconstant(CStrRef name, bool error) {\n",
-        system ? "builtin_" : "");
-    cg.printDeclareGlobals();
-
-    if (!system && Option::EnableEval == Option::FullEval) {
-      // See if there's an eval'd version
-      cg_indentBegin("{\n");
-      cg_printf("Variant r;\n");
-      cg_printf("if (eval_constant_hook(r, name)) return r;\n");
-      cg_indentEnd("}\n");
-    }
-
-    if (strings.size() > 0) {
-      cg_printf("const char* s = name.data();\n");
-      for (JumpTable jt(cg, strings, false, false, false); jt.ready();
-          jt.next()) {
-        const char *name = jt.key();
-        string varName = string(Option::ConstantPrefix) + cg.formatLabel(name);
-        hphp_const_char_map<bool>::const_iterator it = dyns.find(name);
-        bool dyn = it != dyns.end() && it->second;
-        if (dyn) {
-          string escaped = cg.escapeLabel(name);
-          cg_printf("HASH_RETURN(0x%016llXLL, "
-                    "getDynamicConstant(g->%s, \"%s\"), \"%s\");\n",
-                    hash_string(name), varName.c_str(),
-                    escaped.c_str(), escaped.c_str());
-        } else {
-          cg_printf("HASH_RETURN(0x%016llXLL, %s, \"%s\");\n",
-                    hash_string(name), varName.c_str(),
-                    cg.escapeLabel(name).c_str());
-        }
-      }
-    }
-
-    if (system) {
-      cg_printf("if (error) raise_notice(\"Use of undefined constant %%s - "
-                "assumed '%%s'\", s, s);\n");
-      cg_printf("return name;\n");
-    } else {
-      cg_printf("return get_builtin_constant(name, error);\n");
-    }
-    cg_indentEnd("}\n");
-    cg.namespaceEnd();
-    fTable.close();
-  }
+  outputCPPDynamicConstantTable(output);
   if (output != CodeGenerator::SystemCPP) {
     string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
       (Option::GenHashTableInvokeFile ? "dynamic_table_file.cpp"

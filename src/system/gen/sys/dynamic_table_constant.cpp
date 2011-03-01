@@ -644,7 +644,73 @@ extern const int64 k_MB_OVERLOAD_REGEX;
 extern const int64 k_MB_OVERLOAD_STRING;
 extern const int64 k_MCC_ACCESSPOINT_DOWN;
 extern const int64 k_MCC_ACCESSPOINT_UP;
+extern const StaticString k_MCC_ARG_COMPRESSION_THRESHOLD;
+extern const StaticString k_MCC_ARG_CONN_NTRIES;
+extern const StaticString k_MCC_ARG_CONN_TMO;
+extern const StaticString k_MCC_ARG_CONSISTENT_HASHING_PREFIXES;
+extern const StaticString k_MCC_ARG_DEBUG;
+extern const StaticString k_MCC_ARG_DEBUG_LOGFILE;
+extern const StaticString k_MCC_ARG_DEFAULT_PREFIX;
+extern const StaticString k_MCC_ARG_DELETE_PROXY;
+extern const StaticString k_MCC_ARG_DGRAM_NTRIES;
+extern const StaticString k_MCC_ARG_DGRAM_TMO_THRESHOLD;
+extern const StaticString k_MCC_ARG_DGRAM_TMO_WEIGHT;
+extern const StaticString k_MCC_ARG_FB_SERIALIZE_ENABLED;
+extern const StaticString k_MCC_ARG_MIRROR_CFG;
+extern const StaticString k_MCC_ARG_MIRROR_CFG_MODEL;
+extern const StaticString k_MCC_ARG_MIRROR_CFG_NAME;
+extern const StaticString k_MCC_ARG_MIRROR_CFG_SERVERPOOLS;
+extern const StaticString k_MCC_ARG_NODELAY;
+extern const StaticString k_MCC_ARG_NPOOLPREFIX;
+extern const StaticString k_MCC_ARG_NZLIB_COMPRESSION;
+extern const StaticString k_MCC_ARG_PERSISTENT;
+extern const StaticString k_MCC_ARG_POLL_TMO;
+extern const StaticString k_MCC_ARG_PROXY;
+extern const StaticString k_MCC_ARG_PROXY_OPS;
+extern const StaticString k_MCC_ARG_SERVERS;
+extern const StaticString k_MCC_ARG_SERVER_RETRY_TMO_MS;
+extern const StaticString k_MCC_ARG_TCP_INACTIVITY_TIME;
+extern const StaticString k_MCC_ARG_TMO;
+extern const StaticString k_MCC_ARG_UDP_REPLY_PORTS;
+extern const StaticString k_MCC_ARG_WINDOW_MAX;
 extern const int64 k_MCC_COMPRESSION_THRESHHOLD;
+extern const int64 k_MCC_CONN_NTRIES;
+extern const int64 k_MCC_CONN_TMO_MS;
+extern const int64 k_MCC_CONSISTENCY_IGNORE;
+extern const int64 k_MCC_CONSISTENCY_MATCH_ALL;
+extern const int64 k_MCC_CONSISTENCY_MATCH_HITS;
+extern const int64 k_MCC_CONSISTENCY_MATCH_HITS_SUPERCEDES;
+extern const int64 k_MCC_DELETE_DELETED;
+extern const int64 k_MCC_DELETE_ERROR_LOG;
+extern const int64 k_MCC_DELETE_ERROR_NOLOG;
+extern const int64 k_MCC_DELETE_NOTFOUND;
+extern const int64 k_MCC_DGRAM_NTRIES;
+extern const int64 k_MCC_DGRAM_TMO_THRESHOLD;
+extern const int64 k_MCC_DGRAM_TMO_WEIGHT;
+extern const int64 k_MCC_GET_RECORD_ERRORS;
+extern const int64 k_MCC_HAVE_DEBUG_LOG;
+extern const int64 k_MCC_HAVE_FB_SERIALIZATION;
+extern const int64 k_MCC_HAVE_ZLIB_COMPRESSION;
+extern const int64 k_MCC_IPPROTO_TCP;
+extern const int64 k_MCC_IPPROTO_UDP;
+extern const int64 k_MCC_MTU;
+extern const int64 k_MCC_NODELAY;
+extern const int64 k_MCC_POLL_TMO_US;
+extern const int64 k_MCC_POOLPREFIX_LEN;
+extern const int64 k_MCC_PORT_DEFAULT;
+extern const int64 k_MCC_PROXY_ARITH_OP;
+extern const int64 k_MCC_PROXY_DELETE_OP;
+extern const int64 k_MCC_PROXY_GET_OP;
+extern const int64 k_MCC_PROXY_UPDATE_OP;
+extern const int64 k_MCC_RXDGRAM_MAX;
+extern const int64 k_MCC_SERVER_DISABLED;
+extern const int64 k_MCC_SERVER_DOWN;
+extern const int64 k_MCC_SERVER_RETRY_TMO_MS;
+extern const int64 k_MCC_SERVER_UP;
+extern const int64 k_MCC_TCP_INACTIVITY_TMO_DEFAULT;
+extern const int64 k_MCC_TMO_MS;
+extern const int64 k_MCC_UDP_REPLY_PORTS;
+extern const int64 k_MCC_WINDOW_MAX;
 extern const StaticString k_MCRYPT_3DES;
 extern const StaticString k_MCRYPT_ARCFOUR;
 extern const StaticString k_MCRYPT_ARCFOUR_IV;
@@ -1218,6 +1284,9 @@ extern const StaticString k_PATH_SEPARATOR;
 extern const StaticString k_PCRE_VERSION;
 extern const StaticString k_PEAR_EXTENSION_DIR;
 extern const StaticString k_PEAR_INSTALL_DIR;
+extern const int64 k_PHPMCC_NEW_HANDLE;
+extern const int64 k_PHPMCC_USED_FAST_PATH;
+extern const int64 k_PHPMCC_USED_SLOW_PATH;
 extern const int64 k_PHP_BINARY_READ;
 extern const StaticString k_PHP_BINDIR;
 extern const StaticString k_PHP_CONFIG_FILE_PATH;
@@ -2012,7 +2081,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2090];
+static hashNodeCon conBuckets[2084];
 
 void init_builtin_constant_table() {
   SystemGlobals gv;
@@ -2025,85 +2094,10 @@ void init_builtin_constant_table() {
       (const char *)"FB_UNSERIALIZE_UNEXPECTED_END", (const char *)-1, (const char *)32, (const char *)&k_FB_UNSERIALIZE_UNEXPECTED_END,
       (const char *)"FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE", (const char *)-1, (const char *)32, (const char *)&k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE,
       (const char *)"INF", (const char *)-1, (const char *)64, (const char *)&k_INF,
-      (const char *)"MCC_ARG_COMPRESSION_THRESHOLD", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_COMPRESSION_THRESHOLD,
-      (const char *)"MCC_ARG_CONN_NTRIES", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_CONN_NTRIES,
-      (const char *)"MCC_ARG_CONN_TMO", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_CONN_TMO,
-      (const char *)"MCC_ARG_CONSISTENT_HASHING_PREFIXES", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_CONSISTENT_HASHING_PREFIXES,
-      (const char *)"MCC_ARG_DEBUG", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_DEBUG,
-      (const char *)"MCC_ARG_DEBUG_LOGFILE", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_DEBUG_LOGFILE,
-      (const char *)"MCC_ARG_DEFAULT_PREFIX", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_DEFAULT_PREFIX,
-      (const char *)"MCC_ARG_DELETE_PROXY", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_DELETE_PROXY,
-      (const char *)"MCC_ARG_DGRAM_NTRIES", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_DGRAM_NTRIES,
-      (const char *)"MCC_ARG_DGRAM_TMO_THRESHOLD", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_DGRAM_TMO_THRESHOLD,
-      (const char *)"MCC_ARG_DGRAM_TMO_WEIGHT", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_DGRAM_TMO_WEIGHT,
-      (const char *)"MCC_ARG_FB_SERIALIZE_ENABLED", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_FB_SERIALIZE_ENABLED,
-      (const char *)"MCC_ARG_MIRROR_CFG", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_MIRROR_CFG,
-      (const char *)"MCC_ARG_MIRROR_CFG_MODEL", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_MIRROR_CFG_MODEL,
-      (const char *)"MCC_ARG_MIRROR_CFG_NAME", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_MIRROR_CFG_NAME,
-      (const char *)"MCC_ARG_MIRROR_CFG_SERVERPOOLS", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_MIRROR_CFG_SERVERPOOLS,
-      (const char *)"MCC_ARG_NODELAY", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_NODELAY,
-      (const char *)"MCC_ARG_NPOOLPREFIX", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_NPOOLPREFIX,
-      (const char *)"MCC_ARG_NZLIB_COMPRESSION", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_NZLIB_COMPRESSION,
-      (const char *)"MCC_ARG_PERSISTENT", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_PERSISTENT,
-      (const char *)"MCC_ARG_POLL_TMO", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_POLL_TMO,
-      (const char *)"MCC_ARG_PREFER_FIRST_AP", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_PREFER_FIRST_AP,
-      (const char *)"MCC_ARG_PROXY", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_PROXY,
-      (const char *)"MCC_ARG_PROXY_OPS", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_PROXY_OPS,
-      (const char *)"MCC_ARG_QUICKLZ_COMPRESSION", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_QUICKLZ_COMPRESSION,
-      (const char *)"MCC_ARG_RANDOMIZE_APS", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_RANDOMIZE_APS,
-      (const char *)"MCC_ARG_SERVERS", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_SERVERS,
-      (const char *)"MCC_ARG_SERVER_RETRY_TMO_MS", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_SERVER_RETRY_TMO_MS,
-      (const char *)"MCC_ARG_TCP_INACTIVITY_TIME", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_TCP_INACTIVITY_TIME,
-      (const char *)"MCC_ARG_TMO", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_TMO,
-      (const char *)"MCC_ARG_UDP_REPLY_PORTS", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_UDP_REPLY_PORTS,
-      (const char *)"MCC_ARG_WINDOW_MAX", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_WINDOW_MAX,
-      (const char *)"MCC_COMPRESSION_THRESHOLD", (const char *)-1, (const char *)32, (const char *)&k_MCC_COMPRESSION_THRESHOLD,
-      (const char *)"MCC_CONN_NTRIES", (const char *)-1, (const char *)32, (const char *)&k_MCC_CONN_NTRIES,
-      (const char *)"MCC_CONN_TMO_MS", (const char *)-1, (const char *)32, (const char *)&k_MCC_CONN_TMO_MS,
-      (const char *)"MCC_CONSISTENCY_IGNORE", (const char *)-1, (const char *)32, (const char *)&k_MCC_CONSISTENCY_IGNORE,
-      (const char *)"MCC_CONSISTENCY_MATCH_ALL", (const char *)-1, (const char *)32, (const char *)&k_MCC_CONSISTENCY_MATCH_ALL,
-      (const char *)"MCC_CONSISTENCY_MATCH_HITS", (const char *)-1, (const char *)32, (const char *)&k_MCC_CONSISTENCY_MATCH_HITS,
-      (const char *)"MCC_CONSISTENCY_MATCH_HITS_SUPERCEDES", (const char *)-1, (const char *)32, (const char *)&k_MCC_CONSISTENCY_MATCH_HITS_SUPERCEDES,
-      (const char *)"MCC_DELETE_DELETED", (const char *)-1, (const char *)32, (const char *)&k_MCC_DELETE_DELETED,
-      (const char *)"MCC_DELETE_ERROR_LOG", (const char *)-1, (const char *)32, (const char *)&k_MCC_DELETE_ERROR_LOG,
-      (const char *)"MCC_DELETE_ERROR_NOLOG", (const char *)-1, (const char *)32, (const char *)&k_MCC_DELETE_ERROR_NOLOG,
-      (const char *)"MCC_DELETE_NOTFOUND", (const char *)-1, (const char *)32, (const char *)&k_MCC_DELETE_NOTFOUND,
-      (const char *)"MCC_DGRAM_NTRIES", (const char *)-1, (const char *)32, (const char *)&k_MCC_DGRAM_NTRIES,
-      (const char *)"MCC_DGRAM_TMO_THRESHOLD", (const char *)-1, (const char *)32, (const char *)&k_MCC_DGRAM_TMO_THRESHOLD,
-      (const char *)"MCC_DGRAM_TMO_WEIGHT", (const char *)-1, (const char *)64, (const char *)&k_MCC_DGRAM_TMO_WEIGHT,
-      (const char *)"MCC_GET_RECORD_ERRORS", (const char *)-1, (const char *)32, (const char *)&k_MCC_GET_RECORD_ERRORS,
-      (const char *)"MCC_HAVE_DEBUG_LOG", (const char *)-1, (const char *)32, (const char *)&k_MCC_HAVE_DEBUG_LOG,
-      (const char *)"MCC_HAVE_FB_SERIALIZATION", (const char *)-1, (const char *)32, (const char *)&k_MCC_HAVE_FB_SERIALIZATION,
-      (const char *)"MCC_HAVE_LEASE_SET_GET", (const char *)-1, (const char *)32, (const char *)&k_MCC_HAVE_LEASE_SET_GET,
-      (const char *)"MCC_HAVE_ZLIB_COMPRESSION", (const char *)-1, (const char *)32, (const char *)&k_MCC_HAVE_ZLIB_COMPRESSION,
-      (const char *)"MCC_IPPROTO_TCP", (const char *)-1, (const char *)32, (const char *)&k_MCC_IPPROTO_TCP,
-      (const char *)"MCC_IPPROTO_UDP", (const char *)-1, (const char *)32, (const char *)&k_MCC_IPPROTO_UDP,
-      (const char *)"MCC_MTU", (const char *)-1, (const char *)32, (const char *)&k_MCC_MTU,
-      (const char *)"MCC_NODELAY", (const char *)-1, (const char *)32, (const char *)&k_MCC_NODELAY,
-      (const char *)"MCC_POLL_TMO_US", (const char *)-1, (const char *)32, (const char *)&k_MCC_POLL_TMO_US,
-      (const char *)"MCC_POOLPREFIX_LEN", (const char *)-1, (const char *)32, (const char *)&k_MCC_POOLPREFIX_LEN,
-      (const char *)"MCC_PORT_DEFAULT", (const char *)-1, (const char *)32, (const char *)&k_MCC_PORT_DEFAULT,
-      (const char *)"MCC_PROXY_ARITH_OP", (const char *)-1, (const char *)32, (const char *)&k_MCC_PROXY_ARITH_OP,
-      (const char *)"MCC_PROXY_DELETE_OP", (const char *)-1, (const char *)32, (const char *)&k_MCC_PROXY_DELETE_OP,
-      (const char *)"MCC_PROXY_GET_OP", (const char *)-1, (const char *)32, (const char *)&k_MCC_PROXY_GET_OP,
-      (const char *)"MCC_PROXY_UPDATE_OP", (const char *)-1, (const char *)32, (const char *)&k_MCC_PROXY_UPDATE_OP,
-      (const char *)"MCC_RXDGRAM_MAX", (const char *)-1, (const char *)32, (const char *)&k_MCC_RXDGRAM_MAX,
-      (const char *)"MCC_SERVER_DISABLED", (const char *)-1, (const char *)32, (const char *)&k_MCC_SERVER_DISABLED,
-      (const char *)"MCC_SERVER_DOWN", (const char *)-1, (const char *)32, (const char *)&k_MCC_SERVER_DOWN,
-      (const char *)"MCC_SERVER_RETRY_TMO_MS", (const char *)-1, (const char *)32, (const char *)&k_MCC_SERVER_RETRY_TMO_MS,
-      (const char *)"MCC_SERVER_UP", (const char *)-1, (const char *)32, (const char *)&k_MCC_SERVER_UP,
-      (const char *)"MCC_TCP_INACTIVITY_TMO_DEFAULT", (const char *)-1, (const char *)32, (const char *)&k_MCC_TCP_INACTIVITY_TMO_DEFAULT,
-      (const char *)"MCC_TMO_MS", (const char *)-1, (const char *)32, (const char *)&k_MCC_TMO_MS,
-      (const char *)"MCC_UDP_REPLY_PORTS", (const char *)-1, (const char *)32, (const char *)&k_MCC_UDP_REPLY_PORTS,
-      (const char *)"MCC_WINDOW_MAX", (const char *)-1, (const char *)32, (const char *)&k_MCC_WINDOW_MAX,
       (const char *)"NAN", (const char *)-1, (const char *)64, (const char *)&k_NAN,
       (const char *)"PAGELET_DONE", (const char *)-1, (const char *)32, (const char *)&k_PAGELET_DONE,
       (const char *)"PAGELET_NOT_READY", (const char *)-1, (const char *)32, (const char *)&k_PAGELET_NOT_READY,
       (const char *)"PAGELET_READY", (const char *)-1, (const char *)32, (const char *)&k_PAGELET_READY,
-      (const char *)"PHPMCC_NEW_HANDLE", (const char *)-1, (const char *)32, (const char *)&k_PHPMCC_NEW_HANDLE,
-      (const char *)"PHPMCC_USED_FAST_PATH", (const char *)-1, (const char *)32, (const char *)&k_PHPMCC_USED_FAST_PATH,
-      (const char *)"PHPMCC_USED_SLOW_PATH", (const char *)-1, (const char *)32, (const char *)&k_PHPMCC_USED_SLOW_PATH,
-      (const char *)"PHPMCC_VERSION", (const char *)-1, (const char *)128, (const char *)&k_PHPMCC_VERSION,
       (const char *)"SID", (const char *)(&gv.k_SID - gv.stgv_Variant + 1), (const char *)NULL, (const char *)NULL,
       (const char *)"SQLITE3_ASSOC", (const char *)-1, (const char *)32, (const char *)&k_SQLITE3_ASSOC,
       (const char *)"SQLITE3_BLOB", (const char *)-1, (const char *)32, (const char *)&k_SQLITE3_BLOB,
@@ -2764,7 +2758,73 @@ void init_builtin_constant_table() {
       (const char *)"MB_OVERLOAD_STRING", (const char *)-1, (const char *)32, (const char *)&k_MB_OVERLOAD_STRING,
       (const char *)"MCC_ACCESSPOINT_DOWN", (const char *)-1, (const char *)32, (const char *)&k_MCC_ACCESSPOINT_DOWN,
       (const char *)"MCC_ACCESSPOINT_UP", (const char *)-1, (const char *)32, (const char *)&k_MCC_ACCESSPOINT_UP,
+      (const char *)"MCC_ARG_COMPRESSION_THRESHOLD", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_COMPRESSION_THRESHOLD,
+      (const char *)"MCC_ARG_CONN_NTRIES", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_CONN_NTRIES,
+      (const char *)"MCC_ARG_CONN_TMO", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_CONN_TMO,
+      (const char *)"MCC_ARG_CONSISTENT_HASHING_PREFIXES", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_CONSISTENT_HASHING_PREFIXES,
+      (const char *)"MCC_ARG_DEBUG", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_DEBUG,
+      (const char *)"MCC_ARG_DEBUG_LOGFILE", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_DEBUG_LOGFILE,
+      (const char *)"MCC_ARG_DEFAULT_PREFIX", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_DEFAULT_PREFIX,
+      (const char *)"MCC_ARG_DELETE_PROXY", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_DELETE_PROXY,
+      (const char *)"MCC_ARG_DGRAM_NTRIES", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_DGRAM_NTRIES,
+      (const char *)"MCC_ARG_DGRAM_TMO_THRESHOLD", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_DGRAM_TMO_THRESHOLD,
+      (const char *)"MCC_ARG_DGRAM_TMO_WEIGHT", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_DGRAM_TMO_WEIGHT,
+      (const char *)"MCC_ARG_FB_SERIALIZE_ENABLED", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_FB_SERIALIZE_ENABLED,
+      (const char *)"MCC_ARG_MIRROR_CFG", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_MIRROR_CFG,
+      (const char *)"MCC_ARG_MIRROR_CFG_MODEL", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_MIRROR_CFG_MODEL,
+      (const char *)"MCC_ARG_MIRROR_CFG_NAME", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_MIRROR_CFG_NAME,
+      (const char *)"MCC_ARG_MIRROR_CFG_SERVERPOOLS", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_MIRROR_CFG_SERVERPOOLS,
+      (const char *)"MCC_ARG_NODELAY", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_NODELAY,
+      (const char *)"MCC_ARG_NPOOLPREFIX", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_NPOOLPREFIX,
+      (const char *)"MCC_ARG_NZLIB_COMPRESSION", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_NZLIB_COMPRESSION,
+      (const char *)"MCC_ARG_PERSISTENT", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_PERSISTENT,
+      (const char *)"MCC_ARG_POLL_TMO", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_POLL_TMO,
+      (const char *)"MCC_ARG_PROXY", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_PROXY,
+      (const char *)"MCC_ARG_PROXY_OPS", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_PROXY_OPS,
+      (const char *)"MCC_ARG_SERVERS", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_SERVERS,
+      (const char *)"MCC_ARG_SERVER_RETRY_TMO_MS", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_SERVER_RETRY_TMO_MS,
+      (const char *)"MCC_ARG_TCP_INACTIVITY_TIME", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_TCP_INACTIVITY_TIME,
+      (const char *)"MCC_ARG_TMO", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_TMO,
+      (const char *)"MCC_ARG_UDP_REPLY_PORTS", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_UDP_REPLY_PORTS,
+      (const char *)"MCC_ARG_WINDOW_MAX", (const char *)-1, (const char *)128, (const char *)&k_MCC_ARG_WINDOW_MAX,
       (const char *)"MCC_COMPRESSION_THRESHHOLD", (const char *)-1, (const char *)32, (const char *)&k_MCC_COMPRESSION_THRESHHOLD,
+      (const char *)"MCC_CONN_NTRIES", (const char *)-1, (const char *)32, (const char *)&k_MCC_CONN_NTRIES,
+      (const char *)"MCC_CONN_TMO_MS", (const char *)-1, (const char *)32, (const char *)&k_MCC_CONN_TMO_MS,
+      (const char *)"MCC_CONSISTENCY_IGNORE", (const char *)-1, (const char *)32, (const char *)&k_MCC_CONSISTENCY_IGNORE,
+      (const char *)"MCC_CONSISTENCY_MATCH_ALL", (const char *)-1, (const char *)32, (const char *)&k_MCC_CONSISTENCY_MATCH_ALL,
+      (const char *)"MCC_CONSISTENCY_MATCH_HITS", (const char *)-1, (const char *)32, (const char *)&k_MCC_CONSISTENCY_MATCH_HITS,
+      (const char *)"MCC_CONSISTENCY_MATCH_HITS_SUPERCEDES", (const char *)-1, (const char *)32, (const char *)&k_MCC_CONSISTENCY_MATCH_HITS_SUPERCEDES,
+      (const char *)"MCC_DELETE_DELETED", (const char *)-1, (const char *)32, (const char *)&k_MCC_DELETE_DELETED,
+      (const char *)"MCC_DELETE_ERROR_LOG", (const char *)-1, (const char *)32, (const char *)&k_MCC_DELETE_ERROR_LOG,
+      (const char *)"MCC_DELETE_ERROR_NOLOG", (const char *)-1, (const char *)32, (const char *)&k_MCC_DELETE_ERROR_NOLOG,
+      (const char *)"MCC_DELETE_NOTFOUND", (const char *)-1, (const char *)32, (const char *)&k_MCC_DELETE_NOTFOUND,
+      (const char *)"MCC_DGRAM_NTRIES", (const char *)-1, (const char *)32, (const char *)&k_MCC_DGRAM_NTRIES,
+      (const char *)"MCC_DGRAM_TMO_THRESHOLD", (const char *)-1, (const char *)32, (const char *)&k_MCC_DGRAM_TMO_THRESHOLD,
+      (const char *)"MCC_DGRAM_TMO_WEIGHT", (const char *)-1, (const char *)32, (const char *)&k_MCC_DGRAM_TMO_WEIGHT,
+      (const char *)"MCC_GET_RECORD_ERRORS", (const char *)-1, (const char *)32, (const char *)&k_MCC_GET_RECORD_ERRORS,
+      (const char *)"MCC_HAVE_DEBUG_LOG", (const char *)-1, (const char *)32, (const char *)&k_MCC_HAVE_DEBUG_LOG,
+      (const char *)"MCC_HAVE_FB_SERIALIZATION", (const char *)-1, (const char *)32, (const char *)&k_MCC_HAVE_FB_SERIALIZATION,
+      (const char *)"MCC_HAVE_ZLIB_COMPRESSION", (const char *)-1, (const char *)32, (const char *)&k_MCC_HAVE_ZLIB_COMPRESSION,
+      (const char *)"MCC_IPPROTO_TCP", (const char *)-1, (const char *)32, (const char *)&k_MCC_IPPROTO_TCP,
+      (const char *)"MCC_IPPROTO_UDP", (const char *)-1, (const char *)32, (const char *)&k_MCC_IPPROTO_UDP,
+      (const char *)"MCC_MTU", (const char *)-1, (const char *)32, (const char *)&k_MCC_MTU,
+      (const char *)"MCC_NODELAY", (const char *)-1, (const char *)32, (const char *)&k_MCC_NODELAY,
+      (const char *)"MCC_POLL_TMO_US", (const char *)-1, (const char *)32, (const char *)&k_MCC_POLL_TMO_US,
+      (const char *)"MCC_POOLPREFIX_LEN", (const char *)-1, (const char *)32, (const char *)&k_MCC_POOLPREFIX_LEN,
+      (const char *)"MCC_PORT_DEFAULT", (const char *)-1, (const char *)32, (const char *)&k_MCC_PORT_DEFAULT,
+      (const char *)"MCC_PROXY_ARITH_OP", (const char *)-1, (const char *)32, (const char *)&k_MCC_PROXY_ARITH_OP,
+      (const char *)"MCC_PROXY_DELETE_OP", (const char *)-1, (const char *)32, (const char *)&k_MCC_PROXY_DELETE_OP,
+      (const char *)"MCC_PROXY_GET_OP", (const char *)-1, (const char *)32, (const char *)&k_MCC_PROXY_GET_OP,
+      (const char *)"MCC_PROXY_UPDATE_OP", (const char *)-1, (const char *)32, (const char *)&k_MCC_PROXY_UPDATE_OP,
+      (const char *)"MCC_RXDGRAM_MAX", (const char *)-1, (const char *)32, (const char *)&k_MCC_RXDGRAM_MAX,
+      (const char *)"MCC_SERVER_DISABLED", (const char *)-1, (const char *)32, (const char *)&k_MCC_SERVER_DISABLED,
+      (const char *)"MCC_SERVER_DOWN", (const char *)-1, (const char *)32, (const char *)&k_MCC_SERVER_DOWN,
+      (const char *)"MCC_SERVER_RETRY_TMO_MS", (const char *)-1, (const char *)32, (const char *)&k_MCC_SERVER_RETRY_TMO_MS,
+      (const char *)"MCC_SERVER_UP", (const char *)-1, (const char *)32, (const char *)&k_MCC_SERVER_UP,
+      (const char *)"MCC_TCP_INACTIVITY_TMO_DEFAULT", (const char *)-1, (const char *)32, (const char *)&k_MCC_TCP_INACTIVITY_TMO_DEFAULT,
+      (const char *)"MCC_TMO_MS", (const char *)-1, (const char *)32, (const char *)&k_MCC_TMO_MS,
+      (const char *)"MCC_UDP_REPLY_PORTS", (const char *)-1, (const char *)32, (const char *)&k_MCC_UDP_REPLY_PORTS,
+      (const char *)"MCC_WINDOW_MAX", (const char *)-1, (const char *)32, (const char *)&k_MCC_WINDOW_MAX,
       (const char *)"MCRYPT_3DES", (const char *)-1, (const char *)128, (const char *)&k_MCRYPT_3DES,
       (const char *)"MCRYPT_ARCFOUR", (const char *)-1, (const char *)128, (const char *)&k_MCRYPT_ARCFOUR,
       (const char *)"MCRYPT_ARCFOUR_IV", (const char *)-1, (const char *)128, (const char *)&k_MCRYPT_ARCFOUR_IV,
@@ -3338,6 +3398,9 @@ void init_builtin_constant_table() {
       (const char *)"PCRE_VERSION", (const char *)-1, (const char *)128, (const char *)&k_PCRE_VERSION,
       (const char *)"PEAR_EXTENSION_DIR", (const char *)-1, (const char *)128, (const char *)&k_PEAR_EXTENSION_DIR,
       (const char *)"PEAR_INSTALL_DIR", (const char *)-1, (const char *)128, (const char *)&k_PEAR_INSTALL_DIR,
+      (const char *)"PHPMCC_NEW_HANDLE", (const char *)-1, (const char *)32, (const char *)&k_PHPMCC_NEW_HANDLE,
+      (const char *)"PHPMCC_USED_FAST_PATH", (const char *)-1, (const char *)32, (const char *)&k_PHPMCC_USED_FAST_PATH,
+      (const char *)"PHPMCC_USED_SLOW_PATH", (const char *)-1, (const char *)32, (const char *)&k_PHPMCC_USED_SLOW_PATH,
       (const char *)"PHP_BINARY_READ", (const char *)-1, (const char *)32, (const char *)&k_PHP_BINARY_READ,
       (const char *)"PHP_BINDIR", (const char *)-1, (const char *)128, (const char *)&k_PHP_BINDIR,
       (const char *)"PHP_CONFIG_FILE_PATH", (const char *)-1, (const char *)128, (const char *)&k_PHP_CONFIG_FILE_PATH,

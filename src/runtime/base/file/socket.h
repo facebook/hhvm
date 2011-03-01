@@ -57,8 +57,9 @@ public:
   // allows SSLSocket to perform special checking
   virtual bool checkLiveness() { return true;}
 
-  void setError(int err) { m_error = err;}
+  void setError(int err);
   int getError() const { return m_error;}
+  static int getLastError();
   int getType() const { return m_type;}
 
   // This is only for updating a local copy of timeouts set by setsockopt()

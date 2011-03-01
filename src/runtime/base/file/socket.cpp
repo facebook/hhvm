@@ -19,6 +19,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/server/server_stats.h>
+#include <runtime/base/util/request_local.h>
 #include <util/logger.h>
 #include <fcntl.h>
 #include <poll.h>
@@ -27,6 +28,21 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 StaticString Socket::s_class_name("Socket");
+
+class SocketData : public RequestEventHandler {
+public:
+  SocketData() : m_lastErrno(0) {}
+  void clear() { m_lastErrno = 0; }
+  virtual void requestInit() {
+    clear();
+  }
+  virtual void requestShutdown() {
+    clear();
+  }
+  int m_lastErrno;
+};
+
+IMPLEMENT_REQUEST_LOCAL(SocketData, s_socket_data);
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors and destructor
@@ -47,7 +63,9 @@ Socket::Socket(int sockfd, int type, const char *address /* = NULL */,
   tv.tv_sec = RuntimeOption::SocketDefaultTimeout;
   tv.tv_usec = 0;
   setsockopt(m_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+  s_socket_data->m_lastErrno = errno;
   setsockopt(m_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+  s_socket_data->m_lastErrno = errno;
   setTimeout(tv);
 }
 
@@ -56,6 +74,14 @@ Socket::~Socket() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void Socket::setError(int err) {
+  s_socket_data->m_lastErrno = m_error = err;
+}
+
+int Socket::getLastError() {
+  return s_socket_data->m_lastErrno;
+}
 
 bool Socket::open(CStrRef filename, CStrRef mode) {
   throw NotSupportedException(__func__, "cannot open socket this way");

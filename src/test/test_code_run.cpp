@@ -493,6 +493,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestExtIterator);
   RUN_TEST(TestExtSoap);
   RUN_TEST(TestExtCollator);
+  RUN_TEST(TestExtSocket);
   RUN_TEST(TestFiber);
   RUN_TEST(TestAPC);
   RUN_TEST(TestInlining);
@@ -14964,6 +14965,14 @@ bool TestCodeRun::TestExtCollator() {
       "}\n"
       "ut_run('ut_main6');\n"
   );
+
+  return true;
+}
+
+bool TestCodeRun::TestExtSocket() {
+  MVCR("<?php "
+      "$r = socket_create(AF_INET, SOCK_RAW, 0);"
+      "var_dump(socket_last_error());");
 
   return true;
 }

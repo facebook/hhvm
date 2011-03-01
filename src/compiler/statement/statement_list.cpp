@@ -442,52 +442,25 @@ void StatementList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void StatementList::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   FunctionScopePtr func = getFunctionScope();
-  bool inPseudoMain = func && func->inPseudoMain();
-  std::vector<bool> isDeclaration;
-
-  if (inPseudoMain) {
-    // We need these declarations to go first, because PHP allows top level
-    // function and class declarations to appear after usage.
-    for (unsigned int i = 0; i < m_stmts.size(); i++) {
-      StatementPtr stmt = m_stmts[i];
-      bool isDecl = false;
-      if (stmt->is(Statement::KindOfFunctionStatement)) {
-        isDecl = true;
-      } else if (stmt->is(Statement::KindOfClassStatement) ||
-                 stmt->is(Statement::KindOfInterfaceStatement)) {
-        ClassScopePtr cls =
-          (dynamic_pointer_cast<InterfaceStatement>(stmt))->getClassScope();
-        isDecl = cls->isBaseClass() || !cls->isVolatile();
-      }
-      if (isDecl) stmt->outputCPP(cg,ar);
-      isDeclaration.push_back(isDecl);
-    }
-  }
 
   for (unsigned int i = 0; i < m_stmts.size(); i++) {
     StatementPtr stmt = m_stmts[i];
-    if (stmt->is(Statement::KindOfClassStatement)) {
-      if (!inPseudoMain || !isDeclaration[i]) stmt->outputCPP(cg, ar);
-    } else if (!(stmt->is(Statement::KindOfFunctionStatement) ||
-                 stmt->is(Statement::KindOfInterfaceStatement)) ||
-               (!inPseudoMain || !isDeclaration[i])) {
-      stmt->outputCPP(cg, ar);
-      if (stmt->is(Statement::KindOfMethodStatement)) {
-        MethodStatementPtr methodStmt =
-          dynamic_pointer_cast<MethodStatement>(stmt);
-        std::string methodName = methodStmt->getName();
-        if (methodName == "offsetget") {
-          ClassScopePtr cls = getClassScope();
-          std::string arrayAccess("arrayaccess");
-          if (cls->derivesFrom(ar, arrayAccess, false, false)) {
-            FunctionScopePtr funcScope = methodStmt->getFunctionScope();
-            std::string name = funcScope->getName();
-            funcScope->setName("__offsetget_lval");
-            methodStmt->setName("__offsetget_lval");
-            methodStmt->outputCPP(cg, ar);
-            funcScope->setName(name);
-            methodStmt->setName("offsetget");
-          }
+    stmt->outputCPP(cg, ar);
+    if (stmt->is(Statement::KindOfMethodStatement)) {
+      MethodStatementPtr methodStmt =
+        dynamic_pointer_cast<MethodStatement>(stmt);
+      std::string methodName = methodStmt->getName();
+      if (methodName == "offsetget") {
+        ClassScopePtr cls = getClassScope();
+        std::string arrayAccess("arrayaccess");
+        if (cls->derivesFrom(ar, arrayAccess, false, false)) {
+          FunctionScopePtr funcScope = methodStmt->getFunctionScope();
+          std::string name = funcScope->getName();
+          funcScope->setName("__offsetget_lval");
+          methodStmt->setName("__offsetget_lval");
+          methodStmt->outputCPP(cg, ar);
+          funcScope->setName(name);
+          methodStmt->setName("offsetget");
         }
       }
     }

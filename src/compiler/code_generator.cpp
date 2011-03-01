@@ -59,8 +59,9 @@ const char *CodeGenerator::SPLITTER_MARKER =
 CodeGenerator::CodeGenerator(std::ostream *primary,
                              Output output /* = PickledPHP */,
                              const std::string *filename /* = NULL */)
-    : m_out(NULL), m_output(output), m_context(NoContext),
-      m_insideScalarArray(false), m_itemIndex(-1) {
+    : m_out(NULL), m_output(output),
+      m_hoistedClasses(0), m_collectHoistedClasses(false),
+      m_context(NoContext), m_insideScalarArray(false), m_itemIndex(-1) {
   for (int i = 0; i < StreamCount; i++) {
     m_streams[i] = NULL;
     m_indentation[i] = 0;
@@ -584,4 +585,34 @@ void CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
                                 ConstructPtr cs,
                                 bool stringWrapper /* = true */) {
   printString(str, ar, (BlockScopePtr)cs->getScope(), stringWrapper);
+}
+
+void CodeGenerator::beginHoistedClasses() {
+  m_hoistedClasses = new set<string>();
+  m_collectHoistedClasses = true;
+}
+
+void CodeGenerator::endHoistedClasses() {
+  delete m_hoistedClasses;
+  m_hoistedClasses = 0;
+}
+
+void CodeGenerator::collectHoistedClasses(bool flag) {
+  m_collectHoistedClasses = flag;
+}
+
+void CodeGenerator::addHoistedClass(const string &cls) {
+  if (m_hoistedClasses && m_collectHoistedClasses) {
+    m_hoistedClasses->insert(cls);
+  }
+}
+
+bool CodeGenerator::checkHoistedClass(const string &cls) {
+  if (m_hoistedClasses) {
+    if (m_hoistedClasses->find(cls) != m_hoistedClasses->end()) {
+      return true;
+    }
+    addHoistedClass(cls);
+  }
+  return false;
 }

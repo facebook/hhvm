@@ -368,7 +368,13 @@ String f_exec(CStrRef command, Variant output /* = null */,
   sbuf.read(fp);
 
   Array lines = StringUtil::Explode(sbuf.detach(), "\n");
-  return_var = ctx.exit();
+  int ret = ctx.exit();
+  if (!LightProcess::Available()) {
+    if (WIFEXITED(ret)) {
+      ret = WEXITSTATUS(ret);
+    }
+  }
+  return_var = ret;
   int count = lines.size();
   if (count > 0 && lines[count - 1].toString().empty()) {
     count--; // remove explode()'s last empty line

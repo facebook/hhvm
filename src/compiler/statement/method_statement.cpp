@@ -802,7 +802,8 @@ bool MethodStatement::outputFFI(CodeGenerator &cg, AnalysisResultPtr ar) {
     inClass && (!m_modifiers->isPublic() || clsScope->isRedeclaring());
   // skip constructors
   bool isConstructor = inClass && funcScope->isConstructor(clsScope);
-  bool valid = !pseudoMain && !inaccessible && !isConstructor;
+  bool valid = !pseudoMain && !inaccessible && !isConstructor &&
+    (inClass || (m_originalName[0] != '1' && m_originalName[0] != '0'));
 
   if (cg.getContext() == CodeGenerator::CppFFIDecl ||
       cg.getContext() == CodeGenerator::CppFFIImpl) {

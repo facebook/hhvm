@@ -334,10 +334,11 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
     "    if (p->offset) {\n"
     "      const char *addr = (const char *)g + (int64)p->data;\n"
     "      ci = *(const CallInfo **)addr;\n"
+    "      return ci != 0;\n"
     "    } else {\n"
     "      ci = (const CallInfo *)p->data;\n"
+    "      return true;\n"
     "    }\n"
-    "    return true;\n"
     "  }\n";
 
   const char text4s[] =

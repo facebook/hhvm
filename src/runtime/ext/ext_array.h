@@ -310,6 +310,7 @@ inline Variant f_reset(Variant array) {
   return array.array_iter_reset();
 }
 inline Variant f_end(Variant array) {
+  array.array_iter_dirty_reset();
   return array.array_iter_end();
 }
 inline Variant f_key(Variant array) {

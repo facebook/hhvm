@@ -121,9 +121,17 @@ ALL_SOURCES += \
   $(GENERATED_SOURCES) \
   $(ASM_SOURCES)
 
+ifdef USE_PIC_ONLY
+pic_objects = $(1)
+CPPFLAGS += -fPIC
+else
+pic_objects = $(patsubst %.o, %.pic.o, $(1))
+endif
+
 INTERMEDIATE_FILES += $(GENERATED_SOURCES) time_build.out
 SOURCES += $(filter-out $(EXCLUDES), $(ALL_SOURCES))
 OBJECTS += $(addprefix $(OUT_DIR),$(patsubst %.S, %.o, $(patsubst %.cpp, %.o, $(SOURCES:.c=.o))))
+PIC_OBJECTS = $(call pic_objects, $(OBJECTS))
 OBJECT_DIR_DEPS := $(if $(OUT_DIR),$(addsuffix .mkdir, \
 	$(sort $(dir $(OBJECTS)))))
 OBJECT_DIRS_REQUIRED := $(filter-out $(wildcard $(OBJECT_DIR_DEPS)), \
@@ -180,7 +188,7 @@ P_CC = $(PREFIX) $(CC)
 LD = $(CXX)
 
 # Both $(CC) and $(CXX) will now generate .d dependency files.
-CPPFLAGS += -MMD -fPIC
+CPPFLAGS += -MMD
 
 # allowing "and", "or" to be re-defined
 CXXFLAGS += -fno-operator-names
@@ -654,6 +662,7 @@ $(LV)$(LD_CMD) -o $@ $(LDFLAGS) $(filter %.o,$^) $(LIBS)
 endef
 
 OBJECT_FILES = $(addprefix $(OUT_DIR),$(patsubst %.$(2),%.o,$(1)))
+PIC_OBJECT_FILES = $(addprefix $(OUT_DIR),$(patsubst %.$(2),%.pic.o,$(1)))
 PREPROCESSED_FILES = $(addprefix $(OUT_DIR),$(patsubst %.$(2),%.cpp.E,$(1)))
 
 ifdef NOT_NOW
@@ -679,9 +688,26 @@ $(call OBJECT_FILES,$(GENERATED_CPP_SOURCES),c): $(OUT_DIR)%.o:%.c
 $(call OBJECT_FILES,$(ASM_SOURCES),S): $(OUT_DIR)%.o:%.S
 	$(call COMPILE_IT,$(P_CC:distcc=),$(OPT))
 
+$(call PIC_OBJECT_FILES,$(CXX_NOOPT_SOURCES) $(GENERATED_CXX_NOOPT_SOURCES),cpp): $(OUT_DIR)%.pic.o:%.cpp
+	$(call COMPILE_IT,$(P_CXX),$(CXXFLAGS) -fPIC)
+
+$(call PIC_OBJECT_FILES,$(CXX_SOURCES) $(GENERATED_CXX_SOURCES),cpp): $(OUT_DIR)%.pic.o:%.cpp
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS) -fPIC)
+
+$(call PIC_OBJECT_FILES,$(C_SOURCES) $(GENERATED_C_SOURCES),c): $(OUT_DIR)%.pic.o:%.c
+	$(call COMPILE_IT,$(P_CC),$(OPT) -fPIC)
+
+$(call PIC_OBJECT_FILES,$(GENERATED_CPP_SOURCES),c): $(OUT_DIR)%.pic.o:%.c
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS) -fPIC)
+
+$(call PIC_OBJECT_FILES,$(ASM_SOURCES),S): $(OUT_DIR)%.pic.o:%.S
+	$(call COMPILE_IT,$(P_CC:distcc=),$(OPT) -fPIC)
+
 $(OUT_DIR)%.o:$(OUT_DIR)%.cpp
 	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
 
+$(OUT_DIR)%.pic.o:$(OUT_DIR)%.cpp
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS) -fPIC)
 
 $(OUT_DIR)%.cpp.E:$(OUT_DIR)%.cpp
 	$(call PREPROCESS_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
@@ -721,15 +747,16 @@ SUB_INTERMEDIATE_FILES = $(INTERMEDIATE_FILES)
 	$(V)$(MAKE) $(NO_PRINT) -f $(PROJECT_ROOT)/src/default.mk $@
 
 $(OBJECTS): $(GENERATED_SOURCES)
+$(PIC_OBJECTS): $(GENERATED_SOURCES)
 
 .PHONY: objects
-objects: $(OBJECTS) quiet
+objects: $(OBJECTS) $(PIC_OBJECTS) quiet
 
 ifdef SHOW_LINK
 
-$(SHARED_LIB) $(SHARED_LIB_GD): $(OBJECTS)
+$(SHARED_LIB) $(SHARED_LIB_GD): $(PIC_OBJECTS)
 	$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,$(notdir $@) \
-			$(SO_LDFLAGS) -o $@ $(OBJECTS) $(EXTERNAL)
+			$(SO_LDFLAGS) -o $@ $(PIC_OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)
 	$(AR_CMD) $@ $(OBJECTS) $(ADDITIONAL_OBJS)
@@ -739,10 +766,10 @@ $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 
 else
 
-$(SHARED_LIB) $(SHARED_LIB_GD): $(OBJECTS)
+$(SHARED_LIB) $(SHARED_LIB_GD): $(PIC_OBJECTS)
 	@echo 'Linking $@ ...'
 	$(V)$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,$(notdir $@) \
-		$(SO_LDFLAGS) -o $@ $(OBJECTS) $(EXTERNAL)
+		$(SO_LDFLAGS) -o $@ $(PIC_OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)
 	@echo 'Linking $@ ...'

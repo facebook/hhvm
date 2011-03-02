@@ -29,8 +29,6 @@ using namespace std;
 // statics
 
 TypePtr Type::Boolean     (new Type(Type::KindOfBoolean     ));
-TypePtr Type::Byte        (new Type(Type::KindOfByte        ));
-TypePtr Type::Int16       (new Type(Type::KindOfInt16       ));
 TypePtr Type::Int32       (new Type(Type::KindOfInt32       ));
 TypePtr Type::Int64       (new Type(Type::KindOfInt64       ));
 TypePtr Type::Double      (new Type(Type::KindOfDouble      ));
@@ -81,8 +79,6 @@ TypePtr Type::CreateObjectType(const std::string &classname) {
 TypePtr Type::GetType(KindOf kindOf) {
   switch (kindOf) {
   case KindOfBoolean:     return Type::Boolean;
-  case KindOfByte:        return Type::Byte;
-  case KindOfInt16:       return Type::Int16;
   case KindOfInt32:       return Type::Int32;
   case KindOfInt64:       return Type::Int64;
   case KindOfDouble:      return Type::Double;
@@ -152,18 +148,18 @@ TypePtr Type::Intersection(AnalysisResultConstPtr ar,
       }
     }
 
-    // Otherwise, return Byte
-    res = Byte;
+    // Otherwise, return Int32
+    res = Int32;
   } else if (from->m_kindOf == KindOfBoolean
              && to->mustBe(KindOfNumeric | KindOfArray | KindOfString)
              && !IsExactType(to->m_kindOf)) {
-    res = Byte;
+    res = Int32;
   } else {
     res = to;
   }
 
   if (from->mustBe(KindOfBoolean) && to->m_kindOf == KindOfPrimitive) {
-    res = Byte;
+    res = Int32;
   }
 
   return res;
@@ -384,8 +380,6 @@ Type::Type(KindOf kindOf, const std::string &name)
 
 bool Type::isInteger() const {
   switch (m_kindOf) {
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
     return true;
@@ -468,8 +462,6 @@ string Type::getCPPDecl(CodeGenerator &cg, AnalysisResultConstPtr ar,
                         BlockScopeRawPtr scope) {
   switch (m_kindOf) {
   case KindOfBoolean:     return "bool";
-  case KindOfByte:        return "char";
-  case KindOfInt16:       return "short";
   case KindOfInt32:       return "int";
   case KindOfInt64:       return "int64";
   case KindOfDouble:      return "double";
@@ -506,8 +498,6 @@ void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultConstPtr ar,
                          BlockScopeRawPtr scope) {
   switch (m_kindOf) {
     case KindOfBoolean:     cg_printf("toBoolean");   break;
-    case KindOfByte:        cg_printf("toByte");      break;
-    case KindOfInt16:       cg_printf("toInt16");     break;
     case KindOfInt32:       cg_printf("toInt32");     break;
     case KindOfInt64:       cg_printf("toInt64");     break;
     case KindOfDouble:      cg_printf("toDouble");    break;
@@ -535,8 +525,6 @@ void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultConstPtr ar,
 const char *Type::getCPPInitializer() {
   switch (m_kindOf) {
   case KindOfBoolean:     return "false";
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:       return "0";
   case KindOfNumeric:
@@ -559,8 +547,6 @@ std::string Type::getPHPName() {
 std::string Type::toString() const {
   switch (m_kindOf) {
   case KindOfBoolean:     return "Boolean";
-  case KindOfByte:        return "Byte";
-  case KindOfInt16:       return "Int16";
   case KindOfInt32:       return "Int32";
   case KindOfInt64:       return "Int64";
   case KindOfDouble:      return "Double";

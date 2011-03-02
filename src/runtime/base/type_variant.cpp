@@ -75,7 +75,6 @@ Variant::Variant(CStrRef v) : _count(0), m_type(KindOfString) {
       s->incRefCount();
     }
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
 }
@@ -93,7 +92,6 @@ Variant::Variant(CArrRef v) : _count(0), m_type(KindOfArray) {
     m_data.parr = a;
     a->incRefCount();
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
 }
@@ -104,7 +102,6 @@ Variant::Variant(CObjRef v) : _count(0), m_type(KindOfObject) {
     m_data.pobj = o;
     o->incRefCount();
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
 }
@@ -118,7 +115,6 @@ Variant::Variant(StringData *v) : _count(0), m_type(KindOfString) {
       v->incRefCount();
     }
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
 }
@@ -128,7 +124,6 @@ Variant::Variant(ArrayData *v) : _count(0), m_type(KindOfArray) {
     m_data.parr = v;
     v->incRefCount();
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
 }
@@ -138,7 +133,6 @@ Variant::Variant(ObjectData *v) : _count(0), m_type(KindOfObject) {
     m_data.pobj = v;
     v->incRefCount();
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
 }
@@ -147,7 +141,6 @@ Variant::Variant(Variant *v) : _count(0), m_type(KindOfVariant) {
   if (v) {
     m_data.pvar = v;
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
 }
@@ -158,7 +151,6 @@ Variant::Variant(CVarRef v) {
 }
 
 void Variant::reset() {
-  m_data.num = 0;
   m_type = KindOfNull;
 }
 
@@ -289,14 +281,13 @@ Variant &Variant::setWithRef(CVarRef v, const ArrayData *arr /* = NULL */) {
 
   if (IS_REFCOUNTED_TYPE(m_type)) destruct();
   m_type = rhs.m_type;
-  // drop uninitialized flag
-  m_data.num = m_type == KindOfNull ? 0 : rhs.m_data.num;
+  if (m_type == KindOfUninit) m_type = KindOfNull; // drop uninit
+  m_data.num = rhs.m_data.num;
   return *this;
 }
 
 void Variant::setNull() {
   if (isPrimitive()) {
-    m_data.num = 0;
     m_type = KindOfNull;
   } else if (m_type == KindOfVariant) {
     m_data.pvar->setNull();
@@ -328,7 +319,7 @@ CVarRef Variant::set(char v) {
   } else {
     destruct();
   }
-  m_type = KindOfByte;
+  m_type = KindOfInt32;
   m_data.num = v;
   return *this;
 }
@@ -342,7 +333,7 @@ CVarRef Variant::set(short v) {
   } else {
     destruct();
   }
-  m_type = KindOfInt16;
+  m_type = KindOfInt32;
   m_data.num = v;
   return *this;
 }
@@ -422,7 +413,6 @@ CVarRef Variant::set(StringData *v) {
       v->incRefCount();
     }
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
   return *this;
@@ -455,7 +445,6 @@ CVarRef Variant::set(ArrayData *v) {
     m_data.parr = v;
     v->incRefCount();
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
   return *this;
@@ -475,7 +464,6 @@ CVarRef Variant::set(ObjectData *v) {
     m_data.pobj = v;
     v->incRefCount();
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
   return *this;
@@ -516,8 +504,6 @@ int Variant::getRefCount() const {
 
 bool Variant::isInteger() const {
   switch (m_type) {
-    case KindOfByte:
-    case KindOfInt16:
     case KindOfInt32:
     case KindOfInt64:
       return true;
@@ -539,8 +525,6 @@ bool Variant::isNumeric(bool checkString /* = false */) const {
 DataType Variant::toNumeric(int64 &ival, double &dval,
     bool checkString /* = false */) const {
   switch (m_type) {
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
     ival = m_data.num;
@@ -564,6 +548,7 @@ DataType Variant::toNumeric(int64 &ival, double &dval,
 
 bool Variant::isScalar() const {
   switch (getType()) {
+  case KindOfUninit:
   case KindOfNull:
   case KindOfArray:
   case KindOfObject:
@@ -1355,8 +1340,6 @@ Variant &Variant::operator%=(double n) {
 
 Variant Variant::operator~() const {
   switch (getType()) {
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
     return ~toInt64();
@@ -1434,9 +1417,8 @@ Variant &Variant::operator>>=(int64 n) {
 
 Variant &Variant::operator++() {
   switch (getType()) {
+  case KindOfUninit:
   case KindOfNull:   set(1LL); break;
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:  set(toInt64() + 1);  break;
   case KindOfDouble: set(toDouble() + 1); break;
@@ -1451,6 +1433,7 @@ Variant &Variant::operator++() {
         switch (ret) {
         case KindOfInt64:  set(lval + 1); break;
         case KindOfDouble: set(dval + 1); break;
+        case KindOfUninit:
         case KindOfNull:
           split();
           getStringData()->inc(); break;
@@ -1475,8 +1458,6 @@ Variant Variant::operator++(int) {
 
 Variant &Variant::operator--() {
   switch (getType()) {
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:  set(toInt64() - 1);  break;
   case KindOfDouble: set(toDouble() - 1); break;
@@ -1491,6 +1472,7 @@ Variant &Variant::operator--() {
         switch (ret) {
         case KindOfInt64:  set(lval - 1);   break;
         case KindOfDouble: set(dval - 1);   break;
+        case KindOfUninit:
         case KindOfNull:   /* do nothing */ break;
         default:
           ASSERT(false);
@@ -1558,6 +1540,7 @@ void Variant::escalate(bool mutableIteration /* = false */) {
 
 bool Variant::toBooleanHelper() const {
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:    return false;
   case KindOfDouble:  return m_data.dbl != 0;
   case KindOfStaticString:
@@ -1574,6 +1557,7 @@ bool Variant::toBooleanHelper() const {
 
 int64 Variant::toInt64Helper(int base /* = 10 */) const {
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:    return 0;
   case KindOfDouble:  {
     return (m_data.dbl > LONG_MAX) ? (uint64)m_data.dbl : (int64)m_data.dbl;
@@ -1592,6 +1576,7 @@ int64 Variant::toInt64Helper(int base /* = 10 */) const {
 
 double Variant::toDoubleHelper() const {
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:    return 0.0;
   case KindOfDouble:  return m_data.dbl;
   case KindOfStaticString:
@@ -1606,6 +1591,7 @@ double Variant::toDoubleHelper() const {
 
 String Variant::toStringHelper() const {
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:    return empty_string;
   case KindOfBoolean: return m_data.num ? s_1 : empty_string;
   case KindOfDouble:  return m_data.dbl;
@@ -1624,6 +1610,7 @@ String Variant::toStringHelper() const {
 
 Array Variant::toArrayHelper(bool warn) const {
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:    return Array::Create();
   case KindOfInt64:   return Array::Create(m_data.num);
   case KindOfStaticString:
@@ -1641,11 +1628,10 @@ Object Variant::toObjectHelper() const {
   if (m_type == KindOfVariant) return m_data.pvar->toObject();
 
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:
     break;
   case KindOfBoolean:
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
   case KindOfDouble:
@@ -1675,11 +1661,10 @@ VarNR Variant::toKey() const {
     }
   }
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:
     return empty_string;
   case KindOfBoolean:
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
     return m_data.num;
@@ -1725,8 +1710,6 @@ bool Variant::same(int v2) const {
 bool Variant::same(int64 v2) const {
   TypedValueAccessor acc = getTypedAccessor();
   switch (GetAccessorType(acc)) {
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
     return HPHP::equal(v2, GetInt64(acc));
@@ -1781,14 +1764,10 @@ bool Variant::same(CVarRef v2) const {
 
   TypedValueAccessor acc = getTypedAccessor();
   switch (GetAccessorType(acc)) {
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64: {
     TypedValueAccessor acc2 = v2.getTypedAccessor();
     switch (GetAccessorType(acc2)) {
-    case KindOfByte:
-    case KindOfInt16:
     case KindOfInt32:
     case KindOfInt64:
       return HPHP::equal(GetInt64(acc), GetInt64(acc2));
@@ -1826,10 +1805,9 @@ bool Variant::same(CVarRef v2) const {
 #define UNWRAP(reverse)                                                    \
   TypedValueAccessor acc = getTypedAccessor();                             \
   switch (GetAccessorType(acc)) {                                          \
+  case KindOfUninit:                                                       \
   case KindOfNull:    return HPHP::reverse(v2, false);                     \
   case KindOfBoolean: return HPHP::reverse(v2, GetBoolean(acc));           \
-  case KindOfByte:                                                         \
-  case KindOfInt16:                                                        \
   case KindOfInt32:                                                        \
   case KindOfInt64:   return HPHP::reverse(v2, GetInt64(acc));             \
   case KindOfDouble:  return HPHP::reverse(v2, GetDouble(acc));            \
@@ -1847,10 +1825,9 @@ bool Variant::same(CVarRef v2) const {
 #define UNWRAP_STR(reverse)                                                \
   TypedValueAccessor acc = getTypedAccessor();                             \
   switch (GetAccessorType(acc)) {                                          \
+  case KindOfUninit:                                                       \
   case KindOfNull:    return HPHP::reverse(v2, empty_string);              \
   case KindOfBoolean: return HPHP::reverse(v2, GetBoolean(acc));           \
-  case KindOfByte:                                                         \
-  case KindOfInt16:                                                        \
   case KindOfInt32:                                                        \
   case KindOfInt64:   return HPHP::reverse(v2, GetInt64(acc));             \
   case KindOfDouble:  return HPHP::reverse(v2, GetDouble(acc));            \
@@ -1868,10 +1845,9 @@ bool Variant::same(CVarRef v2) const {
 #define UNWRAP_STRING(reverse)                                             \
   TypedValueAccessor acc = getTypedAccessor();                             \
   switch (GetAccessorType(acc)) {                                          \
+  case KindOfUninit:                                                       \
   case KindOfNull:    return HPHP::reverse(v2, empty_string);              \
   case KindOfBoolean: return HPHP::reverse(v2, GetBoolean(acc));           \
-  case KindOfByte:                                                         \
-  case KindOfInt16:                                                        \
   case KindOfInt32:                                                        \
   case KindOfInt64:   return HPHP::reverse(v2, GetInt64(acc));             \
   case KindOfDouble:  return HPHP::reverse(v2, GetDouble(acc));            \
@@ -1890,14 +1866,13 @@ bool Variant::same(CVarRef v2) const {
 #define UNWRAP_VAR(forward, reverse)                                       \
   TypedValueAccessor acc = getTypedAccessor();                             \
   switch (GetAccessorType(acc)) {                                          \
+  case KindOfUninit:                                                       \
   case KindOfNull:                                                         \
     if (v2.isString()) {                                                   \
       return HPHP::reverse(v2.getStringData(), empty_string);              \
     }                                                                      \
     return HPHP::reverse(v2, false);                                       \
   case KindOfBoolean: return HPHP::reverse(v2, GetBoolean(acc));           \
-  case KindOfByte:                                                         \
-  case KindOfInt16:                                                        \
   case KindOfInt32:                                                        \
   case KindOfInt64:   return HPHP::reverse(v2, GetInt64(acc));             \
   case KindOfDouble:  return HPHP::reverse(v2, GetDouble(acc));            \
@@ -1920,10 +1895,9 @@ bool Variant::same(CVarRef v2) const {
 #define UNWRAP_ARR(forward, reverse)                                       \
   TypedValueAccessor acc = getTypedAccessor();                             \
   switch (GetAccessorType(acc)) {                                          \
+  case KindOfUninit:                                                       \
   case KindOfNull:    return HPHP::reverse(v2, false);                     \
   case KindOfBoolean: return HPHP::reverse(v2, GetBoolean(acc));           \
-  case KindOfByte:                                                         \
-  case KindOfInt16:                                                        \
   case KindOfInt32:                                                        \
   case KindOfInt64:   return HPHP::reverse(v2, GetInt64(acc));             \
   case KindOfDouble:  return HPHP::reverse(v2, GetDouble(acc));            \
@@ -2046,6 +2020,7 @@ static void raise_bad_offset_notice() {
                                         Array::Create(offset));         \
     case KindOfVariant:                                                 \
       return m_data.pvar->rvalAt(offset, flags);                        \
+    case KindOfUninit:                                                  \
     case KindOfNull:                                                    \
       break;                                                            \
     default:                                                            \
@@ -2072,6 +2047,7 @@ Variant Variant::rvalAtHelper(int64 offset, ACCESSPARAMS_IMPL) const {
     return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
     return m_data.pvar->rvalAt(offset, flags);
+  case KindOfUninit:
   case KindOfNull:
     break;
   default:
@@ -2105,6 +2081,7 @@ Variant Variant::rvalAt(litstr offset, ACCESSPARAMS_IMPL) const {
     return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
     return m_data.pvar->rvalAt(offset, flags);
+  case KindOfUninit:
   case KindOfNull:
     break;
   default:
@@ -2138,6 +2115,7 @@ Variant Variant::rvalAt(CStrRef offset, ACCESSPARAMS_IMPL) const {
     return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
     return m_data.pvar->rvalAt(offset, flags);
+  case KindOfUninit:
   case KindOfNull:
     break;
   default:
@@ -2153,11 +2131,10 @@ Variant Variant::rvalAt(CVarRef offset, ACCESSPARAMS_IMPL) const {
   if (m_type == KindOfArray) {
     // Fast path for KindOfArray
     switch (offset.m_type) {
+    case KindOfUninit:
     case KindOfNull:
       return m_data.parr->get(empty_string, flags & AccessFlags::Error);
     case KindOfBoolean:
-    case KindOfByte:
-    case KindOfInt16:
     case KindOfInt32:
     case KindOfInt64:
       return m_data.parr->get(offset.m_data.num, flags & AccessFlags::Error);
@@ -2198,6 +2175,7 @@ Variant Variant::rvalAt(CVarRef offset, ACCESSPARAMS_IMPL) const {
     return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
     return m_data.pvar->rvalAt(offset, flags);
+  case KindOfUninit:
   case KindOfNull:
     break;
   default:
@@ -2222,6 +2200,7 @@ CVarRef Variant::rvalRefHelper(T offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
     return tmp;
   case KindOfVariant:
     return m_data.pvar->rvalRef(offset, tmp, flags);
+  case KindOfUninit:
   case KindOfNull:
     break;
   default:
@@ -2274,11 +2253,10 @@ CVarRef Variant::rvalRef(CVarRef offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
   if (m_type == KindOfArray) {
     // Fast path for KindOfArray
     switch (offset.m_type) {
+    case KindOfUninit:
     case KindOfNull:
       return m_data.parr->get(empty_string, flags & AccessFlags::Error);
     case KindOfBoolean:
-    case KindOfByte:
-    case KindOfInt16:
     case KindOfInt32:
     case KindOfInt64:
       return m_data.parr->get(offset.m_data.num, flags & AccessFlags::Error);
@@ -2413,6 +2391,7 @@ Variant *Variant::lvalPtr(CStrRef key, bool forWrite, bool create) {
 
 Variant &Variant::lvalAt() {
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:
     set(ArrayData::Create());
     break;
@@ -2828,6 +2807,7 @@ Variant &Variant::o_unsetLval(CStrRef propName, CVarRef tmpForGet,
       break;                                                            \
     }                                                                   \
     /* Fall through */                                                  \
+  case KindOfUninit:                                                    \
   case KindOfNull:                                                      \
     set(ArrayData::Create(ToKey(key), v));                              \
     break;                                                              \
@@ -2894,6 +2874,7 @@ check_array:                                                            \
       break;                                                            \
     }                                                                   \
     /* Fall through */                                                  \
+  case KindOfUninit:                                                    \
   case KindOfNull:                                                      \
     set(ArrayData::Create(ToKey(key), null));                           \
     goto check_array;                                                   \
@@ -2955,6 +2936,7 @@ CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
       break;
     }
     /* Fall through */
+  case KindOfUninit:
   case KindOfNull:
     if (isString) {
       set(ArrayData::Create(key, v));
@@ -3007,6 +2989,7 @@ CVarRef Variant::set(CVarRef key, CVarRef v) {
       break;
     }
     /* Fall through */
+  case KindOfUninit:
   case KindOfNull: {
     Variant k(ToKey(key));
     if (k.isNull()) return lvalBlackHole();
@@ -3079,6 +3062,7 @@ check_array:
       break;
     }
     /* Fall through */
+  case KindOfUninit:
   case KindOfNull:
     if (isString) {
       set(ArrayData::Create(key, null));
@@ -3139,6 +3123,7 @@ check_array:
       break;
     }
     /* Fall through */
+  case KindOfUninit:
   case KindOfNull: {
     Variant k(ToKey(key));
     if (k.isNull()) return lvalBlackHole();
@@ -3175,6 +3160,7 @@ check_array:
 
 CVarRef Variant::append(CVarRef v) {
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:
     set(ArrayData::Create(v));
     break;
@@ -3247,6 +3233,7 @@ check_array:
     return v;
   }
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:
     set(ArrayData::Create());
     goto check_array;
@@ -3298,6 +3285,7 @@ check_array:
 
 void Variant::removeImpl(double key) {
   switch (getType()) {
+  case KindOfUninit:
   case KindOfNull:
     break;
   case KindOfArray:
@@ -3322,6 +3310,7 @@ void Variant::removeImpl(double key) {
 
 void Variant::removeImpl(int64 key) {
   switch (getType()) {
+  case KindOfUninit:
   case KindOfNull:
     break;
   case KindOfArray:
@@ -3346,6 +3335,7 @@ void Variant::removeImpl(int64 key) {
 
 void Variant::removeImpl(bool key) {
   switch (getType()) {
+  case KindOfUninit:
   case KindOfNull:
     break;
   case KindOfArray:
@@ -3370,6 +3360,7 @@ void Variant::removeImpl(bool key) {
 
 void Variant::removeImpl(CVarRef key, bool isString /* false */) {
   switch (getType()) {
+  case KindOfUninit:
   case KindOfNull:
     break;
   case KindOfArray:
@@ -3399,6 +3390,7 @@ void Variant::removeImpl(CVarRef key, bool isString /* false */) {
 
 void Variant::removeImpl(CStrRef key, bool isString /* false */) {
   switch (getType()) {
+  case KindOfUninit:
   case KindOfNull:
     break;
   case KindOfArray:
@@ -3428,8 +3420,6 @@ void Variant::removeImpl(CStrRef key, bool isString /* false */) {
 
 void Variant::remove(CVarRef key) {
   switch(key.getType()) {
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
     removeImpl(key.toInt64());
@@ -3498,14 +3488,13 @@ void Variant::serialize(VariableSerializer *serializer,
   }
 
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:
     ASSERT(!isArrayKey);
     serializer->writeNull();                break;
   case KindOfBoolean:
     ASSERT(!isArrayKey);
     serializer->write(m_data.num != 0);     break;
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
     serializer->write(m_data.num);          break;
@@ -3769,10 +3758,9 @@ Variant Variant::share(bool save) const {
   }
 
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:    return false; // same as non-existent
   case KindOfBoolean: return (m_data.num != 0);
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:   return m_data.num;
   case KindOfDouble:  return m_data.dbl;
@@ -3836,10 +3824,9 @@ Variant Variant::fiberMarshal(FiberReferenceMap &refMap) const {
   }
 
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:    return Variant();
   case KindOfBoolean: return (m_data.num != 0);
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:   return m_data.num;
   case KindOfDouble:  return m_data.dbl;
@@ -3882,10 +3869,9 @@ Variant Variant::fiberUnmarshal(FiberReferenceMap &refMap) const {
   }
 
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:    return Variant();
   case KindOfBoolean: return (m_data.num != 0);
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:   return m_data.num;
   case KindOfDouble:  return m_data.dbl;
@@ -3906,10 +3892,9 @@ Variant Variant::fiberUnmarshal(FiberReferenceMap &refMap) const {
 
 const char *Variant::getTypeString(DataType type) {
   switch (type) {
+  case KindOfUninit:
   case KindOfNull:    return "KindOfNull";
   case KindOfBoolean: return "KindOfBoolean";
-  case KindOfByte:    return "KindOfByte";
-  case KindOfInt16:   return "KindOfInt16";
   case KindOfInt32:   return "KindOfInt32";
   case KindOfInt64:   return "KindOfInt64";
   case KindOfDouble:  return "KindOfDouble";
@@ -3942,7 +3927,6 @@ VarNR::VarNR(CStrRef v) : Variant(KindOfString) {
   if (s) {
     m_data.pstr = s;
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
 }
@@ -3952,7 +3936,6 @@ VarNR::VarNR(CArrRef v) : Variant(KindOfArray) {
   if (a) {
     m_data.parr = a;
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
 }
@@ -3962,7 +3945,6 @@ VarNR::VarNR(CObjRef v) : Variant(KindOfObject) {
   if (o) {
     m_data.pobj = o;
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
 }
@@ -3971,7 +3953,6 @@ VarNR::VarNR(StringData *v) : Variant(KindOfString) {
   if (v) {
     m_data.pstr = v;
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
 }
@@ -3980,7 +3961,6 @@ VarNR::VarNR(ArrayData *v) : Variant(KindOfArray) {
   if (v) {
     m_data.parr = v;
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
 }
@@ -3989,7 +3969,6 @@ VarNR::VarNR(ObjectData *v) : Variant(KindOfObject) {
   if (v) {
     m_data.pobj = v;
   } else {
-    m_data.num = 0;
     m_type = KindOfNull;
   }
 }

@@ -22,16 +22,29 @@
 /src/hphpi/hphpi
 /src/tools/shmw/shmw
 
-/facebook/output_*
-/facebook/push/install
+/src/ffi/java/classes
+/src/ffi/java/hphp_ffi_java.h
+
 /facebook/autoload_files
-/facebook/volatile.hdf
 /facebook/hotcold.hdf
 /facebook/libcore_files
-/facebook/push/output_www
+/facebook/output_*
+/facebook/push/install
+/facebook/stub_funcs.hdf
+/facebook/volatile.hdf
+
+/facebook/push/apc
+/facebook/push/apclog
 /facebook/push/autoload_files
-/facebook/push/volatile.hdf
 /facebook/push/hotcold.hdf
+/facebook/push/output_www
+/facebook/push/system.tgz
+/facebook/push/volatile.hdf
+
+/facebook/extensions/*/*.so
+/facebook/extensions/string/test_string
+/facebook/extensions/photodna/test_photodna
+/facebook/extensions/utils/test_utils
 
 /local/*.mk
 

@@ -151,8 +151,8 @@ OUT_TOP := $(OUT_TOP_BASE)$(OUT_EXT)
 OUT_DIR := $(OUT_TOP)$(REL)/
 LIB_DIR := $(OUT_TOP)
 OUT_TOP := $(OUT_TOP)/
-HPHP := $(HPHP_LIB)/hphp
-HPHPI := $(HPHP_LIB)/hphpi
+HPHP := $(OUT_TOP)hphp
+HPHPI := $(OUT_TOP)hphpi
 
 else
 
@@ -185,4 +185,3 @@ dirinfo:
 	@echo $(ABS_PROJECT_ROOT) $(OUT_TOP) $(if $(PROFILE),P)$(if $(DEBUG),D,R)$(if $(USE_ICC),-I)
 
 endif
-

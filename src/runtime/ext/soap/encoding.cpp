@@ -217,14 +217,12 @@ static void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 encodeStatic s_defaultEncoding[] = {
   {UNKNOWN_TYPE, "", "", guess_zval_convert, guess_xml_convert},
 
+  {KindOfUninit, "nil", XSI_NAMESPACE,
+   to_zval_null, to_xml_null},
   {KindOfNull, "nil", XSI_NAMESPACE,
    to_zval_null, to_xml_null},
   {KindOfBoolean, XSD_BOOLEAN_STRING, XSD_NAMESPACE,
    to_zval_bool, to_xml_bool},
-  {KindOfByte, XSD_INT_STRING, XSD_NAMESPACE,
-   to_zval_long, to_xml_long},
-  {KindOfInt16, XSD_INT_STRING, XSD_NAMESPACE,
-   to_zval_long, to_xml_long},
   {KindOfInt32, XSD_INT_STRING, XSD_NAMESPACE,
    to_zval_long, to_xml_long},
   {KindOfInt64, XSD_INT_STRING, XSD_NAMESPACE,

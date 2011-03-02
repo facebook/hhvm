@@ -93,8 +93,8 @@ invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
   attemptAccess(FrameInjection::GetClassName(false));
   DECLARE_THREAD_INFO_NOINIT
   MethScopeVariableEnvironment fenv(this, 0);
-  directBind(env, caller, fenv);
   fenv.setArgPop();
+  directBind(env, caller, fenv);
   fenv.setCurrentObject(obj);
   String clsName(m_class->name());
   EvalFrameInjection fi(clsName, m_fullName.c_str(), fenv,
@@ -126,8 +126,8 @@ invokeStaticDirect(const char* cls, VariableEnvironment &env,
   const {
   attemptAccess(FrameInjection::GetClassName(false));
   MethScopeVariableEnvironment fenv(this, 0);
-  directBind(env, caller, fenv);
   fenv.setArgPop();
+  directBind(env, caller, fenv);
   fenv.setCurrentClass(cls);
   DECLARE_THREAD_INFO_NOINIT
   String clsName(m_class->name());

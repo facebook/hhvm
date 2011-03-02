@@ -26,10 +26,9 @@ namespace HPHP {
 
 String f_gettype(CVarRef v) {
   switch (v.getType()) {
+  case KindOfUninit:
   case KindOfNull:    return "NULL";
   case KindOfBoolean: return "boolean";
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:   return "integer";
   case KindOfDouble:  return "double";

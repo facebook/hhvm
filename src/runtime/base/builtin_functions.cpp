@@ -144,6 +144,101 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
   return null;
 }
 
+bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp) {
+  mcp.noFatal();
+  if (function.isString() || function.instanceof("closure")) {
+    String sfunction = function.toString();
+    int c = sfunction.find("::");
+    if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {
+      String classname = sfunction.substr(0, c);
+      String methodname = sfunction.substr(c + 2);
+#ifdef ENABLE_LATE_STATIC_BINDING
+      if (classname->same(s_static.get())) {
+        ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+        classname = FrameInjection::GetStaticClassName(ti);
+      }
+#endif
+      mcp.dynamicNamedCall(classname, methodname);
+      if (mcp.ci) return true;
+      raise_warning("call_user_func to non-existent function %s",
+                    sfunction.data());
+      return false;
+    }
+    mcp.functionNamedCall(sfunction);
+    if (mcp.ci) return true;
+    raise_warning("call_user_func to non-existent function %s",
+                  sfunction.data());
+    return false;
+  } else if (function.is(KindOfArray)) {
+    Array arr = function.toArray();
+    if (!(arr.size() == 2 && arr.exists(0LL) && arr.exists(1LL))) {
+      throw_invalid_argument("function: not a valid callback array");
+      return false;
+    }
+    Variant classname = arr.rvalAt(0LL);
+    Variant methodname = arr.rvalAt(1LL);
+    if (!methodname.isString()) {
+      throw_invalid_argument("function: methodname not string");
+      return false;
+    }
+    String method = methodname.toString();
+    if (classname.is(KindOfObject)) {
+      Object obj = classname.toObject();
+      int c = method.find("::");
+      if (c != 0 && c != String::npos && c + 2 < method.size()) {
+        String cls = method.substr(0, c);
+        if (cls->same(s_self.get())) {
+          cls = FrameInjection::GetClassName(true);
+        } else if (cls->same(s_parent.get())) {
+          cls = FrameInjection::GetParentClassName(true);
+        }
+        mcp.methodCallEx(obj, method.substr(c + 2));
+        if (obj->o_get_call_info_ex(cls, mcp)) {
+          return true;
+        }
+        return false;
+      }
+      mcp.methodCall(obj, method);
+      if (mcp.ci) return true;
+      return false;
+    } else {
+      if (!classname.isString()) {
+        throw_invalid_argument("function: classname not string");
+        return false;
+      }
+      String sclass = classname.toString();
+      if (sclass->same(s_self.get())) {
+        sclass = FrameInjection::GetClassName(true);
+      } else if (sclass->same(s_parent.get())) {
+        sclass = FrameInjection::GetParentClassName(true);
+      }
+      Object obj = FrameInjection::GetThis(true);
+      if (obj.instanceof(sclass)) {
+        mcp.methodCallEx(obj, method);
+        if (obj->o_get_call_info_ex(sclass, mcp)) {
+          return true;
+        }
+        return false;
+      }
+#ifdef ENABLE_LATE_STATIC_BINDING
+      if (sclass->same(s_static.get())) {
+        ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+        sclass = FrameInjection::GetStaticClassName(ti);
+      }
+#endif
+      mcp.dynamicNamedCall(sclass, method);
+      if (mcp.ci) return true;
+      raise_warning("call_user_func to non-existent function %s::%s",
+                    sclass.data(), method.data());
+      return false;
+    }
+    raise_warning("call_user_func to non-existent function");
+    return false;
+  }
+  throw_invalid_argument("function: not string or array");
+  return false;
+}
+
 Variant invoke(CStrRef function, CArrRef params, int64 hash /* = -1 */,
                bool tryInterp /* = true */, bool fatal /* = true */) {
   StringData *sd = function.get();
@@ -546,10 +641,9 @@ void throw_unexpected_argument_type(int argNum, const char *fnName,
                                     const char *expected, CVarRef val) {
   const char *otype = NULL;
   switch (val.getType()) {
+  case KindOfUninit:
   case KindOfNull:    otype = "null";        break;
   case KindOfBoolean: otype = "bool";        break;
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:   otype = "int";         break;
   case KindOfDouble:  otype = "double";      break;
@@ -577,12 +671,11 @@ Object f_clone(CVarRef v) {
 
 String f_serialize(CVarRef value) {
   switch (value.getType()) {
+  case KindOfUninit:
   case KindOfNull:
     return "N;";
   case KindOfBoolean:
     return value.getBoolean() ? "b:1;" : "b:0;";
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64: {
     StringBuffer sb;
@@ -1244,6 +1337,11 @@ void MethodCallPackage::dynamicNamedCallWithIndex(const char *self,
     rootObj = obj;
     obj->o_get_call_info_with_index_ex(self, *this, mi, prehash);
   }
+}
+
+void MethodCallPackage::functionNamedCall(CStrRef func) {
+  m_isFunc = true;
+  get_call_info(ci, extra, func);
 }
 
 void MethodCallPackage::construct(CObjRef self) {

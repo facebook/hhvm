@@ -334,6 +334,7 @@ String get_static_class_name(CVarRef objOrClassName);
 
 Variant f_call_user_func_array(CVarRef function, CArrRef params,
                                bool bound = false);
+bool get_user_func_handler(CVarRef function, MethodCallPackage& mcp);
 
 Variant invoke(CStrRef function, CArrRef params, int64 hash = -1,
                bool tryInterp = true, bool fatal = true);
@@ -549,7 +550,8 @@ class CallInfo;
 
 class MethodCallPackage {
 public:
-  MethodCallPackage() : ci(NULL), extra(NULL), m_fatal(true), obj(NULL) {}
+  MethodCallPackage() : ci(NULL), extra(NULL), m_fatal(true), m_isFunc(false),
+                        obj(NULL) {}
 
   // e->n() style method call
   void methodCall(CObjRef self, CStrRef method, int64 prehash = -1) {
@@ -592,6 +594,8 @@ public:
   void dynamicNamedCall(const char *self, CStrRef method, int64 prehash = -1);
   void dynamicNamedCallWithIndex(const char *self, CStrRef method,
       MethodIndex mi, int64 prehash = -1);
+  // function call
+  void functionNamedCall(CStrRef func);
   // Get constructor
   void construct(CObjRef self);
 
@@ -604,6 +608,7 @@ public:
   void *extra;
   Variant rootObj; // object or class name
   bool m_fatal;
+  bool m_isFunc;
   ObjectData *obj;
   String name;
 };

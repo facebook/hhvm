@@ -311,15 +311,14 @@ static bool create_new_socket(const char *&name, int port, Variant &errnum,
 
 Variant f_socket_create(int domain, int type, int protocol) {
   check_socket_parameters(domain, type);
-
-  Socket *sock = new Socket(socket(domain, type, protocol), domain);
-  Object ret(sock);
-  if (!sock->valid()) {
-    raise_warning("Unable to create socket [%d]: %s", errno,
-                    Util::safe_strerror(errno).c_str());
+  int socketId = socket(domain, type, protocol);
+  if (socketId == -1) {
+    Socket dummySock; // for setting last socket error
+    SOCKET_ERROR((&dummySock), "Unable to create socket [%d]: %s", errno);
     return false;
   }
-
+  Socket *sock = new Socket(socketId, domain);
+  Object ret(sock);
   return ret;
 }
 
@@ -361,8 +360,8 @@ bool f_socket_create_pair(int domain, int type, int protocol, Variant fd) {
 
   int fds_array[2];
   if (socketpair(domain, type, protocol, fds_array) != 0) {
-    raise_warning("unable to create socket pair [%d]: %s", errno,
-                    Util::safe_strerror(errno).c_str());
+    Socket dummySock; // for setting last socket error
+    SOCKET_ERROR((&dummySock), "unable to create socket pair [%d]: %s", errno);
     return false;
   }
 
@@ -953,7 +952,7 @@ int f_socket_last_error(CObjRef socket /* = null_object */) {
     Socket *sock = socket.getTyped<Socket>();
     return sock->getError();
   }
-  return errno;
+  return Socket::getLastError();
 }
 
 void f_socket_clear_error(CObjRef socket /* = null_object */) {

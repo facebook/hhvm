@@ -39,8 +39,6 @@ SharedVariant::SharedVariant(CVarRef source, bool serialized,
       m_data.num = source.toBoolean();
       break;
     }
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
     {
@@ -106,9 +104,9 @@ SharedVariant::SharedVariant(CVarRef source, bool serialized,
       }
       break;
     }
+  case KindOfUninit:
   case KindOfNull:
     {
-      m_data.num = 0;
       break;
     }
   default:
@@ -159,6 +157,7 @@ Variant SharedVariant::toLocal() {
       }
       return NEW(SharedMap)(this);
     }
+  case KindOfUninit:
   case KindOfNull:
     {
       return null_variant;
@@ -207,6 +206,7 @@ void SharedVariant::dump(std::string &out) {
       SharedMap(this).dump(out);
     }
     break;
+  case KindOfUninit:
   case KindOfNull:
     out += "null";
     break;
@@ -259,8 +259,6 @@ size_t SharedVariant::arrSize() const {
 int SharedVariant::getIndex(CVarRef key) {
   ASSERT(is(KindOfArray));
   switch (key.getType()) {
-  case KindOfByte:
-  case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64: {
     int64 num = key.getNumData();
@@ -430,6 +428,7 @@ void SharedVariant::getStats(SharedVariantStats *stats) {
   stats->initStats();
   stats->variantCount = 1;
   switch (m_type) {
+  case KindOfUninit:
   case KindOfNull:
   case KindOfBoolean:
   case KindOfInt64:

@@ -285,18 +285,20 @@ void create_generator(Parser *_p, Token &out, Token &params,
     _p->finishStatement(scont, stmts1); scont = 1;
   }
 
-  Token closure, ret, ref;
+  Token ret, ref;
   ret.setText("Continuation");
   if (clsname) {
+    Token closure;
     _p->onMethod(closure, *modifiers, ret, ref, name, params, scont);
-  } else {
-    _p->onFunction(closure, ret, ref, name, params, scont);
-  }
 
-  Token stmts0;  _p->onStatementListStart(stmts0);
-  Token stmts1;  _p->addStatement(stmts1, stmts0, closure);
-  Token stmts2;  _p->addStatement(stmts2, stmts1, out);
-  _p->finishStatement(out, stmts2); out = 1;
+    Token stmts0;  _p->onStatementListStart(stmts0);
+    Token stmts1;  _p->addStatement(stmts1, stmts0, closure);
+    Token stmts2;  _p->addStatement(stmts2, stmts1, out);
+    _p->finishStatement(out, stmts2); out = 1;
+  } else {
+    out.reset();
+    _p->onFunction(out, ret, ref, name, params, scont);
+  }
 }
 
 void transform_yield(Parser *_p, Token &stmts, int index, Token *expr) {
@@ -1562,8 +1564,8 @@ expr_without_variable:
     is_reference '('                   { Token t; _p->onFunctionStart(t);
                                          _p->pushLabelInfo();}
     parameter_list ')' lexical_vars
-    '{' inner_statement_list '}'       { _p->popLabelInfo();
-                                         _p->onClosure($$,$1,$3,$6,$8,$10);}
+    '{' inner_statement_list '}'       { _p->onClosure($$,$1,$3,$6,$8,$10);
+                                         _p->popLabelInfo();}
   | expr '[' dim_offset ']'            { _p->onRefDim($$, $1, $3);}
   | xhp_tag                            { $$ = $1;}
 ;

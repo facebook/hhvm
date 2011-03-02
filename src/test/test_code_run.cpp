@@ -16460,6 +16460,14 @@ bool TestCodeRun::TestYield() {
         "int(4)\n"
         "int(5)\n");
 
+  // yield within anonymous function
+  MVCRO("<?php\n"
+        "$a = function() { yield 1; yield 2; };\n"
+        "foreach ($a() as $v) { var_dump($v); }\n",
+
+        "int(1)\n"
+        "int(2)\n");
+
   return true;
 }
 

@@ -723,7 +723,8 @@ Variant c_SimpleXMLElement::t___get(Variant name) {
     return obj;
   }
   if (ret.isNull()) {
-    return create_object(o_getClassName(), Array(), false);
+    XmlDocWrapper *wrapper = m_doc.getTyped<XmlDocWrapper>();
+    return create_object(wrapper->getXmlClassName(), Array(), false);
   }
   return ret;
 }
@@ -853,7 +854,7 @@ Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
 }
 
 bool c_SimpleXMLElement::o_toBoolean() const {
-  return m_node != NULL || o_properties;
+  return (m_node != NULL || o_properties) && !m_children.toArray().empty();
 }
 
 int64 c_SimpleXMLElement::o_toInt64() const {

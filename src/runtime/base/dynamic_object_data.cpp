@@ -138,6 +138,30 @@ Array DynamicObjectData::o_toArray(bool warn /* = false */) const {
   }
 }
 
+bool DynamicObjectData::o_toBoolean() const {
+  if (!parent.isNull()) {
+    return parent->o_toBoolean();
+  } else {
+    return ObjectData::o_toBoolean();
+  }
+}
+
+int64 DynamicObjectData::o_toInt64() const {
+  if (!parent.isNull()) {
+    return parent->o_toInt64();
+  } else {
+    return ObjectData::o_toInt64();
+  }
+}
+
+double DynamicObjectData::o_toDouble() const {
+  if (!parent.isNull()) {
+    return parent->o_toDouble();
+  } else {
+    return ObjectData::o_toDouble();
+  }
+}
+
 Array DynamicObjectData::o_getDynamicProperties() const {
   if (!parent.isNull()) {
     return parent->o_getDynamicProperties();

@@ -40,6 +40,9 @@ class DynamicObjectData : public ObjectData {
 
   // properties
   virtual Array o_toArray(bool warn = false) const;
+  virtual bool o_toBoolean() const;
+  virtual int64 o_toInt64() const;
+  virtual double o_toDouble() const;
   virtual Array o_getDynamicProperties() const;
   virtual Variant *o_realProp(CStrRef prop, int flags,
                               CStrRef context = null_string) const;

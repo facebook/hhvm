@@ -175,7 +175,7 @@ static bool s_rand_is_seeded = false;
 void f_srand(CVarRef seed /* = null_variant */) {
   s_rand_is_seeded = true;
   if (seed.isNull()) {
-    return srand(GENERATE_SEED());
+    return srand(math_generate_seed());
   }
   if (seed.isNumeric(true)) {
     srand(seed.toInt32());
@@ -187,7 +187,7 @@ void f_srand(CVarRef seed /* = null_variant */) {
 int64 f_rand(int64 min /* = 0 */, int64 max /* = RAND_MAX */) {
   if (!s_rand_is_seeded) {
     s_rand_is_seeded = true;
-    srand(GENERATE_SEED());
+    srand(math_generate_seed());
   }
 
   int64 number = rand();
@@ -199,7 +199,7 @@ int64 f_rand(int64 min /* = 0 */, int64 max /* = RAND_MAX */) {
 
 void f_mt_srand(CVarRef seed /* = null_variant */) {
   if (seed.isNull()) {
-    return math_mt_srand(GENERATE_SEED());
+    return math_mt_srand(math_generate_seed());
   }
   if (seed.isNumeric(true)) {
     math_mt_srand(seed.toInt32());

@@ -17,6 +17,7 @@
 
 #include <runtime/base/zend/zend_math.h>
 #include <util/thread_local.h>
+#include <openssl/rand.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -181,7 +182,7 @@ static inline uint32 php_mt_rand() {
 // Returns a random number from Mersenne Twister
 int64 math_mt_rand(int64 min /* = 0 */, int64 max /* = RAND_MAX */) {
   if (!s_rand_data->seeded) {
-    math_mt_srand(GENERATE_SEED());
+    math_mt_srand(math_generate_seed());
   }
 
   /*
@@ -246,6 +247,15 @@ double math_combined_lcg() {
   }
 
   return z * 4.656613e-10;
+}
+
+int64 math_generate_seed() {
+  int64 value;
+  if (RAND_bytes((unsigned char *)&value, sizeof(value)) < 1) {
+    return GENERATE_SEED();
+  } else {
+    return value;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

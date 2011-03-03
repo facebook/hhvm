@@ -510,7 +510,7 @@ public:
   Profiler() : m_successful(true), m_stack(NULL), m_frame_free_list(NULL) {
     if (!s_rand_initialized) {
       s_rand_initialized = true;
-      srand(GENERATE_SEED());
+      srand(math_generate_seed());
     }
 
     // bind to a random cpu so that we can use rdtsc instruction.

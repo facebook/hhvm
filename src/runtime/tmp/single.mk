@@ -10,7 +10,7 @@ LIBS =  \
         $(ALL_LIBS)
 
 ifdef COMPILE
-TARGETS = $(OBJECTS)
+TARGETS = $(PIC_OBJECTS)
 endif
 
 ifdef LINK
@@ -35,8 +35,8 @@ endif
 
 all: $(TARGETS)
 
-$(TEST_LIB): $(OBJECTS)
-	$(V)echo $(OBJECTS) > $@.response
+$(TEST_LIB): $(PIC_OBJECTS)
+	$(V)echo $(PIC_OBJECTS) > $@.response
 	$(V)$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wl,-soname,lib$(PROJECT_NAME).so \
-			$(SO_LDFLAGS) -o $@ $(OBJECTS) $(EXTERNAL)
+			$(SO_LDFLAGS) -o $@ $(PIC_OBJECTS) $(EXTERNAL)
 

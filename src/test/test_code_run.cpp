@@ -13566,6 +13566,19 @@ bool TestCodeRun::TestFile() {
       "mkdir('test/tmp_dir');"
       "print_r(glob('test/tmp_dir/*'));"
       "rmdir('test/tmp_dir');");
+  MVCR("<?php "
+      "$src = tmpfile();"
+      "$dst = tmpfile();"
+      "fwrite($src, 'a');"
+      "fseek($src, 0);"
+      "stream_copy_to_stream($src, $dst);"
+      "fseek($dst, 0);"
+      "$str = stream_get_contents($dst);"
+      "fseek($src, 0);"
+      "stream_copy_to_stream($src, $dst);"
+      "fseek($dst, 0);"
+      "$str = stream_get_contents($dst);"
+      "echo $str;");
   return true;
 }
 

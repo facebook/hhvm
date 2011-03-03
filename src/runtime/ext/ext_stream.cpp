@@ -71,7 +71,9 @@ Variant f_stream_copy_to_stream(CObjRef source, CObjRef dest,
     int rbytes = srcFile->readImpl(buf, toread);
     if (rbytes == 0) break;
     if (rbytes < 0) return false;
-    if (destFile->writeImpl(buf, rbytes) != rbytes) return false;
+    if (destFile->write(String(buf, rbytes, AttachLiteral)) != rbytes) {
+      return false;
+    }
     cbytes += rbytes;
   }
   return cbytes;

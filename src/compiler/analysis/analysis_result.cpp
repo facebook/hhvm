@@ -2989,6 +2989,18 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       outputCPPJumpTableSupport(cg, ar, needGlobals);
       outputCPPCodeInfoTable(cg, ar, true);
     } else {
+      // For functions declared in separable extensions, generate CallInfo and
+      // add to declaration list to be included it the table.
+      for (StringToFunctionScopePtrVecMap::const_iterator iter =
+             m_functions.begin(); iter != m_functions.end(); ++iter) {
+        FunctionScopePtr func = iter->second[0];
+        if (func->isSepExtension()) {
+          outputCPPJumpTableSupportMethod(cg, ar, func, Option::FunctionPrefix);
+          func->outputCPPCallInfo(cg, ar);
+          FunctionScopePtrVec &funcVec = m_functionDecs[iter->first];
+          funcVec.push_back(func);
+        }
+      }
       outputCPPCodeInfoTable(cg, ar, false, &m_functionDecs);
     }
     cg.namespaceEnd();

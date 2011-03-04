@@ -846,7 +846,7 @@ static int execute_program_impl(int argc, char **argv) {
 
           if (po.debugger_options.extension.empty()) {
             // even if it's empty, still need to call for warmup
-            hphp_invoke_simple(" "); // so not to run the 1st file if compiled
+            hphp_invoke_simple("", true); // not to run the 1st file if compiled
           } else {
             hphp_invoke_simple(po.debugger_options.extension);
           }
@@ -1076,10 +1076,11 @@ static void handle_invoke_exception(bool &ret, ExecutionContext *context,
   }
 }
 
-bool hphp_invoke_simple(const std::string &filename) {
+bool hphp_invoke_simple(const std::string &filename,
+                        bool warmupOnly /* = false */) {
   bool error; string errorMsg;
   return hphp_invoke(g_context.get(), filename, false, null_array, null,
-                     "", "", "", error, errorMsg);
+                     "", "", "", error, errorMsg, true, warmupOnly);
 }
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
@@ -1087,7 +1088,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  const string &warmupDoc, const string &reqInitFunc,
                  const string &reqInitDoc,
                  bool &error, string &errorMsg,
-                 bool once /* = true */) {
+                 bool once /* = true */, bool warmupOnly /* = false */) {
   bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
   error = false;
 
@@ -1115,16 +1116,18 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
   }
 
   bool ret = true;
-  try {
-    ServerStatsHelper ssh("invoke");
-    if (func) {
-      funcRet = invoke(cmd.c_str(), funcParams);
-    } else {
-      if (isServer) hphp_chdir_file(cmd);
-      include_impl_invoke(cmd.c_str(), once, get_variable_table());
+  if (!warmupOnly) {
+    try {
+      ServerStatsHelper ssh("invoke");
+      if (func) {
+        funcRet = invoke(cmd.c_str(), funcParams);
+      } else {
+        if (isServer) hphp_chdir_file(cmd);
+        include_impl_invoke(cmd.c_str(), once, get_variable_table());
+      }
+    } catch (...) {
+      handle_invoke_exception(ret, context, errorMsg, error);
     }
-  } catch (...) {
-    handle_invoke_exception(ret, context, errorMsg, error);
   }
 
   try {

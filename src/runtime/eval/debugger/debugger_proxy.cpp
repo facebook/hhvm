@@ -128,11 +128,15 @@ void DebuggerProxy::switchThreadMode(ThreadMode mode,
 
 void DebuggerProxy::getThreads(DThreadInfoPtrVec &threads) {
   Lock lock(this);
-  CmdInterrupt *tint =
-    (CmdInterrupt*)ThreadInfo::s_threadInfo->m_reqInjectionData.interrupt;
-  ASSERT(tint);
-  if (tint) {
-    threads.push_back(createThreadInfo(tint->desc()));
+  std::stack<void *> &interrupts =
+    ThreadInfo::s_threadInfo->m_reqInjectionData.interrupts;
+  ASSERT(!interrupts.empty());
+  if (!interrupts.empty()) {
+    CmdInterrupt *tint = (CmdInterrupt*)interrupts.top();
+    ASSERT(tint);
+    if (tint) {
+      threads.push_back(createThreadInfo(tint->desc()));
+    }
   }
   for (std::map<int64, DThreadInfoPtr>::const_iterator iter =
          m_threads.begin(); iter != m_threads.end(); ++iter) {

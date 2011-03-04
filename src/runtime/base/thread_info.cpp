@@ -104,7 +104,7 @@ void RequestInjectionData::reset() {
   signaled    = false;
   surprised   = false;
   debugger    = false;
-  interrupt   = NULL;
+  while (!interrupts.empty()) interrupts.pop();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

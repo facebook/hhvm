@@ -13,7 +13,7 @@ AUTO_SOURCES = 1
 
 include $(PROJECT_ROOT)/src/rules.mk
 
-EXTERNAL += $(LIB_DIR)/libhphp_runtime_gd.so
+EXTERNAL += $(LIB_DIR)/libhphp_runtime.so
 
 TARGETS = $(SHARED_LIB)
 
@@ -28,7 +28,7 @@ CPPFLAGS += -I $(JAVA_PATH)/include -I $(JAVA_PATH)/include/linux \
 $(SHARED_LIB) : setup
 
 setup :
-	$(V)cd $(PROJECT_ROOT)/src && make shared-lib-gd
+	$(V)cd $(PROJECT_ROOT) && make shared-libs
 
 $(CLS) : $(SRC)
 	$(V)mkdir -p classes

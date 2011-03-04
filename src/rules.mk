@@ -144,8 +144,6 @@ STATIC_LIB = $(LIB_DIR)/lib$(PROJECT_NAME).a
 SHARED_LIB = $(LIB_DIR)/lib$(PROJECT_NAME).so
 APP_TARGET = $(OUT_TOP)$(PROJECT_NAME)
 
-SHARED_LIB_GD = $(LIB_DIR)/lib$(PROJECT_NAME)_gd.so
-
 MONO_TARGETS = $(filter-out $(PROJECT_NAME), $(patsubst %.cpp, %, $(wildcard *.cpp)))
 
 # external shared libraries
@@ -404,10 +402,6 @@ endif
 
 # facebook specific stuff
 CPPFLAGS += -DFACEBOOK -DHAVE_QUICKLZ
-
-ifdef TLS_GD
-CPPFLAGS += -DTLS_GLOBAL_DYNAMIC
-endif
 
 MYSQL_UNIX_SOCK_ADDR := $(shell mysql_config --socket)
 ifneq ($(MYSQL_UNIX_SOCK_ADDR), "")
@@ -754,7 +748,7 @@ objects: $(OBJECTS) $(PIC_OBJECTS) quiet
 
 ifdef SHOW_LINK
 
-$(SHARED_LIB) $(SHARED_LIB_GD): $(PIC_OBJECTS)
+$(SHARED_LIB): $(PIC_OBJECTS)
 	$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,$(notdir $@) \
 			$(SO_LDFLAGS) -o $@ $(PIC_OBJECTS) $(EXTERNAL)
 
@@ -766,7 +760,7 @@ $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 
 else
 
-$(SHARED_LIB) $(SHARED_LIB_GD): $(PIC_OBJECTS)
+$(SHARED_LIB): $(PIC_OBJECTS)
 	@echo 'Linking $@ ...'
 	$(V)$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,$(notdir $@) \
 		$(SO_LDFLAGS) -o $@ $(PIC_OBJECTS) $(EXTERNAL)

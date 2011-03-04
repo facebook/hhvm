@@ -92,24 +92,19 @@ void RequestLocal<T>::createKey() {
 }
 
 #define DECLARE_REQUEST_LOCAL(T,f) \
-  __attribute__((tls_model (TLS_MODEL))) __thread \
-    RequestLocal<T> f
+  __thread RequestLocal<T> f
 
 #define IMPLEMENT_REQUEST_LOCAL(T,f) \
-  __attribute__((tls_model (TLS_MODEL))) __thread \
-    RequestLocal<T> f = { { NULL, NULL, NULL } }
+  __thread RequestLocal<T> f = { { NULL, NULL, NULL } }
 
 #define DECLARE_STATIC_REQUEST_LOCAL(T,f) \
-  static __attribute__((tls_model (TLS_MODEL))) __thread \
-    RequestLocal<T> f
+  static __thread RequestLocal<T> f
 
 #define IMPLEMENT_STATIC_REQUEST_LOCAL(T,f) \
-  static __attribute__((tls_model (TLS_MODEL))) __thread \
-    RequestLocal<T> f = { { NULL, NULL, NULL } }
+  static __thread RequestLocal<T> f = { { NULL, NULL, NULL } }
 
 #define DECLARE_EXTERN_REQUEST_LOCAL(T,f) \
-  extern __attribute__((tls_model (TLS_MODEL))) __thread \
-    RequestLocal<T> f
+  extern __thread RequestLocal<T> f
 
 #else // defined(USE_GCC_FAST_TLS)
 

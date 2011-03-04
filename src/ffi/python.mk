@@ -1,7 +1,5 @@
 PROJECT_ROOT = $(HPHP_HOME)
 
-TLS_GD = 1
-
 SWIG_FILE = $(shell echo `find ffi -name "*.i"`)
 NAME = $(patsubst ffi/%.i,%,$(SWIG_FILE))
 

@@ -47,7 +47,7 @@ SHARED_LIBS = $(EXT_DIR)/binutils/libbinutils.so \
 
 EXTERNAL += $(SHARED_LIBS)
 
-TARGETS = $(PROGRAMS) $(SHARED_LIB) $(STATIC_LIB)
+TARGETS = $(PROGRAMS) $(STATIC_LIB)
 
 all: $(TARGETS)
 
@@ -56,15 +56,8 @@ hphp-setup: compiler-setup
 hphp: compiler
 hphpi: hphp
 test-setup: compiler-setup
-test: compiler shared-lib-gd
-
-shared-lib-target: $(if $(TLS_GD),$(SHARED_LIB_GD),$(SHARED_LIB))
-	$(V)cp $< $(SHARED_LIB_TARGET)
+test: compiler
 
 .PHONY: shared-lib-target
-
-INTERMEDIATE_DIRS += $(PROJECT_ROOT)/output_gd
-INTERMEDIATE_FILES += $(LIB_DIR)/libhphp_runtime_gd.so
-
-shared-lib-gd:
-	$(V)$(MAKE) $(if $(OUTDIR_BY_TYPE),,OUTPUT_ROOT=output_gd) TLS_GD=1 DIRS_INCLUDED= shared-lib-target SHARED_LIB_TARGET=$(LIB_DIR)
+shared-lib-target:
+	$(V)$(MAKE) SHARED=1 $(SHARED_LIB)

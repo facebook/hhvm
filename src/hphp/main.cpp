@@ -844,7 +844,7 @@ int buildTarget(const ProgramOptions &po) {
   if (getenv("SHOW_LINK"))    flags += "SHOW_LINK=1 ";
   if (getenv("SHOW_COMPILE")) flags += "SHOW_COMPILE=1 ";
   if (po.format == "lib")     flags += "HPHP_BUILD_LIBRARY=1 ";
-  if (Option::GenerateFFI)    flags += "HPHP_BUILD_FFI=1 TLS_GD=1 ";
+  if (Option::GenerateFFI)    flags += "HPHP_BUILD_FFI=1 ";
   const char *argv[] = {"", po.outputDir.c_str(),
                         po.program.c_str(), flags.c_str(), NULL};
 

@@ -78,7 +78,7 @@ endif
 
 # Only use jemalloc *or* tcmalloc.
 ifdef USE_JEMALLOC
-ifdef TLS_GD
+ifdef SHARED
 # Clear USE_JEMALLOC, since it may have already been set by the parent make.
 # Ideally we would actually undefine USE_JEMALLOC:
 #   override undefine USE_JEMALLOC
@@ -98,7 +98,7 @@ ifndef NO_TCMALLOC
 GOOGLE_TCMALLOC = 1
 endif
 
-ifdef TLS_GD
+ifdef SHARED
 # See related comments above re: USE_JEMALLOC.
 override GOOGLE_TCMALLOC =
 endif
@@ -130,7 +130,6 @@ OUT_EXTS := \
 	$(if $(USE_ICC),-icc) \
 	$(if $(USE_JEMALLOC),-je) \
 	$(if $(NO_TCMALLOC),,-tc) \
-	$(if $(TLS_GD),-gd) \
 	$(if $(PROFILE),-pg) \
 	$(if $(DEBUG),-g,-O)
 

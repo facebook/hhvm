@@ -20,7 +20,6 @@ endif
 ifdef SHARED
 TEST_LIB = $(OUT_TOP)lib$(PROJECT_NAME).so
 TARGETS = $(TEST_LIB)
-TLS_GD = 1
 NO_JEMALLOC = 1
 USE_JEMALLOC =
 NO_TCMALLOC = 1
@@ -30,7 +29,7 @@ endif
 include $(PROJECT_ROOT)/src/rules.mk
 
 ifdef SHARED
-EXTERNAL += $(LIB_DIR)/libhphp_runtime_gd.so
+EXTERNAL += $(LIB_DIR)/libhphp_runtime.so
 endif
 
 all: $(TARGETS)

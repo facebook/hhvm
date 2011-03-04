@@ -63,7 +63,7 @@ else
 OS = fedora
 endif
 
-GCC_VERSION := $(shell gcc --version | head -1 | cut -d ' ' -f3)
+GCC_VERSION := $(shell gcc --version | sed -e '1!d' -e 's%^.*LLVM.*$$%gcc x 4.4.0%' -e 's%^gcc \S\+ \(\S\+\).*$$%\1%')
 
 ###############################################################################
 # Directories an command line switches
@@ -179,8 +179,8 @@ endif
 PREFIX := $(TIMECMD)$(if $(USE_CCACHE), ccache,$(if $(NO_DISTCC),, distcc))
 ICC_ARGS := -no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -wd68
 
-CXX := $(if $(USE_ICC),$(ICC)/bin/icpc $(ICC_ARGS),g++)
-CC = $(if $(USE_ICC),$(ICC)/bin/icc $(ICC_ARGS),gcc)
+CXX := $(if $(USE_LLVM), /data/llvm/bin/g++, $(if $(USE_ICC),$(ICC)/bin/icpc $(ICC_ARGS),g++))
+CC = $(if $(USE_LLVM), /data/llvm/bin/gcc, $(if $(USE_ICC),$(ICC)/bin/icc $(ICC_ARGS),gcc))
 
 P_CXX = $(PREFIX) $(CXX)
 P_CC = $(PREFIX) $(CC)

@@ -169,7 +169,7 @@ public:
   SmallArray(const SmallArray &other)
     : m_nNumOfElements(other.m_nNumOfElements), m_nListHead(other.m_nListHead),
       m_nListTail(other.m_nListTail), m_siPastEnd(other.m_siPastEnd),
-      m_nNextFreeElement(m_nNextFreeElement) {
+      m_nNextFreeElement(other.m_nNextFreeElement) {
     m_pos = other.m_pos;
     for (int i = 0; i < SARR_TABLE_SIZE; i++) {
       m_arBuckets[i].copy(other.m_arBuckets[i], &other);

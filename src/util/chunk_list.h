@@ -160,7 +160,7 @@ public:
       if (m_chunk) {
         m_pos++;
         if (m_chunk == m_list->m_tail && m_pos > m_list->m_pos) {
-          operator=(m_list->m_end);
+          this->operator=(m_list->m_end);
         } else if (m_pos == CHUNK_ITEM_COUNT) {
           m_pos = 0;
           m_chunk = m_chunk->next;

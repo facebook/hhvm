@@ -126,6 +126,7 @@ ifndef OUTPUT_ROOT
 OUTPUT_ROOT := bin
 endif
 OUT_EXTS := \
+	$(if $(USE_LLVM),-llvm) \
 	$(if $(USE_ICC),-icc) \
 	$(if $(USE_JEMALLOC),-je) \
 	$(if $(NO_TCMALLOC),,-tc) \
@@ -182,6 +183,6 @@ EXT_DIR = $(PROJECT_ROOT)/external-$(OS)
 	$(V)touch $@
 
 dirinfo:
-	@echo $(ABS_PROJECT_ROOT) $(OUT_TOP) $(if $(PROFILE),P)$(if $(DEBUG),D,R)$(if $(USE_ICC),-I)
+	@echo $(ABS_PROJECT_ROOT) $(OUT_TOP) $(if $(PROFILE),P)$(if $(DEBUG),D,R)$(if $(USE_ICC),-I)$(if $(USE_LLVM),-L)
 
 endif

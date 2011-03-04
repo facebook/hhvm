@@ -163,8 +163,7 @@ Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
   string shost = host.data();
   if (!RuntimeOption::DebuggerRpcHostDomain.empty()) {
     unsigned int pos = shost.find(RuntimeOption::DebuggerRpcHostDomain);
-    if (pos == string::npos ||
-        pos != shost.length() - RuntimeOption::DebuggerRpcHostDomain.size()) {
+    if (pos != shost.length() - RuntimeOption::DebuggerRpcHostDomain.size()) {
       shost += RuntimeOption::DebuggerRpcHostDomain;
     }
   }

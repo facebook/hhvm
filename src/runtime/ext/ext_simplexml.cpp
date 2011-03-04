@@ -536,7 +536,7 @@ String c_SimpleXMLElement::t_getname() {
     int namelen = xmlStrlen(m_node->name);
     return String((char*)m_node->name, namelen, CopyString);
   }
-  return String();
+  return String("");
 }
 
 Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,

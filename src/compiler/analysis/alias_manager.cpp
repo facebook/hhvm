@@ -1830,13 +1830,17 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
     if (e->getContext() & Expression::DeadStore) m_hasDeadStore = true;
     e->setCanonID(0);
     if (!kidCost) {
-      if (!nkid && !e->isScalar()) {
+      if (!nkid) {
         if (e->is(Expression::KindOfSimpleVariable)) {
-          Symbol *sym = spc(SimpleVariable, e)->getSymbol();
-          if (!sym || !sym->isParameter()) kidCost = 1;
-        } else {
+          if (!e->isThis()) {
+            Symbol *sym = spc(SimpleVariable, e)->getSymbol();
+            if (!sym || !sym->isParameter()) kidCost = 1;
+          }
+        } else if (!e->isScalar()) {
           kidCost = 1;
         }
+      } else if (e->getLocalEffects() & ~Expression::AccessorEffect) {
+        kidCost = 1;
       }
     } else if (!e->is(Expression::KindOfExpressionList)) {
       ++kidCost;
@@ -2024,7 +2028,7 @@ void AliasManager::gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m) {
 
   if (m_inlineAsExpr) {
     if (!Option::AutoInline ||
-        cost > 10 ||
+        cost > 1 ||
         func->isVariableArgument() ||
         m_variables->getAttribute(VariableTable::ContainsDynamicVariable) ||
         m_variables->getAttribute(VariableTable::ContainsExtract) ||

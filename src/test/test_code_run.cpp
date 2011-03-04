@@ -16481,6 +16481,31 @@ bool TestCodeRun::TestYield() {
         "int(1)\n"
         "int(2)\n");
 
+  MVCRO("<?php\n"
+        "function f() {\n"
+        "  $a = function() { yield 1; yield 2; };\n"
+        "  return $a;\n"
+        "}\n"
+        "$f = f();\n"
+        "foreach ($f() as $v) { var_dump($v); }\n",
+
+        "int(1)\n"
+        "int(2)\n");
+
+  MVCRO("<?php\n"
+        "class A {\n"
+        "  function f() {\n"
+        "    $a = function() { yield 1; yield 2; };\n"
+        "    return $a;\n"
+        "  }\n"
+        "}\n"
+        "$a = new A;\n"
+        "$f = $a->f();\n"
+        "foreach ($f() as $v) { var_dump($v); }\n",
+
+        "int(1)\n"
+        "int(2)\n");
+
   return true;
 }
 

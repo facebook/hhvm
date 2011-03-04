@@ -179,6 +179,7 @@ public:
   void onName(Token &out, Token &name, NameKind kind);
   void onStaticVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onSimpleVariable(Token &out, Token &var);
+  void onSynthesizedVariable(Token &out, Token &var);
   void onDynamicVariable(Token &out, Token &expr, bool encap);
   void onIndirectRef(Token &out, Token &refCount, Token &var);
   void onStaticMember(Token &out, Token &className, Token &name);

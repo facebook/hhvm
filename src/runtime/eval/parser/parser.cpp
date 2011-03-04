@@ -414,6 +414,18 @@ void Parser::onSimpleVariable(Token &out, Token &var) {
   }
 }
 
+void Parser::onSynthesizedVariable(Token &out, Token &var) {
+  out.reset();
+  if (var.text() == "this" && haveClass()) {
+    out->exp() = NEW_EXP0(This);
+  } else {
+    // Synthesized variables are essentially like normal simple variables,
+    // but they are always looked up by the name, becasue they might have
+    // been synthesized out of its containing function.
+    out->exp() = NEW_EXP(Variable, Name::fromString(this, var.text()), -1);
+  }
+}
+
 void Parser::onDynamicVariable(Token &out, Token &expr, bool encap) {
   out.reset();
   out->exp() = getDynamicVariable(expr->exp(), encap);

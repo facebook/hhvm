@@ -110,6 +110,9 @@ public:
   void onClassVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onClassConstant(Token &out, Token *exprs, Token &var, Token &value);
   void onSimpleVariable(Token &out, Token &var);
+  void onSynthesizedVariable(Token &out, Token &var) {
+    onSimpleVariable(out, var);
+  }
   void onDynamicVariable(Token &out, Token &expr, bool encap);
   void onIndirectRef(Token &out, Token &refCount, Token &var);
   void onStaticMember(Token &out, Token &cls, Token &name);

@@ -230,7 +230,7 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
     Token scall;
     {
       Token name;    name.setText(CONTINUATION_OBJECT_NAME);
-      Token var;     _p->onSimpleVariable(var, name);
+      Token var;     _p->onSynthesizedVariable(var, name);
       Token pn;      pn.setText("getVars");
       Token pname;   _p->onName(pname, pn, Parser::VarName);
       Token mcall;   _p->pushObject(var); _p->appendProperty(pname);
@@ -248,7 +248,7 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
     Token sswitch;
     {
       Token name;    name.setText(CONTINUATION_OBJECT_NAME);
-      Token var;     _p->onSimpleVariable(var, name);
+      Token var;     _p->onSynthesizedVariable(var, name);
       Token pn;      pn.setText("label");
       Token pname;   _p->onName(pname, pn, Parser::VarName);
       Token prop;    _p->pushObject(var); _p->appendProperty(pname);
@@ -277,7 +277,7 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
     Token sdone;
     {
       Token name;    name.setText(CONTINUATION_OBJECT_NAME);
-      Token var;     _p->onSimpleVariable(var, name);
+      Token var;     _p->onSynthesizedVariable(var, name);
       Token pn;      pn.setText("done");
       Token pname;   _p->onName(pname, pn, Parser::VarName);
       Token mcall;   _p->pushObject(var); _p->appendProperty(pname);
@@ -380,7 +380,7 @@ void transform_yield(Parser *_p, Token &stmts, int index, Token *expr) {
   Token update;
   {
     Token name;    name.setText(CONTINUATION_OBJECT_NAME);
-    Token var;     _p->onSimpleVariable(var, name);
+    Token var;     _p->onSynthesizedVariable(var, name);
     Token pn;      pn.setText("update");
     Token pname;   _p->onName(pname, pn, Parser::VarName);
     Token mcall;   _p->pushObject(var); _p->appendProperty(pname);
@@ -416,7 +416,7 @@ void transform_yield(Parser *_p, Token &stmts, int index, Token *expr) {
 
   if (!expr) {
     Token name;    name.setText(CONTINUATION_OBJECT_NAME);
-    Token var;     _p->onSimpleVariable(var, name);
+    Token var;     _p->onSynthesizedVariable(var, name);
     Token pn;      pn.setText("done");
     Token pname;   _p->onName(pname, pn, Parser::VarName);
     Token mcall;   _p->pushObject(var); _p->appendProperty(pname);
@@ -455,7 +455,7 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
     Token param2;   _p->onCallParam(param2, &param1, mut, 0);
     Token call;     _p->onCall(call, 0, cname, param2, NULL);
     Token lname;    lname.setText(loopvar);
-    Token var;      _p->onSimpleVariable(var, lname);
+    Token var;      _p->onSynthesizedVariable(var, lname);
     Token assign;   _p->onAssign(assign, var, call, false);
     _p->onExprListElem(init, NULL, assign);
   }
@@ -463,7 +463,7 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
   Token cond;
   {
     Token lname;    lname.setText(loopvar);
-    Token var;      _p->onSimpleVariable(var, lname);
+    Token var;      _p->onSynthesizedVariable(var, lname);
     Token pn;       pn.setText("valid");
     Token pname;    _p->onName(pname, pn, Parser::VarName);
     Token empty;    empty = 1;
@@ -475,7 +475,7 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
   Token step;
   {
     Token lname;    lname.setText(loopvar);
-    Token var;      _p->onSimpleVariable(var, lname);
+    Token var;      _p->onSynthesizedVariable(var, lname);
     Token pn;       pn.setText("next");
     Token pname;    _p->onName(pname, pn, Parser::VarName);
     Token empty;    empty = 1;
@@ -491,7 +491,7 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
       Token skset;
       {
         Token lname;  lname.setText(loopvar);
-        Token var;    _p->onSimpleVariable(var, lname);
+        Token var;    _p->onSynthesizedVariable(var, lname);
         Token pn;     pn->setText("key");
         Token pname;  _p->onName(pname, pn, Parser::VarName);
         Token empty;  empty = 1;
@@ -505,7 +505,7 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
       Token svset;
       {
         Token lname;  lname.setText(loopvar);
-        Token var;    _p->onSimpleVariable(var, lname);
+        Token var;    _p->onSynthesizedVariable(var, lname);
         Token pn;     pn.setText(byRef ? "currentRef" : "current");
         Token pname;  _p->onName(pname, pn, Parser::VarName);
         Token empty;  empty = 1;
@@ -523,7 +523,7 @@ void transform_foreach(Parser *_p, Token &out, Token &arr, Token &name,
       Token svset;
       {
         Token lname;  lname.setText(loopvar);
-        Token var;    _p->onSimpleVariable(var, lname);
+        Token var;    _p->onSynthesizedVariable(var, lname);
         Token pn;     pn.setText(byRef ? "currentRef" : "current");
         Token pname;  _p->onName(pname, pn, Parser::VarName);
         Token empty;  empty = 1;

@@ -118,7 +118,7 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
         return classname.toObject()->o_invoke_ex
           (cls, method.substr(c + 2), params, false);
       }
-      return classname.toObject()->o_invoke(method, params, -1, false);
+      return classname.getObjectData()->o_invoke(method, params, -1, false);
     } else {
       if (!classname.isString()) {
         throw_invalid_argument("function: classname not string");
@@ -282,9 +282,7 @@ Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
   if (mcp.ci) {
     return (mcp.ci->getMeth())(mcp, params);
   } else {
-    if (g_context->getThrowAllErrors()) {
-      o_invoke_failed(s.data(), method.data(), fatal);
-    }
+    o_invoke_failed(s.data(), method.data(), fatal);
     return null;
   }
 }

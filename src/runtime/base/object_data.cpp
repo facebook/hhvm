@@ -618,6 +618,8 @@ Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
   mcp.methodCallEx(this, str);
   if (o_get_call_info_ex(clsname, mcp)) {
     return (mcp.ci->getMeth())(mcp, params);
+  } else {
+    o_invoke_failed(clsname.data(), s.data(), fatal);
   }
   return null;
 }
@@ -923,7 +925,7 @@ Variant ObjectData::callHandler(MethodCallPackage &info, CArrRef params) {
     clsname = info.obj->o_getClassName();
   }
   return invoke_static_method(clsname, s___callStatic,
-                              CREATE_VECTOR2(*info.name, params));
+                              CREATE_VECTOR2(*info.name, params), info.m_fatal);
 }
 
 Variant ObjectData::callHandlerFewArgs(MethodCallPackage &info, int count,

@@ -1,6 +1,9 @@
 
 PROJECT_ROOT = ../../..
 
+export \
+BISON_PKGDATADIR=$(realpath $(PROJECT_ROOT))/external-centos/bison/share/bison
+
 all: lex.yy.cpp
 	$(MAKE) -C $(PROJECT_ROOT)/src/compiler/parser
 	$(MAKE) -C $(PROJECT_ROOT)/src/runtime/eval/parser

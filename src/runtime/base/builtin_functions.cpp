@@ -960,7 +960,10 @@ Variant include_impl_invoke(CStrRef file, bool once, LVariableTable* variables,
     }
     string server_root = RuntimeOption::SourceRoot;
     if (server_root.empty()) {
-      server_root = string(g_context->getCwd()->data()) + "/";
+      server_root = string(g_context->getCwd()->data());
+      if (server_root.empty() || server_root[server_root.size() - 1] != '/') {
+        server_root += "/";
+      }
     }
 
     String rel_path(Util::relativePath(server_root, string(file.data())));

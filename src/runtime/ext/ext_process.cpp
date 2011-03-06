@@ -243,21 +243,16 @@ static SignalHandlersStaticInitializer s_signal_handlers_initializer;
 
 bool f_pcntl_signal_dispatch() {
   int *signaled = s_signal_handlers->signaled;
-  bool error = false;
   for (int i = 0; i < _NSIG; i++) {
     if (signaled[i]) {
       signaled[i] = 0;
       if (s_signal_handlers->handlers.exists(i)) {
-        try {
-          f_call_user_func_array(s_signal_handlers->handlers[i],
-                                 CREATE_VECTOR1(i));
-        } catch (...) {
-          error = true;
-        }
+        f_call_user_func_array(s_signal_handlers->handlers[i],
+                               CREATE_VECTOR1(i));
       }
     }
   }
-  return !error;
+  return true;
 }
 
 bool f_pcntl_signal(int signo, CVarRef handler,

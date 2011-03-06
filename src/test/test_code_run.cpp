@@ -11832,6 +11832,18 @@ bool TestCodeRun::TestExit() {
        "echo \"foobar!\\n\";"
        "exit;");
 
+  MVCR("<?php "
+       "declare(ticks=1);"
+       "function foo() {"
+       "  echo 'a';"
+       "  exit(1);"
+       "}"
+       "pcntl_signal(SIGUSR1,  'foo');"
+       "$pid = posix_getpid();"
+       "posix_kill($pid, SIGUSR1);"
+       "for ($i = 0; $i < 2; $i++) {"
+       "  echo 'a';"
+       "}");
   return true;
 }
 

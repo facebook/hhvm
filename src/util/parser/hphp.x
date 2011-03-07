@@ -261,8 +261,6 @@ BACKQUOTE_CHARS     ("{"*([^$`\\{]|("\\"{ANY_CHAR}))|{BACKQUOTE_LITERAL_DOLLAR})
       return T_XHP_LABEL;
     case ')':
     case T_ELSE:
-      _scanner->warn("Ambiguous XHP syntax. Use white space after ':' or "
-                     "use {} to surround xhp statement to resolve.");
       // fall through, treating them as normal PHP syntax
     default:
       yyless(1);

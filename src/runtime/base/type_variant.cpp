@@ -154,6 +154,14 @@ void Variant::reset() {
   m_type = KindOfNull;
 }
 
+static void destructString(void *p)  { ((StringData *)p)->release(); }
+static void destructArray(void *p)   { ((ArrayData *)p)->release();  }
+static void destructObject(void *p)  { ((ObjectData *)p)->release(); }
+static void destructVariant(void *p) { ((Variant *)p)->release();    }
+
+static void (*destructors[4])(void *) =
+  {destructString, destructArray, destructObject, destructVariant};
+
 void Variant::destruct() {
   ASSERT(!isPrimitive());
 #ifdef FAST_REFCOUNT_FOR_VARIANT
@@ -164,23 +172,8 @@ void Variant::destruct() {
    * and Variant classes.
    */
   if (m_data.pvar->decRefCount() == 0) {
-    switch (m_type) {
-    case KindOfString:
-      m_data.pstr->release();
-      break;
-    case KindOfArray:
-      m_data.parr->release();
-      break;
-    case KindOfObject:
-      m_data.pobj->release();
-      break;
-    case KindOfVariant:
-      m_data.pvar->release();
-      break;
-    default:
-      ASSERT(false);
-      break;
-    }
+    ASSERT(m_type >= KindOfString && m_type <= KindOfVariant);
+    destructors[m_type - KindOfString]((void *)m_data.pvar);
   }
 #else
   switch (m_type) {

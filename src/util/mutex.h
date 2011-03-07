@@ -59,6 +59,9 @@ public:
   pthread_mutex_t &getRaw() { return m_mutex;}
 
 private:
+  Mutex(const Mutex &); // suppress
+  Mutex &operator=(const Mutex &); // suppress
+
   pthread_mutexattr_t m_mutexattr;
   pthread_mutex_t m_mutex;
 };
@@ -84,6 +87,9 @@ public:
   pthread_spinlock_t &getRaw() { return m_spinlock;}
 
 private:
+  SpinLock(const SpinLock &); // suppress
+  SpinLock &operator=(const SpinLock &); // suppress
+
   pthread_spinlock_t m_spinlock;
 };
 
@@ -108,6 +114,9 @@ public:
   void release() { pthread_rwlock_unlock(&m_rwlock); }
 
 private:
+  ReadWriteMutex(const ReadWriteMutex &); // suppress
+  ReadWriteMutex &operator=(const ReadWriteMutex &); // suppress
+
   pthread_rwlock_t m_rwlock;
 };
 

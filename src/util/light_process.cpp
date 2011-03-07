@@ -28,6 +28,7 @@
 #include <poll.h>
 #include <pwd.h>
 #include <signal.h>
+#include <boost/scoped_array.hpp>
 
 using namespace std;
 
@@ -263,7 +264,8 @@ static void do_change_user(FILE *fin, FILE *fout) {
 ///////////////////////////////////////////////////////////////////////////////
 // light-weight process
 
-static vector<LightProcess> g_procs;
+static boost::scoped_array<LightProcess> g_procs;
+static int g_procsCount = 0;
 
 LightProcess::LightProcess()
 : m_shadowProcess(0), m_fin(NULL), m_fout(NULL), m_afdt_fd(-1) { }
@@ -281,14 +283,16 @@ void LightProcess::Initialize(const std::string &prefix, int count) {
     return;
   }
 
-  g_procs.resize(count);
+  g_procs.reset(new LightProcess[count]);
+  g_procsCount = count;
 
   for (int i = 0; i < count; i++) {
     if (!g_procs[i].initShadow(prefix, i)) {
       for (int j = 0; j < i; j++) {
         g_procs[j].closeShadow();
       }
-      g_procs.clear();
+      g_procs.reset();
+      g_procsCount = 0;
       break;
     }
   }
@@ -367,10 +371,11 @@ bool LightProcess::initShadow(const std::string &prefix, int id) {
 }
 
 void LightProcess::Close() {
-  for (unsigned int i = 0; i < g_procs.size(); i++) {
+  for (int i = 0; i < g_procsCount; i++) {
     g_procs[i].closeShadow();
   }
-  g_procs.clear();
+  g_procs.reset();
+  g_procsCount = 0;
 }
 
 void LightProcess::closeShadow() {
@@ -399,7 +404,7 @@ void LightProcess::closeFiles() {
 }
 
 bool LightProcess::Available() {
-  return !g_procs.empty();
+  return g_procsCount > 0;
 }
 
 void LightProcess::runShadow(int fdin, int fdout) {
@@ -443,7 +448,7 @@ void LightProcess::runShadow(int fdin, int fdout) {
 }
 
 int LightProcess::GetId() {
-  return (long)pthread_self() % g_procs.size();
+  return (long)pthread_self() % g_procsCount;
 }
 
 FILE *LightProcess::popen(const char *cmd, const char *type,
@@ -629,7 +634,7 @@ pid_t LightProcess::pcntl_waitpid(pid_t pid, int *stat_loc, int options) {
 
 void LightProcess::ChangeUser(const string &username) {
   if (username.empty()) return;
-  for (unsigned i = 0; i < g_procs.size(); i++) {
+  for (int i = 0; i < g_procsCount; i++) {
     Lock lock(g_procs[i].m_procMutex);
     fprintf(g_procs[i].m_fout, "change_user\n%s\n", username.c_str());
     fflush(g_procs[i].m_fout);

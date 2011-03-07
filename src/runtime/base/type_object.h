@@ -124,6 +124,11 @@ class Object : public SmartPtr<ObjectData> {
     return getTyped<T>();
   }
 
+  ObjectData *objectForCall() const {
+    if (m_px) return m_px;
+    throw_call_non_object();
+  }
+
   /**
    * Type conversions
    */

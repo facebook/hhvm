@@ -553,13 +553,13 @@ public:
 
   // e->n() style method call
   void methodCall(CObjRef self, CStrRef method, int64 prehash = -1) {
-    methodCall(self.get(), method, prehash);
+    methodCall(self.objectForCall(), method, prehash);
   }
   void methodCall(ObjectData *self, CStrRef method, int64 prehash = -1);
   void methodCall(CVarRef self, CStrRef method, int64 prehash = -1);
   void methodCallWithIndex(CObjRef self, CStrRef method, MethodIndex mi,
                            int64 prehash = -1) {
-    methodCallWithIndex(self.get(), method, mi, prehash);
+    methodCallWithIndex(self.objectForCall(), method, mi, prehash);
   }
   void methodCallWithIndex(ObjectData *self, CStrRef method, MethodIndex mi,
                            int64 prehash = -1);
@@ -569,7 +569,12 @@ public:
   // instance method. Lookup is done outside since K is known.
   void methodCallEx(CObjRef self, CStrRef method) {
     isObj = true;
-    rootObj = self.get();
+    rootObj = self.objectForCall();
+    name = &method;
+  }
+  void methodCallEx(ObjectData *self, CStrRef method) {
+    isObj = true;
+    rootObj = self;
     name = &method;
   }
   // K::n() style call where K::n() is a static method. Lookup is done outside

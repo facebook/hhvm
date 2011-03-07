@@ -24,6 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+DECLARE_BOOST_TYPES(Cronolog);
 class Cronolog {
 public:
   Cronolog() :
@@ -66,6 +67,10 @@ public:
   int m_bytesWritten;
   int m_prevBytesWritten;
   Mutex m_mutex;
+
+private:
+  Cronolog(const Cronolog &); // suppress
+  Cronolog &operator=(const Cronolog &); // suppress
 };
 
 ///////////////////////////////////////////////////////////////////////////////

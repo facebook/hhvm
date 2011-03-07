@@ -113,7 +113,8 @@ FILE *Cronolog::getOutputFile() {
 
     /* If there is no log file open then open a new one. */
     if (m_file == NULL) {
-      m_file = new_log_file(m_template.c_str(), m_linkName.c_str(), S_IFLNK,
+      const char *linkname = m_linkName.empty() ? NULL : m_linkName.c_str();
+      m_file = new_log_file(m_template.c_str(), linkname, S_IFLNK,
                             m_prevLinkName, m_periodicity, m_periodMultiple,
                             m_periodDelay, m_fileName, sizeof(m_fileName),
                             time_now, &m_nextPeriod);

@@ -76,14 +76,14 @@ void AccessLog::openFiles(const string &username) {
     ASSERT(!file.empty());
     FILE *fp = NULL;
     if (Logger::UseCronolog) {
-      Cronolog cl;
+      CronologPtr cl(new Cronolog);
       if (strchr(file.c_str(), '%')) {
-        cl.m_template = file;
-        cl.setPeriodicity();
-        cl.m_linkName = symLink;
+        cl->m_template = file;
+        cl->setPeriodicity();
+        cl->m_linkName = symLink;
         Cronolog::changeOwner(username, symLink);
       } else {
-        cl.m_file = fopen(file.c_str(), "a");
+        cl->m_file = fopen(file.c_str(), "a");
       }
       m_cronOutput.push_back(cl);
     } else {
@@ -116,10 +116,10 @@ void AccessLog::log(Transport *transport, const VirtualHost *vhost) {
   }
   if (Logger::UseCronolog) {
     for (uint i = 0; i < m_cronOutput.size(); ++i) {
-      FILE *outFile = m_cronOutput[i].getOutputFile();
+      Cronolog &cronOutput = *m_cronOutput[i];
+      FILE *outFile = cronOutput.getOutputFile();
       if (!outFile) continue;
       const char *format = m_files[i].format.c_str();
-      Cronolog &cronOutput = m_cronOutput[i];
       int bytes = writeLog(transport, vhost, outFile, format);
       atomic_add(cronOutput.m_bytesWritten, bytes);
       Logger::checkDropCache(cronOutput.m_bytesWritten,

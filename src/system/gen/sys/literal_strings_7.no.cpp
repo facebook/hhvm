@@ -22,6 +22,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss33988b3e("info");
+StaticString s_sys_ss3403085f("getstats");
+StaticString s_sys_ss343a37dc("geterrormessage");
+StaticString s_sys_ss344c5db6("hasAttributes");
 StaticString s_sys_ss37217e60("hasConstant");
 StaticString s_sys_ss372c9151("ksort");
 StaticString s_sys_ss37eff1c8("getInnerIterator");
@@ -39,7 +43,9 @@ StaticString s_sys_ss3f63bb07("getextendedstats");
 StaticString s_sys_ss3fe4822b("setAccessible");
 StaticString s_sys_ss404bf1b4("isStatic");
 StaticString s_sys_ss406322f2("currentRef");
+StaticString s_sys_ss40877955("\000Continuation\000label", 19);
 StaticString s_sys_ss41c7a197("stdclass");
+StaticString s_sys_ss42161ae0("nextImpl");
 StaticString s_sys_ss424e8241("getTimezone");
 StaticString s_sys_ss426361a3("stdClass");
 StaticString s_sys_ss42a11cef("setobject");
@@ -80,12 +86,6 @@ StaticString s_sys_ss4db221b9("setInfoClass");
 StaticString s_sys_ss4dd3a743("text");
 StaticString s_sys_ss4e21b0f1("rollback");
 StaticString s_sys_ss4e3b07b3("detach");
-StaticString s_sys_ss4e65aff3("\000Continuation\000value", 19);
-StaticString s_sys_ss4efec04e("getResultCode");
-StaticString s_sys_ss4f2f48c7("getMessage");
-StaticString s_sys_ss4fa2c4dd("helpTitle");
-StaticString s_sys_ss500f232f("lasterrormsg");
-StaticString s_sys_ss504bc94d("isInternal");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

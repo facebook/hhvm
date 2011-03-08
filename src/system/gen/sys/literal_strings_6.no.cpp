@@ -22,6 +22,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss15921d14("areConfusable");
+StaticString s_sys_ss15a9d310("fgetcsv");
 StaticString s_sys_ss163bad01("addServer");
 StaticString s_sys_ss164363b4("getPathname");
 StaticString s_sys_ss172df677("deleteByKey");
@@ -30,6 +32,7 @@ StaticString s_sys_ss17f0e883("exec");
 StaticString s_sys_ss1863b3c7("getGroup");
 StaticString s_sys_ss18bebdc2("replaceByKey");
 StaticString s_sys_ss1902bc14("getParameters");
+StaticString s_sys_ss19136311("\000Continuation\000received", 22);
 StaticString s_sys_ss19281e76("format");
 StaticString s_sys_ss1b64dec9("bindparam");
 StaticString s_sys_ss1bbd440a("lastinsertrowid");
@@ -72,6 +75,7 @@ StaticString s_sys_ss2dd6aec3("Closure");
 StaticString s_sys_ss2f8e5140("setOption");
 StaticString s_sys_ss2fd353cc("iterator");
 StaticString s_sys_ss30120c29("__setcookie");
+StaticString s_sys_ss305b0746("received");
 StaticString s_sys_ss309aefff("msg");
 StaticString s_sys_ss31a11388("errorcode");
 StaticString s_sys_ss31ec77af("insertBefore");
@@ -82,10 +86,6 @@ StaticString s_sys_ss337f2a0c("MutableArrayIterator");
 StaticString s_sys_ss3382a209("contains");
 StaticString s_sys_ss33872dc4("getStaticVariables");
 StaticString s_sys_ss33896428("writeElement");
-StaticString s_sys_ss33988b3e("info");
-StaticString s_sys_ss3403085f("getstats");
-StaticString s_sys_ss343a37dc("geterrormessage");
-StaticString s_sys_ss344c5db6("hasAttributes");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

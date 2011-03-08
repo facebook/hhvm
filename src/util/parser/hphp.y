@@ -149,6 +149,51 @@ static void on_constant(Parser *_p, Token &out, Token *stmts,
 ///////////////////////////////////////////////////////////////////////////////
 // continuation transformations
 
+static void on_yield_assign(Parser *_p, Token &out, Token &var, Token *expr) {
+  Token yield;    _p->onYield(yield, expr);
+  Token rhs;
+  {
+    Token name;   name.setText(CONTINUATION_OBJECT_NAME);
+    Token var;    _p->onSynthesizedVariable(var, name);
+    Token pn;     pn.setText("receive");
+    Token pname;  _p->onName(pname, pn, Parser::VarName);
+                  _p->pushObject(var); _p->appendProperty(pname);
+    Token empty;  empty = 1; _p->appendMethodParams(empty);
+                  _p->popObject(rhs);
+  }
+  Token assign;   _p->onAssign(assign, var, rhs, 0);
+  Token stmt;     _p->onExpStatement(stmt, assign);
+
+  Token stmts0;   _p->onStatementListStart(stmts0);
+  Token stmts1;   _p->addStatement(stmts1, stmts0, yield);
+  Token stmts2;   _p->addStatement(stmts2, stmts1, stmt);
+
+  _p->finishStatement(out, stmts2); out = 1;
+}
+
+static void on_yield_list_assign(Parser *_p, Token &out, Token &var,
+                                 Token *expr) {
+  Token yield;    _p->onYield(yield, expr);
+  Token rhs;
+  {
+    Token name;   name.setText(CONTINUATION_OBJECT_NAME);
+    Token var;    _p->onSynthesizedVariable(var, name);
+    Token pn;     pn.setText("receive");
+    Token pname;  _p->onName(pname, pn, Parser::VarName);
+                  _p->pushObject(var); _p->appendProperty(pname);
+    Token empty;  empty = 1; _p->appendMethodParams(empty);
+                  _p->popObject(rhs);
+  }
+  Token assign;   _p->onListAssignment(assign, var, &rhs);
+  Token stmt;     _p->onExpStatement(stmt, assign);
+
+  Token stmts0;   _p->onStatementListStart(stmts0);
+  Token stmts1;   _p->addStatement(stmts1, stmts0, yield);
+  Token stmts2;   _p->addStatement(stmts2, stmts1, stmt);
+
+  _p->finishStatement(out, stmts2); out = 1;
+}
+
 void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
   // 1. add prologue and epilogue to original body and store it back to "stmt"
   {
@@ -174,10 +219,11 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
     {
       Token name;    name.setText(CONTINUATION_OBJECT_NAME);
       Token var;     _p->onSynthesizedVariable(var, name);
-      Token pn;      pn.setText("label");
+      Token pn;      pn.setText("getLabel");
       Token pname;   _p->onName(pname, pn, Parser::VarName);
-      Token prop;    _p->pushObject(var); _p->appendProperty(pname);
-                     _p->popObject(prop);
+      Token mcall;   _p->pushObject(var); _p->appendProperty(pname);
+      Token empty;   empty = 1; _p->appendMethodParams(empty);
+                     _p->popObject(mcall);
 
       Token cases;
       for (int i = count; i > 0; i--) {
@@ -196,7 +242,7 @@ void prepare_generator(Parser *_p, Token &stmt, Token &params, int count) {
         cases = scase;
       }
       _p->pushLabelScope();
-      _p->onSwitch(sswitch, prop, cases);
+      _p->onSwitch(sswitch, mcall, cases);
       _p->popLabelScope();
     }
     Token sdone;
@@ -1036,6 +1082,13 @@ statement_without_expr:
   | T_YIELD T_BREAK ';'                { _p->onYield($$, NULL);}
   | T_YIELD expr_without_variable ';'  { _p->onYield($$, &$2);}
   | T_YIELD variable ';'               { _p->onYield($$, &$2);}
+  | variable '='
+    T_YIELD expr_without_variable ';'  { on_yield_assign(_p, $$, $1, &$4);}
+  | variable '=' T_YIELD variable ';'  { on_yield_assign(_p, $$, $1, &$4);}
+  | T_LIST '(' assignment_list ')' '='
+    T_YIELD expr_without_variable ';'  { on_yield_list_assign(_p, $$, $3, &$7);}
+  | T_LIST '(' assignment_list ')' '='
+    T_YIELD variable ';'               { on_yield_list_assign(_p, $$, $3, &$7);}
 
   | T_GLOBAL global_var_list ';'       { _p->onGlobal($$, $2);}
   | T_STATIC static_var_list ';'       { _p->onStatic($$, $2);}

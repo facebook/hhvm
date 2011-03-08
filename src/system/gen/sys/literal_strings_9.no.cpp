@@ -22,6 +22,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss679e8b98("normalize");
+StaticString s_sys_ss6863d210("schemaValidateSource");
+StaticString s_sys_ss68bc25e3("__dorequest");
+StaticString s_sys_ss68d731f7("getChildren");
+StaticString s_sys_ss690e46e7("saveHTML");
+StaticString s_sys_ss6974a1cc("__toString");
 StaticString s_sys_ss69f4b5d8("escapestring");
 StaticString s_sys_ss6a9626a3("seek");
 StaticString s_sys_ss6aa5ef61("helpBody");

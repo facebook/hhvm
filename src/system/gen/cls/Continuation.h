@@ -38,6 +38,7 @@ class c_Continuation : public c_Closure {
   int64 m_index;
   Variant m_value;
   bool m_running;
+  Variant m_received;
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
@@ -61,7 +62,7 @@ class c_Continuation : public c_Closure {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
+  #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Continuation 1
 
   // DECLARE_COMMON_INVOKE
   static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
@@ -79,23 +80,31 @@ class c_Continuation : public c_Closure {
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: void t_update(CVarRef v_label, CVarRef v_value, CVarRef v_vars);
   public: void t_done();
+  public: Variant t_getlabel();
   public: int t_num_args();
   public: Variant t_get_args();
   public: Variant t_get_arg(CVarRef v_id);
   public: Variant t_current();
   public: int64 t_key();
   public: void t_next();
+  public: void t_nextimpl();
   public: void t_rewind();
   public: bool t_valid();
+  public: void t_send(CVarRef v_v);
+  public: Variant t_receive();
   DECLARE_METHOD_INVOKE_HELPERS(next);
   DECLARE_METHOD_INVOKE_HELPERS(key);
+  DECLARE_METHOD_INVOKE_HELPERS(getlabel);
   DECLARE_METHOD_INVOKE_HELPERS(valid);
   DECLARE_METHOD_INVOKE_HELPERS(get_args);
+  DECLARE_METHOD_INVOKE_HELPERS(nextimpl);
   DECLARE_METHOD_INVOKE_HELPERS(get_arg);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(done);
   DECLARE_METHOD_INVOKE_HELPERS(num_args);
+  DECLARE_METHOD_INVOKE_HELPERS(receive);
   DECLARE_METHOD_INVOKE_HELPERS(current);
+  DECLARE_METHOD_INVOKE_HELPERS(send);
   DECLARE_METHOD_INVOKE_HELPERS(rewind);
   DECLARE_METHOD_INVOKE_HELPERS(update);
 };

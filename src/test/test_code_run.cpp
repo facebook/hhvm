@@ -16540,6 +16540,23 @@ bool TestCodeRun::TestYield() {
         "int(1)\n"
         "int(2)\n");
 
+  // Continuatin::send()
+  MVCRO("<?php\n"
+        "function f() {\n"
+        "  $a = yield 1; list($a, $b) = yield $a; yield $b;\n"
+        "}\n"
+        "$c = f();\n"
+        "$c->next();\n"
+        "var_dump($c->current());\n"
+        "$c->send(2);\n"
+        "var_dump($c->current());\n"
+        "$c->send(array(3, 4));\n"
+        "var_dump($c->current());\n",
+
+        "int(1)\n"
+        "int(2)\n"
+        "int(4)\n");
+
   return true;
 }
 

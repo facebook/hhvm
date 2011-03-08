@@ -141,7 +141,7 @@ Variant f_set_error_handler(CVarRef error_handler,
   return g_context->pushUserErrorHandler(error_handler, error_types);
 }
 
-String f_set_exception_handler(CStrRef exception_handler) {
+String f_set_exception_handler(CVarRef exception_handler) {
   return g_context->pushUserExceptionHandler(exception_handler);
 }
 

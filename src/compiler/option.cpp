@@ -205,6 +205,7 @@ int Option::InlineFunctionThreshold = -1;
 bool Option::ControlEvalOrder = true;
 bool Option::UseVirtualDispatch = false;
 bool Option::EliminateDeadCode = true;
+bool Option::CopyProp = false;
 bool Option::LocalCopyProp = true;
 bool Option::StringLoopOpts = true;
 bool Option::AutoInline = false;
@@ -414,6 +415,7 @@ void Option::Load(Hdf &config) {
   GenerateDocComments = config["GenerateDocComments"].getBool(true);
   UseVirtualDispatch = config["UseVirtualDispatch"].getBool(false);
   EliminateDeadCode  = config["EliminateDeadCode"].getBool(true);
+  CopyProp           = config["CopyProp"].getBool(false);
   LocalCopyProp      = config["LocalCopyProp"].getBool(true);
   StringLoopOpts     = config["StringLoopOpts"].getBool(true);
   AutoInline         = config["AutoInline"].getBool(false);

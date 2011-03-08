@@ -45,34 +45,46 @@ DECLARE_BOOST_TYPES(Statement);
 DECLARE_BOOST_TYPES(Expression);
 class Variant;
 
+#define DECLARE_EXPRESSION_TYPES(x)             \
+  x(ExpressionList, None),                      \
+    x(AssignmentExpression, Store),             \
+    x(SimpleVariable, Load),                    \
+    x(DynamicVariable, Load),                   \
+    x(StaticMemberExpression, Load),            \
+    x(ArrayElementExpression, Load),            \
+    x(DynamicFunctionCall, Call),               \
+    x(SimpleFunctionCall, Call),                \
+    x(ScalarExpression, None),                  \
+    x(ObjectPropertyExpression, Load),          \
+    x(ObjectMethodExpression, Call),            \
+    x(ListAssignment, Store),                   \
+    x(NewObjectExpression, Call),               \
+    x(UnaryOpExpression, Update),               \
+    x(IncludeExpression, Call),                 \
+    x(BinaryOpExpression, Update),              \
+    x(QOpExpression, None),                     \
+    x(ArrayPairExpression, None),               \
+    x(ClassConstantExpression, Const),          \
+    x(ParameterExpression, None),               \
+    x(ModifierExpression, None),                \
+    x(ConstantExpression, Const),               \
+    x(EncapsListExpression, None),              \
+    x(ClosureExpression, None)
+
 class Expression : public Construct {
 public:
+#define DEC_EXPR_ENUM(x,t) KindOf##x
   enum KindOf {
-    KindOfExpressionList,
-    KindOfAssignmentExpression,
-    KindOfSimpleVariable,
-    KindOfDynamicVariable,
-    KindOfStaticMemberExpression,
-    KindOfArrayElementExpression,
-    KindOfDynamicFunctionCall,
-    KindOfSimpleFunctionCall,
-    KindOfScalarExpression,
-    KindOfObjectPropertyExpression,
-    KindOfObjectMethodExpression,
-    KindOfListAssignment,
-    KindOfNewObjectExpression,
-    KindOfUnaryOpExpression,
-    KindOfIncludeExpression,
-    KindOfBinaryOpExpression,
-    KindOfQOpExpression,
-    KindOfArrayPairExpression,
-    KindOfClassConstantExpression,
-    KindOfParameterExpression,
-    KindOfModifierExpression,
-    KindOfConstantExpression,
-    KindOfEncapsListExpression,
-    KindOfClosureExpression,
-    /* KindOfCount = 23 */
+    DECLARE_EXPRESSION_TYPES(DEC_EXPR_ENUM)
+  };
+  static const char *Names[];
+  enum ExprClass {
+    None,
+    Load = 1,
+    Store = 2,
+    Update = 3,
+    Const = 4,
+    Call = 8
   };
 
   enum Context {
@@ -143,6 +155,7 @@ public:
   int getError() const { return m_error;}
   bool hasError(Error error) const { return m_error & error; }
 
+  ExprClass getExprClass() const;
   void setArgNum(int n);
 
   /**
@@ -345,6 +358,7 @@ protected:
                      bool force = false);
 
  private:
+  static ExprClass Classes[];
   void outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar);
 
   BlockScopeRawPtr m_originalScope;

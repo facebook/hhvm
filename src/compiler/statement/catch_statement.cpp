@@ -37,7 +37,9 @@ CatchStatement::CatchStatement
  const std::string &className, const std::string &variable,
  StatementPtr stmt)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
-    m_variable(variable), m_stmt(stmt), m_valid(true) {
+    m_variable(new SimpleVariable(scope, loc, Expression::KindOfSimpleVariable,
+                                  variable)), m_stmt(stmt), m_valid(true) {
+  m_variable->setContext(Expression::LValue);
   m_className = Util::toLower(className);
   m_originalClassName = className;
 }
@@ -45,6 +47,7 @@ CatchStatement::CatchStatement
 StatementPtr CatchStatement::clone() {
   CatchStatementPtr stmt(new CatchStatement(*this));
   stmt->m_stmt = Clone(m_stmt);
+  stmt->m_variable = Clone(m_variable);
   return stmt;
 }
 
@@ -56,13 +59,15 @@ StatementPtr CatchStatement::clone() {
 
 void CatchStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   addUserClass(ar, m_className);
-  getScope()->getVariables()->addUsed(m_variable);
+  m_variable->analyzeProgram(ar);
   if (m_stmt) m_stmt->analyzeProgram(ar);
 }
 
 ConstructPtr CatchStatement::getNthKid(int n) const {
   switch (n) {
     case 0:
+      return m_variable;
+    case 1:
       return m_stmt;
     default:
       ASSERT(false);
@@ -72,12 +77,15 @@ ConstructPtr CatchStatement::getNthKid(int n) const {
 }
 
 int CatchStatement::getKidCount() const {
-  return 1;
+  return 2;
 }
 
 void CatchStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
     case 0:
+      m_variable = boost::dynamic_pointer_cast<SimpleVariable>(cp);
+      break;
+    case 1:
       m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
       break;
     default:
@@ -100,16 +108,7 @@ void CatchStatement::inferTypes(AnalysisResultPtr ar) {
   // DynamicObjectData: p_exception v_e = e;
   type = Type::Object;
 
-  BlockScopePtr scope = getScope();
-  VariableTablePtr variables = scope->getVariables();
-  variables->add(m_variable, type, false, ar, shared_from_this(),
-                 ModifierExpressionPtr(), false);
-  if (getScope()->isFirstPass()) {
-    FunctionScopePtr func = dynamic_pointer_cast<FunctionScope>(scope);
-    if (func && variables->isParameter(m_variable)) {
-      variables->addLvalParam(m_variable);
-    }
-  }
+  m_variable->inferAndCheck(ar, type, true);
   if (m_stmt) m_stmt->inferTypes(ar);
 }
 
@@ -118,7 +117,7 @@ void CatchStatement::inferTypes(AnalysisResultPtr ar) {
 
 void CatchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf(" catch (%s $%s) ", m_originalClassName.c_str(),
-            m_variable.c_str());
+            m_variable->getName().c_str());
   cg_indentBegin("{\n");
   if (m_stmt) m_stmt->outputPHP(cg, ar);
   cg_indentEnd("}");
@@ -130,7 +129,7 @@ void CatchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printString(m_className, ar, shared_from_this());
     cg_indentBegin(")) {\n");
     VariableTablePtr variables = getScope()->getVariables();
-    string name = variables->getVariableName(cg, ar, m_variable);
+    string name = variables->getVariableName(cg, ar, m_variable->getName());
     cg_printf("%s = e;\n", name.c_str());
   } else {
     cg_indentBegin("if (false) {\n");

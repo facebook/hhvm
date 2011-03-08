@@ -358,6 +358,7 @@ public:
   static bool ControlEvalOrder;
   static bool UseVirtualDispatch;
   static bool EliminateDeadCode;
+  static bool CopyProp;
   static bool LocalCopyProp;
   static bool StringLoopOpts;
   static bool AutoInline;

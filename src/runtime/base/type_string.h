@@ -401,6 +401,17 @@ struct hphp_string_isame {
   }
 };
 
+struct StringDataHashCompare {
+  bool equal(StringData *s1, StringData *s2) const {
+    ASSERT(s1 && s2);
+    return s1->same(s2);
+  }
+  size_t hash(const StringData *s) const {
+    ASSERT(s);
+    return s->hash();
+  }
+};
+
 typedef hphp_hash_set<String, hphp_string_hash, hphp_string_isame> StringISet;
 
 template<typename T>

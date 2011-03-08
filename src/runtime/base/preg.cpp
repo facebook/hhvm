@@ -22,6 +22,7 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/array/array_iterator.h>
+#include <tbb/concurrent_hash_map.h>
 
 #define PREG_PATTERN_ORDER          1
 #define PREG_SET_ORDER              2
@@ -73,8 +74,6 @@ public:
   int compile_options;
 };
 
-typedef hphp_hash_map<StringData *, pcre_cache_entry*,
-                      string_data_hash, string_data_same> PCREStringMap;
 
 // TODO LRU cache
 class PCRECache {
@@ -82,6 +81,7 @@ public:
   ~PCRECache() { }
 
   void cleanup() {
+    WriteLock l(m_lock);
     for (PCREStringMap::iterator it = m_cache.begin(); it != m_cache.end();
          ++it) {
       delete it->second;
@@ -92,46 +92,58 @@ public:
   }
 
   pcre_cache_entry *find(CStrRef regex) {
-    PCREStringMap::const_iterator it = m_cache.find(regex.get());
-    if (it != m_cache.end()) return it->second;
-    return NULL;
+    ReadLock l(m_lock);
+    PCREStringMap::const_accessor acc;
+    if (!m_cache.find(acc, regex.get())) {
+      return NULL;
+    }
+    return acc->second;
   }
 
   void set(CStrRef regex, pcre_cache_entry *pce) {
-    PCREStringMap::iterator it = m_cache.find(regex.get());
-    if (it != m_cache.end()) {
-      delete it->second;
-      it->second = pce;
+    ReadLock l(m_lock);
+    PCREStringMap::accessor acc;
+    if (m_cache.find(acc, regex.get())) {
+      delete acc->second;
     } else {
-      m_cache[regex->copy(true)] = pce;
+      m_cache.insert(acc, regex->copy(true));
     }
+    acc->second = pce;
   }
 
-  int error_code;
-  pcre_extra extra_data;
-
 private:
+  typedef tbb::concurrent_hash_map <StringData *, pcre_cache_entry *,
+                                    StringDataHashCompare> PCREStringMap;
+  ReadWriteMutex m_lock;
   PCREStringMap m_cache;
 };
-IMPLEMENT_THREAD_LOCAL_NO_CHECK(PCRECache, s_pcre_cache);
+
+static PCRECache s_pcre_cache;
+
+class PCRELocal {
+public:
+  ~PCRELocal() { }
+  int error_code;
+  pcre_extra extra_data;
+};
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(PCRELocal, s_pcre_local);
 
 void preg_get_pcre_cache() {
-  s_pcre_cache.getCheck();
+  s_pcre_local.getCheck();
 }
 
 static pcre_cache_entry *pcre_get_compiled_regex_cache(CStrRef regex) {
-  PCRECache &pcre_cache = *s_pcre_cache;
 
   /* Try to lookup the cached regex entry, and if successful, just pass
      back the compiled pattern, otherwise go on and compile it. */
-  pcre_cache_entry *pce = pcre_cache.find(regex);
+  pcre_cache_entry *pce = s_pcre_cache.find(regex);
   if (pce) {
     /**
      * We use a quick pcre_info() check to see whether cache is corrupted,
      * and if it is, we flush it and compile the pattern from scratch.
      */
     if (pcre_info(pce->re, NULL, NULL) == PCRE_ERROR_BADMAGIC) {
-      pcre_cache.cleanup();
+      s_pcre_cache.cleanup();
     } else {
 #if HAVE_SETLOCALE
       if (!strcmp(pce->locale, locale)) {
@@ -292,13 +304,13 @@ static pcre_cache_entry *pcre_get_compiled_regex_cache(CStrRef regex) {
   new_entry->locale = strdup(locale);
   new_entry->tables = tables;
 #endif
-  pcre_cache.set(regex, new_entry);
+  s_pcre_cache.set(regex, new_entry);
   return new_entry;
 }
 
 static void set_extra_limits(pcre_extra *&extra) {
   if (extra == NULL) {
-    pcre_extra &extra_data = s_pcre_cache->extra_data;
+    pcre_extra &extra_data = s_pcre_local->extra_data;
     extra_data.flags = PCRE_EXTRA_MATCH_LIMIT |
       PCRE_EXTRA_MATCH_LIMIT_RECURSION;
     extra = &extra_data;
@@ -366,7 +378,7 @@ static void pcre_handle_exec_error(int pcre_code) {
     preg_code = PHP_PCRE_INTERNAL_ERROR;
     break;
   }
-  s_pcre_cache->error_code = preg_code;
+  s_pcre_local->error_code = preg_code;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -385,7 +397,7 @@ Variant preg_grep(CStrRef pattern, CArrRef input, int flags /* = 0 */) {
 
   /* Initialize return array */
   Array ret = Array::Create();
-  s_pcre_cache->error_code = PHP_PCRE_NO_ERROR;
+  s_pcre_local->error_code = PHP_PCRE_NO_ERROR;
 
   /* Go through the input array */
   bool invert = (flags & PREG_GREP_INVERT);
@@ -531,7 +543,7 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
   }
 
   int matched = 0;
-  s_pcre_cache->error_code = PHP_PCRE_NO_ERROR;
+  s_pcre_local->error_code = PHP_PCRE_NO_ERROR;
 
   Variant result_set; // Holds a set of subpatterns after a global match
   int g_notempty = 0; // If the match should not be empty
@@ -800,7 +812,7 @@ static String php_pcre_replace(CStrRef pattern, CStrRef subject,
   /* Initialize */
   const char *match = NULL;
   int start_offset = 0;
-  s_pcre_cache->error_code = PHP_PCRE_NO_ERROR;
+  s_pcre_local->error_code = PHP_PCRE_NO_ERROR;
   pcre_extra *extra = pce->extra;
   set_extra_limits(extra);
 
@@ -1104,7 +1116,7 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
   int start_offset = 0;
   int next_offset = 0;
   const char *last_match = ssubject.data();
-  s_pcre_cache->error_code = PHP_PCRE_NO_ERROR;
+  s_pcre_local->error_code = PHP_PCRE_NO_ERROR;
   pcre_extra *extra = pce->extra;
 
   // Get next piece if no limit or limit not yet reached and something matched
@@ -1284,7 +1296,7 @@ String preg_quote(CStrRef str, CStrRef delimiter /* = null_string */) {
 }
 
 int preg_last_error() {
-  return s_pcre_cache->error_code;
+  return s_pcre_local->error_code;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

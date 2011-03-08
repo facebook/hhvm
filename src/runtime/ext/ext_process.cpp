@@ -364,11 +364,7 @@ String f_exec(CStrRef command, Variant output /* = null */,
 
   Array lines = StringUtil::Explode(sbuf.detach(), "\n");
   int ret = ctx.exit();
-  if (!LightProcess::Available()) {
-    if (WIFEXITED(ret)) {
-      ret = WEXITSTATUS(ret);
-    }
-  }
+  if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
   return_var = ret;
   int count = lines.size();
   if (count > 0 && lines[count - 1].toString().empty()) {
@@ -401,7 +397,9 @@ void f_passthru(CStrRef command, Variant return_var /* = null */) {
     buffer[len] = '\0';
     echo(String(buffer, len, AttachLiteral));
   }
-  return_var = ctx.exit();
+  int ret = ctx.exit();
+  if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
+  return_var = ret;
 }
 
 String f_system(CStrRef command, Variant return_var /* = null */) {
@@ -414,7 +412,9 @@ String f_system(CStrRef command, Variant return_var /* = null */) {
   }
 
   Array lines = StringUtil::Explode(sbuf.detach(), "\n");
-  return_var = ctx.exit();
+  int ret = ctx.exit();
+  if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
+  return_var = ret;
   int count = lines.size();
   if (count > 0 && lines[count - 1].toString().empty()) {
     count--; // remove explode()'s last empty line

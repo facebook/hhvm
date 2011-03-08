@@ -11844,6 +11844,15 @@ bool TestCodeRun::TestExit() {
        "for ($i = 0; $i < 2; $i++) {"
        "  echo 'a';"
        "}");
+  MVCR("<?php "
+       "$command = \"exit 2\";"
+       "system($command, $return);"
+       "print \"$return\\n\";");
+  MVCR("<?php "
+       "$command = \"exit 2\";"
+       "passthru($command, $return);"
+       "print \"$return\\n\";");
+
   return true;
 }
 

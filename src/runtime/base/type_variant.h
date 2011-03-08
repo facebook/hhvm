@@ -491,9 +491,9 @@ class Variant {
     }
     return toStringHelper();
   }
-  Array  toArray  (bool warn = false) const {
+  Array  toArray  () const {
     if (m_type == KindOfArray) return m_data.parr;
-    return toArrayHelper(warn);
+    return toArrayHelper();
   }
   Object toObject () const {
     if (m_type == KindOfObject) return m_data.pobj;
@@ -1173,7 +1173,7 @@ class Variant {
   int64  toInt64Helper(int base = 10) const;
   double toDoubleHelper() const;
   String toStringHelper() const;
-  Array  toArrayHelper(bool warn) const;
+  Array  toArrayHelper() const;
   Object toObjectHelper() const;
 
   static void compileTimeAssertions() {

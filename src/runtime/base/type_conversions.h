@@ -153,10 +153,10 @@ inline Array toArray(CStrRef v) { return Array::Create(v);}
 inline Array toArray(ArrayData *v) { return v;}
 inline Array toArray(CArrRef v) { return v;}
 inline Array toArray(const ObjectData *v) {
-  return v ? v->o_toArray(true) : Array();
+  return v ? v->o_toArray() : Array();
 }
 inline Array toArray(CObjRef v) { return toArray(v.get());}
-inline Array toArray(CVarRef v) { return v.toArray(true);}
+inline Array toArray(CVarRef v) { return v.toArray();}
 
 inline Object toObject(bool    v) { return Variant(v).toObject();}
 inline Object toObject(char    v) { return Variant(v).toObject();}

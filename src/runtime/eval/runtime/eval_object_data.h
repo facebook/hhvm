@@ -41,7 +41,7 @@ public:
   virtual void destruct();
 
   // properties
-  virtual Array o_toArray(bool warn = false) const;
+  virtual Array o_toArray() const;
   virtual void o_getArray(Array &props, bool pubOnly = false) const;
   virtual void o_setArray(CArrRef props);
   virtual Variant *o_realProp(CStrRef prop, int flags,

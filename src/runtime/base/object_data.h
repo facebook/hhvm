@@ -170,7 +170,7 @@ class ObjectData : public Countable {
       MethodIndex mi, int64 hash = -1);
 
   // properties
-  virtual Array o_toArray(bool warn = false) const;
+  virtual Array o_toArray() const;
   virtual Array o_toIterArray(CStrRef context, bool getRef = false);
   virtual Array o_getDynamicProperties() const;
   virtual Variant *o_realProp(CStrRef s, int flags,

@@ -40,7 +40,7 @@ MutableArrayIter Object::begin(Variant *key, Variant &val,
 }
 
 Array Object::toArray() const {
-  return m_px ? m_px->o_toArray(false) : Array();
+  return m_px ? m_px->o_toArray() : Array();
 }
 
 Variant Object::toKey() const {

@@ -123,7 +123,7 @@ class c_SimpleXMLElement :
   virtual bool o_toBoolean() const;
   virtual int64 o_toInt64() const;
   virtual double o_toDouble() const;
-  virtual Array o_toArray(bool warn = false) const;
+  virtual Array o_toArray() const;
   virtual Variant *___lval(Variant v_name);
  private:
   xmlXPathContextPtr m_xpath;

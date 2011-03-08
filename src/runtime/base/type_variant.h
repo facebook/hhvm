@@ -359,20 +359,12 @@ class Variant {
   Variant &operator=(CVarRef v) {
     return assign(v);
   }
-  Variant &operator=(const StaticString & v) {
-    if (m_type != KindOfVariant) {
-      set(v);
-    } else {
-      m_data.pvar->set(v);
-    }
+  Variant &operator=(const StaticString &v) {
+    set(v);
     return *this;
   }
   template<typename T> Variant &operator=(const T &v) {
-    if (m_type != KindOfVariant) {
-      set(v);
-    } else {
-      m_data.pvar->set(v);
-    }
+    set(v);
     return *this;
   }
 

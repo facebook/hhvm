@@ -204,7 +204,7 @@ void Variant::destruct() {
 #endif
 }
 
-Variant& Variant::assign(CVarRef v) {
+Variant &Variant::assign(CVarRef v) {
   // otherwise our code generation is wrong
   ASSERT(!isContagious() || this == &v);
   if (v.isContagious()) {

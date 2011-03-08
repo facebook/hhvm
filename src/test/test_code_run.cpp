@@ -15258,6 +15258,18 @@ bool TestCodeRun::TestFiber() {
         "int(2)\n"
         );
 
+  // recursive objects
+  MVCRO("<?php\n"
+        "class A { private $v; function set($a) { $this->v = $a; } }\n"
+        "$o1 = new A;\n"
+        "$o2 = new A;\n"
+        "$o1->set($o2); $o2->set($o1);\n"
+        "function f($a) { return $a; }\n"
+        "$h = call_user_func_async('f', $o1);\n"
+        "$ret = end_user_func_async($h);\n"
+        "echo \"Success!\n\";",
+        "Success!\n");
+
   return true;
 }
 

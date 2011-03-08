@@ -390,6 +390,8 @@ Variant &EvalObjectData::___offsetget_lval(Variant v_name) {
 }
 
 Object EvalObjectData::fiberMarshal(FiberReferenceMap &refMap) const {
+  ObjectData *px = (ObjectData *)refMap.lookup((void *)this);
+  if (px) return px;
   Object ret = ObjectData::fiberMarshal(refMap);
   EvalObjectData *obj = dynamic_cast<EvalObjectData*>(ret.get());
   ASSERT(obj);
@@ -398,6 +400,8 @@ Object EvalObjectData::fiberMarshal(FiberReferenceMap &refMap) const {
 }
 
 Object EvalObjectData::fiberUnmarshal(FiberReferenceMap &refMap) const {
+  ObjectData *px = (ObjectData *)refMap.lookup((void *)this);
+  if (px) return px;
   Object ret = ObjectData::fiberUnmarshal(refMap);
   EvalObjectData *obj = dynamic_cast<EvalObjectData*>(ret.get());
   ASSERT(obj);

@@ -24,6 +24,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(MethodStatement);
 DECLARE_BOOST_TYPES(SimpleVariable);
+DECLARE_BOOST_TYPES(ListAssignment);
 
 class ControlFlowGraph;
 
@@ -82,6 +83,8 @@ class BucketMapEntry {
 
 class AliasManager {
  public:
+  enum { SameAccess, InterfAccess, DisjointAccess, NotAccess };
+
   AliasManager(int opt);
   ~AliasManager();
 
@@ -89,11 +92,13 @@ class AliasManager {
   void beginScope();
   void endScope();
   void resetScope();
+  bool insertForDict(ExpressionPtr e);
   ExpressionPtr getCanonical(ExpressionPtr e);
 
   void gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m);
   int optimize(AnalysisResultConstPtr ar, MethodStatementPtr s);
   void finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m);
+  int copyProp(MethodStatementPtr m);
 
   void setChanged() {
     if (!m_noAdd) {
@@ -104,11 +109,14 @@ class AliasManager {
 
   static bool parseOptimizations(const std::string &optimizations,
                                  std::string &errs);
+
+  ControlFlowGraph *graph() { return m_graph; }
+  int checkAnyInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
+                     int &depth, int &effects);
  private:
   void doFinal(MethodStatementPtr m);
   enum { MaxBuckets = 0x10000 };
   enum { FallThrough, CondBranch, Branch, Converge };
-  enum { SameAccess, InterfAccess, DisjointAccess, NotAccess };
   enum { NoCopyProp = 1, NoDeadStore = 2 };
   struct CondStackElem {
     CondStackElem(size_t s = 0) : m_size(s), m_exprs() {}
@@ -161,6 +169,7 @@ class AliasManager {
                  int *flags = 0);
   void applyAssign(ExpressionPtr lhs, ExpressionPtr rhs);
   void processAccessChain(ExpressionPtr e);
+  void processAccessChainLA(ListAssignmentPtr e);
 
   void canonicalizeKid(ConstructPtr e, ExpressionPtr kid, int i);
   int canonicalizeKid(ConstructPtr e, ConstructPtr kid, int i);
@@ -202,6 +211,8 @@ class AliasManager {
   bool                      m_postOpt;
   bool                      m_cleared;
   bool                      m_inPseudoMain;
+  bool                      m_genAttrs;
+  bool                      m_hasDeadStore;
   BlockScopeRawPtr          m_scope;
 
   ControlFlowGraph          *m_graph;

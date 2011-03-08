@@ -148,5 +148,6 @@ void DataFlow::ComputeAnticipated(const ControlFlowGraph &g) {
       }
       if (!changed) changed = !BitOps::bit_equal(width, tmp1, ain);
     }
+    firstTime = false;
   } while (changed);
 }

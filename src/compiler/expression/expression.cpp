@@ -43,6 +43,16 @@ using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#define DEC_EXPR_NAMES(x,t) #x
+const char *Expression::Names[] = {
+  DECLARE_EXPRESSION_TYPES(DEC_EXPR_NAMES)
+};
+
+#define DEC_EXPR_CLASSES(x,t) Expression::t
+Expression::ExprClass Expression::Classes[] = {
+  DECLARE_EXPRESSION_TYPES(DEC_EXPR_CLASSES)
+};
+
 Expression::Expression(EXPRESSION_CONSTRUCTOR_PARAMETERS)
     : Construct(scope, loc), m_kindOf(kindOf), m_context(RValue),
       m_originalScopeSet(false), m_canon_id(0), m_canonPtr(), m_error(0),
@@ -130,6 +140,15 @@ bool Expression::hasSubExpr(ExpressionPtr sub) const {
     if (kid && kid->hasSubExpr(sub)) return true;
   }
   return false;
+}
+
+Expression::ExprClass Expression::getExprClass() const {
+  ExprClass cls = Classes[m_kindOf];
+  if (cls == Update) {
+    ExpressionPtr k = getNthExpr(0);
+    if (!k || !(k->hasContext(OprLValue))) cls = Expression::None;
+  }
+  return cls;
 }
 
 void Expression::addElement(ExpressionPtr exp) {

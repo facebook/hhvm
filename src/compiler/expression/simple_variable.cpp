@@ -115,17 +115,26 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
       }
     }
   } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
-    if (m_sym && !m_sym->isSystem() &&
-        !(getContext() &
-          (LValue|RefValue|RefParameter|UnsetContext|ExistContext)) &&
-        m_sym->getDeclaration().get() == this &&
-        !variables->getAttribute(VariableTable::ContainsLDynamicVariable) &&
-        !getScope()->is(BlockScope::ClassScope)) {
-      if (getScope()->inPseudoMain()) {
-        Compiler::Error(Compiler::UseUndeclaredGlobalVariable,
-                        shared_from_this());
-      } else {
-        Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
+    if (m_sym) {
+      if (!m_sym->isSystem() &&
+          !(getContext() &
+            (LValue|RefValue|RefParameter|UnsetContext|ExistContext)) &&
+          m_sym->getDeclaration().get() == this &&
+          !variables->getAttribute(VariableTable::ContainsLDynamicVariable) &&
+          !getScope()->is(BlockScope::ClassScope)) {
+        if (getScope()->inPseudoMain()) {
+          Compiler::Error(Compiler::UseUndeclaredGlobalVariable,
+                          shared_from_this());
+        } else {
+          Compiler::Error(Compiler::UseUndeclaredVariable, shared_from_this());
+        }
+      }
+      // check function parameter that can occur in lval context
+      if (m_sym->isParameter() &&
+          m_context & (LValue | RefValue | DeepReference |
+                       UnsetContext | InvokeArgument | OprLValue |
+                       DeepOprLValue)) {
+        m_sym->setLvalParam();
       }
     }
   }

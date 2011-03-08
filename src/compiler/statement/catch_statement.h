@@ -18,6 +18,7 @@
 #define __CATCH_STATEMENT_H__
 
 #include <compiler/statement/statement.h>
+#include <compiler/expression/simple_variable.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,11 +37,11 @@ public:
   virtual int getRecursiveCount() const {
     return (m_stmt ? m_stmt->getRecursiveCount() : 0);
   }
-  const std::string &getVariable() const { return m_variable; }
+  const std::string &getVariable() const { return m_variable->getName(); }
 private:
   std::string m_className;
   std::string m_originalClassName;
-  std::string m_variable;
+  SimpleVariablePtr m_variable;
   StatementPtr m_stmt;
   bool m_valid;
 };

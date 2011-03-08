@@ -389,7 +389,7 @@ static void _php_imap_add_body(Object &ret, BODY *body, bool do_multipart) {
       dparam.o_set("value", String((const char*)dpar->value, CopyString));
       dparametres.append(dparam);
     } while ((dpar = dpar->next));
-    ret.o_set("ifdisposition", dparametres);
+    ret.o_set("dparameters", dparametres);
   } else {
     ret.o_set("ifdparameters", 0);
   }
@@ -405,10 +405,10 @@ static void _php_imap_add_body(Object &ret, BODY *body, bool do_multipart) {
       OBJ_SET_ENTRY(param, par, "value", value);
       parametres.append(param);
     } while ((par = par->next));
+    ret.o_set("parameters", parametres);
   } else {
     ret.o_set("ifparameters", 0);
   }
-  ret.o_set("parameters", parametres);
 
   if (do_multipart) {
     /* multipart message ? */

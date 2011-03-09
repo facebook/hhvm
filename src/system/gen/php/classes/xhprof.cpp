@@ -104,47 +104,6 @@ void c_XhprofFrame::cloneSet(ObjectData *cl) {
   c_XhprofFrame *clone = static_cast<c_XhprofFrame*>(cl);
   ObjectData::cloneSet(clone);
 }
-Variant c_XhprofFrame::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x7F974836AACC1EF3LL, NAMSTR(s_sys_ssa5a7f4f9, "__destruct")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        unsigned int i = 0;
-        do {
-        } while(false);
-        for (; i != params.size(); ++i) {
-          params[i]->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("XhprofFrame::__destruct", 0, 1);
-        return (t___destruct());
-      }
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        unsigned int i = 0;
-        do {
-          if (i == params.size()) break;
-          a0 = params[i]->eval(env);
-          i++;
-        } while(false);
-        for (; i != params.size(); ++i) {
-          params[i]->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("XhprofFrame::__construct", count, 1, 1, 2);
-        return (t___construct(a0), null);
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_XhprofFrame::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 CallInfo c_XhprofFrame::ci___destruct((void*)&c_XhprofFrame::i___destruct, (void*)&c_XhprofFrame::ifa___destruct, 0, 4, 0x0000000000000000LL);
 CallInfo c_XhprofFrame::ci___construct((void*)&c_XhprofFrame::i___construct, (void*)&c_XhprofFrame::ifa___construct, 1, 4, 0x0000000000000000LL);
 Variant c_XhprofFrame::i___destruct(MethodCallPackage &mcp, CArrRef params) {

@@ -63,7 +63,6 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  DECLARE_INVOKES_FROM_EVAL
   void init();
   public: void t___construct(Variant v_cls, Variant v_name = NAMSTR(s_sys_ss00000000, ""));
   public: c_ReflectionMethod *create(Variant v_cls, Variant v_name = NAMSTR(s_sys_ss00000000, ""));

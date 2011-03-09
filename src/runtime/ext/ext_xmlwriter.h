@@ -80,7 +80,6 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
   BEGIN_CLASS_MAP(XMLWriter)
   END_CLASS_MAP(XMLWriter)
   DECLARE_CLASS(XMLWriter, XMLWriter, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_XMLWriter();

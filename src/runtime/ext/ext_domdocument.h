@@ -107,7 +107,6 @@ class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSe
   BEGIN_CLASS_MAP(DOMNode)
   END_CLASS_MAP(DOMNode)
   DECLARE_CLASS(DOMNode, DOMNode, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMNode();
@@ -182,7 +181,6 @@ class c_DOMAttr : public c_DOMNode {
   RECURSIVE_PARENT_CLASS(DOMNode)
   END_CLASS_MAP(DOMAttr)
   DECLARE_CLASS(DOMAttr, DOMAttr, DOMNode)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMAttr();
@@ -220,7 +218,6 @@ class c_DOMCharacterData : public c_DOMNode {
   RECURSIVE_PARENT_CLASS(DOMNode)
   END_CLASS_MAP(DOMCharacterData)
   DECLARE_CLASS(DOMCharacterData, DOMCharacterData, DOMNode)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMCharacterData();
@@ -266,7 +263,6 @@ class c_DOMComment : public c_DOMCharacterData {
   RECURSIVE_PARENT_CLASS(DOMCharacterData)
   END_CLASS_MAP(DOMComment)
   DECLARE_CLASS(DOMComment, DOMComment, DOMCharacterData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMComment();
@@ -296,7 +292,6 @@ class c_DOMText : public c_DOMCharacterData {
   RECURSIVE_PARENT_CLASS(DOMCharacterData)
   END_CLASS_MAP(DOMText)
   DECLARE_CLASS(DOMText, DOMText, DOMCharacterData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMText();
@@ -336,7 +331,6 @@ class c_DOMCDATASection : public c_DOMText {
   RECURSIVE_PARENT_CLASS(DOMText)
   END_CLASS_MAP(DOMCDATASection)
   DECLARE_CLASS(DOMCDATASection, DOMCDATASection, DOMText)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMCDATASection();
@@ -366,7 +360,6 @@ class c_DOMDocument : public c_DOMNode, public Sweepable {
   RECURSIVE_PARENT_CLASS(DOMNode)
   END_CLASS_MAP(DOMDocument)
   DECLARE_CLASS(DOMDocument, DOMDocument, DOMNode)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMDocument();
@@ -474,7 +467,6 @@ class c_DOMDocumentFragment : public c_DOMNode {
   RECURSIVE_PARENT_CLASS(DOMNode)
   END_CLASS_MAP(DOMDocumentFragment)
   DECLARE_CLASS(DOMDocumentFragment, DOMDocumentFragment, DOMNode)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMDocumentFragment();
@@ -506,7 +498,6 @@ class c_DOMDocumentType : public c_DOMNode {
   RECURSIVE_PARENT_CLASS(DOMNode)
   END_CLASS_MAP(DOMDocumentType)
   DECLARE_CLASS(DOMDocumentType, DOMDocumentType, DOMNode)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMDocumentType();
@@ -542,7 +533,6 @@ class c_DOMElement : public c_DOMNode {
   RECURSIVE_PARENT_CLASS(DOMNode)
   END_CLASS_MAP(DOMElement)
   DECLARE_CLASS(DOMElement, DOMElement, DOMNode)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMElement();
@@ -614,7 +604,6 @@ class c_DOMEntity : public c_DOMNode {
   RECURSIVE_PARENT_CLASS(DOMNode)
   END_CLASS_MAP(DOMEntity)
   DECLARE_CLASS(DOMEntity, DOMEntity, DOMNode)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMEntity();
@@ -650,7 +639,6 @@ class c_DOMEntityReference : public c_DOMNode {
   RECURSIVE_PARENT_CLASS(DOMNode)
   END_CLASS_MAP(DOMEntityReference)
   DECLARE_CLASS(DOMEntityReference, DOMEntityReference, DOMNode)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMEntityReference();
@@ -680,7 +668,6 @@ class c_DOMNotation : public c_DOMNode {
   RECURSIVE_PARENT_CLASS(DOMNode)
   END_CLASS_MAP(DOMNotation)
   DECLARE_CLASS(DOMNotation, DOMNotation, DOMNode)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMNotation();
@@ -716,7 +703,6 @@ class c_DOMProcessingInstruction : public c_DOMNode {
   RECURSIVE_PARENT_CLASS(DOMNode)
   END_CLASS_MAP(DOMProcessingInstruction)
   DECLARE_CLASS(DOMProcessingInstruction, DOMProcessingInstruction, DOMNode)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMProcessingInstruction();
@@ -752,7 +738,6 @@ class c_DOMNodeIterator : public ExtObjectData, public Sweepable {
   PARENT_CLASS(Iterator)
   END_CLASS_MAP(DOMNodeIterator)
   DECLARE_CLASS(DOMNodeIterator, DOMNodeIterator, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMNodeIterator();
@@ -799,7 +784,6 @@ class c_DOMNamedNodeMap : public ExtObjectDataFlags<ObjectData::UseGet|ObjectDat
   PARENT_CLASS(IteratorAggregate)
   END_CLASS_MAP(DOMNamedNodeMap)
   DECLARE_CLASS(DOMNamedNodeMap, DOMNamedNodeMap, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMNamedNodeMap();
@@ -843,7 +827,6 @@ class c_DOMNodeList : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::U
   PARENT_CLASS(IteratorAggregate)
   END_CLASS_MAP(DOMNodeList)
   DECLARE_CLASS(DOMNodeList, DOMNodeList, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMNodeList();
@@ -883,7 +866,6 @@ class c_DOMException : public c_Exception {
   RECURSIVE_PARENT_CLASS(Exception)
   END_CLASS_MAP(DOMException)
   DECLARE_CLASS(DOMException, DOMException, Exception)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMException();
@@ -912,7 +894,6 @@ class c_DOMImplementation : public ExtObjectData {
   BEGIN_CLASS_MAP(DOMImplementation)
   END_CLASS_MAP(DOMImplementation)
   DECLARE_CLASS(DOMImplementation, DOMImplementation, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMImplementation();
@@ -947,7 +928,6 @@ class c_DOMXPath : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseS
   BEGIN_CLASS_MAP(DOMXPath)
   END_CLASS_MAP(DOMXPath)
   DECLARE_CLASS(DOMXPath, DOMXPath, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DOMXPath();

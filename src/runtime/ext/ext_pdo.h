@@ -117,7 +117,6 @@ class c_PDO : public ExtObjectData, public Sweepable {
   BEGIN_CLASS_MAP(PDO)
   END_CLASS_MAP(PDO)
   DECLARE_CLASS(PDO, PDO, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_PDO();
@@ -181,7 +180,6 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
   PARENT_CLASS(Iterator)
   END_CLASS_MAP(PDOStatement)
   DECLARE_CLASS(PDOStatement, PDOStatement, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_PDOStatement();
@@ -266,7 +264,6 @@ class c_PDOException : public c_Exception {
   RECURSIVE_PARENT_CLASS(Exception)
   END_CLASS_MAP(PDOException)
   DECLARE_CLASS(PDOException, PDOException, Exception)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_PDOException();

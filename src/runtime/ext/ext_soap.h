@@ -38,7 +38,6 @@ class c_SoapServer : public ExtObjectData {
   BEGIN_CLASS_MAP(SoapServer)
   END_CLASS_MAP(SoapServer)
   DECLARE_CLASS(SoapServer, SoapServer, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_SoapServer();
@@ -97,7 +96,6 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   BEGIN_CLASS_MAP(SoapClient)
   END_CLASS_MAP(SoapClient)
   DECLARE_CLASS(SoapClient, SoapClient, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_SoapClient();
@@ -184,7 +182,6 @@ class c_SoapVar : public ExtObjectData {
   BEGIN_CLASS_MAP(SoapVar)
   END_CLASS_MAP(SoapVar)
   DECLARE_CLASS(SoapVar, SoapVar, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_SoapVar();
@@ -220,7 +217,6 @@ class c_SoapFault : public c_Exception {
   RECURSIVE_PARENT_CLASS(Exception)
   END_CLASS_MAP(SoapFault)
   DECLARE_CLASS(SoapFault, SoapFault, Exception)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_SoapFault();
@@ -258,7 +254,6 @@ class c_SoapParam : public ExtObjectData {
   BEGIN_CLASS_MAP(SoapParam)
   END_CLASS_MAP(SoapParam)
   DECLARE_CLASS(SoapParam, SoapParam, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_SoapParam();
@@ -289,7 +284,6 @@ class c_SoapHeader : public ExtObjectData {
   BEGIN_CLASS_MAP(SoapHeader)
   END_CLASS_MAP(SoapHeader)
   DECLARE_CLASS(SoapHeader, SoapHeader, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_SoapHeader();

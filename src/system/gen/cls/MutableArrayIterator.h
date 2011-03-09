@@ -60,7 +60,6 @@ class c_MutableArrayIterator : public c_ArrayIterator {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  DECLARE_INVOKES_FROM_EVAL
   void init();
   public: void t___construct(Variant v_array, Variant v_flags = 0LL);
   public: c_MutableArrayIterator *create(Variant v_array, Variant v_flags = 0LL);

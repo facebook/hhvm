@@ -1571,11 +1571,6 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
   if (Option::GenerateCPPMacros) {
     outputCPPJumpTable(cg, ar, false, dynamicObject);
     outputCPPJumpTable(cg, ar, true, dynamicObject);
-    if (cg.getOutput() == CodeGenerator::SystemCPP ||
-        Option::EnableEval >= Option::LimitedEval) {
-      outputCPPJumpTable(cg, ar, false, dynamicObject, Eval);
-      outputCPPJumpTable(cg, ar, true, dynamicObject, Eval);
-    }
     bool hasRedec;
     outputCPPCallInfoTableSupport(cg, ar, hasRedec);
     vector<const char *> funcs;
@@ -1834,22 +1829,6 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
           }
         }
         break;
-      case Eval:
-        {
-          const char *extra = NULL;
-          const char *prefix = Option::MethodPrefix;
-          if (func->isStatic()) {
-            prefix = Option::MethodImplPrefix;
-            if (staticOnly) {
-              extra = "c";
-            } else {
-              extra = "o_getClassName()";
-            }
-          }
-          func->outputCPPEvalInvoke(cg, ar, prefix, lname.c_str(),
-              extra, true, func->isConstructor(self));
-        }
-        break;
       case CallInfo:
         cg_printf("mcp.ci = &%s%s::%s%s;\n", Option::ClassPrefix,
                   id.c_str(), Option::CallInfoPrefix, lname.c_str());
@@ -1921,7 +1900,6 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
   invokeName += staticOnly ? Option::ObjectStaticPrefix : Option::ObjectPrefix;
   switch (type) {
     case Invoke: invokeName += "invoke"; break;
-    case Eval: invokeName += "invoke_from_eval"; break;
     case CallInfo:
                invokeName += "get_call_info";
                if (Option::UseMethodIndex) {
@@ -1985,23 +1963,6 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
       }
       FunctionScope::OutputCPPDynamicInvokeCount(cg);
       break;
-    case Eval:
-      if (staticOnly) { // os_invoke
-        cg_indentBegin("Variant %s%s"
-            "(const char *c, const char *s, "
-            "Eval::VariableEnvironment &env, "
-            "const Eval::FunctionCallExpression *caller, "
-            "int64 hash, bool fatal) {\n", scope.c_str(),
-            invokeName.c_str());
-      } else {
-        cg_indentBegin("Variant %s%s"
-            "(const char *s, "
-            "Eval::VariableEnvironment &env, "
-            "const Eval::FunctionCallExpression *caller, "
-            "int64 hash, bool fatal) {\n", scope.c_str(),
-            invokeName.c_str());
-      }
-      break;
     case CallInfo:
       cg_indentBegin("bool %s%s(MethodCallPackage &mcp, %sint64 hash) {\n",
           scope.c_str(), invokeName.c_str(),
@@ -2030,16 +1991,6 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
         cg_indentEnd("}\n");
         cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_INVOKE_%s", clsName);
       }
-      break;
-    case Eval:
-      if (staticOnly) {
-        cg_printf("return %s(c, s, env, caller, hash, fatal);\n",
-                  parentExpr.c_str());
-      } else {
-        cg_printf("return %s(s, env, caller, hash, fatal);\n",
-                  parentExpr.c_str());
-      }
-      cg_indentEnd("}\n");
       break;
     case CallInfo:
       cg_printf("return %s(mcp, hash);\n", parentExpr.c_str());

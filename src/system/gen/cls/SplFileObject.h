@@ -63,7 +63,6 @@ class c_SplFileObject : public c_SplFileInfo {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  DECLARE_INVOKES_FROM_EVAL
   void init();
   public: void t___construct(Variant v_filename, Variant v_open_mode = NAMSTR(s_sys_ss0d42ecf6, "r"), Variant v_use_include_path = false, Variant v_context = null);
   public: c_SplFileObject *create(Variant v_filename, Variant v_open_mode = NAMSTR(s_sys_ss0d42ecf6, "r"), Variant v_use_include_path = false, Variant v_context = null);

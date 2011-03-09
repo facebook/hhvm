@@ -62,7 +62,6 @@ class c_AppendIterator : public ExtObjectData {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  DECLARE_INVOKES_FROM_EVAL
   c_AppendIterator(ObjectData* r = NULL) {
     setAttribute(HasCall);
   }

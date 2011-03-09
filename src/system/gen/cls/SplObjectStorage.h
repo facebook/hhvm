@@ -64,7 +64,6 @@ class c_SplObjectStorage : public ExtObjectData {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  DECLARE_INVOKES_FROM_EVAL
   void init();
   public: void t_rewind();
   public: bool t_valid();

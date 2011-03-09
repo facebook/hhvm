@@ -59,8 +59,25 @@ Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
   if (ms) {
     return ref(ms->invokeInstanceDirect(toObject(obj), env, this));
   }
-  return ref(obj.getObjectData()->o_invoke_from_eval(name.data(), env, this,
-                                                     m_name->hash(), true));
+
+  // Handle builtins 
+  MethodCallPackage mcp1;
+  mcp1.methodCall(obj, name, -1);
+  const CallInfo* cit1 = mcp1.ci;
+  // If the lookup failed methodCall() must throw an exception,
+  // so if we reach here cit1 must not be NULL
+  ASSERT(cit1);
+  ArrayInit ai(m_params.size(), true);
+  for (unsigned int i = 0; i < m_params.size(); ++i) {
+    if (cit1->mustBeRef(i)) {
+      ai.setRef(m_params[i]->refval(env));
+    } else if (cit1->isRef(i)) {
+      ai.setRef(m_params[i]->refval(env, 0));
+    } else {
+      ai.set(m_params[i]->eval(env));
+    }
+  }
+  return ref((cit1->getMeth())(mcp1, Array(ai.create())));
 }
 
 void ObjectMethodExpression::dump(std::ostream &out) const {

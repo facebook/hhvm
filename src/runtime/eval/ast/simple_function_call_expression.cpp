@@ -80,9 +80,13 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
     }
   }
 
-  const CallInfo *cit1;
-  void *vt1;
+  // Handle builtins
+  const CallInfo* cit1;
+  void* vt1;
   get_call_info_or_fail(cit1, vt1, name);
+  // If the lookup failed get_call_info_or_fail() must throw an exception,
+  // so if we reach here cit1 must not be NULL
+  ASSERT(cit1);
   ArrayInit ai(m_params.size(), true);
   for (unsigned int i = 0; i < m_params.size(); ++i) {
     if (cit1->mustBeRef(i)) {
@@ -93,7 +97,7 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
       ai.set(m_params[i]->eval(env));
     }
   }
-  return (cit1->getFunc())(vt1, Array(ai.create()));
+  return ref((cit1->getFunc())(vt1, Array(ai.create())));
 }
 
 void SimpleFunctionCallExpression::dump(std::ostream &out) const {

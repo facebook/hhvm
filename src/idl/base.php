@@ -693,7 +693,6 @@ EOT
   fprintf($f, "  END_CLASS_MAP(%s)\n", $clsname);
   fprintf($f, "  DECLARE_CLASS(%s, %s, %s)\n", $clsname, $clsname,
           $class['parent'] ? $class['parent'] : 'ObjectData');
-  fprintf($f, "  DECLARE_INVOKES_FROM_EVAL\n");
 
   fprintf($f, "\n");
 

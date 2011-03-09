@@ -86,7 +86,7 @@ public:
                        const FunctionCallExpression *caller) const;
   Variant invokeClosure(CObjRef closure, VariableEnvironment &env,
                         const FunctionCallExpression *caller) const;
-  Variant invokeImpl(VariableEnvironment &env, CArrRef params) const;
+  Variant invokeImpl(FuncScopeVariableEnvironment &fenv, CArrRef params) const;
   virtual LVariableTable *getStaticVars(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
   void getInfo(ClassInfo::MethodInfo &info) const;

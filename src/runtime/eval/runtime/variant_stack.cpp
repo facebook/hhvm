@@ -36,12 +36,6 @@ void VariantStack::pop(uint n /* = 1 */) {
   m_ptr -= n;
 }
 
-Variant VariantStack::topPop() {
-  Variant r(top());
-  pop();
-  return r;
-}
-
 Array VariantStack::pull(uint s, uint n) const {
   ASSERT(m_ptr >= s + n);
   Array r = Array::Create();

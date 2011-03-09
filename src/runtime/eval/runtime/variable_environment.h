@@ -132,7 +132,7 @@ public:
  */
 class FuncScopeVariableEnvironment : public VariableEnvironment {
 public:
-  FuncScopeVariableEnvironment(const FunctionStatement *func, int argc);
+  FuncScopeVariableEnvironment(const FunctionStatement *func);
   ~FuncScopeVariableEnvironment();
   virtual void flagStatic(CStrRef name, int64 hash = -1);
   virtual Variant &getIdx(int idx);
@@ -141,7 +141,6 @@ public:
   virtual bool exists(CStrRef name) const;
   virtual Variant &getImpl(CStrRef s);
   void incArgc() { m_argc++; }
-  void setArgPop() { m_argPop = true; }
   virtual Array getDefinedVariables() const;
   virtual ObjectData *getContinuation() const;
 private:
@@ -152,12 +151,11 @@ private:
   AssocList m_alist;
   int m_argc;
   uint m_argStart;
-  bool m_argPop;
 };
 
 class MethScopeVariableEnvironment : public FuncScopeVariableEnvironment {
 public:
-  MethScopeVariableEnvironment(const MethodStatement *meth, int argc);
+  MethScopeVariableEnvironment(const MethodStatement *meth);
   virtual String currentContext() const;
   const ClassStatement *currentClassStatement() const;
 private:

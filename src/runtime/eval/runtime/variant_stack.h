@@ -48,11 +48,6 @@ public:
     m_stack[m_ptr++].swap(v);
   }
   void pop(uint n);
-  void pop() {
-    ASSERT(m_ptr >= 1);
-    m_stack[m_ptr-1].unset();
-    m_ptr--;
-  }
   Variant &top() {
     ASSERT(m_ptr > 0);
     return m_stack[m_ptr - 1];
@@ -61,7 +56,6 @@ public:
     ASSERT(m_ptr > 0);
     return m_stack[m_ptr - n - 1];
   }
-  Variant topPop();
   Array pull(uint s, uint n) const;
   void clear();
   uint pos() const { return m_ptr; }

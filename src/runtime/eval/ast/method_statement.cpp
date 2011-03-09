@@ -72,12 +72,11 @@ Variant MethodStatement::invokeInstance(CObjRef obj, CArrRef params,
   if (check) attemptAccess(FrameInjection::GetClassName(false));
   // The debug frame should have been pushed at ObjectMethodExpression
   DECLARE_THREAD_INFO_NOINIT
-  MethScopeVariableEnvironment env(this, params.size());
+  MethScopeVariableEnvironment env(this);
   env.setCurrentObject(obj);
   String clsName(m_class->name());
   EvalFrameInjection fi(clsName, m_fullName.c_str(), env,
                         loc()->file, obj.get());
-  env.setArgPop();
   if (m_ref) {
     return ref(invokeImpl(env, params));
   }
@@ -92,8 +91,7 @@ invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
   }
   attemptAccess(FrameInjection::GetClassName(false));
   DECLARE_THREAD_INFO_NOINIT
-  MethScopeVariableEnvironment fenv(this, 0);
-  fenv.setArgPop();
+  MethScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv);
   fenv.setCurrentObject(obj);
   String clsName(m_class->name());
@@ -109,11 +107,10 @@ Variant MethodStatement::invokeStatic(const char* cls, CArrRef params,
     bool check /* = true */) const {
   if (check) attemptAccess(FrameInjection::GetClassName(false));
   DECLARE_THREAD_INFO_NOINIT
-  MethScopeVariableEnvironment env(this, params.size());
+  MethScopeVariableEnvironment env(this);
   env.setCurrentClass(cls);
   String clsName(m_class->name());
   EvalFrameInjection fi(clsName, m_fullName.c_str(), env, loc()->file);
-  env.setArgPop();
   if (m_ref) {
     return ref(invokeImpl(env, params));
   }
@@ -125,8 +122,7 @@ invokeStaticDirect(const char* cls, VariableEnvironment &env,
                    const FunctionCallExpression *caller)
   const {
   attemptAccess(FrameInjection::GetClassName(false));
-  MethScopeVariableEnvironment fenv(this, 0);
-  fenv.setArgPop();
+  MethScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv);
   fenv.setCurrentClass(cls);
   DECLARE_THREAD_INFO_NOINIT

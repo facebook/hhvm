@@ -96,12 +96,6 @@ void c_stdClass::cloneSet(ObjectData *cl) {
   c_stdClass *clone = static_cast<c_stdClass*>(cl);
   ObjectData::cloneSet(clone);
 }
-Variant c_stdClass::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_stdClass::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 bool c_stdClass::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_ObjectData::os_get_call_info(mcp, hash);
@@ -186,12 +180,6 @@ ObjectData *c___PHP_Incomplete_Class::cloneImpl() {
 void c___PHP_Incomplete_Class::cloneSet(ObjectData *cl) {
   c___PHP_Incomplete_Class *clone = static_cast<c___PHP_Incomplete_Class*>(cl);
   ObjectData::cloneSet(clone);
-}
-Variant c___PHP_Incomplete_Class::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c___PHP_Incomplete_Class::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c___PHP_Incomplete_Class::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);

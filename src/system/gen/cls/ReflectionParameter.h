@@ -61,7 +61,6 @@ class c_ReflectionParameter : public ExtObjectData {
   virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
-  DECLARE_INVOKES_FROM_EVAL
   void init();
   public: void t___construct(Variant v_func, Variant v_param);
   public: c_ReflectionParameter *create(Variant v_func, Variant v_param);

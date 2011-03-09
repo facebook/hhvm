@@ -460,9 +460,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                     dyn || !parCls ? "DynamicObjectData" :
                     parCls->getId(cg).c_str());
         }
-        if (system || Option::EnableEval >= Option::LimitedEval) {
-          cg_printf("DECLARE_INVOKES_FROM_EVAL\n");
-        }
 
         bool hasGet = classScope->getAttribute(
           ClassScope::HasUnknownPropGetter);
@@ -476,12 +473,11 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         if (dyn || idyn || redec || hasGet || hasSet ||
             hasCall || hasCallStatic) {
           if (redec && classScope->derivedByDynamic()) {
-            cg_printf("DECLARE_ROOT;\n");
-             if (!dyn && !idyn) {
-               cg_printf("private: ObjectData* root;\n");
-               cg_printf("public:\n");
-               cg_printf("virtual ObjectData *getRoot() { return root; }\n");
-             }
+            if (!dyn && !idyn) {
+              cg_printf("private: ObjectData* root;\n");
+              cg_printf("public:\n");
+              cg_printf("virtual ObjectData *getRoot() { return root; }\n");
+            }
           }
 
           string conInit = "";
@@ -595,17 +591,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                        Option::ObjectStaticPrefix);
         cg_printf("return %s%s::%sconstant(s);\n", Option::ClassPrefix,
                   clsName, Option::ObjectStaticPrefix);
-        cg_indentEnd("}\n");
-        cg_indentBegin("Variant %sinvoke_from_eval(const char *c, "
-                       "const char *s, Eval::VariableEnvironment &env, "
-                       "const Eval::FunctionCallExpression *call, "
-                       "int64 hash = -1, bool fatal = true) "
-                       "{\n",
-                       Option::ObjectStaticPrefix);
-        cg_printf("return %s%s::%sinvoke_from_eval(c, s, env, call, hash, "
-                  "fatal);\n",
-                  Option::ClassPrefix, clsName,
-                  Option::ObjectStaticPrefix);
         cg_indentEnd("}\n");
         cg_indentBegin("bool %sget_call_info(MethodCallPackage &mcp, "
           "int64 hash = -1) {\n",

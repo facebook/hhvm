@@ -91,7 +91,6 @@ class c_Memcached : public ExtObjectData, public Sweepable {
   BEGIN_CLASS_MAP(Memcached)
   END_CLASS_MAP(Memcached)
   DECLARE_CLASS(Memcached, Memcached, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_Memcached();

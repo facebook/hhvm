@@ -79,9 +79,25 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
     EvalFrameInjection::EvalStaticClassNameHelper helper(cname, sp);
     return ref(ms->invokeStaticDirect(cname.data(), env, this));
   }
-  Array params = getParams(env);
-  EvalFrameInjection::EvalStaticClassNameHelper helper(cname, sp);
-  return ref(invoke_static_method(cname.data(), name.data(), params));
+
+  // Handle builtins 
+  MethodCallPackage mcp1;
+  mcp1.dynamicNamedCall(cname, name, -1);
+  const CallInfo* cit1 = mcp1.ci;
+  // If the lookup failed dynamicNamedCall() must throw an exception,
+  // so if we reach here cit1 must not be NULL
+  ASSERT(cit1);
+  ArrayInit ai(m_params.size(), true);
+  for (unsigned int i = 0; i < m_params.size(); ++i) {
+    if (cit1->mustBeRef(i)) {
+      ai.setRef(m_params[i]->refval(env));
+    } else if (cit1->isRef(i)) {
+      ai.setRef(m_params[i]->refval(env, 0));
+    } else {
+      ai.set(m_params[i]->eval(env));
+    }
+  }
+  return ref((cit1->getMeth())(mcp1, Array(ai.create())));
 }
 
 void StaticMethodExpression::dump(std::ostream &out) const {

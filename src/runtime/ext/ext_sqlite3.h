@@ -46,7 +46,6 @@ class c_SQLite3 : public ExtObjectData {
   BEGIN_CLASS_MAP(SQLite3)
   END_CLASS_MAP(SQLite3)
   DECLARE_CLASS(SQLite3, SQLite3, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_SQLite3();
@@ -117,7 +116,6 @@ class c_SQLite3Stmt : public ExtObjectData {
   BEGIN_CLASS_MAP(SQLite3Stmt)
   END_CLASS_MAP(SQLite3Stmt)
   DECLARE_CLASS(SQLite3Stmt, SQLite3Stmt, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_SQLite3Stmt();
@@ -170,7 +168,6 @@ class c_SQLite3Result : public ExtObjectData {
   BEGIN_CLASS_MAP(SQLite3Result)
   END_CLASS_MAP(SQLite3Result)
   DECLARE_CLASS(SQLite3Result, SQLite3Result, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_SQLite3Result();

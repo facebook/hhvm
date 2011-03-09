@@ -100,12 +100,6 @@ void c_UnexpectedValueException::cloneSet(ObjectData *cl) {
   c_UnexpectedValueException *clone = static_cast<c_UnexpectedValueException*>(cl);
   c_RuntimeException::cloneSet(clone);
 }
-Variant c_UnexpectedValueException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_UnexpectedValueException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 bool c_UnexpectedValueException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_RuntimeException::os_get_call_info(mcp, hash);
@@ -195,12 +189,6 @@ ObjectData *c_OverflowException::cloneImpl() {
 void c_OverflowException::cloneSet(ObjectData *cl) {
   c_OverflowException *clone = static_cast<c_OverflowException*>(cl);
   c_RuntimeException::cloneSet(clone);
-}
-Variant c_OverflowException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_OverflowException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_OverflowException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);
@@ -292,12 +280,6 @@ void c_OutOfBoundsException::cloneSet(ObjectData *cl) {
   c_OutOfBoundsException *clone = static_cast<c_OutOfBoundsException*>(cl);
   c_RuntimeException::cloneSet(clone);
 }
-Variant c_OutOfBoundsException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_OutOfBoundsException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 bool c_OutOfBoundsException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_RuntimeException::os_get_call_info(mcp, hash);
@@ -386,12 +368,6 @@ ObjectData *c_LogicException::cloneImpl() {
 void c_LogicException::cloneSet(ObjectData *cl) {
   c_LogicException *clone = static_cast<c_LogicException*>(cl);
   c_Exception::cloneSet(clone);
-}
-Variant c_LogicException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_Exception::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_LogicException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_LogicException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);
@@ -482,12 +458,6 @@ ObjectData *c_RangeException::cloneImpl() {
 void c_RangeException::cloneSet(ObjectData *cl) {
   c_RangeException *clone = static_cast<c_RangeException*>(cl);
   c_RuntimeException::cloneSet(clone);
-}
-Variant c_RangeException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_RangeException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_RangeException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);
@@ -581,12 +551,6 @@ void c_InvalidArgumentException::cloneSet(ObjectData *cl) {
   c_InvalidArgumentException *clone = static_cast<c_InvalidArgumentException*>(cl);
   c_LogicException::cloneSet(clone);
 }
-Variant c_InvalidArgumentException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_InvalidArgumentException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 bool c_InvalidArgumentException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_LogicException::os_get_call_info(mcp, hash);
@@ -674,12 +638,6 @@ ObjectData *c_UnderflowException::cloneImpl() {
 void c_UnderflowException::cloneSet(ObjectData *cl) {
   c_UnderflowException *clone = static_cast<c_UnderflowException*>(cl);
   c_RuntimeException::cloneSet(clone);
-}
-Variant c_UnderflowException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_UnderflowException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_UnderflowException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);
@@ -770,12 +728,6 @@ ObjectData *c_OutOfRangeException::cloneImpl() {
 void c_OutOfRangeException::cloneSet(ObjectData *cl) {
   c_OutOfRangeException *clone = static_cast<c_OutOfRangeException*>(cl);
   c_LogicException::cloneSet(clone);
-}
-Variant c_OutOfRangeException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_OutOfRangeException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_OutOfRangeException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);
@@ -872,12 +824,6 @@ void c_BadMethodCallException::cloneSet(ObjectData *cl) {
   c_BadMethodCallException *clone = static_cast<c_BadMethodCallException*>(cl);
   c_BadFunctionCallException::cloneSet(clone);
 }
-Variant c_BadMethodCallException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_BadFunctionCallException::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_BadMethodCallException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_BadFunctionCallException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 bool c_BadMethodCallException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_BadFunctionCallException::os_get_call_info(mcp, hash);
@@ -964,12 +910,6 @@ ObjectData *c_RuntimeException::cloneImpl() {
 void c_RuntimeException::cloneSet(ObjectData *cl) {
   c_RuntimeException *clone = static_cast<c_RuntimeException*>(cl);
   c_Exception::cloneSet(clone);
-}
-Variant c_RuntimeException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_Exception::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_RuntimeException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_RuntimeException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);
@@ -1112,153 +1052,6 @@ void c_Exception::cloneSet(ObjectData *cl) {
   clone->m_file.setWithRef(m_file);
   clone->m_line.setWithRef(m_line);
   clone->m_trace.setWithRef(m_trace);
-}
-Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ssa26bedd7, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        unsigned int i = 0;
-        do {
-        } while(false);
-        for (; i != params.size(); ++i) {
-          params[i]->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ssb0933c52, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        unsigned int i = 0;
-        do {
-        } while(false);
-        for (; i != params.size(); ++i) {
-          params[i]->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss7854bd7b, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        unsigned int i = 0;
-        do {
-        } while(false);
-        for (; i != params.size(); ++i) {
-          params[i]->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss6c5c70db, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        unsigned int i = 0;
-        do {
-        } while(false);
-        for (; i != params.size(); ++i) {
-          params[i]->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss4f2f48c7, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        unsigned int i = 0;
-        do {
-        } while(false);
-        for (; i != params.size(); ++i) {
-          params[i]->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6974a1cc, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        unsigned int i = 0;
-        do {
-        } while(false);
-        for (; i != params.size(); ++i) {
-          params[i]->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ssccbba71e, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        unsigned int i = 0;
-        do {
-        } while(false);
-        for (; i != params.size(); ++i) {
-          params[i]->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ssf401cc22, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        unsigned int i = 0;
-        do {
-        } while(false);
-        for (; i != params.size(); ++i) {
-          params[i]->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        unsigned int i = 0;
-        do {
-          if (i == params.size()) break;
-          a0 = params[i]->eval(env);
-          i++;
-          if (i == params.size()) break;
-          a1 = params[i]->eval(env);
-          i++;
-        } while(false);
-        for (; i != params.size(); ++i) {
-          params[i]->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_Exception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 CallInfo c_Exception::ci_getmessage((void*)&c_Exception::i_getmessage, (void*)&c_Exception::ifa_getmessage, 0, 4, 0x0000000000000000LL);
 CallInfo c_Exception::ci___tostring((void*)&c_Exception::i___tostring, (void*)&c_Exception::ifa___tostring, 0, 4, 0x0000000000000000LL);
@@ -1899,68 +1692,6 @@ void c_ErrorException::cloneSet(ObjectData *cl) {
   c_Exception::cloneSet(clone);
   clone->m_severity.setWithRef(m_severity);
 }
-Variant c_ErrorException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 3) {
-    case 3:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ssa1b87da7, "__construct")) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        Variant a3;
-        Variant a4;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        unsigned int i = 0;
-        do {
-          if (i == params.size()) break;
-          a0 = params[i]->eval(env);
-          i++;
-          if (i == params.size()) break;
-          a1 = params[i]->eval(env);
-          i++;
-          if (i == params.size()) break;
-          a2 = params[i]->eval(env);
-          i++;
-          if (i == params.size()) break;
-          a3 = params[i]->eval(env);
-          i++;
-          if (i == params.size()) break;
-          a4 = params[i]->eval(env);
-          i++;
-        } while(false);
-        for (; i != params.size(); ++i) {
-          params[i]->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else if (count == 2) return (t___construct(a0, a1), null);
-        else if (count == 3) return (t___construct(a0, a1, a2), null);
-        else if (count == 4) return (t___construct(a0, a1, a2, a3), null);
-        else return (t___construct(a0, a1, a2, a3, a4), null);
-      }
-      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ssd323f9f4, "getSeverity")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        unsigned int i = 0;
-        do {
-        } while(false);
-        for (; i != params.size(); ++i) {
-          params[i]->eval(env);
-        }
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
-        return (t_getseverity());
-      }
-      break;
-    default:
-      break;
-  }
-  return c_Exception::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_ErrorException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 CallInfo c_ErrorException::ci___construct((void*)&c_ErrorException::i___construct, (void*)&c_ErrorException::ifa___construct, 5, 4, 0x0000000000000000LL);
 CallInfo c_ErrorException::ci_getseverity((void*)&c_ErrorException::i_getseverity, (void*)&c_ErrorException::ifa_getseverity, 0, 4, 0x0000000000000000LL);
 Variant c_ErrorException::i___construct(MethodCallPackage &mcp, CArrRef params) {
@@ -2257,12 +1988,6 @@ void c_BadFunctionCallException::cloneSet(ObjectData *cl) {
   c_BadFunctionCallException *clone = static_cast<c_BadFunctionCallException*>(cl);
   c_LogicException::cloneSet(clone);
 }
-Variant c_BadFunctionCallException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_BadFunctionCallException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 bool c_BadFunctionCallException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_LogicException::os_get_call_info(mcp, hash);
@@ -2353,12 +2078,6 @@ void c_LengthException::cloneSet(ObjectData *cl) {
   c_LengthException *clone = static_cast<c_LengthException*>(cl);
   c_LogicException::cloneSet(clone);
 }
-Variant c_LengthException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_LengthException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 bool c_LengthException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_LogicException::os_get_call_info(mcp, hash);
@@ -2448,12 +2167,6 @@ ObjectData *c_DomainException::cloneImpl() {
 void c_DomainException::cloneSet(ObjectData *cl) {
   c_DomainException *clone = static_cast<c_DomainException*>(cl);
   c_LogicException::cloneSet(clone);
-}
-Variant c_DomainException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_DomainException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_DomainException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (*mcp.name);

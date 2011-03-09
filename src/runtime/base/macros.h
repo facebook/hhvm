@@ -178,20 +178,6 @@ namespace HPHP {
   DECLARE_INVOKE_EX(cls, originalName, parent)                          \
   public:                                                               \
 
-#define DECLARE_INVOKES_FROM_EVAL                                       \
-  static Variant os_invoke_from_eval(const char *c, const char *s,      \
-                                     Eval::VariableEnvironment &env,    \
-                                     const Eval::FunctionCallExpression *call,\
-                                     int64 hash,                        \
-                                     bool fatal /* = true */);          \
-  Variant o_invoke_from_eval(const char *s,                             \
-                             Eval::VariableEnvironment &env,            \
-                             const Eval::FunctionCallExpression *call,  \
-                             int64 hash,                                \
-                             bool fatal /* = true */);
-
-#define DECLARE_ROOT                                                    \
-
 #define CLASS_CHECK(exp) (checkClassExists(s, g), (exp))
 
 #define IMPLEMENT_CLASS_COMMON(cls)                                     \
@@ -359,11 +345,6 @@ do { \
   if (hash == code && !strcmp(file, s.c_str())) {                       \
     return pm_ ## fun(once, variables);                                 \
   }
-#define HASH_INVOKE_FROM_EVAL(code, f)                                  \
-  if (hash == code && !strcasecmp(s, #f)) return ei_ ## f(env, caller)
-#define HASH_INVOKE_REDECLARED_FROM_EVAL(code, f)                       \
-  if (hash == code && !strcasecmp(s, #f) && g->GCI(f))                  \
-    return g->GCI(f)->getFuncEval()(env, caller)
 #define HASH_INSTANCEOF(code, str)                                      \
   if ((s.data() == str.data()) ||                                       \
       (hash == code &&                                                  \

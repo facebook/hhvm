@@ -89,18 +89,6 @@ Variant ClassStatics::os_constant(const char *s) {
   return null;
 }
 
-Variant ClassStatics::os_invoke_from_eval
-(const char *c, const char *s, Eval::VariableEnvironment &env,
- const Eval::FunctionCallExpression *call, int64 hash,
- bool fatal /* = true */) {
-  if (fatal) {
-    throwUnknownClass();
-  }
-
-  raise_warning("call_user_func to non-existent method %s::%s", c, s);
-  return false;
-}
-
 bool ClassStatics::os_get_call_info(MethodCallPackage &info,
     int64 hash /* = -1 */) {
   info.fail();

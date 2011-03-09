@@ -374,7 +374,6 @@ public:
 
   enum TableType {
     Invoke,
-    Eval,
     CallInfo
   };
   void outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,

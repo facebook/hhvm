@@ -139,14 +139,6 @@ Variant ObjectData::os_constant(const char *s) {
   throw FatalErrorException(msg.str().c_str());
 }
 
-Variant
-ObjectData::os_invoke_from_eval(const char *c, const char *s,
-                                Eval::VariableEnvironment &env,
-                                const Eval::FunctionCallExpression *call,
-                                int64 hash, bool fatal /* = true */) {
-  return os_invoke(c, s, call->getParams(env), hash, fatal);
-}
-
 bool ObjectData::os_get_call_info(MethodCallPackage &info,
                                   int64 hash /* = -1 */) {
   if (info.obj) {
@@ -635,24 +627,6 @@ Variant ObjectData::o_root_invoke_few_args(const char *s, int64 hash,
                                            int count,
                                            INVOKE_FEW_ARGS_IMPL_ARGS) {
   return o_invoke_few_args(s, hash, count, INVOKE_FEW_ARGS_PASS_ARGS);
-}
-
-Variant
-ObjectData::o_invoke_from_eval(const char *s,
-                               Eval::VariableEnvironment &env,
-                               const Eval::FunctionCallExpression *call,
-                               int64 hash,
-                               bool fatal /* = true */) {
-  MethodCallPackage mcp;
-  if (!fatal) mcp.noFatal();
-  String str(s);
-  mcp.methodCall(this, str, hash);
-  if (fatal && mcp.ci == &s_ObjectData_call_handler &&
-      !hasCall() && !hasCallStatic()) {
-    o_invoke_failed(o_getClassName().c_str(), s, true);
-    return null;
-  }
-  return (mcp.ci->getMeth())(mcp, call->getParams(env));
 }
 
 bool ObjectData::o_get_call_info(MethodCallPackage &mcp,

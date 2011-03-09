@@ -45,7 +45,6 @@ class c_DateTime : public ExtObjectData {
   BEGIN_CLASS_MAP(DateTime)
   END_CLASS_MAP(DateTime)
   DECLARE_CLASS(DateTime, DateTime, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DateTime();
@@ -127,7 +126,6 @@ class c_DateTimeZone : public ExtObjectData {
   BEGIN_CLASS_MAP(DateTimeZone)
   END_CLASS_MAP(DateTimeZone)
   DECLARE_CLASS(DateTimeZone, DateTimeZone, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_DateTimeZone();

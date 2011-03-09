@@ -49,7 +49,6 @@ class c_SpoofChecker : public ExtObjectData {
   BEGIN_CLASS_MAP(SpoofChecker)
   END_CLASS_MAP(SpoofChecker)
   DECLARE_CLASS(SpoofChecker, SpoofChecker, ObjectData)
-  DECLARE_INVOKES_FROM_EVAL
 
   // need to implement
   public: c_SpoofChecker();

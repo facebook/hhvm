@@ -462,6 +462,16 @@ CVarRef Variant::set(ObjectData *v) {
   return *this;
 }
 
+void Variant::init(ObjectData *v) {
+  if (v) {
+    m_type = KindOfObject;
+    m_data.pobj = v;
+    v->incRefCount();
+  } else {
+    m_type = KindOfNull;
+  }
+}
+
 void Variant::split() {
   switch (m_type) {
   case KindOfVariant: m_data.pvar->split();     break;
@@ -1532,9 +1542,8 @@ void Variant::escalate(bool mutableIteration /* = false */) {
 // type conversions
 
 bool Variant::toBooleanHelper() const {
+  ASSERT(m_type > KindOfInt64);
   switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:    return false;
   case KindOfDouble:  return m_data.dbl != 0;
   case KindOfStaticString:
   case KindOfString:  return m_data.pstr->toBoolean();
@@ -1549,9 +1558,8 @@ bool Variant::toBooleanHelper() const {
 }
 
 int64 Variant::toInt64Helper(int base /* = 10 */) const {
+  ASSERT(m_type > KindOfInt64);
   switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:    return 0;
   case KindOfDouble:  {
     return (m_data.dbl > LONG_MAX) ? (uint64)m_data.dbl : (int64)m_data.dbl;
   }

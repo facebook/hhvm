@@ -70,10 +70,8 @@ inline bool empty(CObjRef v) { return !v.toBoolean();}
 inline bool empty(CVarRef v) { return !v.toBoolean();}
 
 bool empty(CVarRef v, bool    offset);
-bool empty(CVarRef v, char    offset);
-bool empty(CVarRef v, short   offset);
-bool empty(CVarRef v, int     offset);
 bool empty(CVarRef v, int64   offset);
+inline bool empty(CVarRef v, int  offset) { return empty(v, (int64)offset); }
 bool empty(CVarRef v, double  offset);
 bool empty(CVarRef v, CArrRef offset);
 bool empty(CVarRef v, CObjRef offset);
@@ -242,11 +240,10 @@ String getUndefinedConstant(CStrRef name);
 
 inline bool isset(CVarRef v) { return !v.isNull();}
 inline bool isset(CObjRef v) { return !v.isNull();}
+
 bool isset(CVarRef v, bool    offset);
-bool isset(CVarRef v, char    offset);
-bool isset(CVarRef v, short   offset);
-bool isset(CVarRef v, int     offset);
 bool isset(CVarRef v, int64   offset);
+inline bool isset(CVarRef v, int  offset) { return isset(v, (int64)offset); }
 bool isset(CVarRef v, double  offset);
 bool isset(CVarRef v, CArrRef offset);
 bool isset(CVarRef v, CObjRef offset);

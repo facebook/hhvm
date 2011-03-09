@@ -34,6 +34,7 @@ namespace HPHP {
 // forward declaration
 CVarRef ref(CVarRef v);
 class ArrayIter;
+class StaticArray;
 
 /**
  * Array type wrapping around 2 types of ArrayData to implement reference
@@ -67,8 +68,8 @@ class Array : public SmartPtr<ArrayData> {
    * array value from the parameter, and they are NOT constructing an array
    * with that single value (then one should use Array::Create() functions).
    */
-  Array(ArrayData *data);
-  Array(CArrRef arr);
+  Array(ArrayData *data) : SmartPtr<ArrayData>(data) { }
+  Array(CArrRef arr) : SmartPtr<ArrayData>(arr.m_px) { }
 
   /**
    * Informational
@@ -96,6 +97,7 @@ class Array : public SmartPtr<ArrayData> {
   Array &operator =  (ArrayData *data);
   Array &operator =  (CArrRef v);
   Array &operator =  (CVarRef v);
+  Array &operator =  (const StaticArray &v);
   Array  operator +  (ArrayData *data) const;
   Array  operator +  (CArrRef v) const;
   Array  operator +  (CVarRef v) const;
@@ -238,7 +240,7 @@ class Array : public SmartPtr<ArrayData> {
   CVarRef rvalAtRef(int     key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(int64   key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(double  key, ACCESSPARAMS_DECL) const;
-  CVarRef rvalAtRef(litstr key, ACCESSPARAMS_DECL) const;
+  CVarRef rvalAtRef(litstr  key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(CVarRef key, ACCESSPARAMS_DECL) const;
   CVarRef rvalAtRef(CStrRef key, ACCESSPARAMS_DECL) const;
 
@@ -405,7 +407,7 @@ class Array : public SmartPtr<ArrayData> {
    * Membership functions.
    */
   template<typename T>
-    bool existsImpl(const T &key) const {
+  bool existsImpl(const T &key) const {
     if (m_px) return m_px->exists(key);
     return false;
   }

@@ -215,8 +215,7 @@ namespace HPHP {
   static Variant ifa_##methname(MethodCallPackage &mcp,                 \
                                 int count, INVOKE_FEW_ARGS_IMPL_ARGS);  \
   static Variant i_##methname(MethodCallPackage &mcp, CArrRef params) { \
-    return ((CallInfo::MethInvoker0Args)ifa_##methname)                 \
-           (mcp, (int)params.size());                                   \
+    return ((CallInfo::MethInvoker0Args)ifa_##methname)(mcp, 0);        \
   }                                                                     \
 
 //////////////////////////////////////////////////////////////////////////////

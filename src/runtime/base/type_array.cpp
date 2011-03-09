@@ -47,10 +47,6 @@ Array Array::Create(CVarRef name, CVarRef var) {
   return ArrayData::Create(name.isString() ? name.toKey() : name, var);
 }
 
-Array::Array(ArrayData *data) : SmartPtr<ArrayData>(data) { }
-
-Array::Array(CArrRef arr) : SmartPtr<ArrayData>(arr.m_px) { }
-
 ///////////////////////////////////////////////////////////////////////////////
 // operators
 
@@ -66,6 +62,16 @@ Array &Array::operator=(CArrRef arr) {
 
 Array &Array::operator=(CVarRef var) {
   return operator=(var.toArray());
+}
+
+Array &Array::operator=(const StaticArray &arr) {
+  if (m_px != arr.m_px) {
+    if (m_px && m_px->decRefCount() == 0) {
+      m_px->release();
+    }
+    m_px = arr.m_px;
+  }
+  return *this;
 }
 
 Array Array::operator+(ArrayData *data) const {

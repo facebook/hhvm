@@ -825,17 +825,11 @@ String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
 bool empty(CVarRef v, bool    offset) {
   return empty(v, Variant(offset));
 }
-bool empty(CVarRef v, char    offset) {
-  return empty(v, Variant(offset));
-}
-bool empty(CVarRef v, short   offset) {
-  return empty(v, Variant(offset));
-}
-bool empty(CVarRef v, int     offset) {
-  return empty(v, Variant(offset));
-}
 bool empty(CVarRef v, int64   offset) {
-  return empty(v, Variant(offset));
+  if (!v.isArray()) {
+    return empty(v, Variant(offset));
+  }
+  return !toBoolean(v.toArrNR().rvalAtRef(offset));
 }
 bool empty(CVarRef v, double  offset) {
   return empty(v, Variant(offset));
@@ -883,17 +877,19 @@ bool empty(CVarRef v, CVarRef offset) {
 bool isset(CVarRef v, bool    offset) {
   return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, char    offset) {
-  return isset(v, Variant(offset));
-}
-bool isset(CVarRef v, short   offset) {
-  return isset(v, Variant(offset));
-}
-bool isset(CVarRef v, int     offset) {
-  return isset(v, Variant(offset));
-}
 bool isset(CVarRef v, int64   offset) {
-  return isset(v, Variant(offset));
+  if (v.isArray()) {
+    return isset(v.toArrNR().rvalAtRef(offset));
+  }
+  if (v.isObject()) {
+    return v.getArrayAccess()->o_invoke(s_offsetExists,
+                                        Array::Create(offset), -1);
+  }
+  if (v.isString()) {
+    int pos = (int)offset;
+    return pos >= 0 && pos < v.getStringData()->size();
+  }
+  return false;
 }
 bool isset(CVarRef v, double  offset) {
   return isset(v, Variant(offset));

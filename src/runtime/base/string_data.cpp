@@ -366,7 +366,7 @@ DataType StringData::isNumericWithVal(int64 &lval, double &dval,
   int len = size();
   if (len) {
     ret = is_numeric_string(data(), size(), &lval, &dval, allow_errors);
-    if (ret == KindOfNull && !isShared()) {
+    if (ret == KindOfNull && !isShared() && allow_errors) {
       m_hash |= (1ull << 63);
     }
   }

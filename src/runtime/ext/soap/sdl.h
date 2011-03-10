@@ -19,6 +19,7 @@
 #define PHP_SDL_H
 
 #include <runtime/ext/soap/encoding.h>
+#include <runtime/base/util/http_client.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // defines
@@ -309,7 +310,7 @@ encodePtr get_encoder_ex(sdl *sdl, const std::string &nscat);
 sdlBindingPtr get_binding_from_type(sdl *sdl, int type);
 sdlBindingPtr get_binding_from_name(sdl *sdl, char *name, char *ns);
 
-sdlPtr load_wsdl(char *struri);
+sdlPtr load_wsdl(char *struri, HttpClient *http = NULL);
 bool load_schema(sdlCtx *ctx, xmlNodePtr schema);
 void schema_pass2(sdlCtx *ctx);
 

@@ -1294,7 +1294,50 @@ bool f_imap_mail(CStrRef to, CStrRef subject, CStrRef message,
                  CStrRef additional_headers /* = "" */,
                  CStrRef cc /* = "" */, CStrRef bcc /* = "" */,
                  CStrRef rpath /* = "" */) {
-  throw NotImplementedException(__func__);
+  if (to.empty()) {
+    raise_warning("No to field in mail command");
+  }
+
+  if (subject.empty()) {
+    raise_warning("No subject field in mail command");
+  }
+
+  if (message.empty()) {
+    raise_warning("No message string in mail command");
+  }
+
+  if (RuntimeOption::SendmailPath.empty()) {
+    return false;
+  }
+
+  FILE *sendmail = popen(RuntimeOption::SendmailPath.c_str(), "w");
+  if (sendmail) {
+    if (!rpath.empty()) {
+      fprintf(sendmail, "From: %s\n", rpath.c_str());
+    }
+
+    fprintf(sendmail, "To: %s\n", to.c_str());
+
+    if (!cc.empty()) {
+      fprintf(sendmail, "Cc: %s\n", cc.c_str());
+    }
+    if (!bcc.empty()) {
+      fprintf(sendmail, "Bcc: %s\n", bcc.c_str());
+    }
+
+    fprintf(sendmail, "Subject: %s\n", subject.c_str());
+
+    if (!additional_headers.empty()) {
+      fprintf(sendmail, "%s\n", additional_headers.c_str());
+    }
+
+    fprintf(sendmail, "\n%s\n", message.c_str());
+    int ret = pclose(sendmail);
+    return (!ret);
+  } else {
+    raise_warning("Could not execute mail delivery program");
+    return false;
+  }
 }
 
 Variant f_imap_mailboxmsginfo(CObjRef imap_stream) {

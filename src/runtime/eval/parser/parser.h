@@ -133,6 +133,7 @@ private:
   class Countable {
   public:
     Countable() : m_count(1) {}
+    virtual ~Countable() {}
 
     void dec() { if (--m_count == 0) delete this;}
     void inc() { ++m_count;}

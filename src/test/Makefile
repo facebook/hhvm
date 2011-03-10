@@ -16,6 +16,9 @@ TEST_SUITE_INC := test_base_suite.inc
 TEST_FAST_INC := test_base_fast.inc
 TEST_MYSQL_INFO_INC := dummy_mysql_info.inc
 
+# No need to build PIC objects in this directory
+USE_NO_PIC = 1
+
 HOOK_RULE_FILE = $(wildcard hook.mk)
 ifneq ($(strip $(HOOK_RULE_FILE)),)
  include hook.mk

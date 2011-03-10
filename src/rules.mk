@@ -125,8 +125,12 @@ ifdef USE_PIC_ONLY
 pic_objects = $(1)
 CPPFLAGS += -fPIC
 else
+ifeq ($(origin USE_NO_PIC), file)
+pic_objects =
+else
 pic_objects = $(patsubst %.o, %.pic.o, $(1))
-endif
+endif # USE_NO_PIC
+endif # USE_PIC_ONLY
 
 INTERMEDIATE_FILES += $(GENERATED_SOURCES) time_build.out
 SOURCES += $(filter-out $(EXCLUDES), $(ALL_SOURCES))
@@ -743,8 +747,9 @@ SUB_INTERMEDIATE_FILES = $(INTERMEDIATE_FILES)
 $(OBJECTS): $(GENERATED_SOURCES)
 $(PIC_OBJECTS): $(GENERATED_SOURCES)
 
-.PHONY: objects
-objects: $(OBJECTS) $(PIC_OBJECTS) quiet
+.PHONY: objects picobjects
+objects: $(OBJECTS) quiet
+picobjects: $(PIC_OBJECTS) quiet
 
 ifdef SHOW_LINK
 
@@ -802,7 +807,7 @@ $(PROGRAMS): % : %-obj $(LIB_TARGETS)
 	$(V)$(MAKE) $(NO_PRINT) -C $@
 
 $(addsuffix -obj, $(PROGRAMS) $(LIB_TARGETS)):
-	$(V)$(MAKE) $(NO_PRINT) -C $(@:-obj=) objects
+	$(V)$(MAKE) $(NO_PRINT) -C $(@:-obj=) objects picobjects
 
 .PHONY: report
 report:

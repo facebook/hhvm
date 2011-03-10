@@ -55,7 +55,7 @@ class MutableArrayIter;
  *    o_realPropPublic()
  *    o_realPropPrivate() # non-virtual, only as needed
  */
-class ObjectData : public Countable {
+class ObjectData : public CountableNF {
  public:
   enum Attribute {
     InConstructor = 1,    // __construct()

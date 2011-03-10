@@ -24,7 +24,7 @@ namespace HPHP {
 // resources have a separate id space
 static IMPLEMENT_THREAD_LOCAL(int, os_max_resource_id);
 
-ResourceData::ResourceData() : ObjectData(true) {
+ResourceData::ResourceData() : ObjectData(true), m_static (false) {
   int &pmax = *os_max_resource_id;
   if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
   o_id = ++pmax;

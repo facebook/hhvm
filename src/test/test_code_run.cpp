@@ -15270,6 +15270,17 @@ bool TestCodeRun::TestFiber() {
         "echo \"Success!\n\";",
         "Success!\n");
 
+  // params that are not by-ref
+  MVCRO("<?php\n"
+        "function run($a) { var_dump($a); }\n"
+        "$a = 0;\n"
+        "$h = call_user_func_async('run', $a);\n"
+        "$a = 1;\n"
+        "end_user_func_async($h);\n"
+        "var_dump($a);\n",
+        "int(0)\n"
+        "int(1)\n");
+
   return true;
 }
 

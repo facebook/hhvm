@@ -412,8 +412,29 @@ void FiberAsyncFunc::Restart() {
 }
 
 Object FiberAsyncFunc::Start(CVarRef function, CArrRef params) {
+  // All the elements in the params array are by-ref when they are created,
+  // and if a param is not by-ref, we should remove the reference, so that
+  // when the async function returns, it doesn't accidentially override the
+  // existing value.
+  MethodCallPackage mcp;
+  String classname, methodname;
+  if (!get_user_func_handler(function, mcp, classname, methodname) ||
+      !mcp.ci) {
+    raise_warning("call_user_func_async: not a valid callback");
+    return null_object;
+  }
+  Array new_params;
+  int i = 0;
+  for (ArrayIter iter(params); iter; ++iter) {
+    if (!mcp.ci->isRef(i++)) {
+      new_params.append(iter.secondRef());
+    } else {
+      new_params.append(ref(iter.secondRef()));
+    }
+  }
+
   FiberAsyncFuncHandle *handle =
-    NEW(FiberAsyncFuncHandle)(function, params, s_dispatcher != NULL);
+    NEW(FiberAsyncFuncHandle)(function, new_params, s_dispatcher != NULL);
   Object ret(handle);
 
   FiberJob *job = handle->getJob();

@@ -196,6 +196,7 @@ void FunctionStatement::init(void *parser, bool ref,
 
   bool seenOptional = false;
   set<string> names;
+  m_callInfo.m_argCount = m_params.size();
   for (unsigned int i = 0; i < m_params.size(); i++) {
     ParameterPtr param = m_params[i];
 

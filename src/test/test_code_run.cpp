@@ -16284,7 +16284,19 @@ bool TestCodeRun::TestClosure() {
         "  [1]=>\n"
         "  int(2)\n"
         "}\n");
-
+  MVCRO("<?php\n"
+        "$v=5;"
+        "call_user_func("
+        "  function() use($v) "
+        "  { echo $v; }"
+        ");"
+        "$f = function() use($v) { echo $v; };"
+        "call_user_func($f);"
+        "call_user_func_array("
+        "  function() use($v) "
+        "  { echo $v; }, array()"
+        ");"
+        "call_user_func($f, array());", "5555");
   return true;
 }
 

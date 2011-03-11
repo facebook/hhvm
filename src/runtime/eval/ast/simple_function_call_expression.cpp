@@ -87,7 +87,7 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   bool invokeClosure = false;
   Variant arg0;
   for (unsigned int i = 0; i < m_params.size(); ++i) {
-    ExpressionPtr param = m_params[i];
+    Expression *param = m_params[i].get();
     if (i == 0 &&
         (name == "call_user_func" || name == "call_user_func_array")) {
       ASSERT(!cit1->mustBeRef(i) && !cit1->isRef(i));

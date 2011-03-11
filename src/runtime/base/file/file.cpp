@@ -424,11 +424,6 @@ bool File::lock(int operation) {
 bool File::lock(int operation, bool &wouldblock /* = false */) {
   ASSERT(m_fd >= 0);
 
-  if ((operation & 3) == 0) {
-    throw_invalid_argument("operation: %d", operation);
-    return false;
-  }
-
   wouldblock = false;
   if (flock(m_fd, operation)) {
     if (errno == EWOULDBLOCK) {

@@ -78,13 +78,6 @@ endif
 
 # Only use jemalloc *or* tcmalloc.
 ifdef USE_JEMALLOC
-ifdef SHARED
-# Clear USE_JEMALLOC, since it may have already been set by the parent make.
-# Ideally we would actually undefine USE_JEMALLOC:
-#   override undefine USE_JEMALLOC
-# However, the undefine feature is only available in GNU make 3.82 and later.
-override USE_JEMALLOC =
-endif
 override NO_TCMALLOC = 1
 override GOOGLE_TCMALLOC =
 endif # USE_JEMALLOC
@@ -96,11 +89,6 @@ ifndef NO_TCMALLOC
 
 # Whether to link with tcmalloc.a
 GOOGLE_TCMALLOC = 1
-endif
-
-ifdef SHARED
-# See related comments above re: USE_JEMALLOC.
-override GOOGLE_TCMALLOC =
 endif
 
 # For GNU profiler - gprof.
@@ -171,6 +159,15 @@ endif
 
 ifndef HPHP_LIB
 HPHP_LIB := $(ABS_PROJECT_ROOT)/bin
+endif
+
+ifdef SHARED
+# Clear USE_JEMALLOC, since it may have already been set by the parent make.
+# Ideally we would actually undefine USE_JEMALLOC:
+#   override undefine USE_JEMALLOC
+# However, the undefine feature is only available in GNU make 3.82 and later.
+override USE_JEMALLOC =
+override GOOGLE_TCMALLOC =
 endif
 
 MKDIR = mkdir -p

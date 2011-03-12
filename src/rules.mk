@@ -356,10 +356,10 @@ ifdef GOOGLE_HEAP_PROFILER
 CPPFLAGS += -DGOOGLE_HEAP_PROFILER
 endif
 ifdef GOOGLE_TCMALLOC
-CPPFLAGS += -DGOOGLE_TCMALLOC
+CPP_MALLOC_FLAGS += -DGOOGLE_TCMALLOC
 endif
 ifdef USE_JEMALLOC
-CPPFLAGS += -DUSE_JEMALLOC
+CPP_MALLOC_FLAGS += -DUSE_JEMALLOC
 endif
 ifdef PROFILE
 CPPFLAGS += -pg
@@ -645,7 +645,9 @@ endif
 
 define COMPILE_IT
 $(ECHO_COMPILE)
-$(CV)$(1) -c $(if $(OUT_TOP),-I$(OUT_TOP)src) $(CPPFLAGS) $(2) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
+$(CV)$(1) -c $(if $(OUT_TOP),-I$(OUT_TOP)src) \
+ $(if $(filter %.pic.o,$@),-fPIC,$(CPP_MALLOC_FLAGS)) \
+ $(CPPFLAGS) $(2) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 endef
 
 define PREPROCESS_IT
@@ -687,25 +689,25 @@ $(call OBJECT_FILES,$(ASM_SOURCES),S): $(OUT_DIR)%.o:%.S
 	$(call COMPILE_IT,$(P_CC:distcc=),$(OPT))
 
 $(call PIC_OBJECT_FILES,$(CXX_NOOPT_SOURCES) $(GENERATED_CXX_NOOPT_SOURCES),cpp): $(OUT_DIR)%.pic.o:%.cpp
-	$(call COMPILE_IT,$(P_CXX),$(CXXFLAGS) -fPIC)
+	$(call COMPILE_IT,$(P_CXX),$(CXXFLAGS))
 
 $(call PIC_OBJECT_FILES,$(CXX_SOURCES) $(GENERATED_CXX_SOURCES),cpp): $(OUT_DIR)%.pic.o:%.cpp
-	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS) -fPIC)
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
 
 $(call PIC_OBJECT_FILES,$(C_SOURCES) $(GENERATED_C_SOURCES),c): $(OUT_DIR)%.pic.o:%.c
-	$(call COMPILE_IT,$(P_CC),$(OPT) -fPIC)
+	$(call COMPILE_IT,$(P_CC),$(OPT))
 
 $(call PIC_OBJECT_FILES,$(GENERATED_CPP_SOURCES),c): $(OUT_DIR)%.pic.o:%.c
-	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS) -fPIC)
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
 
 $(call PIC_OBJECT_FILES,$(ASM_SOURCES),S): $(OUT_DIR)%.pic.o:%.S
-	$(call COMPILE_IT,$(P_CC:distcc=),$(OPT) -fPIC)
+	$(call COMPILE_IT,$(P_CC:distcc=),$(OPT))
 
 $(OUT_DIR)%.o:$(OUT_DIR)%.cpp
 	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
 
 $(OUT_DIR)%.pic.o:$(OUT_DIR)%.cpp
-	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS) -fPIC)
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
 
 $(OUT_DIR)%.cpp.E:$(OUT_DIR)%.cpp
 	$(call PREPROCESS_IT,$(P_CXX),$(OPT) $(CXXFLAGS))

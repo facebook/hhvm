@@ -28,6 +28,9 @@
 using namespace std;
 
 namespace HPHP {
+
+extern bool (*file_dump)(const char *filename);
+
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -86,7 +89,25 @@ bool PhpFile::isChanged(const struct stat &s) {
 
 Mutex FileRepository::s_lock;
 hphp_hash_map<std::string, PhpFile*, string_hash>
-FileRepository::m_files;
+FileRepository::s_files;
+
+static class FileDumpInitializer {
+  public: FileDumpInitializer() {
+    file_dump = FileRepository::fileDump;
+  }
+} s_fileDumpInitializer;
+
+bool FileRepository::fileDump(const char *filename) {
+  std::ofstream out(filename);
+  if (out.fail()) return false;
+  Lock lock(s_lock);
+  for (hphp_hash_map<string, PhpFile*, string_hash>::const_iterator it =
+       s_files.begin(); it != s_files.end(); it++) {
+    out << it->first.c_str() << endl;
+  }
+  out.close();
+  return true;
+}
 
 PhpFile *FileRepository::checkoutFile(const std::string &rname,
                                       const struct stat &s) {
@@ -103,11 +124,11 @@ PhpFile *FileRepository::checkoutFile(const std::string &rname,
   }
 
   hphp_hash_map<string, PhpFile*, string_hash>::iterator it =
-    m_files.find(name);
-  if (it == m_files.end()) {
+    s_files.find(name);
+  if (it == s_files.end()) {
     ret = readFile(name, s);
     if (ret) {
-      m_files[name] = ret;
+      s_files[name] = ret;
     }
   } else {
     if (it->second->isChanged(s)) {

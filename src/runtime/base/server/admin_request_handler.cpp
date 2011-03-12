@@ -172,6 +172,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/dump-apc:        dump all current value in APC to /tmp/apc_dump\n"
         "/dump-const:      dump all constant value in constant map to\n"
         "                  /tmp/const_map_dump\n"
+        "/dump-file-repo:  dump file repository to /tmp/file_repo_dump\n"
 
 #ifdef GOOGLE_CPU_PROFILER
         "/prof-cpu-on:     turn on CPU profiler\n"
@@ -854,6 +855,7 @@ bool AdminRequestHandler::handleConstSizeRequest (const std::string &cmd,
 // Dump cache content
 
 extern bool const_dump(const char *filename);
+bool (*file_dump)(const char *filename) = NULL;
 
 bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
                                                  Transport *transport) {
@@ -874,6 +876,13 @@ bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
       return true;
     }
     apc_dump("/tmp/apc_dump");
+    transport->sendString("Done");
+    return true;
+  }
+  if (cmd == "dump-file-repo") {
+    if (file_dump) {
+      (*file_dump)("/tmp/file_repo_dump");
+    }
     transport->sendString("Done");
     return true;
   }

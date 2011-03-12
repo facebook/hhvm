@@ -60,14 +60,14 @@ public:
    */
   static PhpFile *checkoutFile(const std::string &name, const struct stat &s);
   static bool findFile(std::string &path, struct stat &s);
+  static bool fileDump(const char *filename);
 private:
   static Mutex s_lock;
-  static hphp_hash_map<std::string, PhpFile*, string_hash> m_files;
+  static hphp_hash_map<std::string, PhpFile*, string_hash> s_files;
 
   static PhpFile *readFile(const std::string &name, const struct stat &s);
   static bool fileStat(const std::string &name, struct stat &s);
   static std::set<std::string> s_names;
-
   static const char* canonicalize(const std::string &n);
 };
 

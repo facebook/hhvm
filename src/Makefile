@@ -35,7 +35,10 @@ include $(PROJECT_ROOT)/src/rules.mk
 GIT_SHA1 := $(shell git describe --all --long --abbrev=40 --always)
 CPPFLAGS += -DCOMPILER_ID=\"$(GIT_SHA1)\"
 
-EXCEPTIONS := $(EXT_DIR)/mozilla/%.a $(EXT_DIR)/imap/lib/c-client.a
+EXCEPTIONS := $(EXT_DIR)/mozilla/%.a $(EXT_DIR)/imap/lib/c-client.a \
+              $(EXT_DIR)/google-perftools/lib/libtcmalloc.a \
+              $(EXT_DIR)/google-perftools/lib/libtcmalloc_minimal.a \
+              $(EXT_DIR)/jemalloc/lib/libjemalloc.a \
 
 STATIC_LIBS := $(filter-out $(EXCEPTIONS), $(ALL_LIBS))
 
@@ -56,7 +59,7 @@ hphp-setup: compiler-setup
 hphp: compiler
 hphpi: hphp
 test-setup: compiler-setup
-test: compiler
+test: compiler shared-lib-target
 
 .PHONY: shared-lib-target
 shared-lib-target:

@@ -15,7 +15,8 @@
 */
 
 #include <stdlib.h>
-#include "compiler/analysis/bit_set_vec.h"
+#include <compiler/analysis/bit_set_vec.h>
+#include <compiler/analysis/data_flow.h>
 
 using namespace HPHP;
 
@@ -47,7 +48,15 @@ void BitSetVec::alloc(int blocks, size_t width, int rows, int *rowIds) {
     m_idOffsets[rid] = i * m_rowSize + 1;
   }
   m_blockSize = m_rowSize * rows;
-  m_bits = (BitOps::Bits*)calloc(m_blockSize * blocks, 1);
+  m_bits = (BitOps::Bits*)malloc(m_blockSize * blocks);
+  size_t offset = 0;
+  for (int b = 0; b < blocks; b++) {
+    for (int i = 0; i < rows; i++) {
+      unsigned char init = DataFlow::GetInit(rowIds[i]) ? 255 : 0;
+      memset(add(m_bits, offset), init, m_rowSize);
+      offset += m_rowSize;
+    }
+  }
 }
 
 void BitSetVec::reset() {

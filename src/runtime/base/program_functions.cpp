@@ -709,7 +709,7 @@ static int execute_program_impl(int argc, char **argv) {
   }
   if (vm.count("help")) {
     cout << desc << "\n";
-    return -1;
+    return 0;
   }
   if (vm.count("version")) {
 #ifdef HPHP_VERSION
@@ -723,7 +723,7 @@ static int execute_program_impl(int argc, char **argv) {
     } else {
       cout << "Compiled by HipHop Compiler v" << version << "\n";
     }
-    return 1;
+    return 0;
   }
 #ifdef COMPILER_ID
   if (vm.count("compiler-id")) {

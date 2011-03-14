@@ -285,7 +285,7 @@ void AssignmentExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 static void wrapValue(CodeGenerator &cg, AnalysisResultPtr ar,
-                      ExpressionPtr exp, bool ref, bool array) {
+                      ExpressionPtr exp, bool ref, bool array, bool varnr) {
   bool close = false;
   if (ref) {
     cg_printf("ref(");
@@ -295,6 +295,12 @@ static void wrapValue(CodeGenerator &cg, AnalysisResultPtr ar,
              exp->getActualType() && !exp->getActualType()->isPrimitive() &&
              exp->getActualType()->getKindOf() != Type::KindOfString) {
     cg_printf("wrap_variant(");
+    close = true;
+  } else if (varnr && !exp->isScalar() &&
+             (exp->getCPPType()->is(Type::KindOfArray) ||
+              exp->getCPPType()->is(Type::KindOfObject) ||
+              exp->getCPPType()->is(Type::KindOfString))) {
+    cg_printf("VarNR(");
     close = true;
   }
   exp->outputCPP(cg, ar);
@@ -366,7 +372,7 @@ bool AssignmentExpression::SpecialAssignment(CodeGenerator &cg,
                   (exp->getVariable()->is(KindOfArrayElementExpression) ||
                    exp->getVariable()->is(KindOfObjectPropertyExpression)) &&
                   (exp->getVariable()->getContainedEffects() &&
-                   (CreateEffect|AccessorEffect)));
+                   (CreateEffect|AccessorEffect)), true);
       } else {
         cg_printf(ref ? "ref(%s)" : "%s", rvalStr);
       }
@@ -448,7 +454,7 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
     m_variable->outputCPP(cg, ar);
     cg_printf(" = ");
 
-    wrapValue(cg, ar, m_value, ref, false);
+    wrapValue(cg, ar, m_value, ref, false, false);
   }
   if (wrapped) {
     cg_printf(")");

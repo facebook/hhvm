@@ -51,9 +51,13 @@ bool Pipe::close() {
 
 bool Pipe::closeImpl() {
   bool ret = true;
+  s_file_data->m_pcloseRet = 0;
   if (!m_closed) {
     ASSERT(m_stream);
-    ret = (LightProcess::pclose(m_stream) == 0);
+    int pcloseRet = LightProcess::pclose(m_stream);
+    if (WIFEXITED(pcloseRet)) pcloseRet = WEXITSTATUS(pcloseRet);
+    s_file_data->m_pcloseRet = pcloseRet;
+    ret = (pcloseRet == 0); 
     m_closed = true;
     m_stream = NULL;
   }

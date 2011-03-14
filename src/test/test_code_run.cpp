@@ -13623,6 +13623,17 @@ bool TestCodeRun::TestFile() {
       "flock_or_die(FILENAME, $resource, LOCK_EX);"
       "flock_or_die(FILENAME, $resource, LOCK_UN);"
       "unlink(FILENAME);");
+  MVCR("<?php "
+       "$h = popen(\"echo foo; exit 2\", 'r');"
+       "$content = stream_get_contents($h);"
+       "$result = pclose($h);"
+       "echo trim($content).\"/\".$result.\"/\".gettype($result).\"\\n\";");
+  MVCR("<?php "
+       "$fp = fopen('test/test_ext_file.txt', 'r');"
+       "var_dump(pclose($fp));");
+  MVCR("<?php "
+       "$fp = fopen('test/nonexist.txt', 'r');"
+       "var_dump(pclose($fp));");
   return true;
 }
 

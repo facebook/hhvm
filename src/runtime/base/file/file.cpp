@@ -48,6 +48,8 @@ namespace HPHP {
 StaticString File::s_class_name("File");
 StaticString File::s_resource_name("stream");
 
+IMPLEMENT_REQUEST_LOCAL(FileData, s_file_data);
+
 String File::TranslatePath(CStrRef filename, bool useFileCache /* = false */,
                            bool keepRelative /*= false */) {
   String canonicalized(Util::canonicalize(string(filename.data(),

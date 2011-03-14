@@ -160,7 +160,8 @@ bool f_fclose(CObjRef handle) {
 
 Variant f_pclose(CObjRef handle) {
   CHECK_HANDLE(handle, f);
-  return CHECK_ERROR(f->close());
+  CHECK_ERROR(f->close());
+  return s_file_data->m_pcloseRet;
 }
 
 Variant f_fseek(CObjRef handle, int64 offset,

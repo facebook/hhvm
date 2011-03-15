@@ -26,11 +26,11 @@ namespace HPHP {
 
 class File;
 
-class StringBufferLimitException : public Exception {
+class StringBufferLimitException : public FatalErrorException {
 public:
   StringBufferLimitException(int size, CStrRef partialResult)
-      : Exception("StringBuffer exceeded %d bytes of memory", size),
-        m_result(partialResult) {}
+    : FatalErrorException(0, "StringBuffer exceeded %d bytes of memory", size),
+      m_result(partialResult) {}
   virtual ~StringBufferLimitException() throw() {}
 
   String m_result;

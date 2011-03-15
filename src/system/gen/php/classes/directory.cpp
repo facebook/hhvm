@@ -337,21 +337,6 @@ c_Directory *c_Directory::create(Variant v_path) {
   t___construct(v_path);
   return this;
 }
-ObjectData *c_Directory::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
-  return this;
-}
 void c_Directory::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);

@@ -3373,21 +3373,6 @@ c_ReflectionClass *c_ReflectionClass::create(Variant v_name) {
   t___construct(v_name);
   return this;
 }
-ObjectData *c_ReflectionClass::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
-  return this;
-}
 void c_ReflectionClass::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
@@ -4977,21 +4962,6 @@ c_ReflectionExtension *c_ReflectionExtension::create(Variant v_name) {
   t___construct(v_name);
   return this;
 }
-ObjectData *c_ReflectionExtension::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
-  return this;
-}
 void c_ReflectionExtension::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
@@ -6095,26 +6065,6 @@ c_ReflectionMethod *c_ReflectionMethod::create(Variant v_cls, Variant v_name // 
   CountableHelper h(this);
   init();
   t___construct(v_cls, v_name);
-  return this;
-}
-ObjectData *c_ReflectionMethod::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 2) throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
   return this;
 }
 void c_ReflectionMethod::dynConstruct(CArrRef params) {
@@ -7318,22 +7268,6 @@ c_ReflectionProperty *c_ReflectionProperty::create(Variant v_cls, Variant v_name
   t___construct(v_cls, v_name);
   return this;
 }
-ObjectData *c_ReflectionProperty::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 2) throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    }
-  }
-  return this;
-}
 void c_ReflectionProperty::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
@@ -7993,21 +7927,6 @@ c_ReflectionFunction *c_ReflectionFunction::create(Variant v_name) {
   CountableHelper h(this);
   init();
   t___construct(v_name);
-  return this;
-}
-ObjectData *c_ReflectionFunction::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_ReflectionFunction::dynConstruct(CArrRef params) {
@@ -8861,22 +8780,6 @@ c_ReflectionParameter *c_ReflectionParameter::create(Variant v_func, Variant v_p
   CountableHelper h(this);
   init();
   t___construct(v_func, v_param);
-  return this;
-}
-ObjectData *c_ReflectionParameter::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 2) throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    }
-  }
   return this;
 }
 void c_ReflectionParameter::dynConstruct(CArrRef params) {

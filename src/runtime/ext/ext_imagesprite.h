@@ -38,7 +38,6 @@ class c_ImageSprite : public ExtObjectData, public Sweepable {
   END_CLASS_MAP(ImageSprite)
   DECLARE_CLASS(ImageSprite, ImageSprite, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_ImageSprite();

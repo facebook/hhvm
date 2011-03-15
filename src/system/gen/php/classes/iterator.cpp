@@ -1238,26 +1238,6 @@ c_ArrayIterator *c_ArrayIterator::create(Variant v_array, Variant v_flags //  = 
   t___construct(v_array, v_flags);
   return this;
 }
-ObjectData *c_ArrayIterator::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 2) throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
-  return this;
-}
 void c_ArrayIterator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 2);
@@ -2041,16 +2021,6 @@ c_AppendIterator *c_AppendIterator::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_AppendIterator::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("AppendIterator::__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_AppendIterator::dynConstruct(CArrRef params) {
@@ -3052,26 +3022,6 @@ c_RecursiveDirectoryIterator *c_RecursiveDirectoryIterator::create(Variant v_pat
   t___construct(v_path, v_flags);
   return this;
 }
-ObjectData *c_RecursiveDirectoryIterator::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 2) throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
-  return this;
-}
 void c_RecursiveDirectoryIterator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 2);
@@ -3735,21 +3685,6 @@ c_DirectoryIterator *c_DirectoryIterator::create(Variant v_path) {
   t___construct(v_path);
   return this;
 }
-ObjectData *c_DirectoryIterator::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
-  return this;
-}
 void c_DirectoryIterator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 2);
@@ -4320,31 +4255,6 @@ c_RecursiveIteratorIterator *c_RecursiveIteratorIterator::create(Variant v_itera
   t___construct(v_iterator, v_mode, v_flags);
   return this;
 }
-ObjectData *c_RecursiveIteratorIterator::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 3) throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2));
-    } while (false);
-  }
-  return this;
-}
 void c_RecursiveIteratorIterator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 3) throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 2);
@@ -4665,27 +4575,6 @@ c_MutableArrayIterator *c_MutableArrayIterator::create(Variant v_array, Variant 
   CountableHelper h(this);
   init();
   t___construct(ref(v_array), v_flags);
-  return this;
-}
-ObjectData *c_MutableArrayIterator::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 2) throw_wrong_arguments("MutableArrayIterator::__construct", count, 1, 2, 2);
-    const_cast<Array&>(params).escalate(true);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0(ref(ad->getValueRef(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
   return this;
 }
 void c_MutableArrayIterator::dynConstruct(CArrRef params) {

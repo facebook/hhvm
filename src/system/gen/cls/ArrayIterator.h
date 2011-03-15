@@ -68,7 +68,6 @@ class c_ArrayIterator : public ExtObjectData {
   void init();
   public: void t___construct(Variant v_array, Variant v_flags = 0LL);
   public: c_ArrayIterator *create(Variant v_array, Variant v_flags = 0LL);
-  public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);

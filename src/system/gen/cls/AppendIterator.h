@@ -70,7 +70,6 @@ class c_AppendIterator : public ExtObjectData {
   Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   public: void t___construct();
   public: c_AppendIterator *create();
-  public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);

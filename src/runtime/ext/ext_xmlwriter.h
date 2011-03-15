@@ -81,7 +81,6 @@ class c_XMLWriter : public ExtObjectData, public Sweepable {
   END_CLASS_MAP(XMLWriter)
   DECLARE_CLASS(XMLWriter, XMLWriter, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_XMLWriter();

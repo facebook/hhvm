@@ -1563,30 +1563,6 @@ c_Exception *c_Exception::create(Variant v_message //  = NAMSTR(s_sys_ss00000000
   t___construct(v_message, v_code);
   return this;
 }
-ObjectData *c_Exception::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 2) throw_toomany_arguments("Exception::__construct", 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
-  return this;
-}
 void c_Exception::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 2) throw_toomany_arguments("Exception::__construct", 2, 2);
@@ -2089,45 +2065,6 @@ c_ErrorException *c_ErrorException::create(Variant v_message //  = NAMSTR(s_sys_
   CountableHelper h(this);
   init();
   t___construct(v_message, v_code, v_severity, v_filename, v_lineno);
-  return this;
-}
-ObjectData *c_ErrorException::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 5) throw_toomany_arguments("ErrorException::__construct", 5, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 3) {
-        (t___construct(arg0, arg1, arg2));
-        break;
-      }
-      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 4) {
-        (t___construct(arg0, arg1, arg2, arg3));
-        break;
-      }
-      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2, arg3, arg4));
-    } while (false);
-  }
   return this;
 }
 void c_ErrorException::dynConstruct(CArrRef params) {

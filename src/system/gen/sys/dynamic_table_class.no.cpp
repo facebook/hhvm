@@ -715,16 +715,6 @@ c_PDOException *c_PDOException::create() {
   t___construct();
   return this;
 }
-ObjectData *c_PDOException::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_PDOException::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -995,16 +985,6 @@ c_DOMDocumentFragment *c_DOMDocumentFragment::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DOMDocumentFragment::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DOMDocumentFragment::dynConstruct(CArrRef params) {
@@ -1498,25 +1478,6 @@ c_DOMText *c_DOMText::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  return this;
-}
-ObjectData *c_DOMText::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 1) throw_toomany_arguments("__construct", 1, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    } while (false);
-  }
   return this;
 }
 void c_DOMText::dynConstruct(CArrRef params) {
@@ -3281,16 +3242,6 @@ c_DebuggerClient *c_DebuggerClient::create() {
   t___construct();
   return this;
 }
-ObjectData *c_DebuggerClient::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_DebuggerClient::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -3697,16 +3648,6 @@ c_EncodingDetector *c_EncodingDetector::create() {
   t___construct();
   return this;
 }
-ObjectData *c_EncodingDetector::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_EncodingDetector::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -3929,21 +3870,6 @@ c_DOMCDATASection *c_DOMCDATASection::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  return this;
-}
-ObjectData *c_DOMCDATASection::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_DOMCDATASection::dynConstruct(CArrRef params) {
@@ -4176,16 +4102,6 @@ c_Locale *c_Locale::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_Locale::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_Locale::dynConstruct(CArrRef params) {
@@ -4568,16 +4484,6 @@ c_DOMDocumentType *c_DOMDocumentType::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DOMDocumentType::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DOMDocumentType::dynConstruct(CArrRef params) {
@@ -5173,22 +5079,6 @@ c_SQLite3Stmt *c_SQLite3Stmt::create(Object a0, String a1) {
   t___construct(a0, a1);
   return this;
 }
-ObjectData *c_SQLite3Stmt::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    }
-  }
-  return this;
-}
 void c_SQLite3Stmt::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 2);
@@ -5679,16 +5569,6 @@ c_DOMNodeList *c_DOMNodeList::create() {
   t___construct();
   return this;
 }
-ObjectData *c_DOMNodeList::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_DOMNodeList::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -6084,16 +5964,6 @@ c_Normalizer *c_Normalizer::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_Normalizer::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_Normalizer::dynConstruct(CArrRef params) {
@@ -6782,16 +6652,6 @@ c_DOMCharacterData *c_DOMCharacterData::create() {
   t___construct();
   return this;
 }
-ObjectData *c_DOMCharacterData::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_DOMCharacterData::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -7014,21 +6874,6 @@ c_DOMEntityReference *c_DOMEntityReference::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  return this;
-}
-ObjectData *c_DOMEntityReference::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_DOMEntityReference::dynConstruct(CArrRef params) {
@@ -7476,16 +7321,6 @@ c_SimpleXMLElementIterator *c_SimpleXMLElementIterator::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_SimpleXMLElementIterator::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_SimpleXMLElementIterator::dynConstruct(CArrRef params) {
@@ -7994,21 +7829,6 @@ c_DateTimeZone *c_DateTimeZone::create(String a0) {
   t___construct(a0);
   return this;
 }
-ObjectData *c_DateTimeZone::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
-  return this;
-}
 void c_DateTimeZone::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
@@ -8456,16 +8276,6 @@ c_DOMNodeIterator *c_DOMNodeIterator::create() {
   t___construct();
   return this;
 }
-ObjectData *c_DOMNodeIterator::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_DOMNodeIterator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -8886,16 +8696,6 @@ c_DOMImplementation *c_DOMImplementation::create() {
   t___construct();
   return this;
 }
-ObjectData *c_DOMImplementation::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_DOMImplementation::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -9151,37 +8951,6 @@ c_SoapHeader *c_SoapHeader::create(String a0, String a1, Variant a2, bool a3, Va
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4);
-  return this;
-}
-ObjectData *c_SoapHeader::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 2 || count > 5) throw_wrong_arguments("__construct", count, 2, 5, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 3) {
-        (t___construct(arg0, arg1, arg2));
-        break;
-      }
-      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 4) {
-        (t___construct(arg0, arg1, arg2, arg3));
-        break;
-      }
-      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2, arg3, arg4));
-    } while (false);
-  }
   return this;
 }
 void c_SoapHeader::dynConstruct(CArrRef params) {
@@ -9610,16 +9379,6 @@ c_DOMNotation *c_DOMNotation::create() {
   t___construct();
   return this;
 }
-ObjectData *c_DOMNotation::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_DOMNotation::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -9934,16 +9693,6 @@ c_DebuggerProxy *c_DebuggerProxy::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DebuggerProxy::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DebuggerProxy::dynConstruct(CArrRef params) {
@@ -12651,25 +12400,6 @@ c_Memcached *c_Memcached::create(String a0) {
   t___construct(a0);
   return this;
 }
-ObjectData *c_Memcached::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 1) throw_toomany_arguments("__construct", 1, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    } while (false);
-  }
-  return this;
-}
 void c_Memcached::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 1) throw_toomany_arguments("__construct", 1, 2);
@@ -12909,25 +12639,6 @@ c_DOMComment *c_DOMComment::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  return this;
-}
-ObjectData *c_DOMComment::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 1) throw_toomany_arguments("__construct", 1, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    } while (false);
-  }
   return this;
 }
 void c_DOMComment::dynConstruct(CArrRef params) {
@@ -14046,16 +13757,6 @@ c_SQLite3 *c_SQLite3::create() {
   t___construct();
   return this;
 }
-ObjectData *c_SQLite3::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_SQLite3::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -14501,26 +14202,6 @@ c_DOMAttr *c_DOMAttr::create(String a0, String a1) {
   t___construct(a0, a1);
   return this;
 }
-ObjectData *c_DOMAttr::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
-  return this;
-}
 void c_DOMAttr::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
@@ -14804,42 +14485,6 @@ c_SoapVar *c_SoapVar::create(Variant a0, Variant a1, String a2, String a3, Strin
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4, a5);
-  return this;
-}
-ObjectData *c_SoapVar::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 2 || count > 6) throw_wrong_arguments("__construct", count, 2, 6, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 3) {
-        (t___construct(arg0, arg1, arg2));
-        break;
-      }
-      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 4) {
-        (t___construct(arg0, arg1, arg2, arg3));
-        break;
-      }
-      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 5) {
-        (t___construct(arg0, arg1, arg2, arg3, arg4));
-        break;
-      }
-      CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
-    } while (false);
-  }
   return this;
 }
 void c_SoapVar::dynConstruct(CArrRef params) {
@@ -15494,16 +15139,6 @@ c_DOMNamedNodeMap *c_DOMNamedNodeMap::create() {
   t___construct();
   return this;
 }
-ObjectData *c_DOMNamedNodeMap::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_DOMNamedNodeMap::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -16017,16 +15652,6 @@ c_SQLite3Result *c_SQLite3Result::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_SQLite3Result::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_SQLite3Result::dynConstruct(CArrRef params) {
@@ -17464,41 +17089,6 @@ c_SimpleXMLElement *c_SimpleXMLElement::create(String a0, int64 a1, bool a2, Str
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4);
-  return this;
-}
-ObjectData *c_SimpleXMLElement::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 5) throw_wrong_arguments("__construct", count, 1, 5, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 3) {
-        (t___construct(arg0, arg1, arg2));
-        break;
-      }
-      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 4) {
-        (t___construct(arg0, arg1, arg2, arg3));
-        break;
-      }
-      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2, arg3, arg4));
-    } while (false);
-  }
   return this;
 }
 void c_SimpleXMLElement::dynConstruct(CArrRef params) {
@@ -19107,16 +18697,6 @@ c_Memcache *c_Memcache::create() {
   t___construct();
   return this;
 }
-ObjectData *c_Memcache::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_Memcache::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -19516,26 +19096,6 @@ c_DOMProcessingInstruction *c_DOMProcessingInstruction::create(String a0, String
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  return this;
-}
-ObjectData *c_DOMProcessingInstruction::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
   return this;
 }
 void c_DOMProcessingInstruction::dynConstruct(CArrRef params) {
@@ -19985,16 +19545,6 @@ c_EncodingMatch *c_EncodingMatch::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_EncodingMatch::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_EncodingMatch::dynConstruct(CArrRef params) {
@@ -21625,16 +21175,6 @@ c_PDOStatement *c_PDOStatement::create() {
   t___construct();
   return this;
 }
-ObjectData *c_PDOStatement::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_PDOStatement::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -22529,26 +22069,6 @@ c_SoapClient *c_SoapClient::create(Variant a0, Array a1) {
   t___construct(a0, a1);
   return this;
 }
-ObjectData *c_SoapClient::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
-  return this;
-}
 void c_SoapClient::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
@@ -22796,22 +22316,6 @@ c_SoapParam *c_SoapParam::create(Variant a0, String a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  return this;
-}
-ObjectData *c_SoapParam::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    }
-  }
   return this;
 }
 void c_SoapParam::dynConstruct(CArrRef params) {
@@ -23544,30 +23048,6 @@ c_DateTime *c_DateTime::create(String a0, Object a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  return this;
-}
-ObjectData *c_DateTime::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 2) throw_toomany_arguments("__construct", 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
   return this;
 }
 void c_DateTime::dynConstruct(CArrRef params) {
@@ -24546,21 +24026,6 @@ c_Collator *c_Collator::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  return this;
-}
-ObjectData *c_Collator::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_Collator::dynConstruct(CArrRef params) {
@@ -25823,36 +25288,6 @@ c_PDO *c_PDO::create(String a0, String a1, String a2, Array a3) {
   t___construct(a0, a1, a2, a3);
   return this;
 }
-ObjectData *c_PDO::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 4) throw_wrong_arguments("__construct", count, 1, 4, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 3) {
-        (t___construct(arg0, arg1, arg2));
-        break;
-      }
-      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2, arg3));
-    } while (false);
-  }
-  return this;
-}
 void c_PDO::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 4) throw_wrong_arguments("__construct", count, 1, 4, 2);
@@ -26725,16 +26160,6 @@ c_ImageSprite *c_ImageSprite::create() {
   t___construct();
   return this;
 }
-ObjectData *c_ImageSprite::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_ImageSprite::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -27115,16 +26540,6 @@ c_DOMEntity *c_DOMEntity::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DOMEntity::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DOMEntity::dynConstruct(CArrRef params) {
@@ -29677,16 +29092,6 @@ c_XMLWriter *c_XMLWriter::create() {
   t___construct();
   return this;
 }
-ObjectData *c_XMLWriter::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_XMLWriter::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -29921,30 +29326,6 @@ c_DOMException *c_DOMException::create(String a0, int64 a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  return this;
-}
-ObjectData *c_DOMException::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 2) throw_toomany_arguments("__construct", 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
   return this;
 }
 void c_DOMException::dynConstruct(CArrRef params) {
@@ -30604,21 +29985,6 @@ c_DOMXPath *c_DOMXPath::create(Variant a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  return this;
-}
-ObjectData *c_DOMXPath::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_DOMXPath::dynConstruct(CArrRef params) {
@@ -31328,26 +30694,6 @@ c_SoapServer *c_SoapServer::create(Variant a0, Array a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  return this;
-}
-ObjectData *c_SoapServer::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
   return this;
 }
 void c_SoapServer::dynConstruct(CArrRef params) {
@@ -32697,16 +32043,6 @@ c_DOMNode *c_DOMNode::create() {
   t___construct();
   return this;
 }
-ObjectData *c_DOMNode::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_DOMNode::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -33187,16 +32523,6 @@ c_SpoofChecker *c_SpoofChecker::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_SpoofChecker::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_SpoofChecker::dynConstruct(CArrRef params) {
@@ -35265,30 +34591,6 @@ c_DOMDocument *c_DOMDocument::create(String a0, String a1) {
   t___construct(a0, a1);
   return this;
 }
-ObjectData *c_DOMDocument::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 2) throw_toomany_arguments("__construct", 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
-  return this;
-}
 void c_DOMDocument::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 2) throw_toomany_arguments("__construct", 2, 2);
@@ -35525,16 +34827,6 @@ c_LibXMLError *c_LibXMLError::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_LibXMLError::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_LibXMLError::dynConstruct(CArrRef params) {
@@ -35845,42 +35137,6 @@ c_SoapFault *c_SoapFault::create(Variant a0, String a1, String a2, Variant a3, S
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4, a5);
-  return this;
-}
-ObjectData *c_SoapFault::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 2 || count > 6) throw_wrong_arguments("__construct", count, 2, 6, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 3) {
-        (t___construct(arg0, arg1, arg2));
-        break;
-      }
-      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 4) {
-        (t___construct(arg0, arg1, arg2, arg3));
-        break;
-      }
-      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 5) {
-        (t___construct(arg0, arg1, arg2, arg3, arg4));
-        break;
-      }
-      CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
-    } while (false);
-  }
   return this;
 }
 void c_SoapFault::dynConstruct(CArrRef params) {
@@ -37373,31 +36629,6 @@ c_DOMElement *c_DOMElement::create(String a0, String a1, String a2) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2);
-  return this;
-}
-ObjectData *c_DOMElement::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 3) throw_wrong_arguments("__construct", count, 1, 3, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2));
-    } while (false);
-  }
   return this;
 }
 void c_DOMElement::dynConstruct(CArrRef params) {

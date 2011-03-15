@@ -118,7 +118,6 @@ class c_PDO : public ExtObjectData, public Sweepable {
   END_CLASS_MAP(PDO)
   DECLARE_CLASS(PDO, PDO, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_PDO();
@@ -183,7 +182,6 @@ class c_PDOStatement : public ExtObjectData, public Sweepable {
   END_CLASS_MAP(PDOStatement)
   DECLARE_CLASS(PDOStatement, PDOStatement, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_PDOStatement();
@@ -269,7 +267,6 @@ class c_PDOException : public c_Exception {
   END_CLASS_MAP(PDOException)
   DECLARE_CLASS(PDOException, PDOException, Exception)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_PDOException();

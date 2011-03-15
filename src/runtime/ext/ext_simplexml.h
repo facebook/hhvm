@@ -50,7 +50,6 @@ class c_SimpleXMLElement :
   END_CLASS_MAP(SimpleXMLElement)
   DECLARE_CLASS(SimpleXMLElement, SimpleXMLElement, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_SimpleXMLElement();
@@ -139,7 +138,6 @@ class c_LibXMLError : public ExtObjectData {
   END_CLASS_MAP(LibXMLError)
   DECLARE_CLASS(LibXMLError, LibXMLError, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_LibXMLError();
@@ -170,7 +168,6 @@ class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
   END_CLASS_MAP(SimpleXMLElementIterator)
   DECLARE_CLASS(SimpleXMLElementIterator, SimpleXMLElementIterator, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_SimpleXMLElementIterator();

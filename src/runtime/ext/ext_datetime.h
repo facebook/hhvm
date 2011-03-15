@@ -46,7 +46,6 @@ class c_DateTime : public ExtObjectData {
   END_CLASS_MAP(DateTime)
   DECLARE_CLASS(DateTime, DateTime, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_DateTime();
@@ -129,7 +128,6 @@ class c_DateTimeZone : public ExtObjectData {
   END_CLASS_MAP(DateTimeZone)
   DECLARE_CLASS(DateTimeZone, DateTimeZone, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_DateTimeZone();

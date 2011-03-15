@@ -132,10 +132,10 @@ class ObjectData : public CountableNF {
 
   virtual void init() {}
   ObjectData *create() { CountableHelper h(this); init(); return this;}
-  ObjectData *dynCreate(const Array &params, bool init = true) {
-    create();
-    if (init) {
-      CountableHelper h(this);
+  ObjectData *dynCreate(const Array &params, bool construct = true) {
+    CountableHelper h(this);
+    init();
+    if (construct) {
       dynConstruct(params);
     }
     return this;

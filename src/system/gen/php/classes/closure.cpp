@@ -359,22 +359,6 @@ c_Closure *c_Closure::create(Variant v_func, Variant v_vars) {
   t___construct(v_func, v_vars);
   return this;
 }
-ObjectData *c_Closure::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 2) throw_wrong_arguments("Closure::__construct", count, 2, 2, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    }
-  }
-  return this;
-}
 void c_Closure::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) throw_wrong_arguments("Closure::__construct", count, 2, 2, 2);
@@ -1377,32 +1361,6 @@ c_Continuation *c_Continuation::create(Variant v_func, Variant v_vars, Variant v
   CountableHelper h(this);
   init();
   t___construct(v_func, v_vars, v_obj, v_args);
-  return this;
-}
-ObjectData *c_Continuation::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 2 || count > 4) throw_wrong_arguments("Continuation::__construct", count, 2, 4, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 3) {
-        (t___construct(arg0, arg1, arg2));
-        break;
-      }
-      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2, arg3));
-    } while (false);
-  }
   return this;
 }
 void c_Continuation::dynConstruct(CArrRef params) {

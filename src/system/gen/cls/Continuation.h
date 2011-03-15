@@ -74,7 +74,6 @@ class c_Continuation : public c_Closure {
   void init();
   public: void t___construct(Variant v_func, Variant v_vars, Variant v_obj = null, Variant v_args = s_sys_sa00000000);
   public: c_Continuation *create(Variant v_func, Variant v_vars, Variant v_obj = null, Variant v_args = s_sys_sa00000000);
-  public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);

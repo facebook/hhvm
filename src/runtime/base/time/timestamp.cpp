@@ -23,7 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // creation
 
-int TimeStamp::Current() {
+int64 TimeStamp::Current() {
   return time(0);
 }
 
@@ -58,7 +58,7 @@ String TimeStamp::CurrentMicroTime() {
   return String(ret, CopyString);
 }
 
-int TimeStamp::Get(bool &error, int hou, int min, int sec, int mon, int day,
+int64 TimeStamp::Get(bool &error, int hou, int min, int sec, int mon, int day,
                    int yea, bool gmt) {
   DateTime dt(Current());
   if (gmt) {

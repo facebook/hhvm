@@ -49,7 +49,7 @@ bool parse_packet_soap(c_SoapClient *obj, const char *buffer,
   }
 
   /* Parse XML packet */
-  xmlDocPtr response = soap_xmlParseMemory(buffer, buffer_size);
+  xmlDocPtr response = soap_xmlParseMemory(buffer, buffer_size, false);
   if (!response) {
     add_soap_fault(obj, "Client", "looks like we got no XML document");
     return false;

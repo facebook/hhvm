@@ -118,7 +118,7 @@ static encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type,
 static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location,
                              xmlAttrPtr tns, bool import) {
   if (location && ctx->docs.find((char*)location) == ctx->docs.end()) {
-    xmlDocPtr doc = soap_xmlParseFile((char*)location);
+    xmlDocPtr doc = soap_xmlParseFile((char*)location, true);
     if (!doc) {
       throw SoapException("Parsing Schema: can't import schema from '%s'",
                           location);

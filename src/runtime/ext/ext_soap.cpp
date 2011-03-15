@@ -2090,7 +2090,7 @@ void c_SoapServer::t_handle(CStrRef request /* = null_string */) {
       req = ret.toString();
     }
   }
-  xmlDocPtr doc_request = soap_xmlParseMemory(req.data(), req.size());
+  xmlDocPtr doc_request = soap_xmlParseMemory(req.data(), req.size(), false);
   if (doc_request == NULL) {
     throw_soap_server_fault("Client", "Bad Request");
   }

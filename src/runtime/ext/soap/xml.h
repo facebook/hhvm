@@ -39,8 +39,9 @@ typedef std::map<std::string, xmlNodePtr> xmlNodeMap;
 
 #define NS_STRING(ns) (ns.empty() ? NULL : BAD_CAST(ns.c_str()))
 
-xmlDocPtr soap_xmlParseFile(const char *filename);
-xmlDocPtr soap_xmlParseMemory(const void *buf, size_t size);
+xmlDocPtr soap_xmlParseFile(const char *filename, bool removeEmptyText);
+xmlDocPtr soap_xmlParseMemory(const void *buf, size_t size,
+                              bool removeEmptyText);
 
 xmlNsPtr attr_find_ns(xmlAttrPtr node);
 xmlNsPtr node_find_ns(xmlNodePtr node);

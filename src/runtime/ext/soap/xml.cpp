@@ -33,8 +33,8 @@ static bool is_blank(const xmlChar* str) {
   return true;
 }
 
-/* removes all empty text, comments and other insignoficant nodes */
-static void cleanup_xml_node(xmlNodePtr node) {
+/* removes all comments and other insignificant nodes */
+static void cleanup_xml_node(xmlNodePtr node, bool removeEmptyText) {
   xmlNodePtr trav;
   xmlNodePtr del = NULL;
 
@@ -46,14 +46,14 @@ static void cleanup_xml_node(xmlNodePtr node) {
       del = NULL;
     }
     if (trav->type == XML_TEXT_NODE) {
-      if (is_blank(trav->content)) {
+      if (removeEmptyText && is_blank(trav->content)) {
         del = trav;
       }
     } else if ((trav->type != XML_ELEMENT_NODE) &&
                (trav->type != XML_CDATA_SECTION_NODE)) {
       del = trav;
     } else if (trav->children != NULL) {
-      cleanup_xml_node(trav);
+      cleanup_xml_node(trav, removeEmptyText);
     }
     trav = trav->next;
   }
@@ -69,7 +69,7 @@ static void soap_ignorableWhitespace(void *ctx, const xmlChar *ch, int len) {
 static void soap_Comment(void *ctx, const xmlChar *value) {
 }
 
-xmlDocPtr soap_xmlParseFile(const char *filename) {
+xmlDocPtr soap_xmlParseFile(const char *filename, bool removeEmptyText) {
   String cache_key("HPHP.SOAP.WSDL.");
   cache_key += filename;
 
@@ -87,7 +87,8 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
 
   if (!same(content, false)) {
     String scontent = content.toString();
-    xmlDocPtr ret = soap_xmlParseMemory(scontent.data(), scontent.size());
+    xmlDocPtr ret = soap_xmlParseMemory(scontent.data(), scontent.size(),
+                                        removeEmptyText);
     if (ret) {
       ret->URL = xmlCharStrdup(filename);
     }
@@ -96,7 +97,8 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
   return NULL;
 }
 
-xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size) {
+xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size,
+                              bool removeEmptyText) {
   xmlParserCtxtPtr ctxt = NULL;
   xmlDocPtr ret;
 
@@ -132,7 +134,7 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size) {
 */
 
   if (ret) {
-    cleanup_xml_node((xmlNodePtr)ret);
+    cleanup_xml_node((xmlNodePtr)ret, removeEmptyText);
   }
   return ret;
 }

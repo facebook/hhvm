@@ -694,7 +694,7 @@ xmlNodePtr to_xml_user(encodeTypePtr type, CVarRef data, int style,
                                                   CREATE_VECTOR1(data));
     if (return_value.isString()) {
       String sdoc = return_value.toString();
-      xmlDocPtr doc = soap_xmlParseMemory(sdoc.data(), sdoc.size());
+      xmlDocPtr doc = soap_xmlParseMemory(sdoc.data(), sdoc.size(), false);
       if (doc && doc->children) {
         ret = xmlDocCopyNode(doc->children, parent->doc, 1);
       }

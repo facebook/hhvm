@@ -28,7 +28,7 @@ etags:
 	-$(V)cd src && ct -e
 .PHONY: tags ctags etags
 
-$(FAST_TESTS) $(SLOW_TESTS): % : setup
+$(FAST_TESTS) $(SLOW_TESTS) TestCodeRunStatic: % : setup
 	cd src && $(TEST) $(if $($@),$($@),$@)
 
 setup:
@@ -40,7 +40,10 @@ shared-libs:
 fast_tests: $(FAST_TESTS)
 slow_tests: shared-libs $(SLOW_TESTS)
 
-.PHONY: $(FAST_TESTS) $(SLOW_TESTS)
+.PHONY: $(FAST_TESTS) $(SLOW_TESTS) TestCodeRun%
+
+TestCodeRun-% TestCodeRunEval-% TestCodeRunStatic-% : setup
+	cd src && $(TEST) $(patsubst %-$*,%,$@) Test$*
 
 .PHONY: debug release both check_by_type fast_tests slow_tests setup
 check_by_type:

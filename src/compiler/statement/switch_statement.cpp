@@ -20,6 +20,8 @@
 #include <compiler/statement/case_statement.h>
 #include <compiler/option.h>
 #include <compiler/analysis/code_error.h>
+#include <compiler/analysis/variable_table.h>
+#include <compiler/expression/simple_variable.h>
 
 using namespace HPHP;
 using namespace std;
@@ -32,6 +34,16 @@ SwitchStatement::SwitchStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp, StatementListPtr cases)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
     m_exp(exp), m_cases(cases) {
+  if (m_exp->is(Expression::KindOfSimpleVariable)) {
+    for (int i = m_cases->getCount(); i--; ) {
+      CaseStatementPtr c(dynamic_pointer_cast<CaseStatement>((*m_cases)[i]));
+      if (c->getCondition() && c->getCondition()->hasEffect()) {
+        m_exp->setContext(Expression::LValue);
+        m_exp->setContext(Expression::NoLValueWrapper);
+        break;
+      }
+    }
+  }
 }
 
 StatementPtr SwitchStatement::clone() {
@@ -198,15 +210,17 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   labelId &= ~CodeGenerator::BreakScopeBitMask;
   cg_indentBegin("{\n");
 
+  string var;
   int varId = -1;
 
   if (m_exp->preOutputCPP(cg, ar, 0)) {
     varId = cg.createNewLocalId(shared_from_this());
+    var = string(Option::SwitchPrefix) + lexical_cast<string>(varId);
     m_exp->getType()->outputCPPDecl(cg, ar, getScope());
-    cg_printf(" %s%d;\n", Option::SwitchPrefix, varId);
+    cg_printf(" %s;\n", var.c_str());
 
     m_exp->outputCPPBegin(cg, ar);
-    cg_printf("%s%d = (", Option::SwitchPrefix, varId);
+    cg_printf("%s = (", var.c_str());
     m_exp->outputCPP(cg, ar);
     cg_printf(");\n");
     m_exp->outputCPPEnd(cg, ar);
@@ -214,8 +228,8 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (staticCases) {
     cg_printf("switch (");
-    if (varId >= 0) {
-      cg_printf("%s%d", Option::SwitchPrefix, varId);
+    if (!var.empty()) {
+      cg_printf("%s", var.c_str());
     } else {
       m_exp->outputCPP(cg, ar);
     }
@@ -223,12 +237,19 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (m_cases) m_cases->outputCPP(cg, ar);
     cg_printf("}\n");
   } else {
-    if (varId < 0) {
+    if (var.empty()) {
       varId = cg.createNewLocalId(shared_from_this());
-      m_exp->getType()->outputCPPDecl(cg, ar, getScope());
-      cg_printf(" %s%d = (", Option::SwitchPrefix, varId);
-      m_exp->outputCPP(cg, ar);
-      cg_printf(");\n");
+      if (m_exp->hasContext(Expression::LValue) &&
+          m_exp->is(Expression::KindOfSimpleVariable)) {
+        var = getScope()->getVariables()->getVariableName(
+          cg, ar, static_pointer_cast<SimpleVariable>(m_exp)->getName());
+      } else {
+        var = string(Option::SwitchPrefix) + lexical_cast<string>(varId);
+        m_exp->getType()->outputCPPDecl(cg, ar, getScope());
+        cg_printf(" %s = (", var.c_str());
+        m_exp->outputCPP(cg, ar);
+        cg_printf(");\n");
+      }
     }
 
     if (m_cases && m_cases->getCount()) {
@@ -238,14 +259,14 @@ void SwitchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         CaseStatementPtr stmt =
           dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);
         if (stmt->getCondition()) {
-          stmt->outputCPPAsIf(cg, ar, varId, i);
+          stmt->outputCPPAsIf(cg, ar, varId, var.c_str(), i);
         } else {
           defaultCase = stmt;
           defaultCaseNum = i;
         }
       }
       if (defaultCaseNum != -1) {
-        defaultCase->outputCPPAsIf(cg, ar, varId, defaultCaseNum);
+        defaultCase->outputCPPAsIf(cg, ar, varId, var.c_str(), defaultCaseNum);
       } else {
         cg_printf("goto break%d;\n", labelId);
         cg.addLabelId("break", labelId);

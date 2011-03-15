@@ -162,10 +162,10 @@ void CaseStatement::outputCPPByNumber(CodeGenerator &cg, AnalysisResultPtr ar,
 }
 
 void CaseStatement::outputCPPAsIf(CodeGenerator &cg, AnalysisResultPtr ar,
-                                  int varId, int caseNum) {
+                                  int varId, const char *var, int caseNum) {
   if (m_condition) {
     m_condition->outputCPPBegin(cg, ar);
-    cg_printf("if (equal(%s%d, (", Option::SwitchPrefix, varId);
+    cg_printf("if (equal(%s, (", var);
     m_condition->outputCPP(cg, ar);
     cg_printf("))) goto case_%d_%d;\n", varId, caseNum);
     m_condition->outputCPPEnd(cg, ar);

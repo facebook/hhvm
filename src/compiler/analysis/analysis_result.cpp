@@ -4623,10 +4623,13 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
 
   if (genStatic || nstrings == 0) return;
 
-  int chunkSize = (nstrings + Option::LiteralStringFileCount) /
-                  Option::LiteralStringFileCount;
-  if (chunkSize < Option::LiteralStringFileCount) {
-    chunkSize = Option::LiteralStringFileCount;
+  int chunkSize;
+  if (ar->isSystem()) {
+    // generate one single literal_strings file for system
+    chunkSize = nstrings;
+  } else {
+    chunkSize = (nstrings + Option::LiteralStringFileCount) /
+                Option::LiteralStringFileCount;
   }
   int count = 0;
 

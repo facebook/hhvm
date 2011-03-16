@@ -34,7 +34,7 @@ SwitchStatement::SwitchStatement
 (STATEMENT_CONSTRUCTOR_PARAMETERS, ExpressionPtr exp, StatementListPtr cases)
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
     m_exp(exp), m_cases(cases) {
-  if (m_exp->is(Expression::KindOfSimpleVariable)) {
+  if (m_cases && m_exp->is(Expression::KindOfSimpleVariable)) {
     for (int i = m_cases->getCount(); i--; ) {
       CaseStatementPtr c(dynamic_pointer_cast<CaseStatement>((*m_cases)[i]));
       if (c->getCondition() && c->getCondition()->hasEffect()) {

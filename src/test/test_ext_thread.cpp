@@ -22,7 +22,9 @@
 bool TestExtThread::RunTests(const std::string &which) {
   bool ret = true;
 
+  RUN_TEST(test_hphp_is_service_thread);
   RUN_TEST(test_hphp_service_thread_started);
+  RUN_TEST(test_hphp_service_thread_stopped);
   RUN_TEST(test_hphp_thread_is_warmup_enabled);
   RUN_TEST(test_hphp_thread_set_warmup_enabled);
   RUN_TEST(test_hphp_get_thread_id);
@@ -32,8 +34,16 @@ bool TestExtThread::RunTests(const std::string &which) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool TestExtThread::test_hphp_is_service_thread() {
+  return Count(true);
+}
+
 bool TestExtThread::test_hphp_service_thread_started() {
   // need to test with whole server integration
+  return Count(true);
+}
+
+bool TestExtThread::test_hphp_service_thread_stopped() {
   return Count(true);
 }
 

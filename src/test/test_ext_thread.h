@@ -27,7 +27,9 @@ class TestExtThread : public TestCppExt {
  public:
   virtual bool RunTests(const std::string &which);
 
+  bool test_hphp_is_service_thread();
   bool test_hphp_service_thread_started();
+  bool test_hphp_service_thread_stopped();
   bool test_hphp_thread_is_warmup_enabled();
   bool test_hphp_thread_set_warmup_enabled();
   bool test_hphp_get_thread_id();

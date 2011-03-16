@@ -51,6 +51,17 @@ CPP
 
 DefineFunction(
   array(
+    'name'   => "hphp_is_service_thread",
+    'desc'   => "Returns an indication of whether the current thread is a service thread or not.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "TRUE if the current thread is a service thread, FALSE otherwise."
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "hphp_service_thread_started",
     'desc'   => "A function to call to tell system a service thread has completed its startup.",
     'flags'  =>  HasDocComment | HipHopSpecific,

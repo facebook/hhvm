@@ -27,6 +27,10 @@ namespace HPHP {
 
 static IMPLEMENT_THREAD_LOCAL_PROXY(ServiceThread, true, s_service_threads);
 
+bool ServiceThread::IsServiceThread() {
+  return !s_service_threads.isNull();
+}
+
 ServiceThread *ServiceThread::GetThisThread() {
   return s_service_threads.get();
 }

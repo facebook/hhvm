@@ -3684,7 +3684,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
         for (int64 i = 0; i < size; i++) {
           String key = uns->unserializeKey().toString();
           int subLen = 0;
-          if (key.charAt(0) == '\00') {
+          if (key.size() > 0 && key.charAt(0) == '\00') {
             if (key.charAt(1) == '*') {
               subLen = 3; // protected
             } else {

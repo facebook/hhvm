@@ -598,7 +598,7 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
   const ClassInfo *cls = info.class_info;
   if (info.is_object) {
     String ks(key.toString());
-    if (ks.charAt(0) == '\0') {
+    if (ks.size() > 0 && ks.charAt(0) == '\0') {
       // fast path for serializing private properties
       if (m_type == Serialize) {
         write(ks);

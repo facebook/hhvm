@@ -4172,6 +4172,14 @@ bool TestCodeRun::TestObjectProperty() {
        "}\n"
        "f();\n");
 
+  // empty property name shouldn't crash
+  MVCR("<?php\n"
+       "$a = array(); $a[""] = 1;\n"
+       "$o = (object)$a;\n"
+       "var_dump($o);\n"
+       "$s = serialize($o);\n"
+       "$o2 = unserialize($s);\n");
+
   return true;
 }
 

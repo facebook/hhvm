@@ -634,7 +634,7 @@ static bool pre_proc_open(CArrRef descriptorspec,
   return false;
 }
 
-static Variant post_proc_open(CStrRef cmd, Variant &pipes, CStrRef cwd,
+static Variant post_proc_open(CStrRef cmd, Variant &pipes,
                               CVarRef env, vector<DescriptorItem> &items,
                               pid_t child) {
   if (child < 0) {
@@ -689,9 +689,11 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
     }
 
     child = LightProcess::proc_open(cmd.c_str(), created, intended,
-                                    cwd.c_str(), envs);
+                                    cwd.empty() ? g_context->getCwd().c_str()
+                                                : cwd.c_str(),
+                                    envs);
     ASSERT(child);
-    return post_proc_open(cmd, pipes, cwd, env, items, child);
+    return post_proc_open(cmd, pipes, env, items, child);
   } else {
     /* the unix way */
     Lock lock(DescriptorItem::s_mutex);
@@ -699,7 +701,7 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
     child = fork();
     if (child) {
       // the parent process
-      return post_proc_open(cmd, pipes, cwd, env, items, child);
+      return post_proc_open(cmd, pipes, env, items, child);
     }
   }
 
@@ -712,10 +714,8 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
   for (int i = 0; i < (int)items.size(); i++) {
     items[i].dupChild();
   }
-  if (!cwd.empty()) {
-    if (chdir(cwd) < 0) {
-      // chdir failed, the working directory remains unchanged
-    }
+  if (chdir(cwd.empty() ? g_context->getCwd() : cwd) < 0) {
+    // chdir failed, the working directory remains unchanged
   }
   if (!env.isNull()) {
     vector<String> senvs; // holding those char *

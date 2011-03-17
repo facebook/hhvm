@@ -114,8 +114,8 @@ class c_SimpleXMLElement :
   xmlNodePtr m_node;
   Variant m_children;
   Variant m_attributes;
-  bool m_is_text;
-  bool m_free_text;
+  String m_text;
+  bool m_is_text_first_node;
   bool m_is_attribute;
   bool m_is_children;
   bool m_is_property;

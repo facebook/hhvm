@@ -957,8 +957,6 @@ Array c_SimpleXMLElement::o_toArray() const {
   Array ret = Array::Create();
   if (!m_attributes.toArray().empty()) {
     ret.set("@attributes", m_attributes);
-  } else {
-    ret = Array::Create();
   }
 
   for (ArrayIter iter(m_children); iter; ++iter) {

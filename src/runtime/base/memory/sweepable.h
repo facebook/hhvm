@@ -38,6 +38,7 @@ public:
 
   void incPersistent() { ++m_persistentCount;}
   void decPersistent() { --m_persistentCount;}
+  bool isPersistent() { return m_persistentCount > 0; }
 
   /**
    * Excluding this from being swept(). This is useful for child Sweepable

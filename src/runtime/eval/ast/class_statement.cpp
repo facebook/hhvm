@@ -687,6 +687,7 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
   const ClassStatement *parent = parentStatement();
   if (cls) {
     if (getModifiers() & (Interface|Abstract))  {
+      bool extendingAbstractClass = (getModifiers() & Abstract);
       for (vector<MethodStatementPtr>::const_iterator it =
         m_methodsVec.begin(); it != m_methodsVec.end(); ++it) {
         if ((*it)->isAbstract()) {
@@ -703,12 +704,19 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
                 pcls->hasMethod((*it)->name().c_str(), methCls);
               if (meth) {
                 found = true;
-                if (strcmp(meth->name, "__construct") == 0) {
-                  // for some reason construct params aren't checked
+                if (extendingAbstractClass &&
+                    strcmp(meth->name, "__construct") == 0) {
+                  // When a class C extends an abstract class B, the
+                  // signature of C::__construct does not have to match
+                  // that of B::__construct
                 } else if (meth->parameters.size() < (*it)->getParams().size()
                     || !(meth->attribute & ClassInfo::IsStatic) !=
                     !((*it)->getModifiers() & Static)) {
                   incompatible = true;
+                } else if ((bool)(*it)->refReturn() !=
+                           (bool)(meth->attribute & ClassInfo::IsReference)) {
+                  // If one signature returns by value and the other returns by
+                  // reference then they are not compatible
                 } else {
                   const vector<ParameterPtr> &p1 = (*it)->getParams();
                   const vector<const ClassInfo::ParameterInfo *> &p2 =
@@ -731,11 +739,18 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
             }
           } else if (!m->isAbstract()) {
             found = true;
-            if (strcmp(m->name().c_str(), "__construct") == 0) {
-              // for some reason construct params aren't checked
+            if (extendingAbstractClass &&
+                strcmp(m->name().c_str(), "__construct") == 0) {
+              // When a class C extends an abstract class B, the
+              // signature of C::__construct does not have to match
+              // that of B::__construct
             } else if (m->getParams().size() < (*it)->getParams().size() ||
                 (m->getModifiers() & Static) !=
                 ((*it)->getModifiers() & Static)) {
+              incompatible = true;
+            } else if (m->refReturn() != (*it)->refReturn()) {
+              // If one signature returns by value and the other returns by
+              // reference then they are not compatible
               incompatible = true;
             } else {
               const vector<ParameterPtr> &p1 = (*it)->getParams();

@@ -20,11 +20,31 @@
 #include <runtime/base/server/server_stats.h>
 #include <runtime/base/runtime_option.h>
 #include <util/logger.h>
+#include <util/async_func.h>
 
 using namespace std;
 using namespace boost;
 
 namespace HPHP {
+
+///////////////////////////////////////////////////////////////////////////////
+// initializer
+
+std::vector<AllocatorThreadLocalInit>& GetAllocatorInitList() {
+  static std::vector<AllocatorThreadLocalInit> allocatorInitList;
+  if (!AsyncFuncImpl::GetThreadInitFunc()) {
+    AsyncFuncImpl::SetThreadInitFunc(InitAllocatorThreadLocal, NULL);
+  }
+  return allocatorInitList;
+}
+
+void InitAllocatorThreadLocal(void *arg /* = NULL */) {
+  for (std::vector<AllocatorThreadLocalInit>::iterator it =
+      GetAllocatorInitList().begin();
+      it != GetAllocatorInitList().end(); it++) {
+    (*it)();
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // helpers

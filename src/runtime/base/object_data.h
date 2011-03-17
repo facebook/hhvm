@@ -414,6 +414,10 @@ public:
     return m_get();
   }
 
+  ObjectAllocatorBase *getNoCheck() const {
+    return m_get();
+  }
+
 private:
   ObjectAllocatorBase *(*m_get)(void);
 };

@@ -161,6 +161,15 @@ public:
     m_autoDelete = true;
   }
 
+  static void SetThreadInitFunc(PFN_THREAD_FUNC* func, void *arg) {
+    s_initFunc = func;
+    s_initFuncArg = arg;
+  }
+
+  static PFN_THREAD_FUNC* GetThreadInitFunc() {
+    return s_initFunc;
+  }
+
 private:
   Synchronizable m_stopMonitor;
   bool m_stopped;
@@ -168,6 +177,8 @@ private:
 
   void *m_obj;
   PFN_THREAD_FUNC *m_func;
+  static PFN_THREAD_FUNC *s_initFunc;
+  static void* s_initFuncArg;
   pthread_t m_threadId;
   bool m_exceptioned;
   Exception m_exception; // exception was thrown and thread was terminated
@@ -176,6 +187,9 @@ private:
    * Called by ThreadFunc() to delegate the work.
    */
   void threadFuncImpl() {
+    if (s_initFunc) {
+      s_initFunc(s_initFuncArg);
+    }
     try {
       m_func(m_obj);
     } catch (Exception &e) {

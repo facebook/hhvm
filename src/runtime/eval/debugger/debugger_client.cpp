@@ -1398,28 +1398,39 @@ DebuggerCommandPtr DebuggerClient::xend(DebuggerCommand *cmd) {
 }
 
 DebuggerCommandPtr DebuggerClient::send(DebuggerCommand *cmd, int expected) {
+  const char *func = "DebuggerClient::send()";
+
   if (cmd->send(m_machine->m_thrift)) {
     DebuggerCommandPtr res;
-    if (expected) {
-      while (!DebuggerCommand::Receive(m_machine->m_thrift, res,
-                                       "DebuggerClient::send()")) {
+    if (!expected) {
+      return res;
+    }
+
+    while (true) {
+      while (!DebuggerCommand::Receive(m_machine->m_thrift, res, func)) {
         if (m_stopped) throw DebuggerClientExitException();
       }
-      if (res) {
-        if (res->is((DebuggerCommand::Type)expected)) {
-          return res;
-        }
-        Logger::Error("DebuggerClient::send(): unexpected return: %d",
-                      res->getType());
-        throw DebuggerProtocolException();
-      } else {
+      if (!res) {
         Logger::Error("Unable to communicate with server. Server's down?");
         throw DebuggerServerLostException();
       }
-    } else {
-      return res;
+      if (res->is((DebuggerCommand::Type)expected)) {
+        return res;
+      }
+
+      if (!res->is(DebuggerCommand::KindOfInterrupt)) {
+        Logger::Error("%s: unexpected return: %d", func, res->getType());
+        throw DebuggerProtocolException();
+      }
+
+      // eval() can cause more breakpoints
+      if (!res->onClient(this) || !console()) {
+        Logger::Error("%s: unable to process %d", func, res->getType());
+        throw DebuggerProtocolException();
+      }
     }
   }
+
   throw DebuggerProtocolException();
 }
 

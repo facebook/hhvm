@@ -240,6 +240,11 @@ public:
   void setFileOrClassHeader(bool value) { m_inFileOrClassHeader = value; }
   bool isFileOrClassHeader() { return m_inFileOrClassHeader; }
 
+  void beginHoistedClasses();
+  void endHoistedClasses();
+  void collectHoistedClasses(bool flag);
+  void addHoistedClass(const std::string &cls);
+  bool checkHoistedClass(const std::string &cls);
 private:
   std::string m_filename;
   Stream m_curStream;
@@ -259,6 +264,8 @@ private:
   bool m_inFileOrClassHeader;
   bool m_inNamespace;
   int m_localId[StreamCount];
+  std::set<std::string> *m_hoistedClasses;
+  bool m_collectHoistedClasses;
 
   static int s_idLambda;
   std::map<std::string, int> m_idCounters;

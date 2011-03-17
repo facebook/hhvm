@@ -63,7 +63,7 @@ else
 OS = fedora
 endif
 
-GCC_VERSION := $(shell gcc --version | head -1 | cut -d ' ' -f3)
+GCC_VERSION := $(shell gcc --version | sed -e '1!d' -e 's%^.*LLVM.*$$%gcc x 4.4.0%' -e 's%^gcc \S\+ \(\S\+\).*$$%\1%')
 
 ###############################################################################
 # Directories an command line switches
@@ -121,9 +121,21 @@ ALL_SOURCES += \
   $(GENERATED_SOURCES) \
   $(ASM_SOURCES)
 
+ifdef USE_PIC_ONLY
+pic_objects = $(1)
+CPPFLAGS += -fPIC
+else
+ifeq ($(origin USE_NO_PIC), file)
+pic_objects =
+else
+pic_objects = $(patsubst %.o, %.pic.o, $(1))
+endif # USE_NO_PIC
+endif # USE_PIC_ONLY
+
 INTERMEDIATE_FILES += $(GENERATED_SOURCES) time_build.out
 SOURCES += $(filter-out $(EXCLUDES), $(ALL_SOURCES))
 OBJECTS += $(addprefix $(OUT_DIR),$(patsubst %.S, %.o, $(patsubst %.cpp, %.o, $(SOURCES:.c=.o))))
+PIC_OBJECTS = $(call pic_objects, $(OBJECTS))
 OBJECT_DIR_DEPS := $(if $(OUT_DIR),$(addsuffix .mkdir, \
 	$(sort $(dir $(OBJECTS)))))
 OBJECT_DIRS_REQUIRED := $(filter-out $(wildcard $(OBJECT_DIR_DEPS)), \
@@ -135,8 +147,6 @@ endif
 STATIC_LIB = $(LIB_DIR)/lib$(PROJECT_NAME).a
 SHARED_LIB = $(LIB_DIR)/lib$(PROJECT_NAME).so
 APP_TARGET = $(OUT_TOP)$(PROJECT_NAME)
-
-SHARED_LIB_GD = $(LIB_DIR)/lib$(PROJECT_NAME)_gd.so
 
 MONO_TARGETS = $(filter-out $(PROJECT_NAME), $(patsubst %.cpp, %, $(wildcard *.cpp)))
 
@@ -171,8 +181,8 @@ endif
 PREFIX := $(TIMECMD)$(if $(USE_CCACHE), ccache,$(if $(NO_DISTCC),, distcc))
 ICC_ARGS := -no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -wd68
 
-CXX := $(if $(USE_ICC),$(ICC)/bin/icpc $(ICC_ARGS),g++)
-CC = $(if $(USE_ICC),$(ICC)/bin/icc $(ICC_ARGS),gcc)
+CXX := $(if $(USE_LLVM), /data/llvm/bin/g++, $(if $(USE_ICC),$(ICC)/bin/icpc $(ICC_ARGS),g++))
+CC = $(if $(USE_LLVM), /data/llvm/bin/gcc, $(if $(USE_ICC),$(ICC)/bin/icc $(ICC_ARGS),gcc))
 
 P_CXX = $(PREFIX) $(CXX)
 P_CC = $(PREFIX) $(CC)
@@ -180,7 +190,7 @@ P_CC = $(PREFIX) $(CC)
 LD = $(CXX)
 
 # Both $(CC) and $(CXX) will now generate .d dependency files.
-CPPFLAGS += -MMD -fPIC
+CPPFLAGS += -MMD
 
 # allowing "and", "or" to be re-defined
 CXXFLAGS += -fno-operator-names
@@ -346,10 +356,10 @@ ifdef GOOGLE_HEAP_PROFILER
 CPPFLAGS += -DGOOGLE_HEAP_PROFILER
 endif
 ifdef GOOGLE_TCMALLOC
-CPPFLAGS += -DGOOGLE_TCMALLOC
+CPP_MALLOC_FLAGS += -DGOOGLE_TCMALLOC
 endif
 ifdef USE_JEMALLOC
-CPPFLAGS += -DUSE_JEMALLOC
+CPP_MALLOC_FLAGS += -DUSE_JEMALLOC
 endif
 ifdef PROFILE
 CPPFLAGS += -pg
@@ -396,10 +406,6 @@ endif
 
 # facebook specific stuff
 CPPFLAGS += -DFACEBOOK -DHAVE_QUICKLZ
-
-ifdef TLS_GD
-CPPFLAGS += -DTLS_GLOBAL_DYNAMIC
-endif
 
 MYSQL_UNIX_SOCK_ADDR := $(shell mysql_config --socket)
 ifneq ($(MYSQL_UNIX_SOCK_ADDR), "")
@@ -639,7 +645,9 @@ endif
 
 define COMPILE_IT
 $(ECHO_COMPILE)
-$(CV)$(1) -c $(if $(OUT_TOP),-I$(OUT_TOP)src) $(CPPFLAGS) $(2) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
+$(CV)$(1) -c $(if $(OUT_TOP),-I$(OUT_TOP)src) \
+ $(if $(filter %.pic.o,$@),-fPIC,$(CPP_MALLOC_FLAGS)) \
+ $(CPPFLAGS) $(2) -o $@ -MT $@ -MF $(patsubst %.o, %.d, $@) $<
 endef
 
 define PREPROCESS_IT
@@ -654,6 +662,7 @@ $(LV)$(LD_CMD) -o $@ $(LDFLAGS) $(filter %.o,$^) $(LIBS)
 endef
 
 OBJECT_FILES = $(addprefix $(OUT_DIR),$(patsubst %.$(2),%.o,$(1)))
+PIC_OBJECT_FILES = $(addprefix $(OUT_DIR),$(patsubst %.$(2),%.pic.o,$(1)))
 PREPROCESSED_FILES = $(addprefix $(OUT_DIR),$(patsubst %.$(2),%.cpp.E,$(1)))
 
 ifdef NOT_NOW
@@ -679,9 +688,26 @@ $(call OBJECT_FILES,$(GENERATED_CPP_SOURCES),c): $(OUT_DIR)%.o:%.c
 $(call OBJECT_FILES,$(ASM_SOURCES),S): $(OUT_DIR)%.o:%.S
 	$(call COMPILE_IT,$(P_CC:distcc=),$(OPT))
 
+$(call PIC_OBJECT_FILES,$(CXX_NOOPT_SOURCES) $(GENERATED_CXX_NOOPT_SOURCES),cpp): $(OUT_DIR)%.pic.o:%.cpp
+	$(call COMPILE_IT,$(P_CXX),$(CXXFLAGS))
+
+$(call PIC_OBJECT_FILES,$(CXX_SOURCES) $(GENERATED_CXX_SOURCES),cpp): $(OUT_DIR)%.pic.o:%.cpp
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
+
+$(call PIC_OBJECT_FILES,$(C_SOURCES) $(GENERATED_C_SOURCES),c): $(OUT_DIR)%.pic.o:%.c
+	$(call COMPILE_IT,$(P_CC),$(OPT))
+
+$(call PIC_OBJECT_FILES,$(GENERATED_CPP_SOURCES),c): $(OUT_DIR)%.pic.o:%.c
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
+
+$(call PIC_OBJECT_FILES,$(ASM_SOURCES),S): $(OUT_DIR)%.pic.o:%.S
+	$(call COMPILE_IT,$(P_CC:distcc=),$(OPT))
+
 $(OUT_DIR)%.o:$(OUT_DIR)%.cpp
 	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
 
+$(OUT_DIR)%.pic.o:$(OUT_DIR)%.cpp
+	$(call COMPILE_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
 
 $(OUT_DIR)%.cpp.E:$(OUT_DIR)%.cpp
 	$(call PREPROCESS_IT,$(P_CXX),$(OPT) $(CXXFLAGS))
@@ -721,15 +747,17 @@ SUB_INTERMEDIATE_FILES = $(INTERMEDIATE_FILES)
 	$(V)$(MAKE) $(NO_PRINT) -f $(PROJECT_ROOT)/src/default.mk $@
 
 $(OBJECTS): $(GENERATED_SOURCES)
+$(PIC_OBJECTS): $(GENERATED_SOURCES)
 
-.PHONY: objects
+.PHONY: objects picobjects
 objects: $(OBJECTS) quiet
+picobjects: $(PIC_OBJECTS) quiet
 
 ifdef SHOW_LINK
 
-$(SHARED_LIB) $(SHARED_LIB_GD): $(OBJECTS)
+$(SHARED_LIB): $(PIC_OBJECTS)
 	$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,$(notdir $@) \
-			$(SO_LDFLAGS) -o $@ $(OBJECTS) $(EXTERNAL)
+			$(SO_LDFLAGS) -o $@ $(PIC_OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)
 	$(AR_CMD) $@ $(OBJECTS) $(ADDITIONAL_OBJS)
@@ -739,10 +767,10 @@ $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 
 else
 
-$(SHARED_LIB) $(SHARED_LIB_GD): $(OBJECTS)
+$(SHARED_LIB): $(PIC_OBJECTS)
 	@echo 'Linking $@ ...'
 	$(V)$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,$(notdir $@) \
-		$(SO_LDFLAGS) -o $@ $(OBJECTS) $(EXTERNAL)
+		$(SO_LDFLAGS) -o $@ $(PIC_OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)
 	@echo 'Linking $@ ...'
@@ -781,7 +809,7 @@ $(PROGRAMS): % : %-obj $(LIB_TARGETS)
 	$(V)$(MAKE) $(NO_PRINT) -C $@
 
 $(addsuffix -obj, $(PROGRAMS) $(LIB_TARGETS)):
-	$(V)$(MAKE) $(NO_PRINT) -C $(@:-obj=) objects
+	$(V)$(MAKE) $(NO_PRINT) -C $(@:-obj=) objects picobjects
 
 .PHONY: report
 report:

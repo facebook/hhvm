@@ -223,6 +223,7 @@ StatementPtr Parser::ParseFile(const char *fileName,
 Parser::Parser(Scanner &scanner, const char *fileName,
                vector<StaticStatementPtr> &statics)
     : ParserBase(scanner, fileName), m_staticStatements(statics) {
+  m_pendingStatements.push_back(vector<StatementPtr>());
 }
 
 void Parser::error(const char* fmt, ...) {
@@ -410,6 +411,18 @@ void Parser::onSimpleVariable(Token &out, Token &var) {
       idx = peekFunc()->declareVariable(var.text());
     }
     out->exp() = NEW_EXP(Variable, Name::fromString(this, var.text()), idx);
+  }
+}
+
+void Parser::onSynthesizedVariable(Token &out, Token &var) {
+  out.reset();
+  if (var.text() == "this" && haveClass()) {
+    out->exp() = NEW_EXP0(This);
+  } else {
+    // Synthesized variables are essentially like normal simple variables,
+    // but they are always looked up by the name, becasue they might have
+    // been synthesized out of its containing function.
+    out->exp() = NEW_EXP(Variable, Name::fromString(this, var.text()), -1);
   }
 }
 
@@ -956,6 +969,7 @@ void Parser::onFunctionStart(Token &name) {
                                        m_scanner.detachDocComment());
   m_hasCallToGetArgs.push_back(false);
   m_foreaches.push_back(0);
+  m_pendingStatements.push_back(vector<StatementPtr>());
   pushFunc(func);
 }
 
@@ -968,6 +982,7 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
   m_foreaches.pop_back();
+  m_pendingStatements.pop_back();
 
   if (func->hasYield()) {
     string closureName = getClosureName();
@@ -978,8 +993,10 @@ void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
     StatementListStatementPtr body = stmt->getStmtList();
     func->init(this, ref.num(), new_params->params(), body, hasCallToGetArgs);
 
-    out.reset();
-    out->stmt() = func;
+    ASSERT(!m_pendingStatements.empty());
+    vector<StatementPtr> &pending = m_pendingStatements.back();
+    pending.push_back(func);
+
     create_generator(this, out, params, name, closureName, NULL, NULL,
                      hasCallToGetArgs);
 
@@ -1087,6 +1104,7 @@ void Parser::onMethodStart(Token &name, Token &modifiers) {
                                        m_scanner.detachDocComment());
   m_hasCallToGetArgs.push_back(false);
   m_foreaches.push_back(0);
+  m_pendingStatements.push_back(vector<StatementPtr>());
   pushFunc(func);
 }
 
@@ -1104,6 +1122,7 @@ void Parser::onMethod(Token &out, Token &modifiers, Token &ret, Token &ref,
   bool hasCallToGetArgs = m_hasCallToGetArgs.back();
   m_hasCallToGetArgs.pop_back();
   m_foreaches.pop_back();
+  m_pendingStatements.pop_back();
 
   if (ms->hasYield()) {
     string closureName = getClosureName();
@@ -1228,6 +1247,15 @@ void Parser::addStatement(Token &out, Token &stmts, Token &new_stmt) {
   ASSERT(out->getStmtList());
   if (new_stmt->stmt()) {
     out->getStmtList()->add(new_stmt->stmt());
+  }
+
+  ASSERT(!m_pendingStatements.empty());
+  vector<StatementPtr> &pending = m_pendingStatements.back();
+  if (!pending.empty()) {
+    for (unsigned i = 0; i < pending.size(); i++) {
+      out->getStmtList()->add(pending[i]);
+    }
+    pending.clear();
   }
 }
 

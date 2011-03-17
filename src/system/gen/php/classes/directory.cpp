@@ -297,7 +297,7 @@ Variant c_Directory::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   return (self->t_rewind(), null);
 }
 bool c_Directory::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 1:
@@ -335,21 +335,6 @@ c_Directory *c_Directory::create(Variant v_path) {
   CountableHelper h(this);
   init();
   t___construct(v_path);
-  return this;
-}
-ObjectData *c_Directory::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_Directory::dynConstruct(CArrRef params) {

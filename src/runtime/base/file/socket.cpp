@@ -42,7 +42,7 @@ public:
   int m_lastErrno;
 };
 
-IMPLEMENT_REQUEST_LOCAL(SocketData, s_socket_data);
+IMPLEMENT_STATIC_REQUEST_LOCAL(SocketData, s_socket_data);
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors and destructor
@@ -92,8 +92,9 @@ bool Socket::close() {
 }
 
 bool Socket::closeImpl() {
+  s_file_data->m_pcloseRet = 0;
   if (valid() && !m_closed) {
-    ::close(m_fd);
+    s_file_data->m_pcloseRet = ::close(m_fd);
     m_closed = true;
   }
   File::closeImpl();

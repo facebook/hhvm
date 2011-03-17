@@ -51,6 +51,7 @@ public:
 private:
   ExpressionPtr m_source;
   std::vector<CaseStatementPtr> m_cases;
+  bool m_simpleVar;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

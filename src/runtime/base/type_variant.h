@@ -135,11 +135,16 @@ class Variant {
   Variant(double  v) : _count(0), m_type(KindOfDouble ) { m_data.dbl = v;}
 
   Variant(litstr  v);
-  Variant(const std::string & v);
-  Variant(const StaticString & v) : _count(0), m_type(KindOfStaticString) {
+  Variant(const std::string &v);
+  Variant(const StaticString &v) : _count(0), m_type(KindOfStaticString) {
     StringData *s = v.get();
     ASSERT(s);
     m_data.pstr = s;
+  }
+  Variant(const StaticArray &v) : _count(0), m_type(KindOfArray) {
+    ArrayData *a = v.get();
+    ASSERT(a);
+    m_data.parr = a;
   }
 
   Variant(CStrRef v);
@@ -151,10 +156,7 @@ class Variant {
   Variant(Variant *v);
 
   template<typename T>
-  Variant(const SmartObject<T> &v) {
-    setUninitNull();
-    set(v);
-  }
+  Variant(const SmartObject<T> &v) : _count(0) { init(v.get()); }
 
   inline ALWAYS_INLINE void VariantHelper(CVarRef v) {
     setUninitNull();
@@ -359,20 +361,12 @@ class Variant {
   Variant &operator=(CVarRef v) {
     return assign(v);
   }
-  Variant &operator=(const StaticString & v) {
-    if (m_type != KindOfVariant) {
-      set(v);
-    } else {
-      m_data.pvar->set(v);
-    }
+  Variant &operator=(const StaticString &v) {
+    set(v);
     return *this;
   }
   template<typename T> Variant &operator=(const T &v) {
-    if (m_type != KindOfVariant) {
-      set(v);
-    } else {
-      m_data.pvar->set(v);
-    }
+    set(v);
     return *this;
   }
 
@@ -499,9 +493,9 @@ class Variant {
     }
     return toStringHelper();
   }
-  Array  toArray  (bool warn = false) const {
+  Array  toArray  () const {
     if (m_type == KindOfArray) return m_data.parr;
-    return toArrayHelper(warn);
+    return toArrayHelper();
   }
   Object toObject () const {
     if (m_type == KindOfObject) return m_data.pobj;
@@ -893,7 +887,7 @@ class Variant {
     // Wrap into a referenceable form, if it isn't already.
     if (m_type != KindOfVariant) {
       Variant *shared = NEW(Variant)();
-      shared->bind(*this);
+      shared->bindNoVariant(*this);
       shared->_count = 1;
 
       _count = 0;
@@ -1015,6 +1009,22 @@ class Variant {
     return set(v.get());
   }
 
+  // only called from constructor
+  void init(ObjectData *v);
+
+#ifdef FAST_REFCOUNT_FOR_VARIANT
+  void bindNoVariant(CVarRef v) {
+    ASSERT(v.m_type != KindOfVariant);
+    m_type = v.m_type;
+    m_data.num = v.m_data.num;
+    if (IS_REFCOUNTED_TYPE(v.m_type)) {
+      m_data.pvar->incRefCount();
+    } else if (m_type == KindOfUninit) {
+      m_type = KindOfNull; // drop uninit
+    }
+  }
+#endif
+
   // Internal helper for weakly binding a variable. m_type should be viewed
   // as KindOfNull and for complex types the old data already released.
   void bind(CVarRef v) {
@@ -1041,7 +1051,7 @@ class Variant {
         m_type = KindOfNull;
       }
     } else {
-      bind(*var);
+      bindNoVariant(*var);
     }
 #else
     switch (v.m_type) {
@@ -1080,7 +1090,7 @@ class Variant {
       break;
     }
     case KindOfVariant:
-      bind(*v.m_data.pvar);
+      bindNoVariant(*v.m_data.pvar);
       break;
     default:
       ASSERT(false);
@@ -1109,7 +1119,7 @@ class Variant {
     // we have to wrap up v into a sharable form
     if (v.m_type != KindOfVariant) {
       Variant *shared = NEW(Variant)();
-      shared->bind(v);
+      shared->bindNoVariant(v);
       const_cast<Variant&>(v).strongBind(shared);
     }
     // then we can share v.m_data.pvar
@@ -1181,7 +1191,7 @@ class Variant {
   int64  toInt64Helper(int base = 10) const;
   double toDoubleHelper() const;
   String toStringHelper() const;
-  Array  toArrayHelper(bool warn) const;
+  Array  toArrayHelper() const;
   Object toObjectHelper() const;
 
   static void compileTimeAssertions() {

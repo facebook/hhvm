@@ -85,7 +85,8 @@ Variant f_array_filter(CVarRef input, CVarRef callback /* = null_variant */) {
     return ArrayUtil::Filter(arr_input);
   }
   MethodCallPackage mcp;
-  if (!get_user_func_handler(callback, mcp)) {
+  String classname, methodname;
+  if (!get_user_func_handler(callback, mcp, classname, methodname)) {
     return null;
   }
   return ArrayUtil::Filter(arr_input, filter_func, &mcp);
@@ -141,7 +142,8 @@ Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv /* 
     inputs = inputs.merge(_argv);
   }
   MethodCallPackage mcp;
-  if (!get_user_func_handler(callback, mcp)) {
+  String classname, methodname;
+  if (!get_user_func_handler(callback, mcp, classname, methodname)) {
     return ArrayUtil::Map(inputs, map_func, NULL);
   }
   return ArrayUtil::Map(inputs, map_func, &mcp);
@@ -349,7 +351,8 @@ Variant f_array_reduce(CVarRef input, CVarRef callback,
   }
   CArrRef arr_input = input.toArrNR();
   MethodCallPackage mcp;
-  if (!get_user_func_handler(callback, mcp)) {
+  String classname, methodname;
+  if (!get_user_func_handler(callback, mcp, classname, methodname)) {
     return null;
   }
   return ArrayUtil::Reduce(arr_input, reduce_func, &mcp, initial);
@@ -430,7 +433,8 @@ bool f_array_walk_recursive(Variant input, CVarRef funcname,
     return false;
   }
   MethodCallPackage mcp;
-  if (!get_user_func_handler(funcname, mcp)) {
+  String classname, methodname;
+  if (!get_user_func_handler(funcname, mcp, classname, methodname)) {
     return null;
   }
   PointerSet seen;
@@ -444,7 +448,8 @@ bool f_array_walk(Variant input, CVarRef funcname,
     return false;
   }
   MethodCallPackage mcp;
-  if (!get_user_func_handler(funcname, mcp)) {
+  String classname, methodname;
+  if (!get_user_func_handler(funcname, mcp, classname, methodname)) {
     return null;
   }
   ArrayUtil::Walk(ref(input), walk_func, &mcp, false, NULL, userdata);

@@ -22,6 +22,7 @@
 #include <runtime/ext/soap/sdl.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/util/exceptions.h>
+#include <runtime/base/util/http_client.h>
 #include <util/lock.h>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -91,7 +92,7 @@ private:
   sdlCache m_mem_cache; // URL => sdl
 
 public:
-  sdl *get_sdl(const char *uri, long cache_wsdl);
+  sdl *get_sdl(const char *uri, long cache_wsdl, HttpClient *http = NULL);
   encodeMap *register_typemap(encodeMapPtr typemap);
   void register_encoding(xmlCharEncodingHandlerPtr encoding);
 
@@ -131,7 +132,7 @@ private:
   std::vector<encodeMapPtr> m_typemaps;
   std::vector<xmlCharEncodingHandlerPtr> m_encodings;
 
-  sdlPtr get_sdl_impl(const char *uri, long cache_wsdl);
+  sdlPtr get_sdl_impl(const char *uri, long cache_wsdl, HttpClient *http);
   void reset();
 };
 

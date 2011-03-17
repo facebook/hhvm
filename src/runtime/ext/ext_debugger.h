@@ -40,7 +40,6 @@ class c_DebuggerProxy : public ExtObjectData {
   END_CLASS_MAP(DebuggerProxy)
   DECLARE_CLASS(DebuggerProxy, DebuggerProxy, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_DebuggerProxy();
@@ -86,7 +85,6 @@ class c_DebuggerClient : public ExtObjectData {
   END_CLASS_MAP(DebuggerClient)
   DECLARE_CLASS(DebuggerClient, DebuggerClient, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_DebuggerClient();

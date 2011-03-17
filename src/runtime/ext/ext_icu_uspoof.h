@@ -50,7 +50,6 @@ class c_SpoofChecker : public ExtObjectData {
   END_CLASS_MAP(SpoofChecker)
   DECLARE_CLASS(SpoofChecker, SpoofChecker, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_SpoofChecker();

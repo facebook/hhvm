@@ -78,13 +78,6 @@ endif
 
 # Only use jemalloc *or* tcmalloc.
 ifdef USE_JEMALLOC
-ifdef TLS_GD
-# Clear USE_JEMALLOC, since it may have already been set by the parent make.
-# Ideally we would actually undefine USE_JEMALLOC:
-#   override undefine USE_JEMALLOC
-# However, the undefine feature is only available in GNU make 3.82 and later.
-override USE_JEMALLOC =
-endif
 override NO_TCMALLOC = 1
 override GOOGLE_TCMALLOC =
 endif # USE_JEMALLOC
@@ -96,11 +89,6 @@ ifndef NO_TCMALLOC
 
 # Whether to link with tcmalloc.a
 GOOGLE_TCMALLOC = 1
-endif
-
-ifdef TLS_GD
-# See related comments above re: USE_JEMALLOC.
-override GOOGLE_TCMALLOC =
 endif
 
 # For GNU profiler - gprof.
@@ -126,10 +114,10 @@ ifndef OUTPUT_ROOT
 OUTPUT_ROOT := bin
 endif
 OUT_EXTS := \
+	$(if $(USE_LLVM),-llvm) \
 	$(if $(USE_ICC),-icc) \
 	$(if $(USE_JEMALLOC),-je) \
 	$(if $(NO_TCMALLOC),,-tc) \
-	$(if $(TLS_GD),-gd) \
 	$(if $(PROFILE),-pg) \
 	$(if $(DEBUG),-g,-O)
 
@@ -173,6 +161,15 @@ ifndef HPHP_LIB
 HPHP_LIB := $(ABS_PROJECT_ROOT)/bin
 endif
 
+ifdef SHARED
+# Clear USE_JEMALLOC, since it may have already been set by the parent make.
+# Ideally we would actually undefine USE_JEMALLOC:
+#   override undefine USE_JEMALLOC
+# However, the undefine feature is only available in GNU make 3.82 and later.
+override USE_JEMALLOC =
+override GOOGLE_TCMALLOC =
+endif
+
 MKDIR = mkdir -p
 RMDIR = rm -fR
 EXT_DIR = $(PROJECT_ROOT)/external-$(OS)
@@ -182,6 +179,6 @@ EXT_DIR = $(PROJECT_ROOT)/external-$(OS)
 	$(V)touch $@
 
 dirinfo:
-	@echo $(ABS_PROJECT_ROOT) $(OUT_TOP) $(if $(PROFILE),P)$(if $(DEBUG),D,R)$(if $(USE_ICC),-I)
+	@echo $(ABS_PROJECT_ROOT) $(OUT_TOP) $(if $(PROFILE),P)$(if $(DEBUG),D,R)$(if $(USE_ICC),-I)$(if $(USE_LLVM),-L)
 
 endif

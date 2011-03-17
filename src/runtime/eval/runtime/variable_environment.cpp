@@ -147,10 +147,9 @@ const int SuperGlobalInitializer::s_num =
 static SuperGlobalInitializer g_sinit;
 
 FuncScopeVariableEnvironment::
-FuncScopeVariableEnvironment(const FunctionStatement *func, int argc)
-  : m_func(func), m_staticEnv(NULL), m_argc(argc),
-    m_argStart(RequestEvalState::argStack().pos()),
-    m_argPop(false) {
+FuncScopeVariableEnvironment(const FunctionStatement *func)
+  : m_func(func), m_staticEnv(NULL), m_argc(0),
+    m_argStart(RequestEvalState::argStack().pos()) {
 
   const Block::VariableIndices &vi = func->varIndices();
   const vector<string> &vars = func->variables();
@@ -181,9 +180,7 @@ FuncScopeVariableEnvironment(const FunctionStatement *func, int argc)
 }
 
 FuncScopeVariableEnvironment::~FuncScopeVariableEnvironment() {
-  if (m_argPop) {
-    RequestEvalState::argStack().pop(m_argc);
-  }
+  RequestEvalState::argStack().pop(m_argc);
   ASSERT(RequestEvalState::argStack().pos() == m_argStart);
 }
 
@@ -247,8 +244,8 @@ ObjectData *FuncScopeVariableEnvironment::getContinuation() const {
 }
 
 MethScopeVariableEnvironment::
-MethScopeVariableEnvironment(const MethodStatement *meth, int argc)
-  : FuncScopeVariableEnvironment(meth, argc), m_cls(meth->getClass()) {}
+MethScopeVariableEnvironment(const MethodStatement *meth)
+  : FuncScopeVariableEnvironment(meth), m_cls(meth->getClass()) {}
 
 String MethScopeVariableEnvironment::currentContext() const {
   return m_cls->name();

@@ -1503,10 +1503,8 @@ void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
                       ->getParams(), true);
   cg.setContext(context);
   cg_printf(");\n");
-  cg_printf("public: ObjectData *dynCreate(CArrRef params, bool init = true);"
-            "\n");
+  cg_printf("public: void dynConstruct(CArrRef params);\n");
   if (isDynamic()) {
-    cg_printf("public: void dynConstruct(CArrRef params);\n");
     cg_printf("public: void getConstructor(MethodCallPackage &mcp);\n");
     if (cg.getOutput() == CodeGenerator::SystemCPP ||
         Option::EnableEval >= Option::LimitedEval) {
@@ -1540,27 +1538,14 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
   cg_printf(");\n");
   cg_printf("return this;\n");
   cg_indentEnd("}\n");
-  cg_indentBegin("ObjectData *%s%s::dynCreate(CArrRef params, "
-                 "bool construct /* = true */) {\n",
+  cg_indentBegin("void %s%s::dynConstruct(CArrRef params) {\n",
                  Option::ClassPrefix, clsName);
-  cg_printf("init();\n");
-  cg_indentBegin("if (construct) {\n");
-  cg_printf("CountableHelper h(this);\n");
   OutputCPPDynamicInvokeCount(cg);
   outputCPPDynamicInvoke(cg, ar, Option::MethodPrefix,
                          cg.formatLabel(consName).c_str(),
                          true, false, false, NULL, true);
   cg_indentEnd("}\n");
-  cg_printf("return this;\n");
-  cg_indentEnd("}\n");
   if (isDynamic() || isSepExtension()) {
-    cg_indentBegin("void %s%s::dynConstruct(CArrRef params) {\n",
-                   Option::ClassPrefix, clsName);
-    OutputCPPDynamicInvokeCount(cg);
-    outputCPPDynamicInvoke(cg, ar, Option::MethodPrefix,
-                           cg.formatLabel(consName).c_str(),
-                           true, false, false, NULL, true);
-    cg_indentEnd("}\n");
     cg_indentBegin("void %s%s::getConstructor(MethodCallPackage &mcp) {\n",
                    Option::ClassPrefix, clsName);
     cg_printf("mcp.ci = &%s%s::%s%s;\n", Option::ClassPrefix, clsName,

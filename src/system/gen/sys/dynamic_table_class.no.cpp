@@ -32,331 +32,333 @@ namespace HPHP {
 #define M(x, y) MethodIndex(x, y)
 #define H(x,y,z) MethodIndexHMap(#x,MethodIndex(y,z))
 #define Z MethodIndexHMap(0,MethodIndex(0,0))
-const unsigned g_methodIndexHMapSizeSys = 966;
+const unsigned g_methodIndexHMapSizeSys = 972;
 extern const MethodIndexHMap g_methodIndexHMapSys [];
 const MethodIndexHMap g_methodIndexHMapSys [g_methodIndexHMapSizeSys] = {
+Z, Z, H(createElement,98,1), 
 Z, Z, Z, 
+Z, H(serialize,392,1), H(contains,441,1), 
+H(geterrormessage,45,1), Z, Z, 
+H(getTimezone,144,1), Z, Z, 
+H(appendChild,61,1), Z, H(getOwner,202,1), 
+H(setFlags,17,1), H(getStackTrace,163,1), Z, 
+Z, H(lasterrorcode,382,1), Z, 
+Z, H(__gettypes,413,1), Z, 
+H(getServerList,264,1), Z, H(onAutoComplete,178,1), 
+Z, H(isDefaultNamespace,58,1), H(schemaValidate,92,1), 
 Z, Z, Z, 
-H(invoke,348,1), H(getDelayedByKey,255,1), H(setserverparams,229,1), 
-H(eof,427,1), H(getFilename,197,1), H(printFrame,161,1), 
-H(quote,279,1), H(helpBody,166,1), H(rowcount,292,1), 
-Z, Z, H(escapestring,374,1), 
+Z, H(hasChildren,302,1), Z, 
+H(setoptimeout,237,1), H(getProperties,318,1), Z, 
+H(endDocument,463,1), H(getByKey,260,1), H(createAttribute,106,1), 
+Z, Z, H(getClassNames,343,1), 
+H(startDocument,450,1), H(getExtensionName,321,1), Z, 
+H(createaggregate,378,1), H(getPathname,187,1), Z, 
+Z, H(columncount,292,1), Z, 
 Z, Z, Z, 
-Z, H(geterrorcode,39,1), H(increment,230,1), 
-H(offsetUnset,12,1), Z, Z, 
-H(getCTime,192,1), H(version,369,1), H(lastinsertrowid,372,1), 
-H(isFinal,312,1), Z, Z, 
-H(isArray,361,1), H(getINIEntries,339,1), H(getProperty,337,1), 
-Z, H(getExtensionName,318,1), H(isConstructor,354,1), 
-H(saveXML,89,1), H(setText,208,1), H(done,49,1), 
-Z, H(debugdumpparams,296,1), H(getNamedItem,128,1), 
-H(getATime,203,1), H(getTrace,32,1), Z, 
-Z, Z, H(getDocComment,325,1), 
-H(unserialize,388,1), Z, H(fetchobject,294,1), 
-Z, H(lookupPrefix,63,1), H(getInode,194,1), 
-H(getNumberOfRequiredParameters,342,1), H(getParentClass,319,1), Z, 
-H(addString,218,1), Z, Z, 
-H(print,162,1), Z, H(test,329,1), 
-H(getDocNamespaces,396,1), H(fetchcolumn,284,1), Z, 
-Z, H(fgets,431,1), H(__wakeup,275,1), 
-H(quit,165,1), H(detectAll,211,1), Z, 
-H(addCompletion,170,1), H(setattribute,43,1), Z, 
-H(getOwner,199,1), Z, Z, 
-Z, Z, H(addByKey,262,1), 
-H(writeElement,466,1), H(ftruncate,426,1), Z, 
+Z, H(getStaticProperties,333,1), H(addsoapheader,415,1), 
 Z, Z, Z, 
-Z, H(__isset,71,1), H(getTraceAsString,31,1), 
-Z, Z, H(getversion,239,1), 
-H(getGroup,185,1), Z, Z, 
+Z, H(getEncoding,216,1), H(setISODate,145,1), 
+Z, H(errorinfo,285,1), Z, 
+Z, Z, H(getNamedItem,132,1), 
+H(getATime,206,1), Z, Z, 
 Z, Z, Z, 
-H(setAttributeNode,124,1), H(query,132,1), Z, 
-Z, Z, H(getFunctions,338,1), 
-Z, Z, H(bindcolumn,287,1), 
-H(writeComment,450,1), Z, H(getDeclaringClass,353,1), 
-H(listIdentifiers,145,1), H(mapping,220,1), H(createAttribute,102,1), 
-H(getRealPath,190,1), H(getLanguage,215,1), Z, 
-Z, H(endDTDElement,473,1), H(getEndLine,309,1), 
-H(isFile,198,1), H(getMethods,301,1), Z, 
+Z, Z, H(listAbbreviations,150,1), 
+H(getPosition,363,1), Z, H(getNamespaces,396,1), 
+H(writeComment,453,1), Z, Z, 
+H(lastinsertrowid,375,1), Z, Z, 
+Z, H(implementsInterface,323,1), H(increment,233,1), 
+Z, H(getClass,361,1), Z, 
+H(getLinkTarget,191,1), H(isId,59,1), H(offsetExists,10,1), 
+H(isProtected,354,1), H(export,317,1), H(isPublic,358,1), 
+H(setOption,254,1), Z, Z, 
 Z, Z, Z, 
+H(__soapcall,407,1), H(relaxNGValidateSource,101,1), H(text,485,1), 
+Z, H(hasConstant,319,1), H(fgetc,432,1), 
+H(isStatic,355,1), Z, Z, 
+H(commit,280,1), Z, Z, 
+H(getValue,368,1), Z, H(escapestring,377,1), 
+Z, H(fault,419,1), H(getNumberOfRequiredParameters,345,1), 
+H(endPI,473,1), Z, Z, 
+Z, H(setAllowedLocales,442,1), H(args,173,1), 
+H(getCTime,195,1), H(isDir,204,1), Z, 
+H(writePI,466,1), H(setMultiByKey,267,1), Z, 
+Z, Z, Z, 
+Z, Z, H(newInstanceArgs,311,1), 
+Z, Z, H(getElementById,110,1), 
+Z, Z, H(offsetSet,13,1), 
+Z, Z, Z, 
+Z, Z, H(getlocale,44,1), 
+Z, H(removeAttributeNS,122,1), Z, 
+H(fgetcsv,424,1), H(__destruct,37,1), Z, 
+H(getstrength,40,1), H(getParameters,348,1), H(getDefaultValue,366,1), 
+H(__getlastresponse,412,1), H(hasAttributes,65,1), H(startElement,459,1), 
+Z, H(printFrame,165,1), H(getElementsByTagNameNS,87,1), 
+H(openURI,482,1), H(delete,243,1), Z, 
+Z, Z, Z, 
+H(getMTime,203,1), Z, H(argCount,152,1), 
+H(validate,86,1), Z, Z, 
+H(getversion,242,1), Z, Z, 
+H(hasFeature,131,1), H(createEntityReference,91,1), H(__construct,6,1), 
+H(getOption,262,1), Z, Z, 
+H(eof,430,1), H(open,379,1), Z, 
+Z, Z, H(update,55,1), 
+H(read,183,1), Z, Z, 
+Z, Z, H(createElementNS,99,1), 
+H(loadImages,225,1), H(current,7,1), Z, 
+H(replaceChild,64,1), Z, H(setstrength,41,1), 
+H(seek,21,1), H(registerXPathNamespace,395,1), H(loadDims,222,1), 
+H(returnsReference,350,1), H(schemaValidateSource,88,1), H(asort,20,1), 
+H(output,162,1), Z, Z, 
+H(setIDAttribute,124,1), H(getNamedItemNS,135,1), Z, 
+Z, H(flock,435,1), Z, 
+Z, H(closecursor,294,1), H(normalize,68,1), 
+H(isIterateable,305,1), H(setDate,141,1), H(paramcount,390,1), 
+H(isReadable,192,1), H(columnname,384,1), H(isDot,209,1), 
+H(addAttribute,393,1), H(addserver,230,1), H(isPrivate,353,1), 
+H(getUTF8,215,1), H(rollback,279,1), H(outputMemory,449,1), 
+H(fullEndElement,447,1), H(isSameNode,71,1), H(hasProperty,331,1), 
+H(isExecutable,207,1), H(loadHTMLFile,108,1), H(hasChildNodes,76,1), 
+H(unserialize,391,1), H(getConstructor,310,1), H(saveXML,93,1), 
+H(endDTDEntity,457,1), H(createDocument,129,1), H(asXML,398,1), 
+H(natsort,16,1), H(execute,296,1), H(getserverstatus,236,1), 
+H(isSupported,74,1), H(helpBody,170,1), Z, 
+H(print,166,1), Z, Z, 
+Z, H(getName,151,1), Z, 
 Z, H(uksort,18,1), Z, 
-H(getOption,259,1), Z, H(startElement,456,1), 
-Z, Z, H(isAbstract,335,1), 
 Z, Z, Z, 
+Z, Z, H(isInternal,339,1), 
+Z, Z, H(getcolumnmeta,288,1), 
+H(getCommand,159,1), Z, Z, 
+H(insertBefore,57,1), H(substringData,77,1), H(registerNamespace,139,1), 
+H(startAttributens,458,1), H(lasterrormsg,376,1), Z, 
+H(send,54,1), Z, Z, 
+Z, H(count,15,1), H(getDocComment,328,1), 
+H(getConfidence,217,1), H(getOffset,142,1), H(getVars,33,1), 
+H(saveHTMLFile,109,1), H(natcasesort,19,1), Z, 
+H(startDTDElement,461,1), H(__sleep,286,1), H(xend,157,1), 
+Z, Z, H(__dorequest,403,1), 
+Z, H(setclass,420,1), H(hasAttribute,117,1), 
 Z, Z, Z, 
-H(removeChild,68,1), H(fault,416,1), Z, 
+Z, H(close,182,1), Z, 
+Z, H(deleteData,81,1), Z, 
+Z, H(add,241,1), Z, 
+Z, H(version,372,1), Z, 
+Z, Z, H(cloneNode,63,1), 
+Z, H(getLabel,47,1), H(startPI,484,1), 
+Z, H(listIdentifiers,149,1), Z, 
+Z, Z, H(wrap,177,1), 
 Z, Z, Z, 
-H(reset,385,1), H(isDefault,366,1), Z, 
+H(getFileInfo,205,1), Z, Z, 
 Z, Z, Z, 
-H(relaxNGValidate,85,1), Z, Z, 
-H(getAttributeNS,117,1), H(attributes,399,1), H(importNode,96,1), 
-Z, Z, H(addsoapheader,412,1), 
-Z, H(startDTDAttlist,474,1), Z, 
-Z, Z, H(getModifiers,313,1), 
+H(startDTDEntity,451,1), H(setAccessible,370,1), H(__get,73,1), 
+Z, H(isPassedByReference,367,1), Z, 
+H(fpassthru,433,1), H(getSubPathname,300,1), H(addUrl,228,1), 
+H(quit,169,1), H(addfunction,414,1), Z, 
+H(isArray,364,1), Z, H(endAttribute,483,1), 
+Z, Z, H(getINIEntries,342,1), 
+H(next,1,1), H(endCData,452,1), H(fetchobject,297,1), 
 Z, Z, Z, 
-Z, Z, Z, 
-H(loadXML,100,1), H(deleteData,77,1), Z, 
-Z, Z, H(columnname,381,1), 
-Z, Z, Z, 
-H(removeAttribute,123,1), H(getDelayed,250,1), H(getServerList,261,1), 
-H(getstats,232,1), Z, Z, 
-Z, Z, Z, 
-Z, H(getMultiByKey,265,1), H(onServer,177,1), 
-H(isLocal,178,1), Z, Z, 
-H(flock,432,1), H(isId,55,1), Z, 
-Z, Z, H(compare,46,1), 
-Z, Z, Z, 
-Z, H(fwrite,434,1), H(offsetGet,11,1), 
-H(writeAttributeNS,462,1), H(next,1,1), Z, 
-Z, H(isValid,216,1), H(setTime,139,1), 
-Z, Z, Z, 
-Z, H(getOffset,138,1), Z, 
-H(getConstants,324,1), Z, Z, 
-H(delete,240,1), H(isWritable,182,1), Z, 
-Z, Z, Z, 
-Z, H(setInfoClass,187,1), H(getElementsByTagName,80,1), 
-Z, H(getDefaultProperties,331,1), H(getCsvControl,423,1), 
-H(getAttributeNode,119,1), H(argValue,157,1), H(isPublic,355,1), 
-H(tutorial,156,1), H(get,236,1), H(getTimezone,140,1), 
-H(invokeArgs,346,1), H(setMultiByKey,264,1), H(getstrength,40,1), 
-Z, Z, H(isInternal,336,1), 
-H(fullEndElement,444,1), H(replaceByKey,254,1), H(rollback,276,1), 
-H(startElementNS,457,1), H(rewind,9,1), Z, 
-H(openMemory,478,1), Z, Z, 
-Z, H(getConstructor,307,1), H(getSubPathname,297,1), 
-Z, Z, H(schemaValidate,88,1), 
-Z, H(save,101,1), H(isWhitespaceInElementContent,78,1), 
-H(splitText,79,1), H(contains,438,1), H(addChild,398,1), 
-Z, Z, Z, 
-Z, Z, H(startDTDEntity,448,1), 
-H(info,160,1), Z, H(__setcookie,403,1), 
-H(flush,243,1), Z, H(__getlastrequestheaders,406,1), 
-Z, Z, Z, 
-H(returnsReference,347,1), H(__set,58,1), Z, 
-Z, Z, Z, 
-Z, Z, H(offsetExists,10,1), 
-Z, H(createDocumentType,126,1), H(setAllowedLocales,439,1), 
-H(helpCmds,150,1), H(schemaValidateSource,84,1), Z, 
-Z, H(createfunction,371,1), H(__construct,6,1), 
-Z, Z, Z, 
-Z, Z, Z, 
-Z, Z, Z, 
-Z, Z, Z, 
-H(c14nfile,66,1), H(getParameters,345,1), Z, 
-H(createProcessingInstruction,90,1), H(getBasename,183,1), Z, 
-H(startDocument,447,1), Z, H(serialize,389,1), 
-Z, Z, H(__dorequest,400,1), 
-Z, H(key,2,1), Z, 
-Z, Z, H(evaluate,133,1), 
-H(onClient,176,1), H(setChecks,441,1), H(isnormalized,271,1), 
-H(getNodePath,65,1), Z, Z, 
-H(replaceData,76,1), H(getattribute,35,1), H(ask,151,1), 
-H(code,163,1), H(setIDAttributeNode,121,1), H(setobject,415,1), 
-Z, Z, Z, 
-H(getResultCode,247,1), Z, Z, 
-Z, Z, Z, 
-H(getSubPath,298,1), Z, Z, 
-Z, Z, Z, 
-Z, H(isSubclassOf,327,1), H(modify,143,1), 
-H(item,129,1), H(__sleep,283,1), Z, 
-Z, Z, Z, 
-H(getDefaultValue,363,1), Z, Z, 
-H(getFileInfo,202,1), H(setVars,34,1), H(fetcharray,384,1), 
-Z, H(hasAttributes,61,1), H(createDocument,125,1), 
-Z, Z, Z, 
-Z, Z, Z, 
-H(setstrength,41,1), Z, H(startAttribute,465,1), 
-H(isExecutable,204,1), H(getClass,358,1), H(getStaticProperties,330,1), 
-H(getPerms,181,1), Z, Z, 
-H(startCData,475,1), Z, H(update,51,1), 
-Z, H(normalizeDocument,108,1), H(setAttributeNodeNS,115,1), 
-H(errorcode,272,1), H(error,152,1), H(endDTDEntity,454,1), 
-H(getChildren,300,1), Z, Z, 
-Z, Z, Z, 
-Z, Z, Z, 
-Z, H(hasProperty,328,1), H(setISODate,141,1), 
-H(deleteByKey,258,1), H(lookupNamespaceUri,56,1), H(getPosition,360,1), 
-H(__setlocation,405,1), H(getByKey,257,1), H(bindparam,290,1), 
-Z, Z, H(begintransaction,280,1), 
-H(setDeclaredEncoding,209,1), H(argRest,171,1), H(fgetss,420,1), 
-Z, H(getStartLine,322,1), Z, 
-H(openURI,479,1), H(isPassedByReference,364,1), Z, 
-Z, H(xpath,391,1), H(isPrivate,350,1), 
-Z, Z, H(getCurrentLocation,172,1), 
-Z, H(getLineNo,52,1), Z, 
-H(isDefaultValueAvailable,357,1), Z, Z, 
-Z, Z, H(writeDTDAttlist,476,1), 
-Z, H(hasAttributeNS,114,1), H(setIDAttribute,120,1), 
-H(writePI,463,1), H(__init__,29,1), H(endAttribute,480,1), 
-H(addfunction,411,1), H(get_args,47,1), H(getAttributeNodeNS,112,1), 
-Z, Z, Z, 
-Z, Z, H(newInstance,305,1), 
-H(errorinfo,282,1), H(getExtension,306,1), H(startPI,481,1), 
-H(getFrame,167,1), H(outputMemory,446,1), H(args,169,1), 
-Z, Z, Z, 
-H(createTextNode,98,1), H(getName,147,1), H(__getlastrequest,401,1), 
-H(columntype,382,1), H(lasterrorcode,379,1), Z, 
-H(setfetchmode,288,1), H(columncount,289,1), H(appendXML,110,1), 
-H(fscanf,418,1), Z, Z, 
-Z, H(fseek,419,1), Z, 
-Z, Z, Z, 
-H(appendByKey,249,1), H(cas,268,1), H(endDTD,477,1), 
-Z, H(prependByKey,269,1), Z, 
-Z, H(setMulti,256,1), H(setValue,368,1), 
-H(validate,82,1), H(setTimezone,142,1), H(getEncoding,213,1), 
-H(setcompressthreshold,235,1), H(fpassthru,430,1), Z, 
-Z, H(detach,437,1), H(appendData,75,1), 
-Z, Z, H(decrement,231,1), 
-Z, Z, H(currentRef,270,1), 
-Z, Z, H(__setsoapheaders,402,1), 
-H(read,180,1), Z, Z, 
-Z, Z, Z, 
-Z, Z, Z, 
-H(getTransitions,144,1), Z, H(loadHTML,86,1), 
-Z, Z, H(openFile,205,1), 
-Z, H(loadHTMLFile,104,1), Z, 
-H(getClosure,349,1), H(isDir,201,1), Z, 
-H(listAbbreviations,146,1), Z, Z, 
-H(getcolumnmeta,285,1), Z, Z, 
-H(getValue,365,1), H(getSeverity,217,1), H(setpersistence,413,1), 
-H(addAttribute,390,1), H(writeDTD,453,1), H(hasFeature,127,1), 
-H(send,174,1), Z, Z, 
-Z, Z, Z, 
-Z, H(getNamedItemNS,131,1), Z, 
-H(argCount,148,1), Z, Z, 
-H(getStaticPropertyValue,303,1), Z, Z, 
-Z, H(addserver,227,1), Z, 
-Z, Z, H(exec,273,1), 
-H(saveHTMLFile,105,1), Z, Z, 
-H(sort,38,1), Z, Z, 
-H(createComment,107,1), Z, H(getPathInfo,191,1), 
-Z, H(getFlags,22,1), Z, 
-H(loadImages,222,1), H(createEntityReference,87,1), Z, 
-H(isProtected,351,1), Z, H(asort,20,1), 
-Z, Z, H(getArrayCopy,14,1), 
-Z, Z, H(endComment,452,1), 
-H(startAttributens,455,1), Z, Z, 
-H(create,42,1), Z, Z, 
-H(current,7,1), H(c14n,62,1), H(attach,436,1), 
-H(saveHTML,99,1), H(__gettypes,410,1), Z, 
-H(startDTD,471,1), H(endCData,449,1), Z, 
-H(detect,210,1), Z, H(set,228,1), 
-H(children,397,1), Z, Z, 
-H(fgetcsv,421,1), H(export,314,1), H(getNumberOfParameters,343,1), 
-Z, Z, Z, 
-H(execute,293,1), Z, Z, 
-H(connect,241,1), H(registerPHPFunctions,134,1), H(normalize,64,1), 
-H(__getlastresponseheaders,408,1), Z, H(getConfidence,214,1), 
-Z, H(getErrors,224,1), Z, 
-Z, H(getMaxLineLen,425,1), H(isDot,206,1), 
-H(valid,3,1), H(getSize,196,1), Z, 
-Z, Z, Z, 
-H(getLinkTarget,188,1), H(open,376,1), Z, 
-Z, H(getStackTrace,159,1), Z, 
-Z, H(setAccessible,367,1), Z, 
-Z, Z, Z, 
-H(output,158,1), H(__get,69,1), H(bindvalue,295,1), 
-H(setByKey,248,1), Z, Z, 
-Z, H(getVars,33,1), H(isReadable,189,1), 
-H(finalize,386,1), Z, Z, 
-H(getInterfaces,334,1), Z, H(writeAttribute,451,1), 
-Z, H(getserverstatus,233,1), H(isDefaultNamespace,54,1), 
-H(createElementNS,95,1), H(wrap,173,1), H(setMaxLineLen,424,1), 
-H(getMessage,25,1), Z, Z, 
-Z, Z, Z, 
-H(createDocumentFragment,109,1), Z, H(setclass,417,1), 
-H(getMethod,317,1), H(numcolumns,383,1), Z, 
-H(getPath,193,1), H(querysingle,380,1), H(getlocale,44,1), 
-H(isStatic,352,1), Z, Z, 
-H(isLink,195,1), Z, H(asXML,395,1), 
-Z, H(isInstantiable,333,1), Z, 
-Z, Z, H(openblob,378,1), 
-Z, H(getPathname,184,1), Z, 
-Z, H(addServers,267,1), Z, 
-H(hasChildNodes,72,1), H(getConstant,323,1), H(removeAttributeNode,122,1), 
-H(getUTF8,212,1), H(allowsNull,359,1), Z, 
-H(natcasesort,19,1), H(__call,8,1), H(text,482,1), 
-H(nextrowset,286,1), H(registerXPathNamespace,392,1), Z, 
-H(clear,223,1), H(isIterateable,302,1), H(getMulti,245,1), 
-H(arg,149,1), H(ftell,433,1), H(getInterfaceNames,321,1), 
-H(natsort,16,1), H(__getfunctions,407,1), H(addUrl,225,1), 
-Z, Z, Z, 
-Z, H(substringData,73,1), Z, 
-Z, Z, H(hasAttribute,113,1), 
-H(areConfusable,440,1), Z, Z, 
-Z, H(add,238,1), Z, 
-H(setoptimeout,234,1), Z, Z, 
-H(getavailabledrivers,278,1), H(hasChildren,299,1), H(loadextension,370,1), 
-H(appendChild,57,1), Z, H(onAutoComplete,175,1), 
-Z, H(close,179,1), Z, 
-Z, Z, Z, 
-H(startDTDElement,458,1), H(endDTDAttlist,445,1), H(lastinsertid,274,1), 
-Z, H(fstat,435,1), Z, 
-Z, Z, H(help,168,1), 
-Z, Z, Z, 
-Z, H(paramcount,387,1), H(getClassNames,340,1), 
-H(getCommand,155,1), H(handle,414,1), H(loadDims,219,1), 
-H(xinclude,103,1), H(changes,377,1), H(newInstanceArgs,308,1), 
-Z, Z, H(__unset,394,1), 
-Z, Z, H(writeDTDEntity,469,1), 
-H(isSameNode,67,1), Z, H(__toString,26,1), 
-Z, Z, Z, 
-Z, H(count,15,1), Z, 
-Z, Z, Z, 
-H(implementsInterface,320,1), H(css,221,1), H(sortwithsortkeys,36,1), 
-Z, Z, Z, 
-Z, Z, H(insertData,74,1), 
-H(isOptional,362,1), H(getCode,27,1), H(xend,153,1), 
-H(isInstance,311,1), H(writeDTDElement,461,1), Z, 
-H(replace,242,1), H(insertBefore,53,1), H(createElement,94,1), 
-H(getextendedstats,244,1), Z, Z, 
-Z, H(closecursor,291,1), Z, 
-Z, Z, Z, 
-Z, Z, Z, 
-Z, H(getProperties,315,1), H(helpSection,164,1), 
-Z, H(prepare,281,1), H(isUserDefined,304,1), 
-Z, H(hasMethod,310,1), Z, 
-H(fflush,428,1), H(geterrormessage,45,1), H(getType,207,1), 
-H(createaggregate,375,1), H(getElementById,106,1), H(pconnect,237,1), 
-Z, H(__destruct,37,1), H(getInnerIterator,4,1), 
-Z, H(getStaticVariables,344,1), H(helpTitle,154,1), 
-H(fetch,266,1), H(hasConstant,316,1), Z, 
-Z, H(__soapcall,404,1), H(getIterator,130,1), 
-Z, H(getNamespaces,393,1), H(registerNamespace,135,1), 
-Z, Z, Z, 
-H(replaceChild,60,1), Z, H(endDocument,460,1), 
-H(setStaticPropertyValue,332,1), H(getResultMessage,246,1), H(setDate,137,1), 
-H(getElementsByTagNameNS,83,1), Z, Z, 
-H(startComment,483,1), Z, H(casByKey,253,1), 
-Z, H(setFileClass,186,1), Z, 
-Z, Z, Z, 
-H(setFlags,17,1), H(isInterface,326,1), H(addFile,226,1), 
-H(setOption,251,1), Z, Z, 
+Z, H(setattribute,43,1), H(getIterator,134,1), 
+H(__wakeup,278,1), H(setAttributeNodeNS,119,1), Z, 
+H(getStartLine,325,1), H(isWhitespaceInElementContent,82,1), H(get_arg,50,1), 
+H(replace,245,1), Z, H(endDTD,480,1), 
+Z, H(deleteByKey,261,1), Z, 
+Z, H(helpCmds,154,1), Z, 
+Z, H(css,224,1), H(setobject,418,1), 
+Z, H(getLine,28,1), H(areConfusable,443,1), 
+H(columntype,385,1), Z, H(sortwithsortkeys,36,1), 
+H(querysingle,383,1), H(hasAttributeNS,118,1), H(getType,210,1), 
+Z, H(addCompletion,174,1), Z, 
+Z, Z, H(addChild,401,1), 
+H(getConstants,327,1), Z, H(getFunctions,341,1), 
+H(cas,271,1), H(allowsNull,362,1), Z, 
+H(startComment,486,1), H(getConstant,326,1), H(getFilename,200,1), 
+H(isFinal,315,1), Z, Z, 
+Z, H(writeAttribute,454,1), H(getProperty,340,1), 
 Z, Z, H(getFile,30,1), 
+Z, H(getErrors,227,1), Z, 
+Z, H(getSeverity,220,1), Z, 
+Z, Z, Z, 
+H(startCData,478,1), Z, H(getInode,197,1), 
 Z, Z, Z, 
 Z, Z, Z, 
-H(offsetSet,13,1), H(fgetc,429,1), H(setIDAttributeNS,111,1), 
-H(setIndentString,464,1), H(isSuspicious,442,1), H(fetchAll,263,1), 
-H(isDestructor,356,1), H(relaxNGValidateSource,97,1), Z, 
-Z, H(format,136,1), H(append,5,1), 
+H(getextendedstats,247,1), H(rewind,9,1), Z, 
+Z, H(setFileClass,189,1), H(info,164,1), 
+H(onClient,179,1), Z, Z, 
+Z, H(getServerByKey,263,1), Z, 
+H(code,167,1), Z, Z, 
+Z, H(getDocNamespaces,399,1), Z, 
+Z, H(getDelayedByKey,258,1), H(writeCData,462,1), 
+H(addString,221,1), H(error,156,1), H(getModifiers,316,1), 
 Z, Z, Z, 
-Z, H(writeElementNS,443,1), H(cloneNode,59,1), 
+H(invokeArgs,349,1), Z, Z, 
+Z, Z, H(format,140,1), 
+H(offsetUnset,12,1), H(setChecks,444,1), H(getNumberOfParameters,346,1), 
+H(__unset,397,1), H(bindvalue,298,1), H(test,332,1), 
 Z, Z, Z, 
-H(__getlastresponse,409,1), Z, Z, 
-Z, Z, H(prepend,252,1), 
-H(commit,277,1), Z, Z, 
-H(writeRaw,468,1), H(removeAttributeNS,118,1), Z, 
+H(getSubPath,301,1), H(num_args,52,1), H(createfunction,374,1), 
+Z, H(endDTDElement,476,1), Z, 
+Z, Z, H(helpSection,168,1), 
+H(getFrame,171,1), H(get_args,48,1), H(getMaxLineLen,428,1), 
 Z, Z, Z, 
-Z, H(lasterrormsg,373,1), Z, 
-H(writeCData,459,1), Z, Z, 
-Z, H(num_args,50,1), H(load,92,1), 
-H(getMTime,200,1), H(uasort,24,1), H(endPI,470,1), 
-H(createAttributens,93,1), H(ksort,23,1), H(setIndent,472,1), 
-H(isSupported,70,1), Z, Z, 
-H(endElement,467,1), Z, H(registerNodeClass,91,1), 
+Z, Z, H(isUserDefined,307,1), 
+H(set,231,1), H(getMethod,320,1), Z, 
+H(c14nfile,70,1), H(isOptional,365,1), H(__isset,75,1), 
+H(getArrayCopy,14,1), H(geterrorcode,39,1), H(registerNodeClass,95,1), 
+Z, H(getPath,196,1), Z, 
+Z, H(connect,244,1), H(helpTitle,158,1), 
+Z, H(lookupNamespaceUri,60,1), Z, 
 Z, Z, Z, 
-H(createCDATASection,81,1), H(getClasses,341,1), H(get_arg,48,1), 
-H(getServerByKey,260,1), H(getLine,28,1), H(setCsvControl,422,1), 
-H(seek,21,1), Z, H(setAttributeNS,116,1)
+H(openMemory,481,1), H(createDocumentType,130,1), Z, 
+Z, Z, Z, 
+Z, Z, H(getCurrentLocation,176,1), 
+H(valid,3,1), H(fstat,438,1), H(pconnect,240,1), 
+Z, H(saveHTML,103,1), Z, 
+Z, Z, Z, 
+H(isLocal,181,1), H(setfetchmode,291,1), H(compare,46,1), 
+H(addFile,229,1), Z, Z, 
+Z, Z, H(setTime,143,1), 
+Z, Z, Z, 
+H(setByKey,251,1), Z, H(debugdumpparams,299,1), 
+H(writeRaw,471,1), Z, Z, 
+H(getGroup,188,1), Z, Z, 
+H(isFile,201,1), Z, Z, 
+H(tutorial,160,1), Z, H(fgetss,423,1), 
+Z, Z, Z, 
+Z, H(isWritable,185,1), Z, 
+H(insertData,78,1), Z, Z, 
+H(createDocumentFragment,113,1), Z, H(fflush,431,1), 
+Z, H(save,105,1), H(detach,440,1), 
+H(setcompressthreshold,238,1), Z, Z, 
+H(createProcessingInstruction,94,1), Z, Z, 
+Z, H(setInfoClass,190,1), H(setDeclaredEncoding,212,1), 
+H(getDefaultProperties,334,1), Z, Z, 
+Z, H(createTextNode,102,1), Z, 
+H(isInstance,314,1), Z, Z, 
+Z, Z, Z, 
+H(getInterfaces,337,1), H(nextrowset,289,1), H(setIndent,475,1), 
+H(flush,246,1), Z, Z, 
+H(loadXML,104,1), H(setVars,34,1), Z, 
+H(writeElement,469,1), Z, Z, 
+Z, Z, Z, 
+H(isValid,219,1), H(getEndLine,312,1), H(getInnerIterator,4,1), 
+Z, Z, Z, 
+Z, Z, H(uasort,24,1), 
+H(__init__,29,1), H(getBasename,186,1), Z, 
+H(getStaticPropertyValue,306,1), Z, H(offsetGet,11,1), 
+Z, Z, H(finalize,389,1), 
+H(getTransitions,148,1), Z, Z, 
+Z, Z, Z, 
+H(__getlastresponseheaders,411,1), Z, H(exec,276,1), 
+Z, H(numcolumns,386,1), Z, 
+Z, Z, Z, 
+H(startDTDAttlist,477,1), H(isInstantiable,336,1), Z, 
+H(errorcode,275,1), H(ftruncate,429,1), Z, 
+H(appendXML,114,1), Z, Z, 
+Z, Z, Z, 
+Z, H(done,51,1), H(item,133,1), 
+H(sort,38,1), Z, H(__getlastrequestheaders,409,1), 
+Z, H(c14n,66,1), Z, 
+H(isSuspicious,445,1), H(endDTDAttlist,448,1), H(getTraceAsString,31,1), 
+Z, H(getStaticVariables,347,1), H(quote,282,1), 
+H(__setlocation,408,1), H(query,136,1), Z, 
+Z, Z, Z, 
+H(setMulti,259,1), H(changes,380,1), Z, 
+Z, Z, H(newInstance,308,1), 
+H(create,42,1), H(writeElementNS,446,1), H(help,172,1), 
+Z, H(normalizeDocument,112,1), H(getPathInfo,194,1), 
+Z, Z, H(getElementsByTagName,84,1), 
+Z, H(ksort,23,1), H(openFile,208,1), 
+Z, Z, Z, 
+Z, H(isLink,198,1), H(ftell,436,1), 
+H(isInterface,329,1), H(fwrite,437,1), H(openblob,381,1), 
+H(endElement,470,1), Z, H(getMulti,248,1), 
+Z, H(getInterfaceNames,324,1), H(fgets,434,1), 
+H(startElementNS,460,1), H(replaceByKey,257,1), H(startAttribute,468,1), 
+H(arg,153,1), H(fetchcolumn,287,1), Z, 
+Z, Z, Z, 
+Z, Z, H(setCsvControl,425,1), 
+Z, H(registerPHPFunctions,138,1), Z, 
+Z, Z, H(getChildren,303,1), 
+H(getNodePath,69,1), Z, Z, 
+Z, H(removeAttribute,127,1), Z, 
+H(getstats,235,1), Z, Z, 
+Z, H(attributes,402,1), H(replaceData,80,1), 
+H(hasMethod,313,1), H(getResultMessage,249,1), H(nextImpl,49,1), 
+H(begintransaction,283,1), H(getCode,27,1), H(children,400,1), 
+H(createAttributens,97,1), H(fetcharray,387,1), H(getExtension,309,1), 
+Z, Z, Z, 
+H(startDTD,474,1), Z, Z, 
+Z, H(fetch,269,1), Z, 
+H(setserverparams,232,1), H(handle,417,1), Z, 
+Z, H(__set,62,1), Z, 
+Z, H(__getlastrequest,404,1), H(__getfunctions,410,1), 
+H(invoke,351,1), H(argRest,175,1), Z, 
+Z, H(setText,211,1), H(isAbstract,338,1), 
+Z, H(key,2,1), H(isDefaultValueAvailable,360,1), 
+H(getPerms,184,1), H(get,239,1), H(getMessage,25,1), 
+H(getavailabledrivers,281,1), H(mapping,223,1), H(importNode,100,1), 
+H(setIDAttributeNode,125,1), H(getClosure,352,1), H(attach,439,1), 
+H(appendByKey,252,1), Z, Z, 
+Z, H(writeAttributeNS,465,1), Z, 
+Z, H(splitText,83,1), Z, 
+Z, H(getDeclaringClass,356,1), H(currentRef,273,1), 
+Z, H(append,5,1), H(bindparam,293,1), 
+Z, H(casByKey,256,1), H(appendData,79,1), 
+H(getMultiByKey,268,1), H(prepare,284,1), H(getattribute,35,1), 
+Z, Z, Z, 
+Z, Z, Z, 
+Z, H(__call,8,1), Z, 
+H(removeAttributeNode,126,1), H(addServers,270,1), H(getAttributeNodeNS,116,1), 
+Z, Z, Z, 
+Z, Z, H(getDelayed,253,1), 
+H(__setsoapheaders,405,1), Z, Z, 
+H(getAttributeNode,123,1), Z, Z, 
+H(lookupPrefix,67,1), Z, H(receive,53,1), 
+H(setValue,371,1), H(getLanguage,218,1), H(decrement,234,1), 
+H(fscanf,421,1), H(writeDTD,456,1), H(setIDAttributeNS,115,1), 
+Z, Z, H(getRealPath,193,1), 
+H(isnormalized,274,1), H(isSubclassOf,330,1), H(xpath,394,1), 
+H(reset,388,1), H(fseek,422,1), Z, 
+Z, Z, Z, 
+Z, H(modify,147,1), Z, 
+H(prependByKey,272,1), H(writeDTDElement,464,1), Z, 
+Z, Z, Z, 
+Z, Z, Z, 
+H(getSize,199,1), H(loadextension,373,1), H(argValue,161,1), 
+H(__toString,26,1), H(setAttributeNS,120,1), H(onServer,180,1), 
+Z, H(createComment,111,1), H(isConstructor,357,1), 
+H(isDestructor,359,1), Z, Z, 
+Z, H(load,96,1), Z, 
+H(setStaticPropertyValue,335,1), H(getTrace,32,1), Z, 
+Z, Z, Z, 
+H(setTimezone,146,1), H(getLineNo,56,1), Z, 
+Z, H(setIndentString,467,1), H(endComment,455,1), 
+H(getParentClass,322,1), H(prepend,255,1), H(addByKey,265,1), 
+H(setAttributeNode,128,1), Z, Z, 
+H(clear,226,1), H(setpersistence,416,1), Z, 
+Z, Z, Z, 
+H(createCDATASection,85,1), H(getClasses,344,1), Z, 
+Z, H(writeDTDEntity,472,1), H(loadHTML,90,1), 
+Z, Z, Z, 
+Z, H(detectAll,214,1), Z, 
+Z, H(rowcount,295,1), H(detect,213,1), 
+H(relaxNGValidate,89,1), H(isDefault,369,1), H(ask,155,1), 
+Z, Z, H(writeDTDAttlist,479,1), 
+H(xinclude,107,1), Z, H(bindcolumn,290,1), 
+H(getAttributeNS,121,1), Z, H(setMaxLineLen,427,1), 
+Z, Z, Z, 
+Z, Z, H(__setcookie,406,1), 
+Z, Z, Z, 
+Z, Z, Z, 
+Z, Z, H(lastinsertid,277,1), 
+Z, Z, Z, 
+Z, Z, Z, 
+Z, H(getMethods,304,1), H(evaluate,137,1), 
+H(removeChild,72,1), H(getFlags,22,1), Z, 
+Z, Z, Z, 
+Z, Z, H(fetchAll,266,1), 
+H(getResultCode,250,1), H(getCsvControl,426,1), Z
 };
 #undef M
 #undef H
@@ -387,7 +389,7 @@ const unsigned g_methodIndexReverseCallIndexSys[] = {0,
 421,422,423,424,425,426,427,428,429,430,431,432,433,434,435,436,437,438,439,440,
 441,442,443,444,445,446,447,448,449,450,451,452,453,454,455,456,457,458,459,460,
 461,462,463,464,465,466,467,468,469,470,471,472,473,474,475,476,477,478,479,480,
-481,482};
+481,482,483,484,485};
 extern const char * g_methodIndexReverseIndexSys[];
 const char * g_methodIndexReverseIndexSys[] = {
 "next", "key", "valid", "getInnerIterator", "append", 
@@ -399,94 +401,95 @@ const char * g_methodIndexReverseIndexSys[] = {
 "getTraceAsString", "getTrace", "getVars", "setVars", "getattribute", 
 "sortwithsortkeys", "__destruct", "sort", "geterrorcode", "getstrength", 
 "setstrength", "create", "setattribute", "getlocale", "geterrormessage", 
-"compare", "get_args", "get_arg", "done", "num_args", 
-"update", "getLineNo", "insertBefore", "isDefaultNamespace", "isId", 
-"lookupNamespaceUri", "appendChild", "__set", "cloneNode", "replaceChild", 
-"hasAttributes", "c14n", "lookupPrefix", "normalize", "getNodePath", 
-"c14nfile", "isSameNode", "removeChild", "__get", "isSupported", 
-"__isset", "hasChildNodes", "substringData", "insertData", "appendData", 
-"replaceData", "deleteData", "isWhitespaceInElementContent", "splitText", "getElementsByTagName", 
-"createCDATASection", "validate", "getElementsByTagNameNS", "schemaValidateSource", "relaxNGValidate", 
-"loadHTML", "createEntityReference", "schemaValidate", "saveXML", "createProcessingInstruction", 
-"registerNodeClass", "load", "createAttributens", "createElement", "createElementNS", 
-"importNode", "relaxNGValidateSource", "createTextNode", "saveHTML", "loadXML", 
-"save", "createAttribute", "xinclude", "loadHTMLFile", "saveHTMLFile", 
-"getElementById", "createComment", "normalizeDocument", "createDocumentFragment", "appendXML", 
-"setIDAttributeNS", "getAttributeNodeNS", "hasAttribute", "hasAttributeNS", "setAttributeNodeNS", 
-"setAttributeNS", "getAttributeNS", "removeAttributeNS", "getAttributeNode", "setIDAttribute", 
-"setIDAttributeNode", "removeAttributeNode", "removeAttribute", "setAttributeNode", "createDocument", 
-"createDocumentType", "hasFeature", "getNamedItem", "item", "getIterator", 
-"getNamedItemNS", "query", "evaluate", "registerPHPFunctions", "registerNamespace", 
-"format", "setDate", "getOffset", "setTime", "getTimezone", 
-"setISODate", "setTimezone", "modify", "getTransitions", "listIdentifiers", 
-"listAbbreviations", "getName", "argCount", "arg", "helpCmds", 
-"ask", "error", "xend", "helpTitle", "getCommand", 
-"tutorial", "argValue", "output", "getStackTrace", "info", 
-"printFrame", "print", "code", "helpSection", "quit", 
-"helpBody", "getFrame", "help", "args", "addCompletion", 
-"argRest", "getCurrentLocation", "wrap", "send", "onAutoComplete", 
-"onClient", "onServer", "isLocal", "close", "read", 
-"getPerms", "isWritable", "getBasename", "getPathname", "getGroup", 
-"setFileClass", "setInfoClass", "getLinkTarget", "isReadable", "getRealPath", 
-"getPathInfo", "getCTime", "getPath", "getInode", "isLink", 
-"getSize", "getFilename", "isFile", "getOwner", "getMTime", 
-"isDir", "getFileInfo", "getATime", "isExecutable", "openFile", 
-"isDot", "getType", "setText", "setDeclaredEncoding", "detect", 
-"detectAll", "getUTF8", "getEncoding", "getConfidence", "getLanguage", 
-"isValid", "getSeverity", "addString", "loadDims", "mapping", 
-"css", "loadImages", "clear", "getErrors", "addUrl", 
-"addFile", "addserver", "set", "setserverparams", "increment", 
-"decrement", "getstats", "getserverstatus", "setoptimeout", "setcompressthreshold", 
-"get", "pconnect", "add", "getversion", "delete", 
-"connect", "replace", "flush", "getextendedstats", "getMulti", 
-"getResultMessage", "getResultCode", "setByKey", "appendByKey", "getDelayed", 
-"setOption", "prepend", "casByKey", "replaceByKey", "getDelayedByKey", 
-"setMulti", "getByKey", "deleteByKey", "getOption", "getServerByKey", 
-"getServerList", "addByKey", "fetchAll", "setMultiByKey", "getMultiByKey", 
-"fetch", "addServers", "cas", "prependByKey", "currentRef", 
-"isnormalized", "errorcode", "exec", "lastinsertid", "__wakeup", 
-"rollback", "commit", "getavailabledrivers", "quote", "begintransaction", 
-"prepare", "errorinfo", "__sleep", "fetchcolumn", "getcolumnmeta", 
-"nextrowset", "bindcolumn", "setfetchmode", "columncount", "bindparam", 
-"closecursor", "rowcount", "execute", "fetchobject", "bindvalue", 
-"debugdumpparams", "getSubPathname", "getSubPath", "hasChildren", "getChildren", 
-"getMethods", "isIterateable", "getStaticPropertyValue", "isUserDefined", "newInstance", 
-"getExtension", "getConstructor", "newInstanceArgs", "getEndLine", "hasMethod", 
-"isInstance", "isFinal", "getModifiers", "export", "getProperties", 
-"hasConstant", "getMethod", "getExtensionName", "getParentClass", "implementsInterface", 
-"getInterfaceNames", "getStartLine", "getConstant", "getConstants", "getDocComment", 
-"isInterface", "isSubclassOf", "hasProperty", "test", "getStaticProperties", 
-"getDefaultProperties", "setStaticPropertyValue", "isInstantiable", "getInterfaces", "isAbstract", 
-"isInternal", "getProperty", "getFunctions", "getINIEntries", "getClassNames", 
-"getClasses", "getNumberOfRequiredParameters", "getNumberOfParameters", "getStaticVariables", "getParameters", 
-"invokeArgs", "returnsReference", "invoke", "getClosure", "isPrivate", 
-"isProtected", "isStatic", "getDeclaringClass", "isConstructor", "isPublic", 
-"isDestructor", "isDefaultValueAvailable", "getClass", "allowsNull", "getPosition", 
-"isArray", "isOptional", "getDefaultValue", "isPassedByReference", "getValue", 
-"isDefault", "setAccessible", "setValue", "version", "loadextension", 
-"createfunction", "lastinsertrowid", "lasterrormsg", "escapestring", "createaggregate", 
-"open", "changes", "openblob", "lasterrorcode", "querysingle", 
-"columnname", "columntype", "numcolumns", "fetcharray", "reset", 
-"finalize", "paramcount", "unserialize", "serialize", "addAttribute", 
-"xpath", "registerXPathNamespace", "getNamespaces", "__unset", "asXML", 
-"getDocNamespaces", "children", "addChild", "attributes", "__dorequest", 
-"__getlastrequest", "__setsoapheaders", "__setcookie", "__soapcall", "__setlocation", 
-"__getlastrequestheaders", "__getfunctions", "__getlastresponseheaders", "__getlastresponse", "__gettypes", 
-"addfunction", "addsoapheader", "setpersistence", "handle", "setobject", 
-"fault", "setclass", "fscanf", "fseek", "fgetss", 
-"fgetcsv", "setCsvControl", "getCsvControl", "setMaxLineLen", "getMaxLineLen", 
-"ftruncate", "eof", "fflush", "fgetc", "fpassthru", 
-"fgets", "flock", "ftell", "fwrite", "fstat", 
-"attach", "detach", "contains", "setAllowedLocales", "areConfusable", 
-"setChecks", "isSuspicious", "writeElementNS", "fullEndElement", "endDTDAttlist", 
-"outputMemory", "startDocument", "startDTDEntity", "endCData", "writeComment", 
-"writeAttribute", "endComment", "writeDTD", "endDTDEntity", "startAttributens", 
-"startElement", "startElementNS", "startDTDElement", "writeCData", "endDocument", 
-"writeDTDElement", "writeAttributeNS", "writePI", "setIndentString", "startAttribute", 
-"writeElement", "endElement", "writeRaw", "writeDTDEntity", "endPI", 
-"startDTD", "setIndent", "endDTDElement", "startDTDAttlist", "startCData", 
-"writeDTDAttlist", "endDTD", "openMemory", "openURI", "endAttribute", 
-"startPI", "text", "startComment"};
+"compare", "getLabel", "get_args", "nextImpl", "get_arg", 
+"done", "num_args", "receive", "send", "update", 
+"getLineNo", "insertBefore", "isDefaultNamespace", "isId", "lookupNamespaceUri", 
+"appendChild", "__set", "cloneNode", "replaceChild", "hasAttributes", 
+"c14n", "lookupPrefix", "normalize", "getNodePath", "c14nfile", 
+"isSameNode", "removeChild", "__get", "isSupported", "__isset", 
+"hasChildNodes", "substringData", "insertData", "appendData", "replaceData", 
+"deleteData", "isWhitespaceInElementContent", "splitText", "getElementsByTagName", "createCDATASection", 
+"validate", "getElementsByTagNameNS", "schemaValidateSource", "relaxNGValidate", "loadHTML", 
+"createEntityReference", "schemaValidate", "saveXML", "createProcessingInstruction", "registerNodeClass", 
+"load", "createAttributens", "createElement", "createElementNS", "importNode", 
+"relaxNGValidateSource", "createTextNode", "saveHTML", "loadXML", "save", 
+"createAttribute", "xinclude", "loadHTMLFile", "saveHTMLFile", "getElementById", 
+"createComment", "normalizeDocument", "createDocumentFragment", "appendXML", "setIDAttributeNS", 
+"getAttributeNodeNS", "hasAttribute", "hasAttributeNS", "setAttributeNodeNS", "setAttributeNS", 
+"getAttributeNS", "removeAttributeNS", "getAttributeNode", "setIDAttribute", "setIDAttributeNode", 
+"removeAttributeNode", "removeAttribute", "setAttributeNode", "createDocument", "createDocumentType", 
+"hasFeature", "getNamedItem", "item", "getIterator", "getNamedItemNS", 
+"query", "evaluate", "registerPHPFunctions", "registerNamespace", "format", 
+"setDate", "getOffset", "setTime", "getTimezone", "setISODate", 
+"setTimezone", "modify", "getTransitions", "listIdentifiers", "listAbbreviations", 
+"getName", "argCount", "arg", "helpCmds", "ask", 
+"error", "xend", "helpTitle", "getCommand", "tutorial", 
+"argValue", "output", "getStackTrace", "info", "printFrame", 
+"print", "code", "helpSection", "quit", "helpBody", 
+"getFrame", "help", "args", "addCompletion", "argRest", 
+"getCurrentLocation", "wrap", "onAutoComplete", "onClient", "onServer", 
+"isLocal", "close", "read", "getPerms", "isWritable", 
+"getBasename", "getPathname", "getGroup", "setFileClass", "setInfoClass", 
+"getLinkTarget", "isReadable", "getRealPath", "getPathInfo", "getCTime", 
+"getPath", "getInode", "isLink", "getSize", "getFilename", 
+"isFile", "getOwner", "getMTime", "isDir", "getFileInfo", 
+"getATime", "isExecutable", "openFile", "isDot", "getType", 
+"setText", "setDeclaredEncoding", "detect", "detectAll", "getUTF8", 
+"getEncoding", "getConfidence", "getLanguage", "isValid", "getSeverity", 
+"addString", "loadDims", "mapping", "css", "loadImages", 
+"clear", "getErrors", "addUrl", "addFile", "addserver", 
+"set", "setserverparams", "increment", "decrement", "getstats", 
+"getserverstatus", "setoptimeout", "setcompressthreshold", "get", "pconnect", 
+"add", "getversion", "delete", "connect", "replace", 
+"flush", "getextendedstats", "getMulti", "getResultMessage", "getResultCode", 
+"setByKey", "appendByKey", "getDelayed", "setOption", "prepend", 
+"casByKey", "replaceByKey", "getDelayedByKey", "setMulti", "getByKey", 
+"deleteByKey", "getOption", "getServerByKey", "getServerList", "addByKey", 
+"fetchAll", "setMultiByKey", "getMultiByKey", "fetch", "addServers", 
+"cas", "prependByKey", "currentRef", "isnormalized", "errorcode", 
+"exec", "lastinsertid", "__wakeup", "rollback", "commit", 
+"getavailabledrivers", "quote", "begintransaction", "prepare", "errorinfo", 
+"__sleep", "fetchcolumn", "getcolumnmeta", "nextrowset", "bindcolumn", 
+"setfetchmode", "columncount", "bindparam", "closecursor", "rowcount", 
+"execute", "fetchobject", "bindvalue", "debugdumpparams", "getSubPathname", 
+"getSubPath", "hasChildren", "getChildren", "getMethods", "isIterateable", 
+"getStaticPropertyValue", "isUserDefined", "newInstance", "getExtension", "getConstructor", 
+"newInstanceArgs", "getEndLine", "hasMethod", "isInstance", "isFinal", 
+"getModifiers", "export", "getProperties", "hasConstant", "getMethod", 
+"getExtensionName", "getParentClass", "implementsInterface", "getInterfaceNames", "getStartLine", 
+"getConstant", "getConstants", "getDocComment", "isInterface", "isSubclassOf", 
+"hasProperty", "test", "getStaticProperties", "getDefaultProperties", "setStaticPropertyValue", 
+"isInstantiable", "getInterfaces", "isAbstract", "isInternal", "getProperty", 
+"getFunctions", "getINIEntries", "getClassNames", "getClasses", "getNumberOfRequiredParameters", 
+"getNumberOfParameters", "getStaticVariables", "getParameters", "invokeArgs", "returnsReference", 
+"invoke", "getClosure", "isPrivate", "isProtected", "isStatic", 
+"getDeclaringClass", "isConstructor", "isPublic", "isDestructor", "isDefaultValueAvailable", 
+"getClass", "allowsNull", "getPosition", "isArray", "isOptional", 
+"getDefaultValue", "isPassedByReference", "getValue", "isDefault", "setAccessible", 
+"setValue", "version", "loadextension", "createfunction", "lastinsertrowid", 
+"lasterrormsg", "escapestring", "createaggregate", "open", "changes", 
+"openblob", "lasterrorcode", "querysingle", "columnname", "columntype", 
+"numcolumns", "fetcharray", "reset", "finalize", "paramcount", 
+"unserialize", "serialize", "addAttribute", "xpath", "registerXPathNamespace", 
+"getNamespaces", "__unset", "asXML", "getDocNamespaces", "children", 
+"addChild", "attributes", "__dorequest", "__getlastrequest", "__setsoapheaders", 
+"__setcookie", "__soapcall", "__setlocation", "__getlastrequestheaders", "__getfunctions", 
+"__getlastresponseheaders", "__getlastresponse", "__gettypes", "addfunction", "addsoapheader", 
+"setpersistence", "handle", "setobject", "fault", "setclass", 
+"fscanf", "fseek", "fgetss", "fgetcsv", "setCsvControl", 
+"getCsvControl", "setMaxLineLen", "getMaxLineLen", "ftruncate", "eof", 
+"fflush", "fgetc", "fpassthru", "fgets", "flock", 
+"ftell", "fwrite", "fstat", "attach", "detach", 
+"contains", "setAllowedLocales", "areConfusable", "setChecks", "isSuspicious", 
+"writeElementNS", "fullEndElement", "endDTDAttlist", "outputMemory", "startDocument", 
+"startDTDEntity", "endCData", "writeComment", "writeAttribute", "endComment", 
+"writeDTD", "endDTDEntity", "startAttributens", "startElement", "startElementNS", 
+"startDTDElement", "writeCData", "endDocument", "writeDTDElement", "writeAttributeNS", 
+"writePI", "setIndentString", "startAttribute", "writeElement", "endElement", 
+"writeRaw", "writeDTDEntity", "endPI", "startDTD", "setIndent", 
+"endDTDElement", "startDTDAttlist", "startCData", "writeDTDAttlist", "endDTD", 
+"openMemory", "openURI", "endAttribute", "startPI", "text", 
+"startComment"};
 extern struct ObjectStaticCallbacks cw_ReflectionFunctionAbstract;
 extern struct ObjectStaticCallbacks cw_ReflectionObject;
 extern struct ObjectStaticCallbacks cw_SplFileObject;
@@ -684,7 +687,7 @@ Variant c_PDOException::ifa___construct(MethodCallPackage &mcp, int count, INVOK
   return (self->t___construct(), null);
 }
 bool c_PDOException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -710,16 +713,6 @@ c_PDOException *c_PDOException::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_PDOException::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_PDOException::dynConstruct(CArrRef params) {
@@ -958,7 +951,7 @@ Variant c_DOMDocumentFragment::ifa_appendxml(MethodCallPackage &mcp, int count, 
   return (self->t_appendxml(arg0));
 }
 bool c_DOMDocumentFragment::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 1:
@@ -992,16 +985,6 @@ c_DOMDocumentFragment *c_DOMDocumentFragment::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DOMDocumentFragment::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DOMDocumentFragment::dynConstruct(CArrRef params) {
@@ -1439,7 +1422,7 @@ Variant c_DOMText::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   return (self->t___isset(arg0));
 }
 bool c_DOMText::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -1495,25 +1478,6 @@ c_DOMText *c_DOMText::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  return this;
-}
-ObjectData *c_DOMText::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 1) throw_toomany_arguments("__construct", 1, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    } while (false);
-  }
   return this;
 }
 void c_DOMText::dynConstruct(CArrRef params) {
@@ -3096,7 +3060,7 @@ Variant c_DebuggerClient::ifa_wrap(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t_wrap(arg0));
 }
 bool c_DebuggerClient::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 0:
@@ -3276,16 +3240,6 @@ c_DebuggerClient *c_DebuggerClient::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DebuggerClient::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DebuggerClient::dynConstruct(CArrRef params) {
@@ -3644,7 +3598,7 @@ Variant c_EncodingDetector::ifa_detectall(MethodCallPackage &mcp, int count, INV
   return (self->t_detectall());
 }
 bool c_EncodingDetector::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 0:
@@ -3692,16 +3646,6 @@ c_EncodingDetector *c_EncodingDetector::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_EncodingDetector::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_EncodingDetector::dynConstruct(CArrRef params) {
@@ -3900,7 +3844,7 @@ Variant c_DOMCDATASection::ifa___construct(MethodCallPackage &mcp, int count, IN
   return (self->t___construct(arg0), null);
 }
 bool c_DOMCDATASection::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -3926,21 +3870,6 @@ c_DOMCDATASection *c_DOMCDATASection::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  return this;
-}
-ObjectData *c_DOMCDATASection::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_DOMCDATASection::dynConstruct(CArrRef params) {
@@ -4147,7 +4076,7 @@ Variant c_Locale::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_
   return (self->t___construct(), null);
 }
 bool c_Locale::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -4173,16 +4102,6 @@ c_Locale *c_Locale::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_Locale::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_Locale::dynConstruct(CArrRef params) {
@@ -4521,7 +4440,7 @@ Variant c_DOMDocumentType::ifa___isset(MethodCallPackage &mcp, int count, INVOKE
   return (self->t___isset(arg0));
 }
 bool c_DOMDocumentType::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -4565,16 +4484,6 @@ c_DOMDocumentType *c_DOMDocumentType::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DOMDocumentType::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DOMDocumentType::dynConstruct(CArrRef params) {
@@ -5098,7 +5007,7 @@ Variant c_SQLite3Stmt::ifa_bindvalue(MethodCallPackage &mcp, int count, INVOKE_F
   return (self->t_bindvalue(arg0, arg1, arg2));
 }
 bool c_SQLite3Stmt::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
@@ -5168,22 +5077,6 @@ c_SQLite3Stmt *c_SQLite3Stmt::create(Object a0, String a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  return this;
-}
-ObjectData *c_SQLite3Stmt::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    }
-  }
   return this;
 }
 void c_SQLite3Stmt::dynConstruct(CArrRef params) {
@@ -5620,7 +5513,7 @@ Variant c_DOMNodeList::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t___isset(arg0));
 }
 bool c_DOMNodeList::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -5674,16 +5567,6 @@ c_DOMNodeList *c_DOMNodeList::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DOMNodeList::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DOMNodeList::dynConstruct(CArrRef params) {
@@ -5979,7 +5862,7 @@ Variant c_Normalizer::i___construct(MethodCallPackage &mcp, CArrRef params) {
 Variant c_Normalizer::i_normalize(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5992,7 +5875,7 @@ Variant c_Normalizer::i_normalize(MethodCallPackage &mcp, CArrRef params) {
 Variant c_Normalizer::i_isnormalized(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -6026,7 +5909,7 @@ Variant c_Normalizer::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_
 }
 Variant c_Normalizer::ifa_normalize(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0((a0));
   if (count <= 1) return (c_Normalizer::ti_normalize(c, arg0));
   CVarRef arg1((a1));
@@ -6034,14 +5917,14 @@ Variant c_Normalizer::ifa_normalize(MethodCallPackage &mcp, int count, INVOKE_FE
 }
 Variant c_Normalizer::ifa_isnormalized(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0((a0));
   if (count <= 1) return (c_Normalizer::ti_isnormalized(c, arg0));
   CVarRef arg1((a1));
   return (c_Normalizer::ti_isnormalized(c, arg0, arg1));
 }
 bool c_Normalizer::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 2:
@@ -6081,16 +5964,6 @@ c_Normalizer *c_Normalizer::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_Normalizer::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_Normalizer::dynConstruct(CArrRef params) {
@@ -6701,7 +6574,7 @@ Variant c_DOMCharacterData::ifa___isset(MethodCallPackage &mcp, int count, INVOK
   return (self->t___isset(arg0));
 }
 bool c_DOMCharacterData::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 13:
@@ -6777,16 +6650,6 @@ c_DOMCharacterData *c_DOMCharacterData::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DOMCharacterData::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DOMCharacterData::dynConstruct(CArrRef params) {
@@ -6985,7 +6848,7 @@ Variant c_DOMEntityReference::ifa___construct(MethodCallPackage &mcp, int count,
   return (self->t___construct(arg0), null);
 }
 bool c_DOMEntityReference::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -7011,21 +6874,6 @@ c_DOMEntityReference *c_DOMEntityReference::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  return this;
-}
-ObjectData *c_DOMEntityReference::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_DOMEntityReference::dynConstruct(CArrRef params) {
@@ -7415,7 +7263,7 @@ Variant c_SimpleXMLElementIterator::ifa_rewind(MethodCallPackage &mcp, int count
   return (self->t_rewind());
 }
 bool c_SimpleXMLElementIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 1:
@@ -7473,16 +7321,6 @@ c_SimpleXMLElementIterator *c_SimpleXMLElementIterator::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_SimpleXMLElementIterator::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_SimpleXMLElementIterator::dynConstruct(CArrRef params) {
@@ -7798,7 +7636,7 @@ Variant c_DateTimeZone::i_gettransitions(MethodCallPackage &mcp, CArrRef params)
 Variant c_DateTimeZone::i_listidentifiers(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   return (c_DateTimeZone::ti_listidentifiers(c));
 }
 Variant c_DateTimeZone::i___destruct(MethodCallPackage &mcp, CArrRef params) {
@@ -7850,7 +7688,7 @@ Variant c_DateTimeZone::i___construct(MethodCallPackage &mcp, CArrRef params) {
 Variant c_DateTimeZone::i_listabbreviations(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   return (c_DateTimeZone::ti_listabbreviations(c));
 }
 Variant c_DateTimeZone::i_getname(MethodCallPackage &mcp, CArrRef params) {
@@ -7878,7 +7716,7 @@ Variant c_DateTimeZone::ifa_gettransitions(MethodCallPackage &mcp, int count, IN
 }
 Variant c_DateTimeZone::ifa_listidentifiers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   return (c_DateTimeZone::ti_listidentifiers(c));
 }
 Variant c_DateTimeZone::ifa___destruct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -7918,7 +7756,7 @@ Variant c_DateTimeZone::ifa___construct(MethodCallPackage &mcp, int count, INVOK
 }
 Variant c_DateTimeZone::ifa_listabbreviations(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   return (c_DateTimeZone::ti_listabbreviations(c));
 }
 Variant c_DateTimeZone::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -7933,7 +7771,7 @@ Variant c_DateTimeZone::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FE
   return (self->t_getname());
 }
 bool c_DateTimeZone::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -7989,21 +7827,6 @@ c_DateTimeZone *c_DateTimeZone::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  return this;
-}
-ObjectData *c_DateTimeZone::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_DateTimeZone::dynConstruct(CArrRef params) {
@@ -8393,7 +8216,7 @@ Variant c_DOMNodeIterator::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_
   return (self->t_rewind());
 }
 bool c_DOMNodeIterator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 1:
@@ -8451,16 +8274,6 @@ c_DOMNodeIterator *c_DOMNodeIterator::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DOMNodeIterator::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DOMNodeIterator::dynConstruct(CArrRef params) {
@@ -8839,7 +8652,7 @@ Variant c_DOMImplementation::ifa_hasfeature(MethodCallPackage &mcp, int count, I
   return (self->t_hasfeature(arg0, arg1));
 }
 bool c_DOMImplementation::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -8881,16 +8694,6 @@ c_DOMImplementation *c_DOMImplementation::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DOMImplementation::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DOMImplementation::dynConstruct(CArrRef params) {
@@ -9122,7 +8925,7 @@ Variant c_SoapHeader::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_
   return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
 }
 bool c_SoapHeader::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -9148,37 +8951,6 @@ c_SoapHeader *c_SoapHeader::create(String a0, String a1, Variant a2, bool a3, Va
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4);
-  return this;
-}
-ObjectData *c_SoapHeader::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 2 || count > 5) throw_wrong_arguments("__construct", count, 2, 5, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 3) {
-        (t___construct(arg0, arg1, arg2));
-        break;
-      }
-      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 4) {
-        (t___construct(arg0, arg1, arg2, arg3));
-        break;
-      }
-      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2, arg3, arg4));
-    } while (false);
-  }
   return this;
 }
 void c_SoapHeader::dynConstruct(CArrRef params) {
@@ -9561,7 +9333,7 @@ Variant c_DOMNotation::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t___isset(arg0));
 }
 bool c_DOMNotation::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -9605,16 +9377,6 @@ c_DOMNotation *c_DOMNotation::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DOMNotation::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DOMNotation::dynConstruct(CArrRef params) {
@@ -9891,7 +9653,7 @@ Variant c_DebuggerProxy::ifa_send(MethodCallPackage &mcp, int count, INVOKE_FEW_
   return (self->t_send(arg0));
 }
 bool c_DebuggerProxy::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 0:
@@ -9931,16 +9693,6 @@ c_DebuggerProxy *c_DebuggerProxy::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DebuggerProxy::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DebuggerProxy::dynConstruct(CArrRef params) {
@@ -12404,7 +12156,7 @@ Variant c_Memcached::ifa_prependbykey(MethodCallPackage &mcp, int count, INVOKE_
   return (self->t_prependbykey(arg0, arg1, arg2));
 }
 bool c_Memcached::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 127) {
     case 2:
@@ -12648,25 +12400,6 @@ c_Memcached *c_Memcached::create(String a0) {
   t___construct(a0);
   return this;
 }
-ObjectData *c_Memcached::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 1) throw_toomany_arguments("__construct", 1, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    } while (false);
-  }
-  return this;
-}
 void c_Memcached::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 1) throw_toomany_arguments("__construct", 1, 2);
@@ -12880,7 +12613,7 @@ Variant c_DOMComment::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_
   return (self->t___construct(arg0), null);
 }
 bool c_DOMComment::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -12906,25 +12639,6 @@ c_DOMComment *c_DOMComment::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  return this;
-}
-ObjectData *c_DOMComment::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 1) throw_toomany_arguments("__construct", 1, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    } while (false);
-  }
   return this;
 }
 void c_DOMComment::dynConstruct(CArrRef params) {
@@ -13919,7 +13633,7 @@ Variant c_SQLite3::ifa_querysingle(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t_querysingle(arg0, arg1));
 }
 bool c_SQLite3::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 1:
@@ -14041,16 +13755,6 @@ c_SQLite3 *c_SQLite3::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_SQLite3::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_SQLite3::dynConstruct(CArrRef params) {
@@ -14446,7 +14150,7 @@ Variant c_DOMAttr::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   return (self->t___isset(arg0));
 }
 bool c_DOMAttr::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -14496,26 +14200,6 @@ c_DOMAttr *c_DOMAttr::create(String a0, String a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  return this;
-}
-ObjectData *c_DOMAttr::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
   return this;
 }
 void c_DOMAttr::dynConstruct(CArrRef params) {
@@ -14775,7 +14459,7 @@ Variant c_SoapVar::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
 }
 bool c_SoapVar::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -14801,42 +14485,6 @@ c_SoapVar *c_SoapVar::create(Variant a0, Variant a1, String a2, String a3, Strin
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4, a5);
-  return this;
-}
-ObjectData *c_SoapVar::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 2 || count > 6) throw_wrong_arguments("__construct", count, 2, 6, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 3) {
-        (t___construct(arg0, arg1, arg2));
-        break;
-      }
-      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 4) {
-        (t___construct(arg0, arg1, arg2, arg3));
-        break;
-      }
-      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 5) {
-        (t___construct(arg0, arg1, arg2, arg3, arg4));
-        break;
-      }
-      CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
-    } while (false);
-  }
   return this;
 }
 void c_SoapVar::dynConstruct(CArrRef params) {
@@ -15419,7 +15067,7 @@ Variant c_DOMNamedNodeMap::ifa___isset(MethodCallPackage &mcp, int count, INVOKE
   return (self->t___isset(arg0));
 }
 bool c_DOMNamedNodeMap::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 3:
@@ -15489,16 +15137,6 @@ c_DOMNamedNodeMap *c_DOMNamedNodeMap::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DOMNamedNodeMap::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DOMNamedNodeMap::dynConstruct(CArrRef params) {
@@ -15950,7 +15588,7 @@ Variant c_SQLite3Result::ifa_finalize(MethodCallPackage &mcp, int count, INVOKE_
   return (self->t_finalize());
 }
 bool c_SQLite3Result::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 0:
@@ -16014,16 +15652,6 @@ c_SQLite3Result *c_SQLite3Result::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_SQLite3Result::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_SQLite3Result::dynConstruct(CArrRef params) {
@@ -17311,7 +16939,7 @@ Variant c_SimpleXMLElement::ifa_offsetset(MethodCallPackage &mcp, int count, INV
   return (self->t_offsetset(arg0, arg1), null);
 }
 bool c_SimpleXMLElement::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 0:
@@ -17461,41 +17089,6 @@ c_SimpleXMLElement *c_SimpleXMLElement::create(String a0, int64 a1, bool a2, Str
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4);
-  return this;
-}
-ObjectData *c_SimpleXMLElement::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 5) throw_wrong_arguments("__construct", count, 1, 5, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 3) {
-        (t___construct(arg0, arg1, arg2));
-        break;
-      }
-      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 4) {
-        (t___construct(arg0, arg1, arg2, arg3));
-        break;
-      }
-      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2, arg3, arg4));
-    } while (false);
-  }
   return this;
 }
 void c_SimpleXMLElement::dynConstruct(CArrRef params) {
@@ -18962,7 +18555,7 @@ Variant c_Memcache::ifa_getextendedstats(MethodCallPackage &mcp, int count, INVO
   return (self->t_getextendedstats(arg0, arg1, arg2));
 }
 bool c_Memcache::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 1:
@@ -19102,16 +18695,6 @@ c_Memcache *c_Memcache::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_Memcache::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_Memcache::dynConstruct(CArrRef params) {
@@ -19469,7 +19052,7 @@ Variant c_DOMProcessingInstruction::ifa___isset(MethodCallPackage &mcp, int coun
   return (self->t___isset(arg0));
 }
 bool c_DOMProcessingInstruction::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -19513,26 +19096,6 @@ c_DOMProcessingInstruction *c_DOMProcessingInstruction::create(String a0, String
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  return this;
-}
-ObjectData *c_DOMProcessingInstruction::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
   return this;
 }
 void c_DOMProcessingInstruction::dynConstruct(CArrRef params) {
@@ -19928,7 +19491,7 @@ Variant c_EncodingMatch::ifa_isvalid(MethodCallPackage &mcp, int count, INVOKE_F
   return (self->t_isvalid());
 }
 bool c_EncodingMatch::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -19982,16 +19545,6 @@ c_EncodingMatch *c_EncodingMatch::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_EncodingMatch::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_EncodingMatch::dynConstruct(CArrRef params) {
@@ -21442,7 +20995,7 @@ Variant c_PDOStatement::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t_rewind());
 }
 bool c_PDOStatement::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 1:
@@ -21620,16 +21173,6 @@ c_PDOStatement *c_PDOStatement::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_PDOStatement::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_PDOStatement::dynConstruct(CArrRef params) {
@@ -22432,7 +21975,7 @@ Variant c_SoapClient::ifa___call(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   return (self->t___call(arg0, arg1));
 }
 bool c_SoapClient::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 4:
@@ -22524,26 +22067,6 @@ c_SoapClient *c_SoapClient::create(Variant a0, Array a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  return this;
-}
-ObjectData *c_SoapClient::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
   return this;
 }
 void c_SoapClient::dynConstruct(CArrRef params) {
@@ -22767,7 +22290,7 @@ Variant c_SoapParam::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   return (self->t___construct(arg0, arg1), null);
 }
 bool c_SoapParam::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -22793,22 +22316,6 @@ c_SoapParam *c_SoapParam::create(Variant a0, String a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  return this;
-}
-ObjectData *c_SoapParam::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 2) throw_wrong_arguments("__construct", count, 2, 2, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    }
-  }
   return this;
 }
 void c_SoapParam::dynConstruct(CArrRef params) {
@@ -23469,7 +22976,7 @@ Variant c_DateTime::ifa_modify(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
   return (self->t_modify(arg0));
 }
 bool c_DateTime::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 7:
@@ -23541,30 +23048,6 @@ c_DateTime *c_DateTime::create(String a0, Object a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  return this;
-}
-ObjectData *c_DateTime::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 2) throw_toomany_arguments("__construct", 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
   return this;
 }
 void c_DateTime::dynConstruct(CArrRef params) {
@@ -24205,7 +23688,7 @@ Variant c_Collator::i_setstrength(MethodCallPackage &mcp, CArrRef params) {
 Variant c_Collator::i_create(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -24390,7 +23873,7 @@ Variant c_Collator::ifa_setstrength(MethodCallPackage &mcp, int count, INVOKE_FE
 }
 Variant c_Collator::ifa_create(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0((a0));
   return (c_Collator::ti_create(c, arg0));
 }
@@ -24445,7 +23928,7 @@ Variant c_Collator::ifa_compare(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   return (self->t_compare(arg0, arg1));
 }
 bool c_Collator::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
@@ -24543,21 +24026,6 @@ c_Collator *c_Collator::create(String a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  return this;
-}
-ObjectData *c_Collator::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_Collator::dynConstruct(CArrRef params) {
@@ -25403,7 +24871,7 @@ Variant c_PDO::i_commit(MethodCallPackage &mcp, CArrRef params) {
 Variant c_PDO::i_getavailabledrivers(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   return (c_PDO::ti_getavailabledrivers(c));
 }
 Variant c_PDO::i_quote(MethodCallPackage &mcp, CArrRef params) {
@@ -25622,7 +25090,7 @@ Variant c_PDO::ifa_commit(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMP
 }
 Variant c_PDO::ifa_getavailabledrivers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   return (c_PDO::ti_getavailabledrivers(c));
 }
 Variant c_PDO::ifa_quote(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -25700,7 +25168,7 @@ Variant c_PDO::ifa___sleep(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IM
   return (self->t___sleep());
 }
 bool c_PDO::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 7:
@@ -25818,36 +25286,6 @@ c_PDO *c_PDO::create(String a0, String a1, String a2, Array a3) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3);
-  return this;
-}
-ObjectData *c_PDO::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 4) throw_wrong_arguments("__construct", count, 1, 4, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 3) {
-        (t___construct(arg0, arg1, arg2));
-        break;
-      }
-      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2, arg3));
-    } while (false);
-  }
   return this;
 }
 void c_PDO::dynConstruct(CArrRef params) {
@@ -26634,7 +26072,7 @@ Variant c_ImageSprite::ifa_addfile(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t_addfile(arg0, arg1));
 }
 bool c_ImageSprite::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
@@ -26720,16 +26158,6 @@ c_ImageSprite *c_ImageSprite::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_ImageSprite::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_ImageSprite::dynConstruct(CArrRef params) {
@@ -27068,7 +26496,7 @@ Variant c_DOMEntity::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   return (self->t___isset(arg0));
 }
 bool c_DOMEntity::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -27112,16 +26540,6 @@ c_DOMEntity *c_DOMEntity::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DOMEntity::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DOMEntity::dynConstruct(CArrRef params) {
@@ -29398,7 +28816,7 @@ Variant c_XMLWriter::ifa_startcomment(MethodCallPackage &mcp, int count, INVOKE_
   return (self->t_startcomment());
 }
 bool c_XMLWriter::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 127) {
     case 2:
@@ -29674,16 +29092,6 @@ c_XMLWriter *c_XMLWriter::create() {
   t___construct();
   return this;
 }
-ObjectData *c_XMLWriter::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
-  return this;
-}
 void c_XMLWriter::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("__construct", 0, 2);
@@ -29892,7 +29300,7 @@ Variant c_DOMException::ifa___construct(MethodCallPackage &mcp, int count, INVOK
   return (self->t___construct(arg0, arg1), null);
 }
 bool c_DOMException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -29918,30 +29326,6 @@ c_DOMException *c_DOMException::create(String a0, int64 a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  return this;
-}
-ObjectData *c_DOMException::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 2) throw_toomany_arguments("__construct", 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
   return this;
 }
 void c_DOMException::dynConstruct(CArrRef params) {
@@ -30533,7 +29917,7 @@ Variant c_DOMXPath::ifa___isset(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
   return (self->t___isset(arg0));
 }
 bool c_DOMXPath::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 2:
@@ -30601,21 +29985,6 @@ c_DOMXPath *c_DOMXPath::create(Variant a0) {
   CountableHelper h(this);
   init();
   t___construct(a0);
-  return this;
-}
-ObjectData *c_DOMXPath::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_DOMXPath::dynConstruct(CArrRef params) {
@@ -31251,7 +30620,7 @@ Variant c_SoapServer::ifa_setclass(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t_setclass(count, arg0, p), null);
 }
 bool c_SoapServer::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 3:
@@ -31325,26 +30694,6 @@ c_SoapServer *c_SoapServer::create(Variant a0, Array a1) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1);
-  return this;
-}
-ObjectData *c_SoapServer::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 2) throw_wrong_arguments("__construct", count, 1, 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
   return this;
 }
 void c_SoapServer::dynConstruct(CArrRef params) {
@@ -32552,7 +31901,7 @@ Variant c_DOMNode::ifa_haschildnodes(MethodCallPackage &mcp, int count, INVOKE_F
   return (self->t_haschildnodes());
 }
 bool c_DOMNode::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 3:
@@ -32692,16 +32041,6 @@ c_DOMNode *c_DOMNode::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_DOMNode::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_DOMNode::dynConstruct(CArrRef params) {
@@ -33134,7 +32473,7 @@ Variant c_SpoofChecker::ifa_issuspicious(MethodCallPackage &mcp, int count, INVO
   return (self->t_issuspicious(arg0, arg1));
 }
 bool c_SpoofChecker::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 3:
@@ -33184,16 +32523,6 @@ c_SpoofChecker *c_SpoofChecker::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_SpoofChecker::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_SpoofChecker::dynConstruct(CArrRef params) {
@@ -35046,7 +34375,7 @@ Variant c_DOMDocument::ifa_createdocumentfragment(MethodCallPackage &mcp, int co
   return (self->t_createdocumentfragment());
 }
 bool c_DOMDocument::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 127) {
     case 5:
@@ -35262,30 +34591,6 @@ c_DOMDocument *c_DOMDocument::create(String a0, String a1) {
   t___construct(a0, a1);
   return this;
 }
-ObjectData *c_DOMDocument::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 2) throw_toomany_arguments("__construct", 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
-  return this;
-}
 void c_DOMDocument::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 2) throw_toomany_arguments("__construct", 2, 2);
@@ -35496,7 +34801,7 @@ Variant c_LibXMLError::ifa___construct(MethodCallPackage &mcp, int count, INVOKE
   return (self->t___construct(), null);
 }
 bool c_LibXMLError::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -35522,16 +34827,6 @@ c_LibXMLError *c_LibXMLError::create() {
   CountableHelper h(this);
   init();
   t___construct();
-  return this;
-}
-ObjectData *c_LibXMLError::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 0) throw_toomany_arguments("__construct", 0, 2);
-    (t___construct());
-  }
   return this;
 }
 void c_LibXMLError::dynConstruct(CArrRef params) {
@@ -35810,7 +35105,7 @@ Variant c_SoapFault::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   return (self->t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
 }
 bool c_SoapFault::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 7) {
     case 3:
@@ -35842,42 +35137,6 @@ c_SoapFault *c_SoapFault::create(Variant a0, String a1, String a2, Variant a3, S
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2, a3, a4, a5);
-  return this;
-}
-ObjectData *c_SoapFault::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 2 || count > 6) throw_wrong_arguments("__construct", count, 2, 6, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 3) {
-        (t___construct(arg0, arg1, arg2));
-        break;
-      }
-      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 4) {
-        (t___construct(arg0, arg1, arg2, arg3));
-        break;
-      }
-      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 5) {
-        (t___construct(arg0, arg1, arg2, arg3, arg4));
-        break;
-      }
-      CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
-    } while (false);
-  }
   return this;
 }
 void c_SoapFault::dynConstruct(CArrRef params) {
@@ -37226,7 +36485,7 @@ Variant c_DOMElement::ifa_setattributenode(MethodCallPackage &mcp, int count, IN
   return (self->t_setattributenode(arg0));
 }
 bool c_DOMElement::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 10:
@@ -37370,31 +36629,6 @@ c_DOMElement *c_DOMElement::create(String a0, String a1, String a2) {
   CountableHelper h(this);
   init();
   t___construct(a0, a1, a2);
-  return this;
-}
-ObjectData *c_DOMElement::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 3) throw_wrong_arguments("__construct", count, 1, 3, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2));
-    } while (false);
-  }
   return this;
 }
 void c_DOMElement::dynConstruct(CArrRef params) {
@@ -37964,7 +37198,7 @@ Object create_builtin_object_only(const char *s, ObjectData* root /* = NULL*/) {
   return throw_missing_class(s);
 }
 bool get_call_info_static_method_builtin(MethodCallPackage &mcp) {
-  StringData *s __attribute__((__unused__)) (mcp.rootObj.getStringData());
+  StringData *s __attribute__((__unused__)) (mcp.rootCls);
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = s->hash();
   switch (hash & 255) {

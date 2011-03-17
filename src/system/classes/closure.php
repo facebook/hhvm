@@ -31,11 +31,12 @@ class Closure {
 class Continuation extends Closure implements Iterator {
   private $obj;
   private $args;
-  public $label = 0;
+  private $label = 0;
   private $done = false;
   private $index = -1;
   private $value;
   private $running = false;
+  private $received = null;
 
   public function __construct($func, $vars, $obj = null, $args = array()) {
     parent::__construct($func, $vars);
@@ -49,6 +50,10 @@ class Continuation extends Closure implements Iterator {
   }
   public function done() {
     $this->done = true;
+  }
+
+  public function getLabel() {
+    return $this->label;
   }
 
   public function num_args() {
@@ -77,6 +82,10 @@ class Continuation extends Closure implements Iterator {
     return $this->index;
   }
   public function next() {
+    $this->received = null;
+    $this->nextImpl();
+  }
+  private function nextImpl() {
     if ($this->done) {
       throw new Exception('Continuation is already finished');
     }
@@ -107,5 +116,16 @@ class Continuation extends Closure implements Iterator {
   }
   public function valid() {
     return !$this->done;
+  }
+
+  public function send($v) {
+    if ($this->index < 0) {
+      throw new Exception('Need to call next() first');
+    }
+    $this->received = $v;
+    $this->nextImpl();
+  }
+  public function receive() {
+    return $this->received;
   }
 }

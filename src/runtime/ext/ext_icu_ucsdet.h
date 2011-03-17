@@ -43,7 +43,6 @@ class c_EncodingDetector : public ExtObjectData {
   END_CLASS_MAP(EncodingDetector)
   DECLARE_CLASS(EncodingDetector, EncodingDetector, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_EncodingDetector();
@@ -82,7 +81,6 @@ class c_EncodingMatch : public ExtObjectData {
   END_CLASS_MAP(EncodingMatch)
   DECLARE_CLASS(EncodingMatch, EncodingMatch, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_EncodingMatch();

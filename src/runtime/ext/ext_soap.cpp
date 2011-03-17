@@ -2369,7 +2369,20 @@ void c_SoapClient::t___construct(CVarRef wsdl,
   if (!wsdl.isNull()) {
     int old_soap_version = SOAP_GLOBAL(soap_version);
     SOAP_GLOBAL(soap_version) = m_soap_version;
-    m_sdl = s_soap_data->get_sdl(wsdl.toString().data(), cache_wsdl);
+    String swsdl = wsdl.toString();
+    if (swsdl.find("http://") == 0 || swsdl.find("https://") == 0) {
+      HttpClient http(m_connection_timeout, m_max_redirect, m_use11, true);
+      if (!m_proxy_host.empty() && m_proxy_port) {
+        http.proxy(m_proxy_host.data(), m_proxy_port, m_proxy_login.data(),
+                   m_proxy_password.data());
+      }
+      if (!m_login.empty()) {
+        http.auth(m_login.data(), m_password.data(), !m_digest);
+      }
+      m_sdl = s_soap_data->get_sdl(swsdl.data(), cache_wsdl, &http);
+    } else {
+      m_sdl = s_soap_data->get_sdl(swsdl.data(), cache_wsdl);
+    }
     SOAP_GLOBAL(soap_version) = old_soap_version;
   }
 

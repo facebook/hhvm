@@ -67,13 +67,13 @@ void hphp_process_init();
 void hphp_session_init(bool blank_warmup = false);
 
 ExecutionContext *hphp_context_init();
-bool hphp_invoke_simple(const std::string &filename);
+bool hphp_invoke_simple(const std::string &filename, bool warmupOnly = false);
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool func, CArrRef funcParams, Variant funcRet,
                  const std::string &warmupDoc, const std::string &reqInitFunc,
                  const std::string &reqInitDoc,
                  bool &error, std::string &errorMsg,
-                 bool once = true);
+                 bool once = true, bool warmupOnly = false);
 void hphp_context_exit(ExecutionContext *context, bool psp,
                        bool shutdown = true, const char *program = NULL);
 

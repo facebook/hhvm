@@ -128,7 +128,7 @@ class BitOps {
 class BitSetVec {
   public:
   static const size_t elemSize = BitOps::elemSize;
-  BitSetVec() : m_idOffsets(0), m_bits(0) {}
+  BitSetVec() : m_maxId(0), m_idOffsets(0), m_bits(0) {}
   BitSetVec(int blocks, size_t width, int rows, int *rowIds) {
     alloc(blocks, width, rows, rowIds);
   }

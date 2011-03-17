@@ -22,6 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ssced27431("increment");
 StaticString s_sys_sscedef5dc("ini");
 StaticString s_sys_sscfb8e254("interfaces");
 StaticString s_sys_sscfd63bc6("replace");
@@ -85,7 +86,6 @@ StaticString s_sys_sse3f54806("query");
 StaticString s_sys_sse41ca304("addString");
 StaticString s_sys_sse48e511b("setattribute");
 StaticString s_sys_sse4a1cad7("getVersion");
-StaticString s_sys_sse5340a31("mapping");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

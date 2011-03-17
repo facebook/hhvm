@@ -67,7 +67,6 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   void init();
   public: void t___construct(Variant v_cls, Variant v_name = NAMSTR(s_sys_ss00000000, ""));
   public: c_ReflectionMethod *create(Variant v_cls, Variant v_name = NAMSTR(s_sys_ss00000000, ""));
-  public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);

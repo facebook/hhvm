@@ -21,8 +21,8 @@
 
 /**
  * All external dependencies of runtime/base. This file may not include any
- * generated file based on user code, as this file is included by some runtime/base
- * .cpp files.
+ * generated file based on user code, as this file is included by some
+ * runtime/base .cpp files.
  */
 
 #include <runtime/base/types.h>

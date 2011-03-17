@@ -692,7 +692,6 @@ EOT
   fprintf($f, "  DECLARE_CLASS(%s, %s, %s)\n", $clsname, $clsname,
           $class['parent'] ? $class['parent'] : 'ObjectData');
   fprintf($f, "  DECLARE_INVOKES_FROM_EVAL\n");
-  fprintf($f, "  ObjectData* dynCreate(CArrRef params, bool init = true);\n");
 
   fprintf($f, "\n");
 

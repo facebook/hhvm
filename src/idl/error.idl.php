@@ -203,7 +203,7 @@ DefineFunction(
     'args'   => array(
       array(
         'name'   => "exception_handler",
-        'type'   => String,
+        'type'   => Variant,
         'desc'   => "Name of the function to be called when an uncaught exception occurs. This function must be defined before calling set_exception_handler(). This handler function needs to accept one parameter, which will be the exception object that was thrown.",
       ),
     ),

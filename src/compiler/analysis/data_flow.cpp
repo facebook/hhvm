@@ -22,12 +22,31 @@ using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const char *DataFlow::GetName(int i) {
+#define DECLARE_DF_NAME(x,v) #x
+  static const char *names[] = {
+    DECLARE_DATA_FLOW(DECLARE_DF_NAME)
+  };
+  if (i >= 0 && i < NumBVs) return names[i];
+  return "Unknown";
+}
+
+int DataFlow::GetInit(int i) {
+#define DECLARE_DF_INIT(x,v) v
+  static int inits[] = {
+    DECLARE_DATA_FLOW(DECLARE_DF_INIT)
+  };
+  if (i >= 0 && i < NumBVs) return inits[i];
+  return 0;
+}
+
 void DataFlow::ComputeAvailable(const ControlFlowGraph &g) {
   int num = g.getNumBlocks();
   bool changed;
   BitOps::Bits *tmp1 = g.getTempBits(0);
   bool hasAltered = g.rowExists(Altered);
   size_t width = g.bitWidth();
+  bool firstTime = true;
 
   do {
     changed = false;
@@ -56,8 +75,10 @@ void DataFlow::ComputeAvailable(const ControlFlowGraph &g) {
           }
           BitOps::bit_copy(width, ain, p->getRow(AvailOut));
         }
-      } else {
-        // nothing to do
+      } else if (firstTime) {
+        // available defaults to all 1s
+        // if there are no preds, set to all 0s
+        BitOps::set(width, ain, 0);
       }
 
       BitOps::Bits *aout = b->getRow(AvailOut);
@@ -71,6 +92,7 @@ void DataFlow::ComputeAvailable(const ControlFlowGraph &g) {
       }
       if (!changed) changed = !BitOps::bit_equal(width, tmp1, aout);
     }
+    firstTime = false;
   } while (changed);
 }
 
@@ -80,6 +102,7 @@ void DataFlow::ComputeAnticipated(const ControlFlowGraph &g) {
   BitOps::Bits *tmp1 = g.getTempBits(0);
   bool hasAltered = g.rowExists(Altered);
   size_t width = g.bitWidth();
+  bool firstTime = true;
 
   do {
     changed = false;
@@ -108,8 +131,10 @@ void DataFlow::ComputeAnticipated(const ControlFlowGraph &g) {
           }
           BitOps::bit_copy(width, aout, s->getRow(AntIn));
         }
-      } else {
-        // nothing to do. aout is initialized to 0
+      } else if (firstTime) {
+        // anticipated defaults to all 1s
+        // if there are no succs, set to all 0s
+        BitOps::set(width, aout, 0);
       }
 
       BitOps::Bits *ain = b->getRow(AntIn);

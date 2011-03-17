@@ -1456,7 +1456,7 @@ Variant c_SplFileObject::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FE
   return (self->t_rewind(), null);
 }
 bool c_SplFileObject::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 0:
@@ -1643,36 +1643,6 @@ c_SplFileObject *c_SplFileObject::create(Variant v_filename, Variant v_open_mode
   CountableHelper h(this);
   init();
   t___construct(v_filename, v_open_mode, v_use_include_path, v_context);
-  return this;
-}
-ObjectData *c_SplFileObject::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 4) throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 3) {
-        (t___construct(arg0, arg1, arg2));
-        break;
-      }
-      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2, arg3));
-    } while (false);
-  }
   return this;
 }
 void c_SplFileObject::dynConstruct(CArrRef params) {
@@ -3183,7 +3153,7 @@ Variant c_SplFileInfo::ifa_gettype(MethodCallPackage &mcp, int count, INVOKE_FEW
   return (self->t_gettype());
 }
 bool c_SplFileInfo::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 63) {
     case 5:
@@ -3359,21 +3329,6 @@ c_SplFileInfo *c_SplFileInfo::create(Variant v_file_name) {
   CountableHelper h(this);
   init();
   t___construct(v_file_name);
-  return this;
-}
-ObjectData *c_SplFileInfo::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_SplFileInfo::dynConstruct(CArrRef params) {

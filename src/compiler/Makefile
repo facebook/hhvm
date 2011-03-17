@@ -7,6 +7,9 @@ SOURCE_SUBDIRS = expression statement analysis util parser
 INTERMEDIATE_FILES += $(OUT_DIR)analysis/code_error.inc
 ALWAYS_ASSERT = 1
 
+# No need to build PIC objects in this directory
+USE_NO_PIC = 1
+
 ERROR_INC := analysis/core_code_error.inc
 HOOK_RULE_FILE = $(wildcard hook.mk)
 ifneq ($(strip $(HOOK_RULE_FILE)),)

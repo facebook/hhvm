@@ -56,7 +56,6 @@ class c_Memcache : public ExtObjectData, public Sweepable {
   END_CLASS_MAP(Memcache)
   DECLARE_CLASS(Memcache, Memcache, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_Memcache();

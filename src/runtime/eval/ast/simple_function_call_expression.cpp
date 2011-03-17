@@ -18,6 +18,7 @@
 #include <runtime/eval/ast/name.h>
 #include <runtime/base/string_util.h>
 #include <runtime/eval/ast/scalar_expression.h>
+#include <runtime/eval/ast/closure_expression.h>
 #include <runtime/eval/ast/class_statement.h>
 #include <runtime/eval/runtime/eval_state.h>
 #include <runtime/eval/ast/function_statement.h>
@@ -39,20 +40,18 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   bool renamed = false;
 
   // handling closure
-  ObjectData *closure = NULL;
   if (name[0] == '0') {
     const char *id = strchr(name.data(), ':');
-    ASSERT(id);
     if (id) {
       int pos = id - name.data();
       String sid = name.substr(pos + 1);
-      name = name.substr(0, pos);
-      const Function *fs = RequestEvalState::findFunction(name.data());
+      String function = name.substr(0, pos);
+      const Function *fs = RequestEvalState::findFunction(function.data());
       if (fs) {
         const FunctionStatement *fstmt =
           dynamic_cast<const FunctionStatement *>(fs);
         if (fstmt) {
-          closure = (ObjectData*)sid.toInt64();
+          ObjectData *closure = (ObjectData*)sid.toInt64();
           return ref(fstmt->invokeClosure(Object(closure), env, this));
         }
       }
@@ -85,14 +84,43 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   void *vt1;
   get_call_info_or_fail(cit1, vt1, name);
   ArrayInit ai(m_params.size(), true);
+  bool invokeClosure = false;
+  Variant arg0;
   for (unsigned int i = 0; i < m_params.size(); ++i) {
-    if (cit1->mustBeRef(i)) {
-      ai.setRef(m_params[i]->refval(env));
-    } else if (cit1->isRef(i)) {
-      ai.setRef(m_params[i]->refval(env, 0));
-    } else {
-      ai.set(m_params[i]->eval(env));
+    Expression *param = m_params[i].get();
+    if (i == 0 &&
+        (name == "call_user_func" || name == "call_user_func_array")) {
+      ASSERT(!cit1->mustBeRef(i) && !cit1->isRef(i));
+      arg0 = param->eval(env);
+      if (arg0.instanceof("closure")) {
+        invokeClosure = true;
+      } else {
+        ai.set(arg0);
+      }
+      continue;
     }
+    if (cit1->mustBeRef(i)) {
+      ai.setRef(param->refval(env));
+    } else if (cit1->isRef(i)) {
+      ai.setRef(param->refval(env, 0));
+    } else {
+      ai.set(param->eval(env));
+    }
+  }
+  if (invokeClosure) {
+    String sfunction = arg0.toString();
+    const char *id = sfunction.data();
+    assert(id[0] == '0');
+    id = strchr(id, ':');
+    ASSERT(id);
+    int pos = id - sfunction.data();
+    String sid = sfunction.substr(pos + 1);
+    sfunction = sfunction.substr(0, pos);
+    const Function *fs = RequestEvalState::findFunction(sfunction.data());
+    const FunctionStatement *fstmt =
+      dynamic_cast<const FunctionStatement *>(fs);
+    ObjectData *closure = (ObjectData*)sid.toInt64();
+    return ref(fstmt->invokeClosure(Object(closure), env, this));
   }
   return (cit1->getFunc())(vt1, Array(ai.create()));
 }

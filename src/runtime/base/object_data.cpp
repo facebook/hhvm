@@ -154,7 +154,8 @@ bool ObjectData::os_get_call_info(MethodCallPackage &info,
     return info.obj->ObjectData::o_get_call_info(info, hash);
   }
   Object obj = FrameInjection::GetThis();
-  String cls = info.rootObj.toString();
+  ASSERT(!info.isObj);
+  String cls = info.rootCls;
   if (obj.isNull() || !obj->o_instanceof(cls)) {
     obj = create_object(cls, Array::Create(), false);
     obj->setDummy();
@@ -437,10 +438,7 @@ Variant *ObjectData::o_weakLval(CStrRef propName,
   return NULL;
 }
 
-Array ObjectData::o_toArray(bool warn /* = false */) const {
-  if (warn && RuntimeOption::EnableHipHopErrors) {
-    raise_warning("casting object to array");
-  }
+Array ObjectData::o_toArray() const {
   Array ret(ArrayData::Create());
   const_cast<ObjectData*>(this)->getRoot()->o_getArray(ret);
   return ret;
@@ -599,7 +597,8 @@ Variant ObjectData::o_invoke(const char *s, CArrRef params, int64 hash,
                              bool fatal /* = true */) {
   MethodCallPackage mcp;
   if (!fatal) mcp.noFatal();
-  mcp.methodCall(this, s, hash);
+  String str(s);
+  mcp.methodCall(this, str, hash);
   return (mcp.ci->getMeth())(mcp, params);
 }
 
@@ -612,9 +611,12 @@ Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
                                 CArrRef params, bool fatal /* = true */) {
   MethodCallPackage mcp;
   if (!fatal) mcp.noFatal();
-  mcp.methodCallEx(this, s);
+  String str(s);
+  mcp.methodCallEx(this, str);
   if (o_get_call_info_ex(clsname, mcp)) {
     return (mcp.ci->getMeth())(mcp, params);
+  } else {
+    o_invoke_failed(clsname.data(), s.data(), fatal);
   }
   return null;
 }
@@ -622,7 +624,8 @@ Variant ObjectData::o_invoke_ex(CStrRef clsname, CStrRef s,
 Variant ObjectData::o_invoke_few_args(const char *s, int64 hash, int count,
                                       INVOKE_FEW_ARGS_IMPL_ARGS) {
   MethodCallPackage mcp;
-  mcp.methodCall(this, s, hash);
+  String str(s);
+  mcp.methodCall(this, str, hash);
   return (mcp.ci->getMethFewArgs())(mcp, count, INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
@@ -640,7 +643,8 @@ ObjectData::o_invoke_from_eval(const char *s,
                                bool fatal /* = true */) {
   MethodCallPackage mcp;
   if (!fatal) mcp.noFatal();
-  mcp.methodCall(this, s, hash);
+  String str(s);
+  mcp.methodCall(this, str, hash);
   if (fatal && mcp.ci == &s_ObjectData_call_handler &&
       !hasCall() && !hasCallStatic()) {
     o_invoke_failed(o_getClassName().c_str(), s, true);
@@ -654,7 +658,7 @@ bool ObjectData::o_get_call_info(MethodCallPackage &mcp,
   // If UseMethodIndex is on, classes will define o_get_call_info_with_index
   // and this will be a virtual call to the class' version.
   // If it's off, this will go to ObjectData's version.
-  return o_get_call_info_with_index(mcp, methodIndexExists(mcp.name), hash);
+  return o_get_call_info_with_index(mcp, methodIndexExists(*mcp.name), hash);
 }
 
 bool ObjectData::o_get_call_info_ex(const char *clsname,
@@ -908,16 +912,17 @@ Variant ObjectData::t___clone() {
 
 Variant ObjectData::callHandler(MethodCallPackage &info, CArrRef params) {
   if (info.obj && info.obj->o_getId() && info.obj->hasCall()) {
-    return info.obj->doRootCall(info.name, params, true);
+    return info.obj->doRootCall(*info.name, params, true);
   }
   String clsname;
   if (!info.obj) {
-    clsname = info.rootObj.toString();
+    ASSERT(!info.isObj);
+    clsname = info.rootCls;
   } else {
     clsname = info.obj->o_getClassName();
   }
   return invoke_static_method(clsname, s___callStatic,
-                              CREATE_VECTOR2(info.name, params));
+                              CREATE_VECTOR2(*info.name, params), info.m_fatal);
 }
 
 Variant ObjectData::callHandlerFewArgs(MethodCallPackage &info, int count,

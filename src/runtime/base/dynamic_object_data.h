@@ -39,7 +39,7 @@ class DynamicObjectData : public ObjectData {
   virtual ObjectData *getRoot();
 
   // properties
-  virtual Array o_toArray(bool warn = false) const;
+  virtual Array o_toArray() const;  
   virtual bool o_toBoolean() const;
   virtual int64 o_toInt64() const;
   virtual double o_toDouble() const;

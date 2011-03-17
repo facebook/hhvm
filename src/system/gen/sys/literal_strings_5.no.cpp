@@ -22,6 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ssfbb3eb52("addUrl");
 StaticString s_sys_ssfc2d4779("getType");
 StaticString s_sys_ssfc63c2bb("ReflectionClass");
 StaticString s_sys_ssfdbe04fa("set");
@@ -49,6 +50,7 @@ StaticString s_sys_ss0a49a8a1("getAttribute");
 StaticString s_sys_ss0a60a5a3("OutOfRangeException");
 StaticString s_sys_ss0ab49528("printFrame");
 StaticString s_sys_ss0bb83e44("lastinsertid");
+StaticString s_sys_ss0bbec676("getLabel");
 StaticString s_sys_ss0bfd696f("setIDAttributeNS");
 StaticString s_sys_ss0c3a6c4a("getPath");
 StaticString s_sys_ss0c50ad86("OutOfBoundsException");
@@ -84,8 +86,6 @@ StaticString s_sys_ss1491baad("label");
 StaticString s_sys_ss14e5c43c("running");
 StaticString s_sys_ss14eade34("hasChildNodes");
 StaticString s_sys_ss155366df("message");
-StaticString s_sys_ss15921d14("areConfusable");
-StaticString s_sys_ss15a9d310("fgetcsv");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

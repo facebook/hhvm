@@ -116,6 +116,25 @@ private:
   }
 };
 
+void FunctionContainer::outputCPPJumpTableSupportMethod
+(CodeGenerator &cg, AnalysisResultPtr ar, FunctionScopePtr func,
+ const char *funcPrefix) {
+  string name = func->getId(cg);
+  const char *cname = name.c_str();
+  cg_indentBegin("Variant %s%s(void *extra, CArrRef params) {\n",
+      Option::InvokePrefix, cname);
+  FunctionScope::OutputCPPDynamicInvokeCount(cg);
+  func->outputCPPDynamicInvoke(cg, ar, funcPrefix, cname);
+  cg_indentEnd("}\n");
+
+  cg_indentBegin("Variant %s%s(void *extra, int count, "
+      "INVOKE_FEW_ARGS_IMPL_ARGS) {\n",
+      Option::InvokeFewArgsPrefix, cname);
+  func->outputCPPDynamicInvoke(cg, ar, funcPrefix, cname, false,
+      true);
+  cg_indentEnd("}\n");
+}
+
 void FunctionContainer::outputCPPJumpTableSupport
 (CodeGenerator &cg, AnalysisResultPtr ar, bool &hasRedeclared,
  vector<const char *> *funcs /* = NULL */) {
@@ -127,24 +146,11 @@ void FunctionContainer::outputCPPJumpTableSupport
       fit.next()) {
     FunctionScopePtr func = fit.get();
     if (func->inPseudoMain() || !(systemcpp || func->isDynamic())) continue;
-    string name = func->getId(cg);
-    const char *cname = name.c_str();
     if (funcs && fit.firstInner()) {
       funcs->push_back(fit.name().c_str());
     }
 
-    cg_indentBegin("Variant %s%s(void *extra, CArrRef params) {\n",
-        Option::InvokePrefix, cname);
-    FunctionScope::OutputCPPDynamicInvokeCount(cg);
-    func->outputCPPDynamicInvoke(cg, ar, funcPrefix, cname);
-    cg_indentEnd("}\n");
-
-    cg_indentBegin("Variant %s%s(void *extra, int count, "
-        "INVOKE_FEW_ARGS_IMPL_ARGS) {\n",
-        Option::InvokeFewArgsPrefix, cname);
-    func->outputCPPDynamicInvoke(cg, ar, funcPrefix, cname, false,
-        true);
-    cg_indentEnd("}\n");
+    outputCPPJumpTableSupportMethod(cg, ar, func, funcPrefix);
 
     if (func->isRedeclaring()) hasRedeclared = true;
   }
@@ -334,10 +340,11 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
     "    if (p->offset) {\n"
     "      const char *addr = (const char *)g + (int64)p->data;\n"
     "      ci = *(const CallInfo **)addr;\n"
+    "      return ci != 0;\n"
     "    } else {\n"
     "      ci = (const CallInfo *)p->data;\n"
+    "      return true;\n"
     "    }\n"
-    "    return true;\n"
     "  }\n";
 
   const char text4s[] =
@@ -405,12 +412,13 @@ void FunctionContainer::outputCPPCodeInfoTable(CodeGenerator &cg,
   for (FunctionIterator fit(*functions, needGlobals); fit.ready();
       fit.next()) {
     FunctionScopePtr func = fit.get();
-    if (!func->inPseudoMain() && (system || func->isDynamic()) &&
+    if (!func->inPseudoMain() &&
+        (system || func->isDynamic() || func->isSepExtension()) &&
         fit.firstInner()) {
       funcs.push_back(fit.name().c_str());
-      if (!support && !func->isRedeclaring()) {
+      if (!support && !func->isRedeclaring() && !func->isSepExtension()) {
         cg_printf("extern CallInfo %s%s;\n", Option::CallInfoPrefix,
-        func->getId(cg).c_str());
+                  func->getId(cg).c_str());
       }
     }
   }

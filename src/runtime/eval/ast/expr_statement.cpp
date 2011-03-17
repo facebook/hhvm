@@ -27,13 +27,13 @@ ExprStatement::ExprStatement(STATEMENT_ARGS, ExpressionPtr exp)
 
 void ExprStatement::eval(VariableEnvironment &env) const {
   if (env.isGotoing()) return;
-  m_exp->eval(env);
 
   // if m_exp hasn't set the line yet, set it, otherwise, we can skip
   // so to avoid annoying double-stay with debugger's "step" command.
   if (loc()->line1 != ThreadInfo::s_threadInfo->m_top->getLine()) {
     ENTER_STMT;
   }
+  m_exp->eval(env);
 }
 
 void ExprStatement::dump(std::ostream &out) const {

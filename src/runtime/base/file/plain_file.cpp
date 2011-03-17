@@ -91,13 +91,15 @@ bool PlainFile::close() {
 
 bool PlainFile::closeImpl() {
   bool ret = true;
+  s_file_data->m_pcloseRet = 0;
   if (!m_closed) {
     if (m_stream) {
-      ret = (fclose(m_stream) == 0);
+      s_file_data->m_pcloseRet = fclose(m_stream);
       m_stream = NULL;
     } else if (m_fd >= 0) {
-      ret = (::close(m_fd) == 0);
+      s_file_data->m_pcloseRet = ::close(m_fd);
     }
+    ret = (s_file_data->m_pcloseRet == 0);
     m_closed = true;
     m_fd = -1;
   }

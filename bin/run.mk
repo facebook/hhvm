@@ -31,13 +31,8 @@ include $(HPHP_HOME)/src/rules.mk
 
 ifdef HPHP_BUILD_LIBRARY
 
-ifdef TLS_GD
-EXTERNAL += $(HPHP_LIB)/libhphp_runtime_gd.so
-HPHP_OBJ_DIR = $(HPHP_HOME)/output_gd
-else
 EXTERNAL += $(HPHP_LIB)/libhphp_runtime.so
 HPHP_OBJ_DIR = $(HPHP_HOME)
-endif
 
 ifdef HPHP_BUILD_FFI
 EXTERNAL += $(HPHP_LIB)/libhphp_java.so

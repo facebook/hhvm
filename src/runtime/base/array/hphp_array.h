@@ -50,7 +50,7 @@ public:
   virtual ssize_t iter_advance(ssize_t prev) const;
   virtual ssize_t iter_rewind(ssize_t prev) const;
 
-  ssize_t iter_advance_helper(ssize_t prev) const __attribute__((cold));
+  ssize_t iter_advance_helper(ssize_t prev) const ATTRIBUTE_COLD;
 
   virtual Variant reset();
   virtual Variant prev();
@@ -263,21 +263,21 @@ private:
 
   inline Elm* ALWAYS_INLINE allocElm(ElmInd* ei);
   void reallocData(size_t maxElms, size_t tableSize);
-  void delinearize() __attribute__((cold));
+  void delinearize() ATTRIBUTE_COLD;
 
   /**
    * grow() increases the hash table size and the number of slots for
    * elements by a factor of 2. grow() rebuilds the hash table, but it
    * does not compact the elements.
    */
-  void grow() __attribute__((cold));
+  void grow() ATTRIBUTE_COLD;
 
   /**
    * compact() does not change the hash table size or the number of slots
    * for elements. compact() rebuilds the hash table and compacts the
    * elements into the slots with lower addresses.
    */
-  void compact(bool renumber=false) __attribute__((cold));
+  void compact(bool renumber=false) ATTRIBUTE_COLD;
 
   /**
    * resize() and resizeIfNeeded() will grow or compact the array as

@@ -54,7 +54,7 @@ public:
    * evaluates true.
    */
   void outputCPPAsIf(CodeGenerator &cg, AnalysisResultPtr ar,
-                     int varId, int caseNum);
+                     int varId, const char *var, int caseNum);
 
   /**
    * Generate a case statement that cases by caseNum.

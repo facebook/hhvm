@@ -22,6 +22,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+StaticString s_sys_ss4e65aff3("\000Continuation\000value", 19);
+StaticString s_sys_ss4efec04e("getResultCode");
+StaticString s_sys_ss4f2f48c7("getMessage");
+StaticString s_sys_ss4fa2c4dd("helpTitle");
+StaticString s_sys_ss500f232f("lasterrormsg");
+StaticString s_sys_ss504bc94d("isInternal");
 StaticString s_sys_ss50652d33("next");
 StaticString s_sys_ss508b1d41("addfunction");
 StaticString s_sys_ss5097084d("setByKey");
@@ -80,12 +86,6 @@ StaticString s_sys_ss6640e60f("listIdentifiers");
 StaticString s_sys_ss6677e6df("fgetss");
 StaticString s_sys_ss672a5730("css");
 StaticString s_sys_ss6775c5a7("__getlastrequestheaders");
-StaticString s_sys_ss679e8b98("normalize");
-StaticString s_sys_ss6863d210("schemaValidateSource");
-StaticString s_sys_ss68bc25e3("__dorequest");
-StaticString s_sys_ss68d731f7("getChildren");
-StaticString s_sys_ss690e46e7("saveHTML");
-StaticString s_sys_ss6974a1cc("__toString");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

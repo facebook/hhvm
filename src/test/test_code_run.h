@@ -135,6 +135,7 @@ class TestCodeRun : public TestBase {
   bool TestDefined();
   bool TestAssignment();
   bool TestPrint();
+  bool TestVarExport();
   bool TestLocale();
   bool TestBadFunctionCalls();
   bool TestConstructor();

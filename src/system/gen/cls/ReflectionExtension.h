@@ -67,7 +67,6 @@ class c_ReflectionExtension : public ExtObjectData {
   void init();
   public: void t___construct(Variant v_name);
   public: c_ReflectionExtension *create(Variant v_name);
-  public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);

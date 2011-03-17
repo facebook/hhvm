@@ -160,7 +160,7 @@ void VariableSerializer::write(double v) {
     {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
-      vspprintf(&buf, 0, "%.*G", 14, v);
+      vspprintf(&buf, 0, m_type == VarExport ? "%.*H" : "%.*G", 14, v);
       m_buf->append(buf);
       free(buf);
     }
@@ -189,7 +189,7 @@ void VariableSerializer::write(double v) {
     } else {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
-      vspprintf(&buf, 0, "%.*G", 14, v);
+      vspprintf(&buf, 0, "%.*H", 14, v);
       m_buf->append(buf);
       free(buf);
     }
@@ -217,16 +217,11 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     for (int i = 0; i < len; i++, p++) {
       const char c = *p;
       // adapted from Zend php_var_export and php_addcslashes
-      if (c == '\'' || c == '\\' || (!isArrayKey && c == '\0')) {
-        if ((unsigned char) c < 32 || (unsigned char) c > 126) {
-          m_buf->append('\\');
-          char buffer[4];
-          sprintf(buffer, "%03o", (unsigned char)c);
-          m_buf->append(buffer);
-          continue;
-        } else {
-          m_buf->append('\\');
-        }
+      if (c == '\0') {
+        m_buf->append("' . \"\\0\" . '");
+        continue;
+      } else if (c == '\'' || c == '\\') {
+        m_buf->append('\\');
       }
       m_buf->append(c);
     }

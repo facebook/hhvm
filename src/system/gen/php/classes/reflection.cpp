@@ -618,7 +618,7 @@ Variant c_ReflectionFunctionAbstract::ifa_isinternal(MethodCallPackage &mcp, int
   return (self->t_isinternal());
 }
 bool c_ReflectionFunctionAbstract::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
@@ -832,8 +832,9 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
           bool tmp0;
           {
             MethodCallPackage mcp1;
-            mcp1.methodCall((v_param.objectForCall()), NAMSTR(s_sys_ss6d9ef7e5, "isOptional"), 0x2D6EF48BBAB22735LL);
-            const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+            CVarRef obj1 = v_param;
+            mcp1.methodCall((obj1), NAMSTR(s_sys_ss6d9ef7e5, "isOptional"), 0x2D6EF48BBAB22735LL);
+            const CallInfo *cit1 __attribute__((__unused__)) = mcp1.ci;
             tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
           }
           if (tmp0) {
@@ -993,7 +994,7 @@ CallInfo c_ReflectionObject::ci_export((void*)&c_ReflectionObject::i_export, (vo
 Variant c_ReflectionObject::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1004,13 +1005,13 @@ Variant c_ReflectionObject::i_export(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant c_ReflectionObject::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0((a0));
   CVarRef arg1((a1));
   return (c_ReflectionObject::ti_export(c, arg0, arg1));
 }
 bool c_ReflectionObject::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 1) {
     case 0:
@@ -1134,7 +1135,7 @@ Variant c_ReflectionException::os_invoke_from_eval(const char *c, const char *s,
   return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_ReflectionException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_Exception::os_get_call_info(mcp, hash);
 }
 bool c_ReflectionException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -2245,7 +2246,7 @@ Variant c_ReflectionClass::i_getmodifiers(MethodCallPackage &mcp, CArrRef params
 Variant c_ReflectionClass::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -2806,7 +2807,7 @@ Variant c_ReflectionClass::ifa_getmodifiers(MethodCallPackage &mcp, int count, I
 }
 Variant c_ReflectionClass::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0((a0));
   CVarRef arg1((a1));
   return (c_ReflectionClass::ti_export(c, arg0, arg1));
@@ -3112,7 +3113,7 @@ Variant c_ReflectionClass::ifa_isinternal(MethodCallPackage &mcp, int count, INV
   return (self->t_isinternal());
 }
 bool c_ReflectionClass::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 127) {
     case 4:
@@ -3370,21 +3371,6 @@ c_ReflectionClass *c_ReflectionClass::create(Variant v_name) {
   CountableHelper h(this);
   init();
   t___construct(v_name);
-  return this;
-}
-ObjectData *c_ReflectionClass::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_ReflectionClass::dynConstruct(CArrRef params) {
@@ -4059,8 +4045,9 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
     {
       {
         MethodCallPackage mcp0;
-        mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
-        const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+        CVarRef obj0 = v_cls;
+        mcp0.methodCall((obj0), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
+        const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, NAMSTR(s_sys_ssdc3cbddc, "name"))));
         v_cls = tmp1;
       }
@@ -4117,8 +4104,9 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   }
   {
     MethodCallPackage mcp0;
-    mcp0.methodCall((t_getparentclass().objectForCall()), NAMSTR(s_sys_ssdd355b2b, "isSubclassOf"), 0x373333991926C97ELL);
-    const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+    CVarRef obj0 = t_getparentclass();
+    mcp0.methodCall((obj0), NAMSTR(s_sys_ssdd355b2b, "isSubclassOf"), 0x373333991926C97ELL);
+    const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
     return wrap_variant((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_cls));
   }
 }
@@ -4141,8 +4129,9 @@ Array c_ReflectionClass::t_getstaticproperties() {
           bool tmp0;
           {
             MethodCallPackage mcp1;
-            mcp1.methodCall((v_prop.objectForCall()), NAMSTR(s_sys_ss404bf1b4, "isStatic"), 0x7A15DC56E8CC0B19LL);
-            const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+            CVarRef obj1 = v_prop;
+            mcp1.methodCall((obj1), NAMSTR(s_sys_ss404bf1b4, "isStatic"), 0x7A15DC56E8CC0B19LL);
+            const CallInfo *cit1 __attribute__((__unused__)) = mcp1.ci;
             tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
           }
           if (tmp0) {
@@ -4207,8 +4196,9 @@ Array c_ReflectionClass::t_getdefaultproperties() {
           bool tmp0;
           {
             MethodCallPackage mcp1;
-            mcp1.methodCall((v_prop.objectForCall()), NAMSTR(s_sys_ss9dad4367, "isDefault"), 0x384A52597AB11F15LL);
-            const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+            CVarRef obj1 = v_prop;
+            mcp1.methodCall((obj1), NAMSTR(s_sys_ss9dad4367, "isDefault"), 0x384A52597AB11F15LL);
+            const CallInfo *cit1 __attribute__((__unused__)) = mcp1.ci;
             tmp0 = (toBoolean((mcp1.bindClass(fi)->getMeth0Args())(mcp1, 0)));
           }
           if (tmp0) {
@@ -4243,8 +4233,9 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
     {
       {
         MethodCallPackage mcp0;
-        mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
-        const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+        CVarRef obj0 = v_cls;
+        mcp0.methodCall((obj0), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
+        const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, NAMSTR(s_sys_ssdc3cbddc, "name"))));
         v_cls = tmp1;
       }
@@ -4307,8 +4298,9 @@ Variant c_ReflectionClass::t_getextensionname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtensionName);
   {
     MethodCallPackage mcp0;
-    mcp0.methodCall((t_fetch(NAMSTR(s_sys_sse9bf4500, "extension")).objectForCall()), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
-    const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+    CVarRef obj0 = t_fetch(NAMSTR(s_sys_sse9bf4500, "extension"));
+    mcp0.methodCall((obj0), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
+    const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
     return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
   }
 }
@@ -4678,7 +4670,7 @@ Variant c_ReflectionExtension::i_getfunctions(MethodCallPackage &mcp, CArrRef pa
 Variant c_ReflectionExtension::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -4807,7 +4799,7 @@ Variant c_ReflectionExtension::ifa_getfunctions(MethodCallPackage &mcp, int coun
 }
 Variant c_ReflectionExtension::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0((a0));
   CVarRef arg1((a1));
   return (c_ReflectionExtension::ti_export(c, arg0, arg1));
@@ -4890,7 +4882,7 @@ Variant c_ReflectionExtension::ifa_getclasses(MethodCallPackage &mcp, int count,
   return (self->t_getclasses());
 }
 bool c_ReflectionExtension::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 2:
@@ -4968,21 +4960,6 @@ c_ReflectionExtension *c_ReflectionExtension::create(Variant v_name) {
   CountableHelper h(this);
   init();
   t___construct(v_name);
-  return this;
-}
-ObjectData *c_ReflectionExtension::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_ReflectionExtension::dynConstruct(CArrRef params) {
@@ -5117,8 +5094,9 @@ Array c_ReflectionExtension::t_getclassnames() {
       {
         {
           MethodCallPackage mcp0;
-          mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
-          const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+          CVarRef obj0 = v_cls;
+          mcp0.methodCall((obj0), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
+          const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
           Variant tmp1(((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0)));
           v_ret.append((tmp1));
         }
@@ -5714,7 +5692,7 @@ Variant c_ReflectionMethod::i_getmodifiers(MethodCallPackage &mcp, CArrRef param
 Variant c_ReflectionMethod::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -5907,7 +5885,7 @@ Variant c_ReflectionMethod::ifa_getmodifiers(MethodCallPackage &mcp, int count, 
 }
 Variant c_ReflectionMethod::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0((a0));
   CVarRef arg1((a1));
   CVarRef arg2((a2));
@@ -5976,7 +5954,7 @@ Variant c_ReflectionMethod::ifa_isabstract(MethodCallPackage &mcp, int count, IN
   return (self->t_isabstract());
 }
 bool c_ReflectionMethod::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 2:
@@ -6087,26 +6065,6 @@ c_ReflectionMethod *c_ReflectionMethod::create(Variant v_cls, Variant v_name // 
   CountableHelper h(this);
   init();
   t___construct(v_cls, v_name);
-  return this;
-}
-ObjectData *c_ReflectionMethod::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count < 1 || count > 2) throw_wrong_arguments("ReflectionMethod::__construct", count, 1, 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
   return this;
 }
 void c_ReflectionMethod::dynConstruct(CArrRef params) {
@@ -6220,8 +6178,9 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMST
       }
       {
         MethodCallPackage mcp0;
-        mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
-        const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+        CVarRef obj0 = v_cls;
+        mcp0.methodCall((obj0), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
+        const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
         v_method = tmp1;
       }
@@ -6279,8 +6238,9 @@ Variant c_ReflectionMethod::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name
   }
   {
     MethodCallPackage mcp0;
-    mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
-    const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+    CVarRef obj0 = v_cls;
+    mcp0.methodCall((obj0), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
+    const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
     Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
     v_obj = tmp1;
   }
@@ -6953,7 +6913,7 @@ Variant c_ReflectionProperty::i_getmodifiers(MethodCallPackage &mcp, CArrRef par
 Variant c_ReflectionProperty::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -7139,7 +7099,7 @@ Variant c_ReflectionProperty::ifa_getmodifiers(MethodCallPackage &mcp, int count
 }
 Variant c_ReflectionProperty::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0((a0));
   CVarRef arg1((a1));
   CVarRef arg2((a2));
@@ -7204,7 +7164,7 @@ Variant c_ReflectionProperty::ifa_getname(MethodCallPackage &mcp, int count, INV
   return (self->t_getname());
 }
 bool c_ReflectionProperty::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 2:
@@ -7308,22 +7268,6 @@ c_ReflectionProperty *c_ReflectionProperty::create(Variant v_cls, Variant v_name
   t___construct(v_cls, v_name);
   return this;
 }
-ObjectData *c_ReflectionProperty::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 2) throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    }
-  }
-  return this;
-}
 void c_ReflectionProperty::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
@@ -7401,8 +7345,9 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
       }
       {
         MethodCallPackage mcp0;
-        mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
-        const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+        CVarRef obj0 = v_cls;
+        mcp0.methodCall((obj0), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
+        const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
         v_prop = tmp1;
       }
@@ -7460,8 +7405,9 @@ Variant c_ReflectionProperty::ti_export(CStrRef cls, Variant v_cls, CVarRef v_na
   }
   {
     MethodCallPackage mcp0;
-    mcp0.methodCall((v_cls.objectForCall()), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
-    const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+    CVarRef obj0 = v_cls;
+    mcp0.methodCall((obj0), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
+    const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
     Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
     v_obj = tmp1;
   }
@@ -7854,7 +7800,7 @@ Variant c_ReflectionFunction::i_invokeargs(MethodCallPackage &mcp, CArrRef param
 Variant c_ReflectionFunction::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -7912,7 +7858,7 @@ Variant c_ReflectionFunction::ifa_invokeargs(MethodCallPackage &mcp, int count, 
 }
 Variant c_ReflectionFunction::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0((a0));
   CVarRef arg1((a1));
   return (c_ReflectionFunction::ti_export(c, arg0, arg1));
@@ -7935,7 +7881,7 @@ Variant c_ReflectionFunction::ifa_invoke(MethodCallPackage &mcp, int count, INVO
   return (self->t_invoke(count, p));
 }
 bool c_ReflectionFunction::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 15) {
     case 2:
@@ -7981,21 +7927,6 @@ c_ReflectionFunction *c_ReflectionFunction::create(Variant v_name) {
   CountableHelper h(this);
   init();
   t___construct(v_name);
-  return this;
-}
-ObjectData *c_ReflectionFunction::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 1) throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      (t___construct(arg0));
-    }
-  }
   return this;
 }
 void c_ReflectionFunction::dynConstruct(CArrRef params) {
@@ -8522,7 +8453,7 @@ Variant c_ReflectionParameter::i_getclass(MethodCallPackage &mcp, CArrRef params
 Variant c_ReflectionParameter::i_export(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -8675,7 +8606,7 @@ Variant c_ReflectionParameter::ifa_getclass(MethodCallPackage &mcp, int count, I
 }
 Variant c_ReflectionParameter::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
-  CStrRef c(mcp.rootObj.is(KindOfObject) ? mcp.rootObj.getObjectData()->o_getClassName() : mcp.rootObj.toString());
+  CStrRef c(mcp.isObj ? mcp.rootObj->o_getClassName() : String(mcp.rootCls));
   CVarRef arg0((a0));
   CVarRef arg1((a1));
   CVarRef arg2((a2));
@@ -8759,7 +8690,7 @@ Variant c_ReflectionParameter::ifa_ispassedbyreference(MethodCallPackage &mcp, i
   return (self->t_ispassedbyreference());
 }
 bool c_ReflectionParameter::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 3:
@@ -8851,22 +8782,6 @@ c_ReflectionParameter *c_ReflectionParameter::create(Variant v_func, Variant v_p
   t___construct(v_func, v_param);
   return this;
 }
-ObjectData *c_ReflectionParameter::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count != 2) throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
-    {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    }
-  }
-  return this;
-}
 void c_ReflectionParameter::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 2) throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
@@ -8924,8 +8839,9 @@ void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
     {
       {
         MethodCallPackage mcp0;
-        mcp0.methodCall((v_func.objectForCall()), NAMSTR(s_sys_ss1902bc14, "getParameters"), 0x3E62225132C2A32DLL);
-        const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+        CVarRef obj0 = v_func;
+        mcp0.methodCall((obj0), NAMSTR(s_sys_ss1902bc14, "getParameters"), 0x3E62225132C2A32DLL);
+        const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0)));
         v_params = tmp1;
       }

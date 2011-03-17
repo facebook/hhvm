@@ -196,6 +196,7 @@ void FunctionStatement::init(void *parser, bool ref,
 
   bool seenOptional = false;
   set<string> names;
+  m_callInfo.m_argCount = m_params.size();
   for (unsigned int i = 0; i < m_params.size(); i++) {
     ParameterPtr param = m_params[i];
 
@@ -247,9 +248,8 @@ void FunctionStatement::eval(VariableEnvironment &env) const {
 
 Variant FunctionStatement::invoke(CArrRef params) const {
   DECLARE_THREAD_INFO_NOINIT
-  FuncScopeVariableEnvironment env(this, params.size());
+  FuncScopeVariableEnvironment env(this);
   EvalFrameInjection fi(empty_string, m_name.c_str(), env, loc()->file);
-  env.setArgPop();
   if (m_ref) {
     return ref(invokeImpl(env, params));
   }
@@ -339,11 +339,9 @@ Variant FunctionStatement::directInvoke(VariableEnvironment &env,
                                         const FunctionCallExpression *caller)
   const {
   DECLARE_THREAD_INFO_NOINIT
-  FuncScopeVariableEnvironment fenv(this, 0);
+  FuncScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv);
-  fenv.setArgPop();
   EvalFrameInjection fi(empty_string, m_name.c_str(), fenv, loc()->file);
-  fenv.setArgPop();
   if (m_ref) {
     return ref(evalBody(fenv));
   } else {
@@ -357,9 +355,8 @@ Variant FunctionStatement::invokeClosure(CObjRef closure,
                                          const FunctionCallExpression *caller)
   const {
   DECLARE_THREAD_INFO_NOINIT
-  FuncScopeVariableEnvironment fenv(this, 0);
+  FuncScopeVariableEnvironment fenv(this);
   directBind(env, caller, fenv);
-  fenv.setArgPop();
 
   p_Closure c = closure.getTyped<c_Closure>();
   for (ArrayIter iter(c->m_vars); iter; ++iter) {
@@ -379,21 +376,22 @@ LVariableTable *FunctionStatement::getStaticVars(VariableEnvironment &env)
   return &RequestEvalState::getFunctionStatics(this);
 }
 
-Variant FunctionStatement::invokeImpl(VariableEnvironment &env,
+Variant FunctionStatement::invokeImpl(FuncScopeVariableEnvironment &fenv,
                                       CArrRef params) const {
   VariantStack &as = RequestEvalState::argStack();
 
   for (ArrayIter iter(params); !iter.end(); iter.next()) {
     as.push(iter.second());
+    fenv.incArgc();
   }
 
   vector<ParameterPtr>::const_iterator piter = m_params.begin();
   for (ArrayIter iter(params); !iter.end() && piter != m_params.end();
        ++piter, iter.next()) {
     if ((*piter)->isRef()) {
-      (*piter)->bind(env, iter.secondRef(), true);
+      (*piter)->bind(fenv, iter.secondRef(), true);
     } else {
-      (*piter)->bind(env, iter.second());
+      (*piter)->bind(fenv, iter.second());
     }
   }
 
@@ -402,13 +400,13 @@ Variant FunctionStatement::invokeImpl(VariableEnvironment &env,
     if (!(*piter)->isOptional()) {
       throw_missing_arguments(fullName().c_str(), (*piter)->argNum());
     }
-    (*piter)->bindDefault(env);
+    (*piter)->bindDefault(fenv);
   }
 
   if (m_ref) {
-    return ref(evalBody(env));
+    return ref(evalBody(fenv));
   } else {
-    return evalBody(env);
+    return evalBody(fenv);
   }
 }
 

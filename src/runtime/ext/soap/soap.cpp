@@ -60,8 +60,9 @@ SoapData::SoapData() : m_cache(WSDL_CACHE_MEMORY), m_cache_ttl(86400) {
   m_defEncNs[SOAP_1_2_ENC_NAMESPACE] = SOAP_1_2_ENC_NS_PREFIX;
 }
 
-sdl *SoapData::get_sdl(const char *uri, long cache_wsdl) {
-  sdlPtr sdl = get_sdl_impl(uri, cache_wsdl);
+sdl *SoapData::get_sdl(const char *uri, long cache_wsdl,
+                       HttpClient *http /* = NULL */) {
+  sdlPtr sdl = get_sdl_impl(uri, cache_wsdl, http);
   if (sdl) {
     // holding it for the entire request life time, so soapserver and
     // soapclient can use sdl* without being deleted
@@ -87,7 +88,8 @@ void SoapData::register_encoding(xmlCharEncodingHandlerPtr encoding) {
   }
 }
 
-sdlPtr SoapData::get_sdl_impl(const char *uri, long cache_wsdl) {
+sdlPtr SoapData::get_sdl_impl(const char *uri, long cache_wsdl,
+                              HttpClient *http) {
   if (cache_wsdl & WSDL_CACHE_MEMORY) {
     sdlCache::iterator iter = m_mem_cache.find(uri);
     if (iter != m_mem_cache.end()) {
@@ -102,7 +104,7 @@ sdlPtr SoapData::get_sdl_impl(const char *uri, long cache_wsdl) {
 
   const char *old = m_error_code;
   m_error_code = "WSDL";
-  sdlPtr sdl = load_wsdl((char*)uri);
+  sdlPtr sdl = load_wsdl((char*)uri, http);
   m_error_code = old;
 
   if (sdl && (cache_wsdl & WSDL_CACHE_MEMORY)) {

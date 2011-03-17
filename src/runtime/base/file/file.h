@@ -20,9 +20,25 @@
 #include <runtime/base/types.h>
 #include <runtime/base/resource_data.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/util/request_local.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+class FileData : public RequestEventHandler {
+public:
+  FileData() : m_pcloseRet(0) {}
+  void clear() { m_pcloseRet = 0; }
+  virtual void requestInit() {
+    clear();
+  }
+  virtual void requestShutdown() {
+    clear();
+  }
+  int m_pcloseRet;
+};
+
+DECLARE_REQUEST_LOCAL(FileData, s_file_data);
 
 /**
  * This is PHP's "stream", base class of plain file, gzipped file, directory
@@ -47,6 +63,7 @@ public:
 
   static StaticString s_class_name;
   static StaticString s_resource_name;
+
   // overriding ResourceData
   CStrRef o_getClassName() const { return s_class_name; }
   CStrRef o_getResourceName() const { return s_resource_name; }

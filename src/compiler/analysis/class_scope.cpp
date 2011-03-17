@@ -912,8 +912,7 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
     cg_printf("return get_call_info_static_method_no_index%s(mcp);\n",
         system ? "_builtin" : "");
   } else {
-    cg_printf("StringData *s __attribute__((__unused__)) "
-        "(mcp.rootObj.getStringData());\n");
+    cg_printf("StringData *s __attribute__((__unused__)) (mcp.rootCls);\n");
 
     if (!system && Option::EnableEval == Option::FullEval) {
       cg_printf("bool foundClass = false;\n");
@@ -959,8 +958,7 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
       "(MethodCallPackage &mcp, MethodIndex mi) {\n",
       system ? "_builtin" : "");
   if (Option::UseMethodIndex) {
-    cg_printf("StringData *s __attribute__((__unused__)) "
-        "(mcp.rootObj.getStringData());\n");
+    cg_printf("StringData *s __attribute__((__unused__)) (mcp.rootCls);\n");
 
     if (!system && Option::EnableEval == Option::FullEval) {
       cg_printf("bool foundClass = false;\n");
@@ -1606,6 +1604,15 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
     iterFuncs = funcScopes.find(name);
     ASSERT(iterFuncs != funcScopes.end());
     FunctionScopePtr func = iterFuncs->second[0];
+
+    // For functions with no parameter, we can combine the i_ wrapper and
+    // the ifa_ wrapper.
+    if (Option::InvokeWithSpecificArgs && !fewArgs &&
+        !ar->isSystem() && !ar->isSepExtension() &&
+        func->getMaxParamCount() == 0 && !func->isVariableArgument()) {
+      continue;
+    }
+
     const char *extra = NULL;
     string prefix;
     const char *instance = NULL;
@@ -1645,12 +1652,12 @@ void ClassScope::outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
       cg_printf("self = createDummy(pobj);\n");
       cg_indentEnd("}\n");
     } else {
-      // If rootObj is an object, was a static method invoked instance style.
+      // If mcp contains an object, was a static method invoked instance style.
       // Use rootObj's class name as invoking class
       class_name =
-        "CStrRef c(mcp.rootObj.is(KindOfObject)"
-        " ? mcp.rootObj.getObjectData()->o_getClassName()"
-        " : mcp.rootObj.toString());\n";
+        "CStrRef c(mcp.isObj"
+        " ? mcp.rootObj->o_getClassName()"
+        " : String(mcp.rootCls));\n";
     }
     func->outputCPPDynamicInvoke(cg, ar, prefix.c_str(),
                                  lname.c_str(), false, fewArgs, true, extra,
@@ -1752,7 +1759,13 @@ void ClassScope::outputCPPJumpTableDecl(CodeGenerator &cg,
          m_functions.begin(); iter != m_functions.end(); ++iter) {
     FunctionScopePtr func = iter->second[0];
     string id = cg.formatLabel(func->getName());
-    cg_printf("DECLARE_METHOD_INVOKE_HELPERS(%s);\n", id.c_str());
+    if (Option::InvokeWithSpecificArgs &&
+        !ar->isSystem() && !ar->isSepExtension() &&
+        func->getMaxParamCount() == 0 && !func->isVariableArgument()) {
+      cg_printf("DECLARE_METHOD_INVOKE_HELPERS_NOPARAM(%s);\n", id.c_str());
+    } else {
+      cg_printf("DECLARE_METHOD_INVOKE_HELPERS(%s);\n", id.c_str());
+    }
   }
 }
 
@@ -1882,7 +1895,7 @@ void ClassScope::outputCPPJumpTable(CodeGenerator &cg,
       cg_indentBegin("bool %s%s(MethodCallPackage &mcp, %sint64 hash) {\n",
           scope.c_str(), invokeName.c_str(),
           Option::UseMethodIndex ? "MethodIndex mi, " : "");
-      cg_printf("CStrRef s __attribute__((__unused__)) (mcp.name);\n");
+      cg_printf("CStrRef s __attribute__((__unused__)) (*mcp.name);\n");
       break;
     default: ASSERT(false);
   }

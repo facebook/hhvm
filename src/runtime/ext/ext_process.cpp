@@ -243,21 +243,16 @@ static SignalHandlersStaticInitializer s_signal_handlers_initializer;
 
 bool f_pcntl_signal_dispatch() {
   int *signaled = s_signal_handlers->signaled;
-  bool error = false;
   for (int i = 0; i < _NSIG; i++) {
     if (signaled[i]) {
       signaled[i] = 0;
       if (s_signal_handlers->handlers.exists(i)) {
-        try {
-          f_call_user_func_array(s_signal_handlers->handlers[i],
-                                 CREATE_VECTOR1(i));
-        } catch (...) {
-          error = true;
-        }
+        f_call_user_func_array(s_signal_handlers->handlers[i],
+                               CREATE_VECTOR1(i));
       }
     }
   }
-  return !error;
+  return true;
 }
 
 bool f_pcntl_signal(int signo, CVarRef handler,
@@ -369,11 +364,7 @@ String f_exec(CStrRef command, Variant output /* = null */,
 
   Array lines = StringUtil::Explode(sbuf.detach(), "\n");
   int ret = ctx.exit();
-  if (!LightProcess::Available()) {
-    if (WIFEXITED(ret)) {
-      ret = WEXITSTATUS(ret);
-    }
-  }
+  if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
   return_var = ret;
   int count = lines.size();
   if (count > 0 && lines[count - 1].toString().empty()) {
@@ -406,7 +397,9 @@ void f_passthru(CStrRef command, Variant return_var /* = null */) {
     buffer[len] = '\0';
     echo(String(buffer, len, AttachLiteral));
   }
-  return_var = ctx.exit();
+  int ret = ctx.exit();
+  if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
+  return_var = ret;
 }
 
 String f_system(CStrRef command, Variant return_var /* = null */) {
@@ -419,7 +412,9 @@ String f_system(CStrRef command, Variant return_var /* = null */) {
   }
 
   Array lines = StringUtil::Explode(sbuf.detach(), "\n");
-  return_var = ctx.exit();
+  int ret = ctx.exit();
+  if (WIFEXITED(ret)) ret = WEXITSTATUS(ret);
+  return_var = ret;
   int count = lines.size();
   if (count > 0 && lines[count - 1].toString().empty()) {
     count--; // remove explode()'s last empty line
@@ -639,7 +634,7 @@ static bool pre_proc_open(CArrRef descriptorspec,
   return false;
 }
 
-static Variant post_proc_open(CStrRef cmd, Variant &pipes, CStrRef cwd,
+static Variant post_proc_open(CStrRef cmd, Variant &pipes,
                               CVarRef env, vector<DescriptorItem> &items,
                               pid_t child) {
   if (child < 0) {
@@ -694,9 +689,11 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
     }
 
     child = LightProcess::proc_open(cmd.c_str(), created, intended,
-                                    cwd.c_str(), envs);
+                                    cwd.empty() ? g_context->getCwd().c_str()
+                                                : cwd.c_str(),
+                                    envs);
     ASSERT(child);
-    return post_proc_open(cmd, pipes, cwd, env, items, child);
+    return post_proc_open(cmd, pipes, env, items, child);
   } else {
     /* the unix way */
     Lock lock(DescriptorItem::s_mutex);
@@ -704,7 +701,7 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
     child = fork();
     if (child) {
       // the parent process
-      return post_proc_open(cmd, pipes, cwd, env, items, child);
+      return post_proc_open(cmd, pipes, env, items, child);
     }
   }
 
@@ -717,10 +714,8 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
   for (int i = 0; i < (int)items.size(); i++) {
     items[i].dupChild();
   }
-  if (!cwd.empty()) {
-    if (chdir(cwd) < 0) {
-      // chdir failed, the working directory remains unchanged
-    }
+  if (chdir(cwd.empty() ? g_context->getCwd() : cwd) < 0) {
+    // chdir failed, the working directory remains unchanged
   }
   if (!env.isNull()) {
     vector<String> senvs; // holding those char *

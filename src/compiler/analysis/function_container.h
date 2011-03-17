@@ -74,6 +74,9 @@ protected:
       std::vector<const char *> *funcs = NULL);
   void outputCPPCallInfoTableSupport(CodeGenerator &cg, AnalysisResultPtr ar,
       bool &hasRedeclared, std::vector<const char *> *funcs = NULL);
+  void outputCPPJumpTableSupportMethod(CodeGenerator &cg, AnalysisResultPtr ar,
+                                       FunctionScopePtr func,
+                                       const char *funcPrefix);
 private:
   void outputGetCallInfoHeader(CodeGenerator &cg, bool system,
                                bool needGlobals);

@@ -92,7 +92,6 @@ class c_Memcached : public ExtObjectData, public Sweepable {
   END_CLASS_MAP(Memcached)
   DECLARE_CLASS(Memcached, Memcached, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_Memcached();

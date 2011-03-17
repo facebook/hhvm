@@ -65,13 +65,17 @@ Variant f_stream_copy_to_stream(CObjRef source, CObjRef dest,
   int cbytes = 0;
   if (maxlength == 0) maxlength = INT_MAX;
   while (cbytes < maxlength) {
-    char buf[8192];
+    char buf[8193];
     int remaining = maxlength - cbytes;
-    int toread = ((remaining > (int)sizeof(buf)) ? sizeof(buf): remaining);
+    int toread =
+      ((remaining >= (int)sizeof(buf)) ? sizeof(buf) - 1 : remaining);
     int rbytes = srcFile->readImpl(buf, toread);
     if (rbytes == 0) break;
     if (rbytes < 0) return false;
-    if (destFile->writeImpl(buf, rbytes) != rbytes) return false;
+    buf[rbytes] = '\0';
+    if (destFile->write(String(buf, rbytes, AttachLiteral)) != rbytes) {
+      return false;
+    }
     cbytes += rbytes;
   }
   return cbytes;

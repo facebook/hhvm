@@ -453,6 +453,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestUnaryOperators);
   RUN_TEST(TestSilenceOperator);
   RUN_TEST(TestPrint);
+  RUN_TEST(TestVarExport);
   RUN_TEST(TestLogicalOperators);
   RUN_TEST(TestGetClass);
   RUN_TEST(TestGetParentClass);
@@ -7960,6 +7961,19 @@ bool TestCodeRun::TestErrorHandler() {
       "  return $b;\n"
       "}\n"
       "f(array(1, 2, 3));\n");
+  MVCR("<?php\n"
+       "class C {"
+       "  public static function log(Exception $exception) {"
+       "    $msg = get_class($exception).': '.$exception->getMessage();"
+       "    var_dump($msg);"
+       "  }"
+       "  public static function setup() {"
+       "    set_exception_handler(array(__CLASS__, 'log'));"
+       "  }"
+       "}"
+       "$obj = new C;"
+       "$obj->setup();"
+       "throw new Exception('test');");
 
   return true;
 }
@@ -9273,8 +9287,8 @@ bool TestCodeRun::TestOperationTypes() {
   return true;
 }
 
-#define UNARY_OP(op) \
-  MVCR("<?php " \
+#define UNARY_OP_DATA(op) \
+  "<?php " \
   #op"(!null);" \
   #op"(!true);" \
   #op"(!false);" \
@@ -9559,7 +9573,10 @@ bool TestCodeRun::TestOperationTypes() {
   #op"((float)\"1.7e+319\");" \
   #op"((double)\"1.7e+319\");" \
   #op"((real)\"1.7e+319\");" \
-  #op"((string)\"1.7e+319\");" \
+  #op"((string)\"1.7e+319\");"
+
+#define UNARY_OP_ARRAY_DATA(op) \
+  "<?php " \
   #op"(array(\"\\0\" => 1));" \
   #op"(array(\"\\0\" => \"\\0\"));" \
   #op"(array(\"\\0\" => \"\\\\\"));" \
@@ -9611,7 +9628,11 @@ bool TestCodeRun::TestOperationTypes() {
   "$a = array(\"\\'\" => \"\\'\");" \
   #op"($a);" \
   "$a = array(\"\\a\" => \"\\a\");" \
-  #op"($a);")
+  #op"($a);"
+
+#define UNARY_OP(op) \
+  MVCR(UNARY_OP_DATA(op)) \
+  MVCR(UNARY_OP_ARRAY_DATA(op))
 
 bool TestCodeRun::TestUnaryOperators() {
   UNARY_OP(var_dump);
@@ -9628,8 +9649,70 @@ bool TestCodeRun::TestPrint() {
   UNARY_OP(echo);
   UNARY_OP(print);
   UNARY_OP(print_r);
-  UNARY_OP(var_export);
   UNARY_OP(serialize);
+  return true;
+}
+
+bool TestCodeRun::TestVarExport() {
+  MVCR(UNARY_OP_DATA(var_export));
+
+
+  MVCRO(UNARY_OP_ARRAY_DATA(var_export),
+  "array (\n"
+  "  '' . \"\\0\" . '' => 1,\n"
+  ")array (\n"
+  "  '' . \"\\0\" . '' => '' . \"\\0\" . '',\n"
+  ")array (\n"
+  "  '' . \"\\0\" . '' => '\\\\',\n"
+  ")array (\n"
+  "  '' . \"\\0\" . '' => '\\\\\\\'',\n"
+  ")array (\n"
+  "  '\\\\' => 1,\n"
+  ")array (\n"
+  "  '\\\\' => '' . \"\\0\" . '',\n"
+  ")array (\n"
+  "  '\\\\' => '\\\\',\n"
+  ")array (\n"
+  "  '\\\\' => '\\\\\\\'',\n"
+  ")array (\n"
+  "  '\\\\\\\'' => 1,\n"
+  ")array (\n"
+  "  '\\\\\\\'' => '' . \"\\0\" . '',\n"
+  ")array (\n"
+  "  '\\\\\\\'' => '\\\\',\n"
+  ")array (\n"
+  "  '\\\\\\\'' => '\\\\\\\'',\n"
+  ")array (\n"
+  "  '\\\\a' => '\\\\a',\n"
+  ")falsearray (\n"
+  "  '' . \"\\0\" . '' => '' . \"\\0\" . '',\n"
+  ")11truetrue111'Array''0x10''' . \"\\0\" . ''array (\n"
+  "  '' . \"\\0\" . '' => 1,\n"
+  ")array (\n"
+  "  '' . \"\\0\" . '' => '' . \"\\0\" . '',\n"
+  ")array (\n"
+  "  '' . \"\\0\" . '' => '\\\\',\n"
+  ")array (\n"
+  "  '' . \"\\0\" . '' => '\\\\\\\'',\n"
+  ")array (\n"
+  "  '\\\\' => 1,\n"
+  ")array (\n"
+  "  '\\\\' => '' . \"\\0\" . '',\n"
+  ")array (\n"
+  "  '\\\\' => '\\\\',\n"
+  ")array (\n"
+  "  '\\\\' => '\\\\\\\'',\n"
+  ")array (\n"
+  "  '\\\\\\\'' => 1,\n"
+  ")array (\n"
+  "  '\\\\\\\'' => '' . \"\\0\" . '',\n"
+  ")array (\n"
+  "  '\\\\\\\'' => '\\\\',\n"
+  ")array (\n"
+  "  '\\\\\\\'' => '\\\\\\\'',\n"
+  ")array (\n"
+  "  '\\\\a' => '\\\\a',\n"
+  ")");
   return true;
 }
 
@@ -11832,6 +11915,27 @@ bool TestCodeRun::TestExit() {
        "echo \"foobar!\\n\";"
        "exit;");
 
+  MVCR("<?php "
+       "declare(ticks=1);"
+       "function foo() {"
+       "  echo 'a';"
+       "  exit(1);"
+       "}"
+       "pcntl_signal(SIGUSR1,  'foo');"
+       "$pid = posix_getpid();"
+       "posix_kill($pid, SIGUSR1);"
+       "for ($i = 0; $i < 2; $i++) {"
+       "  echo 'a';"
+       "}");
+  MVCR("<?php "
+       "$command = \"exit 2\";"
+       "system($command, $return);"
+       "print \"$return\\n\";");
+  MVCR("<?php "
+       "$command = \"exit 2\";"
+       "passthru($command, $return);"
+       "print \"$return\\n\";");
+
   return true;
 }
 
@@ -13566,6 +13670,40 @@ bool TestCodeRun::TestFile() {
       "mkdir('test/tmp_dir');"
       "print_r(glob('test/tmp_dir/*'));"
       "rmdir('test/tmp_dir');");
+  MVCR("<?php "
+      "$src = tmpfile();"
+      "$dst = tmpfile();"
+      "fwrite($src, 'a');"
+      "fseek($src, 0);"
+      "stream_copy_to_stream($src, $dst);"
+      "fseek($dst, 0);"
+      "$str = stream_get_contents($dst);"
+      "fseek($src, 0);"
+      "stream_copy_to_stream($src, $dst);"
+      "fseek($dst, 0);"
+      "$str = stream_get_contents($dst);"
+      "echo $str;");
+  MVCR("<?php "
+      "define('FILENAME', '/tmp/flock_file.dat');"
+      "function flock_or_die($filename, $resource, $flock_op) {"
+      "  $r = flock($resource, $flock_op);"
+      "  var_dump($r); "
+      "}"
+      "$resource = fopen(FILENAME, 'w');"
+      "flock_or_die(FILENAME, $resource, LOCK_EX);"
+      "flock_or_die(FILENAME, $resource, LOCK_UN);"
+      "unlink(FILENAME);");
+  MVCR("<?php "
+       "$h = popen(\"echo foo; exit 2\", 'r');"
+       "$content = stream_get_contents($h);"
+       "$result = pclose($h);"
+       "echo trim($content).\"/\".$result.\"/\".gettype($result).\"\\n\";");
+  MVCR("<?php "
+       "$fp = fopen('test/test_ext_file.txt', 'r');"
+       "var_dump(pclose($fp));");
+  MVCR("<?php "
+       "$fp = fopen('test/nonexist.txt', 'r');"
+       "var_dump(pclose($fp));");
   return true;
 }
 
@@ -13934,6 +14072,42 @@ bool TestCodeRun::TestSwitchStatement() {
       "case 'foo': "
       "default:"
       "}");
+
+  MVCR("<?php "
+       "function test() {"
+       "  $a = 2;"
+       "  switch ($a) {"
+       "    case ++$a: var_dump('ok'); break;"
+       "    case 2: var_dump('broken'); break;"
+       "    case 3: var_dump('really broken'); break;"
+       "    default: var_dump('fail'); break;"
+       "  }"
+       "  $a = 'b';"
+       "  $b = 2;"
+       "  switch ($$a) {"
+       "    case ++$$a: var_dump('broken'); break;"
+       "    case 2: var_dump('ok'); break;"
+       "    case 3: var_dump('really broken'); break;"
+       "    default: var_dump('fail'); break;"
+       "  }"
+       "}"
+       "$a = 2;"
+       "switch ($a) {"
+       "  case ++$a: var_dump('ok'); break;"
+       "  case 2: var_dump('broken'); break;"
+       "  case 3: var_dump('really broken'); break;"
+       "  default: var_dump('fail'); break;"
+       "}"
+       "$a = 'b';"
+       "$b = 2;"
+       "switch ($$a) {"
+       "  case ++$$a: var_dump('broken'); break;"
+       "  case 2: var_dump('ok'); break;"
+       "  case 3: var_dump('really broken'); break;"
+       "  default: var_dump('fail'); break;"
+       "}"
+       "test();");
+
   return true;
 }
 
@@ -15211,6 +15385,29 @@ bool TestCodeRun::TestFiber() {
         "int(2)\n"
         );
 
+  // recursive objects
+  MVCRO("<?php\n"
+        "class A { private $v; function set($a) { $this->v = $a; } }\n"
+        "$o1 = new A;\n"
+        "$o2 = new A;\n"
+        "$o1->set($o2); $o2->set($o1);\n"
+        "function f($a) { return $a; }\n"
+        "$h = call_user_func_async('f', $o1);\n"
+        "$ret = end_user_func_async($h);\n"
+        "echo \"Success!\n\";",
+        "Success!\n");
+
+  // params that are not by-ref
+  MVCRO("<?php\n"
+        "function run($a) { var_dump($a); }\n"
+        "$a = 0;\n"
+        "$h = call_user_func_async('run', $a);\n"
+        "$a = 1;\n"
+        "end_user_func_async($h);\n"
+        "var_dump($a);\n",
+        "int(0)\n"
+        "int(1)\n");
+
   return true;
 }
 
@@ -16214,7 +16411,19 @@ bool TestCodeRun::TestClosure() {
         "  [1]=>\n"
         "  int(2)\n"
         "}\n");
-
+  MVCRO("<?php\n"
+        "$v=5;"
+        "call_user_func("
+        "  function() use($v) "
+        "  { echo $v; }"
+        ");"
+        "$f = function() use($v) { echo $v; };"
+        "call_user_func($f);"
+        "call_user_func_array("
+        "  function() use($v) "
+        "  { echo $v; }, array()"
+        ");"
+        "call_user_func($f, array());", "5555");
   return true;
 }
 
@@ -16459,6 +16668,56 @@ bool TestCodeRun::TestYield() {
         "int(5)\n"
         "int(4)\n"
         "int(5)\n");
+
+  // yield within anonymous function
+  MVCRO("<?php\n"
+        "$a = function() { yield 1; yield 2; };\n"
+        "foreach ($a() as $v) { var_dump($v); }\n",
+
+        "int(1)\n"
+        "int(2)\n");
+
+  MVCRO("<?php\n"
+        "function f() {\n"
+        "  $a = function() { yield 1; yield 2; };\n"
+        "  return $a;\n"
+        "}\n"
+        "$f = f();\n"
+        "foreach ($f() as $v) { var_dump($v); }\n",
+
+        "int(1)\n"
+        "int(2)\n");
+
+  MVCRO("<?php\n"
+        "class A {\n"
+        "  function f() {\n"
+        "    $a = function() { yield 1; yield 2; };\n"
+        "    return $a;\n"
+        "  }\n"
+        "}\n"
+        "$a = new A;\n"
+        "$f = $a->f();\n"
+        "foreach ($f() as $v) { var_dump($v); }\n",
+
+        "int(1)\n"
+        "int(2)\n");
+
+  // Continuatin::send()
+  MVCRO("<?php\n"
+        "function f() {\n"
+        "  $a = yield 1; list($a, $b) = yield $a; yield $b;\n"
+        "}\n"
+        "$c = f();\n"
+        "$c->next();\n"
+        "var_dump($c->current());\n"
+        "$c->send(2);\n"
+        "var_dump($c->current());\n"
+        "$c->send(array(3, 4));\n"
+        "var_dump($c->current());\n",
+
+        "int(1)\n"
+        "int(2)\n"
+        "int(4)\n");
 
   return true;
 }

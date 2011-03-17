@@ -26,7 +26,7 @@ namespace Eval {
 
 VariableExpression::VariableExpression(EXPRESSION_ARGS, NamePtr name,
                                        int idx /* = -1 */)
-  : LvalExpression(EXPRESSION_PASS), m_name(name), m_idx(idx) {}
+  : LvalExpression(EXPRESSION_PASS), m_name(name), m_idx(idx) { }
 
 Variant &VariableExpression::getRef(VariableEnvironment &env,
                                     bool initNotice) const {

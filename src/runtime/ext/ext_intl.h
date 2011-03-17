@@ -83,7 +83,6 @@ class c_Collator : public ExtObjectData, public Sweepable {
   END_CLASS_MAP(Collator)
   DECLARE_CLASS(Collator, Collator, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_Collator();
@@ -145,7 +144,6 @@ class c_Locale : public ExtObjectData {
   END_CLASS_MAP(Locale)
   DECLARE_CLASS(Locale, Locale, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_Locale();
@@ -184,7 +182,6 @@ class c_Normalizer : public ExtObjectData, public Sweepable {
   END_CLASS_MAP(Normalizer)
   DECLARE_CLASS(Normalizer, Normalizer, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
-  ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
   public: c_Normalizer();

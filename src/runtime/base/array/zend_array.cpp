@@ -399,8 +399,9 @@ bool ZendArray::exists(CStrRef k) const {
 
 bool ZendArray::exists(CVarRef k) const {
   if (k.isNumeric()) return find(k.toInt64());
-  String key = k.toString();
-  return find(key.data(), key.size(), key->hash());
+  ASSERT(k.isString());
+  StringData *key = k.getStringData();
+  return find(key->data(), key->size(), key->hash());
 }
 
 bool ZendArray::idxExists(ssize_t idx) const {
@@ -448,8 +449,8 @@ CVarRef ZendArray::get(CVarRef k, bool error /* = false */) const {
   if (k.isNumeric()) {
     p = find(k.toInt64());
   } else {
-    String key = k.toString();
-    StringData *strkey = key.get();
+    ASSERT(k.isString());
+    StringData *strkey = k.getStringData();
     int64 prehash = strkey->hash();
     p = find(strkey->data(), strkey->size(), prehash);
   }
@@ -467,8 +468,8 @@ void ZendArray::load(CVarRef k, Variant &v) const {
   if (k.isNumeric()) {
     p = find(k.toInt64());
   } else {
-    String key = k.toString();
-    StringData *strkey = key.get();
+    ASSERT(k.isString());
+    StringData *strkey = k.getStringData();
     int64 prehash = strkey->hash();
     p = find(strkey->data(), strkey->size(), prehash);
   }
@@ -507,8 +508,9 @@ ssize_t ZendArray::getIndex(CVarRef k) const {
   if (k.isNumeric()) {
     p = find(k.toInt64());
   } else {
-    String key = k.toString();
-    p = find(key.data(), key.size(), key->hash());
+    ASSERT(k.isString());
+    StringData *key = k.getStringData();
+    p = find(key->data(), key->size(), key->hash());
   }
   if (p) {
     return (ssize_t)p;
@@ -845,7 +847,8 @@ ArrayData *ZendArray::lval(CVarRef k, Variant *&ret, bool copy,
   if (k.isNumeric()) {
     return lval(k.toInt64(), ret, copy, checkExist);
   } else {
-    return lval(k.toString(), ret, copy, checkExist);
+    ASSERT(k.isString());
+    return lval(k.toStrNR(), ret, copy, checkExist);
   }
 }
 
@@ -909,8 +912,8 @@ ArrayData *ZendArray::set(CVarRef k, CVarRef v, bool copy) {
     update(k.toInt64(), v);
     return NULL;
   } else {
-    String sk = k.toString();
-    StringData *sd = sk.get();
+    ASSERT(k.isString());
+    StringData *sd = k.getStringData();
     if (copy) {
       ZendArray *a = copyImpl();
       a->update(sd, v);
@@ -968,7 +971,8 @@ ArrayData *ZendArray::add(CStrRef k, CVarRef v, bool copy) {
 ArrayData *ZendArray::add(CVarRef k, CVarRef v, bool copy) {
   ASSERT(!exists(k));
   if (k.isNumeric()) return add(k.toInt64(), v, copy);
-  return add(k.toString(), v, copy);
+  ASSERT(k.isString());
+  return add(k.toStrNR(), v, copy);
 }
 
 ArrayData *ZendArray::addLval(int64 k, Variant *&ret, bool copy) {
@@ -996,7 +1000,8 @@ ArrayData *ZendArray::addLval(CStrRef k, Variant *&ret, bool copy) {
 ArrayData *ZendArray::addLval(CVarRef k, Variant *&ret, bool copy) {
   ASSERT(!exists(k));
   if (k.isNumeric()) return addLval(k.toInt64(), ret, copy);
-  return addLval(k.toString(), ret, copy);
+  ASSERT(k.isString());
+  return addLval(k.toStrNR(), ret, copy);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1114,16 +1119,17 @@ ArrayData *ZendArray::remove(CVarRef k, bool copy) {
     erase(findForErase(k.toInt64()));
     return NULL;
   } else {
-    String key = k.toString();
+    ASSERT(k.isString());
+    StringData *key = k.getStringData();
     int64 prehash = key->hash();
     if (copy) {
       ZendArray *a = copyImpl();
       a->prepareBucketHeadsForWrite();
-      a->erase(a->findForErase(key.data(), key.size(), prehash));
+      a->erase(a->findForErase(key->data(), key->size(), prehash));
       return a;
     }
     prepareBucketHeadsForWrite();
-    erase(findForErase(key.data(), key.size(), prehash));
+    erase(findForErase(key->data(), key->size(), prehash));
     return NULL;
   }
 }

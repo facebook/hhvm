@@ -160,7 +160,8 @@ bool f_fclose(CObjRef handle) {
 
 Variant f_pclose(CObjRef handle) {
   CHECK_HANDLE(handle, f);
-  return CHECK_ERROR(f->close());
+  CHECK_ERROR(f->close());
+  return s_file_data->m_pcloseRet;
 }
 
 Variant f_fseek(CObjRef handle, int64 offset,
@@ -281,10 +282,20 @@ bool f_ftruncate(CObjRef handle, int64 size) {
   return CHECK_ERROR(f->truncate(size));
 }
 
+static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
+
 bool f_flock(CObjRef handle, int operation, Variant wouldblock /* = null */) {
   CHECK_HANDLE(handle, f);
   bool block = false;
-  bool ret = f->lock(operation, block);
+  int act;
+
+  act = operation & 3;
+  if (act < 1 || act > 3) {
+    throw_invalid_argument("operation: %d", operation);
+    return false;
+  }
+  act = flock_values[act - 1] | (operation & 4 ? LOCK_NB : 0);
+  bool ret = f->lock(act, block);
   wouldblock = block;
   return ret;
 }

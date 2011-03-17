@@ -17,6 +17,7 @@
 #include <runtime/eval/ast/switch_statement.h>
 #include <runtime/eval/ast/expression.h>
 #include <runtime/eval/runtime/variable_environment.h>
+#include <runtime/eval/ast/variable_expression.h>
 
 using namespace std;
 
@@ -56,7 +57,9 @@ void CaseStatement::dump(std::ostream &out) const {
 
 SwitchStatement::SwitchStatement(STATEMENT_ARGS, ExpressionPtr source,
                 const std::vector<CaseStatementPtr> &cases)
-  : Statement(STATEMENT_PASS), m_source(source), m_cases(cases) {}
+  : Statement(STATEMENT_PASS), m_source(source), m_cases(cases) {
+  m_simpleVar = m_source->is<VariableExpression>();
+}
 
 void SwitchStatement::eval(VariableEnvironment &env) const {
   bool gotoing = false;
@@ -66,9 +69,14 @@ void SwitchStatement::eval(VariableEnvironment &env) const {
   }
 
   ENTER_STMT;
-  Variant source;
+  Variant source, *srcPtr;
   if (!gotoing) {
-    source = m_source->eval(env);
+    if (!m_simpleVar) {
+      source = m_source->eval(env);
+      srcPtr = &source;
+    } else {
+      m_source->cast<VariableExpression>()->weakLval(env, srcPtr);
+    }
   }
   bool matched = false;
   vector<CaseStatementPtr>::const_iterator defaultPos = m_cases.end();
@@ -79,7 +87,7 @@ void SwitchStatement::eval(VariableEnvironment &env) const {
     if (!gotoing) {
       if ((*iter)->isDefault()) {
         defaultPos = iter;
-      } else if (!matched && (*iter)->match(env, source)) {
+      } else if (!matched && (*iter)->match(env, *srcPtr)) {
         matched = true;
       }
     }

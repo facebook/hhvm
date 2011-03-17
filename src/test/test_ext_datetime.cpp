@@ -103,7 +103,7 @@ bool TestExtDatetime::test_date_default_timezone_set() {
 bool TestExtDatetime::test_date_format() {
   Object dt = f_date_create("@1170288001");
   VS(f_date_format(dt, "Y-m-d\\TH:i:s\\Z"), "2007-02-01T00:00:01Z");
-  VS(f_date_format(dt, "Y-m-dTH:i:sZ"), "2007-02-01PST00:00:01-28800");
+  VS(f_date_format(dt, "Y-m-d H:i:sZ"), "2007-02-01 00:00:01-28800");
   VS(DateTime(1255494072, true).toString(DateTime::Cookie),
      "Wed, 14-Oct-2009 04:21:12 GMT");
   return Count(true);

@@ -107,7 +107,7 @@ Variant c_UnexpectedValueException::os_invoke_from_eval(const char *c, const cha
   return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_UnexpectedValueException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_UnexpectedValueException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -203,7 +203,7 @@ Variant c_OverflowException::os_invoke_from_eval(const char *c, const char *s, E
   return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_OverflowException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_OverflowException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -299,7 +299,7 @@ Variant c_OutOfBoundsException::os_invoke_from_eval(const char *c, const char *s
   return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_OutOfBoundsException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_OutOfBoundsException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -394,7 +394,7 @@ Variant c_LogicException::os_invoke_from_eval(const char *c, const char *s, Eval
   return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_LogicException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_Exception::os_get_call_info(mcp, hash);
 }
 bool c_LogicException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -490,7 +490,7 @@ Variant c_RangeException::os_invoke_from_eval(const char *c, const char *s, Eval
   return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_RangeException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_RangeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -588,7 +588,7 @@ Variant c_InvalidArgumentException::os_invoke_from_eval(const char *c, const cha
   return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_InvalidArgumentException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_InvalidArgumentException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -682,7 +682,7 @@ Variant c_UnderflowException::os_invoke_from_eval(const char *c, const char *s, 
   return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_UnderflowException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_RuntimeException::os_get_call_info(mcp, hash);
 }
 bool c_UnderflowException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -778,7 +778,7 @@ Variant c_OutOfRangeException::os_invoke_from_eval(const char *c, const char *s,
   return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_OutOfRangeException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_OutOfRangeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -879,7 +879,7 @@ Variant c_BadMethodCallException::os_invoke_from_eval(const char *c, const char 
   return c_BadFunctionCallException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_BadMethodCallException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_BadFunctionCallException::os_get_call_info(mcp, hash);
 }
 bool c_BadMethodCallException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -972,7 +972,7 @@ Variant c_RuntimeException::os_invoke_from_eval(const char *c, const char *s, Ev
   return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_RuntimeException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_Exception::os_get_call_info(mcp, hash);
 }
 bool c_RuntimeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -1489,7 +1489,7 @@ Variant c_Exception::ifa_gettrace(MethodCallPackage &mcp, int count, INVOKE_FEW_
   return (self->t_gettrace());
 }
 bool c_Exception::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 0:
@@ -1561,30 +1561,6 @@ c_Exception *c_Exception::create(Variant v_message //  = NAMSTR(s_sys_ss00000000
   CountableHelper h(this);
   init();
   t___construct(v_message, v_code);
-  return this;
-}
-ObjectData *c_Exception::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 2) throw_toomany_arguments("Exception::__construct", 2, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1));
-    } while (false);
-  }
   return this;
 }
 void c_Exception::dynConstruct(CArrRef params) {
@@ -2058,7 +2034,7 @@ Variant c_ErrorException::ifa_getseverity(MethodCallPackage &mcp, int count, INV
   return (self->t_getseverity());
 }
 bool c_ErrorException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 3:
@@ -2089,45 +2065,6 @@ c_ErrorException *c_ErrorException::create(Variant v_message //  = NAMSTR(s_sys_
   CountableHelper h(this);
   init();
   t___construct(v_message, v_code, v_severity, v_filename, v_lineno);
-  return this;
-}
-ObjectData *c_ErrorException::dynCreate(CArrRef params, bool construct /* = true */) {
-  init();
-  if (construct) {
-    CountableHelper h(this);
-    int count __attribute__((__unused__)) = params.size();
-    if (count > 5) throw_toomany_arguments("ErrorException::__construct", 5, 2);
-    do {
-      ArrayData *ad(params.get());
-      ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-      if (count <= 0) {
-        (t___construct());
-        break;
-      }
-      CVarRef arg0((ad->getValue(pos)));
-      if (count <= 1) {
-        (t___construct(arg0));
-        break;
-      }
-      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 2) {
-        (t___construct(arg0, arg1));
-        break;
-      }
-      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 3) {
-        (t___construct(arg0, arg1, arg2));
-        break;
-      }
-      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-      if (count <= 4) {
-        (t___construct(arg0, arg1, arg2, arg3));
-        break;
-      }
-      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-      (t___construct(arg0, arg1, arg2, arg3, arg4));
-    } while (false);
-  }
   return this;
 }
 void c_ErrorException::dynConstruct(CArrRef params) {
@@ -2327,7 +2264,7 @@ Variant c_BadFunctionCallException::os_invoke_from_eval(const char *c, const cha
   return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_BadFunctionCallException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_BadFunctionCallException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -2423,7 +2360,7 @@ Variant c_LengthException::os_invoke_from_eval(const char *c, const char *s, Eva
   return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_LengthException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_LengthException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
@@ -2519,7 +2456,7 @@ Variant c_DomainException::os_invoke_from_eval(const char *c, const char *s, Eva
   return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
 bool c_DomainException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   return c_LogicException::os_get_call_info(mcp, hash);
 }
 bool c_DomainException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {

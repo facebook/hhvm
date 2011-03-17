@@ -55,7 +55,7 @@ class MutableArrayIter;
  *    o_realPropPublic()
  *    o_realPropPrivate() # non-virtual, only as needed
  */
-class ObjectData : public Countable {
+class ObjectData : public CountableNF {
  public:
   enum Attribute {
     InConstructor = 1,    // __construct()
@@ -132,10 +132,10 @@ class ObjectData : public Countable {
 
   virtual void init() {}
   ObjectData *create() { CountableHelper h(this); init(); return this;}
-  ObjectData *dynCreate(const Array &params, bool init = true) {
-    create();
-    if (init) {
-      CountableHelper h(this);
+  ObjectData *dynCreate(const Array &params, bool construct = true) {
+    CountableHelper h(this);
+    init();
+    if (construct) {
       dynConstruct(params);
     }
     return this;
@@ -170,7 +170,7 @@ class ObjectData : public Countable {
       MethodIndex mi, int64 hash = -1);
 
   // properties
-  virtual Array o_toArray(bool warn = false) const;
+  virtual Array o_toArray() const;
   virtual Array o_toIterArray(CStrRef context, bool getRef = false);
   virtual Array o_getDynamicProperties() const;
   virtual Variant *o_realProp(CStrRef s, int flags,

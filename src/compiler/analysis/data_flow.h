@@ -23,18 +23,26 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+#define DECLARE_DATA_FLOW(x)                    \
+  x(Anticipated,0),                             \
+    x(Altered,0),                               \
+    x(Available,0),                             \
+    x(AvailIn,1),                               \
+    x(AvailOut,1),                              \
+    x(AntIn,1),                                 \
+    x(AntOut,1)
+
 class DataFlow {
 public:
   enum {
-    Available,
-    Anticipated,
-    Altered,
-    AvailIn,
-    AvailOut,
-    AntIn,
-    AntOut,
+#define DECLARE_DF_ENUM(x,v) x
+    DECLARE_DATA_FLOW(DECLARE_DF_ENUM),
+
+    NumBVs
   };
 
+  static const char *GetName(int i);
+  static int GetInit(int i);
   typedef ControlFlowGraph::vertex_descriptor vertex_descriptor;
   typedef ControlFlowGraph::out_edge_iterator out_edge_iterator;
   typedef ControlFlowGraph::in_edge_iterator in_edge_iterator;

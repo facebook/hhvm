@@ -527,7 +527,7 @@ Variant c_SplObjectStorage::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE
   return (self->t_rewind(), null);
 }
 bool c_SplObjectStorage::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
-  CStrRef s __attribute__((__unused__)) (mcp.name);
+  CStrRef s __attribute__((__unused__)) (*mcp.name);
   if (hash < 0) hash = s->hash();
   switch (hash & 31) {
     case 4:
@@ -713,7 +713,7 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
                 {
                   MethodCallPackage mcp0;
                   mcp0.methodCall((GET_THIS_VALID()), NAMSTR(s_sys_ss941ca25f, "rewind"), 0x1670096FDE27AF6ALL);
-                  const CallInfo *cit0  __attribute__((__unused__)) = mcp0.ci;
+                  const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
                   (mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0);
                 }
                 return;

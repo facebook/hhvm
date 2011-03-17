@@ -146,13 +146,12 @@ void Debugger::Interrupt(int type, const char *program,
   if (proxy) {
     if (proxy->needInterrupt() || type != BreakPointReached) {
       // Interrupts may execute some PHP code, causing another interruption.
-      void *&tint = rjdata.interrupt;
-      if (!tint) {
-        CmdInterrupt cmd((InterruptType)type, program, site, error);
-        tint = &cmd;
-        proxy->interrupt(cmd);
-        tint = NULL;
-      }
+      std::stack<void *> &interrupts = rjdata.interrupts;
+
+      CmdInterrupt cmd((InterruptType)type, program, site, error);
+      interrupts.push(&cmd);
+      proxy->interrupt(cmd);
+      interrupts.pop();
     }
     rjdata.debuggerIdle = proxy->needInterrupt() ? 0 : 1000;
   } else {

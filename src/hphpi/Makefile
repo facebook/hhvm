@@ -17,6 +17,6 @@ $(HPHPI): $(HPHP) $(PHP_FILES)
 clobber:
 	$(V)rm -rf $(OUT_DIR)gen $(HPHPI)
 
-.PHONY: do-setup objects
-do-setup objects:
+.PHONY: do-setup objects picobjects
+do-setup objects picobjects:
 	@true

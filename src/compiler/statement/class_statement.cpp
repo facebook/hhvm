@@ -336,31 +336,34 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
 void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   ClassScopeRawPtr classScope = getClassScope();
   if (cg.getContext() == CodeGenerator::NoContext) {
-    if (classScope->isRedeclaring()) {
-      cg_printf("g->%s%s = ClassStaticsPtr(NEW(%s%s)());\n",
-                Option::ClassStaticsObjectPrefix,
-                cg.formatLabel(m_name).c_str(),
-                Option::ClassStaticsPrefix, classScope->getId(cg).c_str());
-      cg_printf("g->%s%s = &%s%s;\n",
-                Option::ClassStaticsCallbackPrefix,
-                cg.formatLabel(m_name).c_str(),
-                Option::ClassWrapperFunctionPrefix,
-                classScope->getId(cg).c_str());
-    }
     if (classScope->isVolatile()) {
-      cg_printf("g->CDEC(%s) = true;\n", m_name.c_str());
-    }
-    const vector<string> &bases = classScope->getBases();
-    for (vector<string>::const_iterator it = bases.begin();
-         it != bases.end(); ++it) {
-      ClassScopePtr base = ar->findClass(*it);
-      if (base && base->isVolatile()) {
-        cg_printf("checkClassExists(");
-        cg_printString(base->getOriginalName(), ar, shared_from_this());
-        string lname = Util::toLower(base->getOriginalName());
-        cg_printf(", &%s->CDEC(%s), %s->FVF(__autoload));\n",
-                  cg.getGlobals(ar), cg.formatLabel(lname).c_str(),
-                  cg.getGlobals(ar));
+      string name = cg.formatLabel(m_name);
+      if (classScope->isRedeclaring()) {
+        cg_printf("g->%s%s = ClassStaticsPtr(NEW(%s%s)());\n",
+                  Option::ClassStaticsObjectPrefix,
+                  name.c_str(),
+                  Option::ClassStaticsPrefix, classScope->getId(cg).c_str());
+        cg_printf("g->%s%s = &%s%s;\n",
+                  Option::ClassStaticsCallbackPrefix,
+                  name.c_str(),
+                  Option::ClassWrapperFunctionPrefix,
+                  classScope->getId(cg).c_str());
+      }
+      cg_printf("g->CDEC(%s) = true;\n", name.c_str());
+
+      const vector<string> &bases = classScope->getBases();
+      for (vector<string>::const_iterator it = bases.begin();
+           it != bases.end(); ++it) {
+        if (cg.checkHoistedClass(*it)) continue;
+        ClassScopePtr base = ar->findClass(*it);
+        if (base && base->isVolatile()) {
+          cg_printf("checkClassExists(");
+          cg_printString(base->getOriginalName(), ar, shared_from_this());
+          string lname = Util::toLower(base->getOriginalName());
+          cg_printf(", &%s->CDEC(%s), %s->FVF(__autoload));\n",
+                    cg.getGlobals(ar), cg.formatLabel(lname).c_str(),
+                    cg.getGlobals(ar));
+        }
       }
     }
     return;

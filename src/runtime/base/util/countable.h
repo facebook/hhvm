@@ -102,6 +102,28 @@ private:
   Countable *m_countable;
 };
 
+/**
+ * CountableNF : countable no flags
+ */
+
+#define IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC                               \
+  void setAtomic() const { ASSERT(false); }                                   \
+  bool isAtomic() const { return false;   }                                   \
+  bool isRefCounted() const { return true; }                                  \
+  void incAtomicCount() const { ASSERT(false); }                              \
+  int decAtomicCount() const { ASSERT(false); return _count; }                \
+  void incRefCount() const { ++_count; }                                      \
+  int decRefCount() const { ASSERT(_count > 0); return --_count; }            \
+  int getCount() const { return _count; }                                     \
+
+class CountableNF : public Countable {
+ public:
+  void setStatic() const { ASSERT(false); }
+  bool isStatic() const { return false;   }
+  IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC;
+};
+
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

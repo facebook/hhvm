@@ -103,8 +103,8 @@ void EvalObjectData::destruct() {
   }
 }
 
-Array EvalObjectData::o_toArray(bool warn /* = false */) const {
-  Array values(DynamicObjectData::o_toArray(warn));
+Array EvalObjectData::o_toArray() const {
+  Array values(DynamicObjectData::o_toArray());
   Array props(Array::Create());
   m_cls.getClass()->toArray(props, values);
   if (!values.empty()) {
@@ -209,7 +209,7 @@ bool EvalObjectData::o_get_call_info(MethodCallPackage &mcp,
     int64 hash /* = -1 */) {
   const ClassEvalState::MethodTable &meths = m_cls.getMethodTable();
   ClassEvalState::MethodTable::const_iterator it =
-    meths.find(mcp.name.c_str());
+    meths.find(mcp.name->c_str());
   if (it != meths.end()) {
     if (it->second.first) {
       mcp.extra = (void*)it->second.first;
@@ -230,7 +230,7 @@ bool EvalObjectData::o_get_call_info_ex(const char *clsname,
   if (m_cls.getClass()->subclassOf(clsname)) {
     bool foundClass;
     const MethodStatement *ms =
-      RequestEvalState::findMethod(clsname, mcp.name.c_str(),
+      RequestEvalState::findMethod(clsname, mcp.name->c_str(),
           foundClass);
     if (ms) {
       mcp.extra = (void*)ms;
@@ -240,7 +240,7 @@ bool EvalObjectData::o_get_call_info_ex(const char *clsname,
     } else {
       // Possibly builtin class has this method
       const ClassEvalState::MethodTable &meths = m_cls.getMethodTable();
-      if (meths.find(mcp.name.c_str()) == meths.end()) {
+      if (meths.find(mcp.name->c_str()) == meths.end()) {
         // Absolutely nothing in the hierarchy has this method
         mcp.obj = this;
         return ObjectData::o_get_call_info(mcp, hash);
@@ -390,6 +390,8 @@ Variant &EvalObjectData::___offsetget_lval(Variant v_name) {
 }
 
 Object EvalObjectData::fiberMarshal(FiberReferenceMap &refMap) const {
+  ObjectData *px = (ObjectData *)refMap.lookup((void *)this);
+  if (px) return px;
   Object ret = ObjectData::fiberMarshal(refMap);
   EvalObjectData *obj = dynamic_cast<EvalObjectData*>(ret.get());
   ASSERT(obj);
@@ -398,6 +400,8 @@ Object EvalObjectData::fiberMarshal(FiberReferenceMap &refMap) const {
 }
 
 Object EvalObjectData::fiberUnmarshal(FiberReferenceMap &refMap) const {
+  ObjectData *px = (ObjectData *)refMap.lookup((void *)this);
+  if (px) return px;
   Object ret = ObjectData::fiberUnmarshal(refMap);
   EvalObjectData *obj = dynamic_cast<EvalObjectData*>(ret.get());
   ASSERT(obj);

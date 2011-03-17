@@ -16,6 +16,7 @@
 
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/zend/zend_strtod.h>
 
 
 using namespace std;
@@ -48,7 +49,7 @@ int64 VariableUnserializer::readInt() {
 double VariableUnserializer::readDouble() {
   check();
   char *newBuf;
-  double r = strtod(m_buf, &newBuf);
+  double r = zend_strtod(m_buf, &newBuf);
   m_buf = newBuf;
   return r;
 }

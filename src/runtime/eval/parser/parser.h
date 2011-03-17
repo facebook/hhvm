@@ -133,6 +133,7 @@ private:
   class Countable {
   public:
     Countable() : m_count(1) {}
+    virtual ~Countable() {}
 
     void dec() { if (--m_count == 0) delete this;}
     void inc() { ++m_count;}
@@ -179,6 +180,7 @@ public:
   void onName(Token &out, Token &name, NameKind kind);
   void onStaticVariable(Token &out, Token *exprs, Token &var, Token *value);
   void onSimpleVariable(Token &out, Token &var);
+  void onSynthesizedVariable(Token &out, Token &var);
   void onDynamicVariable(Token &out, Token &expr, bool encap);
   void onIndirectRef(Token &out, Token &refCount, Token &var);
   void onStaticMember(Token &out, Token &className, Token &name);
@@ -299,6 +301,7 @@ private:
   void pushFunc(FunctionStatementPtr fs);
   void popFunc();
   std::vector<bool> m_hasCallToGetArgs;
+  std::vector<std::vector<StatementPtr> > m_pendingStatements;
 
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);

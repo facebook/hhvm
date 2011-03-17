@@ -20,7 +20,7 @@ TestExt = "" "" $@
 FAST_TESTS := QuickTests TestExt TestCodeRunEval
 SLOW_TESTS := TestCodeRun TestServer
 
-all: fast_tests
+all: fast_tests shared-libs
 tags: ctags etags
 ctags:
 	-$(V)cd src && ct
@@ -28,16 +28,22 @@ etags:
 	-$(V)cd src && ct -e
 .PHONY: tags ctags etags
 
-$(FAST_TESTS) $(SLOW_TESTS): % : setup
+$(FAST_TESTS) $(SLOW_TESTS) TestCodeRunStatic: % : setup
 	cd src && $(TEST) $(if $($@),$($@),$@)
 
 setup:
 	$(MAKE) -C src $(COPY)
 
-fast_tests: $(FAST_TESTS)
-slow_tests: $(SLOW_TESTS)
+shared-libs:
+	$(MAKE) -C src SHARED=1 shared-lib-target
 
-.PHONY: $(FAST_TESTS) $(SLOW_TESTS)
+fast_tests: $(FAST_TESTS)
+slow_tests: shared-libs $(SLOW_TESTS)
+
+.PHONY: $(FAST_TESTS) $(SLOW_TESTS) TestCodeRun%
+
+TestCodeRun-% TestCodeRunEval-% TestCodeRunStatic-% : setup
+	cd src && $(TEST) $(patsubst %-$*,%,$@) Test$*
 
 .PHONY: debug release both check_by_type fast_tests slow_tests setup
 check_by_type:

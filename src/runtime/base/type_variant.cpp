@@ -154,6 +154,14 @@ void Variant::reset() {
   m_type = KindOfNull;
 }
 
+static void destructString(void *p)  { ((StringData *)p)->release(); }
+static void destructArray(void *p)   { ((ArrayData *)p)->release();  }
+static void destructObject(void *p)  { ((ObjectData *)p)->release(); }
+static void destructVariant(void *p) { ((Variant *)p)->release();    }
+
+static void (*destructors[4])(void *) =
+  {destructString, destructArray, destructObject, destructVariant};
+
 void Variant::destruct() {
   ASSERT(!isPrimitive());
 #ifdef FAST_REFCOUNT_FOR_VARIANT
@@ -164,23 +172,8 @@ void Variant::destruct() {
    * and Variant classes.
    */
   if (m_data.pvar->decRefCount() == 0) {
-    switch (m_type) {
-    case KindOfString:
-      m_data.pstr->release();
-      break;
-    case KindOfArray:
-      m_data.parr->release();
-      break;
-    case KindOfObject:
-      m_data.pobj->release();
-      break;
-    case KindOfVariant:
-      m_data.pvar->release();
-      break;
-    default:
-      ASSERT(false);
-      break;
-    }
+    ASSERT(m_type >= KindOfString && m_type <= KindOfVariant);
+    destructors[m_type - KindOfString]((void *)m_data.pvar);
   }
 #else
   switch (m_type) {
@@ -211,7 +204,7 @@ void Variant::destruct() {
 #endif
 }
 
-Variant& Variant::assign(CVarRef v) {
+Variant &Variant::assign(CVarRef v) {
   // otherwise our code generation is wrong
   ASSERT(!isContagious() || this == &v);
   if (v.isContagious()) {
@@ -467,6 +460,16 @@ CVarRef Variant::set(ObjectData *v) {
     m_type = KindOfNull;
   }
   return *this;
+}
+
+void Variant::init(ObjectData *v) {
+  if (v) {
+    m_type = KindOfObject;
+    m_data.pobj = v;
+    v->incRefCount();
+  } else {
+    m_type = KindOfNull;
+  }
 }
 
 void Variant::split() {
@@ -1539,9 +1542,8 @@ void Variant::escalate(bool mutableIteration /* = false */) {
 // type conversions
 
 bool Variant::toBooleanHelper() const {
+  ASSERT(m_type > KindOfInt64);
   switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:    return false;
   case KindOfDouble:  return m_data.dbl != 0;
   case KindOfStaticString:
   case KindOfString:  return m_data.pstr->toBoolean();
@@ -1556,9 +1558,8 @@ bool Variant::toBooleanHelper() const {
 }
 
 int64 Variant::toInt64Helper(int base /* = 10 */) const {
+  ASSERT(m_type > KindOfInt64);
   switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:    return 0;
   case KindOfDouble:  {
     return (m_data.dbl > LONG_MAX) ? (uint64)m_data.dbl : (int64)m_data.dbl;
   }
@@ -1608,7 +1609,7 @@ String Variant::toStringHelper() const {
   return m_data.num;
 }
 
-Array Variant::toArrayHelper(bool warn) const {
+Array Variant::toArrayHelper() const {
   switch (m_type) {
   case KindOfUninit:
   case KindOfNull:    return Array::Create();
@@ -1616,8 +1617,8 @@ Array Variant::toArrayHelper(bool warn) const {
   case KindOfStaticString:
   case KindOfString:  return Array::Create(m_data.pstr);
   case KindOfArray:   return m_data.parr;
-  case KindOfObject:  return m_data.pobj->o_toArray(warn);
-  case KindOfVariant: return m_data.pvar->toArray(warn);
+  case KindOfObject:  return m_data.pobj->o_toArray();
+  case KindOfVariant: return m_data.pvar->toArray();
   default:
     break;
   }
@@ -3527,8 +3528,8 @@ void Variant::unserialize(VariableUnserializer *uns) {
   }
 
   if (type == 'N') {
-    // ASSERT(isNull());
     if(sep != ';') throw Exception("Expected ';' but got '%c'", sep);
+    setNull(); // NULL *IS* the value, without we get undefined warnings
     return;
   }
   if (sep != ':') {

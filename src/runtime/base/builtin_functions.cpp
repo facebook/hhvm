@@ -118,7 +118,7 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
         return classname.toObject()->o_invoke_ex
           (cls, method.substr(c + 2), params, false);
       }
-      return classname.toObject()->o_invoke(method, params, -1, false);
+      return classname.getObjectData()->o_invoke(method, params, -1, false);
     } else {
       if (!classname.isString()) {
         throw_invalid_argument("function: classname not string");
@@ -144,14 +144,15 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
   return null;
 }
 
-bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp) {
+bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp,
+                           String &classname, String &methodname) {
   mcp.noFatal();
   if (function.isString() || function.instanceof("closure")) {
     String sfunction = function.toString();
     int c = sfunction.find("::");
     if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {
-      String classname = sfunction.substr(0, c);
-      String methodname = sfunction.substr(c + 2);
+      classname = sfunction.substr(0, c);
+      methodname = sfunction.substr(c + 2);
 #ifdef ENABLE_LATE_STATIC_BINDING
       if (classname->same(s_static.get())) {
         ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
@@ -164,7 +165,8 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp) {
                     sfunction.data());
       return false;
     }
-    mcp.functionNamedCall(sfunction);
+    methodname = sfunction;
+    mcp.functionNamedCall(methodname);
     if (mcp.ci) return true;
     raise_warning("call_user_func to non-existent function %s",
                   sfunction.data());
@@ -175,15 +177,15 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp) {
       throw_invalid_argument("function: not a valid callback array");
       return false;
     }
-    Variant classname = arr.rvalAt(0LL);
-    Variant methodname = arr.rvalAt(1LL);
-    if (!methodname.isString()) {
+    Variant clsname = arr.rvalAt(0LL);
+    Variant mthname = arr.rvalAt(1LL);
+    if (!mthname.isString()) {
       throw_invalid_argument("function: methodname not string");
       return false;
     }
-    String method = methodname.toString();
-    if (classname.is(KindOfObject)) {
-      Object obj = classname.toObject();
+    String method = mthname.toString();
+    if (clsname.is(KindOfObject)) {
+      Object obj = clsname.toObject();
       int c = method.find("::");
       if (c != 0 && c != String::npos && c + 2 < method.size()) {
         String cls = method.substr(0, c);
@@ -192,21 +194,23 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp) {
         } else if (cls->same(s_parent.get())) {
           cls = FrameInjection::GetParentClassName(true);
         }
-        mcp.methodCallEx(obj, method.substr(c + 2));
+        methodname = method.substr(c + 2);
+        mcp.methodCallEx(obj, methodname);
         if (obj->o_get_call_info_ex(cls, mcp)) {
           return true;
         }
         return false;
       }
-      mcp.methodCall(obj, method);
+      methodname = method;
+      mcp.methodCall(obj, methodname);
       if (mcp.ci) return true;
       return false;
     } else {
-      if (!classname.isString()) {
+      if (!clsname.isString()) {
         throw_invalid_argument("function: classname not string");
         return false;
       }
-      String sclass = classname.toString();
+      String sclass = clsname.toString();
       if (sclass->same(s_self.get())) {
         sclass = FrameInjection::GetClassName(true);
       } else if (sclass->same(s_parent.get())) {
@@ -214,7 +218,8 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp) {
       }
       Object obj = FrameInjection::GetThis(true);
       if (obj.instanceof(sclass)) {
-        mcp.methodCallEx(obj, method);
+        methodname = method;
+        mcp.methodCallEx(obj, methodname);
         if (obj->o_get_call_info_ex(sclass, mcp)) {
           return true;
         }
@@ -226,7 +231,9 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp) {
         sclass = FrameInjection::GetStaticClassName(ti);
       }
 #endif
-      mcp.dynamicNamedCall(sclass, method);
+      classname = sclass;
+      methodname = method;
+      mcp.dynamicNamedCall(classname, methodname);
       if (mcp.ci) return true;
       raise_warning("call_user_func to non-existent function %s::%s",
                     sclass.data(), method.data());
@@ -275,9 +282,7 @@ Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
   if (mcp.ci) {
     return (mcp.ci->getMeth())(mcp, params);
   } else {
-    if (g_context->getThrowAllErrors()) {
-      o_invoke_failed(s.data(), method.data(), fatal);
-    }
+    o_invoke_failed(s.data(), method.data(), fatal);
     return null;
   }
 }
@@ -820,17 +825,11 @@ String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
 bool empty(CVarRef v, bool    offset) {
   return empty(v, Variant(offset));
 }
-bool empty(CVarRef v, char    offset) {
-  return empty(v, Variant(offset));
-}
-bool empty(CVarRef v, short   offset) {
-  return empty(v, Variant(offset));
-}
-bool empty(CVarRef v, int     offset) {
-  return empty(v, Variant(offset));
-}
 bool empty(CVarRef v, int64   offset) {
-  return empty(v, Variant(offset));
+  if (!v.isArray()) {
+    return empty(v, Variant(offset));
+  }
+  return !toBoolean(v.toArrNR().rvalAtRef(offset));
 }
 bool empty(CVarRef v, double  offset) {
   return empty(v, Variant(offset));
@@ -878,17 +877,19 @@ bool empty(CVarRef v, CVarRef offset) {
 bool isset(CVarRef v, bool    offset) {
   return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, char    offset) {
-  return isset(v, Variant(offset));
-}
-bool isset(CVarRef v, short   offset) {
-  return isset(v, Variant(offset));
-}
-bool isset(CVarRef v, int     offset) {
-  return isset(v, Variant(offset));
-}
 bool isset(CVarRef v, int64   offset) {
-  return isset(v, Variant(offset));
+  if (v.isArray()) {
+    return isset(v.toArrNR().rvalAtRef(offset));
+  }
+  if (v.isObject()) {
+    return v.getArrayAccess()->o_invoke(s_offsetExists,
+                                        Array::Create(offset), -1);
+  }
+  if (v.isString()) {
+    int pos = (int)offset;
+    return pos >= 0 && pos < v.getStringData()->size();
+  }
+  return false;
 }
 bool isset(CVarRef v, double  offset) {
   return isset(v, Variant(offset));
@@ -955,7 +956,10 @@ Variant include_impl_invoke(CStrRef file, bool once, LVariableTable* variables,
     }
     string server_root = RuntimeOption::SourceRoot;
     if (server_root.empty()) {
-      server_root = string(g_context->getCwd()->data()) + "/";
+      server_root = string(g_context->getCwd()->data());
+      if (server_root.empty() || server_root[server_root.size() - 1] != '/') {
+        server_root += "/";
+      }
     }
 
     String rel_path(Util::relativePath(server_root, string(file.data())));
@@ -1252,49 +1256,93 @@ Variant invoke_static_method_bind(CStrRef s, CStrRef method,
   return ref(ret);
 }
 
-void MethodCallPackage::dynamicNamedCall(CVarRef self, CStrRef method,
-    int64 prehash /* = -1 */) {
+void MethodCallPackage::methodCall(ObjectData *self, CStrRef method,
+                                   int64 prehash /* = -1 */) {
+  isObj = true;
   rootObj = self;
-  name = method;
-  if (rootObj.is(KindOfObject)) {
-    rootObj.getObjectData()->o_get_call_info(*this, prehash);
+  name = &method;
+  self->o_get_call_info(*this, prehash);
+}
+
+void MethodCallPackage::methodCall(CVarRef self, CStrRef method,
+                                   int64 prehash /* = -1 */) {
+  isObj = true;
+  ObjectData *s = self.objectForCall();
+  rootObj = s;
+  name = &method;
+  s->o_get_call_info(*this, prehash);
+}
+
+void MethodCallPackage::methodCallWithIndex(ObjectData *self, CStrRef method,
+                                            MethodIndex mi,
+                                            int64 prehash /* = -1 */) {
+  isObj = true;
+  rootObj = self;
+  name = &method;
+  self->o_get_call_info_with_index(*this, mi, prehash);
+}
+
+void MethodCallPackage::methodCallWithIndex(CVarRef self, CStrRef method,
+                                            MethodIndex mi,
+                                            int64 prehash /* = -1 */) {
+  isObj = true;
+  ObjectData *s = self.objectForCall();
+  rootObj = s;
+  name = &method;
+  s->o_get_call_info_with_index(*this, mi, prehash);
+}
+
+void MethodCallPackage::dynamicNamedCall(CVarRef self, CStrRef method,
+                                         int64 prehash /* = -1 */) {
+  name = &method;
+  if (self.is(KindOfObject)) {
+    isObj = true;
+    rootObj = self.getObjectData();
+    rootObj->o_get_call_info(*this, prehash);
   } else {
-    Object obj = FrameInjection::GetThis();
-    if (obj.isNull() || !obj->o_instanceof(rootObj.toString())) {
+    String str = self.toString();
+    ObjectData *obj = FrameInjection::GetThis();
+    if (!obj || !obj->o_instanceof(str)) {
+      rootCls = str.get();
       get_call_info_static_method(*this);
     } else {
+      isObj = true;
       rootObj = obj;
-      obj->o_get_call_info_ex(self.toString().data(), *this, prehash);
+      obj->o_get_call_info_ex(str->data(), *this, prehash);
     }
   }
 }
 
 void MethodCallPackage::dynamicNamedCallWithIndex(CVarRef self, CStrRef method,
     MethodIndex mi, int64 prehash /* = -1 */) {
-  rootObj = self;
-  name = method;
-  if (rootObj.is(KindOfObject)) {
-    rootObj.getObjectData()->o_get_call_info_with_index(*this, mi, prehash);
+  name = &method;
+  if (self.is(KindOfObject)) {
+    isObj = true;
+    rootObj = self.getObjectData();
+    rootObj->o_get_call_info_with_index(*this, mi, prehash);
   } else {
-    Object obj = FrameInjection::GetThis();
-    if (obj.isNull() || !obj->o_instanceof(rootObj.toString())) {
+    String str = self.toString();
+    ObjectData *obj = FrameInjection::GetThis();
+    if (!obj || !obj->o_instanceof(str)) {
+      rootCls = str.get();
       get_call_info_static_method_with_index(*this, mi);
     } else {
+      isObj = true;
       rootObj = obj;
-      obj->o_get_call_info_with_index_ex(self.toString().data(), *this, mi,
-          prehash);
+      obj->o_get_call_info_with_index_ex(str->data(), *this, mi, prehash);
     }
   }
 }
 
 void MethodCallPackage::dynamicNamedCall(CStrRef self, CStrRef method,
     int64 prehash /* = -1 */) {
-  rootObj = self;
-  name = method;
-  Object obj = FrameInjection::GetThis();
-  if (obj.isNull() || !obj->o_instanceof(self)) {
+  rootCls = self.get();
+  name = &method;
+  ObjectData *obj = FrameInjection::GetThis();
+  if (!obj || !obj->o_instanceof(self)) {
     get_call_info_static_method(*this);
   } else {
+    isObj = true;
     rootObj = obj;
     obj->o_get_call_info_ex(self, *this, prehash);
   }
@@ -1302,38 +1350,13 @@ void MethodCallPackage::dynamicNamedCall(CStrRef self, CStrRef method,
 
 void MethodCallPackage::dynamicNamedCallWithIndex(CStrRef self, CStrRef method,
     MethodIndex mi, int64 prehash /* = -1 */) {
-  rootObj = self;
-  name = method;
-  Object obj = FrameInjection::GetThis();
-  if (obj.isNull() || !obj->o_instanceof(self)) {
+  rootCls = self.get();
+  name = &method;
+  ObjectData *obj = FrameInjection::GetThis();
+  if (!obj || !obj->o_instanceof(self)) {
     get_call_info_static_method_with_index(*this, mi);
   } else {
-    rootObj = obj;
-    obj->o_get_call_info_with_index_ex(self, *this, mi, prehash);
-  }
-}
-
-void MethodCallPackage::dynamicNamedCall(const char *self, CStrRef method,
-    int64 prehash /* = -1 */) {
-  rootObj = self;
-  name = method;
-  Object obj = FrameInjection::GetThis();
-  if (obj.isNull() || !obj->o_instanceof(self)) {
-    get_call_info_static_method(*this);
-  } else {
-    rootObj = obj;
-    obj->o_get_call_info_ex(self, *this, prehash);
-  }
-}
-
-void MethodCallPackage::dynamicNamedCallWithIndex(const char *self,
-    CStrRef method, MethodIndex mi, int64 prehash /* = -1 */) {
-  rootObj = self;
-  name = method;
-  Object obj = FrameInjection::GetThis();
-  if (obj.isNull() || !obj->o_instanceof(self)) {
-    get_call_info_static_method_with_index(*this, mi);
-  } else {
+    isObj = true;
     rootObj = obj;
     obj->o_get_call_info_with_index_ex(self, *this, mi, prehash);
   }
@@ -1345,26 +1368,26 @@ void MethodCallPackage::functionNamedCall(CStrRef func) {
 }
 
 void MethodCallPackage::construct(CObjRef self) {
-  rootObj = self;
+  rootObj = self.get();
   self->getConstructor(*this);
 }
+
 void MethodCallPackage::fail() {
   if (m_fatal) {
-    o_invoke_failed(rootObj.is(KindOfObject) ?
-        rootObj.getObjectData()->o_getClassName() : rootObj.toString(),
-        name, true);
+    o_invoke_failed(isObj ? rootObj->o_getClassName() : String(rootCls),
+                    *name, true);
   }
 }
 String MethodCallPackage::getClassName() {
-  if (rootObj.is(KindOfObject)) {
-    return rootObj.getObjectData()->o_getClassName();
+  if (isObj) {
+    return rootObj->o_getClassName();
   } else {
-    return rootObj.toString();
+    return rootCls;
   }
 }
 void MethodCallPackage::lateStaticBind(ThreadInfo *ti) {
 #ifdef ENABLE_LATE_STATIC_BINDING
-  rootObj = FrameInjection::GetStaticClassName(ti);
+  rootCls = FrameInjection::GetStaticClassName(ti).get();
   get_call_info_static_method(*this);
 #else
   m_fatal = true;

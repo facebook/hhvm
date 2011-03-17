@@ -18,6 +18,7 @@
 #define __PROCESS_H__
 
 #include "base.h"
+#include <sys/syscall.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -118,7 +119,7 @@ public:
    * Thread's process identifier.
    */
   static pid_t GetThreadPid() {
-    return syscall(2);
+    return syscall(SYS_gettid);
   }
 
   /**

@@ -23,6 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 StaticString s_sys_ssb5a1e6bc("ReflectionObject");
+StaticString s_sys_ssb5d283cb("receive");
 StaticString s_sys_ssb6132cef("setoptimeout");
 StaticString s_sys_ssb65737a4("DomainException");
 StaticString s_sys_ssb69f1960("getTransitions");
@@ -85,7 +86,6 @@ StaticString s_sys_sscd5dc41e("ReflectionParameter");
 StaticString s_sys_sscdbb2d67("getMethod");
 StaticString s_sys_ssce568670("appendByKey");
 StaticString s_sys_ssce80f767("isProtected");
-StaticString s_sys_ssced27431("increment");
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -43,7 +43,17 @@ public:
   virtual int o_getResourceId() const { return o_getId(); }
 
   // implementing UnsafePointer
-  virtual void protect() { setStatic();}
+  virtual void protect() { m_static = true; }
+
+  // override CountableNF by using its own flag
+  void incRefCount() const {
+    if (m_static) return;
+    ObjectData::incRefCount();
+  }
+  int decRefCount() const {
+    if (m_static) return _count;
+    return ObjectData::decRefCount();
+  }
 
   /**
    * Marshaling/Unmarshaling between request thread and fiber thread.
@@ -56,6 +66,9 @@ public:
 
 protected:
   virtual ObjectData* cloneImpl();
+
+private:
+  bool m_static;
 };
 
 /**

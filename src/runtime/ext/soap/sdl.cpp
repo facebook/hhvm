@@ -145,12 +145,25 @@ static bool is_wsdl_element(xmlNodePtr node) {
   return true;
 }
 
-static void load_wsdl_ex(char *struri, sdlCtx *ctx, bool include) {
+static void load_wsdl_ex(char *struri, sdlCtx *ctx, bool include,
+                         HttpClient *http) {
   if (ctx->docs.find(struri) != ctx->docs.end()) {
     return;
   }
 
-  xmlDocPtr wsdl = soap_xmlParseFile(struri);
+  xmlDocPtr wsdl;
+  if (http) {
+    HeaderMap headers;
+    StringBuffer response;
+    int code = http->get(struri, response, &headers);
+    if (code != 200) {
+      throw SoapException("Parsing WSDL: Couldn't load from '%s'", struri);
+    }
+    String msg = response.detach();
+    wsdl = soap_xmlParseMemory(msg.data(), msg.size());
+  } else {
+    wsdl = soap_xmlParseFile(struri);
+  }
   if (!wsdl) {
     xmlErrorPtr xmlErrorPtr = xmlGetLastError();
     if (xmlErrorPtr) {
@@ -218,7 +231,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, bool include) {
           uri = xmlBuildURI(tmp->children->content, base);
           xmlFree(base);
         }
-        load_wsdl_ex((char*)uri, ctx, true);
+        load_wsdl_ex((char*)uri, ctx, true, NULL);
         xmlFree(uri);
       }
 
@@ -546,12 +559,12 @@ static void wsdl_message(sdlCtx *ctx, sdlParamVec &parameters,
   }
 }
 
-sdlPtr load_wsdl(char *struri) {
+sdlPtr load_wsdl(char *struri, HttpClient *http) {
   sdlCtx ctx;
   ctx.sdl = sdlPtr(new sdl());
   ctx.sdl->source = struri;
 
-  load_wsdl_ex(struri, &ctx, false);
+  load_wsdl_ex(struri, &ctx, false, http);
   schema_pass2(&ctx);
 
   int i = 0;

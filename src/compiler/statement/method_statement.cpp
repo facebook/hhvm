@@ -672,9 +672,47 @@ void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
 
 void MethodStatement::outputCPPStmt(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_stmt) {
-    m_stmt->outputCPP(cg, ar);
+    FunctionScopeRawPtr funcScope = getFunctionScope();
+    if (funcScope->inPseudoMain()) {
+      cg.beginHoistedClasses();
+      int i, n = m_stmt->getCount();
+      for (i = 0; i < n; ++i) {
+        StatementPtr s((*m_stmt)[i]);
+        if (s->is(Statement::KindOfClassStatement) ||
+            s->is(Statement::KindOfInterfaceStatement)) {
+          cg.addHoistedClass(s->getClassScope()->getName());
+        }
+      }
+      for (i = 0; i < n; ++i) {
+        StatementPtr s((*m_stmt)[i]);
+        if (s->is(Statement::KindOfFunctionStatement) ||
+            ((s->is(Statement::KindOfClassStatement) ||
+              s->is(Statement::KindOfInterfaceStatement)) &&
+             s->getClassScope()->isBaseClass())) {
+          s->outputCPP(cg, ar);
+        }
+      }
+      cg.collectHoistedClasses(false);
+      for (i = 0; i < n; ++i) {
+        StatementPtr s((*m_stmt)[i]);
+        if (s->is(Statement::KindOfFunctionStatement)) continue;
+        if (s->is(Statement::KindOfClassStatement) ||
+            s->is(Statement::KindOfInterfaceStatement)) {
+          if (s->getClassScope()->isBaseClass()) {
+            continue;
+          }
+          cg.collectHoistedClasses(true);
+          s->outputCPP(cg, ar);
+          cg.collectHoistedClasses(false);
+        } else {
+          s->outputCPP(cg, ar);
+        }
+      }
+      cg.endHoistedClasses();
+    } else {
+      m_stmt->outputCPP(cg, ar);
+    }
     if (!m_stmt->hasRetExp()) {
-      FunctionScopeRawPtr funcScope = getFunctionScope();
       ClassScopePtr cls = getClassScope();
       if (funcScope->isConstructor(cls)) {
         cg_printf("gasInCtor(oldInCtor);\n");

@@ -151,7 +151,7 @@ MYSQL *MySQL::GetConn(CVarRef link_identifier, MySQL **rconn /* = NULL */) {
 
 bool MySQL::CloseConn(CVarRef link_identifier) {
   MySQL *mySQL = Get(link_identifier);
-  if (mySQL) {
+  if (mySQL && !mySQL->isPersistent()) {
     mySQL->close();
   }
   return true;

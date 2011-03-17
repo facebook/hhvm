@@ -54,7 +54,8 @@ String::String(int n) {
 
   buf = (char*)malloc(len + 1);
   memcpy(buf, p, len + 1); // including the null terminator.
-  SmartPtr<StringData>::operator=(NEW(StringData)(buf, len, AttachString));
+  m_px = NEW(StringData)(buf, len, AttachString);
+  m_px->setRefCount(1);
 }
 
 String::String(int64 n) {
@@ -70,7 +71,7 @@ String::String(int64 n) {
   buf = (char*)malloc(len + 1);
   memcpy(buf, p, len + 1); // including the null terminator.
   m_px = NEW(StringData)(buf, len, AttachString);
-  m_px->incRefCount();
+  m_px->setRefCount(1);
 }
 
 String::String(double n) {
@@ -78,7 +79,7 @@ String::String(double n) {
   if (n == 0.0) n = 0.0; // so to avoid "-0" output
   vspprintf(&buf, 0, "%.*G", 14, n);
   m_px = NEW(StringData)(buf, AttachString);
-  m_px->incRefCount();
+  m_px->setRefCount(1);
 }
 
 String::String(const AtomicString &s) {
@@ -224,10 +225,14 @@ char String::charAt(int pos) const {
 // assignments
 
 String &String::operator=(litstr s) {
+  if (m_px && m_px->decRefCount() == 0) {
+    m_px->release();
+  }
   if (s) {
-    SmartPtr<StringData>::operator=(NEW(StringData)(s, AttachLiteral));
+    m_px = NEW(StringData)(s, AttachLiteral);
+    m_px->setRefCount(1);
   } else {
-    reset();
+    m_px = NULL;
   }
   return *this;
 }
@@ -238,8 +243,11 @@ String &String::operator=(StringData *data) {
 }
 
 String &String::operator=(const std::string & s) {
-  SmartPtr<StringData>::operator=(
-    NEW(StringData)(s.c_str(), s.size(), CopyString));
+  if (m_px && m_px->decRefCount() == 0) {
+    m_px->release();
+  }
+  m_px = NEW(StringData)(s.c_str(), s.size(), CopyString);
+  m_px->setRefCount(1);
   return *this;
 }
 
@@ -262,14 +270,19 @@ String &String::operator=(const AtomicString &s) {
 String &String::operator+=(litstr s) {
   if (s && *s) {
     if (empty()) {
-      SmartPtr<StringData>::operator=(NEW(StringData)(s, AttachLiteral));
+      m_px = NEW(StringData)(s, AttachLiteral);
+      m_px->setRefCount(1);
     } else if (m_px->getCount() == 1) {
       int len = strlen(s);
       m_px->append(s, len);
     } else {
       int len;
       char *ret = string_concat(data(), size(), s, strlen(s), len);
-      SmartPtr<StringData>::operator=(NEW(StringData)(ret, len, AttachString));
+      if (m_px->decRefCount() == 0) {
+        m_px->release();
+      }
+      m_px = NEW(StringData)(ret, len, AttachString);
+      m_px->setRefCount(1);
     }
   }
   return *this;
@@ -284,7 +297,11 @@ String &String::operator+=(CStrRef str) {
     } else {
       int len;
       char *ret = string_concat(data(), size(), str.data(), str.size(), len);
-      SmartPtr<StringData>::operator=(NEW(StringData)(ret, len, AttachString));
+      if (m_px->decRefCount() == 0) {
+        m_px->release();
+      }
+      m_px = NEW(StringData)(ret, len, AttachString);
+      m_px->setRefCount(1);
     }
   }
   return *this;
@@ -333,16 +350,22 @@ String &String::operator|=(CStrRef v) {
   const char *s2 = v.data();
   int len1 = size();
   int len2 = v.size();
+  int len;
   char *copy = NULL;
   if (len2 > len1) {
+    len = len2;
     copy = string_duplicate(s2, len2);
     for (int i = 0; i < len1; i++) copy[i] |= s1[i];
-    SmartPtr<StringData>::operator=(NEW(StringData)(copy, len2, AttachString));
   } else {
+    len = len1;
     copy = string_duplicate(s1, len1);
     for (int i = 0; i < len2; i++) copy[i] |= s2[i];
-    SmartPtr<StringData>::operator=(NEW(StringData)(copy, len1, AttachString));
   }
+  if (m_px && m_px->decRefCount() == 0) {
+    m_px->release();
+  }
+  m_px = NEW(StringData)(copy, len, AttachString);
+  m_px->setRefCount(1);
   return *this;
 }
 
@@ -351,16 +374,22 @@ String &String::operator&=(CStrRef v) {
   const char *s2 = v.data();
   int len1 = size();
   int len2 = v.size();
+  int len;
   char *copy = NULL;
   if (len2 < len1) {
+    len = len2;
     copy = string_duplicate(s2, len2);
     for (int i = 0; i < len2; i++) copy[i] &= s1[i];
-    SmartPtr<StringData>::operator=(NEW(StringData)(copy, len2, AttachString));
   } else {
+    len = len1;
     copy = string_duplicate(s1, len1);
     for (int i = 0; i < len1; i++) copy[i] &= s2[i];
-    SmartPtr<StringData>::operator=(NEW(StringData)(copy, len1, AttachString));
   }
+  if (m_px && m_px->decRefCount() == 0) {
+    m_px->release();
+  }
+  m_px = NEW(StringData)(copy, len, AttachString);
+  m_px->setRefCount(1);
   return *this;
 }
 
@@ -369,16 +398,22 @@ String &String::operator^=(CStrRef v) {
   const char *s2 = v.data();
   int len1 = size();
   int len2 = v.size();
+  int len;
   char *copy = NULL;
   if (len2 < len1) {
+    len = len2;
     copy = string_duplicate(s2, len2);
     for (int i = 0; i < len2; i++) copy[i] ^= s1[i];
-    SmartPtr<StringData>::operator=(NEW(StringData)(copy, len2, AttachString));
   } else {
+    len = len1;
     copy = string_duplicate(s1, len1);
     for (int i = 0; i < len1; i++) copy[i] ^= s2[i];
-    SmartPtr<StringData>::operator=(NEW(StringData)(copy, len1, AttachString));
   }
+  if (m_px && m_px->decRefCount() == 0) {
+    m_px->release();
+  }
+  m_px = NEW(StringData)(copy, len, AttachString);
+  m_px->setRefCount(1);
   return *this;
 }
 
@@ -584,7 +619,11 @@ void String::unserialize(VariableUnserializer *uns,
   char *buf = (char*)malloc(size + 1);
   uns->read(buf, size);
   buf[size] = '\0';
-  SmartPtr<StringData>::operator=(NEW(StringData)(buf, size, AttachString));
+  if (m_px && m_px->decRefCount() == 0) {
+    m_px->release();
+  }
+  m_px = NEW(StringData)(buf, size, AttachString);
+  m_px->setRefCount(1);
 
   ch = uns->readChar();
   if (ch != delimiter1) {

@@ -65,7 +65,8 @@ AnalysisResult::AnalysisResult()
     m_scalarArraysCounter(0), m_paramRTTICounter(0),
     m_scalarArraySortedAvgLen(0), m_scalarArraySortedIndex(0),
     m_scalarArraySortedSumLen(0), m_scalarArrayCompressedTextSize(0),
-    m_pregenerating(false), m_pregenerated(false), m_system(false) {
+    m_pregenerating(false), m_pregenerated(false),
+    m_system(false), m_sepExtension(false) {
   m_classForcedVariants[0] = m_classForcedVariants[1] = false;
 }
 

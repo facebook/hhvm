@@ -22,11 +22,11 @@ override DIRS_INCLUDED := 1
 unexport DIRS_INCLUDED
 
 # This is to make sure "make" without any target will actually "make all".
-overall: all quiet
+overall: all quiet-1
 
 # Add quiet as a dependent to prevent "nothing to do for... warnings from make"
-.PHONY: quiet
-quiet:
+.PHONY: quiet quiet-%
+quiet quiet-%:
 	@true
 
 ###############################################################################

@@ -603,7 +603,7 @@ LIB_PATHS := $(HPHP_LIB) $(HPHP_TEST_LIB_PATH) $(EXT_DIR)/binutils \
 # Dependencies
 
 # This is to make sure "make" without any target will actually "make all".
-overall: all quiet
+overall: all quiet-1
 
 # Suppressing no rule errors
 %.d:
@@ -750,8 +750,8 @@ $(OBJECTS): $(GENERATED_SOURCES)
 $(PIC_OBJECTS): $(GENERATED_SOURCES)
 
 .PHONY: objects picobjects
-objects: $(OBJECTS) quiet
-picobjects: $(PIC_OBJECTS) quiet
+objects: $(OBJECTS) quiet-2
+picobjects: $(PIC_OBJECTS) quiet-3
 
 ifdef SHOW_LINK
 
@@ -760,6 +760,7 @@ $(SHARED_LIB): $(PIC_OBJECTS)
 			$(SO_LDFLAGS) -o $@ $(PIC_OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)
+	$(V)$(RM) $@
 	$(AR_CMD) $@ $(OBJECTS) $(ADDITIONAL_OBJS)
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
@@ -774,6 +775,7 @@ $(SHARED_LIB): $(PIC_OBJECTS)
 
 $(STATIC_LIB): $(OBJECTS)
 	@echo 'Linking $@ ...'
+	$(V)$(RM) $@
 	$(V)$(AR_CMD) $@ $(OBJECTS) $(ADDITIONAL_OBJS)
 
 $(MONO_TARGETS): %:%.o $(DEP_LIBS)
@@ -784,7 +786,7 @@ endif
 
 .PHONY:out-of-date do-setup
 
-do-setup: quiet
+do-setup: quiet-4
 
 
 ifdef LINK_LOCAL

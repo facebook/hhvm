@@ -91,9 +91,6 @@ void RequestLocal<T>::createKey() {
   }
 }
 
-#define DECLARE_REQUEST_LOCAL(T,f) \
-  extern __thread RequestLocal<T> f
-
 #define IMPLEMENT_REQUEST_LOCAL(T,f) \
   __thread RequestLocal<T> f = { { NULL, NULL, NULL } }
 
@@ -152,10 +149,6 @@ private:
  *
  * Remember: *Never* write IMPLEMENT_STATIC_REQUEST_LOCAL in a header file.
  */
-
-#define DECLARE_REQUEST_LOCAL(T,f)    \
-  DECLARE_THREAD_LOCAL(T,f ## __tl);  \
-  RequestLocal<T> f
 
 #define IMPLEMENT_REQUEST_LOCAL(T,f)     \
   IMPLEMENT_THREAD_LOCAL(T, f ## __tl);  \

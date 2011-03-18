@@ -85,22 +85,6 @@ String::String(const AtomicString &s) {
   m_px = s.get();
 }
 
-void String::assign(const char *data, StringDataMode mode) {
-  if (data) {
-    SmartPtr<StringData>::operator=(NEW(StringData)(data, mode));
-  } else {
-    reset();
-  }
-}
-
-void String::assign(const char *data, int len, StringDataMode mode) {
-  if (data) {
-    SmartPtr<StringData>::operator=(NEW(StringData)(data, len, mode));
-  } else {
-    reset();
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // informational
 

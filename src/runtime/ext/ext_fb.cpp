@@ -353,7 +353,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
             int len = (uint8_t)buff[(*pos)++];
 
             CHECK_ENOUGH(len, *pos, buff_len);
-            key.assign(buff + (*pos), len, CopyString);
+            key = NEW(StringData)(buff + (*pos), len, CopyString);
             (*pos) += len;
             break;
           }
@@ -364,7 +364,7 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
             (*pos) += 4;
 
             CHECK_ENOUGH(len, *pos, buff_len);
-            key.assign(buff + (*pos), len, CopyString);
+            key = NEW(StringData)(buff + (*pos), len, CopyString);
             (*pos) += len;
             break;
           }

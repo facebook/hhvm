@@ -66,12 +66,6 @@ public:
     : SmartPtr<StringData>(s ? NEW(StringData)(s, length, mode) : NULL) { }
   String(const AtomicString &s);
 
-  void assign(const char *data, StringDataMode mode);
-  void assign(const char *data, int len, StringDataMode mode);
-  void assignLiteral(litstr data) {
-    assign(data, AttachLiteral);
-  }
-
   void clear() { reset();}
   /**
    * Informational

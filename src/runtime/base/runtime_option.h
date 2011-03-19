@@ -33,6 +33,8 @@ class RuntimeOption {
 public:
   static void Load(Hdf &config, StringVec *overwrites = NULL);
 
+  static bool Loaded;
+
   static const char *ExecutionMode;
   static std::string BuildId;
   static std::string PidFile;

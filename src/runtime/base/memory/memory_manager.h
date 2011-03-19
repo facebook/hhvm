@@ -52,6 +52,7 @@ public:
    * manager.
    */
   void enable() { m_enabled = true;}
+  void disable() { m_enabled = false;}
 
   /**
    * Register a smart allocator. Done by SmartAlloctorImpl's constructor.

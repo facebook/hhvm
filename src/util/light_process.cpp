@@ -193,13 +193,9 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
     for (int i = 0; i < pipe_size; i++) {
       dup2(pkeys[i], pvals[i]);
     }
-    if (strlen(cwd) > 0) {
-      if (chdir(cwd)) { // non-zero for error
-        fprintf(fout, "error\n%d\n", errno);
-        fflush(fout);
-        close_fds(pkeys);
-        return;
-      }
+    if (strlen(cwd) > 0 && chdir(cwd)) {
+      // non-zero for error
+      // chdir failed, the working directory remains unchanged
     }
     if (!env.empty()) {
       char **envp = build_envp(env);
@@ -569,11 +565,11 @@ pid_t LightProcess::proc_open(const char *cmd, const vector<int> &created,
     fprintf(g_procs[id].m_fout, "%d\n", desired[i]);
   }
   fflush(g_procs[id].m_fout);
-  char buf[BUFFER_SIZE];
   for (unsigned int i = 0; i < created.size(); i++) {
     if (!send_fd(g_procs[id].m_afdt_fd, created[i])) break;
   }
 
+  char buf[BUFFER_SIZE];
   read_buf(g_procs[id].m_fin, buf);
   if (strncmp(buf, "error", 5) == 0) {
     read_buf(g_procs[id].m_fin, buf);
@@ -582,6 +578,7 @@ pid_t LightProcess::proc_open(const char *cmd, const vector<int> &created,
   }
   int64 pid = -1;
   sscanf(buf, "%lld", &pid);
+  ASSERT(pid);
   return (pid_t)pid;
 }
 

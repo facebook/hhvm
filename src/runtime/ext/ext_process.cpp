@@ -665,6 +665,13 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
                     CVarRef other_options /* = null_variant */) {
   std::vector<DescriptorItem> items;
 
+  string scwd = "";
+  if (!cwd.empty()) {
+    scwd = cwd.c_str();
+  } else if (!g_context->getCwd().empty()) {
+    scwd = g_context->getCwd().c_str();
+  }
+
   pid_t child;
 
   if (LightProcess::Available()) {
@@ -689,9 +696,7 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
     }
 
     child = LightProcess::proc_open(cmd.c_str(), created, intended,
-                                    cwd.empty() ? g_context->getCwd().c_str()
-                                                : cwd.c_str(),
-                                    envs);
+                                    scwd.c_str(), envs);
     ASSERT(child);
     return post_proc_open(cmd, pipes, env, items, child);
   } else {
@@ -714,7 +719,7 @@ Variant f_proc_open(CStrRef cmd, CArrRef descriptorspec, Variant pipes,
   for (int i = 0; i < (int)items.size(); i++) {
     items[i].dupChild();
   }
-  if (chdir(cwd.empty() ? g_context->getCwd() : cwd) < 0) {
+  if (scwd.length() > 0 && chdir(scwd.c_str())) {
     // chdir failed, the working directory remains unchanged
   }
   if (!env.isNull()) {

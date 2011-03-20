@@ -244,6 +244,7 @@ CPPFLAGS += \
   -isystem $(EXT_DIR)/libcap/include \
   -isystem $(EXT_DIR)/libpng/include \
   -isystem $(EXT_DIR)/imap/include \
+  -isystem $(EXT_DIR)/zlib/include \
   -I $(PROJECT_ROOT)/src \
   -I $(PROJECT_ROOT)/src/system/gen \
 
@@ -458,9 +459,9 @@ endif
 # NOT add something that not everyone wants.
 
 ifdef MAC_OS_X
-LINK_LIBS = -lpthread -lstdc++ -lz -ldl
+LINK_LIBS = -lpthread -lstdc++ -ldl
 else
-BFD_LIBS = -L$(EXT_DIR)/binutils/ -lbfd -liberty -ldl -lz
+BFD_LIBS = -L$(EXT_DIR)/binutils/ -lbfd -liberty -ldl
 LINK_LIBS = -lpthread $(BFD_LIBS) -lrt -lstdc++ -lresolv -lbz2
 endif
 
@@ -588,13 +589,15 @@ LDAP_LIBS = $(EXT_DIR)/ldap/lib/libldap.a $(EXT_DIR)/ldap/lib/liblber.a
 READLINE_LIBS = $(EXT_DIR)/readline/lib/libreadline.a \
 	$(EXT_DIR)/readline/lib/libhistory.a -lcurses
 
+ZLIB_LIBS = $(EXT_DIR)/zlib/lib/libz.a
+
 ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
 	$(MYSQL_LIBS) $(SQLITE_LIBS) $(MCC_LIBS) \
 	$(GD_LIBS) $(LIBXML_LIBS) $(FBML_LIBS) $(MBFL_LIBS) \
 	$(MCRYPT_LIBS) $(JEMALLOC_LIBS) $(GOOGLE_LIBS) $(ICU_LIBS) \
 	$(HTTP_LIBS) $(XHP_LIBS) $(TIME_LIBS) $(TBB_LIBS) $(FBI_LIBS) \
 	$(LDAP_LIBS) $(READLINE_LIBS) $(LIBMEMCACHED_LIBS) \
-	$(LIBCAP_LIBS) $(IMAP_LIBS) $(ORACLE_LIBS) \
+	$(LIBCAP_LIBS) $(IMAP_LIBS) $(ORACLE_LIBS) $(ZLIB_LIBS) \
 
 LIB_PATHS := $(HPHP_LIB) $(HPHP_TEST_LIB_PATH) $(EXT_DIR)/binutils \
              $(sort $(foreach L,$(filter-out -%, $(ALL_LIBS)), $(dir $(L))))

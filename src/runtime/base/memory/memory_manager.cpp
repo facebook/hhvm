@@ -166,12 +166,6 @@ void MemoryManager::rollback() {
   protectUnsafePointers();
 }
 
-void MemoryManager::disableDealloc() {
-  for (unsigned int i = 0; i < m_smartAllocators.size(); i++) {
-    m_smartAllocators[i]->disableDealloc();
-  }
-}
-
 void MemoryManager::cleanup() {
 }
 

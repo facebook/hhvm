@@ -93,7 +93,7 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
     m_rowChecked(0), m_colChecked(0), m_linearSize(0), m_linearCount(0),
     m_allocatedBlocks(0), m_multiplier(1), m_maxMultiplier(1),
     m_targetMultiplier(1),
-    m_iter(this), m_dealloc(true), m_linearized(false), m_stats(NULL) {
+    m_iter(this), m_linearized(false), m_stats(NULL) {
 
   // automatically pick a good per slab item count
   if (m_itemCount <= 0) {
@@ -332,8 +332,6 @@ void SmartAllocatorImpl::backupObjects(LinearAllocator &allocator) {
 }
 
 void SmartAllocatorImpl::rollbackObjects(LinearAllocator &allocator) {
-  m_dealloc = true;
-
   // sweep dangling objects
   if (m_flag & (NeedRestore | NeedRestoreOnce | NeedSweep)) {
     m_iter.clear();

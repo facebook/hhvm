@@ -18,6 +18,15 @@
 #include <runtime/ext/ext_variable.h>
 #include <runtime/eval/ast/variable_expression.h>
 #include <runtime/eval/ast/temp_expression_list.h>
+#include <runtime/eval/ast/array_element_expression.h>
+#include <runtime/eval/ast/include_expression.h>
+#include <runtime/eval/ast/unary_op_expression.h>
+#include <runtime/eval/ast/object_property_expression.h>
+#include <runtime/eval/ast/assignment_op_expression.h>
+#include <runtime/eval/ast/assignment_ref_expression.h>
+#include <runtime/eval/ast/inc_op_expression.h>
+#include <runtime/eval/ast/function_call_expression.h>
+#include <util/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {
@@ -73,25 +82,57 @@ void SubListElement::dump(std::ostream &out) const {
   out << ")";
 }
 
+static bool IsAbnormal(ExpressionPtr rhs) {
+  if (rhs->is<VariableExpression>() ||
+      rhs->is<ArrayElementExpression>() ||
+      rhs->is<ObjectPropertyExpression>() ||
+      rhs->is<FunctionCallExpression>() ||
+      rhs->is<IncludeExpression>() ||
+      rhs->is<AssignmentOpExpression>() ||
+      rhs->is<AssignmentRefExpression>()) {
+    return false;
+  }
+
+  if (IncOpExpression *op = rhs->cast<IncOpExpression>()) {
+    return !op->front();
+  }
+
+  if (UnaryOpExpression *op = rhs->cast<UnaryOpExpression>()) {
+    if (op->getOp() == '@') return IsAbnormal(op->getExpression());
+    if (op->getOp() == T_EVAL) return false;
+    return true;
+  }
+
+  if (ListAssignmentExpression *la = rhs->cast<ListAssignmentExpression>()) {
+    return IsAbnormal(la->getArray());
+  }
+
+  if (TempExpressionList *t = rhs->cast<TempExpressionList>()) {
+    return IsAbnormal(t->getLastExp().get());
+  }
+
+  return true;
+}
+
 ListAssignmentExpression::ListAssignmentExpression(EXPRESSION_ARGS,
                                                    ListElementPtr lhs,
                                                    ExpressionPtr rhs)
-  : Expression(EXPRESSION_PASS), m_lhs(lhs), m_rhs(rhs) {}
+  : Expression(EXPRESSION_PASS), m_lhs(lhs), m_rhs(rhs) {
+  m_abnormal = IsAbnormal(rhs);
+}
 
 Variant ListAssignmentExpression::eval(VariableEnvironment &env) const {
-  const VariableExpression *v =
-    dynamic_cast<const VariableExpression*>(m_rhs.get());
+  const VariableExpression *v = m_rhs->cast<VariableExpression>();
   if (v) {
     // Rhs has to be taken as lval if a variable in case there are references
     // to that variable on the lhs.
     CVarRef rhs(v->lval(env));
     Variant tmp(ref(rhs));
-    if (!f_is_array(tmp)) tmp.unset();
     m_lhs->set(env, tmp);
     return rhs;
   } else {
     Variant rhs(m_rhs->eval(env));
-    m_lhs->set(env, rhs.is(KindOfArray) ? rhs : null_variant);
+    m_lhs->set(env, !m_abnormal || rhs.is(KindOfArray) ? rhs : null_variant);
     return rhs;
   }
 }

@@ -31,6 +31,8 @@ public:
   virtual Variant eval(VariableEnvironment &env) const;
   virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   virtual void dump(std::ostream &out) const;
+  int getOp() const { return m_op; }
+  Expression *getExpression() const { return m_exp.get(); }
 private:
   ExpressionPtr m_exp;
   int m_op;

@@ -21,6 +21,9 @@
 #include <compiler/analysis/function_scope.h>
 #include <compiler/expression/array_element_expression.h>
 #include <compiler/expression/object_property_expression.h>
+#include <compiler/expression/unary_op_expression.h>
+#include <compiler/expression/binary_op_expression.h>
+#include <util/parser/hphp.tab.hpp>
 
 using namespace HPHP;
 using namespace std;
@@ -29,12 +32,88 @@ using namespace boost;
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
 
+/*
+  Determine whether the rhs behaves normall, or abnormally.
+
+  1) If the expression is the silence operator, recurse on the inner expression.
+  2) If the expression is a list assignment expression, recurse on the
+     RHS of the expression.
+  3) If the expression is one of the following, then E behaves normally:
+  Simple/Dynamic variable (including $this and superglobals)
+  Array element expression
+  Property expression
+  Static variable expression
+  Function call expression
+  Preinc/predec expression (but not postinc/postdec)
+  Assignment expression
+  Assignment op expression
+  Binding assignment expression
+  Include/require expression
+  Eval expression
+  Array expression
+  Array cast expression
+  4) For all other expressions, E behaves abnormally. This includes:
+  All binary operator expressions
+  All unary operator expressions except silence and preinc/predec
+  Scalar expression of type null, bool, int, double, or string
+  Qop expression (?:)
+  Constant expression
+  Class constant expression
+  Isset or empty expression
+  Exit expression
+  Instanceof expression
+*/
+static bool IsAbnormal(ExpressionPtr rhs) {
+  switch (rhs->getKindOf()) {
+    case Expression::KindOfSimpleVariable:
+    case Expression::KindOfDynamicVariable:
+    case Expression::KindOfArrayElementExpression:
+    case Expression::KindOfObjectPropertyExpression:
+    case Expression::KindOfSimpleFunctionCall:
+    case Expression::KindOfDynamicFunctionCall:
+    case Expression::KindOfObjectMethodExpression:
+    case Expression::KindOfNewObjectExpression:
+    case Expression::KindOfAssignmentExpression:
+    case Expression::KindOfIncludeExpression:
+      return false;
+
+    case Expression::KindOfListAssignment:
+      return IsAbnormal(static_pointer_cast<ListAssignment>(rhs)->getArray());
+
+    case Expression::KindOfUnaryOpExpression: {
+      UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(rhs));
+      switch (u->getOp()) {
+        case '@':
+          return IsAbnormal(u->getExpression());
+        case T_INC:
+        case T_DEC:
+          return !u->getFront();
+        case T_EVAL:
+        case T_ARRAY:
+        case T_ARRAY_CAST:
+          return false;
+        default:
+          return true;
+      }
+      break;
+    }
+    case Expression::KindOfBinaryOpExpression: {
+      BinaryOpExpressionPtr b(static_pointer_cast<BinaryOpExpression>(rhs));
+      return !b->isAssignmentOp();
+    }
+    default: break;
+  }
+  return true;
+}
+
 ListAssignment::ListAssignment
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionListPtr variables, ExpressionPtr array)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_variables(variables), m_array(array) {
+    m_variables(variables), m_array(array), m_abnormal(false) {
   setLValue();
+
+  m_abnormal = m_array && IsAbnormal(m_array);
 }
 
 ExpressionPtr ListAssignment::clone() {
@@ -155,20 +234,34 @@ void ListAssignment::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 }
 
-void ListAssignment::outputCPPAssignment(CodeGenerator &cg,
-    AnalysisResultPtr ar, const string &arrTmp) {
-  if (!m_variables) return;
+static string getArrRef(const string &arrTmp, int index) {
+  if (arrTmp == "null_variant") return arrTmp;
+  return arrTmp + "[" + lexical_cast<string>(index) + "]";
+}
 
+bool ListAssignment::outputCPPAssignment(CodeGenerator &cg,
+                                         AnalysisResultPtr ar,
+                                         const string &arrTmp, bool subRef) {
+  if (!m_variables) return false;
+
+  bool ret = false;
   for (int i = m_variables->getCount() - 1; i >= 0; --i) {
     ExpressionPtr exp = (*m_variables)[i];
     if (exp) {
       if (exp->is(Expression::KindOfListAssignment)) {
         ListAssignmentPtr sublist = dynamic_pointer_cast<ListAssignment>(exp);
-        string subTmp = genCPPTemp(cg, ar);
-        cg_printf("Variant %s((ref(%s[%d])));\n", subTmp.c_str(),
-                  arrTmp.c_str(), i);
-        sublist->outputCPPAssignment(cg, ar, subTmp);
+        string subTmp;
+        if (arrTmp == "null_variant") {
+          subTmp = arrTmp;
+        } else {
+          subTmp = genCPPTemp(cg, ar);
+          cg_printf("Variant %s((%s(%s[%d])));\n",
+                    subTmp.c_str(), subRef ? "ref" : "",
+                    arrTmp.c_str(), i);
+        }
+        if (sublist->outputCPPAssignment(cg, ar, subTmp, subRef)) ret = true;
       } else {
+        ret = true;
         bool done = false;
         if (exp->is(Expression::KindOfArrayElementExpression)) {
           ArrayElementExpressionPtr arrExp =
@@ -182,7 +275,7 @@ void ListAssignment::outputCPPAssignment(CodeGenerator &cg,
             } else {
               cg_printf(".append(");
             }
-            cg_printf("%s[%d]);\n", arrTmp.c_str(), i);
+            cg_printf("%s);\n", getArrRef(arrTmp, i).c_str());
             done = true;
           }
         } else if (exp->is(Expression::KindOfObjectPropertyExpression)) {
@@ -192,23 +285,20 @@ void ListAssignment::outputCPPAssignment(CodeGenerator &cg,
             var->outputCPPObject(cg, ar);
             cg_printf("o_set(");
             var->outputCPPProperty(cg, ar);
-            cg_printf(", %s[%d], %s);\n",
-                      arrTmp.c_str(), i,
+            cg_printf(", %s, %s);\n",
+                      getArrRef(arrTmp, i).c_str(),
                       getClassScope() ? "s_class_name" : "empty_string");
             done = true;
           }
         }
         if (!done) {
           exp->outputCPP(cg, ar);
-          if (arrTmp == "null") {
-            cg_printf(" = null;\n");
-          } else {
-            cg_printf(" = %s[%d];\n", arrTmp.c_str(), i);
-          }
+          cg_printf(" = %s;\n", getArrRef(arrTmp, i).c_str());
         }
       }
     }
   }
+  return ret;
 }
 
 void ListAssignment::preOutputVariables(CodeGenerator &cg,
@@ -242,50 +332,49 @@ bool ListAssignment::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   m_array->preOutputCPP(cg, ar, 0);
 
   bool isArray = false, notArray = false;
+  bool simpleVar = m_array->is(KindOfSimpleVariable) &&
+    !static_pointer_cast<SimpleVariable>(m_array)->getAlwaysStash();
+  bool needsUse = false;
   if (TypePtr type = m_array->getActualType()) {
     isArray = type->is(Type::KindOfArray);
     notArray = type->isPrimitive() ||
-      type->is(Type::KindOfString) ||
-      type->is(Type::KindOfObject);
+      (m_abnormal && (type->is(Type::KindOfString) ||
+                      type->is(Type::KindOfObject)));
   }
   cg.wrapExpressionBegin();
-  m_cppTemp = genCPPTemp(cg, ar);
   if (outputLineMap(cg, ar)) cg_printf("0);\n");
   if (notArray && isUnused()) {
     if (m_array->outputCPPUnneeded(cg, ar)) cg_printf(";\n");
     m_cppTemp = "null";
   } else {
     m_cppTemp = genCPPTemp(cg, ar);
-    cg_printf("CVarRef %s((", m_cppTemp.c_str());
+    needsUse = simpleVar || m_array->isTemporary();
+    const char *decl;
+    if (isArray && m_array->getCPPType()->is(Type::KindOfArray)) {
+      decl = needsUse ? "CArrRef" : "Array";
+    } else {
+      decl = needsUse ? "CVarRef" : "Variant";
+    }
+    cg_printf("%s %s((", decl, m_cppTemp.c_str());
     m_array->outputCPP(cg, ar);
     cg_printf("));\n");
-    if (notArray) cg_printf("id(%s);\n", m_cppTemp.c_str());
   }
   std::string tmp;
   if (notArray) {
-    tmp = "null";
+    tmp = "null_variant";
+    if (needsUse) cg_printf("id(%s);\n", m_cppTemp.c_str());
+    needsUse = false;
+  } else if (!m_abnormal || isArray) {
+    tmp = m_cppTemp;
   } else {
     tmp = genCPPTemp(cg, ar);
-    bool need_ref = true;
-    if (m_array->is(Expression::KindOfSimpleVariable)) {
-      std::string name =
-        static_pointer_cast<SimpleVariable>(m_array)->getName();
-      VariableTablePtr variables = getScope()->getVariables();
-      if (variables->isParameter(name) && !variables->isLvalParam(name)) {
-        need_ref = false;
-      }
-    }
-    cg_printf("Variant %s((", tmp.c_str());
-    if (need_ref) cg_printf("ref(");
-    cg_printf("%s",m_cppTemp.c_str());
-    if (need_ref) cg_printf(")");
-    cg_printf("));\n");
-    if (!isArray) {
-      cg_printf("if (!f_is_array(%s)) %s.unset();\n",tmp.c_str(),
-                tmp.c_str());
-    }
+    cg_printf("CVarRef %s(f_is_array(%s)?%s:null_variant);\n",
+              tmp.c_str(), m_cppTemp.c_str(), m_cppTemp.c_str());
+    needsUse = true;
   }
-  outputCPPAssignment(cg, ar, tmp);
+  if (!outputCPPAssignment(cg, ar, tmp, simpleVar) && needsUse) {
+    cg_printf("id(%s);\n", tmp.c_str());
+  }
 
   return true;
 }

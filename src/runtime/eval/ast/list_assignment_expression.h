@@ -60,9 +60,11 @@ public:
                            ExpressionPtr rhs);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
+  Expression *getArray() const { return m_rhs.get(); }
 private:
   ListElementPtr m_lhs;
   ExpressionPtr m_rhs;
+  bool m_abnormal;
 };
 
 

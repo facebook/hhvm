@@ -171,6 +171,9 @@ void Variant::destruct() {
    * the beginning of the object for the StringData, ArrayData, ObjectData,
    * and Variant classes.
    */
+  CT_ASSERT(KindOfString + 1 == KindOfArray &&
+            KindOfArray + 1 == KindOfObject &&
+            KindOfObject + 1 == KindOfVariant);
   if (m_data.pvar->decRefCount() == 0) {
     ASSERT(m_type >= KindOfString && m_type <= KindOfVariant);
     destructors[m_type - KindOfString]((void *)m_data.pvar);

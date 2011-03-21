@@ -85,12 +85,6 @@ public:
   void checkpoint();
 
   /**
-   * Application can call this function optionally as an optimization not
-   * to put back object pointers to free list before sweeping them all.
-   */
-  void disableDealloc();
-
-  /**
    * Mark current allocator's position as ending point of a generation and
    * sweep all memory that has allocated since the previous check point.
    */

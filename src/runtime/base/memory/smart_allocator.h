@@ -188,34 +188,32 @@ public:
   void *alloc();
   void *allocHelper() __attribute__((noinline));
   void dealloc(void *obj) {
-    if (obj) {
 #ifdef SMART_ALLOCATOR_STACKTRACE
-      if (!isValid(obj)) {
-        Lock lock(s_st_mutex);
-        if (s_st_allocs.find(obj) != s_st_allocs.end()) {
-          printf("Object %p was allocated from a different thread: %s\n",
-                 obj, s_st_allocs[obj].toString().c_str());
-        } else {
-          printf("Object %p was not smart allocated\n", obj);
-        }
+    if (!isValid(obj)) {
+      Lock lock(s_st_mutex);
+      if (s_st_allocs.find(obj) != s_st_allocs.end()) {
+        printf("Object %p was allocated from a different thread: %s\n",
+               obj, s_st_allocs[obj].toString().c_str());
+      } else {
+        printf("Object %p was not smart allocated\n", obj);
       }
-      s_st_allocs.erase(obj);
+    }
+    s_st_allocs.erase(obj);
 #endif
-      ASSERT(isValid(obj));
-      m_freelist.push_back(obj);
+    ASSERT(isValid(obj));
+    m_freelist.push_back(obj);
 #ifdef SMART_ALLOCATOR_STACKTRACE
-      {
-        Lock lock(s_st_mutex);
-        bool enabled = StackTrace::Enabled;
-        StackTrace::Enabled = true;
-        s_st_deallocs.operator[](obj);
-        StackTrace::Enabled = enabled;
-      }
+    {
+      Lock lock(s_st_mutex);
+      bool enabled = StackTrace::Enabled;
+      StackTrace::Enabled = true;
+      s_st_deallocs.operator[](obj);
+      StackTrace::Enabled = enabled;
+    }
 #endif
 
-      ASSERT(m_stats);
-      m_stats->usage -= m_itemSize;
-    }
+    ASSERT(m_stats);
+    m_stats->usage -= m_itemSize;
   }
   bool isValid(void *obj) const;
 
@@ -228,7 +226,6 @@ public:
   void logStats();
   void checkMemory(bool detailed);
 
-  void disableDealloc() { m_dealloc = false;}
   void disableRestore() { m_flag |= RestoreDisabled;}
 
   /**
@@ -298,7 +295,6 @@ private:
                         int lastCol, int lastBlockSize);
 
 protected:
-  bool m_dealloc;
   bool m_linearized; // No more restore needed for rollback
 
 #ifdef SMART_ALLOCATOR_STACKTRACE
@@ -331,9 +327,7 @@ class SmartAllocator : public SmartAllocatorImpl {
   void release(T *p) {
     if (p) {
       p->~T();
-      if (m_dealloc) {
-        dealloc(p);
-      }
+      dealloc(p);
     }
   }
 
@@ -401,7 +395,7 @@ public:
   ObjectAllocatorBase(int itemSize);
 
   void release(void *p) {
-    if (p && m_dealloc) {
+    if (p) {
       dealloc(p);
     }
   }

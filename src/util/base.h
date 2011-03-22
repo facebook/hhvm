@@ -63,6 +63,8 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/filesystem/operations.hpp>
 
+#include <util/hash.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // debugging
@@ -137,23 +139,23 @@ struct string_hash {
   }
 };
 
+struct int64_hash {
+  size_t operator() (const int64 v) const {
+    return (size_t)hash_int64(v);
+  }
+};
+
 template<typename T>
 struct pointer_hash {
   size_t operator() (const T *const &p) const {
-    return (size_t)p;
+    return (size_t)hash_int64(intptr_t(p));
   }
 };
 
 template<typename T>
 struct smart_pointer_hash {
   size_t operator() (const T &p) const {
-    return (size_t)p.get();
-  }
-};
-
-struct int64_hash {
-  size_t operator() (const int64 v) const {
-    return (size_t)v;
+    return (size_t)hash_int64(intptr_t(p.get()));
   }
 };
 

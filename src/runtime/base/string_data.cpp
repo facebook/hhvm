@@ -313,17 +313,14 @@ void StringData::removeChar(int offset) {
 
 void StringData::inc() {
   ASSERT(!isStatic());
-  if (empty()) {
-    m_len = (IsLiteral | 1);
-    m_data = "1";
-    return;
-  }
+  ASSERT(!empty());
   if (isImmutable()) {
     escalate();
   }
-  char *overflowed = increment_string((char *)m_data, size());
+  int len = size();
+  char *overflowed = increment_string((char *)m_data, len);
   if (overflowed) {
-    assign(overflowed, AttachString);
+    assign(overflowed, len, AttachString);
   }
 }
 

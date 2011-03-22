@@ -36,7 +36,7 @@ DataType is_numeric_string(const char *str, int length, int64 *lval,
  * Zend's way of incrementing a string. Definitely something we want to get rid
  * of in the future.
  */
-char *increment_string(char *s, int len);
+char *increment_string(char *s, int &len);
 
 /**
  * Whether or not a string is a valid variable name.

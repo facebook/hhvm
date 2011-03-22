@@ -160,7 +160,7 @@ DataType is_numeric_string(const char *str, int length, int64 *lval,
 #define UPPER_CASE 2
 #define NUMERIC 3
 
-char *increment_string(char *s, int len) {
+char *increment_string(char *s, int &len) {
   ASSERT(s && *s);
 
   int carry=0;

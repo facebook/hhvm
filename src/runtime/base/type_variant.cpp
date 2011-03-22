@@ -1432,7 +1432,7 @@ Variant &Variant::operator++() {
   case KindOfString:
     {
       if (getStringData()->empty()) {
-        set(1LL);
+        set("1");
       } else {
         int64 lval; double dval;
         DataType ret = convertToNumeric(&lval, &dval);

@@ -1373,7 +1373,34 @@ bool TestCodeRun::TestString() {
        "  $s .= 'd'; var_dump($a[$s]);\n" // should find 'abcd' in $a
        "}\n"
        "test('ab');\n");
-
+  MVCR("<?php\n"
+       "function foo() {"
+       "  $a = '';"
+       "  $a++;"
+       "  var_dump($a);"
+       "  $a = '';"
+       "  ++$a;"
+       "  var_dump($a);"
+       "  $a = '';"
+       "  $a--;"
+       "  var_dump($a);"
+       "  $a = '';"
+       "  --$a;"
+       "  var_dump($a);"
+       "  $a = '@';"
+       "  $a++;"
+       "  var_dump($a);"
+       "  $a = '@';"
+       "  ++$a;"
+       "  var_dump($a);"
+       "  $a = '@';"
+       "  $a--;"
+       "  var_dump($a);"
+       "  $a = '@';"
+       "  --$a;"
+       "  var_dump($a);"
+       "}"
+       "foo();");
   return true;
 }
 

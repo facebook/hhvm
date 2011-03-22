@@ -11,7 +11,7 @@ foreach(unicode_file ${unicode_files})
 
 	if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${unicode_file}")
 		message(STATUS "Downloading ${unicode_file}")
-		file(DOWNLOAD "ftp://ftp.unicode.org/Public/MAPPINGS/ISO8859/${unicode_file}" "${CMAKE_CURRENT_SOURCE_DIR}/${unicode_file}")
+		file(DOWNLOAD "http://unicode.org/Public/MAPPINGS/ISO8859/${unicode_file}" "${CMAKE_CURRENT_SOURCE_DIR}/${unicode_file}")
 	endif()
 
 	set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${CMAKE_CURRENT_SOURCE_DIR}/${unicode_file}")

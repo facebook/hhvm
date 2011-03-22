@@ -375,6 +375,7 @@ public:
   static bool ControlFlow;
   static bool DumpAst;
   static bool PregenerateCPP;
+  static bool GenerateFFIStaticBinding;
 
   static int GCCOptimization[3];
   static int GetOptimizationLevel(int length);

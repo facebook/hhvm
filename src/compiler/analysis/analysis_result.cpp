@@ -4285,8 +4285,10 @@ void AnalysisResult::outputCPPFFIStubs() {
   cg_printf("using namespace HPHP;\n\n");
   cg_printf("/* preface finishes */\n");
 
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputCPPFFI(cg, ar);
+  if (Option::GenerateFFIStaticBinding) {
+    BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+      fs->outputCPPFFI(cg, ar);
+    }
   }
 
   cg.useStream(CodeGenerator::PrimaryStream);
@@ -4364,8 +4366,10 @@ void AnalysisResult::outputJavaFFIStubs() {
 
   cg_printf("public static native HphpVariant identify(long ptr);\n\n");
 
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputJavaFFI(cg, ar);
+  if (Option::GenerateFFIStaticBinding) {
+    BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+      fs->outputJavaFFI(cg, ar);
+    }
   }
 
   cg_indentEnd("}\n");
@@ -4391,8 +4395,10 @@ void AnalysisResult::outputJavaFFICppDecl() {
   cg_printf("%s(JNIEnv *env, jclass main, jlong ptr);\n\n",
             mangledName.c_str());
 
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputJavaFFICPPStub(cg, ar);
+  if (Option::GenerateFFIStaticBinding) {
+    BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+      fs->outputJavaFFICPPStub(cg, ar);
+    }
   }
 
   cg_printf("}\n");
@@ -4444,8 +4450,10 @@ void AnalysisResult::outputJavaFFICppImpl() {
   cg_printf("return env->NewObject(cls, init, ptr);\n");
   cg_indentEnd("}\n\n");
 
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputJavaFFICPPStub(cg, ar);
+  if (Option::GenerateFFIStaticBinding) {
+    BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+      fs->outputJavaFFICPPStub(cg, ar);
+    }
   }
 
   f.close();
@@ -4466,8 +4474,10 @@ void AnalysisResult::outputSwigFFIStubs() {
 
   cg.setContext(CodeGenerator::SwigFFIImpl);
 
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputSwigFFIStubs(cg, ar);
+  if (Option::GenerateFFIStaticBinding) {
+    BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+      fs->outputSwigFFIStubs(cg, ar);
+    }
   }
 
   cg_printf("%%}\n\n");
@@ -4484,8 +4494,10 @@ void AnalysisResult::outputSwigFFIStubs() {
 
   cg.setContext(CodeGenerator::SwigFFIDecl);
 
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputSwigFFIStubs(cg, ar);
+  if (Option::GenerateFFIStaticBinding) {
+    BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+      fs->outputSwigFFIStubs(cg, ar);
+    }
   }
 
   f.close();

@@ -225,6 +225,7 @@ bool Option::SystemGen = false;
 bool Option::SplitDynamicClassTable = true;
 bool Option::PregenerateCPP = false;
 bool Option::UseMethodIndex = false;
+bool Option::GenerateFFIStaticBinding = true;
 
 int Option::GCCOptimization[] = {0, 0, 0};
 
@@ -422,6 +423,7 @@ void Option::Load(Hdf &config) {
   ControlFlow        = config["ControlFlow"].getBool(true);
   DumpAst            = config["DumpAst"].getBool(false);
   PregenerateCPP     = config["PregenerateCPP"].getBool(false);
+  GenerateFFIStaticBinding = config["GenerateFFIStaticBinding"].getBool(true);
 
   {
     Hdf gccOptimization = config["GCCOptimization"];

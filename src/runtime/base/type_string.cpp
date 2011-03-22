@@ -713,7 +713,7 @@ StaticString& StaticString::operator=(const StaticString &str) {
 }
 
 void StaticString::init(litstr s, int length) {
-  m_data.assign(s, length, AttachLiteral);
+  new(&m_data) StringData(s, length, AttachLiteral);
   ASSERT(!m_px);
   String::operator=(&m_data);
   m_px->setStatic();

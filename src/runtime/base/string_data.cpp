@@ -123,6 +123,14 @@ void StringData::assignHelper(const char *data, int len, StringDataMode mode) {
   ASSERT(m_data);
 }
 
+void StringData::assign(const char *data, int len, StringDataMode mode) {
+  if (len < 0 || (len & IsMask)) {
+    throw InvalidArgumentException("len: %d", len);
+  }
+  releaseData();
+  assignHelper(data, len, mode);
+}
+
 void StringData::append(const char *s, int len) {
   if (len == 0) return;
 

@@ -9,7 +9,15 @@ else
 COPY =
 endif
 
-ifneq ($(filter fast_tests slow_tests,$(MAKECMDGOALS)),)
+TOBUILD := $(filter clean% clobber% both debug release, $(MAKECMDGOALS))
+CLEAN := $(filter clean% clobber%,$(MAKECMDGOALS))
+TOTEST := $(filter-out $(TOBUILD), $(MAKECMDGOALS))
+
+ifeq ($(if $(TOBUILD),1)$(if $(TOTEST),1),11)
+$(TOTEST) : $(TOBUILD)
+endif
+
+ifneq ($(filter fast_tests slow_tests $(FAST_TESTS) $(SLOW_TESTS) TestCodeRun%,$(MAKECMDGOALS)),)
 # run all tests, even if some fail
 MAKEFLAGS += k
 .NOTPARALLEL:
@@ -20,7 +28,7 @@ TestExt = "" "" $@
 FAST_TESTS := QuickTests TestExt TestCodeRunEval
 SLOW_TESTS := TestCodeRun TestServer
 
-all: fast_tests shared-libs
+all: fast_tests
 tags: ctags etags
 ctags:
 	-$(V)cd src && ct
@@ -31,11 +39,8 @@ etags:
 $(FAST_TESTS) $(SLOW_TESTS) TestCodeRunStatic: % : setup
 	cd src && $(TEST) $(if $($@),$($@),$@)
 
-setup:
+setup: $(CLEAN)
 	$(MAKE) -C src $(COPY)
-
-shared-libs:
-	$(MAKE) -C src SHARED=1 shared-lib-target
 
 fast_tests: $(FAST_TESTS)
 slow_tests: shared-libs $(SLOW_TESTS)
@@ -46,7 +51,7 @@ TestCodeRun-% TestCodeRunEval-% TestCodeRunStatic-% : setup
 	cd src && $(TEST) $(patsubst %-$*,%,$@) Test$*
 
 .PHONY: debug release both check_by_type fast_tests slow_tests setup
-check_by_type:
+check_by_type: $(CLEAN)
 	@if [ -z "$$OUTDIR_BY_TYPE" ] ; then \
 	  echo "You need to set OUTDIR_BY_TYPE to build both DEBUG and RELEASE into the same client"; \
 	  exit 1; \

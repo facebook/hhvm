@@ -96,17 +96,6 @@ class StringData {
 
   StringData(SharedVariant *shared);
 
-  void assign(const char *data, int len, StringDataMode mode) {
-    if (len < 0 || (len & IsMask)) {
-      throw InvalidArgumentException("len: %d", len);
-    }
-    releaseData();
-    assignHelper(data, len, mode);
-  }
-  void assign(const char *data, StringDataMode mode) {
-    ASSERT(data);
-    assign(data, strlen(data), mode);
-  }
   void append(const char *s, int len);
   StringData *copy(bool sharedMemory = false) const;
 
@@ -247,6 +236,7 @@ class StringData {
   int64 hashHelper() const __attribute__((noinline));
 
   void assignHelper(const char *data, int len, StringDataMode mode);
+  void assign(const char *data, int len, StringDataMode mode);
 
 #ifdef FAST_REFCOUNT_FOR_VARIANT
  private:

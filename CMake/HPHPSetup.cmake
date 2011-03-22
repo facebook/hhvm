@@ -99,8 +99,15 @@ if(APPLE OR FREEBSD)
 	add_definitions(-DSKIP_USER_CHANGE=1)
 endif()
 
-# eable the OSS options if we have any
+# enable the OSS options if we have any
 add_definitions(-DHPHP_OSS=1)
+
+execute_process(COMMAND git describe --all --long --abbrev=40 --always
+    OUTPUT_VARIABLE _COMPILER_ID OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+if (_COMPILER_ID)
+	add_definitions(-DCOMPILER_ID="${_COMPILER_ID}")
+endif()
 
 IF($ENV{CXX} MATCHES "icpc")
 	set(CMAKE_C_FLAGS "-no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -w")

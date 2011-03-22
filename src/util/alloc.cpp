@@ -49,7 +49,10 @@ void flush_thread_caches() {
 #ifndef NO_JEMALLOC
   if (mallctl) {
     mallctl("tcache.flush", NULL, NULL, NULL, 0);
-  } else
+  }
+# ifndef NO_TCMALLOC
+    else
+# endif
 #endif
 #ifndef NO_TCMALLOC
   if (MallocExtensionInstance) {

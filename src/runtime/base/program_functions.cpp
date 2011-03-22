@@ -724,6 +724,9 @@ static int execute_program_impl(int argc, char **argv) {
     } else {
       cout << "Compiled by HipHop Compiler v" << version << "\n";
     }
+#ifdef COMPILER_ID
+    cout << "Compiler: " << COMPILER_ID << "\n";
+#endif
     return 0;
   }
 #ifdef COMPILER_ID

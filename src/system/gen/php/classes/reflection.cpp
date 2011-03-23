@@ -795,7 +795,7 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
           v_param = tmp0;
         }
         v_param->m_info = v_info;
-        v_ret.append((v_param));
+        v_ret.append((VarNR(v_param)));
       }
     }
   }
@@ -3777,7 +3777,7 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = 65535LL
         }
         if (((((((toBoolean(bitwise_and(v_filter, 256LL /* ReflectionMethod::IS_PUBLIC */)) && v_m->t_ispublic()) || (toBoolean(bitwise_and(v_filter, 512LL /* ReflectionMethod::IS_PROTECTED */)) && v_m->t_isprotected())) || (toBoolean(bitwise_and(v_filter, 1024LL /* ReflectionMethod::IS_PRIVATE */)) && v_m->t_isprivate())) || (toBoolean(bitwise_and(v_filter, 1LL /* ReflectionMethod::IS_STATIC */)) && toBoolean(v_m->t_isstatic()))) || (toBoolean(bitwise_and(v_filter, 4LL /* ReflectionMethod::IS_FINAL */)) && toBoolean(v_m->t_isfinal()))) || (toBoolean(bitwise_and(v_filter, 2LL /* ReflectionMethod::IS_ABSTRACT */)) && toBoolean(v_m->t_isabstract())))) {
           {
-            v_ret.append((v_m));
+            v_ret.append((VarNR(v_m)));
           }
         }
       }
@@ -3849,7 +3849,7 @@ Array c_ReflectionClass::t_getproperties(CVarRef v_filter //  = 65535LL
         }
         if (((((toBoolean(bitwise_and(v_filter, 256LL /* ReflectionProperty::IS_PUBLIC */)) && v_p->t_ispublic()) || (toBoolean(bitwise_and(v_filter, 512LL /* ReflectionProperty::IS_PROTECTED */)) && v_p->t_isprotected())) || (toBoolean(bitwise_and(v_filter, 1024LL /* ReflectionProperty::IS_PRIVATE */)) && v_p->t_isprivate())) || (toBoolean(bitwise_and(v_filter, 1LL /* ReflectionProperty::IS_STATIC */)) && toBoolean(v_p->t_isstatic())))) {
           {
-            v_ret.append((v_p));
+            v_ret.append((VarNR(v_p)));
           }
         }
       }
@@ -3915,7 +3915,7 @@ Array c_ReflectionClass::t_getinterfaces() {
           {
             {
               const Variant &tmp0((v_cls->t_getname()));
-              v_ret.set(tmp0, (v_cls));
+              v_ret.set(tmp0, (VarNR(v_cls)));
             }
           }
         }

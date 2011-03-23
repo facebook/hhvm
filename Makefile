@@ -43,7 +43,7 @@ setup: $(CLEAN)
 	$(MAKE) -C src $(COPY)
 
 fast_tests: $(FAST_TESTS)
-slow_tests: shared-libs $(SLOW_TESTS)
+slow_tests: $(SLOW_TESTS)
 
 .PHONY: $(FAST_TESTS) $(SLOW_TESTS) TestCodeRun%
 

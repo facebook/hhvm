@@ -3459,17 +3459,6 @@ void Variant::setStatic() const {
   }
 }
 
-Variant &Variant::bindClass(ThreadInfo *info) const {
-  if (m_type == KindOfObject) {
-    m_data.pobj->bindThis(info);
-  } else if (m_type == KindOfVariant) {
-    m_data.pvar->bindClass(info);
-  } else {
-    throw InvalidOperandException("Call to a member function on a non-object");
-  }
-  return const_cast<Variant&>(*this);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 

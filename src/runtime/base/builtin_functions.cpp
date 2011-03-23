@@ -76,21 +76,20 @@ String getUndefinedConstant(CStrRef name) {
 
 Variant f_call_user_func_array(CVarRef function, CArrRef params,
                                bool bound /* = false */) {
-#ifndef ENABLE_LATE_STATIC_BINDING
-  bound = true;
-#endif
   if (function.isString() || function.instanceof("closure")) {
     String sfunction = function.toString();
     int c = sfunction.find("::");
     if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {
-      if (bound) {
-        return invoke_static_method(sfunction.substr(0, c),
-                                    sfunction.substr(c + 2), params,
-                                    false);
+#ifdef ENABLE_LATE_STATIC_BINDING
+      if (!bound) {
+        return invoke_static_method_bind(sfunction.substr(0, c),
+                                         sfunction.substr(c + 2), params,
+                                         false);
       }
-      return invoke_static_method_bind(sfunction.substr(0, c),
-                                       sfunction.substr(c + 2), params,
-                                       false);
+#endif /* ENABLE_LATE_STATIC_BINDING */
+      return invoke_static_method(sfunction.substr(0, c),
+                                  sfunction.substr(c + 2), params,
+                                  false);
     }
     return invoke(sfunction, params, -1, true, false);
   } else if (function.is(KindOfArray)) {
@@ -134,10 +133,12 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
       if (obj.instanceof(sclass)) {
         return obj->o_invoke_ex(sclass, method, params, false);
       }
-      if (bound) {
-        return invoke_static_method(sclass, method, params, false);
+#ifdef ENABLE_LATE_STATIC_BINDING
+      if (!bound) {
+        return invoke_static_method_bind(sclass, method, params, false);
       }
-      return invoke_static_method_bind(sclass, method, params, false);
+#endif /* ENABLE_LATE_STATIC_BINDING */
+      return invoke_static_method(sclass, method, params, false);
     }
   }
   throw_invalid_argument("function: not string or array");
@@ -1238,10 +1239,10 @@ Variant &get_static_property_lval(const char *s, const char *prop) {
   return Variant::lvalBlackHole();
 }
 
+#ifdef ENABLE_LATE_STATIC_BINDING
 Variant invoke_static_method_bind(CStrRef s, CStrRef method,
                                   CArrRef params, bool fatal /* = true */) {
   ThreadInfo *info = ThreadInfo::s_threadInfo.get();
-
   String cls = s;
   bool isStatic = cls->isame(s_static.get());
   if (isStatic) {
@@ -1255,6 +1256,7 @@ Variant invoke_static_method_bind(CStrRef s, CStrRef method,
   }
   return ref(ret);
 }
+#endif /* ENABLE_LATE_STATIC_BINDING */
 
 void MethodCallPackage::methodCall(ObjectData *self, CStrRef method,
                                    int64 prehash /* = -1 */) {

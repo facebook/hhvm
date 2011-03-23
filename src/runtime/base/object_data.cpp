@@ -95,9 +95,11 @@ const Eval::MethodStatement *ObjectData::getMethodStatement(const char* name)
   return NULL;
 }
 
+#ifdef ENABLE_LATE_STATIC_BINDING
 void ObjectData::bindThis(ThreadInfo *info) {
   FrameInjection::SetCallingObject(info, this);
 }
+#endif
 
 void ObjectData::setDummy() {
   int *pmax = os_max_id.get();

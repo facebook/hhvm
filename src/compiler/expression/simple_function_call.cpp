@@ -1336,6 +1336,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         cg_printf("CStrRef clsName%d(", m_clsNameTemp);
         cg_printString(m_origClassName, ar, shared_from_this());
         cg_printf(");\n");
+        cg_printf("id(clsName%d);\n", m_clsNameTemp);
       }
     }
 

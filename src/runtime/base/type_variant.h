@@ -713,8 +713,6 @@ class Variant {
       bool isString = false);
   Variant argvalAt(bool byRef, CVarRef key);
 
-  Variant &bindClass(ThreadInfo *info) const;
-
   Variant o_get(CStrRef propName, bool error = true,
                 CStrRef context = null_string) const;
   Variant o_set(CStrRef s, CVarRef v, CStrRef context = null_string);

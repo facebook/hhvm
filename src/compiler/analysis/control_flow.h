@@ -313,4 +313,33 @@ inline void put(vertex_color_t c,
 ///////////////////////////////////////////////////////////////////////////////
 }
 
+namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+class ControlFlowGraphWalker : public FunctionWalker {
+public:
+  ControlFlowGraphWalker(ControlFlowGraph *g) : m_block(0), m_graph(*g) {}
+  template <class T>
+  void walk(T &t) {
+    std::pair<ControlFlowGraph::vertex_iterator,
+      ControlFlowGraph::vertex_iterator> v(boost::vertices(m_graph));
+    while (v.first != v.second) {
+      ControlBlock *b = *v.first;
+      m_block = b;
+      AstWalkerStateVec s = b->getStartState();
+      beforeBlock(b);
+      AstWalker::walk(t, s, b->getEndBefore(), b->getEndAfter());
+      afterBlock(b);
+      ++v.first;
+    }
+  }
+  virtual void beforeBlock(ControlBlock *b) {}
+  virtual void afterBlock(ControlBlock *b) {}
+protected:
+  ControlBlock *m_block;
+  ControlFlowGraph &m_graph;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+}
 #endif // __CONTROL_FLOW_H__

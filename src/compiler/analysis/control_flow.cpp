@@ -33,6 +33,7 @@
 #include "compiler/statement/try_statement.h"
 #include "compiler/statement/label_statement.h"
 #include "compiler/statement/goto_statement.h"
+#include "compiler/statement/case_statement.h"
 
 #include <boost/graph/depth_first_search.hpp>
 
@@ -348,12 +349,27 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
 
           case Statement::KindOfSwitchStatement: {
             SwitchStatementPtr sw(static_pointer_cast<SwitchStatement>(s));
-            ExpressionPtr exp = sw->getExp();
-            noFallThrough(exp);
             if (StatementListPtr cases = sw->getCases()) {
-              addEdge(exp, AfterConstruct, s, AfterConstruct);
+              ExpressionPtr exp;
+              StatementPtr def;
               for (int n = cases->getCount(), i = 0; i < n; ++i) {
-                addEdge(exp, AfterConstruct, (*cases)[i], BeforeConstruct);
+                CaseStatementPtr caseStmt =
+                  static_pointer_cast<CaseStatement>((*cases)[i]);
+                if (!caseStmt->getCondition()) {
+                  def = caseStmt->getStatement();
+                } else {
+                  if (exp) {
+                    addEdge(exp, AfterConstruct, caseStmt, BeforeConstruct);
+                  }
+                  exp = caseStmt->getCondition();
+                }
+              }
+              if (exp) {
+                if (def) {
+                  addEdge(exp, AfterConstruct, def, BeforeConstruct);
+                } else {
+                  addEdge(exp, AfterConstruct, s, AfterConstruct);
+                }
               }
             }
             break;

@@ -21,16 +21,27 @@
 #include <compiler/analysis/control_flow.h>
 
 namespace HPHP {
+
+DECLARE_BOOST_TYPES(ListAssignment);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define DECLARE_DATA_FLOW(x)                    \
   x(Anticipated,0),                             \
     x(Altered,0),                               \
     x(Available,0),                             \
-    x(AvailIn,1),                               \
+    x(Dying,0),                                 \
+    x(Used,0),                                  \
+    x(AvailIn,0),                               \
     x(AvailOut,1),                              \
     x(AntIn,1),                                 \
-    x(AntOut,1)
+    x(AntOut,0),                                \
+    x(PAvailIn,0),                              \
+    x(PAvailOut,0),                             \
+    x(PAntIn,0),                                \
+    x(PAntOut,0),                               \
+    x(PDieIn,0),                                \
+    x(PDieOut,0)
 
 class DataFlow {
 public:
@@ -49,6 +60,34 @@ public:
 
   static void ComputeAvailable(const ControlFlowGraph &g);
   static void ComputeAnticipated(const ControlFlowGraph &g);
+  static void ComputePartialAvailable(const ControlFlowGraph &g);
+  static void ComputePartialAnticipated(const ControlFlowGraph &g);
+  static void ComputeUsed(const ControlFlowGraph &g);
+  static void ComputePartialDying(const ControlFlowGraph &g);
+private:
+  template <typename T>
+  static void ComputeForwards(T func, const ControlFlowGraph &g,
+                              int lAttr, int altAttr,
+                              int inAttr, int outAttr);
+  template <typename T>
+  static void ComputeBackwards(T func, const ControlFlowGraph &g,
+                               int lAttr, int altAttr,
+                               int inAttr, int outAttr);
+};
+
+class DataFlowWalker : public ControlFlowGraphWalker {
+public:
+  DataFlowWalker(ControlFlowGraph *g) : ControlFlowGraphWalker(g) {}
+
+  void walk() { ControlFlowGraphWalker::walk(*this); }
+
+  int after(ConstructRawPtr cp);
+  int afterEach(ConstructRawPtr cur, int i, ConstructRawPtr kid);
+  void processAccessChain(ExpressionPtr e);
+  void processAccessChainLA(ListAssignmentPtr la);
+  void process(ExpressionPtr e, bool doAccessChains = false);
+
+  virtual void processAccess(ExpressionPtr e) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

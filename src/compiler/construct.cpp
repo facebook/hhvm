@@ -231,6 +231,9 @@ void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
     if (c & Expression::AssignmentLHS) {
       scontext += "|AssignmentLHS";
     }
+    if (c & Expression::RefAssignmentLHS) {
+      scontext += "|RefAssignmentLHS";
+    }
     if (c & Expression::DeepAssignmentLHS) {
       scontext += "|DeepAssignmentLHS";
     }

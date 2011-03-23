@@ -37,24 +37,34 @@ void BitSetVec::alloc(int blocks, size_t width, int rows, int *rowIds) {
 
   m_width = width;
   m_maxId = 0;
-  for (int i = 0; i < rows; i++) {
-    int rid = rowIds[i];
-    if (rid >= m_maxId) m_maxId = rid + 1;
+
+  bool noTranslate = rows < 0;
+  if (noTranslate) {
+    m_maxId = rows = -rows;
+  } else {
+    for (int i = 0; i < rows; i++) {
+      int rid = rowIds[i];
+      if (rid >= m_maxId) m_maxId = rid + 1;
+    }
   }
+
   m_rowSize = (width + elemSize - 1) / elemSize * sizeof(BitOps::Bits);
   m_idOffsets = (size_t*)calloc(m_maxId, sizeof(size_t));
   for (int i = 0; i < rows; i++) {
-    int rid = rowIds[i];
+    int rid = noTranslate ? i : rowIds[i];
     m_idOffsets[rid] = i * m_rowSize + 1;
   }
   m_blockSize = m_rowSize * rows;
-  m_bits = (BitOps::Bits*)malloc(m_blockSize * blocks);
-  size_t offset = 0;
-  for (int b = 0; b < blocks; b++) {
-    for (int i = 0; i < rows; i++) {
-      unsigned char init = DataFlow::GetInit(rowIds[i]) ? 255 : 0;
-      memset(add(m_bits, offset), init, m_rowSize);
-      offset += m_rowSize;
+  m_bits = (BitOps::Bits*)calloc(m_blockSize, blocks);
+  if (!noTranslate) {
+    size_t offset = 0;
+    for (int b = 0; b < blocks; b++) {
+      for (int i = 0; i < rows; i++) {
+        if (DataFlow::GetInit(rowIds[i])) {
+          memset(add(m_bits, offset), 255, m_rowSize);
+        }
+        offset += m_rowSize;
+      }
     }
   }
 }

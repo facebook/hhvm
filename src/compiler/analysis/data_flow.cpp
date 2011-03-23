@@ -16,6 +16,11 @@
 
 #include "compiler/analysis/data_flow.h"
 
+#include "compiler/expression/expression.h"
+#include "compiler/expression/simple_variable.h"
+#include "compiler/expression/binary_op_expression.h"
+#include "compiler/expression/list_assignment.h"
+
 using namespace HPHP;
 using std::pair;
 using namespace boost;
@@ -40,13 +45,15 @@ int DataFlow::GetInit(int i) {
   return 0;
 }
 
-void DataFlow::ComputeAvailable(const ControlFlowGraph &g) {
+template <typename T>
+void DataFlow::ComputeForwards(T func, const ControlFlowGraph &g,
+                               int lAttr, int altAttr,
+                               int inAttr, int outAttr) {
   int num = g.getNumBlocks();
   bool changed;
   BitOps::Bits *tmp1 = g.getTempBits(0);
-  bool hasAltered = g.rowExists(Altered);
+  bool hasAltered = g.rowExists(altAttr);
   size_t width = g.bitWidth();
-  bool firstTime = true;
 
   do {
     changed = false;
@@ -55,54 +62,51 @@ void DataFlow::ComputeAvailable(const ControlFlowGraph &g) {
       ControlBlock *b = g.getDfBlock(i);
       std::pair<in_edge_iterator, in_edge_iterator> vi =
         in_edges(b, g);
-      BitOps::Bits *ain = b->getRow(AvailIn);
+      BitOps::Bits *ain = b->getRow(inAttr);
 
       if (vi.first != vi.second) {
         ControlBlock *p = source(*vi.first, g);
         if (++vi.first != vi.second) {
           if (!changed) BitOps::bit_copy(width, tmp1, ain);
-          BitOps::bit_and(width, ain,
-                          p->getRow(AvailOut),
-                          source(*vi.first, g)->getRow(AvailOut));
+          func(width, ain,
+               p->getRow(outAttr),
+               source(*vi.first, g)->getRow(outAttr));
           while (++vi.first != vi.second) {
             p = source(*vi.first, g);
-            BitOps::bit_and(width, ain, ain, p->getRow(AvailOut));
+            func(width, ain, ain, p->getRow(outAttr));
           }
           if (!changed) changed = !BitOps::bit_equal(width, tmp1, ain);
         } else {
           if (!changed) {
-            changed = !BitOps::bit_equal(width, ain, p->getRow(AvailOut));
+            changed = !BitOps::bit_equal(width, ain, p->getRow(outAttr));
           }
-          BitOps::bit_copy(width, ain, p->getRow(AvailOut));
+          BitOps::bit_copy(width, ain, p->getRow(outAttr));
         }
-      } else if (firstTime) {
-        // available defaults to all 1s
-        // if there are no preds, set to all 0s
-        BitOps::set(width, ain, 0);
       }
 
-      BitOps::Bits *aout = b->getRow(AvailOut);
+      BitOps::Bits *aout = b->getRow(outAttr);
       if (!changed) BitOps::bit_copy(width, tmp1, aout);
-      BitOps::Bits *avl = b->getRow(Available);
+      BitOps::Bits *avl = b->getRow(lAttr);
       if (hasAltered) {
-        BitOps::Bits *alt = b->getRow(Altered);
+        BitOps::Bits *alt = b->getRow(altAttr);
         BitOps::bit_andc_or(width, aout, ain, alt, avl);
       } else {
         BitOps::bit_or(width, aout, ain, avl);
       }
       if (!changed) changed = !BitOps::bit_equal(width, tmp1, aout);
     }
-    firstTime = false;
   } while (changed);
 }
 
-void DataFlow::ComputeAnticipated(const ControlFlowGraph &g) {
+template <typename T>
+void DataFlow::ComputeBackwards(T func, const ControlFlowGraph &g,
+                                int lAttr, int altAttr,
+                                int inAttr, int outAttr) {
   int num = g.getNumBlocks();
   bool changed;
   BitOps::Bits *tmp1 = g.getTempBits(0);
-  bool hasAltered = g.rowExists(Altered);
+  bool hasAltered = g.rowExists(altAttr);
   size_t width = g.bitWidth();
-  bool firstTime = true;
 
   do {
     changed = false;
@@ -111,43 +115,233 @@ void DataFlow::ComputeAnticipated(const ControlFlowGraph &g) {
       ControlBlock *b = g.getDfBlock(i);
       std::pair<out_edge_iterator, out_edge_iterator> vi =
         out_edges(b, g);
-      BitOps::Bits *aout = b->getRow(AntOut);
+      BitOps::Bits *aout = b->getRow(outAttr);
 
       if (vi.first != vi.second) {
         ControlBlock *s = target(*vi.first, g);
         if (++vi.first != vi.second) {
           if (!changed) BitOps::bit_copy(width, tmp1, aout);
-          BitOps::bit_and(width, aout,
-                          s->getRow(AntIn),
-                          target(*vi.first, g)->getRow(AntIn));
+          func(width, aout,
+               s->getRow(inAttr),
+               target(*vi.first, g)->getRow(inAttr));
           while (++vi.first != vi.second) {
             s = target(*vi.first, g);
-            BitOps::bit_and(width, aout, aout, s->getRow(AntIn));
+            func(width, aout, aout, s->getRow(inAttr));
           }
           if (!changed) changed = !BitOps::bit_equal(width, tmp1, aout);
         } else {
           if (!changed) {
-            changed = !BitOps::bit_equal(width, aout, s->getRow(AntIn));
+            changed = !BitOps::bit_equal(width, aout, s->getRow(inAttr));
           }
-          BitOps::bit_copy(width, aout, s->getRow(AntIn));
+          BitOps::bit_copy(width, aout, s->getRow(inAttr));
         }
-      } else if (firstTime) {
-        // anticipated defaults to all 1s
-        // if there are no succs, set to all 0s
-        BitOps::set(width, aout, 0);
       }
 
-      BitOps::Bits *ain = b->getRow(AntIn);
+      BitOps::Bits *ain = b->getRow(inAttr);
       if (!changed) BitOps::bit_copy(width, tmp1, ain);
-      BitOps::Bits *ant = b->getRow(Anticipated);
+      BitOps::Bits *ant = b->getRow(lAttr);
       if (hasAltered) {
-        BitOps::Bits *alt = b->getRow(Altered);
+        BitOps::Bits *alt = b->getRow(altAttr);
         BitOps::bit_andc_or(width, ain, aout, alt, ant);
       } else {
         BitOps::bit_or(width, ain, aout, ant);
       }
       if (!changed) changed = !BitOps::bit_equal(width, tmp1, ain);
     }
-    firstTime = false;
   } while (changed);
+}
+
+void DataFlow::ComputeAvailable(const ControlFlowGraph &g) {
+  DataFlow::ComputeForwards(
+    BitOps::bit_and, g,
+    DataFlow::Available, DataFlow::Altered,
+    DataFlow::AvailIn, DataFlow::AvailOut);
+}
+
+void DataFlow::ComputeAnticipated(const ControlFlowGraph &g) {
+  DataFlow::ComputeBackwards(
+    BitOps::bit_and, g,
+    DataFlow::Anticipated, DataFlow::Altered,
+    DataFlow::AntIn, DataFlow::AntOut);
+}
+
+void DataFlow::ComputePartialAvailable(const ControlFlowGraph &g) {
+  DataFlow::ComputeForwards(
+    BitOps::bit_or, g,
+    DataFlow::Available, DataFlow::Altered,
+    DataFlow::PAvailIn, DataFlow::PAvailOut);
+}
+
+void DataFlow::ComputePartialAnticipated(const ControlFlowGraph &g) {
+  DataFlow::ComputeBackwards(
+    BitOps::bit_or, g,
+    DataFlow::Anticipated, DataFlow::Altered,
+    DataFlow::PAntIn, DataFlow::PAntOut);
+}
+
+void DataFlow::ComputeUsed(const ControlFlowGraph &g) {
+  int num = g.getNumBlocks();
+  size_t width = g.bitWidth();
+
+  for (int i = num; i ; i--) {
+    ControlBlock *b = g.getDfBlock(i);
+    BitOps::Bits *ant = b->getRow(Anticipated);
+    BitOps::Bits *alt = b->getRow(Altered);
+    BitOps::Bits *avl = b->getRow(Available);
+    BitOps::bit_or_or(width, b->getRow(Used), ant, alt, avl);
+  }
+}
+
+void DataFlow::ComputePartialDying(const ControlFlowGraph &g) {
+  DataFlow::ComputeBackwards(
+    BitOps::bit_or, g,
+    DataFlow::Dying, DataFlow::Used,
+    DataFlow::PDieIn, DataFlow::PDieOut);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// DataFlowWalker
+
+int DataFlowWalker::after(ConstructRawPtr cp) {
+  if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(cp)) {
+    switch (e->getKindOf()) {
+      case Expression::KindOfSimpleVariable:
+        if (!boost::static_pointer_cast<SimpleVariable>(
+              e)->getAlwaysStash()) {
+          return WalkContinue;
+        }
+        break;
+      case Expression::KindOfBinaryOpExpression:
+        if (boost::static_pointer_cast<BinaryOpExpression>(
+              e)->isShortCircuitOperator()) {
+          break;
+        }
+        goto process_vars;
+      case Expression::KindOfExpressionList:
+      case Expression::KindOfObjectMethodExpression:
+      case Expression::KindOfDynamicFunctionCall:
+      case Expression::KindOfSimpleFunctionCall:
+      case Expression::KindOfNewObjectExpression:
+      case Expression::KindOfQOpExpression:
+        break;
+      default: process_vars: {
+        for (int i = 0, nk = e->getKidCount(); i < nk; i++) {
+          ExpressionPtr k = e->getNthExpr(i);
+          if (k && k->is(Expression::KindOfSimpleVariable) &&
+              !boost::static_pointer_cast<SimpleVariable>(
+                k)->getAlwaysStash()) {
+            process(k);
+          }
+        }
+        break;
+      }
+    }
+    process(e);
+  }
+  return WalkContinue;
+}
+
+int DataFlowWalker::afterEach(ConstructRawPtr cur, int i, ConstructRawPtr kid) {
+  if (ExpressionRawPtr k = boost::dynamic_pointer_cast<Expression>(kid)) {
+    if (k->is(Expression::KindOfSimpleVariable) &&
+        !boost::static_pointer_cast<SimpleVariable>(
+          k)->getAlwaysStash()) {
+      if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(cur)) {
+        switch (e->getKindOf()) {
+          case Expression::KindOfBinaryOpExpression:
+            if (!boost::static_pointer_cast<BinaryOpExpression>(
+                  e)->isShortCircuitOperator()) {
+              return WalkContinue;
+            }
+            break;
+          case Expression::KindOfExpressionList:
+          case Expression::KindOfObjectMethodExpression:
+          case Expression::KindOfDynamicFunctionCall:
+          case Expression::KindOfSimpleFunctionCall:
+          case Expression::KindOfNewObjectExpression:
+          case Expression::KindOfQOpExpression:
+            break;
+          default:
+            return WalkContinue;
+        }
+      }
+      process(k);
+    }
+  }
+  return WalkContinue;
+}
+
+void DataFlowWalker::processAccessChain(ExpressionPtr e) {
+  if (!e) return;
+  if (!e->is(Expression::KindOfObjectPropertyExpression) &&
+      !e->is(Expression::KindOfArrayElementExpression)) {
+    return;
+  }
+  for (int i = 0, n = e->getKidCount(); i < n; ++i) {
+    ExpressionPtr kid(e->getNthExpr(i));
+    if (kid && kid->hasContext(Expression::AccessContext)) {
+      processAccessChain(kid);
+      process(kid, true);
+      break;
+    }
+  }
+}
+
+void DataFlowWalker::processAccessChainLA(ListAssignmentPtr la) {
+  ExpressionList &lhs = *la->getVariables().get();
+  for (int i = lhs.getCount(); i--; ) {
+    ExpressionPtr ep = lhs[i];
+    if (ep) {
+      if (ep->is(Expression::KindOfListAssignment)) {
+        processAccessChainLA(static_pointer_cast<ListAssignment>(ep));
+      } else {
+        processAccessChain(ep);
+        processAccess(ep);
+      }
+    }
+  }
+}
+
+void DataFlowWalker::process(ExpressionPtr e, bool doAccessChains) {
+  if (e->getContext() & (Expression::AssignmentLHS|Expression::OprLValue) ||
+      !doAccessChains && e->hasContext(Expression::AccessContext)) {
+    return;
+  }
+
+  switch (e->getKindOf()) {
+    case Expression::KindOfListAssignment:
+      processAccessChainLA(static_pointer_cast<ListAssignment>(e));
+      processAccess(e);
+      break;
+    case Expression::KindOfArrayElementExpression:
+    case Expression::KindOfObjectPropertyExpression:
+      if (!e->hasContext(Expression::AccessContext)) {
+        processAccessChain(e);
+      }
+      // fall through
+    case Expression::KindOfObjectMethodExpression:
+    case Expression::KindOfDynamicFunctionCall:
+    case Expression::KindOfSimpleFunctionCall:
+    case Expression::KindOfNewObjectExpression:
+    case Expression::KindOfIncludeExpression:
+    case Expression::KindOfSimpleVariable:
+    case Expression::KindOfDynamicVariable:
+    case Expression::KindOfStaticMemberExpression:
+    case Expression::KindOfConstantExpression:
+      processAccess(e);
+      break;
+    case Expression::KindOfAssignmentExpression:
+    case Expression::KindOfBinaryOpExpression:
+    case Expression::KindOfUnaryOpExpression: {
+      ExpressionPtr var = e->getNthExpr(0);
+      if (var && var->getContext() & (Expression::AssignmentLHS|
+                                      Expression::OprLValue)) {
+        processAccessChain(var);
+        processAccess(var);
+      }
+    }
+    default:
+      processAccess(e);
+      break;
+  }
 }

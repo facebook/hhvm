@@ -574,6 +574,7 @@ static int execute_program_impl(int argc, char **argv);
 int execute_program(int argc, char **argv) {
   try {
     InitAllocatorThreadLocal();
+    ThreadInfo::s_threadInfo.get();
     return execute_program_impl(argc, argv);
   } catch (const Exception &e) {
     Logger::Error("Uncaught exception: %s", e.what());

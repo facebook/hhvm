@@ -584,15 +584,20 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop) {
   return null;
 }
 
-void check_request_timeout_ex(ThreadInfo *info, int lc) {
+void check_request_timeout_info(ThreadInfo *info, int lc) {
   check_request_timeout(info);
   if (info->m_pendingException) {
     throw_pending_exception(info);
   }
   if (RuntimeOption::MaxLoopCount > 0 && lc > RuntimeOption::MaxLoopCount) {
     throw FatalErrorException(0, "loop iterated over %d times",
-                              RuntimeOption::MaxLoopCount);
+        RuntimeOption::MaxLoopCount);
   }
+}
+
+void check_request_timeout_ex(const FrameInjection &fi, int lc) {
+  ThreadInfo *info = fi.getThreadInfo();
+  check_request_timeout_info(info, lc);
 }
 
 void throw_infinite_recursion_exception() {

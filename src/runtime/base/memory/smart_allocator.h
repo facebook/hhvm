@@ -51,7 +51,10 @@ namespace HPHP {
 #define DELETE_OBJECT(T) delete this
 #else
 #define NEW(T) new (T::Allocator.getNoCheck()) T
-#define NEWOBJ(T) new (info->m_allocators[ItemSize<sizeof(T)>::index]) T
+#define NEWOBJ(T) new                                  \
+  (ThreadLocalSingleton                                \
+    <ObjectAllocator<ItemSize<sizeof(T)>::value> >     \
+    ::getNoCheck()) T
 #define DELETE(T) T::Allocator->release
 #define DELETE_EX_CLS(NS,T) this->~T(); NS::T::Allocator->release(this)
 #define DELETE_OBJECT(T) this->~T()

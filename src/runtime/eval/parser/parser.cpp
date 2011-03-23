@@ -182,8 +182,8 @@ void Token::operator=(Token &other) {
 }
 
 Parser::ParserFrameInjection::ParserFrameInjection(
-  ThreadInfo *&info, const char *func, const char *fileName) :
-    FrameInjection(info, empty_string, func, false),
+  const char *func, const char *fileName) :
+    FrameInjection(empty_string, func, false),
     m_file(fileName) {}
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -233,8 +233,7 @@ void Parser::error(const char* fmt, ...) {
   Util::string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
-  ThreadInfo *info;
-  ParserFrameInjection fi(info, "include", m_fileName);
+  ParserFrameInjection fi("include", m_fileName);
   fi.setLine(line1());
   raise_error("%s", msg.c_str());
 }

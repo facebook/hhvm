@@ -39,7 +39,7 @@ public:
   EvalFrameInjection(CStrRef cls, const char *name,
                      VariableEnvironment &env, const char *file,
                      ObjectData *obj = NULL, int fs = 0)
-    : FrameInjection(m_info, cls, name,
+    : FrameInjection(cls, name,
                      obj ? obj->getRoot() : NULL, fs),
       m_env(env), m_file(file) { }
 

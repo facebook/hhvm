@@ -220,6 +220,12 @@ public:
     return p;
   }
 
+  static T* getNoCheck() {
+    T *& p = getSingleton();
+    ASSERT(p);
+    return p;
+  }
+
   static void createKey(T *& p) __attribute__((noinline));
 
   static bool isNull() { return getSingleton() == NULL; }
@@ -453,6 +459,12 @@ public:
       obj = T::Create();
       pthread_setspecific(s_key, obj);
     }
+    return obj;
+  }
+
+  static T* getNoCheck() {
+    T *obj = (T*)pthread_getspecific(s_key);
+    ASSERT(obj);
     return obj;
   }
 

@@ -646,6 +646,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
       }
       try {
         g_context->setThrowAllErrors(true);
+        ThreadInfo::s_threadInfo.get();
         Variant v = invoke_builtin(m_funcScope->getName().c_str(),
                                    arr, -1, true);
         g_context->setThrowAllErrors(false);
@@ -1409,7 +1410,9 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
         cg_printf(", ");
         cg_printString(escapedName, ar, shared_from_this());
         cg_printf(");\n");
-        if (lsb) cg_printf("mcp%d.lateStaticBind(info);\n", m_ciTemp);
+        if (lsb) {
+          cg_printf("mcp%d.lateStaticBind(fi.getThreadInfo());\n", m_ciTemp);
+        }
       } else {
         // Nonexistent method
         cg_printf("mcp%d.dynamicNamedCall%s(", m_ciTemp,

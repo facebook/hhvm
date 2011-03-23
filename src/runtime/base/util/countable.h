@@ -89,19 +89,6 @@ class Countable {
   mutable int _count;
 };
 
-class CountableHelper {
-public:
-  CountableHelper(Countable *countable) : m_countable(countable) {
-    m_countable->incRefCount();
-  }
-  ~CountableHelper() {
-    m_countable->decRefCount();
-  }
-
-private:
-  Countable *m_countable;
-};
-
 /**
  * CountableNF : countable no flags
  */
@@ -123,6 +110,20 @@ class CountableNF : public Countable {
   IMPLEMENT_COUNTABLENF_METHODS_NO_STATIC;
 };
 
+/* We only use this to hold objects */
+
+class CountableHelper {
+public:
+  CountableHelper(CountableNF *countable) : m_countable(countable) {
+    m_countable->incRefCount();
+  }
+  ~CountableHelper() {
+    m_countable->decRefCount();
+  }
+
+private:
+  CountableNF *m_countable;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -597,6 +597,40 @@ DefineFunction(
     ),
   ));
 
+DefineFunction(
+  array(
+    'name'   => "sncompress",
+    'desc'   => "This function compress the given string using the Snappy data format.\n\nFor details on the Snappy compression algorithm go to http://code.google.com/p/snappy/.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "The compressed string or FALSE if an error occurred.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "data",
+        'type'   => String,
+        'desc'   => "The data to compress.",
+      )
+    )));
+
+DefineFunction(
+  array(
+    'name'   => "snuncompress",
+    'desc'   => "This function uncompress a compressed string.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "The compressed string or FALSE if an error occurred.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "data",
+        'type'   => String,
+        'desc'   => "The data compressed by sncompress().",
+      )
+    )));
+
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
 //

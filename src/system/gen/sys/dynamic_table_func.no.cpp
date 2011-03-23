@@ -20571,6 +20571,21 @@ Variant ifa_imageline(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg5((a5));
   return (x_imageline(arg0, arg1, arg2, arg3, arg4, arg5));
 }
+Variant i_sncompress(void *extra, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("sncompress", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (x_sncompress(arg0));
+  }
+}
+Variant ifa_sncompress(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("sncompress", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (x_sncompress(arg0));
+}
 Variant i_socket_read(void *extra, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 2 || count > 3) return throw_wrong_arguments("socket_read", count, 2, 3, 1);
@@ -36139,6 +36154,21 @@ Variant ifa_libxml_disable_entity_loader(void *extra, int count, INVOKE_FEW_ARGS
   CVarRef arg0((a0));
   return (x_libxml_disable_entity_loader(arg0));
 }
+Variant i_snuncompress(void *extra, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("snuncompress", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (x_snuncompress(arg0));
+  }
+}
+Variant ifa_snuncompress(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("snuncompress", count, 1, 1, 1);
+  CVarRef arg0((a0));
+  return (x_snuncompress(arg0));
+}
 Variant i_magickmotionblurimage(void *extra, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 4) return throw_wrong_arguments("magickmotionblurimage", count, 4, 4, 1);
@@ -38600,6 +38630,7 @@ CallInfo ci_krsort((void*)&i_krsort, (void*)&ifa_krsort, 2, 0, 0x000000000000000
 CallInfo ci_clock_gettime((void*)&i_clock_gettime, (void*)&ifa_clock_gettime, 3, 0, 0x0000000000000006LL);
 CallInfo ci_pushdrawingwand((void*)&i_pushdrawingwand, (void*)&ifa_pushdrawingwand, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imageline((void*)&i_imageline, (void*)&ifa_imageline, 6, 0, 0x0000000000000000LL);
+CallInfo ci_sncompress((void*)&i_sncompress, (void*)&ifa_sncompress, 1, 0, 0x0000000000000000LL);
 CallInfo ci_socket_read((void*)&i_socket_read, (void*)&ifa_socket_read, 3, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_write_dtd_entity((void*)&i_xmlwriter_write_dtd_entity, (void*)&ifa_xmlwriter_write_dtd_entity, 7, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_tablename((void*)&i_mysql_tablename, (void*)&ifa_mysql_tablename, 2, 0, 0x0000000000000000LL);
@@ -39479,6 +39510,7 @@ CallInfo ci_escapeshellcmd((void*)&i_escapeshellcmd, (void*)&ifa_escapeshellcmd,
 CallInfo ci_apc_store((void*)&i_apc_store, (void*)&ifa_apc_store, 4, 0, 0x0000000000000000LL);
 CallInfo ci_magickresetiterator((void*)&i_magickresetiterator, (void*)&ifa_magickresetiterator, 1, 0, 0x0000000000000000LL);
 CallInfo ci_libxml_disable_entity_loader((void*)&i_libxml_disable_entity_loader, (void*)&ifa_libxml_disable_entity_loader, 1, 0, 0x0000000000000000LL);
+CallInfo ci_snuncompress((void*)&i_snuncompress, (void*)&ifa_snuncompress, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickmotionblurimage((void*)&i_magickmotionblurimage, (void*)&ifa_magickmotionblurimage, 4, 0, 0x0000000000000000LL);
 CallInfo ci_session_cache_expire((void*)&i_session_cache_expire, (void*)&ifa_session_cache_expire, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magicksetwandsize((void*)&i_magicksetwandsize, (void*)&ifa_magicksetwandsize, 3, 0, 0x0000000000000000LL);
@@ -44816,6 +44848,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 3542:
+      HASH_GUARD(0x251236613D41EDD6LL, snuncompress) {
+        ci = &ci_snuncompress;
+        return true;
+      }
+      break;
     case 3543:
       HASH_GUARD(0x1AE08377A1630DD7LL, mysql_insert_id) {
         ci = &ci_mysql_insert_id;
@@ -49531,6 +49569,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 6734:
       HASH_GUARD(0x1635DCC4882CBA4ELL, dom_node_has_attributes) {
         ci = &ci_dom_node_has_attributes;
+        return true;
+      }
+      HASH_GUARD(0x52959B6E03615A4ELL, sncompress) {
+        ci = &ci_sncompress;
         return true;
       }
       break;

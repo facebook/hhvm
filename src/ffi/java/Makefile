@@ -28,7 +28,7 @@ CPPFLAGS += -I $(JAVA_PATH)/include -I $(JAVA_PATH)/include/linux \
 $(SHARED_LIB) : setup
 
 setup :
-	$(V)cd $(PROJECT_ROOT) && make shared-libs
+	$(V)cd $(PROJECT_ROOT)/src && make
 
 $(CLS) : $(SRC)
 	$(V)mkdir -p classes

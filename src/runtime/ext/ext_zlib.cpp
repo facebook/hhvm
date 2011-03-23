@@ -206,6 +206,7 @@ Variant f_qlzcompress(CStrRef data, int level /* = 1 */) {
   }
 
   ASSERT(size < (size_t)data.size() + 401);
+  compressed = (char *)realloc(compressed, size + 1);
   compressed[size] = '\0';
   return String(compressed, size, AttachString);
 #endif

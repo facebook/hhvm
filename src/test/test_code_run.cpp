@@ -16459,6 +16459,25 @@ bool TestCodeRun::TestClosure() {
         "  { echo $v; }, array()"
         ");"
         "call_user_func($f, array());", "5555");
+  MVCRO("<?php\n"
+        "$myfunc = function() {"
+        "  echo \"hello, world!\\n\";"
+        "};"
+        "$myfunc();"
+        "call_user_func($myfunc);"
+        "call_user_func(\"$myfunc\");"
+        "call_user_func_array($myfunc, array());"
+        "call_user_func_array(\"$myfunc\", array());"
+        "$isc = is_callable($myfunc, false, &$p);"
+        "echo \"is_callable(\\$myfunc) = $isc\\n\";"
+        "var_dump($p);",
+        "hello, world!\n"
+        "hello, world!\n"
+        "hello, world!\n"
+        "hello, world!\n"
+        "hello, world!\n"
+        "is_callable($myfunc) = 1\n"
+        "string(17) \"Closure::__invoke\"\n");
   return true;
 }
 

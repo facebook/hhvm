@@ -91,6 +91,10 @@ ifndef NO_TCMALLOC
 GOOGLE_TCMALLOC = 1
 endif
 
+ifndef NO_SNAPPY
+HAVE_SNAPPY = 1
+endif
+
 # For GNU profiler - gprof.
 #PROFILE = 1
 

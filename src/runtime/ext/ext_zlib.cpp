@@ -18,7 +18,9 @@
 #include <runtime/ext/ext_zlib.h>
 #include <runtime/base/file/zip_file.h>
 #include <util/compression.h>
+#ifdef HAVE_SNAPPY
 #include <snappy.h>
+#endif
 
 #define PHP_ZLIB_MODIFIER 1000
 
@@ -268,6 +270,9 @@ Variant f_qlzuncompress(CStrRef data, int level /* = 1 */) {
 }
 
 Variant f_sncompress(CStrRef data) {
+#ifndef HAVE_SNAPPY
+  throw NotSupportedException(__func__, "Snappy library cannot be found");
+#else
   size_t size;
   char *compressed =
     (char *)malloc(snappy::MaxCompressedLength(data.size()) + 1);
@@ -276,9 +281,13 @@ Variant f_sncompress(CStrRef data) {
   compressed = (char *)realloc(compressed, size + 1);
   compressed[size] = '\0';
   return String(compressed, size, AttachString);
+#endif
 }
 
 Variant f_snuncompress(CStrRef data) {
+#ifndef HAVE_SNAPPY
+  throw NotSupportedException(__func__, "Snappy library cannot be found");
+#else
   char *uncompressed;
   size_t dsize;
 
@@ -291,6 +300,7 @@ Variant f_snuncompress(CStrRef data) {
   }
   uncompressed[dsize] = '\0';
   return String(uncompressed, dsize, AttachString);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

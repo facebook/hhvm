@@ -406,6 +406,10 @@ ifdef TAINTED
 CPPFLAGS += -DTAINTED
 endif
 
+ifdef HAVE_SNAPPY
+CPPFLAGS += -DHAVE_SNAPPY
+endif
+
 # facebook specific stuff
 CPPFLAGS += -DFACEBOOK -DHAVE_QUICKLZ
 
@@ -592,7 +596,9 @@ READLINE_LIBS = $(EXT_DIR)/readline/lib/libreadline.a \
 
 ZLIB_LIBS = $(EXT_DIR)/zlib/lib/libz.a
 
+ifdef HAVE_SNAPPY
 SNAPPY_LIBS = $(EXT_DIR)/snappy/lib/libsnappy.a
+endif
 
 ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
 	$(MYSQL_LIBS) $(SQLITE_LIBS) $(MCC_LIBS) \

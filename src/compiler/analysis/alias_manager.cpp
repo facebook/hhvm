@@ -38,6 +38,7 @@
 #include <compiler/statement/break_statement.h>
 #include <compiler/statement/return_statement.h>
 #include <compiler/statement/loop_statement.h>
+#include <compiler/statement/foreach_statement.h>
 #include <compiler/statement/exp_statement.h>
 #include <compiler/statement/echo_statement.h>
 #include <compiler/analysis/alias_manager.h>
@@ -45,6 +46,8 @@
 #include <compiler/analysis/variable_table.h>
 #include <compiler/analysis/data_flow.h>
 #include <compiler/analysis/dictionary.h>
+#include <compiler/analysis/expr_dict.h>
+#include <compiler/analysis/live_dict.h>
 
 #include <util/parser/hphp.tab.hpp>
 #include <util/util.h>
@@ -95,12 +98,15 @@ bool AliasManager::parseOptimizations(const std::string &optimizations,
       Option::AutoInline = val;
     } else if (opt == "cflow") {
       Option::ControlFlow = val;
+    } else if (opt == "coalesce") {
+      Option::VariableCoalescing = val;
     } else if (val && (opt == "all" || opt == "none")) {
       val = opt == "all";
       Option::EliminateDeadCode = val;
       Option::LocalCopyProp = val;
       Option::AutoInline = val;
       Option::ControlFlow = val;
+      Option::CopyProp = val;
     } else {
       errs = "Unknown optimization: " + opt;
       return false;
@@ -312,6 +318,7 @@ void AliasManager::dumpAccessChain() {
 }
 
 bool AliasManager::couldBeAliased(SimpleVariablePtr sv) {
+  if (m_wildRefs) return true;
   if (!sv->couldBeAliased()) return false;
   if (m_inPseudoMain) return true;
   int context = sv->getContext();
@@ -329,12 +336,19 @@ bool AliasManager::couldBeAliased(SimpleVariablePtr sv) {
   return true;
 }
 
+static bool canonCompare(ExpressionPtr e1, ExpressionPtr e2) {
+  return
+    e1->hasContext(Expression::ExistContext) ==
+    e2->hasContext(Expression::ExistContext) &&
+    e1->canonCompare(e2);
+}
+
 int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
   Expression::KindOf k1 = e1->getKindOf(), k2 = e2->getKindOf();
   while (true) {
     switch (k1) {
     case Expression::KindOfConstantExpression:
-      if (e1->canonCompare(e2)) return SameAccess;
+      if (canonCompare(e1, e2)) return SameAccess;
       switch (k2) {
       case Expression::KindOfObjectMethodExpression:
       case Expression::KindOfDynamicFunctionCall:
@@ -353,7 +367,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
         break;
       }
 
-      return e1->canonCompare(e2) ?
+      return canonCompare(e1, e2) ?
         SameAccess : InterfAccess;
 
     case Expression::KindOfStaticMemberExpression:
@@ -361,7 +375,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
           k2 == Expression::KindOfConstantExpression) {
         break;
       }
-      return e1->canonCompare(e2) ?
+      return canonCompare(e1, e2) ?
         SameAccess : InterfAccess;
 
     case Expression::KindOfObjectPropertyExpression:
@@ -377,7 +391,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
         break;
       }
 
-      return e1->canonCompare(e2) ?
+      return canonCompare(e1, e2) ?
         SameAccess : InterfAccess;
 
     case Expression::KindOfSimpleVariable:
@@ -394,8 +408,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
               return SameAccess;
             }
 
-            if (m_wildRefs ||
-                (couldBeAliased(sv1) && couldBeAliased(sv2))) {
+            if (couldBeAliased(sv1) && couldBeAliased(sv2)) {
               return InterfAccess;
             }
           }
@@ -405,7 +418,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
           return InterfAccess;
 
         case Expression::KindOfArrayElementExpression:
-          if (m_wildRefs || couldBeAliased(sv1)) {
+          if (couldBeAliased(sv1)) {
             return InterfAccess;
           }
           return DisjointAccess;
@@ -427,7 +440,7 @@ int AliasManager::testAccesses(ExpressionPtr e1, ExpressionPtr e2) {
         case Expression::KindOfStaticMemberExpression:
         case Expression::KindOfObjectPropertyExpression:
         default: def:
-          if (m_wildRefs || couldBeAliased(sv1)) {
+          if (couldBeAliased(sv1)) {
             return InterfAccess;
           }
           return DisjointAccess;
@@ -1819,6 +1832,22 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
             }
           }
         }
+        break;
+      case Statement::KindOfForEachStatement: {
+        SimpleVariablePtr name =
+          dpc(SimpleVariable, s->getNthKid(ForEachStatement::NameExpr));
+        if (name) {
+          Symbol *sym = name->getSymbol();
+          sym->setNeeded();
+        }
+        SimpleVariablePtr value =
+          dpc(SimpleVariable, s->getNthKid(ForEachStatement::ValueExpr));
+        if (value) {
+          Symbol *sym = value->getSymbol();
+          sym->setNeeded();
+        }
+        break;
+      }
       default:
         break;
     }
@@ -1894,7 +1923,8 @@ int AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
               e->setCanonID(id);
             }
           }
-          if ((context & Expression::RefValue) || sym->isRefClosureVar()) {
+          if ((context & (Expression::RefValue|Expression::RefAssignmentLHS)) ||
+              sym->isRefClosureVar()) {
             sym->setReferenced();
           }
           if (!(context & (Expression::AssignmentLHS |
@@ -2040,32 +2070,6 @@ void AliasManager::gatherInfo(AnalysisResultConstPtr ar, MethodStatementPtr m) {
   func->setInlineAsExpr(m_inlineAsExpr);
 }
 
-class ConstructTagger;
-
-class ControlFlowGraphWalker : public FunctionWalker {
-public:
-  ControlFlowGraphWalker(ControlFlowGraph *g) : m_block(0), m_graph(*g) {}
-  template <class T>
-  void walk(T &t) {
-    std::pair<ControlFlowGraph::vertex_iterator,
-      ControlFlowGraph::vertex_iterator> v(boost::vertices(m_graph));
-    while (v.first != v.second) {
-      ControlBlock *b = *v.first;
-      m_block = b;
-      AstWalkerStateVec s = b->getStartState();
-      beforeBlock(b);
-      AstWalker::walk(t, s, b->getEndBefore(), b->getEndAfter());
-      afterBlock(b);
-      ++v.first;
-    }
-  }
-  virtual void beforeBlock(ControlBlock *b) {}
-  virtual void afterBlock(ControlBlock *b) {}
-protected:
-  ControlBlock *m_block;
-  ControlFlowGraph &m_graph;
-};
-
 static void markAvailable(ExpressionRawPtr e) {
   if (e->isThis()) {
     SimpleVariableRawPtr sv(dpc(SimpleVariable,e));
@@ -2112,176 +2116,6 @@ public:
     }
     return WalkContinue;
   }
-};
-
-class DataFlowWalker : public ControlFlowGraphWalker {
-public:
-  DataFlowWalker(ControlFlowGraph *g) : ControlFlowGraphWalker(g) {}
-
-  void walk() { ControlFlowGraphWalker::walk(*this); }
-  int after(ConstructRawPtr cp) {
-    if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(cp)) {
-      switch (e->getKindOf()) {
-        case Expression::KindOfSimpleVariable:
-          if (!boost::static_pointer_cast<SimpleVariable>(
-                e)->getAlwaysStash()) {
-            return WalkContinue;
-          }
-          break;
-        case Expression::KindOfBinaryOpExpression:
-          if (boost::static_pointer_cast<BinaryOpExpression>(
-                e)->isShortCircuitOperator()) {
-            break;
-          }
-          goto process_vars;
-        case Expression::KindOfExpressionList:
-        case Expression::KindOfObjectMethodExpression:
-        case Expression::KindOfDynamicFunctionCall:
-        case Expression::KindOfSimpleFunctionCall:
-        case Expression::KindOfNewObjectExpression:
-        case Expression::KindOfQOpExpression:
-          break;
-        default: process_vars: {
-          for (int i = 0, nk = e->getKidCount(); i < nk; i++) {
-            ExpressionPtr k = e->getNthExpr(i);
-            if (k && k->is(Expression::KindOfSimpleVariable) &&
-                !boost::static_pointer_cast<SimpleVariable>(
-                  k)->getAlwaysStash()) {
-              process(k);
-            }
-          }
-          break;
-        }
-      }
-      process(e);
-    }
-    return WalkContinue;
-  }
-
-  int afterEach(ConstructRawPtr cur, int i, ConstructRawPtr kid) {
-    if (ExpressionRawPtr k = boost::dynamic_pointer_cast<Expression>(kid)) {
-      if (k->is(Expression::KindOfSimpleVariable) &&
-          !boost::static_pointer_cast<SimpleVariable>(
-            k)->getAlwaysStash()) {
-        if (ExpressionRawPtr e = boost::dynamic_pointer_cast<Expression>(cur)) {
-          switch (e->getKindOf()) {
-            case Expression::KindOfBinaryOpExpression:
-              if (!boost::static_pointer_cast<BinaryOpExpression>(
-                    e)->isShortCircuitOperator()) {
-                return WalkContinue;
-              }
-              break;
-            case Expression::KindOfExpressionList:
-            case Expression::KindOfObjectMethodExpression:
-            case Expression::KindOfDynamicFunctionCall:
-            case Expression::KindOfSimpleFunctionCall:
-            case Expression::KindOfNewObjectExpression:
-            case Expression::KindOfQOpExpression:
-              break;
-            default:
-              return WalkContinue;
-          }
-        }
-        process(k);
-      }
-    }
-    return WalkContinue;
-  }
-
-  void processAccessChain(ExpressionPtr e) {
-    if (!e) return;
-    if (!e->is(Expression::KindOfObjectPropertyExpression) &&
-        !e->is(Expression::KindOfArrayElementExpression)) {
-      return;
-    }
-    for (int i = 0, n = e->getKidCount(); i < n; ++i) {
-      ExpressionPtr kid(e->getNthExpr(i));
-      if (kid && kid->hasContext(Expression::AccessContext)) {
-        processAccessChain(kid);
-        process(kid, true);
-        break;
-      }
-    }
-  }
-
-  void processAccessChainLA(ListAssignmentPtr la) {
-    ExpressionList &lhs = *la->getVariables().get();
-    for (int i = lhs.getCount(); i--; ) {
-      ExpressionPtr ep = lhs[i];
-      if (ep) {
-        if (ep->is(Expression::KindOfListAssignment)) {
-          processAccessChainLA(spc(ListAssignment, ep));
-        } else {
-          processAccessChain(ep);
-        }
-      }
-    }
-  }
-
-  void process(ExpressionPtr e, bool doAccessChains = false) {
-    if (e->getContext() & (Expression::AssignmentLHS|Expression::OprLValue) ||
-        !doAccessChains && e->hasContext(Expression::AccessContext)) {
-      return;
-    }
-
-    switch (e->getKindOf()) {
-      case Expression::KindOfListAssignment:
-        processAccessChainLA(spc(ListAssignment,e));
-        processAccess(e);
-        break;
-      case Expression::KindOfArrayElementExpression:
-      case Expression::KindOfObjectPropertyExpression:
-        if (!e->hasContext(Expression::AccessContext)) {
-          processAccessChain(e);
-        }
-        // fall through
-      case Expression::KindOfObjectMethodExpression:
-      case Expression::KindOfDynamicFunctionCall:
-      case Expression::KindOfSimpleFunctionCall:
-      case Expression::KindOfNewObjectExpression:
-      case Expression::KindOfIncludeExpression:
-      case Expression::KindOfSimpleVariable:
-      case Expression::KindOfDynamicVariable:
-      case Expression::KindOfStaticMemberExpression:
-      case Expression::KindOfConstantExpression:
-        processAccess(e);
-        break;
-      case Expression::KindOfAssignmentExpression:
-      case Expression::KindOfBinaryOpExpression:
-      case Expression::KindOfUnaryOpExpression: {
-        ExpressionPtr var = e->getNthExpr(0);
-        if (var && var->getContext() & (Expression::AssignmentLHS|
-                                        Expression::OprLValue)) {
-          processAccessChain(var);
-          processAccess(var);
-        }
-      }
-      default:
-        processAccess(e);
-        break;
-    }
-  }
-
-  virtual void processAccess(ExpressionPtr e) = 0;
-};
-
-class AttributeTagger : public DataFlowWalker {
-public:
-  AttributeTagger(ControlFlowGraph *g, ExprDict &d) :
-      DataFlowWalker(g), m_dict(d) {}
-
-  void processAccess(ExpressionPtr e) {
-    m_dict.updateAccess(e);
-  }
-
-  void beforeBlock(ControlBlock *b) {
-    m_dict.beginBlock(b);
-  }
-  void afterBlock(ControlBlock *b) {
-    m_dict.endBlock(b);
-  }
-private:
-  ExprDict &m_dict;
 };
 
 class Propagater : public ControlFlowGraphWalker {
@@ -2342,20 +2176,11 @@ void AliasManager::doFinal(MethodStatementPtr m) {
 }
 
 int AliasManager::copyProp(MethodStatementPtr m) {
-  static int rows[] =
-    {
-      DataFlow::Altered, DataFlow::Available, DataFlow::Anticipated,
-      DataFlow::AvailIn, DataFlow::AvailOut,
-      DataFlow::AntIn, DataFlow::AntOut
-    };
-
   m_graph = ControlFlowGraph::buildControlFlow(m);
   ExprDict ed(*this);
   m_genAttrs = true;
   ed.build(m);
-  m_graph->allocateDataFlow(ed.size()+1,
-                            sizeof(rows)/sizeof(rows[0]), rows);
-  AttributeTagger at(m_graph, ed);
+  AttributeTagger<ExprDict> at(m_graph, ed);
   at.walk();
   m_genAttrs = false;
 
@@ -2400,18 +2225,19 @@ int AliasManager::optimize(AnalysisResultConstPtr ar, MethodStatementPtr m) {
 }
 
 void AliasManager::finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m) {
-  static int rows[] =
-    { DataFlow::Available, DataFlow::AvailIn, DataFlow::AvailOut };
-
   if (Option::ControlFlow) {
     m_graph = ControlFlowGraph::buildControlFlow(m);
-    if (Option::DumpAst) m_graph->dump(ar);
   }
 
   gatherInfo(ar, m);
   if (m_graph) {
-    m_graph->allocateDataFlow(m_gidMap.size()+1,
-                              sizeof(rows)/sizeof(rows[0]), rows);
+    {
+      static int rows[] =
+        { DataFlow::Available, DataFlow::AvailIn, DataFlow::AvailOut };
+      m_graph->allocateDataFlow(m_gidMap.size()+1,
+                                sizeof(rows)/sizeof(rows[0]), rows);
+    }
+
     ConstructTagger ct(m_graph);
     ct.walk();
 
@@ -2419,6 +2245,35 @@ void AliasManager::finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m) {
 
     ConstructMarker cm(m_graph);
     cm.walk();
+
+    if (Option::VariableCoalescing &&
+        !m_inPseudoMain &&
+        !m_variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
+      LiveDict ld(*this);
+      m_genAttrs = true;
+      ld.build(m);
+      AttributeTagger<LiveDict> lt(m_graph, ld);
+      lt.walk();
+      ld.updateParams();
+      m_genAttrs = false;
+      DataFlow::ComputePartialAvailable(*m_graph);
+      DataFlow::ComputePartialAnticipated(*m_graph);
+      DataFlow::ComputeUsed(*m_graph);
+      DataFlow::ComputePartialDying(*m_graph);
+
+      if (Option::DumpAst) m_graph->dump(ar);
+
+      ld.buildConflicts();
+      if (ld.color(Type::Variant) ||
+          ld.color(Type::String) ||
+          ld.color(Type::Numeric) ||
+          ld.color(Type::Primitive)) {
+        ld.coalesce(m);
+      }
+    }
+
+    if (Option::DumpAst) m_graph->dump(ar);
+
     delete m_graph;
     m_graph = 0;
   }

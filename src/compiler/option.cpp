@@ -210,6 +210,7 @@ bool Option::LocalCopyProp = true;
 bool Option::StringLoopOpts = true;
 bool Option::AutoInline = false;
 bool Option::ControlFlow = true;
+bool Option::VariableCoalescing = false;
 bool Option::DumpAst = false;
 
 bool Option::AllDynamic = true;
@@ -421,6 +422,7 @@ void Option::Load(Hdf &config) {
   StringLoopOpts     = config["StringLoopOpts"].getBool(true);
   AutoInline         = config["AutoInline"].getBool(false);
   ControlFlow        = config["ControlFlow"].getBool(true);
+  VariableCoalescing = config["VariableCoalescing"].getBool(false);
   DumpAst            = config["DumpAst"].getBool(false);
   PregenerateCPP     = config["PregenerateCPP"].getBool(false);
   GenerateFFIStaticBinding = config["GenerateFFIStaticBinding"].getBool(true);

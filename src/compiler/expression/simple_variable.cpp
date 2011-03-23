@@ -33,7 +33,7 @@ using namespace boost;
 SimpleVariable::SimpleVariable
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, const std::string &name)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_name(name), m_sym(NULL),
+    m_name(name), m_sym(NULL), m_originalSym(NULL),
     m_this(false), m_globals(false),
     m_superGlobal(false), m_alwaysStash(false),
     m_guardedThis(false) {
@@ -63,6 +63,16 @@ bool SimpleVariable::couldBeAliased() const {
   if (m_globals || m_superGlobal) return true;
   assert(m_sym);
   return m_sym->isReferenced() || m_sym->isGlobal() || m_sym->isStatic();
+}
+
+void SimpleVariable::coalesce(SimpleVariablePtr other) {
+  assert(m_sym);
+  assert(other->m_sym);
+  if (!m_originalSym) m_originalSym = m_sym;
+  m_sym->clearUsed();
+  m_sym->clearNeeded();
+  m_sym = other->m_sym;
+  m_name = m_sym->getName();
 }
 
 /*
@@ -269,5 +279,8 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     const char *prefix =
       getScope()->getVariables()->getVariablePrefix(m_sym);
     cg_printf("%s%s", prefix, cg.formatLabel(m_name).c_str());
+    if (m_originalSym) {
+      cg.printf(" /* %s */", m_originalSym->getName().c_str());
+    }
   }
 }

@@ -373,6 +373,7 @@ public:
   static bool SystemGen; // -t cpp -f sys
   static bool SplitDynamicClassTable;
   static bool ControlFlow;
+  static bool VariableCoalescing;
   static bool DumpAst;
   static bool PregenerateCPP;
   static bool GenerateFFIStaticBinding;

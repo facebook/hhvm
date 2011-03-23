@@ -52,12 +52,13 @@ public:
   void updateSymbol(SimpleVariablePtr src);
   void setGuardedThis() { m_guardedThis = true; }
   bool isGuardedThis() const { return m_guardedThis; }
+  void coalesce(SimpleVariablePtr other);
 private:
   std::string m_name;
-  std::string m_text;
 
   TypePtr m_superGlobalType;
   Symbol *m_sym;
+  Symbol *m_originalSym;
 
   unsigned m_this : 1; // whether this is a legitimate $this
   unsigned m_globals : 1; // whether is is $GLOBAL

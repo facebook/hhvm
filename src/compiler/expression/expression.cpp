@@ -514,12 +514,6 @@ bool Expression::canonCompare(ExpressionPtr e) const {
     return false;
   }
 
-  int c1 = getContext();
-  int c2 = e->getContext();
-  if ((c1 ^ c2) & ExistContext) {
-    return false;
-  }
-
   int kk = getKidCount();
   if (kk != e->getKidCount()) {
     return false;

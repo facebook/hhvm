@@ -39,37 +39,39 @@ public:
 
   void record(ExpressionPtr e);
   int size() const { return m_idMap.size(); }
+  void resize(int s) { m_idMap.resize(s); }
   ExpressionPtr get(int id) const { return m_idMap[id]; }
   AliasManager &am() { return m_am; }
+
+  void beginBlock(ControlBlock *b);
 protected:
   AliasManager &m_am;
-private:
-  IdMap m_idMap;
-};
-
-class ExprDict : public Dictionary {
-public:
-  ExprDict(AliasManager &am) : Dictionary(am) {}
-  /* Building the dictionary */
-  void build(MethodStatementPtr m);
-  void visit(ExpressionPtr e);
-
-  /* Computing the attributes */
-  void beginBlock(ControlBlock *b);
-  void endBlock(ControlBlock *b);
-  void updateAccess(ExpressionPtr e);
-
-  /* Copy propagation */
-  void beforePropagate(ControlBlock *b);
-  ExpressionPtr propagate(ExpressionPtr e);
-private:
   BitOps::Bits *m_altered;
   BitOps::Bits *m_available;
   BitOps::Bits *m_anticipated;
   size_t        m_width;
-  std::vector<ExpressionRawPtr> m_avlExpr;
-  std::vector<ExpressionRawPtr> m_avlAccess;
-  ExpressionPtr m_active;
+private:
+  IdMap m_idMap;
+};
+
+template <class Dict>
+class AttributeTagger : public DataFlowWalker {
+public:
+  AttributeTagger(ControlFlowGraph *g, Dict &d) :
+      DataFlowWalker(g), m_dict(d) {}
+
+  void processAccess(ExpressionPtr e) {
+    m_dict.updateAccess(e);
+  }
+
+  void beforeBlock(ControlBlock *b) {
+    m_dict.beginBlock(b);
+  }
+  void afterBlock(ControlBlock *b) {
+    m_dict.endBlock(b);
+  }
+private:
+  Dict &m_dict;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

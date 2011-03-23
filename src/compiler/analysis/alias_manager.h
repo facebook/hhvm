@@ -113,6 +113,8 @@ class AliasManager {
   ControlFlowGraph *graph() { return m_graph; }
   int checkAnyInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
                      int &depth, int &effects);
+  bool hasWildRefs() const { return m_wildRefs; }
+  bool couldBeAliased(SimpleVariablePtr sv);
  private:
   void doFinal(MethodStatementPtr m);
   enum { MaxBuckets = 0x10000 };
@@ -162,7 +164,6 @@ class AliasManager {
                    int depth);
   void killLocals();
   bool okToKill(ExpressionPtr ep, bool killRef);
-  bool couldBeAliased(SimpleVariablePtr sv);
   int checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
                   int &depth, int &effects);
   int findInterf(ExpressionPtr rv, bool isLoad, ExpressionPtr &rep,

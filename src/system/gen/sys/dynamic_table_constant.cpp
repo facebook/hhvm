@@ -2084,7 +2084,6 @@ static hashNodeCon *conMapTable[8192];
 static hashNodeCon conBuckets[2084];
 
 void init_builtin_constant_table() {
-  SystemGlobals gv;
   const char *conMapData[] = {
       (const char *)"CURLINFO_LOCAL_PORT", (const char *)-1, (const char *)32, (const char *)&k_CURLINFO_LOCAL_PORT,
       (const char *)"CURLOPT_CONNECTTIMEOUT_MS", (const char *)-1, (const char *)32, (const char *)&k_CURLOPT_CONNECTTIMEOUT_MS,
@@ -2098,7 +2097,7 @@ void init_builtin_constant_table() {
       (const char *)"PAGELET_DONE", (const char *)-1, (const char *)32, (const char *)&k_PAGELET_DONE,
       (const char *)"PAGELET_NOT_READY", (const char *)-1, (const char *)32, (const char *)&k_PAGELET_NOT_READY,
       (const char *)"PAGELET_READY", (const char *)-1, (const char *)32, (const char *)&k_PAGELET_READY,
-      (const char *)"SID", (const char *)(&gv.k_SID - gv.stgv_Variant + 1), (const char *)NULL, (const char *)NULL,
+      (const char *)"SID", (const char *)((offsetof(SystemGlobals, k_SID) -  offsetof(SystemGlobals, stgv_Variant)) / sizeof(Variant) + 1), (const char *)NULL, (const char *)NULL,
       (const char *)"SQLITE3_ASSOC", (const char *)-1, (const char *)32, (const char *)&k_SQLITE3_ASSOC,
       (const char *)"SQLITE3_BLOB", (const char *)-1, (const char *)32, (const char *)&k_SQLITE3_BLOB,
       (const char *)"SQLITE3_BOTH", (const char *)-1, (const char *)32, (const char *)&k_SQLITE3_BOTH,

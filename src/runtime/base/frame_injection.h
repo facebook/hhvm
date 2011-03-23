@@ -77,21 +77,16 @@ public:
 public:
   // NOTE: obj has to be the root object
   // constructors with hot profiler
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name);
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
-                 ObjectData *obj);
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name, int fs);
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
-                 ObjectData *obj, int fs);
+  FrameInjection(CStrRef cls, const char *name);
+  FrameInjection(CStrRef cls, const char *name, ObjectData *obj);
+  FrameInjection(CStrRef cls, const char *name, int fs);
+  FrameInjection(CStrRef cls, const char *name, ObjectData *obj, int fs);
 
   // constructors without hot profiler
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
-                 bool unused);
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
-                 ObjectData *obj, bool unused);
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name, int fs,
-                 bool unused);
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
+  FrameInjection(CStrRef cls, const char *name, bool unused);
+  FrameInjection(CStrRef cls, const char *name, ObjectData *obj, bool unused);
+  FrameInjection(CStrRef cls, const char *name, int fs, bool unused);
+  FrameInjection(CStrRef cls, const char *name,
                  ObjectData *obj, int fs, bool unused);
 
   virtual ~FrameInjection();
@@ -106,6 +101,7 @@ public:
   int getLine() const { return m_line;}
   void setLine(int line) { m_line = line;}
   void setBreakPointHit() { m_flags |= BreakPointHit;}
+  ThreadInfo* getThreadInfo() const { return m_info;}
 
   /**
    * Complex accessors. EvalFrameInjection overwrites these.

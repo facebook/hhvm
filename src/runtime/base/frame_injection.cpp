@@ -35,7 +35,7 @@ static StaticString s_type("type");
 ///////////////////////////////////////////////////////////////////////////////
 
 
-static inline void injection_check(ThreadInfo *info) {
+static inline void injection_check(ThreadInfo *&info) {
 #ifdef INFINITE_RECURSION_DETECTION
   check_recursion(info);
 #endif
@@ -45,122 +45,109 @@ static inline void injection_check(ThreadInfo *info) {
 }
 
 // constructors with hot profiler
-FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
-                               const char *name)
-    : m_class(cls), m_name(name),
-      m_object(NULL),
+FrameInjection::FrameInjection(CStrRef cls, const char *name)
+    : m_class(cls), m_name(name), m_object(NULL),
 #ifdef ENABLE_LATE_STATIC_BINDING
       m_staticClass(NULL), m_callingObject(NULL),
 #endif /* ENABLE_LATE_STATIC_BINDING */
       m_line(0), m_flags(0) {
-  info = m_info = ThreadInfo::s_threadInfo.get();
-  injection_check(info);
+  m_info = ThreadInfo::s_threadInfo.getNoCheck();
+  injection_check(m_info);
   doCommon();
-  hotProfilerInit(info, name);
+  hotProfilerInit(m_info, name);
 }
 
-FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
-                               const char *name, ObjectData *obj)
-    : m_class(cls), m_name(name),
-      m_object(obj),
+FrameInjection::FrameInjection(CStrRef cls, const char *name, ObjectData *obj)
+    : m_class(cls), m_name(name), m_object(obj),
 #ifdef ENABLE_LATE_STATIC_BINDING
       m_staticClass(NULL), m_callingObject(NULL),
 #endif
       m_line(0), m_flags(0) {
-  info = m_info = ThreadInfo::s_threadInfo.get();
-  injection_check(info);
+  m_info = ThreadInfo::s_threadInfo.getNoCheck();
+  injection_check(m_info);
   doCommon();
-  hotProfilerInit(info, name);
+  hotProfilerInit(m_info, name);
 }
 
-FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
-                               const char *name, int fs)
-    : m_class(cls), m_name(name),
-      m_object(NULL),
+FrameInjection::FrameInjection(CStrRef cls, const char *name, int fs)
+    : m_class(cls), m_name(name), m_object(NULL),
 #ifdef ENABLE_LATE_STATIC_BINDING
       m_staticClass(NULL), m_callingObject(NULL),
 #endif
       m_line(0), m_flags(fs) {
-  info = m_info = ThreadInfo::s_threadInfo.get();
-  injection_check(info);
+  m_info = ThreadInfo::s_threadInfo.getNoCheck();
+  injection_check(m_info);
   doCommon();
-  hotProfilerInit(info, name);
+  hotProfilerInit(m_info, name);
 }
 
-FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
+FrameInjection::FrameInjection(CStrRef cls,
                                const char *name, ObjectData *obj, int fs)
-    : m_class(cls), m_name(name),
-      m_object(obj),
+    : m_class(cls), m_name(name), m_object(obj),
 #ifdef ENABLE_LATE_STATIC_BINDING
       m_staticClass(NULL), m_callingObject(NULL),
 #endif
       m_line(0), m_flags(fs) {
-  info = m_info = ThreadInfo::s_threadInfo.get();
-  injection_check(info);
+  m_info = ThreadInfo::s_threadInfo.getNoCheck();
+  injection_check(m_info);
   doCommon();
-  hotProfilerInit(info, name);
+  hotProfilerInit(m_info, name);
 }
 
 // constructors without hot profiler
-FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
-                               const char *name, bool unused)
-    : m_class(cls), m_name(name),
-      m_object(NULL),
+FrameInjection::FrameInjection(CStrRef cls, const char *name, bool unused)
+    : m_class(cls), m_name(name), m_object(NULL),
 #ifdef ENABLE_LATE_STATIC_BINDING
       m_staticClass(NULL), m_callingObject(NULL),
 #endif
       m_line(0), m_flags(0) {
-  info = m_info = ThreadInfo::s_threadInfo.get();
-  injection_check(info);
+  m_info = ThreadInfo::s_threadInfo.getNoCheck();
+  injection_check(m_info);
   doCommon();
 #ifdef HOTPROFILER
   m_prof = false;
 #endif
 }
 
-FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
+FrameInjection::FrameInjection(CStrRef cls,
                                const char *name, ObjectData *obj, bool unused)
-    : m_class(cls), m_name(name),
-      m_object(obj),
+    : m_class(cls), m_name(name), m_object(obj),
 #ifdef ENABLE_LATE_STATIC_BINDING
       m_staticClass(NULL), m_callingObject(NULL),
 #endif
       m_line(0), m_flags(0) {
-  info = m_info = ThreadInfo::s_threadInfo.get();
-  injection_check(info);
+  m_info = ThreadInfo::s_threadInfo.getNoCheck();
+  injection_check(m_info);
   doCommon();
 #ifdef HOTPROFILER
   m_prof = false;
 #endif
 }
 
-FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
+FrameInjection::FrameInjection(CStrRef cls,
                                const char *name, int fs, bool unused)
-    : m_class(cls), m_name(name),
-      m_object(NULL),
+    : m_class(cls), m_name(name), m_object(NULL),
 #ifdef ENABLE_LATE_STATIC_BINDING
       m_staticClass(NULL), m_callingObject(NULL),
 #endif
       m_line(0), m_flags(fs) {
-  info = m_info = ThreadInfo::s_threadInfo.get();
-  injection_check(info);
+  m_info = ThreadInfo::s_threadInfo.getNoCheck();
+  injection_check(m_info);
   doCommon();
 #ifdef HOTPROFILER
   m_prof = false;
 #endif
 }
 
-FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
-                               const char *name, ObjectData *obj,
+FrameInjection::FrameInjection(CStrRef cls, const char *name, ObjectData *obj,
                                int fs, bool unused)
-    : m_class(cls), m_name(name),
-      m_object(obj),
+    : m_class(cls), m_name(name), m_object(obj),
 #ifdef ENABLE_LATE_STATIC_BINDING
       m_staticClass(NULL), m_callingObject(NULL),
 #endif
       m_line(0), m_flags(fs) {
-  info = m_info = ThreadInfo::s_threadInfo.get();
-  injection_check(info);
+  m_info = ThreadInfo::s_threadInfo.getNoCheck();
+  injection_check(m_info);
   doCommon();
 #ifdef HOTPROFILER
   m_prof = false;

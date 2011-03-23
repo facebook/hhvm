@@ -321,8 +321,7 @@ private:
   void throw_invalid_lval();
   class ParserFrameInjection : public FrameInjection {
   public:
-    ParserFrameInjection(ThreadInfo *&info, const char *func,
-                         const char *fileName);
+    ParserFrameInjection(const char *func, const char *fileName);
     String getFileName() { return m_file; }
   private:
     const char *m_file;

@@ -33,7 +33,7 @@ void DoWhileStatement::eval(VariableEnvironment &env) const {
   LOOP_COUNTER(1);
 
   do {
-    LOOP_COUNTER_CHECK(1);
+    LOOP_COUNTER_CHECK_INFO(1);
     EVAL_STMT_HANDLE_GOTO_BEGIN(restart);
     if (m_body) EVAL_STMT_HANDLE_BREAK(m_body, env);
     EVAL_STMT_HANDLE_GOTO_END(restart);

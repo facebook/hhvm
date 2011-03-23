@@ -41,7 +41,7 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
       for (ArrayIter iter = map.begin(env.currentContext(), true);
            !iter.end(); iter.next()) {
         {
-          LOOP_COUNTER_CHECK(1);
+          LOOP_COUNTER_CHECK_INFO(1);
           const Variant &value = iter.second();
           const Variant &key = iter.first();
           TempExpressionHelper helper(texp, env);
@@ -56,7 +56,7 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
     } else {
       for (ArrayIter iter = map.begin(env.currentContext(), true);
            !iter.end(); iter.next()) {
-        LOOP_COUNTER_CHECK(1);
+        LOOP_COUNTER_CHECK_INFO(1);
         const Variant &value = iter.second();
         const Variant &key = iter.first();
         m_value->set(env, value);
@@ -70,7 +70,7 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
   } else {
     for (ArrayIter iter = map.begin(env.currentContext(), true);
          !iter.end(); iter.next()) {
-      LOOP_COUNTER_CHECK(1);
+      LOOP_COUNTER_CHECK_INFO(1);
       m_value->set(env, iter.second());
       if (!m_body) continue;
       EVAL_STMT_HANDLE_GOTO_BEGIN(restart3);

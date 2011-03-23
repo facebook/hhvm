@@ -261,7 +261,8 @@ inline void check_request_timeout(ThreadInfo *info) {
 void throw_pending_exception(ThreadInfo *info) ATTRIBUTE_COLD
                                                __attribute__((noreturn));
 
-void check_request_timeout_ex(ThreadInfo *info, int lc);
+void check_request_timeout_info(ThreadInfo *info, int lc);
+void check_request_timeout_ex(const FrameInjection &fi, int lc);
 
 // implemented in runtime/ext/ext_hotprofiler.cpp
 extern void begin_profiler_frame(Profiler *p, const char *symbol);

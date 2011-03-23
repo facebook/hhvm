@@ -388,35 +388,27 @@ do { \
   int lc __attribute__((__unused__)) = 0;        \
 
 #define DECLARE_THREAD_INFO_NOINIT               \
-  ThreadInfo *info __attribute__((__unused__));  \
   int lc __attribute__((__unused__)) = 0;        \
 
 #ifdef INFINITE_LOOP_DETECTION
 #define LOOP_COUNTER(n)
 #define LOOP_COUNTER_CHECK(n)                                           \
   if ((++lc & 1023) == 0) {                                             \
-    check_request_timeout_ex(info, lc);                                 \
+    check_request_timeout_ex(fi, lc);                                   \
   }
-
+#define LOOP_COUNTER_CHECK_INFO(n)                                      \
+  if ((++lc & 1023) == 0) {                                             \
+    check_request_timeout_info(info, lc);                               \
+  }
 #else
 #define LOOP_COUNTER(n)
 #define LOOP_COUNTER_CHECK(n)
-#endif
-
-#ifdef INFINITE_RECURSION_DETECTION
-#define RECURSION_INJECTION check_recursion(info);
-#else
-#define RECURSION_INJECTION
-#endif
-
-#ifdef REQUEST_TIMEOUT_DETECTION
-#define REQUEST_TIMEOUT_INJECTION check_request_timeout(info);
-#else
-#define REQUEST_TIMEOUT_INJECTION
+#define LOOP_COUNTER_CHECK_INFO(n)
 #endif
 
 #ifdef EXECUTION_PROFILER
-#define EXECUTION_PROFILER_INJECTION(n) ExecutionProfiler ep(info, n);
+#define EXECUTION_PROFILER_INJECTION(n) \
+  ExecutionProfiler ep(fi.getThreadInfo(), n);
 #else
 #define EXECUTION_PROFILER_INJECTION(n)
 #endif
@@ -430,10 +422,10 @@ do { \
 // Get global variables from thread info.
 #define DECLARE_GLOBAL_VARIABLES_INJECTION(g)       \
   GlobalVariables *g __attribute__((__unused__)) =  \
-    info->m_globals;
+    fi.getThreadInfo()->m_globals;
 #define DECLARE_SYSTEM_GLOBALS_INJECTION(g)         \
   SystemGlobals *g __attribute__((__unused__)) =    \
-    (SystemGlobals *)info->m_globals;
+    (SystemGlobals *)fi.getThreadInfo()->m_globals;
 
 #define CHECK_ONCE(n)                             \
   {                                               \
@@ -444,14 +436,14 @@ do { \
   }
 
 // Stack frame injection is also for correctness, and cannot be disabled.
-#define FRAME_INJECTION(c, n) FrameInjection fi(info, c, #n);
-#define FRAME_INJECTION_FLAGS(c, n, f) FrameInjection fi(info, c, #n, f);
+#define FRAME_INJECTION(c, n) FrameInjection fi(c, #n);
+#define FRAME_INJECTION_FLAGS(c, n, f) FrameInjection fi(c, #n, f);
 // For classes that might have redeclaring subclasse
 #define FRAME_INJECTION_WITH_THIS(c, n) \
-  FrameInjection fi(info, c, #n, this->getRoot());
+  FrameInjection fi(c, #n, this->getRoot());
 // For classes that do not have redeclaring subclasses
 #define FRAME_INJECTION_WITH_ONLY_THIS(c, n) \
-  FrameInjection fi(info, c, #n, this);
+  FrameInjection fi(c, #n, this);
 
 #ifndef HOTPROFILER_NO_BUILTIN
   #define FRAME_INJECTION_BUILTIN FRAME_INJECTION
@@ -460,16 +452,16 @@ do { \
   #define FRAME_INJECTION_WITH_ONLY_THIS_BUILTIN FRAME_INJECTION_WITH_ONLY_THIS
 #else
   #define FRAME_INJECTION_BUILTIN(c, n) \
-    FrameInjection fi(info, c, #n, true);
+    FrameInjection fi(c, #n, true);
 
   #define FRAME_INJECTION_FLAGS_BUILTIN(c, n, f) \
-    FrameInjection fi(info, c, #n, f, true);
+    FrameInjection fi(c, #n, f, true);
 
   #define FRAME_INJECTION_WITH_THIS_BUILTIN(c, n) \
-    FrameInjection fi(info, c, #n, this->getRoot(), true);
+    FrameInjection fi(c, #n, this->getRoot(), true);
 
   #define FRAME_INJECTION_WITH_ONLY_THIS_BUILTIN(c, n) \
-    FrameInjection fi(info, c, #n, this, true);
+    FrameInjection fi(c, #n, this, true);
 #endif
 
 // code injected into beginning of every function/method
@@ -515,7 +507,7 @@ do { \
 // code injected into every unprofiled builtin function/method
 #define FUNCTION_NOPROFILE_BUILTIN(n) \
   DECLARE_THREAD_INFO_NOINIT                    \
-  FrameInjection fi(info, empty_string, #n, \
+  FrameInjection fi(empty_string, #n, \
                     FrameInjection::BuiltinFunction, true); \
   DECLARE_SYSTEM_GLOBALS_INJECTION(g)           \
 
@@ -555,13 +547,13 @@ do { \
 
 #ifdef ENABLE_LATE_STATIC_BINDING
 
-#define STATIC_CLASS_NAME_CALL(s, exp)                             \
-  (FrameInjection::StaticClassNameHelper(info, s), exp)
-#define STATIC_CLASS_INVOKE_CALL(s, exp)                             \
-  (FrameInjection::StaticClassNameHelper(info, s), exp)
+#define STATIC_CLASS_NAME_CALL(s, exp)                                 \
+  (FrameInjection::StaticClassNameHelper(fi.getThreadInfo(), s), exp)
+#define STATIC_CLASS_INVOKE_CALL(s, exp)                               \
+  (FrameInjection::StaticClassNameHelper(fi.getThreadInfo(), s), exp)
 
-#define BIND_CLASS_DOT  bindClass(info).
-#define BIND_CLASS_ARROW(T) bindClass<c_##T>(info)->
+#define BIND_CLASS_DOT  bindClass(fi.getThreadInfo()).
+#define BIND_CLASS_ARROW(T) bindClass<c_##T>(fi.getThreadInfo())->
 
 #else
 

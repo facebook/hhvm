@@ -447,6 +447,14 @@ public:
   virtual CStrRef o_getClassName() const { return s_class_name; }
 
   int close() {
+    // Although the PHP doc about proc_close() says that the pipes need to be
+    // explicitly pclose()'ed, it seems that Zend is implicitly closing the
+    // pipes when proc_close() is called.
+    for (ArrayIter iter(pipes); iter; ++iter) {
+      iter.second().toObject().getTyped<PlainFile>()->close();
+    }
+    pipes.clear();
+
     pid_t wait_pid;
     int wstatus;
     do {

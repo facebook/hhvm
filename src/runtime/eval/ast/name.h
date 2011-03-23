@@ -40,8 +40,9 @@ public:
   static NamePtr fromString(CONSTRUCT_ARGS, CStrRef name, bool isSp = false);
   static NamePtr fromExp(CONSTRUCT_ARGS, ExpressionPtr e);
   static NamePtr fromStaticClassExp(CONSTRUCT_ARGS, ExpressionPtr e);
+#ifdef ENABLE_LATE_STATIC_BINDING
   static NamePtr LateStatic(CONSTRUCT_ARGS);
-
+#endif
   void setOriginalText(const std::string &text) { m_originalText = text;}
   const std::string &getOriginalText() const { return m_originalText;}
 
@@ -84,6 +85,7 @@ public:
   virtual String get() const { return ExprName::get(); }
 };
 
+#ifdef ENABLE_LATE_STATIC_BINDING
 class LateStaticName : public Name {
 public:
   LateStaticName(CONSTRUCT_ARGS);
@@ -91,6 +93,7 @@ public:
   virtual String get() const { return Name::get(); }
   virtual void dump(std::ostream &out) const;
 };
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 }

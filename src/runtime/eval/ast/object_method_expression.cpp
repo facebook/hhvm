@@ -37,8 +37,9 @@ Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
     raise_error("Call to a member function %s() on a non-object",
                 name.c_str());
   }
+#ifdef ENABLE_LATE_STATIC_BINDING
   EvalFrameInjection::EvalStaticClassNameHelper helper(obj.toObject());
-
+#endif
   Variant cobj(env.currentObject());
   const MethodStatement *ms = NULL;
   if (cobj.is(KindOfObject) && obj.getObjectData() == cobj.getObjectData()) {

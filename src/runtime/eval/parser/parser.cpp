@@ -313,8 +313,10 @@ void Parser::onName(Token &out, Token &name, Parser::NameKind kind) {
     out->name() = Name::fromExp(this, name->exp());
   } else if (kind == StaticClassExprName) {
     out->name() = Name::fromStaticClassExp(this, name->exp());
+#ifdef ENABLE_LATE_STATIC_BINDING
   } else if (kind == StaticName) {
     out->name() = Name::LateStatic(this);
+#endif
   }
 }
 

@@ -48,8 +48,11 @@ static inline void injection_check(ThreadInfo *info) {
 FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
                                const char *name)
     : m_class(cls), m_name(name),
-      m_object(NULL), m_line(0), m_flags(0),
-      m_staticClass(NULL), m_callingObject(NULL) {
+      m_object(NULL),
+#ifdef ENABLE_LATE_STATIC_BINDING
+      m_staticClass(NULL), m_callingObject(NULL),
+#endif /* ENABLE_LATE_STATIC_BINDING */
+      m_line(0), m_flags(0) {
   info = m_info = ThreadInfo::s_threadInfo.get();
   injection_check(info);
   doCommon();
@@ -59,8 +62,11 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
 FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
                                const char *name, ObjectData *obj)
     : m_class(cls), m_name(name),
-      m_object(obj), m_line(0), m_flags(0),
-      m_staticClass(NULL), m_callingObject(NULL) {
+      m_object(obj),
+#ifdef ENABLE_LATE_STATIC_BINDING
+      m_staticClass(NULL), m_callingObject(NULL),
+#endif
+      m_line(0), m_flags(0) {
   info = m_info = ThreadInfo::s_threadInfo.get();
   injection_check(info);
   doCommon();
@@ -70,8 +76,11 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
 FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
                                const char *name, int fs)
     : m_class(cls), m_name(name),
-      m_object(NULL), m_line(0), m_flags(fs),
-      m_staticClass(NULL), m_callingObject(NULL) {
+      m_object(NULL),
+#ifdef ENABLE_LATE_STATIC_BINDING
+      m_staticClass(NULL), m_callingObject(NULL),
+#endif
+      m_line(0), m_flags(fs) {
   info = m_info = ThreadInfo::s_threadInfo.get();
   injection_check(info);
   doCommon();
@@ -81,8 +90,11 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
 FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
                                const char *name, ObjectData *obj, int fs)
     : m_class(cls), m_name(name),
-      m_object(obj), m_line(0), m_flags(fs),
-      m_staticClass(NULL), m_callingObject(NULL) {
+      m_object(obj),
+#ifdef ENABLE_LATE_STATIC_BINDING
+      m_staticClass(NULL), m_callingObject(NULL),
+#endif
+      m_line(0), m_flags(fs) {
   info = m_info = ThreadInfo::s_threadInfo.get();
   injection_check(info);
   doCommon();
@@ -93,8 +105,11 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
 FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
                                const char *name, bool unused)
     : m_class(cls), m_name(name),
-      m_object(NULL), m_line(0), m_flags(0),
-      m_staticClass(NULL), m_callingObject(NULL) {
+      m_object(NULL),
+#ifdef ENABLE_LATE_STATIC_BINDING
+      m_staticClass(NULL), m_callingObject(NULL),
+#endif
+      m_line(0), m_flags(0) {
   info = m_info = ThreadInfo::s_threadInfo.get();
   injection_check(info);
   doCommon();
@@ -106,8 +121,11 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
 FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
                                const char *name, ObjectData *obj, bool unused)
     : m_class(cls), m_name(name),
-      m_object(obj), m_line(0), m_flags(0),
-      m_staticClass(NULL), m_callingObject(NULL) {
+      m_object(obj),
+#ifdef ENABLE_LATE_STATIC_BINDING
+      m_staticClass(NULL), m_callingObject(NULL),
+#endif
+      m_line(0), m_flags(0) {
   info = m_info = ThreadInfo::s_threadInfo.get();
   injection_check(info);
   doCommon();
@@ -119,8 +137,11 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
 FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
                                const char *name, int fs, bool unused)
     : m_class(cls), m_name(name),
-      m_object(NULL), m_line(0), m_flags(fs),
-      m_staticClass(NULL), m_callingObject(NULL) {
+      m_object(NULL),
+#ifdef ENABLE_LATE_STATIC_BINDING
+      m_staticClass(NULL), m_callingObject(NULL),
+#endif
+      m_line(0), m_flags(fs) {
   info = m_info = ThreadInfo::s_threadInfo.get();
   injection_check(info);
   doCommon();
@@ -133,8 +154,11 @@ FrameInjection::FrameInjection(ThreadInfo *&info, CStrRef cls,
                                const char *name, ObjectData *obj,
                                int fs, bool unused)
     : m_class(cls), m_name(name),
-      m_object(obj), m_line(0), m_flags(fs),
-      m_staticClass(NULL), m_callingObject(NULL) {
+      m_object(obj),
+#ifdef ENABLE_LATE_STATIC_BINDING
+      m_staticClass(NULL), m_callingObject(NULL),
+#endif
+      m_line(0), m_flags(fs) {
   info = m_info = ThreadInfo::s_threadInfo.get();
   injection_check(info);
   doCommon();
@@ -391,6 +415,7 @@ ObjectData *FrameInjection::getThisForArrow() {
 ///////////////////////////////////////////////////////////////////////////////
 // static late binding
 
+#ifdef ENABLE_LATE_STATIC_BINDING
 CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
   ASSERT(info);
   for (FrameInjection *t = info->m_top; t; t = t->m_prev) {
@@ -406,6 +431,7 @@ CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
   }
   return empty_string;
 }
+#endif /* ENABLE_LATE_STATIC_BINDING */
 
 ///////////////////////////////////////////////////////////////////////////////
 }

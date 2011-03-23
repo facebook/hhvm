@@ -31,23 +31,29 @@ Array EvalFrameInjection::getArgs() {
 
 EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
 (CStrRef name, bool sp) : m_set(false), m_prev(NULL) {
+#ifdef ENABLE_LATE_STATIC_BINDING
   if (!sp) {
     m_prev =
       FrameInjection::SetStaticClassName(ThreadInfo::s_threadInfo.get(), name);
     m_set = true;
   }
+#endif
 }
 
 EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
 (CObjRef obj) : m_set(false), m_prev(NULL) {
+#ifdef ENABLE_LATE_STATIC_BINDING
   FrameInjection::SetCallingObject(ThreadInfo::s_threadInfo.get(), obj.get());
+#endif
 }
 
 EvalFrameInjection::EvalStaticClassNameHelper::~EvalStaticClassNameHelper() {
+#ifdef ENABLE_LATE_STATIC_BINDING
   if (m_set) {
     FrameInjection::SetStaticClassName(ThreadInfo::s_threadInfo.get(),
                                        *m_prev);
   }
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

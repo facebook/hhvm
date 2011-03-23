@@ -346,11 +346,14 @@ Variant invoke(CStrRef function, CArrRef params, int64 hash = -1,
  */
 Variant invoke_static_method(CStrRef s, CStrRef method,
                              CArrRef params, bool fatal = true);
+
+#ifdef ENABLE_LATE_STATIC_BINDING
 /**
  * For "static::" resolution
  */
 Variant invoke_static_method_bind(CStrRef s, CStrRef method,
                                   CArrRef params, bool fatal = true);
+#endif
 
 /**
  * Fallback when a dynamic function call fails to find a user function

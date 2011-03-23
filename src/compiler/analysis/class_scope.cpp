@@ -736,10 +736,12 @@ void ClassScope::outputCPPHashTableClassVarInit
     "static hashNodeCTD *ctdMapTable[%d];\n"
     "static hashNodeCTD ctdBuckets[%d];\n"
     "\n"
-    "#define GET_OFFSET(n) (&gv.%s ## n - gv.tgv_ClassStaticsPtr + 1)\n"
+    "#define GET_OFFSET(n) "
+    "((offsetof(GlobalVariables, %s ## n) -"
+    "  offsetof(GlobalVariables, tgv_ClassStaticsPtr)) / "
+    "sizeof(ClassStaticsPtr) + 1)\n"
     "static class CTDTableInitializer {\n"
     "  public: CTDTableInitializer() {\n"
-    "    GlobalVariables gv;\n"
     "    const char *ctdMapData[] = {\n";
 
   const char text2[] =

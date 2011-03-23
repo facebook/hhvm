@@ -2744,7 +2744,6 @@ void AnalysisResult::outputCPPHashTableGetConstant(
     "static hashNodeCon conBuckets[%d];\n"
     "\n"
     "void init_%sconstant_table() {\n%s"
-    "  %s gv;\n"
     "  const char *conMapData[] = {\n";
 
   const char text2[] =
@@ -2784,8 +2783,7 @@ void AnalysisResult::outputCPPHashTableGetConstant(
             Type::KindOfVariant,
             tableSize, strings.size(),
             system ? "builtin_" : "",
-            system ? "" : "  init_builtin_constant_table();\n",
-            system ? "SystemGlobals" : "GlobalVariables");
+            system ? "" : "  init_builtin_constant_table();\n");
   for (uint i = 0; i < strings.size(); i++) {
     const char *name = strings[i];
     string escaped = cg.escapeLabel(name);
@@ -2793,11 +2791,18 @@ void AnalysisResult::outputCPPHashTableGetConstant(
     hphp_const_char_map<bool>::const_iterator it = dyns.find(name);
     bool dyn = it != dyns.end() && it->second;
     if (dyn) {
+      const char *globals = 
+        system ? "SystemGlobals" : "GlobalVariables";
       cg_printf("      (const char *)\"%s\", "
-                "(const char *)(&gv.%s - gv.%stgv_Variant + 1), "
+                "(const char *)"
+                "((offsetof(%s, %s) -"
+                "  offsetof(%s, %stgv_Variant)) / "
+                "sizeof(Variant) + 1), "
                 "(const char *)NULL, "
                 "(const char *)NULL,\n",
-                escaped.c_str(), varName.c_str(), system ? "s" : "");
+                escaped.c_str(), globals,
+                varName.c_str(), globals,
+                system ? "s" : "");
     } else {
       TypePtr type = types[i];
       Type::KindOf kindOf = type->getKindOf();

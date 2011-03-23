@@ -305,7 +305,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
     "static hashNodeFunc funcBuckets[%d];\n"
     "\n"
     "static class %sFuncTableInitializer {\n"
-    "  public: %sFuncTableInitializer() {\n%s"
+    "  public: %sFuncTableInitializer() {\n"
     "    const char *funcMapData[] = {\n";
 
   const char text3[] =
@@ -361,8 +361,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
     cg_printf(system ? text1s : text1);
     cg_printf(text2, tableSize, numEntries,
               (system ? "Sys" : ""),
-              (system ? "Sys" : ""),
-              (system ? "" : "    GlobalVariables gv;\n"));
+              (system ? "Sys" : ""));
     for (int i = 0; i < numEntries; i++) {
       const char *name = funcs[i];
       StringToFunctionScopePtrVecMap::const_iterator iterFuncs =
@@ -378,7 +377,7 @@ void FunctionContainer::outputCPPHashTableGetCallInfo(
       if (func->isRedeclaring()) {
         assert(!system);
         string lname(cg.formatLabel(name));
-        cg_printf("(const char *)((char *)&gv.GCI(%s) - (char *)&gv),\n",
+        cg_printf("(const char *)(offsetof(GlobalVariables, GCI(%s))),\n",
                   lname.c_str());
       } else {
         cg_printf("(const char *)&%s%s,\n",

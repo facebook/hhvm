@@ -211,12 +211,16 @@ bool TestExtZlib::test_qlzcompress() {
 }
 
 bool TestExtZlib::test_qlzuncompress() {
-  VS(f_qlzuncompress(f_qlzcompress("testing gzcompress", 1), 1),
-     "testing gzcompress");
-  VS(f_qlzuncompress(f_qlzcompress("testing gzcompress", 2), 2),
-     "testing gzcompress");
-  VS(f_qlzuncompress(f_qlzcompress("testing gzcompress", 3), 3),
-     "testing gzcompress");
+  try {
+    VS(f_qlzuncompress(f_qlzcompress("testing gzcompress", 1), 1),
+       "testing gzcompress");
+    VS(f_qlzuncompress(f_qlzcompress("testing gzcompress", 2), 2),
+       "testing gzcompress");
+    VS(f_qlzuncompress(f_qlzcompress("testing gzcompress", 3), 3),
+       "testing gzcompress");
+  } catch (NotSupportedException e) {
+    SKIP("no qlzcompress() support");
+  }
   return Count(true);
 }
 
@@ -226,7 +230,11 @@ bool TestExtZlib::test_sncompress() {
 }
 
 bool TestExtZlib::test_snuncompress() {
-  VS(f_snuncompress(f_sncompress("testing sncompress")),
-     "testing sncompress");
+  try {
+    VS(f_snuncompress(f_sncompress("testing sncompress")),
+       "testing sncompress");
+  } catch (NotSupportedException e) {
+    SKIP("No sncompress() support");
+  }
   return Count(true);
 }

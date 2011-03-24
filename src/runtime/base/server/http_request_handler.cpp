@@ -180,7 +180,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
             throw FatalErrorException("cannot unzip compressed data");
           }
           compressed = false;
-          str.assign(data, len, AttachString);
+          str = NEW(StringData)(data, len, AttachString);
         }
         sendStaticContent(transport, data, len, st.st_mtime, compressed, path);
         StaticContentCache::TheFileCache->adviseOutMemory();
@@ -320,8 +320,8 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
         DynamicContentCache::TheCache.store(key, content.data(),
                                             content.size());
       }
-      code = 200;
-      transport->sendRaw((void*)content.data(), content.size(), code);
+      transport->sendRaw((void*)content.data(), content.size());
+      code = transport->getResponseCode();
     } else if (error) {
       code = 500;
 
@@ -342,6 +342,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
         if (ret) {
           String content = context->obDetachContents();
           transport->sendRaw((void*)content.data(), content.size());
+          code = transport->getResponseCode();
         } else {
           Logger::Error("Unable to invoke error page %s", errorPage.c_str());
           errorPage.clear(); // so we fall back to 500 return

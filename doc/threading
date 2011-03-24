@@ -122,14 +122,35 @@ This will ignore all modifications from a new thread, except $GLOBALS['CACHE'],
 which will merge any values under $GLOBALS['CACHE'][$key] that are not present
 in main thread.
 
+NOTE: if the asynchronously invoked function has pass-by-ref parameters, at the
+time of end_user_func_async() call, their values will overwrite those in the
+main thread. This also applies to $this, which is essentially a special
+pass-by-ref parameter.
+
+For example,
+
+  class A {
+    var $a = 1;
+    function f(&$a, $b) { $this->a = 2; $a = 2; $b = 2; }
+  }
+  $obj = new A;
+  $a = 1;
+  $b = 1;
+  $h = call_user_func_async(array($obj, 'f'), $a, $b);
+  end_user_func_async($h);
+
+After the end_user_func_async() call, $obj->a and $a will be 2, but $b will
+remain 1.
+
 Check status of the async job(s):
 
-mixed check_user_func_async(mixed $handles, int $timeout = -1);
+  mixed check_user_func_async(mixed $handles, int $timeout = -1);
 
 This function takes one or multiple handles and check whether the job(s) have
 finished. If taking a single handle, it will return TRUE or FALSE to indicate
 whether the job has finished. If taking an array, it will return an array of
 finished jobs.
+
 The parameter timeout is in milliseconds. If -1 is specified, it is
 non-blocking. If 0 is specified, it blocks until some of the specified jobs
 are done.

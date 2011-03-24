@@ -36,16 +36,34 @@ IMPLEMENT_SMART_ALLOCATION(StringData, SmartAllocatorImpl::NeedRestoreOnce);
 
 StringData::StringData(const char *data,
                        StringDataMode mode /* = AttachLiteral */)
-  : m_data(NULL), _count(0), m_len(0) {
+  : _count(0) {
+  int len = strlen(data);
+  ASSERT(data);
+  ASSERT(mode >= 0 && mode < StringDataModeCount);
+  if (len & IsMask) {
+    throw InvalidArgumentException("len: %d", len);
+  }
   m_hash = 0;
-
-  assign(data, mode);
+  assignHelper(data, len, mode);
 
   TAINT_OBSERVER_REGISTER_MUTATED(this);
 }
 
+StringData::StringData(const char *data, int len, StringDataMode mode)
+  : _count(0) {
+  m_hash = 0;
+  ASSERT(data);
+  ASSERT(len >= 0);
+  ASSERT(mode >= 0 && mode < StringDataModeCount);
+  if (len < 0 || (len & IsMask)) {
+    throw InvalidArgumentException("len: %d", len);
+  }
+  assignHelper(data, len, mode);
+  TAINT_OBSERVER_REGISTER_MUTATED(this);
+}
+
 StringData::StringData(SharedVariant *shared)
-  : m_data(NULL), _count(0), m_len(0) {
+  : _count(0), m_len(0) {
   m_hash = 0;
 
   ASSERT(shared);
@@ -56,18 +74,6 @@ StringData::StringData(SharedVariant *shared)
   ASSERT(m_data);
 
   TAINT_OBSERVER_REGISTER_MUTATED(this);
-}
-
-StringData::StringData(const char *data, int len, StringDataMode mode)
-  : m_data(NULL), _count(0), m_len(0) {
-  m_hash = 0;
-  assign(data, len, mode);
-
-  TAINT_OBSERVER_REGISTER_MUTATED(this);
-}
-
-StringData::~StringData() {
-  releaseData();
 }
 
 void StringData::releaseData() {
@@ -82,22 +88,7 @@ void StringData::releaseData() {
   m_hash = 0;
 }
 
-void StringData::assign(const char *data, StringDataMode mode) {
-  ASSERT(data);
-  assign(data, strlen(data), mode);
-}
-
-void StringData::assign(const char *data, int len, StringDataMode mode) {
-  ASSERT(data);
-  ASSERT(len >= 0);
-  ASSERT(mode >= 0 && mode < StringDataModeCount);
-
-  if (len < 0 || (len & IsMask)) {
-    throw InvalidArgumentException("len: %d", len);
-  }
-
-  releaseData();
-  m_hash = 0;
+void StringData::assignHelper(const char *data, int len, StringDataMode mode) {
   m_len = len;
   if (m_len) {
     switch (mode) {
@@ -130,6 +121,14 @@ void StringData::assign(const char *data, int len, StringDataMode mode) {
     m_data = "";
   }
   ASSERT(m_data);
+}
+
+void StringData::assign(const char *data, int len, StringDataMode mode) {
+  if (len < 0 || (len & IsMask)) {
+    throw InvalidArgumentException("len: %d", len);
+  }
+  releaseData();
+  assignHelper(data, len, mode);
 }
 
 void StringData::append(const char *s, int len) {
@@ -322,17 +321,14 @@ void StringData::removeChar(int offset) {
 
 void StringData::inc() {
   ASSERT(!isStatic());
-  if (empty()) {
-    m_len = (IsLiteral | 1);
-    m_data = "1";
-    return;
-  }
+  ASSERT(!empty());
   if (isImmutable()) {
     escalate();
   }
-  char *overflowed = increment_string((char *)m_data, size());
+  int len = size();
+  char *overflowed = increment_string((char *)m_data, len);
   if (overflowed) {
-    assign(overflowed, AttachString);
+    assign(overflowed, len, AttachString);
   }
 }
 
@@ -375,7 +371,7 @@ DataType StringData::isNumericWithVal(int64 &lval, double &dval,
   int len = size();
   if (len) {
     ret = is_numeric_string(data(), size(), &lval, &dval, allow_errors);
-    if (ret == KindOfNull && !isShared()) {
+    if (ret == KindOfNull && !isShared() && allow_errors) {
       m_hash |= (1ull << 63);
     }
   }
@@ -532,10 +528,6 @@ void StringData::restore(const char *&data) {
 #ifdef TAINTED
   ASSERT(m_taint_data.getOriginalStr() == NULL);
 #endif
-}
-
-void StringData::sweep() {
-  releaseData();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

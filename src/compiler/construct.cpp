@@ -158,7 +158,7 @@ void Construct::printSource(CodeGenerator &cg) {
 
 void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
   int nkid = getKidCount();
-  std::string name;
+  const char *name = 0;
   int type = 0;
   std::string scontext = "";
   std::string value = "";
@@ -169,96 +169,8 @@ void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
 
   if (Statement *s = dynamic_cast<Statement*>(this)) {
     Statement::KindOf stype = s->getKindOf();
+    name = Statement::Names[stype];
     value = s->getName();
-    switch (stype) {
-    case Statement::KindOfFunctionStatement:
-      name="FunctionStatement";
-      break;
-    case Statement::KindOfClassStatement:
-      name="ClassStatement";
-      break;
-    case Statement::KindOfInterfaceStatement:
-      name="InterfaceStatement";
-      break;
-    case Statement::KindOfClassVariable:
-      name="ClassVariable";
-      break;
-    case Statement::KindOfClassConstant:
-      name="ClassConstant";
-      break;
-    case Statement::KindOfMethodStatement:
-      name="MethodStatement";
-      break;
-    case Statement::KindOfStatementList:
-      name="StatementList";
-      break;
-    case Statement::KindOfBlockStatement:
-      name="BlockStatement";
-      break;
-    case Statement::KindOfIfBranchStatement:
-      name="IfBranchStatement";
-      break;
-    case Statement::KindOfIfStatement:
-      name="IfStatement";
-      break;
-    case Statement::KindOfWhileStatement:
-      name="WhileStatement";
-      break;
-    case Statement::KindOfDoStatement:
-      name="DoStatement";
-      break;
-    case Statement::KindOfForStatement:
-      name="ForStatement";
-      break;
-    case Statement::KindOfSwitchStatement:
-      name="SwitchStatement";
-      break;
-    case Statement::KindOfCaseStatement:
-      name="CaseStatement";
-      break;
-    case Statement::KindOfBreakStatement:
-      name="BreakStatement";
-      break;
-    case Statement::KindOfContinueStatement:
-      name="ContinueStatement";
-      break;
-    case Statement::KindOfReturnStatement:
-      name="ReturnStatement";
-      break;
-    case Statement::KindOfGlobalStatement:
-      name="GlobalStatement";
-      break;
-    case Statement::KindOfStaticStatement:
-      name="StaticStatement";
-      break;
-    case Statement::KindOfEchoStatement:
-      name="EchoStatement";
-      break;
-    case Statement::KindOfUnsetStatement:
-      name="UnsetStatement";
-      break;
-    case Statement::KindOfExpStatement:
-      name="ExpStatement";
-      break;
-    case Statement::KindOfForEachStatement:
-      name="ForEachStatement";
-      break;
-    case Statement::KindOfCatchStatement:
-      name="CatchStatement";
-      break;
-    case Statement::KindOfTryStatement:
-      name="TryStatement";
-      break;
-    case Statement::KindOfThrowStatement:
-      name="ThrowStatement";
-      break;
-    case Statement::KindOfGotoStatement:
-      name="GotoStatement";
-      break;
-    case Statement::KindOfLabelStatement:
-      name="LabelStatement";
-      break;
-    }
     type = (int)stype;
   } else if (Expression *e = dynamic_cast<Expression*>(this)) {
     id = e->getCanonID();
@@ -266,84 +178,21 @@ void Construct::dumpNode(int spc, AnalysisResultConstPtr ar) {
     ef = e->getLocalEffects();
 
     Expression::KindOf etype = e->getKindOf();
+    name = Expression::Names[etype];
     switch (etype) {
-    case Expression::KindOfSimpleFunctionCall:
-      name="SimpleFunctionCall";
-      value = static_cast<SimpleFunctionCall*>(e)->getName();
-      break;
-    case Expression::KindOfSimpleVariable:
-      name="SimpleVariable";
-      value = static_cast<SimpleVariable*>(e)->getName();
-      break;
-    case Expression::KindOfConstantExpression:
-      name="ConstantExpression";
-      value = e->getText();
-      break;
-    case Expression::KindOfScalarExpression:
-      name="ScalarExpression";
-      value = e->getText();
-      break;
-
-    case Expression::KindOfExpressionList:
-      name="ExpressionList";
-      break;
-    case Expression::KindOfAssignmentExpression:
-      name="AssignmentExpression";
-      break;
-    case Expression::KindOfDynamicVariable:
-      name="DynamicVariable";
-      break;
-    case Expression::KindOfStaticMemberExpression:
-      name="StaticMemberExpression";
-      break;
-    case Expression::KindOfArrayElementExpression:
-      name="ArrayElementExpression";
-      break;
-    case Expression::KindOfDynamicFunctionCall:
-      name="DynamicFunctionCall";
-      break;
-    case Expression::KindOfObjectPropertyExpression:
-      name="ObjectPropertyExpression";
-      break;
-    case Expression::KindOfObjectMethodExpression:
-      name="ObjectMethodExpression";
-      break;
-    case Expression::KindOfListAssignment:
-      name="ListAssignment";
-      break;
-    case Expression::KindOfNewObjectExpression:
-      name="NewObjectExpression";
-      break;
-    case Expression::KindOfUnaryOpExpression:
-      name="UnaryOpExpression";
-      break;
-    case Expression::KindOfIncludeExpression:
-      name="IncludeExpression";
-      break;
-    case Expression::KindOfBinaryOpExpression:
-      name="BinaryOpExpression";
-      break;
-    case Expression::KindOfQOpExpression:
-      name="QOpExpression";
-      break;
-    case Expression::KindOfArrayPairExpression:
-      name="ArrayPairExpression";
-      break;
-    case Expression::KindOfClassConstantExpression:
-      name="ClassConstantExpression";
-      break;
-    case Expression::KindOfParameterExpression:
-      name="ParameterExpression";
-      break;
-    case Expression::KindOfModifierExpression:
-      name="ModifierExpression";
-      break;
-    case Expression::KindOfEncapsListExpression:
-      name="EncapsListExpression";
-      break;
-    case Expression::KindOfClosureExpression:
-      name="ClosureExpression";
-      break;
+      case Expression::KindOfSimpleFunctionCall:
+        value = static_cast<SimpleFunctionCall*>(e)->getName();
+        break;
+      case Expression::KindOfSimpleVariable:
+        value = static_cast<SimpleVariable*>(e)->getName();
+        break;
+      case Expression::KindOfConstantExpression:
+        value = e->getText();
+        break;
+      case Expression::KindOfScalarExpression:
+        value = e->getText();
+        break;
+      default: break;
     }
 
     int c = e->getContext();

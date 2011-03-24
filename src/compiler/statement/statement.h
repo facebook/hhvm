@@ -43,40 +43,45 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 DECLARE_BOOST_TYPES(Statement);
 
+#define DECLARE_STATEMENT_TYPES(x)              \
+    x(FunctionStatement),                       \
+    x(ClassStatement),                          \
+    x(InterfaceStatement),                      \
+    x(ClassVariable),                           \
+    x(ClassConstant),                           \
+    x(MethodStatement),                         \
+    x(StatementList),                           \
+    x(BlockStatement),                          \
+    x(IfBranchStatement),                       \
+    x(IfStatement),                             \
+    x(WhileStatement),                          \
+    x(DoStatement),                             \
+    x(ForStatement),                            \
+    x(SwitchStatement),                         \
+    x(CaseStatement),                           \
+    x(BreakStatement),                          \
+    x(ContinueStatement),                       \
+    x(ReturnStatement),                         \
+    x(GlobalStatement),                         \
+    x(StaticStatement),                         \
+    x(EchoStatement),                           \
+    x(UnsetStatement),                          \
+    x(ExpStatement),                            \
+    x(ForEachStatement),                        \
+    x(CatchStatement),                          \
+    x(TryStatement),                            \
+    x(ThrowStatement),                          \
+    x(GotoStatement),                           \
+    x(LabelStatement)
+
 class Statement : public Construct {
 public:
+#define DEC_STMT_ENUM(x) KindOf##x
   enum KindOf {
-    KindOfFunctionStatement,
-    KindOfClassStatement,
-    KindOfInterfaceStatement,
-    KindOfClassVariable,
-    KindOfClassConstant,
-    KindOfMethodStatement,
-    KindOfStatementList,
-    KindOfBlockStatement,
-    KindOfIfBranchStatement,
-    KindOfIfStatement,
-    KindOfWhileStatement,
-    KindOfDoStatement,
-    KindOfForStatement,
-    KindOfSwitchStatement,
-    KindOfCaseStatement,
-    KindOfBreakStatement,
-    KindOfContinueStatement,
-    KindOfReturnStatement,
-    KindOfGlobalStatement,
-    KindOfStaticStatement,
-    KindOfEchoStatement,
-    KindOfUnsetStatement,
-    KindOfExpStatement,
-    KindOfForEachStatement,
-    KindOfCatchStatement,
-    KindOfTryStatement,
-    KindOfThrowStatement,
-    KindOfGotoStatement,
-    KindOfLabelStatement,
+    DECLARE_STATEMENT_TYPES(DEC_STMT_ENUM)
     /* KindOfCount = 29 */
   };
+  static const char *Names[];
 
 public:
   Statement(STATEMENT_CONSTRUCTOR_PARAMETERS);

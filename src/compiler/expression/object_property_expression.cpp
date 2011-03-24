@@ -50,9 +50,6 @@ ExpressionPtr ObjectPropertyExpression::clone() {
   Expression::deepCopy(exp);
   exp->m_object = Clone(m_object);
   exp->m_property = Clone(m_property);
-  exp->m_propSym = NULL;
-  exp->m_propSymValid = false;
-  exp->m_objectClass.reset();
   return exp;
 }
 
@@ -418,9 +415,12 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
         FunctionScopeRawPtr fs = m_object->getOriginalFunction();
         if (!fs || fs->isStatic()) {
           m_valid = false;
-        } else if (m_object->getOriginalClass() != getClassScope() &&
-                   m_object->getOriginalClass()->isRedeclaring()) {
-          m_valid = false;
+        } else if (m_object->getOriginalClass() != getClassScope()) {
+          if (m_object->getOriginalClass()->isRedeclaring()) {
+            m_valid = false;
+          } else {
+            m_objectClass = getClassScope();
+          }
         }
       }
     }
@@ -466,6 +466,12 @@ bool ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
     m_object->outputCPP(cg, ar);
     if (!ok) cg_printf(")");
     cg_printf(".");
+  }
+
+  if (m_valid && m_propSym->isPrivate() &&
+      m_objectClass != getOriginalClass()) {
+    cg_printf("%s%s::",
+              Option::ClassPrefix, getOriginalClass()->getId(cg).c_str());
   }
   return false;
 }

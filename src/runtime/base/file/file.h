@@ -38,7 +38,7 @@ public:
   int m_pcloseRet;
 };
 
-DECLARE_REQUEST_LOCAL(FileData, s_file_data);
+DECLARE_EXTERN_REQUEST_LOCAL(FileData, s_file_data);
 
 /**
  * This is PHP's "stream", base class of plain file, gzipped file, directory

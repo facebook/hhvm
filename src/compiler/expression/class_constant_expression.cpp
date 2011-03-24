@@ -38,7 +38,8 @@ ClassConstantExpression::ClassConstantExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionPtr classExp, const std::string &varName)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    StaticClassName(classExp), m_varName(varName), m_valid(false) {
+    StaticClassName(classExp), m_varName(varName), m_defScope(NULL),
+    m_valid(false) {
 }
 
 ExpressionPtr ClassConstantExpression::clone() {
@@ -166,7 +167,7 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
   ClassScopePtr defClass = cls;
   ConstructPtr decl =
     cls->getConstants()->getDeclarationRecur(ar, m_varName, defClass);
-  if (decl) { // No decl means an extension class.
+  if (decl) { // No decl means an extension class or derived from redeclaring
     cls = defClass;
     m_valid = true;
     if (cls->isUserClass()) {
@@ -180,6 +181,8 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
   if (defScope) {
     m_valid = true;
     m_defScope = defScope;
+  } else if (cls->derivesFromRedeclaring()) {
+    m_defScope = cls.get();
   }
 
   return t;
@@ -268,6 +271,9 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
     if (outsideClass) {
       ClassScope::OutputVolatileCheckEnd(cg);
     }
+  } else if (m_defScope) { // !m_valid && m_defScope -> derives from redeclaring
+    cg_printf("%s%s::os_constant(\"%s\")", Option::ClassPrefix,
+              m_defScope->getId(cg).c_str(), m_varName.c_str());
   } else {
     cg_printf("throw_fatal(\"unknown class constant %s::%s\")",
               m_className.c_str(), m_varName.c_str());

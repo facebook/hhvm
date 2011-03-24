@@ -573,6 +573,7 @@ static void prepare_args(int &argc, char **&argv, const StringVec &args,
 static int execute_program_impl(int argc, char **argv);
 int execute_program(int argc, char **argv) {
   try {
+    InitAllocatorThreadLocal();
     return execute_program_impl(argc, argv);
   } catch (const Exception &e) {
     Logger::Error("Uncaught exception: %s", e.what());
@@ -723,6 +724,9 @@ static int execute_program_impl(int argc, char **argv) {
     } else {
       cout << "Compiled by HipHop Compiler v" << version << "\n";
     }
+#ifdef COMPILER_ID
+    cout << "Compiler: " << COMPILER_ID << "\n";
+#endif
     return 0;
   }
 #ifdef COMPILER_ID
@@ -959,6 +963,7 @@ public:
 static IMPLEMENT_THREAD_LOCAL(WarmupState, s_warmup_state);
 
 void hphp_process_init() {
+  InitAllocatorThreadLocal();
   ClassInfo::Load();
   Process::InitProcessStatics();
   init_static_variables();

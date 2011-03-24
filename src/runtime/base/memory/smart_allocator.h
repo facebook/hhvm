@@ -50,7 +50,7 @@ namespace HPHP {
 #define DELETE_EX_CLS(NS,T) delete this
 #define DELETE_OBJECT(T) delete this
 #else
-#define NEW(T) new (T::Allocator.get()) T
+#define NEW(T) new (T::Allocator.getNoCheck()) T
 #define NEWOBJ(T) new (info->m_allocators[ItemSize<sizeof(T)>::index]) T
 #define DELETE(T) T::Allocator->release
 #define DELETE_EX_CLS(NS,T) this->~T(); NS::T::Allocator->release(this)
@@ -70,23 +70,40 @@ namespace HPHP {
  * IMPLEMENT_SMART_ALLOCATION(MyClass, SmartAllocatorImpl::NoCallbacks);
  */
 
+typedef void (*AllocatorThreadLocalInit)(void);
+std::vector<AllocatorThreadLocalInit>& GetAllocatorInitList();
+void InitAllocatorThreadLocal(void* arg = NULL);
+template<typename T>
+class StaticInitializerAllocatorSetup {
+public:
+  StaticInitializerAllocatorSetup() {
+    GetAllocatorInitList().push_back(T::AllocatorSetup);
+  }
+};
+
+
 #define DECLARE_SMART_ALLOCATION(T, F)                                  \
   public:                                                               \
   typedef SmartAllocator<T, SmartAllocatorImpl::T, F> AllocatorType;    \
   static DECLARE_THREAD_LOCAL(AllocatorType, Allocator);                \
   void release();                                                       \
+  static void AllocatorSetup() {                                        \
+    Allocator.get();                                                    \
+  }                                                                     \
 
 #define IMPLEMENT_SMART_ALLOCATION(T, F)                                \
   IMPLEMENT_THREAD_LOCAL(T::AllocatorType, T::Allocator);               \
   void T::release() {                                                   \
     DELETE(T)(this);                                                    \
   }                                                                     \
+  static StaticInitializerAllocatorSetup<T> s_initAllocator##T;         \
 
 #define IMPLEMENT_SMART_ALLOCATION_CLS(C, T, F)                         \
   IMPLEMENT_THREAD_LOCAL(C::T::AllocatorType, C::T::Allocator);         \
   void C::T::release() {                                                \
     DELETE(T)(this);                                                    \
   }                                                                     \
+  static StaticInitializerAllocatorSetup<C::T> s_initAllocator##T;      \
 
 #define DECLARE_SMART_ALLOCATION_NOCALLBACKS(T)                         \
   DECLARE_SMART_ALLOCATION(T, SmartAllocatorImpl::NoCallbacks);         \

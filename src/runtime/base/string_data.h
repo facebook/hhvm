@@ -24,6 +24,7 @@
 #include <util/hash.h>
 #include <runtime/base/taint/taint_observer.h>
 #include <runtime/base/taint/taint_data.h>
+#include <runtime/base/util/exceptions.h>
 
 namespace HPHP {
 
@@ -60,6 +61,7 @@ class StringData {
    */
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
+  void setRefCount(int n) { _count = n;}
   /* Only call setStatic() in a thread-neutral context! */
   void setStatic() const;
   bool isStatic() const { return _count == (1 << 30); }
@@ -91,14 +93,13 @@ class StringData {
    */
   StringData(const char *data, StringDataMode mode = AttachLiteral);
   StringData(const char *data, int len, StringDataMode mode);
+
   StringData(SharedVariant *shared);
 
-  void assign(const char *data, StringDataMode mode);
-  void assign(const char *data, int len, StringDataMode mode);
   void append(const char *s, int len);
   StringData *copy(bool sharedMemory = false) const;
 
-  ~StringData();
+  ~StringData() { releaseData();}
 
   /**
    * Informational.
@@ -198,7 +199,8 @@ class StringData {
   bool calculate(int &size);
   void backup(LinearAllocator &allocator);
   void restore(const char *&data);
-  void sweep();
+  void sweep() { releaseData();}
+
   void dump() const;
   std::string toCPPString() const;
 
@@ -225,7 +227,6 @@ class StringData {
   /**
    * Helpers.
    */
-  void assign(SharedVariant *shared);
   int numericCompare(const StringData *v2) const;
   void escalate(); // change to malloc-ed string
   void setChar(int offset, char ch);
@@ -233,6 +234,9 @@ class StringData {
 
   int64 getSharedStringHash() const;
   int64 hashHelper() const __attribute__((noinline));
+
+  void assignHelper(const char *data, int len, StringDataMode mode);
+  void assign(const char *data, int len, StringDataMode mode);
 
 #ifdef FAST_REFCOUNT_FOR_VARIANT
  private:

@@ -54,23 +54,31 @@ public:
   String(int     n);
   String(int64   n);
   String(double  n);
-  String(litstr  s)
-    : SmartPtr<StringData>(s ? NEW(StringData)(s, AttachLiteral) : NULL) { }
+  String(litstr  s) {
+    if (s) {
+      m_px = NEW(StringData)(s, AttachLiteral);
+      m_px->setRefCount(1);
+    }
+  }
   String(CStrRef str)
     : SmartPtr<StringData>(str.m_px) { }
-  String(const std::string &s) // always make a copy
-    : SmartPtr<StringData>(NEW(StringData)(s.data(), s.size(), CopyString)) { }
-  String(const char *s, StringDataMode mode) // null-terminated string
-    : SmartPtr<StringData>(s ? NEW(StringData)(s, mode) : NULL) { }
-  String(const char *s, int length, StringDataMode mode) // binary string
-    : SmartPtr<StringData>(s ? NEW(StringData)(s, length, mode) : NULL) { }
-  String(const AtomicString &s);
-
-  void assign(const char *data, StringDataMode mode);
-  void assign(const char *data, int len, StringDataMode mode);
-  void assignLiteral(litstr data) {
-    assign(data, AttachLiteral);
+  String(const std::string &s) { // always make a copy
+    m_px = NEW(StringData)(s.data(), s.size(), CopyString);
+    m_px->setRefCount(1);
   }
+  String(const char *s, StringDataMode mode) { // null-terminated string
+    if (s) {
+      m_px = NEW(StringData)(s, mode);
+      m_px->setRefCount(1);
+    }
+  }
+  String(const char *s, int length, StringDataMode mode) { // binary string
+    if (s) {
+      m_px = NEW(StringData)(s, length, mode);
+      m_px->setRefCount(1);
+    }
+  }
+  String(const AtomicString &s);
 
   void clear() { reset();}
   /**

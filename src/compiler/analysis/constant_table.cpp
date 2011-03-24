@@ -152,7 +152,7 @@ TypePtr ConstantTable::checkBases(const std::string &name, TypePtr type,
   for (int i = bases.size() - 1; i >= (parent ? 1 : 0); i--) {
     const string &base = bases[i];
     ClassScopePtr super = ar->findClass(base);
-    if (!super) continue;
+    if (!super || super->isRedeclaring()) continue;
     actualType = super->checkConst(name, type, coerce, ar, construct,
                                    super->getBases(), defScope);
     if (defScope) return actualType;

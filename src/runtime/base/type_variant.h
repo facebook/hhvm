@@ -156,7 +156,7 @@ class Variant {
   Variant(Variant *v);
 
   template<typename T>
-  Variant(const SmartObject<T> &v) : _count(0) { init(v.get()); }
+  Variant(const SmartObject<T> &v) : _count(0) { init((ObjectData *)v.get()); }
 
   inline ALWAYS_INLINE void VariantHelper(CVarRef v) {
     setUninitNull();

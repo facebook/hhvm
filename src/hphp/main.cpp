@@ -36,7 +36,7 @@
 #include <util/timer.h>
 #include <util/hdf.h>
 #include <util/async_func.h>
-
+#include <runtime/base/memory/smart_allocator.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <dlfcn.h>
@@ -507,6 +507,8 @@ int process(const ProgramOptions &po) {
   if (po.target == "lint") {
     return lintTarget(po);
   }
+
+  InitAllocatorThreadLocal();
 
   Timer timer(Timer::WallTime);
   AnalysisResultPtr ar;

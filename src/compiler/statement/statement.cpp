@@ -20,6 +20,11 @@ using namespace HPHP;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#define DEC_STMT_NAMES(x) #x
+const char *Statement::Names[] = {
+  DECLARE_STATEMENT_TYPES(DEC_STMT_NAMES)
+};
+
 Statement::Statement(STATEMENT_CONSTRUCTOR_PARAMETERS)
     : Construct(scope, loc), m_kindOf(kindOf), m_silencerCountMax(0),
       m_silencerCountCurrent(0) {

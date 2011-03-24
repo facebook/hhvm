@@ -108,6 +108,11 @@ struct ThreadLocal {
     return m_node.m_p;
   }
 
+  T* getNoCheck() const {
+    ASSERT(m_node.m_p);
+    return m_node.m_p;
+  }
+
   void createKey() __attribute__((noinline));
 
   bool isNull() const { return m_node.m_p == NULL; }
@@ -348,6 +353,12 @@ public:
       obj = new T();
       pthread_setspecific(m_key, obj);
     }
+    return obj;
+  }
+
+  T* getNoCheck() const {
+    T *obj = (T*)pthread_getspecific(m_key);
+    ASSERT(obj);
     return obj;
   }
 

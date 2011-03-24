@@ -102,7 +102,7 @@ Variant f_dom_xpath_register_php_functions(CVarRef obj, CVarRef funcs = null);
 // class DOMNode
 
 FORWARD_DECLARE_CLASS(DOMNode);
-class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>, public Sweepable {
+class c_DOMNode : public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet> {
  public:
   BEGIN_CLASS_MAP(DOMNode)
   END_CLASS_MAP(DOMNode)
@@ -360,7 +360,7 @@ class c_DOMCDATASection : public c_DOMText {
 // class DOMDocument
 
 FORWARD_DECLARE_CLASS(DOMDocument);
-class c_DOMDocument : public c_DOMNode {
+class c_DOMDocument : public c_DOMNode, public Sweepable {
  public:
   BEGIN_CLASS_MAP(DOMDocument)
   RECURSIVE_PARENT_CLASS(DOMNode)
@@ -460,7 +460,7 @@ public:
   bool m_stricterror;
   bool m_recover;
   Array m_classmap;
-  Array m_orphans;
+  std::auto_ptr<XmlNodeSet> m_orphans;
   bool m_owner;
 };
 

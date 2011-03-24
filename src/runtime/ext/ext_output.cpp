@@ -24,11 +24,49 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
 static ReadWriteMutex s_loggers_mutex;
-typedef std::map<std::string, LogFileData> LoggerMap;
-typedef std::map<std::string, Cronolog> CronLoggerMap;
-static LoggerMap s_loggers;
-static CronLoggerMap s_cronLoggers;
+
+typedef hphp_string_map<LogFileData> StringToLoggerMap;
+struct Loggers {
+  StringToLoggerMap plain;
+  StringToCronologPtrMap cron;
+
+  ~Loggers() {
+    // LogFileData files must be explicitly closed
+    for (StringToLoggerMap::iterator it = plain.begin(), end = plain.end();
+         it != end; ++it) {
+      LogFileData &data = it->second;
+      if (data.log) {
+        if (it->first[0] == '|') {
+          pclose(data.log);
+        } else {
+          fclose(data.log);
+        }
+      }
+    }
+    // Cronolog files are closed automatically
+  }
+};
+
+static Loggers s_loggers;
+
+static void extractLog(LogFileData &data, CStrRef filename, FILE *&f,
+                       int *&bytesWritten, int *&prevBytesWritten) {
+  f = data.log;
+  if (filename.charAt(0) != '|') {
+    bytesWritten = &data.bytesWritten;
+    prevBytesWritten = &data.prevBytesWritten;
+  }
+}
+
+static void extractLog(Cronolog &data, FILE *&f,
+                       int *&bytesWritten, int *&prevBytesWritten) {
+  f = data.getOutputFile();
+  bytesWritten = &data.m_bytesWritten;
+  prevBytesWritten = &data.m_prevBytesWritten;
+}
+}
 
 bool f_hphp_log(CStrRef filename, CStrRef message) {
   if (!RuntimeOption::EnableApplicationLog) {
@@ -38,77 +76,61 @@ bool f_hphp_log(CStrRef filename, CStrRef message) {
   FILE *f = NULL;
   int *bytesWritten = NULL;
   int *prevBytesWritten = NULL;
+  bool found = false;
   {
     ReadLock lock(s_loggers_mutex);
     if (Logger::UseCronolog) {
-      CronLoggerMap::iterator iter = s_cronLoggers.find(filename.data());
-      if (iter != s_cronLoggers.end()) {
-        f = iter->second.getOutputFile();
-        bytesWritten = &(iter->second.m_bytesWritten);
-        prevBytesWritten = &(iter->second.m_prevBytesWritten);
+      StringToCronologPtrMap::iterator iter =
+        s_loggers.cron.find(filename.data());
+      if (iter != s_loggers.cron.end()) {
+        extractLog(*iter->second, f, bytesWritten, prevBytesWritten);
+        found = true;
       }
     } else {
-      LoggerMap::iterator iter = s_loggers.find(filename.data());
-      if (iter != s_loggers.end()) {
-        f = iter->second.log;
-        if (filename.charAt(0) != '|') {
-          bytesWritten = &(iter->second.bytesWritten);
-          prevBytesWritten = &(iter->second.prevBytesWritten);
-        }
+      StringToLoggerMap::iterator iter = s_loggers.plain.find(filename.data());
+      if (iter != s_loggers.plain.end()) {
+        extractLog(iter->second, filename, f, bytesWritten, prevBytesWritten);
+        found = true;
       }
     }
   }
-  if (f == NULL) {
+
+  if (!found) {
     WriteLock lock(s_loggers_mutex);
     if (Logger::UseCronolog) {
-      CronLoggerMap::iterator iter = s_cronLoggers.find(filename.data());
-      if (iter != s_cronLoggers.end()) {
-        f = iter->second.getOutputFile();
-        bytesWritten = &(iter->second.m_bytesWritten);
-        prevBytesWritten = &(iter->second.m_prevBytesWritten);
-      } else {
-        Cronolog cl;
+      std::pair<StringToCronologPtrMap::iterator, bool> res =
+        s_loggers.cron.insert(StringToCronologPtrMap::value_type(
+          filename.data(), CronologPtr()));
+      if (res.second) {
+        CronologPtr newCl(new Cronolog);
         if (strchr(filename.c_str(), '%')) {
-          cl.m_template = filename;
-          cl.setPeriodicity();
+          newCl->m_template = filename;
+          newCl->setPeriodicity();
         } else {
-          cl.m_file = fopen(filename.data(), "a");
+          newCl->m_file = fopen(filename.data(), "a");
         }
-        s_cronLoggers[filename.data()] = cl;
-        f = cl.getOutputFile();
-        if (f == NULL) {
-          return false;
-        }
-        iter = s_cronLoggers.find(filename.data());
-        bytesWritten = &(iter->second.m_bytesWritten);
-        prevBytesWritten = &(iter->second.m_prevBytesWritten);
+        res.first->second = newCl;
       }
+      extractLog(*res.first->second, f, bytesWritten, prevBytesWritten);
     } else {
-      LoggerMap::iterator iter = s_loggers.find(filename.data());
-      if (iter != s_loggers.end()) {
-        f = iter->second.log;
-        if (filename.charAt(0) != '|') {
-          bytesWritten = &(iter->second.bytesWritten);
-          prevBytesWritten = &(iter->second.prevBytesWritten);
-        }
-      } else {
+      std::pair<StringToLoggerMap::iterator, bool> res =
+        s_loggers.plain.insert(StringToLoggerMap::value_type(
+          filename.data(), LogFileData()));
+      if (res.second) {
         if (filename.charAt(0) == '|') {
           f = popen(filename.data() + 1, "w");
         } else {
           f = fopen(filename.data(), "a");
         }
-        if (f == NULL) {
-          return false;
-        }
-        s_loggers[filename.data()] = LogFileData(f);
-        if (filename.charAt(0) != '|') {
-          iter = s_loggers.find(filename.data());
-          bytesWritten = &(iter->second.bytesWritten);
-          prevBytesWritten = &(iter->second.prevBytesWritten);
-        }
+        res.first->second = LogFileData(f);
       }
+      extractLog(res.first->second, filename,
+                 f, bytesWritten, prevBytesWritten);
     }
   }
+
+  if (!f) return false;
+
   bool ret = (fwrite(message.data(), message.size(), 1, f) == 1);
   if (ret) {
     fflush(f);

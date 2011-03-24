@@ -16,6 +16,7 @@
 
 #include "compiler/analysis/ast_walker.h"
 #include "compiler/analysis/control_flow.h"
+#include "compiler/analysis/data_flow.h"
 #include "compiler/expression/expression.h"
 #include "compiler/expression/binary_op_expression.h"
 #include "compiler/expression/qop_expression.h"
@@ -250,7 +251,41 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
           case Statement::KindOfExpStatement:
           case Statement::KindOfStatementList:
           case Statement::KindOfBlockStatement:
-          case Statement::KindOfTryStatement:
+            break;
+
+          case Statement::KindOfTryStatement: {
+            TryStatementPtr t = static_pointer_cast<TryStatement>(s);
+            StatementListPtr catches = t->getCatches();
+            StatementPtr body = t->getBody();
+            if (body) {
+              for (int n = catches->getCount(), j = 0; j < n; ++j) {
+                addEdge(body, BeforeConstruct,
+                        (*catches)[j], BeforeConstruct);
+                addEdge(body, AfterConstruct,
+                        (*catches)[j], BeforeConstruct);
+              }
+              addEdge(body, AfterConstruct, t, AfterConstruct);
+              noFallThrough(body);
+            }
+            break;
+          }
+
+          case Statement::KindOfThrowStatement: {
+            size_t d = depth();
+            for (size_t i = 1; i < d; i++) {
+              TryStatementPtr t = dynamic_pointer_cast<TryStatement>(top(i));
+              if (t) {
+                StatementListPtr catches = t->getCatches();
+                for (int n = catches->getCount(), j = 0; j < n; ++j) {
+                  addEdge(s, AfterConstruct, (*catches)[j], BeforeConstruct);
+                }
+                break;
+              }
+            }
+            break;
+          }
+
+          case Statement::KindOfCatchStatement:
             break;
 
           case Statement::KindOfIfStatement:
@@ -397,22 +432,6 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
             break;
           }
 
-          case Statement::KindOfThrowStatement: {
-            size_t d = depth();
-            for (size_t i = 1; i < d; i++) {
-              TryStatementPtr t = dynamic_pointer_cast<TryStatement>(top(i));
-              if (t) {
-                StatementListPtr catches = t->getCatches();
-                for (int n = catches->getCount(), j = 0; j < n; ++j) {
-                  addEdge(s, AfterConstruct, (*catches)[j], BeforeConstruct);
-                }
-                break;
-              }
-            }
-            break;
-          }
-
-          case Statement::KindOfCatchStatement:
           case Statement::KindOfEchoStatement:
             break;
         }
@@ -454,6 +473,15 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
       if (!m_cur) newBlock();
       m_ccbpMap[BeforeConstruct][cp] = m_cur;
     } else if (m_pass == 2) {
+      ControlBlock *hb = m_ccbpMap[HoldingBlock][cp];
+      if (hb) {
+        if (hb != m_cur) {
+          if (m_cur) {
+            addCFEdge(m_cur, hb);
+          }
+          m_cur = hb;
+        }
+      }
       ControlBlock *bb = m_ccbpMap[BeforeConstruct][cp];
       assert(bb);
       if (bb != m_cur) {
@@ -466,7 +494,6 @@ int ControlFlowBuilder::before(ConstructRawPtr cp) {
         ConstructPtrLocMap &beforeTargets =
           c->m_targets[BeforeConstruct];
         if (beforeTargets.size()) {
-          ControlBlock *hb = m_ccbpMap[HoldingBlock][cp];
           assert(hb);
           addCFEdge(hb, bb);
           ConstructPtrLocMap::iterator it =
@@ -575,6 +602,20 @@ void ControlBlock::dump(int spc, AnalysisResultConstPtr ar,
       printf("    -> %08llx\n", (unsigned long long)t);
     }
   }
+
+  for (int i = 0; i < DataFlow::NumBVs; i++) {
+    if (graph->rowExists(i)) {
+      BitOps::Bits *row = getRow(i);
+      printf("  Row %s:", DataFlow::GetName(i));
+      for (int b = 0, n = graph->bitWidth(); b < n; ++b) {
+        if (BitOps::get_bit(b, row)) {
+          printf(" %1d", b);
+        }
+      }
+      printf("\n");
+    }
+  }
+
   Construct::dump(m_start.size() * 2, ar, true, m_start,
                   m_endBefore, m_endAfter);
 }

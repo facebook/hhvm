@@ -28,6 +28,7 @@
 #include <poll.h>
 #include <pwd.h>
 #include <signal.h>
+#include <boost/scoped_array.hpp>
 
 using namespace std;
 
@@ -193,13 +194,9 @@ static void do_proc_open(FILE *fin, FILE *fout, int afdt_fd) {
     for (int i = 0; i < pipe_size; i++) {
       dup2(pkeys[i], pvals[i]);
     }
-    if (strlen(cwd) > 0) {
-      if (chdir(cwd)) { // non-zero for error
-        fprintf(fout, "error\n%d\n", errno);
-        fflush(fout);
-        close_fds(pkeys);
-        return;
-      }
+    if (strlen(cwd) > 0 && chdir(cwd)) {
+      // non-zero for error
+      // chdir failed, the working directory remains unchanged
     }
     if (!env.empty()) {
       char **envp = build_envp(env);
@@ -267,7 +264,8 @@ static void do_change_user(FILE *fin, FILE *fout) {
 ///////////////////////////////////////////////////////////////////////////////
 // light-weight process
 
-static vector<LightProcess> g_procs;
+static boost::scoped_array<LightProcess> g_procs;
+static int g_procsCount = 0;
 
 LightProcess::LightProcess()
 : m_shadowProcess(0), m_fin(NULL), m_fout(NULL), m_afdt_fd(-1) { }
@@ -285,14 +283,16 @@ void LightProcess::Initialize(const std::string &prefix, int count) {
     return;
   }
 
-  g_procs.resize(count);
+  g_procs.reset(new LightProcess[count]);
+  g_procsCount = count;
 
   for (int i = 0; i < count; i++) {
     if (!g_procs[i].initShadow(prefix, i)) {
       for (int j = 0; j < i; j++) {
         g_procs[j].closeShadow();
       }
-      g_procs.clear();
+      g_procs.reset();
+      g_procsCount = 0;
       break;
     }
   }
@@ -371,10 +371,11 @@ bool LightProcess::initShadow(const std::string &prefix, int id) {
 }
 
 void LightProcess::Close() {
-  for (unsigned int i = 0; i < g_procs.size(); i++) {
+  for (int i = 0; i < g_procsCount; i++) {
     g_procs[i].closeShadow();
   }
-  g_procs.clear();
+  g_procs.reset();
+  g_procsCount = 0;
 }
 
 void LightProcess::closeShadow() {
@@ -403,7 +404,7 @@ void LightProcess::closeFiles() {
 }
 
 bool LightProcess::Available() {
-  return !g_procs.empty();
+  return g_procsCount > 0;
 }
 
 void LightProcess::runShadow(int fdin, int fdout) {
@@ -447,7 +448,7 @@ void LightProcess::runShadow(int fdin, int fdout) {
 }
 
 int LightProcess::GetId() {
-  return (long)pthread_self() % g_procs.size();
+  return (long)pthread_self() % g_procsCount;
 }
 
 FILE *LightProcess::popen(const char *cmd, const char *type,
@@ -569,11 +570,11 @@ pid_t LightProcess::proc_open(const char *cmd, const vector<int> &created,
     fprintf(g_procs[id].m_fout, "%d\n", desired[i]);
   }
   fflush(g_procs[id].m_fout);
-  char buf[BUFFER_SIZE];
   for (unsigned int i = 0; i < created.size(); i++) {
     if (!send_fd(g_procs[id].m_afdt_fd, created[i])) break;
   }
 
+  char buf[BUFFER_SIZE];
   read_buf(g_procs[id].m_fin, buf);
   if (strncmp(buf, "error", 5) == 0) {
     read_buf(g_procs[id].m_fin, buf);
@@ -582,6 +583,7 @@ pid_t LightProcess::proc_open(const char *cmd, const vector<int> &created,
   }
   int64 pid = -1;
   sscanf(buf, "%lld", &pid);
+  ASSERT(pid);
   return (pid_t)pid;
 }
 
@@ -632,7 +634,7 @@ pid_t LightProcess::pcntl_waitpid(pid_t pid, int *stat_loc, int options) {
 
 void LightProcess::ChangeUser(const string &username) {
   if (username.empty()) return;
-  for (unsigned i = 0; i < g_procs.size(); i++) {
+  for (int i = 0; i < g_procsCount; i++) {
     Lock lock(g_procs[i].m_procMutex);
     fprintf(g_procs[i].m_fout, "change_user\n%s\n", username.c_str());
     fflush(g_procs[i].m_fout);

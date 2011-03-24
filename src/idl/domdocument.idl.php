@@ -1595,7 +1595,6 @@ DefineFunction(
 BeginClass(
   array(
     'name'   => "DOMNode",
-    'bases'  => array('Sweepable'),
     'desc'   => "",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
@@ -2489,8 +2488,9 @@ BeginClass(
   array(
     'name'   => "DOMDocument",
     'parent' => "DOMNode",
+    'bases'  => array('Sweepable'),
     'desc'   => "Represents an entire HTML or XML document; serves as the root of the document tree.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | NoDefaultSweep,
     'footer' => <<<EOT
 
 public:
@@ -2503,7 +2503,7 @@ public:
   bool m_stricterror;
   bool m_recover;
   Array m_classmap;
-  Array m_orphans;
+  std::auto_ptr<XmlNodeSet> m_orphans;
   bool m_owner;
 EOT
 ,
@@ -4078,7 +4078,7 @@ BeginClass(
     'ifaces' => array('Iterator'),
     'bases'  => array('Sweepable'),
     'desc'   => "",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | NoDefaultSweep,
     'footer' => <<<EOT
 
 public:
@@ -4580,7 +4580,7 @@ BeginClass(
     'name'   => "DOMXPath",
     'bases'  => array('Sweepable'),
     'desc'   => "Supports XPath 1.0",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | NoDefaultSweep,
     'footer' => <<<EOT
 
  public:

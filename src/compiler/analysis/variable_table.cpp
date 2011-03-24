@@ -1608,7 +1608,7 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
     if (!sym->isStatic()) {
       empty = false;
       if (priv) {
-        ClassScope clsScope = dynamic_cast<ClassScope &>(m_blockScope);
+        ClassScope &clsScope = dynamic_cast<ClassScope &>(m_blockScope);
         prop = '\0' + clsScope.getOriginalName() + '\0' + prop;
       }
       if (prot || priv) {
@@ -1649,7 +1649,7 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
     if (!sym->isPrivate() || sym->isStatic()) continue;
     empty = false;
     const char *s = sym->getName().c_str();
-    ClassScope clsScope = dynamic_cast<ClassScope &>(m_blockScope);
+    ClassScope &clsScope = dynamic_cast<ClassScope &>(m_blockScope);
     string prop = '\0' + clsScope.getOriginalName() + '\0' + sym->getName();
     if (sym->getFinalType()->is(Type::KindOfVariant)) {
       cg_printf("props->load(");

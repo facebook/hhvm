@@ -65,7 +65,8 @@ AnalysisResult::AnalysisResult()
     m_scalarArraysCounter(0), m_paramRTTICounter(0),
     m_scalarArraySortedAvgLen(0), m_scalarArraySortedIndex(0),
     m_scalarArraySortedSumLen(0), m_scalarArrayCompressedTextSize(0),
-    m_pregenerating(false), m_pregenerated(false), m_system(false) {
+    m_pregenerating(false), m_pregenerated(false),
+    m_system(false), m_sepExtension(false) {
   m_classForcedVariants[0] = m_classForcedVariants[1] = false;
 }
 
@@ -4284,8 +4285,10 @@ void AnalysisResult::outputCPPFFIStubs() {
   cg_printf("using namespace HPHP;\n\n");
   cg_printf("/* preface finishes */\n");
 
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputCPPFFI(cg, ar);
+  if (Option::GenerateFFIStaticBinding) {
+    BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+      fs->outputCPPFFI(cg, ar);
+    }
   }
 
   cg.useStream(CodeGenerator::PrimaryStream);
@@ -4363,8 +4366,10 @@ void AnalysisResult::outputJavaFFIStubs() {
 
   cg_printf("public static native HphpVariant identify(long ptr);\n\n");
 
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputJavaFFI(cg, ar);
+  if (Option::GenerateFFIStaticBinding) {
+    BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+      fs->outputJavaFFI(cg, ar);
+    }
   }
 
   cg_indentEnd("}\n");
@@ -4390,8 +4395,10 @@ void AnalysisResult::outputJavaFFICppDecl() {
   cg_printf("%s(JNIEnv *env, jclass main, jlong ptr);\n\n",
             mangledName.c_str());
 
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputJavaFFICPPStub(cg, ar);
+  if (Option::GenerateFFIStaticBinding) {
+    BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+      fs->outputJavaFFICPPStub(cg, ar);
+    }
   }
 
   cg_printf("}\n");
@@ -4443,8 +4450,10 @@ void AnalysisResult::outputJavaFFICppImpl() {
   cg_printf("return env->NewObject(cls, init, ptr);\n");
   cg_indentEnd("}\n\n");
 
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputJavaFFICPPStub(cg, ar);
+  if (Option::GenerateFFIStaticBinding) {
+    BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+      fs->outputJavaFFICPPStub(cg, ar);
+    }
   }
 
   f.close();
@@ -4465,8 +4474,10 @@ void AnalysisResult::outputSwigFFIStubs() {
 
   cg.setContext(CodeGenerator::SwigFFIImpl);
 
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputSwigFFIStubs(cg, ar);
+  if (Option::GenerateFFIStaticBinding) {
+    BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+      fs->outputSwigFFIStubs(cg, ar);
+    }
   }
 
   cg_printf("%%}\n\n");
@@ -4483,8 +4494,10 @@ void AnalysisResult::outputSwigFFIStubs() {
 
   cg.setContext(CodeGenerator::SwigFFIDecl);
 
-  BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
-    fs->outputSwigFFIStubs(cg, ar);
+  if (Option::GenerateFFIStaticBinding) {
+    BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+      fs->outputSwigFFIStubs(cg, ar);
+    }
   }
 
   f.close();
@@ -4623,10 +4636,13 @@ void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
 
   if (genStatic || nstrings == 0) return;
 
-  int chunkSize = (nstrings + Option::LiteralStringFileCount) /
-                  Option::LiteralStringFileCount;
-  if (chunkSize < Option::LiteralStringFileCount) {
-    chunkSize = Option::LiteralStringFileCount;
+  int chunkSize;
+  if (ar->isSystem()) {
+    // generate one single literal_strings file for system
+    chunkSize = nstrings;
+  } else {
+    chunkSize = (nstrings + Option::LiteralStringFileCount) /
+                Option::LiteralStringFileCount;
   }
   int count = 0;
 

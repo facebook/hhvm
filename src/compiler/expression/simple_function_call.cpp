@@ -538,7 +538,7 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
                                  Expression::KindOfExpressionList,
                                  ExpressionList::ListKindWrapped));
             string root_name;
-            int n = arr->getCount();
+            int n = arr ? arr->getCount() : 0;
             int i, j, k;
             for (i = j = k = 0; i < n; i++) {
               ArrayPairExpressionPtr ap(

@@ -16,6 +16,7 @@
 
 #include <runtime/base/memory/unsafe_pointer.h>
 #include <runtime/base/memory/memory_manager.h>
+#include <runtime/base/runtime_option.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,6 +28,7 @@ UnsafePointer::UnsafePointer() {
 }
 
 bool UnsafePointer::beforeCheckpoint() {
+  ASSERT(RuntimeOption::Loaded);
   return MemoryManager::TheMemoryManager()->beforeCheckpoint();
 }
 

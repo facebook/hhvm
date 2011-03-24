@@ -38,6 +38,8 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+bool RuntimeOption::Loaded = false;
+
 const char *RuntimeOption::ExecutionMode = "";
 std::string RuntimeOption::BuildId;
 std::string RuntimeOption::PidFile = "www.pid";
@@ -674,6 +676,9 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
     server["ForbiddenFileExtensions"].get(ForbiddenFileExtensions);
 
     EnableMemoryManager = server["EnableMemoryManager"].getBool(true);
+    if (!EnableMemoryManager) {
+      MemoryManager::TheMemoryManager()->disable();
+    }
     CheckMemory = server["CheckMemory"].getBool();
     UseHphpArray = server["UseHphpArray"].getBool(false);
     UseSmallArray = server["UseSmallArray"].getBool(false);
@@ -1017,6 +1022,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
   }
 
   Extension::LoadModules(config);
+  if (overwrites) Loaded = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

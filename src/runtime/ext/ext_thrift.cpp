@@ -134,8 +134,17 @@ public:
   }
 
   ~PHPOutputTransport() {
-    flush();
-    directFlush();
+    // flush() and directFlush() call into user code which may throw
+    // an exception. Because this is a destructor, we might already be
+    // in the process of unwinding when this function is called, so we
+    // need to ensure that no exceptions can escape so that the unwinder
+    // does not terminate the process.
+    try {
+      flush();
+      directFlush();
+    } catch (...) {
+      handle_destructor_exception();
+    }
   }
 
   void write(const char* data, size_t len) {

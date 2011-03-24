@@ -103,9 +103,10 @@ Scanner::Scanner(const char *filename, int type)
 }
 
 Scanner::Scanner(istream &stream, int type, const char *fileName /* = "" */)
-    : m_filename(fileName), m_source(NULL), m_len(0), m_pos(0), m_type(type),
-      m_yyscanner(NULL), m_token(NULL), m_loc(NULL), m_lastToken(-1),
-      m_gap(false), m_inScript(false), m_xhpState(0) {
+    : m_filename(fileName), m_source(NULL), m_len(0), m_pos(0),
+      m_state(Start), m_type(type), m_yyscanner(NULL), m_token(NULL),
+      m_loc(NULL), m_lastToken(-1), m_gap(false), m_inScript(false),
+      m_xhpState(0) {
   m_stream = &stream;
   m_streamOwner = false;
   if (type & PreprocessXHP) {
@@ -120,8 +121,9 @@ Scanner::Scanner(istream &stream, int type, const char *fileName /* = "" */)
 Scanner::Scanner(const char *source, int len, int type,
                  const char *fileName /* = "" */)
     : m_filename(fileName), m_source(source), m_len(len), m_pos(0),
-      m_type(type), m_yyscanner(NULL), m_token(NULL), m_loc(NULL),
-      m_lastToken(-1), m_gap(false), m_inScript(false), m_xhpState(0) {
+      m_state(Start), m_type(type), m_yyscanner(NULL), m_token(NULL),
+      m_loc(NULL), m_lastToken(-1), m_gap(false), m_inScript(false),
+      m_xhpState(0) {
   ASSERT(m_source);
   m_stream = NULL;
   m_streamOwner = false;

@@ -105,6 +105,14 @@ public:
   bool isFileLevel() const { return m_flags.fileLevel;}
   bool isTopLevel() const { return m_flags.topLevel;}
   bool isVisited() const { return m_flags.visited; }
+
+  void setAnticipated() { m_flags.anticipated = true; }
+  void clearAnticipated() { m_flags.anticipated = false; }
+  bool isAnticipated() const { return m_flags.anticipated; }
+  void setAvailable() { m_flags.available = true; }
+  void clearAvailable() { m_flags.available = false; }
+  bool isAvailable() const { return m_flags.available; }
+
   BlockScopeRawPtr getScope() const { return m_blockScope; }
   void setBlockScope(BlockScopeRawPtr scope) { m_blockScope = scope; }
   FileScopeRawPtr getFileScope() const {
@@ -205,6 +213,8 @@ private:
       unsigned fileLevel : 1; // whether this is at top level of a file
       unsigned topLevel : 1;  // whether this is at top level of a scope
       unsigned visited : 1;   // general purpose visited flag for walks
+      unsigned anticipated : 1;
+      unsigned available : 1;
     } m_flags;
   };
 protected:

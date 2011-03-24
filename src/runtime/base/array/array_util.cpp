@@ -609,7 +609,7 @@ Variant ArrayUtil::Filter(CArrRef input, PFUNC_FILTER filter /* = NULL */,
   Array ret = Array::Create();
   for (ArrayIter iter(input); iter; ++iter) {
     CVarRef value(iter.secondRef());
-    if ((filter && filter(value, data)) || (!filter && value.toBoolean())) {
+    if (filter ? filter(Variant(value), data) : value.toBoolean()) {
       ret.addLval(iter.first(), true).setWithRef(iter.secondRef());
     }
   }

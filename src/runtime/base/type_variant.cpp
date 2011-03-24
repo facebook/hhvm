@@ -171,6 +171,9 @@ void Variant::destruct() {
    * the beginning of the object for the StringData, ArrayData, ObjectData,
    * and Variant classes.
    */
+  CT_ASSERT(KindOfString + 1 == KindOfArray &&
+            KindOfArray + 1 == KindOfObject &&
+            KindOfObject + 1 == KindOfVariant);
   if (m_data.pvar->decRefCount() == 0) {
     ASSERT(m_type >= KindOfString && m_type <= KindOfVariant);
     destructors[m_type - KindOfString]((void *)m_data.pvar);
@@ -1429,7 +1432,7 @@ Variant &Variant::operator++() {
   case KindOfString:
     {
       if (getStringData()->empty()) {
-        set(1LL);
+        set("1");
       } else {
         int64 lval; double dval;
         DataType ret = convertToNumeric(&lval, &dval);
@@ -3684,7 +3687,7 @@ void Variant::unserialize(VariableUnserializer *uns) {
         for (int64 i = 0; i < size; i++) {
           String key = uns->unserializeKey().toString();
           int subLen = 0;
-          if (key.charAt(0) == '\00') {
+          if (key.size() > 0 && key.charAt(0) == '\00') {
             if (key.charAt(1) == '*') {
               subLen = 3; // protected
             } else {

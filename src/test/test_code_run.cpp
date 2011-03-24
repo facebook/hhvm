@@ -1373,7 +1373,34 @@ bool TestCodeRun::TestString() {
        "  $s .= 'd'; var_dump($a[$s]);\n" // should find 'abcd' in $a
        "}\n"
        "test('ab');\n");
-
+  MVCR("<?php\n"
+       "function foo() {"
+       "  $a = '';"
+       "  $a++;"
+       "  var_dump($a);"
+       "  $a = '';"
+       "  ++$a;"
+       "  var_dump($a);"
+       "  $a = '';"
+       "  $a--;"
+       "  var_dump($a);"
+       "  $a = '';"
+       "  --$a;"
+       "  var_dump($a);"
+       "  $a = '@';"
+       "  $a++;"
+       "  var_dump($a);"
+       "  $a = '@';"
+       "  ++$a;"
+       "  var_dump($a);"
+       "  $a = '@';"
+       "  $a--;"
+       "  var_dump($a);"
+       "  $a = '@';"
+       "  --$a;"
+       "  var_dump($a);"
+       "}"
+       "foo();");
   return true;
 }
 
@@ -4171,6 +4198,14 @@ bool TestCodeRun::TestObjectProperty() {
        "  var_dump($o);\n"
        "}\n"
        "f();\n");
+
+  // empty property name shouldn't crash
+  MVCR("<?php\n"
+       "$a = array(); $a[""] = 1;\n"
+       "$o = (object)$a;\n"
+       "var_dump($o);\n"
+       "$s = serialize($o);\n"
+       "$o2 = unserialize($s);\n");
 
   return true;
 }

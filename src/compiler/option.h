@@ -358,6 +358,7 @@ public:
   static bool ControlEvalOrder;
   static bool UseVirtualDispatch;
   static bool EliminateDeadCode;
+  static bool CopyProp;
   static bool LocalCopyProp;
   static bool StringLoopOpts;
   static bool AutoInline;
@@ -374,6 +375,7 @@ public:
   static bool ControlFlow;
   static bool DumpAst;
   static bool PregenerateCPP;
+  static bool GenerateFFIStaticBinding;
 
   static int GCCOptimization[3];
   static int GetOptimizationLevel(int length);

@@ -49,5 +49,8 @@ int main(int argc, char **argv) {
   hphp_process_init();
   MethodIndexHMap::initialize(true /* use system map */);
   Test test;
+  Hdf empty;
+  vector<string> emptyConfStrings;
+  RuntimeOption::Load(empty, &emptyConfStrings);
   return test.RunTests(suite, which, set) ? 0 : -1;
 }

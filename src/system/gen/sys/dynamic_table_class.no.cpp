@@ -7920,7 +7920,7 @@ Variant c_DOMNodeIterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNodeIterator
-IMPLEMENT_CLASS(DOMNodeIterator)
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMNodeIterator)
 void c_DOMNodeIterator::destruct() {
   if (!inCtorDtor()) {
     incRefCount();
@@ -29434,7 +29434,7 @@ Variant c_DOMXPath::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMXPath
-IMPLEMENT_CLASS(DOMXPath)
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMXPath)
 void c_DOMXPath::destruct() {
   if (!inCtorDtor()) {
     incRefCount();
@@ -32607,7 +32607,7 @@ Variant c_DOMDocument::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocument
-IMPLEMENT_CLASS(DOMDocument)
+IMPLEMENT_CLASS_NO_DEFAULT_SWEEP(DOMDocument)
 void c_DOMDocument::destruct() {
   if (!inCtorDtor()) {
     incRefCount();

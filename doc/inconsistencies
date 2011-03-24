@@ -47,6 +47,15 @@ point at the first element. In HipHop, when a copy of an array is made, the
 copy's internal cursor will always point to the same element that the original
 array's internal cursor pointed to.
 
+(6) Next free integer key for arrays
+
+Arrays contain a hidden field called the "NextFreeElement" field that tracks
+what integer key should be used when a new element is appended. In PHP, when an
+array is copied the NextFreeElement field of the new array is recomputed based
+on the keys it currently contains. In HipHop, when an array is copied the new
+array's NextFreeElement field is set to the same value as the original array's
+NextFreeElement field.
+
 2. Classes and objects
 
 (1) Exceptions thrown from destructors

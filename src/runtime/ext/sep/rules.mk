@@ -17,11 +17,11 @@ TEST_SOURCES = \
 	test_ext_$(EXT).cpp
 
 TEST_OBJECTS = $(patsubst %.cpp, %.o, $(TEST_SOURCES))
-TEST_PIC_OBJECTS = $(call pic_objects $(TEST_OBJECTS))
+TEST_PIC_OBJECTS = $(call pic_objects, $(TEST_OBJECTS))
 
 SCHEMA_SOURCES = extmap_$(EXT).cpp
 SCHEMA_OBJECTS = $(patsubst %.cpp, %.o, $(SCHEMA_SOURCES:.c=.o))
-SCHEMA_PIC_OBJECTS = $(call pic_objects $(SCHEMA_OBJECTS))
+SCHEMA_PIC_OBJECTS = $(call pic_objects, $(SCHEMA_OBJECTS))
 
 CXX_SOURCES += $(filter-out $(TEST_SOURCES), $(wildcard *.cpp))
 CXXFLAGS += -DSEP_EXTENSION
@@ -34,10 +34,16 @@ TARGETS = lib$(EXT).so lib$(EXT).a test_$(EXT)
 
 all: $(TARGETS)
 
+ifndef SHOW_LINK
 schema.so: $(SCHEMA_PIC_OBJECTS)
 	@echo 'Linking $@ ...'
 	$(V)$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror \
 		-Wl,-soname,schema.so $(SO_LDFLAGS) -o $@ $(SCHEMA_PIC_OBJECTS)
+else
+schema.so: $(SCHEMA_PIC_OBJECTS)
+	$(CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror \
+		-Wl,-soname,schema.so $(SO_LDFLAGS) -o $@ $(SCHEMA_PIC_OBJECTS)
+endif
 
 extimpl_$(EXT).cpp: schema.so
 	$(HPHP) -t sep-ext-cpp --output-file $@ \

@@ -437,18 +437,18 @@ cleanup_parallel:
     ) {
       raise_warning("Search: %s", ldap_err2string(rc));
       ldap_err = 0;
+    } else {
+      if (rc == LDAP_SIZELIMIT_EXCEEDED) {
+        raise_warning("Partial search results returned: Sizelimit exceeded");
+      }
+#ifdef LDAP_ADMINLIMIT_EXCEEDED
+      else if (rc == LDAP_ADMINLIMIT_EXCEEDED) {
+        raise_warning("Partial search results returned: Adminlimit exceeded");
+      }
+#endif
+      parallel_search = 0;
+      ret.append(Object(NEW(LdapResult)(ldap_res)));
     }
-
-    if (rc == LDAP_SIZELIMIT_EXCEEDED) {
-      raise_warning("Partial search results returned: Sizelimit exceeded");
-    }
-  #ifdef LDAP_ADMINLIMIT_EXCEEDED
-    else if (rc == LDAP_ADMINLIMIT_EXCEEDED) {
-      raise_warning("Partial search results returned: Adminlimit exceeded");
-    }
-  #endif
-    parallel_search = 0;
-    ret.append(Object(NEW(LdapResult)(ldap_res)));
   }
 cleanup:
   if (ld) {

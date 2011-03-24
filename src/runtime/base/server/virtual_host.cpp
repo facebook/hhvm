@@ -38,7 +38,9 @@ void VirtualHost::SetCurrent(VirtualHost *vhost) {
 
 const VirtualHost *VirtualHost::GetCurrent() {
   VirtualHost *ret = s_current_vhost.get();
-  ASSERT(ret);
+  if (ret == NULL) {
+    ret = &s_default_vhost;
+  }
   return ret;
 }
 

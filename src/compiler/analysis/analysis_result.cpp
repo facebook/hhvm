@@ -2634,7 +2634,7 @@ void AnalysisResult::outputCPPDynamicClassTables(
     ((system || !Option::SplitDynamicClassTable) ? "dynamic_table_class"
       : "dynamic_table_class_" + lexical_cast<string>(part)) + ".no.cpp";
 
-  if (part == 1 && Option::GenHashTableDynClass && !system) {
+  if (part == 1 && Option::GenHashTableDynClass) {
     tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
                 "dynamic_table_class.cpp";
   }

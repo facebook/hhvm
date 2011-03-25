@@ -298,6 +298,13 @@ string Expression::originalClassName(CodeGenerator &cg, bool withComma) {
   return withComma ? "" : "null_string";
 }
 
+void Expression::fixExpectedType(AnalysisResultConstPtr ar) {
+  if (m_expectedType && m_actualType &&
+      !Type::IsCastNeeded(ar, m_actualType, m_expectedType)) {
+    m_expectedType.reset();
+  }
+}
+
 TypePtr Expression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                   bool coerce) {
   TypePtr actualType = inferTypes(ar, type, coerce);
@@ -617,6 +624,32 @@ bool Expression::outputLineMap(CodeGenerator &cg, AnalysisResultPtr ar,
   default:
     break;
   }
+  return false;
+}
+
+bool Expression::outputCPPArithArg(CodeGenerator &cg, AnalysisResultPtr ar,
+                                   bool arrayOk) {
+  TypePtr at = getActualType();
+  if (at &&
+      (at->is(Type::KindOfString) ||
+       at->is(Type::KindOfObject) ||
+       (at->is(Type::KindOfArray) && !arrayOk)) &&
+      (!hasCPPTemp() || getType()->isExactType())) {
+    if (!hasCPPTemp() && !getCPPType()->isExactType()) {
+      TypePtr et = getExpectedType();
+      setExpectedType(TypePtr());
+      setActualType(getCPPType());
+      outputCPP(cg, ar);
+      setActualType(at);
+      setExpectedType(et);
+    } else {
+      cg_printf("(Variant)(");
+      outputCPP(cg, ar);
+      cg_printf(")");
+    }
+    return true;
+  }
+
   return false;
 }
 

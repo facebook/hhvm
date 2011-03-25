@@ -408,6 +408,11 @@ bool Type::isNoObjectInvolved() const {
 TypePtr Type::combinedArithmeticType(TypePtr t1, TypePtr t2) {
   KindOf kind = KindOfAny;
 
+  if (t1 && t1->is(Type::KindOfArray) ||
+      t2 && t2->is(Type::KindOfArray)) {
+    return TypePtr();
+  }
+
   if (t1 && t1->isPrimitive()) {
     if (t2 && t2->isPrimitive()) {
       if (t2->getKindOf() > t1->getKindOf()) {

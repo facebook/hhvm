@@ -661,7 +661,9 @@ static Variant post_proc_open(CStrRef cmd, Variant &pipes,
   proc->env = env;
   for (int i = 0; i < (int)items.size(); i++) {
     Object f = items[i].dupParent();
-    proc->pipes.append(f);
+    if (!f.isNull()) {
+      proc->pipes.append(f);
+    }
     pipes.set(items[i].index, f);
   }
   return Object(proc);

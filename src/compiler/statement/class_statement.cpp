@@ -339,7 +339,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (classScope->isVolatile()) {
       string name = cg.formatLabel(m_name);
       if (classScope->isRedeclaring()) {
-        cg_printf("g->%s%s = ClassStaticsPtr(NEW(%s%s)());\n",
+        cg_printf("g->%s%s = ClassStaticsPtr(NEWOBJ(%s%s)());\n",
                   Option::ClassStaticsObjectPrefix,
                   name.c_str(),
                   Option::ClassStaticsPrefix, classScope->getId(cg).c_str());

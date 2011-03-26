@@ -3183,7 +3183,7 @@ void AnalysisResult::outputCPPRedeclaredClassImpl(CodeGenerator &cg) {
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
       const char *name = iter->first.c_str();
-      cg_printf("%s%s = ClassStaticsPtr(NEW(ClassStatics)(\"%s\"));\n",
+      cg_printf("%s%s = ClassStaticsPtr(NEWOBJ(ClassStatics)(\"%s\"));\n",
                 Option::ClassStaticsObjectPrefix, name, name);
     }
   }
@@ -4022,7 +4022,7 @@ void AnalysisResult::outputCPPFiberGlobalState() {
 
 void AnalysisResult::outputCPPMain() {
   string mainPath = m_outputPath + "/" + Option::SystemFilePrefix +
-    "main.no.cpp";
+    "main.cpp";
   Util::mkdir(mainPath);
   ofstream fMain(mainPath.c_str());
   CodeGenerator cg(&fMain, CodeGenerator::ClusterCPP);

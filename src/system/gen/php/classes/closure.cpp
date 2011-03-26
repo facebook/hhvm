@@ -117,7 +117,7 @@ bool c_Closure::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_Closure::cloneImpl() {
-  c_Closure *obj = NEW(c_Closure)();
+  c_Closure *obj = NEWOBJ(c_Closure)();
   c_Closure::cloneSet(obj);
   return obj;
 }
@@ -591,7 +591,7 @@ bool c_Continuation::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_Continuation::cloneImpl() {
-  c_Continuation *obj = NEW(c_Continuation)();
+  c_Continuation *obj = NEWOBJ(c_Continuation)();
   c_Continuation::cloneSet(obj);
   return obj;
 }
@@ -1621,18 +1621,18 @@ Variant c_Continuation::t_receive() {
 }
 namespace hphp_impl_splitter {}
 Object co_Closure(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_Closure)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_Closure)())->dynCreate(params, init));
 }
 Object coo_Closure() {
-  Object r(NEW(c_Closure)());
+  Object r(NEWOBJ(c_Closure)());
   r->init();
   return r;
 }
 Object co_Continuation(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_Continuation)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_Continuation)())->dynCreate(params, init));
 }
 Object coo_Continuation() {
-  Object r(NEW(c_Continuation)());
+  Object r(NEWOBJ(c_Continuation)());
   r->init();
   return r;
 }

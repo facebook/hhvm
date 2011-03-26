@@ -244,11 +244,11 @@ public:
   }
 
   T *operator->() const {
-    return get();
+    return getNoCheck();
   }
 
   T &operator*() const {
-    return *get();
+    return *getNoCheck();
   }
 
 private:

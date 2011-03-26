@@ -111,7 +111,7 @@ static void add_property(Array &properties, xmlNodePtr node, Object value) {
 static c_SimpleXMLElement *create_text(CObjRef doc, xmlNodePtr node,
                                        CStrRef value, CStrRef ns,
                                        bool is_prefix, bool free_text) {
-  c_SimpleXMLElement *elem = NEW(c_SimpleXMLElement)();
+  c_SimpleXMLElement *elem = NEWOBJ(c_SimpleXMLElement)();
   elem->m_doc = doc;
   elem->m_node = node->parent; // assign to parent, not node
   elem->m_children.set(0, value);
@@ -126,7 +126,7 @@ static Array create_children(CObjRef doc, xmlNodePtr root,
 
 static c_SimpleXMLElement *create_element(CObjRef doc, xmlNodePtr node,
                                           CStrRef ns, bool is_prefix) {
-  c_SimpleXMLElement *elem = NEW(c_SimpleXMLElement)();
+  c_SimpleXMLElement *elem = NEWOBJ(c_SimpleXMLElement)();
   elem->m_doc = doc;
   elem->m_node = node;
   if (node) {
@@ -298,7 +298,7 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64 options /* = 0 */,
       m_attributes = collect_attributes(m_node, ns, is_prefix);
     }
   } else {
-    throw (Object)p_Exception(NEW(c_Exception)())->create(
+    throw (Object)p_Exception(NEWOBJ(c_Exception)())->create(
         "String could not be parsed as XML");
   }
 }
@@ -458,7 +458,7 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
     return Object();
   }
 
-  c_SimpleXMLElement *elem = NEW(c_SimpleXMLElement)();
+  c_SimpleXMLElement *elem = NEWOBJ(c_SimpleXMLElement)();
   elem->m_doc = m_doc;
   elem->m_node = m_node;
   elem->m_is_text = m_is_text;
@@ -520,7 +520,7 @@ Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
     return Object();
   }
 
-  c_SimpleXMLElement *elem = NEW(c_SimpleXMLElement)();
+  c_SimpleXMLElement *elem = NEWOBJ(c_SimpleXMLElement)();
   elem->m_doc = m_doc;
   elem->m_node = m_node;
   elem->m_is_attribute = true;
@@ -680,7 +680,7 @@ Variant c_SimpleXMLElement::t___get(Variant name) {
   }
   if (ret.isObject()) {
     c_SimpleXMLElement *elem = ret.toObject().getTyped<c_SimpleXMLElement>();
-    c_SimpleXMLElement *e = NEW(c_SimpleXMLElement)();
+    c_SimpleXMLElement *e = NEWOBJ(c_SimpleXMLElement)();
     e->m_doc = elem->m_doc;
     e->m_node = elem->m_node;
     e->m_children = ref(elem->m_children);
@@ -690,7 +690,7 @@ Variant c_SimpleXMLElement::t___get(Variant name) {
     return e;
   }
   if (ret.isNull()) {
-    return NEW(c_SimpleXMLElement)();
+    return NEWOBJ(c_SimpleXMLElement)();
   }
   return ret;
 }
@@ -853,7 +853,7 @@ Array c_SimpleXMLElement::o_toArray() const {
 
 Variant c_SimpleXMLElement::t_getiterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::getiterator);
-  c_SimpleXMLElementIterator *iter = NEW(c_SimpleXMLElementIterator)();
+  c_SimpleXMLElementIterator *iter = NEWOBJ(c_SimpleXMLElementIterator)();
   iter->reset_iterator(this);
   return Object(iter);
 }
@@ -1186,7 +1186,7 @@ static void libxml_error_handler(void *userData, xmlErrorPtr error) {
 }
 
 static Object create_libxmlerror(xmlError &error) {
-  Object ret(NEW(c_LibXMLError)());
+  Object ret(NEWOBJ(c_LibXMLError)());
   ret->o_set("level",   error.level);
   ret->o_set("code",    error.code);
   ret->o_set("column",  error.int2);

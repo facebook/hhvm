@@ -23,7 +23,7 @@ IMPLEMENT_DEFAULT_EXTENSION(xmlwriter);
 // functions are just wrappers of object methods
 
 Variant f_xmlwriter_open_memory() {
-  c_XMLWriter *x = NEW(c_XMLWriter)();
+  c_XMLWriter *x = NEWOBJ(c_XMLWriter)();
   Object ret(x);
   if (x->t_openmemory()) {
     return ret;
@@ -32,7 +32,7 @@ Variant f_xmlwriter_open_memory() {
 }
 
 Object f_xmlwriter_open_uri(CStrRef uri) {
-  c_XMLWriter *x = NEW(c_XMLWriter)();
+  c_XMLWriter *x = NEWOBJ(c_XMLWriter)();
   Object ret(x);
   if (x->t_openuri(uri)) {
     return ret;

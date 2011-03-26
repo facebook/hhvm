@@ -80,7 +80,7 @@ Object c_EncodingDetector::t_detect() {
       "Could not detect encoding, error %d (%s)", status, u_errorName(status));
   }
 
-  p_EncodingMatch matchobj = NEW(c_EncodingMatch)();
+  p_EncodingMatch matchobj = NEWOBJ(c_EncodingMatch)();
   matchobj->m_encoding_match = match;
   return matchobj;
 }
@@ -101,7 +101,7 @@ Array c_EncodingDetector::t_detectall() {
   Array ret = Array::Create();
   int32_t i;
   for (i = 0; i < matchesFound; i++) {
-    p_EncodingMatch matchobj = NEW(c_EncodingMatch)();
+    p_EncodingMatch matchobj = NEWOBJ(c_EncodingMatch)();
     matchobj->m_encoding_match = matches[i];
     ret.append(matchobj);
   }

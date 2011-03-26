@@ -39,7 +39,7 @@ bool TestExtImagesprite::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtImagesprite::preTest() {
-  sprite = p_ImageSprite(NEW(c_ImageSprite)());
+  sprite = p_ImageSprite(NEWOBJ(c_ImageSprite)());
 
   return true;
 }

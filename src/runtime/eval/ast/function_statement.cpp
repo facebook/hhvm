@@ -157,7 +157,7 @@ void Parameter::getInfo(ClassInfo::ParameterInfo &info,
       v = m_defVal->eval(env);
     } catch (FatalErrorException e) {
       std::string msg = e.getMessage();
-      v = Object((NEW(c_stdClass)())->create());
+      v = Object((NEWOBJ(c_stdClass)())->create());
       v.o_set("msg", String(msg.c_str(), msg.size(), CopyString));
     }
     String s = f_serialize(v);

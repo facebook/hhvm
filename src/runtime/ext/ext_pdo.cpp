@@ -455,7 +455,7 @@ public:
 static PDOErrorHash s_err_hash;
 
 void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...) {
-  c_PDOException *e = NEW(c_PDOException)();
+  c_PDOException *e = NEWOBJ(c_PDOException)();
   e->m_code = code;
 
   va_list ap;
@@ -1797,7 +1797,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
     return false;
 
   case PDO_FETCH_OBJ:
-    ret = NEW(c_stdClass)();
+    ret = NEWOBJ(c_stdClass)();
     break;
 
   case PDO_FETCH_CLASS:

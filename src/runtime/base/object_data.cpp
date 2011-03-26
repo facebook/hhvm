@@ -391,7 +391,7 @@ Variant ObjectData::o_argval(bool byRef, CStrRef s,
 }
 
 Object ObjectData::FromArray(ArrayData *properties) {
-  ObjectData *ret = NEW(c_stdClass)();
+  ObjectData *ret = NEWOBJ(c_stdClass)();
   if (!properties->empty()) {
     ret->o_properties = NEW(Array)(properties);
   }

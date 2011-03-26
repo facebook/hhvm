@@ -123,7 +123,7 @@ bool c_SplFileObject::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_SplFileObject::cloneImpl() {
-  c_SplFileObject *obj = NEW(c_SplFileObject)();
+  c_SplFileObject *obj = NEWOBJ(c_SplFileObject)();
   c_SplFileObject::cloneSet(obj);
   return obj;
 }
@@ -1971,7 +1971,7 @@ bool c_SplFileInfo::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_SplFileInfo::cloneImpl() {
-  c_SplFileInfo *obj = NEW(c_SplFileInfo)();
+  c_SplFileInfo *obj = NEWOBJ(c_SplFileInfo)();
   c_SplFileInfo::cloneSet(obj);
   return obj;
 }
@@ -3550,18 +3550,18 @@ void c_SplFileInfo::t_setinfoclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss914
 }
 namespace hphp_impl_splitter {}
 Object co_SplFileObject(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SplFileObject)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SplFileObject)())->dynCreate(params, init));
 }
 Object coo_SplFileObject() {
-  Object r(NEW(c_SplFileObject)());
+  Object r(NEWOBJ(c_SplFileObject)());
   r->init();
   return r;
 }
 Object co_SplFileInfo(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SplFileInfo)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SplFileInfo)())->dynCreate(params, init));
 }
 Object coo_SplFileInfo() {
-  Object r(NEW(c_SplFileInfo)());
+  Object r(NEWOBJ(c_SplFileInfo)());
   r->init();
   return r;
 }

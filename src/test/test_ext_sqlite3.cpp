@@ -33,7 +33,7 @@ bool TestExtSqlite3::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtSqlite3::test_sqlite3() {
-  p_SQLite3 db(NEW(c_SQLite3)());
+  p_SQLite3 db(NEWOBJ(c_SQLite3)());
   db->t_open(":memory:test");
   db->t_exec("DROP TABLE foo");
   db->t_exec("CREATE TABLE foo (bar STRING)");

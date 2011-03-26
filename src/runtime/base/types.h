@@ -204,7 +204,6 @@ public:
 public:
   static DECLARE_THREAD_LOCAL(ThreadInfo, s_threadInfo);
 
-  std::vector<ObjectAllocatorBase *> m_allocators;
   FrameInjection *m_top;
   RequestInjectionData m_reqInjectionData;
 

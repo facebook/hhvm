@@ -905,13 +905,13 @@ bool TestCppBase::TestMemoryManager() {
 
     // Circular reference between two objects.
     {
-      Object obj(NEW(c_stdClass)());
+      Object obj(NEWOBJ(c_stdClass)());
       obj->o_set("a", obj);
       obj->o_set("f", Object(NEW(PlainFile)()));
     }
     {
-      Object obj1(NEW(c_stdClass)());
-      Object obj2(NEW(c_stdClass)());
+      Object obj1(NEWOBJ(c_stdClass)());
+      Object obj2(NEWOBJ(c_stdClass)());
       obj1->o_set("a", obj2);
       obj2->o_set("a", obj1);
       obj1->o_set("f", Object(NEW(PlainFile)()));

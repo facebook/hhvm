@@ -109,7 +109,7 @@ bool c_ReflectionFunctionAbstract::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionFunctionAbstract::cloneImpl() {
-  c_ReflectionFunctionAbstract *obj = NEW(c_ReflectionFunctionAbstract)();
+  c_ReflectionFunctionAbstract *obj = NEWOBJ(c_ReflectionFunctionAbstract)();
   c_ReflectionFunctionAbstract::cloneSet(obj);
   return obj;
 }
@@ -922,7 +922,7 @@ bool c_ReflectionObject::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionObject::cloneImpl() {
-  c_ReflectionObject *obj = NEW(c_ReflectionObject)();
+  c_ReflectionObject *obj = NEWOBJ(c_ReflectionObject)();
   c_ReflectionObject::cloneSet(obj);
   return obj;
 }
@@ -1120,7 +1120,7 @@ bool c_ReflectionException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionException::cloneImpl() {
-  c_ReflectionException *obj = NEW(c_ReflectionException)();
+  c_ReflectionException *obj = NEWOBJ(c_ReflectionException)();
   c_ReflectionException::cloneSet(obj);
   return obj;
 }
@@ -1270,7 +1270,7 @@ bool c_ReflectionClass::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionClass::cloneImpl() {
-  c_ReflectionClass *obj = NEW(c_ReflectionClass)();
+  c_ReflectionClass *obj = NEWOBJ(c_ReflectionClass)();
   c_ReflectionClass::cloneSet(obj);
   return obj;
 }
@@ -4405,7 +4405,7 @@ bool c_ReflectionExtension::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionExtension::cloneImpl() {
-  c_ReflectionExtension *obj = NEW(c_ReflectionExtension)();
+  c_ReflectionExtension *obj = NEWOBJ(c_ReflectionExtension)();
   c_ReflectionExtension::cloneSet(obj);
   return obj;
 }
@@ -5231,7 +5231,7 @@ bool c_ReflectionMethod::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionMethod::cloneImpl() {
-  c_ReflectionMethod *obj = NEW(c_ReflectionMethod)();
+  c_ReflectionMethod *obj = NEWOBJ(c_ReflectionMethod)();
   c_ReflectionMethod::cloneSet(obj);
   return obj;
 }
@@ -6479,7 +6479,7 @@ bool c_ReflectionProperty::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionProperty::cloneImpl() {
-  c_ReflectionProperty *obj = NEW(c_ReflectionProperty)();
+  c_ReflectionProperty *obj = NEWOBJ(c_ReflectionProperty)();
   c_ReflectionProperty::cloneSet(obj);
   return obj;
 }
@@ -7613,7 +7613,7 @@ bool c_ReflectionFunction::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionFunction::cloneImpl() {
-  c_ReflectionFunction *obj = NEW(c_ReflectionFunction)();
+  c_ReflectionFunction *obj = NEWOBJ(c_ReflectionFunction)();
   c_ReflectionFunction::cloneSet(obj);
   return obj;
 }
@@ -8122,7 +8122,7 @@ bool c_ReflectionParameter::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ReflectionParameter::cloneImpl() {
-  c_ReflectionParameter *obj = NEW(c_ReflectionParameter)();
+  c_ReflectionParameter *obj = NEWOBJ(c_ReflectionParameter)();
   c_ReflectionParameter::cloneSet(obj);
   return obj;
 }
@@ -8985,74 +8985,74 @@ Variant c_ReflectionParameter::t_getposition() {
 }
 namespace hphp_impl_splitter {}
 Object co_ReflectionFunctionAbstract(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_ReflectionFunctionAbstract)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_ReflectionFunctionAbstract)())->dynCreate(params, init));
 }
 Object coo_ReflectionFunctionAbstract() {
-  Object r(NEW(c_ReflectionFunctionAbstract)());
+  Object r(NEWOBJ(c_ReflectionFunctionAbstract)());
   r->init();
   return r;
 }
 Object co_ReflectionObject(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_ReflectionObject)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_ReflectionObject)())->dynCreate(params, init));
 }
 Object coo_ReflectionObject() {
-  Object r(NEW(c_ReflectionObject)());
+  Object r(NEWOBJ(c_ReflectionObject)());
   r->init();
   return r;
 }
 Object co_ReflectionException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_ReflectionException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_ReflectionException)())->dynCreate(params, init));
 }
 Object coo_ReflectionException() {
-  Object r(NEW(c_ReflectionException)());
+  Object r(NEWOBJ(c_ReflectionException)());
   r->init();
   return r;
 }
 Object co_ReflectionClass(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_ReflectionClass)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_ReflectionClass)())->dynCreate(params, init));
 }
 Object coo_ReflectionClass() {
-  Object r(NEW(c_ReflectionClass)());
+  Object r(NEWOBJ(c_ReflectionClass)());
   r->init();
   return r;
 }
 Object co_ReflectionExtension(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_ReflectionExtension)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_ReflectionExtension)())->dynCreate(params, init));
 }
 Object coo_ReflectionExtension() {
-  Object r(NEW(c_ReflectionExtension)());
+  Object r(NEWOBJ(c_ReflectionExtension)());
   r->init();
   return r;
 }
 Object co_ReflectionMethod(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_ReflectionMethod)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_ReflectionMethod)())->dynCreate(params, init));
 }
 Object coo_ReflectionMethod() {
-  Object r(NEW(c_ReflectionMethod)());
+  Object r(NEWOBJ(c_ReflectionMethod)());
   r->init();
   return r;
 }
 Object co_ReflectionProperty(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_ReflectionProperty)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_ReflectionProperty)())->dynCreate(params, init));
 }
 Object coo_ReflectionProperty() {
-  Object r(NEW(c_ReflectionProperty)());
+  Object r(NEWOBJ(c_ReflectionProperty)());
   r->init();
   return r;
 }
 Object co_ReflectionFunction(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_ReflectionFunction)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_ReflectionFunction)())->dynCreate(params, init));
 }
 Object coo_ReflectionFunction() {
-  Object r(NEW(c_ReflectionFunction)());
+  Object r(NEWOBJ(c_ReflectionFunction)());
   r->init();
   return r;
 }
 Object co_ReflectionParameter(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_ReflectionParameter)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_ReflectionParameter)())->dynCreate(params, init));
 }
 Object coo_ReflectionParameter() {
-  Object r(NEW(c_ReflectionParameter)());
+  Object r(NEWOBJ(c_ReflectionParameter)());
   r->init();
   return r;
 }

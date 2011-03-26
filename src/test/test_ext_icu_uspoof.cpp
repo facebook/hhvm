@@ -34,7 +34,7 @@ bool TestExtIcu_uspoof::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtIcu_uspoof::test_SpoofChecker_issuspicious() {
-  p_SpoofChecker checker(NEW(c_SpoofChecker)());
+  p_SpoofChecker checker(NEWOBJ(c_SpoofChecker)());
   VS(checker->t_issuspicious("facebook"), false);
 
   // facebook with Cyrillic spoof characters
@@ -66,7 +66,7 @@ bool TestExtIcu_uspoof::test_SpoofChecker_issuspicious() {
 }
 
 bool TestExtIcu_uspoof::test_SpoofChecker_areconfusable() {
-  p_SpoofChecker checker(NEW(c_SpoofChecker)());
+  p_SpoofChecker checker(NEWOBJ(c_SpoofChecker)());
   VS(checker->t_areconfusable("hello, world", "goodbye, world"), false);
   VS(checker->t_areconfusable("hello, world", "hello, world"), true);
   VS(checker->t_areconfusable("hello, world", "he11o, wor1d"), true);
@@ -106,7 +106,7 @@ bool TestExtIcu_uspoof::test_SpoofChecker_areconfusable() {
 }
 
 bool TestExtIcu_uspoof::test_SpoofChecker_issuesfound() {
-  p_SpoofChecker checker(NEW(c_SpoofChecker)());
+  p_SpoofChecker checker(NEWOBJ(c_SpoofChecker)());
   Variant ret;
 
   VS(checker->t_issuspicious("NAPKIN PEZ", ref(ret)), true);
@@ -124,7 +124,7 @@ bool TestExtIcu_uspoof::test_SpoofChecker_issuesfound() {
 
 bool TestExtIcu_uspoof::test_SpoofChecker_setchecks() {
   {
-    p_SpoofChecker checker(NEW(c_SpoofChecker)());
+    p_SpoofChecker checker(NEWOBJ(c_SpoofChecker)());
 
     // The checker should start in any-case mode.
     VS(checker->t_areconfusable("HELLO", "H\u0415LLO"), true);
@@ -142,7 +142,7 @@ bool TestExtIcu_uspoof::test_SpoofChecker_setchecks() {
   }
 
   {
-    p_SpoofChecker checker(NEW(c_SpoofChecker)());
+    p_SpoofChecker checker(NEWOBJ(c_SpoofChecker)());
     VS(checker->t_issuspicious("True fact: \u5fcd\u8005 are mammals"), false);
 
     // Only allow characters of a single script.
@@ -151,7 +151,7 @@ bool TestExtIcu_uspoof::test_SpoofChecker_setchecks() {
   }
 
   try {
-    p_SpoofChecker checker(NEW(c_SpoofChecker)());
+    p_SpoofChecker checker(NEWOBJ(c_SpoofChecker)());
     checker->t_setchecks(0xDEADBEEF);
   } catch (Exception& e) {
     return Count(true);
@@ -161,7 +161,7 @@ bool TestExtIcu_uspoof::test_SpoofChecker_setchecks() {
 }
 
 bool TestExtIcu_uspoof::test_SpoofChecker_setallowedlocales() {
-  p_SpoofChecker checker(NEW(c_SpoofChecker)());
+  p_SpoofChecker checker(NEWOBJ(c_SpoofChecker)());
 
   const char* common = "Rogers";
   const char* japanese_kanji_hiragana = "\u6a4b\u672c\u611b\u307f";

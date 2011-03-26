@@ -61,7 +61,7 @@ bool TestExtJson::test_json_decode() {
      CREATE_VECTOR5("a", 1, true, false, null));
 
   Object obj = f_json_decode("{\"a\":1,\"b\":2.3,\"3\":\"test\"}");
-  Object obj2((NEW(c_stdClass)())->create());
+  Object obj2((NEWOBJ(c_stdClass)())->create());
   obj2->o_set("a", 1);
   obj2->o_set("b", 2.3);
   obj2->o_set("3", "test");

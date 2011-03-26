@@ -197,7 +197,7 @@ namespace HPHP {
 #define IMPLEMENT_CLASS_COMMON(cls)                                     \
   StaticString c_##cls::s_class_name(c_##cls::GetClassName());          \
   c_##cls *c_##cls::createDummy(p_##cls &pobj) {                        \
-    pobj = NEW(c_##cls)();                                              \
+    pobj = NEWOBJ(c_##cls)();                                              \
     pobj->init();                                                       \
     pobj->setDummy();                                                   \
     return pobj.get();                                                  \

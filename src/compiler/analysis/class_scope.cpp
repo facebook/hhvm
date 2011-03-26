@@ -679,11 +679,11 @@ void ClassScope::outputCPPDynamicClassImpl(CodeGenerator &cg,
   const char *clsName = clsStr.c_str();
   cg_indentBegin("Object %s%s(CArrRef params, bool init /* = true */) {\n",
                  Option::CreateObjectPrefix, clsName);
-  cg_printf("return Object((NEW(%s%s)())->dynCreate(params, init));\n",
+  cg_printf("return Object((NEWOBJ(%s%s)())->dynCreate(params, init));\n",
             Option::ClassPrefix, clsName);
   cg_indentEnd("}\n");
   cg_indentBegin("Object %s%s() {\n", Option::CreateObjectOnlyPrefix, clsName);
-  cg_printf("Object r(NEW(%s%s)());\n", Option::ClassPrefix, clsName);
+  cg_printf("Object r(NEWOBJ(%s%s)());\n", Option::ClassPrefix, clsName);
   cg_printf("r->init();\n");
   cg_printf("return r;\n");
   cg_indentEnd("}\n");
@@ -1530,7 +1530,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
   // Cloning
   cg_indentBegin("ObjectData *%s%s::cloneImpl() {\n",
                  Option::ClassPrefix, clsName);
-  cg_printf("%s%s *obj = NEW(%s%s)();\n", Option::ClassPrefix, clsName,
+  cg_printf("%s%s *obj = NEWOBJ(%s%s)();\n", Option::ClassPrefix, clsName,
             Option::ClassPrefix, clsName);
   cg_printf("%s%s::cloneSet(obj);\n", Option::ClassPrefix, clsName);
   cg_printf("return obj;\n");

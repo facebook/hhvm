@@ -92,7 +92,7 @@ bool c_UnexpectedValueException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_UnexpectedValueException::cloneImpl() {
-  c_UnexpectedValueException *obj = NEW(c_UnexpectedValueException)();
+  c_UnexpectedValueException *obj = NEWOBJ(c_UnexpectedValueException)();
   c_UnexpectedValueException::cloneSet(obj);
   return obj;
 }
@@ -188,7 +188,7 @@ bool c_OverflowException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_OverflowException::cloneImpl() {
-  c_OverflowException *obj = NEW(c_OverflowException)();
+  c_OverflowException *obj = NEWOBJ(c_OverflowException)();
   c_OverflowException::cloneSet(obj);
   return obj;
 }
@@ -284,7 +284,7 @@ bool c_OutOfBoundsException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_OutOfBoundsException::cloneImpl() {
-  c_OutOfBoundsException *obj = NEW(c_OutOfBoundsException)();
+  c_OutOfBoundsException *obj = NEWOBJ(c_OutOfBoundsException)();
   c_OutOfBoundsException::cloneSet(obj);
   return obj;
 }
@@ -379,7 +379,7 @@ bool c_LogicException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_LogicException::cloneImpl() {
-  c_LogicException *obj = NEW(c_LogicException)();
+  c_LogicException *obj = NEWOBJ(c_LogicException)();
   c_LogicException::cloneSet(obj);
   return obj;
 }
@@ -475,7 +475,7 @@ bool c_RangeException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_RangeException::cloneImpl() {
-  c_RangeException *obj = NEW(c_RangeException)();
+  c_RangeException *obj = NEWOBJ(c_RangeException)();
   c_RangeException::cloneSet(obj);
   return obj;
 }
@@ -573,7 +573,7 @@ bool c_InvalidArgumentException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_InvalidArgumentException::cloneImpl() {
-  c_InvalidArgumentException *obj = NEW(c_InvalidArgumentException)();
+  c_InvalidArgumentException *obj = NEWOBJ(c_InvalidArgumentException)();
   c_InvalidArgumentException::cloneSet(obj);
   return obj;
 }
@@ -667,7 +667,7 @@ bool c_UnderflowException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_UnderflowException::cloneImpl() {
-  c_UnderflowException *obj = NEW(c_UnderflowException)();
+  c_UnderflowException *obj = NEWOBJ(c_UnderflowException)();
   c_UnderflowException::cloneSet(obj);
   return obj;
 }
@@ -763,7 +763,7 @@ bool c_OutOfRangeException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_OutOfRangeException::cloneImpl() {
-  c_OutOfRangeException *obj = NEW(c_OutOfRangeException)();
+  c_OutOfRangeException *obj = NEWOBJ(c_OutOfRangeException)();
   c_OutOfRangeException::cloneSet(obj);
   return obj;
 }
@@ -864,7 +864,7 @@ bool c_BadMethodCallException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_BadMethodCallException::cloneImpl() {
-  c_BadMethodCallException *obj = NEW(c_BadMethodCallException)();
+  c_BadMethodCallException *obj = NEWOBJ(c_BadMethodCallException)();
   c_BadMethodCallException::cloneSet(obj);
   return obj;
 }
@@ -957,7 +957,7 @@ bool c_RuntimeException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_RuntimeException::cloneImpl() {
-  c_RuntimeException *obj = NEW(c_RuntimeException)();
+  c_RuntimeException *obj = NEWOBJ(c_RuntimeException)();
   c_RuntimeException::cloneSet(obj);
   return obj;
 }
@@ -1100,7 +1100,7 @@ bool c_Exception::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_Exception::cloneImpl() {
-  c_Exception *obj = NEW(c_Exception)();
+  c_Exception *obj = NEWOBJ(c_Exception)();
   c_Exception::cloneSet(obj);
   return obj;
 }
@@ -1890,7 +1890,7 @@ bool c_ErrorException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ErrorException::cloneImpl() {
-  c_ErrorException *obj = NEW(c_ErrorException)();
+  c_ErrorException *obj = NEWOBJ(c_ErrorException)();
   c_ErrorException::cloneSet(obj);
   return obj;
 }
@@ -2249,7 +2249,7 @@ bool c_BadFunctionCallException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_BadFunctionCallException::cloneImpl() {
-  c_BadFunctionCallException *obj = NEW(c_BadFunctionCallException)();
+  c_BadFunctionCallException *obj = NEWOBJ(c_BadFunctionCallException)();
   c_BadFunctionCallException::cloneSet(obj);
   return obj;
 }
@@ -2345,7 +2345,7 @@ bool c_LengthException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_LengthException::cloneImpl() {
-  c_LengthException *obj = NEW(c_LengthException)();
+  c_LengthException *obj = NEWOBJ(c_LengthException)();
   c_LengthException::cloneSet(obj);
   return obj;
 }
@@ -2441,7 +2441,7 @@ bool c_DomainException::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_DomainException::cloneImpl() {
-  c_DomainException *obj = NEW(c_DomainException)();
+  c_DomainException *obj = NEWOBJ(c_DomainException)();
   c_DomainException::cloneSet(obj);
   return obj;
 }
@@ -2475,122 +2475,122 @@ void c_DomainException::init() {
   c_LogicException::init();
 }
 Object co_UnexpectedValueException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_UnexpectedValueException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_UnexpectedValueException)())->dynCreate(params, init));
 }
 Object coo_UnexpectedValueException() {
-  Object r(NEW(c_UnexpectedValueException)());
+  Object r(NEWOBJ(c_UnexpectedValueException)());
   r->init();
   return r;
 }
 Object co_OverflowException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_OverflowException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_OverflowException)())->dynCreate(params, init));
 }
 Object coo_OverflowException() {
-  Object r(NEW(c_OverflowException)());
+  Object r(NEWOBJ(c_OverflowException)());
   r->init();
   return r;
 }
 Object co_OutOfBoundsException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_OutOfBoundsException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_OutOfBoundsException)())->dynCreate(params, init));
 }
 Object coo_OutOfBoundsException() {
-  Object r(NEW(c_OutOfBoundsException)());
+  Object r(NEWOBJ(c_OutOfBoundsException)());
   r->init();
   return r;
 }
 Object co_LogicException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_LogicException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_LogicException)())->dynCreate(params, init));
 }
 Object coo_LogicException() {
-  Object r(NEW(c_LogicException)());
+  Object r(NEWOBJ(c_LogicException)());
   r->init();
   return r;
 }
 Object co_RangeException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_RangeException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_RangeException)())->dynCreate(params, init));
 }
 Object coo_RangeException() {
-  Object r(NEW(c_RangeException)());
+  Object r(NEWOBJ(c_RangeException)());
   r->init();
   return r;
 }
 Object co_InvalidArgumentException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_InvalidArgumentException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_InvalidArgumentException)())->dynCreate(params, init));
 }
 Object coo_InvalidArgumentException() {
-  Object r(NEW(c_InvalidArgumentException)());
+  Object r(NEWOBJ(c_InvalidArgumentException)());
   r->init();
   return r;
 }
 Object co_UnderflowException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_UnderflowException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_UnderflowException)())->dynCreate(params, init));
 }
 Object coo_UnderflowException() {
-  Object r(NEW(c_UnderflowException)());
+  Object r(NEWOBJ(c_UnderflowException)());
   r->init();
   return r;
 }
 Object co_OutOfRangeException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_OutOfRangeException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_OutOfRangeException)())->dynCreate(params, init));
 }
 Object coo_OutOfRangeException() {
-  Object r(NEW(c_OutOfRangeException)());
+  Object r(NEWOBJ(c_OutOfRangeException)());
   r->init();
   return r;
 }
 Object co_BadMethodCallException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_BadMethodCallException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_BadMethodCallException)())->dynCreate(params, init));
 }
 Object coo_BadMethodCallException() {
-  Object r(NEW(c_BadMethodCallException)());
+  Object r(NEWOBJ(c_BadMethodCallException)());
   r->init();
   return r;
 }
 Object co_RuntimeException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_RuntimeException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_RuntimeException)())->dynCreate(params, init));
 }
 Object coo_RuntimeException() {
-  Object r(NEW(c_RuntimeException)());
+  Object r(NEWOBJ(c_RuntimeException)());
   r->init();
   return r;
 }
 Object co_Exception(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_Exception)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_Exception)())->dynCreate(params, init));
 }
 Object coo_Exception() {
-  Object r(NEW(c_Exception)());
+  Object r(NEWOBJ(c_Exception)());
   r->init();
   return r;
 }
 Object co_ErrorException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_ErrorException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_ErrorException)())->dynCreate(params, init));
 }
 Object coo_ErrorException() {
-  Object r(NEW(c_ErrorException)());
+  Object r(NEWOBJ(c_ErrorException)());
   r->init();
   return r;
 }
 Object co_BadFunctionCallException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_BadFunctionCallException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_BadFunctionCallException)())->dynCreate(params, init));
 }
 Object coo_BadFunctionCallException() {
-  Object r(NEW(c_BadFunctionCallException)());
+  Object r(NEWOBJ(c_BadFunctionCallException)());
   r->init();
   return r;
 }
 Object co_LengthException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_LengthException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_LengthException)())->dynCreate(params, init));
 }
 Object coo_LengthException() {
-  Object r(NEW(c_LengthException)());
+  Object r(NEWOBJ(c_LengthException)());
   r->init();
   return r;
 }
 Object co_DomainException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DomainException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DomainException)())->dynCreate(params, init));
 }
 Object coo_DomainException() {
-  Object r(NEW(c_DomainException)());
+  Object r(NEWOBJ(c_DomainException)());
   r->init();
   return r;
 }

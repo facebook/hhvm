@@ -191,7 +191,7 @@ Variant c_Collator::t_compare(CStrRef str1, CStrRef str2) {
 
 Variant c_Collator::ti_create(const char* cls, CStrRef locale) {
   STATIC_METHOD_INJECTION_BUILTIN(Collator, Collator::create);
-  return (NEW(c_Collator)())->create(locale);
+  return (NEWOBJ(c_Collator)())->create(locale);
 }
 
 int64 c_Collator::t_getattribute(int64 attr) {
@@ -492,7 +492,7 @@ Variant f_collator_compare(CVarRef obj, CStrRef str1, CStrRef str2) {
 }
 
 Variant f_collator_create(CStrRef locale) {
-  return (NEW(c_Collator)())->create(locale);
+  return (NEWOBJ(c_Collator)())->create(locale);
 }
 
 Variant f_collator_get_attribute(CVarRef obj, int64 attr) {

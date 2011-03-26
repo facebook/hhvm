@@ -88,7 +88,7 @@ bool c_stdClass::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_stdClass::cloneImpl() {
-  c_stdClass *obj = NEW(c_stdClass)();
+  c_stdClass *obj = NEWOBJ(c_stdClass)();
   c_stdClass::cloneSet(obj);
   return obj;
 }
@@ -179,7 +179,7 @@ bool c___PHP_Incomplete_Class::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c___PHP_Incomplete_Class::cloneImpl() {
-  c___PHP_Incomplete_Class *obj = NEW(c___PHP_Incomplete_Class)();
+  c___PHP_Incomplete_Class *obj = NEWOBJ(c___PHP_Incomplete_Class)();
   c___PHP_Incomplete_Class::cloneSet(obj);
   return obj;
 }
@@ -212,18 +212,18 @@ struct ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
 void c___PHP_Incomplete_Class::init() {
 }
 Object co_stdClass(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_stdClass)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_stdClass)())->dynCreate(params, init));
 }
 Object coo_stdClass() {
-  Object r(NEW(c_stdClass)());
+  Object r(NEWOBJ(c_stdClass)());
   r->init();
   return r;
 }
 Object co___PHP_Incomplete_Class(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c___PHP_Incomplete_Class)())->dynCreate(params, init));
+  return Object((NEWOBJ(c___PHP_Incomplete_Class)())->dynCreate(params, init));
 }
 Object coo___PHP_Incomplete_Class() {
-  Object r(NEW(c___PHP_Incomplete_Class)());
+  Object r(NEWOBJ(c___PHP_Incomplete_Class)());
   r->init();
   return r;
 }

@@ -281,7 +281,7 @@ Variant invokeImpl(void *extra, CArrRef params) {
     return f_strlen(params[0]);
   }
   if (strcasecmp(function, "fault") == 0) {
-    return Object((NEW(c_SoapFault)())->create("MyFault","My fault string"));
+    return Object((NEWOBJ(c_SoapFault)())->create("MyFault","My fault string"));
   }
 
   // for TestExtServer
@@ -303,6 +303,7 @@ void init_static_variables() { SystemScalarArrays::initialize();}
 
 class GlobalVariables : public SystemGlobals {};
 static IMPLEMENT_THREAD_LOCAL(GlobalVariables, g_variables);
+GlobalVariables *get_global_variables_check() { return NULL;} 
 GlobalVariables *get_global_variables() { return g_variables.get();}
 LVariableTable *get_variable_table() { return g_variables.get(); }
 Globals *get_globals() { return g_variables.get(); }

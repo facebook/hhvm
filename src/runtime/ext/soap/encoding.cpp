@@ -2619,7 +2619,7 @@ static Variant guess_zval_convert(encodeTypePtr type, xmlNodePtr data) {
   }
   ret = master_to_zval_int(enc, data);
   if (SOAP_GLOBAL(sdl) && type_name && enc->details.sdl_type) {
-    c_SoapVar *soapvar = NEW(c_SoapVar)();
+    c_SoapVar *soapvar = NEWOBJ(c_SoapVar)();
     soapvar->m_type = enc->details.type;
     soapvar->m_value = ret;
 

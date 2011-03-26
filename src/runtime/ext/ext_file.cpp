@@ -1338,7 +1338,7 @@ Variant f_dir(CStrRef directory) {
   if (same(dir, false)) {
     return false;
   }
-  c_Directory *c_d = NEW(c_Directory)();
+  c_Directory *c_d = NEWOBJ(c_Directory)();
   c_d->m_path = directory;
   c_d->m_handle = dir;
   return c_d;

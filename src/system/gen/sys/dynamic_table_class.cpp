@@ -531,10 +531,10 @@ extern struct ObjectStaticCallbacks cw_Directory;
 extern struct ObjectStaticCallbacks cw_FilterIterator;
 extern struct ObjectStaticCallbacks cw_ReflectionParameter;
 Object co_PDOException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_PDOException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_PDOException)())->dynCreate(params, init));
 }
 Object coo_PDOException() {
-  Object r(NEW(c_PDOException)());
+  Object r(NEWOBJ(c_PDOException)());
   r->init();
   return r;
 }
@@ -593,7 +593,7 @@ void c_PDOException::destruct() {
   }
 }
 ObjectData *c_PDOException::cloneImpl() {
-  c_PDOException *obj = NEW(c_PDOException)();
+  c_PDOException *obj = NEWOBJ(c_PDOException)();
   c_PDOException::cloneSet(obj);
   return obj;
 }
@@ -745,10 +745,10 @@ struct ObjectStaticCallbacks cw_PDOException = {
   c_PDOException::os_get_call_info
 };
 Object co_DOMDocumentFragment(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMDocumentFragment)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMDocumentFragment)())->dynCreate(params, init));
 }
 Object coo_DOMDocumentFragment() {
-  Object r(NEW(c_DOMDocumentFragment)());
+  Object r(NEWOBJ(c_DOMDocumentFragment)());
   r->init();
   return r;
 }
@@ -807,7 +807,7 @@ void c_DOMDocumentFragment::destruct() {
   }
 }
 ObjectData *c_DOMDocumentFragment::cloneImpl() {
-  c_DOMDocumentFragment *obj = NEW(c_DOMDocumentFragment)();
+  c_DOMDocumentFragment *obj = NEWOBJ(c_DOMDocumentFragment)();
   c_DOMDocumentFragment::cloneSet(obj);
   return obj;
 }
@@ -1017,10 +1017,10 @@ struct ObjectStaticCallbacks cw_DOMDocumentFragment = {
   c_DOMDocumentFragment::os_get_call_info
 };
 Object co_DOMText(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMText)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMText)())->dynCreate(params, init));
 }
 Object coo_DOMText() {
-  Object r(NEW(c_DOMText)());
+  Object r(NEWOBJ(c_DOMText)());
   r->init();
   return r;
 }
@@ -1079,7 +1079,7 @@ void c_DOMText::destruct() {
   }
 }
 ObjectData *c_DOMText::cloneImpl() {
-  c_DOMText *obj = NEW(c_DOMText)();
+  c_DOMText *obj = NEWOBJ(c_DOMText)();
   c_DOMText::cloneSet(obj);
   return obj;
 }
@@ -1524,10 +1524,10 @@ struct ObjectStaticCallbacks cw_DOMText = {
   c_DOMText::os_get_call_info
 };
 Object co_DebuggerClient(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DebuggerClient)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DebuggerClient)())->dynCreate(params, init));
 }
 Object coo_DebuggerClient() {
-  Object r(NEW(c_DebuggerClient)());
+  Object r(NEWOBJ(c_DebuggerClient)());
   r->init();
   return r;
 }
@@ -1615,7 +1615,7 @@ void c_DebuggerClient::destruct() {
   }
 }
 ObjectData *c_DebuggerClient::cloneImpl() {
-  c_DebuggerClient *obj = NEW(c_DebuggerClient)();
+  c_DebuggerClient *obj = NEWOBJ(c_DebuggerClient)();
   c_DebuggerClient::cloneSet(obj);
   return obj;
 }
@@ -3272,10 +3272,10 @@ struct ObjectStaticCallbacks cw_DebuggerClient = {
   c_DebuggerClient::os_get_call_info
 };
 Object co_EncodingDetector(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_EncodingDetector)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_EncodingDetector)())->dynCreate(params, init));
 }
 Object coo_EncodingDetector() {
-  Object r(NEW(c_EncodingDetector)());
+  Object r(NEWOBJ(c_EncodingDetector)());
   r->init();
   return r;
 }
@@ -3334,7 +3334,7 @@ void c_EncodingDetector::destruct() {
   }
 }
 ObjectData *c_EncodingDetector::cloneImpl() {
-  c_EncodingDetector *obj = NEW(c_EncodingDetector)();
+  c_EncodingDetector *obj = NEWOBJ(c_EncodingDetector)();
   c_EncodingDetector::cloneSet(obj);
   return obj;
 }
@@ -3678,10 +3678,10 @@ struct ObjectStaticCallbacks cw_EncodingDetector = {
   c_EncodingDetector::os_get_call_info
 };
 Object co_DOMCDATASection(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMCDATASection)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMCDATASection)())->dynCreate(params, init));
 }
 Object coo_DOMCDATASection() {
-  Object r(NEW(c_DOMCDATASection)());
+  Object r(NEWOBJ(c_DOMCDATASection)());
   r->init();
   return r;
 }
@@ -3740,7 +3740,7 @@ void c_DOMCDATASection::destruct() {
   }
 }
 ObjectData *c_DOMCDATASection::cloneImpl() {
-  c_DOMCDATASection *obj = NEW(c_DOMCDATASection)();
+  c_DOMCDATASection *obj = NEWOBJ(c_DOMCDATASection)();
   c_DOMCDATASection::cloneSet(obj);
   return obj;
 }
@@ -3911,10 +3911,10 @@ struct ObjectStaticCallbacks cw_DOMCDATASection = {
   c_DOMCDATASection::os_get_call_info
 };
 Object co_Locale(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_Locale)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_Locale)())->dynCreate(params, init));
 }
 Object coo_Locale() {
-  Object r(NEW(c_Locale)());
+  Object r(NEWOBJ(c_Locale)());
   r->init();
   return r;
 }
@@ -3982,7 +3982,7 @@ void c_Locale::destruct() {
   }
 }
 ObjectData *c_Locale::cloneImpl() {
-  c_Locale *obj = NEW(c_Locale)();
+  c_Locale *obj = NEWOBJ(c_Locale)();
   c_Locale::cloneSet(obj);
   return obj;
 }
@@ -4134,10 +4134,10 @@ struct ObjectStaticCallbacks cw_Locale = {
   c_Locale::os_get_call_info
 };
 Object co_DOMDocumentType(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMDocumentType)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMDocumentType)())->dynCreate(params, init));
 }
 Object coo_DOMDocumentType() {
-  Object r(NEW(c_DOMDocumentType)());
+  Object r(NEWOBJ(c_DOMDocumentType)());
   r->init();
   return r;
 }
@@ -4196,7 +4196,7 @@ void c_DOMDocumentType::destruct() {
   }
 }
 ObjectData *c_DOMDocumentType::cloneImpl() {
-  c_DOMDocumentType *obj = NEW(c_DOMDocumentType)();
+  c_DOMDocumentType *obj = NEWOBJ(c_DOMDocumentType)();
   c_DOMDocumentType::cloneSet(obj);
   return obj;
 }
@@ -4516,10 +4516,10 @@ struct ObjectStaticCallbacks cw_DOMDocumentType = {
   c_DOMDocumentType::os_get_call_info
 };
 Object co_SQLite3Stmt(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SQLite3Stmt)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SQLite3Stmt)())->dynCreate(params, init));
 }
 Object coo_SQLite3Stmt() {
-  Object r(NEW(c_SQLite3Stmt)());
+  Object r(NEWOBJ(c_SQLite3Stmt)());
   r->init();
   return r;
 }
@@ -4578,7 +4578,7 @@ void c_SQLite3Stmt::destruct() {
   }
 }
 ObjectData *c_SQLite3Stmt::cloneImpl() {
-  c_SQLite3Stmt *obj = NEW(c_SQLite3Stmt)();
+  c_SQLite3Stmt *obj = NEWOBJ(c_SQLite3Stmt)();
   c_SQLite3Stmt::cloneSet(obj);
   return obj;
 }
@@ -5123,10 +5123,10 @@ struct ObjectStaticCallbacks cw_SQLite3Stmt = {
   c_SQLite3Stmt::os_get_call_info
 };
 Object co_DOMNodeList(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMNodeList)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMNodeList)())->dynCreate(params, init));
 }
 Object coo_DOMNodeList() {
-  Object r(NEW(c_DOMNodeList)());
+  Object r(NEWOBJ(c_DOMNodeList)());
   r->init();
   return r;
 }
@@ -5185,7 +5185,7 @@ void c_DOMNodeList::destruct() {
   }
 }
 ObjectData *c_DOMNodeList::cloneImpl() {
-  c_DOMNodeList *obj = NEW(c_DOMNodeList)();
+  c_DOMNodeList *obj = NEWOBJ(c_DOMNodeList)();
   c_DOMNodeList::cloneSet(obj);
   return obj;
 }
@@ -5599,10 +5599,10 @@ struct ObjectStaticCallbacks cw_DOMNodeList = {
   c_DOMNodeList::os_get_call_info
 };
 Object co_Normalizer(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_Normalizer)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_Normalizer)())->dynCreate(params, init));
 }
 Object coo_Normalizer() {
-  Object r(NEW(c_Normalizer)());
+  Object r(NEWOBJ(c_Normalizer)());
   r->init();
   return r;
 }
@@ -5687,7 +5687,7 @@ void c_Normalizer::destruct() {
   }
 }
 ObjectData *c_Normalizer::cloneImpl() {
-  c_Normalizer *obj = NEW(c_Normalizer)();
+  c_Normalizer *obj = NEWOBJ(c_Normalizer)();
   c_Normalizer::cloneSet(obj);
   return obj;
 }
@@ -5996,10 +5996,10 @@ struct ObjectStaticCallbacks cw_Normalizer = {
   c_Normalizer::os_get_call_info
 };
 Object co_DOMCharacterData(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMCharacterData)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMCharacterData)())->dynCreate(params, init));
 }
 Object coo_DOMCharacterData() {
-  Object r(NEW(c_DOMCharacterData)());
+  Object r(NEWOBJ(c_DOMCharacterData)());
   r->init();
   return r;
 }
@@ -6058,7 +6058,7 @@ void c_DOMCharacterData::destruct() {
   }
 }
 ObjectData *c_DOMCharacterData::cloneImpl() {
-  c_DOMCharacterData *obj = NEW(c_DOMCharacterData)();
+  c_DOMCharacterData *obj = NEWOBJ(c_DOMCharacterData)();
   c_DOMCharacterData::cloneSet(obj);
   return obj;
 }
@@ -6682,10 +6682,10 @@ struct ObjectStaticCallbacks cw_DOMCharacterData = {
   c_DOMCharacterData::os_get_call_info
 };
 Object co_DOMEntityReference(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMEntityReference)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMEntityReference)())->dynCreate(params, init));
 }
 Object coo_DOMEntityReference() {
-  Object r(NEW(c_DOMEntityReference)());
+  Object r(NEWOBJ(c_DOMEntityReference)());
   r->init();
   return r;
 }
@@ -6744,7 +6744,7 @@ void c_DOMEntityReference::destruct() {
   }
 }
 ObjectData *c_DOMEntityReference::cloneImpl() {
-  c_DOMEntityReference *obj = NEW(c_DOMEntityReference)();
+  c_DOMEntityReference *obj = NEWOBJ(c_DOMEntityReference)();
   c_DOMEntityReference::cloneSet(obj);
   return obj;
 }
@@ -6915,10 +6915,10 @@ struct ObjectStaticCallbacks cw_DOMEntityReference = {
   c_DOMEntityReference::os_get_call_info
 };
 Object co_SimpleXMLElementIterator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SimpleXMLElementIterator)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SimpleXMLElementIterator)())->dynCreate(params, init));
 }
 Object coo_SimpleXMLElementIterator() {
-  Object r(NEW(c_SimpleXMLElementIterator)());
+  Object r(NEWOBJ(c_SimpleXMLElementIterator)());
   r->init();
   return r;
 }
@@ -6977,7 +6977,7 @@ void c_SimpleXMLElementIterator::destruct() {
   }
 }
 ObjectData *c_SimpleXMLElementIterator::cloneImpl() {
-  c_SimpleXMLElementIterator *obj = NEW(c_SimpleXMLElementIterator)();
+  c_SimpleXMLElementIterator *obj = NEWOBJ(c_SimpleXMLElementIterator)();
   c_SimpleXMLElementIterator::cloneSet(obj);
   return obj;
 }
@@ -7353,10 +7353,10 @@ struct ObjectStaticCallbacks cw_SimpleXMLElementIterator = {
   c_SimpleXMLElementIterator::os_get_call_info
 };
 Object co_DateTimeZone(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DateTimeZone)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DateTimeZone)())->dynCreate(params, init));
 }
 Object coo_DateTimeZone() {
-  Object r(NEW(c_DateTimeZone)());
+  Object r(NEWOBJ(c_DateTimeZone)());
   r->init();
   return r;
 }
@@ -7458,7 +7458,7 @@ void c_DateTimeZone::destruct() {
   }
 }
 ObjectData *c_DateTimeZone::cloneImpl() {
-  c_DateTimeZone *obj = NEW(c_DateTimeZone)();
+  c_DateTimeZone *obj = NEWOBJ(c_DateTimeZone)();
   c_DateTimeZone::cloneSet(obj);
   return obj;
 }
@@ -7868,10 +7868,10 @@ struct ObjectStaticCallbacks cw_DateTimeZone = {
   c_DateTimeZone::os_get_call_info
 };
 Object co_DOMNodeIterator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMNodeIterator)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMNodeIterator)())->dynCreate(params, init));
 }
 Object coo_DOMNodeIterator() {
-  Object r(NEW(c_DOMNodeIterator)());
+  Object r(NEWOBJ(c_DOMNodeIterator)());
   r->init();
   return r;
 }
@@ -7930,7 +7930,7 @@ void c_DOMNodeIterator::destruct() {
   }
 }
 ObjectData *c_DOMNodeIterator::cloneImpl() {
-  c_DOMNodeIterator *obj = NEW(c_DOMNodeIterator)();
+  c_DOMNodeIterator *obj = NEWOBJ(c_DOMNodeIterator)();
   c_DOMNodeIterator::cloneSet(obj);
   return obj;
 }
@@ -8306,10 +8306,10 @@ struct ObjectStaticCallbacks cw_DOMNodeIterator = {
   c_DOMNodeIterator::os_get_call_info
 };
 Object co_DOMImplementation(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMImplementation)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMImplementation)())->dynCreate(params, init));
 }
 Object coo_DOMImplementation() {
-  Object r(NEW(c_DOMImplementation)());
+  Object r(NEWOBJ(c_DOMImplementation)());
   r->init();
   return r;
 }
@@ -8368,7 +8368,7 @@ void c_DOMImplementation::destruct() {
   }
 }
 ObjectData *c_DOMImplementation::cloneImpl() {
-  c_DOMImplementation *obj = NEW(c_DOMImplementation)();
+  c_DOMImplementation *obj = NEWOBJ(c_DOMImplementation)();
   c_DOMImplementation::cloneSet(obj);
   return obj;
 }
@@ -8726,10 +8726,10 @@ struct ObjectStaticCallbacks cw_DOMImplementation = {
   c_DOMImplementation::os_get_call_info
 };
 Object co_SoapHeader(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SoapHeader)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SoapHeader)())->dynCreate(params, init));
 }
 Object coo_SoapHeader() {
-  Object r(NEW(c_SoapHeader)());
+  Object r(NEWOBJ(c_SoapHeader)());
   r->init();
   return r;
 }
@@ -8788,7 +8788,7 @@ void c_SoapHeader::destruct() {
   }
 }
 ObjectData *c_SoapHeader::cloneImpl() {
-  c_SoapHeader *obj = NEW(c_SoapHeader)();
+  c_SoapHeader *obj = NEWOBJ(c_SoapHeader)();
   c_SoapHeader::cloneSet(obj);
   return obj;
 }
@@ -9027,10 +9027,10 @@ struct ObjectStaticCallbacks cw_SoapHeader = {
   c_SoapHeader::os_get_call_info
 };
 Object co_DOMNotation(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMNotation)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMNotation)())->dynCreate(params, init));
 }
 Object coo_DOMNotation() {
-  Object r(NEW(c_DOMNotation)());
+  Object r(NEWOBJ(c_DOMNotation)());
   r->init();
   return r;
 }
@@ -9089,7 +9089,7 @@ void c_DOMNotation::destruct() {
   }
 }
 ObjectData *c_DOMNotation::cloneImpl() {
-  c_DOMNotation *obj = NEW(c_DOMNotation)();
+  c_DOMNotation *obj = NEWOBJ(c_DOMNotation)();
   c_DOMNotation::cloneSet(obj);
   return obj;
 }
@@ -9409,10 +9409,10 @@ struct ObjectStaticCallbacks cw_DOMNotation = {
   c_DOMNotation::os_get_call_info
 };
 Object co_DebuggerProxy(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DebuggerProxy)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DebuggerProxy)())->dynCreate(params, init));
 }
 Object coo_DebuggerProxy() {
-  Object r(NEW(c_DebuggerProxy)());
+  Object r(NEWOBJ(c_DebuggerProxy)());
   r->init();
   return r;
 }
@@ -9471,7 +9471,7 @@ void c_DebuggerProxy::destruct() {
   }
 }
 ObjectData *c_DebuggerProxy::cloneImpl() {
-  c_DebuggerProxy *obj = NEW(c_DebuggerProxy)();
+  c_DebuggerProxy *obj = NEWOBJ(c_DebuggerProxy)();
   c_DebuggerProxy::cloneSet(obj);
   return obj;
 }
@@ -9725,10 +9725,10 @@ struct ObjectStaticCallbacks cw_DebuggerProxy = {
   c_DebuggerProxy::os_get_call_info
 };
 Object co_Memcached(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_Memcached)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_Memcached)())->dynCreate(params, init));
 }
 Object coo_Memcached() {
-  Object r(NEW(c_Memcached)());
+  Object r(NEWOBJ(c_Memcached)());
   r->init();
   return r;
 }
@@ -9937,7 +9937,7 @@ void c_Memcached::destruct() {
   }
 }
 ObjectData *c_Memcached::cloneImpl() {
-  c_Memcached *obj = NEW(c_Memcached)();
+  c_Memcached *obj = NEWOBJ(c_Memcached)();
   c_Memcached::cloneSet(obj);
   return obj;
 }
@@ -12444,10 +12444,10 @@ struct ObjectStaticCallbacks cw_Memcached = {
   c_Memcached::os_get_call_info
 };
 Object co_DOMComment(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMComment)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMComment)())->dynCreate(params, init));
 }
 Object coo_DOMComment() {
-  Object r(NEW(c_DOMComment)());
+  Object r(NEWOBJ(c_DOMComment)());
   r->init();
   return r;
 }
@@ -12506,7 +12506,7 @@ void c_DOMComment::destruct() {
   }
 }
 ObjectData *c_DOMComment::cloneImpl() {
-  c_DOMComment *obj = NEW(c_DOMComment)();
+  c_DOMComment *obj = NEWOBJ(c_DOMComment)();
   c_DOMComment::cloneSet(obj);
   return obj;
 }
@@ -12685,10 +12685,10 @@ struct ObjectStaticCallbacks cw_DOMComment = {
   c_DOMComment::os_get_call_info
 };
 Object co_SQLite3(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SQLite3)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SQLite3)())->dynCreate(params, init));
 }
 Object coo_SQLite3() {
-  Object r(NEW(c_SQLite3)());
+  Object r(NEWOBJ(c_SQLite3)());
   r->init();
   return r;
 }
@@ -12747,7 +12747,7 @@ void c_SQLite3::destruct() {
   }
 }
 ObjectData *c_SQLite3::cloneImpl() {
-  c_SQLite3 *obj = NEW(c_SQLite3)();
+  c_SQLite3 *obj = NEWOBJ(c_SQLite3)();
   c_SQLite3::cloneSet(obj);
   return obj;
 }
@@ -13787,10 +13787,10 @@ struct ObjectStaticCallbacks cw_SQLite3 = {
   c_SQLite3::os_get_call_info
 };
 Object co_DOMAttr(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMAttr)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMAttr)())->dynCreate(params, init));
 }
 Object coo_DOMAttr() {
-  Object r(NEW(c_DOMAttr)());
+  Object r(NEWOBJ(c_DOMAttr)());
   r->init();
   return r;
 }
@@ -13849,7 +13849,7 @@ void c_DOMAttr::destruct() {
   }
 }
 ObjectData *c_DOMAttr::cloneImpl() {
-  c_DOMAttr *obj = NEW(c_DOMAttr)();
+  c_DOMAttr *obj = NEWOBJ(c_DOMAttr)();
   c_DOMAttr::cloneSet(obj);
   return obj;
 }
@@ -14251,10 +14251,10 @@ struct ObjectStaticCallbacks cw_DOMAttr = {
   c_DOMAttr::os_get_call_info
 };
 Object co_SoapVar(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SoapVar)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SoapVar)())->dynCreate(params, init));
 }
 Object coo_SoapVar() {
-  Object r(NEW(c_SoapVar)());
+  Object r(NEWOBJ(c_SoapVar)());
   r->init();
   return r;
 }
@@ -14313,7 +14313,7 @@ void c_SoapVar::destruct() {
   }
 }
 ObjectData *c_SoapVar::cloneImpl() {
-  c_SoapVar *obj = NEW(c_SoapVar)();
+  c_SoapVar *obj = NEWOBJ(c_SoapVar)();
   c_SoapVar::cloneSet(obj);
   return obj;
 }
@@ -14571,10 +14571,10 @@ struct ObjectStaticCallbacks cw_SoapVar = {
   c_SoapVar::os_get_call_info
 };
 Object co_DOMNamedNodeMap(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMNamedNodeMap)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMNamedNodeMap)())->dynCreate(params, init));
 }
 Object coo_DOMNamedNodeMap() {
-  Object r(NEW(c_DOMNamedNodeMap)());
+  Object r(NEWOBJ(c_DOMNamedNodeMap)());
   r->init();
   return r;
 }
@@ -14633,7 +14633,7 @@ void c_DOMNamedNodeMap::destruct() {
   }
 }
 ObjectData *c_DOMNamedNodeMap::cloneImpl() {
-  c_DOMNamedNodeMap *obj = NEW(c_DOMNamedNodeMap)();
+  c_DOMNamedNodeMap *obj = NEWOBJ(c_DOMNamedNodeMap)();
   c_DOMNamedNodeMap::cloneSet(obj);
   return obj;
 }
@@ -15169,10 +15169,10 @@ struct ObjectStaticCallbacks cw_DOMNamedNodeMap = {
   c_DOMNamedNodeMap::os_get_call_info
 };
 Object co_SQLite3Result(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SQLite3Result)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SQLite3Result)())->dynCreate(params, init));
 }
 Object coo_SQLite3Result() {
-  Object r(NEW(c_SQLite3Result)());
+  Object r(NEWOBJ(c_SQLite3Result)());
   r->init();
   return r;
 }
@@ -15231,7 +15231,7 @@ void c_SQLite3Result::destruct() {
   }
 }
 ObjectData *c_SQLite3Result::cloneImpl() {
-  c_SQLite3Result *obj = NEW(c_SQLite3Result)();
+  c_SQLite3Result *obj = NEWOBJ(c_SQLite3Result)();
   c_SQLite3Result::cloneSet(obj);
   return obj;
 }
@@ -15684,10 +15684,10 @@ struct ObjectStaticCallbacks cw_SQLite3Result = {
   c_SQLite3Result::os_get_call_info
 };
 Object co_SimpleXMLElement(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SimpleXMLElement)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SimpleXMLElement)())->dynCreate(params, init));
 }
 Object coo_SimpleXMLElement() {
-  Object r(NEW(c_SimpleXMLElement)());
+  Object r(NEWOBJ(c_SimpleXMLElement)());
   r->init();
   return r;
 }
@@ -15746,7 +15746,7 @@ void c_SimpleXMLElement::destruct() {
   }
 }
 ObjectData *c_SimpleXMLElement::cloneImpl() {
-  c_SimpleXMLElement *obj = NEW(c_SimpleXMLElement)();
+  c_SimpleXMLElement *obj = NEWOBJ(c_SimpleXMLElement)();
   c_SimpleXMLElement::cloneSet(obj);
   return obj;
 }
@@ -17170,10 +17170,10 @@ struct ObjectStaticCallbacks cw_SimpleXMLElement = {
   c_SimpleXMLElement::os_get_call_info
 };
 Object co_Memcache(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_Memcache)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_Memcache)())->dynCreate(params, init));
 }
 Object coo_Memcache() {
-  Object r(NEW(c_Memcache)());
+  Object r(NEWOBJ(c_Memcache)());
   r->init();
   return r;
 }
@@ -17232,7 +17232,7 @@ void c_Memcache::destruct() {
   }
 }
 ObjectData *c_Memcache::cloneImpl() {
-  c_Memcache *obj = NEW(c_Memcache)();
+  c_Memcache *obj = NEWOBJ(c_Memcache)();
   c_Memcache::cloneSet(obj);
   return obj;
 }
@@ -18727,10 +18727,10 @@ struct ObjectStaticCallbacks cw_Memcache = {
   c_Memcache::os_get_call_info
 };
 Object co_DOMProcessingInstruction(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMProcessingInstruction)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMProcessingInstruction)())->dynCreate(params, init));
 }
 Object coo_DOMProcessingInstruction() {
-  Object r(NEW(c_DOMProcessingInstruction)());
+  Object r(NEWOBJ(c_DOMProcessingInstruction)());
   r->init();
   return r;
 }
@@ -18789,7 +18789,7 @@ void c_DOMProcessingInstruction::destruct() {
   }
 }
 ObjectData *c_DOMProcessingInstruction::cloneImpl() {
-  c_DOMProcessingInstruction *obj = NEW(c_DOMProcessingInstruction)();
+  c_DOMProcessingInstruction *obj = NEWOBJ(c_DOMProcessingInstruction)();
   c_DOMProcessingInstruction::cloneSet(obj);
   return obj;
 }
@@ -19147,10 +19147,10 @@ struct ObjectStaticCallbacks cw_DOMProcessingInstruction = {
   c_DOMProcessingInstruction::os_get_call_info
 };
 Object co_EncodingMatch(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_EncodingMatch)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_EncodingMatch)())->dynCreate(params, init));
 }
 Object coo_EncodingMatch() {
-  Object r(NEW(c_EncodingMatch)());
+  Object r(NEWOBJ(c_EncodingMatch)());
   r->init();
   return r;
 }
@@ -19209,7 +19209,7 @@ void c_EncodingMatch::destruct() {
   }
 }
 ObjectData *c_EncodingMatch::cloneImpl() {
-  c_EncodingMatch *obj = NEW(c_EncodingMatch)();
+  c_EncodingMatch *obj = NEWOBJ(c_EncodingMatch)();
   c_EncodingMatch::cloneSet(obj);
   return obj;
 }
@@ -19577,10 +19577,10 @@ struct ObjectStaticCallbacks cw_EncodingMatch = {
   c_EncodingMatch::os_get_call_info
 };
 Object co_PDOStatement(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_PDOStatement)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_PDOStatement)())->dynCreate(params, init));
 }
 Object coo_PDOStatement() {
-  Object r(NEW(c_PDOStatement)());
+  Object r(NEWOBJ(c_PDOStatement)());
   r->init();
   return r;
 }
@@ -19639,7 +19639,7 @@ void c_PDOStatement::destruct() {
   }
 }
 ObjectData *c_PDOStatement::cloneImpl() {
-  c_PDOStatement *obj = NEW(c_PDOStatement)();
+  c_PDOStatement *obj = NEWOBJ(c_PDOStatement)();
   c_PDOStatement::cloneSet(obj);
   return obj;
 }
@@ -21205,10 +21205,10 @@ struct ObjectStaticCallbacks cw_PDOStatement = {
   c_PDOStatement::os_get_call_info
 };
 Object co_SoapClient(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SoapClient)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SoapClient)())->dynCreate(params, init));
 }
 Object coo_SoapClient() {
-  Object r(NEW(c_SoapClient)());
+  Object r(NEWOBJ(c_SoapClient)());
   r->init();
   return r;
 }
@@ -21267,7 +21267,7 @@ void c_SoapClient::destruct() {
   }
 }
 ObjectData *c_SoapClient::cloneImpl() {
-  c_SoapClient *obj = NEW(c_SoapClient)();
+  c_SoapClient *obj = NEWOBJ(c_SoapClient)();
   c_SoapClient::cloneSet(obj);
   return obj;
 }
@@ -22118,10 +22118,10 @@ struct ObjectStaticCallbacks cw_SoapClient = {
   c_SoapClient::os_get_call_info
 };
 Object co_SoapParam(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SoapParam)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SoapParam)())->dynCreate(params, init));
 }
 Object coo_SoapParam() {
-  Object r(NEW(c_SoapParam)());
+  Object r(NEWOBJ(c_SoapParam)());
   r->init();
   return r;
 }
@@ -22180,7 +22180,7 @@ void c_SoapParam::destruct() {
   }
 }
 ObjectData *c_SoapParam::cloneImpl() {
-  c_SoapParam *obj = NEW(c_SoapParam)();
+  c_SoapParam *obj = NEWOBJ(c_SoapParam)();
   c_SoapParam::cloneSet(obj);
   return obj;
 }
@@ -22362,10 +22362,10 @@ struct ObjectStaticCallbacks cw_SoapParam = {
   c_SoapParam::os_get_call_info
 };
 Object co_DateTime(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DateTime)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DateTime)())->dynCreate(params, init));
 }
 Object coo_DateTime() {
-  Object r(NEW(c_DateTime)());
+  Object r(NEWOBJ(c_DateTime)());
   r->init();
   return r;
 }
@@ -22456,7 +22456,7 @@ void c_DateTime::destruct() {
   }
 }
 ObjectData *c_DateTime::cloneImpl() {
-  c_DateTime *obj = NEW(c_DateTime)();
+  c_DateTime *obj = NEWOBJ(c_DateTime)();
   c_DateTime::cloneSet(obj);
   return obj;
 }
@@ -23104,10 +23104,10 @@ struct ObjectStaticCallbacks cw_DateTime = {
   c_DateTime::os_get_call_info
 };
 Object co_Collator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_Collator)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_Collator)())->dynCreate(params, init));
 }
 Object coo_Collator() {
-  Object r(NEW(c_Collator)());
+  Object r(NEWOBJ(c_Collator)());
   r->init();
   return r;
 }
@@ -23231,7 +23231,7 @@ void c_Collator::destruct() {
   }
 }
 ObjectData *c_Collator::cloneImpl() {
-  c_Collator *obj = NEW(c_Collator)();
+  c_Collator *obj = NEWOBJ(c_Collator)();
   c_Collator::cloneSet(obj);
   return obj;
 }
@@ -24067,10 +24067,10 @@ struct ObjectStaticCallbacks cw_Collator = {
   c_Collator::os_get_call_info
 };
 Object co_PDO(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_PDO)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_PDO)())->dynCreate(params, init));
 }
 Object coo_PDO() {
-  Object r(NEW(c_PDO)());
+  Object r(NEWOBJ(c_PDO)());
   r->init();
   return r;
 }
@@ -24361,7 +24361,7 @@ void c_PDO::destruct() {
   }
 }
 ObjectData *c_PDO::cloneImpl() {
-  c_PDO *obj = NEW(c_PDO)();
+  c_PDO *obj = NEWOBJ(c_PDO)();
   c_PDO::cloneSet(obj);
   return obj;
 }
@@ -25357,10 +25357,10 @@ struct ObjectStaticCallbacks cw_PDO = {
   c_PDO::os_get_call_info
 };
 Object co_ImageSprite(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_ImageSprite)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_ImageSprite)())->dynCreate(params, init));
 }
 Object coo_ImageSprite() {
-  Object r(NEW(c_ImageSprite)());
+  Object r(NEWOBJ(c_ImageSprite)());
   r->init();
   return r;
 }
@@ -25419,7 +25419,7 @@ void c_ImageSprite::destruct() {
   }
 }
 ObjectData *c_ImageSprite::cloneImpl() {
-  c_ImageSprite *obj = NEW(c_ImageSprite)();
+  c_ImageSprite *obj = NEWOBJ(c_ImageSprite)();
   c_ImageSprite::cloneSet(obj);
   return obj;
 }
@@ -26190,10 +26190,10 @@ struct ObjectStaticCallbacks cw_ImageSprite = {
   c_ImageSprite::os_get_call_info
 };
 Object co_DOMEntity(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMEntity)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMEntity)())->dynCreate(params, init));
 }
 Object coo_DOMEntity() {
-  Object r(NEW(c_DOMEntity)());
+  Object r(NEWOBJ(c_DOMEntity)());
   r->init();
   return r;
 }
@@ -26252,7 +26252,7 @@ void c_DOMEntity::destruct() {
   }
 }
 ObjectData *c_DOMEntity::cloneImpl() {
-  c_DOMEntity *obj = NEW(c_DOMEntity)();
+  c_DOMEntity *obj = NEWOBJ(c_DOMEntity)();
   c_DOMEntity::cloneSet(obj);
   return obj;
 }
@@ -26572,10 +26572,10 @@ struct ObjectStaticCallbacks cw_DOMEntity = {
   c_DOMEntity::os_get_call_info
 };
 Object co_XMLWriter(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_XMLWriter)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_XMLWriter)())->dynCreate(params, init));
 }
 Object coo_XMLWriter() {
-  Object r(NEW(c_XMLWriter)());
+  Object r(NEWOBJ(c_XMLWriter)());
   r->init();
   return r;
 }
@@ -26634,7 +26634,7 @@ void c_XMLWriter::destruct() {
   }
 }
 ObjectData *c_XMLWriter::cloneImpl() {
-  c_XMLWriter *obj = NEW(c_XMLWriter)();
+  c_XMLWriter *obj = NEWOBJ(c_XMLWriter)();
   c_XMLWriter::cloneSet(obj);
   return obj;
 }
@@ -29122,10 +29122,10 @@ struct ObjectStaticCallbacks cw_XMLWriter = {
   c_XMLWriter::os_get_call_info
 };
 Object co_DOMException(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMException)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMException)())->dynCreate(params, init));
 }
 Object coo_DOMException() {
-  Object r(NEW(c_DOMException)());
+  Object r(NEWOBJ(c_DOMException)());
   r->init();
   return r;
 }
@@ -29184,7 +29184,7 @@ void c_DOMException::destruct() {
   }
 }
 ObjectData *c_DOMException::cloneImpl() {
-  c_DOMException *obj = NEW(c_DOMException)();
+  c_DOMException *obj = NEWOBJ(c_DOMException)();
   c_DOMException::cloneSet(obj);
   return obj;
 }
@@ -29382,10 +29382,10 @@ struct ObjectStaticCallbacks cw_DOMException = {
   c_DOMException::os_get_call_info
 };
 Object co_DOMXPath(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMXPath)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMXPath)())->dynCreate(params, init));
 }
 Object coo_DOMXPath() {
-  Object r(NEW(c_DOMXPath)());
+  Object r(NEWOBJ(c_DOMXPath)());
   r->init();
   return r;
 }
@@ -29444,7 +29444,7 @@ void c_DOMXPath::destruct() {
   }
 }
 ObjectData *c_DOMXPath::cloneImpl() {
-  c_DOMXPath *obj = NEW(c_DOMXPath)();
+  c_DOMXPath *obj = NEWOBJ(c_DOMXPath)();
   c_DOMXPath::cloneSet(obj);
   return obj;
 }
@@ -30026,10 +30026,10 @@ struct ObjectStaticCallbacks cw_DOMXPath = {
   c_DOMXPath::os_get_call_info
 };
 Object co_SoapServer(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SoapServer)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SoapServer)())->dynCreate(params, init));
 }
 Object coo_SoapServer() {
-  Object r(NEW(c_SoapServer)());
+  Object r(NEWOBJ(c_SoapServer)());
   r->init();
   return r;
 }
@@ -30088,7 +30088,7 @@ void c_SoapServer::destruct() {
   }
 }
 ObjectData *c_SoapServer::cloneImpl() {
-  c_SoapServer *obj = NEW(c_SoapServer)();
+  c_SoapServer *obj = NEWOBJ(c_SoapServer)();
   c_SoapServer::cloneSet(obj);
   return obj;
 }
@@ -30745,10 +30745,10 @@ struct ObjectStaticCallbacks cw_SoapServer = {
   c_SoapServer::os_get_call_info
 };
 Object co_DOMNode(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMNode)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMNode)())->dynCreate(params, init));
 }
 Object coo_DOMNode() {
-  Object r(NEW(c_DOMNode)());
+  Object r(NEWOBJ(c_DOMNode)());
   r->init();
   return r;
 }
@@ -30807,7 +30807,7 @@ void c_DOMNode::destruct() {
   }
 }
 ObjectData *c_DOMNode::cloneImpl() {
-  c_DOMNode *obj = NEW(c_DOMNode)();
+  c_DOMNode *obj = NEWOBJ(c_DOMNode)();
   c_DOMNode::cloneSet(obj);
   return obj;
 }
@@ -32073,10 +32073,10 @@ struct ObjectStaticCallbacks cw_DOMNode = {
   c_DOMNode::os_get_call_info
 };
 Object co_SpoofChecker(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SpoofChecker)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SpoofChecker)())->dynCreate(params, init));
 }
 Object coo_SpoofChecker() {
-  Object r(NEW(c_SpoofChecker)());
+  Object r(NEWOBJ(c_SpoofChecker)());
   r->init();
   return r;
 }
@@ -32161,7 +32161,7 @@ void c_SpoofChecker::destruct() {
   }
 }
 ObjectData *c_SpoofChecker::cloneImpl() {
-  c_SpoofChecker *obj = NEW(c_SpoofChecker)();
+  c_SpoofChecker *obj = NEWOBJ(c_SpoofChecker)();
   c_SpoofChecker::cloneSet(obj);
   return obj;
 }
@@ -32555,10 +32555,10 @@ struct ObjectStaticCallbacks cw_SpoofChecker = {
   c_SpoofChecker::os_get_call_info
 };
 Object co_DOMDocument(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMDocument)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMDocument)())->dynCreate(params, init));
 }
 Object coo_DOMDocument() {
-  Object r(NEW(c_DOMDocument)());
+  Object r(NEWOBJ(c_DOMDocument)());
   r->init();
   return r;
 }
@@ -32617,7 +32617,7 @@ void c_DOMDocument::destruct() {
   }
 }
 ObjectData *c_DOMDocument::cloneImpl() {
-  c_DOMDocument *obj = NEW(c_DOMDocument)();
+  c_DOMDocument *obj = NEWOBJ(c_DOMDocument)();
   c_DOMDocument::cloneSet(obj);
   return obj;
 }
@@ -34645,10 +34645,10 @@ struct ObjectStaticCallbacks cw_DOMDocument = {
   c_DOMDocument::os_get_call_info
 };
 Object co_LibXMLError(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_LibXMLError)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_LibXMLError)())->dynCreate(params, init));
 }
 Object coo_LibXMLError() {
-  Object r(NEW(c_LibXMLError)());
+  Object r(NEWOBJ(c_LibXMLError)());
   r->init();
   return r;
 }
@@ -34707,7 +34707,7 @@ void c_LibXMLError::destruct() {
   }
 }
 ObjectData *c_LibXMLError::cloneImpl() {
-  c_LibXMLError *obj = NEW(c_LibXMLError)();
+  c_LibXMLError *obj = NEWOBJ(c_LibXMLError)();
   c_LibXMLError::cloneSet(obj);
   return obj;
 }
@@ -34859,10 +34859,10 @@ struct ObjectStaticCallbacks cw_LibXMLError = {
   c_LibXMLError::os_get_call_info
 };
 Object co_SoapFault(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SoapFault)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SoapFault)())->dynCreate(params, init));
 }
 Object coo_SoapFault() {
-  Object r(NEW(c_SoapFault)());
+  Object r(NEWOBJ(c_SoapFault)());
   r->init();
   return r;
 }
@@ -34921,7 +34921,7 @@ void c_SoapFault::destruct() {
   }
 }
 ObjectData *c_SoapFault::cloneImpl() {
-  c_SoapFault *obj = NEW(c_SoapFault)();
+  c_SoapFault *obj = NEWOBJ(c_SoapFault)();
   c_SoapFault::cloneSet(obj);
   return obj;
 }
@@ -35223,10 +35223,10 @@ struct ObjectStaticCallbacks cw_SoapFault = {
   c_SoapFault::os_get_call_info
 };
 Object co_DOMElement(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DOMElement)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DOMElement)())->dynCreate(params, init));
 }
 Object coo_DOMElement() {
-  Object r(NEW(c_DOMElement)());
+  Object r(NEWOBJ(c_DOMElement)());
   r->init();
   return r;
 }
@@ -35285,7 +35285,7 @@ void c_DOMElement::destruct() {
   }
 }
 ObjectData *c_DOMElement::cloneImpl() {
-  c_DOMElement *obj = NEW(c_DOMElement)();
+  c_DOMElement *obj = NEWOBJ(c_DOMElement)();
   c_DOMElement::cloneSet(obj);
   return obj;
 }

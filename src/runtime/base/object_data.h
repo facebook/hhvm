@@ -373,7 +373,6 @@ class ItemSize {
   };
  public:
   enum {
-    index = ItemSize<prev>::index + (int)(pval < M),
     value = (pval < M ? ALIGN_WORD(pval + (pval >> 1)) : pval)
   };
 };
@@ -382,46 +381,38 @@ template<>
 class ItemSize<UNIT_SIZE> {
  public:
   enum {
-    index = 0,
     value = UNIT_SIZE
   };
 };
 
 typedef ObjectAllocatorBase *(*ObjectAllocatorBaseGetter)(void);
-class ObjectAllocatorCollector {
-public:
-  static std::map<int, ObjectAllocatorBaseGetter> &getWrappers() {
-    static std::map<int, ObjectAllocatorBaseGetter> wrappers;
-    return wrappers;
-  }
-  template <typename T>
-  static ObjectAllocatorBaseGetter setup() {
-    ThreadLocalSingleton<ObjectAllocator<ItemSize<sizeof(T)>::value> > tls;
-    return getWrappers()[ItemSize<sizeof(T)>::index] =
-      (ObjectAllocatorBaseGetter)tls.get;
-  }
-};
+template <typename T>
+ObjectAllocatorBaseGetter ObjectAllocatorInitSetup() {
+  ThreadLocalSingleton<ObjectAllocator<ItemSize<sizeof(T)>::value> > tls;
+  GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.get));
+  return (ObjectAllocatorBaseGetter)tls.getNoCheck;
+}
 
 class ObjectAllocatorWrapper {
 public:
-  ObjectAllocatorWrapper(ObjectAllocatorBaseGetter get)
-  : m_get(get) {
+  ObjectAllocatorWrapper(ObjectAllocatorBaseGetter getNoCheck)
+  : m_getNoCheck(getNoCheck) {
   }
 
   ObjectAllocatorBase *operator->() const {
-    return m_get();
+    return m_getNoCheck();
   }
 
   ObjectAllocatorBase *get() const {
-    return m_get();
+    return m_getNoCheck();
   }
 
   ObjectAllocatorBase *getNoCheck() const {
-    return m_get();
+    return m_getNoCheck();
   }
 
 private:
-  ObjectAllocatorBase *(*m_get)(void);
+  ObjectAllocatorBase *(*m_getNoCheck)(void);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

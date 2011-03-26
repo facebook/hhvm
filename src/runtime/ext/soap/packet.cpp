@@ -25,7 +25,7 @@ namespace HPHP {
 
 static void add_soap_fault(c_SoapClient *client, CStrRef code, CStrRef fault) {
   client->m_soap_fault =
-    Object((NEW(c_SoapFault)())->create(String(code, CopyString), fault));
+    Object((NEWOBJ(c_SoapFault)())->create(String(code, CopyString), fault));
 }
 
 /* SOAP client calls this function to parse response from SOAP server */
@@ -254,7 +254,7 @@ bool parse_packet_soap(c_SoapClient *obj, const char *buffer,
       }
     }
     obj->m_soap_fault =
-      Object((NEW(c_SoapFault)())->create(String(faultcode, CopyString),
+      Object((NEWOBJ(c_SoapFault)())->create(String(faultcode, CopyString),
                                           faultstring, faultactor, details));
     xmlFreeDoc(response);
     return false;

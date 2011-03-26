@@ -135,7 +135,7 @@ bool c_SplObjectStorage::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_SplObjectStorage::cloneImpl() {
-  c_SplObjectStorage *obj = NEW(c_SplObjectStorage)();
+  c_SplObjectStorage *obj = NEWOBJ(c_SplObjectStorage)();
   c_SplObjectStorage::cloneSet(obj);
   return obj;
 }
@@ -727,10 +727,10 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
 }
 namespace hphp_impl_splitter {}
 Object co_SplObjectStorage(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_SplObjectStorage)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_SplObjectStorage)())->dynCreate(params, init));
 }
 Object coo_SplObjectStorage() {
-  Object r(NEW(c_SplObjectStorage)());
+  Object r(NEWOBJ(c_SplObjectStorage)());
   r->init();
   return r;
 }

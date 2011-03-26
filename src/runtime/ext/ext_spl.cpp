@@ -94,7 +94,7 @@ void throw_spl_exception(const char *fmt, ...) {
   Util::string_vsnprintf(msg, fmt, ap);
   va_end(ap);
 
-  throw (Object)p_Exception(NEW(c_Exception)())->create(Variant(msg));
+  throw (Object)p_Exception(NEWOBJ(c_Exception)())->create(Variant(msg));
 }
 
 static bool s_inited = false;

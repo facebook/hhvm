@@ -27,11 +27,13 @@ using namespace boost;
 
 namespace HPHP {
 
+extern GlobalVariables *get_global_variables_check();
+
 ///////////////////////////////////////////////////////////////////////////////
 // initializer
 
-std::vector<AllocatorThreadLocalInit>& GetAllocatorInitList() {
-  static std::vector<AllocatorThreadLocalInit> allocatorInitList;
+std::set<AllocatorThreadLocalInit>& GetAllocatorInitList() {
+  static std::set<AllocatorThreadLocalInit> allocatorInitList;
   if (!AsyncFuncImpl::GetThreadInitFunc()) {
     AsyncFuncImpl::SetThreadInitFunc(InitAllocatorThreadLocal, NULL);
   }
@@ -39,11 +41,12 @@ std::vector<AllocatorThreadLocalInit>& GetAllocatorInitList() {
 }
 
 void InitAllocatorThreadLocal(void *arg /* = NULL */) {
-  for (std::vector<AllocatorThreadLocalInit>::iterator it =
+  for (std::set<AllocatorThreadLocalInit>::iterator it =
       GetAllocatorInitList().begin();
       it != GetAllocatorInitList().end(); it++) {
     (*it)();
   }
+  get_global_variables_check();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

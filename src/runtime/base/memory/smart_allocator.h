@@ -74,13 +74,13 @@ namespace HPHP {
  */
 
 typedef void (*AllocatorThreadLocalInit)(void);
-std::vector<AllocatorThreadLocalInit>& GetAllocatorInitList();
+std::set<AllocatorThreadLocalInit>& GetAllocatorInitList();
 void InitAllocatorThreadLocal(void* arg = NULL);
 template<typename T>
 class StaticInitializerAllocatorSetup {
 public:
   StaticInitializerAllocatorSetup() {
-    GetAllocatorInitList().push_back(T::AllocatorSetup);
+    GetAllocatorInitList().insert(T::AllocatorSetup);
   }
 };
 
@@ -376,7 +376,7 @@ class SmartAllocator : public SmartAllocatorImpl {
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T)  \
   ObjectAllocatorWrapper NS::T::Allocator(                      \
-    ObjectAllocatorCollector::setup<NS::T>());                  \
+    ObjectAllocatorInitSetup<NS::T>());                         \
   void NS::T::release() {                                       \
     destruct();                                                 \
     DELETE_EX_CLS(NS, T);                                       \

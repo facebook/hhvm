@@ -206,7 +206,7 @@ static void php_dom_throw_error(dom_exception_code error_code,
   }
 
   if (strict_error) {
-    p_DOMException e(NEW(c_DOMException)());
+    p_DOMException e(NEWOBJ(c_DOMException)());
     e->t___construct(error_message);
     throw e;
   }
@@ -1275,7 +1275,7 @@ static Variant php_xpath_eval(c_DOMXPath * domxpath, CStrRef expr,
         retval.append(create_node_object(node, domxpath->m_doc, owner));
       }
     }
-    c_DOMNodeList *nodelist = NEW(c_DOMNodeList)();
+    c_DOMNodeList *nodelist = NEWOBJ(c_DOMNodeList)();
     nodelist->m_doc = domxpath->m_doc;
     nodelist->m_baseobjptr = retval;
     nodelist->m_nodetype = DOM_NODESET;
@@ -1651,7 +1651,7 @@ static Variant domnode_childnodes_read(CObjRef obj) {
   if (!dom_node_children_valid(nodep)) {
     return null;
   }
-  c_DOMNodeList *retval = NEW(c_DOMNodeList)();
+  c_DOMNodeList *retval = NEWOBJ(c_DOMNodeList)();
   retval->m_doc = domnode->doc();
   retval->m_baseobj = obj;
   retval->m_nodetype = XML_ELEMENT_NODE;
@@ -1689,7 +1689,7 @@ static Variant domnode_nextsibling_read(CObjRef obj) {
 static Variant domnode_attributes_read(CObjRef obj) {
   CHECK_NODE(nodep);
   if (nodep->type == XML_ELEMENT_NODE) {
-    c_DOMNamedNodeMap *nodemap = NEW(c_DOMNamedNodeMap)();
+    c_DOMNamedNodeMap *nodemap = NEWOBJ(c_DOMNamedNodeMap)();
     nodemap->m_doc = domnode->doc();
     nodemap->m_baseobj = obj;
     nodemap->m_nodetype = XML_ATTRIBUTE_NODE;
@@ -2838,7 +2838,7 @@ Variant c_DOMText::t_splittext(int64 offset) {
     xmlAddNextSibling(node, nnode);
     nnode->type = XML_TEXT_NODE;
   }
-  c_DOMText *ret = NEW(c_DOMText)();
+  c_DOMText *ret = NEWOBJ(c_DOMText)();
   ret->m_doc = doc();
   ret->m_node = nnode;
   appendOrphan(*doc()->m_orphans, nnode);
@@ -2890,7 +2890,7 @@ static Variant dom_document_doctype_read(CObjRef obj) {
 }
 
 static Variant dom_document_implementation_read(CObjRef obj) {
-  return NEW(c_DOMImplementation)();
+  return NEWOBJ(c_DOMImplementation)();
 }
 
 static Variant dom_document_document_element_read(CObjRef obj) {
@@ -3125,7 +3125,7 @@ Variant c_DOMDocument::t_createattribute(CStrRef name) {
   if (!node) {
     return false;
   }
-  c_DOMAttr *ret = NEW(c_DOMAttr)();
+  c_DOMAttr *ret = NEWOBJ(c_DOMAttr)();
   ret->m_doc = this;
   ret->m_node = (xmlNodePtr)node;
   appendOrphan(*m_orphans, (xmlNodePtr)node);
@@ -3179,7 +3179,7 @@ Variant c_DOMDocument::t_createattributens(CStrRef namespaceuri,
   if (nodep == NULL) {
     return false;
   }
-  c_DOMAttr *ret = NEW(c_DOMAttr)();
+  c_DOMAttr *ret = NEWOBJ(c_DOMAttr)();
   ret->m_doc = this;
   ret->m_node = nodep;
   appendOrphan(*m_orphans, nodep);
@@ -3193,7 +3193,7 @@ Variant c_DOMDocument::t_createcdatasection(CStrRef data) {
   if (!node) {
     return false;
   }
-  c_DOMCDATASection *ret = NEW(c_DOMCDATASection)();
+  c_DOMCDATASection *ret = NEWOBJ(c_DOMCDATASection)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(*m_orphans, node);
@@ -3207,7 +3207,7 @@ Variant c_DOMDocument::t_createcomment(CStrRef data) {
   if (!node) {
     return false;
   }
-  c_DOMComment *ret = NEW(c_DOMComment)();
+  c_DOMComment *ret = NEWOBJ(c_DOMComment)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(*m_orphans, node);
@@ -3221,7 +3221,7 @@ Variant c_DOMDocument::t_createdocumentfragment() {
   if (!node) {
     return false;
   }
-  c_DOMDocumentFragment *ret = NEW(c_DOMDocumentFragment)();
+  c_DOMDocumentFragment *ret = NEWOBJ(c_DOMDocumentFragment)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(*m_orphans, node);
@@ -3241,7 +3241,7 @@ Variant c_DOMDocument::t_createelement(CStrRef name,
   if (!node) {
     return false;
   }
-  c_DOMElement *ret = NEW(c_DOMElement)();
+  c_DOMElement *ret = NEWOBJ(c_DOMElement)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(*m_orphans, node);
@@ -3291,7 +3291,7 @@ Variant c_DOMDocument::t_createelementns(CStrRef namespaceuri,
     return false;
   }
   nodep->ns = nsptr;
-  c_DOMElement *ret = NEW(c_DOMElement)();
+  c_DOMElement *ret = NEWOBJ(c_DOMElement)();
   ret->m_doc = this;
   ret->m_node = nodep;
   appendOrphan(*m_orphans, nodep);
@@ -3309,7 +3309,7 @@ Variant c_DOMDocument::t_createentityreference(CStrRef name) {
   if (!node) {
     return false;
   }
-  c_DOMEntity *ret = NEW(c_DOMEntity)();
+  c_DOMEntity *ret = NEWOBJ(c_DOMEntity)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(*m_orphans, node);
@@ -3331,7 +3331,7 @@ Variant c_DOMDocument::t_createprocessinginstruction(CStrRef target,
     return false;
   }
   node->doc = docp;
-  c_DOMProcessingInstruction *ret = NEW(c_DOMProcessingInstruction)();
+  c_DOMProcessingInstruction *ret = NEWOBJ(c_DOMProcessingInstruction)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(*m_orphans, node);
@@ -3345,7 +3345,7 @@ Variant c_DOMDocument::t_createtextnode(CStrRef data) {
   if (!node) {
     return false;
   }
-  c_DOMText *ret = NEW(c_DOMText)();
+  c_DOMText *ret = NEWOBJ(c_DOMText)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(*m_orphans, node);
@@ -3357,7 +3357,7 @@ Variant c_DOMDocument::t_getelementbyid(CStrRef elementid) {
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlAttrPtr attrp = xmlGetID(docp, (xmlChar*)elementid.data());
   if (attrp && attrp->parent) {
-    c_DOMText *ret = NEW(c_DOMText)();
+    c_DOMText *ret = NEWOBJ(c_DOMText)();
     ret->m_doc = this;
     ret->m_node = attrp->parent;
     return ret;
@@ -3367,7 +3367,7 @@ Variant c_DOMDocument::t_getelementbyid(CStrRef elementid) {
 
 Variant c_DOMDocument::t_getelementsbytagname(CStrRef name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::getelementsbytagname);
-  c_DOMNodeList *ret = NEW(c_DOMNodeList)();
+  c_DOMNodeList *ret = NEWOBJ(c_DOMNodeList)();
   ret->m_doc = this;
   ret->m_baseobj = this;
   ret->m_nodetype = 0;
@@ -3378,7 +3378,7 @@ Variant c_DOMDocument::t_getelementsbytagname(CStrRef name) {
 Variant c_DOMDocument::t_getelementsbytagnamens(CStrRef namespaceuri,
                                                 CStrRef localname) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::getelementsbytagnamens);
-  c_DOMNodeList *ret = NEW(c_DOMNodeList)();
+  c_DOMNodeList *ret = NEWOBJ(c_DOMNodeList)();
   ret->m_doc = this;
   ret->m_baseobj = this;
   ret->m_nodetype = 0;
@@ -3713,7 +3713,7 @@ static Variant dom_documenttype_name_read(CObjRef obj) {
 
 static Variant dom_documenttype_entities_read(CObjRef obj) {
   CHECK_DOCTYPE(doctypep);
-  c_DOMNamedNodeMap *ret = NEW(c_DOMNamedNodeMap)();
+  c_DOMNamedNodeMap *ret = NEWOBJ(c_DOMNamedNodeMap)();
   ret->m_doc = domdoctype->doc();
   ret->m_baseobj = obj;
   ret->m_nodetype = XML_ENTITY_NODE;
@@ -3723,7 +3723,7 @@ static Variant dom_documenttype_entities_read(CObjRef obj) {
 
 static Variant dom_documenttype_notations_read(CObjRef obj) {
   CHECK_DOCTYPE(doctypep);
-  c_DOMNamedNodeMap *ret = NEW(c_DOMNamedNodeMap)();
+  c_DOMNamedNodeMap *ret = NEWOBJ(c_DOMNamedNodeMap)();
   ret->m_doc = domdoctype->doc();
   ret->m_baseobj = obj;
   ret->m_nodetype = XML_NOTATION_NODE;
@@ -3984,7 +3984,7 @@ Variant c_DOMElement::t_getattributenode(CStrRef name) {
     attrp->ns = curns;
     owner = true;
   }
-  c_DOMNode *ret = NEW(c_DOMAttr)();
+  c_DOMNode *ret = NEWOBJ(c_DOMAttr)();
   ret->m_doc = doc();
   ret->m_node = (xmlNodePtr)attrp;
   if (owner) {
@@ -4003,7 +4003,7 @@ Object c_DOMElement::t_getattributenodens(CStrRef namespaceuri,
   if (attrp == NULL) {
     return null_object;
   }
-  c_DOMNode *ret = NEW(c_DOMAttr)();
+  c_DOMNode *ret = NEWOBJ(c_DOMAttr)();
   ret->m_doc = doc();
   ret->m_node = (xmlNodePtr)attrp;
   return ret;
@@ -4035,7 +4035,7 @@ String c_DOMElement::t_getattributens(CStrRef namespaceuri,
 
 Object c_DOMElement::t_getelementsbytagname(CStrRef name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::getelementsbytagname);
-  c_DOMNodeList *ret = NEW(c_DOMNodeList)();
+  c_DOMNodeList *ret = NEWOBJ(c_DOMNodeList)();
   ret->m_doc = doc();
   ret->m_baseobj = this;
   ret->m_nodetype = 0;
@@ -4046,7 +4046,7 @@ Object c_DOMElement::t_getelementsbytagname(CStrRef name) {
 Object c_DOMElement::t_getelementsbytagnamens(CStrRef namespaceuri,
                                               CStrRef localname) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::getelementsbytagnamens);
-  c_DOMNodeList *ret = NEW(c_DOMNodeList)();
+  c_DOMNodeList *ret = NEWOBJ(c_DOMNodeList)();
   ret->m_doc = doc();
   ret->m_baseobj = this;
   ret->m_nodetype = 0;
@@ -4122,7 +4122,7 @@ Variant c_DOMElement::t_removeattributenode(CObjRef oldattr) {
     return false;
   }
   xmlUnlinkNode((xmlNodePtr)attrp);
-  c_DOMAttr *ret = NEW(c_DOMAttr)();
+  c_DOMAttr *ret = NEWOBJ(c_DOMAttr)();
   ret->m_doc = doc();
   ret->m_node = (xmlNodePtr)attrp;
   appendOrphan(*doc()->m_orphans, (xmlNodePtr)attrp);
@@ -4206,7 +4206,7 @@ Variant c_DOMElement::t_setattribute(CStrRef name, CStrRef value) {
     raise_warning("No such attribute '%s'", name.data());
     return false;
   }
-  c_DOMAttr *ret = NEW(c_DOMAttr)();
+  c_DOMAttr *ret = NEWOBJ(c_DOMAttr)();
   ret->m_doc = doc();
   ret->m_node = (xmlNodePtr)attr;
   return ret;
@@ -4240,7 +4240,7 @@ Variant c_DOMElement::t_setattributenode(CObjRef newattr) {
   xmlAddChild(nodep, (xmlNodePtr)attrp);
   /* Returns old property if removed otherwise NULL */
   if (existattrp != NULL) {
-    c_DOMAttr *ret = NEW(c_DOMAttr)();
+    c_DOMAttr *ret = NEWOBJ(c_DOMAttr)();
     ret->m_doc = doc();
     ret->m_node = (xmlNodePtr)existattrp;
     return ret;
@@ -4282,7 +4282,7 @@ Variant c_DOMElement::t_setattributenodens(CObjRef newattr) {
   xmlAddChild(nodep, (xmlNodePtr) attrp);
   /* Returns old property if removed otherwise NULL */
   if (existattrp != NULL) {
-    c_DOMAttr *ret = NEW(c_DOMAttr)();
+    c_DOMAttr *ret = NEWOBJ(c_DOMAttr)();
     ret->m_doc = doc();
     ret->m_node = (xmlNodePtr)existattrp;
     return ret;
@@ -4910,7 +4910,7 @@ bool c_DOMNamedNodeMap::t___isset(Variant name) {
 
 Variant c_DOMNamedNodeMap::t_getiterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMNamedNodeMap, DOMNamedNodeMap::getiterator);
-  c_DOMNodeIterator *iter = NEW(c_DOMNodeIterator)();
+  c_DOMNodeIterator *iter = NEWOBJ(c_DOMNodeIterator)();
   iter->reset_iterator(this);
   return Object(iter);
 }
@@ -5047,7 +5047,7 @@ Variant c_DOMNodeList::t_item(int64 index) {
 
 Variant c_DOMNodeList::t_getiterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DOMNodeList, DOMNodeList::getiterator);
-  c_DOMNodeIterator *iter = NEW(c_DOMNodeIterator)();
+  c_DOMNodeIterator *iter = NEWOBJ(c_DOMNodeIterator)();
   iter->reset_iterator(this);
   return Object(iter);
 }
@@ -5161,7 +5161,7 @@ Variant c_DOMImplementation::t_createdocument
     xmlDocSetRootElement(docp, nodep);
     xmlFree(localname);
   }
-  c_DOMDocument *ret = NEW(c_DOMDocument)();
+  c_DOMDocument *ret = NEWOBJ(c_DOMDocument)();
   ret->m_node = (xmlNodePtr)docp;
   ret->m_owner = true;
   return ret;

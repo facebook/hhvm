@@ -63,7 +63,7 @@ bool TestExtIcu_ucsdet::RunTests(const std::string &which) {
 bool TestExtIcu_ucsdet::detect_and_convert_to_utf8(
   CStrRef bytes,
   CStrRef utf8) {
-  p_EncodingDetector detector(NEW(c_EncodingDetector)());
+  p_EncodingDetector detector(NEWOBJ(c_EncodingDetector)());
   detector->t_settext(bytes);
   Object matchObj = detector->t_detect();
   p_EncodingMatch match = matchObj.getTyped<c_EncodingMatch>();
@@ -74,7 +74,7 @@ bool TestExtIcu_ucsdet::detect_and_convert_to_utf8(
 }
 
 bool TestExtIcu_ucsdet::test_uninitialized() {
-  p_EncodingDetector detector(NEW(c_EncodingDetector)());
+  p_EncodingDetector detector(NEWOBJ(c_EncodingDetector)());
 
   try {
     Object matchObj = detector->t_detect();
@@ -89,7 +89,7 @@ bool TestExtIcu_ucsdet::test_basics() {
   // This is as unmistakably UTF-8 as it gets.
   const char* utf8_snowman_with_bom = "\uFEFF\u2603";
 
-  p_EncodingDetector detector(NEW(c_EncodingDetector)());
+  p_EncodingDetector detector(NEWOBJ(c_EncodingDetector)());
 
   detector->t_settext(utf8_snowman_with_bom);
   Object matchObj = detector->t_detect();
@@ -107,7 +107,7 @@ bool TestExtIcu_ucsdet::test_empty() {
 }
 
 bool TestExtIcu_ucsdet::test_cannot_detect() {
-  p_EncodingDetector detector(NEW(c_EncodingDetector)());
+  p_EncodingDetector detector(NEWOBJ(c_EncodingDetector)());
 
   // The detector has no idea what to do with this.
   detector->t_settext("\xc7\xe8\xec\xed\xe8\xe9 \xe2\xe5\xf7\xe5\xf0");
@@ -120,7 +120,7 @@ bool TestExtIcu_ucsdet::test_cannot_detect() {
 bool TestExtIcu_ucsdet::test_declared_encoding() {
   // Right now (ICU 4.6), this API doesn't actually do anything, but
   // let's at least verify it doesn't crash.
-  p_EncodingDetector detector(NEW(c_EncodingDetector)());
+  p_EncodingDetector detector(NEWOBJ(c_EncodingDetector)());
   detector->t_settext("Yo!");
   detector->t_setdeclaredencoding("windows-1251");
 

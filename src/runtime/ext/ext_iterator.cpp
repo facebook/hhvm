@@ -150,7 +150,7 @@ Variant f_hphp_recursiveiteratoriterator_current(CObjRef obj) {
   ASSERT(size > 0);
   if (rii->m_iterator.is<RecursiveDirectoryIterator>()) {
     c_RecursiveDirectoryIterator *c_rdi =
-      NEW(c_RecursiveDirectoryIterator)();
+      NEWOBJ(c_RecursiveDirectoryIterator)();
     c_rdi->m_rsrc = rii->m_iterators[size-1].first;
     return f_hphp_recursivedirectoryiterator_current(c_rdi);
   }
@@ -163,7 +163,7 @@ Variant f_hphp_recursiveiteratoriterator_key(CObjRef obj) {
   ASSERT(size > 0);
   if (rii->m_iterator.is<RecursiveDirectoryIterator>()) {
     c_RecursiveDirectoryIterator *c_rdi =
-      NEW(c_RecursiveDirectoryIterator)();
+      NEWOBJ(c_RecursiveDirectoryIterator)();
     c_rdi->m_rsrc = rii->m_iterators[size-1].first;
     return f_hphp_recursivedirectoryiterator_key(c_rdi);
   }
@@ -246,7 +246,7 @@ void f_hphp_recursiveiteratoriterator_rewind(CObjRef obj) {
   rii->m_iterators.push_back(std::pair<Object,bool>(rii->m_iterator, 0));
   if (rii->m_iterator.is<RecursiveDirectoryIterator>()) {
     c_RecursiveDirectoryIterator *c_rdi =
-      NEW(c_RecursiveDirectoryIterator)();
+      NEWOBJ(c_RecursiveDirectoryIterator)();
     c_rdi->m_rsrc = rii->m_iterator;
     f_hphp_recursivedirectoryiterator_rewind(c_rdi);
     if (!f_hphp_recursiveiteratoriterator_valid(obj)) {
@@ -380,7 +380,7 @@ Variant f_hphp_recursivedirectoryiterator_current(CObjRef obj) {
     return pathName;
   }
   if (rdi->m_flags & HPHP::q_RecursiveDirectoryIterator_CURRENT_AS_FILEINFO) {
-    c_SplFileInfo *c_splfi = NEW(c_SplFileInfo)();
+    c_SplFileInfo *c_splfi = NEWOBJ(c_SplFileInfo)();
     c_splfi->m_rsrc = NEW(SplFileInfo)(pathName);
     return c_splfi;
   }
@@ -394,7 +394,7 @@ bool f_hphp_recursivedirectoryiterator_haschildren(CObjRef obj) {
 Object f_hphp_recursivedirectoryiterator_getchildren(CObjRef obj) {
   if (!f_hphp_recursivedirectoryiterator_haschildren(obj)) return Object();
   RecursiveDirectoryIterator *rdi = get_recursivedirectoryiterator(obj);
-  c_RecursiveDirectoryIterator *c_rdi = NEW(c_RecursiveDirectoryIterator)();
+  c_RecursiveDirectoryIterator *c_rdi = NEWOBJ(c_RecursiveDirectoryIterator)();
   c_rdi->m_rsrc =
     NEW(RecursiveDirectoryIterator)(rdi->getPathName(), rdi->m_flags);
   return c_rdi;

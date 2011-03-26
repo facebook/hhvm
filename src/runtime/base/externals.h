@@ -144,6 +144,7 @@ extern void init_constant_table();
  */
 class GlobalVariables;
 extern GlobalVariables *get_global_variables();
+extern GlobalVariables *get_global_variables_check();
 extern void init_global_variables();
 extern void free_global_variables();
 extern Array get_global_array_wrapper();

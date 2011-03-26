@@ -83,7 +83,7 @@ class c_DateTime : public ExtObjectData {
 
   // Helper for DateTime -> c_DateTime conversion
   public: static Object wrap(SmartObject<DateTime> dt) {
-    c_DateTime *cdt = NEW(c_DateTime)();
+    c_DateTime *cdt = NEWOBJ(c_DateTime)();
     Object ret(cdt);
     cdt->m_dt = dt;
     return ret;
@@ -163,7 +163,7 @@ class c_DateTimeZone : public ExtObjectData {
 
   // Helper for TimeZone -> c_DateTimeZone conversion
   public: static Object wrap(SmartObject<TimeZone> tz) {
-    c_DateTimeZone *ctz = NEW(c_DateTimeZone)();
+    c_DateTimeZone *ctz = NEWOBJ(c_DateTimeZone)();
     Object ret(ctz);
     ctz->m_tz = tz;
     return ret;
@@ -325,7 +325,7 @@ inline Variant f_timezone_name_from_abbr(CStrRef abbr, int gmtoffset = -1,
 }
 
 inline Object f_timezone_open(CStrRef timezone) {
-  c_DateTimeZone *ctz = NEW(c_DateTimeZone)();
+  c_DateTimeZone *ctz = NEWOBJ(c_DateTimeZone)();
   Object ret(ctz);
   ctz->t___construct(timezone);
   return ret;
@@ -352,7 +352,7 @@ inline bool f_checkdate(int month, int day, int year) {
 
 inline Object f_date_create(CStrRef time = null_string,
                             CObjRef timezone = null_object) {
-  c_DateTime *cdt = NEW(c_DateTime)();
+  c_DateTime *cdt = NEWOBJ(c_DateTime)();
   Object ret(cdt);
   cdt->t___construct(time, timezone);
   return ret;

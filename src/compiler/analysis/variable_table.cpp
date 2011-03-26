@@ -783,11 +783,6 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     cg_indentBegin("public:\n");
     cg_printf("GlobalVariables();\n");
     cg_printf("~GlobalVariables();\n");
-    cg_printf("static GlobalVariables *Create() "
-              "{ return NEW(GlobalVariables)(); }\n");
-    cg_printf("static void Delete(GlobalVariables *p) "
-              "{ DELETE(GlobalVariables)(p); }\n");
-    cg_printf("static void OnThreadExit(GlobalVariables *p) {}\n");
   }
   cg_printf("static void initialize();\n");
 
@@ -1073,28 +1068,55 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
 
   if (!system) {
     cg_printf("\n");
+
     cg_indentBegin("void init_static_variables() {\n");
     cg_printf("ScalarArrays::initialize();\n");
     if (Option::GenHashTableGetConstant) {
       cg_printf("init_constant_table();\n");
     }
     cg_indentEnd("}\n");
-    cg_printf("static ThreadLocalSingleton<GlobalVariables> g_variables;\n");
-
     cg_printf("static IMPLEMENT_THREAD_LOCAL"
               "(GlobalArrayWrapper, g_array_wrapper);\n");
-    cg_indentBegin("GlobalVariables *get_global_variables() {\n");
-    cg_printf("return g_variables.get();\n");
-    cg_indentEnd("}\n");
-    cg_printf("void init_global_variables() {\n"
-              "  ThreadInfo::s_threadInfo->m_globals =\n"
-              "    get_global_variables();\n"
-              "  GlobalVariables::initialize();\n"
-              "}\n");
-    cg_indentBegin("void free_global_variables() {\n");
-    cg_printf("g_variables.reset();\n");
-    cg_printf("g_array_wrapper.reset();\n");
-    cg_indentEnd("}\n");
+    cg_printf(
+      "#if defined(USE_GCC_FAST_TLS)\n"
+      "static __thread GlobalVariables *g_variables;\n"
+      "GlobalVariables *get_global_variables() {\n"
+      "  ASSERT(g_variables);\n"
+      "  return g_variables;\n"
+      "}\n"
+      "GlobalVariables *get_global_variables_check() {\n"
+      "  if (!g_variables) g_variables = NEW(GlobalVariables)();\n"
+      "  return g_variables;\n"
+      "}\n"
+      "void free_global_variables() {\n"
+      "  if (g_variables) DELETE(GlobalVariables)(g_variables);\n"
+      "  g_variables = NULL;\n"
+      "  g_array_wrapper.reset();\n"
+      "}\n"
+      "\n"
+      "#else /* USE_GCC_FAST_TLS */\n"
+      "static ThreadLocal<GlobalVariables *> g_variables;\n"
+      "GlobalVariables *get_global_variables() {\n"
+      "  GlobalVariables *g = *(g_variables.getNoCheck());\n"
+      "  ASSERT(g);\n"
+      "  return g;\n"
+      "}\n"
+      "GlobalVariables *get_global_variables_check() {\n"
+      "  if (!*g_variables) *g_variables = NEW(GlobalVariables)();\n"
+      "  return *g_variables;\n"
+      "}\n"
+      "void free_global_variables() {\n"
+      "  GlobalVariables *g = *(g_variables.getNoCheck());\n"
+      "  if (g) DELETE(GlobalVariables)(g);\n"
+      "  g_variables.reset();\n"
+      "  g_array_wrapper.reset();\n"
+      "}\n"
+      "#endif /* USE_GCC_FAST_TLS */\n"
+      "void init_global_variables() {\n"
+      "  ThreadInfo::s_threadInfo->m_globals =\n"
+      "    get_global_variables_check();\n"
+      "  GlobalVariables::initialize();\n"
+      "}\n");
     cg_printf("LVariableTable *get_variable_table() "
               "{ return (LVariableTable*)get_global_variables();}\n");
     cg_printf("Globals *get_globals() "

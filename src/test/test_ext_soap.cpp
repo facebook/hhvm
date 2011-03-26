@@ -33,7 +33,7 @@ bool TestExtSoap::RunTests(const std::string &which) {
 }
 
 bool TestExtSoap::preTest() {
-  m_server = p_SoapServer(NEW(c_SoapServer)());
+  m_server = p_SoapServer(NEWOBJ(c_SoapServer)());
   m_server->create(null, CREATE_MAP1("uri", "http://testuri.org"));
   return true;
 }
@@ -106,7 +106,7 @@ bool TestExtSoap::test_SoapServerArrayParam() {
 }
 
 bool TestExtSoap::test_SoapServerWSDL() {
-  m_server = p_SoapServer(NEW(c_SoapServer)());
+  m_server = p_SoapServer(NEWOBJ(c_SoapServer)());
   m_server->create("test/test.wsdl", CREATE_MAP1("uri", "http://testuri.org"));
   m_server->t_addfunction("Add");
 

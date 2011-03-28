@@ -54,7 +54,7 @@ time_t HttpServer::StartTime;
 ///////////////////////////////////////////////////////////////////////////////
 
 HttpServer::HttpServer(void *sslCTX /* = NULL */)
-  : m_stopped(false), m_sslCTX(sslCTX),
+  : m_stopped(false), m_pidFileRemoved(false), m_sslCTX(sslCTX),
     m_loggerThread(this, &HttpServer::flushLog),
     m_watchDog(this, &HttpServer::watchDog) {
 
@@ -204,6 +204,10 @@ void HttpServer::takeoverShutdown(LibEventServerWithTakeover* server) {
   // then asynchronously shut down everything else.
   onServerShutdown();
   stop();
+  // Remove the PID file here instead of afterwards
+  // to avoid a race condition with the new server.
+  removePid();
+  m_pidFileRemoved = true;
 }
 
 HttpServer::~HttpServer() {
@@ -269,7 +273,7 @@ void HttpServer::run() {
     while (!m_stopped) {
       wait();
     }
-    removePid();
+    if (!m_pidFileRemoved) removePid();
     Logger::Info("page server stopped");
   }
 

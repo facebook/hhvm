@@ -250,14 +250,6 @@ Variant DynamicObjectData::t___wakeup() {
   }
 }
 
-Variant DynamicObjectData::t___set_state(Variant v_properties) {
-  if (!parent.isNull()) {
-    return parent->t___set_state(v_properties);
-  } else {
-    return ObjectData::t___set_state(v_properties);
-  }
-}
-
 String DynamicObjectData::t___tostring() {
   if (!parent.isNull()) {
     return parent->t___tostring();

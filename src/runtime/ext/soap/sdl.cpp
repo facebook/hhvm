@@ -161,6 +161,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, bool include,
     }
     String msg = response.detach();
     wsdl = soap_xmlParseMemory(msg.data(), msg.size());
+    wsdl->URL = xmlCharStrdup(struri);
   } else {
     wsdl = soap_xmlParseFile(struri);
   }

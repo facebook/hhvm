@@ -154,6 +154,7 @@ void Variant::reset() {
   m_type = KindOfNull;
 }
 
+#ifdef FAST_REFCOUNT_FOR_VARIANT
 static void destructString(void *p)  { ((StringData *)p)->release(); }
 static void destructArray(void *p)   { ((ArrayData *)p)->release();  }
 static void destructObject(void *p)  { ((ObjectData *)p)->release(); }
@@ -161,6 +162,7 @@ static void destructVariant(void *p) { ((Variant *)p)->release();    }
 
 static void (*destructors[4])(void *) =
   {destructString, destructArray, destructObject, destructVariant};
+#endif
 
 void Variant::destruct() {
   ASSERT(!isPrimitive());

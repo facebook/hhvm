@@ -1010,18 +1010,35 @@ class Variant {
   // only called from constructor
   void init(ObjectData *v);
 
-#ifdef FAST_REFCOUNT_FOR_VARIANT
   void bindNoVariant(CVarRef v) {
     ASSERT(v.m_type != KindOfVariant);
     m_type = v.m_type;
     m_data.num = v.m_data.num;
     if (IS_REFCOUNTED_TYPE(v.m_type)) {
+#ifdef FAST_REFCOUNT_FOR_VARIANT
       m_data.pvar->incRefCount();
+#else
+      switch (m_type) {
+      case KindOfString:
+        ASSERT(m_data.pstr);
+        m_data.pstr->incRefCount();
+        break;
+      case KindOfArray:
+        ASSERT(m_data.parr);
+        m_data.parr->incRefCount();
+        break;
+      case KindOfObject:
+        ASSERT(m_data.pobj);
+        m_data.pobj->incRefCount();
+        break;
+      default:
+        ASSERT(false);
+      }
+#endif
     } else if (m_type == KindOfUninit) {
       m_type = KindOfNull; // drop uninit
     }
   }
-#endif
 
   // Internal helper for weakly binding a variable. m_type should be viewed
   // as KindOfNull and for complex types the old data already released.
@@ -1034,20 +1051,17 @@ class Variant {
     }
 #ifdef FAST_REFCOUNT_FOR_VARIANT
     Variant *var = v.m_data.pvar;
+    ASSERT(var);
     if (v.m_type != KindOfVariant) {
-      if (var) {
-        m_type = v.m_type;
-        m_data.pvar = var;
-        /**
-         * This is safe because we have compile time assertions that
-         * guarantee that the _count field will always be exactly
-         * FAST_REFCOUNT_OFFSET bytes from the beginning of the object
-         * for the StringData, ArrayData, ObjectData, and Variant classes.
-         */
-        var->incRefCount();
-      } else {
-        m_type = KindOfNull;
-      }
+      m_type = v.m_type;
+      m_data.pvar = var;
+      /**
+       * This is safe because we have compile time assertions that
+       * guarantee that the _count field will always be exactly
+       * FAST_REFCOUNT_OFFSET bytes from the beginning of the object
+       * for the StringData, ArrayData, ObjectData, and Variant classes.
+       */
+      var->incRefCount();
     } else {
       bindNoVariant(*var);
     }
@@ -1056,35 +1070,26 @@ class Variant {
     // copy-on-write: ref counting complex types
     case KindOfString: {
       StringData *str = v.m_data.pstr;
-      if (str) {
-        m_type = KindOfString;
-        m_data.pstr = str;
-        str->incRefCount();
-      } else {
-        m_type = KindOfNull;
-      }
+      ASSERT(str);
+      m_type = KindOfString;
+      m_data.pstr = str;
+      str->incRefCount();
       break;
     }
     case KindOfArray: {
       ArrayData *arr = v.m_data.parr;
-      if (arr) {
-        m_type = KindOfArray;
-        m_data.parr = arr;
-        arr->incRefCount();
-      } else {
-        m_type = KindOfNull;
-      }
+      ASSERT(arr);
+      m_type = KindOfArray;
+      m_data.parr = arr;
+      arr->incRefCount();
       break;
     }
     case KindOfObject: {
       ObjectData *obj = v.m_data.pobj;
-      if (obj) {
-        m_type = KindOfObject;
-        m_data.pobj = obj;
-        obj->incRefCount();
-      } else {
-        m_type = KindOfNull;
-      }
+      ASSERT(obj);
+      m_type = KindOfObject;
+      m_data.pobj = obj;
+      obj->incRefCount();
       break;
     }
     case KindOfVariant:

@@ -896,11 +896,6 @@ Variant ObjectData::t___wakeup() {
   return null;
 }
 
-Variant ObjectData::t___set_state(Variant v_properties) {
-  // do nothing
-  return null;
-}
-
 String ObjectData::t___tostring() {
   string msg = o_getClassName().data();
   msg += "::__toString() was not defined";

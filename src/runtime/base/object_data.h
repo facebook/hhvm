@@ -280,7 +280,6 @@ class ObjectData : public CountableNF {
   virtual Variant t___unset(Variant v_name);
   virtual Variant t___sleep();
   virtual Variant t___wakeup();
-  virtual Variant t___set_state(Variant v_properties);
   virtual String t___tostring();
   virtual Variant t___clone();
 

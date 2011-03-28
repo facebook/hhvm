@@ -31,6 +31,7 @@ bool TestExtPdo::RunTests(const std::string &which) {
 
   RUN_TEST(test_pdo_drivers);
   RUN_TEST(test_pdo_mysql);
+  RUN_TEST(test_pdo_mysql_prepared_statement_emulation);
   RUN_TEST(test_pdo_sqlite);
 
   return ret;
@@ -87,6 +88,36 @@ bool TestExtPdo::test_pdo_mysql() {
     rs = stmt->t_fetch(q_PDO_FETCH_ASSOC);
     VS(rs, CREATE_MAP2("id", "2", "name", "test2"));
 
+  } catch (Object &e) {
+    VS(e, null);
+  }
+  return Count(true);
+}
+
+bool TestExtPdo::test_pdo_mysql_prepared_statement_emulation() {
+  CreateMySqlTestTable();
+
+  try {
+    string source = "mysql:host=";
+    source += TEST_HOSTNAME;
+    source += ";dbname=";
+    source += TEST_DATABASE;
+
+    p_PDO dbh((NEW(c_PDO)())->
+              create(source.c_str(), TEST_USERNAME, TEST_PASSWORD,
+                     CREATE_MAP1(q_PDO_ATTR_PERSISTENT, false)));
+    Variant vstmt = dbh->t_prepare("select * from test where id = :id and name = :name");
+
+    c_PDOStatement *stmt = vstmt.toObject().getTyped<c_PDOStatement>();
+    stmt->m_stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
+
+    Array data = Array::Create();
+    data.set(":id", "2");
+    data.set(":name", "test2");
+    VERIFY(stmt->t_execute(data));
+
+    Variant rs = stmt->t_fetch(q_PDO_FETCH_ASSOC);
+    VS(rs, CREATE_MAP2("id", "2", "name", "test2"));
   } catch (Object &e) {
     VS(e, null);
   }

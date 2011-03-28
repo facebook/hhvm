@@ -29,6 +29,7 @@ class TestExtPdo : public TestCppExt {
 
   bool test_pdo_drivers();
   bool test_pdo_mysql();
+  bool test_pdo_mysql_prepared_statement_emulation();
   bool test_pdo_sqlite();
 };
 

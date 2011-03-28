@@ -213,7 +213,7 @@ public:
   ThreadLocalSingleton() { getKey(); }
 
   static T *get() {
-    T *& p = getSingleton();
+    T *& p = s_singleton;
     if (p == NULL) {
       createKey(p);
     }
@@ -221,17 +221,17 @@ public:
   }
 
   static T* getNoCheck() {
-    T *& p = getSingleton();
+    T *& p = s_singleton;
     ASSERT(p);
     return p;
   }
 
   static void createKey(T *& p) __attribute__((noinline));
 
-  static bool isNull() { return getSingleton() == NULL; }
+  static bool isNull() { return s_singleton == NULL; }
 
   static void reset() {
-    T *& p = getSingleton();
+    T *& p = s_singleton;
     if (p) {
       T::Delete(p);
       p = NULL;
@@ -253,11 +253,7 @@ public:
 
 private:
   static pthread_key_t s_key;
-
-  static T *& getSingleton() {
-    static __thread T * s_singleton = NULL;
-    return s_singleton;
-  }
+  static __thread T * s_singleton;
 
   static pthread_key_t getKey() {
     if (s_key == 0) {
@@ -275,6 +271,8 @@ void ThreadLocalSingleton<T>::createKey(T *& p) {
 
 template<typename T>
 pthread_key_t ThreadLocalSingleton<T>::s_key;
+template<typename T>
+__thread T *ThreadLocalSingleton<T>::s_singleton;
 
 ///////////////////////////////////////////////////////////////////////////////
 // some classes don't need new/delete at all

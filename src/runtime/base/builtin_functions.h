@@ -462,6 +462,8 @@ inline Variant f_unserialize(CStrRef str) {
 }
 
 class LVariableTable;
+String resolve_include(CStrRef file, const char* currentDir,
+                       bool (*tryFile)(CStrRef file, void* ctx), void* ctx);
 Variant include(CStrRef file, bool once = false,
                 LVariableTable* variables = NULL,
                 const char *currentDir = "",

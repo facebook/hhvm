@@ -6,4 +6,9 @@
 cp $HPHP_HOME/bin/CMakeLists.base.txt $1/CMakeLists.txt
 cd $1
 cmake -D PROGRAM_NAME:string=$2 . || exit $?
-make $MAKEOPTS || exit $?
+
+if [ -n "$HPHP_VERBOSE" ]; then
+  make $MAKEOPTS > /dev/tty || exit $?
+else
+  make $MAKEOPTS || exit $?
+fi

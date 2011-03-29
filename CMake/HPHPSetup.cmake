@@ -103,7 +103,7 @@ endif()
 add_definitions(-DHPHP_OSS=1)
 
 execute_process(COMMAND git describe --all --long --abbrev=40 --always
-    OUTPUT_VARIABLE _COMPILER_ID OUTPUT_STRIP_TRAILING_WHITESPACE)
+    OUTPUT_VARIABLE _COMPILER_ID OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
 
 if (_COMPILER_ID)
 	add_definitions(-DCOMPILER_ID="${_COMPILER_ID}")

@@ -978,20 +978,48 @@ Variant include_impl_invoke(CStrRef file, bool once, LVariableTable* variables,
   }
 }
 
-static Variant include_impl(CStrRef file, bool once,
-                            LVariableTable* variables,
-                            const char *currentDir, bool required,
-                            bool raiseNotice) {
+/**
+ * Used by include_impl.  resolve_include() needs some way of checking the
+ * existence of a file path, which for hphpc means attempting to invoke it.
+ * This struct carries some context information needed for the invocation, as
+ * well as a place for the return value of invoking the file.
+ */
+struct IncludeImplInvokeContext {
+  bool once;
+  LVariableTable* variables;
+  const char* currentDir;
 
+  Variant returnValue;
+};
+
+static bool include_impl_invoke_context(CStrRef file, void* ctx) {
+  struct IncludeImplInvokeContext* context = (IncludeImplInvokeContext*)ctx;
+  try {
+    context->returnValue = include_impl_invoke(file, context->once,
+                                               context->variables,
+                                               context->currentDir);
+  } catch (PhpFileDoesNotExistException& e) {
+    context->returnValue = false;
+  }
+  return bool(context->returnValue);
+}
+
+/**
+ * tryFile is a pointer to a function that resolve_include() will use to
+ * determine if a path references a real file.  ctx is a pointer to some context
+ * information that will be passed through to tryFile.  (It's a hacky closure)
+ */
+String resolve_include(CStrRef file, const char* currentDir,
+                       bool (*tryFile)(CStrRef file, void*), void* ctx) {
   const char* c_file = file->data();
 
   if (c_file[0] == '/') {
     String can_path(Util::canonicalize(file.c_str(), file.size()),
                     AttachString);
 
-    try {
-      return include_impl_invoke(can_path, once, variables, currentDir);
-    } catch (PhpFileDoesNotExistException &e) {}
+    if (tryFile(can_path, ctx)) {
+      return can_path;
+    }
 
   } else if ((c_file[0] == '.' && (c_file[1] == '/' || (
     c_file[1] == '.' && c_file[2] == '/')))) {
@@ -1000,23 +1028,24 @@ static Variant include_impl(CStrRef file, bool once,
     String can_path(Util::canonicalize(path.c_str(), path.size()),
                     AttachString);
 
-    try {
-      return include_impl_invoke(can_path, once, variables, currentDir);
-    } catch (PhpFileDoesNotExistException &e) {}
-
+    if (tryFile(can_path, ctx)) {
+      return can_path;
+    }
 
   } else {
 
-    unsigned int path_count = RuntimeOption::IncludeSearchPaths.size();
+    Array includePaths = g_context->getIncludePathArray();
+    unsigned int path_count = includePaths.size();
 
-    for (unsigned int i = 0; i < path_count; i++) {
+    for (int i = 0; i < (int)path_count; i++) {
       String path("");
+      String includePath = includePaths[i];
 
-      if (RuntimeOption::IncludeSearchPaths[i][0] != '/') {
+      if (includePath[0] != '/') {
         path += (g_context->getCwd() + "/");
       }
 
-      path += RuntimeOption::IncludeSearchPaths[i];
+      path += includePath;
 
       if (path[path.size() - 1] != '/') {
         path += "/";
@@ -1026,9 +1055,9 @@ static Variant include_impl(CStrRef file, bool once,
       String can_path(Util::canonicalize(path.c_str(), path.size()),
                       AttachString);
 
-      try {
-        return include_impl_invoke(can_path, once, variables, currentDir);
-      } catch (PhpFileDoesNotExistException &e) {}
+      if (tryFile(can_path, ctx)) {
+        return can_path;
+      }
     }
 
     if (currentDir[0] == '/') {
@@ -1039,31 +1068,46 @@ static Variant include_impl(CStrRef file, bool once,
       String can_path(Util::canonicalize(path.c_str(), path.size()),
                       AttachString);
 
-      try {
-        return include_impl_invoke(can_path, once, variables, currentDir);
-      } catch (PhpFileDoesNotExistException &e) {}
+      if (tryFile(can_path, ctx)) {
+        return can_path;
+      }
     } else {
       // Regular hphp
       String path(g_context->getCwd() + "/" + currentDir + file);
       String can_path(Util::canonicalize(path.c_str(), path.size()),
                       AttachString);
 
-      try {
-        return include_impl_invoke(can_path, once, variables, currentDir);
-      } catch (PhpFileDoesNotExistException &e) {}
+      if (tryFile(can_path, ctx)) {
+        return can_path;
+      }
     }
   }
 
-  // Failure
-  if (raiseNotice) {
-    raise_notice("Tried to invoke %s but file not found.", file->data());
+  return String((StringData*)NULL);
+}
+
+static Variant include_impl(CStrRef file, bool once,
+                            LVariableTable* variables,
+                            const char *currentDir, bool required,
+                            bool raiseNotice) {
+  struct IncludeImplInvokeContext ctx = {once, variables, currentDir};
+  String can_path = resolve_include(file, currentDir,
+                                    include_impl_invoke_context, (void*)&ctx);
+
+  if (can_path.isNull()) {
+    // Failure
+    if (raiseNotice) {
+      raise_notice("Tried to invoke %s but file not found.", file->data());
+    }
+    if (required) {
+      String ms = "Required file that does not exist: ";
+      ms += file;
+      throw FatalErrorException(ms.data());
+    }
+    return false;
   }
-  if (required) {
-    String ms = "Required file that does not exist: ";
-    ms += file;
-    throw FatalErrorException(ms.data());
-  }
-  return false;
+
+  return ctx.returnValue;
 }
 
 Variant include(CStrRef file, bool once /* = false */,

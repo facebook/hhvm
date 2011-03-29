@@ -770,7 +770,7 @@ void c_SimpleXMLElement::t_addattribute(CStrRef qname,
 String c_SimpleXMLElement::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__tostring);
 
-  c_SimpleXMLElement *src = get_first_simplexml_node(this);
+  c_SimpleXMLElement *src = get_first_simplexml_node(this, false);
   if (src == NULL) {
     return "";
   }
@@ -955,8 +955,7 @@ bool c_SimpleXMLElement::o_toBoolean() const {
 }
 
 int64 c_SimpleXMLElement::o_toInt64() const {
-  //FIXME: This implementation is wrong. We need to call __toString and convert the return value to integer
-  c_SimpleXMLElement *src = get_first_simplexml_node(this);
+  c_SimpleXMLElement *src = get_first_simplexml_node(this, false);
   if (src == NULL || src->m_text.empty()) {
     return 0;
   }
@@ -964,8 +963,7 @@ int64 c_SimpleXMLElement::o_toInt64() const {
 }
 
 double c_SimpleXMLElement::o_toDouble() const {
-  //FIXME: This implementation is wrong. We need to call __toString and convert the return value to double
-  c_SimpleXMLElement *src = get_first_simplexml_node(this);
+  c_SimpleXMLElement *src = get_first_simplexml_node(this, false);
   if (src == NULL || src->m_text.empty()) {
     return 0.0;
   }

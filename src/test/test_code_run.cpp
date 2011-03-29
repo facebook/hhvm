@@ -12916,10 +12916,25 @@ bool TestCodeRun::TestSimpleXML() {
 
   MVCR("<?php $x = new SimpleXMLElement('<foo><bar>345.234</bar></foo>');"
        "var_dump((double)$x->bar);");
+
   MVCR("<?php $x = new SimpleXMLElement('<foo><bar></bar></foo>');"
        "var_dump((bool)$x->bar);");
-  MVCR("<?php $x = new SimpleXMLElement('<foo><bar>0</bar></foo>');"
-       "var_dump((bool)$x->bar);");
+
+  MVCR("<?php $x = new SimpleXMLElement('<foo><bar>0</bar><baz>1</baz></foo>');"
+       "var_dump((bool)$x->bar);"
+       "var_dump((bool)$x->baz);");
+
+  MVCR("<?php $x = new SimpleXMLElement('<foo/>');\n"
+       "var_dump((string)$x->notAvaiable);\n"
+       "var_dump((array)$x->notAvaiable);\n"
+       "var_dump((bool)$x->notAvaiable);\n"
+       "var_dump((int)$x->notAvaiable);\n"
+       "var_dump((double)$x->notAvaiable);\n"
+       "var_dump((string)$x->children());\n"
+       "var_dump((array)$x->children());\n"
+       "var_dump((bool)$x->children());\n"
+       "var_dump((int)$x->children());\n"
+       "var_dump((double)$x->children());\n");
 
   MVCR("<?php "
        "$x = new SimpleXMLElement('<foo/>'); "
@@ -13399,6 +13414,15 @@ bool TestCodeRun::TestSimpleXML() {
        "$children->addChild('addSecond', '2');\n"
        "$children->addAttribute('new', 'NEW');\n"
        "show($children);\n");
+
+  MVCR("<?php $x = new SimpleXMLElement('<root><foo/></root>');\n"
+       "var_dump(get_class($x->foo));\n"
+       "var_dump(get_class($x->foo->xxx));\n"
+       "var_dump($x->foo->xxx->yyy);\n"
+       "var_dump((string)$x->foo);\n"
+       "var_dump((string)$x->foo->xxx);\n"
+       "var_dump((string)$x->foo->xxx->yyy);\n");
+
   return true;
 }
 

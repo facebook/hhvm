@@ -22,6 +22,7 @@
 #include <runtime/base/resource_data.h>
 #include <runtime/base/fiber_safe.h>
 #include <runtime/base/debuggable.h>
+#include <runtime/base/server/virtual_host.h>
 #include <runtime/base/util/string_buffer.h>
 #include <util/thread_local.h>
 
@@ -212,6 +213,8 @@ public:
   void setIncludePath(CStrRef path);
   String getIncludePath() const;
   Array getIncludePathArray() const { return m_include_paths; }
+  const VirtualHost *getVirtualHost() const { return m_vhost; }
+  void setVirtualHost(const VirtualHost *vhost) { m_vhost = vhost; }
 
 private:
   class OutputBuffer {
@@ -269,6 +272,7 @@ private:
   // include_path configuration option
   Array m_include_paths;
 
+  const VirtualHost *m_vhost;
   // helper functions
   void resetCurrentBuffer();
   void executeFunctions(CArrRef funcs);

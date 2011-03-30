@@ -20,6 +20,7 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/resource_data.h>
 #include <runtime/base/fiber_reference_map.h>
+#include <runtime/base/server/virtual_host.h>
 #include <runtime/ext/ext_array.h>
 #include <system/gen/php/globals/constants.h>
 #include <util/job_queue.h>
@@ -84,6 +85,9 @@ public:
       m_unmarshaled_global_variables = get_global_variables();
       m_unmarshaled_evalState = Eval::RequestEvalState::Get();
       m_autoload_handler = AutoloadHandler::s_instance.get();
+      if (m_context->getTransport()) {
+        m_context->setVirtualHost(VirtualHost::GetCurrent());
+      }
     }
   }
 
@@ -130,6 +134,10 @@ public:
         ExecutionContext *context = g_context.get();
         if (context && m_context) {
           context->fiberInit(m_context, m_refMap);
+          const VirtualHost *vhost = m_context->getVirtualHost();
+          if (vhost) {
+            VirtualHost::SetCurrent((VirtualHost *)vhost);
+          }
           m_context = context; // switching role
         }
 
@@ -306,6 +314,7 @@ private:
   Eval::RequestEvalState *m_evalState;
 
   AutoloadHandler *m_autoload_handler;
+  const VirtualHost *m_vhost;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

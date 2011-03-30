@@ -964,6 +964,23 @@ ServerStats::ServerStats() : m_last(0), m_min(0), m_max(0) {
 
 ServerStats::~ServerStats() {
   clear();
+
+  // Remove this from the s_loggers vector
+  Lock lock(s_lock, false);
+  int pos = -1;
+  // Scan the vector looking for this instance of ServerStats. Scanning
+  // the vector is not terribly efficient, but this doesn't happen often
+  // when the server is in a steady state
+  for (unsigned i = 0; i < s_loggers.size(); ++i) {
+    if (s_loggers[i] == this) {
+      pos = i;
+      break;
+    }
+  }
+  if (pos >= 0) {
+    s_loggers[pos] = s_loggers.back();
+    s_loggers.pop_back();
+  }
 }
 
 void ServerStats::log(const string &name, int64 value) {

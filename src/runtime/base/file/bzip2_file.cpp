@@ -26,7 +26,7 @@ StaticString BZ2File::s_class_name("BZ2File");
 
 
 BZ2File::BZ2File(): m_bzFile(NULL), m_eof(false) {
-  m_innerFile = NEW(PlainFile)();
+  m_innerFile = NEWOBJ(PlainFile)();
   m_innerFile->unregister();
 }
 

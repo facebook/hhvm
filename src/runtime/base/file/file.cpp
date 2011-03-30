@@ -140,18 +140,18 @@ Object File::OpenImpl(CStrRef filename, CStrRef mode, CArrRef options) {
 
   if (!strncasecmp(filename.c_str(), "php://", 6)) {
     if (!strcasecmp(filename.c_str(), "php://stdin")) {
-      return Object(NEW(PlainFile)(dup(STDIN_FILENO), true));
+      return Object(NEWOBJ(PlainFile)(dup(STDIN_FILENO), true));
     }
     if (!strcasecmp(filename.c_str(), "php://stdout")) {
-      return Object(NEW(PlainFile)(dup(STDOUT_FILENO), true));
+      return Object(NEWOBJ(PlainFile)(dup(STDOUT_FILENO), true));
     }
     if (!strcasecmp(filename.c_str(), "php://stderr")) {
-      return Object(NEW(PlainFile)(dup(STDERR_FILENO), true));
+      return Object(NEWOBJ(PlainFile)(dup(STDERR_FILENO), true));
     }
 
     if (!strncasecmp(filename.c_str(), "php://temp", 10) ||
         !strcasecmp(filename.c_str(), "php://memory")) {
-      TempFile *file = NEW(TempFile)();
+      TempFile *file = NEWOBJ(TempFile)();
       if (!file->valid()) {
         raise_warning("Unable to create temporary file");
         return Object();
@@ -165,14 +165,14 @@ Object File::OpenImpl(CStrRef filename, CStrRef mode, CArrRef options) {
         int size = 0;
         const void *data = transport->getPostData(size);
         if (data && size) {
-          return Object(NEW(MemFile)((const char *)data, size));
+          return Object(NEWOBJ(MemFile)((const char *)data, size));
         }
       }
-      return Object(NEW(MemFile)(NULL, 0));
+      return Object(NEWOBJ(MemFile)(NULL, 0));
     }
 
     if (!strcasecmp(filename.c_str(), "php://output")) {
-      return Object(NEW(OutputFile)(filename));
+      return Object(NEWOBJ(OutputFile)(filename));
     }
 
     raise_warning("Unable to open file %s", filename.c_str());
@@ -183,7 +183,7 @@ Object File::OpenImpl(CStrRef filename, CStrRef mode, CArrRef options) {
       !strncmp(filename.data(), https_prefix, sizeof(https_prefix) - 1)) {
     UrlFile *file;
     if (options.isNull()) {
-      file = NEW(UrlFile)();
+      file = NEWOBJ(UrlFile)();
     } else {
       Array opts = options["http"];
       String method = "GET";
@@ -205,7 +205,7 @@ Object File::OpenImpl(CStrRef filename, CStrRef mode, CArrRef options) {
       if (opts.exists("max_redirects")) max_redirs = opts["max_redirects"];
       int timeout = -1;
       if (opts.exists("timeout")) timeout = opts["timeout"];
-      file = NEW(UrlFile)(method.data(), headers, opts["content"].toString(),
+      file = NEWOBJ(UrlFile)(method.data(), headers, opts["content"].toString(),
                           max_redirs, timeout);
     }
     Object obj(file);
@@ -229,7 +229,7 @@ Object File::OpenImpl(CStrRef filename, CStrRef mode, CArrRef options) {
   if (StaticContentCache::TheFileCache) {
     string relative =
       FileCache::GetRelativePath(File::TranslatePath(name).c_str());
-    MemFile *file = NEW(MemFile)();
+    MemFile *file = NEWOBJ(MemFile)();
     Object obj(file);
     bool ret = file->open(relative, mode);
     if (ret) {
@@ -241,7 +241,7 @@ Object File::OpenImpl(CStrRef filename, CStrRef mode, CArrRef options) {
   }
 
   if (gzipped) {
-    ZipFile *file = NEW(ZipFile)();
+    ZipFile *file = NEWOBJ(ZipFile)();
     Object obj(file);
     bool ret = file->open(File::TranslatePath(name), mode);
     if (!ret) {
@@ -251,7 +251,7 @@ Object File::OpenImpl(CStrRef filename, CStrRef mode, CArrRef options) {
     return obj;
   }
 
-  PlainFile *file = NEW(PlainFile)();
+  PlainFile *file = NEWOBJ(PlainFile)();
   Object obj(file);
   bool ret = file->open(File::TranslatePath(name), mode);
   if (!ret) {

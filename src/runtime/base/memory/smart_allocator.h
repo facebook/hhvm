@@ -47,8 +47,8 @@ namespace HPHP {
 #define NEW(T) new T
 #define NEWOBJ(T) new T
 #define DELETE(T) delete
-#define DELETE_EX_CLS(NS,T) delete this
-#define DELETE_OBJECT(T) delete this
+#define DELETEOBJ(NS,T,OBJ) delete OBJ
+#define SWEEPOBJ(T) delete this
 #else
 #define NEW(T) new (T::Allocator.getNoCheck()) T
 #define NEWOBJ(T) new                                  \
@@ -56,10 +56,12 @@ namespace HPHP {
     <ObjectAllocator<ItemSize<sizeof(T)>::value> >     \
     ::getNoCheck()) T
 #define DELETE(T) T::Allocator->release
-#define DELETE_EX_CLS(NS,T) this->~T(); NS::T::Allocator->release(this)
-#define DELETE_OBJECT(T) this->~T()
+#define DELETEOBJ(NS,T,OBJ) OBJ->~T();                 \
+  (ThreadLocalSingleton                                \
+    <ObjectAllocator<ItemSize<sizeof(T)>::value> >     \
+    ::getNoCheck())->release(OBJ)
+#define SWEEPOBJ(T) this->~T()
 #endif
-#define DELETE_EX(T) DELETE_EX_CLS(,T)
 
 ///////////////////////////////////////////////////////////////////////////////
 /**
@@ -370,16 +372,16 @@ class SmartAllocator : public SmartAllocatorImpl {
 
 #define DECLARE_OBJECT_ALLOCATION(T)                                    \
   public:                                                               \
-  static ObjectAllocatorWrapper Allocator;                              \
+  static ObjectAllocatorBaseGetter AllocatorInitSetup;                  \
   virtual void release();                                               \
   virtual void sweep();
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T)  \
-  ObjectAllocatorWrapper NS::T::Allocator(                      \
-    ObjectAllocatorInitSetup<NS::T>());                         \
+  ObjectAllocatorBaseGetter NS::T::AllocatorInitSetup =         \
+    ObjectAllocatorInitSetup<NS::T>();\
   void NS::T::release() {                                       \
     destruct();                                                 \
-    DELETE_EX_CLS(NS, T);                                       \
+    DELETEOBJ(NS, T, this);                                     \
   }
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(T)                 \
@@ -388,7 +390,7 @@ class SmartAllocator : public SmartAllocatorImpl {
 #define IMPLEMENT_OBJECT_ALLOCATION_CLS(NS,T)                           \
   IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T);               \
   void NS::T::sweep() {                                                 \
-    DELETE_OBJECT(T);                                                   \
+    SWEEPOBJ(T);                                                   \
   }
 
 #define IMPLEMENT_OBJECT_ALLOCATION(T) IMPLEMENT_OBJECT_ALLOCATION_CLS(HPHP,T)

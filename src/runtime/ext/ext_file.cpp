@@ -144,7 +144,7 @@ Variant f_fopen(CStrRef filename, CStrRef mode,
 }
 
 Variant f_popen(CStrRef command, CStrRef mode) {
-  File *file = NEW(Pipe)();
+  File *file = NEWOBJ(Pipe)();
   Object handle(file);
   bool ret = CHECK_ERROR(file->open(File::TranslateCommand(command), mode));
   if (!ret) {
@@ -346,7 +346,7 @@ Variant f_file_put_contents(CStrRef filename, CVarRef data,
                             CVarRef context /* = null */) {
   FILE *f = fopen(File::TranslatePath(filename).data(),
                   (flags & PHP_FILE_APPEND) ? "ab" : "wb");
-  Object closer(NEW(PlainFile)(f));
+  Object closer(NEWOBJ(PlainFile)(f));
   if (!f) {
     Logger::Verbose("%s/%d: %s", __FUNCTION__, __LINE__,
                     Util::safe_strerror(errno).c_str());
@@ -1174,7 +1174,7 @@ Variant f_tempnam(CStrRef dir, CStrRef prefix) {
 Variant f_tmpfile() {
   FILE *f = tmpfile();
   if (f) {
-    return Object(NEW(PlainFile)(f));
+    return Object(NEWOBJ(PlainFile)(f));
   }
   return false;
 }

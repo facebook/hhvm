@@ -61,7 +61,7 @@ c_DateTime::~c_DateTime() {
 void c_DateTime::t___construct(CStrRef time /*= "now"*/,
                                CObjRef timezone /*= null_object*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DateTime, DateTime::__construct);
-  m_dt = NEW(DateTime)(TimeStamp::Current());
+  m_dt = NEWOBJ(DateTime)(TimeStamp::Current());
   if (!time.empty()) {
     m_dt->fromString(time, c_DateTimeZone::unwrap(timezone));
   }
@@ -136,7 +136,7 @@ c_DateTimeZone::~c_DateTimeZone() {
 
 void c_DateTimeZone::t___construct(CStrRef timezone) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DateTimeZone, DateTimeZone::__construct);
-  m_tz = NEW(TimeZone)(timezone);
+  m_tz = NEWOBJ(TimeZone)(timezone);
   if (!m_tz->isValid()) {
     raise_error("DateTimeZone::__construct(): Unknown or bad timezone (%s)",
                 timezone.data());

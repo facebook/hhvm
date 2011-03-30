@@ -359,9 +359,9 @@ Variant EvalObjectData::t___clone() {
 }
 
 ObjectData* EvalObjectData::cloneImpl() {
-  EvalObjectData *e = NEW(EvalObjectData)(m_cls,
-                                          parent.isNull() ? 0 :
-                                          parent->o_getClassName().c_str());
+  EvalObjectData *e =
+    NEWOBJ(EvalObjectData)(m_cls, parent.isNull() ? 0 :
+                           parent->o_getClassName().c_str());
   EvalObjectData::cloneSet(e);
   return e;
 }

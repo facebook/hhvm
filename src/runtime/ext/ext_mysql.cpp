@@ -772,7 +772,7 @@ static Variant php_mysql_localize_result(MYSQL *mysql) {
     return true;
   }
   mysql->status = MYSQL_STATUS_READY;
-  Variant result = Object(NEW(MySQLResult)(NULL, true));
+  Variant result = Object(NEWOBJ(MySQLResult)(NULL, true));
   if (!php_mysql_read_rows(mysql, result)) {
     return true;
   }
@@ -914,7 +914,7 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
     return true;
   }
 
-  MySQLResult *r = NEW(MySQLResult)(mysql_result);
+  MySQLResult *r = NEWOBJ(MySQLResult)(mysql_result);
   Object ret(r);
 
   if (RuntimeOption::MaxSQLRowCount > 0 &&
@@ -946,7 +946,7 @@ Variant f_mysql_list_dbs(CVarRef link_identifier /* = null */) {
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Object(NEW(MySQLResult)(res));
+  return Object(NEWOBJ(MySQLResult)(res));
 }
 
 Variant f_mysql_list_tables(CStrRef database,
@@ -961,7 +961,7 @@ Variant f_mysql_list_tables(CStrRef database,
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Object(NEW(MySQLResult)(res));
+  return Object(NEWOBJ(MySQLResult)(res));
 }
 
 Variant f_mysql_list_processes(CVarRef link_identifier /* = null */) {
@@ -972,7 +972,7 @@ Variant f_mysql_list_processes(CVarRef link_identifier /* = null */) {
     raise_warning("Unable to save MySQL query result");
     return false;
   }
-  return Object(NEW(MySQLResult)(res));
+  return Object(NEWOBJ(MySQLResult)(res));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -27,7 +27,7 @@ Variant f_bzopen(CStrRef filename, CStrRef mode) {
     return false;
   }
 
-  BZ2File *bz = NEW(BZ2File)();
+  BZ2File *bz = NEWOBJ(BZ2File)();
   Object handle(bz);
 
   bool ret = bz->open(File::TranslatePath(filename), mode);

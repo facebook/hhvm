@@ -434,7 +434,7 @@ Object FiberAsyncFunc::Start(CVarRef function, CArrRef params) {
   }
 
   FiberAsyncFuncHandle *handle =
-    NEW(FiberAsyncFuncHandle)(function, new_params, s_dispatcher != NULL);
+    NEWOBJ(FiberAsyncFuncHandle)(function, new_params, s_dispatcher != NULL);
   Object ret(handle);
 
   FiberJob *job = handle->getJob();

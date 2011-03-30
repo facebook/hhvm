@@ -119,7 +119,7 @@ Variant f_gzdecode(CStrRef data) {
 
 Object f_gzopen(CStrRef filename, CStrRef mode,
                 bool use_include_path /* = false */) {
-  File *file = NEW(ZipFile)();
+  File *file = NEWOBJ(ZipFile)();
   Object handle(file);
   bool ret = file->open(File::TranslatePath(filename), mode);
   if (!ret) {

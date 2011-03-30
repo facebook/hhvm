@@ -84,7 +84,7 @@ Variant f_msg_get_queue(int64 key, int64 perms /* = 0666 */) {
       return false;
     }
   }
-  MessageQueue *q = NEW(MessageQueue)();
+  MessageQueue *q = NEWOBJ(MessageQueue)();
   q->key = key;
   q->id = id;
   return Object(q);

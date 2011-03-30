@@ -586,7 +586,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                   clsName, Option::ObjectStaticPrefix);
         cg_indentEnd("}\n");
         cg_indentBegin("Object createOnly(ObjectData* root = NULL) {\n");
-        cg_printf("Object r((NEW(%s%s)(root)));\n", Option::ClassPrefix,
+        cg_printf("Object r((NEWOBJ(%s%s)(root)));\n", Option::ClassPrefix,
             clsName);
         cg_printf("r->init();\n");
         cg_printf("return r;\n");

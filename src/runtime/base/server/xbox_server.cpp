@@ -336,7 +336,7 @@ Object XboxServer::TaskStart(CStrRef message) {
   if (RuntimeOption::XboxServerThreadCount <= 0) {
     return null_object;
   }
-  XboxTask *task = NEW(XboxTask)(message);
+  XboxTask *task = NEWOBJ(XboxTask)(message);
   Object ret(task);
   XboxTransport *job = task->getJob();
   job->incRefCount(); // paired with worker's decRefCount()

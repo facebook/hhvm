@@ -393,28 +393,6 @@ ObjectAllocatorBaseGetter ObjectAllocatorInitSetup() {
   return (ObjectAllocatorBaseGetter)tls.getNoCheck;
 }
 
-class ObjectAllocatorWrapper {
-public:
-  ObjectAllocatorWrapper(ObjectAllocatorBaseGetter getNoCheck)
-  : m_getNoCheck(getNoCheck) {
-  }
-
-  ObjectAllocatorBase *operator->() const {
-    return m_getNoCheck();
-  }
-
-  ObjectAllocatorBase *get() const {
-    return m_getNoCheck();
-  }
-
-  ObjectAllocatorBase *getNoCheck() const {
-    return m_getNoCheck();
-  }
-
-private:
-  ObjectAllocatorBase *(*m_getNoCheck)(void);
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 // Attribute helpers
 class AttributeSetter {

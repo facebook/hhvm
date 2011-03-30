@@ -670,12 +670,12 @@ StaticString CurlResource::s_class_name("cURL handle");
   }                                                                     \
 
 Variant f_curl_init(CStrRef url /* = null_string */) {
-  return NEW(CurlResource)(url);
+  return NEWOBJ(CurlResource)(url);
 }
 
 Variant f_curl_copy_handle(CObjRef ch) {
   CHECK_RESOURCE(curl);
-  return NEW(CurlResource)(curl);
+  return NEWOBJ(CurlResource)(curl);
 }
 
 Variant f_curl_version(int uversion /* = CURLVERSION_NOW */) {
@@ -969,7 +969,7 @@ StaticString CurlMultiResource::s_class_name("cURL Multi Handle");
   }                                                                     \
 
 Object f_curl_multi_init() {
-  return NEW(CurlMultiResource)();
+  return NEWOBJ(CurlMultiResource)();
 }
 
 Variant f_curl_multi_add_handle(CObjRef mh, CObjRef ch) {
@@ -1167,7 +1167,7 @@ Variant f_evhttp_async_get(CStrRef url, CArrRef headers /* = null_array */,
   LibEventHttpClientPtr client = prepare_client(url, "", headers, timeout,
                                                 true, false);
   if (client) {
-    return Object(NEW(LibEventHttpHandle)(client));
+    return Object(NEWOBJ(LibEventHttpHandle)(client));
   }
   return false;
 }
@@ -1178,7 +1178,7 @@ Variant f_evhttp_async_post(CStrRef url, CStrRef data,
   LibEventHttpClientPtr client = prepare_client(url, data, headers, timeout,
                                                 true, true);
   if (client) {
-    return Object(NEW(LibEventHttpHandle)(client));
+    return Object(NEWOBJ(LibEventHttpHandle)(client));
   }
   return false;
 }

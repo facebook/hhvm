@@ -32,6 +32,7 @@ ThreadInfo::ThreadInfo() : m_executing(Idling) {
   m_mm = MemoryManager::TheMemoryManager().get();
 
   InitAllocatorThreadLocal();
+  get_global_variables_check();
 
   m_profiler = NULL;
   m_pendingException = false;

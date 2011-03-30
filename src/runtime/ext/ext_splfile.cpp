@@ -42,7 +42,7 @@ static SplFileObject *get_splfileobject(CObjRef obj) {
 
 Object f_hphp_splfileinfo___construct(CObjRef obj, CStrRef file_name) {
   c_SplFileInfo *c_splfi = obj.getTyped<c_SplFileInfo>();
-  c_splfi->m_rsrc = NEW(SplFileInfo)(file_name);
+  c_splfi->m_rsrc = NEWOBJ(SplFileInfo)(file_name);
   return c_splfi;
 }
 
@@ -192,7 +192,7 @@ Object f_hphp_splfileobject___construct(CObjRef obj, CStrRef filename, CStrRef o
   Variant f = f_fopen(filename, open_mode, use_include_path,
                       context.isNull() ? null_object : context.toObject());
   c_SplFileObject *c_splfo = obj.getTyped<c_SplFileObject>();
-  c_splfo->m_rsrc = NEW(SplFileObject)(f);
+  c_splfo->m_rsrc = NEWOBJ(SplFileObject)(f);
   return c_splfo;
 }
 

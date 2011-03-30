@@ -992,7 +992,7 @@ static sdlFunctionPtr deserialize_function_call
                                     "mustUnderstand value is not boolean");
           }
         }
-        h = NEW(soapHeader)();
+        h = NEWOBJ(soapHeader)();
         Object hobj(h);
         h->function = find_function(sdl, hdr_func, h->function_name).get();
         h->mustUnderstand = mustUnderstand;
@@ -2254,7 +2254,7 @@ void c_SoapServer::t_fault(CVarRef code, CStrRef fault,
 void c_SoapServer::t_addsoapheader(CObjRef fault) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapServer, SoapServer::addsoapheader);
   SoapServerScope ss(this);
-  soapHeader *p = NEW(soapHeader)();
+  soapHeader *p = NEWOBJ(soapHeader)();
   Object obj(p);
   p->function = NULL;
   p->mustUnderstand = false;

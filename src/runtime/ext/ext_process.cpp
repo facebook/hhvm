@@ -572,7 +572,7 @@ public:
       /* mark the descriptor close-on-exec, so that it won't be inherited
          by potential other children */
       fcntl(parentend, F_SETFD, FD_CLOEXEC);
-      return Object(NEW(PlainFile)(parentend, true));
+      return Object(NEWOBJ(PlainFile)(parentend, true));
     }
 
     return Object();
@@ -655,7 +655,7 @@ static Variant post_proc_open(CStrRef cmd, Variant &pipes,
   }
 
   /* we forked/spawned and this is the parent */
-  ChildProcess *proc = NEW(ChildProcess)();
+  ChildProcess *proc = NEWOBJ(ChildProcess)();
   proc->command = cmd;
   proc->child = child;
   proc->env = env;

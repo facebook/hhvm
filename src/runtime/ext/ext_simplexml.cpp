@@ -244,7 +244,7 @@ Variant f_simplexml_load_string(CStrRef data,
   if (!doc) {
     return false;
   }
-  c_SimpleXMLElement *ret = create_element(Object(NEW(XmlDocWrapper)(doc)),
+  c_SimpleXMLElement *ret = create_element(Object(NEWOBJ(XmlDocWrapper)(doc)),
                                            root, ns, is_prefix);
   return Object(ret);
 }
@@ -291,7 +291,7 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64 options /* = 0 */,
 
   xmlDocPtr doc = xmlReadMemory(xml.data(), xml.size(), NULL, NULL, options);
   if (doc) {
-    m_doc = Object(NEW(XmlDocWrapper)(doc));
+    m_doc = Object(NEWOBJ(XmlDocWrapper)(doc));
     m_node = xmlDocGetRootElement(doc);
     if (m_node) {
       m_children = create_children(m_doc, m_node, ns, is_prefix);

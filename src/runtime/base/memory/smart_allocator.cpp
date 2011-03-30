@@ -46,7 +46,6 @@ void InitAllocatorThreadLocal(void *arg /* = NULL */) {
       it != GetAllocatorInitList().end(); it++) {
     (*it)();
   }
-  get_global_variables_check();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

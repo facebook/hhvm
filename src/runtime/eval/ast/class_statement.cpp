@@ -299,7 +299,7 @@ Object ClassStatement::create(ClassEvalState &ce, CArrRef params,
     cls = pcls;
   }
 
-  eo = NEW(EvalObjectData)(ce, builtinParent, root);
+  eo = NEWOBJ(EvalObjectData)(ce, builtinParent, root);
 
   Object o(eo);
   eo->init();

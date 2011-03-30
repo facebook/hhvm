@@ -130,7 +130,7 @@ int f_ezmlm_hash(CStrRef addr) {
 // mailparse
 
 Object f_mailparse_msg_create() {
-  return NEW(MimePart)();
+  return NEWOBJ(MimePart)();
 }
 
 bool f_mailparse_msg_free(CObjRef mimemail) {
@@ -142,7 +142,7 @@ Variant f_mailparse_msg_parse_file(CStrRef filename) {
   if (same(stream, false)) return false;
   File *f = stream.toObject().getTyped<File>();
 
-  MimePart *p = NEW(MimePart)();
+  MimePart *p = NEWOBJ(MimePart)();
   Object ret(p);
   while (!f->eof()) {
     String line = f->readLine();
@@ -346,7 +346,7 @@ Variant f_mailparse_uudecode_all(CObjRef fp) {
   File *instream = fp.getTyped<File>();
   instream->rewind();
 
-  File *outstream = NEW(TempFile)(false);
+  File *outstream = NEWOBJ(TempFile)(false);
   Object deleter(outstream);
 
   Array return_value;
@@ -381,7 +381,7 @@ Variant f_mailparse_uudecode_all(CObjRef fp) {
       item.set("origfilename", String(origfilename, CopyString));
 
       /* create a temp file for the data */
-      File *partstream = NEW(TempFile)(false);
+      File *partstream = NEWOBJ(TempFile)(false);
       Object deleter(partstream);
       if (partstream)  {
         nparts++;

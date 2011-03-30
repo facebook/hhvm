@@ -1420,7 +1420,7 @@ Variant f_imap_open(CStrRef mailbox, CStrRef username, CStrRef password,
     return false;
   }
 
-  return NEW(ImapStream)(stream, (options & PHP_EXPUNGE) ? CL_EXPUNGE : NIL);
+  return NEWOBJ(ImapStream)(stream, (options & PHP_EXPUNGE) ? CL_EXPUNGE : NIL);
 }
 
 bool f_imap_ping(CObjRef imap_stream) {

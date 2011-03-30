@@ -79,20 +79,24 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
 #ifndef ENABLE_LATE_STATIC_BINDING
   bound = true;
 #endif
+  //Keys need to be numbered consecutively
+  Array normalisedParams = Array(params).values();
   if (function.isString() || function.instanceof("closure")) {
     String sfunction = function.toString();
     int c = sfunction.find("::");
     if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {
       if (bound) {
         return invoke_static_method(sfunction.substr(0, c),
-                                    sfunction.substr(c + 2), params,
+                                    sfunction.substr(c + 2),
+                                    normalisedParams,
                                     false);
       }
       return invoke_static_method_bind(sfunction.substr(0, c),
-                                       sfunction.substr(c + 2), params,
+                                       sfunction.substr(c + 2),
+                                       normalisedParams,
                                        false);
     }
-    return invoke(sfunction, params, -1, true, false);
+    return invoke(sfunction, normalisedParams, -1, true, false);
   } else if (function.is(KindOfArray)) {
     Array arr = function.toArray();
     if (!(arr.size() == 2 && arr.exists(0LL) && arr.exists(1LL))) {
@@ -116,9 +120,10 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
           cls = FrameInjection::GetParentClassName(true);
         }
         return classname.toObject()->o_invoke_ex
-          (cls, method.substr(c + 2), params, false);
+          (cls, method.substr(c + 2), normalisedParams, false);
       }
-      return classname.getObjectData()->o_invoke(method, params, -1, false);
+      return classname.getObjectData()->o_invoke(method, normalisedParams, -1,
+                                                 false);
     } else {
       if (!classname.isString()) {
         throw_invalid_argument("function: classname not string");
@@ -132,12 +137,12 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
       }
       Object obj = FrameInjection::GetThis(true);
       if (obj.instanceof(sclass)) {
-        return obj->o_invoke_ex(sclass, method, params, false);
+        return obj->o_invoke_ex(sclass, method, normalisedParams, false);
       }
       if (bound) {
-        return invoke_static_method(sclass, method, params, false);
+        return invoke_static_method(sclass, method, normalisedParams, false);
       }
-      return invoke_static_method_bind(sclass, method, params, false);
+      return invoke_static_method_bind(sclass, method, normalisedParams, false);
     }
   }
   throw_invalid_argument("function: not string or array");

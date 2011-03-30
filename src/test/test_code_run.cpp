@@ -6601,6 +6601,19 @@ bool TestCodeRun::TestDynamicMethods() {
       "$obj = new B(); "
       "call_user_func_array(array($obj, 'A::test'), array());");
 
+  MVCR("<?php\n"
+       "class Super {\n"
+       "  public function __call($name, $arguments) {\n"
+       "    var_dump($arguments);\n"
+         "}\n"
+       "}\n"
+       "$object = new Super();\n"
+       "$method = 'setRandomData';\n"
+       "$args = array('first' => 'random1', 'second' => 'random2');\n"
+       "var_dump($args);\n"
+       "call_user_func_array(array($object, $method), $args);\n"
+       "var_dump($args);\n");
+
   MVCR("<?php $i = 'gi'; $s = 'gs'; class A { "
       "public function &dyn_test(&$a) { global $i; $a = $i; return $i;}} "
       "$obj = new A(); $f = 'dyn_test'; "

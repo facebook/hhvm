@@ -28,19 +28,16 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 static VirtualHost s_default_vhost;
-static IMPLEMENT_THREAD_LOCAL_PROXY(VirtualHost, false, s_current_vhost);
 
 VirtualHost &VirtualHost::GetDefault() { return s_default_vhost; }
 
 void VirtualHost::SetCurrent(VirtualHost *vhost) {
-  s_current_vhost.set(vhost ? vhost : &s_default_vhost);
+  g_context->setVirtualHost(vhost ? vhost : &s_default_vhost);
 }
 
 const VirtualHost *VirtualHost::GetCurrent() {
-  VirtualHost *ret = s_current_vhost.get();
-  if (ret == NULL) {
-    ret = &s_default_vhost;
-  }
+  const VirtualHost *ret = g_context->getVirtualHost();
+  ASSERT(ret);
   return ret;
 }
 

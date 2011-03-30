@@ -53,7 +53,8 @@ ExecutionContext::ExecutionContext()
     m_stdout(NULL), m_stdoutData(NULL),
     m_errorState(ExecutionContext::NoError),
     m_errorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel),
-    m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false) {
+    m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false),
+    m_vhost(NULL) {
   MemoryManager::TheMemoryManager()->getStats().maxBytes = m_maxMemory;
   m_include_paths = Array::Create();
   for (unsigned int i = 0; i < RuntimeOption::IncludeSearchPaths.size(); ++i) {

@@ -385,12 +385,11 @@ class ItemSize<UNIT_SIZE> {
   };
 };
 
-typedef ObjectAllocatorBase *(*ObjectAllocatorBaseGetter)(void);
 template <typename T>
-ObjectAllocatorBaseGetter ObjectAllocatorInitSetup() {
+void *ObjectAllocatorInitSetup() {
   ThreadLocalSingleton<ObjectAllocator<ItemSize<sizeof(T)>::value> > tls;
   GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.get));
-  return (ObjectAllocatorBaseGetter)tls.getNoCheck;
+  return (void *)tls.getNoCheck;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

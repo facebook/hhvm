@@ -27,8 +27,6 @@ using namespace boost;
 
 namespace HPHP {
 
-extern GlobalVariables *get_global_variables_check();
-
 ///////////////////////////////////////////////////////////////////////////////
 // initializer
 

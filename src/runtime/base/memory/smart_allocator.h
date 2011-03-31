@@ -50,12 +50,12 @@ namespace HPHP {
 #define DELETEOBJ(NS,T,OBJ) delete OBJ
 #define SWEEPOBJ(T) delete this
 #else
-#define NEW(T) new (T::Allocator.getNoCheck()) T
+#define NEW(T) new (T::AllocatorType::getNoCheck()) T
 #define NEWOBJ(T) new                                  \
   (ThreadLocalSingleton                                \
     <ObjectAllocator<ItemSize<sizeof(T)>::value> >     \
     ::getNoCheck()) T
-#define DELETE(T) T::Allocator->release
+#define DELETE(T) T::AllocatorType::getNoCheck()->release
 #define DELETEOBJ(NS,T,OBJ) OBJ->~T();                 \
   (ThreadLocalSingleton                                \
     <ObjectAllocator<ItemSize<sizeof(T)>::value> >     \
@@ -78,37 +78,28 @@ namespace HPHP {
 typedef void (*AllocatorThreadLocalInit)(void);
 std::set<AllocatorThreadLocalInit>& GetAllocatorInitList();
 void InitAllocatorThreadLocal(void* arg = NULL);
-template<typename T>
-class StaticInitializerAllocatorSetup {
-public:
-  StaticInitializerAllocatorSetup() {
-    GetAllocatorInitList().insert(T::AllocatorSetup);
-  }
-};
-
 
 #define DECLARE_SMART_ALLOCATION(T, F)                                  \
   public:                                                               \
-  typedef SmartAllocator<T, SmartAllocatorImpl::T, F> AllocatorType;    \
-  static DECLARE_THREAD_LOCAL(AllocatorType, Allocator);                \
+  typedef                                                               \
+    ThreadLocalSingleton<SmartAllocator<T, SmartAllocatorImpl::T, F> >  \
+    AllocatorType;                                                      \
+  static void *SmaAllocatorInitSetup;                                   \
   void release();                                                       \
-  static void AllocatorSetup() {                                        \
-    Allocator.get();                                                    \
-  }                                                                     \
 
 #define IMPLEMENT_SMART_ALLOCATION(T, F)                                \
-  IMPLEMENT_THREAD_LOCAL(T::AllocatorType, T::Allocator);               \
+  void *T::SmaAllocatorInitSetup =                                      \
+    SmartAllocatorInitSetup<T, SmartAllocatorImpl::T, F>();             \
   void T::release() {                                                   \
     DELETE(T)(this);                                                    \
   }                                                                     \
-  static StaticInitializerAllocatorSetup<T> s_initAllocator##T;         \
 
 #define IMPLEMENT_SMART_ALLOCATION_CLS(C, T, F)                         \
-  IMPLEMENT_THREAD_LOCAL(C::T::AllocatorType, C::T::Allocator);         \
+  void *C::T::SmaAllocatorInitSetup =                                   \
+    SmartAllocatorInitSetup<C::T, SmartAllocatorImpl::T, F>();          \
   void C::T::release() {                                                \
     DELETE(T)(this);                                                    \
   }                                                                     \
-  static StaticInitializerAllocatorSetup<C::T> s_initAllocator##T;      \
 
 #define DECLARE_SMART_ALLOCATION_NOCALLBACKS(T)                         \
   DECLARE_SMART_ALLOCATION(T, SmartAllocatorImpl::NoCallbacks);         \
@@ -363,7 +354,24 @@ class SmartAllocator : public SmartAllocatorImpl {
       ((T*)p)->dump();
     }
   }
+
+  static SmartAllocator<T, TNameEnum, flag> *Create() {
+    return new SmartAllocator<T, TNameEnum, flag>();
+  }
+  static void Delete(SmartAllocator *p) {
+    delete p;
+  }
+  static void OnThreadExit(SmartAllocator *p) {
+    delete p;
+  }
 };
+
+template<typename T, int TNameEnum, int flag>
+void *SmartAllocatorInitSetup() {
+  ThreadLocalSingleton<SmartAllocator<T, TNameEnum, flag> > tls;
+  GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.get));
+  return (void*)tls.getNoCheck;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // This allocator is for unknown but fixed sized classes, like ObjectData.
@@ -372,16 +380,16 @@ class SmartAllocator : public SmartAllocatorImpl {
 
 #define DECLARE_OBJECT_ALLOCATION(T)                                    \
   public:                                                               \
-  static ObjectAllocatorBaseGetter AllocatorInitSetup;                  \
+  static void *ObjAllocatorInitSetup;                                   \
   virtual void release();                                               \
   virtual void sweep();
 
-#define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T)  \
-  ObjectAllocatorBaseGetter NS::T::AllocatorInitSetup =         \
-    ObjectAllocatorInitSetup<NS::T>();\
-  void NS::T::release() {                                       \
-    destruct();                                                 \
-    DELETEOBJ(NS, T, this);                                     \
+#define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T)          \
+  void *NS::T::ObjAllocatorInitSetup =                                  \
+    ObjectAllocatorInitSetup<NS::T>();                                  \
+  void NS::T::release() {                                               \
+    destruct();                                                         \
+    DELETEOBJ(NS, T, this);                                             \
   }
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(T)                 \
@@ -390,7 +398,7 @@ class SmartAllocator : public SmartAllocatorImpl {
 #define IMPLEMENT_OBJECT_ALLOCATION_CLS(NS,T)                           \
   IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T);               \
   void NS::T::sweep() {                                                 \
-    SWEEPOBJ(T);                                                   \
+    SWEEPOBJ(T);                                                        \
   }
 
 #define IMPLEMENT_OBJECT_ALLOCATION(T) IMPLEMENT_OBJECT_ALLOCATION_CLS(HPHP,T)

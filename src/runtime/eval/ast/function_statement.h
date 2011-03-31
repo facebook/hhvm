@@ -85,7 +85,8 @@ public:
   Variant directInvoke(VariableEnvironment &env,
                        const FunctionCallExpression *caller) const;
   Variant invokeClosure(CObjRef closure, VariableEnvironment &env,
-                        const FunctionCallExpression *caller) const;
+                        const FunctionCallExpression *caller,
+                        int start = 0) const;
   Variant invokeImpl(FuncScopeVariableEnvironment &fenv, CArrRef params) const;
   virtual LVariableTable *getStaticVars(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
@@ -121,7 +122,8 @@ protected:
 
   void directBind(VariableEnvironment &env,
                   const FunctionCallExpression *caller,
-                  FuncScopeVariableEnvironment &fenv) const;
+                  FuncScopeVariableEnvironment &fenv,
+                  int start = 0) const;
   Variant evalBody(VariableEnvironment &env) const;
   CallInfo m_callInfo;
 private:

@@ -120,7 +120,7 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
     const FunctionStatement *fstmt =
       dynamic_cast<const FunctionStatement *>(fs);
     ObjectData *closure = (ObjectData*)sid.toInt64();
-    return ref(fstmt->invokeClosure(Object(closure), env, this));
+    return ref(fstmt->invokeClosure(Object(closure), env, this, 1));
   }
   return (cit1->getFunc())(vt1, Array(ai.create()));
 }

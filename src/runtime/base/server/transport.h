@@ -126,6 +126,7 @@ public:
   /**
    * Get/set response headers.
    */
+  void addHeaderNoLock(const char *name, const char *value);
   void addHeader(const char *name, const char *value);
   void addHeader(CStrRef header);
   void replaceHeader(const char *name, const char *value);
@@ -381,9 +382,11 @@ protected:
   static void urlUnescape(char *value);
   bool splitHeader(CStrRef header, String &name, const char *&value);
 
-  void prepareHeaders(bool compressed, const void *data, int size);
   String prepareResponse(const void *data, int size, bool &compressed,
                          bool last);
+
+private:
+  void prepareHeaders(bool compressed, const void *data, int size);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -67,6 +67,14 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef EXTRA_FIBER_LOCKING
+#ifdef DEBUG
+#define EXTRA_FIBER_LOCKING 1
+#endif
+#elif !DEBUG
+#undef EXTRA_FIBER_LOCKING
+#endif
+
 /**
  * Derive from this class to share the same object between two or more fibers.
  */
@@ -80,8 +88,25 @@ public:
 protected:
   friend class FiberReadLock;
   friend class FiberWriteLock;
+  friend class FiberReadLockViolator;
+  friend class FiberWriteLockViolator;
   int m_fiberCount; // how many fibers are sharing me
   mutable ReadWriteMutex m_fiberMutex;
+
+  inline bool shouldLock() const {
+    /*
+     * As an optimization, avoid costly lock operations when no
+     * fiber is present. However, since fibers are rarely present, we
+     * don't get very good debugging coverage of FiberSafe synchronization
+     * without them. So lock them regardless in debug builds.
+     */
+#if EXTRA_FIBER_LOCKING
+    ASSERT(m_fiberCount >= 0);
+    return true;
+#else
+    return m_fiberCount > 0;
+#endif
+  }
 };
 
 #define IMPLEMENT_FIBER_SAFE_COUNTABLE          \
@@ -110,10 +135,10 @@ protected:
 class FiberReadLock {
 public:
   FiberReadLock(const FiberSafe *obj) : m_obj(obj) {
-    if (m_obj && m_obj->m_fiberCount) m_obj->m_fiberMutex.acquireRead();
+    if (m_obj && m_obj->shouldLock()) m_obj->m_fiberMutex.acquireRead();
   }
   ~FiberReadLock() {
-    if (m_obj && m_obj->m_fiberCount) m_obj->m_fiberMutex.release();
+    if (m_obj && m_obj->shouldLock()) m_obj->m_fiberMutex.release();
   }
 
 private:
@@ -123,15 +148,51 @@ private:
 class FiberWriteLock {
 public:
   FiberWriteLock(const FiberSafe *obj) : m_obj(obj) {
-    if (m_obj && m_obj->m_fiberCount) m_obj->m_fiberMutex.acquireWrite();
+    if (m_obj && m_obj->shouldLock()) m_obj->m_fiberMutex.acquireWrite();
   }
   ~FiberWriteLock() {
-    if (m_obj && m_obj->m_fiberCount) m_obj->m_fiberMutex.release();
+    if (m_obj && m_obj->shouldLock()) m_obj->m_fiberMutex.release();
   }
 
 private:
   const FiberSafe *m_obj;
 };
+
+/*
+ * Do not use this class (unless you have to).
+ * It temporarily unlocks something that was locked with FiberReadLock
+ */
+class FiberReadLockViolator {
+public:
+  FiberReadLockViolator(const FiberSafe *obj) : m_obj(obj) {
+    if (m_obj && m_obj->shouldLock()) m_obj->m_fiberMutex.release();
+  }
+  ~FiberReadLockViolator() {
+    if (m_obj && m_obj->shouldLock()) m_obj->m_fiberMutex.acquireRead();
+  }
+
+private:
+  const FiberSafe *m_obj;
+};
+
+/*
+ * Do not use this class (unless you have to).
+ * It temporarily unlocks something that was locked with FiberWriteLock
+ */
+class FiberWriteLockViolator {
+public:
+  FiberWriteLockViolator(const FiberSafe *obj) : m_obj(obj) {
+    if (m_obj && m_obj->shouldLock()) m_obj->m_fiberMutex.release();
+  }
+  ~FiberWriteLockViolator() {
+    if (m_obj && m_obj->shouldLock()) m_obj->m_fiberMutex.acquireWrite();
+  }
+
+private:
+  const FiberSafe *m_obj;
+};
+
+
 typedef FiberWriteLock FiberLock;
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -167,34 +167,36 @@ void Transport::parseQuery(char *query, ParamMap &params) {
 void Transport::parseGetParams() {
   FiberWriteLock lock(this);
 
-  ASSERT(m_url == NULL);
-  const char *url = getServerObject();
-  ASSERT(url);
+  if (m_url == NULL) {
+    const char *url = getServerObject();
+    ASSERT(url);
 
-  const char *p = strchr(url, '?');
-  if (p) {
-    m_url = strdup(p + 1);
-  } else {
-    m_url = strdup("");
+    const char *p = strchr(url, '?');
+    if (p) {
+      m_url = strdup(p + 1);
+    } else {
+      m_url = strdup("");
+    }
+
+    parseQuery(m_url, m_getParams);
   }
-
-  parseQuery(m_url, m_getParams);
 }
 
 void Transport::parsePostParams() {
   FiberWriteLock lock(this);
 
-  ASSERT(!m_postDataParsed);
-  ASSERT(m_postData == NULL);
-  int size;
-  const char *data = (const char *)getPostData(size);
-  if (data && *data && size) {
-    // Post data may be binary, but if parsePostParams() is called, it is
-    // correct to handle it as a null-terminated string
-    m_postData = strdup(data);
-    parseQuery(m_postData, m_postParams);
+  if (!m_postDataParsed) {
+    ASSERT(m_postData == NULL);
+    int size;
+    const char *data = (const char *)getPostData(size);
+    if (data && *data && size) {
+      // Post data may be binary, but if parsePostParams() is called, it is
+      // correct to handle it as a null-terminated string
+      m_postData = strdup(data);
+      parseQuery(m_postData, m_postParams);
+    }
+    m_postDataParsed = true;
   }
-  m_postDataParsed = true;
 }
 
 bool Transport::paramExists(const char *name, Method method /* = GET */) {
@@ -203,6 +205,7 @@ bool Transport::paramExists(const char *name, Method method /* = GET */) {
 
   if (method == GET || method == AUTO) {
     if (m_url == NULL) {
+      FiberReadLockViolator unlock(this);
       parseGetParams();
     }
     if (m_getParams.find(name) != m_getParams.end()) {
@@ -211,7 +214,8 @@ bool Transport::paramExists(const char *name, Method method /* = GET */) {
   }
 
   if (method == POST || method == AUTO) {
-    if (m_postDataParsed) {
+    if (!m_postDataParsed) {
+      FiberReadLockViolator unlock(this);
       parsePostParams();
     }
     if (m_postParams.find(name) != m_postParams.end()) {
@@ -228,6 +232,7 @@ std::string Transport::getParam(const char *name,  Method method /* = GET */) {
 
   if (method == GET || method == AUTO) {
     if (m_url == NULL) {
+      FiberReadLockViolator unlock(this);
       parseGetParams();
     }
     ParamMap::const_iterator iter = m_getParams.find(name);
@@ -237,7 +242,8 @@ std::string Transport::getParam(const char *name,  Method method /* = GET */) {
   }
 
   if (method == POST || method == AUTO) {
-    if (m_postDataParsed) {
+    if (!m_postDataParsed) {
+      FiberReadLockViolator unlock(this);
       parsePostParams();
     }
     ParamMap::const_iterator iter = m_postParams.find(name);
@@ -273,6 +279,7 @@ void Transport::getArrayParam(const char *name,
 
   if (method == GET || method == AUTO) {
     if (m_url == NULL) {
+      FiberReadLockViolator unlock(this);
       parseGetParams();
     }
     ParamMap::const_iterator iter = m_getParams.find(name);
@@ -283,7 +290,8 @@ void Transport::getArrayParam(const char *name,
   }
 
   if (method == POST || method == AUTO) {
-    if (m_postDataParsed) {
+    if (!m_postDataParsed) {
+      FiberReadLockViolator unlock(this);
       parsePostParams();
     }
     ParamMap::const_iterator iter = m_postParams.find(name);
@@ -340,10 +348,9 @@ bool Transport::splitHeader(CStrRef header, String &name, const char *&value) {
   throw InvalidArgumentException("header", header.c_str());
 }
 
-void Transport::addHeader(const char *name, const char *value) {
+void Transport::addHeaderNoLock(const char *name, const char *value) {
   ASSERT(name && *name);
   ASSERT(value);
-  FiberWriteLock lock(this);
 
   if (!m_firstHeaderSet) {
     m_firstHeaderSet = true;
@@ -370,6 +377,13 @@ void Transport::addHeader(const char *name, const char *value) {
   }
 }
 
+void Transport::addHeader(const char *name, const char *value) {
+  ASSERT(name && *name);
+  ASSERT(value);
+  FiberWriteLock lock(this);
+  addHeaderNoLock(name, value);
+}
+
 void Transport::addHeader(CStrRef header) {
   String name;
   const char *value;
@@ -383,7 +397,7 @@ void Transport::replaceHeader(const char *name, const char *value) {
   ASSERT(value);
   FiberWriteLock lock(this);
   m_responseHeaders[name].clear();
-  addHeader(name, value);
+  addHeaderNoLock(name, value);
 }
 
 void Transport::replaceHeader(CStrRef header) {
@@ -574,7 +588,6 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int64 expire /* = 0 */,
 ///////////////////////////////////////////////////////////////////////////////
 
 void Transport::prepareHeaders(bool compressed, const void *data, int size) {
-  FiberReadLock lock(this);
   for (HeaderMap::const_iterator iter = m_responseHeaders.begin();
        iter != m_responseHeaders.end(); ++iter) {
     const vector<string> &values = iter->second;
@@ -593,8 +606,8 @@ void Transport::prepareHeaders(bool compressed, const void *data, int size) {
     removeHeaderImpl("Content-Length");
     if (m_responseHeaders.find("Content-MD5") != m_responseHeaders.end()) {
       String response((const char *)data, size, AttachLiteral);
-      replaceHeader("Content-MD5",
-                    StringUtil::Base64Encode(
+      removeHeaderImpl("Content-MD5");
+      addHeaderImpl("Content-MD5", StringUtil::Base64Encode(
                       StringUtil::MD5(response, true)).c_str());
     }
   }

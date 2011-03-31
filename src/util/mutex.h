@@ -17,29 +17,14 @@
 #ifndef __MUTEX_H__
 #define __MUTEX_H__
 
+#include <assert.h>
 #include <pthread.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * A mutex that's re-entrant, meaning it won't deadlock if you do this,
- *
- *   class A {
- *    public:
- *      void foo() {
- *        Lock lock(m_mutex);
- *        bar(); // if m_mutex is not re-entrant, this will deadlock
- *      }
- *
- *      void bar() {
- *        Lock lock(m_mutex);
- *        // ...
- *      }
- *
- *    private:
- *      Mutex m_mutex;
- *   };
+ * Recursive mutex.
  */
 class Mutex {
 public:
@@ -96,22 +81,85 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * Read-write mutex for read-write locks.
+ * Read-write lock wrapper.
  */
 class ReadWriteMutex {
+#ifdef DEBUG
+/* 
+ * We have a track record of self-deadlocking on these, and our pthread
+ * implementation tends to do crazy things when a rwlock is double-wlocked,
+ * so check and assert early in debug builds.
+ */
+  static const pthread_t InvalidThread = (pthread_t)0;
+  pthread_t m_writeOwner;
+#endif
+
+  void invalidateWriteOwner() {
+#ifdef DEBUG
+    m_writeOwner = InvalidThread;
+#endif
+  }
+
+  void recordWriteAcquire() {
+#ifdef DEBUG
+    assert(m_writeOwner == InvalidThread);
+    m_writeOwner = pthread_self();
+#endif
+  }
+
+  void assertNotWriteOwner() {
+#ifdef DEBUG
+    assert(m_writeOwner != pthread_self());
+#endif
+  }
+
+  void assertNotWriteOwned() {
+#ifdef DEBUG
+    assert(m_writeOwner == InvalidThread);
+#endif
+  }
+
 public:
   ReadWriteMutex() {
+    invalidateWriteOwner();
     pthread_rwlock_init(&m_rwlock, NULL);
   }
+
   ~ReadWriteMutex() {
+    assertNotWriteOwned();
     pthread_rwlock_destroy(&m_rwlock);
   }
 
-  void acquireRead() { pthread_rwlock_rdlock(&m_rwlock); }
-  void acquireWrite() { pthread_rwlock_wrlock(&m_rwlock); }
+  void acquireRead() {
+    /*
+     * Atomically downgrading a write lock to a read lock is not part of the
+     * pthreads standard. See task #528421. 
+     */
+    assertNotWriteOwner();
+    pthread_rwlock_rdlock(&m_rwlock);
+    /*
+     * Again, see task #528421.
+     */
+    assertNotWriteOwned();
+  }
+
+  void acquireWrite() {
+    assertNotWriteOwner();
+    pthread_rwlock_wrlock(&m_rwlock);
+    assertNotWriteOwned();
+    recordWriteAcquire();
+  }
+
   bool attemptRead() { return !pthread_rwlock_tryrdlock(&m_rwlock); }
   bool attemptWrite() { return !pthread_rwlock_trywrlock(&m_rwlock); }
-  void release() { pthread_rwlock_unlock(&m_rwlock); }
+  void release() {
+#ifdef DEBUG
+    if (m_writeOwner == pthread_self()) {
+      invalidateWriteOwner();
+    }
+#endif
+    pthread_rwlock_unlock(&m_rwlock);
+  }
 
 private:
   ReadWriteMutex(const ReadWriteMutex &); // suppress

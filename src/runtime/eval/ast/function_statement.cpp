@@ -258,10 +258,11 @@ Variant FunctionStatement::invoke(CArrRef params) const {
 
 void FunctionStatement::directBind(VariableEnvironment &env,
                                    const FunctionCallExpression *caller,
-                                   FuncScopeVariableEnvironment &fenv) const {
+                                   FuncScopeVariableEnvironment &fenv,
+                                   int start /* = 0 */) const {
   vector<ParameterPtr>::const_iterator piter = m_params.begin();
   const vector<ExpressionPtr> &args = caller->params();
-  vector<ExpressionPtr>::const_iterator it = args.begin();
+  vector<ExpressionPtr>::const_iterator it = args.begin() + start;
   VariantStack &as = RequestEvalState::argStack();
   for (; it != args.end() && piter != m_params.end(); ++it, ++piter) {
     Variant v;
@@ -352,11 +353,12 @@ Variant FunctionStatement::directInvoke(VariableEnvironment &env,
 // env is caller's env
 Variant FunctionStatement::invokeClosure(CObjRef closure,
                                          VariableEnvironment &env,
-                                         const FunctionCallExpression *caller)
+                                         const FunctionCallExpression *caller,
+                                         int start /* = 0 */)
   const {
   DECLARE_THREAD_INFO_NOINIT
   FuncScopeVariableEnvironment fenv(this);
-  directBind(env, caller, fenv);
+  directBind(env, caller, fenv, start);
 
   p_Closure c = closure.getTyped<c_Closure>();
   for (ArrayIter iter(c->m_vars); iter; ++iter) {

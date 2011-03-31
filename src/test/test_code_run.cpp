@@ -16495,6 +16495,19 @@ bool TestCodeRun::TestClosure() {
         "hello, world!\n"
         "is_callable($myfunc) = 1\n"
         "string(17) \"Closure::__invoke\"\n");
+  MVCRO("<?php\n"
+        "function f() {"
+        "$someVar = 456;"
+        "$closure = function($param) use ($someVar) {"
+        "echo $param . ' ' . $someVar . \"\\n\";"
+        "};"
+        "return $closure;"
+        "}"
+        "$x = f();"
+        "$x(2);"
+        "call_user_func($x, 2);",
+        "2 456\n"
+        "2 456\n");
   return true;
 }
 

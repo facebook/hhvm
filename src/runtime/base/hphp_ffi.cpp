@@ -209,6 +209,7 @@ int hphp_ffi_get_class_constant(void **ret, const char *cls,
 
 void hphp_ffi_init() {
   RuntimeOption::SourceRoot = "/";
+  InitAllocatorThreadLocal();
   init_static_variables();
 }
 

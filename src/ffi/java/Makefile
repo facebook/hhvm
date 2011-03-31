@@ -1,4 +1,4 @@
-PROJECT_ROOT = ../../../
+PROJECT_ROOT = ../../..
 
 PROJECT_NAME = hphp_java
 
@@ -28,7 +28,7 @@ CPPFLAGS += -I $(JAVA_PATH)/include -I $(JAVA_PATH)/include/linux \
 $(SHARED_LIB) : setup
 
 setup :
-	$(V)cd $(PROJECT_ROOT)/src && make
+	$(V)$(MAKE) -C $(PROJECT_ROOT)/src
 
 $(CLS) : $(SRC)
 	$(V)mkdir -p classes

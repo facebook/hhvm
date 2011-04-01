@@ -152,59 +152,6 @@ void ThreadLocal<T>::createKey() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// ThreadLocalCreate allocates by calling T::Create without parameters and
-// frees by calling T::Delete
-
-template<typename T>
-struct ThreadLocalCreate {
-  T *get() const {
-    if (m_node.m_p == NULL) {
-      const_cast<ThreadLocalCreate<T>*>(this)->createKey();
-    }
-    return m_node.m_p;
-  }
-
-  void createKey() __attribute__((noinline));
-
-  bool isNull() const { return m_node.m_p == NULL; }
-
-  void reset() {
-    T::Delete(m_node.m_p);
-    m_node.m_p = NULL;
-  }
-
-  static void OnThreadExit(void * p) {
-    ThreadLocalNode<T> * pNode = (ThreadLocalNode<T>*)p;
-    T::OnThreadExit(pNode->m_p);
-    pNode->m_p = NULL;
-  }
-
-  T *operator->() const {
-    return get();
-  }
-
-  T &operator*() const {
-    return *get();
-  }
-
-  void *m_createInfo;
-
-  ThreadLocalNode<T> m_node;
-};
-
-template<typename T>
-void ThreadLocalCreate<T>::createKey() {
-  if (m_node.m_on_thread_exit_fn == NULL) {
-    m_node.m_on_thread_exit_fn = ThreadLocalCreate<T>::OnThreadExit;
-    m_node.m_next = ThreadLocalManager::s_manager.getTop();
-    ThreadLocalManager::s_manager.setTop((void*)(&m_node));
-  }
-  if (m_node.m_p == NULL) {
-    m_node.m_p = T::Create(m_createInfo);
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Singleton thread-local storage for T
 
 template<typename T>
@@ -324,17 +271,12 @@ struct ThreadLocalProxy {
 #define DECLARE_THREAD_LOCAL(T, f) \
   __thread ThreadLocal<T> f
 #define IMPLEMENT_THREAD_LOCAL(T, f) \
-  __thread ThreadLocal<T> f = { { NULL, NULL, NULL } }
-
-#define DECLARE_THREAD_LOCAL_CREATE(T, f) \
-  __thread ThreadLocalCreate<T> f
-#define IMPLEMENT_THREAD_LOCAL_CREATE(T, f) \
-  __thread ThreadLocalCreate<T> f = { { NULL, NULL, NULL } }
+  __thread ThreadLocal<T> f
 
 #define DECLARE_THREAD_LOCAL_PROXY(T, N, f) \
   __thread ThreadLocalProxy<T, N> f
 #define IMPLEMENT_THREAD_LOCAL_PROXY(T, N, f) \
-  __thread ThreadLocalProxy<T, N> f = { NULL }
+  __thread ThreadLocalProxy<T, N> f
 
 #else /* USE_GCC_FAST_TLS */
 
@@ -387,57 +329,6 @@ public:
   T &operator*() const {
     return *get();
   }
-
-private:
-  pthread_key_t m_key;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// ThreadLocalCreate allocates by calling T::Create without parameters and
-// frees by calling T::Delete
-
-template<typename T>
-class ThreadLocalCreate {
-public:
-  /**
-   * Constructor that has to be called from a thread-neutral place.
-   */
-  ThreadLocalCreate() : m_key(0) {
-    ThreadLocalCreateKey(&m_key, ThreadLocalCreate<T>::OnThreadExit);
-  }
-
-  T *get() const {
-    T *obj = (T*)pthread_getspecific(m_key);
-    if (obj == NULL) {
-      obj = T::Create(m_createInfo);
-      pthread_setspecific(m_key, obj);
-    }
-    return obj;
-  }
-
-  bool isNull() const { return pthread_getspecific(m_key) == NULL; }
-
-  void reset() {
-    T::Delete((T*)pthread_getspecific(m_key));
-    pthread_setspecific(m_key, NULL);
-  }
-
-  static void OnThreadExit(void *obj) {
-    T::OnThreadExit((T*)obj);
-  }
-
-  /**
-   * Access object's member or method through this operator overload.
-   */
-  T *operator->() const {
-    return get();
-  }
-
-  T &operator*() const {
-    return *get();
-  }
-
-  void *m_createInfo;
 
 private:
   pthread_key_t m_key;
@@ -547,9 +438,6 @@ public:
 
 #define DECLARE_THREAD_LOCAL(T, f) ThreadLocal<T> f
 #define IMPLEMENT_THREAD_LOCAL(T, f) ThreadLocal<T> f
-
-#define DECLARE_THREAD_LOCAL_CREATE(T, f) ThreadLocalCreate<T> f
-#define IMPLEMENT_THREAD_LOCAL_CREATE(T, f) ThreadLocalCreate<T> f
 
 #define DECLARE_THREAD_LOCAL_PROXY(T, N, f) ThreadLocalProxy<T, N> f
 #define IMPLEMENT_THREAD_LOCAL_PROXY(T, N, f) ThreadLocalProxy<T, N> f

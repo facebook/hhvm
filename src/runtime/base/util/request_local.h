@@ -92,13 +92,13 @@ void RequestLocal<T>::createKey() {
 }
 
 #define IMPLEMENT_REQUEST_LOCAL(T,f) \
-  __thread RequestLocal<T> f = { { NULL, NULL, NULL } }
+  __thread RequestLocal<T> f
 
 #define DECLARE_STATIC_REQUEST_LOCAL(T,f) \
   static __thread RequestLocal<T> f
 
 #define IMPLEMENT_STATIC_REQUEST_LOCAL(T,f) \
-  static __thread RequestLocal<T> f = { { NULL, NULL, NULL } }
+  static __thread RequestLocal<T> f
 
 #define DECLARE_EXTERN_REQUEST_LOCAL(T,f) \
   extern __thread RequestLocal<T> f

@@ -3917,7 +3917,8 @@ void Variant::dump() const {
   printf("Variant: %s", ret.toString().data());
 }
 
-VarNR::VarNR(CStrRef v) : Variant(KindOfString) {
+VarNR::VarNR(CStrRef v) {
+  init(KindOfString);
   StringData *s = v.get();
   if (s) {
     m_data.pstr = s;
@@ -3926,7 +3927,8 @@ VarNR::VarNR(CStrRef v) : Variant(KindOfString) {
   }
 }
 
-VarNR::VarNR(CArrRef v) : Variant(KindOfArray) {
+VarNR::VarNR(CArrRef v) {
+  init(KindOfArray);
   ArrayData *a = v.get();
   if (a) {
     m_data.parr = a;
@@ -3935,7 +3937,8 @@ VarNR::VarNR(CArrRef v) : Variant(KindOfArray) {
   }
 }
 
-VarNR::VarNR(CObjRef v) : Variant(KindOfObject) {
+VarNR::VarNR(CObjRef v) {
+  init(KindOfObject);
   ObjectData *o = v.get();
   if (o) {
     m_data.pobj = o;
@@ -3944,7 +3947,8 @@ VarNR::VarNR(CObjRef v) : Variant(KindOfObject) {
   }
 }
 
-VarNR::VarNR(StringData *v) : Variant(KindOfString) {
+VarNR::VarNR(StringData *v) {
+  init(KindOfString);
   if (v) {
     m_data.pstr = v;
   } else {
@@ -3952,7 +3956,8 @@ VarNR::VarNR(StringData *v) : Variant(KindOfString) {
   }
 }
 
-VarNR::VarNR(ArrayData *v) : Variant(KindOfArray) {
+VarNR::VarNR(ArrayData *v) {
+  init(KindOfArray);
   if (v) {
     m_data.parr = v;
   } else {
@@ -3960,7 +3965,8 @@ VarNR::VarNR(ArrayData *v) : Variant(KindOfArray) {
   }
 }
 
-VarNR::VarNR(ObjectData *v) : Variant(KindOfObject) {
+VarNR::VarNR(ObjectData *v) {
+  init(KindOfObject);
   if (v) {
     m_data.pobj = v;
   } else {

@@ -1023,12 +1023,13 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
       // use VarNR to avoid unnecessary ref-counting because we know
       // the actual argument will always has a ref in the callee.
       bool wrap = false;
-      if (!param->isScalar() && !param->hasContext(Expression::RefValue) &&
+      if (!param->hasContext(Expression::RefValue) &&
           param->getExpectedType() &&
           param->getExpectedType()->is(Type::KindOfVariant) &&
           (param->getCPPType()->is(Type::KindOfArray) ||
            param->getCPPType()->is(Type::KindOfString) ||
-           param->getCPPType()->is(Type::KindOfObject))) {
+           param->getCPPType()->is(Type::KindOfObject) ||
+           param->getCPPType()->isPrimitive())) {
         wrap = true;
         if (func && i < func->getMaxParamCount()) {
           VariableTablePtr variables = func->getVariables();

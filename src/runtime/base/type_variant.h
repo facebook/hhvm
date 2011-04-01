@@ -126,8 +126,6 @@ class Variant {
    * operator overloads.
    */
   Variant(bool    v) : _count(0), m_type(KindOfBoolean) { m_data.num = (v?1:0);}
-  Variant(char    v) : _count(0), m_type(KindOfInt32  ) { m_data.num = v;}
-  Variant(short   v) : _count(0), m_type(KindOfInt32  ) { m_data.num = v;}
   Variant(int     v) : _count(0), m_type(KindOfInt32  ) { m_data.num = v;}
   Variant(int64   v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   Variant(uint64  v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
@@ -173,10 +171,11 @@ class Variant {
   Variant(CVarRef v);
 #endif
 
- protected:
-  // This constructor is only used to construct VarNR
+ private:
+  friend class VarNR;
+  // This helper is only used to construct VarNR
   static const int NR_FLAG = 1 << 29;
-  Variant(DataType dt) : _count(NR_FLAG), m_type(dt) { }
+  void initForVarNR(DataType dt) { _count = NR_FLAG; m_type = dt; }
 
  public:
   bool isVarNR() const { return _count == NR_FLAG; }
@@ -1216,21 +1215,22 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 // VarNR
 
-class VarNR : public Variant {
+class VarNR : private TypedValue {
 public:
   // Use to hold variant that do not need ref-counting
-  VarNR(bool    v) : Variant(v) {}
-  VarNR(char    v) : Variant(v) {}
-  VarNR(short   v) : Variant(v) {}
-  VarNR(int     v) : Variant(v) {}
-  VarNR(int64   v) : Variant(v) {}
-  VarNR(uint64  v) : Variant(v) {}
-  VarNR(long    v) : Variant(v) {}
-  VarNR(double  v) : Variant(v) {}
+  VarNR(bool    v) { init(KindOfBoolean); m_data.num = (v?1:0);}
+  VarNR(int     v) { init(KindOfInt32  ); m_data.num = v;}
+  VarNR(int64   v) { init(KindOfInt64  ); m_data.num = v;}
+  VarNR(uint64  v) { init(KindOfInt64  ); m_data.num = v;}
+  VarNR(long    v) { init(KindOfInt64  ); m_data.num = v;}
+  VarNR(double  v) { init(KindOfDouble ); m_data.dbl = v;}
 
-  VarNR(litstr  v) : Variant(v) {}
-  VarNR(const std::string & v) : Variant(v) {}
-  VarNR(const StaticString &v) : Variant(v) {}
+  VarNR(const StaticString &v) {
+    init(KindOfStaticString);
+    StringData *s = v.get();
+    ASSERT(s);
+    m_data.pstr = s;
+  }
 
   VarNR(CStrRef v);
   VarNR(CArrRef v);
@@ -1239,24 +1239,38 @@ public:
   VarNR(ArrayData *v);
   VarNR(ObjectData *v);
 
-  VarNR(const VarNR &v) : Variant(v.m_type) {
-    m_data = v.m_data;
+  VarNR(const VarNR &v) : TypedValue(v) {}
+
+  VarNR() { asVariant()->setUninitNull(); }
+
+#ifdef DEBUG
+  ~VarNR() { ASSERT(checkRefCount()); }
+#endif
+
+  operator CVarRef() const { return *asVariant(); }
+
+  bool isNull() const {
+    return asVariant()->isNull();
   }
 
-  VarNR() : Variant(KindOfNull) {
+  bool isVarNR() const {
+    return asVariant()->isVarNR();
   }
-
-  ~VarNR() {
-    ASSERT(checkRefCount());
-    // Need to fool the parent destructor that it is a simple type
-    m_type = KindOfNull;
-  }
-
 private:
+  VarNR(litstr  v); // not implemented
+  VarNR(const std::string & v); // not implemented
+
+  void init(DataType dt) { asVariant()->initForVarNR(dt); }
+  const Variant *asVariant() const {
+    return (const Variant*)this;
+  }
+  Variant *asVariant() {
+    return (Variant*)this;
+  }
   bool checkRefCount() {
     if (m_type == KindOfVariant) return false;
     if (!IS_REFCOUNTED_TYPE(m_type)) return true;
-    if (!isVarNR()) return false;
+    if (!((Variant*)this)->isVarNR()) return false;
     switch (m_type) {
     case KindOfArray:
       return m_data.parr->getCount() > 0;

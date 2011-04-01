@@ -27,11 +27,13 @@ using namespace boost;
 
 namespace HPHP {
 
+extern GlobalVariables *get_global_variables_check();
+
 ///////////////////////////////////////////////////////////////////////////////
 // initializer
 
-std::vector<AllocatorThreadLocalInit>& GetAllocatorInitList() {
-  static std::vector<AllocatorThreadLocalInit> allocatorInitList;
+std::set<AllocatorThreadLocalInit>& GetAllocatorInitList() {
+  static std::set<AllocatorThreadLocalInit> allocatorInitList;
   if (!AsyncFuncImpl::GetThreadInitFunc()) {
     AsyncFuncImpl::SetThreadInitFunc(InitAllocatorThreadLocal, NULL);
   }
@@ -39,7 +41,7 @@ std::vector<AllocatorThreadLocalInit>& GetAllocatorInitList() {
 }
 
 void InitAllocatorThreadLocal(void *arg /* = NULL */) {
-  for (std::vector<AllocatorThreadLocalInit>::iterator it =
+  for (std::set<AllocatorThreadLocalInit>::iterator it =
       GetAllocatorInitList().begin();
       it != GetAllocatorInitList().end(); it++) {
     (*it)();
@@ -93,7 +95,7 @@ SmartAllocatorImpl::SmartAllocatorImpl(int nameEnum, int itemCount,
     m_rowChecked(0), m_colChecked(0), m_linearSize(0), m_linearCount(0),
     m_allocatedBlocks(0), m_multiplier(1), m_maxMultiplier(1),
     m_targetMultiplier(1),
-    m_iter(this), m_dealloc(true), m_linearized(false), m_stats(NULL) {
+    m_iter(this), m_linearized(false), m_stats(NULL) {
 
   // automatically pick a good per slab item count
   if (m_itemCount <= 0) {
@@ -332,8 +334,6 @@ void SmartAllocatorImpl::backupObjects(LinearAllocator &allocator) {
 }
 
 void SmartAllocatorImpl::rollbackObjects(LinearAllocator &allocator) {
-  m_dealloc = true;
-
   // sweep dangling objects
   if (m_flag & (NeedRestore | NeedRestoreOnce | NeedSweep)) {
     m_iter.clear();

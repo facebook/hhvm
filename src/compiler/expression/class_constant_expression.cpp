@@ -218,7 +218,8 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
     if (m_class->is(KindOfScalarExpression)) {
       ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
                         getString().c_str(), "static") == 0);
-      cg_printf("FrameInjection::GetStaticClassName(info).data()");
+      cg_printf("FrameInjection::GetStaticClassName(fi.getThreadInfo())"
+                ".data()");
     } else {
       cg_printf("get_static_class_name(");
       m_class->outputCPP(cg, ar);

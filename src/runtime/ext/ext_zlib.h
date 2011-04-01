@@ -39,6 +39,8 @@ inline String f_zlib_get_coding_type() {
 }
 Variant f_qlzcompress(CStrRef data, int level = 1);
 Variant f_qlzuncompress(CStrRef data, int level = 1);
+Variant f_sncompress(CStrRef data);
+Variant f_snuncompress(CStrRef data);
 
 ///////////////////////////////////////////////////////////////////////////////
 // stream functions

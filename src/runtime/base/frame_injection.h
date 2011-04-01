@@ -41,6 +41,7 @@ public:
   static Array GetCallerInfo(bool skip = false);
   static int GetLine(bool skip = false);
 
+#ifdef ENABLE_LATE_STATIC_BINDING
   // what does "static::" resolve to?
   static CStrRef GetStaticClassName(ThreadInfo *info);
   static const String *SetStaticClassName(ThreadInfo *info, CStrRef cls) {
@@ -67,6 +68,7 @@ public:
   void setStaticClassName(CStrRef cls) { m_staticClass = &cls; }
   void resetStaticClassName() { m_staticClass = NULL; }
   void setCallingObject(ObjectData *obj) { m_callingObject = obj; }
+#endif /* ENABLE_LATE_STATIC_BINDING */
 
   static bool IsGlobalScope();
   static bool IsGlobalScope(FrameInjection *frame);
@@ -75,21 +77,16 @@ public:
 public:
   // NOTE: obj has to be the root object
   // constructors with hot profiler
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name);
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
-                 ObjectData *obj);
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name, int fs);
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
-                 ObjectData *obj, int fs);
+  FrameInjection(CStrRef cls, const char *name);
+  FrameInjection(CStrRef cls, const char *name, ObjectData *obj);
+  FrameInjection(CStrRef cls, const char *name, int fs);
+  FrameInjection(CStrRef cls, const char *name, ObjectData *obj, int fs);
 
   // constructors without hot profiler
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
-                 bool unused);
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
-                 ObjectData *obj, bool unused);
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name, int fs,
-                 bool unused);
-  FrameInjection(ThreadInfo *&info, CStrRef cls, const char *name,
+  FrameInjection(CStrRef cls, const char *name, bool unused);
+  FrameInjection(CStrRef cls, const char *name, ObjectData *obj, bool unused);
+  FrameInjection(CStrRef cls, const char *name, int fs, bool unused);
+  FrameInjection(CStrRef cls, const char *name,
                  ObjectData *obj, int fs, bool unused);
 
   virtual ~FrameInjection();
@@ -104,6 +101,7 @@ public:
   int getLine() const { return m_line;}
   void setLine(int line) { m_line = line;}
   void setBreakPointHit() { m_flags |= BreakPointHit;}
+  ThreadInfo* getThreadInfo() const { return m_info;}
 
   /**
    * Complex accessors. EvalFrameInjection overwrites these.
@@ -126,6 +124,7 @@ public:
   ObjectData *getThisForArrow();
 
 public:
+#ifdef ENABLE_LATE_STATIC_BINDING
   class StaticClassNameHelper {
   public:
     StaticClassNameHelper(ThreadInfo *info, CStrRef cls) : m_info(info) {
@@ -137,6 +136,7 @@ public:
   private:
     ThreadInfo *m_info;
   };
+#endif /* ENABLE_LATE_STATIC_BINDING */
 
 protected:
   ThreadInfo     *m_info;
@@ -149,12 +149,14 @@ private:
   bool            m_prof;
 #endif
 
-  int             m_line;
-  int             m_flags;
-
+#ifdef ENABLE_LATE_STATIC_BINDING
   // for static late binding
   const String   *m_staticClass;
   ObjectData     *m_callingObject;
+#endif /* ENABLE_LATE_STATIC_BINDING */
+
+  int             m_line;
+  int             m_flags;
 
   inline void doCommon() {
     ASSERT(m_class.get());

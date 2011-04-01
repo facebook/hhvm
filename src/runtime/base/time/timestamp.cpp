@@ -62,7 +62,7 @@ int64 TimeStamp::Get(bool &error, int hou, int min, int sec, int mon, int day,
                    int yea, bool gmt) {
   DateTime dt(Current());
   if (gmt) {
-    dt.setTimezone(SmartObject<TimeZone>(NEW(TimeZone)("UTC")));
+    dt.setTimezone(SmartObject<TimeZone>(NEWOBJ(TimeZone)("UTC")));
   }
   dt.set(hou, min, sec, mon, day, yea);
   return dt.toTimeStamp(error);

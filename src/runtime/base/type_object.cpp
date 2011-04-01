@@ -84,14 +84,14 @@ Variant Object::o_getPublic(CStrRef propName, bool error /* = true */) const {
 Variant Object::o_set(CStrRef propName, CVarRef val,
                       CStrRef context /* = null_string */) {
   if (!m_px) {
-    operator=(NEW(c_stdClass)());
+    operator=(NEWOBJ(c_stdClass)());
   }
   return m_px->o_set(propName, val, false, context);
 }
 
 Variant Object::o_setPublic(CStrRef propName, CVarRef val) {
   if (!m_px) {
-    operator=(NEW(c_stdClass)());
+    operator=(NEWOBJ(c_stdClass)());
   }
   return m_px->o_setPublic(propName, val, false);
 }
@@ -99,7 +99,7 @@ Variant Object::o_setPublic(CStrRef propName, CVarRef val) {
 Variant &Object::o_lval(CStrRef propName, CVarRef tmpForGet,
                         CStrRef context /* = null_string */) {
   if (!m_px) {
-    operator=(NEW(c_stdClass)());
+    operator=(NEWOBJ(c_stdClass)());
   }
   return m_px->o_lval(propName, tmpForGet, context);
 }

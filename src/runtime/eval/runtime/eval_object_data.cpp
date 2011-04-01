@@ -331,6 +331,7 @@ Variant EvalObjectData::t___sleep() {
     return DynamicObjectData::t___sleep();
   }
 }
+
 Variant EvalObjectData::t___wakeup() {
   const MethodStatement *ms = getMethodStatement("__wakeup");
   if (ms) {
@@ -339,15 +340,7 @@ Variant EvalObjectData::t___wakeup() {
     return DynamicObjectData::t___wakeup();
   }
 }
-Variant EvalObjectData::t___set_state(Variant v_properties) {
-  const MethodStatement *ms = getMethodStatement("__set_state");
-  if (ms) {
-    return ms->invokeInstance(Object(root), CREATE_VECTOR1(v_properties),
-        false);
-  } else {
-    return DynamicObjectData::t___set_state(v_properties);
-  }
-}
+
 String EvalObjectData::t___tostring() {
   const MethodStatement *ms = getMethodStatement("__tostring");
   if (ms) {
@@ -366,9 +359,9 @@ Variant EvalObjectData::t___clone() {
 }
 
 ObjectData* EvalObjectData::cloneImpl() {
-  EvalObjectData *e = NEW(EvalObjectData)(m_cls,
-                                          parent.isNull() ? 0 :
-                                          parent->o_getClassName().c_str());
+  EvalObjectData *e =
+    NEWOBJ(EvalObjectData)(m_cls, parent.isNull() ? 0 :
+                           parent->o_getClassName().c_str());
   EvalObjectData::cloneSet(e);
   return e;
 }

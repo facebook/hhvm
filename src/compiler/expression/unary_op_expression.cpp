@@ -427,6 +427,8 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     }
   }
 
+  if (m_exp) m_exp->fixExpectedType(ar);
+
   return rt;
 }
 
@@ -753,36 +755,29 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     }
   }
 
-
   if (m_exp) {
     switch (m_op) {
-    case '+':
-    case '-':
-      if (m_exp->getActualType() &&
-          (m_exp->getActualType()->is(Type::KindOfString) ||
-           m_exp->getActualType()->is(Type::KindOfArray))) {
-        cg_printf("(Variant)(");
+      case '+':
+      case '-':
+        if (!m_exp->outputCPPArithArg(cg, ar, false)) {
+          m_exp->outputCPP(cg, ar);
+        }
+        break;
+      case '@':
+        if (m_silencer < 0 && isUnused()) {
+          m_exp->outputCPPUnneeded(cg, ar);
+        } else if (!m_exp->hasCPPTemp() && !m_exp->getActualType()) {
+          // Void needs to return something to silenceDec
+          cg_printf("(");
+          m_exp->outputCPP(cg, ar);
+          cg_printf(",null)");
+        } else {
+          m_exp->outputCPP(cg, ar);
+        }
+        break;
+      default:
         m_exp->outputCPP(cg, ar);
-        cg_printf(")");
-      } else {
-        m_exp->outputCPP(cg, ar);
-      }
-      break;
-    case '@':
-      if (m_silencer < 0 && isUnused()) {
-        m_exp->outputCPPUnneeded(cg, ar);
-      } else if (!m_exp->hasCPPTemp() && !m_exp->getActualType()) {
-        // Void needs to return something to silenceDec
-        cg_printf("(");
-        m_exp->outputCPP(cg, ar);
-        cg_printf(",null)");
-      } else {
-        m_exp->outputCPP(cg, ar);
-      }
-      break;
-    default:
-      m_exp->outputCPP(cg, ar);
-      break;
+        break;
     }
   }
 

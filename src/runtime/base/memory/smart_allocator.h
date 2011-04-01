@@ -47,16 +47,21 @@ namespace HPHP {
 #define NEW(T) new T
 #define NEWOBJ(T) new T
 #define DELETE(T) delete
-#define DELETE_EX_CLS(NS,T) delete this
-#define DELETE_OBJECT(T) delete this
+#define DELETEOBJ(NS,T,OBJ) delete OBJ
+#define SWEEPOBJ(T) delete this
 #else
 #define NEW(T) new (T::Allocator.getNoCheck()) T
-#define NEWOBJ(T) new (info->m_allocators[ItemSize<sizeof(T)>::index]) T
+#define NEWOBJ(T) new                                  \
+  (ThreadLocalSingleton                                \
+    <ObjectAllocator<ItemSize<sizeof(T)>::value> >     \
+    ::getNoCheck()) T
 #define DELETE(T) T::Allocator->release
-#define DELETE_EX_CLS(NS,T) this->~T(); NS::T::Allocator->release(this)
-#define DELETE_OBJECT(T) this->~T()
+#define DELETEOBJ(NS,T,OBJ) OBJ->~T();                 \
+  (ThreadLocalSingleton                                \
+    <ObjectAllocator<ItemSize<sizeof(T)>::value> >     \
+    ::getNoCheck())->release(OBJ)
+#define SWEEPOBJ(T) this->~T()
 #endif
-#define DELETE_EX(T) DELETE_EX_CLS(,T)
 
 ///////////////////////////////////////////////////////////////////////////////
 /**
@@ -71,13 +76,13 @@ namespace HPHP {
  */
 
 typedef void (*AllocatorThreadLocalInit)(void);
-std::vector<AllocatorThreadLocalInit>& GetAllocatorInitList();
+std::set<AllocatorThreadLocalInit>& GetAllocatorInitList();
 void InitAllocatorThreadLocal(void* arg = NULL);
 template<typename T>
 class StaticInitializerAllocatorSetup {
 public:
   StaticInitializerAllocatorSetup() {
-    GetAllocatorInitList().push_back(T::AllocatorSetup);
+    GetAllocatorInitList().insert(T::AllocatorSetup);
   }
 };
 
@@ -188,34 +193,32 @@ public:
   void *alloc();
   void *allocHelper() __attribute__((noinline));
   void dealloc(void *obj) {
-    if (obj) {
 #ifdef SMART_ALLOCATOR_STACKTRACE
-      if (!isValid(obj)) {
-        Lock lock(s_st_mutex);
-        if (s_st_allocs.find(obj) != s_st_allocs.end()) {
-          printf("Object %p was allocated from a different thread: %s\n",
-                 obj, s_st_allocs[obj].toString().c_str());
-        } else {
-          printf("Object %p was not smart allocated\n", obj);
-        }
+    if (!isValid(obj)) {
+      Lock lock(s_st_mutex);
+      if (s_st_allocs.find(obj) != s_st_allocs.end()) {
+        printf("Object %p was allocated from a different thread: %s\n",
+               obj, s_st_allocs[obj].toString().c_str());
+      } else {
+        printf("Object %p was not smart allocated\n", obj);
       }
-      s_st_allocs.erase(obj);
+    }
+    s_st_allocs.erase(obj);
 #endif
-      ASSERT(isValid(obj));
-      m_freelist.push_back(obj);
+    ASSERT(isValid(obj));
+    m_freelist.push_back(obj);
 #ifdef SMART_ALLOCATOR_STACKTRACE
-      {
-        Lock lock(s_st_mutex);
-        bool enabled = StackTrace::Enabled;
-        StackTrace::Enabled = true;
-        s_st_deallocs.operator[](obj);
-        StackTrace::Enabled = enabled;
-      }
+    {
+      Lock lock(s_st_mutex);
+      bool enabled = StackTrace::Enabled;
+      StackTrace::Enabled = true;
+      s_st_deallocs.operator[](obj);
+      StackTrace::Enabled = enabled;
+    }
 #endif
 
-      ASSERT(m_stats);
-      m_stats->usage -= m_itemSize;
-    }
+    ASSERT(m_stats);
+    m_stats->usage -= m_itemSize;
   }
   bool isValid(void *obj) const;
 
@@ -228,7 +231,6 @@ public:
   void logStats();
   void checkMemory(bool detailed);
 
-  void disableDealloc() { m_dealloc = false;}
   void disableRestore() { m_flag |= RestoreDisabled;}
 
   /**
@@ -298,7 +300,6 @@ private:
                         int lastCol, int lastBlockSize);
 
 protected:
-  bool m_dealloc;
   bool m_linearized; // No more restore needed for rollback
 
 #ifdef SMART_ALLOCATOR_STACKTRACE
@@ -331,9 +332,7 @@ class SmartAllocator : public SmartAllocatorImpl {
   void release(T *p) {
     if (p) {
       p->~T();
-      if (m_dealloc) {
-        dealloc(p);
-      }
+      dealloc(p);
     }
   }
 
@@ -373,16 +372,16 @@ class SmartAllocator : public SmartAllocatorImpl {
 
 #define DECLARE_OBJECT_ALLOCATION(T)                                    \
   public:                                                               \
-  static ObjectAllocatorWrapper Allocator;                              \
+  static ObjectAllocatorBaseGetter AllocatorInitSetup;                  \
   virtual void release();                                               \
   virtual void sweep();
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T)  \
-  ObjectAllocatorWrapper NS::T::Allocator(                      \
-    ObjectAllocatorCollector::setup<NS::T>());                  \
+  ObjectAllocatorBaseGetter NS::T::AllocatorInitSetup =         \
+    ObjectAllocatorInitSetup<NS::T>();\
   void NS::T::release() {                                       \
     destruct();                                                 \
-    DELETE_EX_CLS(NS, T);                                       \
+    DELETEOBJ(NS, T, this);                                     \
   }
 
 #define IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(T)                 \
@@ -391,7 +390,7 @@ class SmartAllocator : public SmartAllocatorImpl {
 #define IMPLEMENT_OBJECT_ALLOCATION_CLS(NS,T)                           \
   IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP_CLS(NS,T);               \
   void NS::T::sweep() {                                                 \
-    DELETE_OBJECT(T);                                                   \
+    SWEEPOBJ(T);                                                   \
   }
 
 #define IMPLEMENT_OBJECT_ALLOCATION(T) IMPLEMENT_OBJECT_ALLOCATION_CLS(HPHP,T)
@@ -401,7 +400,7 @@ public:
   ObjectAllocatorBase(int itemSize);
 
   void release(void *p) {
-    if (p && m_dealloc) {
+    if (p) {
       dealloc(p);
     }
   }

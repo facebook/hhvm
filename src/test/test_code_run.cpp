@@ -880,6 +880,23 @@ bool TestCodeRun::TestListAssignment() {
        "  return $x + $y;"
        "}");
 
+  MVCR("<?php "
+       "class X implements ArrayAccess {"
+       "  function offsetget($n) { return $n; }"
+       "  function offsetset($n,$v) { }"
+       "  function offsetexists($n) { return true; }"
+       "  function offsetunset($n) {}"
+       "}"
+       "list($a,$b) = new X;"
+       "var_dump($a, $b);"
+       "$x = 'foo';"
+       "$y = 'bar';"
+       "list($a, $b) = $x.$y;"
+       "var_dump($a,$b);"
+       "$z = $x.$y;"
+       "list($a, $b) = $z;"
+       "var_dump($a, $b);");
+
   return true;
 }
 
@@ -16696,6 +16713,25 @@ bool TestCodeRun::TestClosure() {
         "  { echo $v; }, array()"
         ");"
         "call_user_func($f, array());", "5555");
+  MVCRO("<?php\n"
+        "$myfunc = function() {"
+        "  echo \"hello, world!\\n\";"
+        "};"
+        "$myfunc();"
+        "call_user_func($myfunc);"
+        "call_user_func(\"$myfunc\");"
+        "call_user_func_array($myfunc, array());"
+        "call_user_func_array(\"$myfunc\", array());"
+        "$isc = is_callable($myfunc, false, &$p);"
+        "echo \"is_callable(\\$myfunc) = $isc\\n\";"
+        "var_dump($p);",
+        "hello, world!\n"
+        "hello, world!\n"
+        "hello, world!\n"
+        "hello, world!\n"
+        "hello, world!\n"
+        "is_callable($myfunc) = 1\n"
+        "string(17) \"Closure::__invoke\"\n");
   return true;
 }
 

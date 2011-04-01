@@ -124,7 +124,7 @@ bool TestExtUrl::test_http_build_query() {
        "children%5Bsally%5D%5Bsex%5D=F&flags_0=CEO");
   }
   {
-    Object obj(NEW(c_stdClass)());
+    Object obj(NEWOBJ(c_stdClass)());
     obj->o_set("foo", "bar");
     obj->o_set("baz", "boom");
     VS(f_http_build_query(obj), "foo=bar&baz=boom");

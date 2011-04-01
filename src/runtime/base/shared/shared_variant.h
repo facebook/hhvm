@@ -42,10 +42,6 @@ class SharedMap;
 
 class SharedVariantStats;
 
-typedef hphp_hash_map<int64, int, int64_hash> Int64ToIntMap;
-typedef hphp_hash_map<StringData *, int, string_data_hash, string_data_same>
-        StringDataToIntMap;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 class SharedVariant {

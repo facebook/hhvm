@@ -332,6 +332,8 @@ public:
 
   static bool CheckNeeded(ExpressionPtr variable, ExpressionPtr value);
 
+  void fixExpectedType(AnalysisResultConstPtr ar);
+  bool outputCPPArithArg(CodeGenerator &cg, AnalysisResultPtr ar, bool arrayOk);
   bool isUnused() const { return m_unused; }
   void setUnused(bool u) { m_unused = u; }
   ExpressionPtr fetchReplacement();

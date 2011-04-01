@@ -99,7 +99,7 @@ bool DateTime::IsValid(int y, int m, int d) {
 }
 
 SmartObject<DateTime> DateTime::Current(bool utc /* = false */) {
-  return NEW(DateTime)(time(0), utc);
+  return NEWOBJ(DateTime)(time(0), utc);
 }
 
 #define PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(name, elem) \
@@ -717,13 +717,13 @@ bool DateTime::fromString(CStrRef input, SmartObject<TimeZone> tz) {
   }
 
   m_time = TimePtr(t, time_deleter());
-  m_tz = NEW(TimeZone)(t->tz_info);
+  m_tz = NEWOBJ(TimeZone)(t->tz_info);
   return true;
 }
 
 SmartObject<DateTime> DateTime::cloneDateTime() const {
   bool err;
-  SmartObject<DateTime> ret(NEW(DateTime)(toTimeStamp(err), true));
+  SmartObject<DateTime> ret(NEWOBJ(DateTime)(toTimeStamp(err), true));
   ret->setTimezone(m_tz);
   return ret;
 }

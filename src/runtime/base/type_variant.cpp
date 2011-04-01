@@ -154,6 +154,7 @@ void Variant::reset() {
   m_type = KindOfNull;
 }
 
+#ifdef FAST_REFCOUNT_FOR_VARIANT
 static void destructString(void *p)  { ((StringData *)p)->release(); }
 static void destructArray(void *p)   { ((ArrayData *)p)->release();  }
 static void destructObject(void *p)  { ((ObjectData *)p)->release(); }
@@ -161,6 +162,7 @@ static void destructVariant(void *p) { ((Variant *)p)->release();    }
 
 static void (*destructors[4])(void *) =
   {destructString, destructArray, destructObject, destructVariant};
+#endif
 
 void Variant::destruct() {
   ASSERT(!isPrimitive());
@@ -1642,7 +1644,7 @@ Object Variant::toObjectHelper() const {
   case KindOfStaticString:
   case KindOfString:
     {
-      c_stdClass *obj = NEW(c_stdClass)();
+      c_stdClass *obj = NEWOBJ(c_stdClass)();
       obj->o_set(s_scalar, *this, false);
       return obj;
     }
@@ -1652,7 +1654,7 @@ Object Variant::toObjectHelper() const {
     ASSERT(false);
     break;
   }
-  return Object(NEW(c_stdClass)());
+  return Object(NEWOBJ(c_stdClass)());
 }
 
 VarNR Variant::toKey() const {
@@ -2616,7 +2618,7 @@ Variant Variant::o_set(CStrRef propName, CVarRef val,
   } else if (m_type == KindOfVariant) {
     return m_data.pvar->o_set(propName, val, context);
   } else if (isObjectConvertable()) {
-    set(Object(NEW(c_stdClass)()));
+    set(Object(NEWOBJ(c_stdClass)()));
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
@@ -2634,7 +2636,7 @@ Variant Variant::o_setPublic(CStrRef propName, CVarRef val) {
   } else if (m_type == KindOfVariant) {
     return m_data.pvar->o_setPublic(propName, val);
   } else if (isObjectConvertable()) {
-    set(Object(NEW(c_stdClass)()));
+    set(Object(NEWOBJ(c_stdClass)()));
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
@@ -2775,7 +2777,7 @@ Variant &Variant::o_lval(CStrRef propName, CVarRef tmpForGet,
   } else if (m_type == KindOfVariant) {
     return m_data.pvar->o_lval(propName, tmpForGet, context);
   } else if (isObjectConvertable()) {
-    set(Object(NEW(c_stdClass)()));
+    set(Object(NEWOBJ(c_stdClass)()));
     return m_data.pobj->o_lval(propName, tmpForGet, context);
   } else {
     // Raise a warning
@@ -3459,17 +3461,6 @@ void Variant::setStatic() const {
   }
 }
 
-Variant &Variant::bindClass(ThreadInfo *info) const {
-  if (m_type == KindOfObject) {
-    m_data.pobj->bindThis(info);
-  } else if (m_type == KindOfVariant) {
-    m_data.pvar->bindClass(info);
-  } else {
-    throw InvalidOperandException("Call to a member function on a non-object");
-  }
-  return const_cast<Variant&>(*this);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 
@@ -3783,7 +3774,7 @@ Variant Variant::share(bool save) const {
   case KindOfObject:
     if (save) {
       // we have to return an object so to remember its type
-      c_stdClass *obj = NEW(c_stdClass)();
+      c_stdClass *obj = NEWOBJ(c_stdClass)();
       obj->o_set(s_s, f_serialize(*this));
       return obj;
     } else {
@@ -4053,7 +4044,7 @@ T Variant::o_assign_op(CStrRef propName, CVarRef val,
   } else if (m_type == KindOfVariant) {
     return (T)m_data.pvar->template o_assign_op<T,op>(propName, val, context);
   } else if (isObjectConvertable()) {
-    set(Object(NEW(c_stdClass)()));
+    set(Object(NEWOBJ(c_stdClass)()));
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
@@ -4071,7 +4062,7 @@ T Object::o_assign_op(CStrRef propName, CVarRef val,
   }
   ObjectData *obj = m_px;
   if (!obj) {
-    obj = NEW(c_stdClass)();
+    obj = NEWOBJ(c_stdClass)();
     SmartPtr<ObjectData>::operator=(obj);
   }
 

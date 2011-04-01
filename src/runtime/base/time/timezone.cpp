@@ -132,7 +132,7 @@ String TimeZone::CurrentName() {
 }
 
 SmartObject<TimeZone> TimeZone::Current() {
-  return NEW(TimeZone)(CurrentName());
+  return NEWOBJ(TimeZone)(CurrentName());
 }
 
 bool TimeZone::SetCurrent(CStrRef zone) {
@@ -197,8 +197,8 @@ TimeZone::TimeZone(timelib_tzinfo *tzi) {
 }
 
 SmartObject<TimeZone> TimeZone::cloneTimeZone() const {
-  if (!m_tzi) return NEW(TimeZone)();
-  return NEW(TimeZone)(timelib_tzinfo_clone(m_tzi.get()));
+  if (!m_tzi) return NEWOBJ(TimeZone)();
+  return NEWOBJ(TimeZone)(timelib_tzinfo_clone(m_tzi.get()));
 }
 
 String TimeZone::name() const {

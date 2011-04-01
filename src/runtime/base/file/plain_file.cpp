@@ -233,7 +233,7 @@ void BuiltinFiles::requestShutdown() {
 
 CVarRef BuiltinFiles::GetSTDIN() {
   if (g_builtin_files->m_stdin.isNull()) {
-    BuiltinFile *f = NEW(BuiltinFile)(stdin);
+    BuiltinFile *f = NEWOBJ(BuiltinFile)(stdin);
     g_builtin_files->m_stdin = f;
     f->o_setId(1);
     ASSERT(f->o_getId() == 1);
@@ -243,7 +243,7 @@ CVarRef BuiltinFiles::GetSTDIN() {
 
 CVarRef BuiltinFiles::GetSTDOUT() {
   if (g_builtin_files->m_stdout.isNull()) {
-    BuiltinFile *f = NEW(BuiltinFile)(stdout);
+    BuiltinFile *f = NEWOBJ(BuiltinFile)(stdout);
     g_builtin_files->m_stdout = f;
     f->o_setId(2);
     ASSERT(f->o_getId() == 2);
@@ -253,7 +253,7 @@ CVarRef BuiltinFiles::GetSTDOUT() {
 
 CVarRef BuiltinFiles::GetSTDERR() {
   if (g_builtin_files->m_stderr.isNull()) {
-    BuiltinFile *f = NEW(BuiltinFile)(stderr);
+    BuiltinFile *f = NEWOBJ(BuiltinFile)(stderr);
     g_builtin_files->m_stderr = f;
     f->o_setId(3);
     ASSERT(f->o_getId() == 3);

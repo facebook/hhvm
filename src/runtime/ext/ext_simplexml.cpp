@@ -320,7 +320,7 @@ Variant f_simplexml_load_string(CStrRef data,
     return false;
   }
 
-  return create_element(Object(NEW(XmlDocWrapper)(doc, class_name)), root, ns,
+  return create_element(Object(NEWOBJ(XmlDocWrapper)(doc, class_name)), root, ns,
                         is_prefix);
 }
 
@@ -366,7 +366,7 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64 options /* = 0 */,
 
   xmlDocPtr doc = xmlReadMemory(xml.data(), xml.size(), NULL, NULL, options);
   if (doc) {
-    m_doc = Object(NEW(XmlDocWrapper)(doc, "SimpleXMLElement"));
+    m_doc = Object(NEWOBJ(XmlDocWrapper)(doc, "SimpleXMLElement"));
     m_node = xmlDocGetRootElement(doc);
 
     if (m_node) {
@@ -378,7 +378,7 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64 options /* = 0 */,
       m_attributes = collect_attributes(m_node, ns, is_prefix);
     }
   } else {
-    throw (Object)p_Exception(NEW(c_Exception)())->create(
+    throw (Object)p_Exception(NEWOBJ(c_Exception)())->create(
         "String could not be parsed as XML");
   }
 }
@@ -1017,7 +1017,7 @@ Array c_SimpleXMLElement::o_toArray() const {
 
 Variant c_SimpleXMLElement::t_getiterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::getiterator);
-  c_SimpleXMLElementIterator *iter = NEW(c_SimpleXMLElementIterator)();
+  c_SimpleXMLElementIterator *iter = NEWOBJ(c_SimpleXMLElementIterator)();
   iter->reset_iterator(this);
   return Object(iter);
 }
@@ -1348,7 +1348,7 @@ static void libxml_error_handler(void *userData, xmlErrorPtr error) {
 }
 
 static Object create_libxmlerror(xmlError &error) {
-  Object ret(NEW(c_LibXMLError)());
+  Object ret(NEWOBJ(c_LibXMLError)());
   ret->o_set("level",   error.level);
   ret->o_set("code",    error.code);
   ret->o_set("column",  error.int2);

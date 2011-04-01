@@ -18,6 +18,9 @@
 #include <runtime/ext/ext_zlib.h>
 #include <runtime/base/file/zip_file.h>
 #include <util/compression.h>
+#ifdef HAVE_SNAPPY
+#include <snappy.h>
+#endif
 
 #define PHP_ZLIB_MODIFIER 1000
 
@@ -116,7 +119,7 @@ Variant f_gzdecode(CStrRef data) {
 
 Object f_gzopen(CStrRef filename, CStrRef mode,
                 bool use_include_path /* = false */) {
-  File *file = NEW(ZipFile)();
+  File *file = NEWOBJ(ZipFile)();
   Object handle(file);
   bool ret = file->open(File::TranslatePath(filename), mode);
   if (!ret) {
@@ -206,6 +209,7 @@ Variant f_qlzcompress(CStrRef data, int level /* = 1 */) {
   }
 
   ASSERT(size < (size_t)data.size() + 401);
+  compressed = (char *)realloc(compressed, size + 1);
   compressed[size] = '\0';
   return String(compressed, size, AttachString);
 #endif
@@ -262,6 +266,40 @@ Variant f_qlzuncompress(CStrRef data, int level /* = 1 */) {
   ASSERT(dsize == size);
   decompressed[dsize] = '\0';
   return String(decompressed, dsize, AttachString);
+#endif
+}
+
+Variant f_sncompress(CStrRef data) {
+#ifndef HAVE_SNAPPY
+  throw NotSupportedException(__func__, "Snappy library cannot be found");
+#else
+  size_t size;
+  char *compressed =
+    (char *)malloc(snappy::MaxCompressedLength(data.size()) + 1);
+
+  snappy::RawCompress(data.data(), data.size(), compressed, &size);
+  compressed = (char *)realloc(compressed, size + 1);
+  compressed[size] = '\0';
+  return String(compressed, size, AttachString);
+#endif
+}
+
+Variant f_snuncompress(CStrRef data) {
+#ifndef HAVE_SNAPPY
+  throw NotSupportedException(__func__, "Snappy library cannot be found");
+#else
+  char *uncompressed;
+  size_t dsize;
+
+  snappy::GetUncompressedLength(data.data(), data.size(), &dsize);
+  uncompressed = (char *)malloc(dsize + 1);
+
+  if (!snappy::RawUncompress(data.data(), data.size(), uncompressed)) {
+    free(uncompressed);
+    return false;
+  }
+  uncompressed[dsize] = '\0';
+  return String(uncompressed, dsize, AttachString);
 #endif
 }
 

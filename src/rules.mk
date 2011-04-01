@@ -245,6 +245,7 @@ CPPFLAGS += \
   -isystem $(EXT_DIR)/libpng/include \
   -isystem $(EXT_DIR)/imap/include \
   -isystem $(EXT_DIR)/zlib/include \
+  -isystem $(EXT_DIR)/snappy/include \
   -I $(PROJECT_ROOT)/src \
   -I $(PROJECT_ROOT)/src/system/gen \
 
@@ -403,6 +404,10 @@ endif
 
 ifdef TAINTED
 CPPFLAGS += -DTAINTED
+endif
+
+ifdef HAVE_SNAPPY
+CPPFLAGS += -DHAVE_SNAPPY
 endif
 
 # facebook specific stuff
@@ -591,6 +596,10 @@ READLINE_LIBS = $(EXT_DIR)/readline/lib/libreadline.a \
 
 ZLIB_LIBS = $(EXT_DIR)/zlib/lib/libz.a
 
+ifdef HAVE_SNAPPY
+SNAPPY_LIBS = $(EXT_DIR)/snappy/lib/libsnappy.a
+endif
+
 ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
 	$(MYSQL_LIBS) $(SQLITE_LIBS) $(MCC_LIBS) \
 	$(GD_LIBS) $(LIBXML_LIBS) $(FBML_LIBS) $(MBFL_LIBS) \
@@ -598,6 +607,7 @@ ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
 	$(HTTP_LIBS) $(XHP_LIBS) $(TIME_LIBS) $(TBB_LIBS) $(FBI_LIBS) \
 	$(LDAP_LIBS) $(READLINE_LIBS) $(LIBMEMCACHED_LIBS) \
 	$(LIBCAP_LIBS) $(IMAP_LIBS) $(ORACLE_LIBS) $(ZLIB_LIBS) \
+	$(SNAPPY_LIBS) \
 
 LIB_PATHS := $(HPHP_LIB) $(HPHP_TEST_LIB_PATH) $(EXT_DIR)/binutils \
              $(sort $(foreach L,$(filter-out -%, $(ALL_LIBS)), $(dir $(L))))

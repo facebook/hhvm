@@ -34,6 +34,7 @@ Object create_object_only(const char *s, ObjectData *root) {
 
 class GlobalVariables;
 GlobalVariables *get_global_variables() { return NULL;}
+GlobalVariables *get_global_variables_check() { return NULL;}
 class LVariableTable;
 LVariableTable *get_variable_table() { return NULL;}
 class Globals;

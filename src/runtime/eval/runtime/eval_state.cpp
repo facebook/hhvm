@@ -338,7 +338,7 @@ bool RequestEvalState::includeFile(Variant &res, CStrRef path, bool once,
 
   string spath(translated.data());
   struct stat s;
-  if (!FileRepository::findFile(spath, s)) return false;
+  if (!FileRepository::findFile(spath, &s)) return false;
 
   map<string, PhpFile*>::const_iterator it = self->m_evaledFiles.find(spath);
   Eval::PhpFile *efile = NULL;

@@ -447,6 +447,14 @@ public:
   virtual CStrRef o_getClassName() const { return s_class_name; }
 
   int close() {
+    // Although the PHP doc about proc_close() says that the pipes need to be
+    // explicitly pclose()'ed, it seems that Zend is implicitly closing the
+    // pipes when proc_close() is called.
+    for (ArrayIter iter(pipes); iter; ++iter) {
+      iter.second().toObject().getTyped<PlainFile>()->close();
+    }
+    pipes.clear();
+
     pid_t wait_pid;
     int wstatus;
     do {
@@ -564,7 +572,7 @@ public:
       /* mark the descriptor close-on-exec, so that it won't be inherited
          by potential other children */
       fcntl(parentend, F_SETFD, FD_CLOEXEC);
-      return Object(NEW(PlainFile)(parentend, true));
+      return Object(NEWOBJ(PlainFile)(parentend, true));
     }
 
     return Object();
@@ -647,13 +655,15 @@ static Variant post_proc_open(CStrRef cmd, Variant &pipes,
   }
 
   /* we forked/spawned and this is the parent */
-  ChildProcess *proc = NEW(ChildProcess)();
+  ChildProcess *proc = NEWOBJ(ChildProcess)();
   proc->command = cmd;
   proc->child = child;
   proc->env = env;
   for (int i = 0; i < (int)items.size(); i++) {
     Object f = items[i].dupParent();
-    proc->pipes.append(f);
+    if (!f.isNull()) {
+      proc->pipes.append(f);
+    }
     pipes.set(items[i].index, f);
   }
   return Object(proc);

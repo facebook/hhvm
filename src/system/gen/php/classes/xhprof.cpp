@@ -96,7 +96,7 @@ bool c_XhprofFrame::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_XhprofFrame::cloneImpl() {
-  c_XhprofFrame *obj = NEW(c_XhprofFrame)();
+  c_XhprofFrame *obj = NEWOBJ(c_XhprofFrame)();
   c_XhprofFrame::cloneSet(obj);
   return obj;
 }
@@ -283,10 +283,10 @@ Variant c_XhprofFrame::t___destruct() {
 }
 namespace hphp_impl_splitter {}
 Object co_XhprofFrame(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_XhprofFrame)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_XhprofFrame)())->dynCreate(params, init));
 }
 Object coo_XhprofFrame() {
-  Object r(NEW(c_XhprofFrame)());
+  Object r(NEWOBJ(c_XhprofFrame)());
   r->init();
   return r;
 }

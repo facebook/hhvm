@@ -248,7 +248,7 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     } else {
       cg_printf("create_object_only(");
       if (isStatic()) {
-        cg_printf("FrameInjection::GetStaticClassName(info)");
+        cg_printf("FrameInjection::GetStaticClassName(fi.getThreadInfo())");
       } else if (!cname.empty()) {
         cg_printf("\"%s\"", cname.c_str());
       } else if (m_nameExp->is(Expression::KindOfSimpleVariable)) {

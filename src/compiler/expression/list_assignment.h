@@ -34,14 +34,18 @@ public:
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
+  bool isAbnormal() const { return m_abnormal; }
+
   ExpressionListPtr getVariables() const { return m_variables; }
+  ExpressionPtr getArray() const { return m_array; }
 private:
   ExpressionListPtr m_variables;
   ExpressionPtr m_array;
+  bool m_abnormal;
 
   void setLValue();
-  void outputCPPAssignment(CodeGenerator &cg, AnalysisResultPtr ar,
-      const std::string &arrTmp);
+  bool outputCPPAssignment(CodeGenerator &cg, AnalysisResultPtr ar,
+                           const std::string &arrTmp, bool subRef);
 
   void preOutputVariables(CodeGenerator &cg, AnalysisResultPtr ar, int state);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);

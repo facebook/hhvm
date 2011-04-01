@@ -105,6 +105,12 @@ bool f_is_callable(CVarRef v, bool syntax /* = false */,
     }
   }
 
+  if (v.instanceof("closure")) {
+    if (name.isReferenced()) {
+      name = "Closure::__invoke";
+    }
+    return true;
+  }
   if (name.isReferenced()) {
     name = v.toString();
   }

@@ -306,7 +306,7 @@ Variant c_SQLite3::t_prepare(CStrRef sql) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::prepare);
   validate();
   if (!sql.empty()) {
-    c_SQLite3Stmt *stmt = NEW(c_SQLite3Stmt)();
+    c_SQLite3Stmt *stmt = NEWOBJ(c_SQLite3Stmt)();
     Object ret(stmt);
     stmt->t___construct(p_SQLite3(this), sql);
     if (stmt->m_raw_stmt) {
@@ -591,7 +591,7 @@ Variant c_SQLite3Stmt::t_execute() {
   case SQLITE_DONE: /* Valid but no results */
     {
       sqlite3_reset(m_raw_stmt);
-      c_SQLite3Result *result = NEW(c_SQLite3Result)();
+      c_SQLite3Result *result = NEWOBJ(c_SQLite3Result)();
       result->m_stmt = p_SQLite3Stmt(this);
       return Object(result);
     }

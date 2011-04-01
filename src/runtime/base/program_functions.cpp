@@ -574,6 +574,8 @@ static int execute_program_impl(int argc, char **argv);
 int execute_program(int argc, char **argv) {
   try {
     InitAllocatorThreadLocal();
+    get_global_variables_check();
+    ThreadInfo::s_threadInfo.get();
     return execute_program_impl(argc, argv);
   } catch (const Exception &e) {
     Logger::Error("Uncaught exception: %s", e.what());
@@ -964,6 +966,7 @@ static IMPLEMENT_THREAD_LOCAL(WarmupState, s_warmup_state);
 
 void hphp_process_init() {
   InitAllocatorThreadLocal();
+  get_global_variables_check();
   ClassInfo::Load();
   Process::InitProcessStatics();
   init_static_variables();

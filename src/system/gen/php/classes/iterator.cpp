@@ -130,7 +130,7 @@ bool c_ArrayIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_ArrayIterator::cloneImpl() {
-  c_ArrayIterator *obj = NEW(c_ArrayIterator)();
+  c_ArrayIterator *obj = NEWOBJ(c_ArrayIterator)();
   c_ArrayIterator::cloneSet(obj);
   return obj;
 }
@@ -1560,7 +1560,7 @@ bool c_AppendIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_AppendIterator::cloneImpl() {
-  c_AppendIterator *obj = NEW(c_AppendIterator)();
+  c_AppendIterator *obj = NEWOBJ(c_AppendIterator)();
   c_AppendIterator::cloneSet(obj);
   return obj;
 }
@@ -2426,7 +2426,7 @@ bool c_RecursiveDirectoryIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_RecursiveDirectoryIterator::cloneImpl() {
-  c_RecursiveDirectoryIterator *obj = NEW(c_RecursiveDirectoryIterator)();
+  c_RecursiveDirectoryIterator *obj = NEWOBJ(c_RecursiveDirectoryIterator)();
   c_RecursiveDirectoryIterator::cloneSet(obj);
   return obj;
 }
@@ -3231,7 +3231,7 @@ bool c_DirectoryIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_DirectoryIterator::cloneImpl() {
-  c_DirectoryIterator *obj = NEW(c_DirectoryIterator)();
+  c_DirectoryIterator *obj = NEWOBJ(c_DirectoryIterator)();
   c_DirectoryIterator::cloneSet(obj);
   return obj;
 }
@@ -3883,7 +3883,7 @@ bool c_RecursiveIteratorIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_RecursiveIteratorIterator::cloneImpl() {
-  c_RecursiveIteratorIterator *obj = NEW(c_RecursiveIteratorIterator)();
+  c_RecursiveIteratorIterator *obj = NEWOBJ(c_RecursiveIteratorIterator)();
   c_RecursiveIteratorIterator::cloneSet(obj);
   return obj;
 }
@@ -4434,7 +4434,7 @@ bool c_MutableArrayIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_MutableArrayIterator::cloneImpl() {
-  c_MutableArrayIterator *obj = NEW(c_MutableArrayIterator)();
+  c_MutableArrayIterator *obj = NEWOBJ(c_MutableArrayIterator)();
   c_MutableArrayIterator::cloneSet(obj);
   return obj;
 }
@@ -4712,7 +4712,7 @@ bool c_FilterIterator::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_FilterIterator::cloneImpl() {
-  c_FilterIterator *obj = NEW(c_FilterIterator)();
+  c_FilterIterator *obj = NEWOBJ(c_FilterIterator)();
   c_FilterIterator::cloneSet(obj);
   return obj;
 }
@@ -4745,58 +4745,58 @@ struct ObjectStaticCallbacks cw_FilterIterator = {
 void c_FilterIterator::init() {
 }
 Object co_ArrayIterator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_ArrayIterator)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_ArrayIterator)())->dynCreate(params, init));
 }
 Object coo_ArrayIterator() {
-  Object r(NEW(c_ArrayIterator)());
+  Object r(NEWOBJ(c_ArrayIterator)());
   r->init();
   return r;
 }
 Object co_AppendIterator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_AppendIterator)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_AppendIterator)())->dynCreate(params, init));
 }
 Object coo_AppendIterator() {
-  Object r(NEW(c_AppendIterator)());
+  Object r(NEWOBJ(c_AppendIterator)());
   r->init();
   return r;
 }
 Object co_RecursiveDirectoryIterator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_RecursiveDirectoryIterator)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_RecursiveDirectoryIterator)())->dynCreate(params, init));
 }
 Object coo_RecursiveDirectoryIterator() {
-  Object r(NEW(c_RecursiveDirectoryIterator)());
+  Object r(NEWOBJ(c_RecursiveDirectoryIterator)());
   r->init();
   return r;
 }
 Object co_DirectoryIterator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_DirectoryIterator)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_DirectoryIterator)())->dynCreate(params, init));
 }
 Object coo_DirectoryIterator() {
-  Object r(NEW(c_DirectoryIterator)());
+  Object r(NEWOBJ(c_DirectoryIterator)());
   r->init();
   return r;
 }
 Object co_RecursiveIteratorIterator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_RecursiveIteratorIterator)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_RecursiveIteratorIterator)())->dynCreate(params, init));
 }
 Object coo_RecursiveIteratorIterator() {
-  Object r(NEW(c_RecursiveIteratorIterator)());
+  Object r(NEWOBJ(c_RecursiveIteratorIterator)());
   r->init();
   return r;
 }
 Object co_MutableArrayIterator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_MutableArrayIterator)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_MutableArrayIterator)())->dynCreate(params, init));
 }
 Object coo_MutableArrayIterator() {
-  Object r(NEW(c_MutableArrayIterator)());
+  Object r(NEWOBJ(c_MutableArrayIterator)());
   r->init();
   return r;
 }
 Object co_FilterIterator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_FilterIterator)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_FilterIterator)())->dynCreate(params, init));
 }
 Object coo_FilterIterator() {
-  Object r(NEW(c_FilterIterator)());
+  Object r(NEWOBJ(c_FilterIterator)());
   r->init();
   return r;
 }

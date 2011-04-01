@@ -596,7 +596,7 @@ bool MimePart::parse(const char *buf, int bufsize) {
 }
 
 MimePart *MimePart::createChild(int startpos, bool inherit) {
-  MimePart *child = NEW(MimePart)();
+  MimePart *child = NEWOBJ(MimePart)();
   m_parsedata.lastpart = child;
   child->m_parent = this;
 
@@ -895,7 +895,7 @@ Variant MimePart::extract(CVarRef filename, CVarRef callbackfunc, int decode,
   } else {
     /* filename is the actual data */
     String data = filename.toString();
-    f = NEW(MemFile)(data.data(), data.size());
+    f = NEWOBJ(MemFile)(data.data(), data.size());
     file = Object(f);
   }
 

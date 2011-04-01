@@ -25,6 +25,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(ServiceThread);
 class ServiceThread : public AsyncFunc<ServiceThread>, public Synchronizable {
 public:
+  static bool IsServiceThread();
   static ServiceThread *GetThisThread();
 
 public:

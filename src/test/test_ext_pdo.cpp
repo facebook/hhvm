@@ -49,7 +49,7 @@ static void CreateMySqlTestTable() {
 
 static void CreateSqliteTestTable() {
   f_unlink("/tmp/foo.db");
-  p_SQLite3 db(NEW(c_SQLite3)());
+  p_SQLite3 db(NEWOBJ(c_SQLite3)());
   db->t_open("/tmp/foo.db");
   db->t_exec("CREATE TABLE foo (bar STRING)");
   db->t_exec("INSERT INTO foo VALUES ('ABC')");
@@ -76,7 +76,7 @@ bool TestExtPdo::test_pdo_mysql() {
     source += ";dbname=";
     source += TEST_DATABASE;
 
-    p_PDO dbh((NEW(c_PDO)())->
+    p_PDO dbh((NEWOBJ(c_PDO)())->
               create(source.c_str(), TEST_USERNAME, TEST_PASSWORD,
                      CREATE_MAP1(q_PDO_ATTR_PERSISTENT, false)));
     Variant vstmt = dbh->t_prepare("select * from test");
@@ -103,7 +103,7 @@ bool TestExtPdo::test_pdo_mysql_prepared_statement_emulation() {
     source += ";dbname=";
     source += TEST_DATABASE;
 
-    p_PDO dbh((NEW(c_PDO)())->
+    p_PDO dbh((NEWOBJ(c_PDO)())->
               create(source.c_str(), TEST_USERNAME, TEST_PASSWORD,
                      CREATE_MAP1(q_PDO_ATTR_PERSISTENT, false)));
     Variant vstmt = dbh->t_prepare("select * from test where id = :id and name = :name");
@@ -130,7 +130,7 @@ bool TestExtPdo::test_pdo_sqlite() {
   try {
     string source = "sqlite:/tmp/foo.db";
 
-    p_PDO dbh((NEW(c_PDO)())->
+    p_PDO dbh((NEWOBJ(c_PDO)())->
               create(source.c_str(), TEST_USERNAME, TEST_PASSWORD,
                      CREATE_MAP1(q_PDO_ATTR_PERSISTENT, false)));
     Variant vstmt = dbh->t_prepare("select * from foo");
@@ -149,7 +149,7 @@ bool TestExtPdo::test_pdo_sqlite() {
   try {
     string source = "sqlite:/tmp/foo.db";
 
-    p_PDO dbh((NEW(c_PDO)())->
+    p_PDO dbh((NEWOBJ(c_PDO)())->
               create(source.c_str(), TEST_USERNAME, TEST_PASSWORD,
                      CREATE_MAP1(q_PDO_ATTR_PERSISTENT, false)));
     Variant vstmt = dbh->t_query("select * from foo");
@@ -170,7 +170,7 @@ bool TestExtPdo::test_pdo_sqlite() {
 
   try {
     string source = "sqlite:/tmp/foo.db";
-    p_PDO dbh((NEW(c_PDO)())->
+    p_PDO dbh((NEWOBJ(c_PDO)())->
                create(source.c_str(), TEST_USERNAME, TEST_PASSWORD,
                       CREATE_MAP1(q_PDO_ATTR_PERSISTENT, false)));
     dbh->t_query("CREATE TABLE IF NOT EXISTS foobar (id INT)");

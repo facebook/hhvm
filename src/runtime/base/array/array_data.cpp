@@ -86,7 +86,7 @@ int ArrayData::compare(const ArrayData *v2) const {
   if (count1 == 0) return 0;
 
   // prevent circular referenced objects/arrays or deep ones
-  DECLARE_THREAD_INFO; RECURSION_INJECTION;
+  DECLARE_THREAD_INFO; check_recursion(info);
 
   for (ArrayIter iter(this); iter; ++iter) {
     Variant key(iter.first());
@@ -110,7 +110,7 @@ bool ArrayData::equal(const ArrayData *v2, bool strict) const {
   if (count1 == 0) return true;
 
   // prevent circular referenced objects/arrays or deep ones
-  DECLARE_THREAD_INFO; RECURSION_INJECTION;
+  DECLARE_THREAD_INFO; check_recursion(info);
 
   if (strict) {
     for (ArrayIter iter1(this), iter2(v2); iter1 && iter2; ++iter1, ++iter2) {

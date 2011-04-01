@@ -51,6 +51,8 @@ class TestExtZlib : public TestCppExt {
   bool test_gzputs();
   bool test_qlzcompress();
   bool test_qlzuncompress();
+  bool test_sncompress();
+  bool test_snuncompress();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

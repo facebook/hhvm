@@ -339,7 +339,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (classScope->isVolatile()) {
       string name = cg.formatLabel(m_name);
       if (classScope->isRedeclaring()) {
-        cg_printf("g->%s%s = ClassStaticsPtr(NEW(%s%s)());\n",
+        cg_printf("g->%s%s = ClassStaticsPtr(NEWOBJ(%s%s)());\n",
                   Option::ClassStaticsObjectPrefix,
                   name.c_str(),
                   Option::ClassStaticsPrefix, classScope->getId(cg).c_str());
@@ -586,7 +586,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                   clsName, Option::ObjectStaticPrefix);
         cg_indentEnd("}\n");
         cg_indentBegin("Object createOnly(ObjectData* root = NULL) {\n");
-        cg_printf("Object r((NEW(%s%s)(root)));\n", Option::ClassPrefix,
+        cg_printf("Object r((NEWOBJ(%s%s)(root)));\n", Option::ClassPrefix,
             clsName);
         cg_printf("r->init();\n");
         cg_printf("return r;\n");

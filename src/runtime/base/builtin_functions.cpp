@@ -76,25 +76,24 @@ String getUndefinedConstant(CStrRef name) {
 
 Variant f_call_user_func_array(CVarRef function, CArrRef params,
                                bool bound /* = false */) {
-#ifndef ENABLE_LATE_STATIC_BINDING
-  bound = true;
-#endif
   //Keys need to be numbered consecutively
   Array normalisedParams = Array(params).values();
   if (function.isString() || function.instanceof("closure")) {
     String sfunction = function.toString();
     int c = sfunction.find("::");
     if (c != 0 && c != String::npos && c + 2 < sfunction.size()) {
-      if (bound) {
-        return invoke_static_method(sfunction.substr(0, c),
-                                    sfunction.substr(c + 2),
-                                    normalisedParams,
-                                    false);
+#ifdef ENABLE_LATE_STATIC_BINDING
+      if (!bound) {
+        return invoke_static_method_bind(sfunction.substr(0, c),
+                                         sfunction.substr(c + 2),
+	                                     normalisedParams,
+                                         false);
       }
-      return invoke_static_method_bind(sfunction.substr(0, c),
-                                       sfunction.substr(c + 2),
-                                       normalisedParams,
-                                       false);
+#endif /* ENABLE_LATE_STATIC_BINDING */
+      return invoke_static_method(sfunction.substr(0, c),
+                                  sfunction.substr(c + 2),
+                                  normalisedParams,
+                                  false);
     }
     return invoke(sfunction, normalisedParams, -1, true, false);
   } else if (function.is(KindOfArray)) {
@@ -139,10 +138,12 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
       if (obj.instanceof(sclass)) {
         return obj->o_invoke_ex(sclass, method, normalisedParams, false);
       }
-      if (bound) {
-        return invoke_static_method(sclass, method, normalisedParams, false);
+#ifdef ENABLE_LATE_STATIC_BINDING
+      if (!bound) {
+        return invoke_static_method_bind(sclass, method, normalisedParams, false);
       }
-      return invoke_static_method_bind(sclass, method, normalisedParams, false);
+#endif /* ENABLE_LATE_STATIC_BINDING */
+      return invoke_static_method(sclass, method, normalisedParams, false);
     }
   }
   throw_invalid_argument("function: not string or array");
@@ -588,15 +589,20 @@ Variant throw_fatal_unset_static_property(const char *s, const char *prop) {
   return null;
 }
 
-void check_request_timeout_ex(ThreadInfo *info, int lc) {
+void check_request_timeout_info(ThreadInfo *info, int lc) {
   check_request_timeout(info);
   if (info->m_pendingException) {
     throw_pending_exception(info);
   }
   if (RuntimeOption::MaxLoopCount > 0 && lc > RuntimeOption::MaxLoopCount) {
     throw FatalErrorException(0, "loop iterated over %d times",
-                              RuntimeOption::MaxLoopCount);
+        RuntimeOption::MaxLoopCount);
   }
+}
+
+void check_request_timeout_ex(const FrameInjection &fi, int lc) {
+  ThreadInfo *info = fi.getThreadInfo();
+  check_request_timeout_info(info, lc);
 }
 
 void throw_infinite_recursion_exception() {
@@ -977,20 +983,48 @@ Variant include_impl_invoke(CStrRef file, bool once, LVariableTable* variables,
   }
 }
 
-static Variant include_impl(CStrRef file, bool once,
-                            LVariableTable* variables,
-                            const char *currentDir, bool required,
-                            bool raiseNotice) {
+/**
+ * Used by include_impl.  resolve_include() needs some way of checking the
+ * existence of a file path, which for hphpc means attempting to invoke it.
+ * This struct carries some context information needed for the invocation, as
+ * well as a place for the return value of invoking the file.
+ */
+struct IncludeImplInvokeContext {
+  bool once;
+  LVariableTable* variables;
+  const char* currentDir;
 
+  Variant returnValue;
+};
+
+static bool include_impl_invoke_context(CStrRef file, void* ctx) {
+  struct IncludeImplInvokeContext* context = (IncludeImplInvokeContext*)ctx;
+  try {
+    context->returnValue = include_impl_invoke(file, context->once,
+                                               context->variables,
+                                               context->currentDir);
+  } catch (PhpFileDoesNotExistException& e) {
+    context->returnValue = false;
+  }
+  return bool(context->returnValue);
+}
+
+/**
+ * tryFile is a pointer to a function that resolve_include() will use to
+ * determine if a path references a real file.  ctx is a pointer to some context
+ * information that will be passed through to tryFile.  (It's a hacky closure)
+ */
+String resolve_include(CStrRef file, const char* currentDir,
+                       bool (*tryFile)(CStrRef file, void*), void* ctx) {
   const char* c_file = file->data();
 
   if (c_file[0] == '/') {
     String can_path(Util::canonicalize(file.c_str(), file.size()),
                     AttachString);
 
-    try {
-      return include_impl_invoke(can_path, once, variables, currentDir);
-    } catch (PhpFileDoesNotExistException &e) {}
+    if (tryFile(can_path, ctx)) {
+      return can_path;
+    }
 
   } else if ((c_file[0] == '.' && (c_file[1] == '/' || (
     c_file[1] == '.' && c_file[2] == '/')))) {
@@ -999,23 +1033,24 @@ static Variant include_impl(CStrRef file, bool once,
     String can_path(Util::canonicalize(path.c_str(), path.size()),
                     AttachString);
 
-    try {
-      return include_impl_invoke(can_path, once, variables, currentDir);
-    } catch (PhpFileDoesNotExistException &e) {}
-
+    if (tryFile(can_path, ctx)) {
+      return can_path;
+    }
 
   } else {
 
-    unsigned int path_count = RuntimeOption::IncludeSearchPaths.size();
+    Array includePaths = g_context->getIncludePathArray();
+    unsigned int path_count = includePaths.size();
 
-    for (unsigned int i = 0; i < path_count; i++) {
+    for (int i = 0; i < (int)path_count; i++) {
       String path("");
+      String includePath = includePaths[i];
 
-      if (RuntimeOption::IncludeSearchPaths[i][0] != '/') {
+      if (includePath[0] != '/') {
         path += (g_context->getCwd() + "/");
       }
 
-      path += RuntimeOption::IncludeSearchPaths[i];
+      path += includePath;
 
       if (path[path.size() - 1] != '/') {
         path += "/";
@@ -1025,9 +1060,9 @@ static Variant include_impl(CStrRef file, bool once,
       String can_path(Util::canonicalize(path.c_str(), path.size()),
                       AttachString);
 
-      try {
-        return include_impl_invoke(can_path, once, variables, currentDir);
-      } catch (PhpFileDoesNotExistException &e) {}
+      if (tryFile(can_path, ctx)) {
+        return can_path;
+      }
     }
 
     if (currentDir[0] == '/') {
@@ -1038,31 +1073,46 @@ static Variant include_impl(CStrRef file, bool once,
       String can_path(Util::canonicalize(path.c_str(), path.size()),
                       AttachString);
 
-      try {
-        return include_impl_invoke(can_path, once, variables, currentDir);
-      } catch (PhpFileDoesNotExistException &e) {}
+      if (tryFile(can_path, ctx)) {
+        return can_path;
+      }
     } else {
       // Regular hphp
       String path(g_context->getCwd() + "/" + currentDir + file);
       String can_path(Util::canonicalize(path.c_str(), path.size()),
                       AttachString);
 
-      try {
-        return include_impl_invoke(can_path, once, variables, currentDir);
-      } catch (PhpFileDoesNotExistException &e) {}
+      if (tryFile(can_path, ctx)) {
+        return can_path;
+      }
     }
   }
 
-  // Failure
-  if (raiseNotice) {
-    raise_notice("Tried to invoke %s but file not found.", file->data());
+  return String((StringData*)NULL);
+}
+
+static Variant include_impl(CStrRef file, bool once,
+                            LVariableTable* variables,
+                            const char *currentDir, bool required,
+                            bool raiseNotice) {
+  struct IncludeImplInvokeContext ctx = {once, variables, currentDir};
+  String can_path = resolve_include(file, currentDir,
+                                    include_impl_invoke_context, (void*)&ctx);
+
+  if (can_path.isNull()) {
+    // Failure
+    if (raiseNotice) {
+      raise_notice("Tried to invoke %s but file not found.", file->data());
+    }
+    if (required) {
+      String ms = "Required file that does not exist: ";
+      ms += file;
+      throw FatalErrorException(ms.data());
+    }
+    return false;
   }
-  if (required) {
-    String ms = "Required file that does not exist: ";
-    ms += file;
-    throw FatalErrorException(ms.data());
-  }
-  return false;
+
+  return ctx.returnValue;
 }
 
 Variant include(CStrRef file, bool once /* = false */,
@@ -1243,10 +1293,10 @@ Variant &get_static_property_lval(const char *s, const char *prop) {
   return Variant::lvalBlackHole();
 }
 
+#ifdef ENABLE_LATE_STATIC_BINDING
 Variant invoke_static_method_bind(CStrRef s, CStrRef method,
                                   CArrRef params, bool fatal /* = true */) {
   ThreadInfo *info = ThreadInfo::s_threadInfo.get();
-
   String cls = s;
   bool isStatic = cls->isame(s_static.get());
   if (isStatic) {
@@ -1260,6 +1310,7 @@ Variant invoke_static_method_bind(CStrRef s, CStrRef method,
   }
   return ref(ret);
 }
+#endif /* ENABLE_LATE_STATIC_BINDING */
 
 void MethodCallPackage::methodCall(ObjectData *self, CStrRef method,
                                    int64 prehash /* = -1 */) {

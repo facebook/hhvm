@@ -17,9 +17,15 @@
 #ifndef __HPHP_HASH_H__
 #define __HPHP_HASH_H__
 
+#include <stdint.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * "64 bit Mix Functions", from Thomas Wang's "Integer Hash Function."
+ * http://www.concentric.net/~ttwang/tech/inthash.htm
+ */
 inline long long hash_int64(long long key) {
   key = (~key) + (key << 21); // key = (key << 21) - key - 1;
   key = key ^ ((unsigned long long)key >> 24);
@@ -147,14 +153,14 @@ inline long long hash_string_i(const char *arKey) {
 //      digit, followed by at most 18 more digits, and is greater than
 //      or equal to -9223372036854775807.
 inline bool is_strictly_integer(const char* arKey, size_t nKeyLength,
-                                int64& res) {
+                                long long& res) {
   if (nKeyLength == 0 || arKey[0] > '9')
     return false;
   if (nKeyLength <= 19 ||
       (arKey[0] == '-' && nKeyLength == 20)) {
-    uint64 num = 0;
+    unsigned long long num = 0;
     bool neg = false;
-    uint32 i = 0;
+    unsigned i = 0;
     if (arKey[0] == '-') {
       neg = true;
       i = 1;
@@ -186,7 +192,7 @@ inline bool is_strictly_integer(const char* arKey, size_t nKeyLength,
     }
     if (good) {
       if (num <= 0x7FFFFFFFFFFFFFFEULL || (neg && num == 0x7FFFFFFFFFFFFFFFULL)) {
-        res = neg ? 0 - num : (int64)num;
+        res = neg ? 0 - num : (long long)num;
         return true;
       }
     }

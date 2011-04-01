@@ -145,7 +145,7 @@ static void model_to_string(sdlContentModelPtr model, StringBuffer &buf,
 // client helpers
 
 static Object create_soap_fault(CStrRef code, CStrRef fault) {
-  return Object((NEW(c_SoapFault)())->create(code, fault));
+  return Object((NEWOBJ(c_SoapFault)())->create(code, fault));
 }
 
 static Object create_soap_fault(Exception &e) {
@@ -992,7 +992,7 @@ static sdlFunctionPtr deserialize_function_call
                                     "mustUnderstand value is not boolean");
           }
         }
-        h = NEW(soapHeader)();
+        h = NEWOBJ(soapHeader)();
         Object hobj(h);
         h->function = find_function(sdl, hdr_func, h->function_name).get();
         h->mustUnderstand = mustUnderstand;
@@ -2247,14 +2247,14 @@ void c_SoapServer::t_fault(CVarRef code, CStrRef fault,
                            CStrRef name /* = null_string */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapServer, SoapServer::fault);
   SoapServerScope ss(this);
-  Object obj((NEW(c_SoapFault)())->create(code, fault, actor, detail, name));
+  Object obj((NEWOBJ(c_SoapFault)())->create(code, fault, actor, detail, name));
   send_soap_server_fault(sdlFunctionPtr(), obj, NULL);
 }
 
 void c_SoapServer::t_addsoapheader(CObjRef fault) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapServer, SoapServer::addsoapheader);
   SoapServerScope ss(this);
-  soapHeader *p = NEW(soapHeader)();
+  soapHeader *p = NEWOBJ(soapHeader)();
   Object obj(p);
   p->function = NULL;
   p->mustUnderstand = false;
@@ -2616,7 +2616,7 @@ Variant c_SoapClient::t___dorequest(String buf, String location, String action,
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__dorequest);
   if (location.empty()) {
     m_soap_fault =
-      Object((NEW(c_SoapFault)())->create("HTTP", "Unable to parse URL"));
+      Object((NEWOBJ(c_SoapFault)())->create("HTTP", "Unable to parse URL"));
     return null;
   }
 
@@ -2677,7 +2677,7 @@ Variant c_SoapClient::t___dorequest(String buf, String location, String action,
                        &headers);
   if (code == 0) {
     m_soap_fault =
-      Object((NEW(c_SoapFault)())->create
+      Object((NEWOBJ(c_SoapFault)())->create
              ("HTTP", "Failed Sending HTTP SOAP request"));
     return null;
   }
@@ -2686,7 +2686,7 @@ Variant c_SoapClient::t___dorequest(String buf, String location, String action,
     if (msg.empty()) {
       msg = HttpProtocol::GetReasonString(code);
     }
-    m_soap_fault = Object((NEW(c_SoapFault)())->create("HTTP", msg));
+    m_soap_fault = Object((NEWOBJ(c_SoapFault)())->create("HTTP", msg));
     return null;
   }
 

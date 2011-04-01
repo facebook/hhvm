@@ -54,7 +54,9 @@ RUNTIME_DIRS = \
 	$(HPHP_OBJ_DIR)/src/util
 endif
 
-ADDITIONAL_OBJS += $(shell find $(RUNTIME_DIRS) -name "*.o")
+ADDITIONAL_OBJS += \
+	$(filter-out $(shell find $(RUNTIME_DIRS) -name "*.pic.o"), \
+	$(shell find $(RUNTIME_DIRS) -name "*.o"))
 TARGETS = $(STATIC_LIB) $(SHARED_LIB)
 
 else # HPHP_BUILD_LIBRARY

@@ -32,6 +32,7 @@ public:
   virtual Variant eval(VariableEnvironment &env) const;
   virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   virtual void dump(std::ostream &out) const;
+  bool front() const { return m_front; }
 private:
   LvalExpressionPtr m_exp;
   bool m_inc;

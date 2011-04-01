@@ -95,9 +95,11 @@ const Eval::MethodStatement *ObjectData::getMethodStatement(const char* name)
   return NULL;
 }
 
+#ifdef ENABLE_LATE_STATIC_BINDING
 void ObjectData::bindThis(ThreadInfo *info) {
   FrameInjection::SetCallingObject(info, this);
 }
+#endif
 
 void ObjectData::setDummy() {
   int *pmax = os_max_id.get();
@@ -389,7 +391,7 @@ Variant ObjectData::o_argval(bool byRef, CStrRef s,
 }
 
 Object ObjectData::FromArray(ArrayData *properties) {
-  ObjectData *ret = NEW(c_stdClass)();
+  ObjectData *ret = NEWOBJ(c_stdClass)();
   if (!properties->empty()) {
     ret->o_properties = NEW(Array)(properties);
   }
@@ -890,11 +892,6 @@ Variant ObjectData::t___sleep() {
 }
 
 Variant ObjectData::t___wakeup() {
-  // do nothing
-  return null;
-}
-
-Variant ObjectData::t___set_state(Variant v_properties) {
   // do nothing
   return null;
 }

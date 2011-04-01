@@ -28,13 +28,14 @@ StaticString ZipFile::s_class_name("ZipFile");
 ///////////////////////////////////////////////////////////////////////////////
 
 ZipFile::ZipFile() : m_gzFile(NULL) {
-  m_innerFile = NEW(PlainFile)();
+  m_innerFile = NEWOBJ(PlainFile)();
   m_innerFile->unregister(); // so Sweepable won't touch my child
 }
 
 ZipFile::~ZipFile() {
   closeImpl();
-  DELETE(PlainFile)(m_innerFile);
+  m_innerFile->~PlainFile();
+  DELETEOBJ(HPHP, PlainFile, m_innerFile);
 }
 
 void ZipFile::sweep() {

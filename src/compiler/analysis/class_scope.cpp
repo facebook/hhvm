@@ -679,11 +679,11 @@ void ClassScope::outputCPPDynamicClassImpl(CodeGenerator &cg,
   const char *clsName = clsStr.c_str();
   cg_indentBegin("Object %s%s(CArrRef params, bool init /* = true */) {\n",
                  Option::CreateObjectPrefix, clsName);
-  cg_printf("return Object((NEW(%s%s)())->dynCreate(params, init));\n",
+  cg_printf("return Object((NEWOBJ(%s%s)())->dynCreate(params, init));\n",
             Option::ClassPrefix, clsName);
   cg_indentEnd("}\n");
   cg_indentBegin("Object %s%s() {\n", Option::CreateObjectOnlyPrefix, clsName);
-  cg_printf("Object r(NEW(%s%s)());\n", Option::ClassPrefix, clsName);
+  cg_printf("Object r(NEWOBJ(%s%s)());\n", Option::ClassPrefix, clsName);
   cg_printf("r->init();\n");
   cg_printf("return r;\n");
   cg_indentEnd("}\n");
@@ -717,8 +717,30 @@ void ClassScope::outputCPPClassJumpTable
 void ClassScope::outputCPPHashTableClassVarInit
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
+  bool system = cg.getOutput() == CodeGenerator::SystemCPP;
   ASSERT(cg.getCurrentIndentation() == 0);
-  const char text1[] =
+  const char text1s[] =
+    "class hashNodeCTD {\n"
+    "public:\n"
+    "  hashNodeCTD() {}\n"
+    "  hashNodeCTD(int64 h, const char *n,\n"
+    "              const void *p1,\n"
+    "              const void *p2) :\n"
+    "    hash(h), name(n), ptr1(p1), ptr2(p2), next(NULL) {}\n"
+    "  int64 hash;\n"
+    "  const char *name;\n"
+    "  const void *ptr1;\n"
+    "  const void *ptr2;\n"
+    "  hashNodeCTD *next;\n"
+    "};\n"
+    "static hashNodeCTD *ctdMapTable[%d];\n"
+    "static hashNodeCTD ctdBuckets[%d];\n"
+    "\n"
+    "static class SysCTDTableInitializer {\n"
+    "  public: SysCTDTableInitializer() {\n"
+    "    const char *ctdMapData[] = {\n";
+
+  const char text1u[] = 
     "class hashNodeCTD {\n"
     "public:\n"
     "  hashNodeCTD() {}\n"
@@ -736,13 +758,40 @@ void ClassScope::outputCPPHashTableClassVarInit
     "static hashNodeCTD *ctdMapTable[%d];\n"
     "static hashNodeCTD ctdBuckets[%d];\n"
     "\n"
-    "#define GET_OFFSET(n) (&gv.%s ## n - gv.tgv_ClassStaticsPtr + 1)\n"
+    "#define GET_OFFSET(n) "
+    "((offsetof(GlobalVariables, %s ## n) -"
+    "  offsetof(GlobalVariables, tgv_ClassStaticsPtr)) / "
+    "sizeof(ClassStaticsPtr) + 1)\n"
     "static class CTDTableInitializer {\n"
     "  public: CTDTableInitializer() {\n"
-    "    GlobalVariables gv;\n"
     "    const char *ctdMapData[] = {\n";
 
-  const char text2[] =
+  const char text2s[] =
+    "      NULL, NULL, NULL\n"
+    "    };\n"
+    "    hashNodeCTD *b = ctdBuckets;\n"
+    "    for (const char **s = ctdMapData; *s; s++, b++) {\n"
+    "      const char *name = *s++;\n"
+    "      const void *p1 = (const void *)(*s++);\n"
+    "      const void *p2 = (const void *)(*s);\n"
+    "      int64 hash = hash_string(name, strlen(name));\n"
+    "      hashNodeCTD *node =\n"
+    "        new(b) hashNodeCTD(hash, name, p1, p2);\n"
+    "      int h = hash & %d;\n"
+    "      if (ctdMapTable[h]) node->next = ctdMapTable[h];\n"
+    "      ctdMapTable[h] = node;\n"
+    "    }\n"
+    "  }\n"
+    "} ctd_table_initializer;\n"
+    "\n"
+    "static const hashNodeCTD *\n"
+    "findCTD(const char *name, int64 hash) {\n"
+    "  for (const hashNodeCTD *p = ctdMapTable[hash & %d]; p; p = p->next) {\n"
+    "    if (p->hash == hash && !strcasecmp(p->name, name)) return p;\n"
+    "  }\n"
+    "  return NULL;\n"
+    "}\n";
+  const char text2u[] =
     "      NULL, NULL, NULL, NULL\n"
     "    };\n"
     "    hashNodeCTD *b = ctdBuckets;\n"
@@ -770,12 +819,14 @@ void ClassScope::outputCPPHashTableClassVarInit
     "}\n";
 
   int tableSize = Util::roundUpToPowerOfTwo(classes.size() * 2);
-  cg_printf(text1, tableSize, classes.size(), Option::ClassStaticsObjectPrefix);
+  cg_printf((system ? text1s :text1u),
+             tableSize, classes.size(), Option::ClassStaticsObjectPrefix);
   for (uint i = 0; i < classes.size(); i++) {
     const char *clsName = classes[i];
     StringToClassScopePtrVecMap::const_iterator iterClasses =
       classScopes.find(Util::toLower(clsName));
     if (iterClasses->second[0]->isRedeclaring()) {
+      ASSERT(!system);
       cg_printf("      (const char *)\"%s\", "
                 "(const char *)GET_OFFSET(%s), "
                 "(const char *)NULL,"
@@ -783,6 +834,7 @@ void ClassScope::outputCPPHashTableClassVarInit
                 cg.formatLabel(clsName).c_str(),
                 iterClasses->second[0]->getName().c_str());
     } else if (iterClasses->second[0]->isVolatile()) {
+      ASSERT(!system);
       cg_printf("      (const char *)\"%s\", "
                 "(const char *)-1, "
                 "(const char *)&%s%s,"
@@ -793,26 +845,36 @@ void ClassScope::outputCPPHashTableClassVarInit
                 Option::CreateObjectOnlyPrefix,
                 cg.formatLabel(clsName).c_str());
     } else {
-      cg_printf("      (const char *)\"%s\", "
-                "(const char *)0, "
-                "(const char *)&%s%s,"
-                "(const char *)&%s%s,\n",
-                cg.formatLabel(clsName).c_str(),
-                Option::ClassWrapperFunctionPrefix,
-                cg.formatLabel(clsName).c_str(),
-                Option::CreateObjectOnlyPrefix,
-                cg.formatLabel(clsName).c_str());
+      if (system) {
+        cg_printf("      (const char *)\"%s\", "
+                  "(const char *)&%s%s,"
+                  "(const char *)&%s%s,\n",
+                  cg.formatLabel(clsName).c_str(),
+                  Option::ClassWrapperFunctionPrefix,
+                  cg.formatLabel(clsName).c_str(),
+                  Option::CreateObjectOnlyPrefix,
+                  cg.formatLabel(clsName).c_str());
+      } else {
+        cg_printf("      (const char *)\"%s\", "
+                  "(const char *)0, "
+                  "(const char *)&%s%s,"
+                  "(const char *)&%s%s,\n",
+                  cg.formatLabel(clsName).c_str(),
+                  Option::ClassWrapperFunctionPrefix,
+                  cg.formatLabel(clsName).c_str(),
+                  Option::CreateObjectOnlyPrefix,
+                  cg.formatLabel(clsName).c_str());
+      }
     }
   }
-  cg_printf(text2, tableSize - 1, tableSize - 1);
+  cg_printf(system ? text2s : text2u, tableSize - 1, tableSize - 1);
 }
 
 void ClassScope::outputCPPClassVarInitImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  bool useHashTable = (Option::GenHashTableDynClass && classes.size() > 0
-                       && !system);
+  bool useHashTable = (Option::GenHashTableDynClass && classes.size() > 0);
   if (useHashTable) {
     outputCPPHashTableClassVarInit(cg, classScopes, classes);
   }
@@ -832,26 +894,35 @@ void ClassScope::outputCPPClassVarInitImpl
     outputCPPClassJumpTable(cg, classScopes, classes,
                             "HASH_GET_CLASS_VAR_INIT");
   } else {
-    cg.printDeclareGlobals();
-    cg_printf("const hashNodeCTD *p = findCTD(s, hash_string(s));\n"
-              "if (!p) return get_builtin_class_var_init(s, var);\n"
-              "int64 off = p->off;\n"
-              "if (off == 0) {\n  return "
-              "((const ObjectStaticCallbacks *)p->ptr1)->os_getInit(var);\n"
-              "}\n"
-              "checkClassExists(s, g);\n"
-              "if (off < 0) {\n  // volatile class\n  return "
-              "((const ObjectStaticCallbacks *)p->ptr1)->os_getInit(var);\n"
-              "}\n"
-              "// redeclared class\n"
-              "return g->tgv_ClassStaticsPtr[off-1]->os_getInit(var);\n");
+    if (system) {
+      cg_printf("const hashNodeCTD *p = findCTD(s, hash_string(s));\n"
+                "if (p) {\n"
+                "  return "
+                "((const ObjectStaticCallbacks *)p->ptr1)->os_getInit(var);\n"
+                "}\n"
+                "return throw_missing_class(s);\n");
+    } else {
+      cg.printDeclareGlobals();
+      cg_printf("const hashNodeCTD *p = findCTD(s, hash_string(s));\n"
+                "if (!p) return get_builtin_class_var_init(s, var);\n"
+                "int64 off = p->off;\n"
+                "if (off == 0) {\n  return "
+                "((const ObjectStaticCallbacks *)p->ptr1)->os_getInit(var);\n"
+                "}\n"
+                "checkClassExists(s, g);\n"
+                "if (off < 0) {\n  // volatile class\n  return "
+                "((const ObjectStaticCallbacks *)p->ptr1)->os_getInit(var);\n"
+                "}\n"
+                "// redeclared class\n"
+                "return g->tgv_ClassStaticsPtr[off-1]->os_getInit(var);\n");
+    }
   }
-  if (!system) {
-    if (!useHashTable) {
+  if (!useHashTable) {
+    if (system) {
+      cg_printf("return throw_missing_class(s);\n");
+    } else {
       cg_printf("return get_builtin_class_var_init(s, var);\n");
     }
-  } else {
-    cg_printf("return throw_missing_class(s);\n");
   }
   cg_indentEnd("}\n");
 }
@@ -861,8 +932,7 @@ void ClassScope::outputCPPDynamicClassCreateImpl
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
   bool withEval = !system && Option::EnableEval == Option::FullEval;
-  bool useHashTable = (Option::GenHashTableDynClass && classes.size() > 0
-                       && !system);
+  bool useHashTable = (Option::GenHashTableDynClass && classes.size() > 0);
 
   // output create_object_only()
   cg_indentBegin("Object create%s_object_only(const char *s, "
@@ -879,23 +949,31 @@ void ClassScope::outputCPPDynamicClassCreateImpl
     outputCPPClassJumpTable(cg, classScopes, classes,
                             "HASH_CREATE_OBJECT_ONLY");
   } else {
-    cg.printDeclareGlobals();
-    cg_printf("const hashNodeCTD *p = findCTD(s, hash_string(s));\n"
-              "if (!p) return create_builtin_object_only(s, root);\n"
-              "int64 off = p->off;\n"
-              "if (off == 0) return ((Object(*)())(p->ptr2))();\n"
-              "checkClassExists(s, g);\n"
-              "if (off < 0) return ((Object(*)())(p->ptr2))(); "
-              "// volatile class\n"
-              "return g->tgv_ClassStaticsPtr[off-1]->createOnly(root); "
-              "// redeclared class\n");
+    if (system) {
+      cg_printf("const hashNodeCTD *p = findCTD(s, hash_string(s));\n"
+                "if (p) {\n"
+                "  return ((Object(*)())(p->ptr2))();\n"
+                "}\n"
+                "return throw_missing_class(s);\n");
+    } else {
+      cg.printDeclareGlobals();
+      cg_printf("const hashNodeCTD *p = findCTD(s, hash_string(s));\n"
+                "if (!p) return create_builtin_object_only(s, root);\n"
+                "int64 off = p->off;\n"
+                "if (off == 0) return ((Object(*)())(p->ptr2))();\n"
+                "checkClassExists(s, g);\n"
+                "if (off < 0) return ((Object(*)())(p->ptr2))(); "
+                "// volatile class\n"
+                "return g->tgv_ClassStaticsPtr[off-1]->createOnly(root); "
+                "// redeclared class\n");
+    }
   }
-  if (!system) {
-    if (!useHashTable) {
+  if (!useHashTable) {
+    if (system) {
+      cg_printf("return throw_missing_class(s);\n");
+    } else {
       cg_printf("return create_builtin_object_only(s, root);\n");
     }
-  } else {
-    cg_printf("return throw_missing_class(s);\n");
   }
   cg_indentEnd("}\n");
 }
@@ -904,8 +982,7 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  bool useHashTable = (Option::GenHashTableDynClass && classes.size() > 0
-                       && !system);
+  bool useHashTable = (Option::GenHashTableDynClass && classes.size() > 0);
   cg_indentBegin("bool get_call_info_static_method%s(MethodCallPackage &mcp)"
       " {\n", system ? "_builtin" : "");
   if (Option::UseMethodIndex) {
@@ -927,29 +1004,39 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
       outputCPPClassJumpTable(cg, classScopes, classes,
           "HASH_CALL_INFO_STATIC_METHOD", true);
     } else {
-      cg.printDeclareGlobals();
-      cg_printf("const hashNodeCTD *p = findCTD(s->data(), s->hash());\n"
-                "if (!p) return get_call_info_static_method_builtin(mcp);\n"
-                "int64 off = p->off;\n"
-                "if (off == 0) {\n  return "
-                "((const ObjectStaticCallbacks *)p->ptr1)->"
-                "os_get_call_info(mcp, -1);\n"
-                "}\n"
-                "checkClassExists(s, g);\n"
-                "if (off < 0) {\n  // volatile class\n  return "
-                "((const ObjectStaticCallbacks *)p->ptr1)->"
-                "os_get_call_info(mcp, -1);\n"
-                "}\n"
-                "// redeclared class\n"
-                "return g->tgv_ClassStaticsPtr[off-1]->"
-                "os_get_call_info(mcp, -1);\n");
+      if (system) {
+        cg_printf("const hashNodeCTD *p = findCTD(s->data(), s->hash());\n"
+                  "if (p) {\n"
+                  "  return "
+                  "((const ObjectStaticCallbacks *)p->ptr1)->"
+                  "os_get_call_info(mcp, -1);\n"
+                  "}\n"
+                  "return ObjectData::os_get_call_info(mcp);\n");
+      } else {
+        cg.printDeclareGlobals();
+        cg_printf("const hashNodeCTD *p = findCTD(s->data(), s->hash());\n"
+                  "if (!p) return get_call_info_static_method_builtin(mcp);\n"
+                  "int64 off = p->off;\n"
+                  "if (off == 0) {\n  return "
+                  "((const ObjectStaticCallbacks *)p->ptr1)->"
+                  "os_get_call_info(mcp, -1);\n"
+                  "}\n"
+                  "checkClassExists(s, g);\n"
+                  "if (off < 0) {\n  // volatile class\n  return "
+                  "((const ObjectStaticCallbacks *)p->ptr1)->"
+                  "os_get_call_info(mcp, -1);\n"
+                  "}\n"
+                  "// redeclared class\n"
+                  "return g->tgv_ClassStaticsPtr[off-1]->"
+                  "os_get_call_info(mcp, -1);\n");
+      }
     }
-    if (!system) {
-      if (!useHashTable) {
+    if (!useHashTable) {
+      if (system) {
+        cg_printf("return ObjectData::os_get_call_info(mcp);\n");
+      } else {
         cg_printf("return get_call_info_static_method_builtin(mcp);\n");
       }
-    } else {
-      cg_printf("return ObjectData::os_get_call_info(mcp);\n");
     }
   }
   cg_indentEnd("}\n");
@@ -973,32 +1060,44 @@ void ClassScope::outputCPPGetCallInfoStaticMethodImpl
       outputCPPClassJumpTable(cg, classScopes, classes,
           "HASH_CALL_INFO_STATIC_METHOD_WITH_INDEX", true);
     } else {
-      cg.printDeclareGlobals();
-      cg_printf("const hashNodeCTD *p = findCTD(s->data(), s->hash());\n"
-                "if (!p) return "
-                "get_call_info_static_method_with_index_builtin(mcp, mi, -1);\n"
-                "int64 off = p->off;\n"
-                "if (off == 0) {\n  return "
-                "((const ObjectStaticCallbacks *)p->ptr1)->"
-                "os_get_call_info_with_index(mcp, mi, -1);\n"
-                "}\n"
-                "checkClassExists(s, g);\n"
-                "if (off < 0) {\n  // volatile class\n  return "
-                "((const ObjectStaticCallbacks *)p->ptr1)->"
-                "os_get_call_info_with_index(mcp, mi, -1);\n"
-                "}\n"
-                "// redeclared class\n"
-                "return g->tgv_ClassStaticsPtr[off-1]->"
-                "os_get_call_info_with_index(mcp, mi, -1);\n");
-    }
-    if (!system) {
-      if (!useHashTable) {
-        cg_printf("return get_call_info_static_method_with_index_builtin(mcp, "
-            "mi);\n");
+      if (system) {
+        cg_printf("const hashNodeCTD *p = findCTD(s->data(), s->hash());\n"
+                  "if (p) {\n"
+                  "  return "
+                  "((const ObjectStaticCallbacks *)p->ptr1)->"
+                  "os_get_call_info_with_index(mcp, mi, -1);\n"
+                  "}\n"
+                  "mcp.fail();\n"
+                  "return false;\n");
+      } else {
+        cg.printDeclareGlobals();
+        cg_printf("const hashNodeCTD *p = findCTD(s->data(), s->hash());\n"
+                  "if (!p) return "
+                  "get_call_info_static_method_with_index_builtin"
+                  "(mcp, mi, -1);\n"
+                  "int64 off = p->off;\n"
+                  "if (off == 0) {\n  return "
+                  "((const ObjectStaticCallbacks *)p->ptr1)->"
+                  "os_get_call_info_with_index(mcp, mi, -1);\n"
+                  "}\n"
+                  "checkClassExists(s, g);\n"
+                  "if (off < 0) {\n  // volatile class\n  return "
+                  "((const ObjectStaticCallbacks *)p->ptr1)->"
+                  "os_get_call_info_with_index(mcp, mi, -1);\n"
+                  "}\n"
+                  "// redeclared class\n"
+                  "return g->tgv_ClassStaticsPtr[off-1]->"
+                  "os_get_call_info_with_index(mcp, mi, -1);\n");
       }
-    } else {
-      cg_printf("mcp.fail();\n");
-      cg_printf("return false;\n");
+    }
+    if (!useHashTable) {
+      if (!system) {
+        cg_printf("mcp.fail();\n");
+        cg_printf("return false;\n");
+      } else {
+        cg_printf("return get_call_info_static_method_with_index_builtin(mcp, "
+                  "mi);\n");
+      }
     }
   } else {
     cg_printf("return get_call_info_static_method%s(mcp);\n",
@@ -1012,8 +1111,7 @@ void ClassScope::outputCPPGetStaticPropertyImpl
 (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
  const vector<const char*> &classes) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  bool useHashTable = (Option::GenHashTableDynClass && classes.size() > 0
-                       && !system);
+  bool useHashTable = (Option::GenHashTableDynClass && classes.size() > 0);
 
   cg_indentBegin("const ObjectStaticCallbacks * "
                  "get%s_object_static_callbacks(const char *s) {\n",
@@ -1022,26 +1120,35 @@ void ClassScope::outputCPPGetStaticPropertyImpl
     outputCPPClassJumpTable(cg, classScopes, classes,
                             "HASH_GET_OBJECT_STATIC_CALLBACKS");
   } else {
-    cg.printDeclareGlobals();
-    cg_printf("const hashNodeCTD *p = findCTD(s, hash_string(s));\n"
-              "if (!p) return get_builtin_object_static_callbacks(s);\n"
-              "int64 off = p->off;\n"
-              "if (off == 0) {\n  return "
-              "((const ObjectStaticCallbacks *)p->ptr1);\n"
-              "}\n"
-              "checkClassExists(s, g);\n"
-              "if (off < 0) {\n  // volatile class\n  return "
-              "((const ObjectStaticCallbacks *)p->ptr1);\n"
-              "}\n"
-              "// redeclared class\n"
-              "return (g->tgv_ObjectStaticCallbacksPtr[off-1]);\n");
+    if (system) {
+      cg_printf("const hashNodeCTD *p = findCTD(s, hash_string(s));\n"
+                "if (p) {\n"
+                "  return "
+                "((const ObjectStaticCallbacks *)p->ptr1);\n"
+                "}\n"
+                "return NULL;\n");
+    } else {
+      cg.printDeclareGlobals();
+      cg_printf("const hashNodeCTD *p = findCTD(s, hash_string(s));\n"
+                "if (!p) return get_builtin_object_static_callbacks(s);\n"
+                "int64 off = p->off;\n"
+                "if (off == 0) {\n  return "
+                "((const ObjectStaticCallbacks *)p->ptr1);\n"
+                "}\n"
+                "checkClassExists(s, g);\n"
+                "if (off < 0) {\n  // volatile class\n  return "
+                "((const ObjectStaticCallbacks *)p->ptr1);\n"
+                "}\n"
+                "// redeclared class\n"
+                "return (g->tgv_ObjectStaticCallbacksPtr[off-1]);\n");
+    }
   }
-  if (!system) {
-    if (!useHashTable) {
+  if (!useHashTable) {
+    if (system) {
+      cg_printf("return NULL;\n");
+    } else {
       cg_printf("return get_builtin_object_static_callbacks(s);\n");
     }
-  } else {
-    cg_printf("return NULL;\n");
   }
   cg_indentEnd("}\n");
 
@@ -1423,7 +1530,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
   // Cloning
   cg_indentBegin("ObjectData *%s%s::cloneImpl() {\n",
                  Option::ClassPrefix, clsName);
-  cg_printf("%s%s *obj = NEW(%s%s)();\n", Option::ClassPrefix, clsName,
+  cg_printf("%s%s *obj = NEWOBJ(%s%s)();\n", Option::ClassPrefix, clsName,
             Option::ClassPrefix, clsName);
   cg_printf("%s%s::cloneSet(obj);\n", Option::ClassPrefix, clsName);
   cg_printf("return obj;\n");

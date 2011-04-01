@@ -41,7 +41,7 @@ public:
 
 inline Object f_stream_context_create(CArrRef options = null_array,
                                       CArrRef params = null_array) {
-  return Object(NEW(StreamContext)(options, params));
+  return Object(NEWOBJ(StreamContext)(options, params));
 }
 
 inline Object f_stream_context_get_default(CArrRef options = null_array) {

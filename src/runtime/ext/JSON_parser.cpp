@@ -571,7 +571,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
             top.unset();
           }
           if (!assoc) {
-            top = NEW(c_stdClass)();
+            top = NEWOBJ(c_stdClass)();
           } else {
             top = Array::Create();
           }

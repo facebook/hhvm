@@ -394,7 +394,7 @@ static Variant php_ldap_do_search(CVarRef link, CVarRef base_dn,
                              NULL, &ldap_res);
       }
       if (rcs[i] != -1) {
-        ret.append(Object(NEW(LdapResult)(ldap_res)));
+        ret.append(Object(NEWOBJ(LdapResult)(ldap_res)));
       } else {
         ret.append(false);
       }
@@ -437,18 +437,18 @@ cleanup_parallel:
     ) {
       raise_warning("Search: %s", ldap_err2string(rc));
       ldap_err = 0;
+    } else {
+      if (rc == LDAP_SIZELIMIT_EXCEEDED) {
+        raise_warning("Partial search results returned: Sizelimit exceeded");
+      }
+#ifdef LDAP_ADMINLIMIT_EXCEEDED
+      else if (rc == LDAP_ADMINLIMIT_EXCEEDED) {
+        raise_warning("Partial search results returned: Adminlimit exceeded");
+      }
+#endif
+      parallel_search = 0;
+      ret.append(Object(NEWOBJ(LdapResult)(ldap_res)));
     }
-
-    if (rc == LDAP_SIZELIMIT_EXCEEDED) {
-      raise_warning("Partial search results returned: Sizelimit exceeded");
-    }
-  #ifdef LDAP_ADMINLIMIT_EXCEEDED
-    else if (rc == LDAP_ADMINLIMIT_EXCEEDED) {
-      raise_warning("Partial search results returned: Adminlimit exceeded");
-    }
-  #endif
-    parallel_search = 0;
-    ret.append(Object(NEW(LdapResult)(ldap_res)));
   }
 cleanup:
   if (ld) {
@@ -531,7 +531,7 @@ Variant f_ldap_connect(CStrRef hostname /* = null_string */,
     return false;
   }
 
-  LdapLink *ld = NEW(LdapLink)();
+  LdapLink *ld = NEWOBJ(LdapLink)();
   Object ret(ld);
 
   LDAP *ldap = NULL;
@@ -1048,7 +1048,7 @@ Variant f_ldap_first_entry(CObjRef link, CObjRef result) {
     return false;
   }
 
-  return NEW(LdapResultEntry)(entry, res);
+  return NEWOBJ(LdapResultEntry)(entry, res);
 }
 
 Variant f_ldap_next_entry(CObjRef link, CObjRef result_entry) {
@@ -1060,7 +1060,7 @@ Variant f_ldap_next_entry(CObjRef link, CObjRef result_entry) {
     return false;
   }
 
-  return NEW(LdapResultEntry)(msg, entry->result.get());
+  return NEWOBJ(LdapResultEntry)(msg, entry->result.get());
 }
 
 Array f_ldap_get_attributes(CObjRef link, CObjRef result_entry) {
@@ -1118,7 +1118,7 @@ Variant f_ldap_first_reference(CObjRef link, CObjRef result) {
     return false;
   }
 
-  return NEW(LdapResultEntry)(entry, res);
+  return NEWOBJ(LdapResultEntry)(entry, res);
 }
 
 Variant f_ldap_next_reference(CObjRef link, CObjRef result_entry) {
@@ -1130,7 +1130,7 @@ Variant f_ldap_next_reference(CObjRef link, CObjRef result_entry) {
     return false;
   }
 
-  return NEW(LdapResultEntry)(entry_next, entry->result.get());
+  return NEWOBJ(LdapResultEntry)(entry_next, entry->result.get());
 }
 
 bool f_ldap_parse_reference(CObjRef link, CObjRef result_entry,

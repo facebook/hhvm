@@ -39,7 +39,7 @@ void WhileStatement::eval(VariableEnvironment &env) const {
   begin:
   if (m_cond->eval(env)) {
     body:
-    LOOP_COUNTER_CHECK(1);
+    LOOP_COUNTER_CHECK_INFO(1);
     EVAL_STMT_HANDLE_GOTO_BEGIN(restart);
     if (m_body) EVAL_STMT_HANDLE_GOTO(m_body, env);
     EVAL_STMT_HANDLE_GOTO_END(restart);

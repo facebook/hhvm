@@ -25,11 +25,23 @@ namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(thread);
 ///////////////////////////////////////////////////////////////////////////////
 
+bool f_hphp_is_service_thread() {
+  return ServiceThread::IsServiceThread();
+}
+
 void f_hphp_service_thread_started() {
+  if (!ServiceThread::IsServiceThread()) {
+    raise_error("hphp_service_thread_started called "
+                "from outside a service thread");
+  }
   ServiceThread::GetThisThread()->notifyStarted();
 }
 
 bool f_hphp_service_thread_stopped(int timeout) {
+  if (!ServiceThread::IsServiceThread()) {
+    raise_error("hphp_service_thread_stopped called "
+                "from outside a service thread");
+  }
   return ServiceThread::GetThisThread()->waitForStopped(timeout);
 }
 

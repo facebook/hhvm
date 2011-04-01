@@ -567,7 +567,7 @@ Variant c_Memcache::t___destruct() {
 
 Object f_memcache_connect(CStrRef host, int port /* = 0 */,
                           int timeout /* = 0 */, int timeoutms /* = 0 */) {
-  c_Memcache *memcache_obj = NEW(c_Memcache)();
+  c_Memcache *memcache_obj = NEWOBJ(c_Memcache)();
   Object ret(memcache_obj);
   memcache_obj->t_connect(host, port, timeout, timeoutms);
   return ret;

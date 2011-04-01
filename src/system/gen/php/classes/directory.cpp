@@ -115,7 +115,7 @@ bool c_Directory::o_instanceof(CStrRef s) const {
   return false;
 }
 ObjectData *c_Directory::cloneImpl() {
-  c_Directory *obj = NEW(c_Directory)();
+  c_Directory *obj = NEWOBJ(c_Directory)();
   c_Directory::cloneSet(obj);
   return obj;
 }
@@ -410,10 +410,10 @@ void c_Directory::t_close() {
 }
 namespace hphp_impl_splitter {}
 Object co_Directory(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_Directory)())->dynCreate(params, init));
+  return Object((NEWOBJ(c_Directory)())->dynCreate(params, init));
 }
 Object coo_Directory() {
-  Object r(NEW(c_Directory)());
+  Object r(NEWOBJ(c_Directory)());
   r->init();
   return r;
 }

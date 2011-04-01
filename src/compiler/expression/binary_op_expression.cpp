@@ -732,12 +732,8 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
           if (!a1 || !a2) {
             m_implementedType = Type::Variant;
           } else {
-            if (!m_exp1->getType()->is(Type::KindOfArray)) {
-              m_exp1->setExpectedType(Type::Array);
-            }
-            if (!m_exp2->getType()->is(Type::KindOfArray)) {
-              m_exp2->setExpectedType(Type::Array);
-            }
+            m_exp1->setExpectedType(TypePtr());
+            m_exp2->setExpectedType(TypePtr());
           }
           rt = Type::Array;
         }
@@ -749,6 +745,10 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     m_exp2->inferAndCheck(ar, et2, coerce2);
     break;
   }
+
+  m_exp1->fixExpectedType(ar);
+  m_exp2->fixExpectedType(ar);
+
   return rt;
 }
 
@@ -813,7 +813,7 @@ static bool castIfNeeded(TypePtr top, TypePtr arg,
         return true;
       }
     } else if (top->is(Type::KindOfArray)) {
-      if (!arg || !arg->is(Type::KindOfArray)) {
+      if (arg && arg->isExactType() && !arg->is(Type::KindOfArray)) {
         cg_printf("((Variant)");
         return true;
       }
@@ -1205,24 +1205,17 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   case '+':
   case '-':
   case '*':
-  case '/': {
-    TypePtr actualType = first->getActualType();
-
-    if (actualType &&
-        (actualType->is(Type::KindOfString) ||
-         (m_op != '+' && actualType->is(Type::KindOfArray)))) {
-      cg_printf("(Variant)(");
-      first->outputCPP(cg, ar);
-      cg_printf(")");
-    } else {
-      bool flag = castIfNeeded(getActualType(), actualType, cg, ar, getScope());
+  case '/':
+    if (!first->outputCPPArithArg(cg, ar, m_op == '+')) {
+      TypePtr argType = first->hasCPPTemp() ?
+        first->getType() : first->getActualType();
+      bool flag = castIfNeeded(getActualType(), argType, cg, ar, getScope());
       first->outputCPP(cg, ar);
       if (flag) {
         cg_printf(")");
       }
     }
     break;
-  }
   case T_SL:
   case T_SR:
     cg_printf("toInt64(");
@@ -1267,24 +1260,17 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   case '+':
   case '-':
   case '*':
-  case '/': {
-    TypePtr actualType = second->getActualType();
-
-    if (actualType &&
-        (actualType->is(Type::KindOfString) ||
-         (m_op != '+' && actualType->is(Type::KindOfArray)))) {
-      cg_printf("(Variant)(");
-      second->outputCPP(cg, ar);
-      cg_printf(")");
-    } else {
-      bool flag = castIfNeeded(getActualType(), actualType, cg, ar, getScope());
+  case '/':
+    if (!second->outputCPPArithArg(cg, ar, m_op == '+')) {
+      TypePtr argType = second->hasCPPTemp() ?
+        second->getType() : second->getActualType();
+      bool flag = castIfNeeded(getActualType(), argType, cg, ar, getScope());
       second->outputCPP(cg, ar);
       if (flag) {
         cg_printf(")");
       }
     }
     break;
-  }
   case T_INSTANCEOF:
     {
       if (second->isScalar()) {
@@ -1293,7 +1279,7 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
         bool notQuoted = scalar && !scalar->isQuoted();
         std::string s = second->getLiteralString();
         if (s == "static" && notQuoted) {
-          cg_printf("FrameInjection::GetStaticClassName(info)");
+          cg_printf("FrameInjection::GetStaticClassName(fi.getThreadInfo())");
         } else if (s != "") {
           if (s == "self" && notQuoted) {
             ClassScopeRawPtr cls = getOriginalClass();

@@ -122,12 +122,15 @@ class ObjectData : public CountableNF {
   virtual int64  o_toInt64() const;
   virtual double o_toDouble()  const { return o_toInt64();}
 
+#ifdef ENABLE_LATE_STATIC_BINDING
   template<typename T>
   T *bindClass(ThreadInfo *info) {
     bindThis(info);
     return static_cast<T*>(this);
   }
   void bindThis(ThreadInfo *info);
+#endif
+
   void setDummy();
 
   virtual void init() {}
@@ -277,7 +280,6 @@ class ObjectData : public CountableNF {
   virtual Variant t___unset(Variant v_name);
   virtual Variant t___sleep();
   virtual Variant t___wakeup();
-  virtual Variant t___set_state(Variant v_properties);
   virtual String t___tostring();
   virtual Variant t___clone();
 
@@ -371,7 +373,6 @@ class ItemSize {
   };
  public:
   enum {
-    index = ItemSize<prev>::index + (int)(pval < M),
     value = (pval < M ? ALIGN_WORD(pval + (pval >> 1)) : pval)
   };
 };
@@ -380,47 +381,17 @@ template<>
 class ItemSize<UNIT_SIZE> {
  public:
   enum {
-    index = 0,
     value = UNIT_SIZE
   };
 };
 
 typedef ObjectAllocatorBase *(*ObjectAllocatorBaseGetter)(void);
-class ObjectAllocatorCollector {
-public:
-  static std::map<int, ObjectAllocatorBaseGetter> &getWrappers() {
-    static std::map<int, ObjectAllocatorBaseGetter> wrappers;
-    return wrappers;
-  }
-  template <typename T>
-  static ObjectAllocatorBaseGetter setup() {
-    ThreadLocalSingleton<ObjectAllocator<ItemSize<sizeof(T)>::value> > tls;
-    return getWrappers()[ItemSize<sizeof(T)>::index] =
-      (ObjectAllocatorBaseGetter)tls.get;
-  }
-};
-
-class ObjectAllocatorWrapper {
-public:
-  ObjectAllocatorWrapper(ObjectAllocatorBaseGetter get)
-  : m_get(get) {
-  }
-
-  ObjectAllocatorBase *operator->() const {
-    return m_get();
-  }
-
-  ObjectAllocatorBase *get() const {
-    return m_get();
-  }
-
-  ObjectAllocatorBase *getNoCheck() const {
-    return m_get();
-  }
-
-private:
-  ObjectAllocatorBase *(*m_get)(void);
-};
+template <typename T>
+ObjectAllocatorBaseGetter ObjectAllocatorInitSetup() {
+  ThreadLocalSingleton<ObjectAllocator<ItemSize<sizeof(T)>::value> > tls;
+  GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.get));
+  return (ObjectAllocatorBaseGetter)tls.getNoCheck;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Attribute helpers

@@ -264,7 +264,7 @@ Object PageletServer::TaskStart(CStrRef url, CArrRef headers,
   if (RuntimeOption::PageletServerThreadCount <= 0) {
     return null_object;
   }
-  PageletTask *task = NEW(PageletTask)(url, headers, remote_host, post_data);
+  PageletTask *task = NEWOBJ(PageletTask)(url, headers, remote_host, post_data);
   Object ret(task);
   PageletTransport *job = task->getJob();
   job->incRefCount(); // paired with worker's decRefCount()

@@ -33,6 +33,7 @@ public:
                     const std::vector<ParameterPtr> &vars);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
+  const std::vector<ParameterPtr> &getVars() const { return m_vars;}
 private:
   FunctionStatementPtr m_func;
   std::vector<ParameterPtr> m_vars;

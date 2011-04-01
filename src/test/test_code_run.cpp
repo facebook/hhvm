@@ -16508,6 +16508,47 @@ bool TestCodeRun::TestClosure() {
         "call_user_func($x, 2);",
         "2 456\n"
         "2 456\n");
+  MVCRO("<?php\n"
+        "$my_array = array(7, 1, 5, 6);"
+        "$some_value = 'My print';"
+        ""
+        "usort($my_array,"
+        "  function($a, $b) use ($some_value) { var_dump($some_value); }"
+        ");",
+        "string(8) \"My print\"\n"
+        "string(8) \"My print\"\n"
+        "string(8) \"My print\"\n"
+        "string(8) \"My print\"\n");
+  MVCRO("<?php\n"
+        "function f() {"
+        "  $someVar = 456;"
+        "  $closure = function($param) use (&$someVar) {"
+        "      echo $param . ' ' . $someVar . \"\\n\";"
+        "      $param = 7;"
+        "      $someVar = 11;"
+        "    };"
+        "  return $closure;"
+        "}"
+        "$x = f();"
+        "$x(2);"
+        "$x(2);",
+        "2 456\n"
+        "2 11\n");
+  MVCRO("<?php\n"
+        "function f() {"
+        "  $someVar = 456;"
+        "  $closure = function($param) use ($someVar) {"
+        "      echo $param . ' ' . $someVar . \"\\n\";"
+        "      $param = 7;"
+        "      $someVar = 11;"
+        "    };"
+        "  return $closure;"
+        "}"
+        "$x = f();"
+        "$x(2);"
+        "$x(2);",
+        "2 456\n"
+        "2 456\n");
   return true;
 }
 

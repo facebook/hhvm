@@ -1865,6 +1865,9 @@ private:
 
 class OutputWorker : public JobQueueWorker<OutputJob*> {
 public:
+  virtual void onThreadExit() {
+    g_context.reset();
+  }
   virtual void doJob(OutputJob *job) { job->output();}
 };
 

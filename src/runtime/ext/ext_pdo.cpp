@@ -1997,6 +1997,9 @@ static int register_bound_param(CVarRef paramno, CVarRef param, int64 type,
                                 int64 max_value_len, CVarRef driver_params,
                                 sp_PDOStatement stmt, bool is_param) {
   SmartObject<PDOBoundParam> p(new PDOBoundParam);
+  // need to make sure this is NULL, in case a fatal errors occurs before its set
+  // inside really_register_bound_param
+  p->stmt = NULL;
 
   if (paramno.isNumeric()) {
     p->paramno = paramno.toInt64();
@@ -2615,6 +2618,7 @@ Variant c_PDOStatement::t_execute(CArrRef params /* = null_array */) {
       SmartObject<PDOBoundParam> param(new PDOBoundParam);
       param->param_type = PDO_PARAM_STR;
       param->parameter = iter.second();
+      param->stmt = NULL;
 
       if (iter.first().isString()) {
         param->name = iter.first();

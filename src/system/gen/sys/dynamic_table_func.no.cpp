@@ -11145,6 +11145,15 @@ Variant ifa_sql_regcase(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   CVarRef arg0((a0));
   return (x_sql_regcase(arg0));
 }
+Variant i_hphp_is_service_thread(void *extra, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("hphp_is_service_thread", 0, 1);
+  return (x_hphp_is_service_thread());
+}
+Variant ifa_hphp_is_service_thread(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("hphp_is_service_thread", 0, 1);
+  return (x_hphp_is_service_thread());
+}
 Variant i_in_array(void *extra, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 2 || count > 3) return throw_wrong_arguments("in_array", count, 2, 3, 1);
@@ -38105,6 +38114,7 @@ CallInfo ci_magicksampleimage((void*)&i_magicksampleimage, (void*)&ifa_magicksam
 CallInfo ci_mysql_escape_string((void*)&i_mysql_escape_string, (void*)&ifa_mysql_escape_string, 1, 0, 0x0000000000000000LL);
 CallInfo ci_idn_to_utf8((void*)&i_idn_to_utf8, (void*)&ifa_idn_to_utf8, 2, 0, 0x0000000000000002LL);
 CallInfo ci_sql_regcase((void*)&i_sql_regcase, (void*)&ifa_sql_regcase, 1, 0, 0x0000000000000000LL);
+CallInfo ci_hphp_is_service_thread((void*)&i_hphp_is_service_thread, (void*)&ifa_hphp_is_service_thread, 0, 0, 0x0000000000000000LL);
 CallInfo ci_in_array((void*)&i_in_array, (void*)&ifa_in_array, 3, 0, 0x0000000000000000LL);
 CallInfo ci_imap_search((void*)&i_imap_search, (void*)&ifa_imap_search, 4, 0, 0x0000000000000000LL);
 CallInfo ci_drawpathcurvetoquadraticbezierabsolute((void*)&i_drawpathcurvetoquadraticbezierabsolute, (void*)&ifa_drawpathcurvetoquadraticbezierabsolute, 5, 0, 0x0000000000000000LL);
@@ -42925,6 +42935,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2315:
       HASH_GUARD(0x2987B15E11FE890BLL, clock_settime) {
         ci = &ci_clock_settime;
+        return true;
+      }
+      break;
+    case 2317:
+      HASH_GUARD(0x71EA5ABF3CB6090DLL, hphp_is_service_thread) {
+        ci = &ci_hphp_is_service_thread;
         return true;
       }
       break;

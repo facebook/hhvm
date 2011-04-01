@@ -29,7 +29,8 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 VariableEnvironment::VariableEnvironment()
-    : m_currentClass(NULL), m_breakLevel(0), m_returning(false)
+    : m_currentClass(NULL), m_breakLevel(0), m_returning(false),
+      m_closure(NULL)
 {
 }
 

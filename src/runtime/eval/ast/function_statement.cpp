@@ -26,6 +26,7 @@
 #include <runtime/eval/ast/array_expression.h>
 #include <runtime/eval/ast/name.h>
 #include <runtime/eval/ast/function_call_expression.h>
+#include <runtime/eval/ast/closure_expression.h>
 #include <runtime/eval/ast/lval_expression.h>
 #include <runtime/eval/ast/scalar_expression.h>
 #include <runtime/eval/strict_mode.h>
@@ -177,7 +178,8 @@ void Parameter::addNullDefault(void *parser) {
 FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
                                      const string &doc)
   : Statement(STATEMENT_PASS), m_name(name),
-    m_maybeIntercepted(-1), m_yieldCount(0), m_docComment(doc),
+    m_maybeIntercepted(-1), m_yieldCount(0), m_closure(NULL),
+    m_docComment(doc),
     m_callInfo((void*)Invoker, (void*)InvokerFewArgs, 0, 0, 0) {
 }
 
@@ -248,6 +250,12 @@ void FunctionStatement::eval(VariableEnvironment &env) const {
 
 Variant FunctionStatement::invoke(CArrRef params) const {
   DECLARE_THREAD_INFO_NOINIT
+  if (m_closure) {
+    if (m_ref) {
+      return ref(invokeClosure(params));
+    }
+    return invokeClosure(params);
+  }
   FuncScopeVariableEnvironment env(this);
   EvalFrameInjection fi(empty_string, m_name.c_str(), env, loc()->file);
   if (m_ref) {
@@ -361,8 +369,50 @@ Variant FunctionStatement::invokeClosure(CObjRef closure,
   directBind(env, caller, fenv, start);
 
   p_Closure c = closure.getTyped<c_Closure>();
+  const std::vector<ParameterPtr> &vars =
+    ((ClosureExpression *)m_closure)->getVars();
   for (ArrayIter iter(c->m_vars); iter; ++iter) {
-    fenv.get(iter.first()).setWithRef(iter.secondRef());
+    int i = iter.first();
+    CVarRef var = iter.secondRef();
+    Parameter *param = vars[i].get(); 
+    if (param->isRef()) {
+      fenv.get(param->getName()) = ref(var);
+    } else {
+      fenv.get(param->getName()) = var;
+    }
+  }
+
+  EvalFrameInjection fi(empty_string, "{closure}", fenv, loc()->file);
+  if (m_ref) {
+    return ref(evalBody(fenv));
+  } else {
+    return evalBody(fenv);
+  }
+}
+
+Variant FunctionStatement::invokeClosure(CArrRef params) const {
+  FuncScopeVariableEnvironment fenv(this);
+  bindParams(fenv, params);
+
+  DECLARE_THREAD_INFO;
+  EvalFrameInjection *efi = NULL;
+  for (FrameInjection *fi = info->m_top; fi; fi= fi->getPrev()) {
+    efi = dynamic_cast<EvalFrameInjection*>(fi);
+    if (efi) break;
+  }
+  ASSERT(efi);
+  c_Closure *closure = (c_Closure *) efi->getEnv().getClosure();
+  const std::vector<ParameterPtr> &vars =
+    ((ClosureExpression *)m_closure)->getVars();
+  for (ArrayIter iter(closure->m_vars); iter; ++iter) {
+    int i = iter.first();
+    CVarRef var = iter.secondRef();
+    Parameter *param = vars[i].get(); 
+    if (param->isRef()) {
+      fenv.get(param->getName()) = ref(var);
+    } else {
+      fenv.get(param->getName()) = var;
+    }
   }
 
   EvalFrameInjection fi(empty_string, "{closure}", fenv, loc()->file);
@@ -378,8 +428,8 @@ LVariableTable *FunctionStatement::getStaticVars(VariableEnvironment &env)
   return &RequestEvalState::getFunctionStatics(this);
 }
 
-Variant FunctionStatement::invokeImpl(FuncScopeVariableEnvironment &fenv,
-                                      CArrRef params) const {
+void FunctionStatement::bindParams(FuncScopeVariableEnvironment &fenv,
+                                   CArrRef params) const {
   VariantStack &as = RequestEvalState::argStack();
 
   for (ArrayIter iter(params); !iter.end(); iter.next()) {
@@ -404,6 +454,11 @@ Variant FunctionStatement::invokeImpl(FuncScopeVariableEnvironment &fenv,
     }
     (*piter)->bindDefault(fenv);
   }
+}
+
+Variant FunctionStatement::invokeImpl(FuncScopeVariableEnvironment &fenv,
+                                      CArrRef params) const {
+  bindParams(fenv, params);
 
   if (m_ref) {
     return ref(evalBody(fenv));

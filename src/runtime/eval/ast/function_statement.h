@@ -87,6 +87,7 @@ public:
   Variant invokeClosure(CObjRef closure, VariableEnvironment &env,
                         const FunctionCallExpression *caller,
                         int start = 0) const;
+  Variant invokeClosure(CArrRef params) const;
   Variant invokeImpl(FuncScopeVariableEnvironment &fenv, CArrRef params) const;
   virtual LVariableTable *getStaticVars(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
@@ -105,6 +106,7 @@ public:
   void setHasReturn() { m_yieldCount = -1;}
   int addYield() { ASSERT(m_yieldCount >= 0); return ++m_yieldCount;}
   int getYieldCount() const { return m_yieldCount;}
+  void setClosure(void *closure) { m_closure = closure;}
 
   void setName(const std::string &name) { m_name = AtomicString(name);}
 
@@ -117,6 +119,7 @@ protected:
   bool m_hasCallToGetArgs;
   mutable char m_maybeIntercepted;
   int m_yieldCount;
+  void *m_closure;
 
   std::string m_docComment;
 
@@ -127,6 +130,7 @@ protected:
   Variant evalBody(VariableEnvironment &env) const;
   CallInfo m_callInfo;
 private:
+  void bindParams(FuncScopeVariableEnvironment &fenv, CArrRef params) const;
   static Variant Invoker(void *ms, CArrRef params);
   static Variant InvokerFewArgs(void *ms, int count, INVOKE_FEW_ARGS_IMPL_ARGS);
 };

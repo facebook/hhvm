@@ -84,7 +84,8 @@ public:
     return false;
   }
   bool isEscaping() const { return isBreaking() || m_returning; }
-
+  void *getClosure() { return m_closure;}
+  void setClosure(void *closure) { m_closure = closure;}
   bool isGotoing() const { return !m_label.empty();}
   bool isLimitedGoto() const { ASSERT(isGotoing()); return m_limitedGoto;}
   void setGoto(const std::string &label, bool limited) {
@@ -106,6 +107,7 @@ protected:
   const char* m_currentClass;
   int m_breakLevel;
   bool m_returning;
+  void *m_closure;
   std::string m_label;
   bool m_limitedGoto;
   Variant m_ret;

@@ -167,6 +167,16 @@ bool eval_get_call_info_hook(const CallInfo *&ci, void *&extra, const char *s,
   const Eval::Function *fs = Eval::RequestEvalState::findFunction(s);
   if (fs) {
     ci = fs->getCallInfo();
+    if (extra) {
+      DECLARE_THREAD_INFO;
+      EvalFrameInjection *efi = NULL;
+      for (FrameInjection *fi = info->m_top; fi; fi= fi->getPrev()) {
+        efi = dynamic_cast<EvalFrameInjection*>(fi);
+       if (efi) break;
+      }
+      ASSERT(efi);
+      efi->getEnv().setClosure(extra);
+    }
     extra = (void*)fs;
     return true;
   }

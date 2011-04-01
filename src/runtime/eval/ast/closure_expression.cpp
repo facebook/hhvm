@@ -26,7 +26,9 @@ using namespace std;
 ClosureExpression::ClosureExpression(EXPRESSION_ARGS,
                                      FunctionStatementPtr func,
                                      const vector<ParameterPtr> &vars)
-    : Expression(EXPRESSION_PASS), m_func(func), m_vars(vars) {}
+    : Expression(EXPRESSION_PASS), m_func(func), m_vars(vars) {
+  func->setClosure(this);
+}
 
 Variant ClosureExpression::eval(VariableEnvironment &env) const {
   m_func->eval(env);
@@ -35,9 +37,9 @@ Variant ClosureExpression::eval(VariableEnvironment &env) const {
     ParameterPtr param = m_vars[i];
     String name = param->getName();
     if (param->isRef()) {
-      vars.lvalAt(name) = ref(env.get(name));
+      vars.append(ref(env.get(name)));
     } else {
-      vars.set(name, env.get(name));
+      vars.append(env.get(name));
     }
   }
   return create_object("Closure", CREATE_VECTOR2(m_func->name(), vars));

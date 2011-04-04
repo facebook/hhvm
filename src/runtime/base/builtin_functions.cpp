@@ -994,14 +994,16 @@ struct IncludeImplInvokeContext {
 
 static bool include_impl_invoke_context(CStrRef file, void* ctx) {
   struct IncludeImplInvokeContext* context = (IncludeImplInvokeContext*)ctx;
+  bool invoked_file = false;
   try {
     context->returnValue = include_impl_invoke(file, context->once,
                                                context->variables,
                                                context->currentDir);
+    invoked_file = true;
   } catch (PhpFileDoesNotExistException& e) {
     context->returnValue = false;
   }
-  return bool(context->returnValue);
+  return invoked_file;
 }
 
 /**

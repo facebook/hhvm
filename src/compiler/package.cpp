@@ -33,6 +33,7 @@
 #include <util/exception.h>
 #include <util/preprocess.h>
 #include <util/job_queue.h>
+#include <runtime/base/execution_context.h>
 
 using namespace HPHP;
 using namespace std;
@@ -197,7 +198,9 @@ class ParserWorker :
 public:
   bool m_ret;
   ParserWorker() : m_ret(true) {}
-
+  virtual void onThreadExit() {
+    g_context.reset();
+  }
   virtual void doJob(JobType job) {
     bool ret;
     try {

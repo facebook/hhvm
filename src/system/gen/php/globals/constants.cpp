@@ -462,6 +462,7 @@ const int64 k_GRAPHEME_EXTR_MAXBYTES = 1LL;
 const int64 k_GRAPHEME_EXTR_MAXCHARS = 2LL;
 const int64 k_HASH_HMAC = 1LL;
 const StaticString k_HPHP_TRIM_CHARLIST(LITSTR_INIT(" \n\r\t\v\000"));
+const StaticString k_HPHP_VERSION(LITSTR_INIT("1.0.0"));
 const int64 k_HTML_ENTITIES = 1LL;
 const int64 k_HTML_SPECIALCHARS = 0LL;
 const StaticString k_ICONV_IMPL(LITSTR_INIT("glibc"));

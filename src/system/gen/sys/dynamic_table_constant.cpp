@@ -463,6 +463,7 @@ extern const int64 k_GRAPHEME_EXTR_MAXBYTES;
 extern const int64 k_GRAPHEME_EXTR_MAXCHARS;
 extern const int64 k_HASH_HMAC;
 extern const StaticString k_HPHP_TRIM_CHARLIST;
+extern const StaticString k_HPHP_VERSION;
 extern const int64 k_HTML_ENTITIES;
 extern const int64 k_HTML_SPECIALCHARS;
 extern const StaticString k_ICONV_IMPL;
@@ -2081,7 +2082,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2084];
+static hashNodeCon conBuckets[2085];
 
 void init_builtin_constant_table() {
   const char *conMapData[] = {
@@ -2576,6 +2577,7 @@ void init_builtin_constant_table() {
       (const char *)"GRAPHEME_EXTR_MAXCHARS", (const char *)-1, (const char *)32, (const char *)&k_GRAPHEME_EXTR_MAXCHARS,
       (const char *)"HASH_HMAC", (const char *)-1, (const char *)32, (const char *)&k_HASH_HMAC,
       (const char *)"HPHP_TRIM_CHARLIST", (const char *)-1, (const char *)128, (const char *)&k_HPHP_TRIM_CHARLIST,
+      (const char *)"HPHP_VERSION", (const char *)-1, (const char *)128, (const char *)&k_HPHP_VERSION,
       (const char *)"HTML_ENTITIES", (const char *)-1, (const char *)32, (const char *)&k_HTML_ENTITIES,
       (const char *)"HTML_SPECIALCHARS", (const char *)-1, (const char *)32, (const char *)&k_HTML_SPECIALCHARS,
       (const char *)"ICONV_IMPL", (const char *)-1, (const char *)128, (const char *)&k_ICONV_IMPL,

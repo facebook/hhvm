@@ -98,6 +98,7 @@ $constants['GLOBAL_SYMBOL_REDECLARED_CLASS'] = 6;
 
 // extra constants
 $constants['PHP_VERSION'] = '5.3.3.hiphop';
+$constants['HPHP_VERSION'] = '1.0.0';
 $constants['CLOCK_REALTIME'] = 0;
 $constants['CLOCK_MONOTONIC'] = 1;
 $constants['CLOCK_PROCESS_CPUTIME_ID'] = 2;

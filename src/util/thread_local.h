@@ -103,7 +103,7 @@ template<typename T>
 struct ThreadLocal {
   T *get() const {
     if (m_node.m_p == NULL) {
-      const_cast<ThreadLocal<T>*>(this)->createKey();
+      const_cast<ThreadLocal<T>*>(this)->create();
     }
     return m_node.m_p;
   }
@@ -113,7 +113,7 @@ struct ThreadLocal {
     return m_node.m_p;
   }
 
-  void createKey() __attribute__((noinline));
+  void create() __attribute__((noinline));
 
   bool isNull() const { return m_node.m_p == NULL; }
 
@@ -140,15 +140,14 @@ struct ThreadLocal {
 };
 
 template<typename T>
-void ThreadLocal<T>::createKey() {
+void ThreadLocal<T>::create() {
   if (m_node.m_on_thread_exit_fn == NULL) {
     m_node.m_on_thread_exit_fn = ThreadLocal<T>::OnThreadExit;
     m_node.m_next = ThreadLocalManager::s_manager.getTop();
     ThreadLocalManager::s_manager.setTop((void*)(&m_node));
   }
-  if (m_node.m_p == NULL) {
-    m_node.m_p = new T();
-  }
+  ASSERT(m_node.m_p == NULL);
+  m_node.m_p = new T();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -162,7 +161,7 @@ public:
   static T *get() {
     T *& p = s_singleton;
     if (p == NULL) {
-      createKey(p);
+      create(p);
     }
     return p;
   }
@@ -173,7 +172,7 @@ public:
     return p;
   }
 
-  static void createKey(T *& p) __attribute__((noinline));
+  static void create(T *& p) __attribute__((noinline));
 
   static bool isNull() { return s_singleton == NULL; }
 
@@ -211,7 +210,7 @@ private:
 };
 
 template<typename T>
-void ThreadLocalSingleton<T>::createKey(T *& p) {
+void ThreadLocalSingleton<T>::create(T *& p) {
   p = T::Create();
   pthread_setspecific(s_key, p);
 }

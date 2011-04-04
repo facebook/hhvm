@@ -44,7 +44,7 @@ template<typename T>
 struct RequestLocal {
   T *get() const {
     if (m_node.m_p == NULL) {
-      const_cast<RequestLocal<T>*>(this)->createKey();
+      const_cast<RequestLocal<T>*>(this)->create();
     }
     if (!m_node.m_p->getInited()) {
       m_node.m_p->setInited(true);
@@ -55,7 +55,7 @@ struct RequestLocal {
     return m_node.m_p;
   }
 
-  void createKey() __attribute__((noinline));
+  void create() __attribute__((noinline));
 
   void reset() {
     delete m_node.m_p;
@@ -80,15 +80,14 @@ struct RequestLocal {
 };
 
 template<typename T>
-void RequestLocal<T>::createKey() {
+void RequestLocal<T>::create() {
   if (m_node.m_on_thread_exit_fn == NULL) {
     m_node.m_on_thread_exit_fn = RequestLocal<T>::OnThreadExit;
     m_node.m_next = ThreadLocalManager::s_manager.getTop();
     ThreadLocalManager::s_manager.setTop((void*)(&m_node));
   }
-  if (m_node.m_p == NULL) {
-    m_node.m_p = new T();
-  }
+  ASSERT(m_node.m_p == NULL);
+  m_node.m_p = new T();
 }
 
 #define IMPLEMENT_REQUEST_LOCAL(T,f) \

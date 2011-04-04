@@ -970,10 +970,11 @@ class Variant {
  private:
   bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }
   bool isObjectConvertable() {
-    return isNull() ||
-           (is(KindOfBoolean) && !toBoolean()) ||
-           (is(KindOfString) && getStringData()->empty()) ||
-           (is(KindOfStaticString) && getStringData()->empty());
+    ASSERT(m_type != KindOfVariant);
+    return m_type <= KindOfNull ||
+      (m_type == KindOfBoolean && !m_data.num) ||
+      ((m_type == KindOfString || m_type == KindOfStaticString) &&
+       m_data.pstr->empty());
   }
 
   void removeImpl(double key);
@@ -1131,7 +1132,7 @@ class Variant {
   void split();  // breaking weak binding by making a real copy
 
   template<typename T>
-  Variant &lvalAtImpl(const T &key, ACCESSPARAMS_DECL);
+  Variant &lvalAtImpl(T key, ACCESSPARAMS_DECL);
 
   template<typename T>
   Variant refvalAtImpl(const T &key) {

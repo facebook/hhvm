@@ -87,7 +87,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
 
   if (!same(content, false)) {
     String scontent = content.toString();
-    xmlDocPtr ret = soap_xmlParseMemory(scontent.data(), scontent.size());
+    xmlDocPtr ret = soap_xmlParseMemory(scontent.data(), scontent.size(), false);
     if (ret) {
       ret->URL = xmlCharStrdup(filename);
     }
@@ -96,7 +96,8 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
   return NULL;
 }
 
-xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size) {
+xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size,
+                              bool skip_clean /*= true */) {
   xmlParserCtxtPtr ctxt = NULL;
   xmlDocPtr ret;
 
@@ -131,7 +132,7 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size) {
   xmlCleanupParser();
 */
 
-  if (ret) {
+  if (!skip_clean && ret) {
     cleanup_xml_node((xmlNodePtr)ret);
   }
   return ret;

@@ -3432,10 +3432,10 @@ void c_ReflectionClass::t___construct(Variant v_name) {
       {
         bool tmp0;
         {
-          bool tmp1((toBoolean(x_call_user_func(2, NAMSTR(s_sys_ssb7ae555d, "class_exists"), Array(ArrayInit(1, true).setRef(v_name).create())))));
+          bool tmp1((toBoolean(x_call_user_func(2, VarNR(NAMSTR(s_sys_ssb7ae555d, "class_exists")), Array(ArrayInit(1, true).setRef(v_name).create())))));
           bool tmp2 = (!(tmp1));
           if (tmp2) {
-            bool tmp3((toBoolean(x_call_user_func(2, NAMSTR(s_sys_ss5f48f4d6, "interface_exists"), Array(ArrayInit(1, true).setRef(v_name).create())))));
+            bool tmp3((toBoolean(x_call_user_func(2, VarNR(NAMSTR(s_sys_ss5f48f4d6, "interface_exists")), Array(ArrayInit(1, true).setRef(v_name).create())))));
             tmp2 = (!(tmp3));
           }
           tmp0 = (tmp2);
@@ -3468,7 +3468,7 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
   if (!(toBoolean(m_info))) {
     {
       {
-        const Variant &tmp0((x_call_user_func(2, NAMSTR(s_sys_ss7732a9a6, "hphp_get_class_info"), Array(ArrayInit(1, true).setRef(m_name).create()))));
+        const Variant &tmp0((x_call_user_func(2, VarNR(NAMSTR(s_sys_ss7732a9a6, "hphp_get_class_info")), Array(ArrayInit(1, true).setRef(m_name).create()))));
         m_info = tmp0;
       }
       if (empty(m_info)) {
@@ -3493,7 +3493,7 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
               v_p = tmp0;
             }
             {
-              const Variant &tmp0((v_p->t_fetch(NAMSTR(s_sys_ss5b229ad5, "methods"))));
+              const Variant &tmp0((v_p->t_fetch(VarNR(NAMSTR(s_sys_ss5b229ad5, "methods")))));
               m_info.setOpEqual(277, NAMSTR(s_sys_ss5b229ad5, "methods"), (tmp0), true);
             }
             {
@@ -3523,7 +3523,7 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
             }
           }
           {
-            const Variant &tmp0((v_p->t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"))));
+            const Variant &tmp0((v_p->t_fetch(VarNR(NAMSTR(s_sys_sscfb8e254, "interfaces")))));
             m_info.setOpEqual(277, NAMSTR(s_sys_sscfb8e254, "interfaces"), (tmp0), true);
           }
           {
@@ -3587,20 +3587,20 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 628 */
 Variant c_ReflectionClass::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getName);
-  return t_fetch(NAMSTR(s_sys_ssdc3cbddc, "name"));
+  return t_fetch(VarNR(NAMSTR(s_sys_ssdc3cbddc, "name")));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 642 */
 Variant c_ReflectionClass::t_isinternal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInternal);
-  return t_fetch(NAMSTR(s_sys_ss9332a8ac, "internal"));
+  return t_fetch(VarNR(NAMSTR(s_sys_ss9332a8ac, "internal")));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 655 */
 bool c_ReflectionClass::t_isuserdefined() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isUserDefined);
   {
-    bool tmp0((toBoolean(t_fetch(NAMSTR(s_sys_ss9332a8ac, "internal")))));
+    bool tmp0((toBoolean(t_fetch(VarNR(NAMSTR(s_sys_ss9332a8ac, "internal"))))));
     return !(tmp0);
   }
 }
@@ -3609,7 +3609,7 @@ namespace hphp_impl_splitter {}
 bool c_ReflectionClass::t_isinstantiable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInstantiable);
   {
-    bool tmp0((toBoolean(t_fetch(NAMSTR(s_sys_ss12c8a8a6, "abstract")))));
+    bool tmp0((toBoolean(t_fetch(VarNR(NAMSTR(s_sys_ss12c8a8a6, "abstract"))))));
     return !(tmp0);
   }
 }
@@ -3617,7 +3617,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 684 */
 bool c_ReflectionClass::t_hasconstant(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::hasConstant);
-  return t_test(NAMSTR(s_sys_ss623ae369, "constants"), v_name);
+  return t_test(VarNR(NAMSTR(s_sys_ss623ae369, "constants")), v_name);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 698 */
@@ -3625,38 +3625,38 @@ bool c_ReflectionClass::t_hasmethod(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::hasMethod);
   {
     const String &tmp0((x_strtolower(toString(v_name))));
-    return t_test(NAMSTR(s_sys_ss5b229ad5, "methods"), VarNR(tmp0));
+    return t_test(VarNR(NAMSTR(s_sys_ss5b229ad5, "methods")), VarNR(tmp0));
   }
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 713 */
 bool c_ReflectionClass::t_hasproperty(CVarRef v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::hasProperty);
-  return t_test(NAMSTR(s_sys_ss90269404, "properties"), v_name);
+  return t_test(VarNR(NAMSTR(s_sys_ss90269404, "properties")), v_name);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 728 */
 Variant c_ReflectionClass::t_getfilename() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getFileName);
-  return t_fetch(NAMSTR(s_sys_ss8ce7db5b, "file"));
+  return t_fetch(VarNR(NAMSTR(s_sys_ss8ce7db5b, "file")));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 742 */
 Variant c_ReflectionClass::t_getstartline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getStartLine);
-  return t_fetch(NAMSTR(s_sys_ssd4c67725, "line1"));
+  return t_fetch(VarNR(NAMSTR(s_sys_ssd4c67725, "line1")));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 755 */
 Variant c_ReflectionClass::t_getendline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getEndLine);
-  return t_fetch(NAMSTR(s_sys_ssbefe32a8, "line2"));
+  return t_fetch(VarNR(NAMSTR(s_sys_ssbefe32a8, "line2")));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 769 */
 Variant c_ReflectionClass::t_getdoccomment() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getDocComment);
-  return t_fetch(NAMSTR(s_sys_ss9cfa17a6, "doc"));
+  return t_fetch(VarNR(NAMSTR(s_sys_ss9cfa17a6, "doc")));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 783 */
@@ -3664,15 +3664,15 @@ Variant c_ReflectionClass::t_getconstructor() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getConstructor);
   Variant v_name;
 
-  if (t_hasmethod(NAMSTR(s_sys_ssa1b87da7, "__construct"))) {
+  if (t_hasmethod(VarNR(NAMSTR(s_sys_ssa1b87da7, "__construct")))) {
     {
-      return t_getmethod(NAMSTR(s_sys_ssa1b87da7, "__construct"));
+      return t_getmethod(VarNR(NAMSTR(s_sys_ssa1b87da7, "__construct")));
     }
   }
   {
     bool tmp0;
     {
-      const Variant &tmp1((t_fetch(NAMSTR(s_sys_ssdc3cbddc, "name"))));
+      const Variant &tmp1((t_fetch(VarNR(NAMSTR(s_sys_ssdc3cbddc, "name")))));
       tmp0 = (t_hasmethod((v_name = tmp1)));
     }
     if (tmp0) {
@@ -3697,7 +3697,7 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
     v_lname = tmp0;
   }
   {
-    const Variant &tmp0((t_fetch(NAMSTR(s_sys_ss5b229ad5, "methods"))));
+    const Variant &tmp0((t_fetch(VarNR(NAMSTR(s_sys_ss5b229ad5, "methods")))));
     v_methods = tmp0;
   }
   if (!(isset(v_methods, v_lname))) {
@@ -3733,7 +3733,7 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
         bool tmp2((toBoolean(x_strcasecmp(v_lname, toString(v_ret->m_class)))));
         bool tmp3 = (!(tmp2));
         if (tmp3) {
-          bool tmp4((t_hasmethod(NAMSTR(s_sys_ssa1b87da7, "__construct"))));
+          bool tmp4((t_hasmethod(VarNR(NAMSTR(s_sys_ssa1b87da7, "__construct")))));
           tmp3 = (!(tmp4));
         }
         tmp1 = (tmp3);
@@ -3761,7 +3761,7 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = 65535LL
 
   v_ret = s_sys_sa00000000;
   {
-    const Variant &tmp0((t_fetch(NAMSTR(s_sys_ss5b229ad5, "methods"))));
+    const Variant &tmp0((t_fetch(VarNR(NAMSTR(s_sys_ss5b229ad5, "methods")))));
     v_methods = tmp0;
   }
   {
@@ -3794,7 +3794,7 @@ p_ReflectionProperty c_ReflectionClass::t_getproperty(CVarRef v_name) {
   p_ReflectionProperty v_ret;
 
   {
-    const Variant &tmp0((t_fetch(NAMSTR(s_sys_ss90269404, "properties"))));
+    const Variant &tmp0((t_fetch(VarNR(NAMSTR(s_sys_ss90269404, "properties")))));
     v_properties = tmp0;
   }
   if (!(isset(v_properties, v_name))) {
@@ -3837,7 +3837,7 @@ Array c_ReflectionClass::t_getproperties(CVarRef v_filter //  = 65535LL
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMSTR(s_sys_ss90269404, "properties"));
+    Variant map2 = t_fetch(VarNR(NAMSTR(s_sys_ss90269404, "properties")));
     for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
@@ -3861,7 +3861,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 916 */
 Variant c_ReflectionClass::t_getconstants() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getConstants);
-  return t_fetch(NAMSTR(s_sys_ss623ae369, "constants"));
+  return t_fetch(VarNR(NAMSTR(s_sys_ss623ae369, "constants")));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 930 */
@@ -3871,7 +3871,7 @@ Variant c_ReflectionClass::t_getconstant(CVarRef v_name) {
   Variant v_class;
 
   {
-    const Variant &tmp0((t_fetch(NAMSTR(s_sys_ss623ae369, "constants"))));
+    const Variant &tmp0((t_fetch(VarNR(NAMSTR(s_sys_ss623ae369, "constants")))));
     v_constants = tmp0;
   }
   if (!(isset(v_constants, v_name))) {
@@ -3900,7 +3900,7 @@ Array c_ReflectionClass::t_getinterfaces() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"));
+    Variant map2 = t_fetch(VarNR(NAMSTR(s_sys_sscfb8e254, "interfaces")));
     for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
@@ -3936,7 +3936,7 @@ Array c_ReflectionClass::t_getinterfacenames() {
   v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"));
+    Variant map2 = t_fetch(VarNR(NAMSTR(s_sys_sscfb8e254, "interfaces")));
     for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
@@ -3964,25 +3964,25 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 992 */
 Variant c_ReflectionClass::t_isinterface() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isInterface);
-  return t_fetch(NAMSTR(s_sys_ss7228e959, "interface"));
+  return t_fetch(VarNR(NAMSTR(s_sys_ss7228e959, "interface")));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1004 */
 Variant c_ReflectionClass::t_isabstract() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isAbstract);
-  return t_fetch(NAMSTR(s_sys_ss12c8a8a6, "abstract"));
+  return t_fetch(VarNR(NAMSTR(s_sys_ss12c8a8a6, "abstract")));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1016 */
 Variant c_ReflectionClass::t_isfinal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isFinal);
-  return t_fetch(NAMSTR(s_sys_ss2145036e, "final"));
+  return t_fetch(VarNR(NAMSTR(s_sys_ss2145036e, "final")));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1029 */
 Variant c_ReflectionClass::t_getmodifiers() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getModifiers);
-  return t_fetch(NAMSTR(s_sys_ss9f244c80, "modifiers"));
+  return t_fetch(VarNR(NAMSTR(s_sys_ss9f244c80, "modifiers")));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1043 */
@@ -4019,7 +4019,7 @@ Variant c_ReflectionClass::t_getparentclass() {
   {
     bool tmp0;
     {
-      const Variant &tmp1((t_fetch(NAMSTR(s_sys_ssfb10fd8c, "parent"))));
+      const Variant &tmp1((t_fetch(VarNR(NAMSTR(s_sys_ssfb10fd8c, "parent")))));
       tmp0 = (empty(tmp1));
     }
     if (tmp0) {
@@ -4030,7 +4030,7 @@ Variant c_ReflectionClass::t_getparentclass() {
   }
   {
     p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
-    const Variant &tmp1((t_fetch(NAMSTR(s_sys_ssfb10fd8c, "parent"))));
+    const Variant &tmp1((t_fetch(VarNR(NAMSTR(s_sys_ssfb10fd8c, "parent")))));
     return (tmp0->create(tmp1), tmp0);
   }
 }
@@ -4048,14 +4048,14 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
         CVarRef obj0 = v_cls;
         mcp0.methodCall((obj0), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
         const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
-        Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, NAMSTR(s_sys_ssdc3cbddc, "name"))));
+        Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, VarNR(NAMSTR(s_sys_ssdc3cbddc, "name")))));
         v_cls = tmp1;
       }
     }
   }
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"));
+    Variant map2 = t_fetch(VarNR(NAMSTR(s_sys_sscfb8e254, "interfaces")));
     for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
@@ -4079,7 +4079,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   {
     bool tmp0;
     {
-      const Variant &tmp1((t_fetch(NAMSTR(s_sys_ssfb10fd8c, "parent"))));
+      const Variant &tmp1((t_fetch(VarNR(NAMSTR(s_sys_ssfb10fd8c, "parent")))));
       tmp0 = (empty(tmp1));
     }
     if (tmp0) {
@@ -4092,7 +4092,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
     bool tmp0;
     {
       const String &tmp1((toString(v_cls)));
-      const String &tmp2((toString(t_fetch(NAMSTR(s_sys_ssfb10fd8c, "parent")))));
+      const String &tmp2((toString(t_fetch(VarNR(NAMSTR(s_sys_ssfb10fd8c, "parent"))))));
       int tmp3((x_strcasecmp(tmp1, tmp2)));
       tmp0 = (equal(tmp3, 0LL));
     }
@@ -4236,7 +4236,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
         CVarRef obj0 = v_cls;
         mcp0.methodCall((obj0), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
         const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
-        Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, NAMSTR(s_sys_ssdc3cbddc, "name"))));
+        Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, VarNR(NAMSTR(s_sys_ssdc3cbddc, "name")))));
         v_cls = tmp1;
       }
     }
@@ -4263,7 +4263,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   }
   {
     LOOP_COUNTER(1);
-    Variant map2 = t_fetch(NAMSTR(s_sys_sscfb8e254, "interfaces"));
+    Variant map2 = t_fetch(VarNR(NAMSTR(s_sys_sscfb8e254, "interfaces")));
     for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
@@ -4290,7 +4290,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1251 */
 Variant c_ReflectionClass::t_getextension() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtension);
-  return t_fetch(NAMSTR(s_sys_sse9bf4500, "extension"));
+  return t_fetch(VarNR(NAMSTR(s_sys_sse9bf4500, "extension")));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 1265 */
@@ -4298,7 +4298,7 @@ Variant c_ReflectionClass::t_getextensionname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtensionName);
   {
     MethodCallPackage mcp0;
-    CVarRef obj0 = t_fetch(NAMSTR(s_sys_sse9bf4500, "extension"));
+    CVarRef obj0 = t_fetch(VarNR(NAMSTR(s_sys_sse9bf4500, "extension")));
     mcp0.methodCall((obj0), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
     const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
     return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
@@ -8937,13 +8937,13 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 182 */
 bool c_ReflectionParameter::t_isoptional() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isOptional);
-  return x_array_key_exists(NAMSTR(s_sys_ss570270cc, "default"), m_info);
+  return x_array_key_exists(VarNR(NAMSTR(s_sys_ss570270cc, "default")), m_info);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 197 */
 bool c_ReflectionParameter::t_isdefaultvalueavailable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::isDefaultValueAvailable);
-  return x_array_key_exists(NAMSTR(s_sys_ss570270cc, "default"), m_info);
+  return x_array_key_exists(VarNR(NAMSTR(s_sys_ss570270cc, "default")), m_info);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/reflection.php line 212 */

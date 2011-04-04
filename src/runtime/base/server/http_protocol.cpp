@@ -200,6 +200,11 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   }
   if (hostName.empty() || RuntimeOption::ForceServerNameToHeader) {
     hostName = hostHeader;
+    // _SERVER['SERVER_NAME'] shouldn't contain the port number
+    int colonPos = hostName.find(':');
+    if (colonPos != String::npos) {
+      hostName = hostName.substr(0, colonPos);
+    }
   }
 
   // APE sets CONTENT_TYPE and CONTENT_LENGTH without HTTP_
@@ -229,8 +234,15 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   server.set("REQUEST_URI", String(transport->getUrl(), CopyString));
   server.set("SCRIPT_URL", r.originalURL());
   String prefix(transport->isSSL() ? "https://" : "http://");
+  String port_suffix("");
+
+  // Need to append port
+  if (!transport->isSSL() && RuntimeOption::ServerPort != 80) {
+    port_suffix = ":" + RuntimeOption::ServerPort;
+  }
   server.set("SCRIPT_URI", String(prefix +
-                                  (hostHeader.empty() ? hostName : hostHeader)
+                                  (hostHeader.empty() ?
+                                    hostName + port_suffix : hostHeader)
                                   + r.originalURL()));
 
   if (r.rewritten()) {

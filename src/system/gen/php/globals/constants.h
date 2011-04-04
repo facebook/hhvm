@@ -465,6 +465,7 @@ extern const int64 k_GRAPHEME_EXTR_MAXBYTES;
 extern const int64 k_GRAPHEME_EXTR_MAXCHARS;
 extern const int64 k_HASH_HMAC;
 extern const StaticString k_HPHP_TRIM_CHARLIST;
+extern const StaticString k_HPHP_VERSION;
 extern const int64 k_HTML_ENTITIES;
 extern const int64 k_HTML_SPECIALCHARS;
 extern const StaticString k_ICONV_IMPL;

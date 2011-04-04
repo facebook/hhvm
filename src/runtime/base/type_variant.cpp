@@ -51,7 +51,6 @@ static StaticString s_1("1");
 // local helpers
 
 static int64 ToKey(bool i) { return (int64)i; }
-static int64 ToKey(int i) { return (int64)i; }
 static int64 ToKey(int64 i) { return i; }
 static int64 ToKey(double d) { return (int64)d; }
 static VarNR ToKey(CStrRef s) { return s.toKey(); }
@@ -2298,26 +2297,66 @@ CVarRef Variant::rvalRef(CVarRef offset, CVarRef tmp, ACCESSPARAMS_IMPL) const {
   return rvalRefHelper(offset, tmp, flags);
 }
 
+template <typename T>
+class LvalHelper {};
+
+template<>
+class LvalHelper<int64> {
+public:
+  typedef int64 KeyType;
+  static bool CheckKey(KeyType k) { return true; };
+  static const bool CheckParams = false;
+};
+
+template<>
+class LvalHelper<CStrRef> {
+public:
+  typedef VarNR KeyType;
+  static bool CheckKey(const KeyType &k) { return true; };
+  static const bool CheckParams = true;
+};
+
+template<>
+class LvalHelper<CVarRef> {
+public:
+  typedef VarNR KeyType;
+  static bool CheckKey(const KeyType &k) { return !k.isNull(); };
+  static const bool CheckParams = true;
+};
+
+
 template<typename T>
-Variant& Variant::lvalAtImpl(const T &key, ACCESSPARAMS_IMPL)  {
-  if (m_type == KindOfVariant) {
-    return m_data.pvar->lvalAtImpl(key, flags);
-  }
-  if (isObjectConvertable()) {
-    unset();
-    set(toArray());
-  }
+Variant& Variant::lvalAtImpl(T key, ACCESSPARAMS_IMPL) {
   if (m_type == KindOfArray) {
     Variant *ret = NULL;
     ArrayData *arr = m_data.parr;
-    ArrayData *escalated =
-      arr->lval(ToKey(key), ret, arr->getCount() > 1,
-                flags & AccessFlags::CheckExist);
+    ArrayData *escalated;
+    if (LvalHelper<T>::CheckParams && flags & AccessFlags::Key) {
+      escalated = arr->lval(key, ret, arr->getCount() > 1,
+                            flags & AccessFlags::CheckExist);
+    } else {
+      typename LvalHelper<T>::KeyType k(ToKey(key));
+      if (LvalHelper<T>::CheckKey(k)) {
+        escalated =
+          arr->lval(k, ret, arr->getCount() > 1,
+                    flags & AccessFlags::CheckExist);
+      } else {
+        ret = &lvalBlackHole();
+        escalated = 0;
+      }
+    }
     if (escalated) {
       set(escalated);
     }
     ASSERT(ret);
     return *ret;
+  }
+  if (m_type == KindOfVariant) {
+    return m_data.pvar->lvalAtImpl<T>(key, flags);
+  }
+  if (isObjectConvertable()) {
+    set(Array::Create());
+    return lvalAtImpl<T>(key, flags);
   }
   if (m_type == KindOfObject) {
     return getArrayAccess()->___offsetget_lval(key);
@@ -2326,65 +2365,26 @@ Variant& Variant::lvalAtImpl(const T &key, ACCESSPARAMS_IMPL)  {
 }
 
 Variant &Variant::lvalAt(bool    key, ACCESSPARAMS_IMPL) {
-  return lvalAtImpl(key, flags);
+  return lvalAt((int64)key, flags);
 }
 Variant &Variant::lvalAt(int     key, ACCESSPARAMS_IMPL) {
-  return lvalAtImpl(key, flags);
+  return lvalAt((int64)key, flags);
 }
 Variant &Variant::lvalAt(int64   key, ACCESSPARAMS_IMPL) {
-  if (m_type == KindOfArray) {
-    Variant *ret = NULL;
-    ArrayData *arr = m_data.parr;
-    ArrayData *escalated =
-      arr->lval(key, ret, arr->getCount() > 1, flags);
-    if (escalated) {
-      set(escalated);
-    }
-    ASSERT(ret);
-    return *ret;
-  }
   return lvalAtImpl(key, flags);
 }
 Variant &Variant::lvalAt(double  key, ACCESSPARAMS_IMPL) {
-  return lvalAtImpl((int64)key, flags);
+  return lvalAt((int64)key, flags);
 }
 Variant &Variant::lvalAt(litstr  ckey, ACCESSPARAMS_IMPL) {
   String key(ckey);
   return lvalAt(key, flags);
 }
 Variant &Variant::lvalAt(CStrRef key, ACCESSPARAMS_IMPL) {
-  if (m_type == KindOfArray) {
-    Variant *ret = NULL;
-    ArrayData *arr = m_data.parr;
-    ArrayData *escalated;
-    if (flags & AccessFlags::Key) {
-      escalated = arr->lval(key, ret, arr->getCount() > 1,
-                            flags & AccessFlags::CheckExist);
-    } else {
-      escalated = arr->lval(key.toKey(), ret, arr->getCount() > 1,
-                            flags & AccessFlags::CheckExist);
-    }
-    if (escalated) {
-      set(escalated);
-    }
-    ASSERT(ret);
-    return *ret;
-  }
-  return lvalAtImpl(key, flags);
+  return Variant::lvalAtImpl<CStrRef>(key, flags);
 }
 Variant &Variant::lvalAt(CVarRef k, ACCESSPARAMS_IMPL) {
-  if (m_type == KindOfArray) {
-    Variant *ret = NULL;
-    ArrayData *arr = m_data.parr;
-    ArrayData *escalated = arr->lval(k.toKey(), ret, arr->getCount() > 1,
-                                     flags & AccessFlags::CheckExist);
-    if (escalated) {
-      set(escalated);
-    }
-    ASSERT(ret);
-    return *ret;
-  }
-  return lvalAtImpl(k, flags);
+  return Variant::lvalAtImpl<CVarRef>(k, flags);
 }
 
 Variant *Variant::lvalPtr(CStrRef key, bool forWrite, bool create) {
@@ -2518,10 +2518,7 @@ Variant Variant::argvalAtImpl(bool byRef, CStrRef key,
   if (m_type == KindOfVariant) {
     return m_data.pvar->argvalAtImpl(byRef, key, isString);
   }
-  if (byRef && (is(KindOfArray) || isNull() ||
-        (is(KindOfBoolean) && !toBoolean()) ||
-        (is(KindOfStaticString) && getStringData()->empty()) ||
-        (is(KindOfString) && getStringData()->empty()))) {
+  if (byRef && (is(KindOfArray) || isObjectConvertable())) {
     return ref(lvalAt(key, AccessFlags::IsKey(isString)));
   } else {
     return rvalAt(key, AccessFlags::IsKey(isString));
@@ -2980,7 +2977,7 @@ CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
 
 CVarRef Variant::set(CVarRef key, CVarRef v) {
   if (m_type == KindOfArray) {
-    Variant k(ToKey(key));
+    VarNR k(ToKey(key));
     if (k.isNull()) return lvalBlackHole();
     ArrayData *escalated = m_data.parr->set(k, v, needCopyForSet(v));
     if (escalated) {
@@ -2997,7 +2994,7 @@ CVarRef Variant::set(CVarRef key, CVarRef v) {
     /* Fall through */
   case KindOfUninit:
   case KindOfNull: {
-    Variant k(ToKey(key));
+    VarNR k(ToKey(key));
     if (k.isNull()) return lvalBlackHole();
     set(ArrayData::Create(k, v));
     break;
@@ -3008,7 +3005,7 @@ CVarRef Variant::set(CVarRef key, CVarRef v) {
   case KindOfString: {
     StringData *s = getStringData();
     if (s->empty()) {
-      Variant k(ToKey(key));
+      VarNR k(ToKey(key));
       if (k.isNull()) return lvalBlackHole();
       set(Array::Create(k, v));
     } else {
@@ -3111,7 +3108,7 @@ check_array:
   if (m_type == KindOfArray) {
     Variant *cv = NULL;
     ASSERT(!v.isContagious());
-    Variant k(ToKey(key));
+    VarNR k(ToKey(key));
     if (k.isNull()) return lvalBlackHole();
     ArrayData *escalated =
       m_data.parr->lval(k, cv, (m_data.parr->getCount() > 1));
@@ -3131,7 +3128,7 @@ check_array:
     /* Fall through */
   case KindOfUninit:
   case KindOfNull: {
-    Variant k(ToKey(key));
+    VarNR k(ToKey(key));
     if (k.isNull()) return lvalBlackHole();
     set(ArrayData::Create(k, null));
     goto check_array;
@@ -3142,7 +3139,7 @@ check_array:
   case KindOfString: {
     String s = toString();
     if (s.empty()) {
-      Variant k(ToKey(key));
+      VarNR k(ToKey(key));
       if (k.isNull()) return lvalBlackHole();
       set(ArrayData::Create(k, null));
       goto check_array;

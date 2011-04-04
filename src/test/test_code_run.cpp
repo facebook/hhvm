@@ -2139,6 +2139,12 @@ bool TestCodeRun::TestArrayOffset() {
        "$attr[b::$s]='mno';"
        "var_dump($attr);");
 
+  MVCR("<?php "
+       "function foo(&$a) {}"
+       "foo($a[array()]);"
+       "foo($a[new StdClass]);"
+       "var_dump($a);");
+
  MVCRO("<?php\n"
        "function f(&$elem) {\n"
        "$elem = 44;\n"

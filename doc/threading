@@ -56,6 +56,11 @@ please read on for call_user_func_async() series.
 
 3. call_user_func_async() and call_user_func_array_async()
 
+<b>Note: This functionality is currently experimental. It has a history
+of exposing deadlocks and memory corruption in HPHP. Prefer one of the
+more mature request-based forms of concurrency delineated above where
+possible.</b>
+
 "Fork" program into 2 or more threads at any time point of the execution from
 the same set of global states, then "join" when thread finishes its execution.
 

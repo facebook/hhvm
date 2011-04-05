@@ -783,19 +783,8 @@ Variant ArrayUtil::Map(CArrRef inputs, PFUNC_MAP map_function,
 Variant ArrayUtil::Reduce(CArrRef input, PFUNC_REDUCE reduce_function,
                           const void *data,
                           CVarRef initial /* = null_variant */) {
-  if (input.empty()) {
-    return initial;
-  }
-
-  ArrayIter iter(input);
-  Variant result;
-  if (initial.isNull()) {
-    result = iter.secondRef();
-  } else {
-    result = initial;
-  }
-
-  for (++iter; iter; ++iter) {
+  Variant result(initial);
+  for (ArrayIter iter(input); iter; ++iter) {
     result = reduce_function(result, iter.second(), data);
   }
   return result;

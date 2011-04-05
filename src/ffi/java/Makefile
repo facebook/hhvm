@@ -2,9 +2,9 @@ PROJECT_ROOT = ../../..
 
 PROJECT_NAME = hphp_java
 
-SRC = $(shell echo `find hphp -name '*.java'`)
+SRC := $(shell find hphp -name '*.java')
 
-CLS = $(shell echo $(patsubst %.java, %.class, $(SRC)) \
+CLS := $(shell echo $(patsubst %.java, %.class, $(SRC)) \
         | sed -e "s/hphp/classes\/hphp/g")
 
 HEADER = hphp_ffi_java.h
@@ -34,9 +34,9 @@ $(CLS) : $(SRC)
 	$(V)mkdir -p classes
 	$(V)$(JAVA_PATH)/bin/javac -sourcepath . -d classes $^
 
-${HEADER} : ${CLS}
-	$(V)$(JAVA_PATH)/bin/javah -classpath classes -o ${HEADER} \
-  `echo ${CLS} | sed -e 's/classes\///g' -e 's/\.class//g' -e 's/\//\./g'`
+$(HEADER) : $(CLS)
+	$(V)$(JAVA_PATH)/bin/javah -classpath classes -o $(HEADER) \
+  `echo $(CLS) | sed -e 's/classes\///g' -e 's/\.class//g' -e 's/\//\./g'`
 
 clobber : clean
 	$(V)rm -rf $(SHARED_LIB) classes $(HEADER)

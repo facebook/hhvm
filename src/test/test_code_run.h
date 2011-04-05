@@ -188,6 +188,7 @@ class TestCodeRun : public TestBase {
 
   // HipHop specific
   bool TestYield();
+  bool TestHint();
 
   // debugging purpose
   bool TestAdHoc();

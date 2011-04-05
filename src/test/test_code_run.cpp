@@ -512,6 +512,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
 
   // HipHop features
   RUN_TEST(TestYield);
+  RUN_TEST(TestHint);
 
   RUN_TEST(TestAdHoc);
   return ret;
@@ -16859,6 +16860,24 @@ bool TestCodeRun::TestYield() {
         "int(1)\n"
         "int(2)\n"
         "int(4)\n");
+
+  return true;
+}
+
+bool TestCodeRun::TestHint() {
+  Option::EnableHipHopSyntax = true;
+
+  MVCRO("<?php\n"
+        "function f1(int $i = 1) { var_dump($i); }\n"
+        "function f2(double $d = 5.5) { var_dump($d); }\n"
+        "function f3(bool $b = true) { var_dump($b); }\n"
+        "function f4(string $s = 'hello') { var_dump($s); }\n"
+        "f1(); f2(); f3(); f4();\n",
+
+        "int(1)\n"
+        "float(5.5)\n"
+        "bool(true)\n"
+        "string(5) \"hello\"\n");
 
   return true;
 }

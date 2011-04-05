@@ -50,6 +50,7 @@ RequestURI::RequestURI(const VirtualHost *vhost, Transport *transport,
       }
     }
     transport->sendString("Not Found", 404);
+    transport->onSendEnd();
     m_done = true;
   }
 }

@@ -1039,7 +1039,7 @@ Variant f_curl_multi_close(CObjRef mh) {
 ///////////////////////////////////////////////////////////////////////////////
 // evhttp functions
 
-class LibEventHttpHandle : public ResourceData {
+class LibEventHttpHandle : public SweepableResourceData {
 public:
   DECLARE_OBJECT_ALLOCATION(LibEventHttpHandle)
 

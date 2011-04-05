@@ -121,6 +121,11 @@ Object f_pagelet_server_task_start(CStrRef url,
   Transport *transport = g_context->getTransport();
   if (transport) {
     remote_host = transport->getRemoteHost();
+    if (headers.isNull() && RuntimeOption::SandboxMode) {
+      Array host;
+      host.set("Host", transport->getHeader("Host"));
+      return PageletServer::TaskStart(url, host, remote_host, post_data);
+    }
   }
   return PageletServer::TaskStart(url, headers, remote_host, post_data);
 }

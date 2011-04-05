@@ -4224,7 +4224,17 @@ bool TestCodeRun::TestObjectProperty() {
        "$s = serialize($o);\n"
        "$o2 = unserialize($s);\n");
 
-  return true;
+  MVCR("<?php "
+       "class Test"
+       "{"
+       "  protected static $color = array('gray' => 30);"
+       "  public static function foo($type, $key) {"
+       "    return isset( self::${$type}[$key] );"
+       "  }"
+       "}"
+       "var_dump(Test::foo('color', 'gray'));");
+
+ return true;
 }
 
 bool TestCodeRun::TestObjectMethod() {

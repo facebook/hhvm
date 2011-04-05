@@ -68,18 +68,27 @@ Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
       if (s) {
         DataType dtype = s->getValue().getType();
         ASSERT(dtype != KindOfUninit);
-        correct = m_nullDefault = dtype == KindOfNull;
+        m_nullDefault = dtype == KindOfNull;
+        if (m_kind == KindOfObject) {
+          correct = m_nullDefault;
+        } else {
+          correct = dtype == m_kind;
+        }
       } else {
         ArrayExpressionPtr a = m_defVal->unsafe_cast<ArrayExpression>();
         correct = a && m_kind == KindOfArray;
       }
       if (!correct) {
         if (m_kind == KindOfArray) {
-          throw_fatal("Default value for parameters with array type hint can "
-                      "only be an array or NULL");
+          parser->error("Default value with array type hint can only be "
+                        "an array or NULL");
+        } else if (m_kind == KindOfObject) {
+          parser->error("Default value with a class type hint can only be "
+                        "NULL");
         } else {
-          throw_fatal("Default value for parameters with a class type hint can"
-                      " only be NULL");
+          ASSERT(RuntimeOption::EnableHipHopSyntax);
+          parser->error("Default value need to have the same type as "
+                        "the type hint");
         }
       }
     }
@@ -374,7 +383,7 @@ Variant FunctionStatement::invokeClosure(CObjRef closure,
   for (ArrayIter iter(c->m_vars); iter; ++iter) {
     int i = iter.first();
     CVarRef var = iter.secondRef();
-    Parameter *param = vars[i].get(); 
+    Parameter *param = vars[i].get();
     if (param->isRef()) {
       fenv.get(param->getName()) = ref(var);
     } else {
@@ -407,7 +416,7 @@ Variant FunctionStatement::invokeClosure(CArrRef params) const {
   for (ArrayIter iter(closure->m_vars); iter; ++iter) {
     int i = iter.first();
     CVarRef var = iter.secondRef();
-    Parameter *param = vars[i].get(); 
+    Parameter *param = vars[i].get();
     if (param->isRef()) {
       fenv.get(param->getName()) = ref(var);
     } else {

@@ -768,10 +768,12 @@ bool TestExtArray::test_array_reduce() {
   VS(b, 15);
   Variant c = f_array_reduce(a, "rmul", 10);
   VS(c, 1200);
+  Variant d = f_array_reduce(a, "rmul");
+  VS(d, 0);
 
   Array x = Array::Create();
-  Variant d = f_array_reduce(x, "rsum", 1);
-  VS(d, 1);
+  Variant e = f_array_reduce(x, "rsum", 1);
+  VS(e, 1);
 
   return Count(true);
 }

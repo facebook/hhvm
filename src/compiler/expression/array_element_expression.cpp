@@ -140,7 +140,8 @@ bool ArrayElementExpression::appendClass(ExpressionPtr cls) {
     return dynamic_pointer_cast<ArrayElementExpression>(m_variable)
       ->appendClass(cls);
   }
-  if (m_variable->is(Expression::KindOfSimpleVariable)) {
+  if (m_variable->is(Expression::KindOfSimpleVariable) ||
+      m_variable->is(Expression::KindOfDynamicVariable)) {
     m_variable = StaticMemberExpressionPtr
       (new StaticMemberExpression(
         m_variable->getScope(), m_variable->getLocation(),

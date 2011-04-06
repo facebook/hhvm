@@ -226,10 +226,14 @@ public:
       if (handler && m_autoload_handler) {
         handler->fiberExit(m_autoload_handler, m_refMap, default_strategy);
         m_autoload_handler = NULL;
+
       }
 
-      Eval::RequestEvalState::Get()->fiberExit(m_evalState, m_refMap,
-                                               default_strategy);
+      if (m_evalState) {
+        Eval::RequestEvalState::Get()->fiberExit(m_evalState, m_refMap,
+                                                 default_strategy);
+      }
+
       if (m_global_variables) {
         fiber_unmarshal_global_state(get_global_variables(),
                                      m_global_variables,

@@ -116,8 +116,8 @@ foreach ($php53 as $name => $value) {
 
   if (isset($constants[$name]) && $constants[$name] !== $value) {
     error_log("PHP 5.3 change: $name: $constants[$name] => $value");
-    $constants[$name] = $value;
   }
+  $constants[$name] = $value;
 }
 
 // sort by key

@@ -1702,6 +1702,7 @@ extern const int64 k_T_CURLY_OPEN;
 extern const int64 k_T_DEC;
 extern const int64 k_T_DECLARE;
 extern const int64 k_T_DEFAULT;
+extern const int64 k_T_DIR;
 extern const int64 k_T_DIV_EQUAL;
 extern const int64 k_T_DNUMBER;
 extern const int64 k_T_DO;
@@ -1734,6 +1735,7 @@ extern const int64 k_T_FOREACH;
 extern const int64 k_T_FUNCTION;
 extern const int64 k_T_FUNC_C;
 extern const int64 k_T_GLOBAL;
+extern const int64 k_T_GOTO;
 extern const int64 k_T_HALT_COMPILER;
 extern const int64 k_T_IF;
 extern const int64 k_T_IMPLEMENTS;
@@ -1761,7 +1763,10 @@ extern const int64 k_T_METHOD_C;
 extern const int64 k_T_MINUS_EQUAL;
 extern const int64 k_T_MOD_EQUAL;
 extern const int64 k_T_MUL_EQUAL;
+extern const int64 k_T_NAMESPACE;
 extern const int64 k_T_NEW;
+extern const int64 k_T_NS_C;
+extern const int64 k_T_NS_SEPARATOR;
 extern const int64 k_T_NUM_STRING;
 extern const int64 k_T_OBJECT_CAST;
 extern const int64 k_T_OBJECT_OPERATOR;
@@ -2082,7 +2087,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2085];
+static hashNodeCon conBuckets[2090];
 
 void init_builtin_constant_table() {
   const char *conMapData[] = {
@@ -3816,6 +3821,7 @@ void init_builtin_constant_table() {
       (const char *)"T_DEC", (const char *)-1, (const char *)32, (const char *)&k_T_DEC,
       (const char *)"T_DECLARE", (const char *)-1, (const char *)32, (const char *)&k_T_DECLARE,
       (const char *)"T_DEFAULT", (const char *)-1, (const char *)32, (const char *)&k_T_DEFAULT,
+      (const char *)"T_DIR", (const char *)-1, (const char *)32, (const char *)&k_T_DIR,
       (const char *)"T_DIV_EQUAL", (const char *)-1, (const char *)32, (const char *)&k_T_DIV_EQUAL,
       (const char *)"T_DNUMBER", (const char *)-1, (const char *)32, (const char *)&k_T_DNUMBER,
       (const char *)"T_DO", (const char *)-1, (const char *)32, (const char *)&k_T_DO,
@@ -3848,6 +3854,7 @@ void init_builtin_constant_table() {
       (const char *)"T_FUNCTION", (const char *)-1, (const char *)32, (const char *)&k_T_FUNCTION,
       (const char *)"T_FUNC_C", (const char *)-1, (const char *)32, (const char *)&k_T_FUNC_C,
       (const char *)"T_GLOBAL", (const char *)-1, (const char *)32, (const char *)&k_T_GLOBAL,
+      (const char *)"T_GOTO", (const char *)-1, (const char *)32, (const char *)&k_T_GOTO,
       (const char *)"T_HALT_COMPILER", (const char *)-1, (const char *)32, (const char *)&k_T_HALT_COMPILER,
       (const char *)"T_IF", (const char *)-1, (const char *)32, (const char *)&k_T_IF,
       (const char *)"T_IMPLEMENTS", (const char *)-1, (const char *)32, (const char *)&k_T_IMPLEMENTS,
@@ -3875,7 +3882,10 @@ void init_builtin_constant_table() {
       (const char *)"T_MINUS_EQUAL", (const char *)-1, (const char *)32, (const char *)&k_T_MINUS_EQUAL,
       (const char *)"T_MOD_EQUAL", (const char *)-1, (const char *)32, (const char *)&k_T_MOD_EQUAL,
       (const char *)"T_MUL_EQUAL", (const char *)-1, (const char *)32, (const char *)&k_T_MUL_EQUAL,
+      (const char *)"T_NAMESPACE", (const char *)-1, (const char *)32, (const char *)&k_T_NAMESPACE,
       (const char *)"T_NEW", (const char *)-1, (const char *)32, (const char *)&k_T_NEW,
+      (const char *)"T_NS_C", (const char *)-1, (const char *)32, (const char *)&k_T_NS_C,
+      (const char *)"T_NS_SEPARATOR", (const char *)-1, (const char *)32, (const char *)&k_T_NS_SEPARATOR,
       (const char *)"T_NUM_STRING", (const char *)-1, (const char *)32, (const char *)&k_T_NUM_STRING,
       (const char *)"T_OBJECT_CAST", (const char *)-1, (const char *)32, (const char *)&k_T_OBJECT_CAST,
       (const char *)"T_OBJECT_OPERATOR", (const char *)-1, (const char *)32, (const char *)&k_T_OBJECT_OPERATOR,

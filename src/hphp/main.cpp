@@ -364,7 +364,7 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
   }
   if (vm.count("version")) {
 #ifdef HPHP_VERSION
-#undefine HPHP_VERSION
+#undef HPHP_VERSION
 #endif
 #define HPHP_VERSION(v) cout << "HipHop Compiler v" #v << "\n";
 #include "../version"
@@ -372,7 +372,6 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
 #ifdef COMPILER_ID
 cout << "Compiler: " << COMPILER_ID << "\n";
 #endif
-
     return 1;
   }
 

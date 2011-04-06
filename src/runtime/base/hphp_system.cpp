@@ -209,5 +209,21 @@ void Globals::fiberUnmarshal(Globals *src, FiberReferenceMap &refMap) {
   }
 }
 
+#ifdef HPHP_VERSION
+#undef HPHP_VERSION
+#endif
+#define HPHP_VERSION(v) return #v;
+const char* getHphpCompilerVersion() {
+#include "../../version"
+}
+
+const char* getHphpCompilerId() {
+#ifdef COMPILER_ID
+  return COMPILER_ID;
+#else
+  return "";
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

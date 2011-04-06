@@ -102,6 +102,9 @@ private:
   ssize_t wrapIter(ssize_t it) const;
 };
 
+const char* getHphpCompilerVersion();
+const char* getHphpCompilerId();
+
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace HPHP
 

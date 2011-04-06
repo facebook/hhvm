@@ -169,16 +169,16 @@ void RequestEvalState::destructObject(EvalObjectData *eo) {
   m_livingObjects.erase(eo);
   const MethodStatement *des = eo->getMethodStatement("__destruct");
   if (des) {
-    if (RuntimeOption::EnableObjDestructCall) {
-      try {
-        des->invokeInstance(Object(eo), Array());
-      } catch (...) {
-        handle_destructor_exception();
+    try {
+      if (RuntimeOption::EnableObjDestructCall) {
+          des->invokeInstance(Object(eo), Array());
+      } else {
+        raise_notice("Object of class %s is swept, "
+                     "and therefore its destructor is not called",
+                     eo->o_getClassName().c_str());
       }
-    } else {
-      raise_notice("Object of class %s is swept, "
-                   "and therefore its destructor is not called",
-                   eo->o_getClassName().c_str());
+    } catch (...) {
+      handle_destructor_exception();
     }
   }
   eo->setInDtor();

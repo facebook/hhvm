@@ -765,11 +765,7 @@ bool Transport::isUploadedFile(CStrRef filename) {
 }
 
 // Move a file if and only if it was created by an upload
-bool Transport::moveUploadedFile(CStrRef filename, CStrRef destination) {
-  if (!is_uploaded_file(filename.c_str())) {
-    Logger::Error("%s is not an uploaded file.", filename.c_str());
-    return false;
-  }
+bool Transport::moveUploadedFileHelper(CStrRef filename, CStrRef destination) {
   // Do access check.
   String dest = File::TranslatePath(destination);
   if (Util::rename(filename.c_str(), dest.c_str()) < 0) {
@@ -781,6 +777,14 @@ bool Transport::moveUploadedFile(CStrRef filename, CStrRef destination) {
   Logger::Verbose("Successfully moved uploaded file %s to %s.",
                   filename.c_str(), dest.c_str());
   return true;
+}
+
+bool Transport::moveUploadedFile(CStrRef filename, CStrRef destination) {
+  if (!is_uploaded_file(filename.c_str())) {
+    Logger::Error("%s is not an uploaded file.", filename.c_str());
+    return false;
+  }
+  return moveUploadedFileHelper(filename, destination);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

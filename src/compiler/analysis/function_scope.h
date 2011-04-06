@@ -422,6 +422,7 @@ private:
   TypePtr m_returnType;
   TypePtr m_prevReturn;
   ModifierExpressionPtr m_modifiers;
+  unsigned m_hasVoid : 1;
   unsigned m_method : 1;
   unsigned m_refReturn : 1; // whether it's "function &get_reference()"
   unsigned m_virtual : 1;

@@ -18,6 +18,7 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
+#include <runtime/base/hphp_system.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/timeout_thread.h>
 #include <runtime/ext/extension.h>
@@ -221,6 +222,14 @@ bool IniSetting::Get(CStrRef name, String &value) {
   }
   if (name == "hphp.build_id") {
     value = String(RuntimeOption::BuildId);
+    return true;
+  }
+  if (name == "hphp.compiler_version") {
+    value = String(getHphpCompilerVersion());
+    return true;
+  }
+  if (name == "hphp.compiler_id") {
+    value = String(getHphpCompilerId());
     return true;
   }
   if (name == "arg_separator.output") {

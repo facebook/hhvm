@@ -71,6 +71,8 @@ Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
         m_nullDefault = dtype == KindOfNull;
         if (m_kind == KindOfObject) {
           correct = m_nullDefault;
+        } else if (m_kind == KindOfArray) {
+          correct = (dtype == m_kind || dtype == KindOfNull);
         } else {
           correct = dtype == m_kind;
         }

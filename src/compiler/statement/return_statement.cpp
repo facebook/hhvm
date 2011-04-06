@@ -85,8 +85,8 @@ void ReturnStatement::setNthKid(int n, ConstructPtr cp) {
 }
 
 void ReturnStatement::inferTypes(AnalysisResultPtr ar) {
+  FunctionScopePtr funcScope = getFunctionScope();
   if (m_exp) {
-    FunctionScopePtr funcScope = getFunctionScope();
     if (funcScope) {
       TypePtr ret;
       if (funcScope->isOverriding()) {
@@ -105,11 +105,7 @@ void ReturnStatement::inferTypes(AnalysisResultPtr ar) {
       m_exp->inferAndCheck(ar, Type::Int64, false);
     }
   } else {
-    FunctionScopePtr funcScope = getFunctionScope();
-    if (funcScope->getReturnType()) {
-      // return; means return null;
-      funcScope->setReturnType(ar, Type::Variant);
-    }
+    funcScope->setReturnType(ar, TypePtr());
   }
 }
 

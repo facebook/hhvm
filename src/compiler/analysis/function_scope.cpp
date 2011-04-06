@@ -51,7 +51,7 @@ FunctionScope::FunctionScope(AnalysisResultConstPtr ar, bool method,
                              bool inPseudoMain /* = false */)
     : BlockScope(name, docComment, stmt, BlockScope::FunctionScope),
       m_minParam(minParam), m_maxParam(maxParam), m_attribute(attribute),
-      m_modifiers(modifiers),
+      m_modifiers(modifiers), m_hasVoid(false),
       m_method(method), m_refReturn(reference), m_virtual(false),
       m_hasOverride(false), m_perfectVirtual(false), m_overriding(false),
       m_volatile(false), m_pseudoMain(inPseudoMain),
@@ -136,7 +136,7 @@ FunctionScope::FunctionScope(bool method, const std::string &name,
                              bool reference)
     : BlockScope(name, "", StatementPtr(), BlockScope::FunctionScope),
       m_minParam(0), m_maxParam(0), m_attribute(0),
-      m_modifiers(ModifierExpressionPtr()),
+      m_modifiers(ModifierExpressionPtr()), m_hasVoid(false),
       m_method(method), m_refReturn(reference), m_virtual(false),
       m_hasOverride(false), m_perfectVirtual(false), m_overriding(false),
       m_volatile(false), m_pseudoMain(false),
@@ -602,7 +602,14 @@ void FunctionScope::setReturnType(AnalysisResultConstPtr ar, TypePtr type) {
   // no change can be made to virtual function's prototype
   if (m_overriding) return;
 
-  if (m_returnType) {
+  if (!type) {
+    m_hasVoid = true;
+    if (!m_returnType) return;
+  }
+
+  if (m_hasVoid) {
+    type = Type::Variant;
+  } else if (m_returnType) {
     type = Type::Coerce(ar, m_returnType, type);
   }
   m_returnType = type;
@@ -610,6 +617,7 @@ void FunctionScope::setReturnType(AnalysisResultConstPtr ar, TypePtr type) {
 
 void FunctionScope::pushReturnType() {
   m_prevReturn = m_returnType;
+  m_hasVoid = false;
   if (m_overriding || m_perfectVirtual || m_pseudoMain) return;
   m_returnType.reset();
 }

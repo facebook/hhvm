@@ -107,6 +107,7 @@ public:
   bool isHidden() const { return m_flags.m_hidden; }
   bool isClosureVar() const { return m_flags.m_closureVar; }
   bool isRefClosureVar() const { return m_flags.m_refClosureVar; }
+  bool isClassName() const { return m_flags.m_className; }
 
   void setParameterIndex(int ix) { m_parameter = ix; }
   void setProtected() { m_flags.m_protected = true; }
@@ -127,6 +128,7 @@ public:
   void setHidden() { m_flags.m_hidden = true; }
   void setClosureVar() { m_flags.m_closureVar = true; }
   void setRefClosureVar() { m_flags.m_refClosureVar = true; }
+  void setClassName() { m_flags.m_className = true; }
 
   void clearGlobal() { m_flags.m_global = false; }
   void clearUsed() { m_flags.m_used = false; }
@@ -192,6 +194,7 @@ private:
       unsigned m_hidden : 1;
       unsigned m_closureVar : 1;
       unsigned m_refClosureVar : 1;
+      unsigned m_className : 1;
     } m_flags;
   };
   ConstructPtr        m_declaration;

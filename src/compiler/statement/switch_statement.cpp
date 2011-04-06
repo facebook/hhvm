@@ -22,6 +22,7 @@
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/expression/simple_variable.h>
+#include <compiler/expression/scalar_expression.h>
 
 using namespace HPHP;
 using namespace std;
@@ -66,6 +67,34 @@ int SwitchStatement::getRecursiveCount() const {
 void SwitchStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   m_exp->analyzeProgram(ar);
   if (m_cases) m_cases->analyzeProgram(ar);
+
+  if (ar->getPhase() == AnalysisResult::AnalyzeAll &&
+      m_exp->is(Expression::KindOfSimpleVariable)) {
+    SimpleVariablePtr exp = dynamic_pointer_cast<SimpleVariable>(m_exp);
+    if (exp && exp->getSymbol() && exp->getSymbol()->isClassName()) {
+      // Mark some classes as volitle since the name is used in switch
+      for (int i = 0; i < m_cases->getCount(); i++) {
+        CaseStatementPtr stmt =
+          dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);
+        ASSERT(stmt);
+        ExpressionPtr caseCond = stmt->getCondition();
+        if (caseCond && caseCond->isScalar()) {
+          ScalarExpressionPtr name =
+            dynamic_pointer_cast<ScalarExpression>(caseCond);
+          if (name && name->isLiteralString()) {
+            string className = name->getLiteralString();
+            ClassScopePtr cls = ar->findClass(Util::toLower(className));
+            if (cls && cls->isUserClass()) {
+              cls->setVolatile();
+            }
+          }
+        }
+      }
+      // Also note this down as code error
+      ConstructPtr self = shared_from_this();
+      Compiler::Error(Compiler::ConditionalClassLoading, self);
+    }
+  }
 }
 
 bool SwitchStatement::hasDecl() const {

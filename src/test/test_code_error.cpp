@@ -457,6 +457,20 @@ bool TestCodeError::TestBadPassByReference() {
   return true;
 }
 
+bool TestCodeError::TestConditionalClassLoading() {
+  VE(ConditionalClassLoading,
+    "<?php "
+    "function load_cls($x) { "
+    "  if (class_exists($x)) { return; } "
+    "  switch ($x) { "
+    "  case 'C1': /* require_once somefile */ break; "
+    "  case 'C2': /* require_once somefile */ break; "
+    "  } "
+    "} "
+    "load_cls('C1');");
+  return true;
+}
+
 bool TestCodeError::TestBadArgumentType() {
   VE(BadArgumentType,
      "<?php "

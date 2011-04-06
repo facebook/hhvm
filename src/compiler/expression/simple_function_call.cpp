@@ -360,6 +360,14 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
               ASSERT(false);
           }
         }
+      } else if ((m_type == InterfaceExistsFunction ||
+                  m_type == ClassExistsFunction) &&
+                 value->is(KindOfSimpleVariable)) {
+        SimpleVariablePtr name = dynamic_pointer_cast<SimpleVariable>(value);
+        if (name && name->getSymbol()) {
+          // name is checked as class name
+          name->getSymbol()->setClassName();
+        }
       }
     }
 

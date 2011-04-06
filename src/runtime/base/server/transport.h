@@ -298,8 +298,8 @@ public:
   void redirect(const char *location, int code, const char *info );
 
   // TODO: support rfc1867
-  bool isUploadedFile(CStrRef filename);
-  bool moveUploadedFile(CStrRef filename, CStrRef destination);
+  virtual bool isUploadedFile(CStrRef filename);
+  virtual bool moveUploadedFile(CStrRef filename, CStrRef destination);
 
   int getResponseSize() const { return m_responseSize; }
   int getResponseCode() const { return m_responseCode; }
@@ -384,6 +384,7 @@ protected:
 
   String prepareResponse(const void *data, int size, bool &compressed,
                          bool last);
+  bool moveUploadedFileHelper(CStrRef filename, CStrRef destination);
 
 private:
   void prepareHeaders(bool compressed, const void *data, int size);

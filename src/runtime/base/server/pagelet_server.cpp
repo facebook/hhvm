@@ -17,6 +17,7 @@
 #include <runtime/base/server/pagelet_server.h>
 #include <runtime/base/server/transport.h>
 #include <runtime/base/server/http_request_handler.h>
+#include <runtime/base/server/upload.h>
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/resource_data.h>
@@ -33,7 +34,7 @@ namespace HPHP {
 class PageletTransport : public Transport, public Synchronizable {
 public:
   PageletTransport(CStrRef url, CArrRef headers, CStrRef postData,
-                   CStrRef remoteHost)
+                   CStrRef remoteHost, const set<string> &rfc1867UploadedFiles)
     : m_refCount(0), m_done(false), m_code(0) {
     m_threadType = PageletThread;
 
@@ -65,6 +66,7 @@ public:
     }
 
     disableCompression(); // so we don't have to decompress during sendImpl()
+    m_rfc1867UploadedFiles = rfc1867UploadedFiles;
   }
 
   /**
@@ -116,7 +118,17 @@ public:
     m_done = true;
     notify();
   }
-
+  virtual bool isUploadedFile(CStrRef filename) {
+    return m_rfc1867UploadedFiles.find(filename.c_str()) !=
+           m_rfc1867UploadedFiles.end();
+  }
+  virtual bool moveUploadedFile(CStrRef filename, CStrRef destination) {
+    if (!isUploadedFile(filename.c_str())) {
+      Logger::Error("%s is not an uploaded file.", filename.c_str());
+      return false;
+    }
+    return moveUploadedFileHelper(filename, destination);
+  }
   // task interface
   bool isDone() {
     return m_done;
@@ -187,6 +199,7 @@ private:
   int m_code;
 
   deque<string> m_pipeline; // the intermediate pagelet results
+  set<string> m_rfc1867UploadedFiles;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -210,8 +223,10 @@ public:
   DECLARE_OBJECT_ALLOCATION(PageletTask)
 
   PageletTask(CStrRef url, CArrRef headers, CStrRef post_data,
-              CStrRef remote_host) {
-    m_job = new PageletTransport(url, headers, remote_host, post_data);
+              CStrRef remote_host,
+              const std::set<std::string> &rfc1867UploadedFiles) {
+    m_job = new PageletTransport(url, headers, remote_host, post_data,
+                                 rfc1867UploadedFiles);
     m_job->incRefCount();
   }
 
@@ -264,7 +279,8 @@ Object PageletServer::TaskStart(CStrRef url, CArrRef headers,
   if (RuntimeOption::PageletServerThreadCount <= 0) {
     return null_object;
   }
-  PageletTask *task = NEWOBJ(PageletTask)(url, headers, remote_host, post_data);
+  PageletTask *task = NEWOBJ(PageletTask)(url, headers, remote_host, post_data,
+                                          get_uploaded_files());
   Object ret(task);
   PageletTransport *job = task->getJob();
   job->incRefCount(); // paired with worker's decRefCount()

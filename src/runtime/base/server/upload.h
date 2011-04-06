@@ -76,6 +76,7 @@ void rfc1867PostHandler(Transport *transport,
                         const std::string boundary);
 
 bool is_uploaded_file(const std::string filename);
+const std::set<std::string> &get_uploaded_files();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

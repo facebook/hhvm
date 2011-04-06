@@ -166,6 +166,10 @@ bool is_uploaded_file(const string filename) {
   return rfc1867UploadedFiles.find(filename) != rfc1867UploadedFiles.end();
 }
 
+const set<string> &get_uploaded_files() {
+  return s_rfc1867_data->rfc1867UploadedFiles;
+}
+
 static void destroy_uploaded_files() {
   set<string> &rfc1867UploadedFiles = s_rfc1867_data->rfc1867UploadedFiles;
   for (set<string>::iterator iter = rfc1867UploadedFiles.begin();

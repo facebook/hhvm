@@ -24,6 +24,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/program_functions.h>
 #include <runtime/base/variable_table.h>
+#include <runtime/base/thread_init_fini.h>
 
 using namespace HPHP;
 
@@ -209,7 +210,7 @@ int hphp_ffi_get_class_constant(void **ret, const char *cls,
 
 void hphp_ffi_init() {
   RuntimeOption::SourceRoot = "/";
-  InitAllocatorThreadLocal();
+  init_thread_locals();
   init_static_variables();
 }
 

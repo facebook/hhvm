@@ -14,18 +14,18 @@
    +----------------------------------------------------------------------+
 */
 
-#include "async_func.h"
+#ifndef __HPHP_THREAD_INIT_FINI_H__
+#define __HPHP_THREAD_INIT_FINI_H__
+
+#include <runtime/base/hphp_system.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef void PFN_THREAD_FUNC(void *);
-
-PFN_THREAD_FUNC* AsyncFuncImpl::s_initFunc = NULL;
-void* AsyncFuncImpl::s_initFuncArg = NULL;
-
-PFN_THREAD_FUNC* AsyncFuncImpl::s_finiFunc = NULL;
-void* AsyncFuncImpl::s_finiFuncArg = NULL;
+void init_thread_locals(void *arg = NULL);
+void fini_thread_locals(void *arg = NULL);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
+
+#endif // __HPHP_THREAD_INIT_FINI_H__

@@ -166,8 +166,17 @@ public:
     s_initFuncArg = arg;
   }
 
+  static void SetThreadFiniFunc(PFN_THREAD_FUNC* func, void *arg) {
+    s_finiFunc = func;
+    s_finiFuncArg = arg;
+  }
+
   static PFN_THREAD_FUNC* GetThreadInitFunc() {
     return s_initFunc;
+  }
+
+  static PFN_THREAD_FUNC* GetThreadFiniFunc() {
+    return s_finiFunc;
   }
 
 private:
@@ -178,7 +187,9 @@ private:
   void *m_obj;
   PFN_THREAD_FUNC *m_func;
   static PFN_THREAD_FUNC *s_initFunc;
+  static PFN_THREAD_FUNC *s_finiFunc;
   static void* s_initFuncArg;
+  static void* s_finiFuncArg;
   pthread_t m_threadId;
   bool m_exceptioned;
   Exception m_exception; // exception was thrown and thread was terminated
@@ -209,6 +220,9 @@ private:
     }
     if (m_autoDelete) {
       delete this;
+    }
+    if (s_finiFunc) {
+      s_finiFunc(s_finiFuncArg);
     }
   }
 };

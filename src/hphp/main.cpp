@@ -38,6 +38,7 @@
 #include <util/async_func.h>
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/externals.h>
+#include <runtime/base/thread_init_fini.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <dlfcn.h>
@@ -508,8 +509,7 @@ int process(const ProgramOptions &po) {
     return lintTarget(po);
   }
 
-  InitAllocatorThreadLocal();
-  get_global_variables_check();
+  init_thread_locals();
 
   Timer timer(Timer::WallTime);
   AnalysisResultPtr ar;

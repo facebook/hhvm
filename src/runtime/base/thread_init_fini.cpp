@@ -14,18 +14,31 @@
    +----------------------------------------------------------------------+
 */
 
-#include "async_func.h"
+#include <runtime/base/thread_init_fini.h>
+#include <runtime/base/memory/smart_allocator.h>
+#include <runtime/base/execution_context.h>
+#include <util/async_func.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef void PFN_THREAD_FUNC(void *);
+void init_thread_locals(void *arg /* = NULL */) {
+  InitAllocatorThreadLocal();
+  get_global_variables_check();
+  ThreadInfo::s_threadInfo.get();
+}
 
-PFN_THREAD_FUNC* AsyncFuncImpl::s_initFunc = NULL;
-void* AsyncFuncImpl::s_initFuncArg = NULL;
+void fini_thread_locals(void *arg /* = NULL */) {
+  g_context.reset();
+}
 
-PFN_THREAD_FUNC* AsyncFuncImpl::s_finiFunc = NULL;
-void* AsyncFuncImpl::s_finiFuncArg = NULL;
+static class SetThreadInitFini {
+public:
+  SetThreadInitFini() {
+    AsyncFuncImpl::SetThreadInitFunc(init_thread_locals, NULL);
+    AsyncFuncImpl::SetThreadFiniFunc(fini_thread_locals, NULL);
+  }
+} s_SetThreadInitFini;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

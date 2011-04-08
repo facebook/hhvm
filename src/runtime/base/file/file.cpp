@@ -530,6 +530,10 @@ String File::readLine(int64 maxlen /* = 0 */) {
 }
 
 String File::readRecord(CStrRef delimiter, int64 maxlen /* = 0 */) {
+  if (eof() && m_writepos == m_readpos) {
+    return empty_string;
+  }
+
   if (maxlen <= 0 || maxlen > CHUNK_SIZE) {
     maxlen = CHUNK_SIZE;
   }
@@ -538,8 +542,8 @@ String File::readRecord(CStrRef delimiter, int64 maxlen /* = 0 */) {
   if (m_buffer == NULL) {
     m_buffer = (char *)malloc(CHUNK_SIZE * 2);
   }
-  if (avail < maxlen) {
-    m_writepos = readImpl(m_buffer + m_readpos, maxlen - avail);
+  if (avail < maxlen && !eof()) {
+    m_writepos += readImpl(m_buffer + m_readpos, maxlen - avail);
     maxlen = m_writepos - m_readpos;
   }
   if (m_readpos >= CHUNK_SIZE) {
@@ -594,7 +598,7 @@ String File::readRecord(CStrRef delimiter, int64 maxlen /* = 0 */) {
     return String(buf, toread, AttachString);
   }
 
-  return String();
+  return empty_string;
 }
 
 int64 File::print() {

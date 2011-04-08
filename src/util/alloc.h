@@ -51,8 +51,8 @@ namespace HPHP {
 
 class OutOfMemoryException : public Exception {
 public:
-  OutOfMemoryException(int size)
-      : Exception("Unable to allocate %d bytes of memory", size) {}
+  OutOfMemoryException(size_t size)
+      : Exception("Unable to allocate %zu bytes of memory", size) {}
   virtual ~OutOfMemoryException() throw() {}
 };
 

@@ -115,11 +115,7 @@ Variant f_stream_get_contents(CObjRef handle, int maxlen /* = 0 */,
 Variant f_stream_get_line(CObjRef handle, int length /* = 0 */,
                           CStrRef ending /* = null_string */) {
   File *file = handle.getTyped<File>();
-  String record = file->readRecord(ending, length);
-  if (record.empty()) {
-    return false;
-  }
-  return record;
+  return file->readRecord(ending, length);
 }
 
 Variant f_stream_select(Variant read, Variant write, Variant except,

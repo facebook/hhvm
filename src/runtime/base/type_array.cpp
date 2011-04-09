@@ -898,6 +898,9 @@ void Array::unserialize(VariableUnserializer *uns) {
     bool isAPC = (uns->getType() == VariableUnserializer::APCSerialize);
     for (int64 i = 0; i < size; i++) {
       Variant key(uns->unserializeKey());
+      if (!key.isString() && !key.isInteger()) {
+        throw Exception("Invalid key");
+      }
       Variant &value = isAPC ? addLval(key, true) :
         lvalAt(key, AccessFlags::Key);
       value.unserialize(uns);

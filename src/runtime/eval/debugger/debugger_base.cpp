@@ -319,6 +319,7 @@ static void get_color(int tokid, int prev, int next,
     COLOR_ENTRY(T_FUNC_C,                   Constant    );
     COLOR_ENTRY(T_LINE,                     Constant    );
     COLOR_ENTRY(T_FILE,                     Constant    );
+    COLOR_ENTRY(T_DIR,                      Constant    );
     COLOR_ENTRY(T_COMMENT,                  Comment     );
     COLOR_ENTRY(T_DOC_COMMENT,              Comment     );
     COLOR_ENTRY(T_OPEN_TAG,                 Tag         );

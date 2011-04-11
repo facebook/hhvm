@@ -74,6 +74,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/util/exceptions.h>
+#include <runtime/ext/ext_file.h>
 
 using namespace HPHP;
 using namespace HPHP::Eval;
@@ -744,6 +745,11 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
   }
   case T_FILE: {
     exp = NEW_EXP(Scalar, T_STRING, file(), T_FILE);
+    break;
+  }
+  case T_DIR: {
+    String dir = f_dirname(file());
+    exp = NEW_EXP(Scalar, T_STRING, dir.c_str(), T_DIR);
     break;
   }
   default:

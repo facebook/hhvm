@@ -105,6 +105,7 @@ void ScalarExpression::dump(std::ostream &out) const {
     case T_METHOD_C: out << "__METHOD__";   return;
     case T_FUNC_C:   out << "__FUNCTION__"; return;
     case T_FILE:     out << "__FILE__";     return;
+    case T_DIR:      out << "__DIR__";      return;
     case T_LINE:     out << "__LINE__";     return;
   }
 

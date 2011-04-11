@@ -128,6 +128,7 @@ bool TestParserExpr::TestScalarExpression() {
   V("<?php \"A\";",        "'A';\n");          // T_CONSTANT_ENCAPSED_STRING
   V("<?php __LINE__;",     "__LINE__;\n");     // T_LINE
   V("<?php __FILE__;",     "__FILE__;\n");     // T_FILE
+  V("<?php __DIR__;",      "__DIR__;\n");     // T_DIR
   V("<?php __CLASS__;",    "__CLASS__;\n");    // T_CLASS_C
   V("<?php __METHOD__;",   "__METHOD__;\n");   // T_METHOD_C
   V("<?php __FUNCTION__;", "__FUNCTION__;\n"); // T_FUNC_C

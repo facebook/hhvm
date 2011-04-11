@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 158 */
+/* SRC: classes/exception.php line 173 */
 FORWARD_DECLARE_CLASS(LogicException);
 class c_LogicException : public c_Exception {
   public:

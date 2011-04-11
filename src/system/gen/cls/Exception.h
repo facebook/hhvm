@@ -31,6 +31,7 @@ class c_Exception : public ExtObjectData {
   // Properties
   Variant m_message;
   Variant m_code;
+  Variant m_previous;
   Variant m_file;
   Variant m_line;
   Variant m_trace;
@@ -66,12 +67,13 @@ class c_Exception : public ExtObjectData {
   public:
   void init();
   public: void t___init__();
-  public: void t___construct(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL);
-  public: c_Exception *create(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL);
+  public: void t___construct(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL, Variant v_previous = null);
+  public: c_Exception *create(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL, Variant v_previous = null);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Variant t_getmessage();
+  public: Variant t_getprevious();
   public: Variant t_getcode();
   public: Variant t_getfile();
   public: Variant t_getline();
@@ -82,6 +84,7 @@ class c_Exception : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(getcode);
+  DECLARE_METHOD_INVOKE_HELPERS(getprevious);
   DECLARE_METHOD_INVOKE_HELPERS(getline);
   DECLARE_METHOD_INVOKE_HELPERS(__init__);
   DECLARE_METHOD_INVOKE_HELPERS(getfile);

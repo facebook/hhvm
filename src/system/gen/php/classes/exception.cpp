@@ -29,7 +29,7 @@ namespace HPHP {
 /* preface starts */
 extern CallInfo ci_;
 /* preface finishes */
-/* SRC: classes/exception.php line 262 */
+/* SRC: classes/exception.php line 277 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnexpectedValueException
 Variant c_UnexpectedValueException::os_getInit(CStrRef s) {
   return c_RuntimeException::os_getInit(s);
@@ -119,7 +119,7 @@ struct ObjectStaticCallbacks cw_UnexpectedValueException = {
 void c_UnexpectedValueException::init() {
   c_RuntimeException::init();
 }
-/* SRC: classes/exception.php line 236 */
+/* SRC: classes/exception.php line 251 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OverflowException
 Variant c_OverflowException::os_getInit(CStrRef s) {
   return c_RuntimeException::os_getInit(s);
@@ -209,7 +209,7 @@ struct ObjectStaticCallbacks cw_OverflowException = {
 void c_OverflowException::init() {
   c_RuntimeException::init();
 }
-/* SRC: classes/exception.php line 228 */
+/* SRC: classes/exception.php line 243 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfBoundsException
 Variant c_OutOfBoundsException::os_getInit(CStrRef s) {
   return c_RuntimeException::os_getInit(s);
@@ -299,7 +299,7 @@ struct ObjectStaticCallbacks cw_OutOfBoundsException = {
 void c_OutOfBoundsException::init() {
   c_RuntimeException::init();
 }
-/* SRC: classes/exception.php line 158 */
+/* SRC: classes/exception.php line 173 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LogicException
 Variant c_LogicException::os_getInit(CStrRef s) {
   return c_Exception::os_getInit(s);
@@ -388,7 +388,7 @@ struct ObjectStaticCallbacks cw_LogicException = {
 void c_LogicException::init() {
   c_Exception::init();
 }
-/* SRC: classes/exception.php line 244 */
+/* SRC: classes/exception.php line 259 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RangeException
 Variant c_RangeException::os_getInit(CStrRef s) {
   return c_RuntimeException::os_getInit(s);
@@ -478,7 +478,7 @@ struct ObjectStaticCallbacks cw_RangeException = {
 void c_RangeException::init() {
   c_RuntimeException::init();
 }
-/* SRC: classes/exception.php line 196 */
+/* SRC: classes/exception.php line 211 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_InvalidArgumentException
 Variant c_InvalidArgumentException::os_getInit(CStrRef s) {
   return c_LogicException::os_getInit(s);
@@ -570,7 +570,7 @@ struct ObjectStaticCallbacks cw_InvalidArgumentException = {
 void c_InvalidArgumentException::init() {
   c_LogicException::init();
 }
-/* SRC: classes/exception.php line 253 */
+/* SRC: classes/exception.php line 268 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnderflowException
 Variant c_UnderflowException::os_getInit(CStrRef s) {
   return c_RuntimeException::os_getInit(s);
@@ -658,7 +658,7 @@ struct ObjectStaticCallbacks cw_UnderflowException = {
 void c_UnderflowException::init() {
   c_RuntimeException::init();
 }
-/* SRC: classes/exception.php line 212 */
+/* SRC: classes/exception.php line 227 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_OutOfRangeException
 Variant c_OutOfRangeException::os_getInit(CStrRef s) {
   return c_LogicException::os_getInit(s);
@@ -748,7 +748,7 @@ struct ObjectStaticCallbacks cw_OutOfRangeException = {
 void c_OutOfRangeException::init() {
   c_LogicException::init();
 }
-/* SRC: classes/exception.php line 178 */
+/* SRC: classes/exception.php line 193 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadMethodCallException
 Variant c_BadMethodCallException::os_getInit(CStrRef s) {
   return c_BadFunctionCallException::os_getInit(s);
@@ -843,7 +843,7 @@ struct ObjectStaticCallbacks cw_BadMethodCallException = {
 void c_BadMethodCallException::init() {
   c_BadFunctionCallException::init();
 }
-/* SRC: classes/exception.php line 220 */
+/* SRC: classes/exception.php line 235 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RuntimeException
 Variant c_RuntimeException::os_getInit(CStrRef s) {
   return c_Exception::os_getInit(s);
@@ -936,6 +936,10 @@ Variant c_Exception::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = s->hash();
   switch (hash & 15) {
+    case 1:
+      HASH_RETURN_NAMSTR(0x0B197E8F85F4DA21LL, NAMSTR(s_sys_ss90291821, "previous"),
+                         null, 8);
+      break;
     case 7:
       HASH_RETURN_NAMSTR(0x3CCB986B2CF0A747LL, NAMSTR(s_sys_ss94c9ce77, "trace"),
                          null, 5);
@@ -976,6 +980,7 @@ Variant &c_Exception::os_lval(CStrRef s) {
 void c_Exception::o_getArray(Array &props, bool pubOnly) const {
   if (!pubOnly) if (isInitialized(m_message)) props.lvalAt(NAMSTR(s_sys_ss155366df, "message"), AccessFlags::Key).setWithRef(m_message);
   if (!pubOnly) if (isInitialized(m_code)) props.lvalAt(NAMSTR(s_sys_ssab7a1dec, "code"), AccessFlags::Key).setWithRef(m_code);
+  if (!pubOnly) if (isInitialized(m_previous)) props.lvalAt(NAMSTR(s_sys_ss90291821, "previous"), AccessFlags::Key).setWithRef(m_previous);
   if (!pubOnly) if (isInitialized(m_file)) props.lvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Key).setWithRef(m_file);
   if (!pubOnly) if (isInitialized(m_line)) props.lvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Key).setWithRef(m_line);
   if (!pubOnly) if (isInitialized(m_trace)) props.lvalAt(NAMSTR(s_sys_ss94c9ce77, "trace"), AccessFlags::Key).setWithRef(m_trace);
@@ -996,6 +1001,9 @@ Variant * c_Exception::o_realProp(CStrRef prop, int flags, CStrRef context) cons
 Variant * c_Exception::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 15) {
+    case 1:
+      HASH_REALPROP_STRING(0x0B197E8F85F4DA21LL, "previous", 8, previous);
+      break;
     case 7:
       HASH_REALPROP_STRING(0x3CCB986B2CF0A747LL, "trace", 5, trace);
       break;
@@ -1049,14 +1057,16 @@ void c_Exception::cloneSet(ObjectData *cl) {
   ObjectData::cloneSet(clone);
   clone->m_message.setWithRef(m_message);
   clone->m_code.setWithRef(m_code);
+  clone->m_previous.setWithRef(m_previous);
   clone->m_file.setWithRef(m_file);
   clone->m_line.setWithRef(m_line);
   clone->m_trace.setWithRef(m_trace);
 }
 CallInfo c_Exception::ci_getmessage((void*)&c_Exception::i_getmessage, (void*)&c_Exception::ifa_getmessage, 0, 4, 0x0000000000000000LL);
 CallInfo c_Exception::ci___tostring((void*)&c_Exception::i___tostring, (void*)&c_Exception::ifa___tostring, 0, 4, 0x0000000000000000LL);
-CallInfo c_Exception::ci___construct((void*)&c_Exception::i___construct, (void*)&c_Exception::ifa___construct, 2, 4, 0x0000000000000000LL);
+CallInfo c_Exception::ci___construct((void*)&c_Exception::i___construct, (void*)&c_Exception::ifa___construct, 3, 4, 0x0000000000000000LL);
 CallInfo c_Exception::ci_getcode((void*)&c_Exception::i_getcode, (void*)&c_Exception::ifa_getcode, 0, 4, 0x0000000000000000LL);
+CallInfo c_Exception::ci_getprevious((void*)&c_Exception::i_getprevious, (void*)&c_Exception::ifa_getprevious, 0, 4, 0x0000000000000000LL);
 CallInfo c_Exception::ci_getline((void*)&c_Exception::i_getline, (void*)&c_Exception::ifa_getline, 0, 4, 0x0000000000000000LL);
 CallInfo c_Exception::ci___init__((void*)&c_Exception::i___init__, (void*)&c_Exception::ifa___init__, 0, 4, 0x0000000000000000LL);
 CallInfo c_Exception::ci_getfile((void*)&c_Exception::i_getfile, (void*)&c_Exception::ifa_getfile, 0, 4, 0x0000000000000000LL);
@@ -1095,7 +1105,7 @@ Variant c_Exception::i___construct(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+  if (count > 3) return throw_toomany_arguments("Exception::__construct", 3, 2);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1103,7 +1113,9 @@ Variant c_Exception::i___construct(MethodCallPackage &mcp, CArrRef params) {
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (self->t___construct(arg0), null);
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (self->t___construct(arg0, arg1), null);
+    if (count <= 2) return (self->t___construct(arg0, arg1), null);
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t___construct(arg0, arg1, arg2), null);
   }
 }
 Variant c_Exception::i_getcode(MethodCallPackage &mcp, CArrRef params) {
@@ -1117,6 +1129,18 @@ Variant c_Exception::i_getcode(MethodCallPackage &mcp, CArrRef params) {
   }
   if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
   return (self->t_getcode());
+}
+Variant c_Exception::i_getprevious(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::getPrevious", 0, 1);
+  return (self->t_getprevious());
 }
 Variant c_Exception::i_getline(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -1208,12 +1232,14 @@ Variant c_Exception::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_F
   } else {
     self = createDummy(pobj);
   }
-  if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+  if (count > 3) return throw_toomany_arguments("Exception::__construct", 3, 2);
   if (count <= 0) return (self->t___construct(), null);
   CVarRef arg0((a0));
   if (count <= 1) return (self->t___construct(arg0), null);
   CVarRef arg1((a1));
-  return (self->t___construct(arg0, arg1), null);
+  if (count <= 2) return (self->t___construct(arg0, arg1), null);
+  CVarRef arg2((a2));
+  return (self->t___construct(arg0, arg1, arg2), null);
 }
 Variant c_Exception::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_Exception *self = NULL;
@@ -1225,6 +1251,17 @@ Variant c_Exception::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_FEW_A
   }
   if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
   return (self->t_getcode());
+}
+Variant c_Exception::ifa_getprevious(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    self = createDummy(pobj);
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::getPrevious", 0, 1);
+  return (self->t_getprevious());
 }
 Variant c_Exception::ifa_getline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_Exception *self = NULL;
@@ -1321,6 +1358,12 @@ bool c_Exception::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
         return true;
       }
       break;
+    case 21:
+      HASH_GUARD_LITSTR(0x7DB5D49CF5DC0795LL, NAMSTR(s_sys_ssb0aae83f, "getPrevious")) {
+        mcp.ci = &c_Exception::ci_getprevious;
+        return true;
+      }
+      break;
     case 26:
       HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ssccbba71e, "getTrace")) {
         mcp.ci = &c_Exception::ci_gettrace;
@@ -1350,15 +1393,16 @@ bool c_Exception::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
 }
 c_Exception *c_Exception::create(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
+, Variant v_previous //  = null
 ) {
   CountableHelper h(this);
   init();
-  t___construct(v_message, v_code);
+  t___construct(v_message, v_code, v_previous);
   return this;
 }
 void c_Exception::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
-  if (count > 2) throw_toomany_arguments("Exception::__construct", 2, 2);
+  if (count > 3) throw_toomany_arguments("Exception::__construct", 3, 2);
   do {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
@@ -1372,7 +1416,12 @@ void c_Exception::dynConstruct(CArrRef params) {
       break;
     }
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    (t___construct(arg0, arg1));
+    if (count <= 2) {
+      (t___construct(arg0, arg1));
+      break;
+    }
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    (t___construct(arg0, arg1, arg2));
   } while (false);
 }
 void c_Exception::getConstructor(MethodCallPackage &mcp) {
@@ -1382,6 +1431,7 @@ void c_Exception::getConstructor(MethodCallPackage &mcp) {
 void c_Exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
+  Variant a2;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   unsigned int i = 0;
   do {
@@ -1391,15 +1441,19 @@ void c_Exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
     if (i == params.size()) break;
     a1 = params[i]->eval(env);
     i++;
+    if (i == params.size()) break;
+    a2 = params[i]->eval(env);
+    i++;
   } while(false);
   for (; i != params.size(); ++i) {
     params[i]->eval(env);
   }
   int count __attribute__((__unused__)) = params.size();
-  if (count > 2) throw_toomany_arguments("Exception::__construct", 2, 1);
+  if (count > 3) throw_toomany_arguments("Exception::__construct", 3, 1);
   if (count <= 0) (t___construct(), null);
   else if (count == 1) (t___construct(a0), null);
-  else (t___construct(a0, a1), null);
+  else if (count == 2) (t___construct(a0, a1), null);
+  else (t___construct(a0, a1, a2), null);
 }
 struct ObjectStaticCallbacks cw_Exception = {
   c_Exception::os_getInit,
@@ -1412,12 +1466,13 @@ struct ObjectStaticCallbacks cw_Exception = {
 void c_Exception::init() {
   m_message = NAMSTR(s_sys_ss00000000, "");
   m_code = 0LL;
+  m_previous = null;
   m_file = null;
   m_line = null;
   m_trace = null;
   {CountableHelper h(this); t___init__();}
 }
-/* SRC: classes/exception.php line 23 */
+/* SRC: classes/exception.php line 24 */
 void c_Exception::t___init__() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__init__);
   Variant v_top;
@@ -1487,48 +1542,60 @@ void c_Exception::t___init__() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 44 */
+/* SRC: classes/exception.php line 45 */
 void c_Exception::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
+, Variant v_previous //  = null
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__construct);
   bool oldInCtor = gasInCtor(true);
+  if(!f_is_null(v_previous) && !v_previous.instanceof(NAMSTR(s_sys_ssae8717ad, "exception"))) {
+    throw_unexpected_argument_type(3,"Exception::__construct()","exception",v_previous);
+    return;
+  }
   m_message = v_message;
   m_code = v_code;
+  m_previous = v_previous;
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 58 */
+/* SRC: classes/exception.php line 60 */
 Variant c_Exception::t_getmessage() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getMessage);
   return m_message;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 71 */
+/* SRC: classes/exception.php line 73 */
+Variant c_Exception::t_getprevious() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getPrevious);
+  return m_previous;
+}
+namespace hphp_impl_splitter {}
+/* SRC: classes/exception.php line 86 */
 Variant c_Exception::t_getcode() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getCode);
   return m_code;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 85 */
+/* SRC: classes/exception.php line 100 */
 Variant c_Exception::t_getfile() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getFile);
   return m_file;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 99 */
+/* SRC: classes/exception.php line 114 */
 Variant c_Exception::t_getline() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getLine);
   return m_line;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 112 */
+/* SRC: classes/exception.php line 127 */
 Variant c_Exception::t_gettrace() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getTrace);
   return m_trace;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 125 */
+/* SRC: classes/exception.php line 140 */
 String c_Exception::t_gettraceasstring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::getTraceAsString);
   int64 v_i = 0;
@@ -1582,7 +1649,7 @@ String c_Exception::t_gettraceasstring() {
   return v_s;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 144 */
+/* SRC: classes/exception.php line 159 */
 String c_Exception::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Exception, Exception::__toString);
   {
@@ -1602,7 +1669,7 @@ String c_Exception::t___tostring() {
   }
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 271 */
+/* SRC: classes/exception.php line 286 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ErrorException
 Variant c_ErrorException::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
@@ -1885,7 +1952,7 @@ void c_ErrorException::init() {
   c_Exception::init();
   m_severity = null;
 }
-/* SRC: classes/exception.php line 273 */
+/* SRC: classes/exception.php line 288 */
 void c_ErrorException::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
 , Variant v_severity //  = 0LL
@@ -1909,13 +1976,13 @@ void c_ErrorException::t___construct(Variant v_message //  = NAMSTR(s_sys_ss0000
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 293 */
+/* SRC: classes/exception.php line 308 */
 Variant c_ErrorException::t_getseverity() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ErrorException, ErrorException::getSeverity);
   return m_severity;
 }
 namespace hphp_impl_splitter {}
-/* SRC: classes/exception.php line 168 */
+/* SRC: classes/exception.php line 183 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_BadFunctionCallException
 Variant c_BadFunctionCallException::os_getInit(CStrRef s) {
   return c_LogicException::os_getInit(s);
@@ -2007,7 +2074,7 @@ struct ObjectStaticCallbacks cw_BadFunctionCallException = {
 void c_BadFunctionCallException::init() {
   c_LogicException::init();
 }
-/* SRC: classes/exception.php line 204 */
+/* SRC: classes/exception.php line 219 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_LengthException
 Variant c_LengthException::os_getInit(CStrRef s) {
   return c_LogicException::os_getInit(s);
@@ -2097,7 +2164,7 @@ struct ObjectStaticCallbacks cw_LengthException = {
 void c_LengthException::init() {
   c_LogicException::init();
 }
-/* SRC: classes/exception.php line 187 */
+/* SRC: classes/exception.php line 202 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DomainException
 Variant c_DomainException::os_getInit(CStrRef s) {
   return c_LogicException::os_getInit(s);

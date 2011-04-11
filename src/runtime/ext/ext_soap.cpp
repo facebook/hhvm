@@ -2404,10 +2404,10 @@ Variant c_SoapClient::t___call(Variant name, Variant args) {
   return t___soapcall(name, args);
 }
 
-Variant c_SoapClient::t___soapcall(String name, Array args,
-                                   Array options /* = null_array */,
-                                   Variant input_headers /* = null */,
-                                   Variant output_headers /*= null */) {
+Variant c_SoapClient::t___soapcall(CStrRef name, CArrRef args,
+                                   CArrRef options /* = null_array */,
+                                   CVarRef input_headers /* = null_variant */,
+                                   Variant output_headers /* = null */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__soapcall);
   SoapClientScope ss(this);
 
@@ -2611,7 +2611,7 @@ Variant c_SoapClient::t___gettypes() {
   return null;
 }
 
-Variant c_SoapClient::t___dorequest(String buf, String location, String action,
+Variant c_SoapClient::t___dorequest(CStrRef buf, CStrRef location, CStrRef action,
                                     int64 version, bool oneway /* = false */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__dorequest);
   if (location.empty()) {
@@ -2625,6 +2625,8 @@ Variant c_SoapClient::t___dorequest(String buf, String location, String action,
 
   HeaderMap headers;
 
+  String buffer(buf);
+
   // compression
   if (m_compression > 0) {
     if (m_compression & SOAP_COMPRESSION_ACCEPT) {
@@ -2635,14 +2637,14 @@ Variant c_SoapClient::t___dorequest(String buf, String location, String action,
     if (level > 0) {
       Variant ret;
       if (m_compression & SOAP_COMPRESSION_DEFLATE) {
-        ret = f_gzcompress(buf, level);
+        ret = f_gzcompress(buffer, level);
         headers["Content-Encoding"].push_back("deflate");
       } else {
-        ret = f_gzencode(buf, level);
+        ret = f_gzencode(buffer, level);
         headers["Content-Encoding"].push_back("gzip");
       }
       if (!ret.isString()) return null;
-      buf = ret.toString();
+      buffer = ret.toString();
     }
   }
 
@@ -2673,7 +2675,7 @@ Variant c_SoapClient::t___dorequest(String buf, String location, String action,
     http.auth(m_login.data(), m_password.data(), !m_digest);
   }
   StringBuffer response;
-  int code = http.post(location.data(), buf.data(), buf.size(), response,
+  int code = http.post(location.data(), buffer.data(), buffer.size(), response,
                        &headers);
   if (code == 0) {
     m_soap_fault =
@@ -2700,8 +2702,8 @@ Variant c_SoapClient::t___dorequest(String buf, String location, String action,
   return response.detach();
 }
 
-Variant c_SoapClient::t___setcookie(String name,
-                                    String value /* = null_string */) {
+Variant c_SoapClient::t___setcookie(CStrRef name,
+                                    CStrRef value /* = null_string */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__setcookie);
   if (!value.isNull()) {
     m_cookies.set(name, CREATE_VECTOR1(value));
@@ -2711,14 +2713,14 @@ Variant c_SoapClient::t___setcookie(String name,
   return null;
 }
 
-Variant c_SoapClient::t___setlocation(String new_location /* = null_string */){
+Variant c_SoapClient::t___setlocation(CStrRef new_location /* = null_string */){
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__setlocation);
   Variant ret = m_location;
   m_location = new_location;
   return ret;
 }
 
-bool c_SoapClient::t___setsoapheaders(Variant headers /* = null */) {
+bool c_SoapClient::t___setsoapheaders(CVarRef headers /* = null_variant */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SoapClient, SoapClient::__setsoapheaders);
   if (headers.isNull()) {
     m_default_headers = null;

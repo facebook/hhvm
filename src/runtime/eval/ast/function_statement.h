@@ -51,6 +51,7 @@ public:
   virtual void dump(std::ostream &out) const;
   void getInfo(ClassInfo::ParameterInfo &info, VariableEnvironment &env) const;
   bool isOptional() const;
+  bool hasTypeHint() const { return !m_type.empty(); }
   void addNullDefault(void *parser);
   int argNum() const { return m_argNum; }
   const std::string &type() const { return m_type; }

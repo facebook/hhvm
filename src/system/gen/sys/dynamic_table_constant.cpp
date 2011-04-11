@@ -408,11 +408,13 @@ extern const int64 k_E_COMPILE_ERROR;
 extern const int64 k_E_COMPILE_WARNING;
 extern const int64 k_E_CORE_ERROR;
 extern const int64 k_E_CORE_WARNING;
+extern const int64 k_E_DEPRECATED;
 extern const int64 k_E_ERROR;
 extern const int64 k_E_NOTICE;
 extern const int64 k_E_PARSE;
 extern const int64 k_E_RECOVERABLE_ERROR;
 extern const int64 k_E_STRICT;
+extern const int64 k_E_USER_DEPRECATED;
 extern const int64 k_E_USER_ERROR;
 extern const int64 k_E_USER_NOTICE;
 extern const int64 k_E_USER_WARNING;
@@ -2087,7 +2089,7 @@ public:
   hashNodeCon *next;
 };
 static hashNodeCon *conMapTable[8192];
-static hashNodeCon conBuckets[2090];
+static hashNodeCon conBuckets[2092];
 
 void init_builtin_constant_table() {
   const char *conMapData[] = {
@@ -2527,11 +2529,13 @@ void init_builtin_constant_table() {
       (const char *)"E_COMPILE_WARNING", (const char *)-1, (const char *)32, (const char *)&k_E_COMPILE_WARNING,
       (const char *)"E_CORE_ERROR", (const char *)-1, (const char *)32, (const char *)&k_E_CORE_ERROR,
       (const char *)"E_CORE_WARNING", (const char *)-1, (const char *)32, (const char *)&k_E_CORE_WARNING,
+      (const char *)"E_DEPRECATED", (const char *)-1, (const char *)32, (const char *)&k_E_DEPRECATED,
       (const char *)"E_ERROR", (const char *)-1, (const char *)32, (const char *)&k_E_ERROR,
       (const char *)"E_NOTICE", (const char *)-1, (const char *)32, (const char *)&k_E_NOTICE,
       (const char *)"E_PARSE", (const char *)-1, (const char *)32, (const char *)&k_E_PARSE,
       (const char *)"E_RECOVERABLE_ERROR", (const char *)-1, (const char *)32, (const char *)&k_E_RECOVERABLE_ERROR,
       (const char *)"E_STRICT", (const char *)-1, (const char *)32, (const char *)&k_E_STRICT,
+      (const char *)"E_USER_DEPRECATED", (const char *)-1, (const char *)32, (const char *)&k_E_USER_DEPRECATED,
       (const char *)"E_USER_ERROR", (const char *)-1, (const char *)32, (const char *)&k_E_USER_ERROR,
       (const char *)"E_USER_NOTICE", (const char *)-1, (const char *)32, (const char *)&k_E_USER_NOTICE,
       (const char *)"E_USER_WARNING", (const char *)-1, (const char *)32, (const char *)&k_E_USER_WARNING,

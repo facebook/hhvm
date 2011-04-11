@@ -38,6 +38,8 @@ public:
     USER_NOTICE = 1024,
     STRICT = 2048,
     RECOVERABLE_ERROR = 4096,
+    DEPRECATED = 8192,
+    USER_DEPRECATED = 16384,
 
     /**
      * PHP's fatal errors cannot be fed into error handler. HipHop can. We
@@ -49,7 +51,7 @@ public:
 
     PHP_ALL = ERROR | WARNING | PARSE | NOTICE | CORE_ERROR | CORE_WARNING |
         COMPILE_ERROR | COMPILE_WARNING | USER_ERROR | USER_WARNING |
-        USER_NOTICE | RECOVERABLE_ERROR,
+        USER_NOTICE | RECOVERABLE_ERROR | DEPRECATED | USER_DEPRECATED,
 
     HPHP_ALL = PHP_ALL | FATAL_ERROR
   };

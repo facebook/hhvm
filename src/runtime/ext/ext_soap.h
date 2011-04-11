@@ -105,7 +105,7 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   public: Variant t___call(Variant name, Variant args);
   DECLARE_METHOD_INVOKE_HELPERS(__call);
   public: Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
-  public: Variant t___soapcall(String name, Array args, Array options = null_array, Variant input_headers = null, Variant output_headers = null);
+  public: Variant t___soapcall(CStrRef name, CArrRef args, CArrRef options = null_array, CVarRef input_headers = null_variant, Variant output_headers = null);
   DECLARE_METHOD_INVOKE_HELPERS(__soapcall);
   public: Variant t___getlastrequest();
   DECLARE_METHOD_INVOKE_HELPERS(__getlastrequest);
@@ -119,13 +119,13 @@ class c_SoapClient : public ExtObjectDataFlags<ObjectData::HasCall> {
   DECLARE_METHOD_INVOKE_HELPERS(__getfunctions);
   public: Variant t___gettypes();
   DECLARE_METHOD_INVOKE_HELPERS(__gettypes);
-  public: Variant t___dorequest(String buf, String location, String action, int64 version, bool oneway = false);
+  public: Variant t___dorequest(CStrRef buf, CStrRef location, CStrRef action, int64 version, bool oneway = false);
   DECLARE_METHOD_INVOKE_HELPERS(__dorequest);
-  public: Variant t___setcookie(String name, String value = null_string);
+  public: Variant t___setcookie(CStrRef name, CStrRef value = null_string);
   DECLARE_METHOD_INVOKE_HELPERS(__setcookie);
-  public: Variant t___setlocation(String new_location = null_string);
+  public: Variant t___setlocation(CStrRef new_location = null_string);
   DECLARE_METHOD_INVOKE_HELPERS(__setlocation);
-  public: bool t___setsoapheaders(Variant headers = null);
+  public: bool t___setsoapheaders(CVarRef headers = null_variant);
   DECLARE_METHOD_INVOKE_HELPERS(__setsoapheaders);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);

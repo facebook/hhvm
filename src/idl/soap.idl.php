@@ -451,7 +451,7 @@ DefineFunction(
       array(
         'name'   => "input_headers",
         'type'   => Variant,
-        'value'  => "null",
+        'value'  => "null_variant",
       ),
       array(
         'name'   => "output_headers",
@@ -594,7 +594,7 @@ DefineFunction(
       array(
         'name'   => "headers",
         'type'   => Variant,
-        'value'  => "null",
+        'value'  => "null_variant",
       ),
     ),
   ));

@@ -175,6 +175,10 @@ bool f_trigger_error(CStrRef error_msg,
     g_context->handleError(msg, error_type, true,
                        ExecutionContext::NeverThrow,
                        "HipHop Notice:  ");
+  } else if (error_type == k_E_USER_DEPRECATED) {
+    g_context->handleError(msg, error_type, true,
+                       ExecutionContext::NeverThrow,
+                       "HipHop Deprecated: ");
   } else {
     return false;
   }

@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 253 */
+/* SRC: classes/exception.php line 268 */
 FORWARD_DECLARE_CLASS(UnderflowException);
 class c_UnderflowException : public c_RuntimeException {
   public:

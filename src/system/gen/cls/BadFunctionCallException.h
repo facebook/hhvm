@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 168 */
+/* SRC: classes/exception.php line 183 */
 FORWARD_DECLARE_CLASS(BadFunctionCallException);
 class c_BadFunctionCallException : public c_LogicException {
   public:

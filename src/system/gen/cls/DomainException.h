@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 187 */
+/* SRC: classes/exception.php line 202 */
 FORWARD_DECLARE_CLASS(DomainException);
 class c_DomainException : public c_LogicException {
   public:

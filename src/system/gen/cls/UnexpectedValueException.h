@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 262 */
+/* SRC: classes/exception.php line 277 */
 FORWARD_DECLARE_CLASS(UnexpectedValueException);
 class c_UnexpectedValueException : public c_RuntimeException {
   public:

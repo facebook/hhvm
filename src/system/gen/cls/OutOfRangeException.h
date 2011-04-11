@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 212 */
+/* SRC: classes/exception.php line 227 */
 FORWARD_DECLARE_CLASS(OutOfRangeException);
 class c_OutOfRangeException : public c_LogicException {
   public:

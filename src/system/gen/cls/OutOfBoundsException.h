@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 228 */
+/* SRC: classes/exception.php line 243 */
 FORWARD_DECLARE_CLASS(OutOfBoundsException);
 class c_OutOfBoundsException : public c_RuntimeException {
   public:

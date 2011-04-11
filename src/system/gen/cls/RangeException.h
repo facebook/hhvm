@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 244 */
+/* SRC: classes/exception.php line 259 */
 FORWARD_DECLARE_CLASS(RangeException);
 class c_RangeException : public c_RuntimeException {
   public:

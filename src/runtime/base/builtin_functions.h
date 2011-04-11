@@ -226,7 +226,7 @@ inline void echo(CStrRef s) {
   g_context->write(s);
 }
 
-String get_source_filename(litstr path);
+String get_source_filename(litstr path,bool dir_component = false);
 
 void throw_exception(CObjRef e);
 bool set_line(int line0, int char0 = 0, int line1 = 0, int char1 = 0);

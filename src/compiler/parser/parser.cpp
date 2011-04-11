@@ -468,8 +468,8 @@ void Parser::onConstantValue(Token &out, Token &constant) {
 }
 
 void Parser::onScalar(Token &out, int type, Token &scalar) {
-  if (type == T_FILE) {
-    onUnaryOpExp(out, scalar, T_FILE, true);
+  if (type == T_FILE || type == T_DIR) {
+    onUnaryOpExp(out, scalar, type, true);
     return;
   }
 

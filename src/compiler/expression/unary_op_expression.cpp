@@ -385,6 +385,7 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     rt = Type::Any;
     getScope()->getVariables()->forceVariants(ar, VariableTable::AnyVars);
     break;
+  case T_DIR:
   case T_FILE:          et = rt = Type::String;                      break;
   default:
     ASSERT(false);
@@ -478,6 +479,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case T_REQUIRE:       cg_printf("require ");      break;
     case T_REQUIRE_ONCE:  cg_printf("require_once "); break;
     case T_FILE:          cg_printf("__FILE__");      break;
+    case T_DIR:           cg_printf("__DIR__");       break;
     default:
       ASSERT(false);
     }
@@ -508,7 +510,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void UnaryOpExpression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                        int state) {
-  if (hasCPPTemp() || m_op == T_FILE) return;
+  if (hasCPPTemp() || m_op == T_FILE || m_op == T_DIR) return;
   if (m_exp && !getLocalEffects() &&
       m_op != '@' && m_op != T_ISSET && m_op != T_EMPTY &&
       !m_exp->is(KindOfExpressionList)) {
@@ -749,6 +751,8 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     case T_FILE:
       cg_printf("get_source_filename(\"%s\")", getLocation()->file);
       break;
+    case T_DIR:
+      cg_printf("get_source_filename(\"%s\", true)", getLocation()->file);
       break;
     default:
       ASSERT(false);

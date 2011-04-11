@@ -1846,6 +1846,7 @@ common_scalar:
                                          T_CONSTANT_ENCAPSED_STRING,  $1);}
   | T_LINE                             { _p->onScalar($$, T_LINE,     $1);}
   | T_FILE                             { _p->onScalar($$, T_FILE,     $1);}
+  | T_DIR                              { _p->onScalar($$, T_DIR,      $1);}
   | T_CLASS_C                          { _p->onScalar($$, T_CLASS_C,  $1);}
   | T_METHOD_C                         { _p->onScalar($$, T_METHOD_C, $1);}
   | T_FUNC_C                           { _p->onScalar($$, T_FUNC_C,   $1);}

@@ -26,6 +26,7 @@
 #include <runtime/ext/ext_process.h>
 #include <runtime/ext/ext_class.h>
 #include <runtime/ext/ext_function.h>
+#include <runtime/ext/ext_file.h>
 #include <util/logger.h>
 #include <util/util.h>
 #include <util/process.h>
@@ -944,12 +945,21 @@ bool isset(CVarRef v, CStrRef offset, bool isString /* = false */) {
   return false;
 }
 
-String get_source_filename(litstr path) {
-  if (path[0] == '/') return path;
-  if (RuntimeOption::SourceRoot.empty()) {
-    return Process::GetCurrentDirectory() + "/" + path;
+String get_source_filename(litstr path, bool dir_component /* = false */) {
+  String ret;
+  if (path[0] == '/') {
+    ret = path;
+  } else if (RuntimeOption::SourceRoot.empty()) {
+    ret = Process::GetCurrentDirectory() + "/" + path;
+  } else {
+    ret = RuntimeOption::SourceRoot + path;
   }
-  return RuntimeOption::SourceRoot + path;
+
+  if (dir_component) {
+    return f_dirname(ret);
+  } else {
+    return ret;
+  }
 }
 
 Variant include_impl_invoke(CStrRef file, bool once, LVariableTable* variables,

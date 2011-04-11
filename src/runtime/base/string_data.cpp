@@ -41,7 +41,7 @@ StringData::StringData(const char *data,
   ASSERT(data);
   ASSERT(mode >= 0 && mode < StringDataModeCount);
   if (len & IsMask) {
-    throw InvalidArgumentException("len: %d", len);
+    throw InvalidArgumentException("len>=2^29: %d", len);
   }
   m_hash = 0;
   assignHelper(data, len, mode);
@@ -56,7 +56,7 @@ StringData::StringData(const char *data, int len, StringDataMode mode)
   ASSERT(len >= 0);
   ASSERT(mode >= 0 && mode < StringDataModeCount);
   if (len < 0 || (len & IsMask)) {
-    throw InvalidArgumentException("len: %d", len);
+    throw InvalidArgumentException("len>=2^29: %d", len);
   }
   assignHelper(data, len, mode);
   TAINT_OBSERVER_REGISTER_MUTATED(this);
@@ -125,7 +125,7 @@ void StringData::assignHelper(const char *data, int len, StringDataMode mode) {
 
 void StringData::assign(const char *data, int len, StringDataMode mode) {
   if (len < 0 || (len & IsMask)) {
-    throw InvalidArgumentException("len: %d", len);
+    throw InvalidArgumentException("len>=2^29: %d", len);
   }
   releaseData();
   assignHelper(data, len, mode);
@@ -135,7 +135,7 @@ void StringData::append(const char *s, int len) {
   if (len == 0) return;
 
   if (len < 0 || (len & IsMask)) {
-    throw InvalidArgumentException("len: %d", len);
+    throw InvalidArgumentException("len>=2^29: %d", len);
   }
 
   ASSERT(!isStatic()); // never mess around with static strings!

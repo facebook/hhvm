@@ -300,7 +300,14 @@ void FunctionStatement::directBind(VariableEnvironment &env,
   // more parameters than actual arguments
   for (; piter != m_params.end(); ++piter) {
     if (!(*piter)->isOptional()) {
-      throw_missing_arguments(fullName().c_str(), (*piter)->argNum());
+      if ((*piter)->hasTypeHint()) {
+        const string &t = (*piter)->type();
+        throw_missing_typed_argument(fullName().c_str(),
+                                     (t == "array" ? 0 : t.c_str()),
+                                     (*piter)->argNum());
+      } else {
+        throw_missing_arguments(fullName().c_str(), (*piter)->argNum());
+      }
     }
     (*piter)->bindDefault(fenv);
   }
@@ -461,7 +468,14 @@ void FunctionStatement::bindParams(FuncScopeVariableEnvironment &fenv,
   // more params than actual args
   for (; piter != m_params.end(); ++piter) {
     if (!(*piter)->isOptional()) {
-      throw_missing_arguments(fullName().c_str(), (*piter)->argNum());
+      if ((*piter)->hasTypeHint()) {
+        const string &t = (*piter)->type();
+        throw_missing_typed_argument(fullName().c_str(),
+                                     (t == "array" ? 0 : t.c_str()),
+                                     (*piter)->argNum());
+      } else {
+        throw_missing_arguments(fullName().c_str(), (*piter)->argNum());
+      }
     }
     (*piter)->bindDefault(fenv);
   }

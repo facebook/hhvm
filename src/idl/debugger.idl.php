@@ -185,7 +185,7 @@ DefineFunction(
     'args'   => array(
       array(
         'name'   => "cmd",
-        'type'   => 'DebuggerCommand',
+        'type'   => Object,
         'desc'   => "The command to send to client.",
       ),
     ),
@@ -659,7 +659,7 @@ DefineFunction(
     'args'   => array(
       array(
         'name'   => "cmd",
-        'type'   => 'DebuggerCommand',
+        'type'   => Object,
         'desc'   => "The command to send.",
       ),
     ),
@@ -677,7 +677,7 @@ DefineFunction(
     'args'   => array(
       array(
         'name'   => "cmd",
-        'type'   => 'DebuggerCommand',
+        'type'   => Object,
         'desc'   => "The command to send.",
       ),
     ),

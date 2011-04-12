@@ -20,6 +20,7 @@ TARGETS = $(SHARED_LIB)
 all : $(CLS) $(HEADER) $(TARGETS)
 
 $(OBJECTS) : $(HEADER)
+$(PIC_OBJECTS) : $(HEADER)
 
 JAVA_PATH = /usr/local/jdk-6u7-64
 

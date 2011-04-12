@@ -47,7 +47,7 @@ class c_DebuggerProxy : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: bool t_islocal();
   DECLARE_METHOD_INVOKE_HELPERS(islocal);
-  public: Variant t_send(p_DebuggerCommand cmd);
+  public: Variant t_send(CObjRef cmd);
   DECLARE_METHOD_INVOKE_HELPERS(send);
   public: Variant t___destruct();
   DECLARE_METHOD_INVOKE_HELPERS(__destruct);
@@ -131,9 +131,9 @@ class c_DebuggerClient : public ExtObjectData {
   DECLARE_METHOD_INVOKE_HELPERS(argrest);
   public: Array t_args();
   DECLARE_METHOD_INVOKE_HELPERS(args);
-  public: Variant t_send(p_DebuggerCommand cmd);
+  public: Variant t_send(CObjRef cmd);
   DECLARE_METHOD_INVOKE_HELPERS(send);
-  public: Variant t_xend(p_DebuggerCommand cmd);
+  public: Variant t_xend(CObjRef cmd);
   DECLARE_METHOD_INVOKE_HELPERS(xend);
   public: Variant t_getcurrentlocation();
   DECLARE_METHOD_INVOKE_HELPERS(getcurrentlocation);

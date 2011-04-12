@@ -82,7 +82,7 @@ bool c_DebuggerProxy::t_islocal() {
   return m_proxy->isLocal();
 }
 
-Variant c_DebuggerProxy::t_send(p_DebuggerCommand cmd) {
+Variant c_DebuggerProxy::t_send(CObjRef cmd) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerProxy, DebuggerProxy::send);
   CmdUser cmdUser(cmd);
   return m_proxy->send(&cmdUser);
@@ -244,14 +244,14 @@ Array c_DebuggerClient::t_args() {
   return ret;
 }
 
-Variant c_DebuggerClient::t_send(p_DebuggerCommand cmd) {
+Variant c_DebuggerClient::t_send(CObjRef cmd) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClient, DebuggerClient::send);
   CmdUser cmdUser(cmd);
   m_client->send(&cmdUser);
   return true;
 }
 
-Variant c_DebuggerClient::t_xend(p_DebuggerCommand cmd) {
+Variant c_DebuggerClient::t_xend(CObjRef cmd) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DebuggerClient, DebuggerClient::xend);
   CmdUser cmdUser(cmd);
   CmdUserPtr ret = m_client->xend<CmdUser>(&cmdUser);

@@ -846,9 +846,6 @@ static int execute_program_impl(int argc, char **argv) {
         try {
           execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
 
-          DECLARE_THREAD_INFO_NOINIT;
-          FRAME_INJECTION_FLAGS(empty_string, _, FrameInjection::PseudoMain);
-
           if (po.debugger_options.extension.empty()) {
             // even if it's empty, still need to call for warmup
             hphp_invoke_simple("", true); // not to run the 1st file if compiled

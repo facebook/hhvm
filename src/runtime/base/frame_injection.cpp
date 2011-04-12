@@ -364,7 +364,7 @@ FrameInjection *FrameInjection::GetStackFrame(int level) {
 
 String FrameInjection::getFileName() {
   if (m_flags & PseudoMain) {
-    return m_name + 10;
+    return m_name[0] == '_' ? m_name : m_name + 10;
   }
   const char *c = strstr(m_name, "::");
   const char *f = NULL;

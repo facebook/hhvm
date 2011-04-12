@@ -43,6 +43,8 @@ Variant eval(LVariableTable *vars, CObjRef self, CStrRef code_str,
   RequestEvalState::addCodeContainer(scc);
   // todo: pass in params
   NestedVariableEnvironment env(vars, blk, Array(), self);
+  EvalFrameInjection fi(empty_string, "_", env, NULL, NULL,
+                        FrameInjection::PseudoMain);
   s->eval(env);
   if (env.isReturning()) {
     return env.getRet();
@@ -172,7 +174,7 @@ bool eval_get_call_info_hook(const CallInfo *&ci, void *&extra, const char *s,
       EvalFrameInjection *efi = NULL;
       for (FrameInjection *fi = info->m_top; fi; fi= fi->getPrev()) {
         efi = dynamic_cast<EvalFrameInjection*>(fi);
-       if (efi) break;
+        if (efi) break;
       }
       ASSERT(efi);
       efi->getEnv().setClosure(extra);

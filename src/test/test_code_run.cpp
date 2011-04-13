@@ -48,6 +48,7 @@ TestCodeRun::TestCodeRun() : m_perfMode(false) {
 bool TestCodeRun::preTest() {
   if (!CleanUp()) return false;
   m_infos.clear();
+  Type::ResetTypeHintTypes();
   return true;
 }
 

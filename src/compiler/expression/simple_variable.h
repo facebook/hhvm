@@ -30,7 +30,7 @@ public:
   SimpleVariable(EXPRESSION_CONSTRUCTOR_PARAMETERS, const std::string &name);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
-  virtual int getLocalEffects() const { return NoEffect; }
+  virtual int getLocalEffects() const;
   virtual bool isThis() const { return m_this;}
   bool isSuperGlobal() const { return m_superGlobal || m_globals; }
   virtual bool isRefable(bool checkError = false) const { return true;}

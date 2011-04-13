@@ -39,6 +39,7 @@ public:
   void buildConflicts();
   bool color(TypePtr type);
   void coalesce(MethodStatementPtr m);
+  bool shrinkWrap();
 private:
   void addConflicts(size_t width, BitOps::Bits *live, BitOps::Bits *dying);
   ExpressionPtr m_refs;

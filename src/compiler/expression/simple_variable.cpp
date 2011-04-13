@@ -52,6 +52,14 @@ ExpressionPtr SimpleVariable::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
+int SimpleVariable::getLocalEffects() const {
+  if (m_context == Declaration &&
+      m_sym && m_sym->isShrinkWrapped()) {
+    return LocalEffect;
+  }
+  return NoEffect;
+}
+
 void SimpleVariable::updateSymbol(SimpleVariablePtr src) {
   m_sym = getScope()->getVariables()->addSymbol(m_name);
   if (src && src->m_sym) {
@@ -276,11 +284,26 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   } else if (m_globals) {
     cg_printf("get_global_array_wrapper()");
   } else {
+    bool sw = false;
+    if (m_sym->isShrinkWrapped() &&
+        m_context == Declaration) {
+      TypePtr type = m_sym->getFinalType();
+      type->outputCPPDecl(cg, ar, getScope());
+      sw = true;
+      cg_printf(" ");
+    }
     const char *prefix =
       getScope()->getVariables()->getVariablePrefix(m_sym);
     cg_printf("%s%s", prefix, cg.formatLabel(m_name).c_str());
     if (m_originalSym) {
       cg.printf(" /* %s */", m_originalSym->getName().c_str());
+    }
+    if (sw) {
+      TypePtr type = m_sym->getFinalType();
+      const char *initializer = type->getCPPInitializer();
+      if (initializer) {
+        cg_printf(" = %s", initializer);
+      }
     }
   }
 }

@@ -22,7 +22,10 @@
 #include <compiler/expression/simple_variable.h>
 
 #include <compiler/statement/statement.h>
+#include <compiler/statement/block_statement.h>
+#include <compiler/statement/exp_statement.h>
 #include <compiler/statement/method_statement.h>
+#include <compiler/statement/statement_list.h>
 
 using namespace HPHP;
 using namespace boost;
@@ -92,7 +95,7 @@ void LiveDict::updateParams() {
       assert(e->is(Expression::KindOfSimpleVariable));
       Symbol *sym = static_pointer_cast<SimpleVariable>(e)->getSymbol();
       if (sym) {
-        if (sym->isParameter()) {
+        if (sym->isParameter() || e->isThis()) {
           BitOps::set_bit(e->getCanonID(), avlin, true);
         }
         if (sym->isNeeded() || sym->isReferenced()) {
@@ -451,7 +454,8 @@ bool LiveDict::color(TypePtr type) {
         if (sym &&
             !sym->isGlobal() &&
             !sym->isParameter() &&
-            !sym->isStatic()) {
+            !sym->isStatic() &&
+            !e->isThis()) {
           col.addNode(i);
         }
       }
@@ -487,4 +491,152 @@ bool LiveDict::color(TypePtr type) {
     m_remap[ni.originalIndex] = ix;
   }
   return doit;
+}
+
+typedef std::pair<AstWalkerStateVec,int> RootEntry;
+static bool reCmp(const RootEntry &re1, const RootEntry &re2) {
+  if (!re1.second || !re2.second) return re2.second < re1.second;
+  int sz1 = re1.first.size(), sz2 = re2.first.size();
+  if (sz1 > sz2) return true;
+  if (sz1 < sz2) return false;
+  return re1.first[sz1-1].index > re2.first[sz1-1].index;
+}
+
+class ShrinkWrapWalker : public FunctionWalker {
+  typedef std::vector<RootEntry> RootEntryVec;
+public:
+  ShrinkWrapWalker(LiveDict &dict, int size, std::map<int,int> &remap) :
+      m_dict(dict), m_size(size), m_remap(remap), m_rootEntries(size) {}
+  void walk(ControlBlock *b, BitOps::Bits *tmp) {
+    const AstWalkerStateVec &start = b->getStartState();
+    if (!start.size()) return;
+
+    BitOps::Bits *pantin = b->getRow(DataFlow::PAntIn);
+    BitOps::Bits *pavlin = b->getRow(DataFlow::PAvailIn);
+    BitOps::Bits *pdiein = b->getRow(DataFlow::PDieIn);
+
+    BitOps::bit_or_and(m_size, tmp, pantin, pdiein, pavlin);
+
+    m_state = start;
+
+    for (int i = m_size; i--; ) {
+      if (BitOps::get_bit(i, tmp)) {
+        mark(i);
+      }
+    }
+
+    AstWalker::walk(*this, m_state, b->getEndBefore(), b->getEndAfter());
+  }
+
+  int after(ConstructRawPtr cp) {
+    SimpleVariableRawPtr e(dynamic_pointer_cast<SimpleVariable>(cp));
+    if (e) mark(e->getCanonID());
+    return WalkContinue;
+  }
+
+  void mark(int i) {
+    int j = m_remap[i] ? m_remap[i] : i;
+    RootEntry &re = m_rootEntries[j];
+    int reSize = re.first.size();
+    int sz = m_state.size();
+    if (reSize && reSize < sz) sz = reSize + 1;
+    while (sz--) {
+      const AstWalkerState &s = m_state[sz];
+      if (reSize && re.first[sz].cp != s.cp) {
+        continue;
+      }
+      StatementPtr sp(
+        dynamic_pointer_cast<Statement>(s.cp));
+      if (!sp) continue;
+      if (!sp->is(Statement::KindOfBlockStatement) || s.index) {
+        if (!sp->is(Statement::KindOfStatementList) ||
+            (sz && !dynamic_pointer_cast<BlockStatement>(m_state[sz-1].cp))) {
+          continue;
+        }
+      }
+      if (reSize) {
+        if (reSize > sz) {
+          re.first.resize(sz+1);
+        }
+        if (re.first[sz].index > s.index) {
+          re.first[sz].index = s.index;
+        }
+      } else {
+        re.second = j;
+        for (int k = 0; k <= sz; k++) {
+          re.first.push_back(m_state[k]);
+        }
+      }
+      break;
+    }
+    assert(sz >= 0);
+  }
+
+  void execute() {
+    std::sort(m_rootEntries.begin(), m_rootEntries.end(), reCmp);
+
+    for (int i = 0; i < m_size; i++) {
+      RootEntry &re = m_rootEntries[i];
+      if (!re.second) break;
+      const AstWalkerState &s = re.first[re.first.size() - 1];
+      StatementPtr sp(dynamic_pointer_cast<Statement>(s.cp));
+      assert(sp);
+      StatementListPtr sl;
+      int ix;
+      if (sp->is(Statement::KindOfStatementList)) {
+        sl = static_pointer_cast<StatementList>(sp);
+        ix = (s.index - 1) / 2;
+      } else {
+        assert(sp->is(Statement::KindOfBlockStatement));
+        sl = static_pointer_cast<BlockStatement>(sp)->getStmts();
+        if (!sl) continue;
+        ix = 0;
+      }
+      ExpressionPtr e = m_dict.get(re.second);
+      assert(e && e->is(Expression::KindOfSimpleVariable));
+      SimpleVariablePtr sv(static_pointer_cast<SimpleVariable>(e));
+      Symbol *sym = sv->getSymbol();
+      if (!sym || sym->isGlobal() || sym->isStatic() || sym->isParameter() ||
+          sv->isThis()) {
+        continue;
+      }
+
+      sym->setShrinkWrapped();
+      e = e->clone();
+      e->clearContext();
+      e->recomputeEffects();
+      e->setContext(Expression::Declaration);
+      StatementPtr sub = (*sl)[ix];
+      e->setLocation(sub->getLocation());
+      e->setBlockScope(sub->getScope());
+      ExpStatementPtr exp(new ExpStatement(
+                            sub->getScope(), sub->getLocation(),
+                            Statement::KindOfExpStatement, e));
+      sl->insertElement(exp, ix);
+    }
+  }
+
+private:
+  LiveDict          &m_dict;
+  int               m_size;
+  std::map<int,int> &m_remap;
+  RootEntryVec      m_rootEntries;
+  AstWalkerStateVec m_state;
+};
+
+bool LiveDict::shrinkWrap() {
+  ControlFlowGraph &g = *m_am.graph();
+  BitOps::Bits *tmp = g.getTempBits(0);
+  int size = g.bitWidth();
+
+  ShrinkWrapWalker sw(*this, size, m_remap);
+
+  for (int dfn = g.getNumBlocks(); dfn; dfn--) {
+    ControlBlock *b = g.getDfBlock(dfn);
+    sw.walk(b, tmp);
+  }
+
+  sw.execute();
+
+  return false;
 }

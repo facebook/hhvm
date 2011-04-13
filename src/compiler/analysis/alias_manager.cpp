@@ -2270,6 +2270,7 @@ void AliasManager::finalSetup(AnalysisResultConstPtr ar, MethodStatementPtr m) {
           ld.color(Type::Primitive)) {
         ld.coalesce(m);
       }
+      ld.shrinkWrap();
     }
 
     if (Option::DumpAst) m_graph->dump(ar);

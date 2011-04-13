@@ -131,8 +131,6 @@ class ControlBlock {
   typedef ControlFlowGraph::graph_traits graph_traits;
   typedef boost::default_color_type color_type;
 public:
-//  ControlBlock();
-//  void                  setState(const AstWalkerStateVec &s);
   ControlBlock(const AstWalkerStateVec &s, ControlBlock *prev);
 
   void                  setDfn(int n) { m_dfn = n; }
@@ -149,7 +147,7 @@ public:
   void                  setEndBefore(ConstructRawPtr e) { m_endBefore = e; }
   void                  setEndAfter(ConstructRawPtr e) { m_endAfter = e; }
   ConstructRawPtr       getStartNode() const { return m_start.back().cp; }
-  AstWalkerStateVec     getStartState() const { return m_start; }
+  const AstWalkerStateVec &getStartState() const { return m_start; }
   ConstructRawPtr       getEndBefore() const { return m_endBefore; }
   ConstructRawPtr       getEndAfter() const { return m_endAfter; }
   void                  dump(int spc, AnalysisResultConstPtr ar,

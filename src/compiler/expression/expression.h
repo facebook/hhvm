@@ -91,7 +91,7 @@ public:
     NoContext    = 0,
     RValue       = 0,
     LValue       = 1,            // assignment exp; foreach stmt
-    Declaration  = LValue | 2,   // global or static stmt
+    Declaration  = LValue | 2,   // global or static stmt, or delayed var
     NoLValueWrapper = 4,         // ok to not have lval() wrapper
     RefValue  = 8,               // &exp
     NoRefWrapper = 0x10,         // ok to not have ref() wrapper

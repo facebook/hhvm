@@ -1267,6 +1267,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     const Symbol *sym = m_symbolVec[i];
     const string &name = sym->getName();
     string fname = cg.formatLabel(name);
+    if (sym->isShrinkWrapped()) continue;
     if (sym->isSystem() && cg.getOutput() != CodeGenerator::SystemCPP) {
       continue;
     }

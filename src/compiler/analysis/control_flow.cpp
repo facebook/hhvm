@@ -182,8 +182,6 @@ private:
 
 using namespace HPHP;
 
-//ControlBlock::ControlBlock() : m_dfn(0), m_color() {}
-
 ControlBlock::ControlBlock(const AstWalkerStateVec &s, ControlBlock *prev) :
     m_dfn(0), m_start(s), m_color(), m_next(0) {
   if (prev) prev->m_next = this;
@@ -619,16 +617,18 @@ void ControlBlock::dump(int spc, AnalysisResultConstPtr ar,
     }
   }
 
-  for (int i = 0; i < DataFlow::NumBVs; i++) {
-    if (graph->rowExists(i)) {
-      BitOps::Bits *row = getRow(i);
-      printf("  Row %s:", DataFlow::GetName(i));
-      for (int b = 0, n = graph->bitWidth(); b < n; ++b) {
-        if (BitOps::get_bit(b, row)) {
-          printf(" %1d", b);
+  if (m_dfn) {
+    for (int i = 0; i < DataFlow::NumBVs; i++) {
+      if (graph->rowExists(i)) {
+        BitOps::Bits *row = getRow(i);
+        printf("  Row %s:", DataFlow::GetName(i));
+        for (int b = 0, n = graph->bitWidth(); b < n; ++b) {
+          if (BitOps::get_bit(b, row)) {
+            printf(" %1d", b);
+          }
         }
+        printf("\n");
       }
-      printf("\n");
     }
   }
 

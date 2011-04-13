@@ -72,6 +72,10 @@ const Type::TypePtrMap &Type::GetTypeHintTypes() {
   return TypeHintTypes;
 }
 
+void Type::ResetTypeHintTypes() {
+  TypeHintTypes.clear();
+}
+
 TypePtr Type::CreateObjectType(const std::string &classname) {
   return TypePtr(new Type(KindOfObject, classname));
 }

@@ -96,6 +96,7 @@ public:
 
   typedef hphp_string_imap<TypePtr> TypePtrMap;
   static const TypePtrMap &GetTypeHintTypes();
+  static void ResetTypeHintTypes();
 
   /**
    * Uncertain types: types that are ambiguous yet.

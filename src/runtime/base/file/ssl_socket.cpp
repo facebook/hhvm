@@ -378,12 +378,23 @@ bool SSLSocket::setupCrypto(SSLSocket *session /* = NULL */) {
 #endif
   switch (m_method) {
   case ClientSSLv23: m_client = true;  smethod = SSLv23_client_method(); break;
-  case ClientSSLv2:  m_client = true;  smethod = SSLv2_client_method();  break;
   case ClientSSLv3:  m_client = true;  smethod = SSLv3_client_method();  break;
   case ClientTLS:    m_client = true;  smethod = TLSv1_client_method();  break;
   case ServerSSLv23: m_client = false; smethod = SSLv23_server_method(); break;
   case ServerSSLv3:  m_client = false; smethod = SSLv3_server_method();  break;
+
+  /* SSLv2 protocol might be disabled in the OpenSSL library */
+#ifndef OPENSSL_NO_SSL2
+  case ClientSSLv2:  m_client = true;  smethod = SSLv2_client_method();  break;
   case ServerSSLv2:  m_client = false; smethod = SSLv2_server_method();  break;
+#else
+  case ClientSSLv2:
+  case ServerSSLv2:
+    raise_warning("OpenSSL library does not support SSL2 protocol");
+    return false;
+  break;
+#endif
+
   case ServerTLS:    m_client = false; smethod = TLSv1_server_method();  break;
   default:
     return false;

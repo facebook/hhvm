@@ -333,6 +333,7 @@ void create_generator(Parser *_p, Token &out, Token &params,
 
   Token ret, ref;
   ret.setText("Continuation");
+  ret.setCheck();
   if (clsname) {
     Token closure;
     _p->onMethod(closure, *modifiers, ret, ref, name, params, scont);

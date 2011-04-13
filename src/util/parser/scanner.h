@@ -27,7 +27,7 @@ namespace HPHP {
 
 class ScannerToken {
 public:
-  ScannerToken() : m_num(0) {}
+  ScannerToken() : m_num(0), m_check(false) {}
   void reset() { m_num = 0; m_text.clear();}
 
   int num() const { return m_num;}
@@ -68,6 +68,12 @@ public:
   void setText(const ScannerToken &token) {
     m_text = token.m_text;
   }
+  bool check() const {
+    return m_check;
+  }
+  void setCheck() {
+    m_check = true;
+  }
 
   void xhpLabel(bool prefix = true);
   bool htmlTrim(); // true if non-empty after trimming
@@ -76,6 +82,7 @@ public:
 protected:
   int m_num; // internal token id
   std::string m_text;
+  bool m_check;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

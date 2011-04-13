@@ -982,6 +982,11 @@ void Parser::onFunctionStart(Token &name) {
 
 void Parser::onFunction(Token &out, Token &ret, Token &ref, Token &name,
                         Token &params, Token &stmt) {
+  const string &retType = ret.text();
+  if (!retType.empty() && !ret.check()) {
+    raise_error("Return type hint is not supported yet: %s",
+                getMessage().c_str());
+  }
   FunctionStatementPtr func = peekFunc();
   ASSERT(func);
   popFunc();

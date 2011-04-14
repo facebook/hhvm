@@ -171,12 +171,13 @@ bool eval_get_call_info_hook(const CallInfo *&ci, void *&extra, const char *s,
     ci = fs->getCallInfo();
     if (extra) {
       DECLARE_THREAD_INFO;
-      EvalFrameInjection *efi = NULL;
-      for (FrameInjection *fi = info->m_top; fi; fi= fi->getPrev()) {
-        efi = dynamic_cast<EvalFrameInjection*>(fi);
-        if (efi) break;
+      FrameInjection *fi;
+      for (fi = info->m_top; fi; fi= fi->getPrev()) {
+        if (fi->isEvalFrame()) {
+          break;
+        }
       }
-      ASSERT(efi);
+      EvalFrameInjection *efi = static_cast<EvalFrameInjection*>(fi);
       efi->getEnv().setClosure(extra);
     }
     extra = (void*)fs;

@@ -184,7 +184,7 @@ void Token::operator=(Token &other) {
 
 Parser::ParserFrameInjection::ParserFrameInjection(
   const char *func, const char *fileName) :
-    FrameInjection(empty_string, func, false),
+    FrameInjection(func, 0),
     m_file(fileName) {}
 
 ///////////////////////////////////////////////////////////////////////////////

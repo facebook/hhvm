@@ -21,11 +21,11 @@ namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-String EvalFrameInjection::getFileName() {
+String EvalFrameInjection::getFileNameEval() {
   return m_file;
 }
 
-Array EvalFrameInjection::getArgs() {
+Array EvalFrameInjection::getArgsEval() {
   return m_env.getParams();
 }
 
@@ -44,8 +44,8 @@ EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
 EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
 (CObjRef obj) : m_set(false), m_prev(NULL) {
 #ifdef ENABLE_LATE_STATIC_BINDING
-  FrameInjection::SetCallingObject(ThreadInfo::s_threadInfo.getNoCheck(),
-                                   obj.get());
+  FrameInjection::SetStaticClassName(ThreadInfo::s_threadInfo.getNoCheck(),
+                                     obj->getRoot()->o_getClassName());
 #endif
 }
 

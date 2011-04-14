@@ -536,11 +536,9 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   try {
     LVariableTable *vars = get_variable_table();
     FrameInjection *f = FrameInjection::GetStackFrame(frame);
-    if (f) {
-      EvalFrameInjection *eframe = dynamic_cast<EvalFrameInjection*>(f);
-      if (eframe) {
-        vars = &eframe->getEnv();
-      }
+    if (f && f->isEvalFrame()) {
+      EvalFrameInjection *eframe = static_cast<EvalFrameInjection*>(f);
+      vars = &eframe->getEnv();
     }
 
     String code(php.c_str(), php.size(), AttachLiteral);

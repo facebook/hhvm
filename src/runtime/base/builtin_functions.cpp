@@ -1461,7 +1461,7 @@ void MethodCallPackage::lateStaticBind(ThreadInfo *ti) {
 const CallInfo *MethodCallPackage::bindClass(FrameInjection &fi) {
 #ifdef ENABLE_LATE_STATIC_BINDING
   if (ci->m_flags & CallInfo::StaticMethod) {
-    fi.setCallingObject(obj->getRoot());
+    fi.setStaticClassName(obj->getRoot()->o_getClassName());
   }
 #endif
   return ci;

@@ -20,6 +20,8 @@
 #include <runtime/base/class_info.h>
 #include <runtime/base/frame_injection.h>
 
+#include <runtime/eval/runtime/eval_frame_injection.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // static strings
@@ -34,140 +36,6 @@ static StaticString s_type("type");
 
 ///////////////////////////////////////////////////////////////////////////////
 
-
-static inline void injection_check(ThreadInfo *&info) {
-#ifdef INFINITE_RECURSION_DETECTION
-  check_recursion(info);
-#endif
-  if (info->m_pendingException) {
-    throw_pending_exception(info);
-  }
-}
-
-// constructors with hot profiler
-FrameInjection::FrameInjection(CStrRef cls, const char *name)
-    : m_class(cls), m_name(name), m_object(NULL),
-#ifdef ENABLE_LATE_STATIC_BINDING
-      m_staticClass(NULL), m_callingObject(NULL),
-#endif /* ENABLE_LATE_STATIC_BINDING */
-      m_line(0), m_flags(0) {
-  m_info = ThreadInfo::s_threadInfo.getNoCheck();
-  injection_check(m_info);
-  doCommon();
-  hotProfilerInit(m_info, name);
-}
-
-FrameInjection::FrameInjection(CStrRef cls, const char *name, ObjectData *obj)
-    : m_class(cls), m_name(name), m_object(obj),
-#ifdef ENABLE_LATE_STATIC_BINDING
-      m_staticClass(NULL), m_callingObject(NULL),
-#endif
-      m_line(0), m_flags(0) {
-  m_info = ThreadInfo::s_threadInfo.getNoCheck();
-  injection_check(m_info);
-  doCommon();
-  hotProfilerInit(m_info, name);
-}
-
-FrameInjection::FrameInjection(CStrRef cls, const char *name, int fs)
-    : m_class(cls), m_name(name), m_object(NULL),
-#ifdef ENABLE_LATE_STATIC_BINDING
-      m_staticClass(NULL), m_callingObject(NULL),
-#endif
-      m_line(0), m_flags(fs) {
-  m_info = ThreadInfo::s_threadInfo.getNoCheck();
-  injection_check(m_info);
-  doCommon();
-  hotProfilerInit(m_info, name);
-}
-
-FrameInjection::FrameInjection(CStrRef cls,
-                               const char *name, ObjectData *obj, int fs)
-    : m_class(cls), m_name(name), m_object(obj),
-#ifdef ENABLE_LATE_STATIC_BINDING
-      m_staticClass(NULL), m_callingObject(NULL),
-#endif
-      m_line(0), m_flags(fs) {
-  m_info = ThreadInfo::s_threadInfo.getNoCheck();
-  injection_check(m_info);
-  doCommon();
-  hotProfilerInit(m_info, name);
-}
-
-// constructors without hot profiler
-FrameInjection::FrameInjection(CStrRef cls, const char *name, bool unused)
-    : m_class(cls), m_name(name), m_object(NULL),
-#ifdef ENABLE_LATE_STATIC_BINDING
-      m_staticClass(NULL), m_callingObject(NULL),
-#endif
-      m_line(0), m_flags(0) {
-  m_info = ThreadInfo::s_threadInfo.getNoCheck();
-  injection_check(m_info);
-  doCommon();
-#ifdef HOTPROFILER
-  m_prof = false;
-#endif
-}
-
-FrameInjection::FrameInjection(CStrRef cls,
-                               const char *name, ObjectData *obj, bool unused)
-    : m_class(cls), m_name(name), m_object(obj),
-#ifdef ENABLE_LATE_STATIC_BINDING
-      m_staticClass(NULL), m_callingObject(NULL),
-#endif
-      m_line(0), m_flags(0) {
-  m_info = ThreadInfo::s_threadInfo.getNoCheck();
-  injection_check(m_info);
-  doCommon();
-#ifdef HOTPROFILER
-  m_prof = false;
-#endif
-}
-
-FrameInjection::FrameInjection(CStrRef cls,
-                               const char *name, int fs, bool unused)
-    : m_class(cls), m_name(name), m_object(NULL),
-#ifdef ENABLE_LATE_STATIC_BINDING
-      m_staticClass(NULL), m_callingObject(NULL),
-#endif
-      m_line(0), m_flags(fs) {
-  m_info = ThreadInfo::s_threadInfo.getNoCheck();
-  injection_check(m_info);
-  doCommon();
-#ifdef HOTPROFILER
-  m_prof = false;
-#endif
-}
-
-FrameInjection::FrameInjection(CStrRef cls, const char *name, ObjectData *obj,
-                               int fs, bool unused)
-    : m_class(cls), m_name(name), m_object(obj),
-#ifdef ENABLE_LATE_STATIC_BINDING
-      m_staticClass(NULL), m_callingObject(NULL),
-#endif
-      m_line(0), m_flags(fs) {
-  m_info = ThreadInfo::s_threadInfo.getNoCheck();
-  injection_check(m_info);
-  doCommon();
-#ifdef HOTPROFILER
-  m_prof = false;
-#endif
-}
-
-FrameInjection::~FrameInjection() {
-#ifdef REQUEST_TIMEOUT_DETECTION
-  check_request_timeout(m_info);
-#endif
-
-  m_info->m_top = m_prev;
-#ifdef HOTPROFILER
-  if (m_prof) {
-    Profiler *prof = m_info->m_profiler;
-    if (prof) end_profiler_frame(prof);
-  }
-#endif
-}
-
 CStrRef FrameInjection::GetClassName(bool skip /* = false */) {
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {
@@ -176,13 +44,14 @@ CStrRef FrameInjection::GetClassName(bool skip /* = false */) {
   // If we have included a file inside a class method or called a builtin
   // function, we should walk up to find that class
   if (t) {
-    while (t->m_prev && t->m_class.empty() &&
+    while (t->m_prev && t->getClassName().empty() &&
            t->m_flags & (PseudoMain | BuiltinFunction)) {
       t = t->m_prev;
     }
-  }
-  if (t && !t->m_class.empty()) {
-    return t->m_class;
+    CStrRef name = t->getClassName();
+    if (!name.empty()) {
+      return name;
+    }
   }
   return empty_string;
 }
@@ -206,7 +75,7 @@ ObjectData *FrameInjection::GetThis(bool skip /* = false */) {
     t = t->m_prev;
   }
   if (t) {
-    return t->m_object.get();
+    return t->getObjectV();
   }
   return NULL;
 }
@@ -264,10 +133,10 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
       const char *c = strstr(t->m_name, "::");
       if (c) {
         frame.set(s_function, String(c + 2), true);
-        frame.set(s_class, t->m_class->copy(), true);
-        if (!t->m_object.isNull()) {
+        frame.set(s_class, t->getClassName()->copy(), true);
+        if (t->getObjectV()) {
           if (withThis) {
-            frame.set(s_object, t->m_object, true);
+            frame.set(s_object, Object(t->getObjectV()), true);
           }
           frame.set(s_type, "->", true);
         } else {
@@ -335,6 +204,22 @@ int FrameInjection::GetLine(bool skip /* = false */) {
   return -1;
 }
 
+#ifdef ENABLE_LATE_STATIC_BINDING
+CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
+  ASSERT(info);
+  for (FrameInjection *t = info->m_top; t; t = t->m_prev) {
+    if (t != info->m_top) {
+      if (t->m_staticClass) return *t->m_staticClass;
+    }
+    ObjectData *obj = t->getObjectV();
+    if (obj && obj->o_getId()) {
+      return obj->o_getClassName();
+    }
+  }
+  return empty_string;
+}
+#endif /* ENABLE_LATE_STATIC_BINDING */
+
 bool FrameInjection::IsGlobalScope() {
   return IsGlobalScope(ThreadInfo::s_threadInfo->m_top);
 }
@@ -362,14 +247,54 @@ FrameInjection *FrameInjection::GetStackFrame(int level) {
   return frame;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+CStrRef FrameInjection::getClassName() const {
+  if (isEvalFrame()) {
+    const Eval::EvalFrameInjection *efi =
+      static_cast<const Eval::EvalFrameInjection*>(this);
+    return efi->getClass();
+  }
+  // Otherwise, parse the name and lookup from ClassInfo
+  const char *c = strstr(m_name, "::");
+  if (!c) return empty_string;
+  String cls(m_name, c - m_name, CopyString);
+  const ClassInfo *classInfo = ClassInfo::FindClass(cls);
+  if (classInfo) {
+    CStrRef clsRef = classInfo->getName();
+    if (!clsRef.isNull()) {
+      return clsRef;
+    }
+  }
+  return empty_string;
+}
+
+ObjectData *FrameInjection::getObjectV() const {
+  if (isObjectMethodFrame()) {
+    const FrameInjectionObjectMethod* ofi =
+      static_cast<const FrameInjectionObjectMethod*>(this);
+    return ofi->getObject();
+  } else if (isEvalFrame()) {
+    const Eval::EvalFrameInjection* efi =
+      static_cast<const Eval::EvalFrameInjection*>(this);
+    return efi->getObject();
+  }
+  return NULL;
+}
+
 String FrameInjection::getFileName() {
   if (m_flags & PseudoMain) {
     return m_name[0] == '_' ? m_name : m_name + 10;
   }
+  if (isEvalFrame()) {
+    Eval::EvalFrameInjection *efi =
+      static_cast<Eval::EvalFrameInjection*>(this);
+    return efi->getFileNameEval();
+  }
   const char *c = strstr(m_name, "::");
   const char *f = NULL;
   if (c) {
-    f = SourceInfo::TheSourceInfo.getClassDeclaringFile(m_class);
+    f = SourceInfo::TheSourceInfo.getClassDeclaringFile(getClassName());
   } else {
     f = SourceInfo::TheSourceInfo.getFunctionDeclaringFile(m_name);
   }
@@ -380,45 +305,109 @@ String FrameInjection::getFileName() {
 }
 
 Array FrameInjection::getArgs() {
+  if (m_flags & EvalFrame) {
+    Eval::EvalFrameInjection *efi =
+      static_cast<Eval::EvalFrameInjection*>(this);
+    return efi->getArgsEval();
+  }
   return Array();
 }
 
-ObjectData *FrameInjection::getThis() {
-  ObjectData *ret = m_object.get();
-  if (ret && !ret->o_getId()) {
-    ret = NULL;
-  }
-  return ret;
+///////////////////////////////////////////////////////////////////////////////
+
+static inline void hotProfilerInit(ThreadInfo *info, const char *name) {
+#ifdef HOTPROFILER
+  Profiler *prof = info->m_profiler;
+  if (prof) begin_profiler_frame(prof, name);
+#endif
 }
 
-ObjectData *FrameInjection::getThisForArrow() {
-  ObjectData *ret = m_object.get();
-  if (ret && ret->o_getId()) {
-    return ret;
+static inline void hotProfilerFini(ThreadInfo *info) {
+#ifdef HOTPROFILER
+  Profiler *prof = info->m_profiler;
+  if (prof) end_profiler_frame(prof);
+#endif
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+FrameInjectionFunction::FrameInjectionFunction(const char *name, int fs)
+  : FrameInjection(name, fs) {
+  ASSERT(fs & Function);
+  hotProfilerInit(m_info, name);
+}
+
+FrameInjectionFunction::~FrameInjectionFunction() {
+#ifdef REQUEST_TIMEOUT_DETECTION
+  check_request_timeout(m_info);
+#endif
+  hotProfilerFini(m_info);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+FrameInjectionStaticMethod::FrameInjectionStaticMethod(const char *name, int fs)
+  : FrameInjection(name, fs) {
+  ASSERT(fs & StaticMethod);
+
+  hotProfilerInit(m_info, name);
+}
+
+FrameInjectionStaticMethod::~FrameInjectionStaticMethod() {
+#ifdef REQUEST_TIMEOUT_DETECTION
+  check_request_timeout(m_info);
+#endif
+  hotProfilerFini(m_info);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+FrameInjectionObjectMethod::FrameInjectionObjectMethod(const char *name,
+                                                       int fs, ObjectData *obj)
+  : FrameInjection(name, fs) {
+  ASSERT(fs & ObjectMethod);
+  ASSERT(obj);
+
+  m_object = obj;
+  m_object->incRefCount();
+  hotProfilerInit(m_info, name);
+}
+
+FrameInjectionObjectMethod::~FrameInjectionObjectMethod() {
+#ifdef REQUEST_TIMEOUT_DETECTION
+  check_request_timeout(m_info);
+#endif
+  if (m_object->decRefCount() == 0) {
+    m_object->release();
+  }
+  hotProfilerFini(m_info);
+}
+
+ObjectData *FrameInjectionObjectMethod::getThis() {
+  if (!m_object->o_getId()) {
+    return NULL;
+  }
+  return m_object;
+}
+
+ObjectData *FrameInjectionObjectMethod::getThisForArrow() {
+  if (m_object->o_getId()) {
+    return m_object;
   }
   throw FatalErrorException("Using $this when not in object context");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// static late binding
 
-#ifdef ENABLE_LATE_STATIC_BINDING
-CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
-  ASSERT(info);
-  for (FrameInjection *t = info->m_top; t; t = t->m_prev) {
-    if (t != info->m_top) {
-      if (t->m_staticClass) return *t->m_staticClass;
-      if (t->m_callingObject) {
-        return t->m_callingObject->getRoot()->o_getClassName();
-      }
-    }
-    if (!t->m_object.isNull() && t->m_object->o_getId()) {
-      return t->m_object->o_getClassName();
-    }
-  }
-  return empty_string;
+FrameInjectionFunctionNP::FrameInjectionFunctionNP(const char *name, int fs)
+  : FrameInjection(name, fs) {
 }
-#endif /* ENABLE_LATE_STATIC_BINDING */
+
+FrameInjectionFunctionNP::~FrameInjectionFunctionNP() {
+#ifdef REQUEST_TIMEOUT_DETECTION
+  check_request_timeout(m_info);
+#endif
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

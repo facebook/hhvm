@@ -27,10 +27,14 @@ namespace HPHP {
 class FrameInjection {
 public:
   enum Flag {
-    PseudoMain      = 1,
-    BuiltinFunction = 2,
-    BreakPointHit   = 4
-  };
+    PseudoMain      =  1 << 0,
+    BuiltinFunction =  1 << 1,
+    BreakPointHit   =  1 << 2,
+    EvalFrame       =  1 << 3,
+    Function        =  1 << 4,
+    StaticMethod    =  1 << 5,
+    ObjectMethod    =  1 << 6
+ };
 
   static CStrRef GetClassName(bool skip = false);
   static CStrRef GetParentClassName(bool skip = false);
@@ -59,42 +63,51 @@ public:
     FrameInjection *t = info->m_top;
     if (t) t->m_staticClass = NULL;
   }
-  static void SetCallingObject(ThreadInfo* info, ObjectData *obj) {
-    ASSERT(info);
-    FrameInjection *t = info->m_top;
-    if (t) t->m_callingObject = obj;
-  }
-
-  void setStaticClassName(CStrRef cls) { m_staticClass = &cls; }
-  void resetStaticClassName() { m_staticClass = NULL; }
-  void setCallingObject(ObjectData *obj) { m_callingObject = obj; }
 #endif /* ENABLE_LATE_STATIC_BINDING */
 
   static bool IsGlobalScope();
   static bool IsGlobalScope(FrameInjection *frame);
   static FrameInjection *GetStackFrame(int level);
 
+private:
+  inline void initCommon() {
+    ASSERT(m_name);
+    ASSERT(m_info);
+#ifdef INFINITE_RECURSION_DETECTION
+    check_recursion(m_info);
+#endif
+    if (m_info->m_pendingException) {
+      throw_pending_exception(m_info);
+    }
+    m_prev = m_info->m_top;
+    m_info->m_top = this;
+  }
+
+protected:
+  // constructors and destructor are supposed to be inlined by subclasses
+  FrameInjection(const char *name, int fs)
+    : m_name(name),
+#ifdef ENABLE_LATE_STATIC_BINDING
+      m_staticClass(NULL),
+#endif
+      m_line(0), m_flags(fs) {
+    m_info = ThreadInfo::s_threadInfo.getNoCheck();
+    initCommon();
+    // NOTE: hot profiler needs to be called by subclasses
+  }
+
+  ~FrameInjection() {
+    m_info->m_top = m_prev;
+    // NOTE: hot profiler needs to be called by subclasses
+  }
+
 public:
-  // NOTE: obj has to be the root object
-  // constructors with hot profiler
-  FrameInjection(CStrRef cls, const char *name);
-  FrameInjection(CStrRef cls, const char *name, ObjectData *obj);
-  FrameInjection(CStrRef cls, const char *name, int fs);
-  FrameInjection(CStrRef cls, const char *name, ObjectData *obj, int fs);
-
-  // constructors without hot profiler
-  FrameInjection(CStrRef cls, const char *name, bool unused);
-  FrameInjection(CStrRef cls, const char *name, ObjectData *obj, bool unused);
-  FrameInjection(CStrRef cls, const char *name, int fs, bool unused);
-  FrameInjection(CStrRef cls, const char *name,
-                 ObjectData *obj, int fs, bool unused);
-
-  virtual ~FrameInjection();
 
   /**
    * Simple accessors
    */
-  const char *getClass() const { return m_class;}
+  CStrRef getClassName() const;
+  ObjectData *getObjectV() const;
   const char *getFunction() const { return m_name;}
   FrameInjection *getPrev() const { return m_prev;}
   int getFlags() const { return m_flags;}
@@ -103,25 +116,21 @@ public:
   void setBreakPointHit() { m_flags |= BreakPointHit;}
   ThreadInfo* getThreadInfo() const { return m_info;}
 
+  bool isEvalFrame() const { return m_flags & EvalFrame; }
+  bool isFunctionFrame() const { return m_flags & Function; }
+  bool isStaticMethodFrame() const { return m_flags & StaticMethod; }
+  bool isObjectMethodFrame() const { return m_flags & ObjectMethod; }
+
+#ifdef ENABLE_LATE_STATIC_BINDING
+  void setStaticClassName(CStrRef cls) { m_staticClass = &cls; }
+  void resetStaticClassName() { m_staticClass = NULL; }
+#endif /* ENABLE_LATE_STATIC_BINDING */
+
   /**
    * Complex accessors. EvalFrameInjection overwrites these.
    */
-  virtual String getFileName();
-  virtual Array getArgs();
-
-  /**
-   * This function checks object ID to make sure it's not 0. If it's 0, it
-   * returns a null object. Otherwise, it returns "this";
-   */
-  ObjectData *getThis();
-
-  /**
-   * This function checks object ID to make sure it's not 0. If it's 0, it
-   * was a fake object created just for calling an instance method with a form
-   * of ClassName::MethodName(). Then it will throw a "using this in non-
-   * object context" fatal.
-   */
-  ObjectData *getThisForArrow();
+  String getFileName();
+  Array getArgs();
 
 public:
 #ifdef ENABLE_LATE_STATIC_BINDING
@@ -140,38 +149,73 @@ public:
 
 protected:
   ThreadInfo     *m_info;
-private:
   FrameInjection *m_prev;
-  CStrRef         m_class;
   const char     *m_name;
-  Object          m_object;
-#ifdef HOTPROFILER
-  bool            m_prof;
-#endif
 
 #ifdef ENABLE_LATE_STATIC_BINDING
-  // for static late binding
   const String   *m_staticClass;
-  ObjectData     *m_callingObject;
 #endif /* ENABLE_LATE_STATIC_BINDING */
 
-  int             m_line;
-  int             m_flags;
+  int m_line;
+  int m_flags;
 
-  inline void doCommon() {
-    ASSERT(m_class.get());
-    ASSERT(m_name);
-    m_prev = m_info->m_top;
-    m_info->m_top = this;
+  inline bool checkClassName(CStrRef cls) {
+    int len = cls.length();
+    if (strncmp(cls.data(), m_name, len) != 0) return false;
+    if (m_name[len] != ':' || m_name[len+1] != ':') return false;
+    return true;
   }
-  inline void hotProfilerInit(ThreadInfo *info, const char *name) {
-#ifdef HOTPROFILER
-    m_prof = true;
-    Profiler *prof = m_info->m_profiler;
-    if (prof) begin_profiler_frame(prof, name);
-#endif
+};
+
+class FrameInjectionFunction : public FrameInjection {
+public:
+  FrameInjectionFunction(const char *name, int fs);
+  ~FrameInjectionFunction();
+};
+
+class FrameInjectionStaticMethod : public FrameInjection {
+public:
+  FrameInjectionStaticMethod(const char *name, int fs);
+  ~FrameInjectionStaticMethod();
+
+  ObjectData *getThis() { return NULL; }
+  ObjectData *getThisForArrow() {
+    throw FatalErrorException("Using $this when not in object context");
   }
 
+private:
+};
+
+class FrameInjectionObjectMethod : public FrameInjection {
+public:
+  FrameInjectionObjectMethod(const char *name, int fs, ObjectData *obj);
+  ~FrameInjectionObjectMethod();
+
+  /**
+   * This function checks object ID to make sure it's not 0. If it's 0, it
+   * returns a null object. Otherwise, it returns "this";
+   */
+  ObjectData *getThis();
+
+  /**
+   * This function checks object ID to make sure it's not 0. If it's 0, it
+   * was a fake object created just for calling an instance method with a form
+   * of ClassName::MethodName(). Then it will throw a "using this in non-
+   * object context" fatal.
+   */
+  ObjectData *getThisForArrow();
+
+  ObjectData *getObject() const { return m_object; }
+
+private:
+  ObjectData *m_object;
+};
+
+/* No profile version of Function, for call_user_func_array, etc. */
+class FrameInjectionFunctionNP : public FrameInjection {
+public:
+  FrameInjectionFunctionNP(const char *name, int fs);
+  ~FrameInjectionFunctionNP();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -39,16 +39,30 @@ public:
   EvalFrameInjection(CStrRef cls, const char *name,
                      VariableEnvironment &env, const char *file,
                      ObjectData *obj = NULL, int fs = 0)
-    : FrameInjection(cls, name,
-                     obj ? obj->getRoot() : NULL, fs),
-      m_env(env), m_file(file) { }
+    : FrameInjection(name, fs | FrameInjection::EvalFrame),
+      m_class(cls), m_env(env), m_file(file) {
+        m_object = obj ? obj->getRoot() : NULL;
+        if (m_object) {
+          m_object->incRefCount();
+        }
+      }
 
-  virtual String getFileName();
-  virtual Array getArgs();
+  ~EvalFrameInjection() {
+    if (m_object && m_object->decRefCount() == 0)  {
+      m_object->release();
+    }
+  }
 
-  VariableEnvironment &getEnv() { return m_env;}
+  String getFileNameEval();
+  Array getArgsEval();
+
+  VariableEnvironment &getEnv() { return m_env; }
+  CStrRef getClass() const { return m_class; }
+  ObjectData *getObject() const { return m_object; }
 
 private:
+  CStrRef m_class;
+  ObjectData *m_object;
   VariableEnvironment &m_env;
   const char *m_file;
 };

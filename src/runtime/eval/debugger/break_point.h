@@ -51,7 +51,7 @@ public:
   int32 getChar1() const { return m_char1;}
   CVarRef getException() { return m_exception;}
   const char *getNamespace() const { return NULL;}
-  const char *getClass() const { return m_frame->getClass();}
+  const char *getClass() const { return m_frame->getClassName();}
   const char *getFunction() const;
   int getFileLen() const;
 

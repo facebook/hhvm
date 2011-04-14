@@ -257,6 +257,12 @@ inline void check_request_timeout(ThreadInfo *info) {
   if (info->m_reqInjectionData.surprised) check_request_surprise(info);
 }
 
+inline void check_request_timeout_NA(ThreadInfo *info) {
+  if (SegFaulting) pause_and_exit();
+  ASSERT(info->m_mm->DEBUG_checkStats());
+  if (info->m_reqInjectionData.surprised) check_request_surprise(info);
+}
+
 void throw_pending_exception(ThreadInfo *info) ATTRIBUTE_COLD
                                                __attribute__((noreturn));
 

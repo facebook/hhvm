@@ -413,12 +413,13 @@ Variant FunctionStatement::invokeClosure(CArrRef params) const {
   bindParams(fenv, params);
 
   DECLARE_THREAD_INFO;
-  EvalFrameInjection *efi = NULL;
-  for (FrameInjection *fi = info->m_top; fi; fi= fi->getPrev()) {
-    efi = dynamic_cast<EvalFrameInjection*>(fi);
-    if (efi) break;
+  FrameInjection *fi;
+  for (fi = info->m_top; fi; fi= fi->getPrev()) {
+    if (fi->isEvalFrame()) {
+      break;
+    }
   }
-  ASSERT(efi);
+  EvalFrameInjection *efi = static_cast<EvalFrameInjection*>(fi);
   c_Closure *closure = (c_Closure *) efi->getEnv().getClosure();
   const std::vector<ParameterPtr> &vars =
     ((ClosureExpression *)m_closure)->getVars();
@@ -433,7 +434,7 @@ Variant FunctionStatement::invokeClosure(CArrRef params) const {
     }
   }
 
-  EvalFrameInjection fi(empty_string, "{closure}", fenv, loc()->file);
+  EvalFrameInjection efiLocal(empty_string, "{closure}", fenv, loc()->file);
   if (m_ref) {
     return ref(evalBody(fenv));
   } else {

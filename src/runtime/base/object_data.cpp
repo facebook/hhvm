@@ -93,7 +93,7 @@ const Eval::MethodStatement *ObjectData::getMethodStatement(const char* name)
 
 #ifdef ENABLE_LATE_STATIC_BINDING
 void ObjectData::bindThis(ThreadInfo *info) {
-  FrameInjection::SetCallingObject(info, this);
+  FrameInjection::SetStaticClassName(info, getRoot()->o_getClassName());
 }
 #endif
 

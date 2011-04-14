@@ -267,14 +267,16 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
       if (!isWrapper) {
         const char *sys =
           (cg.getOutput() == CodeGenerator::SystemCPP ? "_BUILTIN" : "");
+        const char *flags = (sys[0] != '\0') ? "" : ", 0";
         if (pseudoMain) {
-          cg_printf("PSEUDOMAIN_INJECTION%s(%s, %s%s);\n",
+          cg_printf("PSEUDOMAIN_INJECTION%s(%s, %s%s%s);\n",
                     sys, origFuncName.c_str(), Option::PseudoMainPrefix,
-                    funcScope->getContainingFile()->pseudoMainName().c_str());
+                    funcScope->getContainingFile()->pseudoMainName().c_str(),
+                    flags);
         } else {
           if (m_stmt->hasBody()) {
-            cg_printf("FUNCTION_INJECTION%s(%s);\n", sys,
-                      origFuncName.c_str());
+            cg_printf("FUNCTION_INJECTION%s(%s%s);\n", sys,
+                      origFuncName.c_str(), flags);
           }
           outputCPPArgInjections(cg, ar, origFuncName.c_str(),
                                  ClassScopePtr(), funcScope);

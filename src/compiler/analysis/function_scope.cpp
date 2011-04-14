@@ -1797,7 +1797,7 @@ void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
     cg_indentBegin(") {\n");
 
     if (clsToConstruct) {
-      cg_printf("%s%s ret(NEW(%s%s)());\n",
+      cg_printf("%s%s ret(NEWOBJ(%s%s)());\n",
                 Option::SmartPtrPrefix, clsToConstruct,
                 Option::ClassPrefix, clsToConstruct);
     }

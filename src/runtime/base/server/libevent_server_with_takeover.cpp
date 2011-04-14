@@ -187,6 +187,7 @@ void LibEventServerWithTakeover::setupFdServer() {
 
 int LibEventServerWithTakeover::getAcceptSocket() {
   int ret;
+  const char *address = m_address.empty() ? NULL : m_address.c_str();
 
   if (m_accept_sock != -1) {
     Logger::Warning("LibEventServerWithTakeover trying to get a socket, "
@@ -194,7 +195,7 @@ int LibEventServerWithTakeover::getAcceptSocket() {
     m_accept_sock = -1;
   }
 
-  ret = evhttp_bind_socket_backlog_fd(m_server, m_address.c_str(),
+  ret = evhttp_bind_socket_backlog_fd(m_server, address,
                                    m_port, RuntimeOption::ServerBacklog);
   if (ret >= 0) {
     Logger::Info("takeover: bound directly to port %d", m_port);

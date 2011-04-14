@@ -185,7 +185,8 @@ LibEventServer::~LibEventServer() {
 
 int LibEventServer::getAcceptSocket() {
   int ret;
-  ret = evhttp_bind_socket_backlog_fd(m_server, m_address.c_str(),
+  const char *address = m_address.empty() ? NULL : m_address.c_str();
+  ret = evhttp_bind_socket_backlog_fd(m_server, address,
                                       m_port, RuntimeOption::ServerBacklog);
   if (ret < 0) {
     Logger::Error("Fail to bind port %d", m_port);
@@ -308,7 +309,8 @@ bool LibEventServer::enableSSL(void *sslCTX, int port) {
 }
 
 int LibEventServer::getAcceptSocketSSL() {
-  int ret = evhttp_bind_socket_backlog_fd(m_server_ssl, m_address.c_str(),
+  const char *address = m_address.empty() ? NULL : m_address.c_str();
+  int ret = evhttp_bind_socket_backlog_fd(m_server_ssl, address,
       m_port_ssl, RuntimeOption::ServerBacklog);
   if (ret < 0) {
     Logger::Error("Failed to bind port %d for SSL", m_port_ssl);

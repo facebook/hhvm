@@ -410,9 +410,9 @@ void Parser::onEncapsList(Token &out, int type, Token &list) {
                      dynamic_pointer_cast<ExpressionList>(list->exp));
 }
 
-void Parser::addEncap(Token &out, Token &list, Token &expr, int type) {
+void Parser::addEncap(Token &out, Token *list, Token &expr, int type) {
   ExpressionListPtr expList;
-  if (list->exp) {
+  if (list && list->exp) {
     expList = dynamic_pointer_cast<ExpressionList>(list->exp);
   } else {
     expList = NEW_EXP0(ExpressionList);

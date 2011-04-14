@@ -191,7 +191,7 @@ public:
   void onCall(Token &out, bool dynamic, Token &name, Token &params,
               Token *className);
   void onEncapsList(Token &out, int type, Token &list);
-  void addEncap(Token &out, Token &list, Token &expr, int type);
+  void addEncap(Token &out, Token *list, Token &expr, int type);
   void encapRefDim(Token &out, Token &var, Token &offset);
   void encapObjProp(Token &out, Token &var, Token &name);
   void encapArray(Token &out, Token &var, Token &expr);

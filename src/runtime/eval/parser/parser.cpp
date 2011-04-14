@@ -166,7 +166,8 @@ GETTER(StaticVariable, StaticVariablePtr, staticVars )
 GETTER(Strings,        String,            strings    )
 
 void Token::operator=(Token &other) {
-  ASSERT(&other != this);
+  if (&other == this)
+    return;
 
   ScannerToken::operator=(other);
   m_exp  = other.m_exp;
@@ -623,8 +624,13 @@ void Parser::onEncapsList(Token &out, int type, Token &list) {
   out->exp() = NEW_EXP(EncapsList, list->exprs(), type == '`');
 }
 
-void Parser::addEncap(Token &out, Token &list, Token &expr, int type) {
-  out = list;
+void Parser::addEncap(Token &out, Token *list, Token &expr, int type) {
+  if (list) {
+    out = *list;
+  } else {
+    out.reset();
+  }
+
   ExpressionPtr exp;
   if (type == -1) {
     exp = expr->exp();
@@ -632,6 +638,7 @@ void Parser::addEncap(Token &out, Token &list, Token &expr, int type) {
     ScalarExpressionPtr scalar = NEW_EXP(Scalar, T_STRING, expr.text());
     exp = scalar;
   }
+
   out->exprs().push_back(exp);
 }
 

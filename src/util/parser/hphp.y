@@ -1612,7 +1612,7 @@ expr_without_variable:
   | '@' expr                           { UEXP($$,$2,'@',1);}
   | scalar                             { $$ = $1;}
   | T_ARRAY  '(' array_pair_list ')'   { _p->onArray($$,$3,T_ARRAY);}
-  | '`' encaps_list '`'                { _p->onEncapsList($$,'`',$2);}
+  | '`' backticks_expr '`'             { _p->onEncapsList($$,'`',$2);}
   | T_PRINT expr                       { UEXP($$,$2,T_PRINT,1);}
   | type_decl function_loc
     is_reference '('                   { Token t; _p->onFunctionStart(t);
@@ -1834,6 +1834,11 @@ exit_expr:
   |                                    { $$.reset();}
 ;
 
+backticks_expr:
+     /* empty */                       { $$.reset();}
+  |  T_ENCAPSED_AND_WHITESPACE         { _p->addEncap($$, NULL, $1, 0);}
+  |  encaps_list                       { $$ = $1;}
+
 ctor_arguments:
     '('
     function_call_parameter_list ')'   { $$ = $2;}
@@ -1852,7 +1857,13 @@ common_scalar:
   | T_METHOD_C                         { _p->onScalar($$, T_METHOD_C, $1);}
   | T_FUNC_C                           { _p->onScalar($$, T_FUNC_C,   $1);}
   | T_NS_C                             { _p->onScalar($$, T_NS_C,  $1);}
+  | T_START_HEREDOC
+    T_ENCAPSED_AND_WHITESPACE
+    T_END_HEREDOC                      { _p->onScalar($$, T_CONSTANT_ENCAPSED_STRING, $2);}
+  | T_START_HEREDOC
+    T_END_HEREDOC                      { $$.setText(""); _p->onScalar($$, T_CONSTANT_ENCAPSED_STRING, $$);}
 ;
+
 static_scalar:
     common_scalar                      { $$ = $1;}
   | namespace_string                   { _p->onConstantValue($$, $1);}
@@ -2022,11 +2033,15 @@ non_empty_array_pair_list:
 ;
 
 encaps_list:
-    encaps_list encaps_var             { _p->addEncap($$, $1, $2, -1);}
+    encaps_list encaps_var             { _p->addEncap($$, &$1, $2, -1);}
   | encaps_list
-    T_ENCAPSED_AND_WHITESPACE          { _p->addEncap($$, $1, $2, 0);}
-  |                                    { $$.reset();}
+    T_ENCAPSED_AND_WHITESPACE          { _p->addEncap($$, &$1, $2, 0);}
+  | encaps_var                         { _p->addEncap($$, NULL, $1, -1);}
+  | T_ENCAPSED_AND_WHITESPACE
+    encaps_var                         { _p->addEncap($$, NULL, $1, 0);
+                                         _p->addEncap($$, &$$, $2, -1); }
 ;
+
 encaps_var:
     T_VARIABLE                         { _p->onSimpleVariable($$, $1);}
   | T_VARIABLE '['

@@ -884,7 +884,7 @@ void ClassStatement::outputJavaFFICPPCreator(CodeGenerator &cg,
   }
 
   cg_indentBegin(") {\n");
-  cg_printf("ObjectData *obj = (NEW(%s%s)())->create(%s);\n",
+  cg_printf("ObjectData *obj = (NEWOBJ(%s%s)())->create(%s);\n",
             Option::ClassPrefix, cls->getId(cg).c_str(), args.str().c_str());
   cg_printf("return (jlong)(NEW(Variant)(obj));\n");
   cg_indentEnd("}\n\n");

@@ -2073,7 +2073,7 @@ void ClassScope::outputMethodWrappers(CodeGenerator &cg,
     } else {
       cg_indentBegin("static %s%s Create() {\n", Option::SmartPtrPrefix,
                      name.c_str());
-      cg_printf("return NEW(%s%s)();\n", Option::ClassPrefix, name.c_str());
+      cg_printf("return NEWOBJ(%s%s)();\n", Option::ClassPrefix, name.c_str());
       cg_indentEnd("}\n");
       cg_printf("\n");
     }

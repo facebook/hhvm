@@ -112,5 +112,6 @@ const MethodIndexHMap g_methodIndexHMap[] = {MethodIndexHMap()};
 const unsigned g_methodIndexReverseCallIndex[] = {0};
 const char * g_methodIndexReverseIndex[] = {0};
 
+bool has_eval_support = false;
 ///////////////////////////////////////////////////////////////////////////////
 }

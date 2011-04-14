@@ -162,7 +162,7 @@ public:
     }
     if (s_rpc_request_handler->needReset() ||
         s_rpc_request_handler->incRequest() > m_serverInfo->getMaxRequest()) {
-      s_rpc_request_handler.reset();
+      s_rpc_request_handler.destroy();
       s_rpc_request_handler->setServerInfo(m_serverInfo);
       s_rpc_request_handler->incRequest();
     }
@@ -174,7 +174,7 @@ public:
   }
 
   virtual void onThreadExit(RequestHandler *handler) {
-    s_rpc_request_handler.reset();
+    s_rpc_request_handler.destroy();
   }
 
   virtual bool supportReset() { return true; }

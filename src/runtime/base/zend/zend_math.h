@@ -89,6 +89,7 @@ void math_mt_srand(uint32 seed);
 int64 math_mt_rand(int64 min = 0, int64 max = RAND_MAX);
 double math_combined_lcg();
 int64 math_generate_seed();
+void zend_get_rand_data() ATTRIBUTE_COLD;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

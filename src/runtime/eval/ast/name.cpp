@@ -118,7 +118,8 @@ String StaticClassExprName::get(VariableEnvironment &env) const {
 LateStaticName::LateStaticName(CONSTRUCT_ARGS) : Name(CONSTRUCT_PASS) {}
 
 String LateStaticName::get(VariableEnvironment &env) const {
-  return FrameInjection::GetStaticClassName(ThreadInfo::s_threadInfo.get());
+  return FrameInjection::GetStaticClassName(
+    ThreadInfo::s_threadInfo.getNoCheck());
 }
 
 void LateStaticName::dump(std::ostream &out) const {

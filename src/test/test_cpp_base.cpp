@@ -953,7 +953,7 @@ bool TestCppBase::TestMemoryManager() {
     VS(arr[apple], "jobs");
   }
   DELETE(TestGlobals)(globals);
-  MemoryManager::TheMemoryManager().reset();
+  MemoryManager::TheMemoryManager().destroy();
   return Count(true);
 }
 

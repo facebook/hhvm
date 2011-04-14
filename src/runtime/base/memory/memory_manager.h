@@ -43,7 +43,7 @@ namespace HPHP {
  */
 class MemoryManager {
 public:
-  static ThreadLocal<MemoryManager> &TheMemoryManager();
+  static ThreadLocalNoCheck<MemoryManager> &TheMemoryManager();
 
   MemoryManager();
 
@@ -180,7 +180,7 @@ public:
 private:
   void refreshStatsHelper();
 
-  static DECLARE_THREAD_LOCAL(MemoryManager, s_singleton);
+  static DECLARE_THREAD_LOCAL_NO_CHECK(MemoryManager, s_singleton);
 
   bool m_enabled;
   bool m_checkpoint;

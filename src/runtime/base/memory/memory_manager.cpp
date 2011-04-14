@@ -62,9 +62,9 @@ static inline void thread_stats(uint64*& allocated, uint64*& deallocated) {
 }
 #endif
 
-IMPLEMENT_THREAD_LOCAL(MemoryManager, MemoryManager::s_singleton);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(MemoryManager, MemoryManager::s_singleton);
 
-ThreadLocal<MemoryManager> &MemoryManager::TheMemoryManager() {
+ThreadLocalNoCheck<MemoryManager> &MemoryManager::TheMemoryManager() {
   return s_singleton;
 }
 
@@ -93,7 +93,7 @@ void MemoryManager::resetStats() {
 
 void MemoryManager::refreshStatsHelper() {
   RequestInjectionData &data =
-    ThreadInfo::s_threadInfo.get()->m_reqInjectionData;
+    ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
   Lock lock(data.surpriseMutex);
   data.memExceeded = true;
   data.surprised = true;

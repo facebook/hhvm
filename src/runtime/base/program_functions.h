@@ -63,7 +63,7 @@ time_t start_time();
 
 class ExecutionContext;
 
-void hphp_process_init();
+void hphp_process_init() ATTRIBUTE_COLD;
 void hphp_session_init(bool blank_warmup = false);
 
 ExecutionContext *hphp_context_init();
@@ -78,7 +78,7 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
                        bool shutdown = true, const char *program = NULL);
 
 void hphp_session_exit();
-void hphp_process_exit();
+void hphp_process_exit() ATTRIBUTE_COLD;
 bool hphp_is_warmup_enabled();
 void hphp_set_warmup_enabled();
 

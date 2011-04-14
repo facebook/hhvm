@@ -75,6 +75,7 @@ public:
   ServerStats();
   ~ServerStats();
 
+  static void GetLogger() ATTRIBUTE_COLD;
 private:
   enum UDF {
     UDF_NONE = 1, // count
@@ -86,7 +87,7 @@ private:
 
   static Mutex s_lock;
   static std::vector<ServerStats*> s_loggers;
-  static DECLARE_THREAD_LOCAL(ServerStats, s_logger);
+  static DECLARE_THREAD_LOCAL_NO_CHECK(ServerStats, s_logger);
 
   typedef hphp_shared_string_map<int64> CounterMap;
 

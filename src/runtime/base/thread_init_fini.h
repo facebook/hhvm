@@ -22,8 +22,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void init_thread_locals(void *arg = NULL);
-void fini_thread_locals(void *arg = NULL);
+void init_thread_locals(void *arg = NULL) ATTRIBUTE_COLD 
+  __attribute__((noinline));
+void finish_thread_locals(void *arg = NULL) ATTRIBUTE_COLD
+  __attribute__((noinline));
 
 ///////////////////////////////////////////////////////////////////////////////
 }

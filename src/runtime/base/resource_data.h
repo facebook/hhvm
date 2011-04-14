@@ -55,6 +55,8 @@ public:
     return ObjectData::decRefCount();
   }
 
+  static int GetMaxResourceId() ATTRIBUTE_COLD;
+
   /**
    * Marshaling/Unmarshaling between request thread and fiber thread.
    *

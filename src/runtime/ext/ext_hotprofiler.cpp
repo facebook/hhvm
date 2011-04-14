@@ -791,7 +791,7 @@ public:
     }
 
     if (m_flags & TrackMemory) {
-      MemoryManager *mm = MemoryManager::TheMemoryManager().get();
+      MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
       const MemoryUsageStats &stats = mm->getStats(true);
       m_stack->m_mu_start  = stats.usage;
       m_stack->m_pmu_start = stats.peakUsage;
@@ -813,7 +813,7 @@ public:
     }
 
     if (m_flags & TrackMemory) {
-      MemoryManager *mm = MemoryManager::TheMemoryManager().get();
+      MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
       const MemoryUsageStats &stats = mm->getStats(true);
       int64 mu_end = stats.usage;
       int64 pmu_end = stats.peakUsage;
@@ -1115,7 +1115,7 @@ public:
       te.cpu = vtsc(m_MHz);
     }
     if (m_flags & TrackMemory) {
-      MemoryManager *mm = MemoryManager::TheMemoryManager().get();
+      MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
       const MemoryUsageStats &stats = mm->getStats(true);
       te.memory = stats.usage;
       te.peak_memory = stats.peakUsage;

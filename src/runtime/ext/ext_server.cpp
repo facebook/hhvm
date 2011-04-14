@@ -145,7 +145,7 @@ String f_pagelet_server_task_result(CObjRef task, Variant headers,
 }
 
 void f_pagelet_server_flush() {
-  ExecutionContext *context = g_context.get();
+  ExecutionContext *context = g_context.getNoCheck();
   Transport *transport = context->getTransport();
   if (transport && transport->getThreadType() == Transport::PageletThread) {
     // this method is only meaningful in a pagelet thread

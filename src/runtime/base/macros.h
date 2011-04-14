@@ -365,7 +365,7 @@ do { \
 
 #define DECLARE_THREAD_INFO                      \
   ThreadInfo *info __attribute__((__unused__)) = \
-    ThreadInfo::s_threadInfo.get();              \
+    ThreadInfo::s_threadInfo.getNoCheck();       \
   int lc __attribute__((__unused__)) = 0;        \
 
 #define DECLARE_THREAD_INFO_NOINIT               \

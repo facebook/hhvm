@@ -40,6 +40,7 @@ public:
   void decPersistent() { --m_persistentCount;}
   bool isPersistent() { return m_persistentCount > 0; }
 
+  static void GetSweepData() ATTRIBUTE_COLD;
   /**
    * Excluding this from being swept(). This is useful for child Sweepable
    * inside a parent Sweepable, when parent's destructor will delete this
@@ -55,7 +56,7 @@ private:
     bool sweeping;
     SweepableSet sweepables;
   };
-  static DECLARE_THREAD_LOCAL(SweepData, s_sweep_data);
+  static DECLARE_THREAD_LOCAL_NO_CHECK(SweepData, s_sweep_data);
 
   int m_persistentCount;
 };

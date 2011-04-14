@@ -315,8 +315,9 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-extern DECLARE_THREAD_LOCAL(ExecutionContext, g_context);
-extern DECLARE_THREAD_LOCAL(PersistentObjectStore, g_persistentObjects);
+extern DECLARE_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
+extern DECLARE_THREAD_LOCAL_NO_CHECK(PersistentObjectStore,
+                                     g_persistentObjects);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

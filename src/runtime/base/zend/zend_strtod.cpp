@@ -382,7 +382,11 @@ public:
   Bigint **freelist;
   Bigint *p5s;
 };
-static IMPLEMENT_THREAD_LOCAL(BigintData, s_bigint_data);
+static IMPLEMENT_THREAD_LOCAL_NO_CHECK(BigintData, s_bigint_data);
+
+void zend_get_bigint_data() {
+  s_bigint_data.getCheck();
+}
 
 static Bigint * Balloc(int k)
 {

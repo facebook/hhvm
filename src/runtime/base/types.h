@@ -202,7 +202,7 @@ public:
   static void GetExecutionSamples(std::map<Executing, int> &counts);
 
 public:
-  static DECLARE_THREAD_LOCAL(ThreadInfo, s_threadInfo);
+  static DECLARE_THREAD_LOCAL_NO_CHECK(ThreadInfo, s_threadInfo);
 
   FrameInjection *m_top;
   RequestInjectionData m_reqInjectionData;
@@ -277,7 +277,7 @@ public:
       builtin ? ThreadInfo::ExtensionFunctions : ThreadInfo::UserFunctions;
   }
   ExecutionProfiler(ThreadInfo::Executing executing) {
-    m_info = ThreadInfo::s_threadInfo.get();
+    m_info = ThreadInfo::s_threadInfo.getNoCheck();
     m_executing = m_info->m_executing;
     m_info->m_executing = executing;
   }

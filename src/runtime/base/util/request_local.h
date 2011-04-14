@@ -57,11 +57,6 @@ struct RequestLocal {
 
   void create() __attribute__((noinline));
 
-  void reset() {
-    delete m_node.m_p;
-    m_node.m_p = NULL;
-  }
-
   static void OnThreadExit(void * p) {
     ThreadLocalNode<T> * pNode = (ThreadLocalNode<T>*)p;
     delete pNode->m_p;
@@ -121,10 +116,6 @@ public:
       g_context->registerRequestEventHandler(obj);
     }
     return obj;
-  }
-
-  void reset() {
-    m_tlsObjects.reset();
   }
 
 private:

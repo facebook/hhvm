@@ -57,7 +57,7 @@ Array f_hphpd_get_user_commands() {
 
 void f_hphpd_break(bool condition /* = true */) {
   if (RuntimeOption::EnableDebugger && condition) {
-    ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+    ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
     FrameInjection *frame = FrameInjection::GetStackFrame(1);
     if (frame && ti->m_reqInjectionData.debugger) {
       Eval::InterruptSite site(frame);

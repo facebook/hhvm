@@ -654,7 +654,6 @@ ExpressionPtr SimpleFunctionCall::optimize(AnalysisResultConstPtr ar) {
       }
       try {
         g_context->setThrowAllErrors(true);
-        ThreadInfo::s_threadInfo.get();
         Variant v = invoke_builtin(m_funcScope->getName().c_str(),
                                    arr, -1, true);
         g_context->setThrowAllErrors(false);

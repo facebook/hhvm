@@ -198,9 +198,6 @@ class ParserWorker :
 public:
   bool m_ret;
   ParserWorker() : m_ret(true) {}
-  virtual void onThreadExit() {
-    g_context.reset();
-  }
   virtual void doJob(JobType job) {
     bool ret;
     try {

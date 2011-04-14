@@ -772,7 +772,7 @@ void RequestEvalState::fiberExit(RequestEvalState *res,
 class EvalClassInfoHook : public ClassInfoHook {
 public:
   EvalClassInfoHook() {
-    ClassInfo::SetHook(this);
+    if (HPHP::has_eval_support) ClassInfo::SetHook(this);
   }
 
   virtual Array getUserFunctions() const {
@@ -805,7 +805,7 @@ static EvalClassInfoHook eval_class_info_hook;
 class EvalSourceInfoHook : public SourceInfoHook {
 public:
   EvalSourceInfoHook() {
-    SourceInfo::SetHook(this);
+    if (HPHP::has_eval_support) SourceInfo::SetHook(this);
   }
   virtual const char *getClassDeclaringFile(const char *name,
                                             int *line = NULL) {

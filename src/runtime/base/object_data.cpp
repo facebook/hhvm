@@ -33,7 +33,11 @@ namespace HPHP {
 // statics
 
 // current maximum object identifier
-static IMPLEMENT_THREAD_LOCAL(int, os_max_id);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(int, ObjectData::os_max_id);
+
+int ObjectData::GetMaxId() {
+  return *(ObjectData::os_max_id.getCheck());
+}
 
 static CallInfo s_ObjectData_call_handler((void*)ObjectData::callHandler,
     (void*)ObjectData::callHandlerFewArgs, 0,
@@ -43,14 +47,6 @@ static StaticString s___callStatic("__callStatic");
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructor/destructor
-
-ObjectData::ObjectData(bool isResource /* = false */)
-    : o_properties(NULL), o_attribute(0) {
-  if (!isResource) {
-    o_id = ++(*os_max_id);
-  }
-}
-
 ObjectData::~ObjectData() {
   if (o_properties) {
     o_properties->release();
@@ -102,7 +98,7 @@ void ObjectData::bindThis(ThreadInfo *info) {
 #endif
 
 void ObjectData::setDummy() {
-  int *pmax = os_max_id.get();
+  int *pmax = os_max_id.getNoCheck();
   if (o_id == *pmax) --(*pmax);
   o_id = 0; // for isset($this) to tell whether this is a fake obj
 }

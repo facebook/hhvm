@@ -77,7 +77,7 @@ namespace HPHP {
 
 typedef void (*AllocatorThreadLocalInit)(void);
 std::set<AllocatorThreadLocalInit>& GetAllocatorInitList();
-void InitAllocatorThreadLocal();
+void InitAllocatorThreadLocal() ATTRIBUTE_COLD;
 
 #define DECLARE_SMART_ALLOCATION(T, F)                                  \
   public:                                                               \
@@ -369,7 +369,7 @@ class SmartAllocator : public SmartAllocatorImpl {
 template<typename T, int TNameEnum, int flag>
 void *SmartAllocatorInitSetup() {
   ThreadLocalSingleton<SmartAllocator<T, TNameEnum, flag> > tls;
-  GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.get));
+  GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.getCheck));
   return (void*)tls.getNoCheck;
 }
 

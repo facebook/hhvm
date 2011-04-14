@@ -881,9 +881,6 @@ class OptWorker : public JobQueueWorker<BlockScope *, true, true> {
 public:
   OptWorker() {}
 
-  virtual void onThreadExit() {
-    g_context.reset();
-  }
   virtual void doJob(BlockScope *scope) {
     try {
       DepthFirstVisitor<OptVisitor<When> > *visitor =
@@ -1205,9 +1202,6 @@ StatementPtr DepthFirstVisitor<PostOptVisitor>::visit(StatementPtr stmt) {
 
 class FinalWorker : public JobQueueWorker<MethodStatementPtr> {
 public:
-  virtual void onThreadExit() {
-    g_context.reset();
-  }
   virtual void doJob(MethodStatementPtr m) {
     try {
       AliasManager am(1);
@@ -1865,9 +1859,6 @@ private:
 
 class OutputWorker : public JobQueueWorker<OutputJob*> {
 public:
-  virtual void onThreadExit() {
-    g_context.reset();
-  }
   virtual void doJob(OutputJob *job) { job->output();}
 };
 
@@ -3620,6 +3611,8 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   cg.setContext(CodeGenerator::CppImplementation);
   switch (part) {
   case 1:
+    cg_printf("bool has_eval_support = %s;\n",
+              (Option::EnableEval > Option::NoEval) ? "true" : "false");
     getVariables()->outputCPPGlobalVariablesDtor(cg);
     getVariables()->outputCPPGlobalVariablesGetImpl (cg, ar);
     outputCPPClassDeclaredFlagsLookup(cg);

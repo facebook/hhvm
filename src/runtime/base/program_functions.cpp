@@ -386,7 +386,7 @@ void execute_command_line_begin(int argc, char **argv, int xhprof) {
   StackTraceNoHeap::AddExtraLogging("Arguments", args.c_str());
 
   hphp_session_init();
-  ExecutionContext *context = g_context.get();
+  ExecutionContext *context = g_context.getNoCheck();
   context->obSetImplicitFlush(true);
 
   SystemGlobals *g = (SystemGlobals *)get_global_variables();
@@ -433,7 +433,7 @@ void execute_command_line_end(int xhprof, bool coverage, const char *program) {
   if (xhprof) {
     f_var_dump(f_json_encode(f_xhprof_disable()));
   }
-  hphp_context_exit(g_context.get(), true, true, program);
+  hphp_context_exit(g_context.getNoCheck(), true, true, program);
   hphp_session_exit();
   if (coverage && RuntimeOption::RecordCodeCoverage &&
       !RuntimeOption::CodeCoverageOutputFile.empty()) {
@@ -971,6 +971,11 @@ void hphp_process_init() {
   Extension::InitModules();
   apc_load(RuntimeOption::ApcLoadThread);
   StaticString::FinishInit();
+
+  // Reset the preloaded g_context
+  ExecutionContext *context = g_context.getNoCheck();
+  context->~ExecutionContext();
+  new (context) ExecutionContext();
 }
 
 static bool hphp_warmup(ExecutionContext *context,
@@ -981,7 +986,7 @@ static bool hphp_warmup(ExecutionContext *context,
   error = false;
   std::string errorMsg;
   if (!s_warmup_state->done) {
-    MemoryManager *mm = MemoryManager::TheMemoryManager().get();
+    MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
     if (mm->beforeCheckpoint()) {
       if (!s_warmup_state->failed) {
         s_warmup_state->enabled = true;
@@ -1043,7 +1048,7 @@ void hphp_session_init(bool blank_warmup /* = false */) {
 
   if (blank_warmup) {
     bool error;
-    hphp_warmup(g_context.get(), "", "", "", error);
+    hphp_warmup(g_context.getNoCheck(), "", "", "", error);
   }
 }
 
@@ -1056,7 +1061,7 @@ void hphp_set_warmup_enabled() {
 }
 
 ExecutionContext *hphp_context_init() {
-  ExecutionContext *context = g_context.get();
+  ExecutionContext *context = g_context.getNoCheck();
   context->obStart();
   context->obProtect(true);
   return context;
@@ -1082,7 +1087,7 @@ static void handle_invoke_exception(bool &ret, ExecutionContext *context,
 bool hphp_invoke_simple(const std::string &filename,
                         bool warmupOnly /* = false */) {
   bool error; string errorMsg;
-  return hphp_invoke(g_context.get(), filename, false, null_array, null,
+  return hphp_invoke(g_context.getNoCheck(), filename, false, null_array, null,
                      "", "", "", error, errorMsg, true, warmupOnly);
 }
 
@@ -1154,7 +1159,9 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
       Eval::Debugger::InterruptPSPEnded(program);
     } catch (const Eval::DebuggerException &e) {}
   }
-  Eval::RequestEvalState::DestructObjects();
+  if (has_eval_support) {
+    Eval::RequestEvalState::DestructObjects();
+  }
   if (shutdown) {
     context->onRequestShutdown();
   }
@@ -1168,11 +1175,11 @@ void hphp_session_exit() {
   // Server note has to live long enough for the access log to fire.
   // RequestLocal is too early.
   ServerNote::Reset();
-  g_context.reset();
+  g_context.destroy();
 
   ThreadInfo::s_threadInfo->clearPendingException();
 
-  MemoryManager *mm = MemoryManager::TheMemoryManager().get();
+  MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
   if (RuntimeOption::CheckMemory) {
     mm->checkMemory(false);
   }
@@ -1183,19 +1190,22 @@ void hphp_session_exit() {
 
   if (mm->afterCheckpoint()) {
     ServerStatsHelper ssh("rollback");
+
+    g_context.getCheck(); // sweep may call g_context->, which is a noCheck
     mm->sweepAll();
 
     /**
-     * We have to do it again, because sweep() may call g_context-> or
-     * RequestLocal<T>, which also calls g_context->, to create a new
+     * We have to do it again, because g_context.getCheck() creates a new
      * ExecutionContext object that has SmartAllocated data members. These
      * members cannot survive over rollback(), so we need to delete g_context.
      */
-    g_context.reset();
+    g_context.destroy();
 
     mm->rollback();
     s_warmup_state->atCheckpoint = true;
+    g_context.getCheck();
   } else {
+    g_context.getCheck();
     ServerStatsHelper ssh("free");
     free_global_variables();
   }

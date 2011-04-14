@@ -249,7 +249,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   } catch (const Eval::DebuggerException &e) {
     transport->sendString(e.what(), 200);
     transport->onSendEnd();
-    hphp_context_exit(g_context.get(), true, true, transport->getUrl());
+    hphp_context_exit(g_context.getNoCheck(), true, true, transport->getUrl());
   } catch (...) {
     Logger::Error("Unhandled exception in HPHP server engine.");
   }

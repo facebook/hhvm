@@ -312,8 +312,8 @@ void init_global_variables() {
   ThreadInfo::s_threadInfo->m_globals = get_global_variables();
   GlobalVariables::initialize();
 }
-void free_global_variables() { g_variables.reset();}
-
+void free_global_variables() { g_variables.destroy();}
+bool has_eval_support = true;
 Variant invoke_file(CStrRef path, bool once /* = false */,
                     LVariableTable* variables /* = NULL */,
                     const char *currentDir /* = NULL */) {

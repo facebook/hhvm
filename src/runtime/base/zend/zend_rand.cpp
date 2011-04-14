@@ -112,7 +112,11 @@ public:
   int32 lcg_s1;
   int32 lcg_s2;
 };
-static IMPLEMENT_THREAD_LOCAL(RandData, s_rand_data);
+static IMPLEMENT_THREAD_LOCAL_NO_CHECK(RandData, s_rand_data);
+
+void zend_get_rand_data() {
+  s_rand_data.getCheck();
+}
 
 static inline void php_mt_initialize(uint32 seed, uint32 *state) {
   /* Initialize generator state with seed
@@ -135,7 +139,7 @@ static inline void php_mt_reload() {
   /* Generate N new values in state
      Made clearer and faster by Matthew Bellew (matthew.bellew@home.com) */
 
-  RandData *data = s_rand_data.get();
+  RandData *data = s_rand_data.getNoCheck();
   register uint32 *state = data->state;
   register uint32 *p = state;
   register int i;
@@ -150,7 +154,7 @@ static inline void php_mt_reload() {
 }
 
 void math_mt_srand(uint32 seed) {
-  RandData *data = s_rand_data.get();
+  RandData *data = s_rand_data.getNoCheck();
 
   /* Seed the generator with a simple uint32 */
   php_mt_initialize(seed, data->state);
@@ -166,7 +170,7 @@ static inline uint32 php_mt_rand() {
 
   register uint32 s1;
 
-  RandData *data = s_rand_data.get();
+  RandData *data = s_rand_data.getNoCheck();
   if (data->left == 0) {
     php_mt_reload();
   }
@@ -212,7 +216,7 @@ int64 math_mt_rand(int64 min /* = 0 */, int64 max /* = RAND_MAX */) {
 #define MODMULT(a, b, c, m, s) q = s/a;s=b*(s-a*q)-c*q;if(s<0)s+=m
 
 static void lcg_seed() {
-  RandData *data = s_rand_data.get();
+  RandData *data = s_rand_data.getNoCheck();
   struct timeval tv;
   if (gettimeofday(&tv, NULL) == 0) {
     data->lcg_s1 = tv.tv_sec ^ (tv.tv_usec<<11);
@@ -233,7 +237,7 @@ double math_combined_lcg() {
   int32 q;
   int32 z;
 
-  RandData *data = s_rand_data.get();
+  RandData *data = s_rand_data.getNoCheck();
   if (!data->lcg_seeded) {
     lcg_seed();
   }

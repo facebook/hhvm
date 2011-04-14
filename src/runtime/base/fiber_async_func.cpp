@@ -76,7 +76,7 @@ public:
     // Variant::fiberUnmarshal() code to tell who needs to set back to original
     // reference.
     if (m_async) {
-      m_context = g_context.get();
+      m_context = g_context.getNoCheck();
       ASSERT(m_context);
       m_unmarshaled_function = NEW(Variant)();
       *m_unmarshaled_function = m_function;
@@ -131,7 +131,7 @@ public:
       try {
         s_fiber_data->m_fiberThread = true;
 
-        ExecutionContext *context = g_context.get();
+        ExecutionContext *context = g_context.getNoCheck();
         if (context && m_context) {
           context->fiberInit(m_context, m_refMap);
           const VirtualHost *vhost = m_context->getVirtualHost();
@@ -216,7 +216,7 @@ public:
 
     Variant unmarshaled_return;
     try {
-      ExecutionContext *context = g_context.get();
+      ExecutionContext *context = g_context.getNoCheck();
       if (context && m_context) {
         context->fiberExit(m_context, m_refMap);
         m_context = NULL;
@@ -360,7 +360,7 @@ void FiberWorker::onThreadEnter() {
 }
 
 void FiberWorker::onThreadExit() {
-  hphp_context_exit(g_context.get(), false, true);
+  hphp_context_exit(g_context.getNoCheck(), false, true);
   hphp_session_exit();
 
   if (s_dispatcher) {

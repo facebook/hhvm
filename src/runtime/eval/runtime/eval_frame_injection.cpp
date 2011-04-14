@@ -34,7 +34,8 @@ EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
 #ifdef ENABLE_LATE_STATIC_BINDING
   if (!sp) {
     m_prev =
-      FrameInjection::SetStaticClassName(ThreadInfo::s_threadInfo.get(), name);
+      FrameInjection::SetStaticClassName(ThreadInfo::s_threadInfo.getNoCheck(),
+                                         name);
     m_set = true;
   }
 #endif
@@ -43,14 +44,15 @@ EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
 EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper
 (CObjRef obj) : m_set(false), m_prev(NULL) {
 #ifdef ENABLE_LATE_STATIC_BINDING
-  FrameInjection::SetCallingObject(ThreadInfo::s_threadInfo.get(), obj.get());
+  FrameInjection::SetCallingObject(ThreadInfo::s_threadInfo.getNoCheck(),
+                                   obj.get());
 #endif
 }
 
 EvalFrameInjection::EvalStaticClassNameHelper::~EvalStaticClassNameHelper() {
 #ifdef ENABLE_LATE_STATIC_BINDING
   if (m_set) {
-    FrameInjection::SetStaticClassName(ThreadInfo::s_threadInfo.get(),
+    FrameInjection::SetStaticClassName(ThreadInfo::s_threadInfo.getNoCheck(),
                                        *m_prev);
   }
 #endif

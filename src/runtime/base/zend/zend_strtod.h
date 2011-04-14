@@ -32,6 +32,8 @@ double zend_oct_strtod(const char *str, char **endptr);
 int zend_startup_strtod(void);
 int zend_shutdown_strtod(void);
 
+void zend_get_bigint_data() ATTRIBUTE_COLD;
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -42,7 +42,7 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL(ExecutionContext, g_context);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(ExecutionContext, g_context);
 
 ExecutionContext::ExecutionContext()
   : m_transport(NULL),
@@ -805,7 +805,7 @@ String ExecutionContext::getIncludePath() const {
 ///////////////////////////////////////////////////////////////////////////////
 // persistent objects
 
-IMPLEMENT_THREAD_LOCAL(PersistentObjectStore, g_persistentObjects);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(PersistentObjectStore, g_persistentObjects);
 
 void PersistentObjectStore::removeObject(ResourceData *data) {
   if (data) {

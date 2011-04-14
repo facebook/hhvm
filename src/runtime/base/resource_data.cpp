@@ -22,7 +22,11 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // resources have a separate id space
-static IMPLEMENT_THREAD_LOCAL(int, os_max_resource_id);
+static IMPLEMENT_THREAD_LOCAL_NO_CHECK(int, os_max_resource_id);
+
+int ResourceData::GetMaxResourceId() {
+  return *(os_max_resource_id.getCheck());
+}
 
 ResourceData::ResourceData() : ObjectData(true), m_static (false) {
   int &pmax = *os_max_resource_id;

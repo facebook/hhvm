@@ -21,7 +21,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_THREAD_LOCAL(Sweepable::SweepData, Sweepable::s_sweep_data);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(Sweepable::SweepData, Sweepable::s_sweep_data);
+
+void Sweepable::GetSweepData() {
+  s_sweep_data.getCheck();
+}
 
 void Sweepable::SweepAll() {
   s_sweep_data->sweeping = true;

@@ -223,7 +223,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(SignalHandlers, s_signal_handlers);
 static void pcntl_signal_handler(int signo) {
   if (signo > 0 && signo < _NSIG) {
     s_signal_handlers->signaled[signo] = 1;
-    RequestInjectionData &data = ThreadInfo::s_threadInfo.get()->
+    RequestInjectionData &data = ThreadInfo::s_threadInfo.getNoCheck()->
                                    m_reqInjectionData;
     data.surpriseMutex.lock();
     data.signaled = true;

@@ -113,7 +113,11 @@ public:
 private:
   PCREStringMap m_cache;
 };
-IMPLEMENT_THREAD_LOCAL(PCRECache, s_pcre_cache);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(PCRECache, s_pcre_cache);
+
+void preg_get_pcre_cache() {
+  s_pcre_cache.getCheck();
+}
 
 static pcre_cache_entry *pcre_get_compiled_regex_cache(CStrRef regex) {
   PCRECache &pcre_cache = *s_pcre_cache;

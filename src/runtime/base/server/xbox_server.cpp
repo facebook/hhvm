@@ -132,7 +132,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 static IMPLEMENT_THREAD_LOCAL(XboxServerInfoPtr, s_xbox_server_info);
-static IMPLEMENT_THREAD_LOCAL(RPCRequestHandler, s_rpc_request_handler);
+static IMPLEMENT_THREAD_LOCAL(RPCRequestHandler, s_xbox_request_handler);
 ///////////////////////////////////////////////////////////////////////////////
 
 class XboxWorker : public JobQueueWorker<XboxTransport*> {
@@ -141,15 +141,15 @@ public:
     if (!*s_xbox_server_info) {
       *s_xbox_server_info = XboxServerInfoPtr(new XboxServerInfo());
     }
-    s_rpc_request_handler->setServerInfo(*s_xbox_server_info);
-    if (s_rpc_request_handler->needReset() ||
-        s_rpc_request_handler->incRequest() >
+    s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
+    if (s_xbox_request_handler->needReset() ||
+        s_xbox_request_handler->incRequest() >
         (*s_xbox_server_info)->getMaxRequest()) {
-      s_rpc_request_handler.reset();
-      s_rpc_request_handler->setServerInfo(*s_xbox_server_info);
-      s_rpc_request_handler->incRequest();
+      s_xbox_request_handler.destroy();
+      s_xbox_request_handler->setServerInfo(*s_xbox_server_info);
+      s_xbox_request_handler->incRequest();
     }
-    return s_rpc_request_handler.get();
+    return s_xbox_request_handler.get();
   }
 
   virtual void doJob(XboxTransport *job) {
@@ -369,15 +369,12 @@ int XboxServer::TaskResult(CObjRef task, int timeout_ms, Variant &ret) {
 }
 
 XboxServerInfoPtr XboxServer::GetServerInfo() {
-  if (s_xbox_server_info.isNull() || !*s_xbox_server_info) {
-    return XboxServerInfoPtr();
-  }
   return *s_xbox_server_info;
 }
 
 RPCRequestHandler *XboxServer::GetRequestHandler() {
-  if (s_rpc_request_handler.isNull()) return NULL;
-  return s_rpc_request_handler.get();
+  if (s_xbox_request_handler.isNull()) return NULL;
+  return s_xbox_request_handler.get();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

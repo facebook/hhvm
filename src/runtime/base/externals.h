@@ -172,6 +172,11 @@ extern StaticString literalStrings[];
 
 extern unsigned int *getRTTICounter(int id);
 
+/**
+ * Eval support
+ */
+extern bool has_eval_support;
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

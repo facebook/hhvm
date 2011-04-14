@@ -75,7 +75,13 @@ class ObjectData : public CountableNF {
     RealPropUnchecked = 8,// Dont check property accessibility
   };
 
-  ObjectData(bool isResource = false);
+  ObjectData(bool isResource = false)
+    : o_properties(NULL), o_attribute(0) {
+    if (!isResource) {
+      o_id = ++(*os_max_id);
+    }
+  }
+
   virtual ~ObjectData(); // all PHP classes need virtual tables
 
   void setAttributes(int attrs) { o_attribute |= attrs; }
@@ -289,6 +295,7 @@ class ObjectData : public CountableNF {
   static Variant NullConstructorFewArgs(MethodCallPackage &info, int count,
       INVOKE_FEW_ARGS_IMPL_ARGS);
   virtual void cloneSet(ObjectData *clone);
+  static int GetMaxId() ATTRIBUTE_COLD;
  protected:
   virtual ObjectData* cloneImpl() = 0;
 
@@ -300,6 +307,7 @@ class ObjectData : public CountableNF {
   ObjectData(const ObjectData &) { ASSERT(false);}
   inline Variant o_getImpl(CStrRef propName, int flags,
                            bool error = true, CStrRef context = null_string);
+  static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_id);
 
  protected:
   int o_id;                      // a numeric identifier of this object
@@ -378,7 +386,7 @@ class ItemSize<UNIT_SIZE> {
 template <typename T>
 void *ObjectAllocatorInitSetup() {
   ThreadLocalSingleton<ObjectAllocator<ItemSize<sizeof(T)>::value> > tls;
-  GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.get));
+  GetAllocatorInitList().insert((AllocatorThreadLocalInit)(tls.getCheck));
   return (void *)tls.getNoCheck;
 }
 

@@ -157,7 +157,7 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp,
       methodname = sfunction.substr(c + 2);
 #ifdef ENABLE_LATE_STATIC_BINDING
       if (classname->same(s_static.get())) {
-        ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+        ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
         classname = FrameInjection::GetStaticClassName(ti);
       }
 #endif
@@ -229,7 +229,7 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp,
       }
 #ifdef ENABLE_LATE_STATIC_BINDING
       if (sclass->same(s_static.get())) {
-        ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+        ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
         sclass = FrameInjection::GetStaticClassName(ti);
       }
 #endif
@@ -610,7 +610,7 @@ void throw_infinite_recursion_exception() {
   }
 }
 void generate_request_timeout_exception() {
-  ThreadInfo *info = ThreadInfo::s_threadInfo.get();
+  ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
   RequestInjectionData &data = info->m_reqInjectionData;
   if (data.timeoutSeconds > 0) {
     // This extra checking is needed, because there may be a race condition
@@ -632,7 +632,7 @@ void generate_request_timeout_exception() {
 }
 
 void generate_memory_exceeded_exception() {
-  ThreadInfo *info = ThreadInfo::s_threadInfo.get();
+  ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
   info->m_pendingException = true;
   info->m_exceptionMsg = "request has exceeded memory limit";
   if (RuntimeOption::InjectedStackTrace) {
@@ -1303,7 +1303,7 @@ Variant &get_static_property_lval(const char *s, const char *prop) {
 #ifdef ENABLE_LATE_STATIC_BINDING
 Variant invoke_static_method_bind(CStrRef s, CStrRef method,
                                   CArrRef params, bool fatal /* = true */) {
-  ThreadInfo *info = ThreadInfo::s_threadInfo.get();
+  ThreadInfo *info = ThreadInfo::s_threadInfo.getNoCheck();
   String cls = s;
   bool isStatic = cls->isame(s_static.get());
   if (isStatic) {
@@ -1477,7 +1477,7 @@ void throw_exception(CObjRef e) {
 
 bool set_line(int line0, int char0 /* = 0 */, int line1 /* = 0 */,
               int char1 /* = 0 */) {
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   FrameInjection *frame = ti->m_top;
   if (frame) {
     frame->setLine(line0);

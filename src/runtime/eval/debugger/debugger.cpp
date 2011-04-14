@@ -119,7 +119,7 @@ void Debugger::InterruptHard(InterruptSite &site) {
 
 bool Debugger::InterruptException(CVarRef e) {
   if (RuntimeOption::EnableDebugger) {
-    ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+    ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
     if (ti->m_top && ti->m_reqInjectionData.debugger) {
       Eval::InterruptSite site(ti->m_top, e);
       Eval::Debugger::Interrupt(ExceptionThrown, NULL, &site);
@@ -208,7 +208,7 @@ bool Debugger::isThreadDebugging(int64 id) {
 void Debugger::addSandbox(const DSandboxInfo &sandbox) {
   WriteLock lock(m_mutex);
   string id = sandbox.id();
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.getNoCheck();
   m_threadInfos[(int64)pthread_self()] = ti;
   if (m_proxies[id]) {
     ti->m_reqInjectionData.debugger = true;

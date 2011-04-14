@@ -32,6 +32,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
+void ServerStats::GetLogger() {
+  s_logger.getCheck();
+}
+
 void ServerStats::Merge(CounterMap &dest, const CounterMap &src) {
   for (CounterMap::const_iterator iter = src.begin();
        iter != src.end(); ++iter) {
@@ -593,7 +597,7 @@ private:
 Mutex ServerStats::s_lock;
 vector<ServerStats*> ServerStats::s_loggers;
 bool ServerStats::s_profile_network = false;
-IMPLEMENT_THREAD_LOCAL(ServerStats, ServerStats::s_logger);
+IMPLEMENT_THREAD_LOCAL_NO_CHECK(ServerStats, ServerStats::s_logger);
 
 void ServerStats::LogPage(const string &url, int code) {
   if (RuntimeOption::EnableStats && RuntimeOption::EnableWebStats) {
@@ -1205,7 +1209,7 @@ ServerStatsHelper::~ServerStatsHelper() {
     logTime("page.cpu.", m_cpuStart, cpuEnd);
 
     if (m_trackMemory) {
-      MemoryManager *mm = MemoryManager::TheMemoryManager().get();
+      MemoryManager *mm = MemoryManager::TheMemoryManager().getNoCheck();
       int64 mem = mm->getStats(true).peakUsage;
       ServerStats::Log(string("mem.") + m_section, mem);
     }

@@ -141,7 +141,7 @@ void LibEventWorker::onThreadExit() {
   ASSERT(m_opaque);
   LibEventServer *server = (LibEventServer*)m_opaque;
   server->onThreadExit(m_handler);
-  MemoryManager::TheMemoryManager().get()->cleanup();
+  MemoryManager::TheMemoryManager().getNoCheck()->cleanup();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

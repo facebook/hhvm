@@ -207,7 +207,10 @@ public:
       Logger::Error("%s", e.getMessage().c_str());
       ret = false;
     }
-    if (!ret && job.second) m_ret = false;
+    if (!ret && job.second) {
+      Logger::Error("Fatal: Unable to stat/parse %s", job.first);
+      m_ret = false;
+    }
   }
 };
 

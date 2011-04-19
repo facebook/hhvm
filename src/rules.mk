@@ -622,10 +622,10 @@ overall: all quiet-1
 %.h %.hpp %.hh %.inc:
 	@
 
-DEPEND_FILES := $(OBJECTS:.o=.d)
+DEPEND_FILES := $(OBJECTS:.o=.d) $(PIC_OBJECTS:.o=.d)
 
 ifneq ($(DEPEND_FILES),)
-$(OBJECTS) : %.o : %.d
+$(OBJECTS) $(PIC_OBJECTS): %.o : %.d
 
 -include $(DEPEND_FILES)
 endif

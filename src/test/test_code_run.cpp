@@ -16982,6 +16982,18 @@ bool TestCodeRun::TestHint() {
         "bool(true)\n"
         "string(5) \"hello\"\n");
 
+  MVCRO("<?php "
+        "g(DATE_COOKIE);"
+        "f(count(array()));"
+        "function f(int $i) {"
+        "  var_dump($i);"
+        "}"
+        "function g(string $s) {"
+        "  var_dump($s);"
+        "}",
+        "string(16) \"l, d-M-y H:i:s T\"\n"
+        "int(0)\n");
+
   return true;
 }
 

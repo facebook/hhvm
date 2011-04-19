@@ -18,6 +18,7 @@
 #include <compiler/expression/constant_expression.h>
 #include <compiler/analysis/block_scope.h>
 #include <compiler/analysis/class_scope.h>
+#include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/constant_table.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/analysis/code_error.h>
@@ -135,6 +136,10 @@ void ConstantExpression::analyzeProgram(AnalysisResultPtr ar) {
         }
       }
     }
+  }
+  if (ar->getPhase() == AnalysisResult::AnalyzeFinal && m_dynamic) {
+    FunctionScopePtr scope = getFunctionScope();
+    if (scope) scope->setNeedsCheckMem();
   }
 }
 

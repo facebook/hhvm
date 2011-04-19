@@ -155,6 +155,10 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
         m_sym->setLvalParam();
       }
     }
+    if (m_superGlobal || m_name == "GLOBALS") {
+      FunctionScopePtr func = getFunctionScope();
+      if (func) func->setNeedsCheckMem();
+    }
   }
 }
 

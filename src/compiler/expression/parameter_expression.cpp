@@ -89,6 +89,7 @@ void ParameterExpression::analyzeProgram(AnalysisResultPtr ar) {
     if (fs->isMagicMethod() || fs->getName() == "offsetget") {
       fs->getVariables()->addLvalParam(m_name);
     }
+    if (m_ref) fs->setNeedsCheckMem();
   }
 }
 

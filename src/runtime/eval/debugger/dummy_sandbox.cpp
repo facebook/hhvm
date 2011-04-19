@@ -55,7 +55,7 @@ void DummySandbox::run() {
       char *argv[] = {"", NULL};
       execute_command_line_begin(1, argv, 0);
 
-      FUNCTION_INJECTION("_", FrameInjection::PseudoMain);
+      FUNCTION_INJECTION_FS("_", FrameInjection::PseudoMain);
 
       DSandboxInfo sandbox = m_proxy->getSandbox();
       string msg;

@@ -145,6 +145,10 @@ void ObjectPropertyExpression::analyzeProgram(AnalysisResultPtr ar) {
       FunctionScopePtr func = getFunctionScope();
       if (func) func->setNeedsRefTemp();
     }
+    if (getContext() & (RefValue | AssignmentLHS | OprLValue)) {
+      FunctionScopePtr func = getFunctionScope();
+      if (func) func->setNeedsCheckMem();
+    }
   }
 }
 

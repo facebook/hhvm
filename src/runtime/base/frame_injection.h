@@ -101,6 +101,19 @@ protected:
     // NOTE: hot profiler needs to be called by subclasses
   }
 
+  void hotProfilerInit(const char *name) {
+#ifdef HOTPROFILER
+    Profiler *prof = m_info->m_profiler;
+    if (prof) begin_profiler_frame(prof, name);
+#endif
+  }
+  void hotProfilerFini() {
+#ifdef HOTPROFILER
+    Profiler *prof = m_info->m_profiler;
+    if (prof) end_profiler_frame(prof);
+#endif
+  }
+
 public:
 
   /**
@@ -169,29 +182,78 @@ protected:
 
 class FrameInjectionFunction : public FrameInjection {
 public:
-  FrameInjectionFunction(const char *name, int fs);
+  FrameInjectionFunction(const char *name, int fs)
+    : FrameInjection(name, fs | Function){
+    hotProfilerInit(name);
+  }
+  ~FrameInjectionFunction() {
+    hotProfilerFini();
+  }
   ObjectData *getThis() const;
   ObjectData *getThisForArrow();
-  ~FrameInjectionFunction();
+};
+
+class FIFunctionMem : public FrameInjectionFunction {
+public:
+  FIFunctionMem(const char *name);
+  ~FIFunctionMem();
+};
+
+class FIFunctionNoMem : public FrameInjectionFunction {
+public:
+  FIFunctionNoMem(const char *name);
+  ~FIFunctionNoMem();
+};
+
+class FIFunctionFS : public FrameInjectionFunction {
+public:
+  FIFunctionFS(const char *name, int fs);
+  ~FIFunctionFS();
 };
 
 class FrameInjectionStaticMethod : public FrameInjection {
 public:
-  FrameInjectionStaticMethod(const char *name, int fs);
-  ~FrameInjectionStaticMethod();
+  FrameInjectionStaticMethod(const char *name)
+    : FrameInjection(name, StaticMethod) {
+    hotProfilerInit(name);
+  }
+  ~FrameInjectionStaticMethod() {
+    hotProfilerFini();
+  }
 
   ObjectData *getThis() const { return NULL; }
   ObjectData *getThisForArrow() {
     throw FatalErrorException("Using $this when not in object context");
   }
+};
 
-private:
+class FIStaticMethodMem : public FrameInjectionStaticMethod {
+public:
+  FIStaticMethodMem(const char *name);
+  ~FIStaticMethodMem();
+};
+
+class FIStaticMethodNoMem : public FrameInjectionStaticMethod {
+public:
+  FIStaticMethodNoMem(const char *name);
+  ~FIStaticMethodNoMem();
 };
 
 class FrameInjectionObjectMethod : public FrameInjection {
 public:
-  FrameInjectionObjectMethod(const char *name, int fs, ObjectData *obj);
-  ~FrameInjectionObjectMethod();
+  FrameInjectionObjectMethod(const char *name, ObjectData *obj)
+    : FrameInjection(name, ObjectMethod)   {
+    ASSERT(obj);
+    m_object = obj;
+    obj->incRefCount();
+    hotProfilerInit(name);
+  }
+  ~FrameInjectionObjectMethod() {
+    if (m_object->decRefCount() == 0) {
+      m_object->release();
+    }
+    hotProfilerFini();
+  }
 
   /**
    * This function checks object ID to make sure it's not 0. If it's 0, it
@@ -211,11 +273,23 @@ private:
   ObjectData *m_object;
 };
 
-/* No profile version of Function, for call_user_func_array, etc. */
-class FrameInjectionFunctionNP : public FrameInjection {
+class FIObjectMethodMem : public FrameInjectionObjectMethod {
 public:
-  FrameInjectionFunctionNP(const char *name, int fs);
-  ~FrameInjectionFunctionNP();
+  FIObjectMethodMem(const char *name, ObjectData *obj);
+  ~FIObjectMethodMem();
+};
+
+class FIObjectMethodNoMem : public FrameInjectionObjectMethod {
+public:
+  FIObjectMethodNoMem(const char *name, ObjectData *obj);
+  ~FIObjectMethodNoMem();
+};
+
+/* No profile version of Function, for call_user_func_array, etc. */
+class FIFunctionNP : public FrameInjection {
+public:
+  FIFunctionNP(const char *name);
+  ~FIFunctionNP();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

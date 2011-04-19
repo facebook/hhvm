@@ -265,18 +265,19 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
       funcScope->outputCPPParamsDecl(cg, ar, m_params, false);
       cg_indentBegin(") {\n");
       if (!isWrapper) {
-        const char *sys =
+        const char *suffix =
           (cg.getOutput() == CodeGenerator::SystemCPP ? "_BUILTIN" : "");
-        const char *flags = (sys[0] != '\0') ? "" : ", 0";
         if (pseudoMain) {
-          cg_printf("PSEUDOMAIN_INJECTION%s(%s, %s%s%s);\n",
-                    sys, origFuncName.c_str(), Option::PseudoMainPrefix,
-                    funcScope->getContainingFile()->pseudoMainName().c_str(),
-                    flags);
+          cg_printf("PSEUDOMAIN_INJECTION%s(%s, %s%s);\n",
+                    suffix, origFuncName.c_str(), Option::PseudoMainPrefix,
+                    funcScope->getContainingFile()->pseudoMainName().c_str());
         } else {
           if (m_stmt->hasBody()) {
-            cg_printf("FUNCTION_INJECTION%s(%s%s);\n", sys,
-                      origFuncName.c_str(), flags);
+            if (suffix[0] == '\0' && !funcScope->needsCheckMem()) {
+              suffix = "_NOMEM";
+            }
+            cg_printf("FUNCTION_INJECTION%s(%s);\n", suffix,
+                      origFuncName.c_str());
           }
           outputCPPArgInjections(cg, ar, origFuncName.c_str(),
                                  ClassScopePtr(), funcScope);

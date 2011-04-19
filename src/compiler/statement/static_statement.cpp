@@ -20,6 +20,7 @@
 #include <compiler/expression/expression_list.h>
 #include <compiler/analysis/block_scope.h>
 #include <compiler/analysis/variable_table.h>
+#include <compiler/analysis/function_scope.h>
 #include <compiler/expression/simple_variable.h>
 #include <compiler/expression/assignment_expression.h>
 #include <compiler/expression/constant_expression.h>
@@ -77,6 +78,9 @@ void StaticStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
       Symbol *sym = var->getSymbol();
       sym->setStaticInitVal(value);
     }
+  } else if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    FunctionScopePtr fs = getFunctionScope();
+    if (fs) fs->setNeedsCheckMem();
   }
 }
 

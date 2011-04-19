@@ -319,28 +319,6 @@ Array FrameInjection::getArgs() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static inline void hotProfilerInit(ThreadInfo *info, const char *name) {
-#ifdef HOTPROFILER
-  Profiler *prof = info->m_profiler;
-  if (prof) begin_profiler_frame(prof, name);
-#endif
-}
-
-static inline void hotProfilerFini(ThreadInfo *info) {
-#ifdef HOTPROFILER
-  Profiler *prof = info->m_profiler;
-  if (prof) end_profiler_frame(prof);
-#endif
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-FrameInjectionFunction::FrameInjectionFunction(const char *name, int fs)
-  : FrameInjection(name, fs) {
-  ASSERT(fs & (Function|EvalFrame));
-  hotProfilerInit(m_info, name);
-}
-
 ObjectData *FrameInjectionFunction::getThis() const {
   if ((m_flags & PseudoMain) && m_prev) {
     return m_prev->getObjectV();
@@ -355,51 +333,64 @@ ObjectData *FrameInjectionFunction::getThisForArrow() {
   throw FatalErrorException("Using $this when not in object context");
 }
 
-FrameInjectionFunction::~FrameInjectionFunction() {
+FIFunctionMem::FIFunctionMem(const char *name)
+  : FrameInjectionFunction(name, 0) {
+  // Do nothing
+}
+
+FIFunctionMem::~FIFunctionMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif
-  hotProfilerFini(m_info);
+}
+
+FIFunctionNoMem::FIFunctionNoMem(const char *name)
+  : FrameInjectionFunction(name, 0) {
+  // Do nothing
+}
+
+FIFunctionNoMem::~FIFunctionNoMem() {
+#ifdef REQUEST_TIMEOUT_DETECTION
+  check_request_timeout_nomemcheck(m_info);
+#endif
+}
+
+FIFunctionFS::FIFunctionFS(const char *name, int fs)
+  : FrameInjectionFunction(name, fs) {
+  // Do nothing
+}
+
+FIFunctionFS::~FIFunctionFS() {
+#ifdef REQUEST_TIMEOUT_DETECTION
+  check_request_timeout(m_info);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-FrameInjectionStaticMethod::FrameInjectionStaticMethod(const char *name, int fs)
-  : FrameInjection(name, fs) {
-  ASSERT(fs & StaticMethod);
-
-  hotProfilerInit(m_info, name);
+FIStaticMethodMem::FIStaticMethodMem(const char *name)
+  : FrameInjectionStaticMethod(name) {
+  // Do nothing
 }
 
-FrameInjectionStaticMethod::~FrameInjectionStaticMethod() {
+FIStaticMethodMem::~FIStaticMethodMem() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif
-  hotProfilerFini(m_info);
+}
+
+FIStaticMethodNoMem::FIStaticMethodNoMem(const char *name)
+  : FrameInjectionStaticMethod(name) {
+  // Do nothing
+}
+
+FIStaticMethodNoMem::~FIStaticMethodNoMem() {
+#ifdef REQUEST_TIMEOUT_DETECTION
+  check_request_timeout_nomemcheck(m_info);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-FrameInjectionObjectMethod::FrameInjectionObjectMethod(const char *name,
-                                                       int fs, ObjectData *obj)
-  : FrameInjection(name, fs) {
-  ASSERT(fs & ObjectMethod);
-  ASSERT(obj);
-
-  m_object = obj;
-  m_object->incRefCount();
-  hotProfilerInit(m_info, name);
-}
-
-FrameInjectionObjectMethod::~FrameInjectionObjectMethod() {
-#ifdef REQUEST_TIMEOUT_DETECTION
-  check_request_timeout(m_info);
-#endif
-  if (m_object->decRefCount() == 0) {
-    m_object->release();
-  }
-  hotProfilerFini(m_info);
-}
 
 ObjectData *FrameInjectionObjectMethod::getThis() const {
   if (!m_object->o_getId()) {
@@ -415,13 +406,35 @@ ObjectData *FrameInjectionObjectMethod::getThisForArrow() {
   throw FatalErrorException("Using $this when not in object context");
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-FrameInjectionFunctionNP::FrameInjectionFunctionNP(const char *name, int fs)
-  : FrameInjection(name, fs) {
+FIObjectMethodMem::FIObjectMethodMem(const char *name, ObjectData *obj)
+ : FrameInjectionObjectMethod(name, obj) {
+  // Do nothing
 }
 
-FrameInjectionFunctionNP::~FrameInjectionFunctionNP() {
+FIObjectMethodMem::~FIObjectMethodMem() {
+#ifdef REQUEST_TIMEOUT_DETECTION
+  check_request_timeout(m_info);
+#endif
+}
+
+FIObjectMethodNoMem::FIObjectMethodNoMem(const char *name, ObjectData *obj)
+ : FrameInjectionObjectMethod(name, obj) {
+  // Do nothing
+}
+
+FIObjectMethodNoMem::~FIObjectMethodNoMem() {
+#ifdef REQUEST_TIMEOUT_DETECTION
+  check_request_timeout_nomemcheck(m_info);
+#endif
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+FIFunctionNP::FIFunctionNP(const char *name)
+  : FrameInjection(name, BuiltinFunction | Function) {
+}
+
+FIFunctionNP::~FIFunctionNP() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
 #endif

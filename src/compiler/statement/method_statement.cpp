@@ -520,22 +520,24 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_indentBegin(") {\n");
         if (context != CodeGenerator::CppTypedParamsWrapperImpl) {
           if (m_stmt->hasBody()) {
-            const char *sys =
+            const char *suffix =
               (cg.getOutput() == CodeGenerator::SystemCPP ? "_BUILTIN" : "");
-            const char *flags = (sys[0] != '\0') ? "" : ", 0";
+            if (suffix[0] == '\0' && !funcScope->needsCheckMem()) {
+              suffix = "_NOMEM";
+            }
             if (m_modifiers->isStatic()) {
-              cg_printf("STATIC_METHOD_INJECTION%s(%s, %s%s);\n", sys,
+              cg_printf("STATIC_METHOD_INJECTION%s(%s, %s);\n", suffix,
                         scope->getOriginalName().c_str(),
-                        origFuncName.c_str(), flags);
+                        origFuncName.c_str());
             } else if (cg.getOutput() != CodeGenerator::SystemCPP &&
                        !scope->isRedeclaring() && !scope->derivedByDynamic()) {
-              cg_printf("INSTANCE_METHOD_INJECTION_ROOTLESS(%s, %s%s);\n",
-                        scope->getOriginalName().c_str(),
-                        origFuncName.c_str(), flags);
+              cg_printf("INSTANCE_METHOD_INJECTION_ROOTLESS%s(%s, %s);\n",
+                        suffix, scope->getOriginalName().c_str(),
+                        origFuncName.c_str());
             } else if (scope->getOriginalName() != "XhprofFrame") {
-              cg_printf("INSTANCE_METHOD_INJECTION%s(%s, %s%s);\n", sys,
+              cg_printf("INSTANCE_METHOD_INJECTION%s(%s, %s);\n", suffix,
                         scope->getOriginalName().c_str(),
-                        origFuncName.c_str(), flags);
+                        origFuncName.c_str());
             }
           }
           outputCPPArgInjections(cg, ar, origFuncName.c_str(),

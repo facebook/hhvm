@@ -184,6 +184,8 @@ void ArrayElementExpression::analyzeProgram(AnalysisResultPtr ar) {
                           shared_from_this());
         }
       }
+      FunctionScopePtr scope = getFunctionScope();
+      if (scope) scope->setNeedsCheckMem();
     }
   }
 }

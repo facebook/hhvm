@@ -93,6 +93,8 @@ public:
   bool isGenerator() const;
   void setNeedsRefTemp() { m_needsRefTemp = true; }
   bool needsRefTemp() const { return m_needsRefTemp; }
+  void setNeedsCheckMem() { m_needsCheckMem = true; }
+  bool needsCheckMem() const { return m_needsCheckMem; }
 
   void setInlineSameContext(bool f) { m_inlineSameContext = f; }
   bool getInlineSameContext() const { return m_inlineSameContext; }
@@ -445,6 +447,7 @@ private:
   unsigned m_contextSensitive : 1;
   unsigned m_directInvoke : 1;
   unsigned m_needsRefTemp : 1;
+  unsigned m_needsCheckMem : 1;
   int m_redeclaring; // multiple definition of the same function
   StatementPtr m_stmtCloned; // cloned method body stmt
   int m_inlineIndex;

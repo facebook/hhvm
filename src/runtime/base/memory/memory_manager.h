@@ -126,16 +126,6 @@ public:
    */
   void resetStats();
 
-  bool DEBUG_checkStats() {
-#ifdef USE_JEMALLOC
-    if (s_stats_enabled) {
-      int64 delta = int64(*m_allocated) - int64(*m_deallocated);
-      return delta < m_delta;
-    }
-#endif
-    return true;
-  }
-
   /**
    * Refresh stats to reflect directly malloc()ed memory, and determine whether
    * the request memory limit has been exceeded.

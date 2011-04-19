@@ -17,6 +17,9 @@
 #include <compiler/statement/return_statement.h>
 #include <compiler/expression/unary_op_expression.h>
 #include <compiler/expression/function_call.h>
+#include <compiler/expression/object_property_expression.h>
+#include <compiler/expression/array_element_expression.h>
+#include <compiler/expression/simple_variable.h>
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/code_error.h>
@@ -55,6 +58,48 @@ void ReturnStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
       }
     }
     m_exp->analyzeProgram(ar);
+  }
+  if (ar->getPhase() == AnalysisResult::AnalyzeFinal) {
+    if (m_exp) {
+      TypePtr retType = m_exp->getCPPType();
+      bool needsCheck = !retType->isPrimitive();
+      if (m_exp->is(Expression::KindOfSimpleFunctionCall) ||
+          m_exp->is(Expression::KindOfDynamicFunctionCall) ||
+          m_exp->is(Expression::KindOfObjectMethodExpression)) {
+        // return a value from another function call
+        needsCheck = false;
+      }
+      ExpressionPtr tmp = m_exp;
+      while (tmp &&
+             (tmp->is(Expression::KindOfObjectPropertyExpression) ||
+              tmp->is(Expression::KindOfArrayElementExpression))) {
+        if (ObjectPropertyExpressionPtr opExp =
+            dynamic_pointer_cast<ObjectPropertyExpression>(tmp)) {
+          tmp = opExp->getObject();
+        } else {
+          ArrayElementExpressionPtr aeExp =
+            dynamic_pointer_cast<ArrayElementExpression>(tmp);
+          ASSERT(aeExp);
+          tmp = aeExp->getVariable();
+        }
+      }
+      if (SimpleVariablePtr svExp = dynamic_pointer_cast<SimpleVariable>(tmp)) {
+        if (svExp->isThis()) {
+          // returning something from $this
+          needsCheck = false;
+        } else {
+          Symbol *sym = svExp->getSymbol();
+          if (sym && sym->isParameter() && !sym->isLvalParam()) {
+            // returning something from non-lval parameter
+            needsCheck = false;
+          }
+        }
+      }
+      if (needsCheck) {
+        FunctionScopePtr funcScope = getFunctionScope();
+        if (funcScope) funcScope->setNeedsCheckMem();
+      }
+    }
   }
 }
 

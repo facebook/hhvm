@@ -418,81 +418,124 @@ do { \
 
 // Stack frame injection is also for correctness, and cannot be disabled.
 
-#define FRAME_INJECTION_FUNCTION(n, fs) \
-  FrameInjectionFunction fi(#n, fs | FrameInjection::Function);
+#define FRAME_INJECTION_FUNCTION_MEM(n) \
+  FIFunctionMem fi(#n);
 
-#define FRAME_INJECTION_STATIC_METHOD(n, fs) \
-  FrameInjectionStaticMethod fi(#n, fs | FrameInjection::StaticMethod);
+#define FRAME_INJECTION_FUNCTION_NOMEM(n) \
+  FIFunctionNoMem fi(#n);
+
+#define FRAME_INJECTION_FUNCTION_FS(n, fs) \
+  FIFunctionFS fi(#n, fs);
+
+#define FRAME_INJECTION_STATIC_METHOD_MEM(n) \
+  FIStaticMethodMem fi(#n);
+
+#define FRAME_INJECTION_STATIC_METHOD_NOMEM(n) \
+  FIStaticMethodNoMem fi(#n);
 
 // For classes that might have redeclaring subclasse
-#define FRAME_INJECTION_OBJECT_METHOD(n, fs) \
-  FrameInjectionObjectMethod fi(#n, fs | FrameInjection::ObjectMethod, \
-                                this->getRoot());
+#define FRAME_INJECTION_OBJECT_METHOD_MEM(n) \
+  FIObjectMethodMem fi(#n, this->getRoot());
+
+#define FRAME_INJECTION_OBJECT_METHOD_NOMEM(n) \
+  FIObjectMethodNoMem fi(#n, this->getRoot());
 
 // For classes that do not have redeclaring subclasses
-#define FRAME_INJECTION_OBJECT_METHOD_ROOTLESS(n, fs) \
-  FrameInjectionObjectMethod fi(#n, fs | FrameInjection::ObjectMethod, \
-                                this);
+#define FRAME_INJECTION_OBJECT_METHOD_ROOTLESS_MEM(n) \
+  FIObjectMethodMem fi(#n, this);
 
-#define FRAME_INJECTION_NO_PROFILE(n, fs) \
-  FrameInjectionFunctionNP fi(#n, fs | FrameInjection::Function);
+#define FRAME_INJECTION_OBJECT_METHOD_ROOTLESS_NOMEM(n) \
+  FIObjectMethodNoMem fi(#n, this);
+
+#define FRAME_INJECTION_NO_PROFILE(n) \
+  FIFunctionNP fi(#n);
 
 // code injected into beginning of every function/method
-#define FUNCTION_INJECTION(n, fs)                                   \
+#define FUNCTION_INJECTION(n)                                       \
   DECLARE_THREAD_INFO_NOINIT                                        \
-  FRAME_INJECTION_FUNCTION(n, fs)                                   \
+  FRAME_INJECTION_FUNCTION_MEM(n)                                   \
   DECLARE_GLOBAL_VARIABLES_INJECTION(g)                             \
   EXECUTION_PROFILER_INJECTION(false)                               \
 
-#define STATIC_METHOD_INJECTION(c, n, fs)                           \
+#define FUNCTION_INJECTION_NOMEM(n)                                 \
   DECLARE_THREAD_INFO_NOINIT                                        \
-  FRAME_INJECTION_STATIC_METHOD(n, fs)                              \
+  FRAME_INJECTION_FUNCTION_NOMEM(n)                                 \
   DECLARE_GLOBAL_VARIABLES_INJECTION(g)                             \
   EXECUTION_PROFILER_INJECTION(false)                               \
 
-#define INSTANCE_METHOD_INJECTION(c, n, fs)                         \
+#define FUNCTION_INJECTION_FS(n, fs)                                \
   DECLARE_THREAD_INFO_NOINIT                                        \
-  FRAME_INJECTION_OBJECT_METHOD(n, fs)                              \
+  FRAME_INJECTION_FUNCTION_FS(n, fs)                                \
   DECLARE_GLOBAL_VARIABLES_INJECTION(g)                             \
   EXECUTION_PROFILER_INJECTION(false)                               \
 
-#define INSTANCE_METHOD_INJECTION_ROOTLESS(c, n, fs)                \
+#define STATIC_METHOD_INJECTION(c, n)                               \
   DECLARE_THREAD_INFO_NOINIT                                        \
-  FRAME_INJECTION_OBJECT_METHOD_ROOTLESS(n, fs)                     \
+  FRAME_INJECTION_STATIC_METHOD_MEM(n)                              \
   DECLARE_GLOBAL_VARIABLES_INJECTION(g)                             \
   EXECUTION_PROFILER_INJECTION(false)                               \
 
-#define PSEUDOMAIN_INJECTION(n, esc, fs)                            \
+#define STATIC_METHOD_INJECTION_NOMEM(c, n)                         \
+  DECLARE_THREAD_INFO_NOINIT                                        \
+  FRAME_INJECTION_STATIC_METHOD_NOMEM(n)                            \
+  DECLARE_GLOBAL_VARIABLES_INJECTION(g)                             \
+  EXECUTION_PROFILER_INJECTION(false)                               \
+
+#define INSTANCE_METHOD_INJECTION(c, n)                             \
+  DECLARE_THREAD_INFO_NOINIT                                        \
+  FRAME_INJECTION_OBJECT_METHOD_MEM(n)                              \
+  DECLARE_GLOBAL_VARIABLES_INJECTION(g)                             \
+  EXECUTION_PROFILER_INJECTION(false)                               \
+
+#define INSTANCE_METHOD_INJECTION_NOMEM(c, n)                       \
+  DECLARE_THREAD_INFO_NOINIT                                        \
+  FRAME_INJECTION_OBJECT_METHOD_NOMEM(n)                            \
+  DECLARE_GLOBAL_VARIABLES_INJECTION(g)                             \
+  EXECUTION_PROFILER_INJECTION(false)                               \
+
+#define INSTANCE_METHOD_INJECTION_ROOTLESS(c, n)                    \
+  DECLARE_THREAD_INFO_NOINIT                                        \
+  FRAME_INJECTION_OBJECT_METHOD_ROOTLESS_MEM(n)                     \
+  DECLARE_GLOBAL_VARIABLES_INJECTION(g)                             \
+  EXECUTION_PROFILER_INJECTION(false)                               \
+
+#define INSTANCE_METHOD_INJECTION_ROOTLESS_NOMEM(c, n)              \
+  DECLARE_THREAD_INFO_NOINIT                                        \
+  FRAME_INJECTION_OBJECT_METHOD_ROOTLESS_NOMEM(n)                   \
+  DECLARE_GLOBAL_VARIABLES_INJECTION(g)                             \
+  EXECUTION_PROFILER_INJECTION(false)                               \
+
+#define PSEUDOMAIN_INJECTION(n, esc)                                \
   DECLARE_THREAD_INFO_NOINIT                                        \
   GlobalVariables *g = (GlobalVariables *)globals;                  \
   CHECK_ONCE(esc)                                                   \
-  FRAME_INJECTION_FUNCTION(n, fs | FrameInjection::PseudoMain)      \
+  FRAME_INJECTION_FUNCTION_FS(n, FrameInjection::PseudoMain)        \
   EXECUTION_PROFILER_INJECTION(false)                               \
 
 // code injected into every profiled builtin function/method
 #define FUNCTION_INJECTION_BUILTIN(n)                                 \
   DECLARE_THREAD_INFO_NOINIT                                          \
-  FRAME_INJECTION_FUNCTION(n, FrameInjection::BuiltinFunction)        \
+  FRAME_INJECTION_FUNCTION_FS(n, FrameInjection::BuiltinFunction)     \
   DECLARE_SYSTEM_GLOBALS_INJECTION(g)                                 \
   EXECUTION_PROFILER_INJECTION(true);                                 \
 
 // code injected into every unprofiled builtin function/method
 #define FUNCTION_NOPROFILE_BUILTIN(n)                                 \
   DECLARE_THREAD_INFO_NOINIT                                          \
-  FRAME_INJECTION_NO_PROFILE(n, FrameInjection::BuiltinFunction)      \
+  FRAME_INJECTION_NO_PROFILE(n)                                       \
   DECLARE_SYSTEM_GLOBALS_INJECTION(g)                                 \
 
 // for frame injection with a real class name
 #define STATIC_METHOD_INJECTION_BUILTIN(c, n)                         \
   DECLARE_THREAD_INFO_NOINIT                                          \
-  FRAME_INJECTION_STATIC_METHOD(n, 0)                                 \
+  FRAME_INJECTION_STATIC_METHOD_MEM(n)                                \
   DECLARE_SYSTEM_GLOBALS_INJECTION(g)                                 \
   EXECUTION_PROFILER_INJECTION(true);                                 \
 
 #define INSTANCE_METHOD_INJECTION_BUILTIN(c, n)                       \
   if (!o_id) throw_instance_method_fatal(#n);                         \
   DECLARE_THREAD_INFO_NOINIT                                          \
-  FRAME_INJECTION_OBJECT_METHOD(n, 0)                                 \
+  FRAME_INJECTION_OBJECT_METHOD_MEM(n)                                \
   DECLARE_SYSTEM_GLOBALS_INJECTION(g)                                 \
   EXECUTION_PROFILER_INJECTION(true);                                 \
 
@@ -500,7 +543,7 @@ do { \
   SystemGlobals *g = (SystemGlobals *)globals;                        \
   CHECK_ONCE(esc)                                                     \
   DECLARE_THREAD_INFO_NOINIT                                          \
-  FRAME_INJECTION_FUNCTION(n, FrameInjection::PseudoMain)             \
+  FRAME_INJECTION_FUNCTION_FS(n, FrameInjection::PseudoMain)          \
   EXECUTION_PROFILER_INJECTION(true);                                 \
 
 #define INTERCEPT_INJECTION_ALWAYS(name, func, args, rr)                \

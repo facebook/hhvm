@@ -257,9 +257,8 @@ inline void check_request_timeout(ThreadInfo *info) {
   if (info->m_reqInjectionData.surprised) check_request_surprise(info);
 }
 
-inline void check_request_timeout_NA(ThreadInfo *info) {
+inline void check_request_timeout_nomemcheck(ThreadInfo *info) {
   if (SegFaulting) pause_and_exit();
-  ASSERT(info->m_mm->DEBUG_checkStats());
   if (info->m_reqInjectionData.surprised) check_request_surprise(info);
 }
 

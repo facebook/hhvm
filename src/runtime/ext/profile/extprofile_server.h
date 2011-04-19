@@ -43,10 +43,10 @@ inline bool x_pagelet_server_is_enabled() {
   return f_pagelet_server_is_enabled();
 }
 
-inline Object x_pagelet_server_task_start(CStrRef url, CArrRef headers = null_array, CStrRef post_data = null_string) {
+inline Object x_pagelet_server_task_start(CStrRef url, CArrRef headers = null_array, CStrRef post_data = null_string, CArrRef files = null_array) {
   FUNCTION_INJECTION_BUILTIN(pagelet_server_task_start);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
-  return f_pagelet_server_task_start(url, headers, post_data);
+  return f_pagelet_server_task_start(url, headers, post_data, files);
 }
 
 inline int64 x_pagelet_server_task_status(CObjRef task) {

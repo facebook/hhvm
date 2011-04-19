@@ -134,6 +134,12 @@ DefineFunction(
         'value'  => "null_string",
         'desc'   => "POST data to send.",
       ),
+      array(
+        'name'   => "files",
+        'type'   => VariantVec,
+        'value'  => "null_array",
+        'desc'   => "$_FILES for the pagelet.",
+      ),
     ),
   ));
 

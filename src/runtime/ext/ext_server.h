@@ -40,7 +40,7 @@ enum PageletStatusType {
 bool f_dangling_server_proxy_old_request();
 bool f_dangling_server_proxy_new_request(CStrRef host);
 bool f_pagelet_server_is_enabled();
-Object f_pagelet_server_task_start(CStrRef url, CArrRef headers = null_array, CStrRef post_data = null_string);
+Object f_pagelet_server_task_start(CStrRef url, CArrRef headers = null_array, CStrRef post_data = null_string, CArrRef files = null_array);
 int64 f_pagelet_server_task_status(CObjRef task);
 String f_pagelet_server_task_result(CObjRef task, Variant headers, Variant code);
 void f_pagelet_server_flush();

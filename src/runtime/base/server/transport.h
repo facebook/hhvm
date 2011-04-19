@@ -104,7 +104,7 @@ public:
   virtual const void *getPostData(int &size) = 0;
   virtual bool hasMorePostData() { return false; }
   virtual const void *getMorePostData(int &size) { size = 0; return NULL; }
-
+  virtual bool getFiles(std::string &files) { return false; }
   /**
    * Is this a GET, POST or anything?
    */

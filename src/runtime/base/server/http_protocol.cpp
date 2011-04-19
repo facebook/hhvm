@@ -121,6 +121,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
       string boundary;
       int content_length = atoi(contentLength.c_str());
       bool rfc1867Post = IsRfc1867(contentType, boundary);
+      string files;
       if (rfc1867Post) {
         if (content_length > VirtualHost::GetMaxPostSize()) {
           // $_POST and $_FILES are empty
@@ -136,6 +137,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
           DecodeRfc1867(transport, g->GV(_POST), g->GV(_FILES),
                         content_length, data, size, boundary);
         }
+        ASSERT(!transport->getFiles(files));
       } else {
         needDelete = read_all_post_data(transport, data, size);
 
@@ -149,6 +151,10 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
           DecodeParameters(g->GV(_POST), (const char*)data, size, true);
         }
 
+        bool ret = transport->getFiles(files);
+        if (ret) {
+          g->GV(_FILES) = f_unserialize(files);
+        }
       }
       CopyParams(request, g->GV(_POST));
       if (needDelete) {

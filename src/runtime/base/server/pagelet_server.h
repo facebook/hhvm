@@ -33,7 +33,8 @@ public:
    */
   static Object TaskStart(CStrRef url, CArrRef headers,
                           CStrRef remote_host,
-                          CStrRef post_data = null_string);
+                          CStrRef post_data = null_string,
+                          CArrRef files = null_array);
 
   /**
    * Query if a task is finished. This is non-blocking and can be called as

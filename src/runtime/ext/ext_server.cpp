@@ -116,7 +116,8 @@ bool f_pagelet_server_is_enabled() {
 
 Object f_pagelet_server_task_start(CStrRef url,
                                    CArrRef headers /* = null_array */,
-                                   CStrRef post_data /* = null_string */) {
+                                   CStrRef post_data /* = null_string */,
+                                   CArrRef files /* = null_array */) {
   String remote_host;
   Transport *transport = g_context->getTransport();
   if (transport) {
@@ -124,7 +125,7 @@ Object f_pagelet_server_task_start(CStrRef url,
     if (!headers.exists("Host") && RuntimeOption::SandboxMode) {
       Array tmp = headers;
       tmp.set("Host", transport->getHeader("Host"));
-      return PageletServer::TaskStart(url, tmp, remote_host, post_data);
+      return PageletServer::TaskStart(url, tmp, remote_host, post_data, files);
     }
   }
   return PageletServer::TaskStart(url, headers, remote_host, post_data);

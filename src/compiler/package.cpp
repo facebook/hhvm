@@ -226,7 +226,7 @@ void Package::addSourceFile(const char *fileName, bool check /* = false */) {
   }
 }
 
-bool Package::parse() {
+bool Package::parse(bool check) {
   if (m_filesToParse.empty()) {
     return true;
   }
@@ -248,7 +248,7 @@ bool Package::parse() {
   dispatcher.start();
   for (std::set<string>::iterator iter = files.begin(), end = files.end();
        iter != end; ++iter) {
-    addSourceFile((*iter).c_str(), true);
+    addSourceFile((*iter).c_str(), check);
   }
   dispatcher.waitEmpty();
 

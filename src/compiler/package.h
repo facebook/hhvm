@@ -49,7 +49,7 @@ public:
   void addStaticDirectory(const std::string path);
   void addPHPDirectory(const char *path, bool force);
 
-  bool parse();
+  bool parse(bool check);
   bool parse(const char *fileName);
   bool parseImpl(const char *fileName);
 

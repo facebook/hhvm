@@ -537,7 +537,7 @@ int process(const ProgramOptions &po) {
       for (unsigned int i = 0; i < po.inputs.size(); i++) {
         package.addSourceFile(po.inputs[i].c_str());
       }
-      if (!package.parse()) {
+      if (!package.parse(!po.force)) {
         return 1;
       }
     } else {
@@ -575,7 +575,7 @@ int process(const ProgramOptions &po) {
     }
     if (po.target != "filecache") {
       {
-        if (!package.parse()) {
+        if (!package.parse(!po.force)) {
           return 1;
         }
       }

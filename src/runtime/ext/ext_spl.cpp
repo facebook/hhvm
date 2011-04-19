@@ -120,11 +120,7 @@ String f_spl_object_hash(CObjRef obj) {
 }
 
 Variant f_hphp_get_this() {
-  Object obj = FrameInjection::GetThis();
-  if (obj.get() && obj->o_getId()) {
-    return obj;
-  }
-  return null;
+  return FrameInjection::GetThis();
 }
 
 Variant f_class_implements(CVarRef obj, bool autoload /* = true */) {

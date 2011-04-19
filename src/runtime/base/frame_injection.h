@@ -170,6 +170,8 @@ protected:
 class FrameInjectionFunction : public FrameInjection {
 public:
   FrameInjectionFunction(const char *name, int fs);
+  ObjectData *getThis() const;
+  ObjectData *getThisForArrow();
   ~FrameInjectionFunction();
 };
 
@@ -178,7 +180,7 @@ public:
   FrameInjectionStaticMethod(const char *name, int fs);
   ~FrameInjectionStaticMethod();
 
-  ObjectData *getThis() { return NULL; }
+  ObjectData *getThis() const { return NULL; }
   ObjectData *getThisForArrow() {
     throw FatalErrorException("Using $this when not in object context");
   }
@@ -195,7 +197,7 @@ public:
    * This function checks object ID to make sure it's not 0. If it's 0, it
    * returns a null object. Otherwise, it returns "this";
    */
-  ObjectData *getThis();
+  ObjectData *getThis() const;
 
   /**
    * This function checks object ID to make sure it's not 0. If it's 0, it
@@ -204,8 +206,6 @@ public:
    * object context" fatal.
    */
   ObjectData *getThisForArrow();
-
-  ObjectData *getObject() const { return m_object; }
 
 private:
   ObjectData *m_object;

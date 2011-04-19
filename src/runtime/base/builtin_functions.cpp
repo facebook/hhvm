@@ -130,8 +130,8 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params,
       } else if (sclass->same(s_parent.get())) {
         sclass = FrameInjection::GetParentClassName(true);
       }
-      Object obj = FrameInjection::GetThis(true);
-      if (obj.instanceof(sclass)) {
+      ObjectData *obj = FrameInjection::GetThis(true);
+      if (obj && obj->o_instanceof(sclass)) {
         return obj->o_invoke_ex(sclass, method, params, false);
       }
 #ifdef ENABLE_LATE_STATIC_BINDING
@@ -218,8 +218,8 @@ bool get_user_func_handler(CVarRef function, MethodCallPackage &mcp,
       } else if (sclass->same(s_parent.get())) {
         sclass = FrameInjection::GetParentClassName(true);
       }
-      Object obj = FrameInjection::GetThis(true);
-      if (obj.instanceof(sclass)) {
+      ObjectData *obj = FrameInjection::GetThis(true);
+      if (obj && obj->o_instanceof(sclass)) {
         methodname = method;
         mcp.methodCallEx(obj, methodname);
         if (obj->o_get_call_info_ex(sclass, mcp)) {

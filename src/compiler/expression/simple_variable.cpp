@@ -113,7 +113,7 @@ void SimpleVariable::analyzeProgram(AnalysisResultPtr ar) {
 
   if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
     if (FunctionScopePtr func = getFunctionScope()) {
-      if (m_name == "this" && getClassScope()) {
+      if (m_name == "this" && (func->inPseudoMain() || getClassScope())) {
         func->setContainsThis();
         m_this = true;
         if (!hasContext(ObjectContext)) {
@@ -189,15 +189,19 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
   }
   if (m_this) {
     ClassScopePtr cls = getOriginalClass();
-    if (!hasContext(ObjectContext) && cls->derivedByDynamic()) {
-      ret = Type::Object;
+    if (cls) {
+      if (!hasContext(ObjectContext) && cls->derivedByDynamic()) {
+        ret = Type::Object;
+      } else {
+        ret = Type::CreateObjectType(cls->getName());
+      }
+      if (!hasContext(ObjectContext) &&
+          variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
+        ret = variables->add(m_sym, ret, true, ar,
+                             construct, scope->getModifiers());
+      }
     } else {
-      ret = Type::CreateObjectType(cls->getName());
-    }
-    if (!hasContext(ObjectContext) &&
-        variables->getAttribute(VariableTable::ContainsDynamicVariable)) {
-      ret = variables->add(m_sym, ret, true, ar,
-                           construct, scope->getModifiers());
+      ret = Type::Object;
     }
   } else if ((m_context & (LValue|Declaration)) &&
              !(m_context & (ObjectContext|RefValue))) {
@@ -271,7 +275,7 @@ void SimpleVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("Variant(GET_THIS())");
     } else {
       ClassScopePtr cls = getOriginalClass();
-      if (cls->derivedByDynamic()) {
+      if (!cls || cls->derivedByDynamic()) {
         cg_printf("Object(GET_THIS())");
       } else {
         cg_printf("GET_THIS_TYPED(%s)", cls->getId(cg).c_str());

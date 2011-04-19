@@ -146,10 +146,7 @@ Variant get_intercept_handler(CStrRef name, char *flag) {
 
 bool handle_intercept(CVarRef handler, CStrRef name, CArrRef params,
                       Variant &ret) {
-  Object obj = FrameInjection::GetThis();
-  if (!obj.isNull() && obj->o_getId() == 0) {
-    obj.reset();
-  }
+  ObjectData *obj = FrameInjection::GetThis();
 
   Variant done = true;
   ret = ref(f_call_user_func_array

@@ -122,7 +122,7 @@ Variant ObjectData::os_invoke(const char *c, const char *s,
                               CArrRef params, int64 hash,
                               bool fatal /* = true */) {
   Object obj = FrameInjection::GetThis();
-  if (obj.isNull() || !obj->o_instanceof(c)) {
+  if (!obj.instanceof(c)) {
     obj = create_object(c, Array::Create(), false);
     obj->setDummy();
   }
@@ -146,7 +146,7 @@ bool ObjectData::os_get_call_info(MethodCallPackage &info,
   Object obj = FrameInjection::GetThis();
   ASSERT(!info.isObj);
   String cls = info.rootCls;
-  if (obj.isNull() || !obj->o_instanceof(cls)) {
+  if (!obj.instanceof(cls)) {
     obj = create_object(cls, Array::Create(), false);
     obj->setDummy();
   } else {

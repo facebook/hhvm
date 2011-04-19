@@ -58,8 +58,9 @@ public:
 
   VariableEnvironment &getEnv() { return m_env; }
   CStrRef getClass() const { return m_class; }
-  ObjectData *getObject() const { return m_object; }
-
+  ObjectData *getThis() const {
+    return m_object && m_object->o_getId() ? m_object : 0;
+  }
 private:
   CStrRef m_class;
   ObjectData *m_object;

@@ -134,9 +134,9 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
       if (c) {
         frame.set(s_function, String(c + 2), true);
         frame.set(s_class, t->getClassName()->copy(), true);
-        if (t->getObjectV()) {
+        if (ObjectData *obj = t->getObjectV()) {
           if (withThis) {
-            frame.set(s_object, Object(t->getObjectV()), true);
+            frame.set(s_object, Object(obj), true);
           }
           frame.set(s_type, "->", true);
         } else {
@@ -212,7 +212,7 @@ CStrRef FrameInjection::GetStaticClassName(ThreadInfo *info) {
       if (t->m_staticClass) return *t->m_staticClass;
     }
     ObjectData *obj = t->getObjectV();
-    if (obj && obj->o_getId()) {
+    if (obj) {
       return obj->o_getClassName();
     }
   }
@@ -273,11 +273,15 @@ ObjectData *FrameInjection::getObjectV() const {
   if (isObjectMethodFrame()) {
     const FrameInjectionObjectMethod* ofi =
       static_cast<const FrameInjectionObjectMethod*>(this);
-    return ofi->getObject();
+    return ofi->getThis();
   } else if (isEvalFrame()) {
     const Eval::EvalFrameInjection* efi =
       static_cast<const Eval::EvalFrameInjection*>(this);
-    return efi->getObject();
+    return efi->getThis();
+  } else if (m_flags & PseudoMain) {
+    const FrameInjectionFunction *ffi =
+      static_cast<const FrameInjectionFunction*>(this);
+    return ffi->getThis();
   }
   return NULL;
 }
@@ -337,6 +341,20 @@ FrameInjectionFunction::FrameInjectionFunction(const char *name, int fs)
   hotProfilerInit(m_info, name);
 }
 
+ObjectData *FrameInjectionFunction::getThis() const {
+  if ((m_flags & PseudoMain) && m_prev) {
+    return m_prev->getObjectV();
+  }
+  return NULL;
+}
+
+ObjectData *FrameInjectionFunction::getThisForArrow() {
+  if (ObjectData *obj = getThis()) {
+    return obj;
+  }
+  throw FatalErrorException("Using $this when not in object context");
+}
+
 FrameInjectionFunction::~FrameInjectionFunction() {
 #ifdef REQUEST_TIMEOUT_DETECTION
   check_request_timeout(m_info);
@@ -383,7 +401,7 @@ FrameInjectionObjectMethod::~FrameInjectionObjectMethod() {
   hotProfilerFini(m_info);
 }
 
-ObjectData *FrameInjectionObjectMethod::getThis() {
+ObjectData *FrameInjectionObjectMethod::getThis() const {
   if (!m_object->o_getId()) {
     return NULL;
   }

@@ -29,19 +29,24 @@ DECLARE_BOOST_TYPES(ListAssignment);
 
 class ListAssignment : public Expression {
 public:
+  enum RHSKind {
+    Regular,
+    Checked,
+    Null
+  };
   ListAssignment(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                  ExpressionListPtr variables, ExpressionPtr array);
 
   DECLARE_EXPRESSION_VIRTUAL_FUNCTIONS;
 
-  bool isAbnormal() const { return m_abnormal; }
+  RHSKind getRHSKind() const { return m_rhsKind; }
 
   ExpressionListPtr getVariables() const { return m_variables; }
   ExpressionPtr getArray() const { return m_array; }
 private:
   ExpressionListPtr m_variables;
   ExpressionPtr m_array;
-  bool m_abnormal;
+  RHSKind m_rhsKind;
 
   void setLValue();
   bool outputCPPAssignment(CodeGenerator &cg, AnalysisResultPtr ar,

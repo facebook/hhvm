@@ -63,7 +63,7 @@ using namespace boost;
   Exit expression
   Instanceof expression
 */
-static bool IsAbnormal(ExpressionPtr rhs) {
+static ListAssignment::RHSKind GetRHSKind(ExpressionPtr rhs) {
   switch (rhs->getKindOf()) {
     case Expression::KindOfSimpleVariable:
     case Expression::KindOfDynamicVariable:
@@ -75,45 +75,53 @@ static bool IsAbnormal(ExpressionPtr rhs) {
     case Expression::KindOfNewObjectExpression:
     case Expression::KindOfAssignmentExpression:
     case Expression::KindOfIncludeExpression:
-      return false;
+      return ListAssignment::Regular;
 
     case Expression::KindOfListAssignment:
-      return IsAbnormal(static_pointer_cast<ListAssignment>(rhs)->getArray());
+      return GetRHSKind(static_pointer_cast<ListAssignment>(rhs)->getArray());
 
     case Expression::KindOfUnaryOpExpression: {
       UnaryOpExpressionPtr u(static_pointer_cast<UnaryOpExpression>(rhs));
       switch (u->getOp()) {
         case '@':
-          return IsAbnormal(u->getExpression());
+          return GetRHSKind(u->getExpression());
         case T_INC:
         case T_DEC:
-          return !u->getFront();
+          return u->getFront() ?
+            ListAssignment::Regular : ListAssignment::Checked;
         case T_EVAL:
         case T_ARRAY:
         case T_ARRAY_CAST:
-          return false;
+          return ListAssignment::Regular;
         default:
-          return true;
+          return ListAssignment::Null;
       }
       break;
     }
+
     case Expression::KindOfBinaryOpExpression: {
       BinaryOpExpressionPtr b(static_pointer_cast<BinaryOpExpression>(rhs));
-      return !b->isAssignmentOp();
+      return b->isAssignmentOp() || b->getOp() == '+' ?
+        ListAssignment::Regular : ListAssignment::Null;
     }
+    case Expression::KindOfQOpExpression:
+      return ListAssignment::Checked;
+
     default: break;
   }
-  return true;
+  return ListAssignment::Null;
 }
 
 ListAssignment::ListAssignment
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  ExpressionListPtr variables, ExpressionPtr array)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_variables(variables), m_array(array), m_abnormal(false) {
+    m_variables(variables), m_array(array), m_rhsKind(Regular) {
   setLValue();
 
-  m_abnormal = m_array && IsAbnormal(m_array);
+  if (m_array) {
+    m_rhsKind = GetRHSKind(m_array);
+  }
 }
 
 ExpressionPtr ListAssignment::clone() {
@@ -337,9 +345,11 @@ bool ListAssignment::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   bool needsUse = false;
   if (TypePtr type = m_array->getActualType()) {
     isArray = type->is(Type::KindOfArray);
-    notArray = type->isPrimitive() ||
-      (m_abnormal && (type->is(Type::KindOfString) ||
-                      type->is(Type::KindOfObject)));
+    notArray = !isArray &&
+      (type->isPrimitive() ||
+       m_rhsKind == Null ||
+      (m_rhsKind == Checked && (type->is(Type::KindOfString) ||
+                                type->is(Type::KindOfObject))));
   }
   cg.wrapExpressionBegin();
   if (outputLineMap(cg, ar)) cg_printf("0);\n");
@@ -364,7 +374,7 @@ bool ListAssignment::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     tmp = "null_variant";
     if (needsUse) cg_printf("id(%s);\n", m_cppTemp.c_str());
     needsUse = false;
-  } else if (!m_abnormal || isArray) {
+  } else if (m_rhsKind != Checked || isArray) {
     tmp = m_cppTemp;
   } else {
     tmp = genCPPTemp(cg, ar);

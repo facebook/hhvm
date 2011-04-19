@@ -142,6 +142,7 @@ void ClosureExpression::analyzeProgram(AnalysisResultPtr ar) {
 TypePtr ClosureExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                       bool coerce) {
   m_func->inferTypes(ar);
+  if (m_values) m_values->inferAndCheck(ar, Type::Some, false);
   if (m_vars) {
     // containing function's variable table (not closure function's)
     VariableTablePtr variables = getScope()->getVariables();

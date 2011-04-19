@@ -16656,6 +16656,19 @@ bool TestCodeRun::TestClosure() {
         "$x(2);",
         "2 456\n"
         "2 456\n");
+  MVCRO("<?php "
+        "function test($x) {"
+        "  $s_path = serialize($x);"
+        "  $filter = function ($rel) use ($s_path) {"
+        "    return $s_path;"
+        "  };"
+        "  var_dump($filter(0));"
+        "}"
+        "test('hello');"
+        "test(array(1,2,'foo'=>'bar'));",
+        "string(12) \"s:5:\"hello\";\"\n"
+        "string(42) \"a:3:{i:0;i:1;i:1;i:2;s:3:\"foo\";s:3:\"bar\";}\"\n");
+
   return true;
 }
 

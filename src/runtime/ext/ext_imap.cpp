@@ -193,7 +193,8 @@ public:
     mail_parameters(NIL, SET_GETS, (void *) NIL);
 
     /* set default timeout values */
-    void *timeout = (void *)RuntimeOption::SocketDefaultTimeout;
+    void *timeout = reinterpret_cast<void *>
+                      (RuntimeOption::SocketDefaultTimeout);
 
     mail_parameters(NIL, SET_OPENTIMEOUT,  timeout);
     mail_parameters(NIL, SET_READTIMEOUT,  timeout);

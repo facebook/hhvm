@@ -594,17 +594,14 @@ int process(const ProgramOptions &po) {
   }
 
   int ret = 0;
-  bool fatalErrorOnly = false;
   if (po.target == "analyze") {
     ret = analyzeTarget(po, ar);
   } else if (po.target == "php") {
     ret = phpTarget(po, ar);
   } else if (po.target == "cpp") {
     ret = cppTarget(po, ar, fileCacheThread);
-    fatalErrorOnly = true;
   } else if (po.target == "run") {
     ret = runTargetCheck(po, ar, fileCacheThread);
-    fatalErrorOnly = true;
   } else if (po.target == "filecache") {
     // do nothing
   } else if (po.target == "sep-ext-cpp") {

@@ -207,7 +207,7 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
     p++;
     // Parse properties
     while (*p) {
-      *p++; // TODO, support visibility
+      p++; // TODO, support visibility
       const char *name = *p++;
       TypePtr type = ParseType(p);
       cl->getVariables()->add(name, type, false, ar, ExpressionPtr(),

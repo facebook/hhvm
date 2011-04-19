@@ -173,7 +173,6 @@ void SwitchStatement::inferTypes(AnalysisResultPtr ar) {
   }
   ConstructPtr self = shared_from_this();
   if (m_cases && m_cases->getCount()) {
-    bool checking = false;
     int defaultCount = 0;
     for (int i = 0; i < m_cases->getCount(); i++) {
       CaseStatementPtr stmt =
@@ -181,7 +180,6 @@ void SwitchStatement::inferTypes(AnalysisResultPtr ar) {
       stmt->inferAndCheck(ar, Type::Some, false);
       ExpressionPtr cond = stmt->getCondition();
       if (!cond) {
-        checking = true;
         defaultCount++;
       }
     }

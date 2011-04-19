@@ -2473,12 +2473,10 @@ Variant f_mb_strrpos(CStrRef haystack, CStrRef needle,
   mbs_needle.len = needle.size();
 
   const char *enc_name = encoding.data();
-  int enc_name_len = encoding.size();
   long noffset = 0;
   String soffset = offset.toString();
   if (offset.isString()) {
     enc_name = soffset.data();
-    enc_name_len = soffset.size();
 
     int str_flg = 1;
     if (enc_name != NULL) {
@@ -2495,7 +2493,6 @@ Variant f_mb_strrpos(CStrRef haystack, CStrRef needle,
     if (str_flg) {
       noffset = offset.toInt32();
       enc_name = encoding.data();
-      enc_name_len = encoding.size();
     }
   } else {
     noffset = offset.toInt32();

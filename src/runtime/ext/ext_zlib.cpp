@@ -124,7 +124,7 @@ Object f_gzopen(CStrRef filename, CStrRef mode,
   bool ret = file->open(File::TranslatePath(filename), mode);
   if (!ret) {
     raise_warning("%s",Util::safe_strerror(errno).c_str());
-    return false;
+    return NULL;
   }
   return handle;
 }

@@ -78,7 +78,7 @@ String DirectoryIterator::getPathName() {
 }
 
 void DirectoryIterator::rewind() {
-  if (!m_dir.same(false)) {
+  if (!m_dir.same(NULL)) {
     f_rewinddir(m_dir);
     m_dirEntry = f_readdir(m_dir);
     m_index = 0;
@@ -91,7 +91,7 @@ bool DirectoryIterator::valid() {
 }
 
 void DirectoryIterator::next() {
-  if (!m_dir.same(false)) {
+  if (!m_dir.same(NULL)) {
     m_dirEntry = f_readdir(m_dir);
     m_index++;
     m_fileName = getPathName();

@@ -37,7 +37,7 @@ Object f_xmlwriter_open_uri(CStrRef uri) {
   if (x->t_openuri(uri)) {
     return ret;
   }
-  return false;
+  return NULL;
 }
 
 bool f_xmlwriter_set_indent_string(CObjRef xmlwriter, CStrRef indentstring) {

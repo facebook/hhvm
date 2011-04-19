@@ -876,7 +876,6 @@ static unsigned short php_read4(CObjRef stream) {
 /* Main loop to parse JPEG2000 raw codestream structure */
 static struct gfxinfo *php_handle_jpc(CObjRef stream) {
   struct gfxinfo *result = NULL;
-  unsigned short dummy_short;
   int highest_bit_depth, bit_depth;
   unsigned char first_marker_id;
   unsigned int i;
@@ -902,8 +901,8 @@ static struct gfxinfo *php_handle_jpc(CObjRef stream) {
   result = (struct gfxinfo *)IM_CALLOC(1, sizeof(struct gfxinfo));
   CHECK_ALLOC_R(result, sizeof (struct gfxinfo), NULL);
 
-  dummy_short = php_read2(stream); /* Lsiz */
-  dummy_short = php_read2(stream); /* Rsiz */
+  php_read2(stream); /* Lsiz */
+  php_read2(stream); /* Rsiz */
   result->width = php_read4(stream); /* Xsiz */
   result->height = php_read4(stream); /* Ysiz */
 
@@ -1109,7 +1108,7 @@ static struct gfxinfo *php_handle_tiff(CObjRef stream, int motorola_intel) {
   struct gfxinfo *result = NULL;
   int i, num_entries;
   unsigned char *dir_entry;
-  size_t ifd_size, dir_size, entry_value, width=0, height=0, ifd_addr;
+  size_t dir_size, entry_value, width=0, height=0, ifd_addr;
   int entry_tag , entry_type;
   String ifd_data;
   String ifd_data2;
@@ -1119,19 +1118,16 @@ static struct gfxinfo *php_handle_tiff(CObjRef stream, int motorola_intel) {
   if (ifd_ptr.length() != 4) return NULL;
   ifd_addr = php_ifd_get32u((void*)ifd_ptr.c_str(), motorola_intel);
   if (f_fseek(stream, ifd_addr-8, SEEK_CUR)) return NULL;
-  ifd_size = 2;
   ifd_data = f_fread(stream, 2);
   if (ifd_data.length() != 2) return NULL;
   num_entries = php_ifd_get16u((void*)ifd_data.c_str(), motorola_intel);
   dir_size = 2/*num dir entries*/ +12/*length of entry*/*
              num_entries +
              4/* offset to next ifd (points to thumbnail or NULL)*/;
-  ifd_size = dir_size;
   ifd_data2 = f_fread(stream, dir_size-2);
   if ((size_t)ifd_data2.length() != dir_size-2) return NULL;
   ifd_data += ifd_data2;
   /* now we have the directory we can look how long it should be */
-  ifd_size = dir_size;
   for(i=0;i<num_entries;i++) {
     dir_entry = (unsigned char*)ifd_data.c_str()+2+i*12;
     entry_tag = php_ifd_get16u(dir_entry+0, motorola_intel);

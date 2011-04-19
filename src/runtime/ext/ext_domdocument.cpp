@@ -2327,7 +2327,6 @@ Variant c_DOMNode::t_replacechild(CObjRef newchildobj, CObjRef oldchildobj) {
     children = children->next;
   }
   if (foundoldchild) {
-    xmlNodePtr node;
     if (newchild->type == XML_DOCUMENT_FRAG_NODE) {
       xmlNodePtr prevsib, nextsib;
       prevsib = oldchild->prev;
@@ -2341,7 +2340,7 @@ Variant c_DOMNode::t_replacechild(CObjRef newchildobj, CObjRef oldchildobj) {
       if (newchild->doc == NULL && nodep->doc != NULL) {
         xmlSetTreeDoc(newchild, nodep->doc);
       }
-      node = xmlReplaceNode(oldchild, newchild);
+      xmlReplaceNode(oldchild, newchild);
       dom_reconcile_ns(nodep->doc, newchild);
     }
     return create_node_object(oldchild, doc(), false);

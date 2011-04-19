@@ -177,8 +177,6 @@ void FunctionContainer::outputCPPJumpTableEvalSupport
  vector<const char *> *funcs /* = NULL */) {
   if (!in) in = &m_functions;
   bool systemcpp = cg.getOutput() == CodeGenerator::SystemCPP;
-  const char *funcPrefix = Option::FunctionPrefix;
-  if (systemcpp) funcPrefix = Option::BuiltinFunctionPrefix;
   // output invoke support methods
   for (FunctionIterator fit(*in, hasRedeclared); fit.ready();
       fit.next()) {

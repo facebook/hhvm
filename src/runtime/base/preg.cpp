@@ -530,7 +530,6 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
     }
   }
 
-  const char *match = NULL;
   int matched = 0;
   s_pcre_cache->error_code = PHP_PCRE_NO_ERROR;
 
@@ -552,7 +551,6 @@ static Variant preg_match_impl(CStrRef pattern, CStrRef subject,
     /* If something has matched */
     if (count > 0) {
       matched++;
-      match = subject.data() + offsets[0];
 
       if (!subpats) continue;
 
@@ -1106,7 +1104,6 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
   int start_offset = 0;
   int next_offset = 0;
   const char *last_match = ssubject.data();
-  const char *match = NULL;
   s_pcre_cache->error_code = PHP_PCRE_NO_ERROR;
   pcre_extra *extra = pce->extra;
 
@@ -1127,7 +1124,6 @@ Variant preg_split(CVarRef pattern, CVarRef subject, int limit /* = -1 */,
 
     /* If something matched */
     if (count > 0) {
-      match = ssubject.data() + offsets[0];
 
       if (!no_empty || ssubject.data() + offsets[0] != last_match) {
         if (offset_capture) {

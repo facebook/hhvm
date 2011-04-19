@@ -920,7 +920,7 @@ Array f_fb_get_flush_stat() {
     int64 time = transport->getFlushTime();
     return CREATE_MAP3("total", total, "sent", sent, "time", time);
   }
-  return false;
+  return NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

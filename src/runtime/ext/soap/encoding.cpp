@@ -1611,7 +1611,6 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model,
     break;
   }
   case XSD_CONTENT_ANY: {
-    xmlNodePtr property;
     encodePtr enc;
 
     Variant data;
@@ -1620,10 +1619,10 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model,
       if ((model->max_occurs == -1 || model->max_occurs > 1) &&
           data.isArray() && data.toArray()->isVectorData()) {
         for (ArrayIter iter(data.toArray()); iter; ++iter) {
-          property = master_to_xml(enc, iter.second(), style, node);
+          master_to_xml(enc, iter.second(), style, node);
         }
       } else {
-        property = master_to_xml(enc, data, style, node);
+        master_to_xml(enc, data, style, node);
       }
       return 1;
     } else if (model->min_occurs == 0) {
@@ -2313,7 +2312,7 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
       dims = get_position(dimension, end+1);
     }
     if (nsptr != NULL) {
-      enc = get_encoder(SOAP_GLOBAL(sdl), (char*)nsptr->href, stype.data());
+      enc = get_encoder(sdl, (char*)nsptr->href, stype.data());
     }
 
   } else if ((attr = get_attribute(data->properties,"itemType")) &&
@@ -2324,7 +2323,7 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
     xmlNsPtr nsptr;
     nsptr = xmlSearchNs(attr->doc, attr->parent, NS_STRING(ns));
     if (nsptr != NULL) {
-      enc = get_encoder(SOAP_GLOBAL(sdl), (char*)nsptr->href, type.data());
+      enc = get_encoder(sdl, (char*)nsptr->href, type.data());
     }
 
     if ((attr = get_attribute(data->properties,"arraySize")) &&
@@ -2352,7 +2351,7 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
       *end = '\0';
     }
     if (!ext->ns.empty()) {
-      enc = get_encoder(SOAP_GLOBAL(sdl), ext->ns.c_str(), type.data());
+      enc = get_encoder(sdl, ext->ns.c_str(), type.data());
     }
 
     dims = (int*)malloc(sizeof(int));
@@ -2363,7 +2362,7 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
                SOAP_1_2_ENC_NAMESPACE":itemType",
                WSDL_NAMESPACE":itemType"))) {
     if (!ext->ns.empty()) {
-      enc = get_encoder(SOAP_GLOBAL(sdl), ext->ns.c_str(), ext->val.c_str());
+      enc = get_encoder(sdl, ext->ns.c_str(), ext->val.c_str());
     }
 
     if ((ext = get_extra_attributes

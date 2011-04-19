@@ -3207,10 +3207,6 @@ CVarRef Variant::append(CVarRef v) {
 CVarRef Variant::appendOpEqual(int op, CVarRef v) {
 check_array:
   if (m_type == KindOfArray) {
-    bool contagious = false;
-    if (v.isContagious()) {
-      contagious = true;
-    }
     Variant *cv = NULL;
     ArrayData *escalated =
       m_data.parr->lvalNew(cv, m_data.parr->getCount() > 1);

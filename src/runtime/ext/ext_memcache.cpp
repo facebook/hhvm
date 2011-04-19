@@ -431,7 +431,7 @@ Array static memcache_build_stats(const memcached_st *ptr,
     if (stat_keys) {
       free(stat_keys);
     }
-    return false;
+    return NULL;
   }
 
   Array return_val = Array::Create();
@@ -456,7 +456,7 @@ Array c_Memcache::t_getstats(CStrRef type /* = null_string */,
                              int slabid /* = 0 */, int limit /* = 100 */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Memcache, Memcache::getstats);
   if (!memcached_server_count(&m_memcache)) {
-    return false;
+    return NULL;
   }
 
   char extra_args[30] = {0};
@@ -474,7 +474,7 @@ Array c_Memcache::t_getstats(CStrRef type /* = null_string */,
   memcached_stat_st stats;
   if (memcached_stat_servername(&stats, extra_args, instance->hostname,
                                 instance->port) != MEMCACHED_SUCCESS) {
-    return false;
+    return NULL;
   }
 
   memcached_return_t ret;
@@ -490,7 +490,7 @@ Array c_Memcache::t_getextendedstats(CStrRef type /* = null_string */,
 
   stats = memcached_stat(&m_memcache, NULL, &ret);
   if (ret != MEMCACHED_SUCCESS) {
-    return false;
+    return NULL;
   }
 
   int server_count = memcached_server_count(&m_memcache);

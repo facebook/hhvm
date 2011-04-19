@@ -476,7 +476,6 @@ bool HttpProtocol::IsRfc1867(const string contentType, string &boundary) {
     return false;
   }
   s++;
-  int len = strlen(s);
   if (s[0] == '"') {
     s++;
     e = strchr(s, '"');
@@ -490,7 +489,6 @@ bool HttpProtocol::IsRfc1867(const string contentType, string &boundary) {
   }
   if (e) {
     e[0] = '\0';
-    len = e - s;
   }
   boundary = s;
   return true;

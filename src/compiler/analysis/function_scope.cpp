@@ -988,7 +988,6 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
       cg_printf("%d, ", paramCount);
     }
   }
-  int firstExtra = 0;
   for (int i = 0; i < paramCount; i++) {
     ExpressionPtr param = (*params)[i];
     if (i > 0) cg_printf(extra ? "." : ", ");
@@ -1012,7 +1011,6 @@ void FunctionScope::OutputCPPArguments(ExpressionListPtr params,
           return;
         }
       }
-      firstExtra = i;
       cg_printf("Array(ArrayInit(%d, true).", paramCount - i);
     }
     if (extra) {

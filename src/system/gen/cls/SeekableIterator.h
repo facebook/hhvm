@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 97 */
+/* SRC: classes/iterator.php line 161 */
 FORWARD_DECLARE_GENERIC_INTERFACE(SeekableIterator);
 class c_SeekableIterator {
   // public: virtual void t_seek(CVarRef v_position) = 0;

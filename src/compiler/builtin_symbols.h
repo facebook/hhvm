@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,8 +47,6 @@ public:
                             VariableTablePtr variables);
   static void LoadConstants(AnalysisResultPtr ar,
                             ConstantTablePtr constants);
-  static void LoadBaseSysRsrcClasses(AnalysisResultPtr ar,
-                                     std::set<std::string> &baseSysRsrcClasses);
 
   /**
    * Testing whether a variable is a PHP superglobal.
@@ -71,7 +69,6 @@ private:
   static const char *ExtensionConsts[];
   static const char *ExtensionDeclaredDynamic[];
   static const char *SystemClasses[];
-  static const char *BaseSysRsrcClasses[];
   static const char *HelperFunctions[];
   static AnalysisResultPtr LoadGlobalSymbols(const char *fileName);
 

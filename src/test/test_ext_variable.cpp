@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
 #include <test/test_ext_variable.h>
 #include <runtime/ext/ext_variable.h>
 #include <runtime/ext/ext_string.h>
+#include <system/lib/systemlib.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -348,7 +349,7 @@ bool TestExtVariable::test_debug_zval_dump() {
 }
 
 bool TestExtVariable::test_serialize() {
-  Object obj(NEWOBJ(c_stdClass)());
+  Object obj(SystemLib::AllocStdClassObject());
   obj->o_set("name", "value");
   VS(f_serialize(obj), "O:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}");
 

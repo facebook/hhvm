@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,6 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/comparisons.h>
 #include <runtime/base/zend/zend_functions.h>
-#include <system/gen/php/classes/stdclass.h>
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/externals.h>
@@ -26,6 +25,8 @@
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/array/array_iterator.h>
 #include <util/parser/hphp.tab.hpp>
+
+#include <system/lib/systemlib.h>
 
 using namespace std;
 
@@ -1638,7 +1639,7 @@ Object Variant::toObjectHelper() const {
   case KindOfStaticString:
   case KindOfString:
     {
-      c_stdClass *obj = NEWOBJ(c_stdClass)();
+      ObjectData *obj = SystemLib::AllocStdClassObject();
       obj->o_set(s_scalar, *this, false);
       return obj;
     }
@@ -1648,7 +1649,7 @@ Object Variant::toObjectHelper() const {
     ASSERT(false);
     break;
   }
-  return Object(NEWOBJ(c_stdClass)());
+  return Object(SystemLib::AllocStdClassObject());
 }
 
 VarNR Variant::toKey() const {
@@ -2610,7 +2611,7 @@ Variant Variant::o_set(CStrRef propName, CVarRef val,
   } else if (m_type == KindOfVariant) {
     return m_data.pvar->o_set(propName, val, context);
   } else if (isObjectConvertable()) {
-    set(Object(NEWOBJ(c_stdClass)()));
+    set(Object(SystemLib::AllocStdClassObject()));
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
@@ -2628,7 +2629,7 @@ Variant Variant::o_setPublic(CStrRef propName, CVarRef val) {
   } else if (m_type == KindOfVariant) {
     return m_data.pvar->o_setPublic(propName, val);
   } else if (isObjectConvertable()) {
-    set(Object(NEWOBJ(c_stdClass)()));
+    set(Object(SystemLib::AllocStdClassObject()));
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
@@ -2769,7 +2770,7 @@ Variant &Variant::o_lval(CStrRef propName, CVarRef tmpForGet,
   } else if (m_type == KindOfVariant) {
     return m_data.pvar->o_lval(propName, tmpForGet, context);
   } else if (isObjectConvertable()) {
-    set(Object(NEWOBJ(c_stdClass)()));
+    set(Object(SystemLib::AllocStdClassObject()));
     return m_data.pobj->o_lval(propName, tmpForGet, context);
   } else {
     // Raise a warning
@@ -3762,7 +3763,7 @@ Variant Variant::share(bool save) const {
   case KindOfObject:
     if (save) {
       // we have to return an object so to remember its type
-      c_stdClass *obj = NEWOBJ(c_stdClass)();
+      ObjectData *obj = SystemLib::AllocStdClassObject();
       obj->o_set(s_s, f_serialize(*this));
       return obj;
     } else {
@@ -4038,7 +4039,7 @@ T Variant::o_assign_op(CStrRef propName, CVarRef val,
   } else if (m_type == KindOfVariant) {
     return (T)m_data.pvar->template o_assign_op<T,op>(propName, val, context);
   } else if (isObjectConvertable()) {
-    set(Object(NEWOBJ(c_stdClass)()));
+    set(Object(SystemLib::AllocStdClassObject()));
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
@@ -4056,7 +4057,7 @@ T Object::o_assign_op(CStrRef propName, CVarRef val,
   }
   ObjectData *obj = m_px;
   if (!obj) {
-    obj = NEWOBJ(c_stdClass)();
+    obj = SystemLib::AllocStdClassObject();
     SmartPtr<ObjectData>::operator=(obj);
   }
 

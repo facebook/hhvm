@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,8 @@
 #include <runtime/base/fiber_reference_map.h>
 
 #include <runtime/eval/ast/function_call_expression.h>
+
+#include <system/lib/systemlib.h>
 
 using namespace std;
 
@@ -379,7 +381,7 @@ Variant ObjectData::o_argval(bool byRef, CStrRef s,
 }
 
 Object ObjectData::FromArray(ArrayData *properties) {
-  ObjectData *ret = NEWOBJ(c_stdClass)();
+  ObjectData *ret = SystemLib::AllocStdClassObject();
   if (!properties->empty()) {
     ret->o_properties = NEW(Array)(properties);
   }

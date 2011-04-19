@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,6 +37,7 @@ void SystemGlobals::initialize() {
   pm_php$classes$closure_php(false);
   pm_php$classes$debugger_php(false);
   pm_php$classes$directory_php(false);
+  pm_php$classes$directoryiterator_php(false);
   pm_php$classes$exception_php(false);
   pm_php$classes$iterator_php(false);
   pm_php$classes$reflection_php(false);

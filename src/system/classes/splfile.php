@@ -9,6 +9,7 @@
  *
  */
 class SplFileInfo {
+  private $rsrc;
 
   public function __construct($file_name) {
     hphp_splfileinfo___construct($this, $file_name);

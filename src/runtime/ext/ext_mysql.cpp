@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -27,6 +27,8 @@
 #include <util/db_mysql.h>
 #include <netinet/in.h>
 #include <netdb.h>
+
+#include <system/lib/systemlib.h>
 
 using namespace std;
 
@@ -1233,7 +1235,7 @@ Variant f_mysql_fetch_field(CVarRef result, int field /* = -1 */) {
   MySQLFieldInfo *info;
   if (!(info = res->fetchFieldInfo())) return false;
 
-  Object obj(NEWOBJ(c_stdClass)());
+  Object obj(SystemLib::AllocStdClassObject());
   obj->set("name",         *(info->name));
   obj->set("table",        *(info->table));
   obj->set("def",          *(info->def));

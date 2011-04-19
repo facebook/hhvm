@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 768 */
+/* SRC: classes/directoryiterator.php line 122 */
 FORWARD_DECLARE_CLASS(RecursiveDirectoryIterator);
 class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   public:
@@ -48,7 +48,8 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   public:
   #define OMIT_JUMP_TABLE_CLASS_GETARRAY_RecursiveDirectoryIterator 1
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveDirectoryIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_RecursiveDirectoryIterator 1
+  virtual Variant *o_realProp(CStrRef s, int flags,
+                              CStrRef context = null_string) const;
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RecursiveDirectoryIterator 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS

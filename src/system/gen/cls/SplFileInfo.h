@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,6 +29,7 @@ class c_SplFileInfo : public ExtObjectData {
   public:
 
   // Properties
+  Variant m_rsrc;
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
@@ -37,17 +38,18 @@ class c_SplFileInfo : public ExtObjectData {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SplFileInfo 1
+  static Variant os_getInit(CStrRef s);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_SplFileInfo 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileInfo 1
   #define OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileInfo 1
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_SplFileInfo 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileInfo 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_SplFileInfo 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileInfo 1
+  virtual void o_getArray(Array &props, bool pubOnly = false) const;
+  virtual void o_setArray(CArrRef props);
+  virtual Variant *o_realProp(CStrRef s, int flags,
+                              CStrRef context = null_string) const;
+  Variant *o_realPropPrivate(CStrRef s, int flags) const;
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
@@ -92,7 +94,6 @@ class c_SplFileInfo : public ExtObjectData {
   public: Object t_openfile(CVarRef v_mode = NAMSTR(s_sys_ss0d42ecf6, "r"), CVarRef v_use_include_path = false, CVarRef v_context = null_variant);
   public: void t_setfileclass(CVarRef v_class_name = NAMSTR(s_sys_ss5d909898, "SplFileObject"));
   public: void t_setinfoclass(CVarRef v_class_name = NAMSTR(s_sys_ss914a58e9, "SplFileInfo"));
-  public: Variant m_rsrc;
   DECLARE_METHOD_INVOKE_HELPERS(getperms);
   DECLARE_METHOD_INVOKE_HELPERS(iswritable);
   DECLARE_METHOD_INVOKE_HELPERS(getbasename);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,27 +24,20 @@ namespace HPHP {
 
 // 1. Static Strings
 extern StaticString s_sys_ssb3fce46e;
-extern StaticString s_sys_ssfb6412d4;
+extern StaticString s_sys_ss246080da;
 extern StaticString s_sys_ss0fad9ac4;
 extern StaticString s_sys_ss92306c9b;
 extern StaticString s_sys_ss993f2e69;
 extern StaticString s_sys_ss5b753b53;
-extern StaticString s_sys_ssc72eef1f;
-extern StaticString s_sys_ssdd233bb0;
 extern StaticString s_sys_ss92c34a85;
 extern StaticString s_sys_ssc64ebfff;
 extern StaticString s_sys_ss337f2a0c;
 extern StaticString s_sys_ss299bd55e;
-extern StaticString s_sys_ss80c39bb4;
-extern StaticString s_sys_ssf0ea8ac1;
-extern StaticString s_sys_ss49963173;
 extern StaticString s_sys_ssc57472df;
 extern StaticString s_sys_ssc1c38583;
-extern StaticString s_sys_ss914a58e9;
 extern StaticString s_sys_ss22bfe43e;
 extern StaticString s_sys_ssc880eb8a;
 extern StaticString s_sys_ssa1b87da7;
-extern StaticString s_sys_ss6974a1cc;
 extern StaticString s_sys_ssba65d5ee;
 extern StaticString s_sys_ss7cb08d68;
 extern StaticString s_sys_ssc89c1797;
@@ -53,13 +46,8 @@ extern StaticString s_sys_ssb3a5c1b3;
 extern StaticString s_sys_ss406322f2;
 extern StaticString s_sys_ss28fae70d;
 extern StaticString s_sys_sse68e7bf5;
-extern StaticString s_sys_ss68d731f7;
 extern StaticString s_sys_ssa20217b5;
 extern StaticString s_sys_ss37eff1c8;
-extern StaticString s_sys_sse3783d41;
-extern StaticString s_sys_ssf0e3c7d6;
-extern StaticString s_sys_ssf6be66f9;
-extern StaticString s_sys_ss5baf0fe3;
 extern StaticString s_sys_ss2fd353cc;
 extern StaticString s_sys_ssd4af8244;
 extern StaticString s_sys_ss12e90587;
@@ -72,6 +60,7 @@ extern StaticString s_sys_ss9d68a010;
 extern StaticString s_sys_ssbe2ba1ac;
 extern StaticString s_sys_sse590286e;
 extern StaticString s_sys_ss941ca25f;
+extern StaticString s_sys_ss7f14ba70;
 extern StaticString s_sys_ss6a9626a3;
 extern StaticString s_sys_ss1fa5c668;
 extern StaticString s_sys_ss0626a7ce;

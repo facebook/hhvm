@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,6 +27,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/ip_block_map.h>
 #include <test/test_mysql_info.inc>
+#include <system/lib/systemlib.h>
 
 using namespace std;
 
@@ -905,13 +906,13 @@ bool TestCppBase::TestMemoryManager() {
 
     // Circular reference between two objects.
     {
-      Object obj(NEWOBJ(c_stdClass)());
+      Object obj(SystemLib::AllocStdClassObject());
       obj->o_set("a", obj);
       obj->o_set("f", Object(NEWOBJ(PlainFile)()));
     }
     {
-      Object obj1(NEWOBJ(c_stdClass)());
-      Object obj2(NEWOBJ(c_stdClass)());
+      Object obj1(SystemLib::AllocStdClassObject());
+      Object obj2(SystemLib::AllocStdClassObject());
       obj1->o_set("a", obj2);
       obj2->o_set("a", obj1);
       obj1->o_set("f", Object(NEWOBJ(PlainFile)()));

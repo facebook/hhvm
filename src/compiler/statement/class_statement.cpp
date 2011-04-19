@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -545,12 +545,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       {
         set<string> done;
         classScope->outputCPPStaticMethodWrappers(cg, ar, done, clsName);
-      }
-
-      if (cg.getOutput() == CodeGenerator::SystemCPP &&
-          ar->isBaseSysRsrcClass(clsName) &&
-          !classScope->hasProperty("rsrc")) {
-        cg_printf("public: Variant %srsrc;\n", Option::PropertyPrefix);
       }
       if (Option::GenerateCPPMacros) {
         classScope->outputCPPJumpTableDecl(cg, ar);

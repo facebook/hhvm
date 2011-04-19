@@ -10,7 +10,8 @@ EXCLUDED_CXX_SOURCES := \
 	runtime/ext/fql/lemon.c \
 	runtime/ext/fql/lempar.c \
 
-RECURSIVE_SOURCE_SUBDIRS := runtime/base runtime/ext system/gen util $(EVAL_DIR)
+RECURSIVE_SOURCE_SUBDIRS := runtime/base runtime/ext system/gen system/lib \
+  util $(EVAL_DIR)
 REC_SOURCES := $(filter-out $(EXCLUDED_CXX_SOURCES), \
 	$(shell find $(RECURSIVE_SOURCE_SUBDIRS) -name "*.cpp" -o -name "*.c" -o -name "*.S"))
 CXX_NOOPT_SOURCES := $(filter %.no.cpp, $(REC_SOURCES))

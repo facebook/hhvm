@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,11 +15,11 @@
 */
 
 #include <runtime/base/array/array_data.h>
+#include <runtime/base/array/array_init.h>
 #include <runtime/base/array/array_iterator.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/complex_types.h>
-#include <system/gen/php/classes/stdclass.h>
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/runtime_option.h>

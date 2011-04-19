@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,12 +25,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 164 */
+/* SRC: classes/iterator.php line 228 */
 FORWARD_DECLARE_CLASS(RecursiveIteratorIterator);
 class c_RecursiveIteratorIterator : public ExtObjectData {
   public:
 
   // Properties
+  Variant m_rsrc;
 
   // Class Map
   virtual bool o_instanceof(CStrRef s) const;
@@ -39,17 +40,18 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RecursiveIteratorIterator 1
+  static Variant os_getInit(CStrRef s);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_RecursiveIteratorIterator 1
   #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RecursiveIteratorIterator 1
   static Variant os_constant(const char *s);
 
   // DECLARE_INSTANCE_PROP_OPS
   public:
-  #define OMIT_JUMP_TABLE_CLASS_GETARRAY_RecursiveIteratorIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveIteratorIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_RecursiveIteratorIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RecursiveIteratorIterator 1
+  virtual void o_getArray(Array &props, bool pubOnly = false) const;
+  virtual void o_setArray(CArrRef props);
+  virtual Variant *o_realProp(CStrRef s, int flags,
+                              CStrRef context = null_string) const;
+  Variant *o_realPropPrivate(CStrRef s, int flags) const;
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
@@ -73,7 +75,6 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   public: void t_next();
   public: void t_rewind();
   public: bool t_valid();
-  public: Variant m_rsrc;
   DECLARE_METHOD_INVOKE_HELPERS(next);
   DECLARE_METHOD_INVOKE_HELPERS(key);
   DECLARE_METHOD_INVOKE_HELPERS(valid);

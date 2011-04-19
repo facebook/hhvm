@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,7 @@
 
 #include <test/test_ext_json.h>
 #include <runtime/ext/ext_json.h>
+#include <system/lib/systemlib.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -61,7 +62,7 @@ bool TestExtJson::test_json_decode() {
      CREATE_VECTOR5("a", 1, true, false, null));
 
   Object obj = f_json_decode("{\"a\":1,\"b\":2.3,\"3\":\"test\"}");
-  Object obj2((NEWOBJ(c_stdClass)())->create());
+  Object obj2(SystemLib::AllocStdClassObject());
   obj2->o_set("a", 1);
   obj2->o_set("b", 2.3);
   obj2->o_set("3", "test");

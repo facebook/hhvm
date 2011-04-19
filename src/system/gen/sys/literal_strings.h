@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -441,9 +441,11 @@ extern StaticString s_sys_ss2145036e;
 extern StaticString s_sys_ss225c5a00;
 extern StaticString s_sys_ss22bfe43e;
 extern StaticString s_sys_ss23afce76;
+extern StaticString s_sys_ss246080da;
 extern StaticString s_sys_ss24749844;
 extern StaticString s_sys_ss25294c59;
 extern StaticString s_sys_ss2559ca9a;
+extern StaticString s_sys_ss25b53cd5;
 extern StaticString s_sys_ss26e41480;
 extern StaticString s_sys_ss26fb679a;
 extern StaticString s_sys_ss274b0685;
@@ -666,6 +668,7 @@ extern StaticString s_sys_ss7d2a9ef4;
 extern StaticString s_sys_ss7e545a5a;
 extern StaticString s_sys_ss7e5fc106;
 extern StaticString s_sys_ss7ef23ee0;
+extern StaticString s_sys_ss7f14ba70;
 extern StaticString s_sys_ss7fd7d2bc;
 
 ///////////////////////////////////////////////////////////////////////////////

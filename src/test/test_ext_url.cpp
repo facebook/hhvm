@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,7 @@
 
 #include <test/test_ext_url.h>
 #include <runtime/ext/ext_url.h>
+#include <system/lib/systemlib.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -124,7 +125,7 @@ bool TestExtUrl::test_http_build_query() {
        "children%5Bsally%5D%5Bsex%5D=F&flags_0=CEO");
   }
   {
-    Object obj(NEWOBJ(c_stdClass)());
+    Object obj(SystemLib::AllocStdClassObject());
     obj->o_set("foo", "bar");
     obj->o_set("baz", "boom");
     VS(f_http_build_query(obj), "foo=bar&baz=boom");

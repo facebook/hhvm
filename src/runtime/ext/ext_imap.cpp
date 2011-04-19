@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,9 +18,10 @@
 #include <runtime/ext/ext_imap.h>
 #include <runtime/base/zend/zend_string.h>
 #include <util/logger.h>
-#include <system/gen/php/classes/stdclass.h>
-#include <c-client.h> /* includes mail.h and rfc822.h */
 
+#include <system/lib/systemlib.h>
+
+#include <c-client.h> /* includes mail.h and rfc822.h */
 #define namespace namespace_
 #include <imap4r1.h>  /* location of c-client quota functions */
 #undef namespace
@@ -282,7 +283,7 @@ static char* _php_imap_parse_address(ADDRESS *addresslist, Array &paddress) {
   ADDRESS *addresstmp = addresslist;
   char *fulladdress = _php_rfc822_write_address(addresstmp);
   do {
-    Object tmpvals(NEWOBJ(c_stdClass)());
+    Object tmpvals(SystemLib::AllocStdClassObject());
     OBJ_SET_ENTRY(tmpvals, addresstmp, "personal", personal);
     OBJ_SET_ENTRY(tmpvals, addresstmp, "adl",      adl);
     OBJ_SET_ENTRY(tmpvals, addresstmp, "mailbox",  mailbox);
@@ -304,7 +305,7 @@ static void set_address(Object &ret, const char *prop, ADDRESS *addr) {
 }
 
 static Object _php_make_header_object(ENVELOPE *en) {
-  Object ret(NEWOBJ(c_stdClass)());
+  Object ret(SystemLib::AllocStdClassObject());
 
   OBJ_SET_ENTRY(ret, en, "remail",      remail);
   OBJ_SET_ENTRY(ret, en, "date",        date);
@@ -384,7 +385,7 @@ static void _php_imap_add_body(Object &ret, BODY *body, bool do_multipart) {
 
     Array dparametres(Array::Create());
     do {
-      Object dparam(NEWOBJ(c_stdClass)());
+      Object dparam(SystemLib::AllocStdClassObject());
       dparam.o_set("attribute",
         String((const char*)dpar->attribute, CopyString));
       dparam.o_set("value", String((const char*)dpar->value, CopyString));
@@ -401,7 +402,7 @@ static void _php_imap_add_body(Object &ret, BODY *body, bool do_multipart) {
   if ((par = body->parameter)) {
     ret.o_set("ifparameters", 1);
     do {
-      Object param(NEWOBJ(c_stdClass)());
+      Object param(SystemLib::AllocStdClassObject());
       OBJ_SET_ENTRY(param, par, "attribute", attribute);
       OBJ_SET_ENTRY(param, par, "value", value);
       parametres.append(param);
@@ -417,7 +418,7 @@ static void _php_imap_add_body(Object &ret, BODY *body, bool do_multipart) {
       parametres.clear();
       PART *part;
       for (part = body->nested.part; part; part = part->next) {
-        Object param(NEWOBJ(c_stdClass)());
+        Object param(SystemLib::AllocStdClassObject());
         _php_imap_add_body(param, &part->body, do_multipart);
         parametres.append(param);
       }
@@ -428,7 +429,7 @@ static void _php_imap_add_body(Object &ret, BODY *body, bool do_multipart) {
     if ((body->type == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
       body = body->nested.msg->body;
       parametres.clear();
-      Object param(NEWOBJ(c_stdClass)());
+      Object param(SystemLib::AllocStdClassObject());
       _php_imap_add_body(param, body, do_multipart);
       parametres.append(param);
       ret.o_set("parts", parametres);
@@ -845,7 +846,7 @@ Variant f_imap_bodystruct(CObjRef imap_stream, int64 msg_number,
   if (!obj->checkMsgNumber(msg_number)) {
     return false;
   }
-  Object ret(NEWOBJ(c_stdClass)());
+  Object ret(SystemLib::AllocStdClassObject());
 
   BODY *body;
   body = mail_body(obj->m_stream, msg_number, (unsigned char *)section.data());
@@ -863,7 +864,7 @@ Variant f_imap_check(CObjRef imap_stream) {
     return false;
   }
   if (obj->m_stream && obj->m_stream->mailbox) {
-    Object ret(NEWOBJ(c_stdClass)());
+    Object ret(SystemLib::AllocStdClassObject());
     char date[100];
     rfc822_date(date);
     ret.o_set("Date", String(date, CopyString));
@@ -968,7 +969,7 @@ Variant f_imap_fetch_overview(CObjRef imap_stream, CStrRef sequence,
       if (((elt = mail_elt(obj->m_stream, i))->sequence) &&
           (env = mail_fetch_structure(obj->m_stream, i, NIL, NIL))) {
 
-        Object myoverview(NEWOBJ(c_stdClass)());
+        Object myoverview(SystemLib::AllocStdClassObject());
         OBJ_SET_ENTRY(myoverview, env, "subject", subject);
 
         if (env->from) {
@@ -1099,7 +1100,7 @@ Variant f_imap_fetchstructure(CObjRef imap_stream, int64 msg_number,
     return false;
   }
 
-  Object ret(NEWOBJ(c_stdClass)());
+  Object ret(SystemLib::AllocStdClassObject());
   _php_imap_add_body(ret, body, true);
 
   return ret;
@@ -1343,7 +1344,7 @@ bool f_imap_mail(CStrRef to, CStrRef subject, CStrRef message,
 
 Variant f_imap_mailboxmsginfo(CObjRef imap_stream) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
-  Object ret(NEWOBJ(c_stdClass)());
+  Object ret(SystemLib::AllocStdClassObject());
 
   int64 unreadmsg = 0, deletedmsg = 0, msize = 0;
 
@@ -1566,7 +1567,7 @@ Variant f_imap_sort(CObjRef imap_stream, int64 criteria, int64 reverse,
 Variant f_imap_status(CObjRef imap_stream, CStrRef mailbox,
                       int64 options /* = 0 */) {
   ImapStream *obj = imap_stream.getTyped<ImapStream>();
-  Object ret(NEWOBJ(c_stdClass)());
+  Object ret(SystemLib::AllocStdClassObject());
 
   if (mail_status(obj->m_stream, (char *)mailbox.data(), options)) {
     ret.o_set("flags", (int64)IMAPG(status_flags));

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,13 +17,13 @@
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/type_conversions.h>
-#include <system/gen/php/classes/stdclass.h>
 
+#include <system/lib/systemlib.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 Object toObject(ArrayData *v) {
-  return v ? v->toObject() : Object(NEWOBJ(c_stdClass)());
+  return v ? v->toObject() : Object(SystemLib::AllocStdClassObject());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

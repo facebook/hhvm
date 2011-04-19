@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,9 @@
 #include <runtime/eval/strict_mode.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/intercept.h>
+
 #include <system/gen/php/classes/closure.h>
+#include <system/lib/systemlib.h>
 
 namespace HPHP {
 namespace Eval {
@@ -171,7 +173,7 @@ void Parameter::getInfo(ClassInfo::ParameterInfo &info,
       v = m_defVal->eval(env);
     } catch (FatalErrorException e) {
       std::string msg = e.getMessage();
-      v = Object((NEWOBJ(c_stdClass)())->create());
+      v = Object(SystemLib::AllocStdClassObject());
       v.o_set("msg", String(msg.c_str(), msg.size(), CopyString));
     }
     String s = f_serialize(v);

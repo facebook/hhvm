@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +18,9 @@
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/variable_serializer.h>
-#include <system/gen/php/classes/stdclass.h>
+#include <runtime/base/array/array_iterator.h>
+
+#include <system/lib/systemlib.h>
 
 namespace HPHP {
 
@@ -84,14 +86,14 @@ Variant Object::o_getPublic(CStrRef propName, bool error /* = true */) const {
 Variant Object::o_set(CStrRef propName, CVarRef val,
                       CStrRef context /* = null_string */) {
   if (!m_px) {
-    operator=(NEWOBJ(c_stdClass)());
+    operator=(SystemLib::AllocStdClassObject());
   }
   return m_px->o_set(propName, val, false, context);
 }
 
 Variant Object::o_setPublic(CStrRef propName, CVarRef val) {
   if (!m_px) {
-    operator=(NEWOBJ(c_stdClass)());
+    operator=(SystemLib::AllocStdClassObject());
   }
   return m_px->o_setPublic(propName, val, false);
 }
@@ -99,7 +101,7 @@ Variant Object::o_setPublic(CStrRef propName, CVarRef val) {
 Variant &Object::o_lval(CStrRef propName, CVarRef tmpForGet,
                         CStrRef context /* = null_string */) {
   if (!m_px) {
-    operator=(NEWOBJ(c_stdClass)());
+    operator=(SystemLib::AllocStdClassObject());
   }
   return m_px->o_lval(propName, tmpForGet, context);
 }

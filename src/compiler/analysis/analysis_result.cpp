@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -541,10 +541,6 @@ bool AnalysisResult::isConstantDeclared(const std::string &constName) const {
   return false;
 }
 
-bool AnalysisResult::isBaseSysRsrcClass(const std::string &className) const {
-  return m_baseSysRsrcClasses.find(className) != m_baseSysRsrcClasses.end();
-}
-
 bool AnalysisResult::isConstantRedeclared(const std::string &constName) const {
   return m_constRedeclared.find(constName) != m_constRedeclared.end();
 }
@@ -569,7 +565,6 @@ void AnalysisResult::loadBuiltins() {
   BuiltinSymbols::LoadClasses(ar, m_systemClasses);
   BuiltinSymbols::LoadVariables(ar, m_variables);
   BuiltinSymbols::LoadConstants(ar, m_constants);
-  BuiltinSymbols::LoadBaseSysRsrcClasses(ar, m_baseSysRsrcClasses);
 }
 
 void AnalysisResult::checkClassDerivations() {

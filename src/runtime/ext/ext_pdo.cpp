@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -27,6 +27,8 @@
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/macros.h>
 #include <runtime/eval/eval.h>
+
+#include <system/lib/systemlib.h>
 
 #define PDO_HANDLE_DBH_ERR(dbh)                         \
   if (strcmp(dbh->error_code, PDO_ERR_NONE)) {          \
@@ -1797,7 +1799,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
     return false;
 
   case PDO_FETCH_OBJ:
-    ret = NEWOBJ(c_stdClass)();
+    ret = SystemLib::AllocStdClassObject();
     break;
 
   case PDO_FETCH_CLASS:

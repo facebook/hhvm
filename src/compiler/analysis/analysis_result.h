@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -287,7 +287,6 @@ public:
   bool isConstantDeclared(const std::string &constName) const;
   bool isConstantRedeclared(const std::string &constName) const;
   bool isSystemConstant(const std::string &constName) const;
-  bool isBaseSysRsrcClass(const std::string &className) const;
 
   /**
    * For function declaration parsing.
@@ -374,7 +373,6 @@ private:
   StringToClassScopePtrVecMap m_methodToClassDecs;
   StringToFileScopePtrMap m_constDecs;
   std::set<std::string> m_constRedeclared;
-  std::set<std::string> m_baseSysRsrcClasses;
 
   bool m_dynamicClass;
   bool m_dynamicFunction;

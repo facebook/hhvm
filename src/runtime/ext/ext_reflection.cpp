@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 2010- Facebook, Inc. (http://www.facebook.com)         |
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -22,6 +22,8 @@
 #include <runtime/base/runtime_option.h>
 #include <system/gen/php/classes/reflection.h>
 #include <runtime/base/string_util.h>
+
+#include <system/lib/systemlib.h>
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(Reflection);
@@ -128,7 +130,7 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
 
         ASSERT(p->attribute & ClassInfo::IsOptional);
         if (*p->value == '\x01') {
-          Object v((NEWOBJ(c_stdClass)())->create());
+          Object v(SystemLib::AllocStdClassObject());
           v.o_set("msg", String("unable to eval ") + defText);
           param.set("default", v);
         } else {

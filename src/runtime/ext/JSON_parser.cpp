@@ -32,8 +32,9 @@ SOFTWARE.
 #include <runtime/base/complex_types.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
-#include <system/gen/php/classes/stdclass.h>
 #include <runtime/base/zend/utf8_decode.h>
+
+#include <system/lib/systemlib.h>
 
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";
@@ -571,7 +572,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
             top.unset();
           }
           if (!assoc) {
-            top = NEWOBJ(c_stdClass)();
+            top = SystemLib::AllocStdClassObject();
           } else {
             top = Array::Create();
           }

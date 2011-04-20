@@ -38,6 +38,8 @@ public:
     return (m_stmt ? m_stmt->getRecursiveCount() : 0);
   }
   const std::string &getVariable() const { return m_variable->getName(); }
+  const std::string &getClassName() const { return m_className; }
+  StatementPtr getStmt() const { return m_stmt; }
 private:
   std::string m_className;
   std::string m_originalClassName;

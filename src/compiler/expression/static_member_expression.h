@@ -39,6 +39,9 @@ public:
   virtual bool canonCompare(ExpressionPtr e) const;
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                       int state);
+  
+  ExpressionPtr getExp() { return m_exp; }
+
 private:
   bool findMember(AnalysisResultPtr ar, std::string &name,
                   Symbol *&sym);

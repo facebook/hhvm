@@ -44,6 +44,11 @@ public:
   static bool PostMessage(CStrRef message, CStrRef host = "localhost");
 
   /**
+   * Check whether all the the xbox threads are busy
+   */
+  static bool Available();
+
+  /**
    * Local tasklet for parallel processing.
    */
   static Object TaskStart(CStrRef message);

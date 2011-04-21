@@ -149,6 +149,7 @@ IpBlockMapPtr RuntimeOption::IpBlocks;
 SatelliteServerInfoPtrVec RuntimeOption::SatelliteServerInfos;
 
 int RuntimeOption::XboxServerThreadCount = 0;
+int RuntimeOption::XboxServerMaxQueueLength = INT_MAX;
 int RuntimeOption::XboxServerPort = 0;
 int RuntimeOption::XboxDefaultLocalTimeoutMilliSeconds = 500;
 int RuntimeOption::XboxDefaultRemoteTimeoutSeconds = 5;
@@ -798,6 +799,9 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
   {
     Hdf xbox = config["Xbox"];
     XboxServerThreadCount = xbox["ServerInfo.ThreadCount"].getInt32(0);
+    XboxServerMaxQueueLength =
+      xbox["ServerInfo.MaxQueueLength"].getInt32(INT_MAX);
+    if (XboxServerMaxQueueLength < 0) XboxServerMaxQueueLength = INT_MAX;
     XboxServerPort = xbox["ServerInfo.Port"].getInt32(0);
     XboxDefaultLocalTimeoutMilliSeconds =
       xbox["DefaultLocalTimeoutMilliSeconds"].getInt32(500);

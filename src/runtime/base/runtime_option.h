@@ -144,6 +144,7 @@ public:
   static std::string SSLCertificateKeyFile;
 
   static int XboxServerThreadCount;
+  static int XboxServerMaxQueueLength;
   static int XboxServerPort;
   static int XboxDefaultLocalTimeoutMilliSeconds;
   static int XboxDefaultRemoteTimeoutSeconds;

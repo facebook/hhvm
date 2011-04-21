@@ -135,8 +135,17 @@ static IMPLEMENT_THREAD_LOCAL(XboxServerInfoPtr, s_xbox_server_info);
 static IMPLEMENT_THREAD_LOCAL(RPCRequestHandler, s_xbox_request_handler);
 ///////////////////////////////////////////////////////////////////////////////
 
-class XboxWorker : public JobQueueWorker<XboxTransport*> {
+class XboxWorker : public JobQueueWorker<XboxTransport*, true> {
 public:
+  virtual void doJob(XboxTransport *job) {
+    try {
+      createRequestHandler()->handleRequest(job);
+      job->decRefCount();
+    } catch (...) {
+      Logger::Error("RpcRequestHandler leaked exceptions");
+    }
+  }
+private:
   RequestHandler *createRequestHandler() {
     if (!*s_xbox_server_info) {
       *s_xbox_server_info = XboxServerInfoPtr(new XboxServerInfo());
@@ -150,15 +159,6 @@ public:
       s_xbox_request_handler->incRequest();
     }
     return s_xbox_request_handler.get();
-  }
-
-  virtual void doJob(XboxTransport *job) {
-    try {
-      createRequestHandler()->handleRequest(job);
-      job->decRefCount();
-    } catch (...) {
-      Logger::Error("RpcRequestHandler leaked exceptions");
-    }
   }
 };
 
@@ -332,8 +332,16 @@ StaticString XboxTask::s_class_name("XboxTask");
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool XboxServer::Available() {
+  return s_dispatcher->getActiveWorker() <
+         RuntimeOption::XboxServerThreadCount ||
+         s_dispatcher->getQueuedJobs() < 
+         RuntimeOption::XboxServerMaxQueueLength;
+}
+
 Object XboxServer::TaskStart(CStrRef message) {
-  if (RuntimeOption::XboxServerThreadCount <= 0) {
+  if (RuntimeOption::XboxServerThreadCount <= 0 ||
+      !Available()) {
     return null_object;
   }
   XboxTask *task = NEWOBJ(XboxTask)(message);

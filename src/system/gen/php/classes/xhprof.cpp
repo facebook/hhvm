@@ -207,7 +207,7 @@ void c_XhprofFrame::dynConstructFromEval(Eval::VariableEnvironment &env, const E
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {

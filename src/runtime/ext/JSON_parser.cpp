@@ -566,7 +566,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
         if (JSON(the_top) > 0) {
           Variant &top = JSON(the_zstack)[JSON(the_top)];
           if (JSON(the_top) == 1) {
-            top = ref(z);
+            top.assignRef(z);
           } else {
             top.unset();
           }
@@ -626,7 +626,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool assoc/*<fb>*/,
 
         if (JSON(the_top) > 0) {
           if (JSON(the_top) == 1) {
-            JSON(the_zstack)[JSON(the_top)] = ref(z);
+            JSON(the_zstack)[JSON(the_top)].assignRef(z);
           } else {
             JSON(the_zstack)[JSON(the_top)].unset();
           }

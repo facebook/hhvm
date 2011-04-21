@@ -35,7 +35,7 @@ VariableEnvironment::VariableEnvironment()
 }
 
 void VariableEnvironment::flagGlobal(CStrRef name, int64 hash) {
-  get(name) = ref(get_globals()->get(name));
+  get(name).assignRef(get_globals()->get(name));
 }
 
 void VariableEnvironment::unset(CStrRef name, int64 hash) {
@@ -192,7 +192,7 @@ void FuncScopeVariableEnvironment::flagStatic(CStrRef name, int64 hash) {
   if (!m_staticEnv->exists(name.data())) {
     m_staticEnv->get(name) = m_func->getStaticValue(*this, name);
   }
-  get(name) = ref(m_staticEnv->get(name));
+  get(name).assignRef(m_staticEnv->get(name));
 }
 
 Variant &FuncScopeVariableEnvironment::getIdx(int idx) {

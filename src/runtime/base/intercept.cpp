@@ -149,9 +149,10 @@ bool handle_intercept(CVarRef handler, CStrRef name, CArrRef params,
   ObjectData *obj = FrameInjection::GetThis();
 
   Variant done = true;
-  ret = ref(f_call_user_func_array
-            (handler["callback"],
-             CREATE_VECTOR5(name, obj, params, handler["data"], ref(done))));
+  ret.assignRef(
+    f_call_user_func_array(
+      handler["callback"],
+      CREATE_VECTOR5(name, obj, params, handler["data"], ref(done))));
   return !done.same(false);
 }
 

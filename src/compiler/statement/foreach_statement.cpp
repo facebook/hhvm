@@ -344,7 +344,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (!AssignmentExpression::SpecialAssignment(
           cg, ar, m_value, ExpressionPtr(), valueStr.c_str(), m_ref)) {
       m_value->outputCPP(cg, ar);
-      cg_printf(m_ref ? " = ref(%s)" : " = %s", valueStr.c_str());
+      cg_printf(".assign%s(%s)", m_ref ? "Ref" : "Val", valueStr.c_str());
     }
     cg_printf(";\n");
   }
@@ -356,7 +356,7 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (!AssignmentExpression::SpecialAssignment(
           cg, ar, m_name, ExpressionPtr(), nameStr.c_str(), m_ref)) {
       m_name->outputCPP(cg, ar);
-      cg_printf(m_ref ? " = ref(%s)" : " = %s", nameStr.c_str());
+      cg_printf(".assign%s(%s)", m_ref ? "Ref" : "Val", nameStr.c_str());
     }
     cg_printf(";\n");
   }

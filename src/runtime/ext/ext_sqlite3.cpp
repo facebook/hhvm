@@ -506,7 +506,7 @@ bool c_SQLite3Stmt::t_bindparam(CVarRef name, Variant parameter,
   INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Stmt, SQLite3Stmt::bindparam);
   BoundParamPtr param(new BoundParam());
   param->type = type;
-  param->value = ref(parameter);
+  param->value.assignRef(parameter);
 
   if (name.isString()) {
     String sname = name.toString();

@@ -1436,13 +1436,13 @@ void c_Exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a2 = params[i]->eval(env);
+    a2.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -1489,7 +1489,7 @@ void c_Exception::t___init__() {
       {
         {
           Variant tmp0((m_trace.rvalAt(0LL, AccessFlags::Error)));
-          v_top = tmp0;
+          v_top.assignVal(tmp0);
         }
         {
           bool tmp0;
@@ -1523,7 +1523,7 @@ void c_Exception::t___init__() {
         }
         {
           const Variant &tmp0((x_array_shift(ref(m_trace))));
-          v_frame = tmp0;
+          v_frame.assignVal(tmp0);
         }
       }
     }
@@ -1531,13 +1531,13 @@ void c_Exception::t___init__() {
   if (isset(v_frame, NAMSTR(s_sys_ss8ce7db5b, "file"), true)) {
     {
       Variant tmp0((v_frame.rvalAt(NAMSTR(s_sys_ss8ce7db5b, "file"), AccessFlags::Error_Key)));
-      m_file = tmp0;
+      m_file.assignVal(tmp0);
     }
   }
   if (isset(v_frame, NAMSTR(s_sys_ssddf8728c, "line"), true)) {
     {
       Variant tmp0((v_frame.rvalAt(NAMSTR(s_sys_ssddf8728c, "line"), AccessFlags::Error_Key)));
-      m_line = tmp0;
+      m_line.assignVal(tmp0);
     }
   }
 }
@@ -1553,9 +1553,9 @@ void c_Exception::t___construct(Variant v_message //  = NAMSTR(s_sys_ss00000000,
     throw_unexpected_argument_type(3,"Exception::__construct()","exception",v_previous);
     return;
   }
-  m_message = v_message;
-  m_code = v_code;
-  m_previous = v_previous;
+  m_message.assignVal(v_message);
+  m_code.assignVal(v_code);
+  m_previous.assignVal(v_previous);
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
@@ -1913,19 +1913,19 @@ void c_ErrorException::dynConstructFromEval(Eval::VariableEnvironment &env, cons
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a2 = params[i]->eval(env);
+    a2.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a3 = params[i]->eval(env);
+    a3.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a4 = params[i]->eval(env);
+    a4.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -1962,15 +1962,15 @@ void c_ErrorException::t___construct(Variant v_message //  = NAMSTR(s_sys_ss0000
   INSTANCE_METHOD_INJECTION_BUILTIN(ErrorException, ErrorException::__construct);
   bool oldInCtor = gasInCtor(true);
   c_Exception::t___construct(v_message, v_code);
-  m_severity = v_severity;
+  m_severity.assignVal(v_severity);
   if (!(x_is_null(v_filename))) {
     {
-      m_file = v_filename;
+      m_file.assignVal(v_filename);
     }
   }
   if (!(x_is_null(v_lineno))) {
     {
-      m_line = v_lineno;
+      m_line.assignVal(v_lineno);
     }
   }
   gasInCtor(oldInCtor);

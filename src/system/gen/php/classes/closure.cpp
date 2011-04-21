@@ -302,10 +302,10 @@ void c_Closure::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval:
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -331,8 +331,8 @@ void c_Closure::init() {
 void c_Closure::t___construct(Variant v_func, Variant v_vars) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::__construct);
   bool oldInCtor = gasInCtor(true);
-  m_func = v_func;
-  m_vars = v_vars;
+  m_func.assignVal(v_func);
+  m_vars.assignVal(v_vars);
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
@@ -356,7 +356,7 @@ namespace hphp_impl_splitter {}
 void c_Closure::t_setvars(Variant v_vars) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Closure, Closure::setVars);
   v_vars.weakRemove(NAMSTR(s_sys_ssacf726a1, "__cont__"), true);
-  m_vars = v_vars;
+  m_vars.assignVal(v_vars);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/closure.php line 31 */
@@ -1065,16 +1065,16 @@ void c_Continuation::dynConstructFromEval(Eval::VariableEnvironment &env, const 
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a2 = params[i]->eval(env);
+    a2.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a3 = params[i]->eval(env);
+    a3.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -1112,16 +1112,16 @@ void c_Continuation::t___construct(Variant v_func, Variant v_vars, Variant v_obj
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::__construct);
   bool oldInCtor = gasInCtor(true);
   c_Closure::t___construct(v_func, v_vars);
-  m_obj = v_obj;
-  m_args = v_args;
+  m_obj.assignVal(v_obj);
+  m_args.assignVal(v_args);
   gasInCtor(oldInCtor);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/closure.php line 46 */
 void c_Continuation::t_update(CVarRef v_label, CVarRef v_value, CVarRef v_vars) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::update);
-  m_label = v_label;
-  m_value = v_value;
+  m_label.assignVal(v_label);
+  m_value.assignVal(v_value);
   c_Closure::t_setvars(v_vars);
 }
 namespace hphp_impl_splitter {}
@@ -1196,7 +1196,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/closure.php line 84 */
 void c_Continuation::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Continuation, Continuation::next);
-  m_received = null;
+  m_received.assignVal(null);
   t_nextimpl();
 }
 namespace hphp_impl_splitter {}
@@ -1224,11 +1224,11 @@ void c_Continuation::t_nextimpl() {
       {
         {
           const Variant &tmp0((x_explode(NAMSTR(s_sys_ss819481f3, "::"), toString(m_func))));
-          v_tokens = tmp0;
+          v_tokens.assignVal(tmp0);
         }
         {
           Variant tmp0((v_tokens.rvalAt(1LL, AccessFlags::Error)));
-          v_func = tmp0;
+          v_func.assignVal(tmp0);
         }
         {
           MethodCallPackage mcp0;
@@ -1242,7 +1242,7 @@ void c_Continuation::t_nextimpl() {
     }
     else {
       {
-        x_call_user_func(2, m_func, Array(ArrayInit(1, true).setRef(Variant(GET_THIS())).create()));
+        x_call_user_func(2, m_func, Array(ArrayInit(1, true).set(Variant(GET_THIS())).create()));
       }
     }
   } catch (Object e) {
@@ -1278,7 +1278,7 @@ void c_Continuation::t_send(CVarRef v_v) {
       throw_exception(p_Exception((NEWOBJ(c_Exception)())->create(NAMSTR(s_sys_ss791c5872, "Need to call next() first"))));
     }
   }
-  m_received = v_v;
+  m_received.assignVal(v_v);
   t_nextimpl();
 }
 namespace hphp_impl_splitter {}

@@ -462,7 +462,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           Variant curtag;
           String myval;
           String mytype;
-          curtag = ref(parser->data.getArrayData()->endRef());
+          curtag.assignRef(parser->data.getArrayData()->endRef());
           if (curtag.toArray().exists("type")) {
             mytype = curtag.rvalAt("type").toString();
             if (!strcmp(mytype.data(), "cdata")) {
@@ -564,7 +564,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         tag.set("attributes",atr);
       }
       parser->data.append(tag);
-      parser->ctag = ref(parser->data.getArrayData()->endRef());
+      parser->ctag.assignRef(parser->data.getArrayData()->endRef());
     }
 
     free(tag_name);
@@ -713,9 +713,9 @@ int f_xml_parse_into_struct(CObjRef parser, CStrRef data, Variant values,
   int ret;
   XmlParser * p = parser.getTyped<XmlParser>();
   values = Array::Create();
-  p->data = ref(values);
+  p->data.assignRef(values);
   index = Array::Create();
-  p->info = ref(index);
+  p->info.assignRef(index);
   p->level = 0;
   p->ltags = (char**)malloc(XML_MAXLEVEL * sizeof(char*));
 
@@ -844,7 +844,7 @@ bool f_xml_set_notation_decl_handler(CObjRef parser, CVarRef handler) {
 
 bool f_xml_set_object(CObjRef parser, Variant object) {
   XmlParser * p = parser.getTyped<XmlParser>();
-  p->object = ref(object);
+  p->object.assignRef(object);
   return true;
 }
 

@@ -558,7 +558,7 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
         for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
           LOOP_COUNTER_CHECK(1);
           iter3.second(v_object);
-          v_idx = iter3.first();
+          v_idx.assignVal(iter3.first());
           {
             if (same(v_object, v_obj)) {
               {

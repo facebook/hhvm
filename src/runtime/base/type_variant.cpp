@@ -215,25 +215,20 @@ Variant &Variant::assign(CVarRef v) {
     assignContagious(v);
     return *this;
   }
-  if (m_type == KindOfVariant) {
-    Variant * innerVar = m_data.pvar;
-    if (innerVar->getCount() > 1) {
-      if (!v.isReferenced() || v.getVariantData() != innerVar) {
-        innerVar->assign(v);
-      }
-    } else if (this != &v) {
-      // We need to release whatever value innerVar holds before
-      // calling bind()
-      if (IS_REFCOUNTED_TYPE(innerVar->m_type)) innerVar->destruct();
-      innerVar->bind(v);
-    }
-    return *this;
-  }
-  if (this == &v) {
-    return *this;
-  }
-  if (IS_REFCOUNTED_TYPE(m_type)) destruct();
-  bind(v);
+
+  AssignValHelper(this, &v);
+  return *this;
+}
+
+Variant &Variant::assignRef(CVarRef v) {
+  ASSERT(!isContagious() && !v.isContagious());
+  assignRefHelper(v);
+  return *this;
+}
+
+Variant &Variant::assignVal(CVarRef v) {
+  ASSERT(!isContagious() && !v.isContagious());
+  AssignValHelper(this, &v);
   return *this;
 }
 

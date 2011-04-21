@@ -229,7 +229,7 @@ void StaticStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       const std::string &name = var->getName();
 
       if (variables->needLocalCopy(name)) {
-        cg_printf("%s%s = ref(%s%s);\n",
+        cg_printf("%s%s.assignRef(%s%s);\n",
                   Option::VariablePrefix, name.c_str(),
                   Option::StaticVariablePrefix, name.c_str());
       }

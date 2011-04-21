@@ -601,13 +601,13 @@ Array c_ReflectionFunctionAbstract::t_getparameters() {
     for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v_info);
-      v_name = iter3.first();
+      v_name.assignVal(iter3.first());
       {
         {
           const p_ReflectionParameter &tmp0((p_ReflectionParameter((NEWOBJ(c_ReflectionParameter)())->create(null, null))));
           v_param = tmp0;
         }
-        v_param->m_info = v_info;
+        v_param->m_info.assignVal(v_info);
         v_ret.append((VarNR(v_param)));
       }
     }
@@ -639,7 +639,7 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
     for (ArrayIter iter3 = v_params.begin(s_class_name, true); !iter3.end(); ++iter3) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v_param);
-      v_name = iter3.first();
+      v_name.assignVal(iter3.first());
       {
         {
           bool tmp0;
@@ -2432,7 +2432,7 @@ void c_ReflectionClass::dynConstructFromEval(Eval::VariableEnvironment &env, con
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -2462,7 +2462,7 @@ void c_ReflectionClass::t___construct(Variant v_name) {
     {
       {
         const Variant &tmp0((x_get_class(v_name)));
-        v_name = tmp0;
+        v_name.assignVal(tmp0);
       }
     }
   }
@@ -2508,7 +2508,7 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
     {
       {
         const Variant &tmp0((x_call_user_func(2, VarNR(NAMSTR(s_sys_ss7732a9a6, "hphp_get_class_info")), Array(ArrayInit(1, true).setRef(m_name).create()))));
-        m_info = tmp0;
+        m_info.assignVal(tmp0);
       }
       if (empty(m_info)) {
         {
@@ -2524,7 +2524,7 @@ Variant c_ReflectionClass::t_fetch(CVarRef v_what) {
         for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
           LOOP_COUNTER_CHECK(1);
           iter3.second(v__);
-          v_interface = iter3.first();
+          v_interface.assignVal(iter3.first());
           {
             {
               p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
@@ -2591,7 +2591,7 @@ bool c_ReflectionClass::t_test(CVarRef v_what, CVarRef v_name) {
 
   {
     const Variant &tmp0((t_fetch(v_what)));
-    v_v = tmp0;
+    v_v.assignVal(tmp0);
   }
   return (toBoolean(v_v) && isset(v_v, v_name));
 }
@@ -2712,7 +2712,7 @@ Variant c_ReflectionClass::t_getconstructor() {
     bool tmp0;
     {
       const Variant &tmp1((t_fetch(VarNR(NAMSTR(s_sys_ssdc3cbddc, "name")))));
-      tmp0 = (t_hasmethod((v_name = tmp1)));
+      tmp0 = (t_hasmethod(v_name.assignVal(tmp1)));
     }
     if (tmp0) {
       {
@@ -2737,13 +2737,13 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
   }
   {
     const Variant &tmp0((t_fetch(VarNR(NAMSTR(s_sys_ss5b229ad5, "methods")))));
-    v_methods = tmp0;
+    v_methods.assignVal(tmp0);
   }
   if (!(isset(v_methods, v_lname))) {
     {
       {
         Variant tmp0((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
-        v_class = tmp0;
+        v_class.assignVal(tmp0);
       }
       {
         p_ReflectionException tmp0 = NEWOBJ(c_ReflectionException)();
@@ -2757,12 +2757,12 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
   }
   {
     Variant tmp0((v_methods.rvalAt(v_lname, AccessFlags::Error)));
-    v_ret->m_info = tmp0;
+    v_ret->m_info.assignVal(tmp0);
   }
   v_ret->m_name = v_lname;
   {
     Variant tmp0((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
-    v_ret->m_class = tmp0;
+    v_ret->m_class.assignVal(tmp0);
   }
   {
     bool tmp0;
@@ -2781,7 +2781,7 @@ p_ReflectionMethod c_ReflectionClass::t_getmethod(CVarRef v_name) {
     }
     if (tmp0) {
       {
-        v_ret->m_info.set(NAMSTR(s_sys_ssefecb9dd, "constructor"), (true), true);
+        v_ret->m_info.set(NAMSTR(s_sys_ssefecb9dd, "constructor"), (VarNR(true)), true);
       }
     }
   }
@@ -2801,14 +2801,14 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = 65535LL
   v_ret = s_sys_sa00000000;
   {
     const Variant &tmp0((t_fetch(VarNR(NAMSTR(s_sys_ss5b229ad5, "methods")))));
-    v_methods = tmp0;
+    v_methods.assignVal(tmp0);
   }
   {
     LOOP_COUNTER(1);
     for (ArrayIter iter3 = v_methods.begin(s_class_name, true); !iter3.end(); ++iter3) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
-      v_name = iter3.first();
+      v_name.assignVal(iter3.first());
       {
         {
           const p_ReflectionMethod &tmp0((t_getmethod(v_name)));
@@ -2834,13 +2834,13 @@ p_ReflectionProperty c_ReflectionClass::t_getproperty(CVarRef v_name) {
 
   {
     const Variant &tmp0((t_fetch(VarNR(NAMSTR(s_sys_ss90269404, "properties")))));
-    v_properties = tmp0;
+    v_properties.assignVal(tmp0);
   }
   if (!(isset(v_properties, v_name))) {
     {
       {
         Variant tmp0((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
-        v_class = tmp0;
+        v_class.assignVal(tmp0);
       }
       {
         p_ReflectionException tmp0 = NEWOBJ(c_ReflectionException)();
@@ -2854,12 +2854,12 @@ p_ReflectionProperty c_ReflectionClass::t_getproperty(CVarRef v_name) {
   }
   {
     Variant tmp0((v_properties.rvalAt(v_name, AccessFlags::Error)));
-    v_ret->m_info = tmp0;
+    v_ret->m_info.assignVal(tmp0);
   }
-  v_ret->m_name = v_name;
+  v_ret->m_name.assignVal(v_name);
   {
     Variant tmp0((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
-    v_ret->m_class = tmp0;
+    v_ret->m_class.assignVal(tmp0);
   }
   return v_ret;
 }
@@ -2880,7 +2880,7 @@ Array c_ReflectionClass::t_getproperties(CVarRef v_filter //  = 65535LL
     for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
-      v_name = iter3.first();
+      v_name.assignVal(iter3.first());
       {
         {
           const p_ReflectionProperty &tmp0((t_getproperty(v_name)));
@@ -2911,13 +2911,13 @@ Variant c_ReflectionClass::t_getconstant(CVarRef v_name) {
 
   {
     const Variant &tmp0((t_fetch(VarNR(NAMSTR(s_sys_ss623ae369, "constants")))));
-    v_constants = tmp0;
+    v_constants.assignVal(tmp0);
   }
   if (!(isset(v_constants, v_name))) {
     {
       {
         Variant tmp0((m_info.rvalAt(NAMSTR(s_sys_ssdc3cbddc, "name"), AccessFlags::Error_Key)));
-        v_class = tmp0;
+        v_class.assignVal(tmp0);
       }
       {
         p_ReflectionException tmp0 = NEWOBJ(c_ReflectionException)();
@@ -2943,7 +2943,7 @@ Array c_ReflectionClass::t_getinterfaces() {
     for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
-      v_name = iter3.first();
+      v_name.assignVal(iter3.first());
       {
         {
           p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
@@ -2979,7 +2979,7 @@ Array c_ReflectionClass::t_getinterfacenames() {
     for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
-      v_name = iter3.first();
+      v_name.assignVal(iter3.first());
       {
         {
           p_ReflectionClass tmp0 = NEWOBJ(c_ReflectionClass)();
@@ -3088,7 +3088,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
         mcp0.methodCall((obj0), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
         const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, VarNR(NAMSTR(s_sys_ssdc3cbddc, "name")))));
-        v_cls = tmp1;
+        v_cls.assignVal(tmp1);
       }
     }
   }
@@ -3098,7 +3098,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
     for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
-      v_name = iter3.first();
+      v_name.assignVal(iter3.first());
       {
         {
           bool tmp0;
@@ -3276,7 +3276,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
         mcp0.methodCall((obj0), NAMSTR(s_sys_ssf46d6580, "fetch"), 0x5E82B850BB90B0FBLL);
         const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, VarNR(NAMSTR(s_sys_ssdc3cbddc, "name")))));
-        v_cls = tmp1;
+        v_cls.assignVal(tmp1);
       }
     }
   }
@@ -3306,7 +3306,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
     for (ArrayIter iter3 = map2.begin(s_class_name, true); !iter3.end(); iter3.next()) {
       LOOP_COUNTER_CHECK(1);
       iter3.second(v__);
-      v_name = iter3.first();
+      v_name.assignVal(iter3.first());
       {
         {
           bool tmp0;
@@ -3821,7 +3821,7 @@ void c_ReflectionExtension::dynConstructFromEval(Eval::VariableEnvironment &env,
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -4633,10 +4633,10 @@ void c_ReflectionMethod::dynConstructFromEval(Eval::VariableEnvironment &env, co
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -4672,7 +4672,7 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMST
     {
       {
         const Variant &tmp0((x_explode(NAMSTR(s_sys_ss819481f3, "::"), toString(v_cls))));
-        v_arr = tmp0;
+        v_arr.assignVal(tmp0);
       }
       {
         bool tmp0;
@@ -4684,11 +4684,11 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMST
           {
             {
               Variant tmp0((v_arr.rvalAt(0LL, AccessFlags::Error)));
-              v_cls = tmp0;
+              v_cls.assignVal(tmp0);
             }
             {
               Variant tmp0((v_arr.rvalAt(1LL, AccessFlags::Error)));
-              v_name = tmp0;
+              v_name.assignVal(tmp0);
             }
           }
         }
@@ -4722,21 +4722,21 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name //  = NAMST
         mcp0.methodCall((obj0), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
         const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
-        v_method = tmp1;
+        v_method.assignVal(tmp1);
       }
       if (toBoolean(v_method)) {
         {
           {
             const Variant &tmp0((v_method.o_getPublic(NAMSTR(s_sys_ss33988b3e, "info"), true)));
-            m_info = tmp0;
+            m_info.assignVal(tmp0);
           }
           {
             const Variant &tmp0((v_method.o_getPublic(NAMSTR(s_sys_ssdc3cbddc, "name"), true)));
-            m_name = tmp0;
+            m_name.assignVal(tmp0);
           }
           {
             const Variant &tmp0((v_method.o_getPublic(NAMSTR(s_sys_ssc82dbd12, "class"), true)));
-            m_class = tmp0;
+            m_class.assignVal(tmp0);
           }
         }
       }
@@ -4782,7 +4782,7 @@ Variant c_ReflectionMethod::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name
     mcp0.methodCall((obj0), NAMSTR(s_sys_sscdbb2d67, "getMethod"), 0x0D81ECE253A3B5B6LL);
     const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
     Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
-    v_obj = tmp1;
+    v_obj.assignVal(tmp1);
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -5545,10 +5545,10 @@ void c_ReflectionProperty::dynConstructFromEval(Eval::VariableEnvironment &env, 
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -5604,21 +5604,21 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
         mcp0.methodCall((obj0), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
         const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
-        v_prop = tmp1;
+        v_prop.assignVal(tmp1);
       }
       if (toBoolean(v_prop)) {
         {
           {
             const Variant &tmp0((v_prop.o_getPublic(NAMSTR(s_sys_ss33988b3e, "info"), true)));
-            m_info = tmp0;
+            m_info.assignVal(tmp0);
           }
           {
             const Variant &tmp0((v_prop.o_getPublic(NAMSTR(s_sys_ssdc3cbddc, "name"), true)));
-            m_name = tmp0;
+            m_name.assignVal(tmp0);
           }
           {
             const Variant &tmp0((v_prop.o_getPublic(NAMSTR(s_sys_ssc82dbd12, "class"), true)));
-            m_class = tmp0;
+            m_class.assignVal(tmp0);
           }
         }
       }
@@ -5664,7 +5664,7 @@ Variant c_ReflectionProperty::ti_export(CStrRef cls, Variant v_cls, CVarRef v_na
     mcp0.methodCall((obj0), NAMSTR(s_sys_ssd029c1ac, "getProperty"), 0x0FD73627FB023047LL);
     const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
     Variant tmp1(((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_name)));
-    v_obj = tmp1;
+    v_obj.assignVal(tmp1);
   }
   v_str = (toString(v_obj));
   if (toBoolean(v_ret)) {
@@ -6079,7 +6079,7 @@ void c_ReflectionFunction::dynConstructFromEval(Eval::VariableEnvironment &env, 
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -6694,10 +6694,10 @@ void c_ReflectionParameter::dynConstructFromEval(Eval::VariableEnvironment &env,
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -6733,11 +6733,11 @@ void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
         mcp0.methodCall((obj0), NAMSTR(s_sys_ss1902bc14, "getParameters"), 0x3E62225132C2A32DLL);
         const CallInfo *cit0 __attribute__((__unused__)) = mcp0.ci;
         Variant tmp1(((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0)));
-        v_params = tmp1;
+        v_params.assignVal(tmp1);
       }
       {
         const Variant &tmp0((v_params.rvalRef(v_param, tmp_ref, AccessFlags::Error).o_getPublic(NAMSTR(s_sys_ss33988b3e, "info"), true)));
-        m_info = tmp0;
+        m_info.assignVal(tmp0);
         tmp_ref.unset();
       }
     }
@@ -6855,7 +6855,7 @@ Variant c_ReflectionParameter::t_getdefaultvalue() {
   }
   {
     Variant tmp0((m_info.rvalAt(NAMSTR(s_sys_ss570270cc, "default"), AccessFlags::Error_Key)));
-    v_defaultValue = tmp0;
+    v_defaultValue.assignVal(tmp0);
   }
   if (instanceOf(v_defaultValue, NAMSTR(s_sys_ss41c7a197, "stdclass"))) {
     {

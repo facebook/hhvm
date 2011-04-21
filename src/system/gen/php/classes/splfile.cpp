@@ -1173,16 +1173,16 @@ void c_SplFileObject::dynConstructFromEval(Eval::VariableEnvironment &env, const
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a2 = params[i]->eval(env);
+    a2.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a3 = params[i]->eval(env);
+    a3.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -2402,7 +2402,7 @@ void c_SplFileInfo::dynConstructFromEval(Eval::VariableEnvironment &env, const E
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {

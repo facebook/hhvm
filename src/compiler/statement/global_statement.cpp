@@ -158,7 +158,7 @@ void GlobalStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       const string &name = var->getName();
       VariableTablePtr variables = scope->getVariables();
       if (variables->needLocalCopy(name)) {
-        cg_printf("%s%s = ref(g->%s);\n",
+        cg_printf("%s%s.assignRef(g->%s);\n",
                   Option::VariablePrefix, name.c_str(),
                   variables->getGlobalVariableName(cg, ar, name).c_str());
       }
@@ -170,7 +170,7 @@ void GlobalStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("CStrRef dgv_%d((", id);
       exp->outputCPP(cg, ar);
       cg_printf("));\n");
-      cg_printf("variables->get(dgv_%d) = ref(g->get(dgv_%d));\n", id, id);
+      cg_printf("variables->get(dgv_%d).assignRef(g->get(dgv_%d));\n", id, id);
       exp->outputCPPEnd(cg, ar);
     } else {
       assert(false);

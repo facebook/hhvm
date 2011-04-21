@@ -356,6 +356,8 @@ class Variant {
    * Operators
    */
   Variant &assign(CVarRef v);
+  Variant &assignVal(CVarRef v);
+  Variant &assignRef(CVarRef v);
 
   Variant &operator=(CVarRef v) {
     return assign(v);
@@ -942,13 +944,12 @@ class Variant {
     return acc->m_data.pobj;
   }
 
-
   /**
    * The order of the data members is significant. The _count field must
    * be exactly FAST_REFCOUNT_OFFSET bytes from the beginning of the object.
    */
  protected:
-  mutable union {
+  mutable union Data {
     int64        num;
     double       dbl;
     litstr       str;
@@ -1101,6 +1102,41 @@ class Variant {
 #endif
   }
 
+  static void AssignValHelper(Variant *self, const Variant *other) {
+    ASSERT(!self->isContagious() && !other->isContagious());
+    if (self->m_type == KindOfVariant) self = self->m_data.pvar;
+    if (other->m_type == KindOfVariant) other = other->m_data.pvar;
+    if (self != other) {
+      DataType mt = other->m_type;
+      Data data = other->m_data;
+      if (IS_REFCOUNTED_TYPE(mt)) {
+#ifdef FAST_REFCOUNT_FOR_VARIANT
+        data.pvar->incRefCount();
+#else
+        switch (mt) {
+          case KindOfString:
+            ASSERT(data.pstr);
+            data.pstr->incRefCount();
+            break;
+          case KindOfArray:
+            ASSERT(data.parr);
+            data.parr->incRefCount();
+            break;
+          case KindOfObject:
+            ASSERT(data.pobj);
+            data.pobj->incRefCount();
+            break;
+          default:
+            ASSERT(false);
+        }
+#endif
+      }
+      if (IS_REFCOUNTED_TYPE(self->m_type)) self->destruct();
+      self->m_data = data;
+      self->m_type = mt == KindOfUninit ? KindOfNull : mt;
+    }
+  }
+
   // Internal helper for strongly binding a variable
   void strongBind(Variant *v) {
     ASSERT(v != this);
@@ -1114,19 +1150,26 @@ class Variant {
     }
   }
 
+  void assignRefHelper(CVarRef v) {
+    if (v.m_type != KindOfVariant) {
+      Variant *shared = NEW(Variant)();
+      if (v.m_type == KindOfUninit) {
+        shared->m_type = KindOfNull;
+      } else {
+        *(TypedValue*)shared = *(TypedValue*)&v;
+      }
+      shared->_count = 1;
+      const_cast<Variant&>(v).m_type = KindOfVariant;
+      const_cast<Variant&>(v).m_data.pvar = shared;
+    }
+    strongBind(v.m_data.pvar);
+  }
+
   // Internal helper for handling contagious assignment
   void assignContagious(CVarRef v) {
     ASSERT(v.isContagious());
-    // do it early to avoid strongBind() triggers deletion of v
     v.clearContagious();
-    // we have to wrap up v into a sharable form
-    if (v.m_type != KindOfVariant) {
-      Variant *shared = NEW(Variant)();
-      shared->bindNoVariant(v);
-      const_cast<Variant&>(v).strongBind(shared);
-    }
-    // then we can share v.m_data.pvar
-    strongBind(v.m_data.pvar);
+    assignRefHelper(v);
   }
 
   void split();  // breaking weak binding by making a real copy

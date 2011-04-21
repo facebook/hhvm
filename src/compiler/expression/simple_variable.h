@@ -33,7 +33,9 @@ public:
   virtual int getLocalEffects() const;
   virtual bool isThis() const { return m_this;}
   bool isSuperGlobal() const { return m_superGlobal || m_globals; }
-  virtual bool isRefable(bool checkError = false) const { return true;}
+  virtual bool isRefable(bool checkError = false) const {
+    return checkError || !m_this;
+  }
   virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                 bool coerce);
 

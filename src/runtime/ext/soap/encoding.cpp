@@ -519,7 +519,7 @@ static bool soap_check_xml_ref(Variant &data, xmlNodePtr node) {
           data.getObjectData() == data2.getObjectData()) &&
         !(data.isReferenced() && data2.isReferenced() &&
           data.getVariantData() == data2.getVariantData())) {
-      data = ref(data2);
+      data.assignRef(data2);
       return true;
     }
   } else {
@@ -1155,7 +1155,7 @@ static bool get_zval_property(Variant &object, const char* name,
   if (object.isObject()) {
     Object obj = object.toObject();
     if (Variant *t = obj->o_weakLval(sname)) {
-      if (ret) *ret = ref(*t);
+      if (ret) ret->assignRef(*t);
       return true;
     }
     return false;
@@ -1165,7 +1165,7 @@ static bool get_zval_property(Variant &object, const char* name,
     if (!arr.exists(sname)) {
       return false;
     }
-    if (ret) *ret = ref(object.lvalAt(sname));
+    if (ret) ret->assignRef(object.lvalAt(sname));
     return true;
   }
   return false;

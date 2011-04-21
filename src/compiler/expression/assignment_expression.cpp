@@ -296,10 +296,7 @@ static void wrapValue(CodeGenerator &cg, AnalysisResultPtr ar,
              exp->getActualType()->getKindOf() != Type::KindOfString) {
     cg_printf("wrap_variant(");
     close = true;
-  } else if (varnr && !exp->isScalar() &&
-             (exp->getCPPType()->is(Type::KindOfArray) ||
-              exp->getCPPType()->is(Type::KindOfObject) ||
-              exp->getCPPType()->is(Type::KindOfString))) {
+  } else if (varnr && exp->getCPPType()->isExactType()) {
     cg_printf("VarNR(");
     close = true;
   }
@@ -448,11 +445,20 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
     cg_printf("setNull(");
     m_variable->outputCPP(cg, ar);
   } else {
-    if ((wrapped = !isUnused())) {
-      cg_printf("(");
+    if (!m_variable->getCPPType()->isExactType() &&
+        !(m_value->hasCPPTemp() ?
+          m_value->getType() : m_value->getCPPType())->isExactType()) {
+      m_variable->outputCPP(cg, ar);
+      cg_printf(".assign%s(", ref ? "Ref" : "Val");
+      wrapped = true;
+      ref = false;
+    } else {
+      if ((wrapped = !isUnused())) {
+        cg_printf("(");
+      }
+      m_variable->outputCPP(cg, ar);
+      cg_printf(" = ");
     }
-    m_variable->outputCPP(cg, ar);
-    cg_printf(" = ");
 
     wrapValue(cg, ar, m_value, ref, false, false);
   }

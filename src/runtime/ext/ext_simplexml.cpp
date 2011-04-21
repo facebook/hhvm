@@ -465,7 +465,7 @@ Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
   elem->m_free_text = m_free_text;
   elem->m_is_children = true;
   if (ns.empty()) {
-    elem->m_children = ref(m_children);
+    elem->m_children.assignRef(m_children);
   } else {
     Array props = Array::Create();
     for (ArrayIter iter(m_children); iter; ++iter) {
@@ -528,7 +528,7 @@ Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
     if (!ns.empty()) {
       elem->m_attributes = collect_attributes(m_node, ns, is_prefix);
     } else {
-      elem->m_attributes = ref(m_attributes);
+      elem->m_attributes.assignRef(m_attributes);
     }
     elem->m_children.set("@attributes", elem->m_attributes);
   }
@@ -683,8 +683,8 @@ Variant c_SimpleXMLElement::t___get(Variant name) {
     c_SimpleXMLElement *e = NEWOBJ(c_SimpleXMLElement)();
     e->m_doc = elem->m_doc;
     e->m_node = elem->m_node;
-    e->m_children = ref(elem->m_children);
-    e->m_attributes = ref(elem->m_attributes);
+    e->m_children.assignRef(elem->m_children);
+    e->m_attributes.assignRef(elem->m_attributes);
     e->m_is_text = elem->m_is_text;
     e->m_is_property = true;
     return e;

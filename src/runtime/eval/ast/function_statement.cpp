@@ -289,7 +289,7 @@ void FunctionStatement::directBind(VariableEnvironment &env,
     Variant v;
     if ((*piter)->isRef() || (*it)->isRefParam()) {
       // should throw if it's ref and not lval
-      v = ref((*it)->refval(env));
+      v.assignRef((*it)->refval(env));
       (*piter)->bind(fenv, v, true);
       as.pushRef(v);
     } else {
@@ -396,9 +396,9 @@ Variant FunctionStatement::invokeClosure(CObjRef closure,
     CVarRef var = iter.secondRef();
     Parameter *param = vars[i].get();
     if (param->isRef()) {
-      fenv.get(param->getName()) = ref(var);
+      fenv.get(param->getName()).assignRef(var);
     } else {
-      fenv.get(param->getName()) = var;
+      fenv.get(param->getName()).assignVal(var);
     }
   }
 
@@ -430,9 +430,9 @@ Variant FunctionStatement::invokeClosure(CArrRef params) const {
     CVarRef var = iter.secondRef();
     Parameter *param = vars[i].get();
     if (param->isRef()) {
-      fenv.get(param->getName()) = ref(var);
+      fenv.get(param->getName()).assignRef(var);
     } else {
-      fenv.get(param->getName()) = var;
+      fenv.get(param->getName()).assignVal(var);
     }
   }
 

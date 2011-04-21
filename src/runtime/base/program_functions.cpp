@@ -209,7 +209,7 @@ void register_variable(Variant &variables, char *name, CVarRef value,
           symtable->set(key, Array::Create());
         }
         gpc_elements.push_back(null);
-        gpc_elements.back() = ref(symtable->lvalAt(key));
+        gpc_elements.back().assignRef(symtable->lvalAt(key));
       }
       symtable = &gpc_elements.back();
       /* ip pointed to the '[' character, now obtain the key */

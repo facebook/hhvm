@@ -904,10 +904,10 @@ void c_ArrayIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -935,8 +935,8 @@ void c_ArrayIterator::t___construct(Variant v_array, Variant v_flags //  = 0LL
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::__construct);
   bool oldInCtor = gasInCtor(true);
-  m_arr = v_array;
-  m_flags = v_flags;
+  m_arr.assignVal(v_array);
+  m_flags.assignVal(v_flags);
   x_reset(ref(m_arr));
   gasInCtor(oldInCtor);
 }
@@ -1078,7 +1078,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 587 */
 void c_ArrayIterator::t_setflags(CVarRef v_flags) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::setFlags);
-  m_flags = v_flags;
+  m_flags.assignVal(v_flags);
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 604 */
@@ -2348,10 +2348,10 @@ void c_RecursiveDirectoryIterator::dynConstructFromEval(Eval::VariableEnvironmen
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -2860,7 +2860,7 @@ void c_DirectoryIterator::dynConstructFromEval(Eval::VariableEnvironment &env, c
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -3321,13 +3321,13 @@ void c_RecursiveIteratorIterator::dynConstructFromEval(Eval::VariableEnvironment
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a2 = params[i]->eval(env);
+    a2.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -3592,10 +3592,10 @@ void c_MutableArrayIterator::dynConstructFromEval(Eval::VariableEnvironment &env
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = ref(params[i]->refval(env));
+    a0.assignRef(params[i]->refval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -3622,8 +3622,8 @@ void c_MutableArrayIterator::t___construct(Variant v_array, Variant v_flags //  
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::__construct);
   bool oldInCtor = gasInCtor(true);
-  m_arr = ref(v_array);
-  m_flags = v_flags;
+  m_arr.assignRef(v_array);
+  m_flags.assignVal(v_flags);
   x_reset(ref(m_arr));
   gasInCtor(oldInCtor);
 }

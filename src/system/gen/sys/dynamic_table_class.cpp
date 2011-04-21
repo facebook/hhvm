@@ -1278,7 +1278,7 @@ void c_DOMText::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval:
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -2994,7 +2994,7 @@ void c_DOMCDATASection::dynConstructFromEval(Eval::VariableEnvironment &env, con
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -3900,10 +3900,10 @@ void c_SQLite3Stmt::dynConstructFromEval(Eval::VariableEnvironment &env, const E
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -5186,7 +5186,7 @@ void c_DOMEntityReference::dynConstructFromEval(Eval::VariableEnvironment &env, 
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -5882,7 +5882,7 @@ void c_DateTimeZone::dynConstructFromEval(Eval::VariableEnvironment &env, const 
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -6742,19 +6742,19 @@ void c_SoapHeader::dynConstructFromEval(Eval::VariableEnvironment &env, const Ev
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a2 = params[i]->eval(env);
+    a2.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a3 = params[i]->eval(env);
+    a3.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a4 = params[i]->eval(env);
+    a4.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -9089,7 +9089,7 @@ void c_Memcached::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -9288,7 +9288,7 @@ void c_DOMComment::dynConstructFromEval(Eval::VariableEnvironment &env, const Ev
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -10382,10 +10382,10 @@ void c_DOMAttr::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval:
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -10622,22 +10622,22 @@ void c_SoapVar::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval:
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a2 = params[i]->eval(env);
+    a2.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a3 = params[i]->eval(env);
+    a3.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a4 = params[i]->eval(env);
+    a4.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a5 = params[i]->eval(env);
+    a5.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -12451,19 +12451,19 @@ void c_SimpleXMLElement::dynConstructFromEval(Eval::VariableEnvironment &env, co
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a2 = params[i]->eval(env);
+    a2.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a3 = params[i]->eval(env);
+    a3.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a4 = params[i]->eval(env);
+    a4.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -13775,10 +13775,10 @@ void c_DOMProcessingInstruction::dynConstructFromEval(Eval::VariableEnvironment 
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -15834,10 +15834,10 @@ void c_SoapClient::dynConstructFromEval(Eval::VariableEnvironment &env, const Ev
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -16034,10 +16034,10 @@ void c_SoapParam::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -16567,10 +16567,10 @@ void c_DateTime::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -17248,7 +17248,7 @@ void c_Collator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -18196,16 +18196,16 @@ void c_PDO::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::Fun
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a2 = params[i]->eval(env);
+    a2.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a3 = params[i]->eval(env);
+    a3.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -20963,10 +20963,10 @@ void c_DOMException::dynConstructFromEval(Eval::VariableEnvironment &env, const 
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -21426,7 +21426,7 @@ void c_DOMXPath::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -21933,10 +21933,10 @@ void c_SoapServer::dynConstructFromEval(Eval::VariableEnvironment &env, const Ev
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -24607,10 +24607,10 @@ void c_DOMDocument::dynConstructFromEval(Eval::VariableEnvironment &env, const E
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -25055,22 +25055,22 @@ void c_SoapFault::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a2 = params[i]->eval(env);
+    a2.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a3 = params[i]->eval(env);
+    a3.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a4 = params[i]->eval(env);
+    a4.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a5 = params[i]->eval(env);
+    a5.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -26060,13 +26060,13 @@ void c_DOMElement::dynConstructFromEval(Eval::VariableEnvironment &env, const Ev
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a1 = params[i]->eval(env);
+    a1.assignVal(params[i]->eval(env));
     i++;
     if (i == params.size()) break;
-    a2 = params[i]->eval(env);
+    a2.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {

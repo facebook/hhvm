@@ -288,7 +288,7 @@ void c_Directory::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   unsigned int i = 0;
   do {
     if (i == params.size()) break;
-    a0 = params[i]->eval(env);
+    a0.assignVal(params[i]->eval(env));
     i++;
   } while(false);
   for (; i != params.size(); ++i) {
@@ -314,10 +314,10 @@ void c_Directory::init() {
 void c_Directory::t___construct(Variant v_path) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::__construct);
   bool oldInCtor = gasInCtor(true);
-  m_path = v_path;
+  m_path.assignVal(v_path);
   {
     const Variant &tmp0((x_opendir(toString(v_path))));
-    m_handle = tmp0;
+    m_handle.assignVal(tmp0);
   }
   gasInCtor(oldInCtor);
 }

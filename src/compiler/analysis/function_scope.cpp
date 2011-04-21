@@ -785,10 +785,10 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
       string name = param->getName();
       if (variables->isPresent(name)) {
         if (param->isRef()) {
-          cg_printf("%s%s = ref(closure->m_vars.lvalAt(\"%s\"));\n",
+          cg_printf("%s%s.assignRef(closure->m_vars.lvalAt(\"%s\"));\n",
                     Option::VariablePrefix, name.c_str(), name.c_str());
         } else {
-          cg_printf("%s%s = closure->m_vars[\"%s\"];\n",
+          cg_printf("%s%s.assignVal(closure->m_vars[\"%s\"]);\n",
                     Option::VariablePrefix, name.c_str(), name.c_str());
         }
       }
@@ -1377,10 +1377,10 @@ void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
     }
     if (isRefParam(i)) {
       if (i < m_minParam) callss << "ref(a" << i << ")";
-      cg_printf("a%d = ref(params[i]->refval(env));\n", i);
+      cg_printf("a%d.assignRef(params[i]->refval(env));\n", i);
     } else {
       if (i < m_minParam) callss << "a" << i;
-      cg_printf("a%d = params[i]->eval(env);\n", i);
+      cg_printf("a%d.assignVal(params[i]->eval(env));\n", i);
     }
     cg_printf("i++;\n");
   }

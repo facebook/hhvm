@@ -191,9 +191,9 @@ int extract(LVariableTable *variables, CArrRef var_array,
     if (!name.isValidVariableName()) continue;
 
     if (reference) {
-      variables->get(name) = ref(iter.secondRef());
+      variables->get(name).assignRef(iter.secondRef());
     } else {
-      variables->get(name) = iter.second();
+      variables->get(name).assignVal(iter.second());
     }
     count++;
   }

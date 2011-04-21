@@ -55,7 +55,7 @@ Variant eval(LVariableTable *vars, CObjRef self, CStrRef code_str,
 bool eval_invoke_hook(Variant &res, const char *s, CArrRef params, int64 hash) {
   const Eval::Function *fs = Eval::RequestEvalState::findFunction(s);
   if (fs) {
-    res = ref(fs->invoke(params));
+    res.assignRef(fs->invoke(params));
     ref(res);
     return true;
   }
@@ -103,7 +103,7 @@ bool eval_invoke_static_method_hook(Variant &res, const char *s,
                                                                  foundClass,
                                                                  true);
   if (ms) {
-    res = ref(ms->invokeStatic(s, params));
+    res.assignRef(ms->invokeStatic(s, params));
     ref(res);
     return true;
   }

@@ -39,7 +39,7 @@ public:
     if (m_ptr == m_cap) {
       grow();
     }
-    m_stack[m_ptr++] = ref(v);
+    m_stack[m_ptr++].assignRef(v);
   }
   void pushSwap(Variant &v) {
     if (m_ptr == m_cap) {

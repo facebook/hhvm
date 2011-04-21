@@ -164,8 +164,25 @@ public:
       // be a second OOM exception in one request.
       if (m_stats.maxBytes > 0 && m_stats.peakUsage <= m_stats.maxBytes &&
           m_stats.usage > m_stats.maxBytes) {
-        refreshStatsHelper();
+        refreshStatsHelperExceeded();
       }
+      // Check whether the process's active memory limit has been exceeded, and
+      // if so, stop the server.
+      //
+      // Only check whether the total memory limit was exceeded if this request
+      // is at a new high water mark.  This check could be performed regardless
+      // of this request's current memory usage (because other request threads
+      // could be to blame for the increased memory usage), but doing so would
+      // measurably increase computation for little benefit.
+#ifdef USE_JEMALLOC
+      // (*m_cactive) consistency is achieved via atomic operations.  The fact
+      // that we do not use an atomic operation here means that we could get a
+      // stale read, but in practice that poses no problems for how we are
+      // using the value.
+      if (*m_cactive > m_cactiveLimit) {
+        refreshStatsHelperStop();
+      }
+#endif
       m_stats.peakUsage = m_stats.usage;
     }
   }
@@ -188,7 +205,10 @@ public:
   };
 
 private:
-  void refreshStatsHelper();
+  void refreshStatsHelperExceeded();
+#ifdef USE_JEMALLOC
+  void refreshStatsHelperStop();
+#endif
 
   static DECLARE_THREAD_LOCAL_NO_CHECK(MemoryManager, s_singleton);
 
@@ -204,6 +224,9 @@ private:
   uint64* m_allocated;
   uint64* m_deallocated;
   int64  m_delta;
+  size_t* m_cactive;
+  size_t m_cactiveLimit;
+  bool m_stopped; // Set to true if m_cactive exceeded limit.
 
 public:
   static bool s_stats_enabled;

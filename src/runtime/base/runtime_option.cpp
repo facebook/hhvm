@@ -14,6 +14,14 @@
    +----------------------------------------------------------------------+
 */
 
+// Get SIZE_MAX definition.  Do this before including any other files, to make
+// sure that this is the first place that stdint.h is included.
+#ifndef __STDC_LIMIT_MACROS
+#define __STDC_LIMIT_MACROS
+#endif
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
+
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
@@ -101,6 +109,7 @@ bool RuntimeOption::PageletServerThreadRoundRobin = false;
 int RuntimeOption::PageletServerThreadDropCacheTimeoutSeconds = 0;
 int RuntimeOption::FiberCount = 1;
 int RuntimeOption::RequestTimeoutSeconds = 0;
+size_t RuntimeOption::ServerMemoryMaxActive = SIZE_MAX;
 int64 RuntimeOption::RequestMemoryMaxBytes = -1;
 int64 RuntimeOption::ImageMemoryMaxBytes = 0;
 int RuntimeOption::ResponseQueueCount;
@@ -567,6 +576,7 @@ void RuntimeOption::Load(Hdf &config, StringVec *overwrites /* = NULL */) {
       server["ThreadDropCacheTimeoutSeconds"].getInt32(0);
     ServerThreadJobLIFO = server["ThreadJobLIFO"].getBool();
     RequestTimeoutSeconds = server["RequestTimeoutSeconds"].getInt32(0);
+    ServerMemoryMaxActive = server["MemoryMaxActive"].getInt64(SIZE_MAX);
     RequestMemoryMaxBytes = server["RequestMemoryMaxBytes"].getInt64(-1);
     ResponseQueueCount = server["ResponseQueueCount"].getInt32(0);
     if (ResponseQueueCount <= 0) {

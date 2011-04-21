@@ -14,10 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
+// Get SIZE_MAX definition.  Do this before including any other files, to make
+// sure that this is the first place that stdint.h is included.
+#ifndef __STDC_LIMIT_MACROS
+#define __STDC_LIMIT_MACROS
+#endif
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
+
 #include <runtime/base/memory/memory_manager.h>
 #include <runtime/base/memory/leak_detectable.h>
 #include <runtime/base/memory/sweepable.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/server/http_server.h>
 #include <util/alloc.h>
 
 namespace HPHP {
@@ -28,6 +37,7 @@ bool MemoryManager::s_stats_enabled = false;
 
 static size_t threadAllocatedpMib[2];
 static size_t threadDeallocatedpMib[2];
+static size_t statsCactiveMib[2];
 static pthread_once_t mibOnce = PTHREAD_ONCE_INIT;
 static void mibInit() {
   if (!mallctlnametomib) return;
@@ -39,10 +49,15 @@ static void mibInit() {
   if (mallctlnametomib("thread.deallocatedp", threadDeallocatedpMib, &miblen)) {
     return;
   }
+  miblen = sizeof(statsCactiveMib) / sizeof(size_t);
+  if (mallctlnametomib("stats.cactive", statsCactiveMib, &miblen)) {
+    return;
+  }
   MemoryManager::s_stats_enabled = true;
 }
 
-static inline void thread_stats(uint64*& allocated, uint64*& deallocated) {
+static inline void thread_stats(uint64*& allocated, uint64*& deallocated,
+                                size_t*& cactive) {
   pthread_once(&mibOnce, mibInit);
   if (!MemoryManager::s_stats_enabled) return;
 
@@ -59,6 +74,13 @@ static inline void thread_stats(uint64*& allocated, uint64*& deallocated) {
                    &deallocated, &len, NULL, 0)) {
     assert(false);
   }
+
+  len = sizeof(cactive);
+  if (mallctlbymib(statsCactiveMib,
+                   sizeof(statsCactiveMib) / sizeof(size_t),
+                   &cactive, &len, NULL, 0)) {
+    assert(false);
+  }
 }
 #endif
 
@@ -73,7 +95,8 @@ MemoryManager::MemoryManager() : m_enabled(false), m_checkpoint(false) {
     m_enabled = true;
   }
 #ifdef USE_JEMALLOC
-  thread_stats(m_allocated, m_deallocated);
+  thread_stats(m_allocated, m_deallocated, m_cactive);
+  m_cactiveLimit = RuntimeOption::ServerMemoryMaxActive;
 #endif
   resetStats();
   m_stats.maxBytes = 0;
@@ -91,13 +114,22 @@ void MemoryManager::resetStats() {
 #endif
 }
 
-void MemoryManager::refreshStatsHelper() {
+void MemoryManager::refreshStatsHelperExceeded() {
   RequestInjectionData &data =
     ThreadInfo::s_threadInfo.getNoCheck()->m_reqInjectionData;
   Lock lock(data.surpriseMutex);
   data.memExceeded = true;
   data.surprised = true;
 }
+
+#ifdef USE_JEMALLOC
+void MemoryManager::refreshStatsHelperStop() {
+  HttpServer::Server->stop();
+  // Increase the limit to the maximum possible value, so that this method
+  // won't be called again.
+  m_cactiveLimit = SIZE_MAX;
+}
+#endif
 
 void MemoryManager::add(SmartAllocatorImpl *allocator) {
   ASSERT(allocator);

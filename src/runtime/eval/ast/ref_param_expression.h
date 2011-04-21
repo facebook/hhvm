@@ -32,6 +32,7 @@ public:
   virtual bool weakLval(VariableEnvironment &env, Variant* &v) const;
   virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   virtual Variant set(VariableEnvironment &env, CVarRef val) const;
+  virtual Variant setRef(VariableEnvironment &env, CVarRef val) const;
   virtual Variant setOp(VariableEnvironment &env, int op, CVarRef rhs) const;
   virtual void unset(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;

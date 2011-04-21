@@ -39,6 +39,7 @@ public:
   virtual Variant refval(VariableEnvironment &env, int strict = 2)
     const;
   virtual Variant set(VariableEnvironment &env, CVarRef val) const;
+  virtual Variant setRef(VariableEnvironment &env, CVarRef val) const;
   void sinkStaticMember(Parser *parser, const NamePtr &className);
   ExpressionPtr getArr() const { return m_arr; }
   ExpressionPtr getIdx() const { return m_idx; }

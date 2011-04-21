@@ -26,11 +26,7 @@ IMPLEMENT_DEFAULT_EXTENSION(json);
 
 String f_json_encode(CVarRef value, bool loose /* = false */) {
   VariableSerializer vs(VariableSerializer::JSON, loose ? 1 : 0);
-  String ret = vs.serialize(value, true);
-  if (value.isContagious()) {
-    value.clearContagious();
-  }
-  return ret;
+  return vs.serialize(value, true);
 }
 
 Variant f_json_decode(CStrRef json, bool assoc /* = false */,

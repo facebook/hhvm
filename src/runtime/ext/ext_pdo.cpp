@@ -1995,7 +1995,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
   return true;
 }
 
-static int register_bound_param(CVarRef paramno, CVarRef param, int64 type,
+static int register_bound_param(CVarRef paramno, VRefParam param, int64 type,
                                 int64 max_value_len, CVarRef driver_params,
                                 sp_PDOStatement stmt, bool is_param) {
   SmartObject<PDOBoundParam> p(new PDOBoundParam);
@@ -2010,7 +2010,7 @@ static int register_bound_param(CVarRef paramno, CVarRef param, int64 type,
     p->name = paramno.toString();
   }
 
-  p->parameter = param;
+  p->parameter.setWithRef(param);
   p->param_type = (PDOParamType)type;
   p->max_value_len = max_value_len;
   p->driver_params = driver_params;

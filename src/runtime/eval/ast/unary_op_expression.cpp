@@ -79,7 +79,7 @@ bool UnaryOpExpression::evalStaticScalar(VariableEnvironment &env, Variant &r)
 
 Variant UnaryOpExpression::refval(VariableEnvironment &env,
     int strict /* = 2 */) const {
-  return ref(Expression::refval(env, strict));
+  return strongBind(Expression::refval(env, strict));
 }
 
 void UnaryOpExpression::dump(std::ostream &out) const {

@@ -32,6 +32,7 @@ public:
   virtual Variant &lval(VariableEnvironment &env) const;
   virtual bool exist(VariableEnvironment &env, int op) const;
   virtual Variant set(VariableEnvironment &env, CVarRef val) const;
+  virtual Variant setRef(VariableEnvironment &env, CVarRef val) const;
   virtual void dump(std::ostream &out) const;
 };
 

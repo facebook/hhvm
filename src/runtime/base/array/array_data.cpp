@@ -48,6 +48,19 @@ ArrayData *ArrayData::Create(CVarRef name, CVarRef value) {
   return init.create();
 }
 
+ArrayData *ArrayData::CreateRef(CVarRef value) {
+  ArrayInit init(1, true);
+  init.setRef(value);
+  return init.create();
+}
+
+ArrayData *ArrayData::CreateRef(CVarRef name, CVarRef value) {
+  ArrayInit init(1, false);
+  // There is no toKey() call on name.
+  init.setRef(name, value, true);
+  return init.create();
+}
+
 ArrayData::~ArrayData() {
   // If there are any strong iterators pointing to this array, they need
   // to be invalidated.
@@ -178,6 +191,18 @@ ArrayData *ArrayData::addLval(CStrRef k, Variant *&ret, bool copy) {
 ArrayData *ArrayData::addLval(CVarRef k, Variant *&ret, bool copy) {
   ASSERT(!exists(k));
   return lval(k, ret, copy);
+}
+
+ArrayData *ArrayData::set(litstr  k, CVarRef v, bool copy) {
+  return set(String(k), v, copy);
+}
+
+ArrayData *ArrayData::setRef(litstr  k, CVarRef v, bool copy) {
+  return setRef(String(k), v, copy);
+}
+
+ArrayData *ArrayData::remove(litstr  k, bool copy) {
+  return remove(String(k), copy);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

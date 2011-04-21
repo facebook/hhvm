@@ -48,11 +48,11 @@ bool Parameter::checkTypeHint(DataType hint, DataType type) const {
   case KindOfArray:
     return (type == hint || type == KindOfNull);
   case KindOfInt64:
-    return (type == KindOfInt64 || 
-            type == KindOfInt32 || 
+    return (type == KindOfInt64 ||
+            type == KindOfInt32 ||
             type == KindOfNull);
   case KindOfString:
-    return (type == KindOfString || 
+    return (type == KindOfString ||
             type == KindOfStaticString ||
             type == KindOfNull);
   case KindOfBoolean:
@@ -134,8 +134,12 @@ void Parameter::bind(VariableEnvironment &env, CVarRef val,
                                      m_type.c_str(), val);
     }
   }
-  if (ref) val.setContagious();
-  *env.getIdx(m_idx) = val;
+  Variant *v = env.getIdx(m_idx);
+  if (ref) {
+    v->assignRef(val);
+  } else {
+    v->assignVal(val);
+  }
 }
 
 void Parameter::bindDefault(VariableEnvironment &env) const {
@@ -158,7 +162,7 @@ void Parameter::bindDefault(VariableEnvironment &env) const {
         }
       }
     }
-    *env.getIdx(m_idx) = v;
+    env.getIdx(m_idx)->assignVal(v);
   }
 }
 
@@ -303,14 +307,14 @@ Variant FunctionStatement::invoke(CArrRef params) const {
   DECLARE_THREAD_INFO_NOINIT
   if (m_closure) {
     if (m_ref) {
-      return ref(invokeClosure(params));
+      return strongBind(invokeClosure(params));
     }
     return invokeClosure(params);
   }
   FuncScopeVariableEnvironment env(this);
   EvalFrameInjection fi(empty_string, m_name.c_str(), env, loc()->file);
   if (m_ref) {
-    return ref(invokeImpl(env, params));
+    return strongBind(invokeImpl(env, params));
   }
   return invokeImpl(env, params);
 }
@@ -370,9 +374,9 @@ Variant FunctionStatement::evalBody(VariableEnvironment &env) const {
     if (!handler.isNull() &&
         handle_intercept(handler, fullName(), env.getParams(), ret)) {
       if (m_ref) {
-        ret.setContagious();
+        return strongBind(ret);
       }
-      return ret;
+      return weakBind(ret);
     }
   }
 
@@ -391,9 +395,9 @@ Variant FunctionStatement::evalBody(VariableEnvironment &env) const {
     }
     if (env.isReturning()) {
       if (m_ref) {
-        ret.setContagious();
+        return strongBind(ret);
       }
-      return ret;
+      return weakBind(ret);
     } else if (env.isBreaking()) {
       throw FatalErrorException("Cannot break/continue out of function");
     }
@@ -410,7 +414,7 @@ Variant FunctionStatement::directInvoke(VariableEnvironment &env,
   directBind(env, caller, fenv);
   EvalFrameInjection fi(empty_string, m_name.c_str(), fenv, loc()->file);
   if (m_ref) {
-    return ref(evalBody(fenv));
+    return strongBind(evalBody(fenv));
   } else {
     return evalBody(fenv);
   }
@@ -442,7 +446,7 @@ Variant FunctionStatement::invokeClosure(CObjRef closure,
 
   EvalFrameInjection fi(empty_string, "{closure}", fenv, loc()->file);
   if (m_ref) {
-    return ref(evalBody(fenv));
+    return strongBind(evalBody(fenv));
   } else {
     return evalBody(fenv);
   }
@@ -476,7 +480,7 @@ Variant FunctionStatement::invokeClosure(CArrRef params) const {
 
   EvalFrameInjection efiLocal(empty_string, "{closure}", fenv, loc()->file);
   if (m_ref) {
-    return ref(evalBody(fenv));
+    return strongBind(evalBody(fenv));
   } else {
     return evalBody(fenv);
   }
@@ -527,7 +531,7 @@ Variant FunctionStatement::invokeImpl(FuncScopeVariableEnvironment &fenv,
   bindParams(fenv, params);
 
   if (m_ref) {
-    return ref(evalBody(fenv));
+    return strongBind(evalBody(fenv));
   } else {
     return evalBody(fenv);
   }
@@ -597,7 +601,7 @@ Variant FunctionStatement::Invoker(void *extra, CArrRef params) {
   const Function *f = (const Function*)extra;
   const FunctionStatement *ms = static_cast<const FunctionStatement*>(f);
   if (ms->refReturn()) {
-    return ref(ms->invoke(params));
+    return strongBind(ms->invoke(params));
   }
   return ms->invoke(params);
 }

@@ -194,8 +194,17 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("%s%d", Option::MapPrefix, mapId);
     }
     cg_printf(" = ");
+    const char *close = ")";
+    if (m_ref) {
+      m_array->setContext(Expression::NoRefWrapper);
+      cg_printf("strongBind(");
+    } else if (!m_array->isTemporary()) {
+      cg_printf("weakBind(");
+    } else {
+      close = "";
+    }
     m_array->outputCPP(cg, ar);
-    cg.printf(";\n");
+    cg.printf("%s;\n", close);
     if (m_ref) {
       cg.printf("%s%d.escalate(true);\n", Option::MapPrefix, mapId);
     }

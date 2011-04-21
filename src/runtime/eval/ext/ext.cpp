@@ -272,7 +272,8 @@ Variant EvalCreateFunction::InvokeImpl(VariableEnvironment &env,
   if (!bodyAst) return false;
   ostringstream nameStream;
   nameStream << "$lambda_" << id;
-  FunctionStatementPtr f = bodyAst->cast<StatementListStatement>()->stmts()[0];
+  StatementListStatement *sl = bodyAst->cast<StatementListStatement>();
+  FunctionStatement *f = sl->stmts()[0]->cast<FunctionStatement>();
   ASSERT(f);
   f->changeName(nameStream.str());
   SmartPtr<CodeContainer> cc(new StringCodeContainer(bodyAst));

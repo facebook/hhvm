@@ -1145,7 +1145,7 @@ Variant c_ReflectionClass::i_newinstance(MethodCallPackage &mcp, CArrRef params)
   } else {
     self = createDummy(pobj);
   }
-  const Array &p(count > 0 ? params.slice(0, count - 0, false) : Array());
+  const Array &p(count > 0 ? params : Array());
   return (self->t_newinstance(count, p));
 }
 Variant c_ReflectionClass::i_getextension(MethodCallPackage &mcp, CArrRef params) {
@@ -3057,7 +3057,7 @@ Object c_ReflectionClass::t_newinstance(int num_args, Array args /* = Array() */
   Array v_args;
 
   {
-    const Array &tmp0((func_get_args(num_args, Array(),args)));
+    const Array &tmp0((args.isNull() ? Array::Create() : args));
     v_args = tmp0;
   }
   return x_hphp_create_object(toString(m_name), v_args);
@@ -3163,7 +3163,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
     CVarRef obj0 = t_getparentclass();
     mcp0.methodCall((obj0), NAMSTR(s_sys_ssdd355b2b, "isSubclassOf"), 0x373333991926C97ELL);
     const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
-    return wrap_variant((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_cls));
+    return weakBind((mcp0.bindClass(fi)->getMeth1Args())(mcp0, 1, v_cls));
   }
 }
 namespace hphp_impl_splitter {}
@@ -3357,7 +3357,7 @@ Variant c_ReflectionClass::t_getextensionname() {
     CVarRef obj0 = t_fetch(VarNR(NAMSTR(s_sys_sse9bf4500, "extension")));
     mcp0.methodCall((obj0), NAMSTR(s_sys_ssc2df217e, "getName"), 0x23F51CDECC198965LL);
     const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
-    return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
+    return weakBind((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
   }
 }
 namespace hphp_impl_splitter {}
@@ -5942,7 +5942,7 @@ Variant c_ReflectionFunction::i_invoke(MethodCallPackage &mcp, CArrRef params) {
   } else {
     self = createDummy(pobj);
   }
-  const Array &p(count > 0 ? params.slice(0, count - 0, false) : Array());
+  const Array &p(count > 0 ? params : Array());
   return (self->t_invoke(count, p));
 }
 Variant c_ReflectionFunction::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
@@ -6130,7 +6130,7 @@ Variant c_ReflectionFunction::t_invoke(int num_args, Array args /* = Array() */)
   Array v_args;
 
   {
-    const Array &tmp0((func_get_args(num_args, Array(),args)));
+    const Array &tmp0((args.isNull() ? Array::Create() : args));
     v_args = tmp0;
   }
   {

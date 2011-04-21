@@ -67,11 +67,13 @@ public:
   virtual Variant &lval(VariableEnvironment &env) const;
   virtual bool weakLval(VariableEnvironment &env, Variant* &v) const;
   virtual Variant set(VariableEnvironment &env, CVarRef val) const;
+  virtual Variant setRef(VariableEnvironment &env, CVarRef val) const;
   virtual Variant setOp(VariableEnvironment &env, int op, CVarRef rhs) const;
   virtual void unset(VariableEnvironment &env) const;
 
   // without calling evalOffsets(), only for ForEachStatement
   Variant setImpl(VariableEnvironment &env, CVarRef val) const;
+  Variant setRefImpl(VariableEnvironment &env, CVarRef val) const;
 
   /**
    * Append a subexpression to the list.

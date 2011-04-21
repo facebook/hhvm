@@ -179,15 +179,6 @@ ArrayData *SharedMap::set(int64 k, CVarRef v, bool copy) {
   }
   return escalated;
 }
-ArrayData *SharedMap::set(litstr k, CVarRef v, bool copy) {
-  ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->set(k, v, false);
-  if (ee) {
-    escalated->release();
-    return ee;
-  }
-  return escalated;
-}
 ArrayData *SharedMap::set(CStrRef k, CVarRef v, bool copy) {
   ArrayData *escalated = escalate();
   ArrayData *ee = escalated->set(k, v, false);
@@ -206,17 +197,35 @@ ArrayData *SharedMap::set(CVarRef k, CVarRef v, bool copy) {
   }
   return escalated;
 }
-
-ArrayData *SharedMap::remove(int64 k, bool copy) {
+ArrayData *SharedMap::setRef(int64 k, CVarRef v, bool copy) {
   ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->remove(k, false);
+  ArrayData *ee = escalated->setRef(k, v, false);
   if (ee) {
     escalated->release();
     return ee;
   }
   return escalated;
 }
-ArrayData *SharedMap::remove(litstr k, bool copy) {
+ArrayData *SharedMap::setRef(CStrRef k, CVarRef v, bool copy) {
+  ArrayData *escalated = escalate();
+  ArrayData *ee = escalated->setRef(k, v, false);
+  if (ee) {
+    escalated->release();
+    return ee;
+  }
+  return escalated;
+}
+ArrayData *SharedMap::setRef(CVarRef k, CVarRef v, bool copy) {
+  ArrayData *escalated = escalate();
+  ArrayData *ee = escalated->setRef(k, v, false);
+  if (ee) {
+    escalated->release();
+    return ee;
+  }
+  return escalated;
+}
+
+ArrayData *SharedMap::remove(int64 k, bool copy) {
   ArrayData *escalated = escalate();
   ArrayData *ee = escalated->remove(k, false);
   if (ee) {
@@ -259,6 +268,16 @@ ArrayData *SharedMap::fiberCopy() const {
 ArrayData *SharedMap::append(CVarRef v, bool copy) {
   ArrayData *escalated = escalate();
   ArrayData *ee = escalated->append(v, false);
+  if (ee) {
+    escalated->release();
+    return ee;
+  }
+  return escalated;
+}
+
+ArrayData *SharedMap::appendRef(CVarRef v, bool copy) {
+  ArrayData *escalated = escalate();
+  ArrayData *ee = escalated->appendRef(v, false);
   if (ee) {
     escalated->release();
     return ee;

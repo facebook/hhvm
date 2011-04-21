@@ -78,7 +78,7 @@ Variant MethodStatement::invokeInstance(CObjRef obj, CArrRef params,
   EvalFrameInjection fi(clsName, m_fullName.c_str(), env,
                         loc()->file, obj.get());
   if (m_ref) {
-    return ref(invokeImpl(env, params));
+    return strongBind(invokeImpl(env, params));
   }
   return invokeImpl(env, params);
 }
@@ -98,7 +98,7 @@ invokeInstanceDirect(CObjRef obj, VariableEnvironment &env,
   EvalFrameInjection fi(clsName, m_fullName.c_str(), fenv,
                         loc()->file, obj.get());
   if (m_ref) {
-    return ref(evalBody(fenv));
+    return strongBind(evalBody(fenv));
   }
   return evalBody(fenv);
 }
@@ -112,7 +112,7 @@ Variant MethodStatement::invokeStatic(const char* cls, CArrRef params,
   String clsName(m_class->name());
   EvalFrameInjection fi(clsName, m_fullName.c_str(), env, loc()->file);
   if (m_ref) {
-    return ref(invokeImpl(env, params));
+    return strongBind(invokeImpl(env, params));
   }
   return invokeImpl(env, params);
 }
@@ -130,7 +130,7 @@ invokeStaticDirect(const char* cls, VariableEnvironment &env,
   EvalFrameInjection fi(clsName, m_fullName.c_str(), fenv,
                         loc()->file);
   if (m_ref) {
-    return ref(evalBody(fenv));
+    return strongBind(evalBody(fenv));
   }
   return evalBody(fenv);
 }
@@ -140,7 +140,7 @@ Variant MethodStatement::evalBody(VariableEnvironment &env) const {
     raise_error("Cannot call abstract method %s()", m_fullName.c_str());
   }
   if (m_ref) {
-    return ref(FunctionStatement::evalBody(env));
+    return strongBind(FunctionStatement::evalBody(env));
   } else {
     return FunctionStatement::evalBody(env);
   }
@@ -212,13 +212,13 @@ Variant MethodStatement::MethInvoker(MethodCallPackage &mcp, CArrRef params) {
   if (ms->getModifiers() & ClassStatement::Static || !mcp.obj) {
     String cn(mcp.getClassName());
     if (ms->refReturn()) {
-      return ref(ms->invokeStatic(cn.c_str(), params));
+      return strongBind(ms->invokeStatic(cn.c_str(), params));
     } else {
       return ms->invokeStatic(cn.c_str(), params);
     }
   } else {
     if (ms->refReturn()) {
-      return ref(ms->invokeInstance(mcp.rootObj, params));
+      return strongBind(ms->invokeInstance(mcp.rootObj, params));
     } else {
       return ms->invokeInstance(mcp.rootObj, params);
     }

@@ -65,17 +65,19 @@ public:
   virtual ArrayData *lvalNew(Variant *&ret, bool copy);
 
   virtual ArrayData *set(int64   k, CVarRef v, bool copy);
-  virtual ArrayData *set(litstr  k, CVarRef v, bool copy);
   virtual ArrayData *set(CStrRef k, CVarRef v, bool copy);
   virtual ArrayData *set(CVarRef k, CVarRef v, bool copy);
+  virtual ArrayData *setRef(int64   k, CVarRef v, bool copy);
+  virtual ArrayData *setRef(CStrRef k, CVarRef v, bool copy);
+  virtual ArrayData *setRef(CVarRef k, CVarRef v, bool copy);
   virtual ArrayData *remove(int64   k, bool copy);
-  virtual ArrayData *remove(litstr  k, bool copy);
   virtual ArrayData *remove(CStrRef k, bool copy);
   virtual ArrayData *remove(CVarRef k, bool copy);
 
   virtual ArrayData *copy() const;
 
   virtual ArrayData *append(CVarRef v, bool copy);
+  virtual ArrayData *appendRef(CVarRef v, bool copy);
   virtual ArrayData *appendWithRef(CVarRef v, bool copy);
 
   virtual ArrayData *append(const ArrayData *elems, ArrayOp op, bool copy);

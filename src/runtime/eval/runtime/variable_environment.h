@@ -76,7 +76,8 @@ public:
     return 0;
   }
   Variant &getRet() { return m_ret; }
-  void setRet(CVarRef ret) { m_ret = ret; m_returning = true; }
+  void setRet(CVarRef ret) { m_ret.assignVal(ret); m_returning = true; }
+  void setRetRef(CVarRef ret) { m_ret.assignRef(ret); m_returning = true; }
   void setRet() { m_returning = true; }
   bool isReturning() const { return m_returning; }
   bool isBreaking() const {

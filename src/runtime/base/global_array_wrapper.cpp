@@ -133,28 +133,33 @@ ArrayData* GlobalArrayWrapper::lvalNew(Variant *&ret, bool copy) {
 }
 
 ArrayData *GlobalArrayWrapper::set(int64   k, CVarRef v, bool copy) {
-  set(Variant(k), v, copy);
-  return NULL;
-}
-ArrayData *GlobalArrayWrapper::set(litstr  k, CVarRef v, bool copy) {
-  m_globals->get(k) = v;
+  set(VarNR(k), v, copy);
   return NULL;
 }
 ArrayData *GlobalArrayWrapper::set(CStrRef k, CVarRef v, bool copy) {
-  m_globals->get(k) = v;
+  m_globals->get(k).assignVal(v);
   return NULL;
 }
 ArrayData *GlobalArrayWrapper::set(CVarRef k, CVarRef v, bool copy) {
-  m_globals->get(k) = v;
+  m_globals->get(k).assignVal(v);
+  return NULL;
+}
+
+ArrayData *GlobalArrayWrapper::setRef(int64   k, CVarRef v, bool copy) {
+  setRef(VarNR(k), v, copy);
+  return NULL;
+}
+ArrayData *GlobalArrayWrapper::setRef(CStrRef k, CVarRef v, bool copy) {
+  m_globals->get(k).assignRef(v);
+  return NULL;
+}
+ArrayData *GlobalArrayWrapper::setRef(CVarRef k, CVarRef v, bool copy) {
+  m_globals->get(k).assignRef(v);
   return NULL;
 }
 
 ArrayData *GlobalArrayWrapper::remove(int64   k, bool copy) {
   return remove(Variant(k), copy);
-}
-ArrayData *GlobalArrayWrapper::remove(litstr  k, bool copy) {
-  unset(m_globals->get(k));
-  return NULL;
 }
 ArrayData *GlobalArrayWrapper::remove(CStrRef k, bool copy) {
   unset(m_globals->get(k));
@@ -173,7 +178,10 @@ ArrayData *GlobalArrayWrapper::append(CVarRef v, bool copy) {
   m_globals->append(v);
   return NULL;
 }
-
+ArrayData *GlobalArrayWrapper::appendRef(CVarRef v, bool copy) {
+  m_globals->appendRef(v);
+  return NULL;
+}
 ArrayData *GlobalArrayWrapper::appendWithRef(CVarRef v, bool copy) {
   m_globals->appendWithRef(v);
   return NULL;

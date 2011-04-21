@@ -34,6 +34,7 @@ public:
   virtual Variant &lval(VariableEnvironment &env) const;
   virtual bool weakLval(VariableEnvironment &env, Variant* &v) const;
   virtual Variant set(VariableEnvironment &env, CVarRef val) const;
+  virtual Variant setRef(VariableEnvironment &env, CVarRef val) const;
   virtual bool exist(VariableEnvironment &env, int op) const;
   virtual void unset(VariableEnvironment &env) const;
   virtual Variant setOp(VariableEnvironment &env, int op, CVarRef rhs) const;

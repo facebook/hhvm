@@ -57,10 +57,10 @@ Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
   }
   SET_LINE;
   if (ms) {
-    return ref(ms->invokeInstanceDirect(toObject(obj), env, this));
+    return strongBind(ms->invokeInstanceDirect(toObject(obj), env, this));
   }
 
-  // Handle builtins 
+  // Handle builtins
   MethodCallPackage mcp1;
   mcp1.methodCall(obj, name, -1);
   const CallInfo* cit1 = mcp1.ci;
@@ -77,7 +77,7 @@ Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
       ai.set(m_params[i]->eval(env));
     }
   }
-  return ref((cit1->getMeth())(mcp1, Array(ai.create())));
+  return strongBind((cit1->getMeth())(mcp1, Array(ai.create())));
 }
 
 void ObjectMethodExpression::dump(std::ostream &out) const {

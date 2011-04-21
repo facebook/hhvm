@@ -294,9 +294,10 @@ Variant ObjectData::o_getUnchecked(CStrRef propName,
   return o_getImpl(propName, RealPropUnchecked, true, context);
 }
 
-Variant ObjectData::o_set(CStrRef propName, CVarRef v,
-                          bool forInit /* = false */,
-                          CStrRef context /* = null_string */) {
+template <class T>
+inline ALWAYS_INLINE Variant ObjectData::o_setImpl(CStrRef propName, T v,
+                                                   bool forInit,
+                                                   CStrRef context) {
   if (propName.size() == 0) {
     throw EmptyObjectPropertyException();
   }
@@ -308,22 +309,42 @@ Variant ObjectData::o_set(CStrRef propName, CVarRef v,
   if (Variant *t = o_realProp(propName, flags, context)) {
     if (!useSet || t->isInitialized()) {
       *t = v;
-      return v;
+      return variant(v);
     }
   }
 
   if (useSet) {
     AttributeClearer a(UseSet, this);
-    t___set(propName, v);
-    return v;
+    t___set(propName, variant(v));
+    return variant(v);
   }
 
   o_setError(propName, context);
-  return v;
+  return variant(v);
 }
 
-Variant ObjectData::o_setPublic(CStrRef propName, CVarRef v,
-                                bool forInit /* = false */) {
+Variant ObjectData::o_set(CStrRef propName, CVarRef v,
+                          bool forInit /* = false */,
+                          CStrRef context /* = null_string */) {
+  return o_setImpl<CVarRef>(propName, v, forInit, context);
+}
+
+Variant ObjectData::o_setRef(CStrRef propName, CVarRef v,
+                             bool forInit /* = false */,
+                             CStrRef context /* = null_string */) {
+  return o_setImpl<RefResult>(propName, ref(v), forInit, context);
+}
+
+Variant ObjectData::o_set(CStrRef propName, RefResult v,
+                          bool forInit /* = false */,
+                          CStrRef context /* = null_string */) {
+  return o_setRef(propName, variant(v), forInit, context);
+}
+
+template<typename T>
+inline ALWAYS_INLINE Variant ObjectData::o_setPublicImpl(CStrRef propName,
+                                                         T v,
+                                                         bool forInit) {
   if (propName.size() == 0) {
     throw EmptyObjectPropertyException();
   }
@@ -335,45 +356,38 @@ Variant ObjectData::o_setPublic(CStrRef propName, CVarRef v,
   if (Variant *t = o_realPropPublic(propName, flags)) {
     if (!useSet || t->isInitialized()) {
       *t = v;
-      return v;
+      return variant(v);
     }
   }
 
   if (useSet) {
     AttributeClearer a(UseSet, this);
-    t___set(propName, v);
-    return v;
+    t___set(propName, weakBind(variant(v)));
+    return variant(v);
   }
 
   o_setError(propName, null_string);
-  return v;
+  return variant(v);
+}
+
+Variant ObjectData::o_setPublic(CStrRef propName, CVarRef v,
+                                bool forInit /* = false */) {
+  return o_setPublicImpl<CVarWeakBind>(propName, weakBind(v), forInit);
+}
+
+Variant ObjectData::o_setPublic(CStrRef propName, RefResult v,
+                                bool forInit /* = false */) {
+  return o_setPublicRef(propName, variant(v), forInit);
+}
+
+Variant ObjectData::o_setPublicRef(CStrRef propName, CVarRef v,
+                                   bool forInit /* = false */) {
+  return o_setPublicImpl<CVarStrongBind>(propName, strongBind(v), forInit);
 }
 
 Variant ObjectData::o_setPublicWithRef(CStrRef propName, CVarRef v,
                                        bool forInit /* = false */) {
-  if (propName.size() == 0) {
-    throw EmptyObjectPropertyException();
-  }
-
-  bool useSet = !forInit && getAttribute(UseSet);
-  int flags = useSet ? RealPropWrite : RealPropCreate | RealPropWrite;
-  if (forInit) flags |= RealPropUnchecked;
-
-  if (Variant *t = o_realPropPublic(propName, flags)) {
-    if (!useSet || t->isInitialized()) {
-      t->setWithRef(v);
-      return v;
-    }
-  }
-
-  if (useSet) {
-    AttributeClearer a(UseSet, this);
-    t___set(propName, v);
-    return v;
-  }
-
-  o_setError(propName, null_string);
-  return v;
+  return o_setPublicImpl<CVarWithRefBind>(propName, withRefBind(v), forInit);
 }
 
 void ObjectData::o_setArray(CArrRef properties) {
@@ -400,7 +414,7 @@ void ObjectData::o_getArray(Array &props, bool pubOnly /* = false */) const {
 Variant ObjectData::o_argval(bool byRef, CStrRef s,
     bool error /* = true */, CStrRef context /* = null_string */) {
   if (byRef) {
-    return ref(o_lval(s, context));
+    return strongBind(o_lval(s, context));
   } else {
     return o_get(s, error, context);
   }

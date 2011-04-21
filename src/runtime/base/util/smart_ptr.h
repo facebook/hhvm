@@ -45,18 +45,16 @@ public:
   SmartPtr() : m_px(NULL) {}
 
   SmartPtr(T *px) : m_px(px) { if (m_px) m_px->incRefCount();}
-  template<class Y>
-  SmartPtr(Y *px) : m_px(px) { if (m_px) m_px->incRefCount();}
 
   /**
    * Copy constructor.
    */
-  SmartPtr(const SmartPtr<T> &src) : m_px(NULL) {
-    operator=(src.m_px);
+  SmartPtr(const SmartPtr<T> &src) : m_px(src.m_px) {
+    if (m_px) m_px->incRefCount();
   }
   template<class Y>
-  SmartPtr(const SmartPtr<Y> &src) : m_px(NULL) {
-    operator=(src.get());
+  SmartPtr(const SmartPtr<Y> &src) : m_px(src.get()) {
+    if (m_px) m_px->incRefCount();
   }
 
   /**
@@ -78,14 +76,13 @@ public:
   SmartPtr &operator=(const SmartPtr<Y> &src) {
     return operator=(src.get());
   }
-  template<class Y>
-  SmartPtr &operator=(Y *px) {
-    T *npx = dynamic_cast<T *>(px);
-    if (m_px != npx) {
+
+  SmartPtr &operator=(T *px) {
+    if (m_px != px) {
       if (m_px && m_px->decRefCount() == 0) {
         m_px->release();
       }
-      m_px = npx;
+      m_px = px;
       if (m_px) m_px->incRefCount();
     }
     return *this;

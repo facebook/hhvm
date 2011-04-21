@@ -185,13 +185,10 @@ Variant DynamicObjectData::t___destruct() {
   }
 }
 Variant DynamicObjectData::t___set(Variant v_name, Variant v_value) {
-  if (v_value.isReferenced()) {
-    v_value.setContagious();
-  }
   if (!parent.isNull()) {
-    return parent->t___set(v_name, v_value);
+    return parent->t___set(v_name, withRefBind(v_value));
   } else {
-    return ObjectData::t___set(v_name, v_value);
+    return ObjectData::t___set(v_name, withRefBind(v_value));
   }
 }
 

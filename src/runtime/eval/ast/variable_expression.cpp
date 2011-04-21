@@ -96,7 +96,18 @@ Variant VariableExpression::set(VariableEnvironment &env, CVarRef val) const {
                    StrictMode::StrictHardCore);
     }
   }
-  return lhs = val;
+  return lhs.assignVal(val);
+}
+
+Variant VariableExpression::setRef(VariableEnvironment &env, CVarRef val) const {
+  Variant &lhs = lval(env);
+  if (RuntimeOption::EnableStrict) {
+    if (!checkCompatibleAssignment(lhs, val)) {
+      throw_strict(TypeVariableChangeException(location_to_string(loc())),
+                   StrictMode::StrictHardCore);
+    }
+  }
+  return lhs.assignRef(val);
 }
 
 Variant VariableExpression::setOp(VariableEnvironment &env, int op, CVarRef rhs)

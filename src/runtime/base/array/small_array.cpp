@@ -476,13 +476,14 @@ ArrayData *SmallArray::escalateToZendArray() const {
   for (int p = m_nListHead; p >= 0; p = m_arBuckets[p].next) {
     const Bucket &b = m_arBuckets[p];
     ASSERT(b.kind != Empty);
-    if (b.data.isReferenced()) b.data.setContagious();
+    Variant *v;
     if (b.kind == IntKey) {
-      ret->add(b.h, b.data, false);
+      ret->addLval(b.h, v, false);
     } else {
       ASSERT(b.key);
-      ret->add(String(b.key), b.data, false);
+      ret->addLval(String(b.key), v, false);
     }
+    v->setWithRef(b.data);
   }
   // Set m_pos in the escalated array
   if (m_pos != ArrayData::invalid_index) {
@@ -761,7 +762,7 @@ ArrayData *SmallArray::set(int64 k, CVarRef v, bool copy) {
     } else {
       addKey(p, k);
     }
-    pb->data = v;
+    pb->data.assignVal(v);
     return result;
   }
 
@@ -769,37 +770,7 @@ ArrayData *SmallArray::set(int64 k, CVarRef v, bool copy) {
     result = copyImpl();
     pb = result->m_arBuckets + p;
   }
-  pb->data = v;
-  return result;
-}
-
-ArrayData *SmallArray::set(litstr k, CVarRef v, bool copy) {
-  String key(k, AttachLiteral);
-  int p = find(k, key.size(), key->hash());
-  Bucket *pb = m_arBuckets + p;
-
-  SmallArray *result = NULL;
-  if (pb->kind == Empty) {
-    if (m_nNumOfElements >= SARR_SIZE) {
-      ArrayData *a = escalateToZendArray();
-      a->set(k, v, false);
-      return a;
-    }
-    if (copy) {
-      result = copyImpl();
-      pb = result->addKey(p, key.get());
-    } else {
-      addKey(p, key.get());
-    }
-    pb->data = v;
-    return result;
-  }
-
-  if (copy) {
-    result = copyImpl();
-    pb = result->m_arBuckets + p;
-  }
-  pb->data = v;
+  pb->data.assignVal(v);
   return result;
 }
 
@@ -821,7 +792,7 @@ ArrayData *SmallArray::set(CStrRef k, CVarRef v, bool copy) {
     } else {
       addKey(p, key);
     }
-    pb->data = v;
+    pb->data.assignVal(v);
     return result;
   }
 
@@ -829,7 +800,7 @@ ArrayData *SmallArray::set(CStrRef k, CVarRef v, bool copy) {
     result = copyImpl();
     pb = result->m_arBuckets + p;
   }
-  pb->data = v;
+  pb->data.assignVal(v);
   return result;
 }
 
@@ -838,6 +809,72 @@ ArrayData *SmallArray::set(CVarRef k, CVarRef v, bool copy) {
     return set(k.toInt64(), v, copy);
   }
   return set(k.toString(), v, copy);
+}
+
+ArrayData *SmallArray::setRef(int64 k, CVarRef v, bool copy) {
+  int p = find(k);
+  Bucket *pb = m_arBuckets + p;
+
+  SmallArray *result = NULL;
+  if (pb->kind == Empty) {
+    if (m_nNumOfElements >= SARR_SIZE) {
+      ArrayData *a = escalateToZendArray();
+      a->setRef(k, v, false);
+      return a;
+    }
+    if (copy) {
+      result = copyImpl();
+      pb = result->addKey(p, k);
+    } else {
+      addKey(p, k);
+    }
+    pb->data.assignRef(v);
+    return result;
+  }
+
+  if (copy) {
+    result = copyImpl();
+    pb = result->m_arBuckets + p;
+  }
+  pb->data.assignRef(v);
+  return result;
+}
+
+ArrayData *SmallArray::setRef(CStrRef k, CVarRef v, bool copy) {
+  StringData *key = k.get();
+  int p = find(key->data(), key->size(), key->hash());
+  Bucket *pb = m_arBuckets + p;
+
+  SmallArray *result = NULL;
+  if (pb->kind == Empty) {
+    if (m_nNumOfElements >= SARR_SIZE) {
+      ArrayData *a = escalateToZendArray();
+      a->setRef(k, v, false);
+      return a;
+    }
+    if (copy) {
+      result = copyImpl();
+      pb = result->addKey(p, key);
+    } else {
+      addKey(p, key);
+    }
+    pb->data.assignRef(v);
+    return result;
+  }
+
+  if (copy) {
+    result = copyImpl();
+    pb = result->m_arBuckets + p;
+  }
+  pb->data.assignRef(v);
+  return result;
+}
+
+ArrayData *SmallArray::setRef(CVarRef k, CVarRef v, bool copy) {
+  if (k.isNumeric()) {
+    return setRef(k.toInt64(), v, copy);
+  }
+  return setRef(k.toString(), v, copy);
 }
 
 ArrayData *SmallArray::add(int64 k, CVarRef v, bool copy) {
@@ -947,7 +984,21 @@ bool SmallArray::nextInsert(CVarRef v) {
   int64 h = m_nNextFreeElement;
   int p = find(h);
   Bucket *pb = addKey(p, h);
-  pb->data = v;
+  pb->data.assignVal(v);
+  m_nNextFreeElement = h + 1;
+  return true;
+}
+
+bool SmallArray::nextInsertRef(CVarRef v) {
+  if (m_nNextFreeElement < 0) {
+    raise_warning("Cannot add element to the array as the next element is "
+                  "already occupied");
+    return false;
+  }
+  int64 h = m_nNextFreeElement;
+  int p = find(h);
+  Bucket *pb = addKey(p, h);
+  pb->data.assignRef(v);
   m_nNextFreeElement = h + 1;
   return true;
 }
@@ -972,6 +1023,21 @@ ArrayData *SmallArray::append(CVarRef v, bool copy) {
     return a;
   }
   nextInsert(v);
+  return NULL;
+}
+
+ArrayData *SmallArray::appendRef(CVarRef v, bool copy) {
+  if (m_nNumOfElements >= SARR_SIZE) {
+    ArrayData *a = escalateToZendArray();
+    a->appendRef(v, false);
+    return a;
+  }
+  if (copy) {
+    SmallArray *a = copyImpl();
+    a->nextInsertRef(v);
+    return a;
+  }
+  nextInsertRef(v);
   return NULL;
 }
 
@@ -1152,21 +1218,6 @@ void SmallArray::erase(Bucket *pb, bool updateNext /* = false */) {
 
 ArrayData *SmallArray::remove(int64 k, bool copy) {
   int p = find(k);
-  Bucket *pb = m_arBuckets + p;
-  if (pb->kind == Empty) return NULL;
-  if (copy) {
-    SmallArray *a = copyImpl();
-    pb = a->m_arBuckets + p;
-    a->erase(pb);
-    return a;
-  }
-  erase(pb);
-  return NULL;
-}
-
-ArrayData *SmallArray::remove(litstr k, bool copy) {
-  String key(k, AttachLiteral);
-  int p = find(k, key.size(), key->hash());
   Bucket *pb = m_arBuckets + p;
   if (pb->kind == Empty) return NULL;
   if (copy) {

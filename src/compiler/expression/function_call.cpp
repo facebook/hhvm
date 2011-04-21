@@ -622,6 +622,9 @@ void FunctionCall::outputDynamicCall(CodeGenerator &cg,
       cg_printf("get%sFewArgs())(%s%d, ", kind, var, m_ciTemp);
     }
     if (pcount) {
+      for (int i = 0; i < pcount; i++) {
+        (*m_params)[i]->setContext(NoRefWrapper);
+      }
       cg_printf("%d, ", pcount);
       cg.pushCallInfo(m_ciTemp);
       FunctionScope::OutputCPPArguments(m_params, FunctionScopePtr(),
@@ -630,7 +633,7 @@ void FunctionCall::outputDynamicCall(CodeGenerator &cg,
     } else {
       cg_printf("0");
     }
-    if (!canInvokeFewArgs()) {
+    if (!Option::InvokeWithSpecificArgs) {
       for (int i = pcount; i < Option::InvokeFewArgsCount; i++) {
         cg_printf(", null_variant");
       }

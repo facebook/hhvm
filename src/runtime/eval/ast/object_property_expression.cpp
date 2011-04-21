@@ -112,6 +112,23 @@ Variant ObjectPropertyExpression::set(VariableEnvironment &env, CVarRef val)
   return val;
 }
 
+Variant ObjectPropertyExpression::setRef(VariableEnvironment &env, CVarRef val)
+  const {
+  const LvalExpression *lobj = m_obj->toLval();
+  if (lobj) {
+    Variant &lv = lobj->lval(env);
+    String name(m_name->get(env));
+    SET_LINE;
+    lv.o_setRef(name, val);
+  } else {
+    Variant obj(m_obj->eval(env));
+    String name(m_name->get(env));
+    SET_LINE;
+    obj.o_setRef(name, val);
+  }
+  return val;
+}
+
 Variant ObjectPropertyExpression::setOp(VariableEnvironment &env, int op,
                                         CVarRef rhs) const {
   Variant *vobj;

@@ -297,7 +297,7 @@ Variant invoke_static_method(CStrRef s, CStrRef method, CArrRef params,
 
 Variant invoke_failed(const char *func, CArrRef params, int64 hash,
                       bool fatal /* = true */) {
-  INTERCEPT_INJECTION_ALWAYS("?", func, params, ref(r));
+  INTERCEPT_INJECTION_ALWAYS("?", func, params, strongBind(r));
 
   if (fatal) {
     throw InvalidFunctionCallException(func);
@@ -1321,7 +1321,7 @@ Variant invoke_static_method_bind(CStrRef s, CStrRef method,
   if (!isStatic) {
     FrameInjection::ResetStaticClassName(info);
   }
-  return ref(ret);
+  return strongBind(ret);
 }
 #endif /* ENABLE_LATE_STATIC_BINDING */
 

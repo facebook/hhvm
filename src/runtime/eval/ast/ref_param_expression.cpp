@@ -39,6 +39,11 @@ Variant RefParamExpression::set(VariableEnvironment &env, CVarRef val) const {
   return m_lv->set(env, val);
 }
 
+Variant RefParamExpression::setRef(VariableEnvironment &env,
+                                   CVarRef val) const {
+  return m_lv->setRef(env, val);
+}
+
 Variant RefParamExpression::setOp(VariableEnvironment &env, int op,
                                   CVarRef rhs) const {
   return m_lv->setOp(env, op, rhs);

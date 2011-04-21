@@ -126,9 +126,8 @@ bool TestExtMemcached::test_Memcached_cas() {
   VERIFY(memc->t_set(key, 10, EXPIRATION));
 
   Variant cas;
-  cas.setContagious();
 
-  VS(memc->t_get(key, null, cas), 10);
+  VS(memc->t_get(key, null, strongBind(cas)), 10);
 
   VERIFY(!cas.isNull() && cas.isDouble());
   VERIFY(memc->t_cas(cas.toDouble(), key, 11, EXPIRATION));

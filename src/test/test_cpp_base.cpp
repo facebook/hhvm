@@ -755,7 +755,7 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant v1("original");
-    Variant v2 = ref(v1);
+    Variant v2 = strongBind(v1);
     v2 = "changed";
     VERIFY(v1 == "changed");
   }
@@ -781,7 +781,7 @@ bool TestCppBase::TestVariant() {
   }
   {
     Variant v1 = 10;
-    Variant v2 = ref(v1);
+    Variant v2 = strongBind(v1);
     v2++;
     VS(v2, 11);
     VS(v1, 11);

@@ -592,11 +592,11 @@ void Parser::appendProperty(Token &prop) {
     Eval::ExprName *ename = dynamic_cast<Eval::ExprName*>(name.get());
     if (ename) {
       ExpressionPtr nameExp = ename->getExp();
-      TempExpressionPtr temp = createOffset(var, nameExp);
+      ExpressionPtr temp = createOffset(var, nameExp);
       ename->setExp(temp);
 
       setOffset(out, var, nameExp);
-    } else if (var->unsafe_cast<TempExpressionList>()) {
+    } else if (var->cast<TempExpressionList>()) {
       setOffset(out, var, ExpressionPtr());
     }
 
@@ -870,7 +870,7 @@ void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
       if (!lv) {
         throw_invalid_lval();
       }
-      out->exp() =  NEW_EXP(IncOp,operand->exp(), op == T_INC, front);
+      out->exp() = NEW_EXP(IncOp, lv, op == T_INC, front);
       break;
     }
   case T_ISSET:

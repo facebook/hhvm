@@ -186,7 +186,13 @@ class ObjectData : public CountableNF {
   Variant o_getUnchecked(CStrRef s, CStrRef context = null_string);
   Variant o_set(CStrRef s, CVarRef v, bool forInit = false,
                 CStrRef context = null_string);
+  Variant o_set(CStrRef s, RefResult v, bool forInit = false,
+                CStrRef context = null_string);
+  Variant o_setRef(CStrRef s, CVarRef v, bool forInit = false,
+                   CStrRef context = null_string);
   Variant o_setPublic(CStrRef s, CVarRef v, bool forInit = false);
+  Variant o_setPublic(CStrRef s, RefResult v, bool forInit = false);
+  Variant o_setPublicRef(CStrRef s, CVarRef v, bool forInit = false);
   Variant o_setPublicWithRef(CStrRef s, CVarRef v, bool forInit = false);
   Variant &o_lval(CStrRef s, CVarRef tmpForGet, CStrRef context = null_string);
   Variant &o_unsetLval(CStrRef s, CVarRef tmpForGet,
@@ -308,6 +314,12 @@ class ObjectData : public CountableNF {
   inline Variant o_getImpl(CStrRef propName, int flags,
                            bool error = true, CStrRef context = null_string);
   static DECLARE_THREAD_LOCAL_NO_CHECK(int, os_max_id);
+  template <typename T>
+  inline Variant o_setImpl(CStrRef propName, T v,
+                           bool forInit, CStrRef context);
+  template <typename T>
+  inline Variant o_setPublicImpl(CStrRef propName, T v,
+                                 bool forInit);
 
  protected:
   int o_id;                      // a numeric identifier of this object

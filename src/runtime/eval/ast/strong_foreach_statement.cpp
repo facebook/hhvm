@@ -48,7 +48,7 @@ void StrongForEachStatement::eval(VariableEnvironment &env) const {
            source.begin(&kTemp, vTemp, env.currentContext());
          iter.advance();) {
       m_key->set(env, kTemp);
-      m_value->set(env, ref(vTemp));
+      m_value->setRef(env, vTemp);
       if (!m_body) continue;
       EVAL_STMT_HANDLE_GOTO_BEGIN(restart1);
       EVAL_STMT_HANDLE_BREAK(m_body, env);
@@ -58,7 +58,7 @@ void StrongForEachStatement::eval(VariableEnvironment &env) const {
     for (MutableArrayIter iter =
            source.begin(NULL, vTemp, env.currentContext());
          iter.advance();) {
-      m_value->set(env, ref(vTemp));
+      m_value->setRef(env, vTemp);
       if (!m_body) continue;
       EVAL_STMT_HANDLE_GOTO_BEGIN(restart2);
       EVAL_STMT_HANDLE_BREAK(m_body, env);

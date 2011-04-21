@@ -30,7 +30,11 @@ bool LvalExpression::weakLval(VariableEnvironment &env, Variant* &v) const {
 }
 
 Variant LvalExpression::set(VariableEnvironment &env, CVarRef val) const {
-  return lval(env) = val;
+  return lval(env).assignVal(val);
+}
+
+Variant LvalExpression::setRef(VariableEnvironment &env, CVarRef val) const {
+  return lval(env).assignRef(val);
 }
 
 Variant LvalExpression::setOpVariant(Variant &lhs, int op, CVarRef rhs) const {
@@ -79,7 +83,7 @@ void LvalExpression::unset(VariableEnvironment &env) const {
 
 Variant LvalExpression::refval(VariableEnvironment &env,
     int strict /* = 2 */) const {
-  return ref(lval(env));
+  return strongBind(lval(env));
 }
 
 const LvalExpression *LvalExpression::toLval() const {

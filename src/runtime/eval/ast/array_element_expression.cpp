@@ -135,10 +135,10 @@ Variant ArrayElementExpression::refval(VariableEnvironment &env,
     Variant arr(m_arr->refval(env, strict));
     Variant idx(m_idx->eval(env));
     SET_LINE;
-    return ref(arr.refvalAt(idx));
+    return strongBind(arr.refvalAt(idx));
   } else {
     SET_LINE;
-    return ref(lval(env));
+    return strongBind(lval(env));
   }
 }
 
@@ -156,6 +156,23 @@ Variant ArrayElementExpression::set(VariableEnvironment &env, CVarRef val)
   } else {
     SET_LINE;
     return arr.append(val);
+  }
+}
+
+Variant ArrayElementExpression::setRef(VariableEnvironment &env, CVarRef val)
+  const {
+  const LvalExpression *larr = m_arr->toLval();
+  if (!larr) {
+    throw InvalidOperandException("Cannot take l-value with function return");
+  }
+  Variant &arr = larr->lval(env);
+  if (m_idx) {
+    Variant idx(m_idx->eval(env));
+    SET_LINE;
+    return arr.setRef(idx, val);
+  } else {
+    SET_LINE;
+    return arr.appendRef(val);
   }
 }
 

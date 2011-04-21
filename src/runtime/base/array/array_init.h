@@ -76,9 +76,18 @@ public:
     return *this;
   }
 
+  ArrayInit &set(RefResult v) {
+    setRef(variant(v));
+    return *this;
+  }
+
+  ArrayInit &set(CVarWithRefBind v) {
+    m_data->appendWithRef(variant(v), false);
+    return *this;
+  }
+
   ArrayInit &setRef(CVarRef v) {
-    v.setContagious();
-    m_data->append(v, false);
+    m_data->appendRef(v, false);
     return *this;
   }
 
@@ -130,6 +139,49 @@ public:
     return *this;
   }
 
+  ArrayInit &set(litstr name, RefResult v, bool keyConverted = false) {
+    if (keyConverted) {
+      m_data->setRef(name, variant(v), false);
+    } else {
+      m_data->setRef(String(name).toKey(), variant(v), false);
+    }
+    return *this;
+  }
+
+  ArrayInit &set(CStrRef name, RefResult v, bool keyConverted = false) {
+    if (keyConverted) {
+      m_data->setRef(name, variant(v), false);
+    } else if (!name.isNull()) {
+      m_data->setRef(name.toKey(), variant(v), false);
+    }
+    return *this;
+  }
+
+  ArrayInit &set(CVarRef name, RefResult v, bool keyConverted = false) {
+    if (keyConverted) {
+      m_data->setRef(name, variant(v), false);
+    } else {
+      VarNR k(name.toKey());
+      if (!k.isNull()) {
+        m_data->setRef(k, variant(v), false);
+      }
+    }
+    return *this;
+  }
+
+  template<typename T>
+  ArrayInit &set(const T &name, RefResult v, bool keyConverted = false) {
+    if (keyConverted) {
+      m_data->setRef(name, variant(v), false);
+    } else {
+      VarNR k(Variant(name).toKey());
+      if (!k.isNull()) {
+        m_data->setRef(k, variant(v), false);
+      }
+    }
+    return *this;
+  }
+
   ArrayInit &add(int64 name, CVarRef v, bool keyConverted = false) {
     m_data->add(name, v, false);
     return *this;
@@ -174,42 +226,35 @@ public:
   }
 
   ArrayInit &setRef(int64 name, CVarRef v, bool keyConverted = false) {
-    v.setContagious();
-    m_data->set(name, v, false);
+    m_data->setRef(name, v, false);
     return *this;
   }
 
   ArrayInit &setRef(litstr name, CVarRef v, bool keyConverted = false) {
-    v.setContagious();
     if (keyConverted) {
-      m_data->set(name, v, false);
+      m_data->setRef(name, v, false);
     } else {
-      m_data->set(String(name).toKey(), v, false);
+      m_data->setRef(String(name).toKey(), v, false);
     }
     return *this;
   }
 
   ArrayInit &setRef(CStrRef name, CVarRef v, bool keyConverted = false) {
-    v.setContagious();
     if (keyConverted) {
-      m_data->set(name, v, false);
+      m_data->setRef(name, v, false);
     } else {
-      m_data->set(name.toKey(), v, false);
+      m_data->setRef(name.toKey(), v, false);
     }
     return *this;
   }
 
   ArrayInit &setRef(CVarRef name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
-      v.setContagious();
-      m_data->set(name, v, false);
+      m_data->setRef(name, v, false);
     } else {
       Variant key(name.toKey());
       if (!key.isNull()) {
-        v.setContagious();
-        m_data->set(key, v, false);
-      } else {
-        v.clearContagious();
+        m_data->setRef(key, v, false);
       }
     }
     return *this;
@@ -218,15 +263,11 @@ public:
   template<typename T>
   ArrayInit &setRef(const T &name, CVarRef v, bool keyConverted = false) {
     if (keyConverted) {
-      v.setContagious();
-      m_data->set(name, v, false);
+      m_data->setRef(name, v, false);
     } else {
       VarNR key(Variant(name).toKey());
       if (!key.isNull()) {
-        v.setContagious();
-        m_data->set(key, v, false);
-      } else {
-        v.clearContagious();
+        m_data->setRef(key, v, false);
       }
     }
     return *this;

@@ -199,6 +199,9 @@ void ReturnStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("gasInCtor(oldInCtor);\n");
   }
   if (m_exp) {
+    if (m_exp->hasContext(Expression::RefValue)) {
+      m_exp->setContext(Expression::NoRefWrapper);
+    }
     m_exp->outputCPPBegin(cg, ar);
   }
 
@@ -207,8 +210,11 @@ void ReturnStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_exp) {
     bool close = false;
     cg_printf(" ");
-    if (checkCopyElision(func, m_exp)) {
-      cg_printf("wrap_variant(");
+    if (m_exp->hasContext(Expression::RefValue) && m_exp->isRefable()) {
+      cg_printf("strongBind(");
+      close = true;
+    } else if (checkCopyElision(func, m_exp)) {
+      cg_printf("weakBind(");
       close = true;
     }
     m_exp->outputCPP(cg, ar);

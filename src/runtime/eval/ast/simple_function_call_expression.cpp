@@ -52,7 +52,7 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
           dynamic_cast<const FunctionStatement *>(fs);
         if (fstmt) {
           ObjectData *closure = (ObjectData*)sid.toInt64();
-          return ref(fstmt->invokeClosure(Object(closure), env, this));
+          return strongBind(fstmt->invokeClosure(Object(closure), env, this));
         }
       }
     }
@@ -67,7 +67,7 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   // fast path for interpreted fn
   const Function *fs = RequestEvalState::findFunction(name.data());
   if (fs) {
-    return ref(fs->directInvoke(env, this));
+    return strongBind(fs->directInvoke(env, this));
   }
 
   if (originalName[0] == '\\') {
@@ -76,7 +76,7 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
     renamed = true;
     fs = RequestEvalState::findFunction(name.data());
     if (fs) {
-      return ref(fs->directInvoke(env, this));
+      return strongBind(fs->directInvoke(env, this));
     }
   }
 
@@ -97,7 +97,7 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
       ai.set(m_params[i]->eval(env));
     }
   }
-  return ref((cit1->getFunc())(vt1, Array(ai.create())));
+  return strongBind((cit1->getFunc())(vt1, Array(ai.create())));
 }
 
 void SimpleFunctionCallExpression::dump(std::ostream &out) const {

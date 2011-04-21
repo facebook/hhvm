@@ -52,6 +52,8 @@ class ArrayData : public Countable {
   static ArrayData *Create();
   static ArrayData *Create(CVarRef value);
   static ArrayData *Create(CVarRef name, CVarRef value);
+  static ArrayData *CreateRef(CVarRef value);
+  static ArrayData *CreateRef(CVarRef name, CVarRef value);
 
   /**
    * Type conversion functions. All other types are handled inside Array class.
@@ -196,9 +198,12 @@ class ArrayData : public Countable {
    * escalated array data.
    */
   virtual ArrayData *set(int64   k, CVarRef v, bool copy) = 0;
-  virtual ArrayData *set(litstr  k, CVarRef v, bool copy) = 0;
   virtual ArrayData *set(CStrRef k, CVarRef v, bool copy) = 0;
   virtual ArrayData *set(CVarRef k, CVarRef v, bool copy) = 0;
+
+  virtual ArrayData *setRef(int64   k, CVarRef v, bool copy) = 0;
+  virtual ArrayData *setRef(CStrRef k, CVarRef v, bool copy) = 0;
+  virtual ArrayData *setRef(CVarRef k, CVarRef v, bool copy) = 0;
 
   /**
    * Basically the same as set(), but for adding a new key to the array.
@@ -216,9 +221,15 @@ class ArrayData : public Countable {
    * escalated array data.
    */
   virtual ArrayData *remove(int64   k, bool copy) = 0;
-  virtual ArrayData *remove(litstr  k, bool copy) = 0;
   virtual ArrayData *remove(CStrRef k, bool copy) = 0;
   virtual ArrayData *remove(CVarRef k, bool copy) = 0;
+
+  /**
+   * legacy overloads that are not used enough to justify optimizing
+   */
+  ArrayData *set(litstr  k, CVarRef v, bool copy);
+  ArrayData *setRef(litstr  k, CVarRef v, bool copy);
+  ArrayData *remove(litstr  k, bool copy);
 
   virtual ssize_t iter_begin() const;
   virtual ssize_t iter_end() const;
@@ -250,6 +261,7 @@ class ArrayData : public Countable {
    * escalated array data.
    */
   virtual ArrayData *append(CVarRef v, bool copy) = 0;
+  virtual ArrayData *appendRef(CVarRef v, bool copy) = 0;
 
   /**
    * Similar to append(v, copy), with reference in v preserved.

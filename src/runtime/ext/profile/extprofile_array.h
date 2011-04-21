@@ -259,7 +259,7 @@ inline Variant x_each(VRefParam array) {
   return f_each(array);
 }
 
-inline Variant x_current(CVarRef array) {
+inline Variant x_current(VRefParam array) {
   FUNCTION_INJECTION_BUILTIN(current);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_current(array);

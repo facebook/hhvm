@@ -70,7 +70,7 @@ void hphp_thread_init();
 ExecutionContext *hphp_context_init();
 bool hphp_invoke_simple(const std::string &filename, bool warmupOnly = false);
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
-                 bool func, CArrRef funcParams, Variant funcRet,
+                 bool func, CArrRef funcParams, VRefParam funcRet,
                  const std::string &warmupDoc, const std::string &reqInitFunc,
                  const std::string &reqInitDoc,
                  bool &error, std::string &errorMsg,

@@ -106,9 +106,12 @@ public:
   virtual ArrayData* lvalNew(Variant*& ret, bool copy);
 
   virtual ArrayData* set(int64   k, CVarRef v, bool copy);
-  virtual ArrayData* set(litstr  k, CVarRef v, bool copy);
   virtual ArrayData* set(CStrRef k, CVarRef v, bool copy);
   virtual ArrayData* set(CVarRef k, CVarRef v, bool copy);
+
+  virtual ArrayData* setRef(int64   k, CVarRef v, bool copy);
+  virtual ArrayData* setRef(CStrRef k, CVarRef v, bool copy);
+  virtual ArrayData* setRef(CVarRef k, CVarRef v, bool copy);
 
   virtual ArrayData *add(int64   k, CVarRef v, bool copy);
   virtual ArrayData *add(CStrRef k, CVarRef v, bool copy);
@@ -118,12 +121,12 @@ public:
   virtual ArrayData *addLval(CVarRef k, Variant*& ret, bool copy);
 
   virtual ArrayData* remove(int64   k, bool copy);
-  virtual ArrayData* remove(litstr  k, bool copy);
   virtual ArrayData* remove(CStrRef k, bool copy);
   virtual ArrayData* remove(CVarRef k, bool copy);
 
   virtual ArrayData* copy() const;
   virtual ArrayData* append(CVarRef v, bool copy);
+  virtual ArrayData* appendRef(CVarRef v, bool copy);
   virtual ArrayData* appendWithRef(CVarRef v, bool copy);
   virtual ArrayData* append(const ArrayData* elems, ArrayOp op, bool copy);
   virtual ArrayData* pop(Variant& value);
@@ -246,6 +249,7 @@ private:
   inline ElmInd* ALWAYS_INLINE findForNewInsert(size_t h0) const;
 
   bool nextInsert(CVarRef data);
+  bool nextInsertRef(CVarRef data);
   bool nextInsertWithRef(CVarRef data);
   bool addLvalImpl(int64 ki, Variant** pDest, bool doFind=true);
   bool addLvalImpl(StringData* key, int64 h, Variant** pDest, bool doFind=true);
@@ -255,8 +259,9 @@ private:
   bool addValWithRef(StringData* key, CVarRef data, bool checkExists=true);
 
   bool update(int64 ki, CVarRef data);
-  bool update(litstr key, CVarRef data);
   bool update(StringData* key, CVarRef data);
+  bool updateRef(int64 ki, CVarRef data);
+  bool updateRef(StringData* key, CVarRef data);
 
   void erase(ElmInd* ei, bool updateNext = false);
   HphpArray* copyImpl() const;

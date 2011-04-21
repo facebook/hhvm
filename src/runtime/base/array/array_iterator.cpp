@@ -175,9 +175,8 @@ bool MutableArrayIter::advance() {
   ASSERT(m_fp.container == data);
   if (!data->setFullPos(m_fp)) return false;
   CVarRef curr = data->currentRef();
-  curr.setContagious();
-  m_val = curr;
-  if (m_key) *m_key = data->key();
+  m_val.assignRef(curr);
+  if (m_key) m_key->assignVal(data->key());
   data->next();
   data->getFullPos(m_fp);
   return true;

@@ -750,7 +750,7 @@ enum {
   INTL_IDN_TO_UTF8
 };
 
-Variant php_intl_idn_to(CStrRef domain, Variant errorcode, int mode) {
+static Variant php_intl_idn_to(CStrRef domain, VRefParam errorcode, int mode) {
   long option = 0;
   UChar* ustring = NULL;
   int ustring_len = 0;

@@ -91,11 +91,35 @@ Variant Object::o_set(CStrRef propName, CVarRef val,
   return m_px->o_set(propName, val, false, context);
 }
 
+Variant Object::o_setRef(CStrRef propName, CVarRef val,
+                         CStrRef context /* = null_string */) {
+  if (!m_px) {
+    operator=(SystemLib::AllocStdClassObject());
+  }
+  return m_px->o_setRef(propName, val, false, context);
+}
+
+Variant Object::o_set(CStrRef propName, RefResult val,
+                      CStrRef context /* = null_string */) {
+  return o_setRef(propName, variant(val), context);
+}
+
 Variant Object::o_setPublic(CStrRef propName, CVarRef val) {
   if (!m_px) {
     operator=(SystemLib::AllocStdClassObject());
   }
   return m_px->o_setPublic(propName, val, false);
+}
+
+Variant Object::o_setPublicRef(CStrRef propName, CVarRef val) {
+  if (!m_px) {
+    operator=(SystemLib::AllocStdClassObject());
+  }
+  return m_px->o_setPublicRef(propName, val, false);
+}
+
+Variant Object::o_setPublic(CStrRef propName, RefResult val) {
+  return o_setPublicRef(propName, variant(val));
 }
 
 Variant &Object::o_lval(CStrRef propName, CVarRef tmpForGet,
@@ -136,7 +160,7 @@ Variant Object::o_argval(bool byRef, CStrRef propName,
   if (!byRef) {
     return o_get(propName, error, context);
   } else {
-    return ref(o_lval(propName, context));
+    return strongBind(o_lval(propName, context));
   }
 }
 

@@ -127,7 +127,7 @@ Variant ListAssignmentExpression::eval(VariableEnvironment &env) const {
     // Rhs has to be taken as lval if a variable in case there are references
     // to that variable on the lhs.
     CVarRef rhs(v->lval(env));
-    Variant tmp(ref(rhs));
+    Variant tmp(strongBind(rhs));
     m_lhs->set(env, tmp);
     return rhs;
   } else {

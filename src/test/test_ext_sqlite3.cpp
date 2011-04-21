@@ -69,7 +69,7 @@ bool TestExtSqlite3::test_sqlite3() {
     VS(stmt->t_paramcount(), 1);
 
     Variant id = "DEF";
-    VERIFY(stmt->t_bindvalue(":id", ref(id), SQLITE3_TEXT));
+    VERIFY(stmt->t_bindvalue(":id", id, SQLITE3_TEXT));
     id = "ABC";
     {
       Object objResult = stmt->t_execute();

@@ -264,7 +264,7 @@ bool ListAssignment::outputCPPAssignment(CodeGenerator &cg,
         } else {
           subTmp = genCPPTemp(cg, ar);
           cg_printf("Variant %s((%s(%s[%d])));\n",
-                    subTmp.c_str(), subRef ? "ref" : "",
+                    subTmp.c_str(), subRef ? "strongBind" : "",
                     arrTmp.c_str(), i);
         }
         if (sublist->outputCPPAssignment(cg, ar, subTmp, subRef)) ret = true;

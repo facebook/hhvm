@@ -14,7 +14,7 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
 */
-#define INLINE_VARIANT_HELPER // for selected inlining
+#define INLINE_VARIANT_HELPER 1 // for selected inlining
 
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/array/array_init.h>
@@ -403,10 +403,25 @@ bool ZendArray::exists(CStrRef k) const {
   return find(k.data(), k.size(), k->hash());
 }
 
+typedef Variant::TypedValueAccessor TypedValueAccessor;
+
+inline static bool isIntKey(TypedValueAccessor tva) {
+  return Variant::GetAccessorType(tva) <= KindOfInt64;
+}
+
+inline static int64 getIntKey(TypedValueAccessor tva) {
+  return Variant::GetInt64(tva);
+}
+
+inline static StringData *getStringKey(TypedValueAccessor tva) {
+  return Variant::GetStringData(tva);
+}
+
 bool ZendArray::exists(CVarRef k) const {
-  if (k.isNumeric()) return find(k.toInt64());
+  TypedValueAccessor tva = k.getTypedAccessor();
+  if (isIntKey(tva)) return find(getIntKey(tva));
   ASSERT(k.isString());
-  StringData *key = k.getStringData();
+  StringData *key = getStringKey(tva);
   return find(key->data(), key->size(), key->hash());
 }
 
@@ -454,11 +469,12 @@ CVarRef ZendArray::get(CStrRef k, bool error /* = false */) const {
 
 CVarRef ZendArray::get(CVarRef k, bool error /* = false */) const {
   Bucket *p;
-  if (k.isNumeric()) {
-    p = find(k.toInt64());
+  TypedValueAccessor tva = k.getTypedAccessor();
+  if (isIntKey(tva)) {
+    p = find(getIntKey(tva));
   } else {
     ASSERT(k.isString());
-    StringData *strkey = k.getStringData();
+    StringData *strkey = getStringKey(tva);
     int64 prehash = strkey->hash();
     p = find(strkey->data(), strkey->size(), prehash);
   }
@@ -473,11 +489,12 @@ CVarRef ZendArray::get(CVarRef k, bool error /* = false */) const {
 
 void ZendArray::load(CVarRef k, Variant &v) const {
   Bucket *p;
-  if (k.isNumeric()) {
-    p = find(k.toInt64());
+  TypedValueAccessor tva = k.getTypedAccessor();
+  if (isIntKey(tva)) {
+    p = find(getIntKey(tva));
   } else {
     ASSERT(k.isString());
-    StringData *strkey = k.getStringData();
+    StringData *strkey = getStringKey(tva);
     int64 prehash = strkey->hash();
     p = find(strkey->data(), strkey->size(), prehash);
   }
@@ -513,11 +530,12 @@ ssize_t ZendArray::getIndex(CStrRef k) const {
 
 ssize_t ZendArray::getIndex(CVarRef k) const {
   Bucket *p;
-  if (k.isNumeric()) {
-    p = find(k.toInt64());
+  TypedValueAccessor tva = k.getTypedAccessor();
+  if (isIntKey(tva)) {
+    p = find(getIntKey(tva));
   } else {
     ASSERT(k.isString());
-    StringData *key = k.getStringData();
+    StringData *key = getStringKey(tva);
     p = find(key->data(), key->size(), key->hash());
   }
   if (p) {
@@ -571,10 +589,29 @@ bool ZendArray::nextInsert(CVarRef data) {
   return true;
 }
 
+bool ZendArray::nextInsertRef(CVarRef data) {
+  if (m_nNextFreeElement < 0) {
+    raise_warning("Cannot add element to the array as the next element is "
+                  "already occupied");
+    return false;
+  }
+  int64 h = m_nNextFreeElement;
+  Bucket * p = NEW(Bucket)(strongBind(data));
+  p->h = h;
+  uint nIndex = (h & m_nTableMask);
+  CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
+  SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
+  CONNECT_TO_GLOBAL_DLLIST(p);
+  m_nNextFreeElement = h + 1;
+  if (++m_nNumOfElements > m_nTableSize) {
+    resize();
+  }
+  return true;
+}
+
 bool ZendArray::nextInsertWithRef(CVarRef data) {
   int64 h = m_nNextFreeElement;
-  Bucket * p = NEW(Bucket)();
-  p->data.setWithRef(data);
+  Bucket * p = NEW(Bucket)(withRefBind(data));
   p->h = h;
   uint nIndex = (h & m_nTableMask);
   CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
@@ -647,8 +684,7 @@ bool ZendArray::addValWithRef(int64 h, CVarRef data) {
   if (p) {
     return false;
   }
-  p = NEW(Bucket)();
-  p->data.setWithRef(data);
+  p = NEW(Bucket)(withRefBind(data));
   p->h = h;
   uint nIndex = (h & m_nTableMask);
   CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
@@ -669,8 +705,7 @@ bool ZendArray::addValWithRef(StringData *key, CVarRef data) {
   if (p) {
     return false;
   }
-  p = NEW(Bucket)();
-  p->data.setWithRef(data);
+  p = NEW(Bucket)(withRefBind(data));
   p->key = key;
   p->key->incRefCount();
   p->h = h;
@@ -687,7 +722,7 @@ bool ZendArray::addValWithRef(StringData *key, CVarRef data) {
 bool ZendArray::update(int64 h, CVarRef data) {
   Bucket *p = find(h);
   if (p) {
-    p->data = data;
+    p->data.assignValHelper(data);
     return true;
   }
 
@@ -708,17 +743,16 @@ bool ZendArray::update(int64 h, CVarRef data) {
   return true;
 }
 
-bool ZendArray::update(litstr key, CVarRef data) {
-  int len = strlen(key);
-  int64 h = hash_string(key, len);
-  Bucket *p = find(key, len, h);
+bool ZendArray::update(StringData *key, CVarRef data) {
+  int64 h = key->hash();
+  Bucket *p = find(key->data(), key->size(), h);
   if (p) {
-    p->data = data;
+    p->data.assignValHelper(data);
     return true;
   }
 
   p = NEW(Bucket)(data);
-  p->key = NEW(StringData)(key, len, AttachLiteral);
+  p->key = key;
   p->key->incRefCount();
   p->h = h;
 
@@ -733,15 +767,39 @@ bool ZendArray::update(litstr key, CVarRef data) {
   return true;
 }
 
-bool ZendArray::update(StringData *key, CVarRef data) {
-  int64 h = key->hash();
-  Bucket *p = find(key->data(), key->size(), h);
+bool ZendArray::updateRef(int64 h, CVarRef data) {
+  Bucket *p = find(h);
   if (p) {
-    p->data = data;
+    p->data.assignRefHelper(data);
     return true;
   }
 
-  p = NEW(Bucket)(data);
+  p = NEW(Bucket)(strongBind(data));
+  p->h = h;
+
+  uint nIndex = (h & m_nTableMask);
+  CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
+  SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
+  CONNECT_TO_GLOBAL_DLLIST(p);
+
+  if (h >= m_nNextFreeElement && m_nNextFreeElement >= 0) {
+    m_nNextFreeElement = h + 1;
+  }
+  if (++m_nNumOfElements > m_nTableSize) {
+    resize();
+  }
+  return true;
+}
+
+bool ZendArray::updateRef(StringData *key, CVarRef data) {
+  int64 h = key->hash();
+  Bucket *p = find(key->data(), key->size(), h);
+  if (p) {
+    p->data.assignRefHelper(data);
+    return true;
+  }
+
+  p = NEW(Bucket)(strongBind(data));
   p->key = key;
   p->key->incRefCount();
   p->h = h;
@@ -808,7 +866,7 @@ ArrayData *ZendArray::lvalPtr(CStrRef k, Variant *&ret, bool copy,
   StringData *key = k.get();
   int64 prehash = key->hash();
   ZendArray *a = 0, *t = this;
-  if (copy) {
+  if (UNLIKELY(copy)) {
     a = t = copyImpl();
   }
 
@@ -828,7 +886,7 @@ ArrayData *ZendArray::lvalPtr(CStrRef k, Variant *&ret, bool copy,
 ArrayData *ZendArray::lvalPtr(int64 k, Variant *&ret, bool copy,
                               bool create) {
   ZendArray *a = 0, *t = this;
-  if (copy) {
+  if (UNLIKELY(copy)) {
     a = t = copyImpl();
   }
 
@@ -853,8 +911,9 @@ ArrayData *ZendArray::lval(litstr k, Variant *&ret, bool copy,
 
 ArrayData *ZendArray::lval(CVarRef k, Variant *&ret, bool copy,
                            bool checkExist /* = false */) {
-  if (k.isNumeric()) {
-    return lval(k.toInt64(), ret, copy, checkExist);
+  TypedValueAccessor tva = k.getTypedAccessor();
+  if (isIntKey(tva)) {
+    return lval(getIntKey(tva), ret, copy, checkExist);
   } else {
     ASSERT(k.isString());
     return lval(k.toStrNR(), ret, copy, checkExist);
@@ -862,7 +921,7 @@ ArrayData *ZendArray::lval(CVarRef k, Variant *&ret, bool copy,
 }
 
 ArrayData *ZendArray::lvalNew(Variant *&ret, bool copy) {
-  if (copy) {
+  if (UNLIKELY(copy)) {
     ZendArray *a = copyImpl();
     if (!a->nextInsert(null)) {
       ret = &(Variant::lvalBlackHole());
@@ -882,7 +941,7 @@ ArrayData *ZendArray::lvalNew(Variant *&ret, bool copy) {
 }
 
 ArrayData *ZendArray::set(int64 k, CVarRef v, bool copy) {
-  if (copy) {
+  if (UNLIKELY(copy)) {
     ZendArray *a = copyImpl();
     a->update(k, v);
     return a;
@@ -892,7 +951,7 @@ ArrayData *ZendArray::set(int64 k, CVarRef v, bool copy) {
 }
 
 ArrayData *ZendArray::set(CStrRef k, CVarRef v, bool copy) {
-  if (copy) {
+  if (UNLIKELY(copy)) {
     ZendArray *a = copyImpl();
     a->update(k.get(), v);
     return a;
@@ -901,29 +960,20 @@ ArrayData *ZendArray::set(CStrRef k, CVarRef v, bool copy) {
   return NULL;
 }
 
-ArrayData *ZendArray::set(litstr k, CVarRef v, bool copy) {
-  if (copy) {
-    ZendArray *a = copyImpl();
-    a->update(k, v);
-    return a;
-  }
-  update(k, v);
-  return NULL;
-}
-
 ArrayData *ZendArray::set(CVarRef k, CVarRef v, bool copy) {
-  if (k.isNumeric()) {
-    if (copy) {
+  TypedValueAccessor tva = k.getTypedAccessor();
+  if (isIntKey(tva)) {
+    if (UNLIKELY(copy)) {
       ZendArray *a = copyImpl();
-      a->update(k.toInt64(), v);
+      a->update(getIntKey(tva), v);
       return a;
     }
-    update(k.toInt64(), v);
+    update(getIntKey(tva), v);
     return NULL;
   } else {
     ASSERT(k.isString());
-    StringData *sd = k.getStringData();
-    if (copy) {
+    StringData *sd = getStringKey(tva);
+    if (UNLIKELY(copy)) {
       ZendArray *a = copyImpl();
       a->update(sd, v);
       return a;
@@ -933,9 +983,52 @@ ArrayData *ZendArray::set(CVarRef k, CVarRef v, bool copy) {
   }
 }
 
+ArrayData *ZendArray::setRef(int64 k, CVarRef v, bool copy) {
+  if (UNLIKELY(copy)) {
+    ZendArray *a = copyImpl();
+    a->updateRef(k, v);
+    return a;
+  }
+  updateRef(k, v);
+  return NULL;
+}
+
+ArrayData *ZendArray::setRef(CStrRef k, CVarRef v, bool copy) {
+  if (UNLIKELY(copy)) {
+    ZendArray *a = copyImpl();
+    a->updateRef(k.get(), v);
+    return a;
+  }
+  updateRef(k.get(), v);
+  return NULL;
+}
+
+ArrayData *ZendArray::setRef(CVarRef k, CVarRef v, bool copy) {
+  TypedValueAccessor tva = k.getTypedAccessor();
+  if (isIntKey(tva)) {
+    if (UNLIKELY(copy)) {
+      ZendArray *a = copyImpl();
+      a->updateRef(getIntKey(tva), v);
+      return a;
+    }
+    updateRef(getIntKey(tva), v);
+    return NULL;
+  } else {
+    ASSERT(k.isString());
+    StringData *sd = getStringKey(tva);
+    if (UNLIKELY(copy)) {
+      ZendArray *a = copyImpl();
+      a->updateRef(sd, v);
+      return a;
+    }
+    updateRef(sd, v);
+    return NULL;
+  }
+}
+
 ArrayData *ZendArray::add(int64 k, CVarRef v, bool copy) {
   ASSERT(!exists(k));
-  if (copy) {
+  if (UNLIKELY(copy)) {
     ZendArray *result = copyImpl();
     result->add(k, v, false);
     return result;
@@ -957,7 +1050,7 @@ ArrayData *ZendArray::add(int64 k, CVarRef v, bool copy) {
 
 ArrayData *ZendArray::add(CStrRef k, CVarRef v, bool copy) {
   ASSERT(!exists(k));
-  if (copy) {
+  if (UNLIKELY(copy)) {
     ZendArray *result = copyImpl();
     result->add(k, v, false);
     return result;
@@ -979,14 +1072,15 @@ ArrayData *ZendArray::add(CStrRef k, CVarRef v, bool copy) {
 
 ArrayData *ZendArray::add(CVarRef k, CVarRef v, bool copy) {
   ASSERT(!exists(k));
-  if (k.isNumeric()) return add(k.toInt64(), v, copy);
+  TypedValueAccessor tva = k.getTypedAccessor();
+  if (isIntKey(tva)) return add(getIntKey(tva), v, copy);
   ASSERT(k.isString());
   return add(k.toStrNR(), v, copy);
 }
 
 ArrayData *ZendArray::addLval(int64 k, Variant *&ret, bool copy) {
   ASSERT(!exists(k));
-  if (copy) {
+  if (UNLIKELY(copy)) {
     ZendArray *result = copyImpl();
     result->addLvalImpl(k, &ret, false);
     return result;
@@ -997,7 +1091,7 @@ ArrayData *ZendArray::addLval(int64 k, Variant *&ret, bool copy) {
 
 ArrayData *ZendArray::addLval(CStrRef k, Variant *&ret, bool copy) {
   ASSERT(!exists(k));
-  if (copy) {
+  if (UNLIKELY(copy)) {
     ZendArray *result = copyImpl();
     result->addLvalImpl(k.get(), k->hash(), &ret, false);
     return result;
@@ -1008,7 +1102,8 @@ ArrayData *ZendArray::addLval(CStrRef k, Variant *&ret, bool copy) {
 
 ArrayData *ZendArray::addLval(CVarRef k, Variant *&ret, bool copy) {
   ASSERT(!exists(k));
-  if (k.isNumeric()) return addLval(k.toInt64(), ret, copy);
+  TypedValueAccessor tva = k.getTypedAccessor();
+  if (isIntKey(tva)) return addLval(getIntKey(tva), ret, copy);
   ASSERT(k.isString());
   return addLval(k.toStrNR(), ret, copy);
 }
@@ -1078,7 +1173,7 @@ void ZendArray::prepareBucketHeadsForWrite() {
 }
 
 ArrayData *ZendArray::remove(int64 k, bool copy) {
-  if (copy) {
+  if (UNLIKELY(copy)) {
     ZendArray *a = copyImpl();
     a->prepareBucketHeadsForWrite();
     a->erase(a->findForErase(k));
@@ -1091,7 +1186,7 @@ ArrayData *ZendArray::remove(int64 k, bool copy) {
 
 ArrayData *ZendArray::remove(CStrRef k, bool copy) {
   int64 prehash = k->hash();
-  if (copy) {
+  if (UNLIKELY(copy)) {
     ZendArray *a = copyImpl();
     a->prepareBucketHeadsForWrite();
     a->erase(a->findForErase(k.data(), k.size(), prehash));
@@ -1102,36 +1197,23 @@ ArrayData *ZendArray::remove(CStrRef k, bool copy) {
   return NULL;
 }
 
-ArrayData *ZendArray::remove(litstr k, bool copy) {
-  int len = strlen(k);
-  int64 prehash = hash_string(k, len);
-  if (copy) {
-    ZendArray *a = copyImpl();
-    a->prepareBucketHeadsForWrite();
-    a->erase(a->findForErase(k, len, prehash));
-    return a;
-  }
-  prepareBucketHeadsForWrite();
-  erase(findForErase(k, len, prehash));
-  return NULL;
-}
-
 ArrayData *ZendArray::remove(CVarRef k, bool copy) {
-  if (k.isNumeric()) {
-    if (copy) {
+  TypedValueAccessor tva = k.getTypedAccessor();
+  if (isIntKey(tva)) {
+    if (UNLIKELY(copy)) {
       ZendArray *a = copyImpl();
       a->prepareBucketHeadsForWrite();
-      a->erase(a->findForErase(k.toInt64()));
+      a->erase(a->findForErase(getIntKey(tva)));
       return a;
     }
     prepareBucketHeadsForWrite();
-    erase(findForErase(k.toInt64()));
+    erase(findForErase(getIntKey(tva)));
     return NULL;
   } else {
     ASSERT(k.isString());
-    StringData *key = k.getStringData();
+    StringData *key = getStringKey(tva);
     int64 prehash = key->hash();
-    if (copy) {
+    if (UNLIKELY(copy)) {
       ZendArray *a = copyImpl();
       a->prepareBucketHeadsForWrite();
       a->erase(a->findForErase(key->data(), key->size(), prehash));
@@ -1152,8 +1234,8 @@ ZendArray *ZendArray::copyImpl() const {
   ZendArray *target = NEW(ZendArray)(m_nNumOfElements);
   Bucket *last = NULL;
   for (Bucket *p = m_pListHead; p; p = p->pListNext) {
-    Bucket *np = NEW(Bucket)();
-    np->data.setWithRef(p->data, this);
+    Bucket *np = NEW(Bucket)(Variant::noInit);
+    np->data.constructWithRefHelper(p->data, this);
     np->h = p->h;
     if (p->key) {
       np->key = p->key;
@@ -1198,7 +1280,7 @@ ZendArray *ZendArray::copyImpl() const {
 
 __attribute__ ((section (".text.hot")))
 ArrayData *ZendArray::append(CVarRef v, bool copy) {
-  if (copy) {
+  if (UNLIKELY(copy)) {
     ZendArray *a = copyImpl();
     a->nextInsert(v);
     return a;
@@ -1207,8 +1289,18 @@ ArrayData *ZendArray::append(CVarRef v, bool copy) {
   return NULL;
 }
 
+ArrayData *ZendArray::appendRef(CVarRef v, bool copy) {
+  if (UNLIKELY(copy)) {
+    ZendArray *a = copyImpl();
+    a->nextInsertRef(v);
+    return a;
+  }
+  nextInsertRef(v);
+  return NULL;
+}
+
 ArrayData *ZendArray::appendWithRef(CVarRef v, bool copy) {
-  if (copy) {
+  if (UNLIKELY(copy)) {
     ZendArray *a = copyImpl();
     a->nextInsertWithRef(v);
     return a;
@@ -1218,7 +1310,7 @@ ArrayData *ZendArray::appendWithRef(CVarRef v, bool copy) {
 }
 
 ArrayData *ZendArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
-  if (copy) {
+  if (UNLIKELY(copy)) {
     ZendArray *a = copyImpl();
     a->append(elems, op, false);
     return a;
@@ -1297,7 +1389,7 @@ ArrayData *ZendArray::dequeue(Variant &value) {
 }
 
 ArrayData *ZendArray::prepend(CVarRef v, bool copy) {
-  if (copy) {
+  if (UNLIKELY(copy)) {
     ZendArray *a = copyImpl();
     a->prepend(v, false);
     return a;

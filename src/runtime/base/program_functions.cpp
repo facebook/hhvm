@@ -1099,7 +1099,7 @@ bool hphp_invoke_simple(const std::string &filename,
 }
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
-                 bool func, CArrRef funcParams, Variant funcRet,
+                 bool func, CArrRef funcParams, VRefParam funcRet,
                  const string &warmupDoc, const string &reqInitFunc,
                  const string &reqInitDoc,
                  bool &error, string &errorMsg,
@@ -1135,7 +1135,7 @@ bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
     try {
       ServerStatsHelper ssh("invoke");
       if (func) {
-        funcRet = invoke(cmd.c_str(), funcParams);
+        funcRet->assignVal(invoke(cmd.c_str(), funcParams));
       } else {
         if (isServer) hphp_chdir_file(cmd);
         include_impl_invoke(cmd.c_str(), once, get_variable_table());

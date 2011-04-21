@@ -58,7 +58,7 @@ void AssignmentOpExpression::dump(std::ostream &out) const {
 
 Variant AssignmentOpExpression::refval(VariableEnvironment &env,
     int strict /* = 2 */) const {
-  return ref(eval(env));
+  return strongBind(eval(env));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -91,7 +91,7 @@ class Array : public SmartPtr<ArrayData> {
   Array values() const;
 
   int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {
-    return m_px ? noMatch : 0; 
+    return m_px ? noMatch : 0;
   }
 
   int64 hashForStringSwitch(
@@ -318,6 +318,8 @@ class Array : public SmartPtr<ArrayData> {
   // defined in type_variant.h
   template<typename T>
   CVarRef setImpl(const T &key, CVarRef v);
+  template<typename T>
+  CVarRef setRefImpl(const T &key, CVarRef v);
 
   CVarRef set(bool    key, CVarRef v) {
     return setImpl(key ? 1LL : 0LL, v);
@@ -341,6 +343,46 @@ class Array : public SmartPtr<ArrayData> {
   CVarRef set(litstr  key, CVarRef v, bool isKey = false);
   CVarRef set(CStrRef key, CVarRef v, bool isKey = false);
   CVarRef set(CVarRef key, CVarRef v, bool isKey = false);
+
+  CVarRef set(bool    key, RefResult v) { return setRef(key,variant(v)); }
+  CVarRef set(char    key, RefResult v) { return setRef(key,variant(v)); }
+  CVarRef set(short   key, RefResult v) { return setRef(key,variant(v)); }
+  CVarRef set(int     key, RefResult v) { return setRef(key,variant(v)); }
+  CVarRef set(int64   key, RefResult v) { return setRef(key,variant(v)); }
+  CVarRef set(double  key, RefResult v) { return setRef(key,variant(v)); }
+
+  CVarRef set(litstr  key, RefResult v, bool isKey = false) {
+    return setRef(key,variant(v), isKey);
+  }
+  CVarRef set(CStrRef key, RefResult v, bool isKey = false) {
+    return setRef(key,variant(v), isKey);
+  }
+  CVarRef set(CVarRef key, RefResult v, bool isKey = false) {
+    return setRef(key,variant(v), isKey);
+  }
+
+  CVarRef setRef(bool    key, CVarRef v) {
+    return setRefImpl(key ? 1LL : 0LL, v);
+  }
+  CVarRef setRef(char    key, CVarRef v) {
+    return setRefImpl((int64)key, v);
+  }
+  CVarRef setRef(short   key, CVarRef v) {
+    return setRefImpl((int64)key, v);
+  }
+  CVarRef setRef(int     key, CVarRef v) {
+    return setRefImpl((int64)key, v);
+  }
+  CVarRef setRef(int64   key, CVarRef v) {
+    return setRefImpl(key, v);
+  }
+  CVarRef setRef(double  key, CVarRef v) {
+    return setRefImpl((int64)key, v);
+  }
+
+  CVarRef setRef(litstr  key, CVarRef v, bool isKey = false);
+  CVarRef setRef(CStrRef key, CVarRef v, bool isKey = false);
+  CVarRef setRef(CVarRef key, CVarRef v, bool isKey = false);
 
   // defined in type_variant.h
   template<typename T>
@@ -495,8 +537,10 @@ class Array : public SmartPtr<ArrayData> {
   void removeAll();
   void clear() { removeAll();}
 
-  Variant append(CVarRef v);
-  Variant appendWithRef(CVarRef v);
+  CVarRef append(CVarRef v);
+  CVarRef append(RefResult v) { return appendRef(variant(v)); }
+  CVarRef appendRef(CVarRef v);
+  CVarRef appendWithRef(CVarRef v);
   Variant appendOpEqual(int op, CVarRef v);
   Variant pop();
   Variant dequeue();

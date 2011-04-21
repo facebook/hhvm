@@ -239,7 +239,7 @@ bool f_settype(VRefParam var, CStrRef type);
 Variant f_print_r(CVarRef expression, bool ret = false);
 Variant f_var_export(CVarRef expression, bool ret = false);
 void f_var_dump(CVarRef v);
-void f_var_dump(int _argc, CVarRef expression, CArrRef _argv = null_array);
+void f_var_dump(int _argc, Variant expression, CArrRef _argv = null_array);
 void f_debug_zval_dump(CVarRef variable);
 String f_serialize(CVarRef value);
 Variant f_unserialize(CStrRef str);

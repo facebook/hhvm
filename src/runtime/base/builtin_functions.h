@@ -477,8 +477,13 @@ inline const SmartObject<T> &id(const SmartObject<T> &v) { return v; }
 
 /**
  * For wrapping return values to prevent elision of copy
- * constructors (which can incorrectly pass through
- * the contagious bit).
+ * constructors. Originally this could incorrectly pass
+ * through the contagious bit, which was disastrous.
+ *
+ * Now it could result in returning an isReferenced variant
+ * even when the function returns by value. This is not
+ * generally a problem, unless we start generating code that
+ * cares.
  */
 inline Variant wrap_variant(CVarRef x) { return x; }
 

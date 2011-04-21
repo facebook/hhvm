@@ -111,12 +111,10 @@ void f_var_dump(CVarRef v) {
     vs.incMaxCount();
   }
   vs.serialize(v, false);
-  if (v.isContagious()) {
-    v.clearContagious();
-  }
 }
 
-void f_var_dump(int _argc, CVarRef expression, CArrRef _argv /* = null_array */) {
+void f_var_dump(int _argc, Variant expression,
+                CArrRef _argv /* = null_array */) {
   f_var_dump(expression);
   for (int i = 0; i < _argv.size(); i++) {
     f_var_dump(_argv[i]);

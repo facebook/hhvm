@@ -34,9 +34,9 @@ Variant IncOpExpression::eval(VariableEnvironment &env) const {
 Variant IncOpExpression::refval(VariableEnvironment &env,
     int strict /* = 2 */) const {
   if (m_front) {
-    return ref(eval(env));
+    return strongBind(eval(env));
   } else {
-    return ref(Expression::refval(env, strict));
+    return strongBind(Expression::refval(env, strict));
   }
 }
 

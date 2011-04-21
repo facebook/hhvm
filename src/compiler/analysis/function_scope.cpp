@@ -817,8 +817,12 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
           TypePtr paramType = getParamType(i);
           paramType->outputCPPDecl(cg, ar, shared_from_this());
           string vname = Option::VariablePrefix + cg.formatLabel(name);
-          cg_printf(ref ? " v%s = ref(%s);\n" : " v%s = %s;\n",
-                    vname.c_str(), vname.c_str());
+          if (paramType->isExactType()) {
+            cg_printf(" v%s = %s;\n", vname.c_str(), vname.c_str());
+          } else {
+            cg_printf(" v%s = %sBind(%s);\n",
+                      vname.c_str(), ref ? "strong" : "weak", vname.c_str());
+          }
         }
       }
     }
@@ -1378,7 +1382,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
         cg_indentBegin("{\n");
       }
     }
-    cg_printf("%s%s%s", retrn, (m_refReturn ? "ref(" : "("),
+    cg_printf("%s%s%s", retrn, (m_refReturn ? "strongBind(" : "("),
               instance ? instance : "");
     if (m_perfectVirtual) {
       ClassScopePtr cls = getContainingClass();

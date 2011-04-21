@@ -269,15 +269,13 @@ Variant EvalObjectData::t___destruct() {
   }
 }
 Variant EvalObjectData::t___set(Variant v_name, Variant v_value) {
-  if (v_value.isReferenced()) {
-    v_value.setContagious();
-  }
   const MethodStatement *ms = getMethodStatement("__set");
   if (ms) {
-    return ms->invokeInstance(Object(root), CREATE_VECTOR2(v_name, v_value),
+    return ms->invokeInstance(Object(root),
+                              CREATE_VECTOR2(v_name, withRefBind(v_value)),
         false);
   } else {
-    return DynamicObjectData::t___set(v_name, v_value);
+    return DynamicObjectData::t___set(v_name, withRefBind(v_value));
   }
 }
 Variant EvalObjectData::t___get(Variant v_name) {

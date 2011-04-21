@@ -1012,7 +1012,11 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
   } else {
     if (hasContext(RefValue) && !hasContext(NoRefWrapper) &&
         isRefable()) {
-      cg_printf("ref(");
+      if (hasContext(RefParameter)) {
+        cg_printf("strongBind(");
+      } else {
+        cg_printf("ref(");
+      }
       closeParen++;
     }
     if (is(Expression::KindOfArrayElementExpression)) {
@@ -1083,7 +1087,13 @@ void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     bool ref = (m_context & RefValue) &&
       !(m_context & NoRefWrapper) &&
       isRefable();
-    if (ref) cg_printf("ref(");
+    if (ref) {
+      if (m_context & RefParameter) {
+        cg_printf("strongBind(");
+      } else {
+        cg_printf("ref(");
+      }
+    }
     cg_printf("%s", m_cppTemp.c_str());
     if (ref) cg_printf(")");
   } else {

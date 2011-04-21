@@ -1797,7 +1797,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
       {
         FunctionScopePtr func = getFunctionScope();
         if (func) {
-          bool isGetArgs = m_name == "func_get_args"; 
+          bool isGetArgs = m_name == "func_get_args";
           if (func->isGenerator()) {
             cg_printf("%s%s.%sinvoke(\"%s\", ",
                       Option::VariablePrefix, CONTINUATION_OBJECT_NAME,
@@ -1818,7 +1818,7 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
           if (isGetArgs && func->getMaxParamCount() == 0) {
             // in the special case of calling func_get_args() for
             // a function with no explicit params, bypass the call
-            // to func_get_args() and simply use the passed in args 
+            // to func_get_args() and simply use the passed in args
             // array or the empty array
             if (func->isVariableArgument()) {
               cg_printf("args.isNull() ? Array::Create() : args");

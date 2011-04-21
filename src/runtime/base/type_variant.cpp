@@ -149,7 +149,7 @@ Variant::Variant(Variant *v) : _count(0), m_type(KindOfVariant) {
 // the version of the high frequency function that is not inlined
 __attribute__ ((section (".text.hot")))
 Variant::Variant(CVarRef v) {
-  VariantHelper(v);
+  constructValHelper(v);
 }
 
 Variant::Variant(CVarWeakBind v) {
@@ -158,6 +158,10 @@ Variant::Variant(CVarWeakBind v) {
 
 Variant::Variant(CVarStrongBind v) {
   constructRefHelper(variant(v));
+}
+
+Variant::Variant(CVarWithRefBind v) {
+  constructWithRefHelper(variant(v), 0);
 }
 
 void Variant::reset() {
@@ -222,13 +226,6 @@ void Variant::destruct() {
 
 __attribute__ ((section (".text.hot")))
 Variant &Variant::assign(CVarRef v) {
-  // otherwise our code generation is wrong
-  ASSERT(!isContagious() || this == &v);
-  if (v.isContagious()) {
-    assignContagious(v);
-    return *this;
-  }
-
   AssignValHelper(this, &v);
   return *this;
 }
@@ -239,55 +236,8 @@ Variant &Variant::assignRef(CVarRef v) {
   return *this;
 }
 
-Variant &Variant::assignVal(CVarRef v) {
-  ASSERT(!isContagious() && !v.isContagious());
-  AssignValHelper(this, &v);
-  return *this;
-}
-
 Variant &Variant::setWithRef(CVarRef v, const ArrayData *arr /* = NULL */) {
-  ASSERT(!isContagious() && this != &v && !v.isContagious());
-
-  CVarRef rhs = v.m_type == KindOfVariant && v.m_data.pvar->getCount() <= 1 &&
-                (!arr || v.m_data.pvar->m_data.parr != arr) ?
-                *v.m_data.pvar : v;
-  if (IS_REFCOUNTED_TYPE(rhs.m_type)) {
-#ifdef FAST_REFCOUNT_FOR_VARIANT
-    Variant *var = rhs.m_data.pvar;
-    ASSERT(var);
-    var->incRefCount();
-#else
-    switch (rhs.m_type) {
-    case KindOfString: {
-      StringData *str = rhs.m_data.pstr;
-      str->incRefCount();
-      break;
-    }
-    case KindOfArray: {
-      ArrayData *arr = rhs.m_data.parr;
-      arr->incRefCount();
-      break;
-    }
-    case KindOfObject: {
-      ObjectData *obj = rhs.m_data.pobj;
-      obj->incRefCount();
-      break;
-    }
-    case KindOfVariant: {
-      Variant *var = rhs.m_data.pvar;
-      var->incRefCount();
-      break;
-    }
-    default:
-      ASSERT(false);
-    }
-#endif
-  }
-
-  if (IS_REFCOUNTED_TYPE(m_type)) destruct();
-  m_type = rhs.m_type;
-  if (m_type == KindOfUninit) m_type = KindOfNull; // drop uninit
-  m_data.num = rhs.m_data.num;
+  setWithRefHelper(v, arr, IS_REFCOUNTED_TYPE(m_type));
   return *this;
 }
 
@@ -312,34 +262,6 @@ CVarRef Variant::set(bool v) {
   }
   m_type = KindOfBoolean;
   m_data.num = (v ? 1 : 0);
-  return *this;
-}
-
-CVarRef Variant::set(char v) {
-  if (isPrimitive()) {
-    // do nothing
-  } else if (m_type == KindOfVariant) {
-    m_data.pvar->set(v);
-    return *this;
-  } else {
-    destruct();
-  }
-  m_type = KindOfInt32;
-  m_data.num = v;
-  return *this;
-}
-
-CVarRef Variant::set(short v) {
-  if (isPrimitive()) {
-    // do nothing
-  } else if (m_type == KindOfVariant) {
-    m_data.pvar->set(v);
-    return *this;
-  } else {
-    destruct();
-  }
-  m_type = KindOfInt32;
-  m_data.num = v;
   return *this;
 }
 
@@ -762,7 +684,7 @@ Variant Variant::array_iter_current_ref() {
       set(arr);
       ASSERT(arr == getArrayData());
     }
-    return ref(arr->currentRef());
+    return strongBind(arr->currentRef());
   }
   throw_bad_type_exception("expecting an array");
   return false;
@@ -1609,10 +1531,11 @@ MutableArrayIter Variant::begin(Variant *key, Variant &val,
 }
 
 void Variant::escalate(bool mutableIteration /* = false */) {
-  if (is(KindOfArray)) {
-    Array arr = toArray();
-    arr.escalate(mutableIteration);
-    set(arr);
+  TypedValueAccessor tva = getTypedAccessor();
+  if (GetAccessorType(tva) == KindOfArray) {
+    ArrayData *arr = GetArrayData(tva);
+    ArrayData *esc = arr->escalate(mutableIteration);
+    if (arr != esc) set(esc);
   }
 }
 
@@ -2385,6 +2308,12 @@ public:
 };
 
 template<>
+class LvalHelper<bool> : public LvalHelper<int64> {};
+
+template<>
+class LvalHelper<double> : public LvalHelper<int64> {};
+
+template<>
 class LvalHelper<CStrRef> {
 public:
   typedef VarNR KeyType;
@@ -2441,7 +2370,7 @@ Variant& Variant::lvalAtImpl(T key, ACCESSPARAMS_IMPL) {
 }
 
 Variant &Variant::lvalAt(bool    key, ACCESSPARAMS_IMPL) {
-  return lvalAt((int64)key, flags);
+  return lvalAtImpl(key, flags);
 }
 Variant &Variant::lvalAt(int     key, ACCESSPARAMS_IMPL) {
   return lvalAt((int64)key, flags);
@@ -2450,7 +2379,7 @@ Variant &Variant::lvalAt(int64   key, ACCESSPARAMS_IMPL) {
   return lvalAtImpl(key, flags);
 }
 Variant &Variant::lvalAt(double  key, ACCESSPARAMS_IMPL) {
-  return lvalAt((int64)key, flags);
+  return lvalAtImpl(key, flags);
 }
 Variant &Variant::lvalAt(litstr  ckey, ACCESSPARAMS_IMPL) {
   String key(ckey);
@@ -2559,7 +2488,7 @@ Variant Variant::refvalAtImpl(CStrRef key, bool isString /* = false */) {
     return m_data.pvar->refvalAtImpl(key, isString);
   }
   if (is(KindOfArray) || isObjectConvertable()) {
-    return ref(lvalAt(key, AccessFlags::IsKey(isString)));
+    return strongBind(lvalAt(key, AccessFlags::IsKey(isString)));
   } else {
     return rvalAt(key, AccessFlags::IsKey(isString));
   }
@@ -2595,7 +2524,7 @@ Variant Variant::argvalAtImpl(bool byRef, CStrRef key,
     return m_data.pvar->argvalAtImpl(byRef, key, isString);
   }
   if (byRef && (is(KindOfArray) || isObjectConvertable())) {
-    return ref(lvalAt(key, AccessFlags::IsKey(isString)));
+    return strongBind(lvalAt(key, AccessFlags::IsKey(isString)));
   } else {
     return rvalAt(key, AccessFlags::IsKey(isString));
   }
@@ -2665,13 +2594,13 @@ Variant Variant::o_argval(bool byRef, CStrRef propName,
     bool error /* = true */, CStrRef context /* = null_string */) const {
   if (m_type == KindOfObject) {
     if (byRef) {
-      return ref(m_data.pobj->o_lval(propName, context));
+      return strongBind(m_data.pobj->o_lval(propName, context));
     } else {
       return m_data.pobj->o_get(propName, error, context);
     }
   } else if (m_type == KindOfVariant) {
     if (byRef) {
-      return ref(m_data.pvar->o_lval(propName, context));
+      return strongBind(m_data.pvar->o_lval(propName, context));
     } else {
       return m_data.pvar->o_get(propName, error, context);
     }
@@ -2700,6 +2629,25 @@ Variant Variant::o_set(CStrRef propName, CVarRef val,
   return m_data.pobj->o_set(propName, val, false, context);
 }
 
+Variant Variant::o_setRef(CStrRef propName, CVarRef val,
+                          CStrRef context /* = null_string */) {
+  if (propName.empty()) {
+    throw EmptyObjectPropertyException();
+  }
+
+  if (m_type == KindOfObject) {
+  } else if (m_type == KindOfVariant) {
+    return m_data.pvar->o_setRef(propName, val, context);
+  } else if (isObjectConvertable()) {
+    set(Object(SystemLib::AllocStdClassObject()));
+  } else {
+    // Raise a warning
+    raise_warning("Attempt to assign property of non-object");
+    return val;
+  }
+  return m_data.pobj->o_setRef(propName, val, false, context);
+}
+
 Variant Variant::o_setPublic(CStrRef propName, CVarRef val) {
   if (propName.empty()) {
     throw EmptyObjectPropertyException();
@@ -2716,6 +2664,24 @@ Variant Variant::o_setPublic(CStrRef propName, CVarRef val) {
     return val;
   }
   return m_data.pobj->o_setPublic(propName, val, false);
+}
+
+Variant Variant::o_setPublicRef(CStrRef propName, CVarRef val) {
+  if (propName.empty()) {
+    throw EmptyObjectPropertyException();
+  }
+
+  if (m_type == KindOfObject) {
+  } else if (m_type == KindOfVariant) {
+    return m_data.pvar->o_setPublicRef(propName, val);
+  } else if (isObjectConvertable()) {
+    set(Object(SystemLib::AllocStdClassObject()));
+  } else {
+    // Raise a warning
+    raise_warning("Attempt to assign property of non-object");
+    return val;
+  }
+  return m_data.pobj->o_setPublicRef(propName, val, false);
 }
 
 Variant Variant::o_invoke(const char *s, CArrRef params,
@@ -2870,51 +2836,6 @@ Variant &Variant::o_unsetLval(CStrRef propName, CVarRef tmpForGet,
   }
 }
 
-#define IMPLEMENT_SETAT                                                 \
-  if (m_type == KindOfArray) {                                          \
-    ArrayData *escalated =                                              \
-      m_data.parr->set(ToKey(key), v, needCopyForSet(v));               \
-    if (escalated) {                                                    \
-      set(escalated);                                                   \
-    }                                                                   \
-    return v;                                                           \
-  }                                                                     \
-  switch (m_type) {                                                     \
-  case KindOfBoolean:                                                   \
-    if (toBoolean()) {                                                  \
-      throw_bad_type_exception("not array objects");                    \
-      break;                                                            \
-    }                                                                   \
-    /* Fall through */                                                  \
-  case KindOfUninit:                                                    \
-  case KindOfNull:                                                      \
-    set(ArrayData::Create(ToKey(key), v));                              \
-    break;                                                              \
-  case KindOfVariant:                                                   \
-    m_data.pvar->set(key, v);                                           \
-    break;                                                              \
-  case KindOfStaticString:                                              \
-  case KindOfString: {                                                  \
-    StringData *s = getStringData();                                    \
-    if (s->empty()) {                                                   \
-      set(Array::Create(ToKey(key), v));                                \
-    } else {                                                            \
-      StringData *es = StringData::Escalate(s);                         \
-      es->set(key, v.toString());                                       \
-      if (es != s) set(es);                                             \
-    }                                                                   \
-    break;                                                              \
-  }                                                                     \
-  case KindOfObject:                                                    \
-    getArrayAccess()->o_invoke(s_offsetSet,                             \
-                               CREATE_VECTOR2(key, v));                 \
-    break;                                                              \
-  default:                                                              \
-    throw_bad_type_exception("not array objects");                      \
-    break;                                                              \
-  }                                                                     \
-  return v;                                                             \
-
 #define OPEQUAL(op, l, r)                                               \
   switch (op) {                                                         \
   case T_CONCAT_EQUAL: concat_assign((l), r); break;                    \
@@ -2983,66 +2904,59 @@ check_array:                                                            \
   }                                                                     \
   return v;                                                             \
 
-CVarRef Variant::set(bool key, CVarRef v) {
-  IMPLEMENT_SETAT;
-}
-
-CVarRef Variant::set(int64 key, CVarRef v) {
-  IMPLEMENT_SETAT;
-}
-
-CVarRef Variant::set(double key, CVarRef v) {
-  IMPLEMENT_SETAT;
-}
-
-CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
-  if (m_type == KindOfArray) {
+template <typename T>
+inline ALWAYS_INLINE CVarRef Variant::SetImpl(Variant *self, T key,
+                                              CVarRef v, bool isKey) {
+  ASSERT(!v.isContagious());
+  retry:
+  if (LIKELY(self->m_type == KindOfArray)) {
     ArrayData *escalated;
-    if (isString) {
-      escalated = m_data.parr->set(key, v, needCopyForSet(v));
+    if (LvalHelper<T>::CheckParams && isKey) {
+      escalated = self->m_data.parr->set(key, v, self->needCopyForSet(v));
     } else {
-      escalated = m_data.parr->set(ToKey(key), v, needCopyForSet(v));
+      typename LvalHelper<T>::KeyType k(ToKey(key));
+      if (!LvalHelper<T>::CheckKey(k)) return lvalBlackHole();
+      escalated = self->m_data.parr->set(k, v, self->needCopyForSet(v));
     }
     if (escalated) {
-      set(escalated);
+      self->set(escalated);
     }
     return v;
   }
-  switch (m_type) {
+  switch (self->m_type) {
   case KindOfBoolean:
-    if (toBoolean()) {
+    if (self->m_data.num) {
       throw_bad_type_exception("not array objects");
       break;
     }
     /* Fall through */
   case KindOfUninit:
   case KindOfNull:
-    if (isString) {
-      set(ArrayData::Create(key, v));
+  create:
+    if (LvalHelper<T>::CheckParams && isKey) {
+      self->set(ArrayData::Create(key, v));
     } else {
-      set(ArrayData::Create(ToKey(key), v));
+      typename LvalHelper<T>::KeyType k(ToKey(key));
+      if (!LvalHelper<T>::CheckKey(k)) return lvalBlackHole();
+      self->set(ArrayData::Create(k, v));
     }
     break;
   case KindOfVariant:
-    return m_data.pvar->set(key, v);
+    self = self->m_data.pvar;
+    goto retry;
   case KindOfStaticString:
   case KindOfString: {
-    StringData *s = getStringData();
+    StringData *s = self->m_data.pstr;
     if (s->empty()) {
-      if (isString) {
-        set(Array::Create(key, v));
-      } else {
-        set(Array::Create(ToKey(key), v));
-      }
-    } else {
-      StringData *es = StringData::Escalate(s);
-      es->set(key, v.toString());
-      if (es != s) set(es);
+      goto create;
     }
+    StringData *es = StringData::Escalate(s);
+    es->set(key, v.toString());
+    if (es != s) self->set(es);
     break;
   }
   case KindOfObject:
-    getArrayAccess()->o_invoke(s_offsetSet, CREATE_VECTOR2(key, v));
+    self->getArrayAccess()->o_invoke_few_args(s_offsetSet, -1, 2, key, v);
     break;
   default:
     throw_bad_type_exception("not array objects");
@@ -3051,53 +2965,188 @@ CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
   return v;
 }
 
+CVarRef Variant::set(bool key, CVarRef v) {
+  return SetImpl(this, key, v, false);
+}
+
+CVarRef Variant::set(int64 key, CVarRef v) {
+  return SetImpl(this, key, v, false);
+}
+
+CVarRef Variant::set(double key, CVarRef v) {
+  return SetImpl(this, key, v, false);
+}
+
+CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
+  return SetImpl<CStrRef>(this, key, v, isString);
+}
+
 __attribute__ ((section (".text.hot")))
 CVarRef Variant::set(CVarRef key, CVarRef v) {
-  if (m_type == KindOfArray) {
-    VarNR k(ToKey(key));
-    if (k.isNull()) return lvalBlackHole();
-    ArrayData *escalated = m_data.parr->set(k, v, needCopyForSet(v));
+  return SetImpl<CVarRef>(this, key, v, false);
+}
+
+CVarRef Variant::append(CVarRef v) {
+  ASSERT(!v.isContagious());
+  switch (m_type) {
+  case KindOfUninit:
+  case KindOfNull:
+    set(ArrayData::Create(v));
+    break;
+  case KindOfBoolean:
+    if (!toBoolean()) {
+      set(ArrayData::Create(v));
+    } else {
+      throw_bad_type_exception("[] operator not supported for this type");
+    }
+    break;
+  case KindOfArray:
+    {
+      ArrayData *escalated = m_data.parr->append(v, needCopyForSet(v));
+      if (escalated) {
+        set(escalated);
+      }
+    }
+    break;
+  case KindOfVariant:
+    m_data.pvar->append(v);
+    break;
+  case KindOfObject:
+    {
+      Array params = CREATE_VECTOR2(null, v);
+      m_data.pobj->o_invoke(s_offsetSet, params);
+      break;
+    }
+  case KindOfStaticString:
+  case KindOfString:
+    if (getStringData()->empty()) {
+      set(ArrayData::Create(v));
+      return v;
+    }
+    // fall through to throw
+  default:
+    throw_bad_type_exception("[] operator not supported for this type");
+  }
+  return v;
+}
+
+template <typename T>
+inline ALWAYS_INLINE CVarRef Variant::SetRefImpl(Variant *self, T key,
+                                                 CVarRef v, bool isKey) {
+  ASSERT(!v.isContagious());
+  retry:
+  if (LIKELY(self->m_type == KindOfArray)) {
+    ArrayData *escalated;
+    if (LvalHelper<T>::CheckParams && isKey) {
+      escalated = self->m_data.parr->setRef(key, v, self->needCopyForSetRef(v));
+    } else {
+      typename LvalHelper<T>::KeyType k(ToKey(key));
+      if (!LvalHelper<T>::CheckKey(k)) return lvalBlackHole();
+      escalated = self->m_data.parr->setRef(k, v, self->needCopyForSetRef(v));
+    }
     if (escalated) {
-      set(escalated);
+      self->set(escalated);
     }
     return v;
   }
-  switch (m_type) {
+  switch (self->m_type) {
   case KindOfBoolean:
-    if (toBoolean()) {
+    if (self->m_data.num) {
       throw_bad_type_exception("not array objects");
       break;
     }
     /* Fall through */
   case KindOfUninit:
-  case KindOfNull: {
-    VarNR k(ToKey(key));
-    if (k.isNull()) return lvalBlackHole();
-    set(ArrayData::Create(k, v));
+  case KindOfNull:
+  create:
+    if (LvalHelper<T>::CheckParams && isKey) {
+      self->set(ArrayData::CreateRef(key, v));
+    } else {
+      typename LvalHelper<T>::KeyType k(ToKey(key));
+      if (!LvalHelper<T>::CheckKey(k)) return lvalBlackHole();
+      self->set(ArrayData::CreateRef(k, v));
+    }
     break;
-  }
   case KindOfVariant:
-    return m_data.pvar->set(key, v);
+    self = self->m_data.pvar;
+    goto retry;
   case KindOfStaticString:
   case KindOfString: {
-    StringData *s = getStringData();
-    if (s->empty()) {
-      VarNR k(ToKey(key));
-      if (k.isNull()) return lvalBlackHole();
-      set(Array::Create(k, v));
-    } else {
-      StringData *es = StringData::Escalate(s);
-      es->set(key, v.toString());
-      if (es != s) set(es);
+    if (self->m_data.pstr->empty()) {
+      goto create;
     }
+    throw_bad_type_exception("binding assignment to stringoffset");
     break;
   }
   case KindOfObject:
-    getArrayAccess()->o_invoke(s_offsetSet, CREATE_VECTOR2(key, v));
+    self->getArrayAccess()->o_invoke_few_args(s_offsetSet, -1, 2, key, v);
     break;
   default:
     throw_bad_type_exception("not array objects");
     break;
+  }
+  return v;
+}
+
+CVarRef Variant::setRef(bool key, CVarRef v) {
+  return SetRefImpl(this, key, v, false);
+}
+
+CVarRef Variant::setRef(int64 key, CVarRef v) {
+  return SetRefImpl(this, key, v, false);
+}
+
+CVarRef Variant::setRef(double key, CVarRef v) {
+  return SetRefImpl(this, key, v, false);
+}
+
+CVarRef Variant::setRef(CStrRef key, CVarRef v, bool isString /* = false */) {
+  return SetRefImpl<CStrRef>(this, key, v, isString);
+}
+
+CVarRef Variant::setRef(CVarRef key, CVarRef v) {
+  return SetRefImpl<CVarRef>(this, key, v, false);
+}
+
+CVarRef Variant::appendRef(CVarRef v) {
+  ASSERT(!v.isContagious());
+  switch (m_type) {
+  case KindOfUninit:
+  case KindOfNull:
+    set(ArrayData::CreateRef(v));
+    break;
+  case KindOfBoolean:
+    if (!toBoolean()) {
+      set(ArrayData::CreateRef(v));
+    } else {
+      throw_bad_type_exception("[] operator not supported for this type");
+    }
+    break;
+  case KindOfArray:
+    {
+      ArrayData *escalated = m_data.parr->appendRef(v, needCopyForSetRef(v));
+      if (escalated) {
+        set(escalated);
+      }
+    }
+    break;
+  case KindOfVariant:
+    m_data.pvar->appendRef(v);
+    break;
+  case KindOfObject:
+    {
+      m_data.pobj->o_invoke_few_args(s_offsetSet, -1, 2, null, v);
+      break;
+    }
+  case KindOfStaticString:
+  case KindOfString:
+    if (getStringData()->empty()) {
+      set(ArrayData::CreateRef(v));
+      return v;
+    }
+    // fall through to throw
+  default:
+    throw_bad_type_exception("[] operator not supported for this type");
   }
   return v;
 }
@@ -3234,49 +3283,6 @@ check_array:
   default:
     throw_bad_type_exception("not array objects");
     break;
-  }
-  return v;
-}
-
-CVarRef Variant::append(CVarRef v) {
-  switch (m_type) {
-  case KindOfUninit:
-  case KindOfNull:
-    set(ArrayData::Create(v));
-    break;
-  case KindOfBoolean:
-    if (!toBoolean()) {
-      set(ArrayData::Create(v));
-    } else {
-      throw_bad_type_exception("[] operator not supported for this type");
-    }
-    break;
-  case KindOfArray:
-    {
-      ArrayData *escalated = m_data.parr->append(v, needCopyForSet(v));
-      if (escalated) {
-        set(escalated);
-      }
-    }
-    break;
-  case KindOfVariant:
-    m_data.pvar->append(v);
-    break;
-  case KindOfObject:
-    {
-      Array params = CREATE_VECTOR2(null, v);
-      m_data.pobj->o_invoke(s_offsetSet, params);
-      break;
-    }
-  case KindOfStaticString:
-  case KindOfString:
-    if (getStringData()->empty()) {
-      set(ArrayData::Create(v));
-      return v;
-    }
-    // fall through to throw
-  default:
-    throw_bad_type_exception("[] operator not supported for this type");
   }
   return v;
 }

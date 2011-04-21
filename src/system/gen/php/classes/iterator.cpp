@@ -1549,7 +1549,7 @@ Variant c_AppendIterator::t_getinneriterator() {
     CVarRef obj0 = m_iterators;
     mcp0.methodCall((obj0), NAMSTR(s_sys_ssb3a5c1b3, "current"), 0x5B3A4A72846B21DCLL);
     const CallInfo *cit0 ATTRIBUTE_UNUSED = mcp0.ci;
-    return wrap_variant((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
+    return weakBind((mcp0.bindClass(fi)->getMeth0Args())(mcp0, 0));
   }
 }
 namespace hphp_impl_splitter {}
@@ -2325,7 +2325,7 @@ Variant c_MutableArrayIterator::i_currentref(MethodCallPackage &mcp, CArrRef par
     self = createDummy(pobj);
   }
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("MutableArrayIterator::currentRef", 0, 1);
-  return ref(self->t_currentref());
+  return strongBind(self->t_currentref());
 }
 Variant c_MutableArrayIterator::i___construct(MethodCallPackage &mcp, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();
@@ -2356,7 +2356,7 @@ Variant c_MutableArrayIterator::ifa_currentref(MethodCallPackage &mcp, int count
     self = createDummy(pobj);
   }
   if (UNLIKELY(count > 0)) return throw_toomany_arguments("MutableArrayIterator::currentRef", 0, 1);
-  return ref(self->t_currentref());
+  return strongBind(self->t_currentref());
 }
 Variant c_MutableArrayIterator::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_MutableArrayIterator *self = NULL;
@@ -2448,7 +2448,7 @@ namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 648 */
 Variant c_MutableArrayIterator::t_currentref() {
   INSTANCE_METHOD_INJECTION_BUILTIN(MutableArrayIterator, MutableArrayIterator::currentRef);
-  return ref(x_hphp_current_ref(ref(m_arr)));
+  return strongBind(x_hphp_current_ref(ref(m_arr)));
 }
 namespace hphp_impl_splitter {}
 /* SRC: classes/iterator.php line 662 */

@@ -158,6 +158,7 @@ typedef const class VRefParamValue    &VRefParam;
 typedef const class RefResultValue    &RefResult;
 typedef const class VariantWeakBind   &CVarWeakBind;
 typedef const class VariantStrongBind &CVarStrongBind;
+typedef const class VariantWithRefBind&CVarWithRefBind;
 typedef VRefParam                     VRefParamWrap;
 
 inline CVarWeakBind
@@ -166,12 +167,19 @@ inline CVarStrongBind
 strongBind(CVarRef v)     { return *(VariantStrongBind*)&v; }
 inline CVarStrongBind
 strongBind(RefResult v)   { return *(VariantStrongBind*)&v; }
+inline CVarWithRefBind
+withRefBind(CVarRef v)    { return *(VariantWithRefBind*)&v; }
+
 inline CVarRef
 variant(CVarWeakBind v)   { return *(Variant*)&v; }
 inline CVarRef
 variant(CVarStrongBind v) { return *(Variant*)&v; }
 inline CVarRef
+variant(CVarWithRefBind v){ return *(Variant*)&v; }
+inline CVarRef
 variant(RefResult v)      { return *(Variant*)&v; }
+inline CVarRef
+variant(CVarRef v)        { return v; }
 
 /**
  * ref() sets contagious flag, so that next assignment will make both sides

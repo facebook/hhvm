@@ -148,11 +148,26 @@ Variant TempExpressionList::set(VariableEnvironment &env, CVarRef val) const {
   return setImpl(env, val);
 }
 
+Variant TempExpressionList::setRef(VariableEnvironment &env,
+                                   CVarRef val) const {
+  TempExpressionHelper helper(this, env);
+  return setRefImpl(env, val);
+}
+
 Variant TempExpressionList::setImpl(VariableEnvironment &env,
                                     CVarRef val) const {
   const LvalExpression *exp = m_last->toLval();
   if (exp) {
     return exp->set(env, val);
+  }
+  return null;
+}
+
+Variant TempExpressionList::setRefImpl(VariableEnvironment &env,
+                                       CVarRef val) const {
+  const LvalExpression *exp = m_last->toLval();
+  if (exp) {
+    return exp->setRef(env, val);
   }
   return null;
 }

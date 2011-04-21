@@ -1078,7 +1078,7 @@ DefineFunction(
     'args'   => array(
       array(
         'name'   => "array",
-        'type'   => Variant,
+        'type'   => Variant | Reference,
         'desc'   => "The array.",
       ),
     ),

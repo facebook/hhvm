@@ -282,7 +282,7 @@ inline Variant f_each(VRefParam array) {
   array.array_iter_dirty_check();
   return array.array_iter_each();
 }
-inline Variant f_current(CVarRef array) {
+inline Variant f_current(VRefParam array) {
   array.array_iter_dirty_check();
   return array.array_iter_current();
 }
@@ -291,7 +291,7 @@ inline Variant f_hphp_current_ref(VRefParam array) {
     throw_bad_array_exception();
     return false;
   }
-  return ref(array.array_iter_current_ref());
+  return strongBind(array.array_iter_current_ref());
 }
 inline Variant f_next(VRefParam array) {
   array.array_iter_dirty_check();

@@ -49,7 +49,7 @@ bool FunctionCallExpression::exist(VariableEnvironment &env, int op) const {
 
 Variant FunctionCallExpression::refval(VariableEnvironment &env,
     int strict /* = 2 */) const {
-  return ref(eval(env));
+  return strongBind(eval(env));
 }
 
 

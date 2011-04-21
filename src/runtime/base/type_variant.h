@@ -49,16 +49,7 @@ class MutableArrayIter;
  *
  * Variant is also the only way to implement references. A reference is a
  * strong binding between two variables, meaning they both point to the same
- * underlying data. Perhaps "contagious" bit is the hardest to understand, but
- * it's really just a temporary flag to indicate that next assignment should
- * set both variables to be strongly bound together. For example,
- *
- *   a = ref(b);
- *
- * Here, ref() simply sets "contagious" flag on b. Then assignment a = b will
- * check contagious flag. If on, both will be bound together. Then contagious
- * flag will be cleared, so not to affect future assignments. Code generation
- * made sure both "a" and "b" are Variants, otherwise we won't do references.
+ * underlying data.
  *
  * In this class, strong binding is done through "pvar" member variable. All
  * others are for weak bindings. Primitive types can just make copies, but not
@@ -158,23 +149,21 @@ class Variant {
   Variant(ObjectData *v);
   Variant(Variant *v);
 
-  inline ALWAYS_INLINE void VariantHelper(CVarRef v) {
-    if (UNLIKELY(v.isContagious())) {
-      v.clearContagious();
-      constructRefHelper(v);
-      return;
-    }
-    constructValHelper(v);
-  }
-
 #ifdef INLINE_VARIANT_HELPER
-  inline ALWAYS_INLINE Variant(CVarRef v) { VariantHelper(v);}
+  inline ALWAYS_INLINE Variant(CVarRef v) { constructValHelper(v); }
+  inline ALWAYS_INLINE
   Variant(CVarWeakBind v) { constructValHelper(variant(v)); }
+  inline ALWAYS_INLINE
   Variant(CVarStrongBind v) { constructRefHelper(variant(v)); }
+  inline ALWAYS_INLINE
+  Variant(CVarWithRefBind v) {
+    constructWithRefHelper(variant(v), 0);
+  }
 #else
   Variant(CVarRef v);
   Variant(CVarWeakBind v);
   Variant(CVarStrongBind v);
+  Variant(CVarWithRefBind v);
 #endif
 
  private:
@@ -308,17 +297,6 @@ class Variant {
   }
   bool isResource() const;
   bool instanceof(CStrRef s) const;
-
-  /**
-   * Borrowing Countable::_count for contagious bit, and this is okay, since
-   * outer Variant never uses reference counting.
-   */
-  void setContagious() const {
-    ASSERT(this != &null_variant);
-    ASSERT(!isVarNR());
-    _count = -1;
-  }
-  void clearContagious() const { ASSERT(!isVarNR()); _count = 0;}
   bool isContagious() const { return _count == -1;}
 
   /**
@@ -329,7 +307,7 @@ class Variant {
    */
   int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const;
 
-  static int64 DoubleHashForIntSwitch(double dbl, int64 noMatch); 
+  static int64 DoubleHashForIntSwitch(double dbl, int64 noMatch);
 
   int64 hashForStringSwitch(
       int64 firstTrueCaseHash,
@@ -381,7 +359,7 @@ class Variant {
    * Operators
    */
   Variant &assign(CVarRef v);
-  Variant &assignVal(CVarRef v);
+  Variant &assignVal(CVarRef v) { return assign(v); }
   Variant &assignRef(CVarRef v);
 
   Variant &operator=(CVarRef v) {
@@ -390,6 +368,7 @@ class Variant {
   Variant &operator=(RefResult v) { return assignRef(variant(v)); }
   Variant &operator=(CVarStrongBind v) { return assignRef(variant(v)); }
   Variant &operator=(CVarWeakBind v) { return assignVal(variant(v)); }
+  Variant &operator=(CVarWithRefBind v) { return setWithRef(variant(v)); }
 
   Variant &operator=(const StaticString &v) {
     set(v);
@@ -746,8 +725,16 @@ class Variant {
   Variant o_get(CStrRef propName, bool error = true,
                 CStrRef context = null_string) const;
   Variant o_set(CStrRef s, CVarRef v, CStrRef context = null_string);
+  Variant o_set(CStrRef s, RefResult v, CStrRef context = null_string) {
+    return o_setRef(s, variant(v), context);
+  }
+  Variant o_setRef(CStrRef s, CVarRef v, CStrRef context = null_string);
   Variant o_getPublic(CStrRef propName, bool error = true) const;
   Variant o_setPublic(CStrRef s, CVarRef v);
+  Variant o_setPublic(CStrRef s, RefResult v) {
+    return o_setPublicRef(s, variant(v));
+  }
+  Variant o_setPublicRef(CStrRef s, CVarRef v);
   Variant &o_lval(CStrRef propName, CVarRef tmpForGet,
                   CStrRef context = null_string);
   Variant &o_unsetLval(CStrRef s, CVarRef tmpForGet,
@@ -773,10 +760,14 @@ class Variant {
                             INVOKE_FEW_ARGS_DECL_ARGS);
   bool o_get_call_info(MethodCallPackage &info, int64 hash = -1);
 
-  /**
-   * The whole purpose of VariantOffset is to collect "v" parameter to call
-   * this function.
-   */
+  template <typename T>
+  inline ALWAYS_INLINE static CVarRef SetImpl(
+    Variant *self, T key, CVarRef v, bool isKey);
+
+  template <typename T>
+  inline ALWAYS_INLINE static CVarRef SetRefImpl(
+    Variant *self, T key, CVarRef v, bool isKey);
+
   CVarRef set(bool    key, CVarRef v);
   CVarRef set(int     key, CVarRef v) { return set((int64)key, v); }
   CVarRef set(int64   key, CVarRef v);
@@ -788,6 +779,31 @@ class Variant {
   CVarRef set(CVarRef key, CVarRef v);
 
   CVarRef append(CVarRef v);
+
+  CVarRef setRef(bool    key, CVarRef v);
+  CVarRef setRef(int     key, CVarRef v) { return setRef((int64)key, v); }
+  CVarRef setRef(int64   key, CVarRef v);
+  CVarRef setRef(double  key, CVarRef v);
+  CVarRef setRef(litstr  key, CVarRef v, bool isString = false) {
+    return setRef(String(key), v, isString);
+  }
+  CVarRef setRef(CStrRef key, CVarRef v, bool isString = false);
+  CVarRef setRef(CVarRef key, CVarRef v);
+
+  CVarRef set(bool    key, RefResult v) { return setRef(key, variant(v)); }
+  CVarRef set(int     key, RefResult v) { return setRef(key, variant(v)); }
+  CVarRef set(int64   key, RefResult v) { return setRef(key, variant(v)); }
+  CVarRef set(double  key, RefResult v) { return setRef(key, variant(v)); }
+  CVarRef set(litstr  key, RefResult v, bool isString = false) {
+    return setRef(key, variant(v), isString);
+  }
+  CVarRef set(CStrRef key, RefResult v, bool isString = false) {
+    return setRef(key, variant(v), isString);
+  }
+  CVarRef set(CVarRef key, RefResult v) { return setRef(key, variant(v)); }
+
+  CVarRef appendRef(CVarRef v);
+  CVarRef append(RefResult v) { return appendRef(variant(v)); }
 
   CVarRef setOpEqual(int op, bool key, CVarRef v);
   CVarRef setOpEqual(int op, int key, CVarRef v) {
@@ -904,11 +920,11 @@ class Variant {
     return m_type == KindOfVariant ? m_data.pvar->m_data.pstr : m_data.pstr;
   }
   StringData *getStringDataOrNull() const {
-    // This is a necessary evil because getStringData() returns 
+    // This is a necessary evil because getStringData() returns
     // an undefined result if this is a null variant
     ASSERT(isNull() || is(KindOfString) || is(KindOfStaticString));
     return m_type == KindOfVariant ?
-      (m_data.pvar->m_type <= KindOfNull ? NULL : m_data.pvar->m_data.pstr) : 
+      (m_data.pvar->m_type <= KindOfNull ? NULL : m_data.pvar->m_data.pstr) :
       (m_type <= KindOfNull ? NULL : m_data.pstr);
   }
   ArrayData *getArrayData() const {
@@ -916,11 +932,11 @@ class Variant {
     return m_type == KindOfVariant ? m_data.pvar->m_data.parr : m_data.parr;
   }
   ArrayData *getArrayDataOrNull() const {
-    // This is a necessary evil because getArrayData() returns 
+    // This is a necessary evil because getArrayData() returns
     // an undefined result if this is a null variant
     ASSERT(isNull() || is(KindOfArray));
     return m_type == KindOfVariant ?
-      (m_data.pvar->m_type <= KindOfNull ? NULL : m_data.pvar->m_data.parr) : 
+      (m_data.pvar->m_type <= KindOfNull ? NULL : m_data.pvar->m_data.parr) :
       (m_type <= KindOfNull ? NULL : m_data.parr);
   }
   ObjectData *getObjectData() const {
@@ -928,11 +944,11 @@ class Variant {
     return m_type == KindOfVariant ? m_data.pvar->m_data.pobj : m_data.pobj;
   }
   ObjectData *getObjectDataOrNull() const {
-    // This is a necessary evil because getObjectData() returns 
+    // This is a necessary evil because getObjectData() returns
     // an undefined result if this is a null variant
     ASSERT(isNull() || is(KindOfObject));
     return m_type == KindOfVariant ?
-      (m_data.pvar->m_type <= KindOfNull ? NULL : m_data.pvar->m_data.pobj) : 
+      (m_data.pvar->m_type <= KindOfNull ? NULL : m_data.pvar->m_data.pobj) :
       (m_type <= KindOfNull ? NULL : m_data.pobj);
   }
   Variant *getVariantData() const {
@@ -1030,8 +1046,6 @@ class Variant {
   void removeImpl(CStrRef key, bool isString = false);
 
   CVarRef set(bool    v);
-  CVarRef set(char    v);
-  CVarRef set(short   v);
   CVarRef set(int     v);
   CVarRef set(int64   v);
   CVarRef set(double  v);
@@ -1056,7 +1070,8 @@ class Variant {
   // only called from constructor
   void init(ObjectData *v);
 
-  static void AssignValHelper(Variant *self, const Variant *other) {
+  static inline ALWAYS_INLINE
+  void AssignValHelper(Variant *self, const Variant *other) {
     ASSERT(!self->isContagious() && !other->isContagious());
     if (self->m_type == KindOfVariant) self = self->m_data.pvar;
     if (other->m_type == KindOfVariant) other = other->m_data.pvar;
@@ -1091,19 +1106,9 @@ class Variant {
     }
   }
 
-  // Internal helper for strongly binding a variable
-  void strongBind(Variant *v) {
-    ASSERT(v != this);
-    if (v) {
-      v->incRefCount(); // in case destruct() triggers deletion of v
-      if (IS_REFCOUNTED_TYPE(m_type)) destruct();
-      m_type = KindOfVariant;
-      m_data.pvar = v;
-    } else {
-      unset();
-    }
-  }
-
+#ifdef INLINE_VARIANT_HELPER
+public:
+#endif
   static inline ALWAYS_INLINE void PromoteToVariant(CVarRef v) {
     ASSERT(!v.isVarNR());
     ASSERT(&v != &null_variant);
@@ -1120,12 +1125,19 @@ class Variant {
     }
   }
 
-  void assignRefHelper(CVarRef v) {
-    PromoteToVariant(v);
-    strongBind(v.m_data.pvar);
+  inline ALWAYS_INLINE void assignValHelper(CVarRef v) {
+    AssignValHelper(this, &v);
   }
 
-  void constructRefHelper(CVarRef v) {
+  inline ALWAYS_INLINE void assignRefHelper(CVarRef v) {
+    PromoteToVariant(v);
+    v.m_data.pvar->incRefCount(); // in case destruct() triggers deletion of v
+    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
+    m_type = KindOfVariant;
+    m_data.pvar = v.m_data.pvar;
+  }
+
+  inline ALWAYS_INLINE void constructRefHelper(CVarRef v) {
     PromoteToVariant(v);
     v.m_data.pvar->incRefCount();
     m_data.pvar = v.m_data.pvar;
@@ -1133,8 +1145,9 @@ class Variant {
     _count = 0;
   }
 
-  void constructValHelper(CVarRef v) {
-    const Variant *other = v.m_type == KindOfVariant ? v.m_data.pvar : &v;
+  inline ALWAYS_INLINE void constructValHelper(CVarRef v) {
+    const Variant *other =
+      UNLIKELY(v.m_type == KindOfVariant) ? v.m_data.pvar : &v;
     ASSERT(this != other);
     if (IS_REFCOUNTED_TYPE(other->m_type)) {
 #ifdef FAST_REFCOUNT_FOR_VARIANT
@@ -1163,12 +1176,61 @@ class Variant {
     m_data = other->m_data;
   }
 
-  // Internal helper for handling contagious assignment
-  void assignContagious(CVarRef v) {
-    ASSERT(v.isContagious());
-    v.clearContagious();
-    assignRefHelper(v);
+  inline ALWAYS_INLINE
+  void setWithRefHelper(CVarRef v, const ArrayData *arr, bool destroy) {
+    ASSERT(!isContagious() && this != &v && !v.isContagious());
+
+    CVarRef rhs = v.m_type == KindOfVariant && v.m_data.pvar->getCount() <= 1 &&
+      (!arr || v.m_data.pvar->m_data.parr != arr) ?
+      *v.m_data.pvar : v;
+    if (IS_REFCOUNTED_TYPE(rhs.m_type)) {
+#ifdef FAST_REFCOUNT_FOR_VARIANT
+      Variant *var = rhs.m_data.pvar;
+      ASSERT(var);
+      var->incRefCount();
+#else
+      switch (rhs.m_type) {
+        case KindOfString: {
+          StringData *str = rhs.m_data.pstr;
+          str->incRefCount();
+          break;
+        }
+        case KindOfArray: {
+          ArrayData *arr = rhs.m_data.parr;
+          arr->incRefCount();
+          break;
+        }
+        case KindOfObject: {
+          ObjectData *obj = rhs.m_data.pobj;
+          obj->incRefCount();
+          break;
+        }
+        case KindOfVariant: {
+          Variant *var = rhs.m_data.pvar;
+          var->incRefCount();
+          break;
+        }
+        default:
+          ASSERT(false);
+      }
+#endif
+    }
+
+    if (destroy) destruct();
+    m_type = rhs.m_type;
+    if (m_type == KindOfUninit) m_type = KindOfNull; // drop uninit
+    m_data.num = rhs.m_data.num;
   }
+
+  inline ALWAYS_INLINE
+  void constructWithRefHelper(CVarRef v, const ArrayData *arr) {
+    _count = 0;
+    setWithRefHelper(v, arr, false);
+  }
+
+#ifdef INLINE_VARIANT_HELPER
+private:
+#endif
 
   void split();  // breaking weak binding by making a real copy
 
@@ -1181,7 +1243,7 @@ class Variant {
       return m_data.pvar->refvalAtImpl(key);
     }
     if (is(KindOfArray) || isObjectConvertable()) {
-      return ref(lvalAt(key));
+      return strongBind(lvalAt(key));
     } else {
       return rvalAt(key);
     }
@@ -1194,17 +1256,16 @@ class Variant {
     if (m_type == KindOfVariant) {
       return m_data.pvar->argvalAtImpl(byRef, key);
     }
-    if (byRef && (is(KindOfArray) || isNull() ||
-          (is(KindOfBoolean) && !toBoolean()) ||
-          (is(KindOfStaticString) && getStringData()->empty()) ||
-          (is(KindOfString) && getStringData()->empty()))) {
-      return ref(lvalAt(key));
+    if (byRef && (m_type == KindOfArray ||
+                  isObjectConvertable())) {
+      return strongBind(lvalAt(key));
     } else {
       return rvalAt(key);
     }
   }
   Variant argvalAtImpl(bool byRef, CStrRef key, bool isString = false);
 
+ private:
   /**
    * Checks whether the LHS array needs to be copied for a *one-level*
    * array set, e.g., "$a[] = $v" or "$a['x'] = $v".
@@ -1221,16 +1282,18 @@ class Variant {
   bool needCopyForSet(CVarRef v) {
     ASSERT(m_type == KindOfArray);
     if (m_data.parr->getCount() > 1) return true;
-    if (!v.isContagious()) {
-      if (v.m_type == KindOfArray) return m_data.parr == v.m_data.parr;
-      if (v.m_type == KindOfVariant) {
-        return m_data.parr == v.m_data.pvar->m_data.parr;
-      }
+    if (v.m_type == KindOfArray) return m_data.parr == v.m_data.parr;
+    if (v.m_type == KindOfVariant) {
+      return m_data.parr == v.m_data.pvar->m_data.parr;
     }
     return false;
   }
 
- private:
+  bool needCopyForSetRef(CVarRef v) {
+    ASSERT(m_type == KindOfArray);
+    return m_data.parr->getCount() > 1;
+  }
+
   bool   toBooleanHelper() const;
   int64  toInt64Helper(int base = 10) const;
   double toDoubleHelper() const;
@@ -1251,7 +1314,6 @@ class Variant {
 
 class RefResultValue {
 public:
-  operator CVarRef() const { m_var.setContagious(); return m_var; }
   CVarRef get() const { return m_var; }
 private:
   Variant m_var;
@@ -1336,8 +1398,9 @@ inline VRefParam directRef(CVarRef v) {
   these two classes are just to help choose the correct
   override.
 */
-class VariantWeakBind : private Variant {};
-class VariantStrongBind : private Variant {};
+class VariantWeakBind { private: Variant m_var; };
+class VariantStrongBind { private: Variant m_var; };
+class VariantWithRefBind { private: Variant m_var; };
 
 template<int op> class AssignOp {
 public:
@@ -1422,15 +1485,30 @@ private:
 
 template<typename T>
 CVarRef Array::setImpl(const T &key, CVarRef v) {
+  ASSERT(!v.isContagious());
   if (!m_px) {
     ArrayData *data = ArrayData::Create(key, v);
     SmartPtr<ArrayData>::operator=(data);
   } else {
-    if (UNLIKELY(v.isContagious())) {
-      escalate();
-    }
     ArrayData *escalated =
       m_px->set(key, v, (m_px->getCount() > 1));
+    if (escalated) {
+      SmartPtr<ArrayData>::operator=(escalated);
+    }
+  }
+  return v;
+}
+
+template<typename T>
+CVarRef Array::setRefImpl(const T &key, CVarRef v) {
+  ASSERT(!v.isContagious());
+  if (!m_px) {
+    ArrayData *data = ArrayData::CreateRef(key, v);
+    SmartPtr<ArrayData>::operator=(data);
+  } else {
+    escalate();
+    ArrayData *escalated =
+      m_px->setRef(key, v, (m_px->getCount() > 1));
     if (escalated) {
       SmartPtr<ArrayData>::operator=(escalated);
     }
@@ -1444,7 +1522,6 @@ CVarRef Array::addImpl(const T &key, CVarRef v) {
     ArrayData *data = ArrayData::Create(key, v);
     SmartPtr<ArrayData>::operator=(data);
   } else {
-    if (UNLIKELY(v.isContagious())) escalate();
     ArrayData *escalated = m_px->add(key, v, (m_px->getCount() > 1));
     if (escalated) {
       SmartPtr<ArrayData>::operator=(escalated);
@@ -1455,15 +1532,15 @@ CVarRef Array::addImpl(const T &key, CVarRef v) {
 
 template<typename T>
 Variant Array::refvalAt(const T &key) {
-  return ref(lvalAt(key));
+  return strongBind(lvalAt(key));
 }
 
 template<typename T>
 Variant Array::argvalAt(bool byRef, const T &key) {
   if (byRef) {
-    return ref(lvalAt(key));
+    return strongBind(lvalAt(key));
   } else {
-    return rvalAt(key);
+    return weakBind(rvalAtRef(key));
   }
 }
 

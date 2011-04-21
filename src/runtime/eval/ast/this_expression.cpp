@@ -49,6 +49,10 @@ Variant ThisExpression::set(VariableEnvironment &env, CVarRef val) const {
   throw FatalErrorException("Cannot re-assign $this");
 }
 
+Variant ThisExpression::setRef(VariableEnvironment &env, CVarRef val) const {
+  throw FatalErrorException("Cannot re-assign $this");
+}
+
 void ThisExpression::dump(std::ostream &out) const {
   out << "$this";
 }

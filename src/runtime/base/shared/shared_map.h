@@ -85,12 +85,13 @@ public:
   ArrayData *lvalNew(Variant *&ret, bool copy);
 
   ArrayData *set(int64   k, CVarRef v, bool copy);
-  ArrayData *set(litstr  k, CVarRef v, bool copy);
   ArrayData *set(CStrRef k, CVarRef v, bool copy);
   ArrayData *set(CVarRef k, CVarRef v, bool copy);
+  ArrayData *setRef(int64   k, CVarRef v, bool copy);
+  ArrayData *setRef(CStrRef k, CVarRef v, bool copy);
+  ArrayData *setRef(CVarRef k, CVarRef v, bool copy);
 
   ArrayData *remove(int64   k, bool copy);
-  ArrayData *remove(litstr  k, bool copy);
   ArrayData *remove(CStrRef k, bool copy);
   ArrayData *remove(CVarRef k, bool copy);
 
@@ -101,6 +102,7 @@ public:
   ArrayData *fiberCopy() const;
 
   ArrayData *append(CVarRef v, bool copy);
+  ArrayData *appendRef(CVarRef v, bool copy);
   ArrayData *appendWithRef(CVarRef v, bool copy);
   ArrayData *append(const ArrayData *elems, ArrayOp op, bool copy);
 

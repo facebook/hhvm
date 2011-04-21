@@ -42,7 +42,7 @@ Variant Expression::refval(VariableEnvironment &env, int strict /* = 2 */)
   } else if (strict == 1) {
     raise_notice("Value cannot be used in reference context");
   }
-  return ref(eval(env));
+  return strongBind(eval(env));
 }
 
 bool Expression::exist(VariableEnvironment &env, int op) const {

@@ -184,9 +184,10 @@ void ClosureExpression::outputCPPImpl(CodeGenerator &cg,
       ParameterExpressionPtr param =
         dynamic_pointer_cast<ParameterExpression>((*m_vars)[i]);
       ExpressionPtr value = (*m_values)[i];
+      bool ref = param->isRef() && value->isRefable();
+      if (ref) value->setContext(NoRefWrapper);
 
-      cg_printf(".set%s(\"%s\", ",
-                param->isRef() ? "Ref" : "", param->getName().c_str());
+      cg_printf(".set%s(\"%s\", ", ref ? "Ref" : "", param->getName().c_str());
       value->outputCPP(cg, ar);
       cg_printf(")");
     }

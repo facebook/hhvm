@@ -27553,13 +27553,13 @@ Variant i_hphp_current_ref(void *extra, CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     VRefParam arg0(vref(ad->getValueRef(pos)));
-    return ref(x_hphp_current_ref(arg0));
+    return strongBind(x_hphp_current_ref(arg0));
   }
 }
 Variant ifa_hphp_current_ref(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (UNLIKELY(count != 1)) return throw_wrong_arguments("hphp_current_ref", count, 1, 1, 1);
   VRefParam arg0(vref(a0));
-  return ref(x_hphp_current_ref(arg0));
+  return strongBind(x_hphp_current_ref(arg0));
 }
 Variant i_hphp_splfileinfo_getlinktarget(void *extra, CArrRef params) {
   int count ATTRIBUTE_UNUSED = params.size();

@@ -445,6 +445,21 @@ static void object_set(Variant &var, StringBuffer &key, CVarRef value,
   }
 }
 
+static void object_set(Variant &var, StringBuffer &key, RefResult value,
+                       int assoc) {
+  String data = key.detach();
+  if (!assoc) {
+    // We know it is stdClass, and everything is public (and dynamic).
+    if (data.empty()) {
+      var.getObjectData()->o_setPublic("_empty_", value);
+    } else {
+      var.getObjectData()->o_setPublic(data, value);
+    }
+  } else {
+    var.set(data, value);
+  }
+}
+
 static void attach_zval(json_parser *json, int up, int cur, StringBuffer &key,
                         int assoc) {
   Variant &root = json->the_zstack[up];

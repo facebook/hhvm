@@ -31,7 +31,7 @@ void ReturnStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
   if (m_value) {
     if (env.refReturn()) {
-      env.setRet(ref(m_value->refval(env, 1)));
+      env.setRetRef(m_value->refval(env, 1));
       return;
     }
     env.setRet(m_value->eval(env));

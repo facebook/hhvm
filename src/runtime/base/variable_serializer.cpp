@@ -65,7 +65,6 @@ String VariableSerializer::serialize(CVarRef v, bool ret) {
     buf.setOutputLimit(RuntimeOption::SerializationSizeLimit);
   }
   m_valueCount = 1;
-  if (m_type == VarDump && v.isContagious()) m_buf->append('&');
   write(v);
   if (ret) {
     return m_buf->detach();

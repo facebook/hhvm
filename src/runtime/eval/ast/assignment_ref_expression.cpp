@@ -27,14 +27,14 @@ AssignmentRefExpression::AssignmentRefExpression(EXPRESSION_ARGS,
   : Expression(EXPRESSION_PASS), m_lhs(lhs), m_rhs(rhs) {}
 
 Variant AssignmentRefExpression::eval(VariableEnvironment &env) const {
-  return m_lhs->set(env, ref(m_rhs->refval(env)));
+  return m_lhs->setRef(env, m_rhs->refval(env));
 }
 
 Variant AssignmentRefExpression::refval(VariableEnvironment &env,
     int strict /* = 2 */) const {
-  Variant tmp = ref(m_rhs->refval(env));
-  m_lhs->set(env, ref(tmp));
-  return ref(tmp);
+  Variant tmp = strongBind(m_rhs->refval(env));
+  m_lhs->setRef(env, tmp);
+  return strongBind(tmp);
 }
 
 void AssignmentRefExpression::dump(std::ostream &out) const {

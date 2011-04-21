@@ -281,9 +281,22 @@ public:
   }
   const std::string &getResponseInfo() const { return m_responseCodeInfo; }
   bool headersSent() { return m_headerSent;}
+private:
+  void sendRawLocked(void *data, int size, int code = 200,
+                     bool compressed = false, bool chunked = false,
+                     const char *codeInfo = NULL);
+public:
   virtual void sendRaw(void *data, int size, int code = 200,
                        bool compressed = false, bool chunked = false,
                        const char *codeInfo = NULL);
+private:
+  void sendStringLocked(const char *data, int code = 200,
+                        bool compressed = false, bool chunked = false,
+                        const char * codeInfo = NULL) {
+    sendRawLocked((void*)data, strlen(data), code, compressed, chunked,
+                  codeInfo);
+  }
+public:
   void sendString(const char *data, int code = 200, bool compressed = false,
                   bool chunked = false,
                   const char * codeInfo = NULL) {

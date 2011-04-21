@@ -681,15 +681,11 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
   return response;
 }
 
-void Transport::sendRaw(void *data, int size, int code /* = 200 */,
-                        bool compressed /* = false */,
-                        bool chunked /* = false */,
-                        const char *codeInfo /* = "" */
-                        ) {
-  ASSERT(data || size == 0);
-  ASSERT(size >= 0);
-  FiberWriteLock lock(this);
-
+void Transport::sendRawLocked(void *data, int size, int code /* = 200 */,
+                              bool compressed /* = false */,
+                              bool chunked /* = false */,
+                              const char *codeInfo /* = "" */
+                              ) {
   if (!compressed && RuntimeOption::ForceChunkedEncoding) {
     chunked = true;
   }
@@ -734,6 +730,15 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
   }
 }
 
+void Transport::sendRaw(void *data, int size, int code /* = 200 */,
+                        bool compressed /* = false */,
+                        bool chunked /* = false */,
+                        const char *codeInfo /* = "" */
+                        ) {
+  FiberWriteLock lock(this);
+  sendRawLocked(data, size, code, compressed, chunked, codeInfo);
+}
+
 void Transport::onSendEnd() {
   FiberWriteLock lock(this);
   if (m_compressor && m_chunkedEncoding) {
@@ -749,7 +754,7 @@ void Transport::redirect(const char *location, int code /* = 302 */,
   FiberWriteLock lock(this);
   addHeaderImpl("Location", location);
   setResponse(code, info);
-  sendString(location, code);
+  sendStringLocked(location, code);
 }
 
 void Transport::onFlushProgress(int writtenSize, int64 delayUs) {

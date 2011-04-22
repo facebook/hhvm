@@ -157,10 +157,12 @@ private:
 class Parser : public ParserBase {
 public:
   static StatementPtr ParseString(const char *input,
-                                  std::vector<StaticStatementPtr> &statics);
+                                  std::vector<StaticStatementPtr> &statics,
+                                  Block::VariableIndices &variableIndice);
 
   static StatementPtr ParseFile(const char *fileName,
-                                std::vector<StaticStatementPtr> &statics);
+                                std::vector<StaticStatementPtr> &statics,
+                                Block::VariableIndices &variableIndices);
 
 public:
   Parser(Scanner &scanner, const char *fileName,
@@ -282,7 +284,12 @@ public:
   ClassStatementPtr peekClass() const;
   bool haveFunc() const;
   FunctionStatementPtr peekFunc() const;
+
+  const Block::VariableIndices &varIndices() const {
+    return m_fileBlock.varIndices();
+  }
 private:
+  Block m_fileBlock; // for pseudomain variables
   std::vector<ExpressionPtr> m_objects; // for parsing obj prop/method calls
   typedef std::pair<ClassStatementPtr, FunctionStatementPtr> ScopePtrPair;
   std::vector<ScopePtrPair> m_scopes;

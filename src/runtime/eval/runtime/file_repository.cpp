@@ -37,8 +37,9 @@ namespace Eval {
 set<string> FileRepository::s_names;
 
 PhpFile::PhpFile(StatementPtr tree, const vector<StaticStatementPtr> &statics,
+                 const Block::VariableIndices &variableIndices,
                  const struct stat &s)
-  : Block(statics), m_refCount(1), m_timestamp(s.st_mtime),
+  : Block(statics, variableIndices), m_refCount(1), m_timestamp(s.st_mtime),
     m_ino(s.st_ino), m_devId(s.st_dev), m_tree(tree),
     m_profName(string("run_init::") + string(m_tree->loc()->file)) {
 }
@@ -152,10 +153,11 @@ bool FileRepository::findFile(std::string &path, struct stat *s) {
 PhpFile *FileRepository::readFile(const std::string &name,
                                   const struct stat &s) {
   vector<StaticStatementPtr> sts;
+  Block::VariableIndices variableIndices;
   const char *canoname = canonicalize(name);
-  StatementPtr stmt = Parser::ParseFile(canoname, sts);
+  StatementPtr stmt = Parser::ParseFile(canoname, sts, variableIndices);
   if (stmt) {
-    PhpFile *p = new PhpFile(stmt, sts, s);
+    PhpFile *p = new PhpFile(stmt, sts, variableIndices, s);
     return p;
   }
   return NULL;

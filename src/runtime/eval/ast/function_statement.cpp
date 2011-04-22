@@ -114,13 +114,13 @@ void Parameter::bind(VariableEnvironment &env, CVarRef val,
     }
   }
   if (ref) val.setContagious();
-  env.getIdx(m_idx) = val;
+  *env.getIdx(m_idx) = val;
 }
 
 void Parameter::bindDefault(VariableEnvironment &env) const {
   if (m_defVal) {
     Variant val = m_defVal->eval(env);
-    env.getIdx(m_idx) = val;
+    *env.getIdx(m_idx) = val;
   }
 }
 

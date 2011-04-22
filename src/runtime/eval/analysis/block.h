@@ -58,7 +58,8 @@ public:
 
   Block();
   ~Block();
-  Block(const std::vector<StaticStatementPtr> &stat);
+  Block(const std::vector<StaticStatementPtr> &stat,
+        const Block::VariableIndices &variableIndices);
   void declareStaticStatement(StaticStatementPtr stat);
   Variant getStaticValue(VariableEnvironment &env, CStrRef name) const;
   int declareVariable(CStrRef var);

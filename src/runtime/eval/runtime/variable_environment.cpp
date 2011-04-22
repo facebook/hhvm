@@ -21,7 +21,7 @@
 #include <runtime/eval/ast/method_statement.h>
 #include <runtime/eval/ast/class_statement.h>
 #include <runtime/eval/runtime/eval_state.h>
-#include <util/parser/parser.h>
+#include <runtime/eval/parser/parser.h>
 
 namespace HPHP {
 namespace Eval {
@@ -63,9 +63,14 @@ String VariableEnvironment::currentContext() const {
   return m_currentClass ? m_currentClass : "";
 }
 
-Variant &VariableEnvironment::getIdx(int idx) {
+Variant *VariableEnvironment::getIdx(int idx) {
   ASSERT(false);
   throw FatalErrorException("getIdx not supported in this env");
+}
+
+void VariableEnvironment::setIdx(int idx, Variant *v) {
+  ASSERT(false);
+  throw FatalErrorException("setIdx not supported in this env");
 }
 
 Array VariableEnvironment::getDefinedVariables() const {
@@ -195,8 +200,13 @@ void FuncScopeVariableEnvironment::flagStatic(CStrRef name, int64 hash) {
   get(name).assignRef(m_staticEnv->get(name));
 }
 
-Variant &FuncScopeVariableEnvironment::getIdx(int idx) {
-  return *m_byIdx[idx];
+Variant *FuncScopeVariableEnvironment::getIdx(int idx) {
+  return m_byIdx[idx];
+}
+
+void FuncScopeVariableEnvironment::setIdx(int idx, Variant *v) {
+  ASSERT(false);
+  throw FatalErrorException("setIdx not supported in this env");
 }
 
 bool FuncScopeVariableEnvironment::refReturn() const {
@@ -261,6 +271,7 @@ NestedVariableEnvironment::NestedVariableEnvironment
 (LVariableTable *ext, const Block &blk, CArrRef params /* = Array() */,
  CObjRef current_object /* = Object() */)
   : m_ext(ext), m_block(blk), m_params(params) {
+  m_byIdx.resize(m_block.varIndices().size());
   if (!current_object.isNull()) setCurrentObject(current_object);
   g_sinit.initGlobals(*this);
 }
@@ -269,6 +280,15 @@ void NestedVariableEnvironment::flagStatic(CStrRef name, int64 hash) {
   // Behavior is to set the variable to init
   // .. and do some other stupid stuff that I'm not going to try
   get(name) = m_block.getStaticValue(*this, name);
+}
+
+Variant *NestedVariableEnvironment::getIdx(int idx) {
+  return m_byIdx[idx];
+}
+
+void NestedVariableEnvironment::setIdx(int idx, Variant *v) {
+  ASSERT(m_byIdx[idx] == NULL);
+  m_byIdx[idx] = v;
 }
 
 bool NestedVariableEnvironment::exists(CStrRef s) const {

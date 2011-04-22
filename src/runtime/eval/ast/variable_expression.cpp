@@ -32,11 +32,10 @@ Variant &VariableExpression::getRef(VariableEnvironment &env,
                                     bool initNotice) const {
   Variant *var = NULL;
   String name;
-  if (m_idx != -1) {
-    var = &env.getIdx(m_idx);
-  } else {
+  if (m_idx == -1 || !(var = env.getIdx(m_idx))) {
     name = m_name->get(env);
     var =  &env.get(name);
+    if (m_idx != -1) env.setIdx(m_idx, var);
   }
   /* note that 'if (!env.exists(str, name->hash()))' does not work
    * as undefined local variables are still in the (function) environment */

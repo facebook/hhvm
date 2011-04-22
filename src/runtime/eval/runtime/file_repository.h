@@ -33,6 +33,7 @@ DECLARE_AST_PTR(StaticStatement);
 class PhpFile : public Block {
 public:
   PhpFile(StatementPtr tree, const std::vector<StaticStatementPtr> &statics,
+          const Block::VariableIndices &variableIndices,
           const struct stat &s);
   ~PhpFile();
   Variant eval(LVariableTable *env);

@@ -262,11 +262,13 @@ Variant EvalCreateFunction::InvokeImpl(VariableEnvironment &env,
   Variant body = params.rvalAt(1);
 
   vector<StaticStatementPtr> statics;
+  Block::VariableIndices variableIndices;
   ostringstream fnStream;
   string id(RequestEvalState::unique());
   fnStream << "<?php function lambda_" << id << "(" << var.toString().data() <<
     ") {" << body.toString().data() << "}\n";
-  StatementPtr bodyAst = Parser::ParseString(fnStream.str().c_str(), statics);
+  StatementPtr bodyAst = Parser::ParseString(fnStream.str().c_str(), statics,
+                                             variableIndices);
   if (!bodyAst) return false;
   ostringstream nameStream;
   nameStream << "$lambda_" << id;

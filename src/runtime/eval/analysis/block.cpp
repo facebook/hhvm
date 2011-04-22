@@ -58,11 +58,13 @@ VariableIndex::SuperGlobal VariableIndex::isSuperGlobal(CStrRef name) {
 
 Block::Block() {}
 
-Block::Block(const vector<StaticStatementPtr> &stat) {
+Block::Block(const vector<StaticStatementPtr> &stat,
+             const Block::VariableIndices &variableIndices) {
   for (vector<StaticStatementPtr>::const_iterator it = stat.begin();
        it != stat.end(); ++it) {
     declareStaticStatement(*it);
   }
+  m_variableIndices = variableIndices;
 }
 
 Block::~Block() {}

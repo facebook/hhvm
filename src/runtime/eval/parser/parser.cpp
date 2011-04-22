@@ -191,12 +191,14 @@ Parser::ParserFrameInjection::ParserFrameInjection(
 // statics
 
 StatementPtr Parser::ParseString(const char *input,
-                                 vector<StaticStatementPtr> &statics) {
+                                 vector<StaticStatementPtr> &statics,
+                                 Block::VariableIndices &variableIndices) {
   ASSERT(input);
   int len = strlen(input);
   Scanner scanner(input, len, RuntimeOption::ScannerType);
   Parser parser(scanner, "string", statics);
   if (parser.parse()) {
+    variableIndices = parser.varIndices();
     return parser.getTree();
   }
   raise_error("Error parsing %s: %s", input, parser.getMessage().c_str());
@@ -204,12 +206,14 @@ StatementPtr Parser::ParseString(const char *input,
 }
 
 StatementPtr Parser::ParseFile(const char *fileName,
-                               vector<StaticStatementPtr> &statics) {
+                               vector<StaticStatementPtr> &statics,
+                               Block::VariableIndices &variableIndices) {
   ASSERT(fileName);
   try {
     Scanner scanner(fileName, RuntimeOption::ScannerType);
     Parser parser(scanner, fileName, statics);
     if (parser.parse()) {
+      variableIndices = parser.varIndices();
       return parser.getTree();
     }
     raise_error("Error parsing %s: %s", fileName, parser.getMessage().c_str());
@@ -411,6 +415,8 @@ void Parser::onSimpleVariable(Token &out, Token &var) {
     int idx = -1;
     if (haveFunc()) {
       idx = peekFunc()->declareVariable(var.text());
+    } else {
+      idx = m_fileBlock.declareVariable(var.text());
     }
     out->exp() = NEW_EXP(Variable, Name::fromString(this, var.text()), idx);
   }

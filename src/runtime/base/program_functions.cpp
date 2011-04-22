@@ -818,9 +818,10 @@ static int execute_program_impl(int argc, char **argv) {
 
   if (!po.parse.empty()) {
     std::vector<Eval::StaticStatementPtr> statics;
+    Eval::Block::VariableIndices variableIndices;
     Eval::Parser::Reset();
     Eval::StatementPtr tree =
-      Eval::Parser::ParseFile(po.parse.c_str(), statics);
+      Eval::Parser::ParseFile(po.parse.c_str(), statics, variableIndices);
     tree->dump(cout);
     return 0;
   }

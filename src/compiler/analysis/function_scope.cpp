@@ -773,23 +773,23 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (inTypedWrapper <= 0) {
     BlockScope::outputCPP(cg, ar);
-  }
 
-  if (m_closureVars) {
-    cg_printf("c_Closure *closure __attribute__((__unused__)) = "
-              "(c_Closure*)extra;\n");
-    VariableTablePtr variables = getVariables();
-    for (int i = 0; i < m_closureVars->getCount(); i++) {
-      ParameterExpressionPtr param =
-        dynamic_pointer_cast<ParameterExpression>((*m_closureVars)[i]);
-      string name = param->getName();
-      if (variables->isPresent(name)) {
-        if (param->isRef()) {
-          cg_printf("%s%s.assignRef(closure->m_vars.lvalAt(\"%s\"));\n",
-                    Option::VariablePrefix, name.c_str(), name.c_str());
-        } else {
-          cg_printf("%s%s.assignVal(closure->m_vars[\"%s\"]);\n",
-                    Option::VariablePrefix, name.c_str(), name.c_str());
+    if (m_closureVars) {
+      cg_printf("c_Closure *closure __attribute__((__unused__)) = "
+                "(c_Closure*)extra;\n");
+      VariableTablePtr variables = getVariables();
+      for (int i = 0; i < m_closureVars->getCount(); i++) {
+        ParameterExpressionPtr param =
+          dynamic_pointer_cast<ParameterExpression>((*m_closureVars)[i]);
+        string name = param->getName();
+        if (variables->isPresent(name)) {
+          if (param->isRef()) {
+            cg_printf("%s%s.assignRef(closure->m_vars.lvalAt(\"%s\"));\n",
+                      Option::VariablePrefix, name.c_str(), name.c_str());
+          } else {
+            cg_printf("%s%s.assignVal(closure->m_vars[\"%s\"]);\n",
+                      Option::VariablePrefix, name.c_str(), name.c_str());
+          }
         }
       }
     }

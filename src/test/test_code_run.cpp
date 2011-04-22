@@ -16668,6 +16668,23 @@ bool TestCodeRun::TestClosure() {
         "test(array(1,2,'foo'=>'bar'));",
         "string(12) \"s:5:\"hello\";\"\n"
         "string(42) \"a:3:{i:0;i:1;i:1;i:2;s:3:\"foo\";s:3:\"bar\";}\"\n");
+  MVCRO("<?php "
+        "function test($a, $b) {"
+        "  return array_map(function (array $x) use ($b) {"
+        "      var_dump($x,$b);"
+        "    }, $a);"
+        "}"
+        "test(array(array(1), array(2)), 5);",
+        "array(1) {\n"
+        "  [0]=>\n"
+        "  int(1)\n"
+        "}\n"
+        "int(5)\n"
+        "array(1) {\n"
+        "  [0]=>\n"
+        "  int(2)\n"
+        "}\n"
+        "int(5)\n");
 
   return true;
 }

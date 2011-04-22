@@ -790,7 +790,11 @@ void MethodStatement::outputCPPTypeCheckWrapper(CodeGenerator &cg,
                          Option::TypedMethodPrefix) :
              Option::TypedFunctionPrefix),
             fname.c_str());
-  if (getClassScope() && m_modifiers->isStatic()) {
+  if (!isMethod) {
+    if (fname[0] == '0') {
+      cg_printf("extra, ");
+    }
+  } else if (m_modifiers->isStatic()) {
     cg_printf("cls, ");
   }
   if (funcScope->isVariableArgument()) {
